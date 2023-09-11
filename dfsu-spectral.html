@@ -58,13 +58,147 @@
 <li class="toctree-l1"><a class="reference internal" href="mesh.html">Mesh</a></li>
 <li class="toctree-l1"><a class="reference internal" href="dfsu-2d.html">Dfsu 2D</a></li>
 <li class="toctree-l1"><a class="reference internal" href="dfsu-3d.html">Dfsu 3D</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dfsu-1dv-vertical-column.html">Dfsu 1DV Vertical Column</a></li>
 <li class="toctree-l1"><a class="reference internal" href="dfsu-2dv-vertical-profile.html">Dfsu 2DV Vertical Profile</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Dfsu Spectral</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#spectral-dfsu-example-notebooks">Spectral Dfsu example notebooks</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#dfsu-spectral-api">Dfsu Spectral API</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#fm-geometry-point-spectrum-api">FM Geometry Point Spectrum API</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#fm-geometry-line-spectrum-api">FM Geometry Line Spectrum API</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#fm-geometry-area-spectrum-api">FM Geometry Area Spectrum API</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#dfsu-spectral-api">Dfsu Spectral API</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#mikeio.dfsu._spectral.DfsuSpectral"><code class="docutils literal notranslate"><span class="pre">DfsuSpectral</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.dfsu._spectral.DfsuSpectral.append"><code class="docutils literal notranslate"><span class="pre">DfsuSpectral.append()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.dfsu._spectral.DfsuSpectral.boundary_codes"><code class="docutils literal notranslate"><span class="pre">DfsuSpectral.boundary_codes</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.dfsu._spectral.DfsuSpectral.boundary_polylines"><code class="docutils literal notranslate"><span class="pre">DfsuSpectral.boundary_polylines</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.dfsu._spectral.DfsuSpectral.calc_Hm0_from_spectrum"><code class="docutils literal notranslate"><span class="pre">DfsuSpectral.calc_Hm0_from_spectrum()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.dfsu._spectral.DfsuSpectral.close"><code class="docutils literal notranslate"><span class="pre">DfsuSpectral.close()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.dfsu._spectral.DfsuSpectral.contains"><code class="docutils literal notranslate"><span class="pre">DfsuSpectral.contains()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.dfsu._spectral.DfsuSpectral.deletevalue"><code class="docutils literal notranslate"><span class="pre">DfsuSpectral.deletevalue</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.dfsu._spectral.DfsuSpectral.directions"><code class="docutils literal notranslate"><span class="pre">DfsuSpectral.directions</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.dfsu._spectral.DfsuSpectral.element_coordinates"><code class="docutils literal notranslate"><span class="pre">DfsuSpectral.element_coordinates</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.dfsu._spectral.DfsuSpectral.element_table"><code class="docutils literal notranslate"><span class="pre">DfsuSpectral.element_table</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.dfsu._spectral.DfsuSpectral.end_time"><code class="docutils literal notranslate"><span class="pre">DfsuSpectral.end_time</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.dfsu._spectral.DfsuSpectral.frequencies"><code class="docutils literal notranslate"><span class="pre">DfsuSpectral.frequencies</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.dfsu._spectral.DfsuSpectral.get_element_area"><code class="docutils literal notranslate"><span class="pre">DfsuSpectral.get_element_area()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.dfsu._spectral.DfsuSpectral.get_node_centered_data"><code class="docutils literal notranslate"><span class="pre">DfsuSpectral.get_node_centered_data()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.dfsu._spectral.DfsuSpectral.get_node_coords"><code class="docutils literal notranslate"><span class="pre">DfsuSpectral.get_node_coords()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.dfsu._spectral.DfsuSpectral.get_overset_grid"><code class="docutils literal notranslate"><span class="pre">DfsuSpectral.get_overset_grid()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.dfsu._spectral.DfsuSpectral.is_2d"><code class="docutils literal notranslate"><span class="pre">DfsuSpectral.is_2d</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.dfsu._spectral.DfsuSpectral.is_geo"><code class="docutils literal notranslate"><span class="pre">DfsuSpectral.is_geo</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.dfsu._spectral.DfsuSpectral.is_layered"><code class="docutils literal notranslate"><span class="pre">DfsuSpectral.is_layered</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.dfsu._spectral.DfsuSpectral.is_local_coordinates"><code class="docutils literal notranslate"><span class="pre">DfsuSpectral.is_local_coordinates</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.dfsu._spectral.DfsuSpectral.is_spectral"><code class="docutils literal notranslate"><span class="pre">DfsuSpectral.is_spectral</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.dfsu._spectral.DfsuSpectral.is_tri_only"><code class="docutils literal notranslate"><span class="pre">DfsuSpectral.is_tri_only</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.dfsu._spectral.DfsuSpectral.items"><code class="docutils literal notranslate"><span class="pre">DfsuSpectral.items</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.dfsu._spectral.DfsuSpectral.max_nodes_per_element"><code class="docutils literal notranslate"><span class="pre">DfsuSpectral.max_nodes_per_element</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.dfsu._spectral.DfsuSpectral.n_directions"><code class="docutils literal notranslate"><span class="pre">DfsuSpectral.n_directions</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.dfsu._spectral.DfsuSpectral.n_elements"><code class="docutils literal notranslate"><span class="pre">DfsuSpectral.n_elements</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.dfsu._spectral.DfsuSpectral.n_frequencies"><code class="docutils literal notranslate"><span class="pre">DfsuSpectral.n_frequencies</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.dfsu._spectral.DfsuSpectral.n_items"><code class="docutils literal notranslate"><span class="pre">DfsuSpectral.n_items</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.dfsu._spectral.DfsuSpectral.n_nodes"><code class="docutils literal notranslate"><span class="pre">DfsuSpectral.n_nodes</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.dfsu._spectral.DfsuSpectral.n_timesteps"><code class="docutils literal notranslate"><span class="pre">DfsuSpectral.n_timesteps</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.dfsu._spectral.DfsuSpectral.node_coordinates"><code class="docutils literal notranslate"><span class="pre">DfsuSpectral.node_coordinates</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.dfsu._spectral.DfsuSpectral.plot_spectrum"><code class="docutils literal notranslate"><span class="pre">DfsuSpectral.plot_spectrum()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.dfsu._spectral.DfsuSpectral.projection_string"><code class="docutils literal notranslate"><span class="pre">DfsuSpectral.projection_string</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.dfsu._spectral.DfsuSpectral.read"><code class="docutils literal notranslate"><span class="pre">DfsuSpectral.read()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.dfsu._spectral.DfsuSpectral.start_time"><code class="docutils literal notranslate"><span class="pre">DfsuSpectral.start_time</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.dfsu._spectral.DfsuSpectral.time"><code class="docutils literal notranslate"><span class="pre">DfsuSpectral.time</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.dfsu._spectral.DfsuSpectral.timestep"><code class="docutils literal notranslate"><span class="pre">DfsuSpectral.timestep</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.dfsu._spectral.DfsuSpectral.to_mesh"><code class="docutils literal notranslate"><span class="pre">DfsuSpectral.to_mesh()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.dfsu._spectral.DfsuSpectral.to_shapely"><code class="docutils literal notranslate"><span class="pre">DfsuSpectral.to_shapely()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.dfsu._spectral.DfsuSpectral.type_name"><code class="docutils literal notranslate"><span class="pre">DfsuSpectral.type_name</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.dfsu._spectral.DfsuSpectral.valid_codes"><code class="docutils literal notranslate"><span class="pre">DfsuSpectral.valid_codes</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.dfsu._spectral.DfsuSpectral.write"><code class="docutils literal notranslate"><span class="pre">DfsuSpectral.write()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.dfsu._spectral.DfsuSpectral.write_header"><code class="docutils literal notranslate"><span class="pre">DfsuSpectral.write_header()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#fm-geometry-point-spectrum-api">FM Geometry Point Spectrum API</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#mikeio.spatial._FM_geometry.GeometryFMPointSpectrum"><code class="docutils literal notranslate"><span class="pre">GeometryFMPointSpectrum</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.spatial._FM_geometry.GeometryFMPointSpectrum.directions"><code class="docutils literal notranslate"><span class="pre">GeometryFMPointSpectrum.directions</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.spatial._FM_geometry.GeometryFMPointSpectrum.frequencies"><code class="docutils literal notranslate"><span class="pre">GeometryFMPointSpectrum.frequencies</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.spatial._FM_geometry.GeometryFMPointSpectrum.is_geo"><code class="docutils literal notranslate"><span class="pre">GeometryFMPointSpectrum.is_geo</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.spatial._FM_geometry.GeometryFMPointSpectrum.is_local_coordinates"><code class="docutils literal notranslate"><span class="pre">GeometryFMPointSpectrum.is_local_coordinates</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.spatial._FM_geometry.GeometryFMPointSpectrum.n_directions"><code class="docutils literal notranslate"><span class="pre">GeometryFMPointSpectrum.n_directions</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.spatial._FM_geometry.GeometryFMPointSpectrum.n_frequencies"><code class="docutils literal notranslate"><span class="pre">GeometryFMPointSpectrum.n_frequencies</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.spatial._FM_geometry.GeometryFMPointSpectrum.projection"><code class="docutils literal notranslate"><span class="pre">GeometryFMPointSpectrum.projection</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.spatial._FM_geometry.GeometryFMPointSpectrum.projection_string"><code class="docutils literal notranslate"><span class="pre">GeometryFMPointSpectrum.projection_string</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.spatial._FM_geometry.GeometryFMPointSpectrum.type_name"><code class="docutils literal notranslate"><span class="pre">GeometryFMPointSpectrum.type_name</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#fm-geometry-line-spectrum-api">FM Geometry Line Spectrum API</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#mikeio.spatial._FM_geometry.GeometryFMLineSpectrum"><code class="docutils literal notranslate"><span class="pre">GeometryFMLineSpectrum</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.spatial._FM_geometry.GeometryFMLineSpectrum.boundary_polylines"><code class="docutils literal notranslate"><span class="pre">GeometryFMLineSpectrum.boundary_polylines</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.spatial._FM_geometry.GeometryFMLineSpectrum.codes"><code class="docutils literal notranslate"><span class="pre">GeometryFMLineSpectrum.codes</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.spatial._FM_geometry.GeometryFMLineSpectrum.contains"><code class="docutils literal notranslate"><span class="pre">GeometryFMLineSpectrum.contains()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.spatial._FM_geometry.GeometryFMLineSpectrum.directions"><code class="docutils literal notranslate"><span class="pre">GeometryFMLineSpectrum.directions</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.spatial._FM_geometry.GeometryFMLineSpectrum.element_coordinates"><code class="docutils literal notranslate"><span class="pre">GeometryFMLineSpectrum.element_coordinates</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.spatial._FM_geometry.GeometryFMLineSpectrum.find_index"><code class="docutils literal notranslate"><span class="pre">GeometryFMLineSpectrum.find_index()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.spatial._FM_geometry.GeometryFMLineSpectrum.find_nearest_elements"><code class="docutils literal notranslate"><span class="pre">GeometryFMLineSpectrum.find_nearest_elements()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.spatial._FM_geometry.GeometryFMLineSpectrum.frequencies"><code class="docutils literal notranslate"><span class="pre">GeometryFMLineSpectrum.frequencies</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.spatial._FM_geometry.GeometryFMLineSpectrum.get_2d_interpolant"><code class="docutils literal notranslate"><span class="pre">GeometryFMLineSpectrum.get_2d_interpolant()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.spatial._FM_geometry.GeometryFMLineSpectrum.get_element_area"><code class="docutils literal notranslate"><span class="pre">GeometryFMLineSpectrum.get_element_area()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.spatial._FM_geometry.GeometryFMLineSpectrum.get_node_centered_data"><code class="docutils literal notranslate"><span class="pre">GeometryFMLineSpectrum.get_node_centered_data()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.spatial._FM_geometry.GeometryFMLineSpectrum.get_overset_grid"><code class="docutils literal notranslate"><span class="pre">GeometryFMLineSpectrum.get_overset_grid()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.spatial._FM_geometry.GeometryFMLineSpectrum.interp2d"><code class="docutils literal notranslate"><span class="pre">GeometryFMLineSpectrum.interp2d()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.spatial._FM_geometry.GeometryFMLineSpectrum.is_2d"><code class="docutils literal notranslate"><span class="pre">GeometryFMLineSpectrum.is_2d</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.spatial._FM_geometry.GeometryFMLineSpectrum.is_geo"><code class="docutils literal notranslate"><span class="pre">GeometryFMLineSpectrum.is_geo</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.spatial._FM_geometry.GeometryFMLineSpectrum.is_layered"><code class="docutils literal notranslate"><span class="pre">GeometryFMLineSpectrum.is_layered</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.spatial._FM_geometry.GeometryFMLineSpectrum.is_local_coordinates"><code class="docutils literal notranslate"><span class="pre">GeometryFMLineSpectrum.is_local_coordinates</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.spatial._FM_geometry.GeometryFMLineSpectrum.is_spectral"><code class="docutils literal notranslate"><span class="pre">GeometryFMLineSpectrum.is_spectral</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.spatial._FM_geometry.GeometryFMLineSpectrum.is_tri_only"><code class="docutils literal notranslate"><span class="pre">GeometryFMLineSpectrum.is_tri_only</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.spatial._FM_geometry.GeometryFMLineSpectrum.isel"><code class="docutils literal notranslate"><span class="pre">GeometryFMLineSpectrum.isel()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.spatial._FM_geometry.GeometryFMLineSpectrum.max_nodes_per_element"><code class="docutils literal notranslate"><span class="pre">GeometryFMLineSpectrum.max_nodes_per_element</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.spatial._FM_geometry.GeometryFMLineSpectrum.n_directions"><code class="docutils literal notranslate"><span class="pre">GeometryFMLineSpectrum.n_directions</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.spatial._FM_geometry.GeometryFMLineSpectrum.n_elements"><code class="docutils literal notranslate"><span class="pre">GeometryFMLineSpectrum.n_elements</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.spatial._FM_geometry.GeometryFMLineSpectrum.n_frequencies"><code class="docutils literal notranslate"><span class="pre">GeometryFMLineSpectrum.n_frequencies</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.spatial._FM_geometry.GeometryFMLineSpectrum.n_nodes"><code class="docutils literal notranslate"><span class="pre">GeometryFMLineSpectrum.n_nodes</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.spatial._FM_geometry.GeometryFMLineSpectrum.projection"><code class="docutils literal notranslate"><span class="pre">GeometryFMLineSpectrum.projection</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.spatial._FM_geometry.GeometryFMLineSpectrum.projection_string"><code class="docutils literal notranslate"><span class="pre">GeometryFMLineSpectrum.projection_string</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.spatial._FM_geometry.GeometryFMLineSpectrum.to_mesh"><code class="docutils literal notranslate"><span class="pre">GeometryFMLineSpectrum.to_mesh()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.spatial._FM_geometry.GeometryFMLineSpectrum.to_shapely"><code class="docutils literal notranslate"><span class="pre">GeometryFMLineSpectrum.to_shapely()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.spatial._FM_geometry.GeometryFMLineSpectrum.type_name"><code class="docutils literal notranslate"><span class="pre">GeometryFMLineSpectrum.type_name</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#fm-geometry-area-spectrum-api">FM Geometry Area Spectrum API</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#mikeio.spatial._FM_geometry.GeometryFMAreaSpectrum"><code class="docutils literal notranslate"><span class="pre">GeometryFMAreaSpectrum</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.spatial._FM_geometry.GeometryFMAreaSpectrum.boundary_polylines"><code class="docutils literal notranslate"><span class="pre">GeometryFMAreaSpectrum.boundary_polylines</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.spatial._FM_geometry.GeometryFMAreaSpectrum.codes"><code class="docutils literal notranslate"><span class="pre">GeometryFMAreaSpectrum.codes</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.spatial._FM_geometry.GeometryFMAreaSpectrum.contains"><code class="docutils literal notranslate"><span class="pre">GeometryFMAreaSpectrum.contains()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.spatial._FM_geometry.GeometryFMAreaSpectrum.directions"><code class="docutils literal notranslate"><span class="pre">GeometryFMAreaSpectrum.directions</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.spatial._FM_geometry.GeometryFMAreaSpectrum.element_coordinates"><code class="docutils literal notranslate"><span class="pre">GeometryFMAreaSpectrum.element_coordinates</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.spatial._FM_geometry.GeometryFMAreaSpectrum.elements_to_geometry"><code class="docutils literal notranslate"><span class="pre">GeometryFMAreaSpectrum.elements_to_geometry()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.spatial._FM_geometry.GeometryFMAreaSpectrum.find_index"><code class="docutils literal notranslate"><span class="pre">GeometryFMAreaSpectrum.find_index()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.spatial._FM_geometry.GeometryFMAreaSpectrum.find_nearest_elements"><code class="docutils literal notranslate"><span class="pre">GeometryFMAreaSpectrum.find_nearest_elements()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.spatial._FM_geometry.GeometryFMAreaSpectrum.frequencies"><code class="docutils literal notranslate"><span class="pre">GeometryFMAreaSpectrum.frequencies</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.spatial._FM_geometry.GeometryFMAreaSpectrum.get_2d_interpolant"><code class="docutils literal notranslate"><span class="pre">GeometryFMAreaSpectrum.get_2d_interpolant()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.spatial._FM_geometry.GeometryFMAreaSpectrum.get_element_area"><code class="docutils literal notranslate"><span class="pre">GeometryFMAreaSpectrum.get_element_area()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.spatial._FM_geometry.GeometryFMAreaSpectrum.get_node_centered_data"><code class="docutils literal notranslate"><span class="pre">GeometryFMAreaSpectrum.get_node_centered_data()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.spatial._FM_geometry.GeometryFMAreaSpectrum.get_overset_grid"><code class="docutils literal notranslate"><span class="pre">GeometryFMAreaSpectrum.get_overset_grid()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.spatial._FM_geometry.GeometryFMAreaSpectrum.interp2d"><code class="docutils literal notranslate"><span class="pre">GeometryFMAreaSpectrum.interp2d()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.spatial._FM_geometry.GeometryFMAreaSpectrum.is_2d"><code class="docutils literal notranslate"><span class="pre">GeometryFMAreaSpectrum.is_2d</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.spatial._FM_geometry.GeometryFMAreaSpectrum.is_geo"><code class="docutils literal notranslate"><span class="pre">GeometryFMAreaSpectrum.is_geo</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.spatial._FM_geometry.GeometryFMAreaSpectrum.is_layered"><code class="docutils literal notranslate"><span class="pre">GeometryFMAreaSpectrum.is_layered</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.spatial._FM_geometry.GeometryFMAreaSpectrum.is_local_coordinates"><code class="docutils literal notranslate"><span class="pre">GeometryFMAreaSpectrum.is_local_coordinates</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.spatial._FM_geometry.GeometryFMAreaSpectrum.is_spectral"><code class="docutils literal notranslate"><span class="pre">GeometryFMAreaSpectrum.is_spectral</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.spatial._FM_geometry.GeometryFMAreaSpectrum.is_tri_only"><code class="docutils literal notranslate"><span class="pre">GeometryFMAreaSpectrum.is_tri_only</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.spatial._FM_geometry.GeometryFMAreaSpectrum.isel"><code class="docutils literal notranslate"><span class="pre">GeometryFMAreaSpectrum.isel()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.spatial._FM_geometry.GeometryFMAreaSpectrum.max_nodes_per_element"><code class="docutils literal notranslate"><span class="pre">GeometryFMAreaSpectrum.max_nodes_per_element</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.spatial._FM_geometry.GeometryFMAreaSpectrum.n_directions"><code class="docutils literal notranslate"><span class="pre">GeometryFMAreaSpectrum.n_directions</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.spatial._FM_geometry.GeometryFMAreaSpectrum.n_elements"><code class="docutils literal notranslate"><span class="pre">GeometryFMAreaSpectrum.n_elements</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.spatial._FM_geometry.GeometryFMAreaSpectrum.n_frequencies"><code class="docutils literal notranslate"><span class="pre">GeometryFMAreaSpectrum.n_frequencies</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.spatial._FM_geometry.GeometryFMAreaSpectrum.n_nodes"><code class="docutils literal notranslate"><span class="pre">GeometryFMAreaSpectrum.n_nodes</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.spatial._FM_geometry.GeometryFMAreaSpectrum.projection"><code class="docutils literal notranslate"><span class="pre">GeometryFMAreaSpectrum.projection</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.spatial._FM_geometry.GeometryFMAreaSpectrum.projection_string"><code class="docutils literal notranslate"><span class="pre">GeometryFMAreaSpectrum.projection_string</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.spatial._FM_geometry.GeometryFMAreaSpectrum.to_mesh"><code class="docutils literal notranslate"><span class="pre">GeometryFMAreaSpectrum.to_mesh()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.spatial._FM_geometry.GeometryFMAreaSpectrum.to_shapely"><code class="docutils literal notranslate"><span class="pre">GeometryFMAreaSpectrum.to_shapely()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.spatial._FM_geometry.GeometryFMAreaSpectrum.type_name"><code class="docutils literal notranslate"><span class="pre">GeometryFMAreaSpectrum.type_name</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="eum.html">EUM</a></li>
@@ -108,15 +242,1282 @@
 </section>
 <section id="dfsu-spectral-api">
 <h2>Dfsu Spectral API<a class="headerlink" href="#dfsu-spectral-api" title="Link to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="mikeio.dfsu._spectral.DfsuSpectral">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mikeio.dfsu._spectral.</span></span><span class="sig-name descname"><span class="pre">DfsuSpectral</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dfs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mikeio/dfsu/_spectral.html#DfsuSpectral"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mikeio.dfsu._spectral.DfsuSpectral" title="Link to this definition"></a></dt>
+<dd><dl class="py method">
+<dt class="sig sig-object py" id="mikeio.dfsu._spectral.DfsuSpectral.append">
+<span class="sig-name descname"><span class="pre">append</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.dfsu._spectral.DfsuSpectral.append" title="Link to this definition"></a></dt>
+<dd><p>Append to a dfsu file opened with <cite>write(…,keep_open=True)</cite></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>data</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">list[np.array]</span></code> or <code class="xref py py-class docutils literal notranslate"><span class="pre">Dataset</span></code>) – list of matrices, one for each item. Matrix dimension: time, x</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mikeio.dfsu._spectral.DfsuSpectral.boundary_codes">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">boundary_codes</span></span><a class="headerlink" href="#mikeio.dfsu._spectral.DfsuSpectral.boundary_codes" title="Link to this definition"></a></dt>
+<dd><p>Unique list of boundary codes</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mikeio.dfsu._spectral.DfsuSpectral.boundary_polylines">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">boundary_polylines</span></span><a class="headerlink" href="#mikeio.dfsu._spectral.DfsuSpectral.boundary_polylines" title="Link to this definition"></a></dt>
+<dd><p>Lists of closed polylines defining domain outline</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mikeio.dfsu._spectral.DfsuSpectral.calc_Hm0_from_spectrum">
+<span class="sig-name descname"><span class="pre">calc_Hm0_from_spectrum</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">spectrum</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tail</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mikeio/dfsu/_spectral.html#DfsuSpectral.calc_Hm0_from_spectrum"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mikeio.dfsu._spectral.DfsuSpectral.calc_Hm0_from_spectrum" title="Link to this definition"></a></dt>
+<dd><p>Calculate significant wave height (Hm0) from spectrum</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>spectrum</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">np.ndarray</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">DataArray</span></code>) – frequency or direction-frequency spectrum</p></li>
+<li><p><strong>tail</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a>, <em>optional</em>) – Should a parametric spectral tail be added in the computations? by default True</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">np.ndarray</span></code> – significant wave height values</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mikeio.dfsu._spectral.DfsuSpectral.close">
+<span class="sig-name descname"><span class="pre">close</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.dfsu._spectral.DfsuSpectral.close" title="Link to this definition"></a></dt>
+<dd><p>Finalize write for a dfsu file opened with <cite>write(…,keep_open=True)</cite></p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mikeio.dfsu._spectral.DfsuSpectral.contains">
+<span class="sig-name descname"><span class="pre">contains</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">points</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.dfsu._spectral.DfsuSpectral.contains" title="Link to this definition"></a></dt>
+<dd><p>test if a list of points are contained by mesh</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>points</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">array-like</span> <span class="pre">n-by-2</span></code>) – x,y-coordinates of n points to be tested</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span> <span class="pre">array</span></code> – True for points inside, False otherwise</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mikeio.dfsu._spectral.DfsuSpectral.deletevalue">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">deletevalue</span></span><a class="headerlink" href="#mikeio.dfsu._spectral.DfsuSpectral.deletevalue" title="Link to this definition"></a></dt>
+<dd><p>File delete value</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mikeio.dfsu._spectral.DfsuSpectral.directions">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">directions</span></span><a class="headerlink" href="#mikeio.dfsu._spectral.DfsuSpectral.directions" title="Link to this definition"></a></dt>
+<dd><p>Directional axis</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mikeio.dfsu._spectral.DfsuSpectral.element_coordinates">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">element_coordinates</span></span><a class="headerlink" href="#mikeio.dfsu._spectral.DfsuSpectral.element_coordinates" title="Link to this definition"></a></dt>
+<dd><p>Center coordinates of each element</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mikeio.dfsu._spectral.DfsuSpectral.element_table">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">element_table</span></span><a class="headerlink" href="#mikeio.dfsu._spectral.DfsuSpectral.element_table" title="Link to this definition"></a></dt>
+<dd><p>Element to node connectivity</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mikeio.dfsu._spectral.DfsuSpectral.end_time">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">end_time</span></span><a class="headerlink" href="#mikeio.dfsu._spectral.DfsuSpectral.end_time" title="Link to this definition"></a></dt>
+<dd><p>File end time</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mikeio.dfsu._spectral.DfsuSpectral.frequencies">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">frequencies</span></span><a class="headerlink" href="#mikeio.dfsu._spectral.DfsuSpectral.frequencies" title="Link to this definition"></a></dt>
+<dd><p>Frequency axis</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mikeio.dfsu._spectral.DfsuSpectral.get_element_area">
+<span class="sig-name descname"><span class="pre">get_element_area</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.dfsu._spectral.DfsuSpectral.get_element_area" title="Link to this definition"></a></dt>
+<dd><p>Calculate the horizontal area of each element.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">np.array(float)</span></code> – areas in m2</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mikeio.dfsu._spectral.DfsuSpectral.get_node_centered_data">
+<span class="sig-name descname"><span class="pre">get_node_centered_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">extrapolate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.dfsu._spectral.DfsuSpectral.get_node_centered_data" title="Link to this definition"></a></dt>
+<dd><p>convert cell-centered data to node-centered by pseudo-laplacian method</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>data</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">np.array(float)</span></code>) – cell-centered data</p></li>
+<li><p><strong>extrapolate</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a>, <em>optional</em>) – allow the method to extrapolate, default:True</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">np.array(float)</span></code> – node-centered data</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mikeio.dfsu._spectral.DfsuSpectral.get_node_coords">
+<span class="sig-name descname"><span class="pre">get_node_coords</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">code</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.dfsu._spectral.DfsuSpectral.get_node_coords" title="Link to this definition"></a></dt>
+<dd><p>Get the coordinates of each node.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>code</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>) – Get only nodes with specific code, e.g. land == 1</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">np.array</span></code> – x,y,z of each node</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mikeio.dfsu._spectral.DfsuSpectral.get_overset_grid">
+<span class="sig-name descname"><span class="pre">get_overset_grid</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dx</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dy</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nx</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ny</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">buffer</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.dfsu._spectral.DfsuSpectral.get_overset_grid" title="Link to this definition"></a></dt>
+<dd><p>get a 2d grid that covers the domain by specifying spacing or shape</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>dx</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a>, <em>optional</em>) – grid resolution in x-direction (or in x- and y-direction)</p></li>
+<li><p><strong>dy</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a>, <em>optional</em>) – grid resolution in y-direction</p></li>
+<li><p><strong>nx</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>, <em>optional</em>) – number of points in x-direction,
+by default None (the value will be inferred)</p></li>
+<li><p><strong>ny</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>, <em>optional</em>) – number of points in y-direction,
+by default None (the value will be inferred)</p></li>
+<li><p><strong>buffer</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a>, <em>optional</em>) – positive to make the area larger, default=0
+can be set to a small negative value to avoid NaN
+values all around the domain.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">&lt;mikeio.Grid2D&gt;</span></code> – 2d grid</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mikeio.dfsu._spectral.DfsuSpectral.is_2d">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">is_2d</span></span><a class="headerlink" href="#mikeio.dfsu._spectral.DfsuSpectral.is_2d" title="Link to this definition"></a></dt>
+<dd><p>Type is either mesh or Dfsu2D (2 horizontal dimensions)</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mikeio.dfsu._spectral.DfsuSpectral.is_geo">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">is_geo</span></span><a class="headerlink" href="#mikeio.dfsu._spectral.DfsuSpectral.is_geo" title="Link to this definition"></a></dt>
+<dd><p>Are coordinates geographical (LONG/LAT)?</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mikeio.dfsu._spectral.DfsuSpectral.is_layered">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">is_layered</span></span><a class="headerlink" href="#mikeio.dfsu._spectral.DfsuSpectral.is_layered" title="Link to this definition"></a></dt>
+<dd><p>Type is layered dfsu (3d, vertical profile or vertical column)</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mikeio.dfsu._spectral.DfsuSpectral.is_local_coordinates">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">is_local_coordinates</span></span><a class="headerlink" href="#mikeio.dfsu._spectral.DfsuSpectral.is_local_coordinates" title="Link to this definition"></a></dt>
+<dd><p>Are coordinates relative (NON-UTM)?</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mikeio.dfsu._spectral.DfsuSpectral.is_spectral">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">is_spectral</span></span><a class="headerlink" href="#mikeio.dfsu._spectral.DfsuSpectral.is_spectral" title="Link to this definition"></a></dt>
+<dd><p>Type is spectral dfsu (point, line or area spectrum)</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mikeio.dfsu._spectral.DfsuSpectral.is_tri_only">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">is_tri_only</span></span><a class="headerlink" href="#mikeio.dfsu._spectral.DfsuSpectral.is_tri_only" title="Link to this definition"></a></dt>
+<dd><p>Does the mesh consist of triangles only?</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mikeio.dfsu._spectral.DfsuSpectral.items">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">items</span></span><a class="headerlink" href="#mikeio.dfsu._spectral.DfsuSpectral.items" title="Link to this definition"></a></dt>
+<dd><p>List of items</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mikeio.dfsu._spectral.DfsuSpectral.max_nodes_per_element">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">max_nodes_per_element</span></span><a class="headerlink" href="#mikeio.dfsu._spectral.DfsuSpectral.max_nodes_per_element" title="Link to this definition"></a></dt>
+<dd><p>The maximum number of nodes for an element</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mikeio.dfsu._spectral.DfsuSpectral.n_directions">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">n_directions</span></span><a class="headerlink" href="#mikeio.dfsu._spectral.DfsuSpectral.n_directions" title="Link to this definition"></a></dt>
+<dd><p>Number of directions</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mikeio.dfsu._spectral.DfsuSpectral.n_elements">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">n_elements</span></span><a class="headerlink" href="#mikeio.dfsu._spectral.DfsuSpectral.n_elements" title="Link to this definition"></a></dt>
+<dd><p>Number of elements</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mikeio.dfsu._spectral.DfsuSpectral.n_frequencies">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">n_frequencies</span></span><a class="headerlink" href="#mikeio.dfsu._spectral.DfsuSpectral.n_frequencies" title="Link to this definition"></a></dt>
+<dd><p>Number of frequencies</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mikeio.dfsu._spectral.DfsuSpectral.n_items">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">n_items</span></span><a class="headerlink" href="#mikeio.dfsu._spectral.DfsuSpectral.n_items" title="Link to this definition"></a></dt>
+<dd><p>Number of items</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mikeio.dfsu._spectral.DfsuSpectral.n_nodes">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">n_nodes</span></span><a class="headerlink" href="#mikeio.dfsu._spectral.DfsuSpectral.n_nodes" title="Link to this definition"></a></dt>
+<dd><p>Number of nodes</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mikeio.dfsu._spectral.DfsuSpectral.n_timesteps">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">n_timesteps</span></span><a class="headerlink" href="#mikeio.dfsu._spectral.DfsuSpectral.n_timesteps" title="Link to this definition"></a></dt>
+<dd><p>Number of time steps</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mikeio.dfsu._spectral.DfsuSpectral.node_coordinates">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">node_coordinates</span></span><a class="headerlink" href="#mikeio.dfsu._spectral.DfsuSpectral.node_coordinates" title="Link to this definition"></a></dt>
+<dd><p>Coordinates (x,y,z) of all nodes</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mikeio.dfsu._spectral.DfsuSpectral.plot_spectrum">
+<span class="sig-name descname"><span class="pre">plot_spectrum</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">spectrum</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'contourf'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">title</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">label</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cmap</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Reds'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vmin</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1e-05</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vmax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">r_as_periods</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rmin</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rmax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">levels</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">figsize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(7,</span> <span class="pre">7)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">add_colorbar</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mikeio/dfsu/_spectral.html#DfsuSpectral.plot_spectrum"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mikeio.dfsu._spectral.DfsuSpectral.plot_spectrum" title="Link to this definition"></a></dt>
+<dd><p>Plot spectrum in polar coordinates</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>spectrum</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">np.array</span></code>) – spectral values as 2d array with dimensions: directions, frequencies</p></li>
+<li><p><strong>plot_type</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <em>optional</em>) – type of plot: ‘contour’, ‘contourf’, ‘patch’, ‘shaded’,
+by default: ‘contourf’</p></li>
+<li><p><strong>title</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <em>optional</em>) – axes title</p></li>
+<li><p><strong>label</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <em>optional</em>) – colorbar label (or title if contour plot)</p></li>
+<li><p><strong>cmap</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">matplotlib.cm.cmap</span></code>, <em>optional</em>) – colormap, default Reds</p></li>
+<li><p><strong>vmin</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">real</span></code>, <em>optional</em>) – lower bound of values to be shown on plot, default: 1e-5</p></li>
+<li><p><strong>vmax</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">real</span></code>, <em>optional</em>) – upper bound of values to be shown on plot, default:None</p></li>
+<li><p><strong>r_as_periods</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a>, <em>optional</em>) – show radial axis as periods instead of frequency, default: True</p></li>
+<li><p><strong>rmin</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a>, <em>optional</em>) – mininum frequency/period to be shown, default: None</p></li>
+<li><p><strong>rmax</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a>, <em>optional</em>) – maximum frequency/period to be shown, default: None</p></li>
+<li><p><strong>levels</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">list(float)</span></code>, <em>optional</em>) – for contour plots: how many levels, default:10
+or a list of discrete levels e.g. [0.03, 0.04, 0.05]</p></li>
+<li><p><strong>figsize</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">(float</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">float)</span></code>, <em>optional</em>) – specify size of figure, default (7, 7)</p></li>
+<li><p><strong>add_colorbar</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a>, <em>optional</em>) – Add colorbar to plot, default True</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">&lt;matplotlib.axes&gt;</span></code></p>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">dfs</span> <span class="o">=</span> <span class="n">mikeio</span><span class="o">.</span><span class="n">Dfsu</span><span class="p">(</span><span class="s2">&quot;tests/testdata/area_spectra.dfsu&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ds</span> <span class="o">=</span> <span class="n">dfs</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">items</span><span class="o">=</span><span class="s2">&quot;Energy density&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">spectrum</span> <span class="o">=</span> <span class="n">ds</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="p">:,</span> <span class="p">:]</span> <span class="c1"># first timestep, element 0</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ax</span> <span class="o">=</span> <span class="n">dfs</span><span class="o">.</span><span class="n">plot_spectrum</span><span class="p">(</span><span class="n">spectrum</span><span class="p">,</span> <span class="n">plot_type</span><span class="o">=</span><span class="s2">&quot;patch&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ax</span> <span class="o">=</span> <span class="n">dfs</span><span class="o">.</span><span class="n">plot_spectrum</span><span class="p">(</span><span class="n">spectrum</span><span class="p">,</span> <span class="n">rmax</span><span class="o">=</span><span class="mi">9</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s2">&quot;Wave spectrum T&lt;9s&quot;</span><span class="p">);</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mikeio.dfsu._spectral.DfsuSpectral.projection_string">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">projection_string</span></span><a class="headerlink" href="#mikeio.dfsu._spectral.DfsuSpectral.projection_string" title="Link to this definition"></a></dt>
+<dd><p>The projection string</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mikeio.dfsu._spectral.DfsuSpectral.read">
+<span class="sig-name descname"><span class="pre">read</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">items=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">time=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">elements=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nodes=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">area=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">keepdims=False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dtype=&lt;class</span> <span class="pre">'numpy.float32'&gt;</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mikeio/dfsu/_spectral.html#DfsuSpectral.read"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mikeio.dfsu._spectral.DfsuSpectral.read" title="Link to this definition"></a></dt>
+<dd><p>Read data from a spectral dfsu file</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>items</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">list[int]</span></code> or <code class="xref py py-class docutils literal notranslate"><span class="pre">list[str]</span></code>, <em>optional</em>) – Read only selected items, by number (0-based), or by name</p></li>
+<li><p><strong>time</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">datetime</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">pd.TimeStamp</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">sequence</span></code>, <a class="reference external" href="https://docs.python.org/3/library/functions.html#slice" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">slice</span></code></a> or <code class="xref py py-class docutils literal notranslate"><span class="pre">pd.DatetimeIndex</span></code>, <em>optional</em>) – Read only selected time steps, by default None (=all)</p></li>
+<li><p><strong>keepdims</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a>, <em>optional</em>) – When reading a single time step only, should the time-dimension be kept
+in the returned Dataset? by default: False</p></li>
+<li><p><strong>area</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">list[float]</span></code>, <em>optional</em>) – Read only data inside (horizontal) area (spectral area files
+only) given as a bounding box (tuple with left, lower, right, upper)
+or as list of coordinates for a polygon, by default None</p></li>
+<li><p><strong>x, y</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a>, <em>optional</em>) – Read only data for elements containing the (x,y) points(s),
+by default None</p></li>
+<li><p><strong>elements</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">list[int]</span></code>, <em>optional</em>) – Read only selected element ids (spectral area files only)</p></li>
+<li><p><strong>nodes</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">list[int]</span></code>, <em>optional</em>) – Read only selected node ids (spectral line files only)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">Dataset</span></code> – A Dataset with dimensions [t,elements/nodes,frequencies,directions]</p>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">mikeio</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="s2">&quot;tests/testdata/line_spectra.dfsu&quot;</span><span class="p">)</span>
+<span class="go">&lt;mikeio.Dataset&gt;</span>
+<span class="go">dims: (time:4, node:10, direction:16, frequency:25)</span>
+<span class="go">time: 2017-10-27 00:00:00 - 2017-10-27 05:00:00 (4 records)</span>
+<span class="go">geometry: DfsuSpectral1D (9 elements, 10 nodes)</span>
+<span class="go">items:</span>
+<span class="go">  0:  Energy density &lt;Wave energy density&gt; (meter pow 2 sec per deg)</span>
+</pre></div>
+</div>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">mikeio</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="s2">&quot;tests/testdata/area_spectra.dfsu&quot;</span><span class="p">,</span> <span class="n">time</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
+<span class="go">&lt;mikeio.Dataset&gt;</span>
+<span class="go">dims: (element:40, direction:16, frequency:25)</span>
+<span class="go">time: 2017-10-27 05:00:00 (time-invariant)</span>
+<span class="go">geometry: DfsuSpectral2D (40 elements, 33 nodes)</span>
+<span class="go">items:</span>
+<span class="go">  0:  Energy density &lt;Wave energy density&gt; (meter pow 2 sec per deg)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mikeio.dfsu._spectral.DfsuSpectral.start_time">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">start_time</span></span><a class="headerlink" href="#mikeio.dfsu._spectral.DfsuSpectral.start_time" title="Link to this definition"></a></dt>
+<dd><p>File start time</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mikeio.dfsu._spectral.DfsuSpectral.time">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">time</span></span><a class="headerlink" href="#mikeio.dfsu._spectral.DfsuSpectral.time" title="Link to this definition"></a></dt>
+<dd><p>File all datetimes</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mikeio.dfsu._spectral.DfsuSpectral.timestep">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">timestep</span></span><a class="headerlink" href="#mikeio.dfsu._spectral.DfsuSpectral.timestep" title="Link to this definition"></a></dt>
+<dd><p>Time step size in seconds</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mikeio.dfsu._spectral.DfsuSpectral.to_mesh">
+<span class="sig-name descname"><span class="pre">to_mesh</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">outfilename</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.dfsu._spectral.DfsuSpectral.to_mesh" title="Link to this definition"></a></dt>
+<dd><p>write object to mesh file</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>outfilename</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>) – path to file to be written</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mikeio.dfsu._spectral.DfsuSpectral.to_shapely">
+<span class="sig-name descname"><span class="pre">to_shapely</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.dfsu._spectral.DfsuSpectral.to_shapely" title="Link to this definition"></a></dt>
+<dd><p>Export mesh as shapely MultiPolygon</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">shapely.geometry.MultiPolygon</span></code> – polygons with mesh elements</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mikeio.dfsu._spectral.DfsuSpectral.type_name">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">type_name</span></span><a class="headerlink" href="#mikeio.dfsu._spectral.DfsuSpectral.type_name" title="Link to this definition"></a></dt>
+<dd><p>Type name, e.g. Mesh, Dfsu2D</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mikeio.dfsu._spectral.DfsuSpectral.valid_codes">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">valid_codes</span></span><a class="headerlink" href="#mikeio.dfsu._spectral.DfsuSpectral.valid_codes" title="Link to this definition"></a></dt>
+<dd><p>Unique list of node codes</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mikeio.dfsu._spectral.DfsuSpectral.write">
+<span class="sig-name descname"><span class="pre">write</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dt</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">elements</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">title</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">keep_open</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.dfsu._spectral.DfsuSpectral.write" title="Link to this definition"></a></dt>
+<dd><p>Write a new dfsu file</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>filename</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>) – full path to the new dfsu file</p></li>
+<li><p><strong>data</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Dataset</span></code>) – list of matrices, one for each item. Matrix dimension: time, x</p></li>
+<li><p><strong>dt</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a>, <em>optional</em>) – The time step (in seconds)</p></li>
+<li><p><strong>elements</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">list[int]</span></code>, <em>optional</em>) – write only these element ids to file</p></li>
+<li><p><strong>title</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>) – title of the dfsu file. Default is blank.</p></li>
+<li><p><strong>keep_open</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a>, <em>optional</em>) – Keep file open for appending</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mikeio.dfsu._spectral.DfsuSpectral.write_header">
+<span class="sig-name descname"><span class="pre">write_header</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start_time</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dt</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">items</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">elements</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">title</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.dfsu._spectral.DfsuSpectral.write_header" title="Link to this definition"></a></dt>
+<dd><p>Write the header of a new dfsu file (for writing huge files)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>filename</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>) – full path to the new dfsu file</p></li>
+<li><p><strong>start_time</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">datetime</span></code>, <em>optional</em>) – start datetime, default is datetime.now()</p></li>
+<li><p><strong>dt</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a>, <em>optional</em>) – The time step (in seconds)</p></li>
+<li><p><strong>items</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">list[mikeio.ItemInfo]</span></code>, <em>optional</em>)</p></li>
+<li><p><strong>elements</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">list[int]</span></code>, <em>optional</em>) – write only these element ids to file</p></li>
+<li><p><strong>title</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>) – title of the dfsu file. Default is blank.</p></li>
+</ul>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">datetime</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">meshfilename</span> <span class="o">=</span> <span class="s2">&quot;tests/testdata/north_sea_2.mesh&quot;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">outfilename</span> <span class="o">=</span> <span class="s2">&quot;bigfile.dfsu&quot;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">dfs</span> <span class="o">=</span> <span class="n">mikeio</span><span class="o">.</span><span class="n">Dfsu</span><span class="p">(</span><span class="n">meshfilename</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">n_elements</span> <span class="o">=</span> <span class="n">dfs</span><span class="o">.</span><span class="n">n_elements</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">nt</span> <span class="o">=</span> <span class="mi">1000</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">n_items</span> <span class="o">=</span> <span class="mi">10</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">items</span> <span class="o">=</span> <span class="p">[</span><span class="n">mikeio</span><span class="o">.</span><span class="n">ItemInfo</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Item </span><span class="si">{</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_items</span><span class="p">)]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">with</span> <span class="n">dfs</span><span class="o">.</span><span class="n">write_header</span><span class="p">(</span><span class="n">outfilename</span><span class="p">,</span> <span class="n">items</span><span class="o">=</span><span class="n">items</span><span class="p">,</span> <span class="n">start_time</span><span class="o">=</span><span class="n">datetime</span><span class="p">(</span><span class="mi">2000</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">),</span> <span class="n">dt</span><span class="o">=</span><span class="mi">3600</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+<span class="gp">... </span>    <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nt</span><span class="p">):</span>
+<span class="gp">... </span>        <span class="c1"># get a list of data</span>
+<span class="gp">... </span>        <span class="n">data</span> <span class="o">=</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">random</span><span class="p">((</span><span class="mi">1</span><span class="p">,</span> <span class="n">n_elements</span><span class="p">))</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_items</span><span class="p">)]</span>
+<span class="gp">... </span>        <span class="n">f</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</dd></dl>
+
 </section>
 <section id="fm-geometry-point-spectrum-api">
 <h2>FM Geometry Point Spectrum API<a class="headerlink" href="#fm-geometry-point-spectrum-api" title="Link to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="mikeio.spatial._FM_geometry.GeometryFMPointSpectrum">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mikeio.spatial._FM_geometry.</span></span><span class="sig-name descname"><span class="pre">GeometryFMPointSpectrum</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">frequencies</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">directions</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mikeio/spatial/_FM_geometry.html#GeometryFMPointSpectrum"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mikeio.spatial._FM_geometry.GeometryFMPointSpectrum" title="Link to this definition"></a></dt>
+<dd><dl class="py property">
+<dt class="sig sig-object py" id="mikeio.spatial._FM_geometry.GeometryFMPointSpectrum.directions">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">directions</span></span><a class="headerlink" href="#mikeio.spatial._FM_geometry.GeometryFMPointSpectrum.directions" title="Link to this definition"></a></dt>
+<dd><p>Directional axis</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mikeio.spatial._FM_geometry.GeometryFMPointSpectrum.frequencies">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">frequencies</span></span><a class="headerlink" href="#mikeio.spatial._FM_geometry.GeometryFMPointSpectrum.frequencies" title="Link to this definition"></a></dt>
+<dd><p>Frequency axis</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mikeio.spatial._FM_geometry.GeometryFMPointSpectrum.is_geo">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">is_geo</span></span><a class="headerlink" href="#mikeio.spatial._FM_geometry.GeometryFMPointSpectrum.is_geo" title="Link to this definition"></a></dt>
+<dd><p>Are coordinates geographical (LONG/LAT)?</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mikeio.spatial._FM_geometry.GeometryFMPointSpectrum.is_local_coordinates">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">is_local_coordinates</span></span><a class="headerlink" href="#mikeio.spatial._FM_geometry.GeometryFMPointSpectrum.is_local_coordinates" title="Link to this definition"></a></dt>
+<dd><p>Are coordinates relative (NON-UTM)?</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mikeio.spatial._FM_geometry.GeometryFMPointSpectrum.n_directions">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">n_directions</span></span><a class="headerlink" href="#mikeio.spatial._FM_geometry.GeometryFMPointSpectrum.n_directions" title="Link to this definition"></a></dt>
+<dd><p>Number of directions</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mikeio.spatial._FM_geometry.GeometryFMPointSpectrum.n_frequencies">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">n_frequencies</span></span><a class="headerlink" href="#mikeio.spatial._FM_geometry.GeometryFMPointSpectrum.n_frequencies" title="Link to this definition"></a></dt>
+<dd><p>Number of frequencies</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mikeio.spatial._FM_geometry.GeometryFMPointSpectrum.projection">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">projection</span></span><a class="headerlink" href="#mikeio.spatial._FM_geometry.GeometryFMPointSpectrum.projection" title="Link to this definition"></a></dt>
+<dd><p>The projection</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mikeio.spatial._FM_geometry.GeometryFMPointSpectrum.projection_string">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">projection_string</span></span><a class="headerlink" href="#mikeio.spatial._FM_geometry.GeometryFMPointSpectrum.projection_string" title="Link to this definition"></a></dt>
+<dd><p>The projection string</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mikeio.spatial._FM_geometry.GeometryFMPointSpectrum.type_name">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">type_name</span></span><a class="headerlink" href="#mikeio.spatial._FM_geometry.GeometryFMPointSpectrum.type_name" title="Link to this definition"></a></dt>
+<dd><p>DfsuSpectral0D</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Type name</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
 </section>
 <section id="fm-geometry-line-spectrum-api">
 <h2>FM Geometry Line Spectrum API<a class="headerlink" href="#fm-geometry-line-spectrum-api" title="Link to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="mikeio.spatial._FM_geometry.GeometryFMLineSpectrum">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mikeio.spatial._FM_geometry.</span></span><span class="sig-name descname"><span class="pre">GeometryFMLineSpectrum</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">node_coordinates</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">element_table</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">codes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">projection</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dfsu_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">element_ids</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">node_ids</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">validate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">frequencies</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">directions</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reindex</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mikeio/spatial/_FM_geometry.html#GeometryFMLineSpectrum"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mikeio.spatial._FM_geometry.GeometryFMLineSpectrum" title="Link to this definition"></a></dt>
+<dd><dl class="py property">
+<dt class="sig sig-object py" id="mikeio.spatial._FM_geometry.GeometryFMLineSpectrum.boundary_polylines">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">boundary_polylines</span></span><a class="headerlink" href="#mikeio.spatial._FM_geometry.GeometryFMLineSpectrum.boundary_polylines" title="Link to this definition"></a></dt>
+<dd><p>Lists of closed polylines defining domain outline</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mikeio.spatial._FM_geometry.GeometryFMLineSpectrum.codes">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">codes</span></span><a class="headerlink" href="#mikeio.spatial._FM_geometry.GeometryFMLineSpectrum.codes" title="Link to this definition"></a></dt>
+<dd><p>Node codes of all nodes (0=water, 1=land, 2…=open boundaries)</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mikeio.spatial._FM_geometry.GeometryFMLineSpectrum.contains">
+<span class="sig-name descname"><span class="pre">contains</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">points</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.spatial._FM_geometry.GeometryFMLineSpectrum.contains" title="Link to this definition"></a></dt>
+<dd><p>test if a list of points are contained by mesh</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>points</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">array-like</span> <span class="pre">n-by-2</span></code>) – x,y-coordinates of n points to be tested</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span> <span class="pre">array</span></code> – True for points inside, False otherwise</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mikeio.spatial._FM_geometry.GeometryFMLineSpectrum.directions">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">directions</span></span><a class="headerlink" href="#mikeio.spatial._FM_geometry.GeometryFMLineSpectrum.directions" title="Link to this definition"></a></dt>
+<dd><p>Directional axis</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mikeio.spatial._FM_geometry.GeometryFMLineSpectrum.element_coordinates">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">element_coordinates</span></span><a class="headerlink" href="#mikeio.spatial._FM_geometry.GeometryFMLineSpectrum.element_coordinates" title="Link to this definition"></a></dt>
+<dd><p>Center coordinates of each element</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mikeio.spatial._FM_geometry.GeometryFMLineSpectrum.find_index">
+<span class="sig-name descname"><span class="pre">find_index</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">coords</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">area</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.spatial._FM_geometry.GeometryFMLineSpectrum.find_index" title="Link to this definition"></a></dt>
+<dd><p>Find a <em>set</em> of element indicies for a number of points or within an area.</p>
+<p>The returned indices returned are the unique, unordered set of element indices that contain the points or area.</p>
+<p>This method will return elements <em>containing</em> the argument
+points/area, which is not necessarily the same as the nearest.</p>
+<p>Typically not called directly, but by Dataset/DataArray’s
+sel() method.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a> or <code class="xref py py-class docutils literal notranslate"><span class="pre">array(float)</span></code>) – X coordinate(s) (easting or longitude)</p></li>
+<li><p><strong>y</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a> or <code class="xref py py-class docutils literal notranslate"><span class="pre">array(float)</span></code>) – Y coordinate(s) (northing or latitude)</p></li>
+<li><p><strong>coords</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">np.array(float,float)</span></code>, <em>optional</em>) – As an alternative to specifying x, and y individually,
+the argument coords can be used instead.
+(x,y)-coordinates of points to be found,
+by default None</p></li>
+<li><p><strong>area</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">(float</span></code>, <a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">float)</span></code>, <em>optional</em>) – Bounding box of coordinates (left lower and right upper)
+to be selected, by default None</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">np.array</span></code> – indicies of containing elements</p>
+</dd>
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.11)"><strong>ValueError</strong></a> – if any point is outside the domain</p>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">g</span> <span class="o">=</span> <span class="n">dfs</span><span class="o">.</span><span class="n">geometry</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">id</span> <span class="o">=</span> <span class="n">dfs</span><span class="o">.</span><span class="n">find_index</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="mf">3.1</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="mf">4.3</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<dl class="simple">
+<dt><a class="reference internal" href="#mikeio.spatial._FM_geometry.GeometryFMLineSpectrum.isel" title="mikeio.spatial._FM_geometry.GeometryFMLineSpectrum.isel"><code class="xref py py-obj docutils literal notranslate"><span class="pre">isel</span></code></a></dt><dd><p>get subset geometry for specific indicies</p>
+</dd>
+<dt><a class="reference internal" href="#mikeio.spatial._FM_geometry.GeometryFMLineSpectrum.find_nearest_elements" title="mikeio.spatial._FM_geometry.GeometryFMLineSpectrum.find_nearest_elements"><code class="xref py py-obj docutils literal notranslate"><span class="pre">find_nearest_elements</span></code></a></dt><dd><p>find nearest instead of containing elements</p>
+</dd>
+</dl>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mikeio.spatial._FM_geometry.GeometryFMLineSpectrum.find_nearest_elements">
+<span class="sig-name descname"><span class="pre">find_nearest_elements</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_nearest</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">return_distances</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.spatial._FM_geometry.GeometryFMLineSpectrum.find_nearest_elements" title="Link to this definition"></a></dt>
+<dd><p>Find index of nearest elements (optionally for a list)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a> or <code class="xref py py-class docutils literal notranslate"><span class="pre">array(float)</span></code>) – X coordinate(s) (easting or longitude)</p></li>
+<li><p><strong>y</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a> or <code class="xref py py-class docutils literal notranslate"><span class="pre">array(float)</span></code>) – Y coordinate(s) (northing or latitude)</p></li>
+<li><p><strong>n_nearest</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>, <em>optional</em>) – return this many (horizontally) nearest points for
+each coordinate set, default=1</p></li>
+<li><p><strong>return_distances</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a>, <em>optional</em>) – should the horizontal distances to each point be returned?
+default=False</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><code class="xref py py-class docutils literal notranslate"><span class="pre">np.array</span></code> – element ids of nearest element(s)</p></li>
+<li><p><code class="xref py py-class docutils literal notranslate"><span class="pre">np.array</span></code>, <em>optional</em> – horizontal distances</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">g</span> <span class="o">=</span> <span class="n">dfs</span><span class="o">.</span><span class="n">geometry</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">id</span> <span class="o">=</span> <span class="n">g</span><span class="o">.</span><span class="n">find_nearest_elements</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ids</span> <span class="o">=</span> <span class="n">g</span><span class="o">.</span><span class="n">find_nearest_elements</span><span class="p">([</span><span class="mi">3</span><span class="p">,</span> <span class="mi">8</span><span class="p">],</span> <span class="p">[</span><span class="mi">4</span><span class="p">,</span> <span class="mi">6</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ids</span> <span class="o">=</span> <span class="n">g</span><span class="o">.</span><span class="n">find_nearest_elements</span><span class="p">(</span><span class="n">xy</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ids</span> <span class="o">=</span> <span class="n">g</span><span class="o">.</span><span class="n">find_nearest_elements</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="n">n_nearest</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ids</span><span class="p">,</span> <span class="n">d</span> <span class="o">=</span> <span class="n">g</span><span class="o">.</span><span class="n">find_nearest_elements</span><span class="p">(</span><span class="n">xy</span><span class="p">,</span> <span class="n">return_distances</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<dl class="simple">
+<dt><a class="reference internal" href="#mikeio.spatial._FM_geometry.GeometryFMLineSpectrum.find_index" title="mikeio.spatial._FM_geometry.GeometryFMLineSpectrum.find_index"><code class="xref py py-obj docutils literal notranslate"><span class="pre">find_index</span></code></a></dt><dd><p>find element indicies for points or an area</p>
+</dd>
+</dl>
+</div>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mikeio.spatial._FM_geometry.GeometryFMLineSpectrum.frequencies">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">frequencies</span></span><a class="headerlink" href="#mikeio.spatial._FM_geometry.GeometryFMLineSpectrum.frequencies" title="Link to this definition"></a></dt>
+<dd><p>Frequency axis</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mikeio.spatial._FM_geometry.GeometryFMLineSpectrum.get_2d_interpolant">
+<span class="sig-name descname"><span class="pre">get_2d_interpolant</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">xy</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_nearest</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">extrapolate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">radius</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.spatial._FM_geometry.GeometryFMLineSpectrum.get_2d_interpolant" title="Link to this definition"></a></dt>
+<dd><p>IDW interpolant for list of coordinates</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>xy</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">array-like</span></code>) – x,y coordinates of new points</p></li>
+<li><p><strong>n_nearest</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>, <em>optional</em>) – number of nearest elements used for IDW, by default 5</p></li>
+<li><p><strong>extrapolate</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a>, <em>optional</em>) – allow extrapolation, by default False</p></li>
+<li><p><strong>p</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a>, <em>optional</em>) – power of inverse distance weighting, default=2</p></li>
+<li><p><strong>radius</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a>, <em>optional</em>) – an alternative to extrapolate=False,
+only include elements within radius</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">(np.array</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">np.array)</span></code> – element ids and weights</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mikeio.spatial._FM_geometry.GeometryFMLineSpectrum.get_element_area">
+<span class="sig-name descname"><span class="pre">get_element_area</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.spatial._FM_geometry.GeometryFMLineSpectrum.get_element_area" title="Link to this definition"></a></dt>
+<dd><p>Calculate the horizontal area of each element.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">np.array(float)</span></code> – areas in m2</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mikeio.spatial._FM_geometry.GeometryFMLineSpectrum.get_node_centered_data">
+<span class="sig-name descname"><span class="pre">get_node_centered_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">extrapolate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.spatial._FM_geometry.GeometryFMLineSpectrum.get_node_centered_data" title="Link to this definition"></a></dt>
+<dd><p>convert cell-centered data to node-centered by pseudo-laplacian method</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>data</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">np.array(float)</span></code>) – cell-centered data</p></li>
+<li><p><strong>extrapolate</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a>, <em>optional</em>) – allow the method to extrapolate, default:True</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">np.array(float)</span></code> – node-centered data</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mikeio.spatial._FM_geometry.GeometryFMLineSpectrum.get_overset_grid">
+<span class="sig-name descname"><span class="pre">get_overset_grid</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dx</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dy</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nx</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ny</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">buffer</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.spatial._FM_geometry.GeometryFMLineSpectrum.get_overset_grid" title="Link to this definition"></a></dt>
+<dd><p>get a 2d grid that covers the domain by specifying spacing or shape</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>dx</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a> or <code class="xref py py-class docutils literal notranslate"><span class="pre">(float</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">float)</span></code>, <em>optional</em>) – grid resolution in x-direction (or in x- and y-direction)</p></li>
+<li><p><strong>dy</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a>, <em>optional</em>) – grid resolution in y-direction</p></li>
+<li><p><strong>nx</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>, <em>optional</em>) – number of points in x-direction, by default None,
+(the value will be inferred)</p></li>
+<li><p><strong>ny</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>, <em>optional</em>) – number of points in y-direction, by default None,
+(the value will be inferred)</p></li>
+<li><p><strong>buffer</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a>, <em>optional</em>) – positive to make the area larger, default=0
+can be set to a small negative value to avoid NaN
+values all around the domain.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">&lt;mikeio.Grid2D&gt;</span></code> – 2d grid</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mikeio.spatial._FM_geometry.GeometryFMLineSpectrum.interp2d">
+<span class="sig-name descname"><span class="pre">interp2d</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">elem_ids</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">weights</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">shape</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.spatial._FM_geometry.GeometryFMLineSpectrum.interp2d" title="Link to this definition"></a></dt>
+<dd><p>interp spatially in data (2d only)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>data</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code> or <code class="xref py py-class docutils literal notranslate"><span class="pre">list(ndarray)</span></code>) – dfsu data</p></li>
+<li><p><strong>elem_ids</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray(int)</span></code>) – n sized array of 1 or more element ids used for interpolation</p></li>
+<li><p><strong>weights</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray(float)</span></code>, <em>optional</em>) – weights with same size as elem_ids used for interpolation</p></li>
+<li><p><strong>shape</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code></a>, <em>optional</em>) – reshape output</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code> or <code class="xref py py-class docutils literal notranslate"><span class="pre">list(ndarray)</span></code> – spatially interped data</p>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">ds</span> <span class="o">=</span> <span class="n">dfsu</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">g</span> <span class="o">=</span> <span class="n">dfs</span><span class="o">.</span><span class="n">get_overset_grid</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="mi">50</span><span class="p">,</span><span class="mi">40</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">elem_ids</span><span class="p">,</span> <span class="n">weights</span> <span class="o">=</span> <span class="n">dfs</span><span class="o">.</span><span class="n">get_2d_interpolant</span><span class="p">(</span><span class="n">g</span><span class="o">.</span><span class="n">xy</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">dsi</span> <span class="o">=</span> <span class="n">dfs</span><span class="o">.</span><span class="n">interp2d</span><span class="p">(</span><span class="n">ds</span><span class="p">,</span> <span class="n">elem_ids</span><span class="p">,</span> <span class="n">weights</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mikeio.spatial._FM_geometry.GeometryFMLineSpectrum.is_2d">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">is_2d</span></span><a class="headerlink" href="#mikeio.spatial._FM_geometry.GeometryFMLineSpectrum.is_2d" title="Link to this definition"></a></dt>
+<dd><p>Type is either mesh or Dfsu2D (2 horizontal dimensions)</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mikeio.spatial._FM_geometry.GeometryFMLineSpectrum.is_geo">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">is_geo</span></span><a class="headerlink" href="#mikeio.spatial._FM_geometry.GeometryFMLineSpectrum.is_geo" title="Link to this definition"></a></dt>
+<dd><p>Are coordinates geographical (LONG/LAT)?</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mikeio.spatial._FM_geometry.GeometryFMLineSpectrum.is_layered">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">is_layered</span></span><a class="headerlink" href="#mikeio.spatial._FM_geometry.GeometryFMLineSpectrum.is_layered" title="Link to this definition"></a></dt>
+<dd><p>Type is layered dfsu (3d, vertical profile or vertical column)</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mikeio.spatial._FM_geometry.GeometryFMLineSpectrum.is_local_coordinates">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">is_local_coordinates</span></span><a class="headerlink" href="#mikeio.spatial._FM_geometry.GeometryFMLineSpectrum.is_local_coordinates" title="Link to this definition"></a></dt>
+<dd><p>Are coordinates relative (NON-UTM)?</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mikeio.spatial._FM_geometry.GeometryFMLineSpectrum.is_spectral">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">is_spectral</span></span><a class="headerlink" href="#mikeio.spatial._FM_geometry.GeometryFMLineSpectrum.is_spectral" title="Link to this definition"></a></dt>
+<dd><p>Type is spectral dfsu (point, line or area spectrum)</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mikeio.spatial._FM_geometry.GeometryFMLineSpectrum.is_tri_only">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">is_tri_only</span></span><a class="headerlink" href="#mikeio.spatial._FM_geometry.GeometryFMLineSpectrum.is_tri_only" title="Link to this definition"></a></dt>
+<dd><p>Does the mesh consist of triangles only?</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mikeio.spatial._FM_geometry.GeometryFMLineSpectrum.isel">
+<span class="sig-name descname"><span class="pre">isel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">idx</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">axis</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'node'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mikeio/spatial/_FM_geometry.html#GeometryFMLineSpectrum.isel"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mikeio.spatial._FM_geometry.GeometryFMLineSpectrum.isel" title="Link to this definition"></a></dt>
+<dd><p>export a selection of elements to a new geometry</p>
+<p>Typically not called directly, but by Dataset/DataArray’s
+isel() or sel() methods.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>idx</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">collection(int)</span></code>) – collection of element indicies</p></li>
+<li><p><strong>keepdims</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a>, <em>optional</em>) – Should the original Geometry type be kept (keepdims=True)
+or should it be reduced e.g. to a GeometryPoint2D if possible
+(keepdims=False), by default False</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">Geometry</span></code> – geometry subset</p>
+</dd>
+</dl>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<dl class="simple">
+<dt><a class="reference internal" href="#mikeio.spatial._FM_geometry.GeometryFMLineSpectrum.find_index" title="mikeio.spatial._FM_geometry.GeometryFMLineSpectrum.find_index"><code class="xref py py-obj docutils literal notranslate"><span class="pre">find_index</span></code></a></dt><dd><p>find element indicies for points or an area</p>
+</dd>
+</dl>
+</div>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mikeio.spatial._FM_geometry.GeometryFMLineSpectrum.max_nodes_per_element">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">max_nodes_per_element</span></span><a class="headerlink" href="#mikeio.spatial._FM_geometry.GeometryFMLineSpectrum.max_nodes_per_element" title="Link to this definition"></a></dt>
+<dd><p>The maximum number of nodes for an element</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mikeio.spatial._FM_geometry.GeometryFMLineSpectrum.n_directions">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">n_directions</span></span><a class="headerlink" href="#mikeio.spatial._FM_geometry.GeometryFMLineSpectrum.n_directions" title="Link to this definition"></a></dt>
+<dd><p>Number of directions</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mikeio.spatial._FM_geometry.GeometryFMLineSpectrum.n_elements">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">n_elements</span></span><a class="headerlink" href="#mikeio.spatial._FM_geometry.GeometryFMLineSpectrum.n_elements" title="Link to this definition"></a></dt>
+<dd><p>Number of elements</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mikeio.spatial._FM_geometry.GeometryFMLineSpectrum.n_frequencies">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">n_frequencies</span></span><a class="headerlink" href="#mikeio.spatial._FM_geometry.GeometryFMLineSpectrum.n_frequencies" title="Link to this definition"></a></dt>
+<dd><p>Number of frequencies</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mikeio.spatial._FM_geometry.GeometryFMLineSpectrum.n_nodes">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">n_nodes</span></span><a class="headerlink" href="#mikeio.spatial._FM_geometry.GeometryFMLineSpectrum.n_nodes" title="Link to this definition"></a></dt>
+<dd><p>Number of nodes</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mikeio.spatial._FM_geometry.GeometryFMLineSpectrum.projection">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">projection</span></span><a class="headerlink" href="#mikeio.spatial._FM_geometry.GeometryFMLineSpectrum.projection" title="Link to this definition"></a></dt>
+<dd><p>The projection</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mikeio.spatial._FM_geometry.GeometryFMLineSpectrum.projection_string">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">projection_string</span></span><a class="headerlink" href="#mikeio.spatial._FM_geometry.GeometryFMLineSpectrum.projection_string" title="Link to this definition"></a></dt>
+<dd><p>The projection string</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mikeio.spatial._FM_geometry.GeometryFMLineSpectrum.to_mesh">
+<span class="sig-name descname"><span class="pre">to_mesh</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">outfilename</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.spatial._FM_geometry.GeometryFMLineSpectrum.to_mesh" title="Link to this definition"></a></dt>
+<dd><p>Export geometry to new mesh file</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>outfilename</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>) – path to file to be written</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mikeio.spatial._FM_geometry.GeometryFMLineSpectrum.to_shapely">
+<span class="sig-name descname"><span class="pre">to_shapely</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.spatial._FM_geometry.GeometryFMLineSpectrum.to_shapely" title="Link to this definition"></a></dt>
+<dd><p>Export mesh as shapely MultiPolygon</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">shapely.geometry.MultiPolygon</span></code> – polygons with mesh elements</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mikeio.spatial._FM_geometry.GeometryFMLineSpectrum.type_name">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">type_name</span></span><a class="headerlink" href="#mikeio.spatial._FM_geometry.GeometryFMLineSpectrum.type_name" title="Link to this definition"></a></dt>
+<dd><p>Type name, e.g. Mesh, Dfsu2D</p>
+</dd></dl>
+
+</dd></dl>
+
 </section>
 <section id="fm-geometry-area-spectrum-api">
 <h2>FM Geometry Area Spectrum API<a class="headerlink" href="#fm-geometry-area-spectrum-api" title="Link to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="mikeio.spatial._FM_geometry.GeometryFMAreaSpectrum">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mikeio.spatial._FM_geometry.</span></span><span class="sig-name descname"><span class="pre">GeometryFMAreaSpectrum</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">node_coordinates</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">element_table</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">codes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">projection</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dfsu_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">element_ids</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">node_ids</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">validate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">frequencies</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">directions</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reindex</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mikeio/spatial/_FM_geometry.html#GeometryFMAreaSpectrum"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mikeio.spatial._FM_geometry.GeometryFMAreaSpectrum" title="Link to this definition"></a></dt>
+<dd><dl class="py property">
+<dt class="sig sig-object py" id="mikeio.spatial._FM_geometry.GeometryFMAreaSpectrum.boundary_polylines">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">boundary_polylines</span></span><a class="headerlink" href="#mikeio.spatial._FM_geometry.GeometryFMAreaSpectrum.boundary_polylines" title="Link to this definition"></a></dt>
+<dd><p>Lists of closed polylines defining domain outline</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mikeio.spatial._FM_geometry.GeometryFMAreaSpectrum.codes">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">codes</span></span><a class="headerlink" href="#mikeio.spatial._FM_geometry.GeometryFMAreaSpectrum.codes" title="Link to this definition"></a></dt>
+<dd><p>Node codes of all nodes (0=water, 1=land, 2…=open boundaries)</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mikeio.spatial._FM_geometry.GeometryFMAreaSpectrum.contains">
+<span class="sig-name descname"><span class="pre">contains</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">points</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.spatial._FM_geometry.GeometryFMAreaSpectrum.contains" title="Link to this definition"></a></dt>
+<dd><p>test if a list of points are contained by mesh</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>points</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">array-like</span> <span class="pre">n-by-2</span></code>) – x,y-coordinates of n points to be tested</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span> <span class="pre">array</span></code> – True for points inside, False otherwise</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mikeio.spatial._FM_geometry.GeometryFMAreaSpectrum.directions">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">directions</span></span><a class="headerlink" href="#mikeio.spatial._FM_geometry.GeometryFMAreaSpectrum.directions" title="Link to this definition"></a></dt>
+<dd><p>Directional axis</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mikeio.spatial._FM_geometry.GeometryFMAreaSpectrum.element_coordinates">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">element_coordinates</span></span><a class="headerlink" href="#mikeio.spatial._FM_geometry.GeometryFMAreaSpectrum.element_coordinates" title="Link to this definition"></a></dt>
+<dd><p>Center coordinates of each element</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mikeio.spatial._FM_geometry.GeometryFMAreaSpectrum.elements_to_geometry">
+<span class="sig-name descname"><span class="pre">elements_to_geometry</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">elements</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">keepdims</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mikeio/spatial/_FM_geometry.html#GeometryFMAreaSpectrum.elements_to_geometry"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mikeio.spatial._FM_geometry.GeometryFMAreaSpectrum.elements_to_geometry" title="Link to this definition"></a></dt>
+<dd><p>export a selection of elements to new flexible file geometry
+:Parameters: * <strong>elements</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">list(int)</span></code>) – list of element ids</p>
+<blockquote>
+<div><ul class="simple">
+<li><p><strong>keepdims</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a>) – Not used</p></li>
+</ul>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#mikeio.spatial._FM_geometry.GeometryFMAreaSpectrum" title="mikeio.spatial._FM_geometry.GeometryFMAreaSpectrum"><code class="xref py py-class docutils literal notranslate"><span class="pre">GeometryFMAreaSpectrum</span></code></a> or <a class="reference internal" href="#mikeio.spatial._FM_geometry.GeometryFMPointSpectrum" title="mikeio.spatial._FM_geometry.GeometryFMPointSpectrum"><code class="xref py py-class docutils literal notranslate"><span class="pre">GeometryFMPointSpectrum</span></code></a> – which can be used for further extraction or saved to file</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mikeio.spatial._FM_geometry.GeometryFMAreaSpectrum.find_index">
+<span class="sig-name descname"><span class="pre">find_index</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">coords</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">area</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.spatial._FM_geometry.GeometryFMAreaSpectrum.find_index" title="Link to this definition"></a></dt>
+<dd><p>Find a <em>set</em> of element indicies for a number of points or within an area.</p>
+<p>The returned indices returned are the unique, unordered set of element indices that contain the points or area.</p>
+<p>This method will return elements <em>containing</em> the argument
+points/area, which is not necessarily the same as the nearest.</p>
+<p>Typically not called directly, but by Dataset/DataArray’s
+sel() method.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a> or <code class="xref py py-class docutils literal notranslate"><span class="pre">array(float)</span></code>) – X coordinate(s) (easting or longitude)</p></li>
+<li><p><strong>y</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a> or <code class="xref py py-class docutils literal notranslate"><span class="pre">array(float)</span></code>) – Y coordinate(s) (northing or latitude)</p></li>
+<li><p><strong>coords</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">np.array(float,float)</span></code>, <em>optional</em>) – As an alternative to specifying x, and y individually,
+the argument coords can be used instead.
+(x,y)-coordinates of points to be found,
+by default None</p></li>
+<li><p><strong>area</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">(float</span></code>, <a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">float)</span></code>, <em>optional</em>) – Bounding box of coordinates (left lower and right upper)
+to be selected, by default None</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">np.array</span></code> – indicies of containing elements</p>
+</dd>
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.11)"><strong>ValueError</strong></a> – if any point is outside the domain</p>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">g</span> <span class="o">=</span> <span class="n">dfs</span><span class="o">.</span><span class="n">geometry</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">id</span> <span class="o">=</span> <span class="n">dfs</span><span class="o">.</span><span class="n">find_index</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="mf">3.1</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="mf">4.3</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<dl class="simple">
+<dt><a class="reference internal" href="#mikeio.spatial._FM_geometry.GeometryFMAreaSpectrum.isel" title="mikeio.spatial._FM_geometry.GeometryFMAreaSpectrum.isel"><code class="xref py py-obj docutils literal notranslate"><span class="pre">isel</span></code></a></dt><dd><p>get subset geometry for specific indicies</p>
+</dd>
+<dt><a class="reference internal" href="#mikeio.spatial._FM_geometry.GeometryFMAreaSpectrum.find_nearest_elements" title="mikeio.spatial._FM_geometry.GeometryFMAreaSpectrum.find_nearest_elements"><code class="xref py py-obj docutils literal notranslate"><span class="pre">find_nearest_elements</span></code></a></dt><dd><p>find nearest instead of containing elements</p>
+</dd>
+</dl>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mikeio.spatial._FM_geometry.GeometryFMAreaSpectrum.find_nearest_elements">
+<span class="sig-name descname"><span class="pre">find_nearest_elements</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_nearest</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">return_distances</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.spatial._FM_geometry.GeometryFMAreaSpectrum.find_nearest_elements" title="Link to this definition"></a></dt>
+<dd><p>Find index of nearest elements (optionally for a list)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a> or <code class="xref py py-class docutils literal notranslate"><span class="pre">array(float)</span></code>) – X coordinate(s) (easting or longitude)</p></li>
+<li><p><strong>y</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a> or <code class="xref py py-class docutils literal notranslate"><span class="pre">array(float)</span></code>) – Y coordinate(s) (northing or latitude)</p></li>
+<li><p><strong>n_nearest</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>, <em>optional</em>) – return this many (horizontally) nearest points for
+each coordinate set, default=1</p></li>
+<li><p><strong>return_distances</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a>, <em>optional</em>) – should the horizontal distances to each point be returned?
+default=False</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><code class="xref py py-class docutils literal notranslate"><span class="pre">np.array</span></code> – element ids of nearest element(s)</p></li>
+<li><p><code class="xref py py-class docutils literal notranslate"><span class="pre">np.array</span></code>, <em>optional</em> – horizontal distances</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">g</span> <span class="o">=</span> <span class="n">dfs</span><span class="o">.</span><span class="n">geometry</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">id</span> <span class="o">=</span> <span class="n">g</span><span class="o">.</span><span class="n">find_nearest_elements</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ids</span> <span class="o">=</span> <span class="n">g</span><span class="o">.</span><span class="n">find_nearest_elements</span><span class="p">([</span><span class="mi">3</span><span class="p">,</span> <span class="mi">8</span><span class="p">],</span> <span class="p">[</span><span class="mi">4</span><span class="p">,</span> <span class="mi">6</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ids</span> <span class="o">=</span> <span class="n">g</span><span class="o">.</span><span class="n">find_nearest_elements</span><span class="p">(</span><span class="n">xy</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ids</span> <span class="o">=</span> <span class="n">g</span><span class="o">.</span><span class="n">find_nearest_elements</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="n">n_nearest</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ids</span><span class="p">,</span> <span class="n">d</span> <span class="o">=</span> <span class="n">g</span><span class="o">.</span><span class="n">find_nearest_elements</span><span class="p">(</span><span class="n">xy</span><span class="p">,</span> <span class="n">return_distances</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<dl class="simple">
+<dt><a class="reference internal" href="#mikeio.spatial._FM_geometry.GeometryFMAreaSpectrum.find_index" title="mikeio.spatial._FM_geometry.GeometryFMAreaSpectrum.find_index"><code class="xref py py-obj docutils literal notranslate"><span class="pre">find_index</span></code></a></dt><dd><p>find element indicies for points or an area</p>
+</dd>
+</dl>
+</div>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mikeio.spatial._FM_geometry.GeometryFMAreaSpectrum.frequencies">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">frequencies</span></span><a class="headerlink" href="#mikeio.spatial._FM_geometry.GeometryFMAreaSpectrum.frequencies" title="Link to this definition"></a></dt>
+<dd><p>Frequency axis</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mikeio.spatial._FM_geometry.GeometryFMAreaSpectrum.get_2d_interpolant">
+<span class="sig-name descname"><span class="pre">get_2d_interpolant</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">xy</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_nearest</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">extrapolate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">radius</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.spatial._FM_geometry.GeometryFMAreaSpectrum.get_2d_interpolant" title="Link to this definition"></a></dt>
+<dd><p>IDW interpolant for list of coordinates</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>xy</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">array-like</span></code>) – x,y coordinates of new points</p></li>
+<li><p><strong>n_nearest</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>, <em>optional</em>) – number of nearest elements used for IDW, by default 5</p></li>
+<li><p><strong>extrapolate</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a>, <em>optional</em>) – allow extrapolation, by default False</p></li>
+<li><p><strong>p</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a>, <em>optional</em>) – power of inverse distance weighting, default=2</p></li>
+<li><p><strong>radius</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a>, <em>optional</em>) – an alternative to extrapolate=False,
+only include elements within radius</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">(np.array</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">np.array)</span></code> – element ids and weights</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mikeio.spatial._FM_geometry.GeometryFMAreaSpectrum.get_element_area">
+<span class="sig-name descname"><span class="pre">get_element_area</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.spatial._FM_geometry.GeometryFMAreaSpectrum.get_element_area" title="Link to this definition"></a></dt>
+<dd><p>Calculate the horizontal area of each element.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">np.array(float)</span></code> – areas in m2</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mikeio.spatial._FM_geometry.GeometryFMAreaSpectrum.get_node_centered_data">
+<span class="sig-name descname"><span class="pre">get_node_centered_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">extrapolate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.spatial._FM_geometry.GeometryFMAreaSpectrum.get_node_centered_data" title="Link to this definition"></a></dt>
+<dd><p>convert cell-centered data to node-centered by pseudo-laplacian method</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>data</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">np.array(float)</span></code>) – cell-centered data</p></li>
+<li><p><strong>extrapolate</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a>, <em>optional</em>) – allow the method to extrapolate, default:True</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">np.array(float)</span></code> – node-centered data</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mikeio.spatial._FM_geometry.GeometryFMAreaSpectrum.get_overset_grid">
+<span class="sig-name descname"><span class="pre">get_overset_grid</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dx</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dy</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nx</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ny</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">buffer</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.spatial._FM_geometry.GeometryFMAreaSpectrum.get_overset_grid" title="Link to this definition"></a></dt>
+<dd><p>get a 2d grid that covers the domain by specifying spacing or shape</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>dx</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a> or <code class="xref py py-class docutils literal notranslate"><span class="pre">(float</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">float)</span></code>, <em>optional</em>) – grid resolution in x-direction (or in x- and y-direction)</p></li>
+<li><p><strong>dy</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a>, <em>optional</em>) – grid resolution in y-direction</p></li>
+<li><p><strong>nx</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>, <em>optional</em>) – number of points in x-direction, by default None,
+(the value will be inferred)</p></li>
+<li><p><strong>ny</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>, <em>optional</em>) – number of points in y-direction, by default None,
+(the value will be inferred)</p></li>
+<li><p><strong>buffer</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a>, <em>optional</em>) – positive to make the area larger, default=0
+can be set to a small negative value to avoid NaN
+values all around the domain.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">&lt;mikeio.Grid2D&gt;</span></code> – 2d grid</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mikeio.spatial._FM_geometry.GeometryFMAreaSpectrum.interp2d">
+<span class="sig-name descname"><span class="pre">interp2d</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">elem_ids</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">weights</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">shape</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.spatial._FM_geometry.GeometryFMAreaSpectrum.interp2d" title="Link to this definition"></a></dt>
+<dd><p>interp spatially in data (2d only)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>data</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code> or <code class="xref py py-class docutils literal notranslate"><span class="pre">list(ndarray)</span></code>) – dfsu data</p></li>
+<li><p><strong>elem_ids</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray(int)</span></code>) – n sized array of 1 or more element ids used for interpolation</p></li>
+<li><p><strong>weights</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray(float)</span></code>, <em>optional</em>) – weights with same size as elem_ids used for interpolation</p></li>
+<li><p><strong>shape</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code></a>, <em>optional</em>) – reshape output</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code> or <code class="xref py py-class docutils literal notranslate"><span class="pre">list(ndarray)</span></code> – spatially interped data</p>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">ds</span> <span class="o">=</span> <span class="n">dfsu</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">g</span> <span class="o">=</span> <span class="n">dfs</span><span class="o">.</span><span class="n">get_overset_grid</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="mi">50</span><span class="p">,</span><span class="mi">40</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">elem_ids</span><span class="p">,</span> <span class="n">weights</span> <span class="o">=</span> <span class="n">dfs</span><span class="o">.</span><span class="n">get_2d_interpolant</span><span class="p">(</span><span class="n">g</span><span class="o">.</span><span class="n">xy</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">dsi</span> <span class="o">=</span> <span class="n">dfs</span><span class="o">.</span><span class="n">interp2d</span><span class="p">(</span><span class="n">ds</span><span class="p">,</span> <span class="n">elem_ids</span><span class="p">,</span> <span class="n">weights</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mikeio.spatial._FM_geometry.GeometryFMAreaSpectrum.is_2d">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">is_2d</span></span><a class="headerlink" href="#mikeio.spatial._FM_geometry.GeometryFMAreaSpectrum.is_2d" title="Link to this definition"></a></dt>
+<dd><p>Type is either mesh or Dfsu2D (2 horizontal dimensions)</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mikeio.spatial._FM_geometry.GeometryFMAreaSpectrum.is_geo">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">is_geo</span></span><a class="headerlink" href="#mikeio.spatial._FM_geometry.GeometryFMAreaSpectrum.is_geo" title="Link to this definition"></a></dt>
+<dd><p>Are coordinates geographical (LONG/LAT)?</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mikeio.spatial._FM_geometry.GeometryFMAreaSpectrum.is_layered">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">is_layered</span></span><a class="headerlink" href="#mikeio.spatial._FM_geometry.GeometryFMAreaSpectrum.is_layered" title="Link to this definition"></a></dt>
+<dd><p>Type is layered dfsu (3d, vertical profile or vertical column)</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mikeio.spatial._FM_geometry.GeometryFMAreaSpectrum.is_local_coordinates">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">is_local_coordinates</span></span><a class="headerlink" href="#mikeio.spatial._FM_geometry.GeometryFMAreaSpectrum.is_local_coordinates" title="Link to this definition"></a></dt>
+<dd><p>Are coordinates relative (NON-UTM)?</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mikeio.spatial._FM_geometry.GeometryFMAreaSpectrum.is_spectral">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">is_spectral</span></span><a class="headerlink" href="#mikeio.spatial._FM_geometry.GeometryFMAreaSpectrum.is_spectral" title="Link to this definition"></a></dt>
+<dd><p>Type is spectral dfsu (point, line or area spectrum)</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mikeio.spatial._FM_geometry.GeometryFMAreaSpectrum.is_tri_only">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">is_tri_only</span></span><a class="headerlink" href="#mikeio.spatial._FM_geometry.GeometryFMAreaSpectrum.is_tri_only" title="Link to this definition"></a></dt>
+<dd><p>Does the mesh consist of triangles only?</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mikeio.spatial._FM_geometry.GeometryFMAreaSpectrum.isel">
+<span class="sig-name descname"><span class="pre">isel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">idx</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">axis</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'elements'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mikeio/spatial/_FM_geometry.html#GeometryFMAreaSpectrum.isel"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mikeio.spatial._FM_geometry.GeometryFMAreaSpectrum.isel" title="Link to this definition"></a></dt>
+<dd><p>export a selection of elements to a new geometry</p>
+<p>Typically not called directly, but by Dataset/DataArray’s
+isel() or sel() methods.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>idx</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">collection(int)</span></code>) – collection of element indicies</p></li>
+<li><p><strong>keepdims</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a>, <em>optional</em>) – Should the original Geometry type be kept (keepdims=True)
+or should it be reduced e.g. to a GeometryPoint2D if possible
+(keepdims=False), by default False</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">Geometry</span></code> – geometry subset</p>
+</dd>
+</dl>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<dl class="simple">
+<dt><a class="reference internal" href="#mikeio.spatial._FM_geometry.GeometryFMAreaSpectrum.find_index" title="mikeio.spatial._FM_geometry.GeometryFMAreaSpectrum.find_index"><code class="xref py py-obj docutils literal notranslate"><span class="pre">find_index</span></code></a></dt><dd><p>find element indicies for points or an area</p>
+</dd>
+</dl>
+</div>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mikeio.spatial._FM_geometry.GeometryFMAreaSpectrum.max_nodes_per_element">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">max_nodes_per_element</span></span><a class="headerlink" href="#mikeio.spatial._FM_geometry.GeometryFMAreaSpectrum.max_nodes_per_element" title="Link to this definition"></a></dt>
+<dd><p>The maximum number of nodes for an element</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mikeio.spatial._FM_geometry.GeometryFMAreaSpectrum.n_directions">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">n_directions</span></span><a class="headerlink" href="#mikeio.spatial._FM_geometry.GeometryFMAreaSpectrum.n_directions" title="Link to this definition"></a></dt>
+<dd><p>Number of directions</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mikeio.spatial._FM_geometry.GeometryFMAreaSpectrum.n_elements">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">n_elements</span></span><a class="headerlink" href="#mikeio.spatial._FM_geometry.GeometryFMAreaSpectrum.n_elements" title="Link to this definition"></a></dt>
+<dd><p>Number of elements</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mikeio.spatial._FM_geometry.GeometryFMAreaSpectrum.n_frequencies">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">n_frequencies</span></span><a class="headerlink" href="#mikeio.spatial._FM_geometry.GeometryFMAreaSpectrum.n_frequencies" title="Link to this definition"></a></dt>
+<dd><p>Number of frequencies</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mikeio.spatial._FM_geometry.GeometryFMAreaSpectrum.n_nodes">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">n_nodes</span></span><a class="headerlink" href="#mikeio.spatial._FM_geometry.GeometryFMAreaSpectrum.n_nodes" title="Link to this definition"></a></dt>
+<dd><p>Number of nodes</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mikeio.spatial._FM_geometry.GeometryFMAreaSpectrum.projection">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">projection</span></span><a class="headerlink" href="#mikeio.spatial._FM_geometry.GeometryFMAreaSpectrum.projection" title="Link to this definition"></a></dt>
+<dd><p>The projection</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mikeio.spatial._FM_geometry.GeometryFMAreaSpectrum.projection_string">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">projection_string</span></span><a class="headerlink" href="#mikeio.spatial._FM_geometry.GeometryFMAreaSpectrum.projection_string" title="Link to this definition"></a></dt>
+<dd><p>The projection string</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mikeio.spatial._FM_geometry.GeometryFMAreaSpectrum.to_mesh">
+<span class="sig-name descname"><span class="pre">to_mesh</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">outfilename</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.spatial._FM_geometry.GeometryFMAreaSpectrum.to_mesh" title="Link to this definition"></a></dt>
+<dd><p>Export geometry to new mesh file</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>outfilename</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>) – path to file to be written</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mikeio.spatial._FM_geometry.GeometryFMAreaSpectrum.to_shapely">
+<span class="sig-name descname"><span class="pre">to_shapely</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.spatial._FM_geometry.GeometryFMAreaSpectrum.to_shapely" title="Link to this definition"></a></dt>
+<dd><p>Export mesh as shapely MultiPolygon</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">shapely.geometry.MultiPolygon</span></code> – polygons with mesh elements</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mikeio.spatial._FM_geometry.GeometryFMAreaSpectrum.type_name">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">type_name</span></span><a class="headerlink" href="#mikeio.spatial._FM_geometry.GeometryFMAreaSpectrum.type_name" title="Link to this definition"></a></dt>
+<dd><p>Type name, e.g. Mesh, Dfsu2D</p>
+</dd></dl>
+
+</dd></dl>
+
 </section>
 </section>
 
@@ -131,7 +1532,7 @@
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2022, Henrik Andersson, Jesper Mariegaard, Marc Ridler,.</p>
+    <p>&#169; Copyright 2023, DHI.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

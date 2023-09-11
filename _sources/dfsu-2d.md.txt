@@ -5,7 +5,7 @@
 
 A Dfsu class (e.g. Dfsu2DH) is returned by {py:meth}`mikeio.open` if the argument is a dfsu file. 
 
-Apart from the common [dfsu-geometry properties and methods](./dfu-mesh-overview.md#mike-io-flexible-mesh-geometry), Dfsu2DH has the following *properties*:
+Apart from the common [dfsu-geometry properties and methods](MIKE IO Flexible Mesh Geometry), Dfsu2DH has the following *properties*:
 
 
 ```{eval-rst}
@@ -34,7 +34,7 @@ Dfsu2DH has the following *methods*:
     mikeio.dfsu._Dfsu.close
 ```
 
-See the [API specification](Dfsu2DH) below for a detailed description. 
+See the [API specification](Dfsu 2DH API) below for a detailed description. 
 
 See the [Dfsu Read Example notebook](https://nbviewer.jupyter.org/github/DHI/mikeio/blob/main/notebooks/Dfsu%20-%20Read.ipynb) for basic dfsu functionality.
 
@@ -51,19 +51,20 @@ See the [Dfsu Read Example notebook](https://nbviewer.jupyter.org/github/DHI/mik
 
 ## Flexible Mesh Geometry API
 
-See [Flexible Mesh Geometry API](GeometryFM)
+See [Flexible Mesh Geometry API](mikeio.spatial.GeometryFM2D)
 
-
-## FM Geometry Plotter API
-
-See [FM Geometry Plotter API](_GeometryFMPlotter)
+```{eval-rst}
+.. autoclass:: mikeio.spatial.GeometryFM2D
+    :members:
+    :inherited-members:
+```
 
 ## DataArray Plotter FM API
 
 A DataArray `da` with a GeometryFM geometry can be plotted using `da.plot`. 
 
 ```{eval-rst}
-.. autoclass:: mikeio.dataarray._DataArrayPlotterFM
+.. autoclass:: mikeio.dataset._data_plot._DataArrayPlotterFM
 	:members:
 	:inherited-members:
 ```

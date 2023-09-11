@@ -55,6 +55,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../mesh.html">Mesh</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../dfsu-2d.html">Dfsu 2D</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../dfsu-3d.html">Dfsu 3D</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../dfsu-1dv-vertical-column.html">Dfsu 1DV Vertical Column</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../dfsu-2dv-vertical-profile.html">Dfsu 2DV Vertical Profile</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../dfsu-spectral.html">Dfsu Spectral</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../eum.html">EUM</a></li>
@@ -204,7 +205,7 @@
 
 
 <div class="viewcode-block" id="TimeStepUnit">
-<a class="viewcode-back" href="../../../eum.html#mikeio.TimeStepUnit">[docs]</a>
+<a class="viewcode-back" href="../../../eum.html#mikeio.eum.TimeStepUnit">[docs]</a>
 <span class="k">class</span> <span class="nc">TimeStepUnit</span><span class="p">(</span><span class="n">IntEnum</span><span class="p">):</span>
 
     <span class="n">SECOND</span> <span class="o">=</span> <span class="mi">1400</span>
@@ -217,7 +218,7 @@
 
 
 <div class="viewcode-block" id="EUMType">
-<a class="viewcode-back" href="../../../eum.html#mikeio.EUMType">[docs]</a>
+<a class="viewcode-back" href="../../../eum.html#mikeio.eum.EUMType">[docs]</a>
 <span class="k">class</span> <span class="nc">EUMType</span><span class="p">(</span><span class="n">IntEnum</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;EUM type</span>
 
@@ -846,7 +847,7 @@
 
 
 <div class="viewcode-block" id="EUMUnit">
-<a class="viewcode-back" href="../../../eum.html#mikeio.EUMUnit">[docs]</a>
+<a class="viewcode-back" href="../../../eum.html#mikeio.eum.EUMUnit">[docs]</a>
 <span class="k">class</span> <span class="nc">EUMUnit</span><span class="p">(</span><span class="n">IntEnum</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;EUM unit</span>
 
@@ -1505,7 +1506,7 @@
 
 
 <div class="viewcode-block" id="ItemInfo">
-<a class="viewcode-back" href="../../../eum.html#mikeio.ItemInfo">[docs]</a>
+<a class="viewcode-back" href="../../../eum.html#mikeio.eum.ItemInfo">[docs]</a>
 <span class="k">class</span> <span class="nc">ItemInfo</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;ItemInfo</span>
 
@@ -1599,7 +1600,7 @@
             <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> &lt;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">type</span><span class="o">.</span><span class="n">display_name</span><span class="si">}</span><span class="s2">&gt; (</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">unit</span><span class="o">.</span><span class="n">display_name</span><span class="si">}</span><span class="s2">) - </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">data_value_type</span><span class="si">}</span><span class="s2">&quot;</span>
     
 <div class="viewcode-block" id="ItemInfo.from_mikecore_dynamic_item_info">
-<a class="viewcode-back" href="../../../eum.html#mikeio.ItemInfo.from_mikecore_dynamic_item_info">[docs]</a>
+<a class="viewcode-back" href="../../../eum.html#mikeio.eum.ItemInfo.from_mikecore_dynamic_item_info">[docs]</a>
     <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">from_mikecore_dynamic_item_info</span><span class="p">(</span><span class="n">dfsItemInfo</span><span class="p">:</span> <span class="n">DfsDynamicItemInfo</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;ItemInfo&quot;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Create ItemInfo from a mikecore.DfsDynamicItemInfo object&quot;&quot;&quot;</span>
@@ -1616,7 +1617,7 @@
 
 
 <div class="viewcode-block" id="ItemInfoList">
-<a class="viewcode-back" href="../../../eum.html#mikeio.ItemInfoList">[docs]</a>
+<a class="viewcode-back" href="../../../eum.html#mikeio.eum.ItemInfoList">[docs]</a>
 <span class="k">class</span> <span class="nc">ItemInfoList</span><span class="p">(</span><span class="nb">list</span><span class="p">):</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">items</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">ItemInfo</span><span class="p">]):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">items</span><span class="p">)</span>
@@ -1669,7 +1670,7 @@
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2022, Henrik Andersson, Jesper Mariegaard, Marc Ridler,.</p>
+    <p>&#169; Copyright 2023, DHI.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

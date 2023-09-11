@@ -8,12 +8,12 @@
 All Dfs classes (and the Dataset) class are representations of timeseries and 
 share these properties: 
 
-* items - a list of [ItemInfo](ItemInfo) with name, type and unit of each item
+* items - a list of [ItemInfo](mikeio.eum._eum.ItemInfo) with name, type and unit of each item
 * n_items - Number of items
 * n_timesteps - Number of timesteps
 * start_time - First time instance (as datetime)
 * end_time - Last time instance (as datetime)
-* geometry - spatial description of the data in the file ([Grid1D](Grid1D), [Grid2D](Grid2D), etc ... )
+* geometry - spatial description of the data in the file ([Grid1D](mikeio.Grid1D), [Grid2D](mikeio.Grid2D), etc ... )
 * deletevalue - File delete value (NaN value)
 
 
@@ -30,5 +30,6 @@ If the file is big, you will typically get the file *header* with `dfs = mikeio.
 
 ```{eval-rst}
 .. automodule:: mikeio
-	:members:
+	:members: read, open
+
 ```

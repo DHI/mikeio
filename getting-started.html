@@ -66,6 +66,7 @@
 <li class="toctree-l1"><a class="reference internal" href="mesh.html">Mesh</a></li>
 <li class="toctree-l1"><a class="reference internal" href="dfsu-2d.html">Dfsu 2D</a></li>
 <li class="toctree-l1"><a class="reference internal" href="dfsu-3d.html">Dfsu 3D</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dfsu-1dv-vertical-column.html">Dfsu 1DV Vertical Column</a></li>
 <li class="toctree-l1"><a class="reference internal" href="dfsu-2dv-vertical-profile.html">Dfsu 2DV Vertical Profile</a></li>
 <li class="toctree-l1"><a class="reference internal" href="dfsu-spectral.html">Dfsu Spectral</a></li>
 <li class="toctree-l1"><a class="reference internal" href="eum.html">EUM</a></li>
@@ -111,15 +112,14 @@
 </section>
 <section id="dataset">
 <h2>Dataset<a class="headerlink" href="#dataset" title="Link to this heading"></a></h2>
-<p>The <a class="reference internal" href="dfs-overview.html#mikeio.Dataset" title="mikeio.Dataset"><span class="xref myst py py-class">Dataset</span></a> is the common MIKE IO data structure for data read from dfs files.
-The  <code class="docutils literal notranslate"><span class="pre">mikeio.read()</span></code> method returns a Dataset with a <a class="reference internal" href="dataarray.html"><span class="doc std std-doc">DataArray</span></a> for each item.</p>
+<p>The <a class="reference internal" href="dataset.html#mikeio.Dataset" title="mikeio.Dataset"><span class="xref myst py py-class">Dataset</span></a> is the common MIKE IO data structure for data read from dfs files.
+The  <code class="docutils literal notranslate"><span class="pre">mikeio.read()</span></code> method returns a Dataset with a <a class="reference internal" href="dataarray.html#mikeio.DataArray" title="mikeio.DataArray"><span class="xref myst py py-class">DataArray</span></a> for each item.</p>
 <p>The DataArray have all the relevant information, e.g:</p>
 <ul class="simple">
 <li><p>item - an <a class="reference internal" href="eum.html#mikeio.eum.ItemInfo" title="mikeio.eum.ItemInfo"><span class="xref myst py py-class">ItemInfo</span></a> with name, type and unit</p></li>
 <li><p>time - a pandas.DateTimeIndex with the time instances of the data</p></li>
 <li><p>values - a NumPy array</p></li>
 </ul>
-<p>Read more on the <a class="reference internal" href="dataset.html"><span class="doc std std-doc">Dataset page</span></a>.</p>
 </section>
 <section id="items-iteminfo-and-eum">
 <h2>Items, ItemInfo and EUM<a class="headerlink" href="#items-iteminfo-and-eum" title="Link to this heading"></a></h2>
@@ -130,7 +130,7 @@ An ItemInfo consists of:</p>
 <li><p>type - an <a class="reference internal" href="eum.html#mikeio.eum.EUMType" title="mikeio.eum.EUMType"><span class="xref myst py py-class">EUMType</span></a></p></li>
 <li><p>unit - an <a class="reference internal" href="eum.html#mikeio.eum.EUMUnit" title="mikeio.eum.EUMUnit"><span class="xref myst py py-class">EUMUnit</span></a></p></li>
 </ul>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">mikeio.eum</span> <span class="kn">import</span> <span class="n">ItemInfo</span><span class="p">,</span> <span class="n">EUMType</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">mikeio</span> <span class="kn">import</span> <span class="n">ItemInfo</span><span class="p">,</span> <span class="n">EUMType</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">item</span> <span class="o">=</span> <span class="n">ItemInfo</span><span class="p">(</span><span class="s2">&quot;Viken&quot;</span><span class="p">,</span> <span class="n">EUMType</span><span class="o">.</span><span class="n">Water_Level</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">item</span>
 <span class="go">Viken &lt;Water Level&gt; (meter)</span>
@@ -138,21 +138,29 @@ An ItemInfo consists of:</p>
 <span class="go">Wind speed &lt;Wind speed&gt; (meter per sec)</span>
 </pre></div>
 </div>
-<p>More info on the <a class="reference internal" href="eum.html"><span class="doc std std-doc">EUM page</span></a>.</p>
 </section>
 <section id="dfs0">
 <h2>Dfs0<a class="headerlink" href="#dfs0" title="Link to this heading"></a></h2>
 <p>A dfs0 file is also called a time series file.</p>
-<p>Working with data from dfs0 files are conveniently done in one of two ways:</p>
-<ul class="simple">
-<li><p>mikeio.Dataset - keeps EUM information (convenient if you save data to new dfs0 file)</p></li>
-<li><p>pandas.DataFrame - utilize all the powerful methods of pandas</p></li>
-</ul>
 <p>Read Dfs0 to Dataset:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">ds</span> <span class="o">=</span> <span class="n">mikeio</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="s2">&quot;testdata/da_diagnostic.dfs0&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ds</span>
+<span class="go">&lt;mikeio.Dataset&gt;</span>
+<span class="go">dims: (time:744)</span>
+<span class="go">time: 2017-10-27 00:00:00 - 2017-10-29 18:00:00 (744 non-equidistant records)</span>
+<span class="go">geometry: GeometryUndefined()</span>
+<span class="go">items:</span>
+<span class="go">  0:  State 1Sign. Wave Height &lt;Significant wave height&gt; (meter)</span>
+<span class="go">  1:  State 2Sign. Wave Height &lt;Significant wave height&gt; (meter)</span>
+<span class="go">  2:  Mean StateSign. Wave Height &lt;Significant wave height&gt; (meter)</span>
+<span class="go">  3:  MeasurementSign. Wave Height &lt;Significant wave height&gt; (meter)</span>
 </pre></div>
 </div>
-<p>Read more on the <a class="reference internal" href="dfs0.html"><span class="doc std std-doc">Dfs0 page</span></a>.</p>
+<p>Read more on the <a class="reference internal" href="dfs0.html"><span class="std std-doc">Dfs0 page</span></a>.</p>
+<p>Convert the timeseries dataset to a pandas DataFrame:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">df</span> <span class="o">=</span> <span class="n">ds</span><span class="o">.</span><span class="n">to_dataframe</span><span class="p">()</span>
+</pre></div>
+</div>
 </section>
 <section id="dfs2">
 <h2>Dfs2<a class="headerlink" href="#dfs2" title="Link to this heading"></a></h2>
@@ -166,7 +174,7 @@ An ItemInfo consists of:</p>
 <span class="go">  0:  Elevation &lt;Total Water Depth&gt; (meter)</span>
 </pre></div>
 </div>
-<p>Read more on the <a class="reference internal" href="dfs2.html"><span class="doc std std-doc">Dfs2 page</span></a>.</p>
+<p>Read more on the <a class="reference internal" href="dfs2.html"><span class="std std-doc">Dfs2 page</span></a>.</p>
 </section>
 <section id="generic-dfs">
 <h2>Generic dfs<a class="headerlink" href="#generic-dfs" title="Link to this heading"></a></h2>
@@ -200,7 +208,7 @@ An ItemInfo consists of:</p>
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2022, Henrik Andersson, Jesper Mariegaard, Marc Ridler,.</p>
+    <p>&#169; Copyright 2023, DHI.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

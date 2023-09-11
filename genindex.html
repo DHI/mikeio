@@ -55,6 +55,7 @@
 <li class="toctree-l1"><a class="reference internal" href="mesh.html">Mesh</a></li>
 <li class="toctree-l1"><a class="reference internal" href="dfsu-2d.html">Dfsu 2D</a></li>
 <li class="toctree-l1"><a class="reference internal" href="dfsu-3d.html">Dfsu 3D</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dfsu-1dv-vertical-column.html">Dfsu 1DV Vertical Column</a></li>
 <li class="toctree-l1"><a class="reference internal" href="dfsu-2dv-vertical-profile.html">Dfsu 2DV Vertical Profile</a></li>
 <li class="toctree-l1"><a class="reference internal" href="dfsu-spectral.html">Dfsu Spectral</a></li>
 <li class="toctree-l1"><a class="reference internal" href="eum.html">EUM</a></li>
@@ -89,13 +90,15 @@
 <h1 id="index">Index</h1>
 
 <div class="genindex-jumpbox">
- <a href="#A"><strong>A</strong></a>
+ <a href="#_"><strong>_</strong></a>
+ | <a href="#A"><strong>A</strong></a>
  | <a href="#B"><strong>B</strong></a>
  | <a href="#C"><strong>C</strong></a>
  | <a href="#D"><strong>D</strong></a>
  | <a href="#E"><strong>E</strong></a>
  | <a href="#F"><strong>F</strong></a>
  | <a href="#G"><strong>G</strong></a>
+ | <a href="#H"><strong>H</strong></a>
  | <a href="#I"><strong>I</strong></a>
  | <a href="#K"><strong>K</strong></a>
  | <a href="#L"><strong>L</strong></a>
@@ -115,13 +118,35 @@
  | <a href="#Z"><strong>Z</strong></a>
  
 </div>
+<h2 id="_">_</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="dataarray.html#mikeio.dataset._data_plot._DataArrayPlotter">_DataArrayPlotter (class in mikeio.dataset._data_plot)</a>
+</li>
+      <li><a href="dfsu-2d.html#mikeio.dataset._data_plot._DataArrayPlotterFM">_DataArrayPlotterFM (class in mikeio.dataset._data_plot)</a>
+</li>
+      <li><a href="dfsu-2dv-vertical-profile.html#mikeio.dataset._data_plot._DataArrayPlotterFMVerticalProfile">_DataArrayPlotterFMVerticalProfile (class in mikeio.dataset._data_plot)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="dfs1.html#mikeio.dataset._data_plot._DataArrayPlotterGrid1D">_DataArrayPlotterGrid1D (class in mikeio.dataset._data_plot)</a>
+</li>
+      <li><a href="dfs2.html#mikeio.dataset._data_plot._DataArrayPlotterGrid2D">_DataArrayPlotterGrid2D (class in mikeio.dataset._data_plot)</a>
+</li>
+      <li><a href="dataset.html#mikeio.dataset._data_plot._DatasetPlotter">_DatasetPlotter (class in mikeio.dataset._data_plot)</a>
+</li>
+      <li><a href="mesh.html#mikeio.spatial._FM_geometry._GeometryFMPlotter">_GeometryFMPlotter (class in mikeio.spatial._FM_geometry)</a>
+</li>
+  </ul></td>
+</tr></table>
+
 <h2 id="A">A</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="dataarray.html#mikeio.DataArray.aggregate">aggregate() (mikeio.DataArray method)</a>, <a href="dfs-overview.html#mikeio.DataArray.aggregate">[1]</a>
+      <li><a href="dataarray.html#mikeio.DataArray.aggregate">aggregate() (mikeio.DataArray method)</a>
 
       <ul>
-        <li><a href="dataset.html#mikeio.Dataset.aggregate">(mikeio.Dataset method)</a>, <a href="dfs-overview.html#mikeio.Dataset.aggregate">[1]</a>
+        <li><a href="dataset.html#mikeio.Dataset.aggregate">(mikeio.Dataset method)</a>
 </li>
       </ul></li>
       <li><a href="dfs1.html#mikeio.Dfs1.append">append() (mikeio.Dfs1 method)</a>
@@ -131,15 +156,21 @@
 </li>
         <li><a href="dfs3.html#mikeio.Dfs3.append">(mikeio.Dfs3 method)</a>
 </li>
+        <li><a href="dfsu-2dv-vertical-profile.html#mikeio.dfsu._layered.Dfsu2DV.append">(mikeio.dfsu._layered.Dfsu2DV method)</a>
+</li>
+        <li><a href="dfsu-3d.html#mikeio.dfsu._layered.Dfsu3D.append">(mikeio.dfsu._layered.Dfsu3D method)</a>
+</li>
+        <li><a href="dfsu-spectral.html#mikeio.dfsu._spectral.DfsuSpectral.append">(mikeio.dfsu._spectral.DfsuSpectral method)</a>
+</li>
         <li><a href="dfsu-2d.html#mikeio.dfsu.Dfsu2DH.append">(mikeio.dfsu.Dfsu2DH method)</a>
 </li>
       </ul></li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="dataarray.html#mikeio.DataArray.average">average() (mikeio.DataArray method)</a>, <a href="dfs-overview.html#mikeio.DataArray.average">[1]</a>
+      <li><a href="dataarray.html#mikeio.DataArray.average">average() (mikeio.DataArray method)</a>
 
       <ul>
-        <li><a href="dataset.html#mikeio.Dataset.average">(mikeio.Dataset method)</a>, <a href="dfs-overview.html#mikeio.Dataset.average">[1]</a>
+        <li><a href="dataset.html#mikeio.Dataset.average">(mikeio.Dataset method)</a>
 </li>
       </ul></li>
       <li><a href="generic.html#mikeio.generic.avg_time">avg_time() (in module mikeio.generic)</a>
@@ -150,20 +181,54 @@
 <h2 id="B">B</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="dfs-overview.html#mikeio.Grid2D.bbox">bbox (mikeio.Grid2D property)</a>, <a href="dfs2.html#mikeio.Grid2D.bbox">[1]</a>
+      <li><a href="dfs2.html#mikeio.Grid2D.bbox">bbox (mikeio.Grid2D property)</a>
 </li>
-      <li><a href="dfsu-2d.html#mikeio.dfsu.Dfsu2DH.boundary_codes">boundary_codes (mikeio.dfsu.Dfsu2DH property)</a>
+      <li><a href="dfsu-2dv-vertical-profile.html#mikeio.dfsu._layered.Dfsu2DV.bottom_elements">bottom_elements (mikeio.dfsu._layered.Dfsu2DV property)</a>
 
       <ul>
+        <li><a href="dfsu-3d.html#mikeio.dfsu._layered.Dfsu3D.bottom_elements">(mikeio.dfsu._layered.Dfsu3D property)</a>
+</li>
+        <li><a href="dfsu-3d.html#mikeio.spatial._FM_geometry_layered.GeometryFM3D.bottom_elements">(mikeio.spatial._FM_geometry_layered.GeometryFM3D property)</a>
+</li>
+        <li><a href="dfsu-1dv-vertical-column.html#mikeio.spatial._FM_geometry_layered.GeometryFMVerticalColumn.bottom_elements">(mikeio.spatial._FM_geometry_layered.GeometryFMVerticalColumn property)</a>
+</li>
+        <li><a href="dfsu-2dv-vertical-profile.html#mikeio.spatial._FM_geometry_layered.GeometryFMVerticalProfile.bottom_elements">(mikeio.spatial._FM_geometry_layered.GeometryFMVerticalProfile property)</a>
+</li>
+      </ul></li>
+      <li><a href="dfsu-2dv-vertical-profile.html#mikeio.dfsu._layered.Dfsu2DV.boundary_codes">boundary_codes (mikeio.dfsu._layered.Dfsu2DV property)</a>
+
+      <ul>
+        <li><a href="dfsu-3d.html#mikeio.dfsu._layered.Dfsu3D.boundary_codes">(mikeio.dfsu._layered.Dfsu3D property)</a>
+</li>
+        <li><a href="dfsu-spectral.html#mikeio.dfsu._spectral.DfsuSpectral.boundary_codes">(mikeio.dfsu._spectral.DfsuSpectral property)</a>
+</li>
+        <li><a href="dfsu-2d.html#mikeio.dfsu.Dfsu2DH.boundary_codes">(mikeio.dfsu.Dfsu2DH property)</a>
+</li>
         <li><a href="mesh.html#mikeio.Mesh.boundary_codes">(mikeio.Mesh property)</a>
 </li>
       </ul></li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="dfsu-2d.html#mikeio.dfsu.Dfsu2DH.boundary_polylines">boundary_polylines (mikeio.dfsu.Dfsu2DH property)</a>
+      <li><a href="mesh.html#mikeio.spatial._FM_geometry._GeometryFMPlotter.boundary_nodes">boundary_nodes() (mikeio.spatial._FM_geometry._GeometryFMPlotter method)</a>
+</li>
+      <li><a href="dfsu-2dv-vertical-profile.html#mikeio.dfsu._layered.Dfsu2DV.boundary_polylines">boundary_polylines (mikeio.dfsu._layered.Dfsu2DV property)</a>
 
       <ul>
+        <li><a href="dfsu-3d.html#mikeio.dfsu._layered.Dfsu3D.boundary_polylines">(mikeio.dfsu._layered.Dfsu3D property)</a>
+</li>
+        <li><a href="dfsu-spectral.html#mikeio.dfsu._spectral.DfsuSpectral.boundary_polylines">(mikeio.dfsu._spectral.DfsuSpectral property)</a>
+</li>
+        <li><a href="dfsu-2d.html#mikeio.dfsu.Dfsu2DH.boundary_polylines">(mikeio.dfsu.Dfsu2DH property)</a>
+</li>
         <li><a href="mesh.html#mikeio.Mesh.boundary_polylines">(mikeio.Mesh property)</a>
+</li>
+        <li><a href="mesh.html#mikeio.spatial._FM_geometry.GeometryFM.boundary_polylines">(mikeio.spatial._FM_geometry.GeometryFM property)</a>
+</li>
+        <li><a href="dfsu-spectral.html#mikeio.spatial._FM_geometry.GeometryFMAreaSpectrum.boundary_polylines">(mikeio.spatial._FM_geometry.GeometryFMAreaSpectrum property)</a>
+</li>
+        <li><a href="dfsu-spectral.html#mikeio.spatial._FM_geometry.GeometryFMLineSpectrum.boundary_polylines">(mikeio.spatial._FM_geometry.GeometryFMLineSpectrum property)</a>
+</li>
+        <li><a href="dfsu-2d.html#mikeio.spatial.GeometryFM2D.boundary_polylines">(mikeio.spatial.GeometryFM2D property)</a>
 </li>
       </ul></li>
   </ul></td>
@@ -172,10 +237,12 @@
 <h2 id="C">C</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="dfsu-spectral.html#mikeio.dfsu._spectral.DfsuSpectral.calc_Hm0_from_spectrum">calc_Hm0_from_spectrum() (mikeio.dfsu._spectral.DfsuSpectral method)</a>
+</li>
       <li><a href="pfs.html#mikeio.PfsDocument.clear">clear() (mikeio.PfsDocument method)</a>
 
       <ul>
-        <li><a href="dfs-overview.html#mikeio.PfsSection.clear">(mikeio.PfsSection method)</a>, <a href="pfs.html#mikeio.PfsSection.clear">[1]</a>
+        <li><a href="pfs.html#mikeio.PfsSection.clear">(mikeio.PfsSection method)</a>
 </li>
       </ul></li>
       <li><a href="dfs1.html#mikeio.Dfs1.close">close() (mikeio.Dfs1 method)</a>
@@ -185,40 +252,92 @@
 </li>
         <li><a href="dfs3.html#mikeio.Dfs3.close">(mikeio.Dfs3 method)</a>
 </li>
+        <li><a href="dfsu-2dv-vertical-profile.html#mikeio.dfsu._layered.Dfsu2DV.close">(mikeio.dfsu._layered.Dfsu2DV method)</a>
+</li>
+        <li><a href="dfsu-3d.html#mikeio.dfsu._layered.Dfsu3D.close">(mikeio.dfsu._layered.Dfsu3D method)</a>
+</li>
+        <li><a href="dfsu-spectral.html#mikeio.dfsu._spectral.DfsuSpectral.close">(mikeio.dfsu._spectral.DfsuSpectral method)</a>
+</li>
         <li><a href="dfsu-2d.html#mikeio.dfsu.Dfsu2DH.close">(mikeio.dfsu.Dfsu2DH method)</a>
+</li>
+      </ul></li>
+      <li><a href="mesh.html#mikeio.spatial._FM_geometry.GeometryFM.codes">codes (mikeio.spatial._FM_geometry.GeometryFM property)</a>
+
+      <ul>
+        <li><a href="dfsu-spectral.html#mikeio.spatial._FM_geometry.GeometryFMAreaSpectrum.codes">(mikeio.spatial._FM_geometry.GeometryFMAreaSpectrum property)</a>
+</li>
+        <li><a href="dfsu-spectral.html#mikeio.spatial._FM_geometry.GeometryFMLineSpectrum.codes">(mikeio.spatial._FM_geometry.GeometryFMLineSpectrum property)</a>
+</li>
+        <li><a href="dfsu-3d.html#mikeio.spatial._FM_geometry_layered.GeometryFM3D.codes">(mikeio.spatial._FM_geometry_layered.GeometryFM3D property)</a>
+</li>
+        <li><a href="dfsu-1dv-vertical-column.html#mikeio.spatial._FM_geometry_layered.GeometryFMVerticalColumn.codes">(mikeio.spatial._FM_geometry_layered.GeometryFMVerticalColumn property)</a>
+</li>
+        <li><a href="dfsu-2dv-vertical-profile.html#mikeio.spatial._FM_geometry_layered.GeometryFMVerticalProfile.codes">(mikeio.spatial._FM_geometry_layered.GeometryFMVerticalProfile property)</a>
+</li>
+        <li><a href="dfsu-2d.html#mikeio.spatial.GeometryFM2D.codes">(mikeio.spatial.GeometryFM2D property)</a>
 </li>
       </ul></li>
       <li><a href="generic.html#mikeio.generic.concat">concat() (in module mikeio.generic)</a>
 
       <ul>
-        <li><a href="dataarray.html#mikeio.DataArray.concat">(mikeio.DataArray static method)</a>, <a href="dfs-overview.html#mikeio.DataArray.concat">[1]</a>
+        <li><a href="dataarray.html#mikeio.DataArray.concat">(mikeio.DataArray static method)</a>
 </li>
-        <li><a href="dataset.html#mikeio.Dataset.concat">(mikeio.Dataset static method)</a>, <a href="dfs-overview.html#mikeio.Dataset.concat">[1]</a>
+        <li><a href="dataset.html#mikeio.Dataset.concat">(mikeio.Dataset static method)</a>
+</li>
+      </ul></li>
+      <li><a href="dfsu-2dv-vertical-profile.html#mikeio.dfsu._layered.Dfsu2DV.contains">contains() (mikeio.dfsu._layered.Dfsu2DV method)</a>
+
+      <ul>
+        <li><a href="dfsu-3d.html#mikeio.dfsu._layered.Dfsu3D.contains">(mikeio.dfsu._layered.Dfsu3D method)</a>
+</li>
+        <li><a href="dfsu-spectral.html#mikeio.dfsu._spectral.DfsuSpectral.contains">(mikeio.dfsu._spectral.DfsuSpectral method)</a>
+</li>
+        <li><a href="dfsu-2d.html#mikeio.dfsu.Dfsu2DH.contains">(mikeio.dfsu.Dfsu2DH method)</a>
+</li>
+        <li><a href="dfs2.html#mikeio.Grid2D.contains">(mikeio.Grid2D method)</a>
+</li>
+        <li><a href="mesh.html#mikeio.Mesh.contains">(mikeio.Mesh method)</a>
+</li>
+        <li><a href="mesh.html#mikeio.spatial._FM_geometry.GeometryFM.contains">(mikeio.spatial._FM_geometry.GeometryFM method)</a>
+</li>
+        <li><a href="dfsu-spectral.html#mikeio.spatial._FM_geometry.GeometryFMAreaSpectrum.contains">(mikeio.spatial._FM_geometry.GeometryFMAreaSpectrum method)</a>
+</li>
+        <li><a href="dfsu-spectral.html#mikeio.spatial._FM_geometry.GeometryFMLineSpectrum.contains">(mikeio.spatial._FM_geometry.GeometryFMLineSpectrum method)</a>
+</li>
+        <li><a href="dfsu-2d.html#mikeio.spatial.GeometryFM2D.contains">(mikeio.spatial.GeometryFM2D method)</a>
 </li>
       </ul></li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="dfsu-2d.html#mikeio.dfsu.Dfsu2DH.contains">contains() (mikeio.dfsu.Dfsu2DH method)</a>
+      <li><a href="dfsu-2d.html#mikeio.dataset._data_plot._DataArrayPlotterFM.contour">contour() (mikeio.dataset._data_plot._DataArrayPlotterFM method)</a>
 
       <ul>
-        <li><a href="dfs-overview.html#mikeio.Grid2D.contains">(mikeio.Grid2D method)</a>, <a href="dfs2.html#mikeio.Grid2D.contains">[1]</a>
+        <li><a href="dfs2.html#mikeio.dataset._data_plot._DataArrayPlotterGrid2D.contour">(mikeio.dataset._data_plot._DataArrayPlotterGrid2D method)</a>
 </li>
-        <li><a href="mesh.html#mikeio.Mesh.contains">(mikeio.Mesh method)</a>
+        <li><a href="mesh.html#mikeio.spatial._FM_geometry._GeometryFMPlotter.contour">(mikeio.spatial._FM_geometry._GeometryFMPlotter method)</a>
 </li>
       </ul></li>
-      <li><a href="dfs-overview.html#mikeio.Grid2D.coordinates">coordinates (mikeio.Grid2D property)</a>, <a href="dfs2.html#mikeio.Grid2D.coordinates">[1]</a>
-</li>
-      <li><a href="dataarray.html#mikeio.DataArray.copy">copy() (mikeio.DataArray method)</a>, <a href="dfs-overview.html#mikeio.DataArray.copy">[1]</a>
+      <li><a href="dfsu-2d.html#mikeio.dataset._data_plot._DataArrayPlotterFM.contourf">contourf() (mikeio.dataset._data_plot._DataArrayPlotterFM method)</a>
 
       <ul>
-        <li><a href="dataset.html#mikeio.Dataset.copy">(mikeio.Dataset method)</a>, <a href="dfs-overview.html#mikeio.Dataset.copy">[1]</a>
+        <li><a href="dfs2.html#mikeio.dataset._data_plot._DataArrayPlotterGrid2D.contourf">(mikeio.dataset._data_plot._DataArrayPlotterGrid2D method)</a>
+</li>
+        <li><a href="mesh.html#mikeio.spatial._FM_geometry._GeometryFMPlotter.contourf">(mikeio.spatial._FM_geometry._GeometryFMPlotter method)</a>
+</li>
+      </ul></li>
+      <li><a href="dfs2.html#mikeio.Grid2D.coordinates">coordinates (mikeio.Grid2D property)</a>
+</li>
+      <li><a href="dataarray.html#mikeio.DataArray.copy">copy() (mikeio.DataArray method)</a>
+
+      <ul>
+        <li><a href="dataset.html#mikeio.Dataset.copy">(mikeio.Dataset method)</a>
 </li>
         <li><a href="pfs.html#mikeio.PfsDocument.copy">(mikeio.PfsDocument method)</a>
 </li>
-        <li><a href="dfs-overview.html#mikeio.PfsSection.copy">(mikeio.PfsSection method)</a>, <a href="pfs.html#mikeio.PfsSection.copy">[1]</a>
+        <li><a href="pfs.html#mikeio.PfsSection.copy">(mikeio.PfsSection method)</a>
 </li>
       </ul></li>
-      <li><a href="dataset.html#mikeio.Dataset.create_data_array">create_data_array() (mikeio.Dataset method)</a>, <a href="dfs-overview.html#mikeio.Dataset.create_data_array">[1]</a>
+      <li><a href="dataset.html#mikeio.Dataset.create_data_array">create_data_array() (mikeio.Dataset method)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -226,11 +345,11 @@
 <h2 id="D">D</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="dataarray.html#mikeio.DataArray">DataArray (class in mikeio)</a>, <a href="dfs-overview.html#mikeio.DataArray">[1]</a>
+      <li><a href="dataarray.html#mikeio.DataArray">DataArray (class in mikeio)</a>
 </li>
-      <li><a href="dataset.html#mikeio.Dataset">Dataset (class in mikeio)</a>, <a href="dfs-overview.html#mikeio.Dataset">[1]</a>
+      <li><a href="dataset.html#mikeio.Dataset">Dataset (class in mikeio)</a>
 </li>
-      <li><a href="dataset.html#mikeio.Dataset.deletevalue">deletevalue (mikeio.Dataset property)</a>, <a href="dfs-overview.html#mikeio.Dataset.deletevalue">[1]</a>
+      <li><a href="dataset.html#mikeio.Dataset.deletevalue">deletevalue (mikeio.Dataset property)</a>
 
       <ul>
         <li><a href="dfs0.html#mikeio.Dfs0.deletevalue">(mikeio.Dfs0 property)</a>
@@ -241,13 +360,19 @@
 </li>
         <li><a href="dfs3.html#mikeio.Dfs3.deletevalue">(mikeio.Dfs3 property)</a>
 </li>
+        <li><a href="dfsu-2dv-vertical-profile.html#mikeio.dfsu._layered.Dfsu2DV.deletevalue">(mikeio.dfsu._layered.Dfsu2DV property)</a>
+</li>
+        <li><a href="dfsu-3d.html#mikeio.dfsu._layered.Dfsu3D.deletevalue">(mikeio.dfsu._layered.Dfsu3D property)</a>
+</li>
+        <li><a href="dfsu-spectral.html#mikeio.dfsu._spectral.DfsuSpectral.deletevalue">(mikeio.dfsu._spectral.DfsuSpectral property)</a>
+</li>
         <li><a href="dfsu-2d.html#mikeio.dfsu.Dfsu2DH.deletevalue">(mikeio.dfsu.Dfsu2DH property)</a>
 </li>
       </ul></li>
-      <li><a href="dataarray.html#mikeio.DataArray.describe">describe() (mikeio.DataArray method)</a>, <a href="dfs-overview.html#mikeio.DataArray.describe">[1]</a>
+      <li><a href="dataarray.html#mikeio.DataArray.describe">describe() (mikeio.DataArray method)</a>
 
       <ul>
-        <li><a href="dataset.html#mikeio.Dataset.describe">(mikeio.Dataset method)</a>, <a href="dfs-overview.html#mikeio.Dataset.describe">[1]</a>
+        <li><a href="dataset.html#mikeio.Dataset.describe">(mikeio.Dataset method)</a>
 </li>
       </ul></li>
       <li><a href="dfs0.html#mikeio.Dfs0">Dfs0 (class in mikeio)</a>
@@ -260,29 +385,41 @@
 </li>
       <li><a href="dfsu-2d.html#mikeio.dfsu.Dfsu2DH">Dfsu2DH (class in mikeio.dfsu)</a>
 </li>
+      <li><a href="dfsu-2dv-vertical-profile.html#mikeio.dfsu._layered.Dfsu2DV">Dfsu2DV (class in mikeio.dfsu._layered)</a>
+</li>
+      <li><a href="dfsu-3d.html#mikeio.dfsu._layered.Dfsu3D">Dfsu3D (class in mikeio.dfsu._layered)</a>
+</li>
+      <li><a href="dfsu-spectral.html#mikeio.dfsu._spectral.DfsuSpectral">DfsuSpectral (class in mikeio.dfsu._spectral)</a>
+</li>
       <li><a href="generic.html#mikeio.generic.diff">diff() (in module mikeio.generic)</a>
 </li>
-      <li><a href="dataset.html#mikeio.Dataset.dims">dims (mikeio.Dataset property)</a>, <a href="dfs-overview.html#mikeio.Dataset.dims">[1]</a>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="dataset.html#mikeio.Dataset.dims">dims (mikeio.Dataset property)</a>
 </li>
+      <li><a href="dfsu-spectral.html#mikeio.dfsu._spectral.DfsuSpectral.directions">directions (mikeio.dfsu._spectral.DfsuSpectral property)</a>
+
+      <ul>
+        <li><a href="dfsu-spectral.html#mikeio.spatial._FM_geometry.GeometryFMAreaSpectrum.directions">(mikeio.spatial._FM_geometry.GeometryFMAreaSpectrum property)</a>
+</li>
+        <li><a href="dfsu-spectral.html#mikeio.spatial._FM_geometry.GeometryFMLineSpectrum.directions">(mikeio.spatial._FM_geometry.GeometryFMLineSpectrum property)</a>
+</li>
+        <li><a href="dfsu-spectral.html#mikeio.spatial._FM_geometry.GeometryFMPointSpectrum.directions">(mikeio.spatial._FM_geometry.GeometryFMPointSpectrum property)</a>
+</li>
+      </ul></li>
       <li><a href="eum.html#mikeio.eum.EUMType.display_name">display_name (mikeio.eum.EUMType property)</a>
 
       <ul>
         <li><a href="eum.html#mikeio.eum.EUMUnit.display_name">(mikeio.eum.EUMUnit property)</a>
 </li>
-        <li><a href="dfs-overview.html#mikeio.EUMType.display_name">(mikeio.EUMType property)</a>
-</li>
-        <li><a href="dfs-overview.html#mikeio.EUMUnit.display_name">(mikeio.EUMUnit property)</a>
-</li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="dataarray.html#mikeio.DataArray.dropna">dropna() (mikeio.DataArray method)</a>, <a href="dfs-overview.html#mikeio.DataArray.dropna">[1]</a>
+      <li><a href="dataarray.html#mikeio.DataArray.dropna">dropna() (mikeio.DataArray method)</a>
 
       <ul>
-        <li><a href="dataset.html#mikeio.Dataset.dropna">(mikeio.Dataset method)</a>, <a href="dfs-overview.html#mikeio.Dataset.dropna">[1]</a>
+        <li><a href="dataset.html#mikeio.Dataset.dropna">(mikeio.Dataset method)</a>
 </li>
       </ul></li>
-      <li><a href="dataarray.html#mikeio.DataArray.dtype">dtype (mikeio.DataArray property)</a>, <a href="dfs-overview.html#mikeio.DataArray.dtype">[1]</a>
+      <li><a href="dataarray.html#mikeio.DataArray.dtype">dtype (mikeio.DataArray property)</a>
 </li>
       <li><a href="dfs1.html#mikeio.Dfs1.dx">dx (mikeio.Dfs1 property)</a>
 
@@ -291,11 +428,11 @@
 </li>
         <li><a href="dfs3.html#mikeio.Dfs3.dx">(mikeio.Dfs3 property)</a>
 </li>
-        <li><a href="dfs-overview.html#mikeio.Grid1D.dx">(mikeio.Grid1D property)</a>, <a href="dfs1.html#mikeio.Grid1D.dx">[1]</a>
+        <li><a href="dfs1.html#mikeio.Grid1D.dx">(mikeio.Grid1D property)</a>
 </li>
-        <li><a href="dfs-overview.html#mikeio.Grid2D.dx">(mikeio.Grid2D property)</a>, <a href="dfs2.html#mikeio.Grid2D.dx">[1]</a>
+        <li><a href="dfs2.html#mikeio.Grid2D.dx">(mikeio.Grid2D property)</a>
 </li>
-        <li><a href="dfs-overview.html#mikeio.Grid3D.dx">(mikeio.Grid3D property)</a>, <a href="dfs3.html#mikeio.Grid3D.dx">[1]</a>
+        <li><a href="dfs3.html#mikeio.Grid3D.dx">(mikeio.Grid3D property)</a>
 </li>
       </ul></li>
       <li><a href="dfs2.html#mikeio.Dfs2.dy">dy (mikeio.Dfs2 property)</a>
@@ -303,15 +440,15 @@
       <ul>
         <li><a href="dfs3.html#mikeio.Dfs3.dy">(mikeio.Dfs3 property)</a>
 </li>
-        <li><a href="dfs-overview.html#mikeio.Grid2D.dy">(mikeio.Grid2D property)</a>, <a href="dfs2.html#mikeio.Grid2D.dy">[1]</a>
+        <li><a href="dfs2.html#mikeio.Grid2D.dy">(mikeio.Grid2D property)</a>
 </li>
-        <li><a href="dfs-overview.html#mikeio.Grid3D.dy">(mikeio.Grid3D property)</a>, <a href="dfs3.html#mikeio.Grid3D.dy">[1]</a>
+        <li><a href="dfs3.html#mikeio.Grid3D.dy">(mikeio.Grid3D property)</a>
 </li>
       </ul></li>
       <li><a href="dfs3.html#mikeio.Dfs3.dz">dz (mikeio.Dfs3 property)</a>
 
       <ul>
-        <li><a href="dfs-overview.html#mikeio.Grid3D.dz">(mikeio.Grid3D property)</a>, <a href="dfs3.html#mikeio.Grid3D.dz">[1]</a>
+        <li><a href="dfs3.html#mikeio.Grid3D.dz">(mikeio.Grid3D property)</a>
 </li>
       </ul></li>
   </ul></td>
@@ -320,28 +457,76 @@
 <h2 id="E">E</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="dfsu-2d.html#mikeio.dfsu.Dfsu2DH.element_coordinates">element_coordinates (mikeio.dfsu.Dfsu2DH property)</a>
+      <li><a href="dfsu-2dv-vertical-profile.html#mikeio.dfsu._layered.Dfsu2DV.e2_e3_table">e2_e3_table (mikeio.dfsu._layered.Dfsu2DV property)</a>
 
       <ul>
-        <li><a href="mesh.html#mikeio.Mesh.element_coordinates">(mikeio.Mesh property)</a>
+        <li><a href="dfsu-3d.html#mikeio.dfsu._layered.Dfsu3D.e2_e3_table">(mikeio.dfsu._layered.Dfsu3D property)</a>
+</li>
+        <li><a href="dfsu-3d.html#mikeio.spatial._FM_geometry_layered.GeometryFM3D.e2_e3_table">(mikeio.spatial._FM_geometry_layered.GeometryFM3D property)</a>
+</li>
+        <li><a href="dfsu-1dv-vertical-column.html#mikeio.spatial._FM_geometry_layered.GeometryFMVerticalColumn.e2_e3_table">(mikeio.spatial._FM_geometry_layered.GeometryFMVerticalColumn property)</a>
+</li>
+        <li><a href="dfsu-2dv-vertical-profile.html#mikeio.spatial._FM_geometry_layered.GeometryFMVerticalProfile.e2_e3_table">(mikeio.spatial._FM_geometry_layered.GeometryFMVerticalProfile property)</a>
 </li>
       </ul></li>
-      <li><a href="dfsu-2d.html#mikeio.dfsu.Dfsu2DH.element_table">element_table (mikeio.dfsu.Dfsu2DH property)</a>
+      <li><a href="dfsu-2dv-vertical-profile.html#mikeio.dfsu._layered.Dfsu2DV.elem2d_ids">elem2d_ids (mikeio.dfsu._layered.Dfsu2DV property)</a>
 
       <ul>
+        <li><a href="dfsu-3d.html#mikeio.dfsu._layered.Dfsu3D.elem2d_ids">(mikeio.dfsu._layered.Dfsu3D property)</a>
+</li>
+        <li><a href="dfsu-3d.html#mikeio.spatial._FM_geometry_layered.GeometryFM3D.elem2d_ids">(mikeio.spatial._FM_geometry_layered.GeometryFM3D property)</a>
+</li>
+        <li><a href="dfsu-1dv-vertical-column.html#mikeio.spatial._FM_geometry_layered.GeometryFMVerticalColumn.elem2d_ids">(mikeio.spatial._FM_geometry_layered.GeometryFMVerticalColumn property)</a>
+</li>
+        <li><a href="dfsu-2dv-vertical-profile.html#mikeio.spatial._FM_geometry_layered.GeometryFMVerticalProfile.elem2d_ids">(mikeio.spatial._FM_geometry_layered.GeometryFMVerticalProfile property)</a>
+</li>
+      </ul></li>
+      <li><a href="dfsu-2dv-vertical-profile.html#mikeio.dfsu._layered.Dfsu2DV.element_coordinates">element_coordinates (mikeio.dfsu._layered.Dfsu2DV property)</a>
+
+      <ul>
+        <li><a href="dfsu-3d.html#mikeio.dfsu._layered.Dfsu3D.element_coordinates">(mikeio.dfsu._layered.Dfsu3D property)</a>
+</li>
+        <li><a href="dfsu-spectral.html#mikeio.dfsu._spectral.DfsuSpectral.element_coordinates">(mikeio.dfsu._spectral.DfsuSpectral property)</a>
+</li>
+        <li><a href="dfsu-2d.html#mikeio.dfsu.Dfsu2DH.element_coordinates">(mikeio.dfsu.Dfsu2DH property)</a>
+</li>
+        <li><a href="mesh.html#mikeio.Mesh.element_coordinates">(mikeio.Mesh property)</a>
+</li>
+        <li><a href="mesh.html#mikeio.spatial._FM_geometry.GeometryFM.element_coordinates">(mikeio.spatial._FM_geometry.GeometryFM property)</a>
+</li>
+        <li><a href="dfsu-spectral.html#mikeio.spatial._FM_geometry.GeometryFMAreaSpectrum.element_coordinates">(mikeio.spatial._FM_geometry.GeometryFMAreaSpectrum property)</a>
+</li>
+        <li><a href="dfsu-spectral.html#mikeio.spatial._FM_geometry.GeometryFMLineSpectrum.element_coordinates">(mikeio.spatial._FM_geometry.GeometryFMLineSpectrum property)</a>
+</li>
+        <li><a href="dfsu-3d.html#mikeio.spatial._FM_geometry_layered.GeometryFM3D.element_coordinates">(mikeio.spatial._FM_geometry_layered.GeometryFM3D property)</a>
+</li>
+        <li><a href="dfsu-1dv-vertical-column.html#mikeio.spatial._FM_geometry_layered.GeometryFMVerticalColumn.element_coordinates">(mikeio.spatial._FM_geometry_layered.GeometryFMVerticalColumn property)</a>
+</li>
+        <li><a href="dfsu-2dv-vertical-profile.html#mikeio.spatial._FM_geometry_layered.GeometryFMVerticalProfile.element_coordinates">(mikeio.spatial._FM_geometry_layered.GeometryFMVerticalProfile property)</a>
+</li>
+        <li><a href="dfsu-2d.html#mikeio.spatial.GeometryFM2D.element_coordinates">(mikeio.spatial.GeometryFM2D property)</a>
+</li>
+      </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="dfsu-2dv-vertical-profile.html#mikeio.dfsu._layered.Dfsu2DV.element_table">element_table (mikeio.dfsu._layered.Dfsu2DV property)</a>
+
+      <ul>
+        <li><a href="dfsu-3d.html#mikeio.dfsu._layered.Dfsu3D.element_table">(mikeio.dfsu._layered.Dfsu3D property)</a>
+</li>
+        <li><a href="dfsu-spectral.html#mikeio.dfsu._spectral.DfsuSpectral.element_table">(mikeio.dfsu._spectral.DfsuSpectral property)</a>
+</li>
+        <li><a href="dfsu-2d.html#mikeio.dfsu.Dfsu2DH.element_table">(mikeio.dfsu.Dfsu2DH property)</a>
+</li>
         <li><a href="mesh.html#mikeio.Mesh.element_table">(mikeio.Mesh property)</a>
 </li>
       </ul></li>
-      <li><a href="dfsu-2d.html#mikeio.dfsu.Dfsu2DH.elements_to_geometry">elements_to_geometry() (mikeio.dfsu.Dfsu2DH method)</a>
-
-      <ul>
-        <li><a href="mesh.html#mikeio.Mesh.elements_to_geometry">(mikeio.Mesh method)</a>
+      <li><a href="dfsu-spectral.html#mikeio.spatial._FM_geometry.GeometryFMAreaSpectrum.elements_to_geometry">elements_to_geometry() (mikeio.spatial._FM_geometry.GeometryFMAreaSpectrum method)</a>
 </li>
-      </ul></li>
-      <li><a href="dataarray.html#mikeio.DataArray.end_time">end_time (mikeio.DataArray property)</a>, <a href="dfs-overview.html#mikeio.DataArray.end_time">[1]</a>
+      <li><a href="dataarray.html#mikeio.DataArray.end_time">end_time (mikeio.DataArray property)</a>
 
       <ul>
-        <li><a href="dataset.html#mikeio.Dataset.end_time">(mikeio.Dataset property)</a>, <a href="dfs-overview.html#mikeio.Dataset.end_time">[1]</a>
+        <li><a href="dataset.html#mikeio.Dataset.end_time">(mikeio.Dataset property)</a>
 </li>
         <li><a href="dfs1.html#mikeio.Dfs1.end_time">(mikeio.Dfs1 property)</a>
 </li>
@@ -349,29 +534,27 @@
 </li>
         <li><a href="dfs3.html#mikeio.Dfs3.end_time">(mikeio.Dfs3 property)</a>
 </li>
+        <li><a href="dfsu-2dv-vertical-profile.html#mikeio.dfsu._layered.Dfsu2DV.end_time">(mikeio.dfsu._layered.Dfsu2DV property)</a>
+</li>
+        <li><a href="dfsu-3d.html#mikeio.dfsu._layered.Dfsu3D.end_time">(mikeio.dfsu._layered.Dfsu3D property)</a>
+</li>
+        <li><a href="dfsu-spectral.html#mikeio.dfsu._spectral.DfsuSpectral.end_time">(mikeio.dfsu._spectral.DfsuSpectral property)</a>
+</li>
         <li><a href="dfsu-2d.html#mikeio.dfsu.Dfsu2DH.end_time">(mikeio.dfsu.Dfsu2DH property)</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="dfs-overview.html#mikeio.EUMType">EUMType (class in mikeio)</a>
-
-      <ul>
-        <li><a href="eum.html#mikeio.eum.EUMType">(class in mikeio.eum)</a>
+      <li><a href="eum.html#mikeio.eum.EUMType">EUMType (class in mikeio.eum)</a>
 </li>
-      </ul></li>
-      <li><a href="dfs-overview.html#mikeio.EUMUnit">EUMUnit (class in mikeio)</a>
-
-      <ul>
-        <li><a href="eum.html#mikeio.eum.EUMUnit">(class in mikeio.eum)</a>
+      <li><a href="eum.html#mikeio.eum.EUMUnit">EUMUnit (class in mikeio.eum)</a>
 </li>
-      </ul></li>
       <li><a href="generic.html#mikeio.generic.extract">extract() (in module mikeio.generic)</a>
 </li>
-      <li><a href="dataarray.html#mikeio.DataArray.extract_track">extract_track() (mikeio.DataArray method)</a>, <a href="dfs-overview.html#mikeio.DataArray.extract_track">[1]</a>
+      <li><a href="dfsu-3d.html#mikeio.dfsu._layered.Dfsu3D.extract_surface_elevation_from_3d">extract_surface_elevation_from_3d() (mikeio.dfsu._layered.Dfsu3D method)</a>
+</li>
+      <li><a href="dataarray.html#mikeio.DataArray.extract_track">extract_track() (mikeio.DataArray method)</a>
 
       <ul>
-        <li><a href="dataset.html#mikeio.Dataset.extract_track">(mikeio.Dataset method)</a>, <a href="dfs-overview.html#mikeio.Dataset.extract_track">[1]</a>
+        <li><a href="dataset.html#mikeio.Dataset.extract_track">(mikeio.Dataset method)</a>
 </li>
         <li><a href="dfsu-2d.html#mikeio.dfsu.Dfsu2DH.extract_track">(mikeio.dfsu.Dfsu2DH method)</a>
 </li>
@@ -384,134 +567,296 @@
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="generic.html#mikeio.generic.fill_corrupt">fill_corrupt() (in module mikeio.generic)</a>
 </li>
-      <li><a href="dfs-overview.html#mikeio.Grid1D.find_index">find_index() (mikeio.Grid1D method)</a>, <a href="dfs1.html#mikeio.Grid1D.find_index">[1]</a>
+      <li><a href="dfs1.html#mikeio.Grid1D.find_index">find_index() (mikeio.Grid1D method)</a>
 
       <ul>
-        <li><a href="dfs-overview.html#mikeio.Grid2D.find_index">(mikeio.Grid2D method)</a>, <a href="dfs2.html#mikeio.Grid2D.find_index">[1]</a>
+        <li><a href="dfs2.html#mikeio.Grid2D.find_index">(mikeio.Grid2D method)</a>
+</li>
+        <li><a href="mesh.html#mikeio.spatial._FM_geometry.GeometryFM.find_index">(mikeio.spatial._FM_geometry.GeometryFM method)</a>
+</li>
+        <li><a href="dfsu-spectral.html#mikeio.spatial._FM_geometry.GeometryFMAreaSpectrum.find_index">(mikeio.spatial._FM_geometry.GeometryFMAreaSpectrum method)</a>
+</li>
+        <li><a href="dfsu-spectral.html#mikeio.spatial._FM_geometry.GeometryFMLineSpectrum.find_index">(mikeio.spatial._FM_geometry.GeometryFMLineSpectrum method)</a>
+</li>
+        <li><a href="dfsu-2d.html#mikeio.spatial.GeometryFM2D.find_index">(mikeio.spatial.GeometryFM2D method)</a>
 </li>
       </ul></li>
-      <li><a href="pfs.html#mikeio.PfsDocument.find_replace">find_replace() (mikeio.PfsDocument method)</a>
+      <li><a href="mesh.html#mikeio.spatial._FM_geometry.GeometryFM.find_nearest_elements">find_nearest_elements() (mikeio.spatial._FM_geometry.GeometryFM method)</a>
 
       <ul>
-        <li><a href="dfs-overview.html#mikeio.PfsSection.find_replace">(mikeio.PfsSection method)</a>, <a href="pfs.html#mikeio.PfsSection.find_replace">[1]</a>
+        <li><a href="dfsu-spectral.html#mikeio.spatial._FM_geometry.GeometryFMAreaSpectrum.find_nearest_elements">(mikeio.spatial._FM_geometry.GeometryFMAreaSpectrum method)</a>
 </li>
-      </ul></li>
-      <li><a href="dataarray.html#mikeio.DataArray.flipud">flipud() (mikeio.DataArray method)</a>, <a href="dfs-overview.html#mikeio.DataArray.flipud">[1]</a>
-
-      <ul>
-        <li><a href="dataset.html#mikeio.Dataset.flipud">(mikeio.Dataset method)</a>, <a href="dfs-overview.html#mikeio.Dataset.flipud">[1]</a>
+        <li><a href="dfsu-spectral.html#mikeio.spatial._FM_geometry.GeometryFMLineSpectrum.find_nearest_elements">(mikeio.spatial._FM_geometry.GeometryFMLineSpectrum method)</a>
+</li>
+        <li><a href="dfsu-2d.html#mikeio.spatial.GeometryFM2D.find_nearest_elements">(mikeio.spatial.GeometryFM2D method)</a>
 </li>
       </ul></li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="pfs.html#mikeio.PfsDocument.find_replace">find_replace() (mikeio.PfsDocument method)</a>
+
+      <ul>
+        <li><a href="pfs.html#mikeio.PfsSection.find_replace">(mikeio.PfsSection method)</a>
+</li>
+      </ul></li>
+      <li><a href="dataarray.html#mikeio.DataArray.flipud">flipud() (mikeio.DataArray method)</a>
+
+      <ul>
+        <li><a href="dataset.html#mikeio.Dataset.flipud">(mikeio.Dataset method)</a>
+</li>
+      </ul></li>
+      <li><a href="dfsu-spectral.html#mikeio.dfsu._spectral.DfsuSpectral.frequencies">frequencies (mikeio.dfsu._spectral.DfsuSpectral property)</a>
+
+      <ul>
+        <li><a href="dfsu-spectral.html#mikeio.spatial._FM_geometry.GeometryFMAreaSpectrum.frequencies">(mikeio.spatial._FM_geometry.GeometryFMAreaSpectrum property)</a>
+</li>
+        <li><a href="dfsu-spectral.html#mikeio.spatial._FM_geometry.GeometryFMLineSpectrum.frequencies">(mikeio.spatial._FM_geometry.GeometryFMLineSpectrum property)</a>
+</li>
+        <li><a href="dfsu-spectral.html#mikeio.spatial._FM_geometry.GeometryFMPointSpectrum.frequencies">(mikeio.spatial._FM_geometry.GeometryFMPointSpectrum property)</a>
+</li>
+      </ul></li>
       <li><a href="dfs0.html#mikeio.Dfs0.from_dataframe">from_dataframe() (mikeio.Dfs0 static method)</a>
 
       <ul>
         <li><a href="pfs.html#mikeio.PfsDocument.from_dataframe">(mikeio.PfsDocument static method)</a>
 </li>
-        <li><a href="dfs-overview.html#mikeio.PfsSection.from_dataframe">(mikeio.PfsSection static method)</a>, <a href="pfs.html#mikeio.PfsSection.from_dataframe">[1]</a>
+        <li><a href="pfs.html#mikeio.PfsSection.from_dataframe">(mikeio.PfsSection static method)</a>
 </li>
       </ul></li>
       <li><a href="eum.html#mikeio.eum.ItemInfo.from_mikecore_dynamic_item_info">from_mikecore_dynamic_item_info() (mikeio.eum.ItemInfo static method)</a>
-
-      <ul>
-        <li><a href="dfs-overview.html#mikeio.ItemInfo.from_mikecore_dynamic_item_info">(mikeio.ItemInfo static method)</a>
 </li>
-      </ul></li>
   </ul></td>
 </tr></table>
 
 <h2 id="G">G</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="dataset.html#mikeio.Dataset.geometry">geometry (mikeio.Dataset property)</a>, <a href="dfs-overview.html#mikeio.Dataset.geometry">[1]</a>
+      <li><a href="dataset.html#mikeio.Dataset.geometry">geometry (mikeio.Dataset property)</a>
 </li>
-      <li><a href="mesh.html#mikeio.spatial.FM_geometry.GeometryFM">GeometryFM (in module mikeio.spatial.FM_geometry)</a>
+      <li><a href="dfsu-3d.html#mikeio.dfsu._layered.Dfsu3D.geometry2d">geometry2d (mikeio.dfsu._layered.Dfsu3D property)</a>
+</li>
+      <li><a href="mesh.html#mikeio.spatial._FM_geometry.GeometryFM">GeometryFM (class in mikeio.spatial._FM_geometry)</a>
+</li>
+      <li><a href="dfsu-2d.html#mikeio.spatial.GeometryFM2D">GeometryFM2D (class in mikeio.spatial)</a>
+</li>
+      <li><a href="dfsu-3d.html#mikeio.spatial._FM_geometry_layered.GeometryFM3D">GeometryFM3D (class in mikeio.spatial._FM_geometry_layered)</a>
+</li>
+      <li><a href="dfsu-spectral.html#mikeio.spatial._FM_geometry.GeometryFMAreaSpectrum">GeometryFMAreaSpectrum (class in mikeio.spatial._FM_geometry)</a>
+</li>
+      <li><a href="dfsu-spectral.html#mikeio.spatial._FM_geometry.GeometryFMLineSpectrum">GeometryFMLineSpectrum (class in mikeio.spatial._FM_geometry)</a>
+</li>
+      <li><a href="dfsu-spectral.html#mikeio.spatial._FM_geometry.GeometryFMPointSpectrum">GeometryFMPointSpectrum (class in mikeio.spatial._FM_geometry)</a>
+</li>
+      <li><a href="dfsu-1dv-vertical-column.html#mikeio.spatial._FM_geometry_layered.GeometryFMVerticalColumn">GeometryFMVerticalColumn (class in mikeio.spatial._FM_geometry_layered)</a>
+</li>
+      <li><a href="dfsu-2dv-vertical-profile.html#mikeio.spatial._FM_geometry_layered.GeometryFMVerticalProfile">GeometryFMVerticalProfile (class in mikeio.spatial._FM_geometry_layered)</a>
 </li>
       <li><a href="pfs.html#mikeio.PfsDocument.get">get() (mikeio.PfsDocument method)</a>
 
       <ul>
-        <li><a href="dfs-overview.html#mikeio.PfsSection.get">(mikeio.PfsSection method)</a>, <a href="pfs.html#mikeio.PfsSection.get">[1]</a>
+        <li><a href="pfs.html#mikeio.PfsSection.get">(mikeio.PfsSection method)</a>
 </li>
       </ul></li>
-      <li><a href="dfsu-2d.html#mikeio.dfsu.Dfsu2DH.get_element_area">get_element_area() (mikeio.dfsu.Dfsu2DH method)</a>
+      <li><a href="mesh.html#mikeio.spatial._FM_geometry.GeometryFM.get_2d_interpolant">get_2d_interpolant() (mikeio.spatial._FM_geometry.GeometryFM method)</a>
 
       <ul>
+        <li><a href="dfsu-spectral.html#mikeio.spatial._FM_geometry.GeometryFMAreaSpectrum.get_2d_interpolant">(mikeio.spatial._FM_geometry.GeometryFMAreaSpectrum method)</a>
+</li>
+        <li><a href="dfsu-spectral.html#mikeio.spatial._FM_geometry.GeometryFMLineSpectrum.get_2d_interpolant">(mikeio.spatial._FM_geometry.GeometryFMLineSpectrum method)</a>
+</li>
+        <li><a href="dfsu-2d.html#mikeio.spatial.GeometryFM2D.get_2d_interpolant">(mikeio.spatial.GeometryFM2D method)</a>
+</li>
+      </ul></li>
+      <li><a href="dfsu-2dv-vertical-profile.html#mikeio.dfsu._layered.Dfsu2DV.get_element_area">get_element_area() (mikeio.dfsu._layered.Dfsu2DV method)</a>
+
+      <ul>
+        <li><a href="dfsu-3d.html#mikeio.dfsu._layered.Dfsu3D.get_element_area">(mikeio.dfsu._layered.Dfsu3D method)</a>
+</li>
+        <li><a href="dfsu-spectral.html#mikeio.dfsu._spectral.DfsuSpectral.get_element_area">(mikeio.dfsu._spectral.DfsuSpectral method)</a>
+</li>
+        <li><a href="dfsu-2d.html#mikeio.dfsu.Dfsu2DH.get_element_area">(mikeio.dfsu.Dfsu2DH method)</a>
+</li>
         <li><a href="mesh.html#mikeio.Mesh.get_element_area">(mikeio.Mesh method)</a>
 </li>
+        <li><a href="mesh.html#mikeio.spatial._FM_geometry.GeometryFM.get_element_area">(mikeio.spatial._FM_geometry.GeometryFM method)</a>
+</li>
+        <li><a href="dfsu-spectral.html#mikeio.spatial._FM_geometry.GeometryFMAreaSpectrum.get_element_area">(mikeio.spatial._FM_geometry.GeometryFMAreaSpectrum method)</a>
+</li>
+        <li><a href="dfsu-spectral.html#mikeio.spatial._FM_geometry.GeometryFMLineSpectrum.get_element_area">(mikeio.spatial._FM_geometry.GeometryFMLineSpectrum method)</a>
+</li>
+        <li><a href="dfsu-2d.html#mikeio.spatial.GeometryFM2D.get_element_area">(mikeio.spatial.GeometryFM2D method)</a>
+</li>
       </ul></li>
-      <li><a href="dfsu-2d.html#mikeio.dfsu.Dfsu2DH.get_node_centered_data">get_node_centered_data() (mikeio.dfsu.Dfsu2DH method)</a>
+      <li><a href="dfsu-2dv-vertical-profile.html#mikeio.dfsu._layered.Dfsu2DV.get_layer_elements">get_layer_elements() (mikeio.dfsu._layered.Dfsu2DV method)</a>
 
       <ul>
-        <li><a href="mesh.html#mikeio.Mesh.get_node_centered_data">(mikeio.Mesh method)</a>
+        <li><a href="dfsu-3d.html#mikeio.dfsu._layered.Dfsu3D.get_layer_elements">(mikeio.dfsu._layered.Dfsu3D method)</a>
+</li>
+        <li><a href="dfsu-3d.html#mikeio.spatial._FM_geometry_layered.GeometryFM3D.get_layer_elements">(mikeio.spatial._FM_geometry_layered.GeometryFM3D method)</a>
+</li>
+        <li><a href="dfsu-1dv-vertical-column.html#mikeio.spatial._FM_geometry_layered.GeometryFMVerticalColumn.get_layer_elements">(mikeio.spatial._FM_geometry_layered.GeometryFMVerticalColumn method)</a>
+</li>
+        <li><a href="dfsu-2dv-vertical-profile.html#mikeio.spatial._FM_geometry_layered.GeometryFMVerticalProfile.get_layer_elements">(mikeio.spatial._FM_geometry_layered.GeometryFMVerticalProfile method)</a>
 </li>
       </ul></li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="dfs-overview.html#mikeio.Grid2D.get_node_coordinates">get_node_coordinates() (mikeio.Grid2D method)</a>, <a href="dfs2.html#mikeio.Grid2D.get_node_coordinates">[1]</a>
+      <li><a href="dfsu-2dv-vertical-profile.html#mikeio.spatial._FM_geometry_layered.GeometryFMVerticalProfile.get_nearest_relative_distance">get_nearest_relative_distance() (mikeio.spatial._FM_geometry_layered.GeometryFMVerticalProfile method)</a>
 </li>
-      <li><a href="dfsu-2d.html#mikeio.dfsu.Dfsu2DH.get_node_coords">get_node_coords() (mikeio.dfsu.Dfsu2DH method)</a>
+      <li><a href="dfsu-2dv-vertical-profile.html#mikeio.dfsu._layered.Dfsu2DV.get_node_centered_data">get_node_centered_data() (mikeio.dfsu._layered.Dfsu2DV method)</a>
 
       <ul>
+        <li><a href="dfsu-3d.html#mikeio.dfsu._layered.Dfsu3D.get_node_centered_data">(mikeio.dfsu._layered.Dfsu3D method)</a>
+</li>
+        <li><a href="dfsu-spectral.html#mikeio.dfsu._spectral.DfsuSpectral.get_node_centered_data">(mikeio.dfsu._spectral.DfsuSpectral method)</a>
+</li>
+        <li><a href="dfsu-2d.html#mikeio.dfsu.Dfsu2DH.get_node_centered_data">(mikeio.dfsu.Dfsu2DH method)</a>
+</li>
+        <li><a href="mesh.html#mikeio.Mesh.get_node_centered_data">(mikeio.Mesh method)</a>
+</li>
+        <li><a href="mesh.html#mikeio.spatial._FM_geometry.GeometryFM.get_node_centered_data">(mikeio.spatial._FM_geometry.GeometryFM method)</a>
+</li>
+        <li><a href="dfsu-spectral.html#mikeio.spatial._FM_geometry.GeometryFMAreaSpectrum.get_node_centered_data">(mikeio.spatial._FM_geometry.GeometryFMAreaSpectrum method)</a>
+</li>
+        <li><a href="dfsu-spectral.html#mikeio.spatial._FM_geometry.GeometryFMLineSpectrum.get_node_centered_data">(mikeio.spatial._FM_geometry.GeometryFMLineSpectrum method)</a>
+</li>
+        <li><a href="dfsu-2d.html#mikeio.spatial.GeometryFM2D.get_node_centered_data">(mikeio.spatial.GeometryFM2D method)</a>
+</li>
+      </ul></li>
+      <li><a href="dfs2.html#mikeio.Grid2D.get_node_coordinates">get_node_coordinates() (mikeio.Grid2D method)</a>
+</li>
+      <li><a href="dfsu-2dv-vertical-profile.html#mikeio.dfsu._layered.Dfsu2DV.get_node_coords">get_node_coords() (mikeio.dfsu._layered.Dfsu2DV method)</a>
+
+      <ul>
+        <li><a href="dfsu-3d.html#mikeio.dfsu._layered.Dfsu3D.get_node_coords">(mikeio.dfsu._layered.Dfsu3D method)</a>
+</li>
+        <li><a href="dfsu-spectral.html#mikeio.dfsu._spectral.DfsuSpectral.get_node_coords">(mikeio.dfsu._spectral.DfsuSpectral method)</a>
+</li>
+        <li><a href="dfsu-2d.html#mikeio.dfsu.Dfsu2DH.get_node_coords">(mikeio.dfsu.Dfsu2DH method)</a>
+</li>
         <li><a href="mesh.html#mikeio.Mesh.get_node_coords">(mikeio.Mesh method)</a>
 </li>
       </ul></li>
-      <li><a href="dfsu-2d.html#mikeio.dfsu.Dfsu2DH.get_overset_grid">get_overset_grid() (mikeio.dfsu.Dfsu2DH method)</a>
+      <li><a href="dfsu-2dv-vertical-profile.html#mikeio.dfsu._layered.Dfsu2DV.get_overset_grid">get_overset_grid() (mikeio.dfsu._layered.Dfsu2DV method)</a>
 
       <ul>
+        <li><a href="dfsu-3d.html#mikeio.dfsu._layered.Dfsu3D.get_overset_grid">(mikeio.dfsu._layered.Dfsu3D method)</a>
+</li>
+        <li><a href="dfsu-spectral.html#mikeio.dfsu._spectral.DfsuSpectral.get_overset_grid">(mikeio.dfsu._spectral.DfsuSpectral method)</a>
+</li>
+        <li><a href="dfsu-2d.html#mikeio.dfsu.Dfsu2DH.get_overset_grid">(mikeio.dfsu.Dfsu2DH method)</a>
+</li>
         <li><a href="mesh.html#mikeio.Mesh.get_overset_grid">(mikeio.Mesh method)</a>
 </li>
+        <li><a href="mesh.html#mikeio.spatial._FM_geometry.GeometryFM.get_overset_grid">(mikeio.spatial._FM_geometry.GeometryFM method)</a>
+</li>
+        <li><a href="dfsu-spectral.html#mikeio.spatial._FM_geometry.GeometryFMAreaSpectrum.get_overset_grid">(mikeio.spatial._FM_geometry.GeometryFMAreaSpectrum method)</a>
+</li>
+        <li><a href="dfsu-spectral.html#mikeio.spatial._FM_geometry.GeometryFMLineSpectrum.get_overset_grid">(mikeio.spatial._FM_geometry.GeometryFMLineSpectrum method)</a>
+</li>
+        <li><a href="dfsu-2d.html#mikeio.spatial.GeometryFM2D.get_overset_grid">(mikeio.spatial.GeometryFM2D method)</a>
+</li>
       </ul></li>
-      <li><a href="dfs-overview.html#mikeio.Grid1D">Grid1D (class in mikeio)</a>, <a href="dfs1.html#mikeio.Grid1D">[1]</a>
+      <li><a href="dfs1.html#mikeio.Grid1D">Grid1D (class in mikeio)</a>
 </li>
-      <li><a href="dfs-overview.html#mikeio.Grid2D">Grid2D (class in mikeio)</a>, <a href="dfs2.html#mikeio.Grid2D">[1]</a>
+      <li><a href="dfs2.html#mikeio.Grid2D">Grid2D (class in mikeio)</a>
 </li>
-      <li><a href="dfs-overview.html#mikeio.Grid3D">Grid3D (class in mikeio)</a>, <a href="dfs3.html#mikeio.Grid3D">[1]</a>
+      <li><a href="dfs3.html#mikeio.Grid3D">Grid3D (class in mikeio)</a>
 </li>
+  </ul></td>
+</tr></table>
+
+<h2 id="H">H</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="dataarray.html#mikeio.dataset._data_plot._DataArrayPlotter.hist">hist() (mikeio.dataset._data_plot._DataArrayPlotter method)</a>
+
+      <ul>
+        <li><a href="dfsu-2d.html#mikeio.dataset._data_plot._DataArrayPlotterFM.hist">(mikeio.dataset._data_plot._DataArrayPlotterFM method)</a>
+</li>
+        <li><a href="dfsu-2dv-vertical-profile.html#mikeio.dataset._data_plot._DataArrayPlotterFMVerticalProfile.hist">(mikeio.dataset._data_plot._DataArrayPlotterFMVerticalProfile method)</a>
+</li>
+        <li><a href="dfs1.html#mikeio.dataset._data_plot._DataArrayPlotterGrid1D.hist">(mikeio.dataset._data_plot._DataArrayPlotterGrid1D method)</a>
+</li>
+        <li><a href="dfs2.html#mikeio.dataset._data_plot._DataArrayPlotterGrid2D.hist">(mikeio.dataset._data_plot._DataArrayPlotterGrid2D method)</a>
+</li>
+      </ul></li>
   </ul></td>
 </tr></table>
 
 <h2 id="I">I</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="dataset.html#mikeio.Dataset.insert">insert() (mikeio.Dataset method)</a>, <a href="dfs-overview.html#mikeio.Dataset.insert">[1]</a>
+      <li><a href="dfs1.html#mikeio.dataset._data_plot._DataArrayPlotterGrid1D.imshow">imshow() (mikeio.dataset._data_plot._DataArrayPlotterGrid1D method)</a>
 </li>
-      <li><a href="dataarray.html#mikeio.DataArray.interp">interp() (mikeio.DataArray method)</a>, <a href="dfs-overview.html#mikeio.DataArray.interp">[1]</a>
+      <li><a href="dataset.html#mikeio.Dataset.insert">insert() (mikeio.Dataset method)</a>
+</li>
+      <li><a href="dataarray.html#mikeio.DataArray.interp">interp() (mikeio.DataArray method)</a>
 
       <ul>
-        <li><a href="dataset.html#mikeio.Dataset.interp">(mikeio.Dataset method)</a>, <a href="dfs-overview.html#mikeio.Dataset.interp">[1]</a>
+        <li><a href="dataset.html#mikeio.Dataset.interp">(mikeio.Dataset method)</a>
 </li>
       </ul></li>
-      <li><a href="dataarray.html#mikeio.DataArray.interp_like">interp_like() (mikeio.DataArray method)</a>, <a href="dfs-overview.html#mikeio.DataArray.interp_like">[1]</a>
+      <li><a href="mesh.html#mikeio.spatial._FM_geometry.GeometryFM.interp2d">interp2d() (mikeio.spatial._FM_geometry.GeometryFM method)</a>
 
       <ul>
-        <li><a href="dataset.html#mikeio.Dataset.interp_like">(mikeio.Dataset method)</a>, <a href="dfs-overview.html#mikeio.Dataset.interp_like">[1]</a>
+        <li><a href="dfsu-spectral.html#mikeio.spatial._FM_geometry.GeometryFMAreaSpectrum.interp2d">(mikeio.spatial._FM_geometry.GeometryFMAreaSpectrum method)</a>
+</li>
+        <li><a href="dfsu-spectral.html#mikeio.spatial._FM_geometry.GeometryFMLineSpectrum.interp2d">(mikeio.spatial._FM_geometry.GeometryFMLineSpectrum method)</a>
+</li>
+        <li><a href="dfsu-2d.html#mikeio.spatial.GeometryFM2D.interp2d">(mikeio.spatial.GeometryFM2D method)</a>
 </li>
       </ul></li>
-      <li><a href="dataarray.html#mikeio.DataArray.interp_na">interp_na() (mikeio.DataArray method)</a>, <a href="dfs-overview.html#mikeio.DataArray.interp_na">[1]</a>
-</li>
-      <li><a href="dataarray.html#mikeio.DataArray.interp_time">interp_time() (mikeio.DataArray method)</a>, <a href="dfs-overview.html#mikeio.DataArray.interp_time">[1]</a>
+      <li><a href="dataarray.html#mikeio.DataArray.interp_like">interp_like() (mikeio.DataArray method)</a>
 
       <ul>
-        <li><a href="dataset.html#mikeio.Dataset.interp_time">(mikeio.Dataset method)</a>, <a href="dfs-overview.html#mikeio.Dataset.interp_time">[1]</a>
+        <li><a href="dataset.html#mikeio.Dataset.interp_like">(mikeio.Dataset method)</a>
 </li>
       </ul></li>
-      <li><a href="dfsu-2d.html#mikeio.dfsu.Dfsu2DH.is_2d">is_2d (mikeio.dfsu.Dfsu2DH property)</a>
+      <li><a href="dataarray.html#mikeio.DataArray.interp_na">interp_na() (mikeio.DataArray method)</a>
+</li>
+      <li><a href="dataarray.html#mikeio.DataArray.interp_time">interp_time() (mikeio.DataArray method)</a>
 
       <ul>
+        <li><a href="dataset.html#mikeio.Dataset.interp_time">(mikeio.Dataset method)</a>
+</li>
+      </ul></li>
+      <li><a href="dfsu-2dv-vertical-profile.html#mikeio.dfsu._layered.Dfsu2DV.is_2d">is_2d (mikeio.dfsu._layered.Dfsu2DV property)</a>
+
+      <ul>
+        <li><a href="dfsu-3d.html#mikeio.dfsu._layered.Dfsu3D.is_2d">(mikeio.dfsu._layered.Dfsu3D property)</a>
+</li>
+        <li><a href="dfsu-spectral.html#mikeio.dfsu._spectral.DfsuSpectral.is_2d">(mikeio.dfsu._spectral.DfsuSpectral property)</a>
+</li>
+        <li><a href="dfsu-2d.html#mikeio.dfsu.Dfsu2DH.is_2d">(mikeio.dfsu.Dfsu2DH property)</a>
+</li>
         <li><a href="mesh.html#mikeio.Mesh.is_2d">(mikeio.Mesh property)</a>
 </li>
+        <li><a href="mesh.html#mikeio.spatial._FM_geometry.GeometryFM.is_2d">(mikeio.spatial._FM_geometry.GeometryFM property)</a>
+</li>
+        <li><a href="dfsu-spectral.html#mikeio.spatial._FM_geometry.GeometryFMAreaSpectrum.is_2d">(mikeio.spatial._FM_geometry.GeometryFMAreaSpectrum property)</a>
+</li>
+        <li><a href="dfsu-spectral.html#mikeio.spatial._FM_geometry.GeometryFMLineSpectrum.is_2d">(mikeio.spatial._FM_geometry.GeometryFMLineSpectrum property)</a>
+</li>
+        <li><a href="dfsu-2d.html#mikeio.spatial.GeometryFM2D.is_2d">(mikeio.spatial.GeometryFM2D property)</a>
+</li>
       </ul></li>
-      <li><a href="dataarray.html#mikeio.DataArray.is_equidistant">is_equidistant (mikeio.DataArray property)</a>, <a href="dfs-overview.html#mikeio.DataArray.is_equidistant">[1]</a>
+      <li><a href="dataarray.html#mikeio.DataArray.is_equidistant">is_equidistant (mikeio.DataArray property)</a>
 
       <ul>
-        <li><a href="dataset.html#mikeio.Dataset.is_equidistant">(mikeio.Dataset property)</a>, <a href="dfs-overview.html#mikeio.Dataset.is_equidistant">[1]</a>
+        <li><a href="dataset.html#mikeio.Dataset.is_equidistant">(mikeio.Dataset property)</a>
 </li>
       </ul></li>
       <li><a href="dfs2.html#mikeio.Dfs2.is_geo">is_geo (mikeio.Dfs2 property)</a>
 
       <ul>
         <li><a href="dfs3.html#mikeio.Dfs3.is_geo">(mikeio.Dfs3 property)</a>
+</li>
+        <li><a href="dfsu-2dv-vertical-profile.html#mikeio.dfsu._layered.Dfsu2DV.is_geo">(mikeio.dfsu._layered.Dfsu2DV property)</a>
+</li>
+        <li><a href="dfsu-3d.html#mikeio.dfsu._layered.Dfsu3D.is_geo">(mikeio.dfsu._layered.Dfsu3D property)</a>
+</li>
+        <li><a href="dfsu-spectral.html#mikeio.dfsu._spectral.DfsuSpectral.is_geo">(mikeio.dfsu._spectral.DfsuSpectral property)</a>
 </li>
         <li><a href="dfsu-2d.html#mikeio.dfsu.Dfsu2DH.is_geo">(mikeio.dfsu.Dfsu2DH property)</a>
 </li>
@@ -523,16 +868,52 @@
 </li>
         <li><a href="mesh.html#mikeio.Mesh.is_geo">(mikeio.Mesh property)</a>
 </li>
-      </ul></li>
-      <li><a href="dfsu-2d.html#mikeio.dfsu.Dfsu2DH.is_layered">is_layered (mikeio.dfsu.Dfsu2DH property)</a>
-
-      <ul>
-        <li><a href="mesh.html#mikeio.Mesh.is_layered">(mikeio.Mesh property)</a>
+        <li><a href="mesh.html#mikeio.spatial._FM_geometry.GeometryFM.is_geo">(mikeio.spatial._FM_geometry.GeometryFM property)</a>
+</li>
+        <li><a href="dfsu-spectral.html#mikeio.spatial._FM_geometry.GeometryFMAreaSpectrum.is_geo">(mikeio.spatial._FM_geometry.GeometryFMAreaSpectrum property)</a>
+</li>
+        <li><a href="dfsu-spectral.html#mikeio.spatial._FM_geometry.GeometryFMLineSpectrum.is_geo">(mikeio.spatial._FM_geometry.GeometryFMLineSpectrum property)</a>
+</li>
+        <li><a href="dfsu-spectral.html#mikeio.spatial._FM_geometry.GeometryFMPointSpectrum.is_geo">(mikeio.spatial._FM_geometry.GeometryFMPointSpectrum property)</a>
+</li>
+        <li><a href="dfsu-3d.html#mikeio.spatial._FM_geometry_layered.GeometryFM3D.is_geo">(mikeio.spatial._FM_geometry_layered.GeometryFM3D property)</a>
+</li>
+        <li><a href="dfsu-1dv-vertical-column.html#mikeio.spatial._FM_geometry_layered.GeometryFMVerticalColumn.is_geo">(mikeio.spatial._FM_geometry_layered.GeometryFMVerticalColumn property)</a>
+</li>
+        <li><a href="dfsu-2dv-vertical-profile.html#mikeio.spatial._FM_geometry_layered.GeometryFMVerticalProfile.is_geo">(mikeio.spatial._FM_geometry_layered.GeometryFMVerticalProfile property)</a>
+</li>
+        <li><a href="dfsu-2d.html#mikeio.spatial.GeometryFM2D.is_geo">(mikeio.spatial.GeometryFM2D property)</a>
 </li>
       </ul></li>
-      <li><a href="dfsu-2d.html#mikeio.dfsu.Dfsu2DH.is_local_coordinates">is_local_coordinates (mikeio.dfsu.Dfsu2DH property)</a>
+      <li><a href="dfsu-2dv-vertical-profile.html#mikeio.dfsu._layered.Dfsu2DV.is_layered">is_layered (mikeio.dfsu._layered.Dfsu2DV property)</a>
 
       <ul>
+        <li><a href="dfsu-3d.html#mikeio.dfsu._layered.Dfsu3D.is_layered">(mikeio.dfsu._layered.Dfsu3D property)</a>
+</li>
+        <li><a href="dfsu-spectral.html#mikeio.dfsu._spectral.DfsuSpectral.is_layered">(mikeio.dfsu._spectral.DfsuSpectral property)</a>
+</li>
+        <li><a href="dfsu-2d.html#mikeio.dfsu.Dfsu2DH.is_layered">(mikeio.dfsu.Dfsu2DH property)</a>
+</li>
+        <li><a href="mesh.html#mikeio.Mesh.is_layered">(mikeio.Mesh property)</a>
+</li>
+        <li><a href="mesh.html#mikeio.spatial._FM_geometry.GeometryFM.is_layered">(mikeio.spatial._FM_geometry.GeometryFM property)</a>
+</li>
+        <li><a href="dfsu-spectral.html#mikeio.spatial._FM_geometry.GeometryFMAreaSpectrum.is_layered">(mikeio.spatial._FM_geometry.GeometryFMAreaSpectrum property)</a>
+</li>
+        <li><a href="dfsu-spectral.html#mikeio.spatial._FM_geometry.GeometryFMLineSpectrum.is_layered">(mikeio.spatial._FM_geometry.GeometryFMLineSpectrum property)</a>
+</li>
+        <li><a href="dfsu-2d.html#mikeio.spatial.GeometryFM2D.is_layered">(mikeio.spatial.GeometryFM2D property)</a>
+</li>
+      </ul></li>
+      <li><a href="dfsu-2dv-vertical-profile.html#mikeio.dfsu._layered.Dfsu2DV.is_local_coordinates">is_local_coordinates (mikeio.dfsu._layered.Dfsu2DV property)</a>
+
+      <ul>
+        <li><a href="dfsu-3d.html#mikeio.dfsu._layered.Dfsu3D.is_local_coordinates">(mikeio.dfsu._layered.Dfsu3D property)</a>
+</li>
+        <li><a href="dfsu-spectral.html#mikeio.dfsu._spectral.DfsuSpectral.is_local_coordinates">(mikeio.dfsu._spectral.DfsuSpectral property)</a>
+</li>
+        <li><a href="dfsu-2d.html#mikeio.dfsu.Dfsu2DH.is_local_coordinates">(mikeio.dfsu.Dfsu2DH property)</a>
+</li>
         <li><a href="dfs1.html#mikeio.Grid1D.is_local_coordinates">(mikeio.Grid1D property)</a>
 </li>
         <li><a href="dfs2.html#mikeio.Grid2D.is_local_coordinates">(mikeio.Grid2D property)</a>
@@ -541,44 +922,92 @@
 </li>
         <li><a href="mesh.html#mikeio.Mesh.is_local_coordinates">(mikeio.Mesh property)</a>
 </li>
+        <li><a href="mesh.html#mikeio.spatial._FM_geometry.GeometryFM.is_local_coordinates">(mikeio.spatial._FM_geometry.GeometryFM property)</a>
+</li>
+        <li><a href="dfsu-spectral.html#mikeio.spatial._FM_geometry.GeometryFMAreaSpectrum.is_local_coordinates">(mikeio.spatial._FM_geometry.GeometryFMAreaSpectrum property)</a>
+</li>
+        <li><a href="dfsu-spectral.html#mikeio.spatial._FM_geometry.GeometryFMLineSpectrum.is_local_coordinates">(mikeio.spatial._FM_geometry.GeometryFMLineSpectrum property)</a>
+</li>
+        <li><a href="dfsu-spectral.html#mikeio.spatial._FM_geometry.GeometryFMPointSpectrum.is_local_coordinates">(mikeio.spatial._FM_geometry.GeometryFMPointSpectrum property)</a>
+</li>
+        <li><a href="dfsu-3d.html#mikeio.spatial._FM_geometry_layered.GeometryFM3D.is_local_coordinates">(mikeio.spatial._FM_geometry_layered.GeometryFM3D property)</a>
+</li>
+        <li><a href="dfsu-1dv-vertical-column.html#mikeio.spatial._FM_geometry_layered.GeometryFMVerticalColumn.is_local_coordinates">(mikeio.spatial._FM_geometry_layered.GeometryFMVerticalColumn property)</a>
+</li>
+        <li><a href="dfsu-2dv-vertical-profile.html#mikeio.spatial._FM_geometry_layered.GeometryFMVerticalProfile.is_local_coordinates">(mikeio.spatial._FM_geometry_layered.GeometryFMVerticalProfile property)</a>
+</li>
+        <li><a href="dfsu-2d.html#mikeio.spatial.GeometryFM2D.is_local_coordinates">(mikeio.spatial.GeometryFM2D property)</a>
+</li>
       </ul></li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="dfsu-2d.html#mikeio.dfsu.Dfsu2DH.is_spectral">is_spectral (mikeio.dfsu.Dfsu2DH property)</a>
+      <li><a href="dfsu-2dv-vertical-profile.html#mikeio.dfsu._layered.Dfsu2DV.is_spectral">is_spectral (mikeio.dfsu._layered.Dfsu2DV property)</a>
 
       <ul>
+        <li><a href="dfsu-3d.html#mikeio.dfsu._layered.Dfsu3D.is_spectral">(mikeio.dfsu._layered.Dfsu3D property)</a>
+</li>
+        <li><a href="dfsu-spectral.html#mikeio.dfsu._spectral.DfsuSpectral.is_spectral">(mikeio.dfsu._spectral.DfsuSpectral property)</a>
+</li>
+        <li><a href="dfsu-2d.html#mikeio.dfsu.Dfsu2DH.is_spectral">(mikeio.dfsu.Dfsu2DH property)</a>
+</li>
         <li><a href="mesh.html#mikeio.Mesh.is_spectral">(mikeio.Mesh property)</a>
 </li>
+        <li><a href="mesh.html#mikeio.spatial._FM_geometry.GeometryFM.is_spectral">(mikeio.spatial._FM_geometry.GeometryFM property)</a>
+</li>
+        <li><a href="dfsu-spectral.html#mikeio.spatial._FM_geometry.GeometryFMAreaSpectrum.is_spectral">(mikeio.spatial._FM_geometry.GeometryFMAreaSpectrum property)</a>
+</li>
+        <li><a href="dfsu-spectral.html#mikeio.spatial._FM_geometry.GeometryFMLineSpectrum.is_spectral">(mikeio.spatial._FM_geometry.GeometryFMLineSpectrum property)</a>
+</li>
+        <li><a href="dfsu-2d.html#mikeio.spatial.GeometryFM2D.is_spectral">(mikeio.spatial.GeometryFM2D property)</a>
+</li>
       </ul></li>
-      <li><a href="dfsu-2d.html#mikeio.dfsu.Dfsu2DH.is_tri_only">is_tri_only (mikeio.dfsu.Dfsu2DH property)</a>
+      <li><a href="dfsu-2dv-vertical-profile.html#mikeio.dfsu._layered.Dfsu2DV.is_tri_only">is_tri_only (mikeio.dfsu._layered.Dfsu2DV property)</a>
 
       <ul>
+        <li><a href="dfsu-3d.html#mikeio.dfsu._layered.Dfsu3D.is_tri_only">(mikeio.dfsu._layered.Dfsu3D property)</a>
+</li>
+        <li><a href="dfsu-spectral.html#mikeio.dfsu._spectral.DfsuSpectral.is_tri_only">(mikeio.dfsu._spectral.DfsuSpectral property)</a>
+</li>
+        <li><a href="dfsu-2d.html#mikeio.dfsu.Dfsu2DH.is_tri_only">(mikeio.dfsu.Dfsu2DH property)</a>
+</li>
         <li><a href="mesh.html#mikeio.Mesh.is_tri_only">(mikeio.Mesh property)</a>
 </li>
-      </ul></li>
-      <li><a href="dfs-overview.html#mikeio.PfsDocument.is_unique">is_unique (mikeio.PfsDocument property)</a>, <a href="pfs.html#mikeio.PfsDocument.is_unique">[1]</a>
+        <li><a href="mesh.html#mikeio.spatial._FM_geometry.GeometryFM.is_tri_only">(mikeio.spatial._FM_geometry.GeometryFM property)</a>
 </li>
-      <li><a href="dataarray.html#mikeio.DataArray.isel">isel() (mikeio.DataArray method)</a>, <a href="dfs-overview.html#mikeio.DataArray.isel">[1]</a>
+        <li><a href="dfsu-spectral.html#mikeio.spatial._FM_geometry.GeometryFMAreaSpectrum.is_tri_only">(mikeio.spatial._FM_geometry.GeometryFMAreaSpectrum property)</a>
+</li>
+        <li><a href="dfsu-spectral.html#mikeio.spatial._FM_geometry.GeometryFMLineSpectrum.is_tri_only">(mikeio.spatial._FM_geometry.GeometryFMLineSpectrum property)</a>
+</li>
+        <li><a href="dfsu-2d.html#mikeio.spatial.GeometryFM2D.is_tri_only">(mikeio.spatial.GeometryFM2D property)</a>
+</li>
+      </ul></li>
+      <li><a href="pfs.html#mikeio.PfsDocument.is_unique">is_unique (mikeio.PfsDocument property)</a>
+</li>
+      <li><a href="dataarray.html#mikeio.DataArray.isel">isel() (mikeio.DataArray method)</a>
 
       <ul>
-        <li><a href="dataset.html#mikeio.Dataset.isel">(mikeio.Dataset method)</a>, <a href="dfs-overview.html#mikeio.Dataset.isel">[1]</a>
+        <li><a href="dataset.html#mikeio.Dataset.isel">(mikeio.Dataset method)</a>
 </li>
-        <li><a href="dfs-overview.html#mikeio.Grid1D.isel">(mikeio.Grid1D method)</a>, <a href="dfs1.html#mikeio.Grid1D.isel">[1]</a>
+        <li><a href="dfs1.html#mikeio.Grid1D.isel">(mikeio.Grid1D method)</a>
 </li>
-        <li><a href="dfs-overview.html#mikeio.Grid2D.isel">(mikeio.Grid2D method)</a>, <a href="dfs2.html#mikeio.Grid2D.isel">[1]</a>
+        <li><a href="dfs2.html#mikeio.Grid2D.isel">(mikeio.Grid2D method)</a>
 </li>
-        <li><a href="dfs-overview.html#mikeio.Grid3D.isel">(mikeio.Grid3D method)</a>, <a href="dfs3.html#mikeio.Grid3D.isel">[1]</a>
+        <li><a href="dfs3.html#mikeio.Grid3D.isel">(mikeio.Grid3D method)</a>
+</li>
+        <li><a href="mesh.html#mikeio.spatial._FM_geometry.GeometryFM.isel">(mikeio.spatial._FM_geometry.GeometryFM method)</a>
+</li>
+        <li><a href="dfsu-spectral.html#mikeio.spatial._FM_geometry.GeometryFMAreaSpectrum.isel">(mikeio.spatial._FM_geometry.GeometryFMAreaSpectrum method)</a>
+</li>
+        <li><a href="dfsu-spectral.html#mikeio.spatial._FM_geometry.GeometryFMLineSpectrum.isel">(mikeio.spatial._FM_geometry.GeometryFMLineSpectrum method)</a>
+</li>
+        <li><a href="dfsu-2d.html#mikeio.spatial.GeometryFM2D.isel">(mikeio.spatial.GeometryFM2D method)</a>
 </li>
       </ul></li>
-      <li><a href="dfs-overview.html#mikeio.ItemInfo">ItemInfo (class in mikeio)</a>
-
-      <ul>
-        <li><a href="eum.html#mikeio.eum.ItemInfo">(class in mikeio.eum)</a>
+      <li><a href="eum.html#mikeio.eum.ItemInfo">ItemInfo (class in mikeio.eum)</a>
 </li>
-      </ul></li>
       <li><a href="eum.html#mikeio.eum.ItemInfoList">ItemInfoList (class in mikeio.eum)</a>
 </li>
-      <li><a href="dataset.html#mikeio.Dataset.items">items (mikeio.Dataset property)</a>, <a href="dfs-overview.html#mikeio.Dataset.items">[1]</a>
+      <li><a href="dataset.html#mikeio.Dataset.items">items (mikeio.Dataset property)</a>
 
       <ul>
         <li><a href="dfs0.html#mikeio.Dfs0.items">(mikeio.Dfs0 property)</a>
@@ -589,13 +1018,19 @@
 </li>
         <li><a href="dfs3.html#mikeio.Dfs3.items">(mikeio.Dfs3 property)</a>
 </li>
+        <li><a href="dfsu-2dv-vertical-profile.html#mikeio.dfsu._layered.Dfsu2DV.items">(mikeio.dfsu._layered.Dfsu2DV property)</a>
+</li>
+        <li><a href="dfsu-3d.html#mikeio.dfsu._layered.Dfsu3D.items">(mikeio.dfsu._layered.Dfsu3D property)</a>
+</li>
+        <li><a href="dfsu-spectral.html#mikeio.dfsu._spectral.DfsuSpectral.items">(mikeio.dfsu._spectral.DfsuSpectral property)</a>
+</li>
         <li><a href="dfsu-2d.html#mikeio.dfsu.Dfsu2DH.items">(mikeio.dfsu.Dfsu2DH property)</a>
 </li>
       </ul></li>
-      <li><a href="dfs-overview.html#mikeio.PfsDocument.items">items() (mikeio.PfsDocument method)</a>, <a href="pfs.html#mikeio.PfsDocument.items">[1]</a>
+      <li><a href="pfs.html#mikeio.PfsDocument.items">items() (mikeio.PfsDocument method)</a>
 
       <ul>
-        <li><a href="dfs-overview.html#mikeio.PfsSection.items">(mikeio.PfsSection method)</a>, <a href="pfs.html#mikeio.PfsSection.items">[1]</a>
+        <li><a href="pfs.html#mikeio.PfsSection.items">(mikeio.PfsSection method)</a>
 </li>
       </ul></li>
   </ul></td>
@@ -604,10 +1039,10 @@
 <h2 id="K">K</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="dfs-overview.html#mikeio.PfsDocument.keys">keys() (mikeio.PfsDocument method)</a>, <a href="pfs.html#mikeio.PfsDocument.keys">[1]</a>
+      <li><a href="pfs.html#mikeio.PfsDocument.keys">keys() (mikeio.PfsDocument method)</a>
 
       <ul>
-        <li><a href="dfs-overview.html#mikeio.PfsSection.keys">(mikeio.PfsSection method)</a>, <a href="pfs.html#mikeio.PfsSection.keys">[1]</a>
+        <li><a href="pfs.html#mikeio.PfsSection.keys">(mikeio.PfsSection method)</a>
 </li>
       </ul></li>
   </ul></td>
@@ -624,8 +1059,32 @@
         <li><a href="dfs3.html#mikeio.Dfs3.latitude">(mikeio.Dfs3 property)</a>
 </li>
       </ul></li>
+      <li><a href="dfsu-2dv-vertical-profile.html#mikeio.dfsu._layered.Dfsu2DV.layer_ids">layer_ids (mikeio.dfsu._layered.Dfsu2DV property)</a>
+
+      <ul>
+        <li><a href="dfsu-3d.html#mikeio.dfsu._layered.Dfsu3D.layer_ids">(mikeio.dfsu._layered.Dfsu3D property)</a>
+</li>
+        <li><a href="dfsu-3d.html#mikeio.spatial._FM_geometry_layered.GeometryFM3D.layer_ids">(mikeio.spatial._FM_geometry_layered.GeometryFM3D property)</a>
+</li>
+        <li><a href="dfsu-1dv-vertical-column.html#mikeio.spatial._FM_geometry_layered.GeometryFMVerticalColumn.layer_ids">(mikeio.spatial._FM_geometry_layered.GeometryFMVerticalColumn property)</a>
+</li>
+        <li><a href="dfsu-2dv-vertical-profile.html#mikeio.spatial._FM_geometry_layered.GeometryFMVerticalProfile.layer_ids">(mikeio.spatial._FM_geometry_layered.GeometryFMVerticalProfile property)</a>
+</li>
+      </ul></li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="dataarray.html#mikeio.dataset._data_plot._DataArrayPlotter.line">line() (mikeio.dataset._data_plot._DataArrayPlotter method)</a>
+
+      <ul>
+        <li><a href="dfsu-2d.html#mikeio.dataset._data_plot._DataArrayPlotterFM.line">(mikeio.dataset._data_plot._DataArrayPlotterFM method)</a>
+</li>
+        <li><a href="dfsu-2dv-vertical-profile.html#mikeio.dataset._data_plot._DataArrayPlotterFMVerticalProfile.line">(mikeio.dataset._data_plot._DataArrayPlotterFMVerticalProfile method)</a>
+</li>
+        <li><a href="dfs1.html#mikeio.dataset._data_plot._DataArrayPlotterGrid1D.line">(mikeio.dataset._data_plot._DataArrayPlotterGrid1D method)</a>
+</li>
+        <li><a href="dfs2.html#mikeio.dataset._data_plot._DataArrayPlotterGrid2D.line">(mikeio.dataset._data_plot._DataArrayPlotterGrid2D method)</a>
+</li>
+      </ul></li>
       <li><a href="dfs1.html#mikeio.Dfs1.longitude">longitude (mikeio.Dfs1 property)</a>
 
       <ul>
@@ -640,28 +1099,56 @@
 <h2 id="M">M</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="dataarray.html#mikeio.DataArray.max">max() (mikeio.DataArray method)</a>, <a href="dfs-overview.html#mikeio.DataArray.max">[1]</a>
+      <li><a href="dataarray.html#mikeio.DataArray.max">max() (mikeio.DataArray method)</a>
 
       <ul>
-        <li><a href="dataset.html#mikeio.Dataset.max">(mikeio.Dataset method)</a>, <a href="dfs-overview.html#mikeio.Dataset.max">[1]</a>
+        <li><a href="dataset.html#mikeio.Dataset.max">(mikeio.Dataset method)</a>
 </li>
       </ul></li>
-      <li><a href="dfsu-2d.html#mikeio.dfsu.Dfsu2DH.max_nodes_per_element">max_nodes_per_element (mikeio.dfsu.Dfsu2DH property)</a>
+      <li><a href="dfsu-2dv-vertical-profile.html#mikeio.dfsu._layered.Dfsu2DV.max_nodes_per_element">max_nodes_per_element (mikeio.dfsu._layered.Dfsu2DV property)</a>
 
       <ul>
+        <li><a href="dfsu-3d.html#mikeio.dfsu._layered.Dfsu3D.max_nodes_per_element">(mikeio.dfsu._layered.Dfsu3D property)</a>
+</li>
+        <li><a href="dfsu-spectral.html#mikeio.dfsu._spectral.DfsuSpectral.max_nodes_per_element">(mikeio.dfsu._spectral.DfsuSpectral property)</a>
+</li>
+        <li><a href="dfsu-2d.html#mikeio.dfsu.Dfsu2DH.max_nodes_per_element">(mikeio.dfsu.Dfsu2DH property)</a>
+</li>
         <li><a href="mesh.html#mikeio.Mesh.max_nodes_per_element">(mikeio.Mesh property)</a>
 </li>
+        <li><a href="mesh.html#mikeio.spatial._FM_geometry.GeometryFM.max_nodes_per_element">(mikeio.spatial._FM_geometry.GeometryFM property)</a>
+</li>
+        <li><a href="dfsu-spectral.html#mikeio.spatial._FM_geometry.GeometryFMAreaSpectrum.max_nodes_per_element">(mikeio.spatial._FM_geometry.GeometryFMAreaSpectrum property)</a>
+</li>
+        <li><a href="dfsu-spectral.html#mikeio.spatial._FM_geometry.GeometryFMLineSpectrum.max_nodes_per_element">(mikeio.spatial._FM_geometry.GeometryFMLineSpectrum property)</a>
+</li>
+        <li><a href="dfsu-3d.html#mikeio.spatial._FM_geometry_layered.GeometryFM3D.max_nodes_per_element">(mikeio.spatial._FM_geometry_layered.GeometryFM3D property)</a>
+</li>
+        <li><a href="dfsu-1dv-vertical-column.html#mikeio.spatial._FM_geometry_layered.GeometryFMVerticalColumn.max_nodes_per_element">(mikeio.spatial._FM_geometry_layered.GeometryFMVerticalColumn property)</a>
+</li>
+        <li><a href="dfsu-2dv-vertical-profile.html#mikeio.spatial._FM_geometry_layered.GeometryFMVerticalProfile.max_nodes_per_element">(mikeio.spatial._FM_geometry_layered.GeometryFMVerticalProfile property)</a>
+</li>
+        <li><a href="dfsu-2d.html#mikeio.spatial.GeometryFM2D.max_nodes_per_element">(mikeio.spatial.GeometryFM2D property)</a>
+</li>
       </ul></li>
-      <li><a href="dataarray.html#mikeio.DataArray.mean">mean() (mikeio.DataArray method)</a>, <a href="dfs-overview.html#mikeio.DataArray.mean">[1]</a>
+      <li><a href="dataarray.html#mikeio.DataArray.mean">mean() (mikeio.DataArray method)</a>
 
       <ul>
-        <li><a href="dataset.html#mikeio.Dataset.mean">(mikeio.Dataset method)</a>, <a href="dfs-overview.html#mikeio.Dataset.mean">[1]</a>
+        <li><a href="dataset.html#mikeio.Dataset.mean">(mikeio.Dataset method)</a>
 </li>
       </ul></li>
-      <li><a href="dataset.html#mikeio.Dataset.merge">merge() (mikeio.Dataset static method)</a>, <a href="dfs-overview.html#mikeio.Dataset.merge">[1]</a>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="dataset.html#mikeio.Dataset.merge">merge() (mikeio.Dataset static method)</a>
 </li>
-      <li><a href="dfs-overview.html#mikeio.Mesh">Mesh (class in mikeio)</a>, <a href="mesh.html#mikeio.Mesh">[1]</a>
+      <li><a href="mesh.html#mikeio.Mesh">Mesh (class in mikeio)</a>
 </li>
+      <li><a href="dfsu-2d.html#mikeio.dataset._data_plot._DataArrayPlotterFM.mesh">mesh() (mikeio.dataset._data_plot._DataArrayPlotterFM method)</a>
+
+      <ul>
+        <li><a href="mesh.html#mikeio.spatial._FM_geometry._GeometryFMPlotter.mesh">(mikeio.spatial._FM_geometry._GeometryFMPlotter method)</a>
+</li>
+      </ul></li>
       <li>
     mikeio
 
@@ -669,8 +1156,6 @@
         <li><a href="dfs-overview.html#module-mikeio">module</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li>
     mikeio.eum
 
@@ -685,10 +1170,10 @@
         <li><a href="generic.html#module-mikeio.generic">module</a>
 </li>
       </ul></li>
-      <li><a href="dataarray.html#mikeio.DataArray.min">min() (mikeio.DataArray method)</a>, <a href="dfs-overview.html#mikeio.DataArray.min">[1]</a>
+      <li><a href="dataarray.html#mikeio.DataArray.min">min() (mikeio.DataArray method)</a>
 
       <ul>
-        <li><a href="dataset.html#mikeio.Dataset.min">(mikeio.Dataset method)</a>, <a href="dfs-overview.html#mikeio.Dataset.min">[1]</a>
+        <li><a href="dataset.html#mikeio.Dataset.min">(mikeio.Dataset method)</a>
 </li>
       </ul></li>
       <li>
@@ -708,15 +1193,55 @@
 <h2 id="N">N</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="dataset.html#mikeio.Dataset.n_elements">n_elements (mikeio.Dataset property)</a>, <a href="dfs-overview.html#mikeio.Dataset.n_elements">[1]</a>
+      <li><a href="dfsu-spectral.html#mikeio.dfsu._spectral.DfsuSpectral.n_directions">n_directions (mikeio.dfsu._spectral.DfsuSpectral property)</a>
 
       <ul>
+        <li><a href="dfsu-spectral.html#mikeio.spatial._FM_geometry.GeometryFMAreaSpectrum.n_directions">(mikeio.spatial._FM_geometry.GeometryFMAreaSpectrum property)</a>
+</li>
+        <li><a href="dfsu-spectral.html#mikeio.spatial._FM_geometry.GeometryFMLineSpectrum.n_directions">(mikeio.spatial._FM_geometry.GeometryFMLineSpectrum property)</a>
+</li>
+        <li><a href="dfsu-spectral.html#mikeio.spatial._FM_geometry.GeometryFMPointSpectrum.n_directions">(mikeio.spatial._FM_geometry.GeometryFMPointSpectrum property)</a>
+</li>
+      </ul></li>
+      <li><a href="dataset.html#mikeio.Dataset.n_elements">n_elements (mikeio.Dataset property)</a>
+
+      <ul>
+        <li><a href="dfsu-2dv-vertical-profile.html#mikeio.dfsu._layered.Dfsu2DV.n_elements">(mikeio.dfsu._layered.Dfsu2DV property)</a>
+</li>
+        <li><a href="dfsu-3d.html#mikeio.dfsu._layered.Dfsu3D.n_elements">(mikeio.dfsu._layered.Dfsu3D property)</a>
+</li>
+        <li><a href="dfsu-spectral.html#mikeio.dfsu._spectral.DfsuSpectral.n_elements">(mikeio.dfsu._spectral.DfsuSpectral property)</a>
+</li>
         <li><a href="dfsu-2d.html#mikeio.dfsu.Dfsu2DH.n_elements">(mikeio.dfsu.Dfsu2DH property)</a>
 </li>
         <li><a href="mesh.html#mikeio.Mesh.n_elements">(mikeio.Mesh property)</a>
 </li>
+        <li><a href="mesh.html#mikeio.spatial._FM_geometry.GeometryFM.n_elements">(mikeio.spatial._FM_geometry.GeometryFM property)</a>
+</li>
+        <li><a href="dfsu-spectral.html#mikeio.spatial._FM_geometry.GeometryFMAreaSpectrum.n_elements">(mikeio.spatial._FM_geometry.GeometryFMAreaSpectrum property)</a>
+</li>
+        <li><a href="dfsu-spectral.html#mikeio.spatial._FM_geometry.GeometryFMLineSpectrum.n_elements">(mikeio.spatial._FM_geometry.GeometryFMLineSpectrum property)</a>
+</li>
+        <li><a href="dfsu-3d.html#mikeio.spatial._FM_geometry_layered.GeometryFM3D.n_elements">(mikeio.spatial._FM_geometry_layered.GeometryFM3D property)</a>
+</li>
+        <li><a href="dfsu-1dv-vertical-column.html#mikeio.spatial._FM_geometry_layered.GeometryFMVerticalColumn.n_elements">(mikeio.spatial._FM_geometry_layered.GeometryFMVerticalColumn property)</a>
+</li>
+        <li><a href="dfsu-2dv-vertical-profile.html#mikeio.spatial._FM_geometry_layered.GeometryFMVerticalProfile.n_elements">(mikeio.spatial._FM_geometry_layered.GeometryFMVerticalProfile property)</a>
+</li>
+        <li><a href="dfsu-2d.html#mikeio.spatial.GeometryFM2D.n_elements">(mikeio.spatial.GeometryFM2D property)</a>
+</li>
       </ul></li>
-      <li><a href="dataset.html#mikeio.Dataset.n_items">n_items (mikeio.Dataset property)</a>, <a href="dfs-overview.html#mikeio.Dataset.n_items">[1]</a>
+      <li><a href="dfsu-spectral.html#mikeio.dfsu._spectral.DfsuSpectral.n_frequencies">n_frequencies (mikeio.dfsu._spectral.DfsuSpectral property)</a>
+
+      <ul>
+        <li><a href="dfsu-spectral.html#mikeio.spatial._FM_geometry.GeometryFMAreaSpectrum.n_frequencies">(mikeio.spatial._FM_geometry.GeometryFMAreaSpectrum property)</a>
+</li>
+        <li><a href="dfsu-spectral.html#mikeio.spatial._FM_geometry.GeometryFMLineSpectrum.n_frequencies">(mikeio.spatial._FM_geometry.GeometryFMLineSpectrum property)</a>
+</li>
+        <li><a href="dfsu-spectral.html#mikeio.spatial._FM_geometry.GeometryFMPointSpectrum.n_frequencies">(mikeio.spatial._FM_geometry.GeometryFMPointSpectrum property)</a>
+</li>
+      </ul></li>
+      <li><a href="dataset.html#mikeio.Dataset.n_items">n_items (mikeio.Dataset property)</a>
 
       <ul>
         <li><a href="dfs0.html#mikeio.Dfs0.n_items">(mikeio.Dfs0 property)</a>
@@ -727,21 +1252,85 @@
 </li>
         <li><a href="dfs3.html#mikeio.Dfs3.n_items">(mikeio.Dfs3 property)</a>
 </li>
+        <li><a href="dfsu-2dv-vertical-profile.html#mikeio.dfsu._layered.Dfsu2DV.n_items">(mikeio.dfsu._layered.Dfsu2DV property)</a>
+</li>
+        <li><a href="dfsu-3d.html#mikeio.dfsu._layered.Dfsu3D.n_items">(mikeio.dfsu._layered.Dfsu3D property)</a>
+</li>
+        <li><a href="dfsu-spectral.html#mikeio.dfsu._spectral.DfsuSpectral.n_items">(mikeio.dfsu._spectral.DfsuSpectral property)</a>
+</li>
         <li><a href="dfsu-2d.html#mikeio.dfsu.Dfsu2DH.n_items">(mikeio.dfsu.Dfsu2DH property)</a>
 </li>
       </ul></li>
-      <li><a href="dfsu-2d.html#mikeio.dfsu.Dfsu2DH.n_nodes">n_nodes (mikeio.dfsu.Dfsu2DH property)</a>
+      <li><a href="dfsu-2dv-vertical-profile.html#mikeio.dfsu._layered.Dfsu2DV.n_layers">n_layers (mikeio.dfsu._layered.Dfsu2DV property)</a>
 
       <ul>
-        <li><a href="mesh.html#mikeio.Mesh.n_nodes">(mikeio.Mesh property)</a>
+        <li><a href="dfsu-3d.html#mikeio.dfsu._layered.Dfsu3D.n_layers">(mikeio.dfsu._layered.Dfsu3D property)</a>
+</li>
+        <li><a href="dfsu-3d.html#mikeio.spatial._FM_geometry_layered.GeometryFM3D.n_layers">(mikeio.spatial._FM_geometry_layered.GeometryFM3D property)</a>
+</li>
+        <li><a href="dfsu-1dv-vertical-column.html#mikeio.spatial._FM_geometry_layered.GeometryFMVerticalColumn.n_layers">(mikeio.spatial._FM_geometry_layered.GeometryFMVerticalColumn property)</a>
+</li>
+        <li><a href="dfsu-2dv-vertical-profile.html#mikeio.spatial._FM_geometry_layered.GeometryFMVerticalProfile.n_layers">(mikeio.spatial._FM_geometry_layered.GeometryFMVerticalProfile property)</a>
 </li>
       </ul></li>
-      <li><a href="dfs-overview.html#mikeio.PfsDocument.n_targets">n_targets (mikeio.PfsDocument property)</a>, <a href="pfs.html#mikeio.PfsDocument.n_targets">[1]</a>
-</li>
-      <li><a href="dataarray.html#mikeio.DataArray.n_timesteps">n_timesteps (mikeio.DataArray property)</a>, <a href="dfs-overview.html#mikeio.DataArray.n_timesteps">[1]</a>
+      <li><a href="dfsu-2dv-vertical-profile.html#mikeio.dfsu._layered.Dfsu2DV.n_layers_per_column">n_layers_per_column (mikeio.dfsu._layered.Dfsu2DV property)</a>
 
       <ul>
-        <li><a href="dataset.html#mikeio.Dataset.n_timesteps">(mikeio.Dataset property)</a>, <a href="dfs-overview.html#mikeio.Dataset.n_timesteps">[1]</a>
+        <li><a href="dfsu-3d.html#mikeio.dfsu._layered.Dfsu3D.n_layers_per_column">(mikeio.dfsu._layered.Dfsu3D property)</a>
+</li>
+        <li><a href="dfsu-3d.html#mikeio.spatial._FM_geometry_layered.GeometryFM3D.n_layers_per_column">(mikeio.spatial._FM_geometry_layered.GeometryFM3D property)</a>
+</li>
+        <li><a href="dfsu-1dv-vertical-column.html#mikeio.spatial._FM_geometry_layered.GeometryFMVerticalColumn.n_layers_per_column">(mikeio.spatial._FM_geometry_layered.GeometryFMVerticalColumn property)</a>
+</li>
+        <li><a href="dfsu-2dv-vertical-profile.html#mikeio.spatial._FM_geometry_layered.GeometryFMVerticalProfile.n_layers_per_column">(mikeio.spatial._FM_geometry_layered.GeometryFMVerticalProfile property)</a>
+</li>
+      </ul></li>
+      <li><a href="dfsu-2dv-vertical-profile.html#mikeio.dfsu._layered.Dfsu2DV.n_nodes">n_nodes (mikeio.dfsu._layered.Dfsu2DV property)</a>
+
+      <ul>
+        <li><a href="dfsu-3d.html#mikeio.dfsu._layered.Dfsu3D.n_nodes">(mikeio.dfsu._layered.Dfsu3D property)</a>
+</li>
+        <li><a href="dfsu-spectral.html#mikeio.dfsu._spectral.DfsuSpectral.n_nodes">(mikeio.dfsu._spectral.DfsuSpectral property)</a>
+</li>
+        <li><a href="dfsu-2d.html#mikeio.dfsu.Dfsu2DH.n_nodes">(mikeio.dfsu.Dfsu2DH property)</a>
+</li>
+        <li><a href="mesh.html#mikeio.Mesh.n_nodes">(mikeio.Mesh property)</a>
+</li>
+        <li><a href="mesh.html#mikeio.spatial._FM_geometry.GeometryFM.n_nodes">(mikeio.spatial._FM_geometry.GeometryFM property)</a>
+</li>
+        <li><a href="dfsu-spectral.html#mikeio.spatial._FM_geometry.GeometryFMAreaSpectrum.n_nodes">(mikeio.spatial._FM_geometry.GeometryFMAreaSpectrum property)</a>
+</li>
+        <li><a href="dfsu-spectral.html#mikeio.spatial._FM_geometry.GeometryFMLineSpectrum.n_nodes">(mikeio.spatial._FM_geometry.GeometryFMLineSpectrum property)</a>
+</li>
+        <li><a href="dfsu-3d.html#mikeio.spatial._FM_geometry_layered.GeometryFM3D.n_nodes">(mikeio.spatial._FM_geometry_layered.GeometryFM3D property)</a>
+</li>
+        <li><a href="dfsu-1dv-vertical-column.html#mikeio.spatial._FM_geometry_layered.GeometryFMVerticalColumn.n_nodes">(mikeio.spatial._FM_geometry_layered.GeometryFMVerticalColumn property)</a>
+</li>
+        <li><a href="dfsu-2dv-vertical-profile.html#mikeio.spatial._FM_geometry_layered.GeometryFMVerticalProfile.n_nodes">(mikeio.spatial._FM_geometry_layered.GeometryFMVerticalProfile property)</a>
+</li>
+        <li><a href="dfsu-2d.html#mikeio.spatial.GeometryFM2D.n_nodes">(mikeio.spatial.GeometryFM2D property)</a>
+</li>
+      </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="dfsu-2dv-vertical-profile.html#mikeio.dfsu._layered.Dfsu2DV.n_sigma_layers">n_sigma_layers (mikeio.dfsu._layered.Dfsu2DV property)</a>
+
+      <ul>
+        <li><a href="dfsu-3d.html#mikeio.dfsu._layered.Dfsu3D.n_sigma_layers">(mikeio.dfsu._layered.Dfsu3D property)</a>
+</li>
+        <li><a href="dfsu-3d.html#mikeio.spatial._FM_geometry_layered.GeometryFM3D.n_sigma_layers">(mikeio.spatial._FM_geometry_layered.GeometryFM3D property)</a>
+</li>
+        <li><a href="dfsu-1dv-vertical-column.html#mikeio.spatial._FM_geometry_layered.GeometryFMVerticalColumn.n_sigma_layers">(mikeio.spatial._FM_geometry_layered.GeometryFMVerticalColumn property)</a>
+</li>
+        <li><a href="dfsu-2dv-vertical-profile.html#mikeio.spatial._FM_geometry_layered.GeometryFMVerticalProfile.n_sigma_layers">(mikeio.spatial._FM_geometry_layered.GeometryFMVerticalProfile property)</a>
+</li>
+      </ul></li>
+      <li><a href="pfs.html#mikeio.PfsDocument.n_targets">n_targets (mikeio.PfsDocument property)</a>
+</li>
+      <li><a href="dataarray.html#mikeio.DataArray.n_timesteps">n_timesteps (mikeio.DataArray property)</a>
+
+      <ul>
+        <li><a href="dataset.html#mikeio.Dataset.n_timesteps">(mikeio.Dataset property)</a>
 </li>
         <li><a href="dfs0.html#mikeio.Dfs0.n_timesteps">(mikeio.Dfs0 property)</a>
 </li>
@@ -751,58 +1340,80 @@
 </li>
         <li><a href="dfs3.html#mikeio.Dfs3.n_timesteps">(mikeio.Dfs3 property)</a>
 </li>
+        <li><a href="dfsu-2dv-vertical-profile.html#mikeio.dfsu._layered.Dfsu2DV.n_timesteps">(mikeio.dfsu._layered.Dfsu2DV property)</a>
+</li>
+        <li><a href="dfsu-3d.html#mikeio.dfsu._layered.Dfsu3D.n_timesteps">(mikeio.dfsu._layered.Dfsu3D property)</a>
+</li>
+        <li><a href="dfsu-spectral.html#mikeio.dfsu._spectral.DfsuSpectral.n_timesteps">(mikeio.dfsu._spectral.DfsuSpectral property)</a>
+</li>
         <li><a href="dfsu-2d.html#mikeio.dfsu.Dfsu2DH.n_timesteps">(mikeio.dfsu.Dfsu2DH property)</a>
 </li>
       </ul></li>
-      <li><a href="dataarray.html#mikeio.DataArray.name">name (mikeio.DataArray property)</a>, <a href="dfs-overview.html#mikeio.DataArray.name">[1]</a>
-</li>
-      <li><a href="dataset.html#mikeio.Dataset.names">names (mikeio.Dataset property)</a>, <a href="dfs-overview.html#mikeio.Dataset.names">[1]</a>
+      <li><a href="dfsu-2dv-vertical-profile.html#mikeio.dfsu._layered.Dfsu2DV.n_z_layers">n_z_layers (mikeio.dfsu._layered.Dfsu2DV property)</a>
 
       <ul>
-        <li><a href="dfs-overview.html#mikeio.PfsDocument.names">(mikeio.PfsDocument property)</a>, <a href="pfs.html#mikeio.PfsDocument.names">[1]</a>
+        <li><a href="dfsu-3d.html#mikeio.dfsu._layered.Dfsu3D.n_z_layers">(mikeio.dfsu._layered.Dfsu3D property)</a>
 </li>
-      </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="dataarray.html#mikeio.DataArray.nanmax">nanmax() (mikeio.DataArray method)</a>, <a href="dfs-overview.html#mikeio.DataArray.nanmax">[1]</a>
-
-      <ul>
-        <li><a href="dataset.html#mikeio.Dataset.nanmax">(mikeio.Dataset method)</a>, <a href="dfs-overview.html#mikeio.Dataset.nanmax">[1]</a>
+        <li><a href="dfsu-3d.html#mikeio.spatial._FM_geometry_layered.GeometryFM3D.n_z_layers">(mikeio.spatial._FM_geometry_layered.GeometryFM3D property)</a>
+</li>
+        <li><a href="dfsu-1dv-vertical-column.html#mikeio.spatial._FM_geometry_layered.GeometryFMVerticalColumn.n_z_layers">(mikeio.spatial._FM_geometry_layered.GeometryFMVerticalColumn property)</a>
+</li>
+        <li><a href="dfsu-2dv-vertical-profile.html#mikeio.spatial._FM_geometry_layered.GeometryFMVerticalProfile.n_z_layers">(mikeio.spatial._FM_geometry_layered.GeometryFMVerticalProfile property)</a>
 </li>
       </ul></li>
-      <li><a href="dataarray.html#mikeio.DataArray.nanmean">nanmean() (mikeio.DataArray method)</a>, <a href="dfs-overview.html#mikeio.DataArray.nanmean">[1]</a>
+      <li><a href="dataarray.html#mikeio.DataArray.name">name (mikeio.DataArray property)</a>
+</li>
+      <li><a href="dataset.html#mikeio.Dataset.names">names (mikeio.Dataset property)</a>
 
       <ul>
-        <li><a href="dataset.html#mikeio.Dataset.nanmean">(mikeio.Dataset method)</a>, <a href="dfs-overview.html#mikeio.Dataset.nanmean">[1]</a>
+        <li><a href="pfs.html#mikeio.PfsDocument.names">(mikeio.PfsDocument property)</a>
 </li>
       </ul></li>
-      <li><a href="dataarray.html#mikeio.DataArray.nanmin">nanmin() (mikeio.DataArray method)</a>, <a href="dfs-overview.html#mikeio.DataArray.nanmin">[1]</a>
+      <li><a href="dataarray.html#mikeio.DataArray.nanmax">nanmax() (mikeio.DataArray method)</a>
 
       <ul>
-        <li><a href="dataset.html#mikeio.Dataset.nanmin">(mikeio.Dataset method)</a>, <a href="dfs-overview.html#mikeio.Dataset.nanmin">[1]</a>
+        <li><a href="dataset.html#mikeio.Dataset.nanmax">(mikeio.Dataset method)</a>
 </li>
       </ul></li>
-      <li><a href="dataarray.html#mikeio.DataArray.nanquantile">nanquantile() (mikeio.DataArray method)</a>, <a href="dfs-overview.html#mikeio.DataArray.nanquantile">[1]</a>
+      <li><a href="dataarray.html#mikeio.DataArray.nanmean">nanmean() (mikeio.DataArray method)</a>
 
       <ul>
-        <li><a href="dataset.html#mikeio.Dataset.nanquantile">(mikeio.Dataset method)</a>, <a href="dfs-overview.html#mikeio.Dataset.nanquantile">[1]</a>
+        <li><a href="dataset.html#mikeio.Dataset.nanmean">(mikeio.Dataset method)</a>
 </li>
       </ul></li>
-      <li><a href="dataarray.html#mikeio.DataArray.nanstd">nanstd() (mikeio.DataArray method)</a>, <a href="dfs-overview.html#mikeio.DataArray.nanstd">[1]</a>
+      <li><a href="dataarray.html#mikeio.DataArray.nanmin">nanmin() (mikeio.DataArray method)</a>
 
       <ul>
-        <li><a href="dataset.html#mikeio.Dataset.nanstd">(mikeio.Dataset method)</a>, <a href="dfs-overview.html#mikeio.Dataset.nanstd">[1]</a>
+        <li><a href="dataset.html#mikeio.Dataset.nanmin">(mikeio.Dataset method)</a>
 </li>
       </ul></li>
-      <li><a href="dataarray.html#mikeio.DataArray.ndim">ndim (mikeio.DataArray property)</a>, <a href="dfs-overview.html#mikeio.DataArray.ndim">[1]</a>
+      <li><a href="dataarray.html#mikeio.DataArray.nanquantile">nanquantile() (mikeio.DataArray method)</a>
 
       <ul>
-        <li><a href="dataset.html#mikeio.Dataset.ndim">(mikeio.Dataset property)</a>, <a href="dfs-overview.html#mikeio.Dataset.ndim">[1]</a>
+        <li><a href="dataset.html#mikeio.Dataset.nanquantile">(mikeio.Dataset method)</a>
 </li>
       </ul></li>
-      <li><a href="dfsu-2d.html#mikeio.dfsu.Dfsu2DH.node_coordinates">node_coordinates (mikeio.dfsu.Dfsu2DH property)</a>
+      <li><a href="dataarray.html#mikeio.DataArray.nanstd">nanstd() (mikeio.DataArray method)</a>
 
       <ul>
+        <li><a href="dataset.html#mikeio.Dataset.nanstd">(mikeio.Dataset method)</a>
+</li>
+      </ul></li>
+      <li><a href="dataarray.html#mikeio.DataArray.ndim">ndim (mikeio.DataArray property)</a>
+
+      <ul>
+        <li><a href="dataset.html#mikeio.Dataset.ndim">(mikeio.Dataset property)</a>
+</li>
+      </ul></li>
+      <li><a href="dfsu-2dv-vertical-profile.html#mikeio.dfsu._layered.Dfsu2DV.node_coordinates">node_coordinates (mikeio.dfsu._layered.Dfsu2DV property)</a>
+
+      <ul>
+        <li><a href="dfsu-3d.html#mikeio.dfsu._layered.Dfsu3D.node_coordinates">(mikeio.dfsu._layered.Dfsu3D property)</a>
+</li>
+        <li><a href="dfsu-spectral.html#mikeio.dfsu._spectral.DfsuSpectral.node_coordinates">(mikeio.dfsu._spectral.DfsuSpectral property)</a>
+</li>
+        <li><a href="dfsu-2d.html#mikeio.dfsu.Dfsu2DH.node_coordinates">(mikeio.dfsu.Dfsu2DH property)</a>
+</li>
         <li><a href="mesh.html#mikeio.Mesh.node_coordinates">(mikeio.Mesh property)</a>
 </li>
       </ul></li>
@@ -811,22 +1422,22 @@
       <ul>
         <li><a href="dfs2.html#mikeio.Dfs2.nx">(mikeio.Dfs2 property)</a>
 </li>
-        <li><a href="dfs-overview.html#mikeio.Grid1D.nx">(mikeio.Grid1D property)</a>, <a href="dfs1.html#mikeio.Grid1D.nx">[1]</a>
+        <li><a href="dfs1.html#mikeio.Grid1D.nx">(mikeio.Grid1D property)</a>
 </li>
-        <li><a href="dfs-overview.html#mikeio.Grid2D.nx">(mikeio.Grid2D property)</a>, <a href="dfs2.html#mikeio.Grid2D.nx">[1]</a>
+        <li><a href="dfs2.html#mikeio.Grid2D.nx">(mikeio.Grid2D property)</a>
 </li>
-        <li><a href="dfs-overview.html#mikeio.Grid3D.nx">(mikeio.Grid3D property)</a>, <a href="dfs3.html#mikeio.Grid3D.nx">[1]</a>
+        <li><a href="dfs3.html#mikeio.Grid3D.nx">(mikeio.Grid3D property)</a>
 </li>
       </ul></li>
       <li><a href="dfs2.html#mikeio.Dfs2.ny">ny (mikeio.Dfs2 property)</a>
 
       <ul>
-        <li><a href="dfs-overview.html#mikeio.Grid2D.ny">(mikeio.Grid2D property)</a>, <a href="dfs2.html#mikeio.Grid2D.ny">[1]</a>
+        <li><a href="dfs2.html#mikeio.Grid2D.ny">(mikeio.Grid2D property)</a>
 </li>
-        <li><a href="dfs-overview.html#mikeio.Grid3D.ny">(mikeio.Grid3D property)</a>, <a href="dfs3.html#mikeio.Grid3D.ny">[1]</a>
+        <li><a href="dfs3.html#mikeio.Grid3D.ny">(mikeio.Grid3D property)</a>
 </li>
       </ul></li>
-      <li><a href="dfs-overview.html#mikeio.Grid3D.nz">nz (mikeio.Grid3D property)</a>, <a href="dfs3.html#mikeio.Grid3D.nz">[1]</a>
+      <li><a href="dfs3.html#mikeio.Grid3D.nz">nz (mikeio.Grid3D property)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -843,9 +1454,9 @@
 </li>
         <li><a href="dfs3.html#mikeio.Dfs3.orientation">(mikeio.Dfs3 property)</a>
 </li>
-        <li><a href="dfs-overview.html#mikeio.Grid2D.orientation">(mikeio.Grid2D property)</a>, <a href="dfs2.html#mikeio.Grid2D.orientation">[1]</a>
+        <li><a href="dfs2.html#mikeio.Grid2D.orientation">(mikeio.Grid2D property)</a>
 </li>
-        <li><a href="dfs-overview.html#mikeio.Grid3D.orientation">(mikeio.Grid3D property)</a>, <a href="dfs3.html#mikeio.Grid3D.orientation">[1]</a>
+        <li><a href="dfs3.html#mikeio.Grid3D.orientation">(mikeio.Grid3D property)</a>
 </li>
       </ul></li>
   </ul></td>
@@ -857,9 +1468,15 @@
 </li>
         <li><a href="dfs3.html#mikeio.Dfs3.origin">(mikeio.Dfs3 property)</a>
 </li>
-        <li><a href="dfs-overview.html#mikeio.Grid2D.origin">(mikeio.Grid2D property)</a>, <a href="dfs2.html#mikeio.Grid2D.origin">[1]</a>
+        <li><a href="dfs2.html#mikeio.Grid2D.origin">(mikeio.Grid2D property)</a>
 </li>
-        <li><a href="dfs-overview.html#mikeio.Grid3D.origin">(mikeio.Grid3D property)</a>, <a href="dfs3.html#mikeio.Grid3D.origin">[1]</a>
+        <li><a href="dfs3.html#mikeio.Grid3D.origin">(mikeio.Grid3D property)</a>
+</li>
+      </ul></li>
+      <li><a href="dfsu-2d.html#mikeio.dataset._data_plot._DataArrayPlotterFM.outline">outline() (mikeio.dataset._data_plot._DataArrayPlotterFM method)</a>
+
+      <ul>
+        <li><a href="mesh.html#mikeio.spatial._FM_geometry._GeometryFMPlotter.outline">(mikeio.spatial._FM_geometry._GeometryFMPlotter method)</a>
 </li>
       </ul></li>
   </ul></td>
@@ -868,19 +1485,29 @@
 <h2 id="P">P</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="dfs-overview.html#mikeio.Pfs">Pfs (in module mikeio)</a>
+      <li><a href="dfsu-2d.html#mikeio.dataset._data_plot._DataArrayPlotterFM.patch">patch() (mikeio.dataset._data_plot._DataArrayPlotterFM method)</a>
 </li>
-      <li><a href="dfs-overview.html#mikeio.PfsDocument">PfsDocument (class in mikeio)</a>, <a href="pfs.html#mikeio.PfsDocument">[1]</a>
+      <li><a href="dfs1.html#mikeio.dataset._data_plot._DataArrayPlotterGrid1D.pcolormesh">pcolormesh() (mikeio.dataset._data_plot._DataArrayPlotterGrid1D method)</a>
+
+      <ul>
+        <li><a href="dfs2.html#mikeio.dataset._data_plot._DataArrayPlotterGrid2D.pcolormesh">(mikeio.dataset._data_plot._DataArrayPlotterGrid2D method)</a>
 </li>
-      <li><a href="dfs-overview.html#mikeio.PfsSection">PfsSection (class in mikeio)</a>, <a href="pfs.html#mikeio.PfsSection">[1]</a>
+      </ul></li>
+      <li><a href="pfs.html#mikeio.PfsDocument">PfsDocument (class in mikeio)</a>
+</li>
+      <li><a href="pfs.html#mikeio.PfsSection">PfsSection (class in mikeio)</a>
+</li>
+      <li><a href="dfsu-spectral.html#mikeio.dfsu._spectral.DfsuSpectral.plot_spectrum">plot_spectrum() (mikeio.dfsu._spectral.DfsuSpectral method)</a>
+</li>
+      <li><a href="dfsu-2dv-vertical-profile.html#mikeio.dfsu._layered.Dfsu2DV.plot_vertical_profile">plot_vertical_profile() (mikeio.dfsu._layered.Dfsu2DV method)</a>
 </li>
       <li><a href="pfs.html#mikeio.PfsDocument.pop">pop() (mikeio.PfsDocument method)</a>
 
       <ul>
-        <li><a href="dfs-overview.html#mikeio.PfsSection.pop">(mikeio.PfsSection method)</a>, <a href="pfs.html#mikeio.PfsSection.pop">[1]</a>
+        <li><a href="pfs.html#mikeio.PfsSection.pop">(mikeio.PfsSection method)</a>
 </li>
       </ul></li>
-      <li><a href="dataset.html#mikeio.Dataset.popitem">popitem() (mikeio.Dataset method)</a>, <a href="dfs-overview.html#mikeio.Dataset.popitem">[1]</a>
+      <li><a href="dataset.html#mikeio.Dataset.popitem">popitem() (mikeio.Dataset method)</a>
 
       <ul>
         <li><a href="pfs.html#mikeio.PfsDocument.popitem">(mikeio.PfsDocument method)</a>
@@ -895,12 +1522,34 @@
 </li>
         <li><a href="dfs3.html#mikeio.Grid3D.projection">(mikeio.Grid3D property)</a>
 </li>
+        <li><a href="mesh.html#mikeio.spatial._FM_geometry.GeometryFM.projection">(mikeio.spatial._FM_geometry.GeometryFM property)</a>
+</li>
+        <li><a href="dfsu-spectral.html#mikeio.spatial._FM_geometry.GeometryFMAreaSpectrum.projection">(mikeio.spatial._FM_geometry.GeometryFMAreaSpectrum property)</a>
+</li>
+        <li><a href="dfsu-spectral.html#mikeio.spatial._FM_geometry.GeometryFMLineSpectrum.projection">(mikeio.spatial._FM_geometry.GeometryFMLineSpectrum property)</a>
+</li>
+        <li><a href="dfsu-spectral.html#mikeio.spatial._FM_geometry.GeometryFMPointSpectrum.projection">(mikeio.spatial._FM_geometry.GeometryFMPointSpectrum property)</a>
+</li>
+        <li><a href="dfsu-3d.html#mikeio.spatial._FM_geometry_layered.GeometryFM3D.projection">(mikeio.spatial._FM_geometry_layered.GeometryFM3D property)</a>
+</li>
+        <li><a href="dfsu-1dv-vertical-column.html#mikeio.spatial._FM_geometry_layered.GeometryFMVerticalColumn.projection">(mikeio.spatial._FM_geometry_layered.GeometryFMVerticalColumn property)</a>
+</li>
+        <li><a href="dfsu-2dv-vertical-profile.html#mikeio.spatial._FM_geometry_layered.GeometryFMVerticalProfile.projection">(mikeio.spatial._FM_geometry_layered.GeometryFMVerticalProfile property)</a>
+</li>
+        <li><a href="dfsu-2d.html#mikeio.spatial.GeometryFM2D.projection">(mikeio.spatial.GeometryFM2D property)</a>
+</li>
       </ul></li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="dfsu-2d.html#mikeio.dfsu.Dfsu2DH.projection_string">projection_string (mikeio.dfsu.Dfsu2DH property)</a>
+      <li><a href="dfsu-2dv-vertical-profile.html#mikeio.dfsu._layered.Dfsu2DV.projection_string">projection_string (mikeio.dfsu._layered.Dfsu2DV property)</a>
 
       <ul>
+        <li><a href="dfsu-3d.html#mikeio.dfsu._layered.Dfsu3D.projection_string">(mikeio.dfsu._layered.Dfsu3D property)</a>
+</li>
+        <li><a href="dfsu-spectral.html#mikeio.dfsu._spectral.DfsuSpectral.projection_string">(mikeio.dfsu._spectral.DfsuSpectral property)</a>
+</li>
+        <li><a href="dfsu-2d.html#mikeio.dfsu.Dfsu2DH.projection_string">(mikeio.dfsu.Dfsu2DH property)</a>
+</li>
         <li><a href="dfs1.html#mikeio.Grid1D.projection_string">(mikeio.Grid1D property)</a>
 </li>
         <li><a href="dfs2.html#mikeio.Grid2D.projection_string">(mikeio.Grid2D property)</a>
@@ -909,11 +1558,27 @@
 </li>
         <li><a href="mesh.html#mikeio.Mesh.projection_string">(mikeio.Mesh property)</a>
 </li>
+        <li><a href="mesh.html#mikeio.spatial._FM_geometry.GeometryFM.projection_string">(mikeio.spatial._FM_geometry.GeometryFM property)</a>
+</li>
+        <li><a href="dfsu-spectral.html#mikeio.spatial._FM_geometry.GeometryFMAreaSpectrum.projection_string">(mikeio.spatial._FM_geometry.GeometryFMAreaSpectrum property)</a>
+</li>
+        <li><a href="dfsu-spectral.html#mikeio.spatial._FM_geometry.GeometryFMLineSpectrum.projection_string">(mikeio.spatial._FM_geometry.GeometryFMLineSpectrum property)</a>
+</li>
+        <li><a href="dfsu-spectral.html#mikeio.spatial._FM_geometry.GeometryFMPointSpectrum.projection_string">(mikeio.spatial._FM_geometry.GeometryFMPointSpectrum property)</a>
+</li>
+        <li><a href="dfsu-3d.html#mikeio.spatial._FM_geometry_layered.GeometryFM3D.projection_string">(mikeio.spatial._FM_geometry_layered.GeometryFM3D property)</a>
+</li>
+        <li><a href="dfsu-1dv-vertical-column.html#mikeio.spatial._FM_geometry_layered.GeometryFMVerticalColumn.projection_string">(mikeio.spatial._FM_geometry_layered.GeometryFMVerticalColumn property)</a>
+</li>
+        <li><a href="dfsu-2dv-vertical-profile.html#mikeio.spatial._FM_geometry_layered.GeometryFMVerticalProfile.projection_string">(mikeio.spatial._FM_geometry_layered.GeometryFMVerticalProfile property)</a>
+</li>
+        <li><a href="dfsu-2d.html#mikeio.spatial.GeometryFM2D.projection_string">(mikeio.spatial.GeometryFM2D property)</a>
+</li>
       </ul></li>
-      <li><a href="dataarray.html#mikeio.DataArray.ptp">ptp() (mikeio.DataArray method)</a>, <a href="dfs-overview.html#mikeio.DataArray.ptp">[1]</a>
+      <li><a href="dataarray.html#mikeio.DataArray.ptp">ptp() (mikeio.DataArray method)</a>
 
       <ul>
-        <li><a href="dataset.html#mikeio.Dataset.ptp">(mikeio.Dataset method)</a>, <a href="dfs-overview.html#mikeio.Dataset.ptp">[1]</a>
+        <li><a href="dataset.html#mikeio.Dataset.ptp">(mikeio.Dataset method)</a>
 </li>
       </ul></li>
   </ul></td>
@@ -925,9 +1590,9 @@
       <li><a href="generic.html#mikeio.generic.quantile">quantile() (in module mikeio.generic)</a>
 
       <ul>
-        <li><a href="dataarray.html#mikeio.DataArray.quantile">(mikeio.DataArray method)</a>, <a href="dfs-overview.html#mikeio.DataArray.quantile">[1]</a>
+        <li><a href="dataarray.html#mikeio.DataArray.quantile">(mikeio.DataArray method)</a>
 </li>
-        <li><a href="dataset.html#mikeio.Dataset.quantile">(mikeio.Dataset method)</a>, <a href="dfs-overview.html#mikeio.Dataset.quantile">[1]</a>
+        <li><a href="dataset.html#mikeio.Dataset.quantile">(mikeio.Dataset method)</a>
 </li>
       </ul></li>
   </ul></td>
@@ -947,16 +1612,22 @@
 </li>
         <li><a href="dfs3.html#mikeio.Dfs3.read">(mikeio.Dfs3 method)</a>
 </li>
+        <li><a href="dfsu-2dv-vertical-profile.html#mikeio.dfsu._layered.Dfsu2DV.read">(mikeio.dfsu._layered.Dfsu2DV method)</a>
+</li>
+        <li><a href="dfsu-3d.html#mikeio.dfsu._layered.Dfsu3D.read">(mikeio.dfsu._layered.Dfsu3D method)</a>
+</li>
+        <li><a href="dfsu-spectral.html#mikeio.dfsu._spectral.DfsuSpectral.read">(mikeio.dfsu._spectral.DfsuSpectral method)</a>
+</li>
         <li><a href="dfsu-2d.html#mikeio.dfsu.Dfsu2DH.read">(mikeio.dfsu.Dfsu2DH method)</a>
 </li>
       </ul></li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="dfs-overview.html#mikeio.read_pfs">read_pfs() (in module mikeio)</a>, <a href="pfs.html#mikeio.read_pfs">[1]</a>
+      <li><a href="pfs.html#mikeio.read_pfs">read_pfs() (in module mikeio)</a>
 </li>
-      <li><a href="dataset.html#mikeio.Dataset.remove">remove() (mikeio.Dataset method)</a>, <a href="dfs-overview.html#mikeio.Dataset.remove">[1]</a>
+      <li><a href="dataset.html#mikeio.Dataset.remove">remove() (mikeio.Dataset method)</a>
 </li>
-      <li><a href="dataset.html#mikeio.Dataset.rename">rename() (mikeio.Dataset method)</a>, <a href="dfs-overview.html#mikeio.Dataset.rename">[1]</a>
+      <li><a href="dataset.html#mikeio.Dataset.rename">rename() (mikeio.Dataset method)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -966,16 +1637,18 @@
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="generic.html#mikeio.generic.scale">scale() (in module mikeio.generic)</a>
 </li>
+      <li><a href="dataset.html#mikeio.dataset._data_plot._DatasetPlotter.scatter">scatter() (mikeio.dataset._data_plot._DatasetPlotter method)</a>
+</li>
       <li><a href="pfs.html#mikeio.PfsDocument.search">search() (mikeio.PfsDocument method)</a>
 
       <ul>
-        <li><a href="dfs-overview.html#mikeio.PfsSection.search">(mikeio.PfsSection method)</a>, <a href="pfs.html#mikeio.PfsSection.search">[1]</a>
+        <li><a href="pfs.html#mikeio.PfsSection.search">(mikeio.PfsSection method)</a>
 </li>
       </ul></li>
-      <li><a href="dataarray.html#mikeio.DataArray.sel">sel() (mikeio.DataArray method)</a>, <a href="dfs-overview.html#mikeio.DataArray.sel">[1]</a>
+      <li><a href="dataarray.html#mikeio.DataArray.sel">sel() (mikeio.DataArray method)</a>
 
       <ul>
-        <li><a href="dataset.html#mikeio.Dataset.sel">(mikeio.Dataset method)</a>, <a href="dfs-overview.html#mikeio.Dataset.sel">[1]</a>
+        <li><a href="dataset.html#mikeio.Dataset.sel">(mikeio.Dataset method)</a>
 </li>
       </ul></li>
       <li><a href="pfs.html#mikeio.PfsDocument.setdefault">setdefault() (mikeio.PfsDocument method)</a>
@@ -984,10 +1657,10 @@
         <li><a href="pfs.html#mikeio.PfsSection.setdefault">(mikeio.PfsSection method)</a>
 </li>
       </ul></li>
-      <li><a href="dataarray.html#mikeio.DataArray.shape">shape (mikeio.DataArray property)</a>, <a href="dfs-overview.html#mikeio.DataArray.shape">[1]</a>
+      <li><a href="dataarray.html#mikeio.DataArray.shape">shape (mikeio.DataArray property)</a>
 
       <ul>
-        <li><a href="dataset.html#mikeio.Dataset.shape">(mikeio.Dataset property)</a>, <a href="dfs-overview.html#mikeio.Dataset.shape">[1]</a>
+        <li><a href="dataset.html#mikeio.Dataset.shape">(mikeio.Dataset property)</a>
 </li>
         <li><a href="dfs1.html#mikeio.Dfs1.shape">(mikeio.Dfs1 property)</a>
 </li>
@@ -996,18 +1669,18 @@
         <li><a href="dfs3.html#mikeio.Dfs3.shape">(mikeio.Dfs3 property)</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="dataarray.html#mikeio.DataArray.squeeze">squeeze() (mikeio.DataArray method)</a>, <a href="dfs-overview.html#mikeio.DataArray.squeeze">[1]</a>
+      <li><a href="dataarray.html#mikeio.DataArray.squeeze">squeeze() (mikeio.DataArray method)</a>
 
       <ul>
-        <li><a href="dataset.html#mikeio.Dataset.squeeze">(mikeio.Dataset method)</a>, <a href="dfs-overview.html#mikeio.Dataset.squeeze">[1]</a>
+        <li><a href="dataset.html#mikeio.Dataset.squeeze">(mikeio.Dataset method)</a>
 </li>
       </ul></li>
-      <li><a href="dataarray.html#mikeio.DataArray.start_time">start_time (mikeio.DataArray property)</a>, <a href="dfs-overview.html#mikeio.DataArray.start_time">[1]</a>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="dataarray.html#mikeio.DataArray.start_time">start_time (mikeio.DataArray property)</a>
 
       <ul>
-        <li><a href="dataset.html#mikeio.Dataset.start_time">(mikeio.Dataset property)</a>, <a href="dfs-overview.html#mikeio.Dataset.start_time">[1]</a>
+        <li><a href="dataset.html#mikeio.Dataset.start_time">(mikeio.Dataset property)</a>
 </li>
         <li><a href="dfs0.html#mikeio.Dfs0.start_time">(mikeio.Dfs0 property)</a>
 </li>
@@ -1017,13 +1690,19 @@
 </li>
         <li><a href="dfs3.html#mikeio.Dfs3.start_time">(mikeio.Dfs3 property)</a>
 </li>
+        <li><a href="dfsu-2dv-vertical-profile.html#mikeio.dfsu._layered.Dfsu2DV.start_time">(mikeio.dfsu._layered.Dfsu2DV property)</a>
+</li>
+        <li><a href="dfsu-3d.html#mikeio.dfsu._layered.Dfsu3D.start_time">(mikeio.dfsu._layered.Dfsu3D property)</a>
+</li>
+        <li><a href="dfsu-spectral.html#mikeio.dfsu._spectral.DfsuSpectral.start_time">(mikeio.dfsu._spectral.DfsuSpectral property)</a>
+</li>
         <li><a href="dfsu-2d.html#mikeio.dfsu.Dfsu2DH.start_time">(mikeio.dfsu.Dfsu2DH property)</a>
 </li>
       </ul></li>
-      <li><a href="dataarray.html#mikeio.DataArray.std">std() (mikeio.DataArray method)</a>, <a href="dfs-overview.html#mikeio.DataArray.std">[1]</a>
+      <li><a href="dataarray.html#mikeio.DataArray.std">std() (mikeio.DataArray method)</a>
 
       <ul>
-        <li><a href="dataset.html#mikeio.Dataset.std">(mikeio.Dataset method)</a>, <a href="dfs-overview.html#mikeio.Dataset.std">[1]</a>
+        <li><a href="dataset.html#mikeio.Dataset.std">(mikeio.Dataset method)</a>
 </li>
       </ul></li>
       <li><a href="generic.html#mikeio.generic.sum">sum() (in module mikeio.generic)</a>
@@ -1034,9 +1713,9 @@
 <h2 id="T">T</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="dfs-overview.html#mikeio.PfsDocument.targets">targets (mikeio.PfsDocument property)</a>, <a href="pfs.html#mikeio.PfsDocument.targets">[1]</a>
+      <li><a href="pfs.html#mikeio.PfsDocument.targets">targets (mikeio.PfsDocument property)</a>
 </li>
-      <li><a href="dataset.html#mikeio.Dataset.time">time (mikeio.Dataset property)</a>, <a href="dfs-overview.html#mikeio.Dataset.time">[1]</a>
+      <li><a href="dataset.html#mikeio.Dataset.time">time (mikeio.Dataset property)</a>
 
       <ul>
         <li><a href="dfs0.html#mikeio.Dfs0.time">(mikeio.Dfs0 property)</a>
@@ -1047,13 +1726,21 @@
 </li>
         <li><a href="dfs3.html#mikeio.Dfs3.time">(mikeio.Dfs3 property)</a>
 </li>
+        <li><a href="dfsu-2dv-vertical-profile.html#mikeio.dfsu._layered.Dfsu2DV.time">(mikeio.dfsu._layered.Dfsu2DV property)</a>
+</li>
+        <li><a href="dfsu-3d.html#mikeio.dfsu._layered.Dfsu3D.time">(mikeio.dfsu._layered.Dfsu3D property)</a>
+</li>
+        <li><a href="dfsu-spectral.html#mikeio.dfsu._spectral.DfsuSpectral.time">(mikeio.dfsu._spectral.DfsuSpectral property)</a>
+</li>
         <li><a href="dfsu-2d.html#mikeio.dfsu.Dfsu2DH.time">(mikeio.dfsu.Dfsu2DH property)</a>
 </li>
       </ul></li>
-      <li><a href="dataarray.html#mikeio.DataArray.timestep">timestep (mikeio.DataArray property)</a>, <a href="dfs-overview.html#mikeio.DataArray.timestep">[1]</a>
+      <li><a href="dfs1.html#mikeio.dataset._data_plot._DataArrayPlotterGrid1D.timeseries">timeseries() (mikeio.dataset._data_plot._DataArrayPlotterGrid1D method)</a>
+</li>
+      <li><a href="dataarray.html#mikeio.DataArray.timestep">timestep (mikeio.DataArray property)</a>
 
       <ul>
-        <li><a href="dataset.html#mikeio.Dataset.timestep">(mikeio.Dataset property)</a>, <a href="dfs-overview.html#mikeio.Dataset.timestep">[1]</a>
+        <li><a href="dataset.html#mikeio.Dataset.timestep">(mikeio.Dataset property)</a>
 </li>
         <li><a href="dfs0.html#mikeio.Dfs0.timestep">(mikeio.Dfs0 property)</a>
 </li>
@@ -1063,75 +1750,147 @@
 </li>
         <li><a href="dfs3.html#mikeio.Dfs3.timestep">(mikeio.Dfs3 property)</a>
 </li>
+        <li><a href="dfsu-2dv-vertical-profile.html#mikeio.dfsu._layered.Dfsu2DV.timestep">(mikeio.dfsu._layered.Dfsu2DV property)</a>
+</li>
+        <li><a href="dfsu-3d.html#mikeio.dfsu._layered.Dfsu3D.timestep">(mikeio.dfsu._layered.Dfsu3D property)</a>
+</li>
+        <li><a href="dfsu-spectral.html#mikeio.dfsu._spectral.DfsuSpectral.timestep">(mikeio.dfsu._spectral.DfsuSpectral property)</a>
+</li>
         <li><a href="dfsu-2d.html#mikeio.dfsu.Dfsu2DH.timestep">(mikeio.dfsu.Dfsu2DH property)</a>
 </li>
       </ul></li>
       <li><a href="eum.html#mikeio.eum.TimeStepUnit">TimeStepUnit (class in mikeio.eum)</a>
 </li>
-      <li><a href="dataarray.html#mikeio.DataArray.to_dataframe">to_dataframe() (mikeio.DataArray method)</a>, <a href="dfs-overview.html#mikeio.DataArray.to_dataframe">[1]</a>
+      <li><a href="dfsu-3d.html#mikeio.dfsu._layered.Dfsu3D.to_2d_geometry">to_2d_geometry() (mikeio.dfsu._layered.Dfsu3D method)</a>
 
       <ul>
-        <li><a href="dataset.html#mikeio.Dataset.to_dataframe">(mikeio.Dataset method)</a>, <a href="dfs-overview.html#mikeio.Dataset.to_dataframe">[1]</a>
+        <li><a href="dfsu-3d.html#mikeio.spatial._FM_geometry_layered.GeometryFM3D.to_2d_geometry">(mikeio.spatial._FM_geometry_layered.GeometryFM3D method)</a>
+</li>
+        <li><a href="dfsu-1dv-vertical-column.html#mikeio.spatial._FM_geometry_layered.GeometryFMVerticalColumn.to_2d_geometry">(mikeio.spatial._FM_geometry_layered.GeometryFMVerticalColumn method)</a>
+</li>
+        <li><a href="dfsu-2dv-vertical-profile.html#mikeio.spatial._FM_geometry_layered.GeometryFMVerticalProfile.to_2d_geometry">(mikeio.spatial._FM_geometry_layered.GeometryFMVerticalProfile method)</a>
+</li>
+      </ul></li>
+      <li><a href="dataarray.html#mikeio.DataArray.to_dataframe">to_dataframe() (mikeio.DataArray method)</a>
+
+      <ul>
+        <li><a href="dataset.html#mikeio.Dataset.to_dataframe">(mikeio.Dataset method)</a>
 </li>
         <li><a href="dfs0.html#mikeio.Dfs0.to_dataframe">(mikeio.Dfs0 method)</a>
 </li>
         <li><a href="pfs.html#mikeio.PfsDocument.to_dataframe">(mikeio.PfsDocument method)</a>
 </li>
-        <li><a href="dfs-overview.html#mikeio.PfsSection.to_dataframe">(mikeio.PfsSection method)</a>, <a href="pfs.html#mikeio.PfsSection.to_dataframe">[1]</a>
+        <li><a href="pfs.html#mikeio.PfsSection.to_dataframe">(mikeio.PfsSection method)</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="dataarray.html#mikeio.DataArray.to_dfs">to_dfs() (mikeio.DataArray method)</a>, <a href="dfs-overview.html#mikeio.DataArray.to_dfs">[1]</a>
+      <li><a href="dataarray.html#mikeio.DataArray.to_dfs">to_dfs() (mikeio.DataArray method)</a>
 
       <ul>
-        <li><a href="dataset.html#mikeio.Dataset.to_dfs">(mikeio.Dataset method)</a>, <a href="dfs-overview.html#mikeio.Dataset.to_dfs">[1]</a>
+        <li><a href="dataset.html#mikeio.Dataset.to_dfs">(mikeio.Dataset method)</a>
 </li>
       </ul></li>
       <li><a href="pfs.html#mikeio.PfsDocument.to_dict">to_dict() (mikeio.PfsDocument method)</a>
 
       <ul>
-        <li><a href="dfs-overview.html#mikeio.PfsSection.to_dict">(mikeio.PfsSection method)</a>, <a href="pfs.html#mikeio.PfsSection.to_dict">[1]</a>
+        <li><a href="pfs.html#mikeio.PfsSection.to_dict">(mikeio.PfsSection method)</a>
 </li>
       </ul></li>
-      <li><a href="dfs-overview.html#mikeio.Grid2D.to_geometryFM">to_geometryFM() (mikeio.Grid2D method)</a>, <a href="dfs2.html#mikeio.Grid2D.to_geometryFM">[1]</a>
+      <li><a href="dfs2.html#mikeio.Grid2D.to_geometryFM">to_geometryFM() (mikeio.Grid2D method)</a>
 </li>
-      <li><a href="dfsu-2d.html#mikeio.dfsu.Dfsu2DH.to_mesh">to_mesh() (mikeio.dfsu.Dfsu2DH method)</a>
+      <li><a href="dfsu-2dv-vertical-profile.html#mikeio.dfsu._layered.Dfsu2DV.to_mesh">to_mesh() (mikeio.dfsu._layered.Dfsu2DV method)</a>
 
       <ul>
-        <li><a href="dfs-overview.html#mikeio.Grid2D.to_mesh">(mikeio.Grid2D method)</a>, <a href="dfs2.html#mikeio.Grid2D.to_mesh">[1]</a>
+        <li><a href="dfsu-3d.html#mikeio.dfsu._layered.Dfsu3D.to_mesh">(mikeio.dfsu._layered.Dfsu3D method)</a>
+</li>
+        <li><a href="dfsu-spectral.html#mikeio.dfsu._spectral.DfsuSpectral.to_mesh">(mikeio.dfsu._spectral.DfsuSpectral method)</a>
+</li>
+        <li><a href="dfsu-2d.html#mikeio.dfsu.Dfsu2DH.to_mesh">(mikeio.dfsu.Dfsu2DH method)</a>
+</li>
+        <li><a href="dfs2.html#mikeio.Grid2D.to_mesh">(mikeio.Grid2D method)</a>
+</li>
+        <li><a href="mesh.html#mikeio.spatial._FM_geometry.GeometryFM.to_mesh">(mikeio.spatial._FM_geometry.GeometryFM method)</a>
+</li>
+        <li><a href="dfsu-spectral.html#mikeio.spatial._FM_geometry.GeometryFMAreaSpectrum.to_mesh">(mikeio.spatial._FM_geometry.GeometryFMAreaSpectrum method)</a>
+</li>
+        <li><a href="dfsu-spectral.html#mikeio.spatial._FM_geometry.GeometryFMLineSpectrum.to_mesh">(mikeio.spatial._FM_geometry.GeometryFMLineSpectrum method)</a>
+</li>
+        <li><a href="dfsu-2d.html#mikeio.spatial.GeometryFM2D.to_mesh">(mikeio.spatial.GeometryFM2D method)</a>
 </li>
       </ul></li>
-      <li><a href="dataarray.html#mikeio.DataArray.to_numpy">to_numpy() (mikeio.DataArray method)</a>, <a href="dfs-overview.html#mikeio.DataArray.to_numpy">[1]</a>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="dataarray.html#mikeio.DataArray.to_numpy">to_numpy() (mikeio.DataArray method)</a>
 
       <ul>
-        <li><a href="dataset.html#mikeio.Dataset.to_numpy">(mikeio.Dataset method)</a>, <a href="dfs-overview.html#mikeio.Dataset.to_numpy">[1]</a>
+        <li><a href="dataset.html#mikeio.Dataset.to_numpy">(mikeio.Dataset method)</a>
 </li>
       </ul></li>
-      <li><a href="dataarray.html#mikeio.DataArray.to_pandas">to_pandas() (mikeio.DataArray method)</a>, <a href="dfs-overview.html#mikeio.DataArray.to_pandas">[1]</a>
+      <li><a href="dataarray.html#mikeio.DataArray.to_pandas">to_pandas() (mikeio.DataArray method)</a>
 
       <ul>
-        <li><a href="dataset.html#mikeio.Dataset.to_pandas">(mikeio.Dataset method)</a>, <a href="dfs-overview.html#mikeio.Dataset.to_pandas">[1]</a>
+        <li><a href="dataset.html#mikeio.Dataset.to_pandas">(mikeio.Dataset method)</a>
 </li>
       </ul></li>
-      <li><a href="dfsu-2d.html#mikeio.dfsu.Dfsu2DH.to_shapely">to_shapely() (mikeio.dfsu.Dfsu2DH method)</a>
+      <li><a href="dfsu-2dv-vertical-profile.html#mikeio.dfsu._layered.Dfsu2DV.to_shapely">to_shapely() (mikeio.dfsu._layered.Dfsu2DV method)</a>
 
       <ul>
+        <li><a href="dfsu-3d.html#mikeio.dfsu._layered.Dfsu3D.to_shapely">(mikeio.dfsu._layered.Dfsu3D method)</a>
+</li>
+        <li><a href="dfsu-spectral.html#mikeio.dfsu._spectral.DfsuSpectral.to_shapely">(mikeio.dfsu._spectral.DfsuSpectral method)</a>
+</li>
+        <li><a href="dfsu-2d.html#mikeio.dfsu.Dfsu2DH.to_shapely">(mikeio.dfsu.Dfsu2DH method)</a>
+</li>
         <li><a href="mesh.html#mikeio.Mesh.to_shapely">(mikeio.Mesh method)</a>
 </li>
-      </ul></li>
-      <li><a href="dataarray.html#mikeio.DataArray.to_xarray">to_xarray() (mikeio.DataArray method)</a>, <a href="dfs-overview.html#mikeio.DataArray.to_xarray">[1]</a>
-
-      <ul>
-        <li><a href="dataset.html#mikeio.Dataset.to_xarray">(mikeio.Dataset method)</a>, <a href="dfs-overview.html#mikeio.Dataset.to_xarray">[1]</a>
+        <li><a href="mesh.html#mikeio.spatial._FM_geometry.GeometryFM.to_shapely">(mikeio.spatial._FM_geometry.GeometryFM method)</a>
+</li>
+        <li><a href="dfsu-spectral.html#mikeio.spatial._FM_geometry.GeometryFMAreaSpectrum.to_shapely">(mikeio.spatial._FM_geometry.GeometryFMAreaSpectrum method)</a>
+</li>
+        <li><a href="dfsu-spectral.html#mikeio.spatial._FM_geometry.GeometryFMLineSpectrum.to_shapely">(mikeio.spatial._FM_geometry.GeometryFMLineSpectrum method)</a>
+</li>
+        <li><a href="dfsu-2d.html#mikeio.spatial.GeometryFM2D.to_shapely">(mikeio.spatial.GeometryFM2D method)</a>
 </li>
       </ul></li>
-      <li><a href="dataarray.html#mikeio.DataArray.type">type (mikeio.DataArray property)</a>, <a href="dfs-overview.html#mikeio.DataArray.type">[1]</a>
-</li>
-      <li><a href="dfsu-2d.html#mikeio.dfsu.Dfsu2DH.type_name">type_name (mikeio.dfsu.Dfsu2DH property)</a>
+      <li><a href="dataarray.html#mikeio.DataArray.to_xarray">to_xarray() (mikeio.DataArray method)</a>
 
       <ul>
+        <li><a href="dataset.html#mikeio.Dataset.to_xarray">(mikeio.Dataset method)</a>
+</li>
+      </ul></li>
+      <li><a href="dfsu-2dv-vertical-profile.html#mikeio.dfsu._layered.Dfsu2DV.top_elements">top_elements (mikeio.dfsu._layered.Dfsu2DV property)</a>
+
+      <ul>
+        <li><a href="dfsu-3d.html#mikeio.dfsu._layered.Dfsu3D.top_elements">(mikeio.dfsu._layered.Dfsu3D property)</a>
+</li>
+        <li><a href="dfsu-3d.html#mikeio.spatial._FM_geometry_layered.GeometryFM3D.top_elements">(mikeio.spatial._FM_geometry_layered.GeometryFM3D property)</a>
+</li>
+        <li><a href="dfsu-1dv-vertical-column.html#mikeio.spatial._FM_geometry_layered.GeometryFMVerticalColumn.top_elements">(mikeio.spatial._FM_geometry_layered.GeometryFMVerticalColumn property)</a>
+</li>
+        <li><a href="dfsu-2dv-vertical-profile.html#mikeio.spatial._FM_geometry_layered.GeometryFMVerticalProfile.top_elements">(mikeio.spatial._FM_geometry_layered.GeometryFMVerticalProfile property)</a>
+</li>
+      </ul></li>
+      <li><a href="dataarray.html#mikeio.DataArray.type">type (mikeio.DataArray property)</a>
+</li>
+      <li><a href="dfsu-2dv-vertical-profile.html#mikeio.dfsu._layered.Dfsu2DV.type_name">type_name (mikeio.dfsu._layered.Dfsu2DV property)</a>
+
+      <ul>
+        <li><a href="dfsu-3d.html#mikeio.dfsu._layered.Dfsu3D.type_name">(mikeio.dfsu._layered.Dfsu3D property)</a>
+</li>
+        <li><a href="dfsu-spectral.html#mikeio.dfsu._spectral.DfsuSpectral.type_name">(mikeio.dfsu._spectral.DfsuSpectral property)</a>
+</li>
+        <li><a href="dfsu-2d.html#mikeio.dfsu.Dfsu2DH.type_name">(mikeio.dfsu.Dfsu2DH property)</a>
+</li>
         <li><a href="mesh.html#mikeio.Mesh.type_name">(mikeio.Mesh property)</a>
+</li>
+        <li><a href="mesh.html#mikeio.spatial._FM_geometry.GeometryFM.type_name">(mikeio.spatial._FM_geometry.GeometryFM property)</a>
+</li>
+        <li><a href="dfsu-spectral.html#mikeio.spatial._FM_geometry.GeometryFMAreaSpectrum.type_name">(mikeio.spatial._FM_geometry.GeometryFMAreaSpectrum property)</a>
+</li>
+        <li><a href="dfsu-spectral.html#mikeio.spatial._FM_geometry.GeometryFMLineSpectrum.type_name">(mikeio.spatial._FM_geometry.GeometryFMLineSpectrum property)</a>
+</li>
+        <li><a href="dfsu-spectral.html#mikeio.spatial._FM_geometry.GeometryFMPointSpectrum.type_name">(mikeio.spatial._FM_geometry.GeometryFMPointSpectrum property)</a>
+</li>
+        <li><a href="dfsu-2d.html#mikeio.spatial.GeometryFM2D.type_name">(mikeio.spatial.GeometryFM2D property)</a>
 </li>
       </ul></li>
   </ul></td>
@@ -1140,26 +1899,22 @@
 <h2 id="U">U</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="dataarray.html#mikeio.DataArray.unit">unit (mikeio.DataArray property)</a>, <a href="dfs-overview.html#mikeio.DataArray.unit">[1]</a>
+      <li><a href="dataarray.html#mikeio.DataArray.unit">unit (mikeio.DataArray property)</a>
 </li>
       <li><a href="eum.html#mikeio.eum.EUMType.units">units (mikeio.eum.EUMType property)</a>
-
-      <ul>
-        <li><a href="dfs-overview.html#mikeio.EUMType.units">(mikeio.EUMType property)</a>
 </li>
-      </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="pfs.html#mikeio.PfsDocument.update">update() (mikeio.PfsDocument method)</a>
 
       <ul>
         <li><a href="pfs.html#mikeio.PfsSection.update">(mikeio.PfsSection method)</a>
 </li>
       </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="pfs.html#mikeio.PfsDocument.update_recursive">update_recursive() (mikeio.PfsDocument method)</a>
 
       <ul>
-        <li><a href="dfs-overview.html#mikeio.PfsSection.update_recursive">(mikeio.PfsSection method)</a>, <a href="pfs.html#mikeio.PfsSection.update_recursive">[1]</a>
+        <li><a href="pfs.html#mikeio.PfsSection.update_recursive">(mikeio.PfsSection method)</a>
 </li>
       </ul></li>
   </ul></td>
@@ -1168,24 +1923,30 @@
 <h2 id="V">V</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="dfsu-2d.html#mikeio.dfsu.Dfsu2DH.valid_codes">valid_codes (mikeio.dfsu.Dfsu2DH property)</a>
+      <li><a href="dfsu-2dv-vertical-profile.html#mikeio.dfsu._layered.Dfsu2DV.valid_codes">valid_codes (mikeio.dfsu._layered.Dfsu2DV property)</a>
 
       <ul>
-        <li><a href="mesh.html#mikeio.Mesh.valid_codes">(mikeio.Mesh property)</a>
+        <li><a href="dfsu-3d.html#mikeio.dfsu._layered.Dfsu3D.valid_codes">(mikeio.dfsu._layered.Dfsu3D property)</a>
 </li>
-      </ul></li>
-      <li><a href="dataarray.html#mikeio.DataArray.values">values (mikeio.DataArray property)</a>, <a href="dfs-overview.html#mikeio.DataArray.values">[1]</a>
-
-      <ul>
-        <li><a href="dataset.html#mikeio.Dataset.values">(mikeio.Dataset property)</a>, <a href="dfs-overview.html#mikeio.Dataset.values">[1]</a>
+        <li><a href="dfsu-spectral.html#mikeio.dfsu._spectral.DfsuSpectral.valid_codes">(mikeio.dfsu._spectral.DfsuSpectral property)</a>
+</li>
+        <li><a href="dfsu-2d.html#mikeio.dfsu.Dfsu2DH.valid_codes">(mikeio.dfsu.Dfsu2DH property)</a>
+</li>
+        <li><a href="mesh.html#mikeio.Mesh.valid_codes">(mikeio.Mesh property)</a>
 </li>
       </ul></li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="dfs-overview.html#mikeio.PfsDocument.values">values() (mikeio.PfsDocument method)</a>, <a href="pfs.html#mikeio.PfsDocument.values">[1]</a>
+      <li><a href="dataarray.html#mikeio.DataArray.values">values (mikeio.DataArray property)</a>
 
       <ul>
-        <li><a href="dfs-overview.html#mikeio.PfsSection.values">(mikeio.PfsSection method)</a>, <a href="pfs.html#mikeio.PfsSection.values">[1]</a>
+        <li><a href="dataset.html#mikeio.Dataset.values">(mikeio.Dataset property)</a>
+</li>
+      </ul></li>
+      <li><a href="pfs.html#mikeio.PfsDocument.values">values() (mikeio.PfsDocument method)</a>
+
+      <ul>
+        <li><a href="pfs.html#mikeio.PfsSection.values">(mikeio.PfsSection method)</a>
 </li>
       </ul></li>
   </ul></td>
@@ -1203,29 +1964,43 @@
 </li>
         <li><a href="dfs3.html#mikeio.Dfs3.write">(mikeio.Dfs3 method)</a>
 </li>
+        <li><a href="dfsu-2dv-vertical-profile.html#mikeio.dfsu._layered.Dfsu2DV.write">(mikeio.dfsu._layered.Dfsu2DV method)</a>
+</li>
+        <li><a href="dfsu-3d.html#mikeio.dfsu._layered.Dfsu3D.write">(mikeio.dfsu._layered.Dfsu3D method)</a>
+</li>
+        <li><a href="dfsu-spectral.html#mikeio.dfsu._spectral.DfsuSpectral.write">(mikeio.dfsu._spectral.DfsuSpectral method)</a>
+</li>
         <li><a href="dfsu-2d.html#mikeio.dfsu.Dfsu2DH.write">(mikeio.dfsu.Dfsu2DH method)</a>
 </li>
-        <li><a href="dfs-overview.html#mikeio.Mesh.write">(mikeio.Mesh method)</a>, <a href="mesh.html#mikeio.Mesh.write">[1]</a>
+        <li><a href="mesh.html#mikeio.Mesh.write">(mikeio.Mesh method)</a>
 </li>
-        <li><a href="dfs-overview.html#mikeio.PfsDocument.write">(mikeio.PfsDocument method)</a>, <a href="pfs.html#mikeio.PfsDocument.write">[1]</a>
+        <li><a href="pfs.html#mikeio.PfsDocument.write">(mikeio.PfsDocument method)</a>
 </li>
       </ul></li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="dfsu-2d.html#mikeio.dfsu.Dfsu2DH.write_header">write_header() (mikeio.dfsu.Dfsu2DH method)</a>
+      <li><a href="dfsu-2dv-vertical-profile.html#mikeio.dfsu._layered.Dfsu2DV.write_header">write_header() (mikeio.dfsu._layered.Dfsu2DV method)</a>
+
+      <ul>
+        <li><a href="dfsu-3d.html#mikeio.dfsu._layered.Dfsu3D.write_header">(mikeio.dfsu._layered.Dfsu3D method)</a>
 </li>
+        <li><a href="dfsu-spectral.html#mikeio.dfsu._spectral.DfsuSpectral.write_header">(mikeio.dfsu._spectral.DfsuSpectral method)</a>
+</li>
+        <li><a href="dfsu-2d.html#mikeio.dfsu.Dfsu2DH.write_header">(mikeio.dfsu.Dfsu2DH method)</a>
+</li>
+      </ul></li>
   </ul></td>
 </tr></table>
 
 <h2 id="X">X</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="dfs-overview.html#mikeio.Grid1D.x">x (mikeio.Grid1D property)</a>, <a href="dfs1.html#mikeio.Grid1D.x">[1]</a>
+      <li><a href="dfs1.html#mikeio.Grid1D.x">x (mikeio.Grid1D property)</a>
 
       <ul>
-        <li><a href="dfs-overview.html#mikeio.Grid2D.x">(mikeio.Grid2D property)</a>, <a href="dfs2.html#mikeio.Grid2D.x">[1]</a>
+        <li><a href="dfs2.html#mikeio.Grid2D.x">(mikeio.Grid2D property)</a>
 </li>
-        <li><a href="dfs-overview.html#mikeio.Grid3D.x">(mikeio.Grid3D property)</a>, <a href="dfs3.html#mikeio.Grid3D.x">[1]</a>
+        <li><a href="dfs3.html#mikeio.Grid3D.x">(mikeio.Grid3D property)</a>
 </li>
       </ul></li>
   </ul></td>
@@ -1236,7 +2011,7 @@
         <li><a href="dfs2.html#mikeio.Dfs2.x0">(mikeio.Dfs2 property)</a>
 </li>
       </ul></li>
-      <li><a href="dfs-overview.html#mikeio.Grid2D.xy">xy (mikeio.Grid2D property)</a>, <a href="dfs2.html#mikeio.Grid2D.xy">[1]</a>
+      <li><a href="dfs2.html#mikeio.Grid2D.xy">xy (mikeio.Grid2D property)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -1244,10 +2019,10 @@
 <h2 id="Y">Y</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="dfs-overview.html#mikeio.Grid2D.y">y (mikeio.Grid2D property)</a>, <a href="dfs2.html#mikeio.Grid2D.y">[1]</a>
+      <li><a href="dfs2.html#mikeio.Grid2D.y">y (mikeio.Grid2D property)</a>
 
       <ul>
-        <li><a href="dfs-overview.html#mikeio.Grid3D.y">(mikeio.Grid3D property)</a>, <a href="dfs3.html#mikeio.Grid3D.y">[1]</a>
+        <li><a href="dfs3.html#mikeio.Grid3D.y">(mikeio.Grid3D property)</a>
 </li>
       </ul></li>
   </ul></td>
@@ -1260,11 +2035,11 @@
 <h2 id="Z">Z</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="dfs-overview.html#mikeio.Grid3D.z">z (mikeio.Grid3D property)</a>, <a href="dfs3.html#mikeio.Grid3D.z">[1]</a>
+      <li><a href="dfs3.html#mikeio.Grid3D.z">z (mikeio.Grid3D property)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="dfs-overview.html#mikeio.Mesh.zn">zn (mikeio.Mesh property)</a>, <a href="mesh.html#mikeio.Mesh.zn">[1]</a>
+      <li><a href="mesh.html#mikeio.Mesh.zn">zn (mikeio.Mesh property)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -1278,7 +2053,7 @@
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2022, Henrik Andersson, Jesper Mariegaard, Marc Ridler,.</p>
+    <p>&#169; Copyright 2023, DHI.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

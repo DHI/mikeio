@@ -20,7 +20,7 @@
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="Dfsu Spectral" href="dfsu-spectral.html" />
-    <link rel="prev" title="Dfsu 3D" href="dfsu-3d.html" /> 
+    <link rel="prev" title="Dfsu 1DV Vertical Column" href="dfsu-1dv-vertical-column.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -58,11 +58,98 @@
 <li class="toctree-l1"><a class="reference internal" href="mesh.html">Mesh</a></li>
 <li class="toctree-l1"><a class="reference internal" href="dfsu-2d.html">Dfsu 2D</a></li>
 <li class="toctree-l1"><a class="reference internal" href="dfsu-3d.html">Dfsu 3D</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dfsu-1dv-vertical-column.html">Dfsu 1DV Vertical Column</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Dfsu 2DV Vertical Profile</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#vertical-profile-dfsu-example-notebooks">Vertical Profile Dfsu example notebooks</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#dfsu-2dv-vertical-profile-api">Dfsu 2DV Vertical Profile API</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#fm-geometry-2dv-vertical-profile-api">FM Geometry 2DV Vertical Profile API</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#dataarray-plotter-fm-vertical-profile-api">DataArray Plotter FM Vertical Profile API</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#dfsu-2dv-vertical-profile-api">Dfsu 2DV Vertical Profile API</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#mikeio.dfsu._layered.Dfsu2DV"><code class="docutils literal notranslate"><span class="pre">Dfsu2DV</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.dfsu._layered.Dfsu2DV.append"><code class="docutils literal notranslate"><span class="pre">Dfsu2DV.append()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.dfsu._layered.Dfsu2DV.bottom_elements"><code class="docutils literal notranslate"><span class="pre">Dfsu2DV.bottom_elements</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.dfsu._layered.Dfsu2DV.boundary_codes"><code class="docutils literal notranslate"><span class="pre">Dfsu2DV.boundary_codes</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.dfsu._layered.Dfsu2DV.boundary_polylines"><code class="docutils literal notranslate"><span class="pre">Dfsu2DV.boundary_polylines</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.dfsu._layered.Dfsu2DV.close"><code class="docutils literal notranslate"><span class="pre">Dfsu2DV.close()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.dfsu._layered.Dfsu2DV.contains"><code class="docutils literal notranslate"><span class="pre">Dfsu2DV.contains()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.dfsu._layered.Dfsu2DV.deletevalue"><code class="docutils literal notranslate"><span class="pre">Dfsu2DV.deletevalue</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.dfsu._layered.Dfsu2DV.e2_e3_table"><code class="docutils literal notranslate"><span class="pre">Dfsu2DV.e2_e3_table</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.dfsu._layered.Dfsu2DV.elem2d_ids"><code class="docutils literal notranslate"><span class="pre">Dfsu2DV.elem2d_ids</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.dfsu._layered.Dfsu2DV.element_coordinates"><code class="docutils literal notranslate"><span class="pre">Dfsu2DV.element_coordinates</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.dfsu._layered.Dfsu2DV.element_table"><code class="docutils literal notranslate"><span class="pre">Dfsu2DV.element_table</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.dfsu._layered.Dfsu2DV.end_time"><code class="docutils literal notranslate"><span class="pre">Dfsu2DV.end_time</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.dfsu._layered.Dfsu2DV.get_element_area"><code class="docutils literal notranslate"><span class="pre">Dfsu2DV.get_element_area()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.dfsu._layered.Dfsu2DV.get_layer_elements"><code class="docutils literal notranslate"><span class="pre">Dfsu2DV.get_layer_elements()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.dfsu._layered.Dfsu2DV.get_node_centered_data"><code class="docutils literal notranslate"><span class="pre">Dfsu2DV.get_node_centered_data()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.dfsu._layered.Dfsu2DV.get_node_coords"><code class="docutils literal notranslate"><span class="pre">Dfsu2DV.get_node_coords()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.dfsu._layered.Dfsu2DV.get_overset_grid"><code class="docutils literal notranslate"><span class="pre">Dfsu2DV.get_overset_grid()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.dfsu._layered.Dfsu2DV.is_2d"><code class="docutils literal notranslate"><span class="pre">Dfsu2DV.is_2d</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.dfsu._layered.Dfsu2DV.is_geo"><code class="docutils literal notranslate"><span class="pre">Dfsu2DV.is_geo</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.dfsu._layered.Dfsu2DV.is_layered"><code class="docutils literal notranslate"><span class="pre">Dfsu2DV.is_layered</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.dfsu._layered.Dfsu2DV.is_local_coordinates"><code class="docutils literal notranslate"><span class="pre">Dfsu2DV.is_local_coordinates</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.dfsu._layered.Dfsu2DV.is_spectral"><code class="docutils literal notranslate"><span class="pre">Dfsu2DV.is_spectral</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.dfsu._layered.Dfsu2DV.is_tri_only"><code class="docutils literal notranslate"><span class="pre">Dfsu2DV.is_tri_only</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.dfsu._layered.Dfsu2DV.items"><code class="docutils literal notranslate"><span class="pre">Dfsu2DV.items</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.dfsu._layered.Dfsu2DV.layer_ids"><code class="docutils literal notranslate"><span class="pre">Dfsu2DV.layer_ids</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.dfsu._layered.Dfsu2DV.max_nodes_per_element"><code class="docutils literal notranslate"><span class="pre">Dfsu2DV.max_nodes_per_element</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.dfsu._layered.Dfsu2DV.n_elements"><code class="docutils literal notranslate"><span class="pre">Dfsu2DV.n_elements</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.dfsu._layered.Dfsu2DV.n_items"><code class="docutils literal notranslate"><span class="pre">Dfsu2DV.n_items</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.dfsu._layered.Dfsu2DV.n_layers"><code class="docutils literal notranslate"><span class="pre">Dfsu2DV.n_layers</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.dfsu._layered.Dfsu2DV.n_layers_per_column"><code class="docutils literal notranslate"><span class="pre">Dfsu2DV.n_layers_per_column</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.dfsu._layered.Dfsu2DV.n_nodes"><code class="docutils literal notranslate"><span class="pre">Dfsu2DV.n_nodes</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.dfsu._layered.Dfsu2DV.n_sigma_layers"><code class="docutils literal notranslate"><span class="pre">Dfsu2DV.n_sigma_layers</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.dfsu._layered.Dfsu2DV.n_timesteps"><code class="docutils literal notranslate"><span class="pre">Dfsu2DV.n_timesteps</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.dfsu._layered.Dfsu2DV.n_z_layers"><code class="docutils literal notranslate"><span class="pre">Dfsu2DV.n_z_layers</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.dfsu._layered.Dfsu2DV.node_coordinates"><code class="docutils literal notranslate"><span class="pre">Dfsu2DV.node_coordinates</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.dfsu._layered.Dfsu2DV.plot_vertical_profile"><code class="docutils literal notranslate"><span class="pre">Dfsu2DV.plot_vertical_profile()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.dfsu._layered.Dfsu2DV.projection_string"><code class="docutils literal notranslate"><span class="pre">Dfsu2DV.projection_string</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.dfsu._layered.Dfsu2DV.read"><code class="docutils literal notranslate"><span class="pre">Dfsu2DV.read()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.dfsu._layered.Dfsu2DV.start_time"><code class="docutils literal notranslate"><span class="pre">Dfsu2DV.start_time</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.dfsu._layered.Dfsu2DV.time"><code class="docutils literal notranslate"><span class="pre">Dfsu2DV.time</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.dfsu._layered.Dfsu2DV.timestep"><code class="docutils literal notranslate"><span class="pre">Dfsu2DV.timestep</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.dfsu._layered.Dfsu2DV.to_mesh"><code class="docutils literal notranslate"><span class="pre">Dfsu2DV.to_mesh()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.dfsu._layered.Dfsu2DV.to_shapely"><code class="docutils literal notranslate"><span class="pre">Dfsu2DV.to_shapely()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.dfsu._layered.Dfsu2DV.top_elements"><code class="docutils literal notranslate"><span class="pre">Dfsu2DV.top_elements</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.dfsu._layered.Dfsu2DV.type_name"><code class="docutils literal notranslate"><span class="pre">Dfsu2DV.type_name</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.dfsu._layered.Dfsu2DV.valid_codes"><code class="docutils literal notranslate"><span class="pre">Dfsu2DV.valid_codes</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.dfsu._layered.Dfsu2DV.write"><code class="docutils literal notranslate"><span class="pre">Dfsu2DV.write()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.dfsu._layered.Dfsu2DV.write_header"><code class="docutils literal notranslate"><span class="pre">Dfsu2DV.write_header()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#fm-geometry-2dv-vertical-profile-api">FM Geometry 2DV Vertical Profile API</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#mikeio.spatial._FM_geometry_layered.GeometryFMVerticalProfile"><code class="docutils literal notranslate"><span class="pre">GeometryFMVerticalProfile</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.spatial._FM_geometry_layered.GeometryFMVerticalProfile.bottom_elements"><code class="docutils literal notranslate"><span class="pre">GeometryFMVerticalProfile.bottom_elements</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.spatial._FM_geometry_layered.GeometryFMVerticalProfile.codes"><code class="docutils literal notranslate"><span class="pre">GeometryFMVerticalProfile.codes</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.spatial._FM_geometry_layered.GeometryFMVerticalProfile.e2_e3_table"><code class="docutils literal notranslate"><span class="pre">GeometryFMVerticalProfile.e2_e3_table</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.spatial._FM_geometry_layered.GeometryFMVerticalProfile.elem2d_ids"><code class="docutils literal notranslate"><span class="pre">GeometryFMVerticalProfile.elem2d_ids</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.spatial._FM_geometry_layered.GeometryFMVerticalProfile.element_coordinates"><code class="docutils literal notranslate"><span class="pre">GeometryFMVerticalProfile.element_coordinates</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.spatial._FM_geometry_layered.GeometryFMVerticalProfile.get_layer_elements"><code class="docutils literal notranslate"><span class="pre">GeometryFMVerticalProfile.get_layer_elements()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.spatial._FM_geometry_layered.GeometryFMVerticalProfile.get_nearest_relative_distance"><code class="docutils literal notranslate"><span class="pre">GeometryFMVerticalProfile.get_nearest_relative_distance()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.spatial._FM_geometry_layered.GeometryFMVerticalProfile.is_geo"><code class="docutils literal notranslate"><span class="pre">GeometryFMVerticalProfile.is_geo</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.spatial._FM_geometry_layered.GeometryFMVerticalProfile.is_local_coordinates"><code class="docutils literal notranslate"><span class="pre">GeometryFMVerticalProfile.is_local_coordinates</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.spatial._FM_geometry_layered.GeometryFMVerticalProfile.layer_ids"><code class="docutils literal notranslate"><span class="pre">GeometryFMVerticalProfile.layer_ids</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.spatial._FM_geometry_layered.GeometryFMVerticalProfile.max_nodes_per_element"><code class="docutils literal notranslate"><span class="pre">GeometryFMVerticalProfile.max_nodes_per_element</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.spatial._FM_geometry_layered.GeometryFMVerticalProfile.n_elements"><code class="docutils literal notranslate"><span class="pre">GeometryFMVerticalProfile.n_elements</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.spatial._FM_geometry_layered.GeometryFMVerticalProfile.n_layers"><code class="docutils literal notranslate"><span class="pre">GeometryFMVerticalProfile.n_layers</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.spatial._FM_geometry_layered.GeometryFMVerticalProfile.n_layers_per_column"><code class="docutils literal notranslate"><span class="pre">GeometryFMVerticalProfile.n_layers_per_column</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.spatial._FM_geometry_layered.GeometryFMVerticalProfile.n_nodes"><code class="docutils literal notranslate"><span class="pre">GeometryFMVerticalProfile.n_nodes</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.spatial._FM_geometry_layered.GeometryFMVerticalProfile.n_sigma_layers"><code class="docutils literal notranslate"><span class="pre">GeometryFMVerticalProfile.n_sigma_layers</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.spatial._FM_geometry_layered.GeometryFMVerticalProfile.n_z_layers"><code class="docutils literal notranslate"><span class="pre">GeometryFMVerticalProfile.n_z_layers</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.spatial._FM_geometry_layered.GeometryFMVerticalProfile.projection"><code class="docutils literal notranslate"><span class="pre">GeometryFMVerticalProfile.projection</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.spatial._FM_geometry_layered.GeometryFMVerticalProfile.projection_string"><code class="docutils literal notranslate"><span class="pre">GeometryFMVerticalProfile.projection_string</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.spatial._FM_geometry_layered.GeometryFMVerticalProfile.to_2d_geometry"><code class="docutils literal notranslate"><span class="pre">GeometryFMVerticalProfile.to_2d_geometry()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.spatial._FM_geometry_layered.GeometryFMVerticalProfile.top_elements"><code class="docutils literal notranslate"><span class="pre">GeometryFMVerticalProfile.top_elements</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#dataarray-plotter-fm-vertical-profile-api">DataArray Plotter FM Vertical Profile API</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#mikeio.dataset._data_plot._DataArrayPlotterFMVerticalProfile"><code class="docutils literal notranslate"><span class="pre">_DataArrayPlotterFMVerticalProfile</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.dataset._data_plot._DataArrayPlotterFMVerticalProfile.hist"><code class="docutils literal notranslate"><span class="pre">_DataArrayPlotterFMVerticalProfile.hist()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#mikeio.dataset._data_plot._DataArrayPlotterFMVerticalProfile.line"><code class="docutils literal notranslate"><span class="pre">_DataArrayPlotterFMVerticalProfile.line()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="dfsu-spectral.html">Dfsu Spectral</a></li>
@@ -97,14 +184,44 @@
              
   <section id="dfsu-2dv-vertical-profile">
 <h1>Dfsu 2DV Vertical Profile<a class="headerlink" href="#dfsu-2dv-vertical-profile" title="Link to this heading"></a></h1>
-<p>In addition to the common <a class="reference internal" href="#./dfu-mesh-overview.md#mike-io-flexible-mesh-geometry"><span class="xref myst">dfsu-geometry properties and methods</span></a>, Dfsu2DV has the below additional <em>properties</em> (from it’s geometry <a class="reference internal" href="#GeometryFMVerticalProfile"><span class="xref myst">GeometryFMVerticalProfile</span></a>):</p>
+<p>In addition to the common [dfsu-geometry properties and methods](MIKE IO Flexible Mesh Geometry), Dfsu2DV has the below additional <em>properties</em> (from it’s geometry <a class="reference internal" href="#mikeio.spatial._FM_geometry_layered.GeometryFMVerticalProfile" title="mikeio.spatial._FM_geometry_layered.GeometryFMVerticalProfile"><span class="xref myst py py-class">GeometryFMVerticalProfile</span></a>):</p>
 <table class="autosummary longtable docutils align-default">
 <tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#mikeio.dfsu._layered.Dfsu2DV.n_layers" title="mikeio.dfsu._layered.Dfsu2DV.n_layers"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mikeio.dfsu._layered.Dfsu2DV.n_layers</span></code></a></p></td>
+<td><p>Maximum number of layers</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#mikeio.dfsu._layered.Dfsu2DV.n_sigma_layers" title="mikeio.dfsu._layered.Dfsu2DV.n_sigma_layers"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mikeio.dfsu._layered.Dfsu2DV.n_sigma_layers</span></code></a></p></td>
+<td><p>Number of sigma layers</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#mikeio.dfsu._layered.Dfsu2DV.n_z_layers" title="mikeio.dfsu._layered.Dfsu2DV.n_z_layers"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mikeio.dfsu._layered.Dfsu2DV.n_z_layers</span></code></a></p></td>
+<td><p>Maximum number of z-layers</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#mikeio.dfsu._layered.Dfsu2DV.layer_ids" title="mikeio.dfsu._layered.Dfsu2DV.layer_ids"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mikeio.dfsu._layered.Dfsu2DV.layer_ids</span></code></a></p></td>
+<td><p>The layer number (0=bottom, 1, 2, ...) for each 3d element</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#mikeio.dfsu._layered.Dfsu2DV.top_elements" title="mikeio.dfsu._layered.Dfsu2DV.top_elements"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mikeio.dfsu._layered.Dfsu2DV.top_elements</span></code></a></p></td>
+<td><p>List of 3d element ids of surface layer</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#mikeio.dfsu._layered.Dfsu2DV.bottom_elements" title="mikeio.dfsu._layered.Dfsu2DV.bottom_elements"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mikeio.dfsu._layered.Dfsu2DV.bottom_elements</span></code></a></p></td>
+<td><p>List of 3d element ids of bottom layer</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#mikeio.dfsu._layered.Dfsu2DV.n_layers_per_column" title="mikeio.dfsu._layered.Dfsu2DV.n_layers_per_column"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mikeio.dfsu._layered.Dfsu2DV.n_layers_per_column</span></code></a></p></td>
+<td><p>List of number of layers for each column</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#mikeio.dfsu._layered.Dfsu2DV.e2_e3_table" title="mikeio.dfsu._layered.Dfsu2DV.e2_e3_table"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mikeio.dfsu._layered.Dfsu2DV.e2_e3_table</span></code></a></p></td>
+<td><p>The 2d-to-3d element connectivity table for a 3d object</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#mikeio.dfsu._layered.Dfsu2DV.elem2d_ids" title="mikeio.dfsu._layered.Dfsu2DV.elem2d_ids"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mikeio.dfsu._layered.Dfsu2DV.elem2d_ids</span></code></a></p></td>
+<td><p>The associated 2d element id for each 3d element</p></td>
+</tr>
 </tbody>
 </table>
 <p>And in addition to the basic dfsu functionality, Dfsu2DV has the below additional <em>methods</em>:</p>
 <table class="autosummary longtable docutils align-default">
 <tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#mikeio.dfsu._layered.Dfsu2DV.get_layer_elements" title="mikeio.dfsu._layered.Dfsu2DV.get_layer_elements"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mikeio.dfsu._layered.Dfsu2DV.get_layer_elements</span></code></a></p></td>
+<td><p>3d element ids for one (or more) specific layer(s)</p></td>
+</tr>
 </tbody>
 </table>
 <div class="admonition warning">
@@ -119,13 +236,664 @@
 </section>
 <section id="dfsu-2dv-vertical-profile-api">
 <h2>Dfsu 2DV Vertical Profile API<a class="headerlink" href="#dfsu-2dv-vertical-profile-api" title="Link to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="mikeio.dfsu._layered.Dfsu2DV">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mikeio.dfsu._layered.</span></span><span class="sig-name descname"><span class="pre">Dfsu2DV</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dfs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mikeio/dfsu/_layered.html#Dfsu2DV"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mikeio.dfsu._layered.Dfsu2DV" title="Link to this definition"></a></dt>
+<dd><dl class="py method">
+<dt class="sig sig-object py" id="mikeio.dfsu._layered.Dfsu2DV.append">
+<span class="sig-name descname"><span class="pre">append</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.dfsu._layered.Dfsu2DV.append" title="Link to this definition"></a></dt>
+<dd><p>Append to a dfsu file opened with <cite>write(…,keep_open=True)</cite></p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>data</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">list[np.array]</span></code> or <code class="xref py py-class docutils literal notranslate"><span class="pre">Dataset</span></code>) – list of matrices, one for each item. Matrix dimension: time, x</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mikeio.dfsu._layered.Dfsu2DV.bottom_elements">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">bottom_elements</span></span><a class="headerlink" href="#mikeio.dfsu._layered.Dfsu2DV.bottom_elements" title="Link to this definition"></a></dt>
+<dd><p>List of 3d element ids of bottom layer</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mikeio.dfsu._layered.Dfsu2DV.boundary_codes">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">boundary_codes</span></span><a class="headerlink" href="#mikeio.dfsu._layered.Dfsu2DV.boundary_codes" title="Link to this definition"></a></dt>
+<dd><p>Unique list of boundary codes</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mikeio.dfsu._layered.Dfsu2DV.boundary_polylines">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">boundary_polylines</span></span><a class="headerlink" href="#mikeio.dfsu._layered.Dfsu2DV.boundary_polylines" title="Link to this definition"></a></dt>
+<dd><p>Lists of closed polylines defining domain outline</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mikeio.dfsu._layered.Dfsu2DV.close">
+<span class="sig-name descname"><span class="pre">close</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.dfsu._layered.Dfsu2DV.close" title="Link to this definition"></a></dt>
+<dd><p>Finalize write for a dfsu file opened with <cite>write(…,keep_open=True)</cite></p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mikeio.dfsu._layered.Dfsu2DV.contains">
+<span class="sig-name descname"><span class="pre">contains</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">points</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.dfsu._layered.Dfsu2DV.contains" title="Link to this definition"></a></dt>
+<dd><p>test if a list of points are contained by mesh</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>points</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">array-like</span> <span class="pre">n-by-2</span></code>) – x,y-coordinates of n points to be tested</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span> <span class="pre">array</span></code> – True for points inside, False otherwise</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mikeio.dfsu._layered.Dfsu2DV.deletevalue">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">deletevalue</span></span><a class="headerlink" href="#mikeio.dfsu._layered.Dfsu2DV.deletevalue" title="Link to this definition"></a></dt>
+<dd><p>File delete value</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mikeio.dfsu._layered.Dfsu2DV.e2_e3_table">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">e2_e3_table</span></span><a class="headerlink" href="#mikeio.dfsu._layered.Dfsu2DV.e2_e3_table" title="Link to this definition"></a></dt>
+<dd><p>The 2d-to-3d element connectivity table for a 3d object</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mikeio.dfsu._layered.Dfsu2DV.elem2d_ids">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">elem2d_ids</span></span><a class="headerlink" href="#mikeio.dfsu._layered.Dfsu2DV.elem2d_ids" title="Link to this definition"></a></dt>
+<dd><p>The associated 2d element id for each 3d element</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mikeio.dfsu._layered.Dfsu2DV.element_coordinates">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">element_coordinates</span></span><a class="headerlink" href="#mikeio.dfsu._layered.Dfsu2DV.element_coordinates" title="Link to this definition"></a></dt>
+<dd><p>Center coordinates of each element</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mikeio.dfsu._layered.Dfsu2DV.element_table">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">element_table</span></span><a class="headerlink" href="#mikeio.dfsu._layered.Dfsu2DV.element_table" title="Link to this definition"></a></dt>
+<dd><p>Element to node connectivity</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mikeio.dfsu._layered.Dfsu2DV.end_time">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">end_time</span></span><a class="headerlink" href="#mikeio.dfsu._layered.Dfsu2DV.end_time" title="Link to this definition"></a></dt>
+<dd><p>File end time</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mikeio.dfsu._layered.Dfsu2DV.get_element_area">
+<span class="sig-name descname"><span class="pre">get_element_area</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.dfsu._layered.Dfsu2DV.get_element_area" title="Link to this definition"></a></dt>
+<dd><p>Calculate the horizontal area of each element.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">np.array(float)</span></code> – areas in m2</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mikeio.dfsu._layered.Dfsu2DV.get_layer_elements">
+<span class="sig-name descname"><span class="pre">get_layer_elements</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">layers</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">layer</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.dfsu._layered.Dfsu2DV.get_layer_elements" title="Link to this definition"></a></dt>
+<dd><p>3d element ids for one (or more) specific layer(s)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>layers</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a> or <code class="xref py py-class docutils literal notranslate"><span class="pre">list(int)</span></code>) – layer between 0 (bottom) and n_layers-1 (top)
+(can also be negative counting from -1 at the top layer)</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">np.array(int)</span></code> – element ids</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mikeio.dfsu._layered.Dfsu2DV.get_node_centered_data">
+<span class="sig-name descname"><span class="pre">get_node_centered_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">extrapolate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.dfsu._layered.Dfsu2DV.get_node_centered_data" title="Link to this definition"></a></dt>
+<dd><p>convert cell-centered data to node-centered by pseudo-laplacian method</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>data</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">np.array(float)</span></code>) – cell-centered data</p></li>
+<li><p><strong>extrapolate</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a>, <em>optional</em>) – allow the method to extrapolate, default:True</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">np.array(float)</span></code> – node-centered data</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mikeio.dfsu._layered.Dfsu2DV.get_node_coords">
+<span class="sig-name descname"><span class="pre">get_node_coords</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">code</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.dfsu._layered.Dfsu2DV.get_node_coords" title="Link to this definition"></a></dt>
+<dd><p>Get the coordinates of each node.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>code</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>) – Get only nodes with specific code, e.g. land == 1</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">np.array</span></code> – x,y,z of each node</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mikeio.dfsu._layered.Dfsu2DV.get_overset_grid">
+<span class="sig-name descname"><span class="pre">get_overset_grid</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dx</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dy</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nx</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ny</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">buffer</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.dfsu._layered.Dfsu2DV.get_overset_grid" title="Link to this definition"></a></dt>
+<dd><p>get a 2d grid that covers the domain by specifying spacing or shape</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>dx</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a>, <em>optional</em>) – grid resolution in x-direction (or in x- and y-direction)</p></li>
+<li><p><strong>dy</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a>, <em>optional</em>) – grid resolution in y-direction</p></li>
+<li><p><strong>nx</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>, <em>optional</em>) – number of points in x-direction,
+by default None (the value will be inferred)</p></li>
+<li><p><strong>ny</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>, <em>optional</em>) – number of points in y-direction,
+by default None (the value will be inferred)</p></li>
+<li><p><strong>buffer</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a>, <em>optional</em>) – positive to make the area larger, default=0
+can be set to a small negative value to avoid NaN
+values all around the domain.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">&lt;mikeio.Grid2D&gt;</span></code> – 2d grid</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mikeio.dfsu._layered.Dfsu2DV.is_2d">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">is_2d</span></span><a class="headerlink" href="#mikeio.dfsu._layered.Dfsu2DV.is_2d" title="Link to this definition"></a></dt>
+<dd><p>Type is either mesh or Dfsu2D (2 horizontal dimensions)</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mikeio.dfsu._layered.Dfsu2DV.is_geo">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">is_geo</span></span><a class="headerlink" href="#mikeio.dfsu._layered.Dfsu2DV.is_geo" title="Link to this definition"></a></dt>
+<dd><p>Are coordinates geographical (LONG/LAT)?</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mikeio.dfsu._layered.Dfsu2DV.is_layered">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">is_layered</span></span><a class="headerlink" href="#mikeio.dfsu._layered.Dfsu2DV.is_layered" title="Link to this definition"></a></dt>
+<dd><p>Type is layered dfsu (3d, vertical profile or vertical column)</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mikeio.dfsu._layered.Dfsu2DV.is_local_coordinates">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">is_local_coordinates</span></span><a class="headerlink" href="#mikeio.dfsu._layered.Dfsu2DV.is_local_coordinates" title="Link to this definition"></a></dt>
+<dd><p>Are coordinates relative (NON-UTM)?</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mikeio.dfsu._layered.Dfsu2DV.is_spectral">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">is_spectral</span></span><a class="headerlink" href="#mikeio.dfsu._layered.Dfsu2DV.is_spectral" title="Link to this definition"></a></dt>
+<dd><p>Type is spectral dfsu (point, line or area spectrum)</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mikeio.dfsu._layered.Dfsu2DV.is_tri_only">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">is_tri_only</span></span><a class="headerlink" href="#mikeio.dfsu._layered.Dfsu2DV.is_tri_only" title="Link to this definition"></a></dt>
+<dd><p>Does the mesh consist of triangles only?</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mikeio.dfsu._layered.Dfsu2DV.items">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">items</span></span><a class="headerlink" href="#mikeio.dfsu._layered.Dfsu2DV.items" title="Link to this definition"></a></dt>
+<dd><p>List of items</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mikeio.dfsu._layered.Dfsu2DV.layer_ids">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">layer_ids</span></span><a class="headerlink" href="#mikeio.dfsu._layered.Dfsu2DV.layer_ids" title="Link to this definition"></a></dt>
+<dd><p>The layer number (0=bottom, 1, 2, …) for each 3d element</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mikeio.dfsu._layered.Dfsu2DV.max_nodes_per_element">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">max_nodes_per_element</span></span><a class="headerlink" href="#mikeio.dfsu._layered.Dfsu2DV.max_nodes_per_element" title="Link to this definition"></a></dt>
+<dd><p>The maximum number of nodes for an element</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mikeio.dfsu._layered.Dfsu2DV.n_elements">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">n_elements</span></span><a class="headerlink" href="#mikeio.dfsu._layered.Dfsu2DV.n_elements" title="Link to this definition"></a></dt>
+<dd><p>Number of elements</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mikeio.dfsu._layered.Dfsu2DV.n_items">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">n_items</span></span><a class="headerlink" href="#mikeio.dfsu._layered.Dfsu2DV.n_items" title="Link to this definition"></a></dt>
+<dd><p>Number of items</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mikeio.dfsu._layered.Dfsu2DV.n_layers">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">n_layers</span></span><a class="headerlink" href="#mikeio.dfsu._layered.Dfsu2DV.n_layers" title="Link to this definition"></a></dt>
+<dd><p>Maximum number of layers</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mikeio.dfsu._layered.Dfsu2DV.n_layers_per_column">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">n_layers_per_column</span></span><a class="headerlink" href="#mikeio.dfsu._layered.Dfsu2DV.n_layers_per_column" title="Link to this definition"></a></dt>
+<dd><p>List of number of layers for each column</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mikeio.dfsu._layered.Dfsu2DV.n_nodes">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">n_nodes</span></span><a class="headerlink" href="#mikeio.dfsu._layered.Dfsu2DV.n_nodes" title="Link to this definition"></a></dt>
+<dd><p>Number of nodes</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mikeio.dfsu._layered.Dfsu2DV.n_sigma_layers">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">n_sigma_layers</span></span><a class="headerlink" href="#mikeio.dfsu._layered.Dfsu2DV.n_sigma_layers" title="Link to this definition"></a></dt>
+<dd><p>Number of sigma layers</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mikeio.dfsu._layered.Dfsu2DV.n_timesteps">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">n_timesteps</span></span><a class="headerlink" href="#mikeio.dfsu._layered.Dfsu2DV.n_timesteps" title="Link to this definition"></a></dt>
+<dd><p>Number of time steps</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mikeio.dfsu._layered.Dfsu2DV.n_z_layers">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">n_z_layers</span></span><a class="headerlink" href="#mikeio.dfsu._layered.Dfsu2DV.n_z_layers" title="Link to this definition"></a></dt>
+<dd><p>Maximum number of z-layers</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mikeio.dfsu._layered.Dfsu2DV.node_coordinates">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">node_coordinates</span></span><a class="headerlink" href="#mikeio.dfsu._layered.Dfsu2DV.node_coordinates" title="Link to this definition"></a></dt>
+<dd><p>Coordinates (x,y,z) of all nodes</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mikeio.dfsu._layered.Dfsu2DV.plot_vertical_profile">
+<span class="sig-name descname"><span class="pre">plot_vertical_profile</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">values</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">time_step</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cmin</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cmax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">label</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mikeio/dfsu/_layered.html#Dfsu2DV.plot_vertical_profile"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mikeio.dfsu._layered.Dfsu2DV.plot_vertical_profile" title="Link to this definition"></a></dt>
+<dd><p>Plot unstructured vertical profile</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>values</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">np.array</span></code>) – value for each element to plot</p></li>
+<li><p><strong>cmin</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">real</span></code>, <em>optional</em>) – lower bound of values to be shown on plot, default:None</p></li>
+<li><p><strong>cmax</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">real</span></code>, <em>optional</em>) – upper bound of values to be shown on plot, default:None</p></li>
+<li><p><strong>title</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <em>optional</em>) – axes title</p></li>
+<li><p><strong>label</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <em>optional</em>) – colorbar label</p></li>
+<li><p><strong>cmap</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">matplotlib.cm.cmap</span></code>, <em>optional</em>) – colormap, default viridis</p></li>
+<li><p><strong>figsize</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">(float</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">float)</span></code>, <em>optional</em>) – specify size of figure</p></li>
+<li><p><strong>ax</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">matplotlib.axes</span></code>, <em>optional</em>) – Adding to existing axis, instead of creating new fig</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">&lt;matplotlib.axes&gt;</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mikeio.dfsu._layered.Dfsu2DV.projection_string">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">projection_string</span></span><a class="headerlink" href="#mikeio.dfsu._layered.Dfsu2DV.projection_string" title="Link to this definition"></a></dt>
+<dd><p>The projection string</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mikeio.dfsu._layered.Dfsu2DV.read">
+<span class="sig-name descname"><span class="pre">read</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">items=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">time=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">elements=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">area=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">z=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">layers=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">keepdims=False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dtype=&lt;class</span> <span class="pre">'numpy.float32'&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">error_bad_data=True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fill_bad_data_value=nan</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.dfsu._layered.Dfsu2DV.read" title="Link to this definition"></a></dt>
+<dd><p>Read data from a dfsu file</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>items</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">list[int]</span></code> or <code class="xref py py-class docutils literal notranslate"><span class="pre">list[str]</span></code>, <em>optional</em>) – Read only selected items, by number (0-based), or by name</p></li>
+<li><p><strong>time</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">datetime</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">pd.TimeStamp</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">sequence</span></code>, <a class="reference external" href="https://docs.python.org/3/library/functions.html#slice" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">slice</span></code></a> or <code class="xref py py-class docutils literal notranslate"><span class="pre">pd.DatetimeIndex</span></code>, <em>optional</em>) – Read only selected time steps, by default None (=all)</p></li>
+<li><p><strong>keepdims</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a>, <em>optional</em>) – When reading a single time step only, should the time-dimension be kept
+in the returned Dataset? by default: False</p></li>
+<li><p><strong>area</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">list[float]</span></code>, <em>optional</em>) – Read only data inside (horizontal) area given as a
+bounding box (tuple with left, lower, right, upper)
+or as list of coordinates for a polygon, by default None</p></li>
+<li><p><strong>x, y, z</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a>, <em>optional</em>) – Read only data for elements containing the (x,y,z) points(s),
+by default None</p></li>
+<li><p><strong>layers</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">list[int]</span></code>, <em>optional</em>) – Read only data for specific layers, by default None</p></li>
+<li><p><strong>elements</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">list[int]</span></code>, <em>optional</em>) – Read only selected element ids, by default None</p></li>
+<li><p><strong>error_bad_data</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a>, <em>optional</em>) – raise error if data is corrupt, by default True,</p></li>
+<li><p><strong>fill_bad_data_value</strong> – fill value for to impute corrupt data, used in conjunction with error_bad_data=False
+default np.nan</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">Dataset</span></code> – A Dataset with data dimensions [t,elements]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mikeio.dfsu._layered.Dfsu2DV.start_time">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">start_time</span></span><a class="headerlink" href="#mikeio.dfsu._layered.Dfsu2DV.start_time" title="Link to this definition"></a></dt>
+<dd><p>File start time</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mikeio.dfsu._layered.Dfsu2DV.time">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">time</span></span><a class="headerlink" href="#mikeio.dfsu._layered.Dfsu2DV.time" title="Link to this definition"></a></dt>
+<dd><p>File all datetimes</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mikeio.dfsu._layered.Dfsu2DV.timestep">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">timestep</span></span><a class="headerlink" href="#mikeio.dfsu._layered.Dfsu2DV.timestep" title="Link to this definition"></a></dt>
+<dd><p>Time step size in seconds</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mikeio.dfsu._layered.Dfsu2DV.to_mesh">
+<span class="sig-name descname"><span class="pre">to_mesh</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">outfilename</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.dfsu._layered.Dfsu2DV.to_mesh" title="Link to this definition"></a></dt>
+<dd><p>write object to mesh file</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>outfilename</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>) – path to file to be written</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mikeio.dfsu._layered.Dfsu2DV.to_shapely">
+<span class="sig-name descname"><span class="pre">to_shapely</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.dfsu._layered.Dfsu2DV.to_shapely" title="Link to this definition"></a></dt>
+<dd><p>Export mesh as shapely MultiPolygon</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">shapely.geometry.MultiPolygon</span></code> – polygons with mesh elements</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mikeio.dfsu._layered.Dfsu2DV.top_elements">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">top_elements</span></span><a class="headerlink" href="#mikeio.dfsu._layered.Dfsu2DV.top_elements" title="Link to this definition"></a></dt>
+<dd><p>List of 3d element ids of surface layer</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mikeio.dfsu._layered.Dfsu2DV.type_name">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">type_name</span></span><a class="headerlink" href="#mikeio.dfsu._layered.Dfsu2DV.type_name" title="Link to this definition"></a></dt>
+<dd><p>Type name, e.g. Mesh, Dfsu2D</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mikeio.dfsu._layered.Dfsu2DV.valid_codes">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">valid_codes</span></span><a class="headerlink" href="#mikeio.dfsu._layered.Dfsu2DV.valid_codes" title="Link to this definition"></a></dt>
+<dd><p>Unique list of node codes</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mikeio.dfsu._layered.Dfsu2DV.write">
+<span class="sig-name descname"><span class="pre">write</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dt</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">elements</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">title</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">keep_open</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.dfsu._layered.Dfsu2DV.write" title="Link to this definition"></a></dt>
+<dd><p>Write a new dfsu file</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>filename</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>) – full path to the new dfsu file</p></li>
+<li><p><strong>data</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Dataset</span></code>) – list of matrices, one for each item. Matrix dimension: time, x</p></li>
+<li><p><strong>dt</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a>, <em>optional</em>) – The time step (in seconds)</p></li>
+<li><p><strong>elements</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">list[int]</span></code>, <em>optional</em>) – write only these element ids to file</p></li>
+<li><p><strong>title</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>) – title of the dfsu file. Default is blank.</p></li>
+<li><p><strong>keep_open</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a>, <em>optional</em>) – Keep file open for appending</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mikeio.dfsu._layered.Dfsu2DV.write_header">
+<span class="sig-name descname"><span class="pre">write_header</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start_time</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dt</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">items</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">elements</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">title</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.dfsu._layered.Dfsu2DV.write_header" title="Link to this definition"></a></dt>
+<dd><p>Write the header of a new dfsu file (for writing huge files)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>filename</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>) – full path to the new dfsu file</p></li>
+<li><p><strong>start_time</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">datetime</span></code>, <em>optional</em>) – start datetime, default is datetime.now()</p></li>
+<li><p><strong>dt</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a>, <em>optional</em>) – The time step (in seconds)</p></li>
+<li><p><strong>items</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">list[mikeio.ItemInfo]</span></code>, <em>optional</em>)</p></li>
+<li><p><strong>elements</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">list[int]</span></code>, <em>optional</em>) – write only these element ids to file</p></li>
+<li><p><strong>title</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>) – title of the dfsu file. Default is blank.</p></li>
+</ul>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">datetime</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">meshfilename</span> <span class="o">=</span> <span class="s2">&quot;tests/testdata/north_sea_2.mesh&quot;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">outfilename</span> <span class="o">=</span> <span class="s2">&quot;bigfile.dfsu&quot;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">dfs</span> <span class="o">=</span> <span class="n">mikeio</span><span class="o">.</span><span class="n">Dfsu</span><span class="p">(</span><span class="n">meshfilename</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">n_elements</span> <span class="o">=</span> <span class="n">dfs</span><span class="o">.</span><span class="n">n_elements</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">nt</span> <span class="o">=</span> <span class="mi">1000</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">n_items</span> <span class="o">=</span> <span class="mi">10</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">items</span> <span class="o">=</span> <span class="p">[</span><span class="n">mikeio</span><span class="o">.</span><span class="n">ItemInfo</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Item </span><span class="si">{</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_items</span><span class="p">)]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">with</span> <span class="n">dfs</span><span class="o">.</span><span class="n">write_header</span><span class="p">(</span><span class="n">outfilename</span><span class="p">,</span> <span class="n">items</span><span class="o">=</span><span class="n">items</span><span class="p">,</span> <span class="n">start_time</span><span class="o">=</span><span class="n">datetime</span><span class="p">(</span><span class="mi">2000</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">),</span> <span class="n">dt</span><span class="o">=</span><span class="mi">3600</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+<span class="gp">... </span>    <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nt</span><span class="p">):</span>
+<span class="gp">... </span>        <span class="c1"># get a list of data</span>
+<span class="gp">... </span>        <span class="n">data</span> <span class="o">=</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">random</span><span class="p">((</span><span class="mi">1</span><span class="p">,</span> <span class="n">n_elements</span><span class="p">))</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_items</span><span class="p">)]</span>
+<span class="gp">... </span>        <span class="n">f</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</dd></dl>
+
 </section>
 <section id="fm-geometry-2dv-vertical-profile-api">
 <h2>FM Geometry 2DV Vertical Profile API<a class="headerlink" href="#fm-geometry-2dv-vertical-profile-api" title="Link to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="mikeio.spatial._FM_geometry_layered.GeometryFMVerticalProfile">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mikeio.spatial._FM_geometry_layered.</span></span><span class="sig-name descname"><span class="pre">GeometryFMVerticalProfile</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">node_coordinates</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">element_table</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">codes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">projection</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dfsu_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">element_ids</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">node_ids</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_layers</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_sigma</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">validate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reindex</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mikeio/spatial/_FM_geometry_layered.html#GeometryFMVerticalProfile"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mikeio.spatial._FM_geometry_layered.GeometryFMVerticalProfile" title="Link to this definition"></a></dt>
+<dd><dl class="py property">
+<dt class="sig sig-object py" id="mikeio.spatial._FM_geometry_layered.GeometryFMVerticalProfile.bottom_elements">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">bottom_elements</span></span><a class="headerlink" href="#mikeio.spatial._FM_geometry_layered.GeometryFMVerticalProfile.bottom_elements" title="Link to this definition"></a></dt>
+<dd><p>List of 3d element ids of bottom layer</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mikeio.spatial._FM_geometry_layered.GeometryFMVerticalProfile.codes">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">codes</span></span><a class="headerlink" href="#mikeio.spatial._FM_geometry_layered.GeometryFMVerticalProfile.codes" title="Link to this definition"></a></dt>
+<dd><p>Node codes of all nodes (0=water, 1=land, 2…=open boundaries)</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mikeio.spatial._FM_geometry_layered.GeometryFMVerticalProfile.e2_e3_table">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">e2_e3_table</span></span><a class="headerlink" href="#mikeio.spatial._FM_geometry_layered.GeometryFMVerticalProfile.e2_e3_table" title="Link to this definition"></a></dt>
+<dd><p>The 2d-to-3d element connectivity table for a 3d object</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mikeio.spatial._FM_geometry_layered.GeometryFMVerticalProfile.elem2d_ids">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">elem2d_ids</span></span><a class="headerlink" href="#mikeio.spatial._FM_geometry_layered.GeometryFMVerticalProfile.elem2d_ids" title="Link to this definition"></a></dt>
+<dd><p>The associated 2d element id for each 3d element</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mikeio.spatial._FM_geometry_layered.GeometryFMVerticalProfile.element_coordinates">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">element_coordinates</span></span><a class="headerlink" href="#mikeio.spatial._FM_geometry_layered.GeometryFMVerticalProfile.element_coordinates" title="Link to this definition"></a></dt>
+<dd><p>Center coordinates of each element</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mikeio.spatial._FM_geometry_layered.GeometryFMVerticalProfile.get_layer_elements">
+<span class="sig-name descname"><span class="pre">get_layer_elements</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">layers</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">layer</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.spatial._FM_geometry_layered.GeometryFMVerticalProfile.get_layer_elements" title="Link to this definition"></a></dt>
+<dd><p>3d element ids for one (or more) specific layer(s)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>layers</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a> or <code class="xref py py-class docutils literal notranslate"><span class="pre">list(int)</span></code>) – layer between 0 (bottom) and n_layers-1 (top)
+(can also be negative counting from -1 at the top layer)</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">np.array(int)</span></code> – element ids</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mikeio.spatial._FM_geometry_layered.GeometryFMVerticalProfile.get_nearest_relative_distance">
+<span class="sig-name descname"><span class="pre">get_nearest_relative_distance</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">coords</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mikeio/spatial/_FM_geometry_layered.html#GeometryFMVerticalProfile.get_nearest_relative_distance"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mikeio.spatial._FM_geometry_layered.GeometryFMVerticalProfile.get_nearest_relative_distance" title="Link to this definition"></a></dt>
+<dd><p>For a point near a transect, find the nearest relative distance
+for showing position on transect plot.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>coords</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">[float</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">float]</span></code>) – x,y-coordinate of point</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a> – relative distance in meters from start of transect</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mikeio.spatial._FM_geometry_layered.GeometryFMVerticalProfile.is_geo">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">is_geo</span></span><a class="headerlink" href="#mikeio.spatial._FM_geometry_layered.GeometryFMVerticalProfile.is_geo" title="Link to this definition"></a></dt>
+<dd><p>Are coordinates geographical (LONG/LAT)?</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mikeio.spatial._FM_geometry_layered.GeometryFMVerticalProfile.is_local_coordinates">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">is_local_coordinates</span></span><a class="headerlink" href="#mikeio.spatial._FM_geometry_layered.GeometryFMVerticalProfile.is_local_coordinates" title="Link to this definition"></a></dt>
+<dd><p>Are coordinates relative (NON-UTM)?</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mikeio.spatial._FM_geometry_layered.GeometryFMVerticalProfile.layer_ids">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">layer_ids</span></span><a class="headerlink" href="#mikeio.spatial._FM_geometry_layered.GeometryFMVerticalProfile.layer_ids" title="Link to this definition"></a></dt>
+<dd><p>The layer number (0=bottom, 1, 2, …) for each 3d element</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mikeio.spatial._FM_geometry_layered.GeometryFMVerticalProfile.max_nodes_per_element">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">max_nodes_per_element</span></span><a class="headerlink" href="#mikeio.spatial._FM_geometry_layered.GeometryFMVerticalProfile.max_nodes_per_element" title="Link to this definition"></a></dt>
+<dd><p>The maximum number of nodes for an element</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mikeio.spatial._FM_geometry_layered.GeometryFMVerticalProfile.n_elements">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">n_elements</span></span><a class="headerlink" href="#mikeio.spatial._FM_geometry_layered.GeometryFMVerticalProfile.n_elements" title="Link to this definition"></a></dt>
+<dd><p>Number of 3d elements</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mikeio.spatial._FM_geometry_layered.GeometryFMVerticalProfile.n_layers">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">n_layers</span></span><a class="headerlink" href="#mikeio.spatial._FM_geometry_layered.GeometryFMVerticalProfile.n_layers" title="Link to this definition"></a></dt>
+<dd><p>Maximum number of layers</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mikeio.spatial._FM_geometry_layered.GeometryFMVerticalProfile.n_layers_per_column">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">n_layers_per_column</span></span><a class="headerlink" href="#mikeio.spatial._FM_geometry_layered.GeometryFMVerticalProfile.n_layers_per_column" title="Link to this definition"></a></dt>
+<dd><p>List of number of layers for each column</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mikeio.spatial._FM_geometry_layered.GeometryFMVerticalProfile.n_nodes">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">n_nodes</span></span><a class="headerlink" href="#mikeio.spatial._FM_geometry_layered.GeometryFMVerticalProfile.n_nodes" title="Link to this definition"></a></dt>
+<dd><p>Number of nodes</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mikeio.spatial._FM_geometry_layered.GeometryFMVerticalProfile.n_sigma_layers">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">n_sigma_layers</span></span><a class="headerlink" href="#mikeio.spatial._FM_geometry_layered.GeometryFMVerticalProfile.n_sigma_layers" title="Link to this definition"></a></dt>
+<dd><p>Number of sigma layers</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mikeio.spatial._FM_geometry_layered.GeometryFMVerticalProfile.n_z_layers">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">n_z_layers</span></span><a class="headerlink" href="#mikeio.spatial._FM_geometry_layered.GeometryFMVerticalProfile.n_z_layers" title="Link to this definition"></a></dt>
+<dd><p>Maximum number of z-layers</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mikeio.spatial._FM_geometry_layered.GeometryFMVerticalProfile.projection">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">projection</span></span><a class="headerlink" href="#mikeio.spatial._FM_geometry_layered.GeometryFMVerticalProfile.projection" title="Link to this definition"></a></dt>
+<dd><p>The projection</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mikeio.spatial._FM_geometry_layered.GeometryFMVerticalProfile.projection_string">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">projection_string</span></span><a class="headerlink" href="#mikeio.spatial._FM_geometry_layered.GeometryFMVerticalProfile.projection_string" title="Link to this definition"></a></dt>
+<dd><p>The projection string</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mikeio.spatial._FM_geometry_layered.GeometryFMVerticalProfile.to_2d_geometry">
+<span class="sig-name descname"><span class="pre">to_2d_geometry</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.spatial._FM_geometry_layered.GeometryFMVerticalProfile.to_2d_geometry" title="Link to this definition"></a></dt>
+<dd><p>extract 2d geometry from 3d geometry</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">UnstructuredGeometry</span></code> – 2d geometry (bottom nodes)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="mikeio.spatial._FM_geometry_layered.GeometryFMVerticalProfile.top_elements">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">top_elements</span></span><a class="headerlink" href="#mikeio.spatial._FM_geometry_layered.GeometryFMVerticalProfile.top_elements" title="Link to this definition"></a></dt>
+<dd><p>List of 3d element ids of surface layer</p>
+</dd></dl>
+
+</dd></dl>
+
 </section>
 <section id="dataarray-plotter-fm-vertical-profile-api">
 <h2>DataArray Plotter FM Vertical Profile API<a class="headerlink" href="#dataarray-plotter-fm-vertical-profile-api" title="Link to this heading"></a></h2>
 <p>A DataArray <code class="docutils literal notranslate"><span class="pre">da</span></code> with a GeometryFMVerticalProfile geometry can be plotted using <code class="docutils literal notranslate"><span class="pre">da.plot</span></code>.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="mikeio.dataset._data_plot._DataArrayPlotterFMVerticalProfile">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mikeio.dataset._data_plot.</span></span><span class="sig-name descname"><span class="pre">_DataArrayPlotterFMVerticalProfile</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">da</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mikeio/dataset/_data_plot.html#_DataArrayPlotterFMVerticalProfile"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mikeio.dataset._data_plot._DataArrayPlotterFMVerticalProfile" title="Link to this definition"></a></dt>
+<dd><p>Plot a DataArray with a 2DV GeometryFMVerticalProfile geometry</p>
+<p>If DataArray has multiple time steps, the first step will be plotted.</p>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">da</span> <span class="o">=</span> <span class="n">mikeio</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="s2">&quot;oresund_vertical_slice.dfsu&quot;</span><span class="p">)[</span><span class="s2">&quot;Temperature&quot;</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">da</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">da</span><span class="o">.</span><span class="n">plot</span><span class="o">.</span><span class="n">mesh</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">da</span><span class="o">.</span><span class="n">plot</span><span class="o">.</span><span class="n">hist</span><span class="p">()</span>
+</pre></div>
+</div>
+<dl class="py method">
+<dt class="sig sig-object py" id="mikeio.dataset._data_plot._DataArrayPlotterFMVerticalProfile.hist">
+<span class="sig-name descname"><span class="pre">hist</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">figsize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">title</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.dataset._data_plot._DataArrayPlotterFMVerticalProfile.hist" title="Link to this definition"></a></dt>
+<dd><p>Plot DataArray as histogram (using ax.hist)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>bins</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a> or <code class="xref py py-class docutils literal notranslate"><span class="pre">sequence</span></code> or <code class="xref py py-class docutils literal notranslate"><span class="pre">str,</span></code>) – If bins is an integer, it defines the number
+of equal-width bins in the range.
+If bins is a sequence, it defines the bin edges,
+including the left edge of the first bin and the
+right edge of the last bin.
+by default: rcParams[“hist.bins”] (default: 10)</p></li>
+<li><p><strong>ax</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">matplotlib.axes</span></code>, <em>optional</em>) – Adding to existing axis, instead of creating new fig</p></li>
+<li><p><strong>figsize</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">(float</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">float)</span></code>, <em>optional</em>) – specify size of figure</p></li>
+<li><p><strong>title</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <em>optional</em>) – axes title</p></li>
+</ul>
+</dd>
+</dl>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<p><a class="reference external" href="https://matplotlib.org/stable/api/_as_gen/matplotlib.pyplot.hist.html#matplotlib.pyplot.hist" title="(in Matplotlib v3.7.2)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">matplotlib.pyplot.hist</span></code></a></p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">&lt;matplotlib.axes&gt;</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mikeio.dataset._data_plot._DataArrayPlotterFMVerticalProfile.line">
+<span class="sig-name descname"><span class="pre">line</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">figsize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.dataset._data_plot._DataArrayPlotterFMVerticalProfile.line" title="Link to this definition"></a></dt>
+<dd><p>Plot data as lines (timeseries if time is present)</p>
+</dd></dl>
+
+</dd></dl>
+
 </section>
 </section>
 
@@ -133,14 +901,14 @@
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="dfsu-3d.html" class="btn btn-neutral float-left" title="Dfsu 3D" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="dfsu-1dv-vertical-column.html" class="btn btn-neutral float-left" title="Dfsu 1DV Vertical Column" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
         <a href="dfsu-spectral.html" class="btn btn-neutral float-right" title="Dfsu Spectral" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2022, Henrik Andersson, Jesper Mariegaard, Marc Ridler,.</p>
+    <p>&#169; Copyright 2023, DHI.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

@@ -68,6 +68,7 @@
 <li class="toctree-l1"><a class="reference internal" href="mesh.html">Mesh</a></li>
 <li class="toctree-l1"><a class="reference internal" href="dfsu-2d.html">Dfsu 2D</a></li>
 <li class="toctree-l1"><a class="reference internal" href="dfsu-3d.html">Dfsu 3D</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dfsu-1dv-vertical-column.html">Dfsu 1DV Vertical Column</a></li>
 <li class="toctree-l1"><a class="reference internal" href="dfsu-2dv-vertical-profile.html">Dfsu 2DV Vertical Profile</a></li>
 <li class="toctree-l1"><a class="reference internal" href="dfsu-spectral.html">Dfsu Spectral</a></li>
 <li class="toctree-l1"><a class="reference internal" href="eum.html">EUM</a></li>
@@ -102,14 +103,14 @@
   <section id="design-philosophy">
 <h1>Design philosophy<a class="headerlink" href="#design-philosophy" title="Link to this heading"></a></h1>
 <ul class="simple">
-<li><p>Easy to use</p></li>
-<li><p>Familiar</p></li>
-<li><p>Easy to install</p></li>
-<li><p>Easy to get started</p></li>
-<li><p>Open Source​</p></li>
-<li><p>Easy to collaborate​</p></li>
-<li><p>Reproducible</p></li>
-<li><p>Easy access to new features</p></li>
+<li><p><a class="reference internal" href="#easy-to-use">Easy to use</a></p></li>
+<li><p><a class="reference internal" href="#familiar">Familiar</a></p></li>
+<li><p><a class="reference internal" href="#easy-to-install">Easy to install</a></p></li>
+<li><p><a class="reference internal" href="#easy-to-get-started">Easy to get started</a></p></li>
+<li><p><a class="reference internal" href="#open-source">Open Source​</a></p></li>
+<li><p><a class="reference internal" href="#easy-to-collaborate">Easy to collaborate​</a></p></li>
+<li><p><a class="reference internal" href="#reproducible">Reproducible</a></p></li>
+<li><p><a class="reference internal" href="#easy-access-to-new-features">Easy access to new features</a></p></li>
 </ul>
 <section id="easy-to-use">
 <h2>Easy to use<a class="headerlink" href="#easy-to-use" title="Link to this heading"></a></h2>
@@ -122,8 +123,7 @@
 </section>
 <section id="easy-to-install">
 <h2>Easy to install<a class="headerlink" href="#easy-to-install" title="Link to this heading"></a></h2>
-<p>From PyPI::</p>
-<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>pip install mikeio
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$<span class="w"> </span>pip<span class="w"> </span>install<span class="w"> </span>mikeio
 </pre></div>
 </div>
 </section>
@@ -149,17 +149,17 @@ The software is provided free of charge with the source code available for inspe
 <section id="reproducible">
 <h2>Reproducible<a class="headerlink" href="#reproducible" title="Link to this heading"></a></h2>
 <p>By providing the historical versions of MIKE IO on PyPI it is possible to reproduce the behaviour of an older existing system, based on an older version.</p>
-<p>Install specific version::</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pip</span> <span class="n">install</span> <span class="n">mikeio</span><span class="o">==</span><span class="mf">0.12.2</span>
+<p><strong>Install specific version</strong></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip<span class="w"> </span>install<span class="w"> </span><span class="nv">mikeio</span><span class="o">==</span><span class="m">1</span>.4.0
 </pre></div>
 </div>
 </section>
 <section id="easy-access-to-new-features">
 <h2>Easy access to new features<a class="headerlink" href="#easy-access-to-new-features" title="Link to this heading"></a></h2>
 <p>Features are being added all the time, by developers at DHI in offices all around the globe as well as external contributors using MIKE IO in their work.
-These new features are always available from the main branch on GitHub and thanks to automated testing, it is always possible to verify that the tests passes before downloading a new development version.</p>
-<p>Install development version::</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pip</span> <span class="n">install</span> <span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">github</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="n">DHI</span><span class="o">/</span><span class="n">mikeio</span><span class="o">/</span><span class="n">archive</span><span class="o">/</span><span class="n">main</span><span class="o">.</span><span class="n">zip</span>
+These new features are always available from the <a class="reference external" href="https://github.com/DHI/mikeio">main branch on GitHub</a> and thanks to automated testing, it is always possible to verify that the tests passes before downloading a new development version.</p>
+<p><strong>Install development version</strong></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>$<span class="w"> </span>pip<span class="w"> </span>install<span class="w"> </span>https://github.com/DHI/mikeio/archive/main.zip
 </pre></div>
 </div>
 </section>
@@ -176,7 +176,7 @@ These new features are always available from the main branch on GitHub and thank
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2022, Henrik Andersson, Jesper Mariegaard, Marc Ridler,.</p>
+    <p>&#169; Copyright 2023, DHI.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

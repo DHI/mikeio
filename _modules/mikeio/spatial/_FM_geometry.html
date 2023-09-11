@@ -55,6 +55,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../mesh.html">Mesh</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../dfsu-2d.html">Dfsu 2D</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../dfsu-3d.html">Dfsu 3D</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../dfsu-1dv-vertical-column.html">Dfsu 1DV Vertical Column</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../dfsu-2dv-vertical-profile.html">Dfsu 2DV Vertical Profile</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../dfsu-spectral.html">Dfsu Spectral</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../eum.html">EUM</a></li>
@@ -116,6 +117,8 @@
 <span class="kn">from</span> <span class="nn">._utils</span> <span class="kn">import</span> <span class="n">xy_to_bbox</span>
 
 
+<div class="viewcode-block" id="GeometryFMPointSpectrum">
+<a class="viewcode-back" href="../../../dfsu-spectral.html#mikeio.dfsu.GeometryFMPointSpectrum">[docs]</a>
 <span class="k">class</span> <span class="nc">GeometryFMPointSpectrum</span><span class="p">(</span><span class="n">_Geometry</span><span class="p">):</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">frequencies</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">directions</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
@@ -163,9 +166,12 @@
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">directions</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Directional axis&quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_directions</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_directions</span></div>
 
 
+
+<div class="viewcode-block" id="_GeometryFMPlotter">
+<a class="viewcode-back" href="../../../mesh.html#mikeio.dfsu._GeometryFMPlotter">[docs]</a>
 <span class="k">class</span> <span class="nc">_GeometryFMPlotter</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Plot GeometryFM</span>
 
@@ -190,17 +196,23 @@
         <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;plot_type&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;plot_type&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="s2">&quot;patch&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_plot_FM_map</span><span class="p">(</span><span class="n">ax</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
+<div class="viewcode-block" id="_GeometryFMPlotter.contour">
+<a class="viewcode-back" href="../../../mesh.html#mikeio.dfsu._GeometryFMPlotter.contour">[docs]</a>
     <span class="k">def</span> <span class="nf">contour</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Plot bathymetry as contour lines&quot;&quot;&quot;</span>
         <span class="n">ax</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_ax</span><span class="p">(</span><span class="n">ax</span><span class="p">,</span> <span class="n">figsize</span><span class="p">)</span>
         <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;plot_type&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;contour&quot;</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_plot_FM_map</span><span class="p">(</span><span class="n">ax</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_plot_FM_map</span><span class="p">(</span><span class="n">ax</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
 
+
+<div class="viewcode-block" id="_GeometryFMPlotter.contourf">
+<a class="viewcode-back" href="../../../mesh.html#mikeio.dfsu._GeometryFMPlotter.contourf">[docs]</a>
     <span class="k">def</span> <span class="nf">contourf</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Plot bathymetry as filled contours&quot;&quot;&quot;</span>
         <span class="n">ax</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_ax</span><span class="p">(</span><span class="n">ax</span><span class="p">,</span> <span class="n">figsize</span><span class="p">)</span>
         <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;plot_type&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;contourf&quot;</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_plot_FM_map</span><span class="p">(</span><span class="n">ax</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_plot_FM_map</span><span class="p">(</span><span class="n">ax</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+
 
     <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">_get_ax</span><span class="p">(</span><span class="n">ax</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
@@ -231,6 +243,8 @@
             <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
         <span class="p">)</span>
 
+<div class="viewcode-block" id="_GeometryFMPlotter.mesh">
+<a class="viewcode-back" href="../../../mesh.html#mikeio.dfsu._GeometryFMPlotter.mesh">[docs]</a>
     <span class="k">def</span> <span class="nf">mesh</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s2">&quot;Mesh&quot;</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Plot mesh only&quot;&quot;&quot;</span>
 
@@ -250,8 +264,11 @@
         <span class="n">ax</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="n">title</span><span class="p">)</span>
         <span class="n">ax</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_set_plot_limits</span><span class="p">(</span><span class="n">ax</span><span class="p">)</span>
         <span class="n">_set_xy_label_by_projection</span><span class="p">(</span><span class="n">ax</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">g</span><span class="o">.</span><span class="n">projection</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">ax</span>
+        <span class="k">return</span> <span class="n">ax</span></div>
 
+
+<div class="viewcode-block" id="_GeometryFMPlotter.outline">
+<a class="viewcode-back" href="../../../mesh.html#mikeio.dfsu._GeometryFMPlotter.outline">[docs]</a>
     <span class="k">def</span> <span class="nf">outline</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s2">&quot;Outline&quot;</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Plot domain outline (using the boundary_polylines property)&quot;&quot;&quot;</span>
 
@@ -268,8 +285,11 @@
         <span class="k">if</span> <span class="n">title</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">ax</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="n">title</span><span class="p">)</span>
         <span class="n">ax</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_set_plot_limits</span><span class="p">(</span><span class="n">ax</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">ax</span>
+        <span class="k">return</span> <span class="n">ax</span></div>
 
+
+<div class="viewcode-block" id="_GeometryFMPlotter.boundary_nodes">
+<a class="viewcode-back" href="../../../mesh.html#mikeio.dfsu._GeometryFMPlotter.boundary_nodes">[docs]</a>
     <span class="k">def</span> <span class="nf">boundary_nodes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">boundary_names</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Plot mesh boundary nodes and their code values&quot;&quot;&quot;</span>
         <span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
@@ -301,7 +321,8 @@
         <span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
         <span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s2">&quot;Boundary nodes&quot;</span><span class="p">)</span>
         <span class="n">ax</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_set_plot_limits</span><span class="p">(</span><span class="n">ax</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">ax</span>
+        <span class="k">return</span> <span class="n">ax</span></div>
+
 
     <span class="k">def</span> <span class="nf">_set_plot_limits</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ax</span><span class="p">):</span>
         <span class="c1"># TODO this must be a duplicate, delegate</span>
@@ -317,7 +338,8 @@
             <span class="n">mean_lat</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">g</span><span class="o">.</span><span class="n">node_coordinates</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">])</span>
             <span class="k">return</span> <span class="mf">1.0</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="n">mean_lat</span> <span class="o">/</span> <span class="mi">180</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="k">return</span> <span class="s2">&quot;equal&quot;</span>
+            <span class="k">return</span> <span class="s2">&quot;equal&quot;</span></div>
+
 
 
 <span class="k">class</span> <span class="nc">_GeometryFM</span><span class="p">(</span><span class="n">_Geometry</span><span class="p">):</span>
@@ -436,6 +458,8 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_codes</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">)</span>
 
 
+<div class="viewcode-block" id="GeometryFM2D">
+<a class="viewcode-back" href="../../../dfsu-2d.html#mikeio.dfsu.GeometryFM2D">[docs]</a>
 <span class="k">class</span> <span class="nc">GeometryFM2D</span><span class="p">(</span><span class="n">_GeometryFM</span><span class="p">):</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
@@ -605,6 +629,8 @@
 
         <span class="k">return</span> <span class="n">ec</span>
 
+<div class="viewcode-block" id="GeometryFM2D.find_nearest_elements">
+<a class="viewcode-back" href="../../../dfsu-2d.html#mikeio.dfsu.GeometryFM2D.find_nearest_elements">[docs]</a>
     <span class="k">def</span> <span class="nf">find_nearest_elements</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">n_nearest</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">return_distances</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Find index of nearest elements (optionally for a list)</span>
 
@@ -647,8 +673,11 @@
         <span class="k">if</span> <span class="n">return_distances</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">idx</span><span class="p">,</span> <span class="n">d2d</span>
 
-        <span class="k">return</span> <span class="n">idx</span>
+        <span class="k">return</span> <span class="n">idx</span></div>
 
+
+<div class="viewcode-block" id="GeometryFM2D.get_2d_interpolant">
+<a class="viewcode-back" href="../../../dfsu-2d.html#mikeio.dfsu.GeometryFM2D.get_2d_interpolant">[docs]</a>
     <span class="k">def</span> <span class="nf">get_2d_interpolant</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">xy</span><span class="p">,</span>
@@ -696,8 +725,11 @@
         <span class="k">if</span> <span class="n">radius</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">weights</span><span class="p">[</span><span class="n">dists</span> <span class="o">&gt;</span> <span class="n">radius</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span> <span class="c1"># type: ignore</span>
 
-        <span class="k">return</span> <span class="n">ids</span><span class="p">,</span> <span class="n">weights</span>
+        <span class="k">return</span> <span class="n">ids</span><span class="p">,</span> <span class="n">weights</span></div>
 
+
+<div class="viewcode-block" id="GeometryFM2D.interp2d">
+<a class="viewcode-back" href="../../../dfsu-2d.html#mikeio.dfsu.GeometryFM2D.interp2d">[docs]</a>
     <span class="k">def</span> <span class="nf">interp2d</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">elem_ids</span><span class="p">,</span> <span class="n">weights</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;interp spatially in data (2d only)</span>
 
@@ -724,7 +756,8 @@
 <span class="sd">        &gt;&gt;&gt; elem_ids, weights = dfs.get_2d_interpolant(g.xy)</span>
 <span class="sd">        &gt;&gt;&gt; dsi = dfs.interp2d(ds, elem_ids, weights)</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="n">interp2d</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">elem_ids</span><span class="p">,</span> <span class="n">weights</span><span class="p">,</span> <span class="n">shape</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">interp2d</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">elem_ids</span><span class="p">,</span> <span class="n">weights</span><span class="p">,</span> <span class="n">shape</span><span class="p">)</span></div>
+
 
     <span class="k">def</span> <span class="nf">_find_n_nearest_2d_elements</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
 
@@ -817,6 +850,8 @@
 
         <span class="k">raise</span> <span class="n">OutsideModelDomainError</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">)</span>
 
+<div class="viewcode-block" id="GeometryFM2D.get_overset_grid">
+<a class="viewcode-back" href="../../../dfsu-2d.html#mikeio.dfsu.GeometryFM2D.get_overset_grid">[docs]</a>
     <span class="k">def</span> <span class="nf">get_overset_grid</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">dx</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">dy</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">nx</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">ny</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">buffer</span><span class="o">=</span><span class="kc">None</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Grid2D</span><span class="p">:</span>
@@ -846,8 +881,11 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">nc</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">node_coordinates</span>
         <span class="n">bbox</span> <span class="o">=</span> <span class="n">xy_to_bbox</span><span class="p">(</span><span class="n">nc</span><span class="p">,</span> <span class="n">buffer</span><span class="o">=</span><span class="n">buffer</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">Grid2D</span><span class="p">(</span><span class="n">bbox</span><span class="o">=</span><span class="n">bbox</span><span class="p">,</span> <span class="n">dx</span><span class="o">=</span><span class="n">dx</span><span class="p">,</span> <span class="n">dy</span><span class="o">=</span><span class="n">dy</span><span class="p">,</span> <span class="n">nx</span><span class="o">=</span><span class="n">nx</span><span class="p">,</span> <span class="n">ny</span><span class="o">=</span><span class="n">ny</span><span class="p">,</span> <span class="n">projection</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">projection</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">Grid2D</span><span class="p">(</span><span class="n">bbox</span><span class="o">=</span><span class="n">bbox</span><span class="p">,</span> <span class="n">dx</span><span class="o">=</span><span class="n">dx</span><span class="p">,</span> <span class="n">dy</span><span class="o">=</span><span class="n">dy</span><span class="p">,</span> <span class="n">nx</span><span class="o">=</span><span class="n">nx</span><span class="p">,</span> <span class="n">ny</span><span class="o">=</span><span class="n">ny</span><span class="p">,</span> <span class="n">projection</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">projection</span><span class="p">)</span></div>
 
+
+<div class="viewcode-block" id="GeometryFM2D.get_element_area">
+<a class="viewcode-back" href="../../../dfsu-2d.html#mikeio.dfsu.GeometryFM2D.get_element_area">[docs]</a>
     <span class="k">def</span> <span class="nf">get_element_area</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Calculate the horizontal area of each element.</span>
 
@@ -913,13 +951,16 @@
             <span class="k">if</span> <span class="n">isquad</span><span class="p">:</span>
                 <span class="n">area</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">area</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">+</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="p">(</span><span class="n">acx</span> <span class="o">*</span> <span class="n">ady</span> <span class="o">-</span> <span class="n">acy</span> <span class="o">*</span> <span class="n">adx</span><span class="p">)</span>
 
-        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">area</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">area</span><span class="p">)</span></div>
+
 
     <span class="nd">@cached_property</span>
     <span class="k">def</span> <span class="nf">boundary_polylines</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">BoundaryPolylines</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Lists of closed polylines defining domain outline&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_boundary_polylines</span><span class="p">()</span>
 
+<div class="viewcode-block" id="GeometryFM2D.contains">
+<a class="viewcode-back" href="../../../dfsu-2d.html#mikeio.dfsu.GeometryFM2D.contains">[docs]</a>
     <span class="k">def</span> <span class="nf">contains</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">points</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">bool</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;test if a list of points are contained by mesh</span>
 
@@ -951,7 +992,8 @@
             <span class="n">in_hole</span> <span class="o">=</span> <span class="n">mp</span><span class="o">.</span><span class="n">Path</span><span class="p">(</span><span class="n">interior</span><span class="o">.</span><span class="n">xy</span><span class="p">)</span><span class="o">.</span><span class="n">contains_points</span><span class="p">(</span><span class="n">points</span><span class="p">)</span>
             <span class="n">cnts</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">logical_and</span><span class="p">(</span><span class="n">cnts</span><span class="p">,</span> <span class="o">~</span><span class="n">in_hole</span><span class="p">)</span>
 
-        <span class="k">return</span> <span class="n">cnts</span>
+        <span class="k">return</span> <span class="n">cnts</span></div>
+
 
     <span class="k">def</span> <span class="fm">__contains__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pt</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">contains</span><span class="p">(</span><span class="n">pt</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
@@ -1031,6 +1073,8 @@
         <span class="n">bnd_face_id</span> <span class="o">=</span> <span class="n">face_counts</span> <span class="o">==</span> <span class="mi">1</span>
         <span class="k">return</span> <span class="n">all_faces</span><span class="p">[</span><span class="n">uf_id</span><span class="p">[</span><span class="n">bnd_face_id</span><span class="p">]]</span>
 
+<div class="viewcode-block" id="GeometryFM2D.isel">
+<a class="viewcode-back" href="../../../dfsu-2d.html#mikeio.dfsu.GeometryFM2D.isel">[docs]</a>
     <span class="k">def</span> <span class="nf">isel</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">idx</span><span class="p">:</span> <span class="n">Collection</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="n">keepdims</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;GeometryFM2D&quot;</span> <span class="o">|</span> <span class="n">GeometryPoint2D</span><span class="p">:</span>
@@ -1061,8 +1105,11 @@
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_type</span> <span class="o">==</span> <span class="n">DfsuFileType</span><span class="o">.</span><span class="n">DfsuSpectral1D</span><span class="p">:</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_nodes_to_geometry</span><span class="p">(</span><span class="n">nodes</span><span class="o">=</span><span class="n">idx</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">elements_to_geometry</span><span class="p">(</span><span class="n">elements</span><span class="o">=</span><span class="n">idx</span><span class="p">,</span> <span class="n">keepdims</span><span class="o">=</span><span class="n">keepdims</span><span class="p">)</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">elements_to_geometry</span><span class="p">(</span><span class="n">elements</span><span class="o">=</span><span class="n">idx</span><span class="p">,</span> <span class="n">keepdims</span><span class="o">=</span><span class="n">keepdims</span><span class="p">)</span></div>
 
+
+<div class="viewcode-block" id="GeometryFM2D.find_index">
+<a class="viewcode-back" href="../../../dfsu-2d.html#mikeio.dfsu.GeometryFM2D.find_index">[docs]</a>
     <span class="k">def</span> <span class="nf">find_index</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">coords</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">area</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Find a *set* of element indicies for a number of points or within an area.</span>
 
@@ -1124,7 +1171,8 @@
         <span class="k">elif</span> <span class="n">area</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_elements_in_area</span><span class="p">(</span><span class="n">area</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Provide either coordinates or area&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Provide either coordinates or area&quot;</span><span class="p">)</span></div>
+
 
     <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">_inside_polygon</span><span class="p">(</span><span class="n">polygon</span><span class="p">,</span> <span class="n">xy</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
@@ -1196,20 +1244,7 @@
     <span class="k">def</span> <span class="nf">elements_to_geometry</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">elements</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="n">Collection</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="n">keepdims</span><span class="o">=</span><span class="kc">False</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;GeometryFM2D&quot;</span> <span class="o">|</span> <span class="n">GeometryPoint2D</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;export a selection of elements to new flexible file geometry</span>
-
-<span class="sd">        Parameters</span>
-<span class="sd">        ----------</span>
-<span class="sd">        elements : int or Collection[int]</span>
-<span class="sd">            collection of element ids</span>
-<span class="sd">        keepdims: bool, optional</span>
-<span class="sd">            keep original geometry type for single points</span>
-
-<span class="sd">        Returns</span>
-<span class="sd">        -------</span>
-<span class="sd">        UnstructuredGeometry</span>
-<span class="sd">            which can be used for further extraction or saved to file</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+        
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">elements</span><span class="p">,</span> <span class="p">(</span><span class="nb">int</span><span class="p">,</span><span class="n">np</span><span class="o">.</span><span class="n">integer</span><span class="p">)):</span>
             <span class="n">sel_elements</span> <span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">elements</span><span class="p">]</span>
         <span class="k">else</span><span class="p">:</span>
@@ -1264,6 +1299,8 @@
         <span class="n">nodes</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">hstack</span><span class="p">(</span><span class="n">elem_tbl</span><span class="p">))</span>
         <span class="k">return</span> <span class="n">nodes</span><span class="p">,</span> <span class="n">elem_tbl</span>
 
+<div class="viewcode-block" id="GeometryFM2D.get_node_centered_data">
+<a class="viewcode-back" href="../../../dfsu-2d.html#mikeio.dfsu.GeometryFM2D.get_node_centered_data">[docs]</a>
     <span class="k">def</span> <span class="nf">get_node_centered_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">extrapolate</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;convert cell-centered data to node-centered by pseudo-laplacian method</span>
 
@@ -1283,8 +1320,11 @@
         <span class="n">nc</span> <span class="o">=</span> <span class="n">geometry</span><span class="o">.</span><span class="n">node_coordinates</span>
         <span class="n">ec</span> <span class="o">=</span> <span class="n">geometry</span><span class="o">.</span><span class="n">element_coordinates</span>
         <span class="n">elem_table</span> <span class="o">=</span> <span class="n">geometry</span><span class="o">.</span><span class="n">element_table</span>
-        <span class="k">return</span> <span class="n">_get_node_centered_data</span><span class="p">(</span><span class="n">nc</span><span class="p">,</span> <span class="n">elem_table</span><span class="p">,</span> <span class="n">ec</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">extrapolate</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">_get_node_centered_data</span><span class="p">(</span><span class="n">nc</span><span class="p">,</span> <span class="n">elem_table</span><span class="p">,</span> <span class="n">ec</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">extrapolate</span><span class="p">)</span></div>
 
+
+<div class="viewcode-block" id="GeometryFM2D.to_shapely">
+<a class="viewcode-back" href="../../../dfsu-2d.html#mikeio.dfsu.GeometryFM2D.to_shapely">[docs]</a>
     <span class="k">def</span> <span class="nf">to_shapely</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Export mesh as shapely MultiPolygon</span>
 
@@ -1306,8 +1346,11 @@
             <span class="n">polygons</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">polygon</span><span class="p">)</span>
         <span class="n">mp</span> <span class="o">=</span> <span class="n">MultiPolygon</span><span class="p">(</span><span class="n">polygons</span><span class="p">)</span>
 
-        <span class="k">return</span> <span class="n">mp</span>
+        <span class="k">return</span> <span class="n">mp</span></div>
 
+
+<div class="viewcode-block" id="GeometryFM2D.to_mesh">
+<a class="viewcode-back" href="../../../dfsu-2d.html#mikeio.dfsu.GeometryFM2D.to_mesh">[docs]</a>
     <span class="k">def</span> <span class="nf">to_mesh</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">outfilename</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Export geometry to new mesh file</span>
 
@@ -1328,11 +1371,13 @@
         <span class="n">quantity</span> <span class="o">=</span> <span class="n">eumQuantity</span><span class="o">.</span><span class="n">Create</span><span class="p">(</span><span class="n">EUMType</span><span class="o">.</span><span class="n">Bathymetry</span><span class="p">,</span> <span class="n">EUMUnit</span><span class="o">.</span><span class="n">meter</span><span class="p">)</span>
         <span class="n">builder</span><span class="o">.</span><span class="n">SetEumQuantity</span><span class="p">(</span><span class="n">quantity</span><span class="p">)</span>
         <span class="n">newMesh</span> <span class="o">=</span> <span class="n">builder</span><span class="o">.</span><span class="n">CreateMesh</span><span class="p">()</span>
-        <span class="n">newMesh</span><span class="o">.</span><span class="n">Write</span><span class="p">(</span><span class="n">outfilename</span><span class="p">)</span>
+        <span class="n">newMesh</span><span class="o">.</span><span class="n">Write</span><span class="p">(</span><span class="n">outfilename</span><span class="p">)</span></div>
+</div>
+
 
 
 <div class="viewcode-block" id="GeometryFM">
-<a class="viewcode-back" href="../../../mesh.html#mikeio.GeometryFM">[docs]</a>
+<a class="viewcode-back" href="../../../mesh.html#mikeio.dfsu.GeometryFM">[docs]</a>
 <span class="k">class</span> <span class="nc">GeometryFM</span><span class="p">(</span><span class="n">GeometryFM2D</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Deprecated, use GeometryFM2D instead&quot;&quot;&quot;</span>
 
@@ -1416,10 +1461,17 @@
 
 
 <span class="c1"># TODO reconsider inheritance to avoid overriding method signature</span>
+<div class="viewcode-block" id="GeometryFMAreaSpectrum">
+<a class="viewcode-back" href="../../../dfsu-spectral.html#mikeio.dfsu.GeometryFMAreaSpectrum">[docs]</a>
 <span class="k">class</span> <span class="nc">GeometryFMAreaSpectrum</span><span class="p">(</span><span class="n">_GeometryFMSpectrum</span><span class="p">):</span>
+<div class="viewcode-block" id="GeometryFMAreaSpectrum.isel">
+<a class="viewcode-back" href="../../../dfsu-spectral.html#mikeio.dfsu.GeometryFMAreaSpectrum.isel">[docs]</a>
     <span class="k">def</span> <span class="nf">isel</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">idx</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="s2">&quot;elements&quot;</span><span class="p">):</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">elements_to_geometry</span><span class="p">(</span><span class="n">elements</span><span class="o">=</span><span class="n">idx</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">elements_to_geometry</span><span class="p">(</span><span class="n">elements</span><span class="o">=</span><span class="n">idx</span><span class="p">)</span></div>
 
+
+<div class="viewcode-block" id="GeometryFMAreaSpectrum.elements_to_geometry">
+<a class="viewcode-back" href="../../../dfsu-spectral.html#mikeio.dfsu.GeometryFMAreaSpectrum.elements_to_geometry">[docs]</a>
     <span class="k">def</span> <span class="nf">elements_to_geometry</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">elements</span><span class="p">,</span> <span class="n">keepdims</span><span class="o">=</span><span class="kc">False</span>
     <span class="p">):</span>
@@ -1462,13 +1514,20 @@
             <span class="n">reindex</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="n">geom</span><span class="o">.</span><span class="n">_type</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_type</span>
-        <span class="k">return</span> <span class="n">geom</span>
+        <span class="k">return</span> <span class="n">geom</span></div>
+</div>
+
 
 
 <span class="c1"># TODO this inherits indirectly from GeometryFM2D, which is not ideal</span>
+<div class="viewcode-block" id="GeometryFMLineSpectrum">
+<a class="viewcode-back" href="../../../dfsu-spectral.html#mikeio.dfsu.GeometryFMLineSpectrum">[docs]</a>
 <span class="k">class</span> <span class="nc">GeometryFMLineSpectrum</span><span class="p">(</span><span class="n">_GeometryFMSpectrum</span><span class="p">):</span>
+<div class="viewcode-block" id="GeometryFMLineSpectrum.isel">
+<a class="viewcode-back" href="../../../dfsu-spectral.html#mikeio.dfsu.GeometryFMLineSpectrum.isel">[docs]</a>
     <span class="k">def</span> <span class="nf">isel</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">idx</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="s2">&quot;node&quot;</span><span class="p">):</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_nodes_to_geometry</span><span class="p">(</span><span class="n">nodes</span><span class="o">=</span><span class="n">idx</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_nodes_to_geometry</span><span class="p">(</span><span class="n">nodes</span><span class="o">=</span><span class="n">idx</span><span class="p">)</span></div>
+
 
     <span class="k">def</span> <span class="nf">_nodes_to_geometry</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">nodes</span>
@@ -1518,7 +1577,8 @@
             <span class="n">reindex</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="n">geom</span><span class="o">.</span><span class="n">_type</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_type</span>  <span class="c1"># TODO</span>
-        <span class="k">return</span> <span class="n">geom</span>
+        <span class="k">return</span> <span class="n">geom</span></div>
+
 </pre></div>
 
            </div>
@@ -1528,7 +1588,7 @@
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2022, Henrik Andersson, Jesper Mariegaard, Marc Ridler,.</p>
+    <p>&#169; Copyright 2023, DHI.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

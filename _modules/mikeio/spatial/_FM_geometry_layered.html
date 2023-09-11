@@ -1,0 +1,1080 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>mikeio.spatial._FM_geometry_layered &mdash; MIKE IO  documentation</title>
+      <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../../_static/documentation_options.js?v=5929fcd5"></script>
+        <script src="../../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            MIKE IO
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../getting-started.html">Getting started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../design.html">Design philosophy</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../data-structures.html">Data Structures</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../dataset.html">Dataset</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../dataarray.html">DataArray</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../dfs-overview.html">Dfs Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../dfs0.html">Dfs0</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../dfs1.html">Dfs1</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../dfs2.html">Dfs2</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../dfs3.html">Dfs3</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../dfsu-mesh-overview.html">Dfsu and Mesh Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../mesh.html">Mesh</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../dfsu-2d.html">Dfsu 2D</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../dfsu-3d.html">Dfsu 3D</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../dfsu-1dv-vertical-column.html">Dfsu 1DV Vertical Column</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../dfsu-2dv-vertical-profile.html">Dfsu 2DV Vertical Profile</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../dfsu-spectral.html">Dfsu Spectral</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../eum.html">EUM</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../pfs.html">Pfs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../generic.html">Generic</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">MIKE IO</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+          <li class="breadcrumb-item"><a href="../../mikeio.html">mikeio</a></li>
+      <li class="breadcrumb-item active">mikeio.spatial._FM_geometry_layered</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for mikeio.spatial._FM_geometry_layered</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">annotations</span>
+<span class="kn">from</span> <span class="nn">functools</span> <span class="kn">import</span> <span class="n">cached_property</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Collection</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">,</span> <span class="n">List</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">mikecore.DfsuFile</span> <span class="kn">import</span> <span class="n">DfsuFileType</span>  <span class="c1"># type: ignore</span>
+
+<span class="kn">from</span> <span class="nn">mikeio.exceptions</span> <span class="kn">import</span> <span class="n">InvalidGeometry</span>
+
+<span class="kn">from</span> <span class="nn">._FM_geometry</span> <span class="kn">import</span> <span class="n">GeometryFM2D</span><span class="p">,</span> <span class="n">_GeometryFM</span><span class="p">,</span> <span class="n">_GeometryFMPlotter</span>
+<span class="kn">from</span> <span class="nn">._geometry</span> <span class="kn">import</span> <span class="n">GeometryPoint3D</span>
+
+<span class="kn">from</span> <span class="nn">._FM_utils</span> <span class="kn">import</span> <span class="n">_plot_vertical_profile</span>
+
+<span class="kn">from</span> <span class="nn">._utils</span> <span class="kn">import</span> <span class="n">_relative_cumulative_distance</span>
+
+
+<span class="k">class</span> <span class="nc">_GeometryFMLayered</span><span class="p">(</span><span class="n">_GeometryFM</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="o">*</span><span class="p">,</span>
+        <span class="n">node_coordinates</span><span class="p">,</span>
+        <span class="n">element_table</span><span class="p">,</span>
+        <span class="n">codes</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">projection</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">dfsu_type</span><span class="o">=</span><span class="n">DfsuFileType</span><span class="o">.</span><span class="n">Dfsu3DSigma</span><span class="p">,</span>
+        <span class="n">element_ids</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">node_ids</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">n_layers</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>  <span class="c1"># at least 1 layer</span>
+        <span class="n">n_sigma</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">validate</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">reindex</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
+            <span class="n">node_coordinates</span><span class="o">=</span><span class="n">node_coordinates</span><span class="p">,</span>
+            <span class="n">element_table</span><span class="o">=</span><span class="n">element_table</span><span class="p">,</span>
+            <span class="n">codes</span><span class="o">=</span><span class="n">codes</span><span class="p">,</span>
+            <span class="n">projection</span><span class="o">=</span><span class="n">projection</span><span class="p">,</span>
+            <span class="n">dfsu_type</span><span class="o">=</span><span class="n">dfsu_type</span><span class="p">,</span>
+            <span class="n">element_ids</span><span class="o">=</span><span class="n">element_ids</span><span class="p">,</span>
+            <span class="n">node_ids</span><span class="o">=</span><span class="n">node_ids</span><span class="p">,</span>
+            <span class="n">validate</span><span class="o">=</span><span class="n">validate</span><span class="p">,</span>
+            <span class="n">reindex</span><span class="o">=</span><span class="n">reindex</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_n_layers</span> <span class="o">=</span> <span class="n">n_layers</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_n_sigma</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="n">n_sigma</span> <span class="k">if</span> <span class="n">n_sigma</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">n_layers</span>
+
+        <span class="c1"># Lazy properties</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_n_layers_column</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_bot_elems</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_e2_e3_table</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_2d_ids</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_layer_ids</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;Flexible Mesh Geometry: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_type</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span>
+            <span class="sa">f</span><span class="s2">&quot;number of nodes: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">n_nodes</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span>
+            <span class="sa">f</span><span class="s2">&quot;number of elements: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">n_elements</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span>
+            <span class="sa">f</span><span class="s2">&quot;number of layers: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">n_layers</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span>
+            <span class="sa">f</span><span class="s2">&quot;number of sigma layers: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">n_sigma_layers</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span>
+            <span class="sa">f</span><span class="s2">&quot;projection: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">projection_string</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="p">)</span>
+
+    <span class="nd">@cached_property</span>
+    <span class="k">def</span> <span class="nf">geometry2d</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">to_2d_geometry</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">isel</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">idx</span><span class="p">:</span> <span class="n">Collection</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="n">keepdims</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">elements_to_geometry</span><span class="p">(</span>
+            <span class="n">elements</span><span class="o">=</span><span class="n">idx</span><span class="p">,</span> <span class="n">node_layers</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">keepdims</span><span class="o">=</span><span class="n">keepdims</span>
+        <span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">elements_to_geometry</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">elements</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="n">Collection</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="n">node_layers</span><span class="o">=</span><span class="s2">&quot;all&quot;</span><span class="p">,</span> <span class="n">keepdims</span><span class="o">=</span><span class="kc">False</span>
+    <span class="p">):</span>
+        <span class="n">sel_elements</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">elements</span><span class="p">,</span> <span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">integer</span><span class="p">)):</span>
+            <span class="n">sel_elements</span> <span class="o">=</span> <span class="p">[</span><span class="n">elements</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">sel_elements</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">elements</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">sel_elements</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">keepdims</span><span class="p">:</span>
+            <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">element_coordinates</span><span class="p">[</span><span class="n">sel_elements</span><span class="o">.</span><span class="n">pop</span><span class="p">(),</span> <span class="p">:]</span>
+
+            <span class="k">return</span> <span class="n">GeometryPoint3D</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="o">=</span><span class="n">z</span><span class="p">,</span> <span class="n">projection</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">projection</span><span class="p">)</span>
+
+        <span class="n">sorted_elements</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span>
+            <span class="n">sel_elements</span>
+        <span class="p">)</span>  <span class="c1"># make sure elements are sorted! # TODO is this necessary?</span>
+
+        <span class="c1"># create new geometry</span>
+        <span class="n">new_type</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_type</span>
+
+        <span class="n">layers_used</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">layer_ids</span><span class="p">[</span><span class="n">sorted_elements</span><span class="p">]</span>
+        <span class="n">unique_layer_ids</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">layers_used</span><span class="p">)</span>
+        <span class="n">n_layers</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">unique_layer_ids</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">n_layers</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">elem_bot</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_layer_elements</span><span class="p">(</span><span class="s2">&quot;bottom&quot;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">in1d</span><span class="p">(</span><span class="n">sorted_elements</span><span class="p">,</span> <span class="n">elem_bot</span><span class="p">)):</span>
+                <span class="n">n_layers</span> <span class="o">=</span> <span class="mi">1</span>
+
+        <span class="k">if</span> <span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_type</span> <span class="o">==</span> <span class="n">DfsuFileType</span><span class="o">.</span><span class="n">Dfsu3DSigma</span>
+            <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">_type</span> <span class="o">==</span> <span class="n">DfsuFileType</span><span class="o">.</span><span class="n">Dfsu3DSigmaZ</span>
+        <span class="p">)</span> <span class="ow">and</span> <span class="n">n_layers</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">new_type</span> <span class="o">=</span> <span class="n">DfsuFileType</span><span class="o">.</span><span class="n">Dfsu2D</span>
+
+        <span class="k">if</span> <span class="n">n_layers</span> <span class="o">==</span> <span class="mi">1</span> <span class="ow">and</span> <span class="n">node_layers</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;all&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">):</span>
+            <span class="n">node_layers</span> <span class="o">=</span> <span class="s2">&quot;bottom&quot;</span>
+
+        <span class="c1"># extract information for selected elements</span>
+        <span class="k">if</span> <span class="n">n_layers</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">elem2d</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">elem2d_ids</span><span class="p">[</span><span class="n">sorted_elements</span><span class="p">]</span>
+            <span class="n">geom2d</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">geometry2d</span>
+            <span class="n">node_ids</span><span class="p">,</span> <span class="n">elem_tbl</span> <span class="o">=</span> <span class="n">geom2d</span><span class="o">.</span><span class="n">_get_nodes_and_table_for_elements</span><span class="p">(</span><span class="n">elem2d</span><span class="p">)</span>
+            <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">elem_tbl</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">&lt;=</span> <span class="mi">4</span><span class="p">,</span> <span class="s2">&quot;Not a 2D element&quot;</span>
+            <span class="n">node_coords</span> <span class="o">=</span> <span class="n">geom2d</span><span class="o">.</span><span class="n">node_coordinates</span><span class="p">[</span><span class="n">node_ids</span><span class="p">]</span>
+            <span class="n">codes</span> <span class="o">=</span> <span class="n">geom2d</span><span class="o">.</span><span class="n">codes</span><span class="p">[</span><span class="n">node_ids</span><span class="p">]</span>
+            <span class="n">elem_ids</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_element_ids</span><span class="p">[</span><span class="n">elem2d</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">node_ids</span><span class="p">,</span> <span class="n">elem_tbl</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_nodes_and_table_for_elements</span><span class="p">(</span>
+                <span class="n">sorted_elements</span><span class="p">,</span> <span class="n">node_layers</span><span class="o">=</span><span class="n">node_layers</span>
+            <span class="p">)</span>
+            <span class="n">node_coords</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">node_coordinates</span><span class="p">[</span><span class="n">node_ids</span><span class="p">]</span>
+            <span class="n">codes</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">codes</span><span class="p">[</span><span class="n">node_ids</span><span class="p">]</span>
+            <span class="n">elem_ids</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_element_ids</span><span class="p">[</span><span class="n">sorted_elements</span><span class="p">]</span>
+        
+        <span class="k">if</span> <span class="n">new_type</span> <span class="o">==</span> <span class="n">DfsuFileType</span><span class="o">.</span><span class="n">Dfsu2D</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">GeometryFM2D</span><span class="p">(</span><span class="n">node_coordinates</span><span class="o">=</span><span class="n">node_coords</span><span class="p">,</span>
+                                <span class="n">codes</span><span class="o">=</span><span class="n">codes</span><span class="p">,</span>
+                                <span class="n">node_ids</span><span class="o">=</span><span class="n">node_ids</span><span class="p">,</span>
+                                <span class="n">projection</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">projection_string</span><span class="p">,</span>
+                                <span class="n">element_table</span><span class="o">=</span><span class="n">elem_tbl</span><span class="p">,</span>
+                                <span class="n">element_ids</span><span class="o">=</span><span class="n">elem_ids</span><span class="p">,</span>
+                                <span class="n">dfsu_type</span><span class="o">=</span><span class="n">DfsuFileType</span><span class="o">.</span><span class="n">Dfsu2D</span><span class="p">,</span>
+                                <span class="n">reindex</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">lowest_sigma</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_layers</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_sigma_layers</span>
+            <span class="n">n_sigma</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">unique_layer_ids</span> <span class="o">&gt;=</span> <span class="n">lowest_sigma</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">n_layers</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">elem_tbl</span><span class="p">):</span>
+                <span class="k">return</span> <span class="n">GeometryFMVerticalColumn</span><span class="p">(</span><span class="n">node_coordinates</span><span class="o">=</span><span class="n">node_coords</span><span class="p">,</span>
+                                                <span class="n">codes</span><span class="o">=</span><span class="n">codes</span><span class="p">,</span>
+                                                <span class="n">node_ids</span><span class="o">=</span><span class="n">node_ids</span><span class="p">,</span>
+                                                <span class="n">projection</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">projection_string</span><span class="p">,</span>
+                                                <span class="n">element_table</span><span class="o">=</span><span class="n">elem_tbl</span><span class="p">,</span>
+                                                <span class="n">element_ids</span><span class="o">=</span><span class="n">elem_ids</span><span class="p">,</span>
+                                                <span class="n">dfsu_type</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_type</span><span class="p">,</span>
+                                                <span class="n">reindex</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                                                <span class="n">n_layers</span><span class="o">=</span><span class="n">n_layers</span><span class="p">,</span>
+                                                <span class="n">n_sigma</span><span class="o">=</span><span class="n">n_sigma</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">klass</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span>
+                <span class="k">return</span> <span class="n">klass</span><span class="p">(</span><span class="n">node_coordinates</span><span class="o">=</span><span class="n">node_coords</span><span class="p">,</span>
+                                    <span class="n">codes</span><span class="o">=</span><span class="n">codes</span><span class="p">,</span>
+                                    <span class="n">node_ids</span><span class="o">=</span><span class="n">node_ids</span><span class="p">,</span>
+                                    <span class="n">projection</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">projection_string</span><span class="p">,</span>
+                                    <span class="n">element_table</span><span class="o">=</span><span class="n">elem_tbl</span><span class="p">,</span>
+                                    <span class="n">element_ids</span><span class="o">=</span><span class="n">elem_ids</span><span class="p">,</span>
+                                    <span class="n">dfsu_type</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_type</span><span class="p">,</span>
+                                    <span class="n">reindex</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                                    <span class="n">n_layers</span><span class="o">=</span><span class="n">n_layers</span><span class="p">,</span>
+                                    <span class="n">n_sigma</span><span class="o">=</span><span class="n">n_sigma</span><span class="p">)</span>
+
+
+    <span class="nd">@cached_property</span>
+    <span class="k">def</span> <span class="nf">element_coordinates</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Center coordinates of each element&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_calc_element_coordinates</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">_calc_element_coordinates</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="n">node_coordinates</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">node_coordinates</span>
+
+        <span class="n">element_table</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">element_table</span>
+
+        <span class="n">n_elements</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">element_table</span><span class="p">)</span>
+        <span class="n">ec</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">([</span><span class="n">n_elements</span><span class="p">,</span> <span class="mi">3</span><span class="p">])</span>
+
+        <span class="c1"># pre-allocate for speed</span>
+        <span class="n">maxnodes</span> <span class="o">=</span> <span class="mi">4</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_2d</span> <span class="k">else</span> <span class="mi">8</span>
+        <span class="n">idx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">maxnodes</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
+        <span class="n">xcoords</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">([</span><span class="n">maxnodes</span><span class="p">,</span> <span class="n">n_elements</span><span class="p">])</span>
+        <span class="n">ycoords</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">([</span><span class="n">maxnodes</span><span class="p">,</span> <span class="n">n_elements</span><span class="p">])</span>
+        <span class="n">zcoords</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">([</span><span class="n">maxnodes</span><span class="p">,</span> <span class="n">n_elements</span><span class="p">])</span>
+        <span class="n">nnodes_per_elem</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">n_elements</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_elements</span><span class="p">):</span>
+            <span class="n">nodes</span> <span class="o">=</span> <span class="n">element_table</span><span class="p">[</span><span class="n">j</span><span class="p">]</span>
+            <span class="n">nnodes</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">nodes</span><span class="p">)</span>
+            <span class="n">nnodes_per_elem</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">nnodes</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nnodes</span><span class="p">):</span>
+                <span class="n">idx</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">nodes</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>  <span class="c1"># - 1</span>
+
+            <span class="n">xcoords</span><span class="p">[:</span><span class="n">nnodes</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">node_coordinates</span><span class="p">[</span><span class="n">idx</span><span class="p">[:</span><span class="n">nnodes</span><span class="p">],</span> <span class="mi">0</span><span class="p">]</span>
+            <span class="n">ycoords</span><span class="p">[:</span><span class="n">nnodes</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">node_coordinates</span><span class="p">[</span><span class="n">idx</span><span class="p">[:</span><span class="n">nnodes</span><span class="p">],</span> <span class="mi">1</span><span class="p">]</span>
+            <span class="n">zcoords</span><span class="p">[:</span><span class="n">nnodes</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">node_coordinates</span><span class="p">[</span><span class="n">idx</span><span class="p">[:</span><span class="n">nnodes</span><span class="p">],</span> <span class="mi">2</span><span class="p">]</span>
+
+        <span class="n">ec</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">xcoords</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span> <span class="o">/</span> <span class="n">nnodes_per_elem</span>
+        <span class="n">ec</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">ycoords</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span> <span class="o">/</span> <span class="n">nnodes_per_elem</span>
+        <span class="n">ec</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">zcoords</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span> <span class="o">/</span> <span class="n">nnodes_per_elem</span>
+
+        <span class="k">return</span> <span class="n">ec</span>
+
+    <span class="k">def</span> <span class="nf">_get_nodes_and_table_for_elements</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">elements</span><span class="p">,</span> <span class="n">node_layers</span><span class="o">=</span><span class="s2">&quot;all&quot;</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;list of nodes and element table for a list of elements</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        elements : np.array(int)</span>
+<span class="sd">            array of element ids</span>
+<span class="sd">        node_layers : str, optional</span>
+<span class="sd">            for 3D files &#39;all&#39;, &#39;bottom&#39; or &#39;top&#39; nodes</span>
+<span class="sd">            of each element, by default &#39;all&#39;</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        np.array(int)</span>
+<span class="sd">            array of node ids (unique)</span>
+<span class="sd">        list(list(int))</span>
+<span class="sd">            element table with a list of nodes for each element</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">elem_tbl</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">elements</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">dtype</span><span class="p">(</span><span class="s2">&quot;O&quot;</span><span class="p">))</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">node_layers</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="n">node_layers</span> <span class="o">==</span> <span class="s2">&quot;all&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_2d</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">j</span><span class="p">,</span> <span class="n">eid</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">elements</span><span class="p">):</span>
+                <span class="n">elem_tbl</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">element_table</span><span class="p">[</span><span class="n">eid</span><span class="p">])</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># 3D =&gt; 2D</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">node_layers</span> <span class="o">!=</span> <span class="s2">&quot;bottom&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">node_layers</span> <span class="o">!=</span> <span class="s2">&quot;top&quot;</span><span class="p">):</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;node_layers must be either all, bottom or top&quot;</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">j</span><span class="p">,</span> <span class="n">eid</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">elements</span><span class="p">):</span>
+                <span class="n">elem_nodes</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">element_table</span><span class="p">[</span><span class="n">eid</span><span class="p">])</span>
+                <span class="n">nn</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">elem_nodes</span><span class="p">)</span>
+                <span class="n">halfn</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">nn</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">node_layers</span> <span class="o">==</span> <span class="s2">&quot;bottom&quot;</span><span class="p">:</span>
+                    <span class="n">elem_nodes</span> <span class="o">=</span> <span class="n">elem_nodes</span><span class="p">[:</span><span class="n">halfn</span><span class="p">]</span>
+                <span class="k">if</span> <span class="n">node_layers</span> <span class="o">==</span> <span class="s2">&quot;top&quot;</span><span class="p">:</span>
+                    <span class="n">elem_nodes</span> <span class="o">=</span> <span class="n">elem_nodes</span><span class="p">[</span><span class="n">halfn</span><span class="p">:]</span>
+                <span class="n">elem_tbl</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">elem_nodes</span>
+
+        <span class="n">nodes</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">hstack</span><span class="p">(</span><span class="n">elem_tbl</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">nodes</span><span class="p">,</span> <span class="n">elem_tbl</span>
+
+    <span class="k">def</span> <span class="nf">to_2d_geometry</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;extract 2d geometry from 3d geometry</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        UnstructuredGeometry</span>
+<span class="sd">            2d geometry (bottom nodes)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># extract information for selected elements</span>
+        <span class="n">elem_ids</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">bottom_elements</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_type</span> <span class="o">==</span> <span class="n">DfsuFileType</span><span class="o">.</span><span class="n">Dfsu3DSigmaZ</span><span class="p">:</span>
+            <span class="c1"># for z-layers nodes will not match on neighboring elements!</span>
+            <span class="n">elem_ids</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">top_elements</span>
+
+        <span class="n">node_ids</span><span class="p">,</span> <span class="n">elem_tbl</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_nodes_and_table_for_elements</span><span class="p">(</span>
+            <span class="n">elem_ids</span><span class="p">,</span> <span class="n">node_layers</span><span class="o">=</span><span class="s2">&quot;bottom&quot;</span>
+        <span class="p">)</span>
+        <span class="n">node_coords</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">node_coordinates</span><span class="p">[</span><span class="n">node_ids</span><span class="p">]</span>
+        <span class="n">codes</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_codes</span><span class="p">[</span><span class="n">node_ids</span><span class="p">]</span>
+
+        <span class="c1"># create new geometry</span>
+        <span class="n">geom</span> <span class="o">=</span> <span class="n">GeometryFM2D</span><span class="p">(</span>
+            <span class="n">node_coordinates</span><span class="o">=</span><span class="n">node_coords</span><span class="p">,</span>
+            <span class="n">codes</span><span class="o">=</span><span class="n">codes</span><span class="p">,</span>
+            <span class="n">node_ids</span><span class="o">=</span><span class="n">node_ids</span><span class="p">,</span>
+            <span class="n">projection</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">projection_string</span><span class="p">,</span>
+            <span class="n">element_table</span><span class="o">=</span><span class="n">elem_tbl</span><span class="p">,</span>
+            <span class="n">element_ids</span><span class="o">=</span><span class="n">elem_ids</span><span class="p">,</span>
+            <span class="n">validate</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+            <span class="n">dfsu_type</span><span class="o">=</span><span class="n">DfsuFileType</span><span class="o">.</span><span class="n">Dfsu2D</span><span class="p">,</span>
+            <span class="n">reindex</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="c1"># Fix z-coordinate for sigma-z:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_type</span> <span class="o">==</span> <span class="n">DfsuFileType</span><span class="o">.</span><span class="n">Dfsu3DSigmaZ</span><span class="p">:</span>
+            <span class="n">zn</span> <span class="o">=</span> <span class="n">geom</span><span class="o">.</span><span class="n">node_coordinates</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+            <span class="k">for</span> <span class="n">j</span><span class="p">,</span> <span class="n">elem_nodes</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">geom</span><span class="o">.</span><span class="n">element_table</span><span class="p">):</span>
+                <span class="n">elem_nodes3d</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">element_table</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">bottom_elements</span><span class="p">[</span><span class="n">j</span><span class="p">]]</span>
+                <span class="k">for</span> <span class="n">jn</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">elem_nodes</span><span class="p">)):</span>
+                    <span class="n">znj_3d</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">node_coordinates</span><span class="p">[</span><span class="n">elem_nodes3d</span><span class="p">[</span><span class="n">jn</span><span class="p">],</span> <span class="mi">2</span><span class="p">]</span>
+                    <span class="n">zn</span><span class="p">[</span><span class="n">elem_nodes</span><span class="p">[</span><span class="n">jn</span><span class="p">]]</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">zn</span><span class="p">[</span><span class="n">elem_nodes</span><span class="p">[</span><span class="n">jn</span><span class="p">]],</span> <span class="n">znj_3d</span><span class="p">)</span>
+            <span class="n">geom</span><span class="o">.</span><span class="n">node_coordinates</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">zn</span>
+
+        <span class="k">return</span> <span class="n">geom</span>
+
+    <span class="nd">@cached_property</span>
+    <span class="k">def</span> <span class="nf">n_elements</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Number of 3d elements&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">element_table</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">n_nodes</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">node_coordinates</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">is_2d</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="kc">False</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">ndim</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="k">return</span> <span class="mi">3</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">is_layered</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">True</span>
+
+    <span class="nd">@cached_property</span>
+    <span class="k">def</span> <span class="nf">layer_ids</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;The layer number (0=bottom, 1, 2, ...) for each 3d element&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_layer_ids</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">res</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_2d_to_3d_association</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_e2_e3_table</span> <span class="o">=</span> <span class="n">res</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_2d_ids</span> <span class="o">=</span> <span class="n">res</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_layer_ids</span> <span class="o">=</span> <span class="n">res</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_layer_ids</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">n_layers</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Maximum number of layers&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_n_layers</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">n_sigma_layers</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Number of sigma layers&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_n_sigma</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">n_z_layers</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Maximum number of z-layers&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_layers</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_sigma_layers</span>
+
+    <span class="nd">@cached_property</span>
+    <span class="k">def</span> <span class="nf">top_elements</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;List of 3d element ids of surface layer&quot;&quot;&quot;</span>
+        <span class="c1"># note: if subset of elements is selected then this cannot be done!</span>
+
+        <span class="c1"># fast path if no z-layers</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_z_layers</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span>
+                <span class="n">start</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">n_sigma_layers</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span>
+                <span class="n">stop</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">n_elements</span><span class="p">,</span>
+                <span class="n">step</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">n_sigma_layers</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># slow path</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_find_top_layer_elements</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">element_table</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_elements_in_area</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">area</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Find element ids of elements inside area&quot;&quot;&quot;</span>
+        <span class="n">idx2d</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">geometry2d</span><span class="o">.</span><span class="n">_elements_in_area</span><span class="p">(</span><span class="n">area</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">idx2d</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">hstack</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">e2_e3_table</span><span class="p">[</span><span class="n">idx2d</span><span class="p">])</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([],</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_find_top_layer_elements</span><span class="p">(</span><span class="n">elementTable</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Find element indices (zero based) of the elements being the upper-most element</span>
+<span class="sd">        in its column.</span>
+<span class="sd">        Each column is identified by matching node id numbers. For 3D elements the</span>
+<span class="sd">        last half of the node numbers of the bottom element must match the first half</span>
+<span class="sd">        of the node numbers in the top element. For 2D vertical elements the order of</span>
+<span class="sd">        the node numbers in the bottom element (last half number of nodes) are reversed</span>
+<span class="sd">        compared to those in the top element (first half number of nodes).</span>
+<span class="sd">        To find the number of elements in each column, assuming the result</span>
+<span class="sd">        is stored in res:</span>
+<span class="sd">        For the first column it is res[0]+1.</span>
+<span class="sd">        For the i&#39;th column, it is res[i]-res[i-1].</span>
+<span class="sd">        :returns: A list of element indices of top layer elements</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">topLayerElments</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="c1"># Find top layer elements by matching the number numers of the last half of elmt i</span>
+        <span class="c1"># with the first half of element i+1.</span>
+        <span class="c1"># Elements always start from the bottom, and the element of one columne are following</span>
+        <span class="c1"># each other in the element table.</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">elementTable</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">):</span>
+            <span class="n">elmt1</span> <span class="o">=</span> <span class="n">elementTable</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+            <span class="n">elmt2</span> <span class="o">=</span> <span class="n">elementTable</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span>
+
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">elmt1</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">elmt2</span><span class="p">):</span>
+                <span class="c1"># elements with different number of nodes can not be on top of each other,</span>
+                <span class="c1"># so elmt2 must be another column, and elmt1 must be a top element</span>
+                <span class="n">topLayerElments</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+                <span class="k">continue</span>
+
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">elmt1</span><span class="p">)</span> <span class="o">%</span> <span class="mi">2</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span>
+                    <span class="s2">&quot;In a layered mesh, each element must have an even number of elements (element index &quot;</span>
+                    <span class="o">+</span> <span class="n">i</span>
+                    <span class="o">+</span> <span class="s2">&quot;)&quot;</span>
+                <span class="p">)</span>
+
+            <span class="c1"># Number of nodes in a 2D element</span>
+            <span class="n">elmt2DSize</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">elmt1</span><span class="p">)</span> <span class="o">//</span> <span class="mi">2</span>
+
+            <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">elmt2DSize</span><span class="p">):</span>
+                <span class="k">if</span> <span class="n">elmt2DSize</span> <span class="o">&gt;</span> <span class="mi">2</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">elmt1</span><span class="p">[</span><span class="n">j</span> <span class="o">+</span> <span class="n">elmt2DSize</span><span class="p">]</span> <span class="o">!=</span> <span class="n">elmt2</span><span class="p">[</span><span class="n">j</span><span class="p">]:</span>
+                        <span class="c1"># At least one node number did not match</span>
+                        <span class="c1"># so elmt2 must be another column, and elmt1 must be a top element</span>
+                        <span class="n">topLayerElments</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+                        <span class="k">break</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="c1"># for 2D vertical profiles the nodes in the element on the</span>
+                    <span class="c1"># top is in reverse order of those in the bottom.</span>
+                    <span class="k">if</span> <span class="n">elmt1</span><span class="p">[</span><span class="n">j</span> <span class="o">+</span> <span class="n">elmt2DSize</span><span class="p">]</span> <span class="o">!=</span> <span class="n">elmt2</span><span class="p">[(</span><span class="n">elmt2DSize</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">-</span> <span class="n">j</span><span class="p">]:</span>
+                        <span class="c1"># At least one node number did not match</span>
+                        <span class="c1"># so elmt2 must be another column, and elmt1 must be a top element</span>
+                        <span class="n">topLayerElments</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+                        <span class="k">break</span>
+
+        <span class="c1"># The last element will always be a top layer element</span>
+        <span class="n">topLayerElments</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">elementTable</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">topLayerElments</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">n_layers_per_column</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;List of number of layers for each column&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_n_layers</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Object has no layers: cannot find n_layers_per_column&quot;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="kc">None</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">_n_layers_column</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">top_elems</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">top_elements</span>
+            <span class="n">n</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">top_elems</span><span class="p">)</span>
+            <span class="n">tmp</span> <span class="o">=</span> <span class="n">top_elems</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+            <span class="n">tmp</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+            <span class="n">tmp</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="n">n</span><span class="p">]</span> <span class="o">=</span> <span class="n">top_elems</span><span class="p">[</span><span class="mi">0</span> <span class="p">:</span> <span class="p">(</span><span class="n">n</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_n_layers_column</span> <span class="o">=</span> <span class="n">top_elems</span> <span class="o">-</span> <span class="n">tmp</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_n_layers_column</span>
+
+    <span class="nd">@cached_property</span>
+    <span class="k">def</span> <span class="nf">bottom_elements</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;List of 3d element ids of bottom layer&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">top_elements</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_layers_per_column</span> <span class="o">+</span> <span class="mi">1</span>
+
+    <span class="k">def</span> <span class="nf">get_layer_elements</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">layers</span><span class="p">,</span> <span class="n">layer</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;3d element ids for one (or more) specific layer(s)</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        layers : int or list(int)</span>
+<span class="sd">            layer between 0 (bottom) and n_layers-1 (top)</span>
+<span class="sd">            (can also be negative counting from -1 at the top layer)</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        np.array(int)</span>
+<span class="sd">            element ids</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">layers</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">layers</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;surface&quot;</span><span class="p">,</span> <span class="s2">&quot;top&quot;</span><span class="p">):</span>
+                <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">top_elements</span>
+            <span class="k">elif</span> <span class="n">layers</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;bottom&quot;</span><span class="p">):</span>
+                <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">bottom_elements</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;layers &#39;</span><span class="si">{</span><span class="n">layers</span><span class="si">}</span><span class="s2">&#39; not recognized (&#39;top&#39;, &#39;bottom&#39; or integer)&quot;</span>
+                <span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">isscalar</span><span class="p">(</span><span class="n">layers</span><span class="p">):</span>
+            <span class="n">elem_ids</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">layer</span> <span class="ow">in</span> <span class="n">layers</span><span class="p">:</span>
+                <span class="n">elem_ids</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">get_layer_elements</span><span class="p">(</span><span class="n">layer</span><span class="p">))</span>
+            <span class="n">elem_ids</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">(</span><span class="n">elem_ids</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">elem_ids</span><span class="p">)</span>
+
+        <span class="n">n_lay</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_layers</span>
+        <span class="k">if</span> <span class="n">n_lay</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">InvalidGeometry</span><span class="p">(</span><span class="s2">&quot;Object has no layers: cannot get_layer_elements&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">layers</span> <span class="o">&lt;</span> <span class="p">(</span><span class="o">-</span><span class="n">n_lay</span><span class="p">)</span> <span class="ow">or</span> <span class="n">layers</span> <span class="o">&gt;=</span> <span class="n">n_lay</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;Layer </span><span class="si">{</span><span class="n">layers</span><span class="si">}</span><span class="s2"> not allowed; must be between -</span><span class="si">{</span><span class="n">n_lay</span><span class="si">}</span><span class="s2"> and </span><span class="si">{</span><span class="n">n_lay</span><span class="o">-</span><span class="mi">1</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">layers</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">layers</span> <span class="o">=</span> <span class="n">layers</span> <span class="o">+</span> <span class="n">n_lay</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_element_ids</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">layer_ids</span> <span class="o">==</span> <span class="n">layers</span><span class="p">]</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">e2_e3_table</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;The 2d-to-3d element connectivity table for a 3d object&quot;&quot;&quot;</span>
+
+        <span class="c1"># e2_e3, 2d_ids and layer_ids are all set at the same time</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_e2_e3_table</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">res</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_2d_to_3d_association</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_e2_e3_table</span> <span class="o">=</span> <span class="n">res</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_2d_ids</span> <span class="o">=</span> <span class="n">res</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_layer_ids</span> <span class="o">=</span> <span class="n">res</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_e2_e3_table</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">elem2d_ids</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;The associated 2d element id for each 3d element&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_2d_ids</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">res</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_2d_to_3d_association</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_e2_e3_table</span> <span class="o">=</span> <span class="n">res</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_2d_ids</span> <span class="o">=</span> <span class="n">res</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_layer_ids</span> <span class="o">=</span> <span class="n">res</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_2d_ids</span>
+
+    <span class="k">def</span> <span class="nf">_get_2d_to_3d_association</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">e2_to_e3</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="p">[]</span>
+        <span class="p">)</span>  <span class="c1"># for each 2d element: the corresponding 3d element ids from bot to top</span>
+        <span class="n">index2d</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># for each 3d element: the associated 2d element id</span>
+        <span class="n">layerid</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># for each 3d element: the associated layer number</span>
+        <span class="n">n2d</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">top_elements</span><span class="p">)</span>
+        <span class="n">topid</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">top_elements</span>
+        <span class="n">botid</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">bottom_elements</span>
+        <span class="c1"># layer_ids = 0, 1, 2...</span>
+        <span class="n">global_layer_ids</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_layers</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n2d</span><span class="p">):</span>
+            <span class="n">col</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">botid</span><span class="p">[</span><span class="n">j</span><span class="p">],</span> <span class="n">topid</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+
+            <span class="n">e2_to_e3</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">col</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">col</span><span class="p">:</span>
+                <span class="n">index2d</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">j</span><span class="p">)</span>
+
+            <span class="n">n_local_layers</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">col</span><span class="p">)</span>
+            <span class="n">local_layers</span> <span class="o">=</span> <span class="n">global_layer_ids</span><span class="p">[</span><span class="o">-</span><span class="n">n_local_layers</span><span class="p">:]</span>
+            <span class="k">for</span> <span class="n">ll</span> <span class="ow">in</span> <span class="n">local_layers</span><span class="p">:</span>
+                <span class="n">layerid</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ll</span><span class="p">)</span>
+
+        <span class="n">e2_to_e3</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">e2_to_e3</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">object</span><span class="p">)</span>
+        <span class="n">index2d</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">index2d</span><span class="p">)</span>
+        <span class="n">layerid</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">layerid</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">e2_to_e3</span><span class="p">,</span> <span class="n">index2d</span><span class="p">,</span> <span class="n">layerid</span>
+
+    <span class="k">def</span> <span class="nf">_z_idx_in_column</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">e3_col</span><span class="p">,</span> <span class="n">z</span><span class="p">):</span>
+        <span class="n">dz</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dz</span><span class="p">[</span><span class="n">e3_col</span><span class="p">]</span>
+        <span class="n">z_col</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">element_coordinates</span><span class="p">[</span><span class="n">e3_col</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span>
+        <span class="n">z_face</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">z_col</span> <span class="o">-</span> <span class="n">dz</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="n">z_col</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">dz</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">z</span> <span class="o">&lt;</span> <span class="n">z_face</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">or</span> <span class="n">z</span> <span class="o">&gt;</span> <span class="n">z_face</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]:</span>
+            <span class="n">xy</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">element_coordinates</span><span class="p">[</span><span class="n">e3_col</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="p">:</span><span class="mi">2</span><span class="p">])</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;z value &#39;</span><span class="si">{</span><span class="n">z</span><span class="si">}</span><span class="s2">&#39; is outside water column [</span><span class="si">{</span><span class="n">z_face</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s2">,</span><span class="si">{</span><span class="n">z_face</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="si">}</span><span class="s2">] in point x,y=</span><span class="si">{</span><span class="n">xy</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="p">)</span>
+        <span class="n">idx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">searchsorted</span><span class="p">(</span><span class="n">z_face</span><span class="p">,</span> <span class="n">z</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span>
+        <span class="k">return</span> <span class="n">idx</span>
+
+    <span class="k">def</span> <span class="nf">_find_elem3d_from_elem2d</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">elem2d</span><span class="p">,</span> <span class="n">z</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Find 3d element ids from 2d element ids and z-values&quot;&quot;&quot;</span>
+
+        <span class="c1"># TODO: coordinate with _find_3d_from_2d_points()</span>
+
+        <span class="n">elem2d</span> <span class="o">=</span> <span class="p">[</span><span class="n">elem2d</span><span class="p">]</span> <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">isscalar</span><span class="p">(</span><span class="n">elem2d</span><span class="p">)</span> <span class="k">else</span> <span class="n">elem2d</span>
+        <span class="n">elem2d</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">elem2d</span><span class="p">)</span>
+        <span class="n">z_vec</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">full</span><span class="p">(</span><span class="n">elem2d</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">fill_value</span><span class="o">=</span><span class="n">z</span><span class="p">)</span> <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">isscalar</span><span class="p">(</span><span class="n">z</span><span class="p">)</span> <span class="k">else</span> <span class="n">z</span>
+        <span class="n">elem3d</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">full_like</span><span class="p">(</span><span class="n">elem2d</span><span class="p">,</span> <span class="n">fill_value</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">j</span><span class="p">,</span> <span class="n">e2</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">elem2d</span><span class="p">):</span>
+            <span class="n">idx_3d</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">hstack</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">e2_e3_table</span><span class="p">[</span><span class="n">e2</span><span class="p">])</span>
+            <span class="n">elem3d</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">idx_3d</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_z_idx_in_column</span><span class="p">(</span><span class="n">idx_3d</span><span class="p">,</span> <span class="n">z_vec</span><span class="p">[</span><span class="n">j</span><span class="p">])]</span>
+
+            <span class="c1"># z_col = self.element_coordinates[idx_3d, 2]</span>
+            <span class="c1"># elem3d[j] = (np.abs(z_col - z_vec[j])).argmin()  # nearest</span>
+        <span class="k">return</span> <span class="n">elem3d</span>
+
+    <span class="k">def</span> <span class="nf">_find_3d_from_2d_points</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">elem2d</span><span class="p">,</span> <span class="n">z</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">layer</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+
+        <span class="n">was_scalar</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">isscalar</span><span class="p">(</span><span class="n">elem2d</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">was_scalar</span><span class="p">:</span>
+            <span class="n">elem2d</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">elem2d</span><span class="p">])</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">orig_shape</span> <span class="o">=</span> <span class="n">elem2d</span><span class="o">.</span><span class="n">shape</span>
+            <span class="n">elem2d</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">elem2d</span><span class="p">,</span> <span class="p">(</span><span class="n">elem2d</span><span class="o">.</span><span class="n">size</span><span class="p">,))</span>
+
+        <span class="k">if</span> <span class="p">(</span><span class="n">layer</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">z</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">):</span>
+            <span class="c1"># return top element</span>
+            <span class="n">idx</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">top_elements</span><span class="p">[</span><span class="n">elem2d</span><span class="p">]</span>  <span class="c1"># TODO: return whole column instead</span>
+
+        <span class="k">elif</span> <span class="n">layer</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">idx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="n">elem2d</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">isscalar</span><span class="p">(</span><span class="n">z</span><span class="p">):</span>
+                <span class="n">z</span> <span class="o">=</span> <span class="n">z</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">ones_like</span><span class="p">(</span><span class="n">elem2d</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+            <span class="n">elem3d</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">e2_e3_table</span><span class="p">[</span><span class="n">elem2d</span><span class="p">]</span>
+            <span class="k">for</span> <span class="n">j</span><span class="p">,</span> <span class="n">row</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">elem3d</span><span class="p">):</span>
+                <span class="n">zc</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">element_coordinates</span><span class="p">[</span><span class="n">row</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span>
+                <span class="n">d3d</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">z</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">-</span> <span class="n">zc</span><span class="p">)</span>
+                <span class="n">idx</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="n">d3d</span><span class="o">.</span><span class="n">argsort</span><span class="p">()[</span><span class="mi">0</span><span class="p">]]</span>
+
+        <span class="k">elif</span> <span class="n">z</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="mi">0</span> <span class="o">&lt;=</span> <span class="n">layer</span> <span class="o">&lt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_z_layers</span> <span class="o">-</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="n">idx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="n">elem2d</span><span class="p">)</span>
+                <span class="n">elem3d</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">e2_e3_table</span><span class="p">[</span><span class="n">elem2d</span><span class="p">]</span>
+                <span class="k">for</span> <span class="n">j</span><span class="p">,</span> <span class="n">row</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">elem3d</span><span class="p">):</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="n">layer_ids</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">layer_ids</span><span class="p">[</span><span class="n">row</span><span class="p">]</span>
+                        <span class="nb">id</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="nb">list</span><span class="p">(</span><span class="n">layer_ids</span><span class="p">)</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">layer</span><span class="p">)]</span>
+                        <span class="n">idx</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="nb">id</span>
+                    <span class="k">except</span> <span class="ne">IndexError</span><span class="p">:</span>
+                        <span class="k">raise</span> <span class="ne">IndexError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Layer </span><span class="si">{</span><span class="n">layer</span><span class="si">}</span><span class="s2"> not present for 2d element </span><span class="si">{</span><span class="n">elem2d</span><span class="p">[</span><span class="n">j</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c1"># sigma layer</span>
+                <span class="n">idx</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_layer_elements</span><span class="p">(</span><span class="n">layer</span><span class="p">)[</span><span class="n">elem2d</span><span class="p">]</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;layer and z cannot both be supplied!&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">was_scalar</span><span class="p">:</span>
+            <span class="n">idx</span> <span class="o">=</span> <span class="n">idx</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">idx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">idx</span><span class="p">,</span> <span class="n">orig_shape</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">idx</span>
+
+    <span class="nd">@cached_property</span>
+    <span class="k">def</span> <span class="nf">_dz</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Height of each 3d element (using static zn information)&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_calc_dz</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">_calc_dz</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">elements</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">zn</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Height of 3d elements using static or dynamic zn information&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">elements</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">element_table</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">element_table</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">element_table</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">element_table</span><span class="p">[</span><span class="n">elements</span><span class="p">]</span>
+        <span class="n">n_elements</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">element_table</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">zn</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">elements</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">zn</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">node_coordinates</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">nodes</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">hstack</span><span class="p">(</span><span class="n">element_table</span><span class="p">))</span>
+                <span class="n">zn</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">node_coordinates</span><span class="p">[</span><span class="n">nodes</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span>
+
+        <span class="n">zn_is_2d</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">zn</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span>
+        <span class="n">shape</span> <span class="o">=</span> <span class="p">(</span><span class="n">zn</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">n_elements</span><span class="p">)</span> <span class="k">if</span> <span class="n">zn_is_2d</span> <span class="k">else</span> <span class="p">(</span><span class="n">n_elements</span><span class="p">,)</span>
+        <span class="n">dz</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">full</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="n">shape</span><span class="p">,</span> <span class="n">fill_value</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">zn_is_2d</span><span class="p">:</span>
+            <span class="c1"># dynamic zn</span>
+            <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_elements</span><span class="p">):</span>
+                <span class="n">nodes</span> <span class="o">=</span> <span class="n">element_table</span><span class="p">[</span><span class="n">j</span><span class="p">]</span>
+                <span class="n">halfn</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">nodes</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span>
+                <span class="n">z_bot</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">zn</span><span class="p">[:,</span> <span class="n">nodes</span><span class="p">[:</span><span class="n">halfn</span><span class="p">]],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+                <span class="n">z_top</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">zn</span><span class="p">[:,</span> <span class="n">nodes</span><span class="p">[</span><span class="n">halfn</span><span class="p">:]],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+                <span class="n">dz</span><span class="p">[:,</span> <span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">z_top</span> <span class="o">-</span> <span class="n">z_bot</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># static zn</span>
+            <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_elements</span><span class="p">):</span>
+                <span class="n">nodes</span> <span class="o">=</span> <span class="n">element_table</span><span class="p">[</span><span class="n">j</span><span class="p">]</span>
+                <span class="n">halfn</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">nodes</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span>
+                <span class="n">z_bot</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">zn</span><span class="p">[</span><span class="n">nodes</span><span class="p">[:</span><span class="n">halfn</span><span class="p">]])</span>
+                <span class="n">z_top</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">zn</span><span class="p">[</span><span class="n">nodes</span><span class="p">[</span><span class="n">halfn</span><span class="p">:]])</span>
+                <span class="n">dz</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">z_top</span> <span class="o">-</span> <span class="n">z_bot</span>
+
+        <span class="k">return</span> <span class="n">dz</span>
+
+
+<div class="viewcode-block" id="GeometryFM3D">
+<a class="viewcode-back" href="../../../dfsu-3d.html#mikeio.spatial._FM_geometry_layered.GeometryFM3D">[docs]</a>
+<span class="k">class</span> <span class="nc">GeometryFM3D</span><span class="p">(</span><span class="n">_GeometryFMLayered</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="o">*</span><span class="p">,</span>
+        <span class="n">node_coordinates</span><span class="p">,</span>
+        <span class="n">element_table</span><span class="p">,</span>
+        <span class="n">codes</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">projection</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">dfsu_type</span><span class="o">=</span><span class="n">DfsuFileType</span><span class="o">.</span><span class="n">Dfsu3DSigma</span><span class="p">,</span>
+        <span class="n">element_ids</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">node_ids</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">n_layers</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>  <span class="c1"># at least 1 layer</span>
+        <span class="n">n_sigma</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">validate</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">reindex</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
+            <span class="n">node_coordinates</span><span class="o">=</span><span class="n">node_coordinates</span><span class="p">,</span>
+            <span class="n">element_table</span><span class="o">=</span><span class="n">element_table</span><span class="p">,</span>
+            <span class="n">codes</span><span class="o">=</span><span class="n">codes</span><span class="p">,</span>
+            <span class="n">projection</span><span class="o">=</span><span class="n">projection</span><span class="p">,</span>
+            <span class="n">dfsu_type</span><span class="o">=</span><span class="n">dfsu_type</span><span class="p">,</span>
+            <span class="n">element_ids</span><span class="o">=</span><span class="n">element_ids</span><span class="p">,</span>
+            <span class="n">node_ids</span><span class="o">=</span><span class="n">node_ids</span><span class="p">,</span>
+            <span class="n">n_layers</span><span class="o">=</span><span class="n">n_layers</span><span class="p">,</span>
+            <span class="n">n_sigma</span><span class="o">=</span><span class="n">n_sigma</span><span class="p">,</span>
+            <span class="n">validate</span><span class="o">=</span><span class="n">validate</span><span class="p">,</span>
+            <span class="n">reindex</span><span class="o">=</span><span class="n">reindex</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">plot</span> <span class="o">=</span> <span class="n">_GeometryFMPlotter</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">boundary_polylines</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">geometry2d</span><span class="o">.</span><span class="n">boundary_polylines</span>
+
+    <span class="k">def</span> <span class="nf">contains</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">points</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">bool</span><span class="p">]:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">geometry2d</span><span class="o">.</span><span class="n">contains</span><span class="p">(</span><span class="n">points</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">to_mesh</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">outfilename</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">geometry2d</span><span class="o">.</span><span class="n">to_mesh</span><span class="p">(</span><span class="n">outfilename</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">find_index</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">z</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">coords</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">area</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">layers</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+
+        <span class="k">if</span> <span class="n">layers</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">idx</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_layer_elements</span><span class="p">(</span><span class="n">layers</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">idx</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_element_ids</span>
+
+        <span class="k">if</span> <span class="p">(</span>
+            <span class="p">(</span><span class="n">coords</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">)</span>
+            <span class="ow">or</span> <span class="p">(</span><span class="n">x</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">)</span>
+            <span class="ow">or</span> <span class="p">(</span><span class="n">y</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">)</span>
+            <span class="ow">or</span> <span class="p">(</span><span class="n">z</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="p">):</span>
+            <span class="k">if</span> <span class="n">area</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                    <span class="s2">&quot;Coordinates and area cannot be provided at the same time!&quot;</span>
+                <span class="p">)</span>
+            <span class="k">if</span> <span class="n">coords</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">coords</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">atleast_2d</span><span class="p">(</span><span class="n">coords</span><span class="p">)</span>
+                <span class="n">xy</span> <span class="o">=</span> <span class="n">coords</span><span class="p">[:,</span> <span class="p">:</span><span class="mi">2</span><span class="p">]</span>
+                <span class="n">z</span> <span class="o">=</span> <span class="n">coords</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">]</span> <span class="k">if</span> <span class="n">coords</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="mi">3</span> <span class="k">else</span> <span class="kc">None</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">xy</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">((</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">))</span><span class="o">.</span><span class="n">T</span>
+            <span class="n">idx_2d</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">geometry2d</span><span class="o">.</span><span class="n">_find_element_2d</span><span class="p">(</span><span class="n">coords</span><span class="o">=</span><span class="n">xy</span><span class="p">)</span>
+            <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">idx_2d</span><span class="p">)</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">xy</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">z</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">idx_3d</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">hstack</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">e2_e3_table</span><span class="p">[</span><span class="n">idx_2d</span><span class="p">])</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">idx_3d</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_find_elem3d_from_elem2d</span><span class="p">(</span><span class="n">idx_2d</span><span class="p">,</span> <span class="n">z</span><span class="p">)</span>
+            <span class="n">idx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">intersect1d</span><span class="p">(</span><span class="n">idx</span><span class="p">,</span> <span class="n">idx_3d</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">area</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">idx_area</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_elements_in_area</span><span class="p">(</span><span class="n">area</span><span class="p">)</span>
+            <span class="n">idx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">intersect1d</span><span class="p">(</span><span class="n">idx</span><span class="p">,</span> <span class="n">idx_area</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">layers</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s2">&quot;At least one selection argument (x,y,z,coords,area,layers) needs to be provided!&quot;</span>
+            <span class="p">)</span>
+        <span class="k">return</span> <span class="n">idx</span></div>
+
+
+
+<div class="viewcode-block" id="GeometryFMVerticalProfile">
+<a class="viewcode-back" href="../../../dfsu-2dv-vertical-profile.html#mikeio.spatial._FM_geometry_layered.GeometryFMVerticalProfile">[docs]</a>
+<span class="k">class</span> <span class="nc">GeometryFMVerticalProfile</span><span class="p">(</span><span class="n">_GeometryFMLayered</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">node_coordinates</span><span class="p">,</span>
+        <span class="n">element_table</span><span class="p">,</span>
+        <span class="n">codes</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">projection</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">dfsu_type</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">element_ids</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">node_ids</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">n_layers</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
+        <span class="n">n_sigma</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">validate</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">reindex</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
+            <span class="n">node_coordinates</span><span class="o">=</span><span class="n">node_coordinates</span><span class="p">,</span>
+            <span class="n">element_table</span><span class="o">=</span><span class="n">element_table</span><span class="p">,</span>
+            <span class="n">codes</span><span class="o">=</span><span class="n">codes</span><span class="p">,</span>
+            <span class="n">projection</span><span class="o">=</span><span class="n">projection</span><span class="p">,</span>
+            <span class="n">dfsu_type</span><span class="o">=</span><span class="n">dfsu_type</span><span class="p">,</span>
+            <span class="n">element_ids</span><span class="o">=</span><span class="n">element_ids</span><span class="p">,</span>
+            <span class="n">node_ids</span><span class="o">=</span><span class="n">node_ids</span><span class="p">,</span>
+            <span class="n">n_layers</span><span class="o">=</span><span class="n">n_layers</span><span class="p">,</span>
+            <span class="n">n_sigma</span><span class="o">=</span><span class="n">n_sigma</span><span class="p">,</span>
+            <span class="n">validate</span><span class="o">=</span><span class="n">validate</span><span class="p">,</span>
+            <span class="n">reindex</span><span class="o">=</span><span class="n">reindex</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">plot</span> <span class="o">=</span> <span class="n">_GeometryFMVerticalProfilePlotter</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+
+    <span class="nd">@cached_property</span>
+    <span class="k">def</span> <span class="nf">relative_element_distance</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">ec</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">element_coordinates</span>
+        <span class="n">nc0</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">node_coordinates</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="p">:</span><span class="mi">2</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">_relative_cumulative_distance</span><span class="p">(</span><span class="n">ec</span><span class="p">,</span> <span class="n">nc0</span><span class="p">,</span> <span class="n">is_geo</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">is_geo</span><span class="p">)</span>
+
+<div class="viewcode-block" id="GeometryFMVerticalProfile.get_nearest_relative_distance">
+<a class="viewcode-back" href="../../../dfsu-2dv-vertical-profile.html#mikeio.spatial._FM_geometry_layered.GeometryFMVerticalProfile.get_nearest_relative_distance">[docs]</a>
+    <span class="k">def</span> <span class="nf">get_nearest_relative_distance</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">coords</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;For a point near a transect, find the nearest relative distance</span>
+<span class="sd">        for showing position on transect plot.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        coords : [float, float]</span>
+<span class="sd">            x,y-coordinate of point</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        float</span>
+<span class="sd">            relative distance in meters from start of transect</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">xe</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">element_coordinates</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span>
+        <span class="n">ye</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">element_coordinates</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span>
+        <span class="n">dd2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">square</span><span class="p">(</span><span class="n">xe</span> <span class="o">-</span> <span class="n">coords</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">square</span><span class="p">(</span><span class="n">ye</span> <span class="o">-</span> <span class="n">coords</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+        <span class="n">idx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argmin</span><span class="p">(</span><span class="n">dd2</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">relative_element_distance</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span></div>
+
+
+    <span class="k">def</span> <span class="nf">find_index</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">z</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">coords</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">layers</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+
+        <span class="k">if</span> <span class="n">layers</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">idx</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_layer_elements</span><span class="p">(</span><span class="n">layers</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">idx</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_element_ids</span>
+
+        <span class="c1"># select in space</span>
+        <span class="k">if</span> <span class="p">(</span>
+            <span class="p">(</span><span class="n">coords</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">)</span>
+            <span class="ow">or</span> <span class="p">(</span><span class="n">x</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">)</span>
+            <span class="ow">or</span> <span class="p">(</span><span class="n">y</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">)</span>
+            <span class="ow">or</span> <span class="p">(</span><span class="n">z</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="p">):</span>
+            <span class="k">if</span> <span class="n">coords</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">coords</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">atleast_2d</span><span class="p">(</span><span class="n">coords</span><span class="p">)</span>
+                <span class="n">xy</span> <span class="o">=</span> <span class="n">coords</span><span class="p">[:,</span> <span class="p">:</span><span class="mi">2</span><span class="p">]</span>
+                <span class="n">z</span> <span class="o">=</span> <span class="n">coords</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">]</span> <span class="k">if</span> <span class="n">coords</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="mi">3</span> <span class="k">else</span> <span class="kc">None</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">xy</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">((</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">))</span><span class="o">.</span><span class="n">T</span>
+
+            <span class="n">idx_2d</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_find_nearest_element_2d</span><span class="p">(</span><span class="n">coords</span><span class="o">=</span><span class="n">xy</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">z</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">idx_3d</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">hstack</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">e2_e3_table</span><span class="p">[</span><span class="n">idx_2d</span><span class="p">])</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">idx_3d</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_find_elem3d_from_elem2d</span><span class="p">(</span><span class="n">idx_2d</span><span class="p">,</span> <span class="n">z</span><span class="p">)</span>
+            <span class="n">idx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">intersect1d</span><span class="p">(</span><span class="n">idx</span><span class="p">,</span> <span class="n">idx_3d</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">idx</span>
+
+    <span class="k">def</span> <span class="nf">_find_nearest_element_2d</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">coords</span><span class="p">):</span>
+        <span class="n">ec2d</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">element_coordinates</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">top_elements</span><span class="p">,</span> <span class="p">:</span><span class="mi">2</span><span class="p">]</span>
+        <span class="n">xe</span><span class="p">,</span> <span class="n">ye</span> <span class="o">=</span> <span class="n">ec2d</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">ec2d</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span>
+        <span class="n">coords</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">atleast_2d</span><span class="p">(</span><span class="n">coords</span><span class="p">)</span>
+        <span class="n">idx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">coords</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">j</span><span class="p">,</span> <span class="n">pt</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">coords</span><span class="p">):</span>
+            <span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">pt</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">2</span><span class="p">]</span>
+            <span class="n">idx</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argmin</span><span class="p">((</span><span class="n">xe</span> <span class="o">-</span> <span class="n">x</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">+</span> <span class="p">(</span><span class="n">ye</span> <span class="o">-</span> <span class="n">y</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">idx</span></div>
+
+
+
+<div class="viewcode-block" id="GeometryFMVerticalColumn">
+<a class="viewcode-back" href="../../../dfsu-1dv-vertical-column.html#mikeio.spatial._FM_geometry_layered.GeometryFMVerticalColumn">[docs]</a>
+<span class="k">class</span> <span class="nc">GeometryFMVerticalColumn</span><span class="p">(</span><span class="n">GeometryFM3D</span><span class="p">):</span>
+    <span class="s2">&quot;A 3d geometry with consisting of a single vertical column&quot;</span>
+
+    <span class="c1"># TODO: add plotter</span>
+
+    <span class="k">def</span> <span class="nf">calc_ze</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">zn</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">zn</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">zn</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">node_coordinates</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">]</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_calc_z_using_idx</span><span class="p">(</span><span class="n">zn</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_idx_e</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">calc_zf</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">zn</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">zn</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">zn</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">node_coordinates</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">]</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_calc_z_using_idx</span><span class="p">(</span><span class="n">zn</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_idx_f</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_calc_zee</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">zn</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="n">ze</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">calc_ze</span><span class="p">(</span><span class="n">zn</span><span class="p">)</span>
+        <span class="n">zf</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">calc_zf</span><span class="p">(</span><span class="n">zn</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">ze</span><span class="o">.</span><span class="n">ndim</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">zee</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">ze</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">zf</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+            <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">zee</span><span class="p">,</span> <span class="n">zf</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">hstack</span><span class="p">(</span>
+                <span class="p">(</span><span class="n">zf</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">reshape</span><span class="p">((</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)),</span> <span class="n">ze</span><span class="p">,</span> <span class="n">zf</span><span class="p">[:,</span> <span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">reshape</span><span class="p">((</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)))</span>
+            <span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_interp_values</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">zn</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">z</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Interpolate to other z values, allow linear extrapolation&quot;&quot;&quot;</span>
+        <span class="kn">from</span> <span class="nn">scipy.interpolate</span> <span class="kn">import</span> <span class="n">interp1d</span>  <span class="c1"># type: ignore</span>
+
+        <span class="n">opt</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;kind&quot;</span><span class="p">:</span> <span class="s2">&quot;linear&quot;</span><span class="p">,</span> <span class="s2">&quot;bounds_error&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span> <span class="s2">&quot;fill_value&quot;</span><span class="p">:</span> <span class="s2">&quot;extrapolate&quot;</span><span class="p">}</span>
+
+        <span class="n">ze</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">calc_ze</span><span class="p">(</span><span class="n">zn</span><span class="p">)</span>
+        <span class="n">dati</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="n">z</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">zn</span><span class="o">.</span><span class="n">ndim</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">dati</span> <span class="o">=</span> <span class="n">interp1d</span><span class="p">(</span><span class="n">ze</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="o">**</span><span class="n">opt</span><span class="p">)(</span><span class="n">z</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">zn</span><span class="o">.</span><span class="n">ndim</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">zn</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>
+                <span class="n">dati</span><span class="p">[</span><span class="n">j</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">interp1d</span><span class="p">(</span><span class="n">ze</span><span class="p">[</span><span class="n">j</span><span class="p">,</span> <span class="p">:],</span> <span class="n">data</span><span class="p">[</span><span class="n">j</span><span class="p">,</span> <span class="p">:],</span> <span class="o">**</span><span class="n">opt</span><span class="p">)(</span><span class="n">z</span><span class="p">[</span><span class="n">j</span><span class="p">,</span> <span class="p">:])</span>
+        <span class="k">return</span> <span class="n">dati</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">_idx_f</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">nnodes_half</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">element_table</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span>
+        <span class="n">n_vfaces</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_elements</span> <span class="o">+</span> <span class="mi">1</span>
+        <span class="n">idx_f</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">n_vfaces</span><span class="p">,</span> <span class="n">nnodes_half</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
+        <span class="n">idx_e</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_idx_e</span>
+        <span class="n">idx_f</span><span class="p">[:</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_elements</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">idx_e</span><span class="p">[:,</span> <span class="p">:</span><span class="n">nnodes_half</span><span class="p">]</span>
+        <span class="n">idx_f</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">n_elements</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">idx_e</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">nnodes_half</span><span class="p">:]</span>
+        <span class="k">return</span> <span class="n">idx_f</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">_idx_e</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">nnodes_per_elem</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">element_table</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="n">idx_e</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">n_elements</span><span class="p">,</span> <span class="n">nnodes_per_elem</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_elements</span><span class="p">):</span>
+            <span class="n">nodes</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">element_table</span><span class="p">[</span><span class="n">j</span><span class="p">]</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nnodes_per_elem</span><span class="p">):</span>
+                <span class="n">idx_e</span><span class="p">[</span><span class="n">j</span><span class="p">,</span> <span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">nodes</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+
+        <span class="k">return</span> <span class="n">idx_e</span>
+
+    <span class="k">def</span> <span class="nf">_calc_z_using_idx</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">zn</span><span class="p">,</span> <span class="n">idx</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">zn</span><span class="o">.</span><span class="n">ndim</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">zf</span> <span class="o">=</span> <span class="n">zn</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">zn</span><span class="o">.</span><span class="n">ndim</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="n">n_steps</span> <span class="o">=</span> <span class="n">zn</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">zf</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">n_steps</span><span class="p">,</span> <span class="n">idx</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
+            <span class="k">for</span> <span class="n">step</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_steps</span><span class="p">):</span>
+                <span class="n">zf</span><span class="p">[</span><span class="n">step</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">zn</span><span class="p">[</span><span class="n">step</span><span class="p">,</span> <span class="n">idx</span><span class="p">]</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">zf</span></div>
+
+
+
+<span class="k">class</span> <span class="nc">_GeometryFMVerticalProfilePlotter</span><span class="p">:</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">geometry</span><span class="p">:</span> <span class="s2">&quot;GeometryFMVerticalProfile&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">g</span> <span class="o">=</span> <span class="n">geometry</span>
+
+    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+
+        <span class="k">if</span> <span class="n">ax</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">_</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="n">figsize</span><span class="p">)</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">g</span><span class="o">.</span><span class="n">node_coordinates</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span>
+        <span class="n">y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">g</span><span class="o">.</span><span class="n">node_coordinates</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">ax</span>
+
+    <span class="k">def</span> <span class="nf">mesh</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s2">&quot;Mesh&quot;</span><span class="p">,</span> <span class="n">edge_color</span><span class="o">=</span><span class="s2">&quot;0.5&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+
+        <span class="n">v</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">full_like</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">g</span><span class="o">.</span><span class="n">element_coordinates</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">_plot_vertical_profile</span><span class="p">(</span>
+            <span class="n">node_coordinates</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">g</span><span class="o">.</span><span class="n">node_coordinates</span><span class="p">,</span>
+            <span class="n">element_table</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">g</span><span class="o">.</span><span class="n">element_table</span><span class="p">,</span>
+            <span class="n">values</span><span class="o">=</span><span class="n">v</span><span class="p">,</span>
+            <span class="n">is_geo</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">g</span><span class="o">.</span><span class="n">is_geo</span><span class="p">,</span>
+            <span class="n">title</span><span class="o">=</span><span class="n">title</span><span class="p">,</span>
+            <span class="n">add_colorbar</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+            <span class="n">edge_color</span><span class="o">=</span><span class="n">edge_color</span><span class="p">,</span>
+            <span class="n">cmin</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span>
+            <span class="n">cmax</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span>
+            <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+        <span class="p">)</span>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, DHI.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
