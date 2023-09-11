@@ -1,13 +1,13 @@
 # Design philosophy
 
-* Easy to use
-* Familiar
-* Easy to install
-* Easy to get started
-* Open Source​
-* Easy to collaborate​
-* Reproducible
-* Easy access to new features
+* [Easy to use](#easy-to-use)
+* [Familiar](#familiar)
+* [Easy to install](#easy-to-install)
+* [Easy to get started](#easy-to-get-started)
+* [Open Source​](#open-source)
+* [Easy to collaborate​](#easy-to-collaborate)
+* [Reproducible](#reproducible)
+* [Easy access to new features](#easy-access-to-new-features)
 
 
 ## Easy to use
@@ -23,9 +23,9 @@ MIKE IO aims to use a syntax familiar to users of scientific computing libraries
 
 ## Easy to install
 
-From PyPI::
-
-    pip install mikeio
+```bash
+$ pip install mikeio
+```
 
 ## Easy to get started
 By providing many examples to cut/paste from.
@@ -47,18 +47,18 @@ By developing MIKE IO on GitHub along with a completely open discussion, we beli
 ## Reproducible
 By providing the historical versions of MIKE IO on PyPI it is possible to reproduce the behaviour of an older existing system, based on an older version.
 
-Install specific version::
+**Install specific version**
 
-```
-pip install mikeio==0.12.2
+```bash
+pip install mikeio==1.4.0
 ```
 
 ## Easy access to new features
 Features are being added all the time, by developers at DHI in offices all around the globe as well as external contributors using MIKE IO in their work.
-These new features are always available from the main branch on GitHub and thanks to automated testing, it is always possible to verify that the tests passes before downloading a new development version.
+These new features are always available from the [main branch on GitHub](https://github.com/DHI/mikeio) and thanks to automated testing, it is always possible to verify that the tests passes before downloading a new development version.
 
-Install development version::
+**Install development version**
 
-```
-pip install https://github.com/DHI/mikeio/archive/main.zip
+```bash
+$ pip install https://github.com/DHI/mikeio/archive/main.zip
 ```

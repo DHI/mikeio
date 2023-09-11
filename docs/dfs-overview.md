@@ -8,7 +8,7 @@
 All Dfs classes (and the Dataset) class are representations of timeseries and 
 share these properties: 
 
-* items - a list of [ItemInfo](mikeio.ItemInfo) with name, type and unit of each item
+* items - a list of [ItemInfo](mikeio.eum._eum.ItemInfo) with name, type and unit of each item
 * n_items - Number of items
 * n_timesteps - Number of timesteps
 * start_time - First time instance (as datetime)
@@ -30,5 +30,6 @@ If the file is big, you will typically get the file *header* with `dfs = mikeio.
 
 ```{eval-rst}
 .. automodule:: mikeio
-	:members:
+	:members: read, open
+
 ```

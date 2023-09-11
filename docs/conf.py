@@ -18,8 +18,8 @@
 # -- Project information -----------------------------------------------------
 
 project = "MIKE IO"
-copyright = "2022, Henrik Andersson, Jesper Mariegaard, Marc Ridler,"
-author = "Henrik Andersson, Jesper Mariegaard, Marc Ridler"
+copyright = "2023, DHI"
+author = "Henrik Andersson, Jesper Mariegaard"
 release = ""
 
 # -- General configuration ---------------------------------------------------

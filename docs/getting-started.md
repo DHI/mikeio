@@ -11,16 +11,13 @@
 
 ## Dataset
 The [Dataset](Dataset) is the common MIKE IO data structure for data read from dfs files. 
-The  `mikeio.read()` method returns a Dataset with a [DataArray](dataarray) for each item.
+The  `mikeio.read()` method returns a Dataset with a [DataArray](DataArray) for each item.
 
 The DataArray have all the relevant information, e.g:
 
 * item - an [ItemInfo](eum.ItemInfo) with name, type and unit
 * time - a pandas.DateTimeIndex with the time instances of the data
 * values - a NumPy array
-
-Read more on the [Dataset page](dataset).
-
 
 ## Items, ItemInfo and EUM
 
@@ -39,7 +36,6 @@ Viken <Water Level> (meter)
 >>> ItemInfo(EUMType.Wind_speed)
 Wind speed <Wind speed> (meter per sec)
 ```
-More info on the [EUM page](eum).
 
 ## Dfs0
 A dfs0 file is also called a time series file. 
@@ -60,7 +56,7 @@ items:
   3:  MeasurementSign. Wave Height <Significant wave height> (meter)
 ```
 
-Read more on the [Dfs0 page](dfs0).
+Read more on the [Dfs0 page](dfs0.md).
 
 Convert the timeseries dataset to a pandas DataFrame:
 
@@ -83,7 +79,7 @@ Items:
   0:  Elevation <Total Water Depth> (meter)
 ```
 
-Read more on the [Dfs2 page](dfs2).
+Read more on the [Dfs2 page](dfs2.md).
 
 
 ## Generic dfs

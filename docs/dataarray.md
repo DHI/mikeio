@@ -98,7 +98,7 @@ The plotting of a DataArray is context-aware meaning that plotting behaviour dep
 >>> da.plot.mesh()
 ```
 
-See details in the [API specification](mikeio.dataset._data_plot._DataArrayPlotter) below and in the bottom of the relevant pages e.g. [DataArray Plotter Grid2D API](mikeio.dataset._data_plot._DataArrayPlotter._DataArrayPlotterGrid2D) on the dfs2 page.
+See details in the [API specification](mikeio.dataset._data_plot._DataArrayPlotter) below and in the bottom of the relevant pages e.g. [DataArray Plotter Grid2D API](dfs2.md#dataarray-plotter-grid2d-api) on the dfs2 page.
 
 
 

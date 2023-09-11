@@ -728,11 +728,6 @@ class Grid2D(_Geometry):
         -------
         array(int), array(int)
             i- and j-index of nearest cell
-
-        Raises
-        ------
-        ValueError if x or y are not scalar values, use coords instead
-        OutsideModelDomainError if point is outside grid
         """
         if x is None and y is not None and not np.isscalar(y):
             raise ValueError(
