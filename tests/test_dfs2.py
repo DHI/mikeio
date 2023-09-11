@@ -651,6 +651,8 @@ def test_incremental_write_from_dfs2(tmp_path):
 
     ds = dfs.read(time=[0], keepdims=True)
     # assert ds.timestep == dfs.timestep, # ds.timestep is undefined
+    
+    # TODO find a better way to do this, without having to create a new dfs2 object
     dfs_to_write = Dfs2()
     dfs_to_write.write(fp, ds, dt=dfs.timestep, keep_open=True)
 

@@ -1,5 +1,5 @@
 import os
-from typing import List, Tuple
+from typing import List, Tuple, Optional
 
 from copy import deepcopy
 import numpy as np
@@ -110,10 +110,11 @@ class Dfs2(_Dfs123):
     def __init__(self, filename=None, type: str = "horizontal"):
         super().__init__(filename)
 
-        self._dx = None
-        self._dy = None
-        self._nx = None
-        self._ny = None
+        # TODO find a better way to avoid initializing these non-sensical values
+        self._dx = 0.0
+        self._dy = 0.0
+        self._nx = 0
+        self._ny = 0
         self._x0 = 0.0
         self._y0 = 0.0
         self.geometry = None
@@ -284,13 +285,11 @@ class Dfs2(_Dfs123):
 
     def write(
         self,
-        filename,
-        data,
-        dt=None,
-        dx=None,
-        dy=None,
-        title=None,
-        keep_open=False,
+        filename: str,
+        data: Dataset,
+        dt: Optional[float] = None,
+        title: Optional[str]=None,
+        keep_open: bool =False,
     ):
         """
         Create a dfs2 file
@@ -301,39 +300,21 @@ class Dfs2(_Dfs123):
         filename: str
             Location to write the dfs2 file
         data: Dataset
-            list of matrices, one for each item. Matrix dimension: time, y, x
-        dt: float, optional
-            The time step in seconds.
-        dx: float, optional
-            length of each grid in the x direction (projection units)
-        dy: float, optional
-            length of each grid in the y direction (projection units)
+            Dataset to write to file
         title: str, optional
             title of the dfs2 file. Default is blank.
         keep_open: bool, optional
             Keep file open for appending
         """
-        if isinstance(data, list):
-            raise TypeError(
-                "supplying data as a list of numpy arrays is deprecated, please supply data in the form of a Dataset",
-            )
-
         filename = str(filename)
 
         self._builder = DfsBuilder.Create(title, "mikeio", __dfs_version__)
-        if not self._dx:
-            self._dx = 1
-        if dx:
-            self._dx = dx
-
-        if not self._dy:
-            self._dy = 1
-        if dy:
-            self._dy = dy
+        self._dx = data.geometry.dx
+        self._dy = data.geometry.dy
 
         self._write(
             filename=filename,
-            data=data,
+            ds=data,
             dt=dt,
             title=title,
             keep_open=keep_open,

@@ -1,6 +1,7 @@
 from __future__ import annotations
 import warnings
 from abc import abstractmethod
+from dataclasses import dataclass
 from datetime import datetime
 from typing import Iterable, List, Optional, Tuple, Sequence
 import numpy as np
@@ -23,6 +24,16 @@ from ..dataset import Dataset
 from ..eum import EUMType, EUMUnit, ItemInfo, ItemInfoList, TimeStepUnit
 from ..exceptions import DataDimensionMismatch, ItemsError
 from ..spatial import GeometryUndefined
+
+@dataclass
+class DfsHeader:
+
+    n_items: int
+    n_timesteps: int
+    start_time: datetime
+    dt: float
+    coordinates: Tuple[str, float, float, float]
+    items: List[ItemInfo]
 
 
 def _read_item_time_step(
@@ -407,23 +418,28 @@ class _Dfs123:
         self,
         *,
         filename,
-        data,
+        ds,
         dt,
         coordinate=None,
         title,
         keep_open=False,
     ):
+        
+        assert isinstance(ds, Dataset)
 
         neq_datetimes = None
-        if isinstance(data, Dataset) and not data.is_equidistant:
-            neq_datetimes = data.time
+        if isinstance(ds, Dataset) and not ds.is_equidistant:
+            neq_datetimes = ds.time
 
-        self._write_handle_common_arguments(
-            title=title, data=data, coordinate=coordinate, dt=dt
+        header, data = self._write_handle_common_arguments(
+            title=title, data=ds, dt=dt, coordinate=coordinate
         )
 
+        
         shape = np.shape(data[0])
         t_offset = 0 if len(shape) == self._ndim else 1
+
+        # TODO find out a clever way to handle the grid dimensions
         if self._ndim == 1:
             self._nx = shape[t_offset + 0]
         elif self._ndim == 2:
@@ -435,17 +451,19 @@ class _Dfs123:
             self._nx = shape[t_offset + 2]
 
         self._factory = DfsFactory()
+
+        # TODO pass grid
         self._set_spatial_axis()
 
         if self._ndim == 1:
-            if not all(np.shape(d)[t_offset + 0] == self._nx for d in self._data):
+            if not all(np.shape(d)[t_offset + 0] == self._nx for d in data):
                 raise DataDimensionMismatch()
 
         if self._ndim == 2:
-            if not all(np.shape(d)[t_offset + 0] == self._ny for d in self._data):
+            if not all(np.shape(d)[t_offset + 0] == self._ny for d in data):
                 raise DataDimensionMismatch()
 
-            if not all(np.shape(d)[t_offset + 1] == self._nx for d in self._data):
+            if not all(np.shape(d)[t_offset + 1] == self._nx for d in data):
                 raise DataDimensionMismatch()
 
         if neq_datetimes is not None:
@@ -453,15 +471,15 @@ class _Dfs123:
             start_time = neq_datetimes[0]
             self._start_time = start_time
 
-        dfs = self._setup_header(filename)
+        dfs = self._setup_header(filename, header)
         self._dfs = dfs
 
         deletevalue = dfs.FileInfo.DeleteValueFloat  # -1.0000000031710769e-30
 
-        for i in trange(self._n_timesteps, disable=not self.show_progress):
-            for item in range(self._n_items):
+        for i in trange(header.n_timesteps, disable=not self.show_progress):
+            for item in range(header.n_items):
 
-                d = self._data[item][i] if t_offset == 1 else self._data[item]
+                d = data[item][i] if t_offset == 1 else data[item]
                 d = d.copy()  # to avoid modifying the input
                 d[np.isnan(d)] = deletevalue
 
@@ -485,31 +503,26 @@ class _Dfs123:
         data: Dataset
         """
 
+        if not data.dims == ("time", "y", "x"):
+            raise NotImplementedError(
+                    "Append is only available for 2D files with dims ('time', 'y', 'x')"
+                )
+
         deletevalue = self._dfs.FileInfo.DeleteValueFloat  # -1.0000000031710769e-30
 
-        for i in trange(self._n_timesteps, disable=not self.show_progress):
-            for item in range(self._n_items):
+        for i in trange(data.n_timesteps, disable=not self.show_progress):
+            for da in data:
 
-                d = data[item].to_numpy()[i]
+                values = da.to_numpy()
+                d = values[i]
                 d = d.copy()  # to avoid modifying the input
                 d[np.isnan(d)] = deletevalue
 
-                if self._ndim == 1:
-                    darray = d
-
-                if self._ndim == 2:
-                    d = d.reshape(self.shape[1:])
-                    darray = d.reshape(d.size, 1)[:, 0]
-
-                if self._ndim == 3:
-                    raise NotImplementedError("Append is not yet available for 3D files")
-
-                if self._is_equidistant:
-                    self._dfs.WriteItemTimeStepNext(0, darray.astype(np.float32))
-                else:
-                    raise NotImplementedError(
-                        "Append is not yet available for non-equidistant files"
-                    )
+                d = d.reshape(data.shape[1:])
+                darray = d.reshape(d.size, 1)[:, 0]
+                self._dfs.WriteItemTimeStepNext(0, darray.astype(np.float32))
+                
+                    
 
     def __enter__(self):
         return self
@@ -521,24 +534,24 @@ class _Dfs123:
         "Finalize write for a dfs file opened with `write(...,keep_open=True)`"
         self._dfs.Close()
 
-    def _write_handle_common_arguments(self, *, title, data, coordinate, dt):
+    def _write_handle_common_arguments(self, *, title: Optional[str], data: Dataset, coordinate, dt: Optional[float] = None):
 
         if title is None:
             self._title = ""
 
-        self._n_timesteps = np.shape(data[0])[0]
-        self._n_items = len(data)
+        n_timesteps = data.n_timesteps
+        n_items = data.n_items
 
         if coordinate is None:
             if self._projstr is not None:
-                self._coordinate = [
+                coordinate = [
                     self._projstr,
                     self._longitude,
                     self._latitude,
                     self._orientation,
                 ]
             elif isinstance(data, Dataset) and (data.geometry is not None):
-                self._coordinate = [
+                coordinate = [
                     data.geometry.projection_string,
                     data.geometry.origin[0],
                     data.geometry.origin[1],
@@ -546,48 +559,44 @@ class _Dfs123:
                 ]
             else:
                 warnings.warn("No coordinate system provided")
-                self._coordinate = ["LONG/LAT", 0, 0, 0]
+                coordinate = ["LONG/LAT", 0, 0, 0]
         else:
             self._override_coordinates = True
-            self._coordinate = coordinate
 
-        if isinstance(data, Dataset):
-            self._items = data.items
-            self._start_time = data.time[0]
-            self._n_timesteps = len(data.time)
-            if dt is None and len(data.time) > 1:
-                self._dt = (data.time[1] - data.time[0]).total_seconds()
-            self._data = data.to_numpy()
-        else:
-            raise TypeError("data must be supplied in the form of a mikeio.Dataset")
+        assert isinstance(data, Dataset), "data must be supplied in the form of a mikeio.Dataset"
 
-        if dt:
-            self._dt = dt
+        items = data.items
+        start_time = data.time[0]
+        n_timesteps = len(data.time)
+        if dt is None and len(data.time) > 1:
+            dt = (data.time[1] - data.time[0]).total_seconds()
+        data = data.to_numpy()
 
-        if self._dt is None:
-            self._dt = 1
-            if self._n_timesteps > 1:
+        if dt is None:
+            dt = 1
+            if n_timesteps > 1:
                 warnings.warn("No timestep supplied. Using 1s.")
 
-        if self._items is None:
-            self._items = [ItemInfo(f"Item {i+1}") for i in range(self._n_items)]
+        if items is None:
+            items = [ItemInfo(f"Item {i+1}") for i in range(self._n_items)]
 
-        self._timeseries_unit = TimeStepUnit.SECOND
+        header = DfsHeader(n_items=n_items, n_timesteps=n_timesteps, dt=dt, start_time=start_time, coordinates=coordinate, items=items)
+        return header, data
 
-    def _setup_header(self, filename):
+    def _setup_header(self, filename: str, header: DfsHeader):
 
-        system_start_time = self._start_time
+        system_start_time = header.start_time
 
         self._builder.SetDataType(0)
 
-        proj = self._factory.CreateProjectionGeoOrigin(*self._coordinate)
+        proj = self._factory.CreateProjectionGeoOrigin(*header.coordinates)
 
         self._builder.SetGeographicalProjection(proj)
 
         if self._is_equidistant:
             self._builder.SetTemporalAxis(
                 self._factory.CreateTemporalEqCalendarAxis(
-                    self._timeseries_unit, system_start_time, 0, self._dt
+                    self._timeseries_unit, system_start_time, 0, header.dt
                 )
             )
         else:
@@ -597,7 +606,7 @@ class _Dfs123:
                 )
             )
 
-        for item in self._items:
+        for item in header.items:
             self._builder.AddCreateDynamicItem(
                 item.name,
                 eumQuantity.Create(item.type, item.unit),

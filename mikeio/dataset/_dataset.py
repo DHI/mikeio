@@ -12,6 +12,7 @@ from typing import (
     Tuple,
     MutableMapping,
     Any,
+    Set,
 )
 
 import numpy as np
@@ -133,30 +134,21 @@ class Dataset(MutableMapping):
             )
         return data_vars
 
-    def _init_from_DataArrays(self, data, validate=True) -> Mapping[str, DataArray]:
+    def _init_from_DataArrays(self, data, validate=True) -> MutableMapping[str, DataArray]:
         """Initialize Dataset object with Iterable of DataArrays"""
         data_vars = self._DataArrays_as_mapping(data)
 
         if (len(data_vars) > 1) and validate:
-            #first = self[0]
-            #for i in range(1, len(self)):
-            #    da = self[i]
-            #    first._is_compatible(da, raise_error=True)
-            # check that all DataArrays are compatible
             first = list(data_vars.values())[0]
             for da in data_vars.values():
                 first._is_compatible(da, raise_error=True)
 
         self._check_all_different_ids(data_vars.values())
 
-        self.__itemattr = []
+        # TODO is it necessary to keep track of item names?
+        self.__itemattr: Set[str] = set()
         for key, value in data_vars.items():
             self._set_name_attr(key, value)
-
-        # since Dataset is MutableMapping it has values and keys by default
-        # but we delete those to avoid confusion
-        # self.values = None
-        self.keys = None
 
         return data_vars
 
@@ -233,8 +225,8 @@ class Dataset(MutableMapping):
         item_names = Dataset._unique_item_names(data)
 
         data_map = {}
-        for n, da in zip(item_names, data):
-            data_map[n] = da
+        for key, da in zip(item_names, data):
+            data_map[key] = da
         return data_map
 
     @staticmethod
@@ -635,7 +627,7 @@ class Dataset(MutableMapping):
     def _set_name_attr(self, name: str, value: DataArray):
         name = _to_safe_name(name)
         if name not in self.__itemattr:
-            self.__itemattr.append(name)  # keep track of what we insert
+            self.__itemattr.add(name)  # keep track of what we insert
         setattr(self, name, value)
 
     def _del_name_attr(self, name: str):

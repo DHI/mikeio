@@ -366,7 +366,7 @@ class Dfs3(_Dfs123):
 
         self._write(
             filename=filename,
-            data=data,
+            ds=data,
             dt=dt,
             coordinate=coordinate,
             title=title,
