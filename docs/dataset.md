@@ -1,8 +1,8 @@
 # Dataset
 
-The [Dataset](Dataset) is the MIKE IO data structure 
+The [Dataset](mikeio.Dataset) is the MIKE IO data structure 
 for data from dfs files. 
-The {py:meth}`mikeio.read` methods returns a Dataset as a container of [DataArrays](dataarray) (Dfs items). Each DataArray has the properties, *item*, *time*, *geometry* and *values*. The time and geometry are common to all DataArrays in the Dataset. 
+The {py:meth}`mikeio.read` methods returns a Dataset as a container of [DataArrays](mikeio.DataArray) (Dfs items). Each DataArray has the properties, *item*, *time*, *geometry* and *values*. The time and geometry are common to all DataArrays in the Dataset. 
 
 The Dataset has the following primary properties: 
 
@@ -113,7 +113,7 @@ In most cases, you will *not* plot the Dataset, but rather it's DataArrays. But 
 * dfs0-Dataset : plot all items as timeseries with ds.plot()
 * scatter : compare two items using ds.plot.scatter(x="itemA", y="itemB")
 
-See details in the [API specification](_DatasetPlotter) below.
+See details in the [API specification](Dataset Plotter API) below.
 
 
 ## Properties
@@ -189,7 +189,7 @@ Other methods that also return a Dataset:
 ## Dataset Plotter API
 
 ```{eval-rst}
-.. autoclass:: mikeio.dataset._DatasetPlotter
+.. autoclass:: mikeio.dataset._data_plot._DatasetPlotter
 	:members:
 ```
 

@@ -1,22 +1,22 @@
 # Dfsu 3D
 
 
-In addition to the common [dfsu-geometry properties and methods](./dfu-mesh-overview.md#mike-io-flexible-mesh-geometry), Dfsu3D has the below additional *properties* (from it's geometry [GeometryFM3D](GeometryFM3D)): 
+In addition to the common [dfsu-geometry properties and methods](MIKE IO Flexible Mesh Geometry), Dfsu3D has the below additional *properties* (from it's geometry [GeometryFM3D](FM Geometry 3D API): 
 
 ```{eval-rst}
 .. autosummary::
     :nosignatures:
 
-    mikeio.dfsu_layered.Dfsu3D.n_layers
-    mikeio.dfsu_layered.Dfsu3D.n_sigma_layers
-    mikeio.dfsu_layered.Dfsu3D.n_z_layers
-    mikeio.dfsu_layered.Dfsu3D.layer_ids
-    mikeio.dfsu_layered.Dfsu3D.top_elements
-    mikeio.dfsu_layered.Dfsu3D.bottom_elements
-    mikeio.dfsu_layered.Dfsu3D.n_layers_per_column
-    mikeio.dfsu_layered.Dfsu3D.geometry2d
-    mikeio.dfsu_layered.Dfsu3D.e2_e3_table
-    mikeio.dfsu_layered.Dfsu3D.elem2d_ids
+    mikeio.dfsu._layered.Dfsu3D.n_layers
+    mikeio.dfsu._layered.Dfsu3D.n_sigma_layers
+    mikeio.dfsu._layered.Dfsu3D.n_z_layers
+    mikeio.dfsu._layered.Dfsu3D.layer_ids
+    mikeio.dfsu._layered.Dfsu3D.top_elements
+    mikeio.dfsu._layered.Dfsu3D.bottom_elements
+    mikeio.dfsu._layered.Dfsu3D.n_layers_per_column
+    mikeio.dfsu._layered.Dfsu3D.geometry2d
+    mikeio.dfsu._layered.Dfsu3D.e2_e3_table
+    mikeio.dfsu._layered.Dfsu3D.elem2d_ids
 ```
 
 
@@ -26,8 +26,7 @@ And in addition to from the basic dfsu functionality, Dfsu3D has the below addit
 .. autosummary::
     :nosignatures:
 
-    mikeio.dfsu_layered.Dfsu3D.get_layer_elements
-    mikeio.dfsu_layered.Dfsu3D.find_nearest_profile_elements
+    mikeio.dfsu._layered.Dfsu3D.get_layer_elements
 ```
 
 
@@ -45,7 +44,7 @@ See the [Dfsu - 3D sigma-z.ipynb](https://nbviewer.jupyter.org/github/DHI/mikeio
 ## Dfsu 3D API
 
 ```{eval-rst}
-.. autoclass:: mikeio.dfsu_layered.Dfsu3D
+.. autoclass:: mikeio.dfsu._layered.Dfsu3D
 	:members:
 	:inherited-members:
 ```
@@ -53,7 +52,7 @@ See the [Dfsu - 3D sigma-z.ipynb](https://nbviewer.jupyter.org/github/DHI/mikeio
 ## FM Geometry 3D API
 
 ```{eval-rst}
-.. autoclass:: mikeio.spatial.FM_geometry.GeometryFM3D
+.. autoclass:: mikeio.spatial._FM_geometry_layered.GeometryFM3D
 	:members:
 	:inherited-members:
 ```

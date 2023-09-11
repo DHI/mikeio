@@ -13,7 +13,7 @@ Number of nodes: 399
 Projection: UTM-33
 ```
 
-In addition to the common [dfsu-geometry properties and methods](./dfu-mesh-overview.md#mike-io-flexible-mesh-geometry), `Mesh` has the following properties and methods:
+In addition to the common [dfsu-geometry properties and methods](MIKE IO Flexible Mesh Geometry), `Mesh` has the following properties and methods:
 
 
 ```{eval-rst}
@@ -48,7 +48,7 @@ See the [Mesh Example notebook](https://nbviewer.jupyter.org/github/DHI/mikeio/b
 A mesh object 
 
 ```{eval-rst}
-.. autoclass:: mikeio.spatial.FM_geometry.GeometryFM
+.. autoclass:: mikeio.spatial._FM_geometry.GeometryFM
 	:members:
 	:inherited-members:
 ```
@@ -56,7 +56,7 @@ A mesh object
 ## FM Geometry Plotter API
 
 ```{eval-rst}
-.. autoclass:: mikeio.spatial.FM_geometry._GeometryFMPlotter
+.. autoclass:: mikeio.spatial._FM_geometry._GeometryFMPlotter
 	:members:
 	:inherited-members:
 ```
