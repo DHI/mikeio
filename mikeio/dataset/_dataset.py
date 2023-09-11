@@ -91,7 +91,8 @@ class Dataset(MutableMapping):
             data = self._create_dataarrays(
                 data=data, time=time, items=items, geometry=geometry, zn=zn, dims=dims
             )  # type: ignore
-        self._init_from_DataArrays(data, validate=validate)
+        self._data_vars = self._init_from_DataArrays(data, validate=validate)
+        self.plot = _DatasetPlotter(self)
 
     @staticmethod
     def _is_DataArrays(data):
@@ -132,31 +133,32 @@ class Dataset(MutableMapping):
             )
         return data_vars
 
-    def _init_from_DataArrays(self, data, validate=True):
+    def _init_from_DataArrays(self, data, validate=True) -> Mapping[str, DataArray]:
         """Initialize Dataset object with Iterable of DataArrays"""
-        self._data_vars = self._DataArrays_as_mapping(data)
+        data_vars = self._DataArrays_as_mapping(data)
 
-        if (len(self) > 1) and validate:
-            first = self[0]
-            for i in range(1, len(self)):
-                da = self[i]
+        if (len(data_vars) > 1) and validate:
+            #first = self[0]
+            #for i in range(1, len(self)):
+            #    da = self[i]
+            #    first._is_compatible(da, raise_error=True)
+            # check that all DataArrays are compatible
+            first = list(data_vars.values())[0]
+            for da in data_vars.values():
                 first._is_compatible(da, raise_error=True)
 
-        self._check_all_different_ids(self._data_vars.values())
+        self._check_all_different_ids(data_vars.values())
 
         self.__itemattr = []
-        for key, value in self._data_vars.items():
+        for key, value in data_vars.items():
             self._set_name_attr(key, value)
-
-        self.plot = _DatasetPlotter(self)
-
-        if len(self) > 0:
-            self._set_spectral_attributes(self.geometry)
 
         # since Dataset is MutableMapping it has values and keys by default
         # but we delete those to avoid confusion
         # self.values = None
         self.keys = None
+
+        return data_vars
 
     @property
     def values(self):
@@ -299,13 +301,6 @@ class Dataset(MutableMapping):
         """Is the DataArray already present in the Dataset?"""
         for da in self:
             self._id_of_DataArrays_equal(da, new_da)
-
-    def _set_spectral_attributes(self, geometry):
-        if hasattr(geometry, "frequencies") and hasattr(geometry, "directions"):
-            self.frequencies = geometry.frequencies
-            self.n_frequencies = geometry.n_frequencies
-            self.directions = geometry.directions
-            self.n_directions = geometry.n_directions
 
     # ============ end of init =============
 

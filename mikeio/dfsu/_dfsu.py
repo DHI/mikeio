@@ -221,13 +221,13 @@ class _UnstructuredFile:
 
         if self.is_spectral:
             dir = dfs.Directions
-            self._directions = None if dir is None else dir * (180 / np.pi)
-            self._frequencies = dfs.Frequencies
+            directions = None if dir is None else dir * (180 / np.pi)
+            frequencies = dfs.Frequencies
 
         # geometry
         if self._type == DfsuFileType.DfsuSpectral0D:
             self._geometry = GeometryFMPointSpectrum(
-                frequencies=self.frequencies, directions=self.directions
+                frequencies=frequencies, directions=directions
             )
         else:
             nc, codes, node_ids = self._get_nodes_from_source(dfs)
@@ -263,8 +263,8 @@ class _UnstructuredFile:
                     element_ids=el_ids,
                     node_ids=node_ids,
                     validate=False,
-                    frequencies=self.frequencies,
-                    directions=self.directions,
+                    frequencies=frequencies,
+                    directions=directions,
                 )
             elif self._type == DfsuFileType.DfsuSpectral2D:
                 self._geometry = GeometryFMAreaSpectrum(
@@ -276,8 +276,8 @@ class _UnstructuredFile:
                     element_ids=el_ids,
                     node_ids=node_ids,
                     validate=False,
-                    frequencies=self.frequencies,
-                    directions=self.directions,
+                    frequencies=frequencies,
+                    directions=directions,
                 )
             else:
                 self._geometry = GeometryFM2D(
@@ -1154,6 +1154,7 @@ class _Dfsu(_UnstructuredFile):
         builder.ApplicationVersion = __dfs_version__
 
         try:
+            # TODO self._dfs is used by append, can we handle this better?
             self._dfs = builder.CreateFile(filename)
         except IOError:
             print("cannot create dfsu file: ", filename)
@@ -1181,7 +1182,7 @@ class _Dfsu(_UnstructuredFile):
         except Exception as e:
 
             print(e)
-            self._dfs.Close()
+            dfs.Close()
             os.remove(filename)
 
     def append(self, data: List[np.ndarray] | Dataset) -> None:

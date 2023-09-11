@@ -27,3 +27,5 @@ htmlcov
 docs/_build
 \tmp
 .venv/
+
+.testmondata
