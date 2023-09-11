@@ -223,11 +223,7 @@ class Dataset(MutableMapping):
             data = [data]
 
         item_names = Dataset._unique_item_names(data)
-
-        data_map = {}
-        for key, da in zip(item_names, data):
-            data_map[key] = da
-        return data_map
+        return {key: da for key, da in zip(item_names, data)}
 
     @staticmethod
     def _validate_item_names_and_keys(data_map: Mapping[str, DataArray]):
@@ -242,13 +238,12 @@ class Dataset(MutableMapping):
         return data_map
 
     @staticmethod
-    def _unique_item_names(das: Sequence[DataArray]):
+    def _unique_item_names(das: Sequence[DataArray]) -> List[str]:
         item_names = [da.name for da in das]
         if len(set(item_names)) != len(item_names):
             raise ValueError(
                 f"Item names must be unique! ({item_names}). Please rename before constructing Dataset."
             )
-            # TODO: make a list of unique items names
         return item_names
 
     @staticmethod
