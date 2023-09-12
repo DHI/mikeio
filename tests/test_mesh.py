@@ -40,14 +40,14 @@ def test_read_mixed_mesh(mixed_mesh):
     assert np.all(el_tbl_vec < msh.n_nodes)
 
 
-def test_read_write_mixed_mesh(mixed_mesh, tmpdir):
+def test_read_write_mixed_mesh(mixed_mesh, tmp_path):
     msh = mixed_mesh
-    outfilename = os.path.join(tmpdir.dirname, "quad_tri_v2.mesh")
+    outfilename = tmp_path / "quad_tri_v2.mesh"
     msh.write(outfilename)
 
     msh2 = Mesh(outfilename)
 
-    assert os.path.exists(outfilename)
+    assert outfilename.exists()
 
     assert np.all(np.hstack(msh2.element_table) == np.hstack(msh.element_table))
     assert np.all(msh2.element_coordinates == msh.element_coordinates)
@@ -78,7 +78,6 @@ def test_get_bad_node_coordinates(tri_mesh):
 
 
 def test_set_z(tri_mesh):
-    os.path.join("tests", "testdata", "odense_rough.mesh")
     msh = tri_mesh
     zn = msh.node_coordinates[:, 2]
     zn[zn < -3] = -3
@@ -107,28 +106,28 @@ def test_set_codes(tri_mesh):
         msh.geometry.codes = codes[0:4]
 
 
-def test_write(tri_mesh, tmpdir):
-    outfilename = os.path.join(tmpdir.dirname, "simple.mesh")
+def test_write(tri_mesh, tmp_path):
+    outfilename = tmp_path / "simple.mesh"
     msh = tri_mesh
 
     msh.write(outfilename)
 
-    assert os.path.exists(outfilename)
+    assert outfilename.exists()
 
 
-def test_write_part(tri_mesh, tmpdir):
-    outfilename = os.path.join(tmpdir.dirname, "simple_sub.mesh")
+def test_write_part(tri_mesh, tmp_path):
+    outfilename = tmp_path / "simple_sub.mesh"
 
     msh = tri_mesh
 
     msh.write(outfilename, elements=list(range(0, 100)))
 
-    assert os.path.exists(outfilename)
+    assert outfilename.exists()
 
 
-def test_write_mesh_from_dfsu(tmpdir):
-    outfilename = os.path.join(tmpdir.dirname, "quad_tri.mesh")
-    dfsufilename = os.path.join("tests", "testdata", "FakeLake.dfsu")
+def test_write_mesh_from_dfsu(tmp_path):
+    outfilename = tmp_path / "quad_tri.mesh"
+    dfsufilename = "tests/testdata/FakeLake.dfsu"
 
     msh = Mesh(dfsufilename)
 
@@ -136,6 +135,6 @@ def test_write_mesh_from_dfsu(tmpdir):
 
     msh2 = Mesh(outfilename)
 
-    assert os.path.exists(outfilename)
+    assert outfilename.exists()
 
     assert np.all(np.hstack(msh2.element_table) == np.hstack(msh.element_table))

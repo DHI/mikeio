@@ -1,55 +1,47 @@
-import os
-import subprocess
+from pathlib import Path
+from typing import List
+
 
 import nbformat
 from nbconvert.preprocessors import ExecutePreprocessor
 from nbconvert.preprocessors import CellExecutionError
 
-_TEST_DIR = os.path.dirname(os.path.abspath(__file__))
-PARENT_DIR = os.path.join(_TEST_DIR, "../..")
-SKIP_LIST = []
 
-
-def _process_notebook(notebook_filename, notebook_path="notebooks"):
+def _process_notebook(fp: Path):
     """Checks if an IPython notebook runs without error from start to finish. If so, writes the notebook to HTML (with outputs) and overwrites the .ipynb file (without outputs)."""
-    with open(notebook_filename) as f:
+    with open(fp) as f:
         nb = nbformat.read(f, as_version=4)
 
     ep = ExecutePreprocessor(timeout=600, kernel_name="python3")
 
     try:
         # Check that the notebook runs
-        ep.preprocess(nb, {"metadata": {"path": notebook_path}})
+        ep.preprocess(nb, {"metadata": {"path": "notebooks"}})
     except CellExecutionError as e:
-        print(f"Failed executing {notebook_filename}")
+        print(f"Failed executing {fp}")
         print(e)
         raise
 
-    print(f"Successfully executed {notebook_filename}")
+    print(f"Successfully executed {fp}")
     return
 
 
-def _get_all_notebooks_in_repo(skip=[]):
-    """Get all files .ipynb included in the git repository"""
-    git_files = (
-        subprocess.check_output(
-            "git ls-tree --full-tree --name-only -r HEAD", shell=True
-        )
-        .decode("utf-8")
-        .splitlines()
-    )
+def _get_all_notebooks_in_repo() -> List[Path]:
+    ROOT_DIR = Path(__file__).parent.parent.parent
+    NOTEBOOK_DIR = ROOT_DIR / "notebooks"
 
-    return [
-        fn
-        for fn in git_files
-        if fn.endswith(".ipynb") and not any(s in fn for s in skip)
-    ]
+    return list(NOTEBOOK_DIR.glob("*.ipynb"))
 
 
 def test_notebook(notebook):
-    _process_notebook(os.path.join(PARENT_DIR, notebook))
-
+    _process_notebook(notebook)
 
 def pytest_generate_tests(metafunc):
-    notebooks = _get_all_notebooks_in_repo(skip=SKIP_LIST)
+    notebooks = _get_all_notebooks_in_repo()
     metafunc.parametrize("notebook", notebooks)
+
+
+if __name__ == "__main__":
+    notebooks = _get_all_notebooks_in_repo()
+    for notebook in notebooks:
+        print(notebook)
