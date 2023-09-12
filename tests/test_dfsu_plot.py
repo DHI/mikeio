@@ -167,9 +167,9 @@ def test_plot_mesh_boundary_nodes():
 def test_plot_invalid():
     msh = Mesh("tests/testdata/odense_rough.mesh")
     with pytest.raises(Exception):
-        mesh.plot(plot_type="invalid")
+        msh.plot(plot_type="invalid")
     with pytest.raises(Exception):
-        mesh.plot(plot_type="invalid")
+        msh.plot(plot_type="invalid")
 
 
 def test_plot_dfsu_vertical_profile():
