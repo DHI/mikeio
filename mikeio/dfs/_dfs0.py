@@ -1,6 +1,7 @@
 import os
 import warnings
 from datetime import datetime, timedelta
+from typing import Sequence
 
 import numpy as np
 import pandas as pd
@@ -259,30 +260,28 @@ class Dfs0:
 
         raise TypeError("Dfs files only support float or double")
 
-    def _setup_header(self):
+    @staticmethod
+    def _setup_header(title:str, filename:str, start_time, dt:float, is_equidistant: bool, dtype, items: Sequence[ItemInfo]):
         factory = DfsFactory()
-        builder = DfsBuilder.Create(self._title, "mikeio", __dfs_version__)
+        builder = DfsBuilder.Create(title, "mikeio", __dfs_version__)
         builder.SetDataType(1)
         builder.SetGeographicalProjection(factory.CreateProjectionUndefined())
 
-        system_start_time = self._start_time
-
-        if self._is_equidistant:
+        if is_equidistant:
             temporal_axis = factory.CreateTemporalEqCalendarAxis(
-                TimeStepUnit.SECOND, system_start_time, 0, self._dt
+                TimeStepUnit.SECOND, start_time, 0, dt
             )
         else:
             temporal_axis = factory.CreateTemporalNonEqCalendarAxis(
-                TimeStepUnit.SECOND, system_start_time
+                TimeStepUnit.SECOND, start_time
             )
 
         builder.SetTemporalAxis(temporal_axis)
         builder.SetItemStatisticsType(StatType.RegularStat)
 
-        dtype_dfs = self._to_dfs_datatype(self._dtype)
+        dtype_dfs = Dfs0._to_dfs_datatype(dtype)
 
-        for i in range(self._n_items):
-            item = self._items[i]
+        for item in items:
             newitem = builder.CreateDynamicItemBuilder()
             quantity = eumQuantity.Create(item.type, item.unit)
             newitem.Set(
@@ -300,9 +299,9 @@ class Dfs0:
             builder.AddDynamicItem(newitem.GetDynamicItemInfo())
 
         try:
-            builder.CreateFile(self._filename)
+            builder.CreateFile(filename)
         except IOError:
-            raise IOError(f"Cannot create dfs0 file: {self._filename}")
+            raise IOError(f"Cannot create dfs0 file: {filename}")
 
         return builder.GetFile()
 
@@ -393,7 +392,16 @@ class Dfs0:
             self._dt = float(self._dt)
             t_seconds = self._dt * np.arange(float(self._n_timesteps))
 
-        dfs = self._setup_header()
+        
+        dfs = self._setup_header(
+            title=self._title,
+            filename=self._filename, 
+            dt = self._dt,
+            start_time = self._start_time,
+            is_equidistant = self._is_equidistant,
+            dtype=self._dtype,
+            items=self._items
+        )
 
         delete_value = dfs.FileInfo.DeleteValueFloat
 
