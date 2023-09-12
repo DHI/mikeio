@@ -1,4 +1,4 @@
-import os
+from pathlib import Path
 from datetime import datetime
 import numpy as np
 import pandas as pd
@@ -840,19 +840,19 @@ def test_to_dfs_extension_validation(tmp_path):
     assert "dfsu" in str(excinfo.value)
 
 
-def test_weighted_average(tmp_path):
+def test_weighted_average(tmp_path: Path):
     # TODO move to integration tests
-    filename = "tests/testdata/HD2D.dfsu"
-    dfs = mikeio.open(filename)
+    fp = Path("tests/testdata/HD2D.dfsu")
+    dfs = mikeio.open(fp)
 
     ds = dfs.read(items=["Surface elevation", "Current speed"])
 
     area = dfs.get_element_area()
     ds2 = ds.average(weights=area, axis=1)
 
-    outfilename = tmp_path / "average.dfs0"
-    ds2.to_dfs(outfilename)
-    assert os.path.isfile(outfilename)
+    out_path = tmp_path / "average.dfs0"
+    ds2.to_dfs(out_path)
+    assert out_path.exists
 
 
 def test_quantile_axis1(ds1):

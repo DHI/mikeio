@@ -6,14 +6,12 @@ from mikeio import Mesh
 
 @pytest.fixture
 def tri_mesh():
-    filename = os.path.join("tests", "testdata", "odense_rough.mesh")
-    return Mesh(filename)
+    return Mesh("tests/testdata/odense_rough.mesh")
 
 
 @pytest.fixture
 def mixed_mesh():
-    filename = os.path.join("tests", "testdata", "quad_tri.mesh")
-    return Mesh(filename)
+    return Mesh("tests/testdata/quad_tri.mesh")
 
 
 def test_get_number_of_elements(tri_mesh):

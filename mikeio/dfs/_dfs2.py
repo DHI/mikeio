@@ -1,4 +1,3 @@
-import os
 from typing import List, Tuple
 
 from copy import deepcopy
@@ -120,7 +119,7 @@ class Dfs2(_Dfs123):
 
         if filename:
             is_spectral = type.lower() in ["spectral", "spectra", "spectrum"]
-            self._read_dfs2_header(read_x0y0=is_spectral)
+            self._read_dfs2_header(filename=filename, read_x0y0=is_spectral)
             self._validate_no_orientation_in_geo()
             origin, orientation = self._origin_and_orientation_in_CRS()
 
@@ -140,7 +139,7 @@ class Dfs2(_Dfs123):
     def __repr__(self):
         out = ["<mikeio.Dfs2>"]
 
-        if os.path.isfile(self._filename):
+        if self._filename:
             out.append(f"dx: {self.dx:.5f}")
             out.append(f"dy: {self.dy:.5f}")
 
@@ -160,11 +159,8 @@ class Dfs2(_Dfs123):
 
         return str.join("\n", out)
 
-    def _read_dfs2_header(self, read_x0y0: bool = False):
-        if not os.path.isfile(self._filename):
-            raise Exception(f"file {self._filename} does not exist!")
-
-        self._dfs = DfsFileFactory.Dfs2FileOpen(self._filename)
+    def _read_dfs2_header(self, filename, read_x0y0: bool = False):
+        self._dfs = DfsFileFactory.Dfs2FileOpen(str(filename))
         self._source = self._dfs
         if read_x0y0:
             self._x0 = self._dfs.SpatialAxis.X0
