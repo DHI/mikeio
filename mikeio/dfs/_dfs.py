@@ -496,12 +496,8 @@ class _Dfs123:
             return self
 
     def append(self, data: Dataset) -> None:
-        """Append to a dfs file opened with `write(...,keep_open=True)`
-
-        Parameters
-        -----------
-        data: Dataset
-        """
+        
+        warnings.warn(FutureWarning("append() is deprecated."))
 
         if not data.dims == ("time", "y", "x"):
             raise NotImplementedError(

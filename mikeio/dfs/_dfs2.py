@@ -1,6 +1,8 @@
 import os
 from typing import List, Tuple, Optional
 
+import warnings
+
 from copy import deepcopy
 import numpy as np
 import pandas as pd
@@ -291,21 +293,10 @@ class Dfs2(_Dfs123):
         title: Optional[str]=None,
         keep_open: bool =False,
     ):
-        """
-        Create a dfs2 file
+        
+        # this method is deprecated
+        warnings.warn(FutureWarning("Dfs2.write() is deprecated, use Dataset.to_dfs() instead"))
 
-        Parameters
-        ----------
-
-        filename: str
-            Location to write the dfs2 file
-        data: Dataset
-            Dataset to write to file
-        title: str, optional
-            title of the dfs2 file. Default is blank.
-        keep_open: bool, optional
-            Keep file open for appending
-        """
         filename = str(filename)
 
         self._builder = DfsBuilder.Create(title, "mikeio", __dfs_version__)
