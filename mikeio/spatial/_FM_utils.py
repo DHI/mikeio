@@ -98,6 +98,7 @@ def _plot_map(
 
     import matplotlib.pyplot as plt
     import matplotlib.cm as cm
+    import matplotlib
 
     VALID_PLOT_TYPES = (
         "mesh_only",
@@ -111,7 +112,7 @@ def _plot_map(
         ok_list = ", ".join(VALID_PLOT_TYPES)
         raise Exception(f"plot_type {plot_type} unknown! ({ok_list})")
 
-    cmap = cmap or cm.viridis
+    cmap = cmap or matplotlib.colormaps["viridis"]
 
     nc = node_coordinates
     ec = element_coordinates

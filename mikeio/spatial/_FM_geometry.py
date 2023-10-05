@@ -830,7 +830,7 @@ class GeometryFM2D(_GeometryFM):
         """Lists of closed polylines defining domain outline"""
         return self._get_boundary_polylines()
 
-    def contains(self, points) -> Sequence[bool]:
+    def contains(self, points):
         """test if a list of points are contained by mesh
 
         Parameters
@@ -1037,7 +1037,7 @@ class GeometryFM2D(_GeometryFM):
             raise ValueError("Provide either coordinates or area")
 
     @staticmethod
-    def _inside_polygon(polygon, xy) -> bool:
+    def _inside_polygon(polygon, xy):
         import matplotlib.path as mp
 
         if polygon.ndim == 1:
