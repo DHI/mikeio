@@ -841,8 +841,36 @@ class DataArray(DataUtilsMixin):
         """
         da = self
 
+
+        slice_sel = False
+
         # select in space
         if len(kwargs) > 0:
+
+            # loop through kwargs and if any is a slice, find the index of start and stop and create a new slice with logical index
+            for k, v in kwargs.items():
+                if isinstance(v, slice):
+                    slice_sel = True
+                    idx_start = self.geometry.find_index(**{k:v.start})
+                    idx_stop = self.geometry.find_index(**{k:v.stop})
+                    pos = 0
+                    if isinstance(idx_start, tuple):
+                        if k == "x":
+                            pos = 0
+                        if k == "y":
+                            pos = 1
+                    
+                    start = idx_start[pos][0] if idx_start is not None else None
+                    stop = idx_stop[pos][0] if idx_stop is not None else None
+
+                    idx = slice(start, stop)
+                    
+                    da = da.isel(idx, axis=k)
+
+            if slice_sel:
+                return da
+
+
             idx = self.geometry.find_index(**kwargs)
             if isinstance(idx, tuple):
                 # TODO: support for dfs3
