@@ -1,6 +1,7 @@
+from __future__ import annotations
 import os
 from datetime import datetime
-from typing import Callable, Optional, Sequence, Tuple, Union
+from typing import Callable, Sequence, Tuple
 
 import numpy as np
 import pandas as pd
@@ -8,7 +9,7 @@ import pandas as pd
 from .dataset import Dataset
 from .dfs import Dfs0
 from .eum import ItemInfo
-from .spatial import GeometryFM
+from .spatial import GeometryFM2D
 
 
 def _extract_track(
@@ -17,8 +18,8 @@ def _extract_track(
     start_time: datetime,
     end_time: datetime,
     timestep: float,
-    geometry: GeometryFM,
-    track: Union[str, Dataset, pd.DataFrame],
+    geometry: GeometryFM2D,
+    track: str | Dataset | pd.DataFrame,
     items: Sequence[ItemInfo],
     item_numbers: Sequence[int],
     time_steps: Sequence[int],
@@ -28,7 +29,7 @@ def _extract_track(
     data_read_func: Callable[[int, int], Tuple[np.ndarray, float]],
 ) -> Dataset:
 
-    if not isinstance(geometry, GeometryFM):
+    if not isinstance(geometry, GeometryFM2D):
         raise NotImplementedError("Only implemented for 2d flexible mesh geometries")
 
     n_items = len(item_numbers)
@@ -41,6 +42,7 @@ def _extract_track(
                 df = Dfs0(filename).to_dataframe()
             elif ext == ".csv":
                 df = pd.read_csv(filename, index_col=0, parse_dates=True)
+                df.index = pd.DatetimeIndex(df.index)
             else:
                 raise ValueError(f"{ext} files not supported (dfs0, csv)")
 
@@ -102,8 +104,8 @@ def _extract_track(
     )
 
     # initialize arrays
-    d1 = np.ndarray(shape=(n_items, n_elements), dtype=dtype)
-    d2 = np.ndarray(shape=(n_items, n_elements), dtype=dtype)
+    d1: np.ndarray = np.ndarray(shape=(n_items, n_elements), dtype=dtype)
+    d2: np.ndarray = np.ndarray(shape=(n_items, n_elements), dtype=dtype)
     t1 = 0.0
     t2 = 0.0
 
@@ -124,7 +126,7 @@ def _extract_track(
 
         read_next = t_rel[t] > t2
 
-        while (read_next == True) and (not is_EOF(dfsu_step + 1)):
+        while read_next and not is_EOF(dfsu_step + 1):
             dfsu_step = dfsu_step + 1
 
             # swap new to old
@@ -139,7 +141,7 @@ def _extract_track(
 
             read_next = t_rel[t] > t2
 
-        if (read_next == True) and (is_EOF(dfsu_step)):
+        if read_next and is_EOF(dfsu_step):
             # cannot read next - no more timesteps
             continue
 

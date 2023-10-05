@@ -1,7 +1,7 @@
 # Dfsu 2DV Vertical Profile
 
 
-In addition to the common [dfsu-geometry properties and methods](./dfu-mesh-overview.md#mike-io-flexible-mesh-geometry), Dfsu2DV has the below additional *properties* (from it's geometry [GeometryFMVerticalProfile](GeometryFMVerticalProfile)): 
+In addition to the common [dfsu-geometry properties and methods](MIKE IO Flexible Mesh Geometry), Dfsu2DV has the below additional *properties* (from it's geometry [GeometryFMVerticalProfile](GeometryFMVerticalProfile)): 
 
 
 
@@ -9,15 +9,15 @@ In addition to the common [dfsu-geometry properties and methods](./dfu-mesh-over
 .. autosummary::
     :nosignatures:
 
-    mikeio.dfsu_layered.Dfsu2DV.n_layers
-    mikeio.dfsu_layered.Dfsu2DV.n_sigma_layers
-    mikeio.dfsu_layered.Dfsu2DV.n_z_layers
-    mikeio.dfsu_layered.Dfsu2DV.layer_ids
-    mikeio.dfsu_layered.Dfsu2DV.top_elements
-    mikeio.dfsu_layered.Dfsu2DV.bottom_elements
-    mikeio.dfsu_layered.Dfsu2DV.n_layers_per_column
-    mikeio.dfsu_layered.Dfsu2DV.e2_e3_table
-    mikeio.dfsu_layered.Dfsu2DV.elem2d_ids
+    mikeio.dfsu._layered.Dfsu2DV.n_layers
+    mikeio.dfsu._layered.Dfsu2DV.n_sigma_layers
+    mikeio.dfsu._layered.Dfsu2DV.n_z_layers
+    mikeio.dfsu._layered.Dfsu2DV.layer_ids
+    mikeio.dfsu._layered.Dfsu2DV.top_elements
+    mikeio.dfsu._layered.Dfsu2DV.bottom_elements
+    mikeio.dfsu._layered.Dfsu2DV.n_layers_per_column
+    mikeio.dfsu._layered.Dfsu2DV.e2_e3_table
+    mikeio.dfsu._layered.Dfsu2DV.elem2d_ids
 ```
 
 
@@ -27,7 +27,7 @@ And in addition to the basic dfsu functionality, Dfsu2DV has the below additiona
 .. autosummary::
     :nosignatures:
 
-    mikeio.dfsu_layered.Dfsu2DV.get_layer_elements    
+    mikeio.dfsu._layered.Dfsu2DV.get_layer_elements    
 ```
 
 
@@ -45,7 +45,7 @@ In MIKE Zero, layer ids are 1-based. In MIKE IO, all ids are **0-based**followin
 ## Dfsu 2DV Vertical Profile API
 
 ```{eval-rst}
-.. autoclass:: mikeio.dfsu_layered.Dfsu2DV
+.. autoclass:: mikeio.dfsu._layered.Dfsu2DV
 	:members:
 	:inherited-members:
 ```
@@ -53,7 +53,7 @@ In MIKE Zero, layer ids are 1-based. In MIKE IO, all ids are **0-based**followin
 ## FM Geometry 2DV Vertical Profile API
 
 ```{eval-rst}
-.. autoclass:: mikeio.spatial.FM_geometry.GeometryFMVerticalProfile
+.. autoclass:: mikeio.spatial._FM_geometry_layered.GeometryFMVerticalProfile
 	:members:
 	:inherited-members:
 ```
@@ -63,7 +63,7 @@ In MIKE Zero, layer ids are 1-based. In MIKE IO, all ids are **0-based**followin
 A DataArray `da` with a GeometryFMVerticalProfile geometry can be plotted using `da.plot`. 
 
 ```{eval-rst}
-.. autoclass:: mikeio.dataarray._DataArrayPlotterFMVerticalProfile
+.. autoclass:: mikeio.dataset._data_plot._DataArrayPlotterFMVerticalProfile
 	:members:
 	:inherited-members:
 ```

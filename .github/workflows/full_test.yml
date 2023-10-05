@@ -18,7 +18,7 @@ jobs:
       matrix:
         os: [ubuntu-latest, windows-latest]
 
-        python-version: [3.8, 3.9, "3.10","3.11"]
+        python-version: [3.8, "3.11"]
 
     steps:
     - uses: actions/checkout@v3
@@ -47,5 +47,5 @@ jobs:
         pytest --cov=mikeio tests --ignore tests/performance/ --ignore tests/notebooks/ --disable-warnings
     - name: Test docstrings with doctest
       run: make doctest
-    #- name: Static type check
-    #  run: make typecheck
+    - name: Static type check
+      run: make typecheck

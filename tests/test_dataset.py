@@ -704,7 +704,7 @@ def test_extrapolate_not_allowed():
     ds2 = mikeio.Dataset(data, time, items)
 
     with pytest.raises(ValueError):
-        dsi = ds1.interp_time(dt=ds2.time, fill_value=1.0, extrapolate=False)
+        ds1.interp_time(dt=ds2.time, fill_value=1.0, extrapolate=False)
 
 
 def test_get_data_2():
@@ -715,7 +715,7 @@ def test_get_data_2():
     data.append(d)
     time = pd.date_range("2000-1-2", freq="H", periods=nt)
     items = [ItemInfo("Foo")]
-    ds = mikeio.Dataset(data, time, items)
+    mikeio.Dataset(data, time, items)
 
     assert data[0].shape == (100, 100, 30)
 
@@ -915,19 +915,19 @@ def test_aggregate_across_items():
 
     ds = mikeio.read("tests/testdata/State_wlbc_north_err.dfs1")
 
-    with pytest.warns(FutureWarning):  # TODO: remove in 1.5.0
-        dam = ds.max(axis="items")
-
-    assert isinstance(dam, mikeio.DataArray)
-    assert dam.geometry == ds.geometry
-    assert dam.dims == ds.dims
-    assert dam.type == ds[-1].type
-
-    dsm = ds.mean(axis="items", keepdims=True)
+    dsm = ds.mean(axis="items")
 
     assert isinstance(dsm, mikeio.Dataset)
     assert dsm.geometry == ds.geometry
     assert dsm.dims == ds.dims
+
+    dsq = ds.quantile(q=[0.1,0.5,0.9], axis="items")
+    assert isinstance(dsq, mikeio.Dataset)
+    assert dsq[0].name == "Quantile 0.1"
+    assert dsq[1].name == "Quantile 0.5"
+    assert dsq[2].name == "Quantile 0.9"
+
+    # TODO allow name to be specified similar to below
 
 
 def test_aggregate_selected_items_dfsu_save_to_new_file(tmp_path):
@@ -936,10 +936,8 @@ def test_aggregate_selected_items_dfsu_save_to_new_file(tmp_path):
 
     assert ds.n_items == 5
 
-    with pytest.warns(FutureWarning):  # TODO: remove keepdims in 1.5.0
-        dsm = ds.max(
-            axis="items", keepdims=True, name="Max Water Level"
-        )  # add a nice name
+    
+    dsm = ds.max(axis="items", name="Max Water Level")  # add a nice name
     assert len(dsm) == 1
     assert dsm[0].name == "Max Water Level"
     assert dsm.geometry == ds.geometry
@@ -1056,7 +1054,7 @@ def test_iteminfo_string_type_should_fail_with_helpful_message():
 
     with pytest.raises(ValueError):
 
-        item = ItemInfo("Water level", "Water level")
+        ItemInfo("Water level", "Water level")
 
 
 def test_item_search():
@@ -1074,6 +1072,7 @@ def test_dfsu3d_dataset():
     dfsu = mikeio.open(filename)
 
     ds = dfsu.read()
+
 
     text = repr(ds)
     assert "mikeio.Dataset" in text
@@ -1211,13 +1210,13 @@ def test_add_inconsistent_dataset(ds1):
 
 def test_add_bad_value(ds1):
 
-    with pytest.raises(ValueError):
+    with pytest.raises(TypeError):
         ds1 + ["one"]
 
 
 def test_multiple_bad_value(ds1):
 
-    with pytest.raises(ValueError):
+    with pytest.raises(TypeError):
         ds1 * ["pi"]
 
 
@@ -1423,17 +1422,17 @@ def test_to_numpy(ds2):
 
 def test_concat():
     filename = "tests/testdata/HD2D.dfsu"
-    ds1 = mikeio.read(filename, time=[0, 1])
-    ds2 = mikeio.read(filename, time=[2, 3])
-    ds3 = mikeio.Dataset.concat([ds1, ds2])
-    ds3.n_timesteps
+    dss1 = mikeio.read(filename, time=[0, 1])
+    dss2 = mikeio.read(filename, time=[2, 3])
+    dss3 = mikeio.Dataset.concat([dss1, dss2])
 
-    assert ds1.n_items == ds2.n_items == ds3.n_items
-    assert ds3.n_timesteps == (ds1.n_timesteps + ds2.n_timesteps)
-    assert ds3.start_time == ds1.start_time
-    assert ds3.end_time == ds2.end_time
-    assert type(ds3.geometry) == type(ds1.geometry)
-    assert ds3.geometry.n_elements == ds1.geometry.n_elements
+    assert dss1.n_items == dss2.n_items == dss3.n_items
+    assert dss3.n_timesteps == (dss1.n_timesteps + dss2.n_timesteps)
+    assert dss3.start_time == dss1.start_time
+    assert dss3.end_time == dss2.end_time
+    assert isinstance(dss1.geometry, mikeio.spatial.GeometryFM2D)
+    assert isinstance(dss3.geometry, mikeio.spatial.GeometryFM2D)
+    assert dss3.geometry.n_elements == dss1.geometry.n_elements
 
 
 def test_concat_dfsu3d():
@@ -1446,7 +1445,8 @@ def test_concat_dfsu3d():
     assert ds1.n_items == ds2.n_items == ds3.n_items
     assert ds3.start_time == ds.start_time
     assert ds3.end_time == ds.end_time
-    assert type(ds3.geometry) == type(ds.geometry)
+    assert isinstance(ds1.geometry, mikeio.spatial.GeometryFM3D)
+    assert isinstance(ds3.geometry, mikeio.spatial.GeometryFM3D)
     assert ds3.geometry.n_elements == ds1.geometry.n_elements
     assert ds3._zn.shape == ds._zn.shape
     assert np.all(ds3._zn == ds._zn)
@@ -1454,7 +1454,7 @@ def test_concat_dfsu3d():
 
 def test_concat_dfsu3d_single_timesteps():
     filename = "tests/testdata/basin_3d.dfsu"
-    ds = mikeio.read(filename)
+    mikeio.read(filename)
     ds1 = mikeio.read(filename, time=0)
     ds2 = mikeio.read(filename, time=2)
     ds3 = mikeio.Dataset.concat([ds1, ds2])
@@ -1466,7 +1466,7 @@ def test_concat_dfsu3d_single_timesteps():
 
 def test_concat_dfs2_single_timesteps():
     filename = "tests/testdata/single_row.dfs2"
-    ds = mikeio.read(filename)
+    mikeio.read(filename)
     ds1 = mikeio.read(filename, time=0)
     ds2 = mikeio.read(filename, time=2)
     ds3 = mikeio.Dataset.concat([ds1, ds2])
@@ -1532,7 +1532,7 @@ def test_layer_selection():
 
     dss_layer = ds.sel(layers=0)
     # should not be layered after selection
-    assert type(dss_layer.geometry) == mikeio.spatial.GeometryFM
+    assert type(dss_layer.geometry) == mikeio.spatial.GeometryFM2D
 
 
 def test_time_selection():

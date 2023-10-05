@@ -4,10 +4,10 @@ from datetime import datetime, timedelta
 
 import numpy as np
 import pandas as pd
-from mikecore.DfsFactory import DfsBuilder, DfsFactory
-from mikecore.DfsFile import DataValueType, DfsSimpleType, StatType, TimeAxisType
-from mikecore.DfsFileFactory import DfsFileFactory
-from mikecore.eum import eumQuantity
+from mikecore.DfsFactory import DfsBuilder, DfsFactory  # type: ignore
+from mikecore.DfsFile import DataValueType, DfsSimpleType, StatType, TimeAxisType  # type: ignore
+from mikecore.DfsFileFactory import DfsFileFactory  # type: ignore
+from mikecore.eum import eumQuantity  # type: ignore
 
 from .. import __dfs_version__
 from ..dataset import Dataset
@@ -29,7 +29,7 @@ def _write_dfs0(filename, dataset: Dataset, title="", dtype=DfsSimpleType.Float)
         if len(dataset.time) == 1:
             dt = 1.0  # TODO
         else:
-            dt = (dataset.time[1] - dataset.time[0]).total_seconds()
+            dt = (dataset.time[1] - dataset.time[0]).total_seconds()  # type: ignore
 
         temporal_axis = factory.CreateTemporalEqCalendarAxis(
             TimeStepUnit.SECOND, system_start_time, 0, dt
@@ -64,7 +64,7 @@ def _write_dfs0(filename, dataset: Dataset, title="", dtype=DfsSimpleType.Float)
 
     delete_value = dfs.FileInfo.DeleteValueFloat
 
-    t_seconds = (dataset.time - dataset.time[0]).total_seconds().values
+    t_seconds = (dataset.time - dataset.time[0]).total_seconds().values  # type: ignore
 
     data = np.array(dataset.to_numpy(), order="F").astype(np.float64).T
     data[np.isnan(data)] = delete_value
@@ -75,7 +75,7 @@ def _write_dfs0(filename, dataset: Dataset, title="", dtype=DfsSimpleType.Float)
         data_to_write = np.concatenate(
             [np.atleast_2d(t_seconds), np.atleast_2d(data)], axis=1
         )
-    rc = dfs.WriteDfs0DataDouble(data_to_write)
+    dfs.WriteDfs0DataDouble(data_to_write)
 
     dfs.Close()
 
@@ -209,7 +209,7 @@ class Dfs0:
                 sel = slice(parts[0], None)  # start only
             else:
                 sel = slice(parts[0], parts[1])
-            ds = ds[sel]
+            ds = ds[sel]  # type: ignore
 
         return ds
 
@@ -614,6 +614,6 @@ def dataframe_to_dfs0(
 
 
 # Monkey patching onto Pandas classes
-pd.DataFrame.to_dfs0 = dataframe_to_dfs0
+pd.DataFrame.to_dfs0 = dataframe_to_dfs0  # type: ignore
 
-pd.Series.to_dfs0 = series_to_dfs0
+pd.Series.to_dfs0 = series_to_dfs0  # type: ignore

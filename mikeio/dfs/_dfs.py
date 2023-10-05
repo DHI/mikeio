@@ -1,12 +1,12 @@
+from __future__ import annotations
 import warnings
 from abc import abstractmethod
-from datetime import datetime, timedelta
-from typing import Iterable, List, Optional, Tuple, Union
+from datetime import datetime
+from typing import Iterable, List, Optional, Tuple, Sequence
 import numpy as np
 import pandas as pd
 from tqdm import tqdm, trange
 
-from copy import deepcopy
 from mikecore.DfsFactory import DfsFactory
 from mikecore.DfsFile import (
     DfsDynamicItemInfo,
@@ -70,40 +70,48 @@ def _fuzzy_item_search(
 
 def _valid_item_numbers(
     dfsItemInfo: List[DfsDynamicItemInfo],
-    items: Optional[Union[str, int, List[int], List[str]]] = None,
+    items: Optional[str | int | List[int] | List[str]] = None,
     ignore_first: bool = False,
 ) -> List[int]:
     start_idx = 1 if ignore_first else 0
     n_items_file = len(dfsItemInfo) - start_idx
     if items is None:
         return list(range(n_items_file))
+    
+    # Handling scalar and sequences is a bit tricky
+    
+    item_numbers : List[int] = []
 
-    items = deepcopy(items)
-
-    if np.isscalar(items):
+    # check if items is a scalar (int or str)
+    if isinstance(items, (int, str)):
         if isinstance(items, str) and "*" in items:
             return _fuzzy_item_search(
                 dfsItemInfo=dfsItemInfo, search=items, start_idx=start_idx
             )
-        else:
-            items = [items]
-
-    for idx, item in enumerate(items):
+        elif isinstance(items, str):
+            item_number  = _item_numbers_by_name(dfsItemInfo, [items], ignore_first)[0]
+            return [item_number]
+        elif isinstance(items, int):
+            if (items < 0) or (items >= n_items_file):
+                raise ItemsError(n_items_file)
+            return [items]
+    
+    assert isinstance(items, Sequence)
+    for item in items:
         if isinstance(item, str):
-            items[idx] = _item_numbers_by_name(dfsItemInfo, [item], ignore_first)[0]
+            item_number = _item_numbers_by_name(dfsItemInfo, [item], ignore_first)[0]
         elif isinstance(item, int):
             if (item < 0) or (item >= n_items_file):
                 raise ItemsError(n_items_file)
+            item_number = item
         else:
             raise ItemsError(n_items_file)
+        item_numbers.append(item_number)
 
-    if len(np.unique(items)) != len(items):
+    if len(set(item_numbers)) != len(item_numbers):
         raise ValueError("'items' must be unique")
 
-    assert isinstance(items, Iterable)
-    assert isinstance(items[0], int)
-
-    return items
+    return item_numbers
 
 
 def _valid_timesteps(dfsFileInfo: DfsFileInfo, time_steps) -> Tuple[bool, List[int]]:
@@ -149,7 +157,7 @@ def _valid_timesteps(dfsFileInfo: DfsFileInfo, time_steps) -> Tuple[bool, List[i
         else:
             s = time.slice_indexer(time_steps.start, time_steps.stop)
             time_steps = list(range(s.start, s.stop))
-    elif isinstance(time_steps, Iterable) and isinstance(time_steps[0], int):
+    elif isinstance(time_steps, Sequence) and isinstance(time_steps[0], int):
         time_steps = np.array(time_steps)
         time_steps[time_steps < 0] = n_steps_file + time_steps[time_steps < 0]
         time_steps = list(time_steps)
@@ -169,8 +177,8 @@ def _valid_timesteps(dfsFileInfo: DfsFileInfo, time_steps) -> Tuple[bool, List[i
     elif isinstance(time_steps, (pd.Timestamp, datetime)):
         s = time.slice_indexer(time_steps, time_steps)
         time_steps = list(range(s.start, s.stop))
-    elif isinstance(time_steps, pd.DatetimeIndex):
-        time_steps = list(time.get_indexer(time_steps))
+    #elif isinstance(time_steps, pd.DatetimeIndex):
+    #    time_steps = list(time.get_indexer(time_steps))
 
     else:
         raise TypeError(f"Indexing is not possible with {type(time_steps)}")
@@ -179,7 +187,7 @@ def _valid_timesteps(dfsFileInfo: DfsFileInfo, time_steps) -> Tuple[bool, List[i
     return single_time_selected, time_steps
 
 
-def _item_numbers_by_name(dfsItemInfo, item_names, ignore_first=False):
+def _item_numbers_by_name(dfsItemInfo, item_names: List[str], ignore_first: bool=False) -> List[int]:
     """Utility function to find item numbers
 
     Parameters
@@ -213,7 +221,7 @@ def _item_numbers_by_name(dfsItemInfo, item_names, ignore_first=False):
 
 def _get_item_info(
     dfsItemInfo: List[DfsDynamicItemInfo],
-    item_numbers: List[int] = None,
+    item_numbers: Optional[List[int]] = None,
     ignore_first: bool = False,
 ) -> ItemInfoList:
     """Read DFS ItemInfo for specific item numbers
@@ -222,26 +230,20 @@ def _get_item_info(
     ----------
     dfsItemInfo : List[DfsDynamicItemInfo]
     item_numbers : list[int], optional
+        Item numbers to read, by default all items are read
+    ignore_first : bool, optional
+        Ignore first item, by default False, used for Dfsu3D
 
     Returns
     -------
-    list[ItemInfo]
+    ItemInfoList
     """
     first_idx = 1 if ignore_first else 0
     if item_numbers is None:
         item_numbers = list(range(len(dfsItemInfo) - first_idx))
 
-    items = []
-    for item in item_numbers:
-        item = item + first_idx
-        name = dfsItemInfo[item].Name
-        eumItem = dfsItemInfo[item].Quantity.Item
-        eumUnit = dfsItemInfo[item].Quantity.Unit
-        itemtype = EUMType(eumItem)
-        unit = EUMUnit(eumUnit)
-        data_value_type = dfsItemInfo[item].ValueType
-        item = ItemInfo(name, itemtype, unit, data_value_type)
-        items.append(item)
+    item_numbers = [i + first_idx for i in item_numbers]
+    items = [ItemInfo.from_mikecore_dynamic_item_info(dfsItemInfo[i]) for i in item_numbers]
     return ItemInfoList(items)
 
 
@@ -273,7 +275,7 @@ def _write_dfs_data(*, dfs: DfsFile, ds: Dataset, n_spatial_dims: int) -> None:
 
 
 class _Dfs123:
-    _ndim = None
+    _ndim: int
 
     show_progress = False
 
@@ -329,6 +331,8 @@ class _Dfs123:
         single_time_selected, time_steps = _valid_timesteps(self._dfs.FileInfo, time)
         nt = len(time_steps) if not single_time_selected else 1
 
+        shape: Tuple[int, ...]
+
         if self._ndim == 1:
             shape = (nt, self._nx)
         elif self._ndim == 2:
@@ -339,7 +343,9 @@ class _Dfs123:
         if single_time_selected and not keepdims:
             shape = shape[1:]
 
-        data_list = [np.ndarray(shape=shape, dtype=dtype) for item in range(n_items)]
+        data_list: List[np.ndarray] = [
+            np.ndarray(shape=shape, dtype=dtype) for _ in range(n_items)
+        ]
 
         t_seconds = np.zeros(len(time_steps))
 
@@ -363,7 +369,7 @@ class _Dfs123:
 
             t_seconds[i] = itemdata.Time
 
-        time = pd.to_datetime(t_seconds, unit="s", origin=self.start_time)
+        time = pd.to_datetime(t_seconds, unit="s", origin=self.start_time)  # type: ignore
 
         items = _get_item_info(self._dfs.ItemInfo, item_numbers)
 
@@ -494,6 +500,9 @@ class _Dfs123:
                 if self._ndim == 2:
                     d = d.reshape(self.shape[1:])
                     darray = d.reshape(d.size, 1)[:, 0]
+
+                if self._ndim == 3:
+                    raise NotImplementedError("Append is not yet available for 3D files")
 
                 if self._is_equidistant:
                     self._dfs.WriteItemTimeStepNext(0, darray.astype(np.float32))
@@ -697,30 +706,18 @@ class _Dfs123:
         return self._n_timesteps
 
     @property
-    def timestep(self) -> Optional[float]:
+    def timestep(self) -> float:
         """Time step size in seconds"""
-        if self._timeaxistype in {
-            TimeAxisType.CalendarEquidistant,
-            TimeAxisType.TimeEquidistant,
-        }:
-            return self._dfs.FileInfo.TimeAxis.TimeStepInSeconds()
+        # this will fail if the TimeAxisType is not calendar and equidistant, but that is ok
+        return self._dfs.FileInfo.TimeAxis.TimeStepInSeconds()
 
     @property
-    def time(self) -> Optional[pd.DatetimeIndex]:
+    def time(self) -> pd.DatetimeIndex:
         """File all datetimes"""
-        if self._timeaxistype in {
-            TimeAxisType.CalendarEquidistant,
-            TimeAxisType.TimeEquidistant,
-        }:
-            return pd.to_datetime(
-                [
-                    self.start_time + timedelta(seconds=i * self.timestep)
-                    for i in range(self.n_timesteps)
-                ]
-            )
-
-        else:
-            return None
+        # this will fail if the TimeAxisType is not calendar and equidistant, but that is ok
+        if not self._is_equidistant:
+            raise NotImplementedError("Not implemented for non-equidistant files")
+        return pd.date_range(start=self.start_time, periods=self.n_timesteps, freq=f"{self.timestep}S")
 
     @property
     def projection_string(self):
@@ -745,6 +742,12 @@ class _Dfs123:
     def orientation(self):
         """Orientation (in own CRS)"""
         return self.geometry.orientation
+
+    @property
+    @abstractmethod
+    def shape(self) -> Tuple[int, ...]:
+        """Shape of the data array"""
+        pass
 
     @property
     @abstractmethod

@@ -23,9 +23,9 @@ jobs:
     - name: Install mikeio
       run: |
         pip install .
-    - name: Test fmskill from github
+    - name: Test modelskill from github
       run: |
-        git clone --depth 1 https://github.com/DHI/fmskill.git
-        cd fmskill
+        git clone --depth 1 https://github.com/DHI/modelskill.git
+        cd modelskill
         pip install .[test]
         pytest

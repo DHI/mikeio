@@ -1,6 +1,6 @@
 import os
 
-from mikecore.DfsuFile import DfsuFile, DfsuFileType
+from mikecore.DfsuFile import DfsuFile, DfsuFileType  # type: ignore
 
 from ._dfsu import Dfsu2DH
 from ._layered import Dfsu2DV, Dfsu3D

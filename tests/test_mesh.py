@@ -76,11 +76,11 @@ def test_get_bad_node_coordinates(tri_mesh):
     msh = tri_mesh
 
     with pytest.raises(Exception):
-        nc = msh.get_node_coords(code="foo")
+        msh.get_node_coords(code="foo")
 
 
 def test_set_z(tri_mesh):
-    filename = os.path.join("tests", "testdata", "odense_rough.mesh")
+    os.path.join("tests", "testdata", "odense_rough.mesh")
     msh = tri_mesh
     zn = msh.node_coordinates[:, 2]
     zn[zn < -3] = -3

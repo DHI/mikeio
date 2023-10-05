@@ -1,0 +1,16 @@
+cff-version: 1.2.0
+message: If you use this software, please cite it as below.
+authors:
+- family-names: Andersson
+  given-names: Johan Henrik
+  affiliation: DHI
+- family-names: Mariegaard
+  given-names: Jesper Sandvig
+  affiliation: DHI
+title: "MIKE IO"
+license: BSD-3-Clause
+repository-code: 'https:///github.com/DHI/mikeio'
+url: "https://dhi.github.io/mikeio/"
+version: 1.6.1
+date-released: 2023-06-09
+

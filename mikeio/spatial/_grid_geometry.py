@@ -1,5 +1,6 @@
+from __future__ import annotations
 import warnings
-from typing import Optional, Sequence, Tuple, Union
+from typing import Optional, Sequence, Tuple
 from dataclasses import dataclass
 import numpy as np
 
@@ -108,7 +109,7 @@ class Grid1D(_Geometry):
     ):
         """Create equidistant 1D spatial geometry"""
         super().__init__(projection)
-        self._origin = (0.0, 0.0) if origin is None else tuple(origin)
+        self._origin = (0.0, 0.0) if origin is None else (origin[0], origin[1])
         assert len(self._origin) == 2, "origin must be a tuple of length 2"
         self._orientation = orientation
         self._x0, self._dx, self._nx = _parse_grid_axis("x", x, x0, dx, nx)
@@ -183,7 +184,7 @@ class Grid1D(_Geometry):
 
     def isel(
         self, idx, axis=None
-    ) -> Union[GeometryPoint2D, GeometryPoint3D, GeometryUndefined]:
+    ) -> "Grid1D" | GeometryPoint2D | GeometryPoint3D | GeometryUndefined:
         """Get a subset geometry from this geometry
 
         Parameters
@@ -405,7 +406,7 @@ class Grid2D(_Geometry):
         """
         super().__init__(projection)
         self._shift_origin_on_write = origin is None  # user-constructed
-        self._origin = (0.0, 0.0) if origin is None else tuple(origin)
+        self._origin = (0.0, 0.0) if origin is None else (origin[0], origin[1])
         assert len(self._origin) == 2, "origin must be a tuple of length 2"
         self._orientation = orientation
         self.__xx = None
@@ -727,11 +728,6 @@ class Grid2D(_Geometry):
         -------
         array(int), array(int)
             i- and j-index of nearest cell
-
-        Raises
-        ------
-        ValueError if x or y are not scalar values, use coords instead
-        OutsideModelDomainError if point is outside grid
         """
         if x is None and y is not None and not np.isscalar(y):
             raise ValueError(
@@ -777,8 +773,8 @@ class Grid2D(_Geometry):
         return ii, jj
 
     def _bbox_to_index(
-        self, bbox: Union[Sequence[float], BoundingBox]
-    ) -> Union[Tuple[None, None], Tuple[range, range]]:
+        self, bbox: Tuple[float,float,float,float] | BoundingBox
+    ) -> Tuple[range, range]:
         """Find subarea within this geometry"""
         if not (len(bbox) == 4):
             raise ValueError(
@@ -787,8 +783,7 @@ class Grid2D(_Geometry):
 
         x0, y0, x1, y1 = bbox
         if x0 > self.x[-1] or y0 > self.y[-1] or x1 < self.x[0] or y1 < self.y[0]:
-            warnings.warn("No elements in bbox")
-            return None, None
+            raise ValueError("area is outside grid")
 
         mask = (self.x >= x0) & (self.x <= x1)
         ii = np.where(mask)[0]
@@ -801,8 +796,8 @@ class Grid2D(_Geometry):
         return i, j
 
     def isel(
-        self, idx, axis: Union[int, str]
-    ) -> Union["Grid2D", "Grid1D", "GeometryUndefined"]:
+        self, idx, axis: int | str
+    ) -> "Grid2D" | "Grid1D" | "GeometryUndefined":
         """Return a new geometry as a subset of Grid2D along the given axis."""
         if isinstance(axis, str):
             if axis == "y":
@@ -934,7 +929,7 @@ class Grid2D(_Geometry):
         south: int, optional
             code value for south boundary
         """
-        from mikeio.spatial._FM_geometry import GeometryFM
+        from mikeio.spatial._FM_geometry import GeometryFM2D
 
         # get node based grid
         xn = self._centers_to_nodes(self.x)
@@ -959,7 +954,7 @@ class Grid2D(_Geometry):
 
         nc = np.column_stack([x, y, zn])
         elem_table = gn._to_element_table(index_base=0)
-        return GeometryFM(
+        return GeometryFM2D(
             node_coordinates=nc,
             element_table=elem_table,
             codes=codes,
@@ -1030,7 +1025,7 @@ class Grid3D(_Geometry):
     ) -> None:
 
         super().__init__()
-        self._origin = (0.0, 0.0) if origin is None else tuple(origin)
+        self._origin = (0.0, 0.0) if origin is None else (origin[0], origin[1])
         assert len(self._origin) == 2, "origin must be a tuple of length 2"
         self._x0, self._dx, self._nx = _parse_grid_axis("x", x, x0, dx, nx)
         self._y0, self._dy, self._ny = _parse_grid_axis("y", y, y0, dy, ny)
@@ -1244,7 +1239,7 @@ class Grid3D(_Geometry):
 
     def _geometry_for_layers(
         self, layers, keepdims=False
-    ) -> Union[Grid2D, "Grid3D", "GeometryUndefined"]:
+    ) -> Grid2D | "Grid3D" | "GeometryUndefined":
         if layers is None:
             return self
 

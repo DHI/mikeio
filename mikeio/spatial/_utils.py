@@ -62,7 +62,7 @@ def _relative_cumulative_distance(coords, reference=None, is_geo=False):
     coords = np.atleast_2d(coords)
     d = np.zeros_like(coords[:, 0])
     if reference is not None:
-        d[0] = dist_in_meters(coords[0, 0:2], reference[0:2], is_geo)
+        d[0] = dist_in_meters(coords[0, 0:2], reference[0:2], is_geo)[0]
     for j in range(1, len(d)):
-        d[j] = d[j - 1] + dist_in_meters(coords[j, 0:2], coords[j - 1, 0:2], is_geo)
+        d[j] = d[j - 1] + dist_in_meters(coords[j, 0:2], coords[j - 1, 0:2], is_geo)[0]
     return d

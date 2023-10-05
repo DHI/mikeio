@@ -1,9 +1,7 @@
-from typing import Collection
-import warnings
+from typing import Collection, Optional
 from functools import wraps
 
 import numpy as np
-import pandas as pd
 from mikecore.DfsuFile import DfsuFile, DfsuFileType
 from scipy.spatial import cKDTree
 from tqdm import trange
@@ -98,7 +96,7 @@ class DfsuLayered(_Dfsu):
         *,
         items=None,
         time=None,
-        elements: Collection[int] = None,
+        elements: Optional[Collection[int]] = None,
         area=None,
         x=None,
         y=None,
@@ -198,7 +196,7 @@ class DfsuLayered(_Dfsu):
             if hasattr(geometry, "is_layered") and geometry.is_layered and item == 0:
                 # and items[item].name == "Z coordinate":
                 item0_is_node_based = True
-                data = np.ndarray(shape=(n_steps, n_nodes), dtype=dtype)
+                data: np.ndarray = np.ndarray(shape=(n_steps, n_nodes), dtype=dtype)
             else:
                 data = np.ndarray(shape=(n_steps, n_elems), dtype=dtype)
             data_list.append(data)
@@ -240,7 +238,11 @@ class DfsuLayered(_Dfsu):
 
         dfs.Close()
 
-        dims = ("time", "element") if not single_time_selected else ("element",)
+        dims = (
+            ("time", "element")
+            if not (single_time_selected and not keepdims)  # TODO extract variable
+            else ("element",)
+        )
 
         if elements is not None and len(elements) == 1:
             # squeeze point data
@@ -346,28 +348,6 @@ class Dfsu3D(DfsuLayered):
     def geometry2d(self):
         """The 2d geometry for a 3d object"""
         return self._geometry2d
-
-    def find_nearest_profile_elements(self, x, y):
-        """Find 3d elements of profile nearest to (x,y) coordinates
-
-        Parameters
-        ----------
-        x : float
-            x-coordinate of point
-        y : float
-            y-coordinate of point
-
-        Returns
-        -------
-        np.array(int)
-            element ids of vertical profile
-        """
-        if self.is_2d:
-            raise InvalidGeometry("Object is 2d. Cannot get_nearest_profile")
-        else:
-            elem2d, _ = self.geometry._find_n_nearest_2d_elements(x, y)
-            elem3d = self.geometry.e2_e3_table[elem2d]
-            return elem3d
 
     def extract_surface_elevation_from_3d(self, filename=None, n_nearest=4):
         """

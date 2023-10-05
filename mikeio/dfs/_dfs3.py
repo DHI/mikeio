@@ -1,14 +1,16 @@
 import os
 
+from typing import Tuple
+
 import numpy as np
 import pandas as pd
 
-from mikecore.DfsBuilder import DfsBuilder
-from mikecore.DfsFactory import DfsFactory
-from mikecore.DfsFile import DfsFile, DfsSimpleType
-from mikecore.DfsFileFactory import DfsFileFactory
-from mikecore.eum import eumQuantity, eumUnit
-from mikecore.Projections import Cartography
+from mikecore.DfsBuilder import DfsBuilder  # type: ignore
+from mikecore.DfsFactory import DfsFactory  # type: ignore
+from mikecore.DfsFile import DfsFile, DfsSimpleType  # type: ignore
+from mikecore.DfsFileFactory import DfsFileFactory  # type: ignore
+from mikecore.eum import eumQuantity, eumUnit  # type: ignore
+from mikecore.Projections import Cartography  # type: ignore
 
 from .. import __dfs_version__
 from ..dataset import Dataset
@@ -188,6 +190,7 @@ class Dfs3(_Dfs123):
         area=None,
         layers=None,
         keepdims=False,
+        dtype=np.float32,
     ) -> Dataset:
         """
         Read data from a dfs3 file
@@ -204,6 +207,8 @@ class Dfs3(_Dfs123):
             in the returned Dataset? by default: False
         layers: int, str, list[int], optional
             Read only data for specific layers, by default None
+        dtype: data-type, optional
+            Define the dtype of the returned dataset (default = np.float32)
 
         Returns
         -------
@@ -211,9 +216,7 @@ class Dfs3(_Dfs123):
         """
 
         if area is not None:
-            return NotImplementedError(
-                "area subsetting is not yet implemented for Dfs3"
-            )
+            raise NotImplementedError("area subsetting is not yet implemented for Dfs3")
         # NOTE:
         # if keepdims is not False:
         #    return NotImplementedError("keepdims is not yet implemented for Dfs3")
@@ -239,6 +242,9 @@ class Dfs3(_Dfs123):
             layers = -1
         layers = None if layers is None else np.atleast_1d(layers)
 
+        dims: Tuple[str, ...]
+        shape: Tuple[int, ...]
+
         nz = zNum if layers is None else len(layers)
         if nz == 1 and (not keepdims):
             geometry = self.geometry._geometry_for_layers([0])
@@ -250,7 +256,7 @@ class Dfs3(_Dfs123):
             shape = (nt, nz, yNum, xNum)
 
         for item in range(n_items):
-            data = np.ndarray(shape=shape, dtype=float)
+            data: np.ndarray = np.ndarray(shape=shape, dtype=dtype)
             data_list.append(data)
 
         if single_time_selected and not keepdims:

@@ -1,4 +1,3 @@
-import os
 from pathlib import Path
 from datetime import datetime
 
@@ -6,11 +5,11 @@ import numpy as np
 import pandas as pd
 import pytest
 import mikeio
-from mikeio import Dataset, DataArray, Dfs0, Dfsu, Mesh, ItemInfo
+from mikeio import Dataset, DataArray, Dfsu, Mesh, ItemInfo
 from pytest import approx
 from mikeio.exceptions import OutsideModelDomainError
 
-from mikeio.spatial._FM_geometry import GeometryFM
+from mikeio.spatial._FM_geometry import GeometryFM2D
 from mikeio.spatial import GeometryPoint2D
 from mikeio.spatial import Grid2D
 
@@ -36,8 +35,8 @@ def test_read_all_items_returns_all_items_and_names():
 
     assert dfs.n_items == 4
 
-    ds_text = repr(ds)
-    dfs_text = repr(dfs)
+    repr(ds)
+    repr(dfs)
 
     assert len(ds) == 4
 
@@ -83,7 +82,7 @@ def test_read_precision_single_and_double():
 def test_read_int_not_accepted():
     filename = "tests/testdata/HD2D.dfsu"
     with pytest.raises(Exception):
-        dfs = mikeio.open(filename, dtype=np.int32)
+        mikeio.open(filename, dtype=np.int32)
 
 
 def test_read_timestep_1():
@@ -227,8 +226,36 @@ def test_read_area():
     dfs = mikeio.open(filename)
 
     ds = dfs.read(area=[0, 0, 0.1, 0.1])
-    assert isinstance(ds.geometry, GeometryFM)
+    assert isinstance(ds.geometry, GeometryFM2D)
     assert ds.geometry.n_elements == 18
+
+
+def test_read_area_polygon():
+
+    polygon = [
+        [7.78, 55.20],
+        [7.03, 55.46],
+        [6.91, 54.98],
+        [7.53, 54.73],
+        [7.78, 55.20],
+    ]
+
+    filename = "tests/testdata/wind_north_sea.dfsu"
+    dfs = mikeio.open(filename)
+
+    p1 = (4.0, 54.0)
+    assert p1 in dfs.geometry
+
+    ds = dfs.read(area=polygon)
+
+    assert p1 not in ds.geometry
+
+    assert ds.geometry.n_elements < dfs.geometry.n_elements
+
+    domain = dfs.geometry.to_shapely().buffer(0)
+    subdomain = ds.geometry.to_shapely().buffer(0)
+
+    assert subdomain.within(domain)
 
 
 def test_find_index_on_island():
@@ -318,8 +345,8 @@ def test_contains():
 
     pts = [[4, 54], [0, 50]]
     inside = dfs.contains(pts)
-    assert inside[0] == True
-    assert inside[1] == False
+    assert inside[0]
+    assert not inside[1]
 
 
 def test_point_in_domain():
@@ -334,8 +361,8 @@ def test_point_in_domain():
 
     pts = [pt, pt2]
     inside = [pt in dfs.geometry for pt in pts]
-    assert inside[0] == True
-    assert inside[1] == False
+    assert inside[0] is True
+    assert inside[1] is False
 
 
 def test_get_overset_grid():
@@ -578,6 +605,29 @@ def test_incremental_write_from_dfsu_context_manager(tmp_path):
     assert dfs.end_time == newdfs.end_time
 
 
+def test_incremental_write_from_dfsu_context_manager_3d(tmp_path):
+
+    sourcefilename = "tests/testdata/oresund_sigma_z.dfsu"
+    fp = tmp_path / "3d.dfsu"
+    dfs = mikeio.open(sourcefilename)
+
+    nt = dfs.n_timesteps
+
+    ds = dfs.read(time=[0], keepdims=True)
+
+    with dfs.write(fp, ds, keep_open=True) as f:
+        for i in range(1, nt):
+            ds = dfs.read(time=[i], keepdims=True)
+            f.append(ds)
+
+        # dfs.close() # should be called automagically by context manager
+
+    newdfs = mikeio.open(fp)
+    assert dfs.start_time == newdfs.start_time
+    assert dfs.timestep == newdfs.timestep
+    assert dfs.end_time == newdfs.end_time
+
+
 def test_write_big_file(tmp_path):
 
     fp = tmp_path / "big.dfsu"
@@ -608,10 +658,12 @@ def test_write_big_file(tmp_path):
     with dfs.write(fp, data=ds, dt=3600, keep_open=True) as f:
         for _ in range(1, nt):
             data = []
-            for _ in range(n_items):
+            for i in range(n_items):
                 d = np.random.random((1, n_elements))
-                data.append(d)
-            f.append(data)
+                da = DataArray(data=d, geometry=msh.geometry, item=f"Item {i+1}")
+                data.append(da)
+            dst = Dataset(data)
+            f.append(dst)
 
     dfsu = mikeio.open(fp)
 
@@ -796,13 +848,14 @@ def test_elements_to_geometry():
     other_tiny_geom = dfs.geometry.isel(set([1, 0]))
     assert other_tiny_geom.n_elements == 2
 
-    prof_ids = dfs.find_nearest_profile_elements(350000, 6150000)
-    geom = dfs.geometry.elements_to_geometry(prof_ids)
+    # Removed, use sel on geometry instead
+    # prof_ids = dfs.find_nearest_profile_elements(350000, 6150000)
+    # geom = dfs.geometry.elements_to_geometry(prof_ids)
 
-    text = repr(geom)
+    # text = repr(geom)
 
-    assert geom.n_layers == 5
-    assert "nodes" in text
+    # assert geom.n_layers == 5
+    # assert "nodes" in text
 
     elements = dfs.get_layer_elements(layers=-1)
     geom = dfs.elements_to_geometry(elements, node_layers="top")
@@ -861,6 +914,13 @@ def test_extract_track():
         index_col=0,
         parse_dates=True,
     )
+
+    # the csv datetime has inconsistent formatting, which is not supported by pandas 2.0
+    # 2008-07-04 12:20:00
+    # 2008-07-04 12:20:00.001
+
+    df.index = pd.DatetimeIndex(df.index)
+
     track = dfs.extract_track(df)
 
     assert track[2].values[23] == approx(3.6284972794399653)
@@ -885,6 +945,7 @@ def test_extract_track_from_dataset():
         index_col=0,
         parse_dates=True,
     )
+    df.index = pd.DatetimeIndex(df.index)
     track = ds.extract_track(df)
 
     assert track[2].values[23] == approx(3.6284972794399653)
@@ -908,6 +969,7 @@ def test_extract_track_from_dataarray():
         index_col=0,
         parse_dates=True,
     )
+    df.index = pd.DatetimeIndex(df.index)
     track = da.extract_track(df)
 
     assert track[2].values[23] == approx(3.6284972794399653)
@@ -1011,7 +1073,7 @@ def test_interp_like_grid_time_invariant():
 
 def test_interp_like_dataarray(tmp_path):
 
-    fp = tmp_path / "interp.dfs2"
+    tmp_path / "interp.dfs2"
 
     da = mikeio.read("tests/testdata/consistency/oresundHD.dfsu")[0]
     da2 = mikeio.read("tests/testdata/consistency/oresundHD.dfs2", time=[0, 1])[0]
@@ -1054,28 +1116,28 @@ def test_interp_like_dataset(tmp_path):
 def test_interp_like_fm():
     msh = Mesh("tests/testdata/north_sea_2.mesh")
     geometry = msh.geometry
-    assert isinstance(geometry, GeometryFM)
+    assert isinstance(geometry, GeometryFM2D)
 
     ds = mikeio.read("tests/testdata/wind_north_sea.dfsu")
     ws = ds[0]
     wsi = ws.interp_like(geometry)
     assert isinstance(wsi, DataArray)
-    assert isinstance(wsi.geometry, GeometryFM)
+    assert isinstance(wsi.geometry, GeometryFM2D)
 
     wsi2 = ws.interp_like(geometry, n_nearest=5, extrapolate=True)
     assert isinstance(wsi2, DataArray)
-    assert isinstance(wsi2.geometry, GeometryFM)
+    assert isinstance(wsi2.geometry, GeometryFM2D)
 
 
 def test_interp_like_fm_dataset():
     msh = Mesh("tests/testdata/north_sea_2.mesh")
     geometry = msh.geometry
-    assert isinstance(geometry, GeometryFM)
+    assert isinstance(geometry, GeometryFM2D)
 
     ds = mikeio.read("tests/testdata/wind_north_sea.dfsu")
     dsi = ds.interp_like(geometry)
     assert isinstance(dsi, Dataset)
-    assert isinstance(dsi.geometry, GeometryFM)
+    assert isinstance(dsi.geometry, GeometryFM2D)
 
 
 def test_write_header(tmp_path):
@@ -1104,3 +1166,16 @@ def test_write_header(tmp_path):
                 d = np.random.random((n_elements))  # 1d
                 data.append(d)
                 f.append(data)
+
+def test_writing_non_equdistant_dfsu_is_not_possible(tmp_path):
+
+    ds = mikeio.read("tests/testdata/wind_north_sea.dfsu")
+    dss = ds.isel(time=[0,2,3])
+    assert not dss.is_equidistant
+
+    # TODO which exception should be raised, when trying to write non-equidistant dfsu? This operation is not supported
+    with pytest.raises(ValueError, match="equidistant"):
+        fp = tmp_path / "not_gonna_work.dfsu"
+        dss.to_dfs(fp)
+
+    

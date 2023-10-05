@@ -4,7 +4,7 @@ import numpy as np
 import pytest
 from mikeio import Mesh
 from mikeio import Grid2D, Grid1D
-from mikeio.spatial._FM_geometry import GeometryFM
+from mikeio.spatial._FM_geometry import GeometryFM2D
 from mikeio.spatial import GeometryUndefined
 from mikeio.exceptions import OutsideModelDomainError
 
@@ -322,7 +322,7 @@ def test_to_geometryFM():
     ny = 3
     grd = Grid2D(nx=nx, dx=1, ny=ny, dy=2)
     g = grd.to_geometryFM()
-    assert isinstance(g, GeometryFM)
+    assert isinstance(g, GeometryFM2D)
     assert g.n_elements == nx * ny
     assert g.n_nodes == (nx + 1) * (ny + 1)
     assert g.projection_string == "NON-UTM"
@@ -347,7 +347,7 @@ def test_to_geometryFM_custom_z_custom_code():
     ny = 3
     grd = Grid2D(nx=nx, dx=1, ny=ny, dy=2)
     g = grd.to_geometryFM(z=-12.0, west=30)
-    assert isinstance(g, GeometryFM)
+    assert isinstance(g, GeometryFM2D)
     assert all(g.node_coordinates[:, 2] == -12.0)
 
     assert g.codes[0] == 30
@@ -426,3 +426,9 @@ def test_grid2d_equality():
     g6 = Grid2D(dx=0.1, nx=2, dy=0.2, ny=4, y0=5)
 
     assert g5 != g6
+
+
+def test_bad_projection_raises_error():
+
+    with pytest.raises(ValueError, match="proj"):
+        Grid2D(nx=2, ny=2, dx=0.1, projection="Not a WKT projection string")

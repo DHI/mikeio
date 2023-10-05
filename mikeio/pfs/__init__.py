@@ -24,3 +24,11 @@ def read_pfs(filename, encoding="cp1252", unique_keywords=False):
         Pfs object which can be used for inspection, manipulation and writing
     """
     return PfsDocument(filename, encoding=encoding, unique_keywords=unique_keywords)
+
+__all__ = [
+    "Pfs",
+    "PfsDocument",
+    "PfsNonUniqueList",
+    "PfsSection",
+    "read_pfs",
+]

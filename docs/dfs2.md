@@ -19,7 +19,7 @@ items:
 
 ## Grid2D
 
-The spatial information is available in the `geometry` attribute (accessible from Dfs2, Dataset, and DataArray), which in the case of a dfs2 file is a [`Grid2D`](Grid2D) geometry. 
+The spatial information is available in the `geometry` attribute (accessible from Dfs2, Dataset, and DataArray), which in the case of a dfs2 file is a [`Grid2D`](mikeio.Grid2D) geometry. 
 
 ```python
 >>> ds.geometry
@@ -46,7 +46,7 @@ Grid2D's primary properties and methods are:
 * `isel()`
 * `to_mesh()`
 
-See [API specification](Grid2D) below for details.
+See [API specification](mikeio.Grid2D) below for details.
 
 
 ## Dfs2 Example notebooks
@@ -81,7 +81,7 @@ See [API specification](Grid2D) below for details.
 A DataArray `da` with a Grid2D geometry can be plotted using `da.plot`. 
 
 ```{eval-rst}
-.. autoclass:: mikeio.dataarray._DataArrayPlotterGrid2D
+.. autoclass:: mikeio.dataset._data_plot._DataArrayPlotterGrid2D
 	:members:
 	:inherited-members:
 ```

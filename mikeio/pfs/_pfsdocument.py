@@ -1,9 +1,10 @@
+from __future__ import annotations
 import re
 import warnings
 from collections import Counter
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict, List, Mapping, TextIO, Tuple, Union
+from typing import Callable, Dict, List, Mapping, TextIO, Tuple
 
 import yaml
 
@@ -81,7 +82,7 @@ class PfsDocument(PfsSection):
 
     def __init__(
         self,
-        data: Union[TextIO, PfsSection, Dict],
+        data: TextIO | PfsSection | Dict,
         *,
         encoding="cp1252",
         names=None,
@@ -128,7 +129,7 @@ class PfsDocument(PfsSection):
         return [(k, v) for k, v in self.__dict__.items() if k not in self._ALIAS_LIST]
 
     @staticmethod
-    def _unravel_items(items):
+    def _unravel_items(items: Callable) -> Tuple[List, List]:
         rkeys = []
         rvals = []
         for k, v in items():
@@ -140,15 +141,6 @@ class PfsDocument(PfsSection):
                 rkeys.append(k)
                 rvals.append(v)
         return rkeys, rvals
-
-    @property
-    def data(self) -> Union[PfsSection, List[PfsSection]]:
-        warnings.warn(
-            FutureWarning(
-                "The data attribute has been deprecated, please access the targets by their names instead."
-            )
-        )
-        return self.targets[0] if self.n_targets == 1 else self.targets
 
     @property
     def targets(self) -> List[PfsSection]:
@@ -331,7 +323,7 @@ class PfsDocument(PfsSection):
         if "," in value:
             tokens = self._split_line_by_comma(value)
             for j in range(len(tokens)):
-                tokens[j] = self._parse_token(tokens[j])
+                tokens[j] = self._parse_token(tokens[j], context=value)
             value = f"[{','.join(tokens)}]" if len(tokens) > 1 else tokens[0]
         else:
             value = self._parse_token(value)
@@ -348,10 +340,12 @@ class PfsDocument(PfsSection):
         # lexer.wordchars += ",.-"
         # return list(lexer)
 
-    def _parse_token(self, token: str) -> str:
+    def _parse_token(self, token: str, context="") -> str:
         s = token.strip()
 
-        if s.count("|") == 2:
+        # Example of complicated string:
+        # '<CLOB:22,1,1,false,1,0,"",0,"",0,"",0,"",0,"",0,"",0,"",0,"",||,false>'
+        if s.count("|") == 2 and "CLOB" not in context:
             parts = s.split("|")
             if len(parts[1]) > 1 and parts[1].count("'") > 0:
                 # string containing single quotes that needs escaping
