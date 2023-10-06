@@ -97,7 +97,6 @@ def _plot_map(
     """
 
     import matplotlib.pyplot as plt
-    import matplotlib.cm as cm
     import matplotlib
 
     VALID_PLOT_TYPES = (

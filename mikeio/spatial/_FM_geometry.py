@@ -2,7 +2,7 @@ from __future__ import annotations
 import warnings
 from collections import namedtuple
 from functools import cached_property
-from typing import Collection, Sequence, Optional, List
+from typing import Collection, Optional, List
 
 import numpy as np
 from mikecore.DfsuFile import DfsuFileType  # type: ignore
