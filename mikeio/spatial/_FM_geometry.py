@@ -1106,20 +1106,7 @@ class GeometryFM2D(_GeometryFM):
     def elements_to_geometry(
         self, elements: int | Collection[int], keepdims=False
     ) -> "GeometryFM2D" | GeometryPoint2D:
-        """export a selection of elements to new flexible file geometry
-
-        Parameters
-        ----------
-        elements : int or Collection[int]
-            collection of element ids
-        keepdims: bool, optional
-            keep original geometry type for single points
-
-        Returns
-        -------
-        UnstructuredGeometry
-            which can be used for further extraction or saved to file
-        """
+        
         if isinstance(elements, (int,np.integer)):
             sel_elements : List[int] = [elements]
         else:
