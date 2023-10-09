@@ -250,7 +250,7 @@ class _UnstructuredFile:
                     element_ids=el_ids,
                     node_ids=node_ids,
                     n_layers=dfs.NumberOfLayers,
-                    n_sigma=dfs.NumberOfSigmaLayers,
+                    n_sigma=min(dfs.NumberOfSigmaLayers, dfs.NumberOfLayers),
                     validate=False,
                 )
             elif self._type == DfsuFileType.DfsuSpectral1D:
