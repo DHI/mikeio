@@ -1,8 +1,7 @@
-`name: Build documentation (don't publish)
+name: Build documentation (don't publish)
 
 on:
-  push:
-    pull_request:
+  pull_request:
       branches: [ main ]
 
 jobs:
