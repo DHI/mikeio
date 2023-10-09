@@ -864,6 +864,13 @@ def test_get_2d_slice_with_sel(da_grid2d):
     da6 = da_grid2d.sel(x=slice(None, 10.3), y=slice(-4.0, None))
     assert da6.shape == (10, 8, 3)
 
+def test_get_2d_outside_domain_raises_error(da_grid2d):
+    with pytest.raises(OutsideModelDomainError):
+        da_grid2d.sel(x=0.0)
+
+    with pytest.raises(OutsideModelDomainError):
+        da_grid2d.sel(x=slice(0.0,1.0))
+
 def test_modify_values_2d_all(da2):
     assert da2.shape == (10, 7)
     assert da2.values[2, 5] == 0.1

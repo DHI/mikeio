@@ -95,12 +95,12 @@ def test_dfs1_interp_x():
 #    ds = mikeio.read("tests/testdata/consistency/oresundHD.dfsu")
 #    g = ds.geometry.get_overset_grid(dx=5000)
 #    dsi = ds.interp_like(g)
-#    dsi.to_dfs("tests/testdata/consistency/oresundHD.dfs2")
+#    dsi.to_dfs("tests/testdata/consistency/oresundHD2.dfs2")
 
 
 def test_read_dfs2():
     ds = mikeio.read(
-        "tests/testdata/consistency/oresundHD.dfs2",
+        "tests/testdata/consistency/oresundHD2.dfs2",
         items=[0, 1],
         time=slice("2018", "2018-03-10"),
     )
@@ -112,7 +112,7 @@ def test_read_dfs2():
 def test_sel_line_dfs2():
     x = 350000
     y = 6145000
-    ds = mikeio.read("tests/testdata/consistency/oresundHD.dfs2")
+    ds = mikeio.read("tests/testdata/consistency/oresundHD2.dfs2")
     dsselx = ds.sel(x=x)
     assert isinstance(dsselx.geometry, mikeio.Grid1D)
     dssely = ds.sel(y=y)
@@ -122,7 +122,7 @@ def test_sel_line_dfs2():
 
 def test_sel_mult_line_not_possible():
     xs = [350000, 360000]
-    ds = mikeio.read("tests/testdata/consistency/oresundHD.dfs2")
+    ds = mikeio.read("tests/testdata/consistency/oresundHD2.dfs2")
     with pytest.raises(
         Exception, match="scalar"
     ):  # NotImplemented or ValueError not sure yet
@@ -131,7 +131,7 @@ def test_sel_mult_line_not_possible():
 
 def test_read_dfs2_single_time():
     ds = mikeio.read(
-        "tests/testdata/consistency/oresundHD.dfs2",
+        "tests/testdata/consistency/oresundHD2.dfs2",
         time=-1,
     )
 
@@ -139,7 +139,7 @@ def test_read_dfs2_single_time():
     assert "time" not in ds.dims
 
     ds = mikeio.read(
-        "tests/testdata/consistency/oresundHD.dfs2",
+        "tests/testdata/consistency/oresundHD2.dfs2",
         time="2018-03-10",
     )
 
@@ -147,7 +147,7 @@ def test_read_dfs2_single_time():
     assert "time" not in ds.dims
 
     ds = mikeio.read(
-        "tests/testdata/consistency/oresundHD.dfs2", time=[-1], keepdims=True
+        "tests/testdata/consistency/oresundHD2.dfs2", time=[-1], keepdims=True
     )
 
     assert ds.n_timesteps == 1
@@ -166,7 +166,7 @@ def test_read_single_row_dfs2_single_time_step():
 
 
 def test_interp_x_y_dfs2():
-    ds = mikeio.read("tests/testdata/consistency/oresundHD.dfs2")
+    ds = mikeio.read("tests/testdata/consistency/oresundHD2.dfs2")
 
     x = 350000
     y = 6145000

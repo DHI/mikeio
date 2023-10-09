@@ -1076,7 +1076,7 @@ def test_interp_like_dataarray(tmp_path):
     tmp_path / "interp.dfs2"
 
     da = mikeio.read("tests/testdata/consistency/oresundHD.dfsu")[0]
-    da2 = mikeio.read("tests/testdata/consistency/oresundHD.dfs2", time=[0, 1])[0]
+    da2 = mikeio.read("tests/testdata/consistency/oresundHD2.dfs2", time=[0, 1])[0]
 
     dai = da.interp_like(da2)
     assert isinstance(dai, DataArray)
@@ -1096,7 +1096,7 @@ def test_interp_like_dataset(tmp_path):
     fp = tmp_path / "interp.dfs2"
 
     ds = mikeio.read("tests/testdata/consistency/oresundHD.dfsu")
-    ds2 = mikeio.read("tests/testdata/consistency/oresundHD.dfs2", time=[0, 1])
+    ds2 = mikeio.read("tests/testdata/consistency/oresundHD2.dfs2", time=[0, 1])
 
     dsi = ds.interp_like(ds2)
     assert isinstance(dsi, Dataset)

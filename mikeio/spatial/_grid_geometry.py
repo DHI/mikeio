@@ -744,8 +744,12 @@ class Grid2D(_Geometry):
                 raise ValueError("x,y and coords cannot be given at the same time!")
             coords = np.column_stack([np.atleast_1d(x), np.atleast_1d(y)])
         elif x is not None:
+            if x < self.x[0] or x > self.x[-1]:
+                raise OutsideModelDomainError(x=x, y=None)
             return np.atleast_1d(np.argmin(np.abs(self.x - x))), None
         elif y is not None:
+            if y < self.y[0] or y > self.y[-1]:
+                raise OutsideModelDomainError(x=None, y=y)
             return None, np.atleast_1d(np.argmin(np.abs(self.y - y)))
 
         if coords is not None:
