@@ -561,7 +561,7 @@ class Dataset(MutableMapping):
             self._data_vars[key] = value
             self._set_name_attr(key, value)
 
-    def insert(self, key: int, value: DataArray):
+    def insert(self, key, value: DataArray):
         """Insert DataArray in a specific position
 
         Parameters
