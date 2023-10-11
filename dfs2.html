@@ -53,6 +53,7 @@
 <li class="toctree-l1"><a class="reference internal" href="dfs0.html">Dfs0</a></li>
 <li class="toctree-l1"><a class="reference internal" href="dfs1.html">Dfs1</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Dfs2</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#subset-in-space">Subset in space</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#grid2d">Grid2D</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#dfs2-example-notebooks">Dfs2 Example notebooks</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#dfs2-api">Dfs2 API</a><ul>
@@ -176,6 +177,33 @@
 <span class="go">  0:  Elevation &lt;Total Water Depth&gt; (meter)</span>
 </pre></div>
 </div>
+<section id="subset-in-space">
+<h2>Subset in space<a class="headerlink" href="#subset-in-space" title="Link to this heading"></a></h2>
+<p>The most convenient way to subset in space is to use the <code class="docutils literal notranslate"><span class="pre">sel</span></code> method, which returns a new (smaller) dataset, which can be further processed or written to disk using the <code class="docutils literal notranslate"><span class="pre">to_dfs</span></code> method.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">ds</span><span class="o">.</span><span class="n">geometry</span>
+<span class="go">&lt;mikeio.Grid2D&gt;</span>
+<span class="go">x: [12.2, 12.21, ..., 13.1] (nx=216, dx=0.004167)</span>
+<span class="go">y: [55.2, 55.21, ..., 56.3] (ny=264, dy=0.004167)</span>
+<span class="go">projection: LONG/LAT</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ds_aoi</span> <span class="o">=</span> <span class="n">ds</span><span class="o">.</span><span class="n">sel</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="nb">slice</span><span class="p">(</span><span class="mf">12.5</span><span class="p">,</span> <span class="mf">13.0</span><span class="p">),</span> <span class="n">y</span><span class="o">=</span><span class="nb">slice</span><span class="p">(</span><span class="mf">55.5</span><span class="p">,</span> <span class="mf">56.0</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ds_aoi</span><span class="o">.</span><span class="n">geometry</span>
+<span class="go">&lt;mikeio.Grid2D&gt;</span>
+<span class="go">x: [12.5, 12.5, ..., 12.99] (nx=120, dx=0.004167)</span>
+<span class="go">y: [55.5, 55.5, ..., 55.99] (ny=120, dy=0.004167)</span>
+<span class="go">projection: LONG/LAT</span>
+</pre></div>
+</div>
+<p>In order to specify an open-ended subset (i.e. where the end of the subset is the end of the domain), use <code class="docutils literal notranslate"><span class="pre">None</span></code> as the end of the slice.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">ds</span><span class="o">.</span><span class="n">sel</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="nb">slice</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span><span class="mf">13.0</span><span class="p">))</span>
+<span class="go">&lt;mikeio.Dataset&gt;</span>
+<span class="go">dims: (time:1, y:264, x:191)</span>
+<span class="go">time: 2020-05-15 11:04:52 (time-invariant)</span>
+<span class="go">geometry: Grid2D (ny=264, nx=191)</span>
+<span class="go">items:</span>
+<span class="go">  0:  Elevation &lt;Total Water Depth&gt; (meter)</span>
+</pre></div>
+</div>
+</section>
 <section id="grid2d">
 <h2>Grid2D<a class="headerlink" href="#grid2d" title="Link to this heading"></a></h2>
 <p>The spatial information is available in the <code class="docutils literal notranslate"><span class="pre">geometry</span></code> attribute (accessible from Dfs2, Dataset, and DataArray), which in the case of a dfs2 file is a <a class="reference internal" href="#mikeio.Grid2D" title="mikeio.Grid2D"><span class="xref myst py py-class"><code class="docutils literal notranslate"><span class="pre">Grid2D</span></code></span></a> geometry.</p>
