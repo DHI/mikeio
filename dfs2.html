@@ -330,8 +330,8 @@
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>items</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">list[int]</span></code> or <code class="xref py py-class docutils literal notranslate"><span class="pre">list[str]</span></code>, <em>optional</em>) – Read only selected items, by number (0-based), or by name</p></li>
-<li><p><strong>time</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">datetime</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">pd.TimeStamp</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">sequence</span></code>, <a class="reference external" href="https://docs.python.org/3/library/functions.html#slice" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">slice</span></code></a> or <code class="xref py py-class docutils literal notranslate"><span class="pre">pd.DatetimeIndex</span></code>, <em>optional</em>) – Read only selected time steps, by default None (=all)</p></li>
-<li><p><strong>keepdims</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a>, <em>optional</em>) – When reading a single time step only, should the time-dimension be kept
+<li><p><strong>time</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">datetime</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">pd.TimeStamp</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">sequence</span></code>, <a class="reference external" href="https://docs.python.org/3/library/functions.html#slice" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">slice</span></code></a> or <code class="xref py py-class docutils literal notranslate"><span class="pre">pd.DatetimeIndex</span></code>, <em>optional</em>) – Read only selected time steps, by default None (=all)</p></li>
+<li><p><strong>keepdims</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a>, <em>optional</em>) – When reading a single time step only, should the time-dimension be kept
 in the returned Dataset? by default: False</p></li>
 <li><p><strong>area</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">array[float]</span></code>, <em>optional</em>) – Read only data inside (horizontal) area given as a
 bounding box (tuple with left, lower, right, upper) coordinates</p></li>
@@ -375,13 +375,13 @@ bounding box (tuple with left, lower, right, upper) coordinates</p></li>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>filename</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>) – Location to write the dfs2 file</p></li>
+<li><p><strong>filename</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>) – Location to write the dfs2 file</p></li>
 <li><p><strong>data</strong> (<a class="reference internal" href="dataset.html#mikeio.Dataset" title="mikeio.Dataset"><code class="xref py py-class docutils literal notranslate"><span class="pre">Dataset</span></code></a>) – list of matrices, one for each item. Matrix dimension: time, y, x</p></li>
-<li><p><strong>dt</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a>, <em>optional</em>) – The time step in seconds.</p></li>
-<li><p><strong>dx</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a>, <em>optional</em>) – length of each grid in the x direction (projection units)</p></li>
-<li><p><strong>dy</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a>, <em>optional</em>) – length of each grid in the y direction (projection units)</p></li>
-<li><p><strong>title</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <em>optional</em>) – title of the dfs2 file. Default is blank.</p></li>
-<li><p><strong>keep_open</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a>, <em>optional</em>) – Keep file open for appending</p></li>
+<li><p><strong>dt</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a>, <em>optional</em>) – The time step in seconds.</p></li>
+<li><p><strong>dx</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a>, <em>optional</em>) – length of each grid in the x direction (projection units)</p></li>
+<li><p><strong>dy</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a>, <em>optional</em>) – length of each grid in the y direction (projection units)</p></li>
+<li><p><strong>title</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <em>optional</em>) – title of the dfs2 file. Default is blank.</p></li>
+<li><p><strong>keep_open</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a>, <em>optional</em>) – Keep file open for appending</p></li>
 </ul>
 </dd>
 </dl>
@@ -456,8 +456,8 @@ Note: not the same as the cell center values (x0,y0,x1,y1)!</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>x</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a>) – x-coordinate of point</p></li>
-<li><p><strong>y</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a>) – y-coordinate of point</p></li>
+<li><p><strong>x</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a>) – x-coordinate of point</p></li>
+<li><p><strong>y</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a>) – y-coordinate of point</p></li>
 <li><p><strong>coords</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">array(float)</span></code>) – xy-coordinate of points given as n-by-2 array</p></li>
 <li><p><strong>area</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">array(float)</span></code>) – xy-coordinates of bounding box</p></li>
 </ul>
@@ -540,11 +540,11 @@ Note: not the same as the cell center values (x0,y0,x1,y1)!</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>z</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a>, <em>optional</em>) – bathymetry values for each node, by default 0</p></li>
-<li><p><strong>west</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>, <em>optional</em>) – code value for west boundary</p></li>
-<li><p><strong>east</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>, <em>optional</em>) – code value for east boundary</p></li>
-<li><p><strong>north</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>, <em>optional</em>) – code value for north boundary</p></li>
-<li><p><strong>south</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>, <em>optional</em>) – code value for south boundary</p></li>
+<li><p><strong>z</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a>, <em>optional</em>) – bathymetry values for each node, by default 0</p></li>
+<li><p><strong>west</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>, <em>optional</em>) – code value for west boundary</p></li>
+<li><p><strong>east</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>, <em>optional</em>) – code value for east boundary</p></li>
+<li><p><strong>north</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>, <em>optional</em>) – code value for north boundary</p></li>
+<li><p><strong>south</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>, <em>optional</em>) – code value for south boundary</p></li>
 </ul>
 </dd>
 </dl>
@@ -557,8 +557,8 @@ Note: not the same as the cell center values (x0,y0,x1,y1)!</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>outfilename</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>) – path of new mesh file</p></li>
-<li><p><strong>z</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a> or <code class="xref py py-class docutils literal notranslate"><span class="pre">array(float)</span></code>, <em>optional</em>) – bathymetry values for each node, by default 0
+<li><p><strong>outfilename</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>) – path of new mesh file</p></li>
+<li><p><strong>z</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a> or <code class="xref py py-class docutils literal notranslate"><span class="pre">array(float)</span></code>, <em>optional</em>) – bathymetry values for each node, by default 0
 if array: must have length=(nx+1)*(ny+1)</p></li>
 </ul>
 </dd>
@@ -622,7 +622,7 @@ if array: must have length=(nx+1)*(ny+1)</p></li>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>bins</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a> or <code class="xref py py-class docutils literal notranslate"><span class="pre">sequence</span></code> or <code class="xref py py-class docutils literal notranslate"><span class="pre">str,</span></code>) – If bins is an integer, it defines the number
+<li><p><strong>bins</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a> or <code class="xref py py-class docutils literal notranslate"><span class="pre">sequence</span></code> or <code class="xref py py-class docutils literal notranslate"><span class="pre">str,</span></code>) – If bins is an integer, it defines the number
 of equal-width bins in the range.
 If bins is a sequence, it defines the bin edges,
 including the left edge of the first bin and the
@@ -630,13 +630,13 @@ right edge of the last bin.
 by default: rcParams[“hist.bins”] (default: 10)</p></li>
 <li><p><strong>ax</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">matplotlib.axes</span></code>, <em>optional</em>) – Adding to existing axis, instead of creating new fig</p></li>
 <li><p><strong>figsize</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">(float</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">float)</span></code>, <em>optional</em>) – specify size of figure</p></li>
-<li><p><strong>title</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <em>optional</em>) – axes title</p></li>
+<li><p><strong>title</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <em>optional</em>) – axes title</p></li>
 </ul>
 </dd>
 </dl>
 <div class="admonition seealso">
 <p class="admonition-title">See also</p>
-<p><a class="reference external" href="https://matplotlib.org/stable/api/_as_gen/matplotlib.pyplot.hist.html#matplotlib.pyplot.hist" title="(in Matplotlib v3.7.2)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">matplotlib.pyplot.hist</span></code></a></p>
+<p><a class="reference external" href="https://matplotlib.org/stable/api/_as_gen/matplotlib.pyplot.hist.html#matplotlib.pyplot.hist" title="(in Matplotlib v3.8.0)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">matplotlib.pyplot.hist</span></code></a></p>
 </div>
 <dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>

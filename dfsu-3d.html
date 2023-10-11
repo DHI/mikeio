@@ -326,8 +326,8 @@ to a new 2d dfsu file with a surface elevation item.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>filename</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>) – Output file name</p></li>
-<li><p><strong>n_nearest</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>, <em>optional</em>) – number of points for spatial interpolation (inverse_distance), default=4</p></li>
+<li><p><strong>filename</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>) – Output file name</p></li>
+<li><p><strong>n_nearest</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>, <em>optional</em>) – number of points for spatial interpolation (inverse_distance), default=4</p></li>
 </ul>
 </dd>
 </dl>
@@ -356,7 +356,7 @@ to a new 2d dfsu file with a surface elevation item.</p>
 <dd><p>3d element ids for one (or more) specific layer(s)</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>layers</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a> or <code class="xref py py-class docutils literal notranslate"><span class="pre">list(int)</span></code>) – layer between 0 (bottom) and n_layers-1 (top)
+<dd class="field-odd"><p><strong>layers</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a> or <code class="xref py py-class docutils literal notranslate"><span class="pre">list(int)</span></code>) – layer between 0 (bottom) and n_layers-1 (top)
 (can also be negative counting from -1 at the top layer)</p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
@@ -373,7 +373,7 @@ to a new 2d dfsu file with a surface elevation item.</p>
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>data</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">np.array(float)</span></code>) – cell-centered data</p></li>
-<li><p><strong>extrapolate</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a>, <em>optional</em>) – allow the method to extrapolate, default:True</p></li>
+<li><p><strong>extrapolate</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a>, <em>optional</em>) – allow the method to extrapolate, default:True</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
@@ -388,7 +388,7 @@ to a new 2d dfsu file with a surface elevation item.</p>
 <dd><p>Get the coordinates of each node.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>code</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>) – Get only nodes with specific code, e.g. land == 1</p>
+<dd class="field-odd"><p><strong>code</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>) – Get only nodes with specific code, e.g. land == 1</p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">np.array</span></code> – x,y,z of each node</p>
@@ -403,13 +403,13 @@ to a new 2d dfsu file with a surface elevation item.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>dx</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a>, <em>optional</em>) – grid resolution in x-direction (or in x- and y-direction)</p></li>
-<li><p><strong>dy</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a>, <em>optional</em>) – grid resolution in y-direction</p></li>
-<li><p><strong>nx</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>, <em>optional</em>) – number of points in x-direction,
+<li><p><strong>dx</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a>, <em>optional</em>) – grid resolution in x-direction (or in x- and y-direction)</p></li>
+<li><p><strong>dy</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a>, <em>optional</em>) – grid resolution in y-direction</p></li>
+<li><p><strong>nx</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>, <em>optional</em>) – number of points in x-direction,
 by default None (the value will be inferred)</p></li>
-<li><p><strong>ny</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>, <em>optional</em>) – number of points in y-direction,
+<li><p><strong>ny</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>, <em>optional</em>) – number of points in y-direction,
 by default None (the value will be inferred)</p></li>
-<li><p><strong>buffer</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a>, <em>optional</em>) – positive to make the area larger, default=0
+<li><p><strong>buffer</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a>, <em>optional</em>) – positive to make the area larger, default=0
 can be set to a small negative value to avoid NaN
 values all around the domain.</p></li>
 </ul>
@@ -542,17 +542,17 @@ values all around the domain.</p></li>
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>items</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">list[int]</span></code> or <code class="xref py py-class docutils literal notranslate"><span class="pre">list[str]</span></code>, <em>optional</em>) – Read only selected items, by number (0-based), or by name</p></li>
-<li><p><strong>time</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">datetime</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">pd.TimeStamp</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">sequence</span></code>, <a class="reference external" href="https://docs.python.org/3/library/functions.html#slice" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">slice</span></code></a> or <code class="xref py py-class docutils literal notranslate"><span class="pre">pd.DatetimeIndex</span></code>, <em>optional</em>) – Read only selected time steps, by default None (=all)</p></li>
-<li><p><strong>keepdims</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a>, <em>optional</em>) – When reading a single time step only, should the time-dimension be kept
+<li><p><strong>time</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">datetime</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">pd.TimeStamp</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">sequence</span></code>, <a class="reference external" href="https://docs.python.org/3/library/functions.html#slice" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">slice</span></code></a> or <code class="xref py py-class docutils literal notranslate"><span class="pre">pd.DatetimeIndex</span></code>, <em>optional</em>) – Read only selected time steps, by default None (=all)</p></li>
+<li><p><strong>keepdims</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a>, <em>optional</em>) – When reading a single time step only, should the time-dimension be kept
 in the returned Dataset? by default: False</p></li>
 <li><p><strong>area</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">list[float]</span></code>, <em>optional</em>) – Read only data inside (horizontal) area given as a
 bounding box (tuple with left, lower, right, upper)
 or as list of coordinates for a polygon, by default None</p></li>
-<li><p><strong>x, y, z</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a>, <em>optional</em>) – Read only data for elements containing the (x,y,z) points(s),
+<li><p><strong>x, y, z</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a>, <em>optional</em>) – Read only data for elements containing the (x,y,z) points(s),
 by default None</p></li>
-<li><p><strong>layers</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">list[int]</span></code>, <em>optional</em>) – Read only data for specific layers, by default None</p></li>
+<li><p><strong>layers</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">list[int]</span></code>, <em>optional</em>) – Read only data for specific layers, by default None</p></li>
 <li><p><strong>elements</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">list[int]</span></code>, <em>optional</em>) – Read only selected element ids, by default None</p></li>
-<li><p><strong>error_bad_data</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a>, <em>optional</em>) – raise error if data is corrupt, by default True,</p></li>
+<li><p><strong>error_bad_data</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a>, <em>optional</em>) – raise error if data is corrupt, by default True,</p></li>
 <li><p><strong>fill_bad_data_value</strong> – fill value for to impute corrupt data, used in conjunction with error_bad_data=False
 default np.nan</p></li>
 </ul>
@@ -598,7 +598,7 @@ default np.nan</p></li>
 <dd><p>write object to mesh file</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>outfilename</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>) – path to file to be written</p>
+<dd class="field-odd"><p><strong>outfilename</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>) – path to file to be written</p>
 </dd>
 </dl>
 </dd></dl>
@@ -639,12 +639,12 @@ default np.nan</p></li>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>filename</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>) – full path to the new dfsu file</p></li>
+<li><p><strong>filename</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>) – full path to the new dfsu file</p></li>
 <li><p><strong>data</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Dataset</span></code>) – list of matrices, one for each item. Matrix dimension: time, x</p></li>
-<li><p><strong>dt</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a>, <em>optional</em>) – The time step (in seconds)</p></li>
+<li><p><strong>dt</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a>, <em>optional</em>) – The time step (in seconds)</p></li>
 <li><p><strong>elements</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">list[int]</span></code>, <em>optional</em>) – write only these element ids to file</p></li>
-<li><p><strong>title</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>) – title of the dfsu file. Default is blank.</p></li>
-<li><p><strong>keep_open</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a>, <em>optional</em>) – Keep file open for appending</p></li>
+<li><p><strong>title</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>) – title of the dfsu file. Default is blank.</p></li>
+<li><p><strong>keep_open</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a>, <em>optional</em>) – Keep file open for appending</p></li>
 </ul>
 </dd>
 </dl>
@@ -657,12 +657,12 @@ default np.nan</p></li>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>filename</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>) – full path to the new dfsu file</p></li>
+<li><p><strong>filename</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>) – full path to the new dfsu file</p></li>
 <li><p><strong>start_time</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">datetime</span></code>, <em>optional</em>) – start datetime, default is datetime.now()</p></li>
-<li><p><strong>dt</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a>, <em>optional</em>) – The time step (in seconds)</p></li>
+<li><p><strong>dt</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a>, <em>optional</em>) – The time step (in seconds)</p></li>
 <li><p><strong>items</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">list[mikeio.ItemInfo]</span></code>, <em>optional</em>)</p></li>
 <li><p><strong>elements</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">list[int]</span></code>, <em>optional</em>) – write only these element ids to file</p></li>
-<li><p><strong>title</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>) – title of the dfsu file. Default is blank.</p></li>
+<li><p><strong>title</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>) – title of the dfsu file. Default is blank.</p></li>
 </ul>
 </dd>
 </dl>
@@ -728,7 +728,7 @@ default np.nan</p></li>
 <dd><p>3d element ids for one (or more) specific layer(s)</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>layers</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a> or <code class="xref py py-class docutils literal notranslate"><span class="pre">list(int)</span></code>) – layer between 0 (bottom) and n_layers-1 (top)
+<dd class="field-odd"><p><strong>layers</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a> or <code class="xref py py-class docutils literal notranslate"><span class="pre">list(int)</span></code>) – layer between 0 (bottom) and n_layers-1 (top)
 (can also be negative counting from -1 at the top layer)</p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
