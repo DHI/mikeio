@@ -1,9 +1,7 @@
-from typing import Collection
-import warnings
+from typing import Collection, Optional
 from functools import wraps
 
 import numpy as np
-import pandas as pd
 from mikecore.DfsuFile import DfsuFile, DfsuFileType
 from scipy.spatial import cKDTree
 from tqdm import trange
@@ -98,7 +96,7 @@ class DfsuLayered(_Dfsu):
         *,
         items=None,
         time=None,
-        elements: Collection[int] = None,
+        elements: Optional[Collection[int]] = None,
         area=None,
         x=None,
         y=None,
@@ -198,7 +196,7 @@ class DfsuLayered(_Dfsu):
             if hasattr(geometry, "is_layered") and geometry.is_layered and item == 0:
                 # and items[item].name == "Z coordinate":
                 item0_is_node_based = True
-                data = np.ndarray(shape=(n_steps, n_nodes), dtype=dtype)
+                data: np.ndarray = np.ndarray(shape=(n_steps, n_nodes), dtype=dtype)
             else:
                 data = np.ndarray(shape=(n_steps, n_elems), dtype=dtype)
             data_list.append(data)

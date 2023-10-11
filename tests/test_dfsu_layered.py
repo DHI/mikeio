@@ -2,7 +2,7 @@ import os
 import numpy as np
 import pytest
 import mikeio
-from mikeio import Dfsu, Mesh
+from mikeio import Mesh
 from mikeio.spatial import (
     GeometryFM2D,
     GeometryFM3D,
@@ -83,7 +83,7 @@ def test_read_single_step_bottom_layer():
     dfs = mikeio.open(filename)
 
     ds = dfs.read(time=-1)  # Last timestep
-    dsbot1 = ds.sel(layers="bottom")
+    ds.sel(layers="bottom")
 
 
 def test_read_multiple_layers():
@@ -175,10 +175,14 @@ def test_read_dfsu3d_column():
 def test_read_dfsu3d_column_save(tmp_path):
     filename = "tests/testdata/oresund_sigma_z.dfsu"
     dfs = mikeio.open(filename)
+    assert dfs.geometry.n_sigma_layers == 4
+    assert dfs.geometry.n_z_layers == 5
+
 
     (x, y) = (333934.1, 6158101.5)
 
     ds = dfs.read(x=x, y=y)  # all data in file
+    assert isinstance(ds.geometry, GeometryFMVerticalColumn)
     assert ds.geometry.n_sigma_layers == 4
     assert ds.geometry.n_z_layers == 0
     fp = tmp_path / "new_column.dfsu"
@@ -187,6 +191,8 @@ def test_read_dfsu3d_column_save(tmp_path):
     (x, y) = (347698.5188405, 6221233.34815)
 
     ds = dfs.read(x=x, y=y)  # all data in file
+    assert isinstance(ds.geometry, GeometryFMVerticalColumn)
+    assert ds.geometry.n_layers == 8
     assert ds.geometry.n_sigma_layers == 4
     assert ds.geometry.n_z_layers == 4
     fp = tmp_path / "new_column_2.dfsu"
@@ -544,12 +550,12 @@ def test_to_mesh_3d(tmp_path):
     fp = tmp_path / "oresund_from_dfs.mesh"
     dfs.to_mesh(fp)
     assert os.path.exists(fp)
-    mesh = Mesh(fp)
+    Mesh(fp)
 
     fp = tmp_path / "oresund_from_geometry.mesh"
     dfs.geometry.to_mesh(fp)
     assert os.path.exists(fp)
-    mesh = Mesh(fp)
+    Mesh(fp)
 
 
 def test_extract_surface_elevation_from_3d(tmp_path):

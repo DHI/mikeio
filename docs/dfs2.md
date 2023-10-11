@@ -16,10 +16,39 @@ items:
   0:  Elevation <Total Water Depth> (meter)
 ```
 
+## Subset in space
+
+The most convenient way to subset in space is to use the `sel` method, which returns a new (smaller) dataset, which can be further processed or written to disk using the `to_dfs` method. 
+
+```python
+>>> ds.geometry
+<mikeio.Grid2D>
+x: [12.2, 12.21, ..., 13.1] (nx=216, dx=0.004167)
+y: [55.2, 55.21, ..., 56.3] (ny=264, dy=0.004167)
+projection: LONG/LAT
+>>> ds_aoi = ds.sel(x=slice(12.5, 13.0), y=slice(55.5, 56.0))
+>>> ds_aoi.geometry
+<mikeio.Grid2D>
+x: [12.5, 12.5, ..., 12.99] (nx=120, dx=0.004167)
+y: [55.5, 55.5, ..., 55.99] (ny=120, dy=0.004167)
+projection: LONG/LAT
+```
+
+In order to specify an open-ended subset (i.e. where the end of the subset is the end of the domain), use `None` as the end of the slice. 
+
+```python
+>>> ds.sel(x=slice(None,13.0))
+<mikeio.Dataset>
+dims: (time:1, y:264, x:191)
+time: 2020-05-15 11:04:52 (time-invariant)
+geometry: Grid2D (ny=264, nx=191)
+items:
+  0:  Elevation <Total Water Depth> (meter)
+```
 
 ## Grid2D
 
-The spatial information is available in the `geometry` attribute (accessible from Dfs2, Dataset, and DataArray), which in the case of a dfs2 file is a [`Grid2D`](Grid2D) geometry. 
+The spatial information is available in the `geometry` attribute (accessible from Dfs2, Dataset, and DataArray), which in the case of a dfs2 file is a [`Grid2D`](mikeio.Grid2D) geometry. 
 
 ```python
 >>> ds.geometry
@@ -46,7 +75,7 @@ Grid2D's primary properties and methods are:
 * `isel()`
 * `to_mesh()`
 
-See [API specification](Grid2D) below for details.
+See [API specification](mikeio.Grid2D) below for details.
 
 
 ## Dfs2 Example notebooks
@@ -81,7 +110,7 @@ See [API specification](Grid2D) below for details.
 A DataArray `da` with a Grid2D geometry can be plotted using `da.plot`. 
 
 ```{eval-rst}
-.. autoclass:: mikeio.dataarray._DataArrayPlotterGrid2D
+.. autoclass:: mikeio.dataset._data_plot._DataArrayPlotterGrid2D
 	:members:
 	:inherited-members:
 ```

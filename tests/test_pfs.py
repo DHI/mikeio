@@ -570,10 +570,10 @@ EndSect // ENGINE
 """
     pfs = mikeio.PfsDocument(StringIO(text))
 
-    assert pfs.ENGINE.advanced == False
+    assert pfs.ENGINE.advanced is False
     assert isinstance(pfs.ENGINE.fill_list, (list, tuple))
     assert len(pfs.ENGINE.fill_list) == 2
-    assert pfs.ENGINE.fill_list[0] == False
+    assert pfs.ENGINE.fill_list[0] is False
     assert pfs.ENGINE.fill_list[1] == "TEST"
 
 
@@ -590,7 +590,7 @@ EndSect // ENGINE
     assert pfs.ENGINE.fill_list[0] == "dsd"
     assert pfs.ENGINE.fill_list[1] == 0
     assert pfs.ENGINE.fill_list[2] == 0.0
-    assert pfs.ENGINE.fill_list[3] == False
+    assert pfs.ENGINE.fill_list[3] is False
 
 
 def test_read_mixed_array3():
@@ -607,7 +607,7 @@ EndSect // ENGINE
     assert pfs.ENGINE.fill_list[1] == 0
     assert pfs.ENGINE.fill_list[2] == 0.0
     assert pfs.ENGINE.fill_list[3] == "str2"
-    assert pfs.ENGINE.fill_list[4] == False
+    assert pfs.ENGINE.fill_list[4] is False
     assert pfs.ENGINE.fill_list[5] == "str3"
 
 
@@ -725,7 +725,7 @@ def test_end_of_stream():
   rr = ||, '', 1, 0
 EndSect  // Results
 """
-    pfs = mikeio.PfsDocument(StringIO(text))
+    mikeio.PfsDocument(StringIO(text))
 
 
 def test_read_string_array():

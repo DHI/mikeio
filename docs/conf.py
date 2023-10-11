@@ -18,8 +18,8 @@
 # -- Project information -----------------------------------------------------
 
 project = "MIKE IO"
-copyright = "2022, Henrik Andersson, Jesper Mariegaard, Marc Ridler,"
-author = "Henrik Andersson, Jesper Mariegaard, Marc Ridler"
+copyright = "2023, DHI"
+author = "Henrik Andersson, Jesper Mariegaard"
 release = ""
 
 # -- General configuration ---------------------------------------------------
@@ -36,6 +36,19 @@ extensions = [
     "sphinx.ext.intersphinx",
     "myst_parser",
 ]
+
+# inspired by https://github.com/pydata/xarray/blob/main/doc/conf.py
+
+autodoc_typehints = "none"
+
+# Napoleon configurations
+
+napoleon_google_docstring = False
+napoleon_numpy_docstring = True
+napoleon_use_param = False
+napoleon_use_rtype = False
+napoleon_preprocess_types = True
+
 
 # Configuration to include links to other project docs when referencing
 # functions/classes

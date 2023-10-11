@@ -1,5 +1,6 @@
+from __future__ import annotations
 import warnings
-from typing import Optional, Sequence, Tuple, Union
+from typing import Optional, Sequence, Tuple
 from dataclasses import dataclass
 import numpy as np
 
@@ -183,7 +184,7 @@ class Grid1D(_Geometry):
 
     def isel(
         self, idx, axis=None
-    ) -> Union["Grid1D", GeometryPoint2D, GeometryPoint3D, GeometryUndefined]:
+    ) -> "Grid1D" | GeometryPoint2D | GeometryPoint3D | GeometryUndefined:
         """Get a subset geometry from this geometry
 
         Parameters
@@ -727,11 +728,6 @@ class Grid2D(_Geometry):
         -------
         array(int), array(int)
             i- and j-index of nearest cell
-
-        Raises
-        ------
-        ValueError if x or y are not scalar values, use coords instead
-        OutsideModelDomainError if point is outside grid
         """
         if x is None and y is not None and not np.isscalar(y):
             raise ValueError(
@@ -748,8 +744,12 @@ class Grid2D(_Geometry):
                 raise ValueError("x,y and coords cannot be given at the same time!")
             coords = np.column_stack([np.atleast_1d(x), np.atleast_1d(y)])
         elif x is not None:
+            if x < self.x[0] or x > self.x[-1]:
+                raise OutsideModelDomainError(x=x, y=None)
             return np.atleast_1d(np.argmin(np.abs(self.x - x))), None
         elif y is not None:
+            if y < self.y[0] or y > self.y[-1]:
+                raise OutsideModelDomainError(x=None, y=y)
             return None, np.atleast_1d(np.argmin(np.abs(self.y - y)))
 
         if coords is not None:
@@ -777,8 +777,8 @@ class Grid2D(_Geometry):
         return ii, jj
 
     def _bbox_to_index(
-        self, bbox: Union[Sequence[float], BoundingBox]
-    ) -> Union[Tuple[None, None], Tuple[range, range]]:
+        self, bbox: Tuple[float,float,float,float] | BoundingBox
+    ) -> Tuple[range, range]:
         """Find subarea within this geometry"""
         if not (len(bbox) == 4):
             raise ValueError(
@@ -787,8 +787,7 @@ class Grid2D(_Geometry):
 
         x0, y0, x1, y1 = bbox
         if x0 > self.x[-1] or y0 > self.y[-1] or x1 < self.x[0] or y1 < self.y[0]:
-            warnings.warn("No elements in bbox")
-            return None, None
+            raise ValueError("area is outside grid")
 
         mask = (self.x >= x0) & (self.x <= x1)
         ii = np.where(mask)[0]
@@ -801,8 +800,8 @@ class Grid2D(_Geometry):
         return i, j
 
     def isel(
-        self, idx, axis: Union[int, str]
-    ) -> Union["Grid2D", "Grid1D", "GeometryUndefined"]:
+        self, idx, axis: int | str
+    ) -> "Grid2D" | "Grid1D" | "GeometryUndefined":
         """Return a new geometry as a subset of Grid2D along the given axis."""
         if isinstance(axis, str):
             if axis == "y":
@@ -1244,7 +1243,7 @@ class Grid3D(_Geometry):
 
     def _geometry_for_layers(
         self, layers, keepdims=False
-    ) -> Union[Grid2D, "Grid3D", "GeometryUndefined"]:
+    ) -> Grid2D | "Grid3D" | "GeometryUndefined":
         if layers is None:
             return self
 

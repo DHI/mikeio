@@ -3,12 +3,14 @@ import numpy as np
 import pytest
 import matplotlib as mpl
 
+from mikeio import Mesh
+import mikeio
+
 mpl.use("Agg")
 mpl.rcParams.update({"figure.max_open_warning": 100})
 
 
-from mikeio import Dfsu, Mesh
-import mikeio
+
 
 ##################################################
 # these tests will not run if matplotlib is not installed
@@ -132,7 +134,7 @@ def test_plot_dfsu_squeeze():
 def test_plot_dfsu_arguments():
     filename = os.path.join("tests", "testdata", "NorthSea_HD_and_windspeed.dfsu")
     dfs = mikeio.open(filename)
-    data = dfs.read()
+    dfs.read()
     with pytest.warns(FutureWarning):
         dfs.plot(title="test", label="test", vmin=-23, vmax=23)
     assert True

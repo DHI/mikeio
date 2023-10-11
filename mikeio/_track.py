@@ -1,6 +1,7 @@
+from __future__ import annotations
 import os
 from datetime import datetime
-from typing import Callable, Optional, Sequence, Tuple, Union
+from typing import Callable, Sequence, Tuple
 
 import numpy as np
 import pandas as pd
@@ -18,7 +19,7 @@ def _extract_track(
     end_time: datetime,
     timestep: float,
     geometry: GeometryFM2D,
-    track: Union[str, Dataset, pd.DataFrame],
+    track: str | Dataset | pd.DataFrame,
     items: Sequence[ItemInfo],
     item_numbers: Sequence[int],
     time_steps: Sequence[int],
@@ -103,8 +104,8 @@ def _extract_track(
     )
 
     # initialize arrays
-    d1 = np.ndarray(shape=(n_items, n_elements), dtype=dtype)
-    d2 = np.ndarray(shape=(n_items, n_elements), dtype=dtype)
+    d1: np.ndarray = np.ndarray(shape=(n_items, n_elements), dtype=dtype)
+    d2: np.ndarray = np.ndarray(shape=(n_items, n_elements), dtype=dtype)
     t1 = 0.0
     t2 = 0.0
 
@@ -125,7 +126,7 @@ def _extract_track(
 
         read_next = t_rel[t] > t2
 
-        while (read_next == True) and (not is_EOF(dfsu_step + 1)):
+        while read_next and not is_EOF(dfsu_step + 1):
             dfsu_step = dfsu_step + 1
 
             # swap new to old
@@ -140,7 +141,7 @@ def _extract_track(
 
             read_next = t_rel[t] > t2
 
-        if (read_next == True) and (is_EOF(dfsu_step)):
+        if read_next and is_EOF(dfsu_step):
             # cannot read next - no more timesteps
             continue
 

@@ -17,7 +17,7 @@ items:
 
 ## Grid 1D
 
-The spatial information is available in the `geometry` attribute (accessible from Dfs1, Dataset, and DataArray), which in the case of a dfs1 file is a [`Grid1D`](Grid1D) geometry. 
+The spatial information is available in the `geometry` attribute (accessible from Dfs1, Dataset, and DataArray), which in the case of a dfs1 file is a [`Grid1D`](mikeio.Grid1D) geometry. 
 
 ```python
 >>> ds.geometry
@@ -33,7 +33,7 @@ Grid1D's primary properties and methods are:
 * `find_index()`
 * `isel()`
 
-See [API specification](Grid1D) below for details.
+See [API specification](mikeio.Grid1D) below for details.
 
 
 
@@ -60,7 +60,7 @@ See [API specification](Grid1D) below for details.
 A DataArray `da` with a Grid1D geometry can be plotted using `da.plot`. 
 
 ```{eval-rst}
-.. autoclass:: mikeio.dataarray._DataArrayPlotterGrid1D
+.. autoclass:: mikeio.dataset._data_plot._DataArrayPlotterGrid1D
 	:members:
 	:inherited-members:
 ```

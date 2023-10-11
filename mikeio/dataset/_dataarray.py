@@ -1,8 +1,10 @@
+from __future__ import annotations
 import warnings
 from copy import deepcopy
 from datetime import datetime
 from functools import cached_property
-from typing import Iterable, Optional, Sequence, Tuple, Union
+from typing import Iterable, Optional, Sequence, Tuple, Mapping
+
 
 import numpy as np
 import pandas as pd
@@ -104,7 +106,7 @@ class DataArray(DataUtilsMixin):
         self,
         data,
         *,
-        time: Optional[Union[pd.DatetimeIndex, str]] = None,
+        time: Optional[pd.DatetimeIndex | str] = None,
         item: Optional[ItemInfo] = None,
         geometry=GeometryUndefined(),
         zn=None,
@@ -136,7 +138,7 @@ class DataArray(DataUtilsMixin):
             )
         return data
 
-    def _parse_dims(self, dims, geometry):
+    def _parse_dims(self, dims, geometry) -> Tuple[str, ...]:
         if dims is None:
             return self._guess_dims(self.ndim, self.shape, self.n_timesteps, geometry)
         else:
@@ -204,17 +206,13 @@ class DataArray(DataUtilsMixin):
             )
 
     @staticmethod
-    def _parse_item(item):
+    def _parse_item(item) -> ItemInfo:
         if item is None:
             return ItemInfo("NoName")
 
         if not isinstance(item, ItemInfo):
-            try:
-                item = ItemInfo(item)
-            except:
-                raise ValueError(
-                    "Item must be None, ItemInfo or valid input to ItemInfo"
-                )
+            return ItemInfo(item)
+        
         return item
 
     @staticmethod
@@ -457,7 +455,18 @@ class DataArray(DataUtilsMixin):
         return self
 
     def describe(self, **kwargs) -> pd.DataFrame:
-        """Generate descriptive statistics by wrapping :py:meth:`pandas.DataFrame.describe`"""
+        """Generate descriptive statistics by wrapping :py:meth:`pandas.DataFrame.describe`
+        
+        Parameters
+        ----------
+        **kwargs
+            Keyword arguments passed to :py:meth:`pandas.DataFrame.describe`
+        
+        Returns
+        -------
+        pd.DataFrame
+        """
+
         data = {}
         data[self.name] = self.to_numpy().ravel()
         df = pd.DataFrame(data).describe(**kwargs)
@@ -723,7 +732,7 @@ class DataArray(DataUtilsMixin):
     def sel(
         self,
         *,
-        time: Optional[Union[str, pd.DatetimeIndex, "DataArray"]] = None,
+        time: Optional[str | pd.DatetimeIndex | "DataArray"] = None,
         **kwargs,
     ) -> "DataArray":
         """Return a new DataArray whose data is given by
@@ -742,7 +751,7 @@ class DataArray(DataUtilsMixin):
 
         Parameters
         ----------
-        time : Union[str, pd.DatetimeIndex, DataArray], optional
+        time : str, pd.DatetimeIndex, DataArray, optional
             time labels e.g. "2018-01" or slice("2018-1-1","2019-1-1"),
             by default None
         x : float, optional
@@ -830,10 +839,14 @@ class DataArray(DataUtilsMixin):
         time: 1997-09-15 21:00:00 - 1997-09-16 03:00:00 (3 records)
         geometry: Dfsu2D (3700 elements, 2090 nodes)
         """
+        if any([isinstance(v, slice) for v in kwargs.values()]):
+            return self._sel_with_slice(kwargs)
+        
         da = self
 
         # select in space
         if len(kwargs) > 0:
+
             idx = self.geometry.find_index(**kwargs)
             if isinstance(idx, tuple):
                 # TODO: support for dfs3
@@ -857,12 +870,33 @@ class DataArray(DataUtilsMixin):
             da = da[time]  # __getitem__ is 🚀
 
         return da
+    
+    def _sel_with_slice(self, kwargs: Mapping[str,slice]) -> "DataArray":
+        for k, v in kwargs.items():
+            if isinstance(v, slice):
+                idx_start = self.geometry.find_index(**{k:v.start})
+                idx_stop = self.geometry.find_index(**{k:v.stop})
+                pos = 0
+                if isinstance(idx_start, tuple):
+                    if k == "x":
+                        pos = 0
+                    if k == "y":
+                        pos = 1
+                
+                start = idx_start[pos][0] if idx_start is not None else None
+                stop = idx_stop[pos][0] if idx_stop is not None else None
+
+                idx = slice(start, stop)
+                
+                self = self.isel(idx, axis=k)
+
+        return self
 
     def interp(
         # TODO find out optimal syntax to allow interpolation to single point, new time, grid, mesh...
         self,
         # *, # TODO: make this a keyword-only argument in the future
-        time: Optional[Union[pd.DatetimeIndex, "DataArray"]] = None,
+        time: Optional[pd.DatetimeIndex | "DataArray"] = None,
         x: Optional[float] = None,
         y: Optional[float] = None,
         z: Optional[float] = None,
@@ -885,7 +919,7 @@ class DataArray(DataUtilsMixin):
 
         Parameters
         ----------
-        time : Union[float, pd.DatetimeIndex, DataArray], optional
+        time : float, pd.DatetimeIndex or DataArray, optional
             timestep in seconds or discrete time instances given by
             pd.DatetimeIndex (typically from another DataArray
             da2.time), by default None (=don't interp in time)
@@ -920,9 +954,7 @@ class DataArray(DataUtilsMixin):
         if z is not None:
             raise NotImplementedError()
 
-        geometry: Union[
-            GeometryPoint2D, GeometryPoint3D, GeometryUndefined
-        ] = GeometryUndefined()
+        geometry: GeometryPoint2D | GeometryPoint3D | GeometryUndefined = GeometryUndefined()
 
         # interp in space
         if (x is not None) or (y is not None) or (z is not None):
@@ -957,10 +989,11 @@ class DataArray(DataUtilsMixin):
                     geometry = GeometryPoint2D(
                         x=x, y=y, projection=self.geometry.projection
                     )
-                else:
-                    geometry = GeometryPoint3D(
-                        x=x, y=y, z=z, projection=self.geometry.projection
-                    )
+                # this is not supported yet (see above)
+                #else:
+                #    geometry = GeometryPoint3D(
+                #        x=x, y=y, z=z, projection=self.geometry.projection
+                #    )
 
             da = DataArray(
                 data=dai, time=self.time, geometry=geometry, item=deepcopy(self.item)
@@ -1025,7 +1058,7 @@ class DataArray(DataUtilsMixin):
 
     def interp_time(
         self,
-        dt: Union[float, pd.DatetimeIndex, "DataArray"],
+        dt: float | pd.DatetimeIndex | "DataArray",
         *,
         method="linear",
         extrapolate=True,
@@ -1104,7 +1137,7 @@ class DataArray(DataUtilsMixin):
 
     def interp_like(
         self,
-        other: Union["DataArray", Grid2D, GeometryFM2D, pd.DatetimeIndex],
+        other: "DataArray" | Grid2D | GeometryFM2D | pd.DatetimeIndex,
         interpolant=None,
         **kwargs,
     ) -> "DataArray":
@@ -1440,10 +1473,14 @@ class DataArray(DataUtilsMixin):
         axis = self._parse_axis(self.shape, self.dims, axis)
         time = self._time_by_agg_axis(self.time, axis)
 
-        if isinstance(axis, Iterable):
-            dims = tuple([d for i, d in enumerate(self.dims) if i not in axis])
+        
+        if isinstance(axis, int):
+            axes = (axis,)
         else:
-            dims = tuple([d for i, d in enumerate(self.dims) if i != axis])
+            axes = axis
+
+        dims = tuple([d for i, d in enumerate(self.dims) if i not in axes])
+        
 
         item = deepcopy(self.item)
         if "name" in kwargs:
@@ -1601,9 +1638,9 @@ class DataArray(DataUtilsMixin):
     def _apply_unary_math_operation(self, func) -> "DataArray":
         try:
             data = func(self.values)
-        except:
-            # TODO: better except... TypeError etc
-            raise ValueError(f"Math operation could not be applied to DataArray")
+        
+        except TypeError:
+            raise TypeError("Math operation could not be applied to DataArray")
 
         new_da = self.copy()
         new_da.values = data
@@ -1614,9 +1651,8 @@ class DataArray(DataUtilsMixin):
         try:
             other_values = other.values if hasattr(other, "values") else other
             data = func(self.values, other_values)
-        except:
-            # TODO: better except... TypeError etc
-            raise ValueError(f"Math operation could not be applied to DataArray")
+        except TypeError:
+            raise TypeError("Math operation could not be applied to DataArray")
 
         # TODO: check if geometry etc match if other is DataArray?
 
@@ -1712,7 +1748,7 @@ class DataArray(DataUtilsMixin):
         self._to_dataset().to_dfs(filename, **kwargs)
 
     def to_dataframe(
-        self, *, unit_in_name: bool = False, round_time: Union[str, bool] = "ms"
+        self, *, unit_in_name: bool = False, round_time: str | bool = "ms"
     ) -> pd.DataFrame:
         """Convert to DataFrame
 

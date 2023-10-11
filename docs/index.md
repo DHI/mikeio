@@ -59,6 +59,7 @@ Where can I get help?
    mesh
    dfsu-2d
    dfsu-3d
+   dfsu-1dv-vertical-column
    dfsu-2dv-vertical-profile
    dfsu-spectral
    eum

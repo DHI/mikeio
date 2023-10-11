@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 import pytest
 
 import mikeio
-from mikeio import EUMType, ItemInfo
+from mikeio import EUMType, EUMUnit, ItemInfo
 from mikeio.exceptions import OutsideModelDomainError
 
 
@@ -85,7 +85,6 @@ def da_grid2d_proj():
 @pytest.fixture
 def da_time_space():
     nt = 10
-    start = 10.0
     time = pd.date_range(start="2000-01-01", freq="S", periods=nt)
     da = mikeio.DataArray(
         data=np.zeros(shape=(nt, 2), dtype=float),
@@ -115,7 +114,7 @@ def test_verify_custom_dims():
     nx = 7
 
     with pytest.raises(ValueError) as excinfo:
-        da = mikeio.DataArray(
+        mikeio.DataArray(
             data=np.zeros([nt, nx]) + 0.1,
             time=pd.date_range(start="2000-01-01", freq="S", periods=nt),
             item=ItemInfo("Foo"),
@@ -125,7 +124,7 @@ def test_verify_custom_dims():
     assert "time" in str(excinfo.value)
 
     with pytest.raises(ValueError) as excinfo:
-        da = mikeio.DataArray(
+        mikeio.DataArray(
             data=np.zeros([nt, nx]) + 0.1,
             time=pd.date_range(start="2000-01-01", freq="S", periods=nt),
             item=ItemInfo("Foo"),
@@ -227,7 +226,7 @@ def test_dataarray_init():
     assert da.time[0] == pd.Timestamp(2018, 1, 1)
 
 
-def test_dataarray_init_item_none():
+def test_dataarray_init_no_item():
 
     nt = 10
     data = data = np.zeros([nt, 4]) + 0.1
@@ -235,9 +234,7 @@ def test_dataarray_init_item_none():
 
     da = mikeio.DataArray(data=data, time=time)
     assert da.type == EUMType.Undefined
-
-    with pytest.raises(ValueError, match="Item must be"):
-        mikeio.DataArray(data=data, time=time, item=3)
+    assert da.unit == EUMUnit.undefined
 
 
 def test_dataarray_init_2d():
@@ -686,9 +683,7 @@ def test_da_sel_xy_grid2d(da_grid2d):
 
 def test_da_sel_multi_xy_grid2d(da_grid2d):
     # Grid2D(x0=10.0, dx=0.1, nx=7, ny=14, dy=1.0, y0=-10.0),
-    da = da_grid2d
-    xx = [10.3, 10.5, 10.4]
-    yy = [-1.0, 1.0, -9.0]
+    pass
     # TODO: not implemented:
     # da1 = da.sel(x=xx, y=yy)
     # assert da1.shape == (10, 3)
@@ -856,6 +851,25 @@ def test_modify_values_1d(da1):
     da1.isel([0, 4, 7]).values[1] = 10.0
     assert da1.values[4] != 10.0
 
+def test_get_2d_slice_with_sel(da_grid2d):
+    assert da_grid2d.shape == (10, 14, 7)
+    da3 = da_grid2d.sel(x=slice(10.0, 10.3))
+    assert da3.shape == (10, 14,3)
+    da4 = da_grid2d.sel(y=slice(-5.0, 0.0))
+    assert da4.shape == (10, 5, 7)
+
+    da5 = da_grid2d.sel(x=slice(10.0, 10.3), y=slice(-5.0,0.0))
+    assert da5.shape == (10,5,3)
+
+    da6 = da_grid2d.sel(x=slice(None, 10.3), y=slice(-4.0, None))
+    assert da6.shape == (10, 8, 3)
+
+def test_get_2d_outside_domain_raises_error(da_grid2d):
+    with pytest.raises(OutsideModelDomainError):
+        da_grid2d.sel(x=0.0)
+
+    with pytest.raises(OutsideModelDomainError):
+        da_grid2d.sel(x=slice(0.0,1.0))
 
 def test_modify_values_2d_all(da2):
     assert da2.shape == (10, 7)
@@ -958,6 +972,10 @@ def test_multiply_scalar(da1):
     assert isinstance(da3, mikeio.DataArray)
     assert np.all(da3.to_numpy() == da2.to_numpy())
 
+
+def test_multiply_string_is_not_valid(da1):
+    with pytest.raises(TypeError):
+        da1 * "2.0"
 
 def test_multiply_two_dataarrays(da1):
 

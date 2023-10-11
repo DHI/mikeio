@@ -1,17 +1,18 @@
+from __future__ import annotations
 import os
 import warnings
 from datetime import datetime, timedelta
 from functools import wraps
-from typing import Collection, List, Union, Optional, Tuple
+from typing import Collection, List, Optional, Tuple
 
 import numpy as np
 import pandas as pd
-from mikecore.DfsFactory import DfsFactory  # type: ignore
-from mikecore.DfsuBuilder import DfsuBuilder  # type: ignore
-from mikecore.DfsuFile import DfsuFile, DfsuFileType  # type: ignore
-from mikecore.eum import eumQuantity, eumUnit  # type: ignore
-from mikecore.MeshBuilder import MeshBuilder  # type: ignore
-from mikecore.MeshFile import MeshFile  # type: ignore
+from mikecore.DfsFactory import DfsFactory
+from mikecore.DfsuBuilder import DfsuBuilder
+from mikecore.DfsuFile import DfsuFile, DfsuFileType
+from mikecore.eum import eumQuantity, eumUnit
+from mikecore.MeshBuilder import MeshBuilder
+from mikecore.MeshFile import MeshFile
 from tqdm import trange
 
 from mikeio.spatial._utils import xy_to_bbox
@@ -45,6 +46,9 @@ def _write_dfsu(filename: str, data: Dataset):
     if len(data.time) == 1:
         dt = 1  # TODO is there any sensible default?
     else:
+        if not data.is_equidistant:
+            raise ValueError("Non-equidistant time axis is not supported.")
+
         dt = (data.time[1] - data.time[0]).total_seconds()  # type: ignore
     n_time_steps = len(data.time)
 
@@ -685,7 +689,7 @@ class _Dfsu(_UnstructuredFile):
             ]
         )
 
-    def read(
+    def _read(
         self,
         *,
         items=None,
@@ -699,38 +703,7 @@ class _Dfsu(_UnstructuredFile):
         error_bad_data=True,
         fill_bad_data_value=np.nan,
     ) -> Dataset:
-        """
-        Read data from a dfsu file
-
-        Parameters
-        ---------
-        items: list[int] or list[str], optional
-            Read only selected items, by number (0-based), or by name
-        time: int, str, datetime, pd.TimeStamp, sequence, slice or pd.DatetimeIndex, optional
-            Read only selected time steps, by default None (=all)
-        keepdims: bool, optional
-            When reading a single time step only, should the time-dimension be kept
-            in the returned Dataset? by default: False
-        area: list[float], optional
-            Read only data inside (horizontal) area given as a
-            bounding box (tuple with left, lower, right, upper)
-            or as list of coordinates for a polygon, by default None
-        x, y: float, optional
-            Read only data for elements containing the (x,y) points(s),
-            by default None
-        elements: list[int], optional
-            Read only selected element ids, by default None
-        error_bad_data: bool, optional
-            raise error if data is corrupt, by default True,
-        fill_bad_data_value:
-            fill value for to impute corrupt data, used in conjunction with error_bad_data=False
-            default np.nan
-
-        Returns
-        -------
-        Dataset
-            A Dataset with data dimensions [t,elements]
-        """
+        
         if dtype not in [np.float32, np.float64]:
             raise ValueError("Invalid data type. Choose np.float32 or np.float64")
 
@@ -865,7 +838,7 @@ class _Dfsu(_UnstructuredFile):
                 raise ValueError(f"Cannot select both {kw} and elements!")
 
         if "area" in used_kwargs and ("x" in used_kwargs or "y" in used_kwargs):
-            raise ValueError(f"Cannot select both x,y and area!")
+            raise ValueError("Cannot select both x,y and area!")
 
     def _parse_geometry_sel(self, area, x, y):
         """Parse geometry selection
@@ -927,7 +900,7 @@ class _Dfsu(_UnstructuredFile):
             start datetime, default is datetime.now()
         dt: float, optional
             The time step (in seconds)
-        items: list[ItemInfo], optional
+        items: list[mikeio.ItemInfo], optional
         elements: list[int], optional
             write only these element ids to file
         title: str
@@ -1211,7 +1184,7 @@ class _Dfsu(_UnstructuredFile):
             self._dfs.Close()
             os.remove(filename)
 
-    def append(self, data: Union[List[np.ndarray], Dataset]) -> None:
+    def append(self, data: List[np.ndarray] | Dataset) -> None:
         """Append to a dfsu file opened with `write(...,keep_open=True)`
 
         Parameters
@@ -1229,7 +1202,7 @@ class _Dfsu(_UnstructuredFile):
                 zn = self.geometry.node_coordinates[:, 2]
                 self._dfs.WriteItemTimeStepNext(0, zn.astype(np.float32))
             for item in range(n_items):
-                dai: Union[np.ndarray, DataArray, Dataset] = data[item]
+                dai: np.ndarray | DataArray | Dataset = data[item]
                 if isinstance(dai, DataArray):
                     di: np.ndarray = dai.to_numpy()
                 elif isinstance(dai, np.ndarray):  # TODO is this too restrictive?
@@ -1268,6 +1241,65 @@ class _Dfsu(_UnstructuredFile):
 
 
 class Dfsu2DH(_Dfsu):
+
+    def read(
+        self,
+        *,
+        items=None,
+        time=None,
+        elements: Optional[Collection[int]] = None,
+        area=None,
+        x=None,
+        y=None,
+        keepdims=False,
+        dtype=np.float32,
+        error_bad_data=True,
+        fill_bad_data_value=np.nan,
+    ) -> Dataset:
+        """
+        Read data from a dfsu file
+
+        Parameters
+        ---------
+        items: list[int] or list[str], optional
+            Read only selected items, by number (0-based), or by name
+        time: int, str, datetime, pd.TimeStamp, sequence, slice or pd.DatetimeIndex, optional
+            Read only selected time steps, by default None (=all)
+        keepdims: bool, optional
+            When reading a single time step only, should the time-dimension be kept
+            in the returned Dataset? by default: False
+        area: list[float], optional
+            Read only data inside (horizontal) area given as a
+            bounding box (tuple with left, lower, right, upper)
+            or as list of coordinates for a polygon, by default None
+        x, y: float, optional
+            Read only data for elements containing the (x,y) points(s),
+            by default None
+        elements: list[int], optional
+            Read only selected element ids, by default None
+        error_bad_data: bool, optional
+            raise error if data is corrupt, by default True,
+        fill_bad_data_value:
+            fill value for to impute corrupt data, used in conjunction with error_bad_data=False
+            default np.nan
+
+        Returns
+        -------
+        Dataset
+            A Dataset with data dimensions [t,elements]
+        """
+        
+        return self._read(items=items,
+                          time=time,
+                          elements=elements,
+                          area=area,
+                          x=x,
+                          y=y,
+                          keepdims=keepdims,
+                          dtype=dtype,
+                          error_bad_data=error_bad_data,
+                          fill_bad_data_value=fill_bad_data_value)
+
     def _dfs_read_item_time_func(self, item: int, step: int):
         dfs = DfsuFile.Open(self._filename)
         itemdata = dfs.ReadItemTimeStep(item + 1, step)

@@ -1,7 +1,8 @@
+from __future__ import annotations
 import warnings
 from collections import namedtuple
 from functools import cached_property
-from typing import Collection, Sequence, Union, Optional
+from typing import Collection, Optional, List
 
 import numpy as np
 from mikecore.DfsuFile import DfsuFileType  # type: ignore
@@ -594,16 +595,16 @@ class GeometryFM2D(_GeometryFM):
         if n_nearest == 1:
             weights = np.ones(dists.shape)
             if not extrapolate:
-                weights[~self.contains(xy)] = np.nan
+                weights[~self.contains(xy)] = np.nan # type: ignore
         elif n_nearest > 1:
             weights = get_idw_interpolant(dists, p=p)
             if not extrapolate:
-                weights[~self.contains(xy), :] = np.nan
+                weights[~self.contains(xy), :] = np.nan # type: ignore
         else:
             ValueError("n_nearest must be at least 1")
 
         if radius is not None:
-            weights[dists > radius] = np.nan
+            weights[dists > radius] = np.nan # type: ignore
 
         return ids, weights
 
@@ -829,7 +830,7 @@ class GeometryFM2D(_GeometryFM):
         """Lists of closed polylines defining domain outline"""
         return self._get_boundary_polylines()
 
-    def contains(self, points) -> Sequence[bool]:
+    def contains(self, points):
         """test if a list of points are contained by mesh
 
         Parameters
@@ -942,7 +943,7 @@ class GeometryFM2D(_GeometryFM):
 
     def isel(
         self, idx: Collection[int], keepdims=False, **kwargs
-    ) -> Union["GeometryFM2D", GeometryPoint2D]:
+    ) -> "GeometryFM2D" | GeometryPoint2D:
         """export a selection of elements to a new geometry
 
         Typically not called directly, but by Dataset/DataArray's
@@ -1036,7 +1037,7 @@ class GeometryFM2D(_GeometryFM):
             raise ValueError("Provide either coordinates or area")
 
     @staticmethod
-    def _inside_polygon(polygon, xy) -> bool:
+    def _inside_polygon(polygon, xy):
         import matplotlib.path as mp
 
         if polygon.ndim == 1:
@@ -1059,7 +1060,7 @@ class GeometryFM2D(_GeometryFM):
 
         return np.where(mask)[0]
 
-    def _nodes_to_geometry(self, nodes) -> Union["GeometryFM2D", GeometryPoint2D]:
+    def _nodes_to_geometry(self, nodes) -> "GeometryFM2D" | GeometryPoint2D:
         """export a selection of nodes to new flexible file geometry
 
         Note: takes only the elements for which all nodes are selected
@@ -1103,41 +1104,28 @@ class GeometryFM2D(_GeometryFM):
         )
 
     def elements_to_geometry(
-        self, elements: Union[int, Collection[int]], keepdims=False
-    ) -> Union["GeometryFM2D", GeometryPoint2D]:
-        """export a selection of elements to new flexible file geometry
-
-        Parameters
-        ----------
-        elements : int or Collection[int]
-            collection of element ids
-        keepdims: bool, optional
-            keep original geometry type for single points
-
-        Returns
-        -------
-        UnstructuredGeometry
-            which can be used for further extraction or saved to file
-        """
-        if np.isscalar(elements):
-            elements = [elements]
+        self, elements: int | Collection[int], keepdims=False
+    ) -> "GeometryFM2D" | GeometryPoint2D:
+        
+        if isinstance(elements, (int,np.integer)):
+            sel_elements : List[int] = [elements]
         else:
-            elements = list(elements)
-        if len(elements) == 1 and not keepdims:
-            x, y, _ = self.element_coordinates[elements.pop(), :]
+            sel_elements = list(elements)
+        if len(sel_elements) == 1 and not keepdims:
+            x, y, _ = self.element_coordinates[sel_elements.pop(), :]
 
             return GeometryPoint2D(x=x, y=y, projection=self.projection)
 
-        elements = np.sort(
-            elements
+        sorted_elements = np.sort(
+            sel_elements
         )  # make sure elements are sorted! # TODO is this necessary? If so, should be done in the initialiser
 
         # extract information for selected elements
 
-        node_ids, elem_tbl = self._get_nodes_and_table_for_elements(elements)
+        node_ids, elem_tbl = self._get_nodes_and_table_for_elements(sorted_elements)
         node_coords = self.node_coordinates[node_ids]
         codes = self.codes[node_ids]
-        elem_ids = self.element_ids[elements]
+        elem_ids = self.element_ids[sorted_elements]
 
         return GeometryFM2D(
             node_coordinates=node_coords,
@@ -1321,18 +1309,21 @@ class _GeometryFMSpectrum(GeometryFM2D):
         return self._directions
 
 
+# TODO reconsider inheritance to avoid overriding method signature
 class GeometryFMAreaSpectrum(_GeometryFMSpectrum):
     def isel(self, idx=None, axis="elements"):
         return self.elements_to_geometry(elements=idx)
 
     def elements_to_geometry(
-        self, elements
-    ) -> Union["GeometryFMAreaSpectrum", GeometryFMPointSpectrum]:
+        self, elements, keepdims=False
+    ):
         """export a selection of elements to new flexible file geometry
         Parameters
         ----------
         elements : list(int)
             list of element ids
+        keepdims: bool
+            Not used
         Returns
         -------
         GeometryFMAreaSpectrum or GeometryFMPointSpectrum
@@ -1375,7 +1366,7 @@ class GeometryFMLineSpectrum(_GeometryFMSpectrum):
 
     def _nodes_to_geometry(
         self, nodes
-    ) -> Union["GeometryFM2D", GeometryFMPointSpectrum, "GeometryFMLineSpectrum"]:
+    ):
         """export a selection of nodes to new flexible file geometry
         Note: takes only the elements for which all nodes are selected
         Parameters

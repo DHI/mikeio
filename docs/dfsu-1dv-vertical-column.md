@@ -6,7 +6,7 @@
 ## FM Geometry Vertical Column API
 
 ```{eval-rst}
-.. autoclass:: mikeio.spatial.FM_geometry.GeometryFMVerticalColumn
+.. autoclass:: mikeio.spatial._FM_geometry_layered.GeometryFMVerticalColumn
 	:members:
 	:inherited-members:
 ```

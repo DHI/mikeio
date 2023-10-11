@@ -1,5 +1,4 @@
 import os
-import sys
 from platform import architecture
 
 # PEP0440 compatible formatted version, see:
@@ -19,7 +18,7 @@ from platform import architecture
 # 'X.Y.dev0' is the canonical version of 'X.Y.dev'
 #
 
-__version__ = "1.6.1"  # TODO use git hash instead for dev version?
+__version__ = "1.7.dev0"  # TODO use git hash instead for dev version?
 # __version__ = "1.5.0"
 __dfs_version__: int = 160
 
@@ -42,6 +41,7 @@ from .spatial import (
 )
 
 from .xyz import read_xyz
+
 
 
 def read(filename, *, items=None, time=None, keepdims=False, **kwargs) -> Dataset:
@@ -176,3 +176,27 @@ def open(filename: str, **kwargs):
     reader_klass = READERS[file_format]
 
     return reader_klass(filename, **kwargs)
+
+__all__ = [
+    "DataArray",
+    "Dataset",
+    "Dfs0",
+    "Dfs1",
+    "Dfs2",
+    "Dfs3",
+    "Dfsu",
+    "Mesh",
+    "EUMType",
+    "EUMUnit",
+    "ItemInfo",
+    "Pfs",
+    "PfsDocument",
+    "PfsSection",
+    "read_pfs",
+    "Grid1D",
+    "Grid2D",
+    "Grid3D",
+    "read_xyz",
+    "read",
+    "open",
+]

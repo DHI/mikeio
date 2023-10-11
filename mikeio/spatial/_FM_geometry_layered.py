@@ -1,13 +1,9 @@
-import warnings
-from collections import namedtuple
+from __future__ import annotations
 from functools import cached_property
-from typing import Collection, Sequence, Union, Optional
+from typing import Collection, Sequence, List
 
 import numpy as np
 from mikecore.DfsuFile import DfsuFileType  # type: ignore
-from mikecore.eum import eumQuantity  # type: ignore
-from mikecore.MeshBuilder import MeshBuilder  # type: ignore
-from scipy.spatial import cKDTree  # type: ignore
 
 from mikeio.exceptions import InvalidGeometry
 
@@ -79,33 +75,33 @@ class _GeometryFMLayered(_GeometryFM):
         )
 
     def elements_to_geometry(
-        self, elements: Union[int, Collection[int]], node_layers="all", keepdims=False
+        self, elements: int | Collection[int], node_layers="all", keepdims=False
     ):
+        sel_elements: List[int]
 
-        if np.isscalar(elements):
-            elements = [elements]
+        if isinstance(elements, (int, np.integer)):
+            sel_elements = [elements]
         else:
-            elements = list(elements)
-        if len(elements) == 1 and not keepdims:
-            x, y, z = self.element_coordinates[elements.pop(), :]
+            sel_elements = list(elements)
+        if len(sel_elements) == 1 and not keepdims:
+            x, y, z = self.element_coordinates[sel_elements.pop(), :]
 
             return GeometryPoint3D(x=x, y=y, z=z, projection=self.projection)
 
-        elements = np.sort(
-            elements
+        sorted_elements = np.sort(
+            sel_elements
         )  # make sure elements are sorted! # TODO is this necessary?
 
         # create new geometry
         new_type = self._type
 
-        elements = list(elements)
-        layers_used = self.layer_ids[elements]
+        layers_used = self.layer_ids[sorted_elements]
         unique_layer_ids = np.unique(layers_used)
         n_layers = len(unique_layer_ids)
 
         if n_layers > 1:
             elem_bot = self.get_layer_elements("bottom")
-            if np.all(np.in1d(elements, elem_bot)):
+            if np.all(np.in1d(sorted_elements, elem_bot)):
                 n_layers = 1
 
         if (
@@ -119,7 +115,7 @@ class _GeometryFMLayered(_GeometryFM):
 
         # extract information for selected elements
         if n_layers == 1:
-            elem2d = self.elem2d_ids[elements]
+            elem2d = self.elem2d_ids[sorted_elements]
             geom2d = self.geometry2d
             node_ids, elem_tbl = geom2d._get_nodes_and_table_for_elements(elem2d)
             assert len(elem_tbl[0]) <= 4, "Not a 2D element"
@@ -128,61 +124,48 @@ class _GeometryFMLayered(_GeometryFM):
             elem_ids = self._element_ids[elem2d]
         else:
             node_ids, elem_tbl = self._get_nodes_and_table_for_elements(
-                elements, node_layers=node_layers
+                sorted_elements, node_layers=node_layers
             )
             node_coords = self.node_coordinates[node_ids]
             codes = self.codes[node_ids]
-            elem_ids = self._element_ids[elements]
-
-        if new_type != DfsuFileType.Dfsu2D:
-            if n_layers == len(elem_tbl):
-
-                GeometryClass = GeometryFMVerticalColumn
-            else:
-                GeometryClass = self.__class__
-        else:
-            GeometryClass = GeometryFM2D
-
-        geom = GeometryClass(
-            node_coordinates=node_coords,
-            codes=codes,
-            node_ids=node_ids,
-            projection=self.projection_string,
-            element_table=elem_tbl,
-            element_ids=elem_ids,
-            dfsu_type=self._type,
-            reindex=True,
-        )
-
-        geom._type = self._type  #
-
+            elem_ids = self._element_ids[sorted_elements]
+        
         if new_type == DfsuFileType.Dfsu2D:
-            # If source is 3d, but output only has 1 layer
-            # then change type to 2d
-            geom._type = DfsuFileType.Dfsu2D
-            geom._n_layers = None
-            if node_layers == "all":
-                raise ValueError(
-                    "Only 1 layer in new geometry (hence 2d), but you have kept both top and bottom nodes! Hint: use node_layers='top' or 'bottom'"
-                )
+            return GeometryFM2D(node_coordinates=node_coords,
+                                codes=codes,
+                                node_ids=node_ids,
+                                projection=self.projection_string,
+                                element_table=elem_tbl,
+                                element_ids=elem_ids,
+                                dfsu_type=DfsuFileType.Dfsu2D,
+                                reindex=True)
         else:
-            geom._type = self._type
-            geom._n_layers = n_layers
             lowest_sigma = self.n_layers - self.n_sigma_layers
-            geom._n_sigma = sum(unique_layer_ids >= lowest_sigma)
+            n_sigma = sum(unique_layer_ids >= lowest_sigma)
+            if n_layers == len(elem_tbl):
+                return GeometryFMVerticalColumn(node_coordinates=node_coords,
+                                                codes=codes,
+                                                node_ids=node_ids,
+                                                projection=self.projection_string,
+                                                element_table=elem_tbl,
+                                                element_ids=elem_ids,
+                                                dfsu_type=self._type,
+                                                reindex=True,
+                                                n_layers=n_layers,
+                                                n_sigma=n_sigma)
+            else:
+                klass = self.__class__
+                return klass(node_coordinates=node_coords,
+                                    codes=codes,
+                                    node_ids=node_ids,
+                                    projection=self.projection_string,
+                                    element_table=elem_tbl,
+                                    element_ids=elem_ids,
+                                    dfsu_type=self._type,
+                                    reindex=True,
+                                    n_layers=n_layers,
+                                    n_sigma=n_sigma)
 
-            # If source is sigma-z but output only has sigma layers
-            # then change type accordingly
-            if (
-                self._type == DfsuFileType.DfsuVerticalProfileSigmaZ
-                or self._type == DfsuFileType.Dfsu3DSigmaZ
-            ) and n_layers == geom._n_sigma:
-                # TODO fix this
-                geom._type = DfsuFileType.Dfsu3DSigma
-
-            geom._top_elems = geom._find_top_layer_elements(geom.element_table)
-
-        return geom
 
     @cached_property
     def element_coordinates(self):
@@ -619,8 +602,8 @@ class _GeometryFMLayered(_GeometryFM):
                         layer_ids = self.layer_ids[row]
                         id = row[list(layer_ids).index(layer)]
                         idx[j] = id
-                    except:
-                        print(f"Layer {layer} not present for 2d element {elem2d[j]}")
+                    except IndexError:
+                        raise IndexError(f"Layer {layer} not present for 2d element {elem2d[j]}")
             else:
                 # sigma layer
                 idx = self.get_layer_elements(layer)[elem2d]
@@ -934,7 +917,7 @@ class GeometryFMVerticalColumn(GeometryFM3D):
 
 
 class _GeometryFMVerticalProfilePlotter:
-    def __init__(self, geometry: "GeometryFM2D") -> None:
+    def __init__(self, geometry: "GeometryFMVerticalProfile") -> None:
         self.g = geometry
 
     def __call__(self, ax=None, figsize=None, **kwargs):
