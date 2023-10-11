@@ -1,10 +1,11 @@
 from __future__ import annotations
 import re
-from datetime import datetime
-from typing import Iterable, Sequence, Sized, Tuple
+from typing import Iterable, Sequence, Sized, Tuple, Union, List
 
 import numpy as np
 import pandas as pd
+
+from .._time import DateTimeSelector
 
 
 def _to_safe_name(name: str) -> str:
@@ -18,45 +19,19 @@ def _n_selected_timesteps(x: Sized, k: slice | Sized) -> int:
     return len(k)
 
 
-def _get_time_idx_list(time: pd.DatetimeIndex, steps):
+def _get_time_idx_list(time: pd.DatetimeIndex, steps) -> Union [List[int], slice]:
     """Find list of idx in DatetimeIndex"""
 
-    if isinstance(steps, str):
-        parts = steps.split(",")
-        if len(parts) == 1:
-            parts.append(parts[0])  # end=start
+    # indexing with a slice needs to be handled differently, since slicing returns a view
 
-        if parts[0] == "":
-            steps = slice(parts[1])  # stop only
-        elif parts[1] == "":
-            steps = slice(parts[0], None)  # start only
-        else:
-            steps = slice(parts[0], parts[1])
-
-    if isinstance(steps, (list, tuple)) and isinstance(
-        steps[0], (str, datetime, np.datetime64, pd.Timestamp)
-    ):
-        steps = pd.DatetimeIndex(steps)
-    if isinstance(steps, pd.DatetimeIndex):
-        return time.get_indexer(steps)
-    if isinstance(steps, (str, datetime, np.datetime64, pd.Timestamp)):
-        steps = slice(steps, steps)
     if isinstance(steps, slice):
-        try:
-            s = time.slice_indexer(
-                steps.start,
-                steps.stop,
-            )
-            steps = list(range(s.start, s.stop))
-        except TypeError:
-            pass  # TODO this seems fishy!
-            # steps = list(range(*steps.indices(len(time))))
-    elif isinstance(steps, int):
-        steps = [steps]
-    # TODO what is the return type of this function
-    return steps
+        if isinstance(steps.start, int) and isinstance(steps.stop, int):
+            return steps
 
+    dts = DateTimeSelector(time)
+    return dts.isel(steps)
 
+# TODO this only used by DataArray, so consider to move it there
 class DataUtilsMixin:
     """DataArray Utils"""
 
@@ -107,7 +82,7 @@ class DataUtilsMixin:
     def _parse_time(time) -> pd.DatetimeIndex:
         """Allow anything that we can create a DatetimeIndex from"""
         if time is None:
-            time = [pd.Timestamp(2018, 1, 1)]
+            time = [pd.Timestamp(2018, 1, 1)] # TODO is this the correct epoch?
         if isinstance(time, str) or (not isinstance(time, Iterable)):
             time = [time]
 

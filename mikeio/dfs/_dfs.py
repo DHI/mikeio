@@ -2,7 +2,7 @@ from __future__ import annotations
 import warnings
 from abc import abstractmethod
 from datetime import datetime
-from typing import Iterable, List, Optional, Tuple, Sequence
+from typing import List, Optional, Tuple, Sequence
 import numpy as np
 import pandas as pd
 from tqdm import tqdm, trange
@@ -23,6 +23,7 @@ from ..dataset import Dataset
 from ..eum import EUMType, EUMUnit, ItemInfo, ItemInfoList, TimeStepUnit
 from ..exceptions import DataDimensionMismatch, ItemsError
 from ..spatial import GeometryUndefined
+from .._time import DateTimeSelector
 
 
 def _read_item_time_step(
@@ -77,10 +78,10 @@ def _valid_item_numbers(
     n_items_file = len(dfsItemInfo) - start_idx
     if items is None:
         return list(range(n_items_file))
-    
+
     # Handling scalar and sequences is a bit tricky
-    
-    item_numbers : List[int] = []
+
+    item_numbers: List[int] = []
 
     # check if items is a scalar (int or str)
     if isinstance(items, (int, str)):
@@ -89,13 +90,13 @@ def _valid_item_numbers(
                 dfsItemInfo=dfsItemInfo, search=items, start_idx=start_idx
             )
         elif isinstance(items, str):
-            item_number  = _item_numbers_by_name(dfsItemInfo, [items], ignore_first)[0]
+            item_number = _item_numbers_by_name(dfsItemInfo, [items], ignore_first)[0]
             return [item_number]
         elif isinstance(items, int):
             if (items < 0) or (items >= n_items_file):
                 raise ItemsError(n_items_file)
             return [items]
-    
+
     assert isinstance(items, Sequence)
     for item in items:
         if isinstance(item, str):
@@ -116,78 +117,48 @@ def _valid_item_numbers(
 
 def _valid_timesteps(dfsFileInfo: DfsFileInfo, time_steps) -> Tuple[bool, List[int]]:
 
+    time_axis = dfsFileInfo.TimeAxis
+
     single_time_selected = False
-    if isinstance(time_steps, int) and np.isscalar(time_steps):
+    if isinstance(time_steps, (int, datetime)):
         single_time_selected = True
 
-    n_steps_file = dfsFileInfo.TimeAxis.NumberOfTimeSteps
-    if time_steps is None:
-        return single_time_selected, list(range(n_steps_file))
+    nt = time_axis.NumberOfTimeSteps
 
-    if isinstance(time_steps, int):
-        time_steps = [time_steps]
+    if time_axis.TimeAxisType != TimeAxisType.CalendarEquidistant:
+        # TODO is this the proper epoch, should this magic number be somewhere else?
+        start_time_file = datetime(1970, 1, 1)
+    else:
+        start_time_file = time_axis.StartDateTime
+
+    if time_axis.TimeAxisType in (
+        TimeAxisType.CalendarEquidistant,
+        TimeAxisType.TimeEquidistant,
+    ):
+        time_step_file = time_axis.TimeStep
+        freq = pd.Timedelta(seconds=time_step_file)
+        time = pd.date_range(start_time_file, periods=nt, freq=freq)
+    elif time_axis.TimeAxisType == TimeAxisType.CalendarNonEquidistant:
+        idx = list(range(nt))
+
+        if isinstance(time_steps, int):
+            return True, [idx[time_steps]]
+        return single_time_selected, idx
+
+    dts = DateTimeSelector(time)
+
+    idx = dts.isel(time_steps)
 
     if isinstance(time_steps, str):
-        parts = time_steps.split(",")
-        if len(parts) == 1:
-            parts.append(parts[0])  # end=start
+        if len(idx) == 1:
+            single_time_selected = True
 
-        if parts[0] == "":
-            time_steps = slice(parts[1])  # stop only
-        elif parts[1] == "":
-            time_steps = slice(parts[0], None)  # start only
-        else:
-            time_steps = slice(parts[0], parts[1])
-
-    if isinstance(time_steps, (slice, pd.Timestamp, datetime, pd.DatetimeIndex)):
-        if dfsFileInfo.TimeAxis.TimeAxisType != TimeAxisType.CalendarEquidistant:
-            # TODO: handle non-equidistant calendar
-            raise ValueError(
-                "Only equidistant calendar files are supported for this type of time_step argument"
-            )
-
-        start_time_file = dfsFileInfo.TimeAxis.StartDateTime
-        time_step_file = dfsFileInfo.TimeAxis.TimeStep
-        freq = pd.Timedelta(seconds=time_step_file)
-        time = pd.date_range(start_time_file, periods=n_steps_file, freq=freq)
-
-    if isinstance(time_steps, slice):
-        if isinstance(time_steps.start, int) or isinstance(time_steps.stop, int):
-            time_steps = list(range(*time_steps.indices(n_steps_file)))
-        else:
-            s = time.slice_indexer(time_steps.start, time_steps.stop)
-            time_steps = list(range(s.start, s.stop))
-    elif isinstance(time_steps, Sequence) and isinstance(time_steps[0], int):
-        time_steps = np.array(time_steps)
-        time_steps[time_steps < 0] = n_steps_file + time_steps[time_steps < 0]
-        time_steps = list(time_steps)
-
-        if max(time_steps) > (n_steps_file - 1):
-            raise IndexError(f"Timestep cannot be larger than {n_steps_file}")
-        if min(time_steps) < 0:
-            raise IndexError(f"Timestep cannot be less than {-n_steps_file}")
-    elif isinstance(time_steps, Iterable):
-        steps = []
-        for t in time_steps:
-            _, step = _valid_timesteps(dfsFileInfo, t)
-            steps.append(step[0])
-        single_time_selected = len(steps) == 1
-        time_steps = steps
-
-    elif isinstance(time_steps, (pd.Timestamp, datetime)):
-        s = time.slice_indexer(time_steps, time_steps)
-        time_steps = list(range(s.start, s.stop))
-    #elif isinstance(time_steps, pd.DatetimeIndex):
-    #    time_steps = list(time.get_indexer(time_steps))
-
-    else:
-        raise TypeError(f"Indexing is not possible with {type(time_steps)}")
-    if len(time_steps) == 1:
-        single_time_selected = True
-    return single_time_selected, time_steps
+    return single_time_selected, idx
 
 
-def _item_numbers_by_name(dfsItemInfo, item_names: List[str], ignore_first: bool=False) -> List[int]:
+def _item_numbers_by_name(
+    dfsItemInfo, item_names: List[str], ignore_first: bool = False
+) -> List[int]:
     """Utility function to find item numbers
 
     Parameters
@@ -243,7 +214,9 @@ def _get_item_info(
         item_numbers = list(range(len(dfsItemInfo) - first_idx))
 
     item_numbers = [i + first_idx for i in item_numbers]
-    items = [ItemInfo.from_mikecore_dynamic_item_info(dfsItemInfo[i]) for i in item_numbers]
+    items = [
+        ItemInfo.from_mikecore_dynamic_item_info(dfsItemInfo[i]) for i in item_numbers
+    ]
     return ItemInfoList(items)
 
 
@@ -387,7 +360,9 @@ class _Dfs123:
         }:
             self._start_time = dfs.FileInfo.TimeAxis.StartDateTime
         else:  # relative time axis
-            self._start_time = datetime(1970, 1, 1)
+            self._start_time = datetime(
+                1970, 1, 1
+            )  # TODO is this the proper epoch, should this magic number be somewhere else?
         if hasattr(dfs.FileInfo.TimeAxis, "TimeStep"):
             self._timestep_in_seconds = (
                 dfs.FileInfo.TimeAxis.TimeStep
@@ -502,7 +477,9 @@ class _Dfs123:
                     darray = d.reshape(d.size, 1)[:, 0]
 
                 if self._ndim == 3:
-                    raise NotImplementedError("Append is not yet available for 3D files")
+                    raise NotImplementedError(
+                        "Append is not yet available for 3D files"
+                    )
 
                 if self._is_equidistant:
                     self._dfs.WriteItemTimeStepNext(0, darray.astype(np.float32))
@@ -717,7 +694,9 @@ class _Dfs123:
         # this will fail if the TimeAxisType is not calendar and equidistant, but that is ok
         if not self._is_equidistant:
             raise NotImplementedError("Not implemented for non-equidistant files")
-        return pd.date_range(start=self.start_time, periods=self.n_timesteps, freq=f"{self.timestep}S")
+        return pd.date_range(
+            start=self.start_time, periods=self.n_timesteps, freq=f"{self.timestep}S"
+        )
 
     @property
     def projection_string(self):
