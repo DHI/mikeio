@@ -506,7 +506,7 @@ def test_write_from_dfsu3D(tmp_path):
 
     dfs.write(fp, ds)
 
-    assert os.path.exists(fp)
+    assert fp.exists()
 
 
 def test_extract_top_layer_to_2d(tmp_path):
@@ -549,12 +549,12 @@ def test_to_mesh_3d(tmp_path):
 
     fp = tmp_path / "oresund_from_dfs.mesh"
     dfs.to_mesh(fp)
-    assert os.path.exists(fp)
+    assert fp.exists()
     Mesh(fp)
 
     fp = tmp_path / "oresund_from_geometry.mesh"
     dfs.geometry.to_mesh(fp)
-    assert os.path.exists(fp)
+    assert fp.exists()
     Mesh(fp)
 
 

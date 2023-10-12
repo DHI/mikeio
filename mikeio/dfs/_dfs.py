@@ -254,7 +254,7 @@ class _Dfs123:
 
     # TODO add all common arguments
     def __init__(self, filename=None):
-        self._filename = str(filename)
+        self._filename = str(filename) if filename else None
         self._projstr = None
         self._start_time = None
         self._end_time = None
