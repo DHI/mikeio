@@ -1,5 +1,6 @@
 from __future__ import annotations
 import os
+from pathlib import Path
 import warnings
 from datetime import datetime, timedelta
 from functools import wraps
@@ -175,10 +176,11 @@ class _UnstructuredFile:
             return
 
         filename = input
-        if not os.path.isfile(filename):
-            raise Exception(f"file {filename} does not exist!")
+        path = Path(input)
+        if not path.exists():
+            raise FileNotFoundError(f"file {path} does not exist!")
 
-        ext = os.path.splitext(filename)[1].lower()
+        ext = path.suffix.lower()
 
         if ext == ".mesh":
             self._read_mesh_header(filename)

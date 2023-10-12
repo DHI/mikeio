@@ -1,4 +1,3 @@
-import os
 import numpy as np
 import pytest
 import matplotlib as mpl
@@ -18,8 +17,12 @@ mpl.rcParams.update({"figure.max_open_warning": 100})
 pytest.importorskip("matplotlib")
 
 
+@pytest.fixture
+def hd2d_dfs():
+    return mikeio.open("tests/testdata/HD2D.dfsu")
+
 def test_plot_bathymetry():
-    filename = os.path.join("tests", "testdata", "oresund_sigma_z.dfsu")
+    filename = "tests/testdata/oresund_sigma_z.dfsu"
     dfs = mikeio.open(filename)
     with pytest.warns(FutureWarning):
         dfs.plot()
@@ -27,40 +30,37 @@ def test_plot_bathymetry():
 
 
 def test_plot_bathymetry_no_colorbar():
-    filename = os.path.join("tests", "testdata", "oresund_sigma_z.dfsu")
+    filename = "tests/testdata/oresund_sigma_z.dfsu"
     dfs = mikeio.open(filename)
     with pytest.warns(FutureWarning):
         dfs.plot(add_colorbar=False)
     assert True
 
 
-def test_plot_2d():
-    filename = os.path.join("tests", "testdata", "HD2D.dfsu")
-    dfs = mikeio.open(filename)
+def test_plot_2d(hd2d_dfs):
+    dfs = hd2d_dfs
     with pytest.warns(FutureWarning):
         dfs.plot(cmap="plasma")
     assert True
 
 
 def test_plot_3d():
-    filename = os.path.join("tests", "testdata", "oresund_sigma_z.dfsu")
+    filename = "tests/testdata/oresund_sigma_z.dfsu"
     dfs = mikeio.open(filename)
     with pytest.warns(FutureWarning):
         dfs.plot()
     assert True
 
 
-def test_plot_dfsu_contour():
-    filename = os.path.join("tests", "testdata", "HD2D.dfsu")
-    dfs = mikeio.open(filename)
+def test_plot_dfsu_contour(hd2d_dfs):
+    dfs = hd2d_dfs
     with pytest.warns(FutureWarning):
         dfs.plot(plot_type="contour", levels=5)
     assert True
 
 
-def test_plot_dfsu_contourf_levels():
-    filename = os.path.join("tests", "testdata", "HD2D.dfsu")
-    dfs = mikeio.open(filename)
+def test_plot_dfsu_contourf_levels(hd2d_dfs):
+    dfs = hd2d_dfs
     cmap = mpl.colors.ListedColormap(["red", "green", "blue"])
     bounds = [-3, 1, 2, 100]
     with pytest.warns(FutureWarning):
@@ -71,8 +71,7 @@ def test_plot_dfsu_contourf_levels():
 
 
 def test_plot_dfsu_contour_mixedmesh():
-    filename = os.path.join("tests", "testdata", "FakeLake.dfsu")
-    msh = Mesh(filename)
+    msh = Mesh("tests/testdata/FakeLake.dfsu")
     msh.plot(plot_type="contour", levels=5)
     msh.plot(
         plot_type="contourf",
@@ -84,15 +83,13 @@ def test_plot_dfsu_contour_mixedmesh():
 
 
 def test_plot_dfsu_n_refinements():
-    filename = os.path.join("tests", "testdata", "FakeLake.dfsu")
-    msh = Mesh(filename)
+    msh = Mesh("tests/testdata/FakeLake.dfsu")
     msh.plot(plot_type="contourf", levels=None, n_refinements=1)
     assert True
 
 
-def test_plot_dfsu_shaded():
-    filename = os.path.join("tests", "testdata", "HD2D.dfsu")
-    dfs = mikeio.open(filename)
+def test_plot_dfsu_shaded(hd2d_dfs):
+    dfs = hd2d_dfs
     da = dfs.read(items="Surface elevation", time=0)[0]
     elem40 = np.arange(40)
 
@@ -103,9 +100,8 @@ def test_plot_dfsu_shaded():
     with pytest.warns(FutureWarning):
         dfs.plot(wl_40, elements=elem40, plot_type="shaded", levels=5)
 
-def test_plot_dfsu_contour_subset_not_allowed():
-    filename = os.path.join("tests", "testdata", "HD2D.dfsu")
-    dfs = mikeio.open(filename)
+def test_plot_dfsu_contour_subset_not_allowed(hd2d_dfs):
+    dfs = hd2d_dfs
     da = dfs.read(items="Surface elevation", time=0)[0]
     elem40 = np.arange(40)
     with pytest.raises(Exception):
@@ -113,18 +109,16 @@ def test_plot_dfsu_contour_subset_not_allowed():
 
 
 
-def test_plot_dfsu():
-    filename = os.path.join("tests", "testdata", "HD2D.dfsu")
-    dfs = mikeio.open(filename)
+def test_plot_dfsu(hd2d_dfs):
+    dfs = hd2d_dfs
     data = dfs.read()
     with pytest.warns(FutureWarning):
         dfs.plot(z=data[1][0, :], figsize=(3, 3), plot_type="mesh_only")
     assert True
 
 
-def test_plot_dfsu_squeeze():
-    filename = os.path.join("tests", "testdata", "HD2D.dfsu")
-    dfs = mikeio.open(filename)
+def test_plot_dfsu_squeeze(hd2d_dfs):
+    dfs = hd2d_dfs
     data = dfs.read(items=0, time=0)
     with pytest.warns(FutureWarning):
         dfs.plot(z=data)  # 1 item-dataset
@@ -132,8 +126,7 @@ def test_plot_dfsu_squeeze():
 
 
 def test_plot_dfsu_arguments():
-    filename = os.path.join("tests", "testdata", "NorthSea_HD_and_windspeed.dfsu")
-    dfs = mikeio.open(filename)
+    dfs = mikeio.open("tests/testdata/NorthSea_HD_and_windspeed.dfsu")
     dfs.read()
     with pytest.warns(FutureWarning):
         dfs.plot(title="test", label="test", vmin=-23, vmax=23)
@@ -141,61 +134,47 @@ def test_plot_dfsu_arguments():
 
 
 def test_plot_mesh():
-    filename = os.path.join("tests", "testdata", "odense_rough.mesh")
-    msh = Mesh(filename)
+    msh = Mesh("tests/testdata/odense_rough.mesh")
     msh.plot(show_mesh=False)
     assert True
 
 
 def test_plot_mesh_outline():
-    filename = os.path.join("tests", "testdata", "odense_rough.mesh")
-    msh = Mesh(filename)
+    msh = Mesh("tests/testdata/odense_rough.mesh")
     msh.plot(plot_type="outline_only")
     assert True
     msh.plot(plot_type=None)
     assert True
 
 
-# TODO: no longer supported?
-# def test_plot_mesh_part():
-#     filename = os.path.join("tests", "testdata", "odense_rough.mesh")
-#     msh = Mesh(filename)
-#     msh.plot(elements=list(range(0, 100)))
-#     assert True
-
-
 def test_plot_mesh_ax():
     import matplotlib.pyplot as plt
 
-    filename = os.path.join("tests", "testdata", "odense_rough.mesh")
-    msh = Mesh(filename)
+    msh = Mesh("tests/testdata/odense_rough.mesh")
     _, ax = plt.subplots()
     msh.plot(ax=ax)
     assert True
 
 
 def test_plot_mesh_boundary_nodes():
-    filename = os.path.join("tests", "testdata", "odense_rough.mesh")
-    msh = Mesh(filename)
+    msh = Mesh("tests/testdata/odense_rough.mesh")
     msh.plot_boundary_nodes()
     msh.plot_boundary_nodes(["Land", "Sea"])
     assert True
 
 
 def test_plot_invalid():
-    filename = os.path.join("tests", "testdata", "odense_rough.mesh")
-    mesh = Mesh(filename)
+    msh = Mesh("tests/testdata/odense_rough.mesh")
     with pytest.raises(Exception):
-        mesh.plot(plot_type="invalid")
+        msh.plot(plot_type="invalid")
     with pytest.raises(Exception):
-        mesh.plot(plot_type="invalid")
+        msh.plot(plot_type="invalid")
 
 
 def test_plot_dfsu_vertical_profile():
     import matplotlib.pyplot as plt
 
-    filename = os.path.join("tests", "testdata", "oresund_vertical_slice.dfsu")
-    dfs = mikeio.open(filename)
+    dfs = mikeio.open("tests/testdata/oresund_vertical_slice.dfsu")
     time_step = 1
     item_number = 1
     data = dfs.read()[item_number].to_numpy()[time_step, :]

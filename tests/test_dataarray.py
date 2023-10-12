@@ -851,6 +851,25 @@ def test_modify_values_1d(da1):
     da1.isel([0, 4, 7]).values[1] = 10.0
     assert da1.values[4] != 10.0
 
+def test_get_2d_slice_with_sel(da_grid2d):
+    assert da_grid2d.shape == (10, 14, 7)
+    da3 = da_grid2d.sel(x=slice(10.0, 10.3))
+    assert da3.shape == (10, 14,3)
+    da4 = da_grid2d.sel(y=slice(-5.0, 0.0))
+    assert da4.shape == (10, 5, 7)
+
+    da5 = da_grid2d.sel(x=slice(10.0, 10.3), y=slice(-5.0,0.0))
+    assert da5.shape == (10,5,3)
+
+    da6 = da_grid2d.sel(x=slice(None, 10.3), y=slice(-4.0, None))
+    assert da6.shape == (10, 8, 3)
+
+def test_get_2d_outside_domain_raises_error(da_grid2d):
+    with pytest.raises(OutsideModelDomainError):
+        da_grid2d.sel(x=0.0)
+
+    with pytest.raises(OutsideModelDomainError):
+        da_grid2d.sel(x=slice(0.0,1.0))
 
 def test_modify_values_2d_all(da2):
     assert da2.shape == (10, 7)
@@ -1292,7 +1311,7 @@ def test_time_selection():
 
     assert das_t.shape == (24,)
 
-    with pytest.raises(IndexError):
+    with pytest.raises(KeyError):
         # not in time
         ds.sel(time="1997-09-15 00:00")
 

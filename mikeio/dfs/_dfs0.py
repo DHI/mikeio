@@ -1,4 +1,4 @@
-import os
+from pathlib import Path
 import warnings
 from datetime import datetime, timedelta
 from typing import Sequence
@@ -105,12 +105,13 @@ class Dfs0:
         self._filename = str(filename)
 
         if filename:
-            self._read_header()
+            self._read_header(Path(filename))
 
     def __repr__(self):
         out = ["<mikeio.Dfs0>"]
 
-        if os.path.isfile(self._filename):
+        # TODO does this make sense:
+        if self._filename:
             out.append(f"timeaxis: {repr(self._timeaxistype)}")
 
         if self._n_items is not None:
@@ -123,11 +124,11 @@ class Dfs0:
 
         return str.join("\n", out)
 
-    def _read_header(self):
-        if not os.path.exists(self._filename):
-            raise FileNotFoundError(self._filename)
+    def _read_header(self, path: Path):
+        if not path.exists():
+            raise FileNotFoundError(path)
 
-        dfs = DfsFileFactory.DfsGenericOpen(self._filename)
+        dfs = DfsFileFactory.DfsGenericOpen(str(path))
         self._source = dfs
         self._deletevalue = dfs.FileInfo.DeleteValueDouble  # NOTE: changed in cutil
 
@@ -165,10 +166,10 @@ class Dfs0:
         -------
         Dataset
             A Dataset with data dimensions [t]
-        """
-
-        if not os.path.exists(self._filename):
-            raise FileNotFoundError(f"File {self._filename} not found.")
+        """        
+        path = Path(self._filename)
+        if not path.exists():
+            raise FileNotFoundError(f"File {path} not found")
 
         # read data from file
         fdata, ftime, fitems = self.__read(self._filename)

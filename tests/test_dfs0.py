@@ -1,4 +1,3 @@
-import os
 import numpy as np
 import pandas as pd
 import datetime
@@ -10,8 +9,7 @@ import pytest
 
 
 def test_repr():
-    filename = os.path.join("tests", "testdata", "da_diagnostic.dfs0")
-    dfs = Dfs0(filename)
+    dfs = Dfs0("tests/testdata/da_diagnostic.dfs0")
 
     text = repr(dfs)
 
@@ -19,8 +17,7 @@ def test_repr():
 
 
 def test_repr_equidistant():
-    filename = os.path.join("tests", "testdata", "random.dfs0")
-    dfs = Dfs0(filename)
+    dfs = Dfs0("tests/testdata/random.dfs0")
 
     text = repr(dfs)
 

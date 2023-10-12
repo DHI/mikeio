@@ -1,12 +1,11 @@
-import os
 import numpy as np
 import pandas as pd
 import mikeio
 
 
-def test_write_read_long_dfs0(tmpdir):
+def test_write_read_long_dfs0(tmp_path):
 
-    filename = os.path.join(tmpdir.dirname, "big.dfs0")
+    filename = tmp_path / "big.dfs0"
 
     nt = 10_000_000
     data = np.random.random([nt])
@@ -15,16 +14,16 @@ def test_write_read_long_dfs0(tmpdir):
     )
     da.to_dfs(filename)
 
-    assert os.path.exists(filename)
+    assert filename.exists()
 
     ds = mikeio.read(filename)
 
     assert len(ds.time) == nt
 
 
-def test_write_read_many_items_dataset_pandas(tmpdir):
+def test_write_read_many_items_dataset_pandas(tmp_path):
 
-    filename = os.path.join(tmpdir.dirname, "many_items.dfs0")
+    filename = tmp_path / "many_items.dfs0"
 
     n_items = 10_000
     nt = 200
@@ -38,7 +37,7 @@ def test_write_read_many_items_dataset_pandas(tmpdir):
     ds = mikeio.Dataset(das)
     ds.to_dfs(filename)
 
-    assert os.path.exists(filename)
+    assert filename.exists()
 
     # read to dataset
     ds = mikeio.read(filename)

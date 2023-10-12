@@ -1,5 +1,3 @@
-import os
-
 from typing import Tuple
 
 import numpy as np
@@ -142,7 +140,8 @@ class Dfs3(_Dfs123):
     def __repr__(self):
         out = ["<mikeio.Dfs3>"]
 
-        if os.path.isfile(self._filename):
+
+        if self._filename:
             out.append(f"geometry: {self.geometry}")
 
             if self._n_items is not None:
@@ -162,9 +161,6 @@ class Dfs3(_Dfs123):
         return str.join("\n", out)
 
     def _read_dfs3_header(self, read_x0y0z0: bool = False):
-        if not os.path.isfile(self._filename):
-            raise Exception(f"file {self._filename} does not exist!")
-
         self._dfs = DfsFileFactory.Dfs3FileOpen(self._filename)
 
         self._source = self._dfs

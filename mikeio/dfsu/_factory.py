@@ -1,4 +1,4 @@
-import os
+from pathlib import Path
 
 from mikecore.DfsuFile import DfsuFile, DfsuFileType  # type: ignore
 
@@ -25,7 +25,7 @@ class Dfsu:
 
     @staticmethod
     def _get_DfsuFileType_n_Obj(filename: str):
-        ext = os.path.splitext(filename)[-1].lower()
+        ext = Path(filename).suffix.lower()
         if "dfs" in ext:
             dfs = DfsuFile.Open(filename)
             type = DfsuFileType(dfs.DfsuFileType)

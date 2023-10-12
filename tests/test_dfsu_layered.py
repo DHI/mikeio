@@ -1,4 +1,3 @@
-import os
 import numpy as np
 import pytest
 import mikeio
@@ -297,7 +296,7 @@ def test_read_column_interp_time_and_select_time():
     salinity_st = da.sel(time="1997-09-15 23:00")  # single time-step
     assert salinity_st.n_timesteps == 1
 
-    with pytest.raises(IndexError):
+    with pytest.raises(KeyError):
         # not in time
         da.sel(time="1997-09-15 00:00")
 
@@ -506,7 +505,7 @@ def test_write_from_dfsu3D(tmp_path):
 
     dfs.write(fp, ds)
 
-    assert os.path.exists(fp)
+    assert fp.exists()
 
 
 def test_extract_top_layer_to_2d(tmp_path):
@@ -549,12 +548,12 @@ def test_to_mesh_3d(tmp_path):
 
     fp = tmp_path / "oresund_from_dfs.mesh"
     dfs.to_mesh(fp)
-    assert os.path.exists(fp)
+    assert fp.exists()
     Mesh(fp)
 
     fp = tmp_path / "oresund_from_geometry.mesh"
     dfs.geometry.to_mesh(fp)
-    assert os.path.exists(fp)
+    assert fp.exists()
     Mesh(fp)
 
 

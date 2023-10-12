@@ -1,15 +1,23 @@
 LIB = mikeio
 
+LIB = mikeio
+
 check: lint typecheck test
+
+build: typecheck test
+	python -m build
 
 lint:
 	ruff .
 
-build: check
-	python -m build
-
 test:
 	pytest --disable-warnings
+
+typecheck:
+	mypy $(LIB)/ --config-file pyproject.toml
+
+coverage: 
+	pytest --cov-report html --cov=$(LIB) tests/
 
 doctest:
 	# only test a specific set of files for now
@@ -19,13 +27,9 @@ doctest:
 perftest:
 	pytest tests/performance/ --durations=0
 
-typecheck:
-	mypy $(LIB)/
-
-coverage: 
-	pytest --cov-report html --cov=$(LIB) tests/
-
 docs: FORCE
 	cd docs; make html ;cd -
 
 FORCE:
+
+
