@@ -3,7 +3,7 @@ import warnings
 from copy import deepcopy
 from datetime import datetime
 from functools import cached_property
-from typing import Iterable, Optional, Sequence, Tuple
+from typing import Iterable, Optional, Sequence, Tuple, Mapping
 
 
 import numpy as np
@@ -291,7 +291,8 @@ class DataArray(DataUtilsMixin):
             problems.append("Number of timesteps must be the same")
         if self.start_time != other.start_time:
             problems.append("start_time must be the same")
-        if type(self.geometry) != type(other.geometry):
+        #if type(self.geometry) != type(other.geometry):
+        if not isinstance(self.geometry, other.geometry.__class__):
             problems.append("The type of geometry must be the same")
         if hasattr(self.geometry, "__eq__"):
             if not (self.geometry == self.geometry):
@@ -839,10 +840,14 @@ class DataArray(DataUtilsMixin):
         time: 1997-09-15 21:00:00 - 1997-09-16 03:00:00 (3 records)
         geometry: Dfsu2D (3700 elements, 2090 nodes)
         """
+        if any([isinstance(v, slice) for v in kwargs.values()]):
+            return self._sel_with_slice(kwargs)
+        
         da = self
 
         # select in space
         if len(kwargs) > 0:
+
             idx = self.geometry.find_index(**kwargs)
             if isinstance(idx, tuple):
                 # TODO: support for dfs3
@@ -866,6 +871,27 @@ class DataArray(DataUtilsMixin):
             da = da[time]  # __getitem__ is 🚀
 
         return da
+    
+    def _sel_with_slice(self, kwargs: Mapping[str,slice]) -> "DataArray":
+        for k, v in kwargs.items():
+            if isinstance(v, slice):
+                idx_start = self.geometry.find_index(**{k:v.start})
+                idx_stop = self.geometry.find_index(**{k:v.stop})
+                pos = 0
+                if isinstance(idx_start, tuple):
+                    if k == "x":
+                        pos = 0
+                    if k == "y":
+                        pos = 1
+                
+                start = idx_start[pos][0] if idx_start is not None else None
+                stop = idx_stop[pos][0] if idx_stop is not None else None
+
+                idx = slice(start, stop)
+                
+                self = self.isel(idx, axis=k)
+
+        return self
 
     def interp(
         # TODO find out optimal syntax to allow interpolation to single point, new time, grid, mesh...

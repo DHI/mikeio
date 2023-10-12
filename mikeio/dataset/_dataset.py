@@ -1,5 +1,5 @@
 from __future__ import annotations
-import os
+from pathlib import Path
 import warnings
 from copy import deepcopy
 from datetime import datetime
@@ -561,7 +561,7 @@ class Dataset(MutableMapping):
             self._data_vars[key] = value
             self._set_name_attr(key, value)
 
-    def insert(self, key: int, value: DataArray):
+    def insert(self, key, value: DataArray):
         """Insert DataArray in a specific position
 
         Parameters
@@ -1838,7 +1838,8 @@ class Dataset(MutableMapping):
 
     @staticmethod
     def _validate_extension(filename, valid_extension):
-        ext = os.path.splitext(filename)[1].lower()
+        path = Path(filename)
+        ext = path.suffix.lower()
         if ext != valid_extension:
             raise ValueError(f"File extension must be {valid_extension}")
 

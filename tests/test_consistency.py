@@ -422,12 +422,13 @@ def test_read_dfs_time_slice_str():
         assert dsr.shape == dsgetitem.shape
 
 
-def test_read_dfs_time_selection_str_comma():
+def test_read_dfs_time_selection_str_slice():
 
     extensions = ["dfs0", "dfs2", "dfs1", "dfs0"]
     for ext in extensions:
         filename = f"tests/testdata/consistency/oresundHD.{ext}"
-        time = "2018-03-08,2018-03-10"
+        
+        time = slice("2018-03-08","2018-03-10")
         ds = mikeio.read(filename=filename)
         dssel = ds.sel(time=time)
         assert dssel.n_timesteps == 3

@@ -1,4 +1,4 @@
-import os
+from pathlib import Path
 from platform import architecture
 
 # PEP0440 compatible formatted version, see:
@@ -117,7 +117,7 @@ def read(filename, *, items=None, time=None, keepdims=False, **kwargs) -> Datase
     >>> ds = mikeio.read("HD2D.dfsu", error_bad_data=False, fill_bad_data_value=0.0) # replace corrupt data with 0.0
     """
 
-    ext = os.path.splitext(filename)[1].lower()
+    ext = Path(filename).suffix.lower()
 
     if "dfs" not in ext:
         raise ValueError("mikeio.read() is only supported for Dfs files")
@@ -156,7 +156,7 @@ def open(filename: str, **kwargs):
 
     >>> dfs = mikeio.open("pt_spectra.dfs2", type="spectral")
     """
-    file_format = os.path.splitext(filename)[1].lower()[1:]
+    ext = Path(filename).suffix.lower()[1:]
 
     READERS = {
         "dfs0": Dfs0,
@@ -167,13 +167,13 @@ def open(filename: str, **kwargs):
         "mesh": Mesh,
     }
 
-    if file_format not in READERS:
+    if ext not in READERS:
         valid_formats = ", ".join(READERS.keys())
         raise Exception(
-            f"{file_format} is not a supported format for mikeio.open. Valid formats are {valid_formats}"
+            f"{ext} is not a supported format for mikeio.open. Valid formats are {valid_formats}"
         )
 
-    reader_klass = READERS[file_format]
+    reader_klass = READERS[ext]
 
     return reader_klass(filename, **kwargs)
 
