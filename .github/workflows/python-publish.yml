@@ -11,6 +11,10 @@ jobs:
   deploy:
 
     runs-on: ubuntu-latest
+    permissions:
+      # IMPORTANT: this permission is mandatory for trusted publishing
+      id-token: write
+
 
     steps:
     - uses: actions/checkout@v3
@@ -26,10 +30,8 @@ jobs:
       run: pip install .[test]
     - name: Test
       run: pytest
-    - name: Build and publish
-      env:
-        TWINE_USERNAME: ${{ secrets.PYPI_USERNAME }}
-        TWINE_PASSWORD: ${{ secrets.PYPI_PASSWORD }}
-      run: |
-        python -m build
-        twine upload dist/*
+    - name: Build
+      run: python -m build
+    - name: Publish package distributions to PyPI
+      uses: pypa/gh-action-pypi-publish@release/v1
+

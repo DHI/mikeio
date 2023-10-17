@@ -1,6 +1,5 @@
 from io import StringIO
 import sys
-import os
 import pytest
 import mikeio
 import pandas as pd
