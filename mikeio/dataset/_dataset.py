@@ -12,7 +12,10 @@ from typing import (
     Tuple,
     MutableMapping,
     Any,
+    overload,
+    Hashable
 )
+
 
 import numpy as np
 import pandas as pd
@@ -648,6 +651,16 @@ class Dataset(MutableMapping):
         if name in self.__itemattr:
             self.__itemattr.remove(name)
             delattr(self, name)
+
+    @overload
+    def __getitem__(self, key: Hashable | int) -> DataArray:
+        ...
+
+    # Mapping is Iterable
+    @overload
+    def __getitem__(self, key: Iterable[Hashable]) -> "Dataset":
+        ...
+
 
     def __getitem__(self, key) -> DataArray | "Dataset":
 
