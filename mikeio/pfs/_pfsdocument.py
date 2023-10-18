@@ -128,6 +128,12 @@ class PfsDocument(PfsSection):
         """Return a new view of the PfsDocument's items ((key, value) pairs)"""
         return [(k, v) for k, v in self.__dict__.items() if k not in self._ALIAS_LIST]
 
+    def to_dict(self) -> dict:
+        """Convert to (nested) dict (as a copy)"""
+        d = super().to_dict()
+        _ = d.pop("_ALIAS_LIST")
+        return d
+
     @staticmethod
     def _unravel_items(items: Callable) -> Tuple[List, List]:
         rkeys = []
@@ -295,9 +301,14 @@ class PfsDocument(PfsSection):
                 value = s[(idx + 1) :].strip()
 
                 if key == "start_time":
-                    value = datetime.strptime(value, "%Y, %m, %d, %H, %M, %S").strftime(
-                        "%Y-%m-%d %H:%M:%S"
-                    )
+                    try:
+                        value = datetime.strptime(value, "%Y, %m, %d, %H, %M, %S").strftime(
+                            "%Y-%m-%d %H:%M:%S"
+                        )
+                    except ValueError:
+                        warnings.warn(
+                            f"Could not parse start_time {value} as datetime"
+                        )
                 value = self._parse_param(value)
                 s = f"{key}: {value}"
 
