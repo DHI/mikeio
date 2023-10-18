@@ -381,7 +381,7 @@ class PfsSection(SimpleNamespace, MutableMapping):
         """Convert to (nested) dict (as a copy)"""
         d = self.__dict__.copy()
         for key, value in d.items():
-            if isinstance(value, self.__class__):
+            if isinstance(value, PfsSection):
                 d[key] = value.to_dict()
         return d
 
