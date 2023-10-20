@@ -273,7 +273,6 @@ def test_str_is_scientific_float(d1):
 
 
 def test_basic():
-
     pfs = mikeio.PfsDocument("tests/testdata/pfs/simple.pfs")
 
     data = pfs.targets[0]
@@ -357,6 +356,7 @@ def test_read_write_she2(tmp_path):
         pfs2 = mikeio.PfsDocument(outfilename)
     assert pfs1.MIKESHE_FLOWMODEL == pfs2.MIKESHE_FLOWMODEL
 
+
 def test_read_write_filenames(tmp_path):
     infilename = "tests/testdata/pfs/filenames.pfs"
     pfs1 = mikeio.PfsDocument(infilename)
@@ -381,7 +381,6 @@ def test_read_write_filenames_modified(tmp_path):
 
 
 def test_sw():
-
     pfs = mikeio.PfsDocument("tests/testdata/pfs/lake.sw")
     assert pfs.targets[0] == pfs.FemEngineSW
     root = pfs.targets[0]
@@ -395,8 +394,10 @@ def test_sw():
 
     assert root.TIME.number_of_time_steps == 450
 
-    assert root.TIME.start_time.year == 2002
-    assert root.TIME.start_time.month == 1
+    # we're no longer parsing datetimes in Pfs module
+    start_time = datetime(*root.TIME.start_time)
+    assert start_time.year == 2002
+    assert start_time.month == 1
 
 
 def test_pfssection_to_dataframe():
@@ -407,7 +408,6 @@ def test_pfssection_to_dataframe():
 
 
 def test_hd_outputs():
-
     with pytest.warns(match="defined multiple times"):
         pfs = mikeio.PfsDocument("tests/testdata/pfs/lake.m21fm", unique_keywords=True)
     df = pfs.HD.OUTPUTS.to_dataframe()
@@ -417,7 +417,6 @@ def test_hd_outputs():
 
 
 def test_included_outputs():
-
     pfs = mikeio.PfsDocument("tests/testdata/pfs/lake.sw")
     df = pfs.SW.OUTPUTS.to_dataframe(prefix="OUTPUT_")
     df = df[df.include == 1]
@@ -427,7 +426,6 @@ def test_included_outputs():
 
 
 def test_output_by_id():
-
     pfs = mikeio.PfsDocument("tests/testdata/pfs/lake.sw")
     df = pfs.SW.OUTPUTS.to_dataframe()
     # .loc refers to output_id irrespective of included or not
@@ -546,7 +544,6 @@ def test_mdf():
 
 
 def test_read_in_memory_string():
-
     text = """
 [ENGINE]
   option = foo,bar
@@ -558,7 +555,6 @@ EndSect // ENGINE
 
 
 def test_read_mixed_array():
-
     text = """
 [ENGINE]
   advanced= false
@@ -575,7 +571,6 @@ EndSect // ENGINE
 
 
 def test_read_mixed_array2():
-
     text = """
 [ENGINE]
   fill_list = 'dsd', 0, 0.0, false
@@ -591,7 +586,6 @@ EndSect // ENGINE
 
 
 def test_read_mixed_array3():
-
     text = """
 [ENGINE]
   fill_list = 'dsd', 0, 0.0, "str2", false, 'str3'
@@ -609,7 +603,6 @@ EndSect // ENGINE
 
 
 def test_read_array():
-
     text = """
 [ENGINE]
   fill_list = 1, 2
@@ -624,7 +617,6 @@ EndSect // ENGINE
 
 
 def test_empty(tmp_path):
-
     text = """
 [ENGINE]
   A = 
@@ -651,7 +643,6 @@ EndSect // ENGINE
 
 
 def test_difficult_chars_in_str(tmp_path):
-
     text = """
 [ENGINE]
   A = 'str,s/d\sd.dfs0'
@@ -689,7 +680,6 @@ EndSect // ENGINE
 
 
 def test_difficult_chars_in_str2(tmp_path):
-
     text = """
 [ENGINE]
    A = 'str,s/d\sd.dfs0'
@@ -726,7 +716,6 @@ EndSect  // Results
 
 
 def test_read_string_array():
-
     text = """
 [ENGINE]
   fill_list = 'foo', 'bar', 'baz'
@@ -1045,7 +1034,6 @@ def test_nonunique_mixed_keywords_sections2(tmp_path):
 
 
 def test_parse_mike_she_pfs():
-
     pfs = mikeio.PfsDocument("tests/testdata/pfs/Karup_basic.she")
 
     assert pfs.n_targets == 2
@@ -1207,6 +1195,7 @@ def test_clob_can_contain_pipe_characters():
         sct.Clob
         == '<CLOB:22,1,1,false,1,0,"",0,"",0,"",0,"",0,"",0,"",0,"",0,"",||,false>'
     )
+
 
 def test_write_read_clob(tmp_path):
     clob_text = """
