@@ -407,7 +407,7 @@ def test_read_dfs0_to_dataframe():
     dfs = Dfs0(dfs0file)
     df = dfs.to_dataframe()
 
-    assert np.isnan(df[df.columns[0]][2])
+    assert np.isnan(df[df.columns[0]].iloc[2])
 
 
 def test_read_dfs0_to_matrix():
