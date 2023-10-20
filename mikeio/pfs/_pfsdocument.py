@@ -88,7 +88,6 @@ class PfsDocument(PfsSection):
         names=None,
         unique_keywords=False,
     ):
-
         if isinstance(data, (str, Path)) or hasattr(data, "read"):
             if names is not None:
                 raise ValueError("names cannot be given as argument if input is a file")
@@ -174,7 +173,9 @@ class PfsDocument(PfsSection):
         try:
             yml = self._pfs2yaml(filename, encoding)
             target_list = parse_yaml_preserving_duplicates(yml, unique_keywords)
-        except AttributeError:  # This is the error raised if parsing fails, try again with the normal loader
+        except (
+            AttributeError
+        ):  # This is the error raised if parsing fails, try again with the normal loader
             target_list = yaml.load(yml, Loader=yaml.CFullLoader)
         except FileNotFoundError as e:
             raise FileNotFoundError(str(e))
@@ -252,11 +253,10 @@ class PfsDocument(PfsSection):
                 self._ALIAS_LIST.append(alias)
 
     def _pfs2yaml(self, filename, encoding=None) -> str:
-
         if hasattr(filename, "read"):  # To read in memory strings StringIO
             pfsstring = filename.read()
         else:
-            with (open(filename, encoding=encoding)) as f:
+            with open(filename, encoding=encoding) as f:
                 pfsstring = f.read()
 
         lines = pfsstring.split("\n")
@@ -300,15 +300,16 @@ class PfsDocument(PfsSection):
                 key = key.strip()
                 value = s[(idx + 1) :].strip()
 
-                if key == "start_time":
-                    try:
-                        value = datetime.strptime(value, "%Y, %m, %d, %H, %M, %S").strftime(
-                            "%Y-%m-%d %H:%M:%S"
-                        )
-                    except ValueError:
-                        warnings.warn(
-                            f"Could not parse start_time {value} as datetime"
-                        )
+                # Don't parse datetimes
+                # if key == "start_time":
+                #     try:
+                #         value = datetime.strptime(value, "%Y, %m, %d, %H, %M, %S").strftime(
+                #             "%Y-%m-%d %H:%M:%S"
+                #         )
+                #     except ValueError:
+                #         warnings.warn(
+                #             f"Could not parse start_time {value} as datetime"
+                #         )
                 value = self._parse_param(value)
                 s = f"{key}: {value}"
 
