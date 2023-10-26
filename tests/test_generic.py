@@ -550,8 +550,6 @@ def test_dfs_ext_capitalisation(tmp_path):
     ds = mikeio.open(filename)
     ds = mikeio.read(filename)
     ds.to_dfs(tmp_path / "void.DFS0")
-    filename = "tests/testdata/odense_rough2.MESH"
-    ds = mikeio.open(filename)
     filename = "tests/testdata/oresund_vertical_slice2.DFSU"
     ds = mikeio.open(filename)
     assert True

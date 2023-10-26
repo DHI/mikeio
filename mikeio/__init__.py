@@ -136,7 +136,7 @@ def read(
 
 
 def open(filename: str | Path, **kwargs):
-    """Open a dfs/mesh file (and read the header)
+    """Open a dfs file (and read the header)
 
     The typical workflow for small dfs files is to read all data
     with *mikeio.read* instead of using this function. For big files, however,
@@ -172,7 +172,6 @@ def open(filename: str | Path, **kwargs):
         "dfs2": Dfs2,
         "dfs3": Dfs3,
         "dfsu": Dfsu,
-        "mesh": Mesh,
     }
 
     if ext not in READERS:

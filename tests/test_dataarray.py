@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 import pytest
 
 import mikeio
-from mikeio import EUMType, EUMUnit, ItemInfo
+from mikeio import EUMType, EUMUnit, ItemInfo, Mesh
 from mikeio.exceptions import OutsideModelDomainError
 
 
@@ -372,8 +372,8 @@ def test_dataarray_init_dfsu2d():
     nt = 10
     time = pd.date_range(start="2000-01-01", freq="S", periods=nt)
     filename = "tests/testdata/north_sea_2.mesh"
-    dfs = mikeio.open(filename)
-    g = dfs.geometry
+    msh = Mesh(filename)
+    g = msh.geometry
     ne = g.n_elements
 
     # time-varying
