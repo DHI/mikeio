@@ -82,6 +82,10 @@ allow_redefinition = true
 warn_unreachable = true
 
 [[tool.mypy.overrides]]
+module = ["mikeio", "mikeio.spatial", "mikeio.dataset"]
+warn_return_any = true
+
+[[tool.mypy.overrides]]
 module = [
     "mikecore.*",
     "pandas.*",
