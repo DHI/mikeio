@@ -109,7 +109,7 @@ class Grid1D(_Geometry):
         axis_name="x",
     ):
         """Create equidistant 1D spatial geometry"""
-        super().__init__(projection)
+        super().__init__(projection=projection)
         self._origin = (0.0, 0.0) if origin is None else (origin[0], origin[1])
         assert len(self._origin) == 2, "origin must be a tuple of length 2"
         self._orientation = orientation
@@ -407,7 +407,7 @@ class Grid2D(_Geometry):
         y: [55, 55.25, 55.5] (ny=3, dy=0.25)
         projection: LONG/LAT
         """
-        super().__init__(projection)
+        super().__init__(projection=projection)
         self._shift_origin_on_write = origin is None  # user-constructed
         self._origin = (0.0, 0.0) if origin is None else (origin[0], origin[1])
         assert len(self._origin) == 2, "origin must be a tuple of length 2"
@@ -1032,7 +1032,7 @@ class Grid3D(_Geometry):
         orientation=0.0,
     ) -> None:
 
-        super().__init__()
+        super().__init__(projection=projection)
         self._origin = (0.0, 0.0) if origin is None else (origin[0], origin[1])
         assert len(self._origin) == 2, "origin must be a tuple of length 2"
         self._x0, self._dx, self._nx = _parse_grid_axis("x", x, x0, dx, nx)
