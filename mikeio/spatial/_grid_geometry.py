@@ -3,6 +3,7 @@ import warnings
 from typing import Optional, Sequence, Tuple
 from dataclasses import dataclass
 import numpy as np
+from numpy.typing import ArrayLike, NDArray
 
 from mikecore.Projections import Cartography  # type: ignore
 
@@ -227,9 +228,11 @@ class Grid1D(_Geometry):
         else:
             coords = self._nc[idx, :]
             if len(coords) == 3:
-                return GeometryPoint3D(*coords)
+                x, y, z = coords
+                return GeometryPoint3D(x=x,y=y,z=z, projection=self.projection)
             else:
-                return GeometryPoint2D(*coords)
+                x, y = coords
+                return GeometryPoint2D(x=x,y=y, projection=self.projection)
 
 
 class _Grid2DPlotter:
@@ -680,7 +683,7 @@ class Grid2D(_Geometry):
             self._x0, self._y0 = 0.0, 0.0
             self._origin = (self._origin[0] + x0, self._origin[1] + y0)
 
-    def contains(self, coords):
+    def contains(self, coords: ArrayLike) -> NDArray[np.bool_]:
         """test if a list of points are inside grid
 
         Parameters
@@ -701,7 +704,7 @@ class Grid2D(_Geometry):
         yinside = (self.bbox.bottom <= y) & (y <= self.bbox.top)
         return xinside & yinside
 
-    def __contains__(self, pt) -> bool:
+    def __contains__(self, pt) -> NDArray[np.bool_]:
         return self.contains(pt)
 
     def find_index(
@@ -801,7 +804,7 @@ class Grid2D(_Geometry):
 
     def isel(
         self, idx, axis: int | str
-    ) -> "Grid2D" | "Grid1D" | "GeometryUndefined":
+    ) -> "Grid2D | Grid1D | GeometryUndefined":
         """Return a new geometry as a subset of Grid2D along the given axis."""
         if isinstance(axis, str):
             if axis == "y":
@@ -835,7 +838,7 @@ class Grid2D(_Geometry):
         else:
             raise ValueError(f"axis must be 0 or 1 (or 'x' or 'y'), not {axis}")
 
-    def _index_to_Grid2D(self, ii=None, jj=None):
+    def _index_to_Grid2D(self, ii=None, jj=None) -> "Grid2D | GeometryUndefined":
         ii = range(self.nx) if ii is None else ii
         jj = range(self.ny) if jj is None else jj
         assert len(ii) > 1 and len(jj) > 1, "Index must be at least len 2"
@@ -845,8 +848,9 @@ class Grid2D(_Geometry):
         if (np.any(di < 1) or not np.allclose(di, di[0])) or (
             np.any(dj < 1) or not np.allclose(dj, dj[0])
         ):
-            warnings.warn("Axis not equidistant! Will return GeometryUndefined()")
-            return GeometryUndefined()
+            # warnings.warn("Axis not equidistant! Will return GeometryUndefined()")
+            raise ValueError()
+            #return GeometryUndefined()
         else:
             dx = self.dx * di[0]
             dy = self.dy * dj[0]
