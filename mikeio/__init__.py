@@ -1,5 +1,7 @@
+from __future__ import annotations
 from pathlib import Path
 from platform import architecture
+from typing import Sequence
 
 # PEP0440 compatible formatted version, see:
 # https://www.python.org/dev/peps/pep-0440/
@@ -43,8 +45,14 @@ from .spatial import (
 from .xyz import read_xyz
 
 
-
-def read(filename, *, items=None, time=None, keepdims=False, **kwargs) -> Dataset:
+def read(
+    filename: str | Path,
+    *,
+    items: str | int | Sequence[str] | Sequence[int] | None = None,
+    time: int | str | slice | None = None,
+    keepdims: bool = False,
+    **kwargs,
+) -> Dataset:
     """Read all or a subset of the data from a dfs file
 
     All dfs files can be subsetted with the *items* and *time* arguments. But
@@ -127,7 +135,7 @@ def read(filename, *, items=None, time=None, keepdims=False, **kwargs) -> Datase
     return dfs.read(items=items, time=time, keepdims=keepdims, **kwargs)
 
 
-def open(filename: str, **kwargs):
+def open(filename: str | Path, **kwargs):
     """Open a dfs/mesh file (and read the header)
 
     The typical workflow for small dfs files is to read all data
@@ -176,6 +184,7 @@ def open(filename: str, **kwargs):
     reader_klass = READERS[ext]
 
     return reader_klass(filename, **kwargs)
+
 
 __all__ = [
     "DataArray",
