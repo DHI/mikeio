@@ -1,3 +1,4 @@
+from pathlib import Path
 import numpy as np
 import pytest
 import mikeio
@@ -13,6 +14,12 @@ def tri_mesh():
 def mixed_mesh():
     return Mesh("tests/testdata/quad_tri.mesh")
 
+
+def test_read_mesh_from_path():
+    testdata = Path("tests/testdata")
+    fp = testdata / "odense_rough.mesh"
+    msh = Mesh(fp)
+    assert msh.n_nodes == 399
 
 def test_get_number_of_elements(tri_mesh):
     msh = tri_mesh
