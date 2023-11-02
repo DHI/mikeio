@@ -9,7 +9,7 @@ from mikecore.MeshFile import MeshFile
 
 from ..eum import EUMType, EUMUnit
 from ..spatial import GeometryFM2D
-from ._common import _get_elements_from_source, _get_nodes_from_source, _element_table_to_mikecore
+from ._common import get_elements_from_source, get_nodes_from_source, element_table_to_mikecore
 
 
 class Mesh:
@@ -39,8 +39,8 @@ class Mesh:
     def _read_header(self, filename: str | Path) -> GeometryFM2D:
         msh = MeshFile.ReadMesh(filename)
 
-        nc, codes, node_ids = _get_nodes_from_source(msh)
-        el_table, el_ids = _get_elements_from_source(msh)
+        nc, codes, node_ids = get_nodes_from_source(msh)
+        el_table, el_ids = get_elements_from_source(msh)
 
         geom = GeometryFM2D(
             node_coordinates=nc,
@@ -124,7 +124,7 @@ class Mesh:
         assert isinstance(geometry, GeometryFM2D)  # i.e. not a GeometryPoint2d
 
         quantity = eumQuantity.Create(EUMType.Bathymetry, unit)
-        elem_table = _element_table_to_mikecore(
+        elem_table = element_table_to_mikecore(
             geometry.element_table
         )
 

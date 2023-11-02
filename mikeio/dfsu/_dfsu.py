@@ -37,7 +37,7 @@ from ..spatial import (
 from ..spatial._FM_utils import _plot_map
 from ..spatial import Grid2D
 from .._track import _extract_track
-from ._common import _get_elements_from_source, _get_nodes_from_source
+from ._common import get_elements_from_source, get_nodes_from_source
 
 
 def _write_dfsu(filename: str, data: Dataset):
@@ -178,8 +178,8 @@ class _Dfsu:
         self._source = msh
         self._type = None  # =DfsuFileType.Mesh
 
-        nc, codes, node_ids = _get_nodes_from_source(msh)
-        el_table, el_ids = _get_elements_from_source(msh)
+        nc, codes, node_ids = get_nodes_from_source(msh)
+        el_table, el_ids = get_elements_from_source(msh)
 
         self._geometry = GeometryFM2D(
             node_coordinates=nc,
@@ -211,8 +211,8 @@ class _Dfsu:
                 frequencies=frequencies, directions=directions
             )
         else:
-            nc, codes, node_ids = _get_nodes_from_source(dfs)
-            el_table, el_ids = _get_elements_from_source(dfs)
+            nc, codes, node_ids = get_nodes_from_source(dfs)
+            el_table, el_ids = get_elements_from_source(dfs)
 
             if self.is_layered:
                 geom_cls = GeometryFM3D
