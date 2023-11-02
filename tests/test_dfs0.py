@@ -1,6 +1,5 @@
 import numpy as np
 import pandas as pd
-import datetime
 import mikeio
 from mikeio import Dfs0, EUMType, EUMUnit, ItemInfo
 
@@ -134,7 +133,7 @@ def test_write_non_equidistant_calendar(tmp_path):
     assert dfs0file.exists()
 
     ds2 = mikeio.read(dfs0file)
-    assert ds2.is_equidistant == False
+    assert not ds2.is_equidistant
 
 
 def test_read_equidistant_dfs0_to_dataframe_fixed_freq():
