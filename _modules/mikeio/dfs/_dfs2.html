@@ -89,9 +89,10 @@
            <div itemprop="articleBody">
              
   <h1>Source code for mikeio.dfs._dfs2</h1><div class="highlight"><pre>
-<span></span><span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Tuple</span>
+<span></span><span class="kn">from</span> <span class="nn">copy</span> <span class="kn">import</span> <span class="n">deepcopy</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Optional</span>
+<span class="kn">import</span> <span class="nn">warnings</span>
 
-<span class="kn">from</span> <span class="nn">copy</span> <span class="kn">import</span> <span class="n">deepcopy</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
 <span class="kn">from</span> <span class="nn">tqdm</span> <span class="kn">import</span> <span class="n">tqdm</span>
@@ -202,10 +203,11 @@
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;horizontal&quot;</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">_dx</span> <span class="o">=</span> <span class="kc">None</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_dy</span> <span class="o">=</span> <span class="kc">None</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_nx</span> <span class="o">=</span> <span class="kc">None</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_ny</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="c1"># TODO find a better way to avoid initializing these non-sensical values</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_dx</span> <span class="o">=</span> <span class="mf">0.0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_dy</span> <span class="o">=</span> <span class="mf">0.0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_nx</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_ny</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_x0</span> <span class="o">=</span> <span class="mf">0.0</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_y0</span> <span class="o">=</span> <span class="mf">0.0</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">geometry</span> <span class="o">=</span> <span class="kc">None</span>
@@ -374,68 +376,34 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_dfs</span> <span class="o">=</span> <span class="n">DfsFileFactory</span><span class="o">.</span><span class="n">Dfs2FileOpen</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_filename</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_source</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dfs</span>
 
-<div class="viewcode-block" id="Dfs2.write">
-<a class="viewcode-back" href="../../../dfs2.html#mikeio.Dfs2.write">[docs]</a>
     <span class="k">def</span> <span class="nf">write</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
-        <span class="n">filename</span><span class="p">,</span>
-        <span class="n">data</span><span class="p">,</span>
-        <span class="n">dt</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-        <span class="n">dx</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-        <span class="n">dy</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-        <span class="n">title</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-        <span class="n">keep_open</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">filename</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">data</span><span class="p">:</span> <span class="n">Dataset</span><span class="p">,</span>
+        <span class="n">dt</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">title</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">keep_open</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span><span class="kc">False</span><span class="p">,</span>
     <span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Create a dfs2 file</span>
-
-<span class="sd">        Parameters</span>
-<span class="sd">        ----------</span>
-
-<span class="sd">        filename: str</span>
-<span class="sd">            Location to write the dfs2 file</span>
-<span class="sd">        data: Dataset</span>
-<span class="sd">            list of matrices, one for each item. Matrix dimension: time, y, x</span>
-<span class="sd">        dt: float, optional</span>
-<span class="sd">            The time step in seconds.</span>
-<span class="sd">        dx: float, optional</span>
-<span class="sd">            length of each grid in the x direction (projection units)</span>
-<span class="sd">        dy: float, optional</span>
-<span class="sd">            length of each grid in the y direction (projection units)</span>
-<span class="sd">        title: str, optional</span>
-<span class="sd">            title of the dfs2 file. Default is blank.</span>
-<span class="sd">        keep_open: bool, optional</span>
-<span class="sd">            Keep file open for appending</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
-            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span>
-                <span class="s2">&quot;supplying data as a list of numpy arrays is deprecated, please supply data in the form of a Dataset&quot;</span><span class="p">,</span>
-            <span class="p">)</span>
+        
+        <span class="c1"># this method is deprecated</span>
+        <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="ne">FutureWarning</span><span class="p">(</span><span class="s2">&quot;Dfs2.write() is deprecated, use Dataset.to_dfs() instead&quot;</span><span class="p">))</span>
 
         <span class="n">filename</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_builder</span> <span class="o">=</span> <span class="n">DfsBuilder</span><span class="o">.</span><span class="n">Create</span><span class="p">(</span><span class="n">title</span><span class="p">,</span> <span class="s2">&quot;mikeio&quot;</span><span class="p">,</span> <span class="n">__dfs_version__</span><span class="p">)</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dx</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_dx</span> <span class="o">=</span> <span class="mi">1</span>
-        <span class="k">if</span> <span class="n">dx</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_dx</span> <span class="o">=</span> <span class="n">dx</span>
-
-        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dy</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_dy</span> <span class="o">=</span> <span class="mi">1</span>
-        <span class="k">if</span> <span class="n">dy</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_dy</span> <span class="o">=</span> <span class="n">dy</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_dx</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">geometry</span><span class="o">.</span><span class="n">dx</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_dy</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">geometry</span><span class="o">.</span><span class="n">dy</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_write</span><span class="p">(</span>
             <span class="n">filename</span><span class="o">=</span><span class="n">filename</span><span class="p">,</span>
-            <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">,</span>
+            <span class="n">ds</span><span class="o">=</span><span class="n">data</span><span class="p">,</span>
             <span class="n">dt</span><span class="o">=</span><span class="n">dt</span><span class="p">,</span>
             <span class="n">title</span><span class="o">=</span><span class="n">title</span><span class="p">,</span>
             <span class="n">keep_open</span><span class="o">=</span><span class="n">keep_open</span><span class="p">,</span>
         <span class="p">)</span>
 
         <span class="k">if</span> <span class="n">keep_open</span><span class="p">:</span>
-            <span class="k">return</span> <span class="bp">self</span></div>
-
+            <span class="k">return</span> <span class="bp">self</span>
 
     <span class="k">def</span> <span class="nf">_set_spatial_axis</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_builder</span><span class="o">.</span><span class="n">SetSpatialAxis</span><span class="p">(</span>

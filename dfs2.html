@@ -58,7 +58,6 @@
 <li class="toctree-l2"><a class="reference internal" href="#dfs2-example-notebooks">Dfs2 Example notebooks</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#dfs2-api">Dfs2 API</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#mikeio.Dfs2"><code class="docutils literal notranslate"><span class="pre">Dfs2</span></code></a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#mikeio.Dfs2.append"><code class="docutils literal notranslate"><span class="pre">Dfs2.append()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#mikeio.Dfs2.close"><code class="docutils literal notranslate"><span class="pre">Dfs2.close()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#mikeio.Dfs2.deletevalue"><code class="docutils literal notranslate"><span class="pre">Dfs2.deletevalue</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#mikeio.Dfs2.dx"><code class="docutils literal notranslate"><span class="pre">Dfs2.dx</span></code></a></li>
@@ -79,7 +78,6 @@
 <li class="toctree-l4"><a class="reference internal" href="#mikeio.Dfs2.start_time"><code class="docutils literal notranslate"><span class="pre">Dfs2.start_time</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#mikeio.Dfs2.time"><code class="docutils literal notranslate"><span class="pre">Dfs2.time</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#mikeio.Dfs2.timestep"><code class="docutils literal notranslate"><span class="pre">Dfs2.timestep</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#mikeio.Dfs2.write"><code class="docutils literal notranslate"><span class="pre">Dfs2.write()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#mikeio.Dfs2.x0"><code class="docutils literal notranslate"><span class="pre">Dfs2.x0</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#mikeio.Dfs2.y0"><code class="docutils literal notranslate"><span class="pre">Dfs2.y0</span></code></a></li>
 </ul>
@@ -250,17 +248,6 @@
 <dt class="sig sig-object py" id="mikeio.Dfs2">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mikeio.</span></span><span class="sig-name descname"><span class="pre">Dfs2</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'horizontal'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mikeio/dfs/_dfs2.html#Dfs2"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mikeio.Dfs2" title="Link to this definition"></a></dt>
 <dd><dl class="py method">
-<dt class="sig sig-object py" id="mikeio.Dfs2.append">
-<span class="sig-name descname"><span class="pre">append</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Dfs2.append" title="Link to this definition"></a></dt>
-<dd><p>Append to a dfs file opened with <cite>write(…,keep_open=True)</cite></p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>data</strong> (<a class="reference internal" href="dataset.html#mikeio.Dataset" title="mikeio.Dataset"><code class="xref py py-class docutils literal notranslate"><span class="pre">Dataset</span></code></a>)</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
 <dt class="sig sig-object py" id="mikeio.Dfs2.close">
 <span class="sig-name descname"><span class="pre">close</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Dfs2.close" title="Link to this definition"></a></dt>
 <dd><p>Finalize write for a dfs file opened with <cite>write(…,keep_open=True)</cite></p>
@@ -394,25 +381,6 @@ bounding box (tuple with left, lower, right, upper) coordinates</p></li>
 <dt class="sig sig-object py" id="mikeio.Dfs2.timestep">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">timestep</span></span><a class="headerlink" href="#mikeio.Dfs2.timestep" title="Link to this definition"></a></dt>
 <dd><p>Time step size in seconds</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="mikeio.Dfs2.write">
-<span class="sig-name descname"><span class="pre">write</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dt</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dx</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dy</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">title</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">keep_open</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mikeio/dfs/_dfs2.html#Dfs2.write"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mikeio.Dfs2.write" title="Link to this definition"></a></dt>
-<dd><p>Create a dfs2 file</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>filename</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>) – Location to write the dfs2 file</p></li>
-<li><p><strong>data</strong> (<a class="reference internal" href="dataset.html#mikeio.Dataset" title="mikeio.Dataset"><code class="xref py py-class docutils literal notranslate"><span class="pre">Dataset</span></code></a>) – list of matrices, one for each item. Matrix dimension: time, y, x</p></li>
-<li><p><strong>dt</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a>, <em>optional</em>) – The time step in seconds.</p></li>
-<li><p><strong>dx</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a>, <em>optional</em>) – length of each grid in the x direction (projection units)</p></li>
-<li><p><strong>dy</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a>, <em>optional</em>) – length of each grid in the y direction (projection units)</p></li>
-<li><p><strong>title</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <em>optional</em>) – title of the dfs2 file. Default is blank.</p></li>
-<li><p><strong>keep_open</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a>, <em>optional</em>) – Keep file open for appending</p></li>
-</ul>
-</dd>
-</dl>
 </dd></dl>
 
 <dl class="py property">
@@ -664,7 +632,7 @@ by default: rcParams[“hist.bins”] (default: 10)</p></li>
 </dl>
 <div class="admonition seealso">
 <p class="admonition-title">See also</p>
-<p><a class="reference external" href="https://matplotlib.org/stable/api/_as_gen/matplotlib.pyplot.hist.html#matplotlib.pyplot.hist" title="(in Matplotlib v3.8.0)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">matplotlib.pyplot.hist</span></code></a></p>
+<p><a class="reference external" href="https://matplotlib.org/stable/api/_as_gen/matplotlib.pyplot.hist.html#matplotlib.pyplot.hist" title="(in Matplotlib v3.8.1)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">matplotlib.pyplot.hist</span></code></a></p>
 </div>
 <dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>

@@ -314,13 +314,13 @@
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_spectral</span><span class="p">:</span>
             <span class="nb">dir</span> <span class="o">=</span> <span class="n">dfs</span><span class="o">.</span><span class="n">Directions</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_directions</span> <span class="o">=</span> <span class="kc">None</span> <span class="k">if</span> <span class="nb">dir</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="nb">dir</span> <span class="o">*</span> <span class="p">(</span><span class="mi">180</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_frequencies</span> <span class="o">=</span> <span class="n">dfs</span><span class="o">.</span><span class="n">Frequencies</span>
+            <span class="n">directions</span> <span class="o">=</span> <span class="kc">None</span> <span class="k">if</span> <span class="nb">dir</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="nb">dir</span> <span class="o">*</span> <span class="p">(</span><span class="mi">180</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">)</span>
+            <span class="n">frequencies</span> <span class="o">=</span> <span class="n">dfs</span><span class="o">.</span><span class="n">Frequencies</span>
 
         <span class="c1"># geometry</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_type</span> <span class="o">==</span> <span class="n">DfsuFileType</span><span class="o">.</span><span class="n">DfsuSpectral0D</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_geometry</span> <span class="o">=</span> <span class="n">GeometryFMPointSpectrum</span><span class="p">(</span>
-                <span class="n">frequencies</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">frequencies</span><span class="p">,</span> <span class="n">directions</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">directions</span>
+                <span class="n">frequencies</span><span class="o">=</span><span class="n">frequencies</span><span class="p">,</span> <span class="n">directions</span><span class="o">=</span><span class="n">directions</span>
             <span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">nc</span><span class="p">,</span> <span class="n">codes</span><span class="p">,</span> <span class="n">node_ids</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_nodes_from_source</span><span class="p">(</span><span class="n">dfs</span><span class="p">)</span>
@@ -356,8 +356,8 @@
                     <span class="n">element_ids</span><span class="o">=</span><span class="n">el_ids</span><span class="p">,</span>
                     <span class="n">node_ids</span><span class="o">=</span><span class="n">node_ids</span><span class="p">,</span>
                     <span class="n">validate</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-                    <span class="n">frequencies</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">frequencies</span><span class="p">,</span>
-                    <span class="n">directions</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">directions</span><span class="p">,</span>
+                    <span class="n">frequencies</span><span class="o">=</span><span class="n">frequencies</span><span class="p">,</span>
+                    <span class="n">directions</span><span class="o">=</span><span class="n">directions</span><span class="p">,</span>
                 <span class="p">)</span>
             <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">_type</span> <span class="o">==</span> <span class="n">DfsuFileType</span><span class="o">.</span><span class="n">DfsuSpectral2D</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">_geometry</span> <span class="o">=</span> <span class="n">GeometryFMAreaSpectrum</span><span class="p">(</span>
@@ -369,8 +369,8 @@
                     <span class="n">element_ids</span><span class="o">=</span><span class="n">el_ids</span><span class="p">,</span>
                     <span class="n">node_ids</span><span class="o">=</span><span class="n">node_ids</span><span class="p">,</span>
                     <span class="n">validate</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-                    <span class="n">frequencies</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">frequencies</span><span class="p">,</span>
-                    <span class="n">directions</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">directions</span><span class="p">,</span>
+                    <span class="n">frequencies</span><span class="o">=</span><span class="n">frequencies</span><span class="p">,</span>
+                    <span class="n">directions</span><span class="o">=</span><span class="n">directions</span><span class="p">,</span>
                 <span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">_geometry</span> <span class="o">=</span> <span class="n">GeometryFM2D</span><span class="p">(</span>
@@ -1247,6 +1247,7 @@
         <span class="n">builder</span><span class="o">.</span><span class="n">ApplicationVersion</span> <span class="o">=</span> <span class="n">__dfs_version__</span>
 
         <span class="k">try</span><span class="p">:</span>
+            <span class="c1"># TODO self._dfs is used by append, can we handle this better?</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_dfs</span> <span class="o">=</span> <span class="n">builder</span><span class="o">.</span><span class="n">CreateFile</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
         <span class="k">except</span> <span class="ne">IOError</span><span class="p">:</span>
             <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;cannot create dfsu file: &quot;</span><span class="p">,</span> <span class="n">filename</span><span class="p">)</span>

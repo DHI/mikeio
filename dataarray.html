@@ -163,7 +163,7 @@ The <a class="reference internal" href="dfs-overview.html#mikeio.read" title="mi
 <p>Each DataArray have the following properties:</p>
 <ul class="simple">
 <li><p><strong>item</strong> - an  <a class="reference internal" href="eum.html#mikeio.eum.ItemInfo" title="mikeio.eum.ItemInfo"><code class="xref py py-class docutils literal notranslate"><span class="pre">mikeio.eum.ItemInfo</span></code></a> with name, type and unit</p></li>
-<li><p><strong>time</strong> - a <a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DatetimeIndex.html#pandas.DatetimeIndex" title="(in pandas v2.1.1)"><code class="xref py py-class docutils literal notranslate"><span class="pre">pandas.DatetimeIndex</span></code></a> with the time instances of the data</p></li>
+<li><p><strong>time</strong> - a <a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DatetimeIndex.html#pandas.DatetimeIndex" title="(in pandas v2.1.2)"><code class="xref py py-class docutils literal notranslate"><span class="pre">pandas.DatetimeIndex</span></code></a> with the time instances of the data</p></li>
 <li><p><strong>geometry</strong> - a Geometry object with the spatial description of the data</p></li>
 <li><p><strong>values</strong> - a <a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="(in NumPy v1.26)"><code class="xref py py-class docutils literal notranslate"><span class="pre">numpy.ndarray</span></code></a></p></li>
 </ul>
@@ -403,10 +403,10 @@ including different ways of <em>selecting</em> data:</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="mikeio.DataArray.describe">
 <span class="sig-name descname"><span class="pre">describe</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mikeio/dataset/_dataarray.html#DataArray.describe"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mikeio.DataArray.describe" title="Link to this definition"></a></dt>
-<dd><p>Generate descriptive statistics by wrapping <a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.describe.html#pandas.DataFrame.describe" title="(in pandas v2.1.1)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">pandas.DataFrame.describe()</span></code></a></p>
+<dd><p>Generate descriptive statistics by wrapping <a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.describe.html#pandas.DataFrame.describe" title="(in pandas v2.1.2)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">pandas.DataFrame.describe()</span></code></a></p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>**kwargs</strong> – Keyword arguments passed to <a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.describe.html#pandas.DataFrame.describe" title="(in pandas v2.1.1)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">pandas.DataFrame.describe()</span></code></a></p>
+<dd class="field-odd"><p><strong>**kwargs</strong> – Keyword arguments passed to <a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.describe.html#pandas.DataFrame.describe" title="(in pandas v2.1.2)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">pandas.DataFrame.describe()</span></code></a></p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">pd.DataFrame</span></code></p>
@@ -439,7 +439,7 @@ including different ways of <em>selecting</em> data:</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>track</strong> (<a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v2.1.1)"><code class="xref py py-class docutils literal notranslate"><span class="pre">pandas.DataFrame</span></code></a>) – with DatetimeIndex and (x, y) of track points as first two columns
+<li><p><strong>track</strong> (<a class="reference external" href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v2.1.2)"><code class="xref py py-class docutils literal notranslate"><span class="pre">pandas.DataFrame</span></code></a>) – with DatetimeIndex and (x, y) of track points as first two columns
 x,y coordinates must be in same coordinate system as dfsu</p></li>
 <li><p><strong>track</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>) – filename of csv or dfs0 file containing t,x,y</p></li>
 <li><p><strong>method</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <em>optional</em>) – Spatial interpolation method (‘nearest’ or ‘inverse_distance’)
@@ -1190,7 +1190,7 @@ by default: rcParams[“hist.bins”] (default: 10)</p></li>
 </dl>
 <div class="admonition seealso">
 <p class="admonition-title">See also</p>
-<p><a class="reference external" href="https://matplotlib.org/stable/api/_as_gen/matplotlib.pyplot.hist.html#matplotlib.pyplot.hist" title="(in Matplotlib v3.8.0)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">matplotlib.pyplot.hist</span></code></a></p>
+<p><a class="reference external" href="https://matplotlib.org/stable/api/_as_gen/matplotlib.pyplot.hist.html#matplotlib.pyplot.hist" title="(in Matplotlib v3.8.1)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">matplotlib.pyplot.hist</span></code></a></p>
 </div>
 <dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>

@@ -384,7 +384,6 @@
             <span class="n">problems</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;Number of timesteps must be the same&quot;</span><span class="p">)</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">start_time</span> <span class="o">!=</span> <span class="n">other</span><span class="o">.</span><span class="n">start_time</span><span class="p">:</span>
             <span class="n">problems</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;start_time must be the same&quot;</span><span class="p">)</span>
-        <span class="c1">#if type(self.geometry) != type(other.geometry):</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">geometry</span><span class="p">,</span> <span class="n">other</span><span class="o">.</span><span class="n">geometry</span><span class="o">.</span><span class="vm">__class__</span><span class="p">):</span>
             <span class="n">problems</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;The type of geometry must be the same&quot;</span><span class="p">)</span>
         <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">geometry</span><span class="p">,</span> <span class="s2">&quot;__eq__&quot;</span><span class="p">):</span>
@@ -437,12 +436,12 @@
     <span class="c1"># ============= Basic properties/methods ===========</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">name</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+    <span class="k">def</span> <span class="nf">name</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Name of this DataArray (=da.item.name)&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">item</span><span class="o">.</span><span class="n">name</span>
 
     <span class="nd">@name</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span> <span class="nf">name</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">name</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">item</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">value</span>
 
     <span class="nd">@property</span>
