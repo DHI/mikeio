@@ -178,17 +178,17 @@ class _Dfsu:
         self._source = msh
         self._type = None  # =DfsuFileType.Mesh
 
-        nc, codes, node_ids = get_nodes_from_source(msh)
-        el_table, el_ids = get_elements_from_source(msh)
+        node_table = get_nodes_from_source(msh)
+        el_table = get_elements_from_source(msh)
 
         self._geometry = GeometryFM2D(
-            node_coordinates=nc,
-            element_table=el_table,
-            codes=codes,
+            node_coordinates=node_table.coordinates,
+            element_table=el_table.connectivity,
+            codes=node_table.codes,
             projection=msh.ProjectionString,
             dfsu_type=self._type,
-            element_ids=el_ids,
-            node_ids=node_ids,
+            element_ids=el_table.ids,
+            node_ids=node_table.ids,
             validate=False,
         )
 
@@ -211,8 +211,9 @@ class _Dfsu:
                 frequencies=frequencies, directions=directions
             )
         else:
-            nc, codes, node_ids = get_nodes_from_source(dfs)
-            el_table, el_ids = get_elements_from_source(dfs)
+            #nc, codes, node_ids = get_nodes_from_source(dfs)
+            node_table = get_nodes_from_source(dfs)
+            el_table = get_elements_from_source(dfs)
 
             if self.is_layered:
                 geom_cls = GeometryFM3D
@@ -223,52 +224,52 @@ class _Dfsu:
                     geom_cls = GeometryFMVerticalProfile
 
                 self._geometry = geom_cls(
-                    node_coordinates=nc,
-                    element_table=el_table,
-                    codes=codes,
+                    node_coordinates=node_table.coordinates,
+                    element_table=el_table.connectivity,
+                    codes=node_table.codes,
                     projection=dfs.Projection.WKTString,
                     dfsu_type=self._type,
-                    element_ids=el_ids,
-                    node_ids=node_ids,
+                    element_ids=el_table.ids,
+                    node_ids=node_table.ids,
                     n_layers=dfs.NumberOfLayers,
                     n_sigma=dfs.NumberOfSigmaLayers,
                     validate=False,
                 )
             elif self._type == DfsuFileType.DfsuSpectral1D:
                 self._geometry = GeometryFMLineSpectrum(
-                    node_coordinates=nc,
-                    element_table=el_table,
-                    codes=codes,
+                    node_coordinates=node_table.coordinates,
+                    element_table=el_table.connectivity,
+                    codes=node_table.codes,
                     projection=dfs.Projection.WKTString,
                     dfsu_type=self._type,
-                    element_ids=el_ids,
-                    node_ids=node_ids,
+                    element_ids=el_table.ids,
+                    node_ids=node_table.ids,
                     validate=False,
                     frequencies=frequencies,
                     directions=directions,
                 )
             elif self._type == DfsuFileType.DfsuSpectral2D:
                 self._geometry = GeometryFMAreaSpectrum(
-                    node_coordinates=nc,
-                    element_table=el_table,
-                    codes=codes,
+                    node_coordinates=node_table.coordinates,
+                    element_table=el_table.connectivity,
+                    codes=node_table.codes,
                     projection=dfs.Projection.WKTString,
                     dfsu_type=self._type,
-                    element_ids=el_ids,
-                    node_ids=node_ids,
+                    element_ids=el_table.ids,
+                    node_ids=node_table.ids,
                     validate=False,
                     frequencies=frequencies,
                     directions=directions,
                 )
             else:
                 self._geometry = GeometryFM2D(
-                    node_coordinates=nc,
-                    element_table=el_table,
-                    codes=codes,
+                    node_coordinates=node_table.coordinates,
+                    element_table=el_table.connectivity,
+                    codes=node_table.codes,
                     projection=dfs.Projection.WKTString,
                     dfsu_type=self._type,
-                    element_ids=el_ids,
-                    node_ids=node_ids,
+                    element_ids=el_table.ids,
+                    node_ids=node_table.ids,
                     validate=False,
                 )
 
