@@ -14,16 +14,15 @@ from ..spatial import GeometryFM2D
 
 class Mesh:
     """
-    The Mesh class is initialized with a mesh or a dfsu file.
+    The Mesh class is initialized with a mesh file.
 
     Parameters
     ---------
     filename: str
-        dfsu or mesh filename
+        mesh filename
 
     Examples
     --------
-
     >>> import mikeio
     >>> msh = mikeio.Mesh("tests/testdata/odense_rough.mesh")
     >>> msh
