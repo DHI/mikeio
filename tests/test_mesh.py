@@ -1,5 +1,6 @@
 import numpy as np
 import pytest
+import mikeio
 from mikeio import Mesh
 
 
@@ -128,12 +129,14 @@ def test_write_mesh_from_dfsu(tmp_path):
     outfilename = tmp_path / "quad_tri.mesh"
     dfsufilename = "tests/testdata/FakeLake.dfsu"
 
-    msh = Mesh(dfsufilename)
+    dfs = mikeio.open(dfsufilename)
 
-    msh.write(outfilename)
+    geometry = dfs.geometry
+
+    geometry.to_mesh(outfilename)
 
     msh2 = Mesh(outfilename)
 
     assert outfilename.exists()
 
-    assert np.all(np.hstack(msh2.element_table) == np.hstack(msh.element_table))
+    assert np.all(np.hstack(msh2.element_table) == np.hstack(geometry.element_table))

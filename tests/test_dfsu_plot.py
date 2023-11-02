@@ -71,9 +71,10 @@ def test_plot_dfsu_contourf_levels(hd2d_dfs):
 
 
 def test_plot_dfsu_contour_mixedmesh():
-    msh = Mesh("tests/testdata/FakeLake.dfsu")
-    msh.plot(plot_type="contour", levels=5)
-    msh.plot(
+    dfs = mikeio.open("tests/testdata/FakeLake.dfsu")
+    geometry = dfs.geometry
+    geometry.plot(plot_type="contour", levels=5)
+    geometry.plot(
         plot_type="contourf",
         title="contourf",
         show_mesh=False,
@@ -83,8 +84,9 @@ def test_plot_dfsu_contour_mixedmesh():
 
 
 def test_plot_dfsu_n_refinements():
-    msh = Mesh("tests/testdata/FakeLake.dfsu")
-    msh.plot(plot_type="contourf", levels=None, n_refinements=1)
+    dfs = mikeio.open("tests/testdata/FakeLake.dfsu")
+    geometry = dfs.geometry
+    geometry.plot(plot_type="contourf", levels=None, n_refinements=1)
     assert True
 
 
