@@ -37,10 +37,10 @@ from ..spatial import (
 from ..spatial._FM_utils import _plot_map
 from ..spatial import Grid2D
 from .._track import _extract_track
+from ._common import _get_elements_from_source, _get_nodes_from_source
 
 
 def _write_dfsu(filename: str, data: Dataset):
-
     filename = str(filename)
 
     if len(data.time) == 1:
@@ -104,29 +104,8 @@ def _write_dfsu(filename: str, data: Dataset):
     dfs.Close()
 
 
-class _UnstructuredFile:
-    """
-    _UnstructuredFile is base class for Mesh and Dfsu
-    has file handle, items and timesteps and reads file header
-    """
-
+class _Dfsu:
     show_progress = False
-
-    def __init__(self) -> None:
-        self._type = None  # -1: mesh, 0: 2d-dfsu, 4:dfsu3dsigma, ...
-        self._geometry = None
-        self._geom2d = None
-        # self._shapely_domain_obj = None
-
-        self._filename = None
-        self._source = None
-        self._deletevalue = None
-
-        self._n_timesteps = None
-        self._start_time = None
-        self._timestep_in_seconds = None
-
-        self._items = None
 
     def __repr__(self):
         out = []
@@ -168,7 +147,7 @@ class _UnstructuredFile:
                 out.append(f"      {self._start_time} -- {self.end_time}")
         return str.join("\n", out)
 
-    def _read_header(self, input):
+    def _read_header(self, input: DfsuFile | str | Path):
         if isinstance(input, DfsuFile):
             # input is a dfsu file object (already open)
             self._read_dfsu_header(input)
@@ -199,8 +178,8 @@ class _UnstructuredFile:
         self._source = msh
         self._type = None  # =DfsuFileType.Mesh
 
-        nc, codes, node_ids = self._get_nodes_from_source(msh)
-        el_table, el_ids = self._get_elements_from_source(msh)
+        nc, codes, node_ids = _get_nodes_from_source(msh)
+        el_table, el_ids = _get_elements_from_source(msh)
 
         self._geometry = GeometryFM2D(
             node_coordinates=nc,
@@ -232,8 +211,8 @@ class _UnstructuredFile:
                 frequencies=frequencies, directions=directions
             )
         else:
-            nc, codes, node_ids = self._get_nodes_from_source(dfs)
-            el_table, el_ids = self._get_elements_from_source(dfs)
+            nc, codes, node_ids = _get_nodes_from_source(dfs)
+            el_table, el_ids = _get_elements_from_source(dfs)
 
             if self.is_layered:
                 geom_cls = GeometryFM3D
@@ -306,40 +285,6 @@ class _UnstructuredFile:
         self._timestep_in_seconds = dfs.TimeStepInSeconds
 
         dfs.Close()
-
-    @staticmethod
-    def _get_nodes_from_source(source):
-        xn = source.X
-        yn = source.Y
-        zn = source.Z
-        nc = np.column_stack([xn, yn, zn])
-        codes = np.array(list(source.Code))
-        node_ids = source.NodeIds - 1
-        return nc, codes, node_ids
-
-    @staticmethod
-    def _get_elements_from_source(source):
-        element_table = _UnstructuredFile._get_element_table_from_mikecore(
-            source.ElementTable
-        )
-        element_ids = source.ElementIds - 1
-        return element_table, element_ids
-
-    @staticmethod
-    def _offset_element_table_by(element_table, offset, copy=True):
-        offset = int(offset)
-        new_elem_table = element_table.copy() if copy else element_table
-        for j in range(len(element_table)):
-            new_elem_table[j] = element_table[j] + offset
-        return new_elem_table
-
-    @staticmethod
-    def _get_element_table_from_mikecore(element_table):
-        return _UnstructuredFile._offset_element_table_by(element_table, -1)
-
-    @staticmethod
-    def _element_table_to_mikecore(element_table):
-        return _UnstructuredFile._offset_element_table_by(element_table, 1)
 
     @property
     def type_name(self):
@@ -572,7 +517,6 @@ class _UnstructuredFile:
         ax=None,
         add_colorbar=True,
     ):
-
         warnings.warn(
             FutureWarning(
                 "Dfsu.plot() have been deprecated, please use DataArray.plot() instead"
@@ -619,9 +563,7 @@ class _UnstructuredFile:
             add_colorbar=add_colorbar,
         )
 
-
-class _Dfsu(_UnstructuredFile):
-    def __init__(self, filename, dfs=None):
+    def __init__(self, filename, dfs: DfsuFile | None = None):
         """
         Create a Dfsu object
 
@@ -631,18 +573,15 @@ class _Dfsu(_UnstructuredFile):
             dfsu or mesh filename
         dfs :
         """
-        super().__init__()
+        # placeholder
+        self._timestep_in_seconds = None
+
         self._filename = str(filename)
         input = self._filename if dfs is None else dfs
         self._read_header(input)
 
-        # show progress bar for large files
-        # if self._type == UnstructuredType.Mesh:
-        #    tot_size = self.n_elements
-        # else:
-        #    tot_size = self.n_elements * self.n_timesteps * self.n_items
-        # if tot_size > 1e6:
-        #    self.show_progress = True
+        # Caching
+        self._geom2d = None
 
     @property
     def deletevalue(self):
@@ -705,7 +644,6 @@ class _Dfsu(_UnstructuredFile):
         error_bad_data=True,
         fill_bad_data_value=np.nan,
     ) -> Dataset:
-        
         if dtype not in [np.float32, np.float64]:
             raise ValueError("Invalid data type. Choose np.float32 or np.float64")
 
@@ -761,7 +699,6 @@ class _Dfsu(_UnstructuredFile):
         for i in trange(n_steps, disable=not self.show_progress):
             it = time_steps[i]
             for item in range(n_items):
-
                 dfs, d = _read_item_time_step(
                     dfs=dfs,
                     filename=self._filename,
@@ -1041,7 +978,9 @@ class _Dfsu(_UnstructuredFile):
             n_time_steps = np.shape(data[0])[0]
 
         if dt is None:
-            if self.timestep is None:
+            if (
+                self.timestep is None
+            ):  # TODO this is a sign that this method needs to be removed
                 dt = 1
             else:
                 dt = self.timestep  # 1 # Arbitrary if there is only a single timestep
@@ -1182,7 +1121,6 @@ class _Dfsu(_UnstructuredFile):
                 return self
 
         except Exception as e:
-
             print(e)
             self._dfs.Close()
             os.remove(filename)
@@ -1244,7 +1182,6 @@ class _Dfsu(_UnstructuredFile):
 
 
 class Dfsu2DH(_Dfsu):
-
     def read(
         self,
         *,
@@ -1291,17 +1228,19 @@ class Dfsu2DH(_Dfsu):
         Dataset
             A Dataset with data dimensions [t,elements]
         """
-        
-        return self._read(items=items,
-                          time=time,
-                          elements=elements,
-                          area=area,
-                          x=x,
-                          y=y,
-                          keepdims=keepdims,
-                          dtype=dtype,
-                          error_bad_data=error_bad_data,
-                          fill_bad_data_value=fill_bad_data_value)
+
+        return self._read(
+            items=items,
+            time=time,
+            elements=elements,
+            area=area,
+            x=x,
+            y=y,
+            keepdims=keepdims,
+            dtype=dtype,
+            error_bad_data=error_bad_data,
+            fill_bad_data_value=fill_bad_data_value,
+        )
 
     def _dfs_read_item_time_func(self, item: int, step: int):
         dfs = DfsuFile.Open(self._filename)
