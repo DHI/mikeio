@@ -182,6 +182,7 @@ class _UnstructuredFile:
         ext = path.suffix.lower()
 
         if ext == ".mesh":
+            # TODO remove the possibility to read mesh files from this class
             self._read_mesh_header(filename)
 
         elif ext == ".dfsu":
