@@ -42,7 +42,7 @@ class Mesh:
 
     def __init__(self, filename: str | Path) -> None:
         # Mesh used to be able to read dfsu files, but not anymore
-        ext = Path(filename).suffix
+        ext = Path(filename).suffix.lower()
 
         if ext == ".dfsu":
             import mikeio
@@ -51,7 +51,7 @@ class Mesh:
                 f'Reading dfsu with `Mesh` is deprecated. Read a .dfsu geometry with `geom = mikeio.open("{filename}").geometry`',
                 FutureWarning,
             )
-            self.geometry = mikeio.open(filename).geometry
+            self.geometry = mikeio.open(str(filename)).geometry
         elif ext == ".mesh":
             self.geometry = self._read_header(filename)
 
