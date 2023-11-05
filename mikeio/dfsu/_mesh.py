@@ -1,7 +1,11 @@
 from __future__ import annotations
 from pathlib import Path
 from collections.abc import Collection
+import warnings
+
+
 import numpy as np
+
 
 from mikecore.eum import eumQuantity
 from mikecore.MeshBuilder import MeshBuilder
@@ -37,7 +41,20 @@ class Mesh:
     """
 
     def __init__(self, filename: str | Path) -> None:
-        self.geometry = self._read_header(filename)
+        # Mesh used to be able to read dfsu files, but not anymore
+        ext = Path(filename).suffix
+
+        if ext == ".dfsu":
+            import mikeio
+
+            warnings.warn(
+                f'Reading dfsu with `Mesh` is deprecated. Read a .dfsu geometry with `geom = mikeio.open("{filename}").geometry`',
+                FutureWarning,
+            )
+            self.geometry = mikeio.open(filename).geometry
+        elif ext == ".mesh":
+            self.geometry = self._read_header(filename)
+
         self.plot = self.geometry.plot
 
     def _read_header(self, filename: str | Path) -> GeometryFM2D:

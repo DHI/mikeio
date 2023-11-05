@@ -147,3 +147,10 @@ def test_write_mesh_from_dfsu(tmp_path):
     assert outfilename.exists()
 
     assert np.all(np.hstack(msh2.element_table) == np.hstack(geometry.element_table))
+
+def test_open_dfsu_as_mesh_is_removed_give_hint():
+    dfsufilename = "tests/testdata/FakeLake.dfsu"
+    with pytest.warns(FutureWarning):
+        msh = Mesh(dfsufilename)
+    
+    msh.plot()
