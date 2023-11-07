@@ -147,6 +147,13 @@ def _valid_timesteps(dfsFileInfo: DfsFileInfo, time_steps) -> Tuple[bool, List[i
         TimeAxisType.TimeEquidistant,
     ):
         time_step_file = time_axis.TimeStep
+
+        if time_step_file <= 0:
+            warnings.warn(
+                f"Time step is {time_step_file} seconds. This must be a positive number. Setting to 1 second."
+            )
+            time_step_file = 1
+
         freq = pd.Timedelta(seconds=time_step_file)
         time = pd.date_range(start_time_file, periods=nt, freq=freq)
     elif time_axis.TimeAxisType == TimeAxisType.CalendarNonEquidistant:
