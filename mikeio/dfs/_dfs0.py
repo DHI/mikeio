@@ -91,47 +91,14 @@ class Dfs0:
         filename: str or Path
             File name including full path to the dfs0 file.
         """
-
-        # self._source = None
-        # self._dfs = None
-        # self._start_time = None
-        # self._end_time = None
-        # self._n_items = None
-        # self._dt = None
-        # self._is_equidistant = None
-        # self._title = None
-        # self._items = None
-        # self._n_timesteps = None
-
         self._filename = str(filename)
 
-        #  if filename:
-        self._read_header(Path(filename))
-
-    def __repr__(self):
-        out = ["<mikeio.Dfs0>"]
-
-        # TODO does this make sense:
-        if self._filename:
-            out.append(f"timeaxis: {repr(self._timeaxistype)}")
-
-        if self._n_items is not None:
-            if self._n_items < 10:
-                out.append("items:")
-                for i, item in enumerate(self.items):
-                    out.append(f"  {i}:  {item}")
-            else:
-                out.append(f"number of items: {self._n_items}")
-
-        return str.join("\n", out)
-
-    def _read_header(self, path: Path):
+        path = Path(filename)
         if not path.exists():
             raise FileNotFoundError(path)
 
         dfs = DfsFileFactory.DfsGenericOpen(str(path))
         self._source = dfs
-        self._deletevalue = dfs.FileInfo.DeleteValueDouble  # NOTE: changed in cutil
 
         # Read items
         self._n_items = len(dfs.ItemInfo)
@@ -151,6 +118,19 @@ class Dfs0:
         self._n_timesteps = dfs.FileInfo.TimeAxis.NumberOfTimeSteps
 
         dfs.Close()
+
+    def __repr__(self):
+        out = ["<mikeio.Dfs0>"]
+        out.append(f"timeaxis: {repr(self._timeaxistype)}")
+
+        if self._n_items < 10:
+            out.append("items:")
+            for i, item in enumerate(self.items):
+                out.append(f"  {i}:  {item}")
+        else:
+            out.append(f"number of items: {self._n_items}")
+
+        return str.join("\n", out)
 
     def read(self, items=None, time=None, keepdims=False) -> Dataset:
         """
