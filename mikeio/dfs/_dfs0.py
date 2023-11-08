@@ -1,3 +1,4 @@
+from functools import cached_property
 from pathlib import Path
 import warnings
 from datetime import datetime, timedelta
@@ -11,7 +12,7 @@ from mikecore.DfsFileFactory import DfsFileFactory  # type: ignore
 from mikecore.eum import eumQuantity  # type: ignore
 
 from .. import __dfs_version__
-from ..dataset import Dataset
+from ..dataset import Dataset, DataArray
 from ._dfs import _get_item_info, _valid_item_numbers, _valid_timesteps
 from ..eum import EUMType, EUMUnit, ItemInfo, TimeStepUnit
 
@@ -82,30 +83,30 @@ def _write_dfs0(filename, dataset: Dataset, title="", dtype=DfsSimpleType.Float)
 
 
 class Dfs0:
-    def __init__(self, filename=None):
+    def __init__(self, filename:str | Path):
         """Create a Dfs0 object for reading, writing
 
         Parameters
         ----------
-        filename: str or Path, optional
+        filename: str or Path
             File name including full path to the dfs0 file.
         """
 
-        self._source = None
-        self._dfs = None
-        self._start_time = None
-        self._end_time = None
-        self._n_items = None
-        self._dt = None
-        self._is_equidistant = None
-        self._title = None
-        self._items = None
-        self._n_timesteps = None
+        # self._source = None
+        # self._dfs = None
+        # self._start_time = None
+        # self._end_time = None
+        # self._n_items = None
+        # self._dt = None
+        # self._is_equidistant = None
+        # self._title = None
+        # self._items = None
+        # self._n_timesteps = None
 
         self._filename = str(filename)
 
-        if filename:
-            self._read_header(Path(filename))
+        #  if filename:
+        self._read_header(Path(filename))
 
     def __repr__(self):
         out = ["<mikeio.Dfs0>"]
@@ -487,19 +488,17 @@ class Dfs0:
         """File start time"""
         return self._start_time
 
-    @property
+    @cached_property
     def end_time(self):
-        if self._end_time is None:
-            if self._source.FileInfo.TimeAxis.IsEquidistant():
-                dt = self._source.FileInfo.TimeAxis.TimeStep
-                n_steps = self._source.FileInfo.TimeAxis.NumberOfTimeSteps
-                timespan = dt * (n_steps - 1)
-            else:
-                timespan = self._source.FileInfo.TimeAxis.TimeSpan
+        
+        if self._source.FileInfo.TimeAxis.IsEquidistant():
+            dt = self._source.FileInfo.TimeAxis.TimeStep
+            n_steps = self._source.FileInfo.TimeAxis.NumberOfTimeSteps
+            timespan = dt * (n_steps - 1)
+        else:
+            timespan = self._source.FileInfo.TimeAxis.TimeSpan
 
-            self._end_time = self.start_time + timedelta(seconds=timespan)
-
-        return self._end_time
+        return self.start_time + timedelta(seconds=timespan)
 
     @property
     def n_timesteps(self):
@@ -577,20 +576,15 @@ def dataframe_to_dfs0(
     dtype : np.dtype, optional
             default np.float32
     """
-
     if not isinstance(self.index, pd.DatetimeIndex):
         raise ValueError(
             "Dataframe index must be a DatetimeIndex. Hint: pd.read_csv(..., parse_dates=True)"
         )
 
-    dfs = Dfs0()
-
-    data = []
-    for i in range(self.values.shape[1]):
-        data.append(self.values[:, i])
+    ncol = self.values.shape[1]
+    data = [self.values[:, i] for i in range(ncol)]
 
     if items is None:
-
         if itemtype is None:
             items = [ItemInfo(name) for name in self.columns]
         else:
@@ -599,27 +593,9 @@ def dataframe_to_dfs0(
             else:
                 items = [ItemInfo(name, itemtype, unit) for name in self.columns]
 
-    if self.index.freq is None:  # non-equidistant
-        dfs.write(
-            filename=filename,
-            data=data,
-            datetimes=self.index,
-            items=items,
-            title=title,
-            dtype=dtype,
-        )
-    else:  # equidistant
-        dt = self.index.freq.delta.total_seconds()
-        start_time = self.index[0].to_pydatetime()
-        dfs.write(
-            filename=filename,
-            data=data,
-            start_time=start_time,
-            dt=dt,
-            items=items,
-            title=title,
-            dtype=dtype,
-        )
+    das = {item.name: DataArray(data=d, item=item, time=self.index) for d, item in zip(data, items)}
+    ds = Dataset(das)
+    _write_dfs0(filename=filename, dataset=ds, title=title, dtype=dtype)
 
 
 # Monkey patching onto Pandas classes
