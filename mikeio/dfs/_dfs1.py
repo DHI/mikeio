@@ -1,113 +1,115 @@
 from pathlib import Path
 
-from mikecore.DfsBuilder import DfsBuilder  # type: ignore
-from mikecore.DfsFileFactory import DfsFileFactory  # type: ignore
-from mikecore.eum import eumUnit  # type: ignore
+from mikecore.DfsFactory import DfsBuilder, DfsFactory
+from mikecore.DfsFile import DfsFile, DfsSimpleType
+from mikecore.DfsFileFactory import DfsFileFactory
+from mikecore.eum import eumQuantity, eumUnit
 
 from .. import __dfs_version__
-from ._dfs import _Dfs123
+from ..dataset import Dataset
+from ._dfs import (
+    _Dfs123,
+    _write_dfs_data,
+)
+from ..eum import TimeStepUnit
 from ..spatial import Grid1D
 
+
+def write_dfs1(filename: str, ds: Dataset, title="") -> None:
+    dfs = _write_dfs1_header(filename, ds, title)
+    _write_dfs_data(dfs=dfs, ds=ds, n_spatial_dims=1)
+
+
+def _write_dfs1_header(filename, ds: Dataset, title="") -> DfsFile:
+    builder = DfsBuilder.Create(title, "mikeio", __dfs_version__)
+    builder.SetDataType(0)
+
+    geometry: Grid1D = ds.geometry
+
+    factory = DfsFactory()
+    proj = factory.CreateProjectionGeoOrigin(ds.geometry.projection_string,ds.geometry.origin[0],ds.geometry.origin[1],ds.geometry.orientation)
+    builder.SetGeographicalProjection(proj)
+    builder.SetSpatialAxis(
+        factory.CreateAxisEqD1(
+            eumUnit.eumUmeter,
+            geometry._nx,
+            geometry._x0,
+            geometry._dx,
+        )
+    )
+
+    timestep_unit = TimeStepUnit.SECOND
+    dt = ds.timestep or 1.0  # It can not be None
+    time_axis = factory.CreateTemporalEqCalendarAxis(
+        timestep_unit, ds.time[0], 0, dt
+    )
+    builder.SetTemporalAxis(time_axis)
+
+    for item in ds.items:
+        builder.AddCreateDynamicItem(
+            item.name,
+            eumQuantity.Create(item.type, item.unit),
+            DfsSimpleType.Float,
+            item.data_value_type,
+        )
+
+    try:
+        builder.CreateFile(filename)
+    except IOError:
+        print("cannot create dfs file: ", filename)
+
+    return builder.GetFile()
+    
 
 class Dfs1(_Dfs123):
     _ndim = 1
 
-    def __init__(self, filename=None):
+    def __init__(self, filename):
         super().__init__(filename)
-
-        self._dx = None
-        self._nx = None
-        self._x0 = 0
-
-        if filename:
-            self._read_dfs1_header(path=Path(filename))
-            origin = self._longitude, self._latitude
-            self.geometry = Grid1D(
-                x0=self._x0,
-                dx=self._dx,
-                nx=self._nx,
-                projection=self._projstr,
-                origin=origin,
-                orientation=self._orientation,
-            )
-
-    def __repr__(self):
-        out = ["<mikeio.Dfs1>"]
-
-        # TODO does this make sense
-        if self._filename:
-            out.append(f"dx: {self.dx:.5f}")
-
-            if self._n_items is not None:
-                if self._n_items < 10:
-                    out.append("items:")
-                    for i, item in enumerate(self.items):
-                        out.append(f"  {i}:  {item}")
-                else:
-                    out.append(f"number of items: {self._n_items}")
-            
-            if self._n_timesteps == 1:
-                out.append("time: time-invariant file (1 step)")
-            else:
-                out.append(f"time: {self._n_timesteps} steps")
-                out.append(f"start time: {self._start_time}")
-
-        return str.join("\n", out)
-
-    def _read_dfs1_header(self, path: Path):
+        path = Path(filename)
         if not path.exists():
             raise FileNotFoundError(path)
 
-        self._dfs = DfsFileFactory.Dfs1FileOpen(str(path))
+        self._dfs = DfsFileFactory.Dfs1FileOpen(str(filename))
         self._x0 = self._dfs.SpatialAxis.X0
         self._dx = self._dfs.SpatialAxis.Dx
         self._nx = self._dfs.SpatialAxis.XCount
 
         self._read_header()
 
+        origin = self._longitude, self._latitude
+        self.geometry = Grid1D(
+            x0=self._x0,
+            dx=self._dx,
+            nx=self._nx,
+            projection=self._projstr,
+            origin=origin,
+            orientation=self._orientation,
+        )
+
+    def __repr__(self):
+        out = ["<mikeio.Dfs1>"]
+
+        out.append(f"dx: {self.dx:.5f}")
+
+        if self._n_items < 10:
+            out.append("items:")
+            for i, item in enumerate(self.items):
+                out.append(f"  {i}:  {item}")
+        else:
+            out.append(f"number of items: {self._n_items}")
+        
+        if self._n_timesteps == 1:
+            out.append("time: time-invariant file (1 step)")
+        else:
+            out.append(f"time: {self._n_timesteps} steps")
+            out.append(f"start time: {self._start_time}")
+
+        return str.join("\n", out)
+    
+
     def _open(self):
         self._dfs = DfsFileFactory.Dfs1FileOpen(self._filename)
-
-    def write(
-        self,
-        filename,
-        data,
-        dt=None,
-        dx=1,
-        x0=0,
-        title=None,
-    ):
-        """
-        Write a dfs1 file
-
-        Parameters
-        ----------
-        filename: str
-            Location to write the dfs1 file
-        data: Dataset
-            list of matrices, one for each item. Matrix dimension: x, time
-        dt: float
-            The time step in seconds.
-        x0:
-            Lower right position
-        dx:
-            length of each grid in the x direction (meters)
-        title: str, optional
-            title of the dfs file (can be blank)
-
-        """
-
-        self._x0 = x0
-        filename = str(filename)
-
-        if isinstance(data, list):
-            raise TypeError(
-                "supplying data as a list of numpy arrays is deprecated, please supply data in the form of a Dataset"
-            )
-
-        self._builder = DfsBuilder.Create(title, "mikeio", __dfs_version__)
-        self._dx = dx
-        self._write(filename=filename, ds=data, dt=dt, title=title)
 
     def _set_spatial_axis(self):
         self._builder.SetSpatialAxis(
