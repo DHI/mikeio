@@ -108,7 +108,7 @@ def test_write_some_time_steps_new_file(tmp_path):
     data = ds[0].to_numpy()
     assert data.shape == (6, 3)  # time, x
 
-    dfs.write(fp, ds)
+    ds.to_dfs(fp)
 
     dfsnew = mikeio.open(fp)
 
