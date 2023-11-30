@@ -7,7 +7,7 @@ exclude = ["notebooks", "tests", "images"]
 
 [project]
 name="mikeio"
-version="1.6.3"
+version="1.7.dev1"
 dependencies = [
     "mikecore>=0.2.1",
     "numpy>=1.15.0",  # first version with numpy.quantile
