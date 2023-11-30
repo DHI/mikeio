@@ -114,7 +114,7 @@ def test_read_all_time_steps_without_reading_items_neq():
     assert isinstance(dfs.time, pd.DatetimeIndex)
     assert len(dfs.time) == 744
 
-
+    
 def test_write_non_equidistant_calendar(tmp_path):
     dfs0file = tmp_path / "neq.dfs0"
     time = pd.DatetimeIndex(["2001-01-01", "2001-01-01 01:00", "2001-01-01 01:10"])
@@ -429,14 +429,15 @@ def test_write_accumulated_datatype(tmp_path):
 
     da = mikeio.DataArray(
         data=np.random.random(100),
-        time=pd.date_range("2000", periods=100, freq="H"),
+        time=pd.date_range("2012-01-01", periods=100, freq="H"),
         item=ItemInfo(
-            "testing water level",
-            EUMType.Water_Level,
-            EUMUnit.meter,
+            name="testing water level",
+            itemtype=EUMType.Water_Level,
+            unit=EUMUnit.meter,
             data_value_type="MeanStepBackward",
         ),
     )
+    da.to_dfs(filename)
 
     da.to_dfs(filename)
     newds = mikeio.read(filename)
@@ -445,8 +446,15 @@ def test_write_accumulated_datatype(tmp_path):
 
 def test_write_default_datatype(tmp_path):
     filename = tmp_path / "simple.dfs0"
-
-    da = mikeio.DataArray(data=np.random.random(100), time=pd.date_range("2000", periods=100, freq="H"))
+    da = mikeio.DataArray(
+        data=np.random.random(100),
+        time=pd.date_range("2012-01-01", periods=100, freq="H"),
+        item=ItemInfo(
+            name="testing water level",
+            itemtype=EUMType.Water_Level,
+            unit=EUMUnit.meter,
+        ),
+    )
     da.to_dfs(filename)
     newds = mikeio.read(filename)
     assert newds[0].item.data_value_type == 0

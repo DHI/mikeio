@@ -5,7 +5,6 @@ import pandas as pd
 
 import mikeio
 
-from mikeio import Dfs1
 from mikeio import EUMType, EUMUnit
 
 
@@ -24,15 +23,6 @@ def test_repr():
     assert "Dfs1" in text
     assert "items" in text
     assert "dx" in text
-
-
-def test_repr_empty():
-
-    dfs = Dfs1()
-
-    text = repr(dfs)
-
-    assert "Dfs1" in text
 
 
 def test_properties():
@@ -102,9 +92,8 @@ def test_read_time_steps():
 def test_write_some_time_steps_new_file(tmp_path):
 
     fp = tmp_path / "random.dfs1"
-    dfs = mikeio.open("tests/testdata/random.dfs1")
+    ds= mikeio.read("tests/testdata/random.dfs1", time=[0, 1, 2, 3, 4, 5])
 
-    ds = dfs.read(time=[0, 1, 2, 3, 4, 5])
     data = ds[0].to_numpy()
     assert data.shape == (6, 3)  # time, x
 
