@@ -114,6 +114,27 @@ def test_read_all_time_steps_without_reading_items_neq():
     assert isinstance(dfs.time, pd.DatetimeIndex)
     assert len(dfs.time) == 744
 
+    
+def test_write_non_equidistant_calendar(tmp_path):
+    dfs0file = tmp_path / "neq.dfs0"
+    time = pd.DatetimeIndex(["2001-01-01", "2001-01-01 01:00", "2001-01-01 01:10"])
+    da1 = mikeio.DataArray(
+        data=np.zeros(3),
+        time=time,
+        item=ItemInfo("VarFun01", EUMType.Water_Level, unit=EUMUnit.meter),
+    )
+    da2 = mikeio.DataArray(
+        data=np.ones(3),
+        time=time,
+        item=ItemInfo("NotFun", EUMType.Rainfall_Depth, data_value_type="Accumulated"),
+    )
+    ds = mikeio.Dataset([da1, da2])
+    ds.to_dfs(dfs0file)
+    assert dfs0file.exists()
+
+    ds2 = mikeio.read(dfs0file)
+    assert not ds2.is_equidistant
+
 
 def test_read_equidistant_dfs0_to_dataframe_fixed_freq():
     dfs0file = "tests/testdata/random.dfs0"
@@ -377,8 +398,7 @@ def test_write_data_with_missing_values(tmp_path):
     dfs0file = r"tests/testdata/random.dfs0"
     tmpfile = tmp_path / "random.dfs0"
 
-    dfs = Dfs0(dfs0file)
-    ds = dfs.read()
+    ds = mikeio.read(dfs0file)
 
     # Do something with the data
     ds[0].values = np.zeros_like(ds[0].values)
@@ -388,22 +408,19 @@ def test_write_data_with_missing_values(tmp_path):
     ds[1].values[0:10] = np.nan
 
     # Overwrite the file
-    dfs.write(tmpfile, ds)
+    ds.to_dfs(tmpfile)
 
     # Write operation does not modify the data
     assert np.isnan(ds[1].values[1])
 
-    moddfs = Dfs0(tmpfile)
-    modified = moddfs.read()
+    modified = mikeio.read(tmpfile)
     assert np.isnan(modified[1].values[5])
 
 
 def test_read_relative_time_axis():
-    filename = r"tests/testdata/eq_relative.dfs0"
+    filename = "tests/testdata/eq_relative.dfs0"
 
-    dfs0 = Dfs0(filename)
-
-    ds = dfs0.read()
+    ds = mikeio.read(filename)
     assert len(ds) == 5
 
 
@@ -422,13 +439,13 @@ def test_write_accumulated_datatype(tmp_path):
     )
     da.to_dfs(filename)
 
-    newdfs = Dfs0(filename)
-    assert newdfs.items[0].data_value_type == 3
+    da.to_dfs(filename)
+    newds = mikeio.read(filename)
+    assert newds[0].item.data_value_type == 3
 
 
 def test_write_default_datatype(tmp_path):
     filename = tmp_path / "simple.dfs0"
-
     da = mikeio.DataArray(
         data=np.random.random(100),
         time=pd.date_range("2012-01-01", periods=100, freq="H"),
@@ -439,9 +456,8 @@ def test_write_default_datatype(tmp_path):
         ),
     )
     da.to_dfs(filename)
-
-    newdfs = Dfs0(filename)
-    assert newdfs.items[0].data_value_type == 0
+    newds = mikeio.read(filename)
+    assert newds[0].item.data_value_type == 0
 
 
 def test_write_from_pandas_series_monkey_patched_data_value_not_default(tmp_path):
@@ -559,3 +575,12 @@ def test_read_dfs0_with_non_unique_item_names():
 
     assert ds.Untitled_3.values[0] == pytest.approx(0.0)
     assert np.isnan(ds.Untitled_3.values[1])
+
+    
+def test_non_equidistant_time_can_read_correctly_with_open(tmp_path):
+
+    dfs = mikeio.open("tests/testdata/neq_daily_time_unit.dfs0")
+    dfs.time
+    ds = dfs.read()
+
+    assert all(dfs.time == ds.time)

@@ -503,7 +503,7 @@ def test_write_from_dfsu3D(tmp_path):
 
     ds = dfs.read(items=[0, 1])
 
-    dfs.write(fp, ds)
+    ds.to_dfs(fp)
 
     assert fp.exists()
 
@@ -512,12 +512,11 @@ def test_extract_top_layer_to_2d(tmp_path):
     filename = "tests/testdata/oresund_sigma_z.dfsu"
 
     dfs = mikeio.open(filename)
-    top_ids = dfs.top_elements
 
-    ds = dfs.read(elements=top_ids)
+    ds = dfs.read(layers="top")
 
     fp = tmp_path / "toplayer.dfsu"
-    dfs.write(fp, ds, elements=top_ids)
+    ds.to_dfs(fp)
 
     newdfs = mikeio.open(fp)
 
