@@ -870,3 +870,17 @@ def test_MIKE_SHE_output():
     assert g2.x[0] == g.x[0] + 30 * g.dx
     assert g2.y[0] == g.y[0] + 35 * g.dy
     assert g2.origin == pytest.approx((g2.x[0], g2.y[0]))
+
+
+def test_read_dfs2_static_dt_zero():
+
+    with pytest.warns(UserWarning, match="positive"):
+        ds = mikeio.read("tests/testdata/single_time_dt_zero.dfs2")
+    assert ds.n_timesteps == 1
+    assert ds.shape == (1, 2, 2)
+
+    with pytest.warns(UserWarning, match="positive"):
+        ds2 = mikeio.read("tests/testdata/single_time_dt_zero.dfs2", time=0)
+    
+    assert ds2.shape == (2,2)
+    assert "time" not in ds2.dims
