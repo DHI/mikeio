@@ -345,7 +345,7 @@
                     <span class="n">element_ids</span><span class="o">=</span><span class="n">el_ids</span><span class="p">,</span>
                     <span class="n">node_ids</span><span class="o">=</span><span class="n">node_ids</span><span class="p">,</span>
                     <span class="n">n_layers</span><span class="o">=</span><span class="n">dfs</span><span class="o">.</span><span class="n">NumberOfLayers</span><span class="p">,</span>
-                    <span class="n">n_sigma</span><span class="o">=</span><span class="n">dfs</span><span class="o">.</span><span class="n">NumberOfSigmaLayers</span><span class="p">,</span>
+                    <span class="n">n_sigma</span><span class="o">=</span><span class="nb">min</span><span class="p">(</span><span class="n">dfs</span><span class="o">.</span><span class="n">NumberOfSigmaLayers</span><span class="p">,</span> <span class="n">dfs</span><span class="o">.</span><span class="n">NumberOfLayers</span><span class="p">),</span>
                     <span class="n">validate</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
                 <span class="p">)</span>
             <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">_type</span> <span class="o">==</span> <span class="n">DfsuFileType</span><span class="o">.</span><span class="n">DfsuSpectral1D</span><span class="p">:</span>
