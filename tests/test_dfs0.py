@@ -624,3 +624,12 @@ def test_read_dfs0_with_non_unique_item_names():
 
     assert ds.Untitled_3.values[0] == pytest.approx(0.0)
     assert np.isnan(ds.Untitled_3.values[1])
+
+
+def test_non_equidistant_time_can_read_correctly_with_open(tmp_path):
+
+    dfs = mikeio.open("tests/testdata/neq_daily_time_unit.dfs0")
+    dfs.time
+    ds = dfs.read()
+
+    assert all(dfs.time == ds.time)

@@ -524,13 +524,7 @@ class Dfs0:
             )
 
         elif self._timeaxistype == TimeAxisType.CalendarNonEquidistant:
-            dfs = DfsFileFactory.DfsGenericOpen(self._filename)
-            t_seconds = np.zeros(self.n_timesteps)
-            for it in range(self.n_timesteps):
-                itemdata = dfs.ReadItemTimeStep(1, int(it))
-                t_seconds[it] = itemdata.Time
-
-            return pd.to_datetime(t_seconds, unit="s", origin=self.start_time)
+            return self.read().time
 
         else:
             return None
