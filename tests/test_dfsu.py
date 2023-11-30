@@ -529,14 +529,8 @@ def test_write(tmp_path):
         geometry=msh.geometry,
     )
 
-    dfs = Dfsu(meshfilename)
-
-    dfs.write(fp, ds)
-    dfs = Dfsu(fp)
-
-    assert dfs._source.ApplicationTitle == "mikeio"
-
-    dfs.write(fp, ds.isel(time=0))  # without time axis
+    ds.to_dfs(fp)
+    ds.isel(time=0).to_dfs(fp)
 
 
 def test_write_from_dfsu(tmp_path):
@@ -545,11 +539,11 @@ def test_write_from_dfsu(tmp_path):
     fp = tmp_path / "simple.dfsu"
     dfs = mikeio.open(sourcefilename)
 
+    assert dfs.start_time.hour == 7
+
     ds = dfs.read(items=[0, 1])
 
-    dfs.write(fp, ds)
-
-    assert dfs.start_time.hour == 7
+    ds.to_dfs(fp)
 
     newdfs = mikeio.open(fp)
     assert dfs.start_time == newdfs.start_time
@@ -682,7 +676,7 @@ def test_write_from_dfsu_2_time_steps(tmp_path):
 
     assert ds.is_equidistant  # Data with two time steps is per definition equidistant
 
-    dfs.write(fp, ds)
+    ds.to_dfs(fp)
 
     newdfs = mikeio.open(fp)
     assert dfs.start_time == newdfs.start_time
@@ -694,12 +688,10 @@ def test_write_non_equidistant_is_not_possible(tmp_path):
 
     sourcefilename = "tests/testdata/HD2D.dfsu"
     fp = tmp_path / "simple.dfsu"
-    dfs = mikeio.open(sourcefilename)
-
-    ds = dfs.read(time=[0, 1, 3])
+    ds = mikeio.read(sourcefilename, time=[0, 1, 3])
 
     with pytest.raises(ValueError):
-        dfs.write(fp, ds)
+        ds.to_dfs(fp)
 
 
 def test_temporal_resample_by_reading_selected_timesteps(tmp_path):
@@ -711,7 +703,7 @@ def test_temporal_resample_by_reading_selected_timesteps(tmp_path):
     nt = dfs.n_timesteps
 
     ds = dfs.read(time=list(range(0, nt, 2)))
-    dfs.write(fp, ds)
+    ds.to_dfs(fp)
 
     newdfs = mikeio.open(fp)
 
@@ -774,7 +766,7 @@ def test_write_temporal_subset(tmp_path):
 
     ds = dfs.read()  # TODO read temporal subset with slice e.g. "1985-08-06 12:00":
     selds = ds["1985-08-06 12:00":]
-    dfs.write(fp, selds)
+    selds.to_dfs(fp)
 
     newdfs = mikeio.open(fp)
 
@@ -791,35 +783,6 @@ def test_geometry_2d():
     geom = dfs.to_2d_geometry()
 
     assert geom.is_2d
-
-
-# def test_geometry_2d_2dfile():
-
-#     dfs = mikeio.open("tests/testdata/HD2D.dfsu")
-
-#     assert dfs.is_2d
-#     geom = dfs.to_2d_geometry()  # No op
-
-#     assert geom.is_2d
-
-
-# def test_get_layers_2d_error():
-
-#     dfs = mikeio.open("tests/testdata/HD2D.dfsu")
-#     assert dfs.is_2d
-
-#     with pytest.raises(InvalidGeometry):
-#         dfs.get_layer_elements(-1)
-
-#     with pytest.raises(InvalidGeometry):
-#         dfs.layer_ids
-
-#     with pytest.raises(InvalidGeometry):
-#         dfs.elem2d_ids
-
-#     with pytest.raises(InvalidGeometry):
-#         dfs.find_nearest_profile_elements(x=0, y=0)
-
 
 def test_to_mesh_2d(tmp_path):
     filename = "tests/testdata/HD2D.dfsu"
@@ -847,15 +810,6 @@ def test_elements_to_geometry():
 
     other_tiny_geom = dfs.geometry.isel(set([1, 0]))
     assert other_tiny_geom.n_elements == 2
-
-    # Removed, use sel on geometry instead
-    # prof_ids = dfs.find_nearest_profile_elements(350000, 6150000)
-    # geom = dfs.geometry.elements_to_geometry(prof_ids)
-
-    # text = repr(geom)
-
-    # assert geom.n_layers == 5
-    # assert "nodes" in text
 
     elements = dfs.get_layer_elements(layers=-1)
     geom = dfs.elements_to_geometry(elements, node_layers="top")
