@@ -3,7 +3,7 @@ import warnings
 from copy import deepcopy
 from datetime import datetime
 from functools import cached_property
-from typing import Iterable, Optional, Sequence, Tuple, Mapping
+from typing import Any, Iterable, Optional, Sequence, Tuple, Mapping
 
 
 import numpy as np
@@ -51,7 +51,7 @@ class _DataArraySpectrumToHm0:
     def __init__(self, da: "DataArray") -> None:
         self.da = da
 
-    def __call__(self, tail=True):
+    def __call__(self, tail=True) -> "DataArray":
         # TODO: if action_density
         m0 = calc_m0_from_spectrum(
             self.da.to_numpy(),
@@ -64,7 +64,7 @@ class _DataArraySpectrumToHm0:
         item = ItemInfo(EUMType.Significant_wave_height)
         g = self.da.geometry
         if isinstance(g, GeometryFMPointSpectrum):
-            geometry = GeometryPoint2D(x=g.x, y=g.y)
+            geometry: Any = GeometryPoint2D(x=g.x, y=g.y)
         elif isinstance(g, GeometryFMLineSpectrum):
             geometry = Grid1D(
                 nx=g.n_nodes,
@@ -104,14 +104,14 @@ class DataArray(DataUtilsMixin):
 
     def __init__(
         self,
-        data,
+        data : np.ndarray,
         *,
         time: Optional[pd.DatetimeIndex | str] = None,
         item: Optional[ItemInfo] = None,
         geometry=GeometryUndefined(),
         zn=None,
         dims: Optional[Sequence[str]] = None,
-    ):
+    ) -> None:
         # TODO: add optional validation validate=True
         self._values = self._parse_data(data)
         self.time: pd.DatetimeIndex = self._parse_time(time)
@@ -153,7 +153,7 @@ class DataArray(DataUtilsMixin):
             return tuple(dims)
 
     @staticmethod
-    def _guess_dims(ndim, shape, n_timesteps, geometry):
+    def _guess_dims(ndim, shape, n_timesteps, geometry) -> Tuple[str, ...]:
 
         # TODO delete default dims to geometry
 
@@ -216,7 +216,7 @@ class DataArray(DataUtilsMixin):
         return item
 
     @staticmethod
-    def _parse_geometry(geometry, dims, shape):
+    def _parse_geometry(geometry: Any, dims: Tuple[str,...], shape: Tuple[int,...]) -> Any:
         if len(dims) > 1 and (
             geometry is None or isinstance(geometry, GeometryUndefined)
         ):
@@ -264,7 +264,7 @@ class DataArray(DataUtilsMixin):
         return geometry
 
     @staticmethod
-    def _parse_zn(zn, geometry, n_timesteps):
+    def _parse_zn(zn: np.ndarray, geometry, n_timesteps) -> Optional[np.ndarray]:
         if zn is not None:
             if isinstance(geometry, _GeometryFMLayered):
                 # TODO: np.squeeze(zn) if n_timesteps=1 ?
@@ -280,11 +280,10 @@ class DataArray(DataUtilsMixin):
                 raise ValueError("zn can only be provided for layered dfsu data")
         return zn
 
-    def _is_compatible(self, other, raise_error=False):
+    def _is_compatible(self, other: "DataArray", raise_error:bool=False) -> bool:
         """check if other DataArray has equivalent dimensions, time and geometry"""
         problems = []
-        if not isinstance(other, DataArray):
-            return False
+        assert isinstance(other, DataArray)
         if self.shape != other.shape:
             problems.append("shape of data must be the same")
         if self.n_timesteps != other.n_timesteps:
@@ -333,7 +332,7 @@ class DataArray(DataUtilsMixin):
         plotter = PLOTTER_MAP.get(type(self.geometry), _DataArrayPlotter)
         return plotter(self)
 
-    def _set_spectral_attributes(self, geometry):
+    def _set_spectral_attributes(self, geometry) -> None:
         if hasattr(geometry, "frequencies") and hasattr(geometry, "directions"):
             self.frequencies = geometry.frequencies
             self.n_frequencies = geometry.n_frequencies
@@ -363,13 +362,13 @@ class DataArray(DataUtilsMixin):
         return self.item.unit
 
     @property
-    def start_time(self):
+    def start_time(self) -> Optional[pd.Timestamp]:
         """First time instance (as datetime)"""
         # TODO: use pd.Timestamp instead
         return self.time[0].to_pydatetime()
 
     @property
-    def end_time(self):
+    def end_time(self) -> Optional[pd.Timestamp]:
         """Last time instance (as datetime)"""
         # TODO: use pd.Timestamp instead
         return self.time[-1].to_pydatetime()
@@ -399,7 +398,7 @@ class DataArray(DataUtilsMixin):
         return len(self.time)
 
     @property
-    def shape(self):
+    def shape(self) -> Tuple[int, ...]:
         """Tuple of array dimensions"""
         return self.values.shape
 
@@ -419,7 +418,7 @@ class DataArray(DataUtilsMixin):
         return self._values
 
     @values.setter
-    def values(self, value):
+    def values(self, value) -> None:
         if np.isscalar(self._values):
             if not np.isscalar(value):
                 raise ValueError("Shape of new data is wrong (should be scalar)")
@@ -433,7 +432,7 @@ class DataArray(DataUtilsMixin):
         return self._values
 
     @property
-    def _has_time_axis(self):
+    def _has_time_axis(self) -> bool:
         return self.dims[0][0] == "t"
 
     def dropna(self) -> "DataArray":
@@ -670,6 +669,7 @@ class DataArray(DataUtilsMixin):
         idx_slice = None
         if isinstance(idx, slice):
             idx_slice = idx
+            assert isinstance(axis, int)
             idx = list(range(*idx.indices(self.shape[axis])))
         if idx is None or (not np.isscalar(idx) and len(idx) == 0):
             raise ValueError(
@@ -697,7 +697,7 @@ class DataArray(DataUtilsMixin):
                 node_ids, _ = self.geometry._get_nodes_and_table_for_elements(
                     idx, node_layers="all"
                 )
-                zn = self._zn[:, node_ids]
+                zn = self._zn[:, node_ids] # type: ignore
 
         # reduce dims only if singleton idx
         dims = (

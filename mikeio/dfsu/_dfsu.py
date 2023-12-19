@@ -91,6 +91,7 @@ def _write_dfsu(filename: str, data: Dataset):
     for i in range(n_time_steps):
         if geometry.is_layered:
             if "time" in data.dims:
+                assert data._zn is not None
                 zn = data._zn[i]
             else:
                 zn = data._zn

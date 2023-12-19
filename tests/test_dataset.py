@@ -115,12 +115,6 @@ def test_insert(ds1):
     assert ds1[-1] == da
 
 
-def test_insert_wrong_type(ds1):
-
-    with pytest.raises(ValueError):
-        ds1["Foo"] = "Bar"
-
-
 def test_insert_fail(ds1):
     da = ds1[0]
     with pytest.raises(ValueError, match="Cannot add the same object"):

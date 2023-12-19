@@ -401,7 +401,7 @@ class Dataset:
         return self[0].geometry
 
     @property
-    def _zn(self) -> np.ndarray:
+    def _zn(self) -> Optional[np.ndarray]:
         return self[0]._zn
 
     # TODO: remove this
@@ -506,14 +506,7 @@ class Dataset:
     def __setitem__(self, key, value) -> None:
         self.__set_or_insert_item(key, value, insert=False)
 
-    def __set_or_insert_item(self, key, value, insert=False) -> None:
-        if not isinstance(value, DataArray):
-            try:
-                value = DataArray(value)
-                # TODO: warn that this is not the preferred way!
-            except TypeError:
-                raise ValueError("Input could not be interpreted as a DataArray")
-
+    def __set_or_insert_item(self, key, value: DataArray, insert=False) -> None:
         if len(self) > 0:
             self[0]._is_compatible(value)
 
