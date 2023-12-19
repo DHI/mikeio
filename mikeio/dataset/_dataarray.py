@@ -344,7 +344,7 @@ class DataArray(DataUtilsMixin):
     # ============= Basic properties/methods ===========
 
     @property
-    def name(self) -> Optional[str]:
+    def name(self) -> str:
         """Name of this DataArray (=da.item.name)"""
         return self.item.name
 

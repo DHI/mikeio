@@ -1,16 +1,16 @@
 from __future__ import annotations
 from pathlib import Path
 import warnings
-from copy import deepcopy
 from datetime import datetime
+from copy import deepcopy
 from typing import (
     Iterable,
+    Iterator,
     List,
     Mapping,
     Optional,
     Sequence,
     Tuple,
-    MutableMapping,
     Any,
     overload,
     Hashable
@@ -39,7 +39,7 @@ from ..spatial._FM_geometry import _GeometryFM
 from ._data_plot import _DatasetPlotter
 
 
-class Dataset(MutableMapping):
+class Dataset:
     """Dataset containing one or more DataArrays with common geometry and time
 
     Most often obtained by reading a dfs file. But can also be
@@ -156,21 +156,11 @@ class Dataset(MutableMapping):
         if len(self) > 0:
             self._set_spectral_attributes(self.geometry)
 
-        # since Dataset is MutableMapping it has values and keys by default
-        # but we delete those to avoid confusion
-        # self.values = None
-        self.keys = None
-
     @property
     def values(self):
         raise AttributeError(
             "Dataset has no property 'values' - use to_numpy() instead or maybe you were looking for DataArray.values?"
         )
-
-    # remove values and keys from dir to avoid confusion
-    def __dir__(self):
-        keys = sorted(list(super().__dir__()) + list(self.__dict__.keys()))
-        return set([d for d in keys if d not in ("values", "keys")])
 
     @staticmethod
     def _modify_list(lst: Iterable[str]) -> List[str]:
@@ -320,18 +310,18 @@ class Dataset(MutableMapping):
         return list(self)[0].time
 
     @time.setter
-    def time(self, new_time):
+    def time(self, new_time) -> None:
         for da in self:
             da.time = new_time
 
     @property
-    def start_time(self):
+    def start_time(self) -> Optional[pd.Timestamp]:
         """First time instance (as datetime)"""
         # TODO: use pd.Timestamp instead
         return self.time[0].to_pydatetime()
 
     @property
-    def end_time(self):
+    def end_time(self) -> Optional[pd.Timestamp]:
         """Last time instance (as datetime)"""
         # TODO: use pd.Timestamp instead
         return self.time[-1].to_pydatetime()
@@ -368,7 +358,7 @@ class Dataset(MutableMapping):
         return len(self.time)
 
     @property
-    def items(self):
+    def items(self) -> List[ItemInfo]:
         """ItemInfo for each of the DataArrays as a list"""
         return [x.item for x in self]
 
@@ -378,7 +368,7 @@ class Dataset(MutableMapping):
         return len(self._data_vars)
 
     @property
-    def names(self):
+    def names(self) -> List[str]:
         """Name of each of the DataArrays as a list"""
         return [da.name for da in self]
 
@@ -396,17 +386,17 @@ class Dataset(MutableMapping):
         return self[0].dims
 
     @property
-    def shape(self):
+    def shape(self) -> Tuple[int, ...]:
         """Shape of each DataArray"""
         return self[0].shape
 
     @property
-    def deletevalue(self):
+    def deletevalue(self) -> float:
         """File delete value"""
         return self[0].deletevalue
 
     @property
-    def geometry(self):
+    def geometry(self) -> Any:
         """Geometry of each DataArray"""
         return self[0].geometry
 
@@ -418,7 +408,7 @@ class Dataset(MutableMapping):
     @property
     def n_elements(self) -> int:
         """Number of spatial elements/points"""
-        n_elem = np.prod(self.shape)
+        n_elem = int(np.prod(self.shape))
         if self.n_timesteps > 1:
             n_elem = int(n_elem / self.n_timesteps)
         return n_elem
@@ -507,16 +497,16 @@ class Dataset(MutableMapping):
 
     # ============= Dataset is (almost) a MutableMapping ===========
 
-    def __len__(self):
+    def __len__(self) -> int:
         return len(self._data_vars)
 
-    def __iter__(self):
+    def __iter__(self) -> Iterator[DataArray]:
         yield from self._data_vars.values()
 
-    def __setitem__(self, key, value):
+    def __setitem__(self, key, value) -> None:
         self.__set_or_insert_item(key, value, insert=False)
 
-    def __set_or_insert_item(self, key, value, insert=False):
+    def __set_or_insert_item(self, key, value, insert=False) -> None:
         if not isinstance(value, DataArray):
             try:
                 value = DataArray(value)
@@ -564,7 +554,7 @@ class Dataset(MutableMapping):
             self._data_vars[key] = value
             self._set_name_attr(key, value)
 
-    def insert(self, key, value: DataArray):
+    def insert(self, key: int, value: DataArray) -> None:
         """Insert DataArray in a specific position
 
         Parameters
@@ -577,12 +567,7 @@ class Dataset(MutableMapping):
         """
         self.__set_or_insert_item(key, value, insert=True)
 
-        if isinstance(key, slice):
-            s = self.time.slice_indexer(key.start, key.stop)
-            time_steps = list(range(s.start, s.stop))
-            return self.isel(time_steps, axis=0)
-
-    def remove(self, key: int | str):
+    def remove(self, key: int | str) -> None:
         """Remove DataArray from Dataset
 
         Parameters
@@ -596,16 +581,8 @@ class Dataset(MutableMapping):
         """
         self.__delitem__(key)
 
-    def popitem(self):
-        """Pop first DataArray from Dataset
 
-        See also
-        --------
-        pop
-        """
-        return self.pop(0)
-
-    def rename(self, mapper: Mapping[str, str], inplace=False):
+    def rename(self, mapper: Mapping[str, str], inplace=False) -> "Dataset":
         """Rename items (DataArrays) in Dataset
 
         Parameters
@@ -640,13 +617,13 @@ class Dataset(MutableMapping):
 
         return ds
 
-    def _set_name_attr(self, name: str, value: DataArray):
+    def _set_name_attr(self, name: str, value: DataArray) -> None:
         name = _to_safe_name(name)
         if name not in self.__itemattr:
             self.__itemattr.append(name)  # keep track of what we insert
         setattr(self, name, value)
 
-    def _del_name_attr(self, name: str):
+    def _del_name_attr(self, name: str) -> None:
         name = _to_safe_name(name)
         if name in self.__itemattr:
             self.__itemattr.remove(name)
@@ -783,7 +760,7 @@ class Dataset(MutableMapping):
 
     # ============ select/interp =============
 
-    def isel(self, idx=None, axis=0, **kwargs):
+    def isel(self, idx=None, axis=0, **kwargs) -> "Dataset":
         """Return a new Dataset whose data is given by
         integer indexing along the specified dimension(s).
 
@@ -991,7 +968,7 @@ class Dataset(MutableMapping):
 
         return data, time
 
-    def extract_track(self, track, method="nearest", dtype=np.float32):
+    def extract_track(self, track, method="nearest", dtype=np.float32) -> "Dataset":
         """
         Extract data along a moving track
 
@@ -1016,6 +993,10 @@ class Dataset(MutableMapping):
 
         item_numbers = list(range(self.n_items))
         time_steps = list(range(self.n_timesteps))
+
+        assert self.start_time is not None
+        assert self.end_time is not None
+        assert self.timestep is not None
 
         return _extract_track(
             deletevalue=self.deletevalue,
