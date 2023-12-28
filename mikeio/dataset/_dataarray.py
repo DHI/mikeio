@@ -3,7 +3,22 @@ import warnings
 from copy import deepcopy
 from datetime import datetime
 from functools import cached_property
-from typing import Any, Iterable, Optional, Sequence, Tuple, Mapping, TypeAlias, Union, Sized, Literal, TYPE_CHECKING, overload, MutableMapping, Callable
+from typing import (
+    Any,
+    Iterable,
+    Optional,
+    Sequence,
+    Tuple,
+    Mapping,
+    TypeAlias,
+    Union,
+    Sized,
+    Literal,
+    TYPE_CHECKING,
+    overload,
+    MutableMapping,
+    Callable,
+)
 
 
 import numpy as np
@@ -51,14 +66,28 @@ from ._data_plot import (
     _DataArrayPlotterLineSpectrum,
 )
 
-GeometryType: TypeAlias = Union[GeometryUndefined, GeometryPoint2D, GeometryPoint3D, GeometryFM2D, GeometryFM3D, GeometryFMAreaSpectrum, GeometryFMLineSpectrum, GeometryFMPointSpectrum, GeometryFMVerticalColumn, GeometryFMVerticalProfile, Grid1D, Grid2D, Grid3D]
+GeometryType: TypeAlias = Union[
+    GeometryUndefined,
+    GeometryPoint2D,
+    GeometryPoint3D,
+    GeometryFM2D,
+    GeometryFM3D,
+    GeometryFMAreaSpectrum,
+    GeometryFMLineSpectrum,
+    GeometryFMPointSpectrum,
+    GeometryFMVerticalColumn,
+    GeometryFMVerticalProfile,
+    Grid1D,
+    Grid2D,
+    Grid3D,
+]
 
 
 class _DataArraySpectrumToHm0:
     def __init__(self, da: "DataArray") -> None:
         self.da = da
 
-    def __call__(self, tail:bool=True) -> "DataArray":
+    def __call__(self, tail: bool = True) -> "DataArray":
         # TODO: if action_density
         m0 = calc_m0_from_spectrum(
             self.da.to_numpy(),
@@ -111,12 +140,12 @@ class DataArray:
 
     def __init__(
         self,
-        data : NDArray[np.floating],
+        data: NDArray[np.floating],
         *,
         time: Optional[pd.DatetimeIndex | str] = None,
         item: Optional[ItemInfo] = None,
         geometry: GeometryType = GeometryUndefined(),
-        zn:Optional[NDArray[np.floating]]=None,
+        zn: Optional[NDArray[np.floating]] = None,
         dims: Optional[Sequence[str]] = None,
     ) -> None:
         # TODO: add optional validation validate=True
@@ -133,7 +162,7 @@ class DataArray:
         self.plot = self._get_plotter_by_geometry()
 
     @staticmethod
-    def _parse_data(data: ArrayLike) -> Any: # NDArray[np.floating] | float:
+    def _parse_data(data: ArrayLike) -> Any:  # NDArray[np.floating] | float:
         validation_errors = []
         for p in ("shape", "ndim", "dtype"):
             if not hasattr(data, p):
@@ -145,7 +174,9 @@ class DataArray:
             )
         return data
 
-    def _parse_dims(self, dims: Sequence[str] | None, geometry: GeometryType) -> Tuple[str, ...]:
+    def _parse_dims(
+        self, dims: Sequence[str] | None, geometry: GeometryType
+    ) -> Tuple[str, ...]:
         if dims is None:
             return self._guess_dims(self.ndim, self.shape, self.n_timesteps, geometry)
         else:
@@ -160,8 +191,9 @@ class DataArray:
             return tuple(dims)
 
     @staticmethod
-    def _guess_dims(ndim: int, shape: Tuple[int,...], n_timesteps: int, geometry: GeometryType) -> Tuple[str, ...]:
-
+    def _guess_dims(
+        ndim: int, shape: Tuple[int, ...], n_timesteps: int, geometry: GeometryType
+    ) -> Tuple[str, ...]:
         # TODO delete default dims to geometry
 
         # This is not very robust, but is probably a reasonable guess
@@ -213,23 +245,22 @@ class DataArray:
             )
 
     @staticmethod
-    def _parse_item(item: ItemInfo| str| EUMType| None) -> ItemInfo:
-        
+    def _parse_item(item: ItemInfo | str | EUMType | None) -> ItemInfo:
         if isinstance(item, ItemInfo):
             return item
-        
+
         if item is None:
             return ItemInfo("NoName")
 
-        if isinstance(item, (str,EUMType,EUMUnit)):
+        if isinstance(item, (str, EUMType, EUMUnit)):
             return ItemInfo(item)
-        
-        
-        
+
         raise ValueError("item must be str, EUMType or EUMUnit")
 
     @staticmethod
-    def _parse_geometry(geometry: Any, dims: Tuple[str,...], shape: Tuple[int,...]) -> Any:
+    def _parse_geometry(
+        geometry: Any, dims: Tuple[str, ...], shape: Tuple[int, ...]
+    ) -> Any:
         if len(dims) > 1 and (
             geometry is None or isinstance(geometry, GeometryUndefined)
         ):
@@ -277,7 +308,9 @@ class DataArray:
         return geometry
 
     @staticmethod
-    def _parse_zn(zn: NDArray[np.floating] | None, geometry: GeometryType, n_timesteps:int) -> Optional[NDArray[np.floating]]:
+    def _parse_zn(
+        zn: NDArray[np.floating] | None, geometry: GeometryType, n_timesteps: int
+    ) -> Optional[NDArray[np.floating]]:
         if zn is not None:
             if isinstance(geometry, _GeometryFMLayered):
                 # TODO: np.squeeze(zn) if n_timesteps=1 ?
@@ -293,7 +326,7 @@ class DataArray:
                 raise ValueError("zn can only be provided for layered dfsu data")
         return zn
 
-    def _is_compatible(self, other: "DataArray", raise_error:bool=False) -> bool:
+    def _is_compatible(self, other: "DataArray", raise_error: bool = False) -> bool:
         """check if other DataArray has equivalent dimensions, time and geometry"""
         problems = []
         assert isinstance(other, DataArray)
@@ -303,7 +336,7 @@ class DataArray:
             problems.append("Number of timesteps must be the same")
         if self.start_time != other.start_time:
             problems.append("start_time must be the same")
-        #if type(self.geometry) != type(other.geometry):
+        # if type(self.geometry) != type(other.geometry):
         if not isinstance(self.geometry, other.geometry.__class__):
             problems.append("The type of geometry must be the same")
         if hasattr(self.geometry, "__eq__"):
@@ -347,7 +380,14 @@ class DataArray:
 
     def _set_spectral_attributes(self, geometry: GeometryType) -> None:
         if hasattr(geometry, "frequencies") and hasattr(geometry, "directions"):
-            assert isinstance(geometry, (GeometryFMAreaSpectrum, GeometryFMLineSpectrum, GeometryFMPointSpectrum))
+            assert isinstance(
+                geometry,
+                (
+                    GeometryFMAreaSpectrum,
+                    GeometryFMLineSpectrum,
+                    GeometryFMPointSpectrum,
+                ),
+            )
             self.frequencies = geometry.frequencies
             self.n_frequencies = geometry.n_frequencies
             self.directions = geometry.directions
@@ -363,7 +403,7 @@ class DataArray:
         return self.item.name
 
     @name.setter
-    def name(self, value:str) -> None:
+    def name(self, value: str) -> None:
         self.item.name = value
 
     @property
@@ -434,14 +474,14 @@ class DataArray:
         return self._values
 
     @values.setter
-    def values(self, value: NDArray[np.floating]| float) -> None:
+    def values(self, value: NDArray[np.floating] | float) -> None:
         if np.isscalar(self._values):
             if not np.isscalar(value):
                 raise ValueError("Shape of new data is wrong (should be scalar)")
-        elif value.shape != self._values.shape: # type: ignore
+        elif value.shape != self._values.shape:  # type: ignore
             raise ValueError("Shape of new data is wrong")
 
-        self._values = value # type: ignore
+        self._values = value  # type: ignore
 
     def to_numpy(self) -> NDArray[np.floating]:
         """Values as a np.ndarray (equivalent to values)"""
@@ -472,12 +512,12 @@ class DataArray:
 
     def describe(self, **kwargs: Any) -> pd.DataFrame:
         """Generate descriptive statistics by wrapping :py:meth:`pandas.DataFrame.describe`
-        
+
         Parameters
         ----------
         **kwargs
             Keyword arguments passed to :py:meth:`pandas.DataFrame.describe`
-        
+
         Returns
         -------
         pd.DataFrame
@@ -526,7 +566,6 @@ class DataArray:
     #        raise ValueError("Invalid mask")
 
     def __getitem__(self, key: Any) -> "DataArray":
-
         da = self
         dims = self.dims
         key = self._getitem_parse_key(key)
@@ -573,7 +612,12 @@ class DataArray:
             return self._set_by_boolean_mask(self._values, mask, value)
         self._values[key] = value
 
-    def isel(self, idx: int| Sequence[int]| slice| None=None, axis:int|str=0, **kwargs:Any) -> "DataArray":
+    def isel(
+        self,
+        idx: int | Sequence[int] | slice | None = None,
+        axis: int | str = 0,
+        **kwargs: Any,
+    ) -> "DataArray":
         """Return a new DataArray whose data is given by
         integer indexing along the specified dimension(s).
 
@@ -687,7 +731,7 @@ class DataArray:
             idx_slice = idx
             assert isinstance(axis, int)
             idx = list(range(*idx.indices(self.shape[axis])))
-        if idx is None or (not np.isscalar(idx) and len(idx) == 0): # type: ignore
+        if idx is None or (not np.isscalar(idx) and len(idx) == 0):  # type: ignore
             raise ValueError(
                 "Empty index is not allowed"
             )  # TODO other option would be to have a NullDataArray
@@ -706,7 +750,7 @@ class DataArray:
             zn = None
             if hasattr(self.geometry, "isel"):
                 assert isinstance(axis, int)
-                spatial_axis = axis -1 if self.dims[0] == "time" else axis
+                spatial_axis = axis - 1 if self.dims[0] == "time" else axis
                 geometry = self.geometry.isel(idx, axis=spatial_axis)
 
             # TOOD this is ugly
@@ -714,7 +758,7 @@ class DataArray:
                 node_ids, _ = self.geometry._get_nodes_and_table_for_elements(
                     idx, node_layers="all"
                 )
-                zn = self._zn[:, node_ids] # type: ignore
+                zn = self._zn[:, node_ids]  # type: ignore
 
         # reduce dims only if singleton idx
         dims = (
@@ -859,12 +903,11 @@ class DataArray:
         """
         if any([isinstance(v, slice) for v in kwargs.values()]):
             return self._sel_with_slice(kwargs)
-        
+
         da = self
 
         # select in space
         if len(kwargs) > 0:
-
             idx = self.geometry.find_index(**kwargs)
             if isinstance(idx, tuple):
                 # TODO: support for dfs3
@@ -888,24 +931,24 @@ class DataArray:
             da = da[time]  # __getitem__ is 🚀
 
         return da
-    
-    def _sel_with_slice(self, kwargs: Mapping[str,slice]) -> "DataArray":
+
+    def _sel_with_slice(self, kwargs: Mapping[str, slice]) -> "DataArray":
         for k, v in kwargs.items():
             if isinstance(v, slice):
-                idx_start = self.geometry.find_index(**{k:v.start})
-                idx_stop = self.geometry.find_index(**{k:v.stop})
+                idx_start = self.geometry.find_index(**{k: v.start})
+                idx_stop = self.geometry.find_index(**{k: v.stop})
                 pos = 0
                 if isinstance(idx_start, tuple):
                     if k == "x":
                         pos = 0
                     if k == "y":
                         pos = 1
-                
+
                 start = idx_start[pos][0] if idx_start is not None else None
                 stop = idx_stop[pos][0] if idx_stop is not None else None
 
                 idx = slice(start, stop)
-                
+
                 self = self.isel(idx, axis=k)
 
         return self
@@ -919,7 +962,7 @@ class DataArray:
         y: Optional[float] = None,
         z: Optional[float] = None,
         n_nearest: int = 3,
-        interpolant: Tuple[Any, Any] | None=None,
+        interpolant: Tuple[Any, Any] | None = None,
         **kwargs: Any,
     ) -> "DataArray":
         """Interpolate data in time and space
@@ -972,7 +1015,9 @@ class DataArray:
         if z is not None:
             raise NotImplementedError()
 
-        geometry: GeometryPoint2D | GeometryPoint3D | GeometryUndefined = GeometryUndefined()
+        geometry: GeometryPoint2D | GeometryPoint3D | GeometryUndefined = (
+            GeometryUndefined()
+        )
 
         # interp in space
         if (x is not None) or (y is not None) or (z is not None):
@@ -1008,7 +1053,7 @@ class DataArray:
                         x=x, y=y, projection=self.geometry.projection
                     )
                 # this is not supported yet (see above)
-                #else:
+                # else:
                 #    geometry = GeometryPoint3D(
                 #        x=x, y=y, z=z, projection=self.geometry.projection
                 #    )
@@ -1035,7 +1080,12 @@ class DataArray:
 
         return data, time
 
-    def extract_track(self, track: pd.DataFrame, method: Literal["nearest", "inverse_distance"]="nearest", dtype: DTypeLike=np.float32) -> "Dataset":
+    def extract_track(
+        self,
+        track: pd.DataFrame,
+        method: Literal["nearest", "inverse_distance"] = "nearest",
+        dtype: DTypeLike = np.float32,
+    ) -> "Dataset":
         """
         Extract data along a moving track
 
@@ -1080,9 +1130,9 @@ class DataArray:
         self,
         dt: float | pd.DatetimeIndex | "DataArray",
         *,
-        method:str="linear",
-        extrapolate:bool=True,
-        fill_value:float=np.nan,
+        method: str = "linear",
+        extrapolate: bool = True,
+        fill_value: float = np.nan,
     ) -> "DataArray":
         """Temporal interpolation
 
@@ -1122,13 +1172,13 @@ class DataArray:
             None
             if self._zn is None
             else interp1d(
-            t_in,
-            self._zn,
-            axis=0,
-            kind=method,
-            bounds_error=not extrapolate,
-            fill_value=fill_value,
-        )(t_out) 
+                t_in,
+                self._zn,
+                axis=0,
+                kind=method,
+                bounds_error=not extrapolate,
+                fill_value=fill_value,
+            )(t_out)
         )
 
         return DataArray(
@@ -1139,7 +1189,7 @@ class DataArray:
             zn=zn,
         )
 
-    def interp_na(self, axis:str="time", **kwargs: Any) -> "DataArray":
+    def interp_na(self, axis: str = "time", **kwargs: Any) -> "DataArray":
         """Fill in NaNs by interpolating according to different methods.
 
         Wrapper of :py:meth:`xarray.DataArray.interpolate_na`
@@ -1170,8 +1220,8 @@ class DataArray:
     def interp_like(
         self,
         other: "DataArray" | Grid2D | GeometryFM2D | pd.DatetimeIndex,
-        interpolant: Tuple[Any, Any] | None=None,
-        **kwargs:Any,
+        interpolant: Tuple[Any, Any] | None = None,
+        **kwargs: Any,
     ) -> "DataArray":
         """Interpolate in space (and in time) to other geometry (and time axis)
 
@@ -1247,7 +1297,9 @@ class DataArray:
         return dai
 
     @staticmethod
-    def concat(dataarrays: Sequence["DataArray"], keep:Literal["last"]="last") -> "DataArray":
+    def concat(
+        dataarrays: Sequence["DataArray"], keep: Literal["last"] = "last"
+    ) -> "DataArray":
         """Concatenate DataArrays along the time axis
 
         Parameters
@@ -1283,7 +1335,7 @@ class DataArray:
 
     # ============= Aggregation methods ===========
 
-    def max(self, axis:int| str =0, **kwargs: Any) -> "DataArray":
+    def max(self, axis: int | str = 0, **kwargs: Any) -> "DataArray":
         """Max value along an axis
 
         Parameters
@@ -1302,7 +1354,7 @@ class DataArray:
         """
         return self.aggregate(axis=axis, func=np.max, **kwargs)
 
-    def min(self, axis:int|str=0, **kwargs: Any) -> "DataArray":
+    def min(self, axis: int | str = 0, **kwargs: Any) -> "DataArray":
         """Min value along an axis
 
         Parameters
@@ -1321,7 +1373,7 @@ class DataArray:
         """
         return self.aggregate(axis=axis, func=np.min, **kwargs)
 
-    def mean(self, axis:int | str = 0, **kwargs:Any) -> "DataArray":
+    def mean(self, axis: int | str = 0, **kwargs: Any) -> "DataArray":
         """Mean value along an axis
 
         Parameters
@@ -1340,7 +1392,7 @@ class DataArray:
         """
         return self.aggregate(axis=axis, func=np.mean, **kwargs)
 
-    def std(self, axis:int | str = 0, **kwargs:Any) -> "DataArray":
+    def std(self, axis: int | str = 0, **kwargs: Any) -> "DataArray":
         """Standard deviation values along an axis
 
         Parameters
@@ -1359,7 +1411,7 @@ class DataArray:
         """
         return self.aggregate(axis=axis, func=np.std, **kwargs)
 
-    def ptp(self, axis:int | str = 0, **kwargs:Any) -> "DataArray":
+    def ptp(self, axis: int | str = 0, **kwargs: Any) -> "DataArray":
         """Range (max - min) a.k.a Peak to Peak along an axis
 
         Parameters
@@ -1374,7 +1426,9 @@ class DataArray:
         """
         return self.aggregate(axis=axis, func=np.ptp, **kwargs)
 
-    def average(self, weights: NDArray[np.floating], axis:int | str = 0, **kwargs:Any) -> "DataArray":
+    def average(
+        self, weights: NDArray[np.floating], axis: int | str = 0, **kwargs: Any
+    ) -> "DataArray":
         """Compute the weighted average along the specified axis.
 
         Parameters
@@ -1399,7 +1453,7 @@ class DataArray:
         >>> da2 = da.average(axis="space", weights=area)
         """
 
-        def func(x, axis, keepdims): # type: ignore
+        def func(x, axis, keepdims):  # type: ignore
             if keepdims:
                 raise NotImplementedError()
 
@@ -1407,7 +1461,7 @@ class DataArray:
 
         return self.aggregate(axis=axis, func=func, **kwargs)
 
-    def nanmax(self, axis:int | str = 0, **kwargs:Any) -> "DataArray":
+    def nanmax(self, axis: int | str = 0, **kwargs: Any) -> "DataArray":
         """Max value along an axis (NaN removed)
 
         Parameters
@@ -1426,7 +1480,7 @@ class DataArray:
         """
         return self.aggregate(axis=axis, func=np.nanmax, **kwargs)
 
-    def nanmin(self, axis:int | str = 0, **kwargs:Any) -> "DataArray":
+    def nanmin(self, axis: int | str = 0, **kwargs: Any) -> "DataArray":
         """Min value along an axis (NaN removed)
 
         Parameters
@@ -1445,7 +1499,7 @@ class DataArray:
         """
         return self.aggregate(axis=axis, func=np.nanmin, **kwargs)
 
-    def nanmean(self, axis:int | str = 0, **kwargs:Any) -> "DataArray":
+    def nanmean(self, axis: int | str = 0, **kwargs: Any) -> "DataArray":
         """Mean value along an axis (NaN removed)
 
         Parameters
@@ -1464,7 +1518,7 @@ class DataArray:
         """
         return self.aggregate(axis=axis, func=np.nanmean, **kwargs)
 
-    def nanstd(self, axis:int | str = 0, **kwargs:Any) -> "DataArray":
+    def nanstd(self, axis: int | str = 0, **kwargs: Any) -> "DataArray":
         """Standard deviation value along an axis (NaN removed)
 
         Parameters
@@ -1483,7 +1537,9 @@ class DataArray:
         """
         return self.aggregate(axis=axis, func=np.nanstd, **kwargs)
 
-    def aggregate(self, axis:int | str = 0, func: Callable[...,Any]=np.nanmean, **kwargs:Any) -> "DataArray":
+    def aggregate(
+        self, axis: int | str = 0, func: Callable[..., Any] = np.nanmean, **kwargs: Any
+    ) -> "DataArray":
         """Aggregate along an axis
 
         Parameters
@@ -1507,14 +1563,12 @@ class DataArray:
         axis = self._parse_axis(self.shape, self.dims, axis)
         time = self._time_by_agg_axis(self.time, axis)
 
-        
         if isinstance(axis, int):
             axes = (axis,)
         else:
             axes = axis
 
         dims = tuple([d for i, d in enumerate(self.dims) if i not in axes])
-        
 
         item = deepcopy(self.item)
         if "name" in kwargs:
@@ -1542,14 +1596,16 @@ class DataArray:
         )
 
     @overload
-    def quantile(self, q:float,**kwargs:Any) -> "DataArray":
+    def quantile(self, q: float, **kwargs: Any) -> "DataArray":
         ...
 
     @overload
-    def quantile(self, q:Sequence[float],**kwargs:Any) -> "Dataset":
+    def quantile(self, q: Sequence[float], **kwargs: Any) -> "Dataset":
         ...
 
-    def quantile(self, q: float| Sequence[float], *, axis:int | str = 0, **kwargs:Any) -> "DataArray" | "Dataset":
+    def quantile(
+        self, q: float | Sequence[float], *, axis: int | str = 0, **kwargs: Any
+    ) -> "DataArray" | "Dataset":
         """Compute the q-th quantile of the data along the specified axis.
 
         Wrapping np.quantile
@@ -1580,14 +1636,16 @@ class DataArray:
         return self._quantile(q, axis=axis, func=np.quantile, **kwargs)
 
     @overload
-    def nanquantile(self, q:float,**kwargs:Any) -> "DataArray":
-        ...
-    
-    @overload
-    def nanquantile(self, q:Sequence[float],**kwargs:Any) -> "Dataset":
+    def nanquantile(self, q: float, **kwargs: Any) -> "DataArray":
         ...
 
-    def nanquantile(self, q:float| Sequence[float], *, axis:int | str = 0, **kwargs:Any) -> "DataArray" | "Dataset":
+    @overload
+    def nanquantile(self, q: Sequence[float], **kwargs: Any) -> "Dataset":
+        ...
+
+    def nanquantile(
+        self, q: float | Sequence[float], *, axis: int | str = 0, **kwargs: Any
+    ) -> "DataArray" | "Dataset":
         """Compute the q-th quantile of the data along the specified axis, while ignoring nan values.
 
         Wrapping np.nanquantile
@@ -1617,8 +1675,7 @@ class DataArray:
         """
         return self._quantile(q, axis=axis, func=np.nanquantile, **kwargs)
 
-    def _quantile(self, q, *, axis:int | str = 0, func=np.quantile, **kwargs:Any): # type: ignore
-
+    def _quantile(self, q, *, axis: int | str = 0, func=np.quantile, **kwargs: Any):  # type: ignore
         from mikeio import Dataset
 
         axis = self._parse_axis(self.shape, self.dims, axis)
@@ -1689,7 +1746,7 @@ class DataArray:
     def _apply_unary_math_operation(self, func) -> "DataArray":
         try:
             data = func(self.values)
-        
+
         except TypeError:
             raise TypeError("Math operation could not be applied to DataArray")
 
@@ -1785,7 +1842,7 @@ class DataArray:
             {self.name: self}
         )  # Single-item Dataset (All info is contained in the DataArray, no need for additional info)
 
-    def to_dfs(self, filename, **kwargs:Any) -> None:
+    def to_dfs(self, filename, **kwargs: Any) -> None:
         """Write data to a new dfs file
 
         Parameters
@@ -1834,7 +1891,7 @@ class DataArray:
 
         import xarray as xr
 
-        coords: MutableMapping[str,Any] = {}
+        coords: MutableMapping[str, Any] = {}
         if self._has_time_axis:
             coords["time"] = xr.DataArray(self.time, dims="time")
 
@@ -1876,7 +1933,6 @@ class DataArray:
     # ===============================================
 
     def __repr__(self) -> str:
-
         out = ["<mikeio.DataArray>"]
         if self.name is not None:
             out.append(f"name: {self.name}")
@@ -1909,7 +1965,6 @@ class DataArray:
         return f"geometry: {self.geometry}"
 
     def _values_txt(self) -> str:
-
         if self.ndim == 0 or (self.ndim == 1 and len(self.values) == 1):
             return f"values: {self.values}"
         elif self.ndim == 1 and len(self.values) < 5:
@@ -1920,9 +1975,10 @@ class DataArray:
         else:
             return ""  # raise NotImplementedError()
 
-
     @staticmethod
-    def _parse_interp_time(old_time:pd.DatetimeIndex, new_time: Any) -> pd.DatetimeIndex:
+    def _parse_interp_time(
+        old_time: pd.DatetimeIndex, new_time: Any
+    ) -> pd.DatetimeIndex:
         if isinstance(new_time, pd.DatetimeIndex):
             t_out_index = new_time
         elif hasattr(new_time, "time"):
@@ -1935,7 +1991,6 @@ class DataArray:
             )
 
         return t_out_index
-    
 
     @staticmethod
     def _time_by_agg_axis(
@@ -1980,7 +2035,7 @@ class DataArray:
     def _parse_time(time) -> pd.DatetimeIndex:
         """Allow anything that we can create a DatetimeIndex from"""
         if time is None:
-            time = [pd.Timestamp(2018, 1, 1)] # TODO is this the correct epoch?
+            time = [pd.Timestamp(2018, 1, 1)]  # TODO is this the correct epoch?
         if isinstance(time, str) or (not isinstance(time, Iterable)):
             time = [time]
 

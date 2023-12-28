@@ -13,7 +13,7 @@ from typing import (
     Tuple,
     Any,
     overload,
-    Hashable
+    Hashable,
 )
 
 
@@ -166,17 +166,19 @@ class Dataset:
     def _modify_list(lst: Iterable[str]) -> List[str]:
         modified_list = []
         count_dict = {}
-        
+
         for item in lst:
             if item not in count_dict:
                 modified_list.append(item)
                 count_dict[item] = 2
             else:
-                warnings.warn(f"Duplicate item name: {item}. Renaming to {item}_{count_dict[item]}")
+                warnings.warn(
+                    f"Duplicate item name: {item}. Renaming to {item}_{count_dict[item]}"
+                )
                 modified_item = f"{item}_{count_dict[item]}"
                 modified_list.append(modified_item)
                 count_dict[item] += 1
-        
+
         return modified_list
 
     @staticmethod
@@ -203,7 +205,7 @@ class Dataset:
             item_names = Dataset._modify_list(item_names)
             for it, item_name in zip(item_infos, item_names):
                 it.name = item_name
-            
+
         return item_infos
 
     @staticmethod
@@ -574,7 +576,6 @@ class Dataset:
         """
         self.__delitem__(key)
 
-
     def rename(self, mapper: Mapping[str, str], inplace=False) -> "Dataset":
         """Rename items (DataArrays) in Dataset
 
@@ -631,9 +632,7 @@ class Dataset:
     def __getitem__(self, key: Iterable[Hashable]) -> "Dataset":
         ...
 
-
     def __getitem__(self, key) -> DataArray | "Dataset":
-
         # select time steps
         if (
             isinstance(key, Sequence) and not isinstance(key, str)
@@ -746,7 +745,6 @@ class Dataset:
         raise TypeError(f"indexing with type {type(key)} is not supported")
 
     def __delitem__(self, key):
-
         key = self._key_to_str(key)
         self._data_vars.__delitem__(key)
         self._del_name_attr(key)
@@ -934,7 +932,6 @@ class Dataset:
             if isinstance(
                 self.geometry, GeometryFM2D
             ):  # TODO remove this when all geometries implements the same method
-
                 interpolant = self.geometry.get_2d_interpolant(
                     xy, n_nearest=n_nearest, **kwargs
                 )
@@ -1290,9 +1287,7 @@ class Dataset:
 
     # ============ aggregate =============
 
-    def aggregate(
-        self, axis=0, func=np.nanmean, **kwargs
-    ) -> "Dataset":
+    def aggregate(self, axis=0, func=np.nanmean, **kwargs) -> "Dataset":
         """Aggregate along an axis
 
         Parameters
@@ -1322,7 +1317,7 @@ class Dataset:
                 dims=self.dims,
                 zn=self._zn,
             )
-            
+
             return Dataset([da], validate=False)
         else:
             res = {
@@ -1401,10 +1396,7 @@ class Dataset:
         """
         return self._quantile(q, axis=axis, func=np.nanquantile, **kwargs)
 
-    def _quantile(
-        self, q, *, axis=0, func=np.quantile, **kwargs
-    ) -> "Dataset":
-
+    def _quantile(self, q, *, axis=0, func=np.quantile, **kwargs) -> "Dataset":
         if axis == "items":
             if self.n_items <= 1:
                 return self  # or raise ValueError?
@@ -1796,7 +1788,6 @@ class Dataset:
         if isinstance(
             self.geometry, (GeometryPoint2D, GeometryPoint3D, GeometryUndefined)
         ):
-
             if self.ndim == 0:  # Not very common, but still...
                 self._validate_extension(filename, ".dfs0")
                 self._to_dfs0(filename, **kwargs)
