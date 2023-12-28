@@ -1,23 +1,27 @@
+from __future__ import annotations
+from typing import Sequence, Tuple
 import numpy as np
+from matplotlib.axes import Axes
+from numpy.typing import NDArray
 
 
 def plot_2dspectrum(
-    spectrum,
-    frequencies,
-    directions,
-    plot_type="contourf",
-    title=None,
-    label=None,
-    cmap="Reds",
-    vmin=1e-5,
-    vmax=None,
-    r_as_periods=True,
-    rmin=None,
-    rmax=None,
-    levels=None,
-    figsize=(7, 7),
-    add_colorbar=True,
-):
+    spectrum :NDArray[np.floating], 
+    frequencies :NDArray[np.floating], 
+    directions :NDArray[np.floating], 
+    plot_type: str ="contourf",
+    title:str | None =None,
+    label:str | None=None,
+    cmap:str="Reds",
+    vmin:float | None =1e-5,
+    vmax:float | None =None,
+    r_as_periods:bool=True,
+    rmin:float | None=None,
+    rmax:float | None=None,
+    levels: int| Sequence[float] | None=None,
+    figsize: Tuple[float,float]=(7, 7),
+    add_colorbar:bool=True,
+) -> Axes:
     """
     Plot spectrum in polar coordinates
 
@@ -67,7 +71,7 @@ def plot_2dspectrum(
     >>> dfs.plot_spectrum(spectrum, rmax=9, title="Wave spectrum T<9s")
     """
 
-    import matplotlib.pyplot as plt  # type: ignore
+    import matplotlib.pyplot as plt
 
     if (frequencies is None or len(frequencies) <= 1) and (
         directions is None or len(directions) <= 1
@@ -89,7 +93,7 @@ def plot_2dspectrum(
 
     ddir = dirs[1] - dirs[0]
 
-    def is_circular(dir):
+    def is_circular(dir: NDArray[np.floating]) -> bool:
         dir_diff = np.mod(dir[0], 2 * np.pi) - np.mod(dir[-1] + ddir, 2 * np.pi)
         return np.abs(dir_diff) < 1e-6
 
@@ -116,7 +120,7 @@ def plot_2dspectrum(
     if levels is None:
         levels = 10
         n_levels = 10
-    if np.isscalar(levels):
+    if isinstance(levels, int):
         n_levels = levels
         levels = np.linspace(vmin, vmax, n_levels)
 
@@ -188,8 +192,9 @@ def plot_2dspectrum(
     return ax
 
 
-def calc_m0_from_spectrum(spec, f, dir=None, tail=True):
+def calc_m0_from_spectrum(spec: NDArray[np.floating], f: NDArray[np.floating], dir: NDArray[np.floating] | None =None, tail:bool=True) -> NDArray[np.floating]:
     if f is None:
+        assert dir is not None
         nd = len(dir)
         dtheta = (dir[-1] - dir[0]) / (nd - 1)
         return np.sum(spec, axis=-1) * dtheta * np.pi / 180.0
@@ -208,7 +213,7 @@ def calc_m0_from_spectrum(spec, f, dir=None, tail=True):
     return m0
 
 
-def _f_to_df(f):
+def _f_to_df(f: NDArray[np.floating]) -> NDArray[np.floating]:
     """Frequency bins for equidistant or logrithmic frequency axis"""
     if np.isclose(np.diff(f).min(), np.diff(f).max()):
         # equidistant frequency bins
