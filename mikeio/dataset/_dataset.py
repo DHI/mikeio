@@ -101,7 +101,7 @@ class Dataset:
         self.plot = _DatasetPlotter(self)
 
     @staticmethod
-    def _is_DataArrays(data):
+    def _is_DataArrays(data: Any) -> bool:
         """Check if input is Sequence/Mapping of DataArrays"""
         if isinstance(data, (Dataset, DataArray)):
             return True
@@ -183,7 +183,7 @@ class Dataset:
         return modified_list
 
     @staticmethod
-    def _parse_items(items, n_items_data):
+    def _parse_items(items: None| Sequence[ItemInfo| EUMType| str], n_items_data: int) -> List[ItemInfo]:
         if items is None:
             # default Undefined items
             item_infos = [ItemInfo(f"Item_{j+1}") for j in range(n_items_data)]
@@ -210,7 +210,7 @@ class Dataset:
         return item_infos
 
     @staticmethod
-    def _DataArrays_as_mapping(data):
+    def _DataArrays_as_mapping(data: Any) -> MutableMapping[str, DataArray]:
         """Create dict of DataArrays if necessary"""
         if isinstance(data, Mapping):
             if isinstance(data, Dataset):
@@ -249,7 +249,7 @@ class Dataset:
         return item_names
 
     @staticmethod
-    def _check_all_different_ids(das):
+    def _check_all_different_ids(das: Iterable[DataArray]) -> None:
         """Are all the DataArrays different objects or are some referring to the same"""
         ids = np.zeros(len(das), dtype=np.int64)
         ids_val = np.zeros(len(das), dtype=np.int64)
@@ -275,7 +275,7 @@ class Dataset:
                 Dataset._id_of_DataArrays_equal(das[jj[0]], das[jj[1]])
 
     @staticmethod
-    def _id_of_DataArrays_equal(da1, da2):
+    def _id_of_DataArrays_equal(da1: DataArray, da2: DataArray) -> None:
         """Check if two DataArrays are actually the same object"""
         if id(da1) == id(da2):
             raise ValueError(
@@ -286,7 +286,7 @@ class Dataset:
                 f"DataArrays {da1.name} and {da2.name} refer to the same data! Create a copy first."
             )
 
-    def _check_already_present(self, new_da):
+    def _check_already_present(self, new_da: DataArray) -> None:
         """Is the DataArray already present in the Dataset?"""
         for da in self:
             self._id_of_DataArrays_equal(da, new_da)
@@ -471,7 +471,7 @@ class Dataset:
 
     # TODO: delete this?
     @staticmethod
-    def create_empty_data(n_items=1, n_timesteps=1, n_elements=None, shape=None):
+    def create_empty_data(n_items:int=1, n_timesteps:int=1, n_elements:int|None=None, shape:Tuple[int,...] | None=None) -> List[np.ndarray[np.float64]]:
         data = []
         if shape is None:
             if n_elements is None:
@@ -674,7 +674,7 @@ class Dataset:
 
         raise TypeError(f"indexing with a {type(key)} is not (yet) supported")
 
-    def _is_slice_time_slice(self, s):
+    def _is_slice_time_slice(self, s: slice) -> bool:
         if (s.start is None) and (s.stop is None):
             return False
         if s.start is not None:
@@ -685,7 +685,7 @@ class Dataset:
                 return False
         return True
 
-    def _is_key_time(self, key):
+    def _is_key_time(self, key: Any) -> bool:
         if isinstance(key, str) and key in self.names:
             return False
         if isinstance(key, str) and len(key) > 0 and key[0].isnumeric():
@@ -695,7 +695,7 @@ class Dataset:
             return True
         return False
 
-    def _multi_indexing_attempted(self, key) -> bool:
+    def _multi_indexing_attempted(self, key: Any) -> bool:
         # find out if user is attempting ds[2, :, 1] or similar (not allowed)
         # this is not bullet-proof, but a good estimate
         if not isinstance(key, tuple):
@@ -733,7 +733,7 @@ class Dataset:
             return key.name
         raise TypeError(f"indexing with type {type(key)} is not supported")
 
-    def __delitem__(self, key):
+    def __delitem__(self, key: Hashable | int) -> None:
         key = self._key_to_str(key)
         self._data_vars.__delitem__(key)
         self._del_name_attr(key)
@@ -1136,7 +1136,7 @@ class Dataset:
 
     # ============= Combine/concat ===========
 
-    def _append_items(self, other, copy=True):
+    def _append_items(self, other: DataArray| "Dataset", copy:bool=True) -> "Dataset":
         if isinstance(other, DataArray):
             other = other._to_dataset()
         item_names = {item.name for item in self.items}
@@ -1255,7 +1255,7 @@ class Dataset:
             newdata, time=newtime, items=ds.items, geometry=ds.geometry, zn=zn
         )
 
-    def _check_all_items_match(self, other):
+    def _check_all_items_match(self, other: "Dataset") -> None:
         if self.n_items != other.n_items:
             raise ValueError(
                 f"Number of items must match ({self.n_items} and {other.n_items})"
@@ -1316,7 +1316,7 @@ class Dataset:
             return Dataset(data=res, validate=False)
 
     @staticmethod
-    def _agg_item_from_items(items, name):
+    def _agg_item_from_items(items: Iterable[ItemInfo], name: str) -> ItemInfo:
         it_type = (
             items[0].type
             if all([it.type == items[0].type for it in items])
@@ -1661,7 +1661,7 @@ class Dataset:
             newds[j].values = data[j]  # type: ignore
         return newds
 
-    def _check_datasets_match(self, other):
+    def _check_datasets_match(self, other: "Dataset") -> None:
         if self.n_items != other.n_items:
             raise ValueError(
                 f"Number of items must match ({self.n_items} and {other.n_items})"
@@ -1804,42 +1804,42 @@ class Dataset:
             )
 
     @staticmethod
-    def _validate_extension(filename, valid_extension):
+    def _validate_extension(filename: str | Path, valid_extension: str) -> None:
         path = Path(filename)
         ext = path.suffix.lower()
         if ext != valid_extension:
             raise ValueError(f"File extension must be {valid_extension}")
 
-    def _to_dfs0(self, filename, **kwargs):
+    def _to_dfs0(self, filename: str | Path, **kwargs: Any) -> None:
         from ..dfs._dfs0 import _write_dfs0
 
         dtype = kwargs.get("dtype", DfsSimpleType.Float)
 
         _write_dfs0(filename, self, dtype=dtype)
 
-    def _to_dfs2(self, filename):
+    def _to_dfs2(self, filename: str | Path) -> None:
         # assumes Grid2D geometry
         from ..dfs._dfs2 import write_dfs2
 
         write_dfs2(filename, self)
 
-    def _to_dfs3(self, filename):
+    def _to_dfs3(self, filename : str | Path) -> None:
         # assumes Grid3D geometry
         from ..dfs._dfs3 import write_dfs3
 
         write_dfs3(filename, self)
 
-    def _to_dfs1(self, filename):
+    def _to_dfs1(self, filename : str | Path) -> None:
         from ..dfs._dfs1 import write_dfs1
 
         write_dfs1(filename=filename,ds=self)
 
-    def _to_dfsu(self, filename):
+    def _to_dfsu(self, filename : str | Path) -> None:
         from ..dfsu._dfsu import _write_dfsu
 
         _write_dfsu(filename, self)
 
-    def to_xarray(self):
+    def to_xarray(self) -> "xarray.Dataset":
         """Export to xarray.Dataset"""
         import xarray
 
