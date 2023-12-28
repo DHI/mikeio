@@ -51,9 +51,11 @@ dev = ["pytest",
        "xarray",
        "netcdf4",
        "matplotlib",
-       "ruff"]
+       "ruff",
+       "mypy==1.6.1",
+       ]
 
-test = ["pytest", "pytest-cov", "matplotlib!=3.5.0", "xarray","mypy","shapely","pyproj"]
+test = ["pytest", "pytest-cov", "matplotlib!=3.5.0", "xarray","mypy==1.6.1","shapely","pyproj"]
 
 notebooks= [
             "nbformat",
