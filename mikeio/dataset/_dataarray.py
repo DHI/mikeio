@@ -3,15 +3,33 @@ import warnings
 from copy import deepcopy
 from datetime import datetime
 from functools import cached_property
-from typing import Iterable, Optional, Sequence, Tuple, Mapping
+from typing import (
+    Any,
+    Iterable,
+    Sequence,
+    Tuple,
+    Mapping,
+    Union,
+    Sized,
+    Literal,
+    TYPE_CHECKING,
+    overload,
+    MutableMapping,
+    Callable,
+)
 
 
 import numpy as np
+from numpy.typing import NDArray, ArrayLike, DTypeLike
 import pandas as pd
-from mikecore.DfsuFile import DfsuFileType  # type: ignore
+from mikecore.DfsuFile import DfsuFileType
 
-from ._data_utils import DataUtilsMixin
 from ..eum import EUMType, EUMUnit, ItemInfo
+from ._data_utils import _get_time_idx_list, _n_selected_timesteps
+
+if TYPE_CHECKING:
+    from ._dataset import Dataset
+    import xarray
 
 
 from ..spatial import (
@@ -46,12 +64,28 @@ from ._data_plot import (
     _DataArrayPlotterLineSpectrum,
 )
 
+GeometryType = Union[
+    GeometryUndefined,
+    GeometryPoint2D,
+    GeometryPoint3D,
+    GeometryFM2D,
+    GeometryFM3D,
+    GeometryFMAreaSpectrum,
+    GeometryFMLineSpectrum,
+    GeometryFMPointSpectrum,
+    GeometryFMVerticalColumn,
+    GeometryFMVerticalProfile,
+    Grid1D,
+    Grid2D,
+    Grid3D,
+]
+
 
 class _DataArraySpectrumToHm0:
     def __init__(self, da: "DataArray") -> None:
         self.da = da
 
-    def __call__(self, tail=True):
+    def __call__(self, tail: bool = True) -> "DataArray":
         # TODO: if action_density
         m0 = calc_m0_from_spectrum(
             self.da.to_numpy(),
@@ -64,7 +98,7 @@ class _DataArraySpectrumToHm0:
         item = ItemInfo(EUMType.Significant_wave_height)
         g = self.da.geometry
         if isinstance(g, GeometryFMPointSpectrum):
-            geometry = GeometryPoint2D(x=g.x, y=g.y)
+            geometry: Any = GeometryPoint2D(x=g.x, y=g.y)
         elif isinstance(g, GeometryFMLineSpectrum):
             geometry = Grid1D(
                 nx=g.n_nodes,
@@ -89,7 +123,7 @@ class _DataArraySpectrumToHm0:
         )
 
 
-class DataArray(DataUtilsMixin):
+class DataArray:
     """DataArray with data and metadata for a single item in a dfs file
 
     The DataArray has these main properties:
@@ -104,14 +138,14 @@ class DataArray(DataUtilsMixin):
 
     def __init__(
         self,
-        data,
+        data: NDArray[np.floating],
         *,
-        time: Optional[pd.DatetimeIndex | str] = None,
-        item: Optional[ItemInfo] = None,
-        geometry=GeometryUndefined(),
-        zn=None,
-        dims: Optional[Sequence[str]] = None,
-    ):
+        time: pd.DatetimeIndex | str | None = None,
+        item: ItemInfo | None = None,
+        geometry: GeometryType = GeometryUndefined(),
+        zn: NDArray[np.floating] | None = None,
+        dims: Sequence[str] | None = None,
+    ) -> None:
         # TODO: add optional validation validate=True
         self._values = self._parse_data(data)
         self.time: pd.DatetimeIndex = self._parse_time(time)
@@ -126,7 +160,7 @@ class DataArray(DataUtilsMixin):
         self.plot = self._get_plotter_by_geometry()
 
     @staticmethod
-    def _parse_data(data):
+    def _parse_data(data: ArrayLike) -> Any:  # NDArray[np.floating] | float:
         validation_errors = []
         for p in ("shape", "ndim", "dtype"):
             if not hasattr(data, p):
@@ -138,7 +172,9 @@ class DataArray(DataUtilsMixin):
             )
         return data
 
-    def _parse_dims(self, dims, geometry) -> Tuple[str, ...]:
+    def _parse_dims(
+        self, dims: Sequence[str] | None, geometry: GeometryType
+    ) -> Tuple[str, ...]:
         if dims is None:
             return self._guess_dims(self.ndim, self.shape, self.n_timesteps, geometry)
         else:
@@ -153,8 +189,9 @@ class DataArray(DataUtilsMixin):
             return tuple(dims)
 
     @staticmethod
-    def _guess_dims(ndim, shape, n_timesteps, geometry):
-
+    def _guess_dims(
+        ndim: int, shape: Tuple[int, ...], n_timesteps: int, geometry: GeometryType
+    ) -> Tuple[str, ...]:
         # TODO delete default dims to geometry
 
         # This is not very robust, but is probably a reasonable guess
@@ -199,24 +236,29 @@ class DataArray(DataUtilsMixin):
                 dims.append("x")
         return tuple(dims)
 
-    def _check_time_data_length(self, time):
+    def _check_time_data_length(self, time: Sized) -> None:
         if "time" in self.dims and len(time) != self._values.shape[0]:
             raise ValueError(
                 f"Number of timesteps ({len(time)}) does not fit with data shape {self.values.shape}"
             )
 
     @staticmethod
-    def _parse_item(item) -> ItemInfo:
+    def _parse_item(item: ItemInfo | str | EUMType | None) -> ItemInfo:
+        if isinstance(item, ItemInfo):
+            return item
+
         if item is None:
             return ItemInfo("NoName")
 
-        if not isinstance(item, ItemInfo):
+        if isinstance(item, (str, EUMType, EUMUnit)):
             return ItemInfo(item)
-        
-        return item
+
+        raise ValueError("item must be str, EUMType or EUMUnit")
 
     @staticmethod
-    def _parse_geometry(geometry, dims, shape):
+    def _parse_geometry(
+        geometry: Any, dims: Tuple[str, ...], shape: Tuple[int, ...]
+    ) -> Any:
         if len(dims) > 1 and (
             geometry is None or isinstance(geometry, GeometryUndefined)
         ):
@@ -264,7 +306,9 @@ class DataArray(DataUtilsMixin):
         return geometry
 
     @staticmethod
-    def _parse_zn(zn, geometry, n_timesteps):
+    def _parse_zn(
+        zn: NDArray[np.floating] | None, geometry: GeometryType, n_timesteps: int
+    ) -> NDArray[np.floating] | None:
         if zn is not None:
             if isinstance(geometry, _GeometryFMLayered):
                 # TODO: np.squeeze(zn) if n_timesteps=1 ?
@@ -280,11 +324,10 @@ class DataArray(DataUtilsMixin):
                 raise ValueError("zn can only be provided for layered dfsu data")
         return zn
 
-    def _is_compatible(self, other, raise_error=False):
+    def _is_compatible(self, other: "DataArray", raise_error: bool = False) -> bool:
         """check if other DataArray has equivalent dimensions, time and geometry"""
         problems = []
-        if not isinstance(other, DataArray):
-            return False
+        assert isinstance(other, DataArray)
         if self.shape != other.shape:
             problems.append("shape of data must be the same")
         if self.n_timesteps != other.n_timesteps:
@@ -315,9 +358,9 @@ class DataArray(DataUtilsMixin):
 
         return len(problems) == 0
 
-    def _get_plotter_by_geometry(self):
+    def _get_plotter_by_geometry(self) -> Any:
         # TODO: this is explicit, but with consistent naming, we could create this mapping automatically
-        PLOTTER_MAP = {
+        PLOTTER_MAP: Any = {
             GeometryFMVerticalProfile: _DataArrayPlotterFMVerticalProfile,
             GeometryFMVerticalColumn: _DataArrayPlotterFMVerticalColumn,
             GeometryFMPointSpectrum: _DataArrayPlotterPointSpectrum,
@@ -332,8 +375,16 @@ class DataArray(DataUtilsMixin):
         plotter = PLOTTER_MAP.get(type(self.geometry), _DataArrayPlotter)
         return plotter(self)
 
-    def _set_spectral_attributes(self, geometry):
+    def _set_spectral_attributes(self, geometry: GeometryType) -> None:
         if hasattr(geometry, "frequencies") and hasattr(geometry, "directions"):
+            assert isinstance(
+                geometry,
+                (
+                    GeometryFMAreaSpectrum,
+                    GeometryFMLineSpectrum,
+                    GeometryFMPointSpectrum,
+                ),
+            )
             self.frequencies = geometry.frequencies
             self.n_frequencies = geometry.n_frequencies
             self.directions = geometry.directions
@@ -345,6 +396,7 @@ class DataArray(DataUtilsMixin):
     @property
     def name(self) -> str:
         """Name of this DataArray (=da.item.name)"""
+        assert isinstance(self.item.name, str)
         return self.item.name
 
     @name.setter
@@ -362,13 +414,12 @@ class DataArray(DataUtilsMixin):
         return self.item.unit
 
     @property
-    def start_time(self):
+    def start_time(self) -> datetime:
         """First time instance (as datetime)"""
-        # TODO: use pd.Timestamp instead
         return self.time[0].to_pydatetime()
 
     @property
-    def end_time(self):
+    def end_time(self) -> datetime:
         """Last time instance (as datetime)"""
         # TODO: use pd.Timestamp instead
         return self.time[-1].to_pydatetime()
@@ -381,14 +432,14 @@ class DataArray(DataUtilsMixin):
         return len(self.time.to_series().diff().dropna().unique()) == 1
 
     @property
-    def timestep(self) -> Optional[float]:
+    def timestep(self) -> float | None:
         """Time step in seconds if equidistant (and at
         least two time instances); otherwise None
         """
         dt = None
         if len(self.time) > 1 and self.is_equidistant:
-            first: pd.Timestamp = self.time[0]  # type: ignore
-            second: pd.Timestamp = self.time[1]  # type: ignore
+            first: pd.Timestamp = self.time[0]
+            second: pd.Timestamp = self.time[1]
             dt = (second - first).total_seconds()
         return dt
 
@@ -398,41 +449,42 @@ class DataArray(DataUtilsMixin):
         return len(self.time)
 
     @property
-    def shape(self):
+    def shape(self) -> Any:
         """Tuple of array dimensions"""
         return self.values.shape
 
     @property
     def ndim(self) -> int:
         """Number of array dimensions"""
+        assert isinstance(self.values.ndim, int)
         return self.values.ndim
 
     @property
-    def dtype(self):
+    def dtype(self) -> DTypeLike:
         """Data-type of the array elements"""
         return self.values.dtype
 
     @property
-    def values(self) -> np.ndarray:
+    def values(self) -> NDArray[np.floating]:
         """Values as a np.ndarray (equivalent to to_numpy())"""
         return self._values
 
     @values.setter
-    def values(self, value):
+    def values(self, value: NDArray[np.floating] | float) -> None:
         if np.isscalar(self._values):
             if not np.isscalar(value):
                 raise ValueError("Shape of new data is wrong (should be scalar)")
-        elif value.shape != self._values.shape:
+        elif value.shape != self._values.shape:  # type: ignore
             raise ValueError("Shape of new data is wrong")
 
-        self._values = value
+        self._values = value  # type: ignore
 
-    def to_numpy(self) -> np.ndarray:
+    def to_numpy(self) -> NDArray[np.floating]:
         """Values as a np.ndarray (equivalent to values)"""
         return self._values
 
     @property
-    def _has_time_axis(self):
+    def _has_time_axis(self) -> bool:
         return self.dims[0][0] == "t"
 
     def dropna(self) -> "DataArray":
@@ -454,14 +506,14 @@ class DataArray(DataUtilsMixin):
         self.values = np.flip(self.values, axis=first_non_t_axis)
         return self
 
-    def describe(self, **kwargs) -> pd.DataFrame:
+    def describe(self, **kwargs: Any) -> pd.DataFrame:
         """Generate descriptive statistics by wrapping :py:meth:`pandas.DataFrame.describe`
-        
+
         Parameters
         ----------
         **kwargs
             Keyword arguments passed to :py:meth:`pandas.DataFrame.describe`
-        
+
         Returns
         -------
         pd.DataFrame
@@ -509,8 +561,7 @@ class DataArray(DataUtilsMixin):
     #    else:
     #        raise ValueError("Invalid mask")
 
-    def __getitem__(self, key) -> "DataArray":
-
+    def __getitem__(self, key: Any) -> "DataArray":
         da = self
         dims = self.dims
         key = self._getitem_parse_key(key)
@@ -524,7 +575,7 @@ class DataArray(DataUtilsMixin):
                 da = da.isel(k, axis=dims[j])
         return da
 
-    def _getitem_parse_key(self, key):
+    def _getitem_parse_key(self, key: Any) -> Any:
         if isinstance(key, tuple):
             # is it multiindex or just a tuple of indexes for first axis?
             # da[2,3,4] and da[(2,3,4)] both have the key=(2,3,4)
@@ -551,13 +602,18 @@ class DataArray(DataUtilsMixin):
             )
         return key
 
-    def __setitem__(self, key, value):
+    def __setitem__(self, key: Any, value: NDArray[np.floating]) -> None:
         if self._is_boolean_mask(key):
             mask = key if isinstance(key, np.ndarray) else key.values
             return self._set_by_boolean_mask(self._values, mask, value)
         self._values[key] = value
 
-    def isel(self, idx=None, axis=0, **kwargs) -> "DataArray":
+    def isel(
+        self,
+        idx: int | Sequence[int] | slice | None = None,
+        axis: int | str = 0,
+        **kwargs: Any,
+    ) -> "DataArray":
         """Return a new DataArray whose data is given by
         integer indexing along the specified dimension(s).
 
@@ -669,8 +725,9 @@ class DataArray(DataUtilsMixin):
         idx_slice = None
         if isinstance(idx, slice):
             idx_slice = idx
+            assert isinstance(axis, int)
             idx = list(range(*idx.indices(self.shape[axis])))
-        if idx is None or (not np.isscalar(idx) and len(idx) == 0):
+        if idx is None or (not np.isscalar(idx) and len(idx) == 0):  # type: ignore
             raise ValueError(
                 "Empty index is not allowed"
             )  # TODO other option would be to have a NullDataArray
@@ -688,7 +745,8 @@ class DataArray(DataUtilsMixin):
             geometry = GeometryUndefined()
             zn = None
             if hasattr(self.geometry, "isel"):
-                spatial_axis = self._axis_to_spatial_axis(self.dims, axis)
+                assert isinstance(axis, int)
+                spatial_axis = axis - 1 if self.dims[0] == "time" else axis
                 geometry = self.geometry.isel(idx, axis=spatial_axis)
 
             # TOOD this is ugly
@@ -696,7 +754,7 @@ class DataArray(DataUtilsMixin):
                 node_ids, _ = self.geometry._get_nodes_and_table_for_elements(
                     idx, node_layers="all"
                 )
-                zn = self._zn[:, node_ids]
+                zn = self._zn[:, node_ids]  # type: ignore
 
         # reduce dims only if singleton idx
         dims = (
@@ -732,8 +790,8 @@ class DataArray(DataUtilsMixin):
     def sel(
         self,
         *,
-        time: Optional[str | pd.DatetimeIndex | "DataArray"] = None,
-        **kwargs,
+        time: str | pd.DatetimeIndex | "DataArray" | None = None,
+        **kwargs: Any,
     ) -> "DataArray":
         """Return a new DataArray whose data is given by
         selecting index labels along the specified dimension(s).
@@ -841,12 +899,11 @@ class DataArray(DataUtilsMixin):
         """
         if any([isinstance(v, slice) for v in kwargs.values()]):
             return self._sel_with_slice(kwargs)
-        
+
         da = self
 
         # select in space
         if len(kwargs) > 0:
-
             idx = self.geometry.find_index(**kwargs)
             if isinstance(idx, tuple):
                 # TODO: support for dfs3
@@ -870,24 +927,24 @@ class DataArray(DataUtilsMixin):
             da = da[time]  # __getitem__ is 🚀
 
         return da
-    
-    def _sel_with_slice(self, kwargs: Mapping[str,slice]) -> "DataArray":
+
+    def _sel_with_slice(self, kwargs: Mapping[str, slice]) -> "DataArray":
         for k, v in kwargs.items():
             if isinstance(v, slice):
-                idx_start = self.geometry.find_index(**{k:v.start})
-                idx_stop = self.geometry.find_index(**{k:v.stop})
+                idx_start = self.geometry.find_index(**{k: v.start})
+                idx_stop = self.geometry.find_index(**{k: v.stop})
                 pos = 0
                 if isinstance(idx_start, tuple):
                     if k == "x":
                         pos = 0
                     if k == "y":
                         pos = 1
-                
+
                 start = idx_start[pos][0] if idx_start is not None else None
                 stop = idx_stop[pos][0] if idx_stop is not None else None
 
                 idx = slice(start, stop)
-                
+
                 self = self.isel(idx, axis=k)
 
         return self
@@ -896,13 +953,13 @@ class DataArray(DataUtilsMixin):
         # TODO find out optimal syntax to allow interpolation to single point, new time, grid, mesh...
         self,
         # *, # TODO: make this a keyword-only argument in the future
-        time: Optional[pd.DatetimeIndex | "DataArray"] = None,
-        x: Optional[float] = None,
-        y: Optional[float] = None,
-        z: Optional[float] = None,
+        time: pd.DatetimeIndex | "DataArray" | None = None,
+        x: float | None = None,
+        y: float | None = None,
+        z: float | None = None,
         n_nearest: int = 3,
-        interpolant=None,
-        **kwargs,
+        interpolant: Tuple[Any, Any] | None = None,
+        **kwargs: Any,
     ) -> "DataArray":
         """Interpolate data in time and space
 
@@ -954,7 +1011,9 @@ class DataArray(DataUtilsMixin):
         if z is not None:
             raise NotImplementedError()
 
-        geometry: GeometryPoint2D | GeometryPoint3D | GeometryUndefined = GeometryUndefined()
+        geometry: GeometryPoint2D | GeometryPoint3D | GeometryUndefined = (
+            GeometryUndefined()
+        )
 
         # interp in space
         if (x is not None) or (y is not None) or (z is not None):
@@ -990,7 +1049,7 @@ class DataArray(DataUtilsMixin):
                         x=x, y=y, projection=self.geometry.projection
                     )
                 # this is not supported yet (see above)
-                #else:
+                # else:
                 #    geometry = GeometryPoint3D(
                 #        x=x, y=y, z=z, projection=self.geometry.projection
                 #    )
@@ -1009,7 +1068,7 @@ class DataArray(DataUtilsMixin):
 
     def __dataarray_read_item_time_func(
         self, item: int, step: int
-    ) -> Tuple[np.ndarray, float]:
+    ) -> Tuple[NDArray[np.floating], float]:
         "Used by _extract_track"
         # Ignore item argument
         data = self.isel(time=step).to_numpy()
@@ -1017,7 +1076,12 @@ class DataArray(DataUtilsMixin):
 
         return data, time
 
-    def extract_track(self, track, method="nearest", dtype=np.float32):
+    def extract_track(
+        self,
+        track: pd.DataFrame,
+        method: Literal["nearest", "inverse_distance"] = "nearest",
+        dtype: DTypeLike = np.float32,
+    ) -> "Dataset":
         """
         Extract data along a moving track
 
@@ -1040,6 +1104,8 @@ class DataArray(DataUtilsMixin):
         """
         from .._track import _extract_track
 
+        assert self.timestep is not None
+
         return _extract_track(
             deletevalue=self.deletevalue,
             start_time=self.start_time,
@@ -1060,9 +1126,9 @@ class DataArray(DataUtilsMixin):
         self,
         dt: float | pd.DatetimeIndex | "DataArray",
         *,
-        method="linear",
-        extrapolate=True,
-        fill_value=np.nan,
+        method: str = "linear",
+        extrapolate: bool = True,
+        fill_value: float = np.nan,
     ) -> "DataArray":
         """Temporal interpolation
 
@@ -1083,20 +1149,32 @@ class DataArray(DataUtilsMixin):
         -------
         DataArray
         """
+        from scipy.interpolate import interp1d  # type: ignore
+
         t_out_index = self._parse_interp_time(self.time, dt)
         t_in = self.time.values.astype(float)
         t_out = t_out_index.values.astype(float)
 
-        data = self._interpolate_time(
-            t_in, t_out, self.to_numpy(), method, extrapolate, fill_value
-        )
+        data = interp1d(
+            t_in,
+            self.to_numpy(),
+            axis=0,
+            kind=method,
+            bounds_error=not extrapolate,
+            fill_value=fill_value,
+        )(t_out)
 
         zn = (
             None
             if self._zn is None
-            else self._interpolate_time(
-                t_in, t_out, self._zn, method, extrapolate, fill_value
-            )
+            else interp1d(
+                t_in,
+                self._zn,
+                axis=0,
+                kind=method,
+                bounds_error=not extrapolate,
+                fill_value=fill_value,
+            )(t_out)
         )
 
         return DataArray(
@@ -1107,7 +1185,7 @@ class DataArray(DataUtilsMixin):
             zn=zn,
         )
 
-    def interp_na(self, axis="time", **kwargs) -> "DataArray":
+    def interp_na(self, axis: str = "time", **kwargs: Any) -> "DataArray":
         """Fill in NaNs by interpolating according to different methods.
 
         Wrapper of :py:meth:`xarray.DataArray.interpolate_na`
@@ -1138,8 +1216,8 @@ class DataArray(DataUtilsMixin):
     def interp_like(
         self,
         other: "DataArray" | Grid2D | GeometryFM2D | pd.DatetimeIndex,
-        interpolant=None,
-        **kwargs,
+        interpolant: Tuple[Any, Any] | None = None,
+        **kwargs: Any,
     ) -> "DataArray":
         """Interpolate in space (and in time) to other geometry (and time axis)
 
@@ -1210,10 +1288,14 @@ class DataArray(DataUtilsMixin):
         if hasattr(other, "time"):
             dai = dai.interp_time(other.time)
 
+        assert isinstance(dai, DataArray)
+
         return dai
 
     @staticmethod
-    def concat(dataarrays: Sequence["DataArray"], keep="last") -> "DataArray":
+    def concat(
+        dataarrays: Sequence["DataArray"], keep: Literal["last"] = "last"
+    ) -> "DataArray":
         """Concatenate DataArrays along the time axis
 
         Parameters
@@ -1249,7 +1331,7 @@ class DataArray(DataUtilsMixin):
 
     # ============= Aggregation methods ===========
 
-    def max(self, axis=0, **kwargs) -> "DataArray":
+    def max(self, axis: int | str = 0, **kwargs: Any) -> "DataArray":
         """Max value along an axis
 
         Parameters
@@ -1268,7 +1350,7 @@ class DataArray(DataUtilsMixin):
         """
         return self.aggregate(axis=axis, func=np.max, **kwargs)
 
-    def min(self, axis=0, **kwargs) -> "DataArray":
+    def min(self, axis: int | str = 0, **kwargs: Any) -> "DataArray":
         """Min value along an axis
 
         Parameters
@@ -1287,7 +1369,7 @@ class DataArray(DataUtilsMixin):
         """
         return self.aggregate(axis=axis, func=np.min, **kwargs)
 
-    def mean(self, axis=0, **kwargs) -> "DataArray":
+    def mean(self, axis: int | str = 0, **kwargs: Any) -> "DataArray":
         """Mean value along an axis
 
         Parameters
@@ -1306,7 +1388,7 @@ class DataArray(DataUtilsMixin):
         """
         return self.aggregate(axis=axis, func=np.mean, **kwargs)
 
-    def std(self, axis=0, **kwargs) -> "DataArray":
+    def std(self, axis: int | str = 0, **kwargs: Any) -> "DataArray":
         """Standard deviation values along an axis
 
         Parameters
@@ -1325,7 +1407,7 @@ class DataArray(DataUtilsMixin):
         """
         return self.aggregate(axis=axis, func=np.std, **kwargs)
 
-    def ptp(self, axis=0, **kwargs) -> "DataArray":
+    def ptp(self, axis: int | str = 0, **kwargs: Any) -> "DataArray":
         """Range (max - min) a.k.a Peak to Peak along an axis
 
         Parameters
@@ -1340,7 +1422,9 @@ class DataArray(DataUtilsMixin):
         """
         return self.aggregate(axis=axis, func=np.ptp, **kwargs)
 
-    def average(self, weights, axis=0, **kwargs) -> "DataArray":
+    def average(
+        self, weights: NDArray[np.floating], axis: int | str = 0, **kwargs: Any
+    ) -> "DataArray":
         """Compute the weighted average along the specified axis.
 
         Parameters
@@ -1365,7 +1449,7 @@ class DataArray(DataUtilsMixin):
         >>> da2 = da.average(axis="space", weights=area)
         """
 
-        def func(x, axis, keepdims):
+        def func(x, axis, keepdims):  # type: ignore
             if keepdims:
                 raise NotImplementedError()
 
@@ -1373,7 +1457,7 @@ class DataArray(DataUtilsMixin):
 
         return self.aggregate(axis=axis, func=func, **kwargs)
 
-    def nanmax(self, axis=0, **kwargs) -> "DataArray":
+    def nanmax(self, axis: int | str = 0, **kwargs: Any) -> "DataArray":
         """Max value along an axis (NaN removed)
 
         Parameters
@@ -1392,7 +1476,7 @@ class DataArray(DataUtilsMixin):
         """
         return self.aggregate(axis=axis, func=np.nanmax, **kwargs)
 
-    def nanmin(self, axis=0, **kwargs) -> "DataArray":
+    def nanmin(self, axis: int | str = 0, **kwargs: Any) -> "DataArray":
         """Min value along an axis (NaN removed)
 
         Parameters
@@ -1411,7 +1495,7 @@ class DataArray(DataUtilsMixin):
         """
         return self.aggregate(axis=axis, func=np.nanmin, **kwargs)
 
-    def nanmean(self, axis=0, **kwargs) -> "DataArray":
+    def nanmean(self, axis: int | str = 0, **kwargs: Any) -> "DataArray":
         """Mean value along an axis (NaN removed)
 
         Parameters
@@ -1430,7 +1514,7 @@ class DataArray(DataUtilsMixin):
         """
         return self.aggregate(axis=axis, func=np.nanmean, **kwargs)
 
-    def nanstd(self, axis=0, **kwargs) -> "DataArray":
+    def nanstd(self, axis: int | str = 0, **kwargs: Any) -> "DataArray":
         """Standard deviation value along an axis (NaN removed)
 
         Parameters
@@ -1449,7 +1533,9 @@ class DataArray(DataUtilsMixin):
         """
         return self.aggregate(axis=axis, func=np.nanstd, **kwargs)
 
-    def aggregate(self, axis=0, func=np.nanmean, **kwargs) -> "DataArray":
+    def aggregate(
+        self, axis: int | str = 0, func: Callable[..., Any] = np.nanmean, **kwargs: Any
+    ) -> "DataArray":
         """Aggregate along an axis
 
         Parameters
@@ -1473,14 +1559,12 @@ class DataArray(DataUtilsMixin):
         axis = self._parse_axis(self.shape, self.dims, axis)
         time = self._time_by_agg_axis(self.time, axis)
 
-        
         if isinstance(axis, int):
             axes = (axis,)
         else:
             axes = axis
 
         dims = tuple([d for i, d in enumerate(self.dims) if i not in axes])
-        
 
         item = deepcopy(self.item)
         if "name" in kwargs:
@@ -1507,7 +1591,17 @@ class DataArray(DataUtilsMixin):
             zn=zn,
         )
 
-    def quantile(self, q, *, axis=0, **kwargs):
+    @overload
+    def quantile(self, q: float, **kwargs: Any) -> "DataArray":
+        ...
+
+    @overload
+    def quantile(self, q: Sequence[float], **kwargs: Any) -> "Dataset":
+        ...
+
+    def quantile(
+        self, q: float | Sequence[float], *, axis: int | str = 0, **kwargs: Any
+    ) -> "DataArray" | "Dataset":
         """Compute the q-th quantile of the data along the specified axis.
 
         Wrapping np.quantile
@@ -1537,7 +1631,17 @@ class DataArray(DataUtilsMixin):
         """
         return self._quantile(q, axis=axis, func=np.quantile, **kwargs)
 
-    def nanquantile(self, q, *, axis=0, **kwargs):
+    @overload
+    def nanquantile(self, q: float, **kwargs: Any) -> "DataArray":
+        ...
+
+    @overload
+    def nanquantile(self, q: Sequence[float], **kwargs: Any) -> "Dataset":
+        ...
+
+    def nanquantile(
+        self, q: float | Sequence[float], *, axis: int | str = 0, **kwargs: Any
+    ) -> "DataArray" | "Dataset":
         """Compute the q-th quantile of the data along the specified axis, while ignoring nan values.
 
         Wrapping np.nanquantile
@@ -1567,11 +1671,11 @@ class DataArray(DataUtilsMixin):
         """
         return self._quantile(q, axis=axis, func=np.nanquantile, **kwargs)
 
-    def _quantile(self, q, *, axis=0, func=np.quantile, **kwargs):
-
+    def _quantile(self, q, *, axis: int | str = 0, func=np.quantile, **kwargs: Any):  # type: ignore
         from mikeio import Dataset
 
         axis = self._parse_axis(self.shape, self.dims, axis)
+        assert isinstance(axis, int)
         time = self._time_by_agg_axis(self.time, axis)
 
         if np.isscalar(q):
@@ -1638,7 +1742,7 @@ class DataArray(DataUtilsMixin):
     def _apply_unary_math_operation(self, func) -> "DataArray":
         try:
             data = func(self.values)
-        
+
         except TypeError:
             raise TypeError("Math operation could not be applied to DataArray")
 
@@ -1734,7 +1838,7 @@ class DataArray(DataUtilsMixin):
             {self.name: self}
         )  # Single-item Dataset (All info is contained in the DataArray, no need for additional info)
 
-    def to_dfs(self, filename, **kwargs) -> None:
+    def to_dfs(self, filename, **kwargs: Any) -> None:
         """Write data to a new dfs file
 
         Parameters
@@ -1778,12 +1882,12 @@ class DataArray(DataUtilsMixin):
 
         return pd.Series(data=self.to_numpy(), index=self.time, name=self.name)
 
-    def to_xarray(self):
+    def to_xarray(self) -> "xarray.DataArray":
         """Export to xarray.DataArray"""
 
         import xarray as xr
 
-        coords = {}
+        coords: MutableMapping[str, Any] = {}
         if self._has_time_axis:
             coords["time"] = xr.DataArray(self.time, dims="time")
 
@@ -1825,7 +1929,6 @@ class DataArray(DataUtilsMixin):
     # ===============================================
 
     def __repr__(self) -> str:
-
         out = ["<mikeio.DataArray>"]
         if self.name is not None:
             out.append(f"name: {self.name}")
@@ -1858,7 +1961,6 @@ class DataArray(DataUtilsMixin):
         return f"geometry: {self.geometry}"
 
     def _values_txt(self) -> str:
-
         if self.ndim == 0 or (self.ndim == 1 and len(self.values) == 1):
             return f"values: {self.values}"
         elif self.ndim == 1 and len(self.values) < 5:
@@ -1868,3 +1970,107 @@ class DataArray(DataUtilsMixin):
             return f"values: [{self.values[0]:0.4g}, {self.values[1]:0.4g}, ..., {self.values[-1]:0.4g}]"
         else:
             return ""  # raise NotImplementedError()
+
+    @staticmethod
+    def _parse_interp_time(
+        old_time: pd.DatetimeIndex, new_time: Any
+    ) -> pd.DatetimeIndex:
+        if isinstance(new_time, pd.DatetimeIndex):
+            t_out_index = new_time
+        elif hasattr(new_time, "time"):
+            t_out_index = pd.DatetimeIndex(new_time.time)
+        else:
+            # offset = pd.tseries.offsets.DateOffset(seconds=new_time) # This seems identical, but doesn't work with slicing
+            offset = pd.Timedelta(seconds=new_time)
+            t_out_index = pd.date_range(
+                start=old_time[0], end=old_time[-1], freq=offset
+            )
+
+        return t_out_index
+
+    @staticmethod
+    def _time_by_agg_axis(
+        time: pd.DatetimeIndex, axis: int | Sequence[int]
+    ) -> pd.DatetimeIndex:
+        """New DatetimeIndex after aggregating over time axis"""
+        if axis == 0 or (isinstance(axis, Sequence) and 0 in axis):
+            time = pd.DatetimeIndex([time[0]])
+
+        return time
+
+    @staticmethod
+    def _get_time_idx_list(time: pd.DatetimeIndex, steps):
+        """Find list of idx in DatetimeIndex"""
+
+        return _get_time_idx_list(time, steps)
+
+    @staticmethod
+    def _n_selected_timesteps(time: Sized, k: slice | Sized) -> int:
+        return _n_selected_timesteps(time, k)
+
+    @staticmethod
+    def _is_boolean_mask(x) -> bool:
+        if hasattr(x, "dtype"):  # isinstance(x, (np.ndarray, DataArray)):
+            return x.dtype == np.dtype("bool")
+        return False
+
+    @staticmethod
+    def _get_by_boolean_mask(data: np.ndarray, mask: np.ndarray) -> np.ndarray:
+        if data.shape != mask.shape:
+            return data[np.broadcast_to(mask, data.shape)]
+        return data[mask]
+
+    @staticmethod
+    def _set_by_boolean_mask(data: np.ndarray, mask: np.ndarray, value) -> None:
+        if data.shape != mask.shape:
+            data[np.broadcast_to(mask, data.shape)] = value
+        else:
+            data[mask] = value
+
+    @staticmethod
+    def _parse_time(time) -> pd.DatetimeIndex:
+        """Allow anything that we can create a DatetimeIndex from"""
+        if time is None:
+            time = [pd.Timestamp(2018, 1, 1)]  # TODO is this the correct epoch?
+        if isinstance(time, str) or (not isinstance(time, Iterable)):
+            time = [time]
+
+        if not isinstance(time, pd.DatetimeIndex):
+            index = pd.DatetimeIndex(time)
+        else:
+            index = time
+
+        if not index.is_monotonic_increasing:
+            raise ValueError(
+                "Time must be monotonic increasing (only equal or increasing) instances."
+            )
+        assert isinstance(index, pd.DatetimeIndex)
+        return index
+
+    @staticmethod
+    def _parse_axis(data_shape, dims, axis) -> int | Tuple[int]:
+        # TODO change to return tuple always
+        # axis = 0 if axis == "time" else axis
+        if (axis == "spatial") or (axis == "space"):
+            if len(data_shape) == 1:
+                if dims[0][0] == "t":
+                    raise ValueError(f"space axis cannot be selected from dims {dims}")
+                return 0
+            if "frequency" in dims or "directions" in dims:
+                space_name = "node" if "node" in dims else "element"
+                return dims.index(space_name)
+            else:
+                axis = 1 if (len(data_shape) == 2) else tuple(range(1, len(data_shape)))
+        if axis is None:
+            axis = 0 if (len(data_shape) == 1) else tuple(range(0, len(data_shape)))
+
+        if isinstance(axis, str):
+            axis = "time" if axis == "t" else axis
+            if axis in dims:
+                return dims.index(axis)
+            else:
+                raise ValueError(
+                    f"axis argument '{axis}' not supported! Must be None, int, list of int or 'time' or 'space'"
+                )
+
+        return axis

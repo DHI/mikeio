@@ -1,6 +1,5 @@
 from __future__ import annotations
 from pathlib import Path
-from datetime import datetime
 from typing import Callable, Sequence, Tuple
 
 import numpy as np
@@ -15,8 +14,8 @@ from .spatial import GeometryFM2D
 def _extract_track(
     *,
     deletevalue: float,
-    start_time: datetime,
-    end_time: datetime,
+    start_time: pd.Timestamp,
+    end_time: pd.Timestamp,
     timestep: float,
     geometry: GeometryFM2D,
     track: str | Dataset | pd.DataFrame,

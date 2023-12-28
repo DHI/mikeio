@@ -1,3 +1,4 @@
+from __future__ import annotations
 from pathlib import Path
 
 from mikecore.DfsFactory import DfsBuilder, DfsFactory
@@ -15,12 +16,12 @@ from ..eum import TimeStepUnit
 from ..spatial import Grid1D
 
 
-def write_dfs1(filename: str, ds: Dataset, title="") -> None:
+def write_dfs1(filename: str | Path, ds: Dataset, title="") -> None:
     dfs = _write_dfs1_header(filename, ds, title)
     _write_dfs_data(dfs=dfs, ds=ds, n_spatial_dims=1)
 
 
-def _write_dfs1_header(filename, ds: Dataset, title="") -> DfsFile:
+def _write_dfs1_header(filename: str | Path, ds: Dataset, title="") -> DfsFile:
     builder = DfsBuilder.Create(title, "mikeio", __dfs_version__)
     builder.SetDataType(0)
 
@@ -54,7 +55,7 @@ def _write_dfs1_header(filename, ds: Dataset, title="") -> DfsFile:
         )
 
     try:
-        builder.CreateFile(filename)
+        builder.CreateFile(str(filename))
     except IOError:
         print("cannot create dfs file: ", filename)
 

@@ -104,30 +104,6 @@ def test_properties(ds1):
     assert isinstance(ds1.items[0], ItemInfo)
 
 
-def test_pop(ds1):
-    da = ds1.pop("Foo")
-    assert len(ds1) == 1
-    assert ds1.names == ["Bar"]
-    assert isinstance(da, mikeio.DataArray)
-    assert da.name == "Foo"
-
-    ds1["Foo2"] = da  # re-insert
-    assert len(ds1) == 2
-
-    da = ds1.pop(-1)
-    assert len(ds1) == 1
-    assert ds1.names == ["Bar"]
-    assert isinstance(da, mikeio.DataArray)
-    assert da.name == "Foo2"
-
-
-def test_popitem(ds1):
-    da = ds1.popitem()
-    assert len(ds1) == 1
-    assert ds1.names == ["Bar"]
-    assert isinstance(da, mikeio.DataArray)
-    assert da.name == "Foo"
-
 
 def test_insert(ds1):
     da = ds1[0].copy()
@@ -137,12 +113,6 @@ def test_insert(ds1):
     assert len(ds1) == 3
     assert ds1.names == ["Foo", "Bar", "Baz"]
     assert ds1[-1] == da
-
-
-def test_insert_wrong_type(ds1):
-
-    with pytest.raises(ValueError):
-        ds1["Foo"] = "Bar"
 
 
 def test_insert_fail(ds1):

@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 import pytest
 
 import mikeio
-from mikeio import EUMType, EUMUnit, ItemInfo
+from mikeio import EUMType, EUMUnit, ItemInfo, Mesh
 from mikeio.exceptions import OutsideModelDomainError
 
 
@@ -372,8 +372,8 @@ def test_dataarray_init_dfsu2d():
     nt = 10
     time = pd.date_range(start="2000-01-01", freq="S", periods=nt)
     filename = "tests/testdata/north_sea_2.mesh"
-    dfs = mikeio.open(filename)
-    g = dfs.geometry
+    msh = Mesh(filename)
+    g = msh.geometry
     ne = g.n_elements
 
     # time-varying
@@ -844,7 +844,7 @@ def test_modify_values_1d(da1):
     assert da1.values[4] == 12.0
 
     # values is scalar, therefore copy by definition. Original is not changed.
-    da1.isel(4).values = 11.0
+    da1.isel(4).values = 11.0 # TODO is the treatment of scalar sensible, i.e. consistent with xarray?
     assert da1.values[4] != 11.0
 
     # fancy indexing will return copy! Original is *not* changed.

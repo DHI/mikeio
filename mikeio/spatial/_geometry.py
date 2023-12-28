@@ -8,13 +8,12 @@ BoundingBox = namedtuple("BoundingBox", ["left", "bottom", "right", "top"])
 
 
 class _Geometry(ABC):
-    def __init__(self, projection=None) -> None:
+    def __init__(self, projection: str = "LONG/LAT") -> None:
 
-        # TODO should projection be a mandatory argument?
-        if projection and not MapProjection.IsValid(projection):
+        if not MapProjection.IsValid(projection):
             raise ValueError(f"{projection=} is not a valid projection string")
 
-        self._projstr = projection if projection else "LONG/LAT"
+        self._projstr = projection
 
     @property
     def projection_string(self) -> str:
@@ -48,7 +47,7 @@ class GeometryUndefined:
 
 
 class GeometryPoint2D(_Geometry):
-    def __init__(self, x: float, y: float, projection=None):
+    def __init__(self, x: float, y: float, projection:str = "LONG/LAT"):
         super().__init__(projection)
         self.x = x
         self.y = y
@@ -76,7 +75,7 @@ class GeometryPoint2D(_Geometry):
 
 
 class GeometryPoint3D(_Geometry):
-    def __init__(self, x: float, y: float, z: float, projection=None):
+    def __init__(self, x: float, y: float, z: float, projection:str = "LONG/LAT"):
         super().__init__(projection)
 
         self.x = x

@@ -1,17 +1,23 @@
+from __future__ import annotations
+from typing import Any, Tuple, TYPE_CHECKING
+
 import numpy as np
+from matplotlib.axes import Axes
 
 from ..spatial._FM_utils import _plot_map, _plot_vertical_profile
 
 from .._spectral import plot_2dspectrum
 
+if TYPE_CHECKING:
+    from ..dataset import DataArray
 
 class _DataArrayPlotter:
     """Context aware plotter (sensible plotting according to geometry)"""
 
-    def __init__(self, da) -> None:
+    def __init__(self, da: "DataArray") -> None:
         self.da = da
 
-    def __call__(self, ax=None, figsize=None, **kwargs):
+    def __call__(self, ax:Axes | None=None, figsize=None, **kwargs):
         """Plot DataArray according to geometry
 
         Parameters
@@ -59,7 +65,7 @@ class _DataArrayPlotter:
             fig = plt.gcf()
         return fig, ax
 
-    def hist(self, ax=None, figsize=None, title=None, **kwargs):
+    def hist(self, ax: Axes| None=None, figsize:Tuple[float,float] | None=None, title: str | None=None, **kwargs: Any) -> Axes:
         """Plot DataArray as histogram (using ax.hist)
 
         Parameters
@@ -91,7 +97,7 @@ class _DataArrayPlotter:
             ax.set_title(title)
         return self._hist(ax, **kwargs)
 
-    def _hist(self, ax, **kwargs):
+    def _hist(self, ax: Axes, **kwargs):
         result = ax.hist(self.da.values.ravel(), **kwargs)
         ax.set_xlabel(self._label_txt())
         return result

@@ -2,7 +2,7 @@ from __future__ import annotations
 import warnings
 from collections import namedtuple
 from functools import cached_property
-from typing import Collection, Optional, List
+from typing import Collection, List, Any
 
 import numpy as np
 from mikecore.DfsuFile import DfsuFileType  # type: ignore
@@ -121,7 +121,6 @@ class _GeometryFMPlotter:
         return ax
 
     def _plot_FM_map(self, ax, **kwargs):
-
         if "title" not in kwargs:
             kwargs["title"] = "Bathymetry"
 
@@ -236,7 +235,7 @@ class _GeometryFM(_Geometry):
         node_coordinates,
         element_table,
         codes=None,
-        projection=None,
+        projection: str = "LONG/LAT",
         dfsu_type=None,  # TODO should this be mandatory?
         element_ids=None,
         node_ids=None,
@@ -267,7 +266,6 @@ class _GeometryFM(_Geometry):
             self._reindex()
 
     def _check_elements(self, element_table, element_ids=None, validate=True):
-
         if validate:
             max_node_id = self._node_ids.max()
             for i, e in enumerate(element_table):
@@ -352,7 +350,7 @@ class GeometryFM2D(_GeometryFM):
         node_coordinates,
         element_table,
         codes=None,
-        projection=None,
+        projection: str = "LONG/LAT",
         dfsu_type=DfsuFileType.Dfsu2D,  # Reasonable default?
         element_ids=None,
         node_ids=None,
@@ -374,7 +372,6 @@ class GeometryFM2D(_GeometryFM):
         self.plot = _GeometryFMPlotter(self)
 
     def __str__(self) -> str:
-
         return f"{self.type_name} ({self.n_elements} elements, {self.n_nodes} nodes)"
 
     def __repr__(self):
@@ -565,7 +562,7 @@ class GeometryFM2D(_GeometryFM):
         n_nearest: int = 5,
         extrapolate: bool = False,
         p: int = 2,
-        radius: Optional[float] = None,
+        radius: float | None = None,
     ):
         """IDW interpolant for list of coordinates
 
@@ -595,16 +592,16 @@ class GeometryFM2D(_GeometryFM):
         if n_nearest == 1:
             weights = np.ones(dists.shape)
             if not extrapolate:
-                weights[~self.contains(xy)] = np.nan # type: ignore
+                weights[~self.contains(xy)] = np.nan  # type: ignore
         elif n_nearest > 1:
             weights = get_idw_interpolant(dists, p=p)
             if not extrapolate:
-                weights[~self.contains(xy), :] = np.nan # type: ignore
+                weights[~self.contains(xy), :] = np.nan  # type: ignore
         else:
             ValueError("n_nearest must be at least 1")
 
         if radius is not None:
-            weights[dists > radius] = np.nan # type: ignore
+            weights[dists > radius] = np.nan  # type: ignore
 
         return ids, weights
 
@@ -636,9 +633,8 @@ class GeometryFM2D(_GeometryFM):
         """
         return interp2d(data, elem_ids, weights, shape)
 
-    def _find_n_nearest_2d_elements(self, x, y=None, n=1):
-
-        # TODO
+    def _find_n_nearest_2d_elements(self, x, y=None, n=1) -> tuple[Any, Any]:
+        # TODO return arguments in the same order than cKDTree.query?
 
         if n > self.n_elements:
             raise ValueError(
@@ -655,7 +651,6 @@ class GeometryFM2D(_GeometryFM):
         return elem_id, d
 
     def _find_element_2d(self, coords: np.ndarray):
-
         points_outside = []
 
         coords = np.atleast_2d(coords)
@@ -711,7 +706,6 @@ class GeometryFM2D(_GeometryFM):
         return ids
 
     def _find_single_element_2d(self, x: float, y: float) -> int:
-
         nc = self.node_coordinates
 
         few_nearest, _ = self._find_n_nearest_2d_elements(
@@ -1106,9 +1100,8 @@ class GeometryFM2D(_GeometryFM):
     def elements_to_geometry(
         self, elements: int | Collection[int], keepdims=False
     ) -> "GeometryFM2D" | GeometryPoint2D:
-        
-        if isinstance(elements, (int,np.integer)):
-            sel_elements : List[int] = [elements]
+        if isinstance(elements, (int, np.integer)):
+            sel_elements: List[int] = [elements]
         else:
             sel_elements = list(elements)
         if len(sel_elements) == 1 and not keepdims:
@@ -1236,7 +1229,7 @@ class GeometryFM(GeometryFM2D):
         node_coordinates,
         element_table,
         codes=None,
-        projection=None,
+        projection: str = "LONG/LAT",
         dfsu_type=None,
         element_ids=None,
         node_ids=None,
@@ -1264,7 +1257,7 @@ class _GeometryFMSpectrum(GeometryFM2D):
         node_coordinates,
         element_table,
         codes=None,
-        projection=None,
+        projection: str = "LONG/LAT",
         dfsu_type=None,
         element_ids=None,
         node_ids=None,
@@ -1314,9 +1307,7 @@ class GeometryFMAreaSpectrum(_GeometryFMSpectrum):
     def isel(self, idx=None, axis="elements"):
         return self.elements_to_geometry(elements=idx)
 
-    def elements_to_geometry(
-        self, elements, keepdims=False
-    ):
+    def elements_to_geometry(self, elements, keepdims=False):
         """export a selection of elements to new flexible file geometry
         Parameters
         ----------
@@ -1364,9 +1355,7 @@ class GeometryFMLineSpectrum(_GeometryFMSpectrum):
     def isel(self, idx=None, axis="node"):
         return self._nodes_to_geometry(nodes=idx)
 
-    def _nodes_to_geometry(
-        self, nodes
-    ):
+    def _nodes_to_geometry(self, nodes):
         """export a selection of nodes to new flexible file geometry
         Note: takes only the elements for which all nodes are selected
         Parameters

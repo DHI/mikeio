@@ -4,7 +4,7 @@ from pathlib import Path
 import warnings
 from datetime import datetime, timedelta
 from functools import wraps
-from typing import Collection, List, Optional, Tuple
+from typing import Collection, List, Tuple
 
 import numpy as np
 import pandas as pd
@@ -40,7 +40,7 @@ from .._track import _extract_track
 from ._common import get_elements_from_source, get_nodes_from_source
 
 
-def _write_dfsu(filename: str, data: Dataset):
+def _write_dfsu(filename: str | Path, data: Dataset) -> None:
     filename = str(filename)
 
     if len(data.time) == 1:
@@ -90,6 +90,7 @@ def _write_dfsu(filename: str, data: Dataset):
     for i in range(n_time_steps):
         if geometry.is_layered:
             if "time" in data.dims:
+                assert data._zn is not None
                 zn = data._zn[i]
             else:
                 zn = data._zn
@@ -211,7 +212,7 @@ class _Dfsu:
                 frequencies=frequencies, directions=directions
             )
         else:
-            #nc, codes, node_ids = get_nodes_from_source(dfs)
+            # nc, codes, node_ids = get_nodes_from_source(dfs)
             node_table = get_nodes_from_source(dfs)
             el_table = get_elements_from_source(dfs)
 
@@ -636,7 +637,7 @@ class _Dfsu:
         *,
         items=None,
         time=None,
-        elements: Optional[Collection[int]] = None,
+        elements: Collection[int] | None = None,
         area=None,
         x=None,
         y=None,
@@ -1188,7 +1189,7 @@ class Dfsu2DH(_Dfsu):
         *,
         items=None,
         time=None,
-        elements: Optional[Collection[int]] = None,
+        elements: Collection[int] | None = None,
         area=None,
         x=None,
         y=None,

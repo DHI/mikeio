@@ -1,14 +1,16 @@
+from __future__ import annotations
+from pathlib import Path
 from typing import Tuple
 
 import numpy as np
 import pandas as pd
 
-from mikecore.DfsBuilder import DfsBuilder  # type: ignore
-from mikecore.DfsFactory import DfsFactory  # type: ignore
-from mikecore.DfsFile import DfsFile, DfsSimpleType  # type: ignore
-from mikecore.DfsFileFactory import DfsFileFactory  # type: ignore
-from mikecore.eum import eumQuantity, eumUnit  # type: ignore
-from mikecore.Projections import Cartography  # type: ignore
+from mikecore.DfsBuilder import DfsBuilder
+from mikecore.DfsFactory import DfsFactory
+from mikecore.DfsFile import DfsFile, DfsSimpleType
+from mikecore.DfsFileFactory import DfsFileFactory
+from mikecore.eum import eumQuantity, eumUnit
+from mikecore.Projections import Cartography
 
 from .. import __dfs_version__
 from ..dataset import Dataset
@@ -23,12 +25,12 @@ from ..eum import TimeStepUnit
 from ..spatial import Grid3D
 
 
-def write_dfs3(filename: str, ds: Dataset, title="") -> None:
+def write_dfs3(filename: str| Path, ds: Dataset, title="") -> None:
     dfs = _write_dfs3_header(filename, ds, title)
     _write_dfs_data(dfs=dfs, ds=ds, n_spatial_dims=3)
 
 
-def _write_dfs3_header(filename, ds: Dataset, title="") -> DfsFile:
+def _write_dfs3_header(filename: str | Path, ds: Dataset, title="") -> DfsFile:
     builder = DfsBuilder.Create(title, "mikeio", __dfs_version__)
     builder.SetDataType(0)
 
@@ -75,7 +77,7 @@ def _write_dfs3_header(filename, ds: Dataset, title="") -> DfsFile:
         )
 
     try:
-        builder.CreateFile(filename)
+        builder.CreateFile(str(filename))
     except IOError:
         print("cannot create dfs file: ", filename)
 
