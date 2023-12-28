@@ -5,19 +5,23 @@ import pathlib
 from copy import deepcopy
 from datetime import datetime, timedelta
 from shutil import copyfile
-from typing import Iterable, List, Optional, Sequence
+from typing import Iterable, List, Optional, Sequence, Any, Tuple, Union, TypeAlias
 
 import numpy as np
+from numpy.typing import NDArray
 import pandas as pd
-from mikecore.DfsBuilder import DfsBuilder  # type: ignore
-from mikecore.DfsFile import DfsDynamicItemInfo, DfsFile  # type: ignore
-from mikecore.DfsFileFactory import DfsFileFactory  # type: ignore
-from mikecore.eum import eumQuantity  # type: ignore
+from mikecore.DfsBuilder import DfsBuilder
+from mikecore.DfsFile import DfsDynamicItemInfo, DfsFile, DfsEqTimeAxis, DfsNonEqTimeAxis, DfsEqCalendarAxis, DfsNonEqCalendarAxis
+from mikecore.DfsFileFactory import DfsFileFactory
+from mikecore.eum import eumQuantity
 from tqdm import tqdm, trange
 
 from . import __dfs_version__
 from .dfs._dfs import _get_item_info, _valid_item_numbers
 from .eum import ItemInfo
+
+
+TimeAxis : TypeAlias = Union[DfsEqTimeAxis, DfsNonEqTimeAxis, DfsEqCalendarAxis, DfsNonEqCalendarAxis]
 
 show_progress = True
 
@@ -52,15 +56,14 @@ class _ChunkInfo:
     """
 
     def __init__(self, n_data: int, n_chunks: int):
-
         self.n_data = n_data
         self.n_chunks = n_chunks
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"_ChunkInfo(n_chunks={self.n_chunks}, n_data={self.n_data}, chunk_size={self.chunk_size})"
 
     @property
-    def chunk_size(self):
+    def chunk_size(self) -> int:
         """number of data points per chunk"""
         return math.ceil(self.n_data / self.n_chunks)
 
@@ -68,7 +71,7 @@ class _ChunkInfo:
         """Return the stop index for a chunk"""
         return min(start + self.chunk_size, self.n_data)
 
-    def chunk_end(self, start):
+    def chunk_end(self, start: int) -> int:
         """Return the end index for a chunk"""
         e2 = self.stop(start)
         return self.chunk_size - ((start + self.chunk_size) - e2)
@@ -80,7 +83,7 @@ class _ChunkInfo:
         """Calculate chunk info based on # of elements in dfs file and selected buffer size"""
 
         n_time_steps = dfs.FileInfo.TimeAxis.NumberOfTimeSteps
-        n_data_all = np.sum([dfs.ItemInfo[i].ElementCount for i in item_numbers])
+        n_data_all: int = np.sum([dfs.ItemInfo[i].ElementCount for i in item_numbers])
         mem_need = 8 * n_time_steps * n_data_all  # n_items *
         n_chunks = math.ceil(mem_need / buffer_size)
         n_data = n_data_all // len(item_numbers)
@@ -91,9 +94,9 @@ class _ChunkInfo:
 def _clone(
     infilename: str | pathlib.Path,
     outfilename: str | pathlib.Path,
-    start_time=None,
-    timestep=None,
-    items=None,
+    start_time: datetime | None = None,
+    timestep: float | None = None,
+    items: Sequence[int | str] | None = None,
 ) -> DfsFile:
     """Clone a dfs file
 
@@ -228,7 +231,6 @@ def scale(
 
     for timestep in trange(n_time_steps, disable=not show_progress):
         for item in range(n_items):
-
             itemdata = dfs.ReadItemTimeStep(item_numbers[item] + 1, timestep)
             time = itemdata.Time
             d = itemdata.Data
@@ -282,7 +284,6 @@ def fill_corrupt(
 
     for timestep in trange(n_time_steps, disable=not show_progress):
         for item in range(n_items):
-
             itemdata = dfs_i.ReadItemTimeStep(item_numbers[item] + 1, timestep)
             if itemdata is not None:
                 time = itemdata.Time
@@ -339,7 +340,6 @@ def sum(
 
     for timestep in trange(n_time_steps):
         for item in range(n_items):
-
             itemdata_a = dfs_i_a.ReadItemTimeStep(item + 1, timestep)
             d_a = itemdata_a.Data
             d_a[d_a == deletevalue] = np.nan
@@ -394,7 +394,6 @@ def diff(
 
     for timestep in trange(n_time_steps):
         for item in range(n_items):
-
             itemdata_a = dfs_i_a.ReadItemTimeStep(item + 1, timestep)
             d_a = itemdata_a.Data
             d_a[d_a == deletevalue] = np.nan
@@ -419,7 +418,7 @@ def diff(
 def concat(
     infilenames: Sequence[str | pathlib.Path],
     outfilename: str | pathlib.Path,
-    keep="last",
+    keep: str = "last",
 ) -> None:
     """Concatenates files along the time axis
 
@@ -451,7 +450,6 @@ def concat(
     current_time = datetime(1, 1, 1)  # beginning of time...
 
     for i, infilename in enumerate(tqdm(infilenames, disable=not show_progress)):
-
         dfs_i = DfsFileFactory.DfsGenericOpen(str(infilename))
         t_axis = dfs_i.FileInfo.TimeAxis
         n_time_steps = t_axis.NumberOfTimeSteps
@@ -466,7 +464,6 @@ def concat(
         current_time = start_time
 
         if keep == "last":
-
             if i < (len(infilenames) - 1):
                 dfs_n = DfsFileFactory.DfsGenericOpen(str(infilenames[i + 1]))
                 nf = dfs_n.FileInfo.TimeAxis.StartDateTime
@@ -476,14 +473,12 @@ def concat(
                 dfs_n.Close()
 
             for timestep in range(n_time_steps):
-
                 current_time = start_time + timedelta(seconds=timestep * dt)
                 if i < (len(infilenames) - 1):
                     if current_time >= next_start_time:
                         break
 
                 for item in range(n_items):
-
                     itemdata = dfs_i.ReadItemTimeStep(item + 1, timestep)
                     d = itemdata.Data
 
@@ -493,7 +488,6 @@ def concat(
             dfs_i.Close()
 
         if keep == "first":
-
             if (
                 i == 0
             ):  # all timesteps in first file are kept (is there a more efficient way to do this without the loop?)
@@ -501,7 +495,6 @@ def concat(
                     current_time = start_time + timedelta(seconds=timestep * dt)
 
                     for item in range(n_items):
-
                         itemdata = dfs_i.ReadItemTimeStep(item + 1, timestep)
                         d = itemdata.Data
 
@@ -523,7 +516,6 @@ def concat(
                     current_time = start_time + timedelta(seconds=timestep * dt)
 
                     for item in range(n_items):
-
                         itemdata = dfs_i.ReadItemTimeStep(item + 1, timestep)
                         d = itemdata.Data
 
@@ -541,10 +533,10 @@ def concat(
 def extract(
     infilename: str | pathlib.Path,
     outfilename: str | pathlib.Path,
-    start=0,
-    end=-1,
-    step=1,
-    items=None,
+    start: int = 0,
+    end: int = -1,
+    step: int = 1,
+    items: Sequence[int | str] | None = None,
 ) -> None:
     """Extract timesteps and/or items to a new dfs file
 
@@ -580,9 +572,9 @@ def extract(
     is_layered_dfsu = dfs_i.ItemInfo[0].Name == "Z coordinate"
 
     file_start_new, start_step, start_sec, end_step, end_sec = _parse_start_end(
-        dfs_i, start, end
+        dfs_i.FileInfo.TimeAxis, start, end
     )
-    timestep = _parse_step(dfs_i, step)
+    timestep = _parse_step(dfs_i.FileInfo.t_axis, step)
     item_numbers = _valid_item_numbers(
         dfs_i.ItemInfo, items, ignore_first=is_layered_dfsu
     )
@@ -629,18 +621,18 @@ def extract(
     dfs_o.Close()
 
 
-def _parse_start_end(dfs_i, start, end):
+def _parse_start_end(time_axis: TimeAxis, start: int| float | str | datetime, end: int| float| str | datetime) -> Tuple[datetime, int, float, int, float]:
     """Helper function for parsing start and end arguments"""
-    n_time_steps = dfs_i.FileInfo.TimeAxis.NumberOfTimeSteps
-    file_start_datetime = dfs_i.FileInfo.TimeAxis.StartDateTime
-    file_start_sec = dfs_i.FileInfo.TimeAxis.StartTimeOffset
+    n_time_steps = time_axis.NumberOfTimeSteps
+    file_start_datetime = time_axis.StartDateTime
+    file_start_sec = time_axis.StartTimeOffset
     start_sec = file_start_sec
 
     timespan = 0
-    if dfs_i.FileInfo.TimeAxis.TimeAxisType == 3:
-        timespan = dfs_i.FileInfo.TimeAxis.TimeStep * (n_time_steps - 1)
-    elif dfs_i.FileInfo.TimeAxis.TimeAxisType == 4:
-        timespan = dfs_i.FileInfo.TimeAxis.TimeSpan
+    if time_axis.TimeAxisType == 3:
+        timespan = time_axis.TimeStep * (n_time_steps - 1)
+    elif time_axis.TimeAxisType == 4:
+        timespan = time_axis.TimeSpan
     else:
         raise ValueError("TimeAxisType not supported")
 
@@ -694,27 +686,26 @@ def _parse_start_end(dfs_i, start, end):
     if end_sec > file_end_sec:
         raise ValueError(f"end cannot be after end of file. end={end_sec} is invalid.")
 
-    file_start_new = None
-    if dfs_i.FileInfo.TimeAxis.TimeAxisType == 3:
-        dt = dfs_i.FileInfo.TimeAxis.TimeStep
+    if time_axis.TimeAxisType == 3:
+        dt = time_axis.TimeStep
         if (start_sec > file_start_sec) and (start_step == 0):
             # we can find the coresponding step
             start_step = int((start_sec - file_start_sec) / dt)
         file_start_new = file_start_datetime + timedelta(seconds=start_step * dt)
-    elif dfs_i.FileInfo.TimeAxis.TimeAxisType == 4:
+    elif time_axis.TimeAxisType == 4:
         if start_sec > file_start_sec:
             file_start_new = file_start_datetime + timedelta(seconds=start_sec)
 
     return file_start_new, start_step, start_sec, end_step, end_sec
 
 
-def _parse_step(dfs_i, step):
+def _parse_step(time_axis: TimeAxis, step: int) -> float | None:
     """Helper function for parsing step argument"""
     if step == 1:
         timestep = None
-    elif dfs_i.FileInfo.TimeAxis.TimeAxisType == 3:
-        timestep = dfs_i.FileInfo.TimeAxis.TimeStep * step
-    elif dfs_i.FileInfo.TimeAxis.TimeAxisType == 4:
+    elif time_axis.TimeAxisType == 3:
+        timestep = time_axis.TimeStep * step
+    elif time_axis.TimeAxisType == 4:
         timestep = None
     else:
         raise ValueError("TimeAxisType not supported")
@@ -724,8 +715,8 @@ def _parse_step(dfs_i, step):
 def avg_time(
     infilename: str | pathlib.Path,
     outfilename: str | pathlib.Path,
-    skipna=True,
-):
+    skipna:bool=True,
+) -> None:
     """Create a temporally averaged dfs file
 
     Parameters
@@ -764,7 +755,6 @@ def avg_time(
 
     for timestep in trange(1, n_time_steps, disable=not show_progress):
         for item in range(n_items):
-
             itemdata = dfs_i.ReadItemTimeStep(item_numbers[item] + 1, timestep)
             d = itemdata.Data
             has_value = d != deletevalue
@@ -790,12 +780,12 @@ def avg_time(
 def quantile(
     infilename: str | pathlib.Path,
     outfilename: str | pathlib.Path,
-    q,
+    q : float | Sequence[float],
     *,
-    items=None,
-    skipna=True,
-    buffer_size=1.0e9,
-):
+    items: Sequence[int | str] | None =None,
+    skipna:bool=True,
+    buffer_size:float=1.0e9,
+) -> None:
     """Create temporal quantiles of all items in dfs file
 
     Parameters
@@ -843,8 +833,8 @@ def quantile(
 
     ci = _ChunkInfo.from_dfs(dfs_i, item_numbers, buffer_size)
 
-    qvec = [q] if np.isscalar(q) else q
-    qtxt = [f"Quantile {q}" for q in qvec]
+    qvec : Sequence[float] = [q] if isinstance(q, float) else q
+    qtxt = [f"Quantile {q!r}" for q in qvec]
     core_items = [dfs_i.ItemInfo[i] for i in item_numbers]
     items = _get_repeated_items(core_items, prefixes=qtxt)
 
@@ -904,7 +894,7 @@ def quantile(
     dfs_o.Close()
 
 
-def _read_item(dfs: DfsFile, item: int, timestep: int) -> np.ndarray:
+def _read_item(dfs: DfsFile, item: int, timestep: int) -> NDArray[np.float64]:
     """Read item data from dfs file
 
     Parameters
