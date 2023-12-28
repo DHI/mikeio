@@ -21,7 +21,7 @@ class DfsuSpectral(_Dfsu):
     @property
     def frequencies(self):
         """Frequency axis"""
-        return self._frequencies
+        return self.geometry._frequencies
 
     @property
     def n_directions(self):
@@ -31,7 +31,7 @@ class DfsuSpectral(_Dfsu):
     @property
     def directions(self):
         """Directional axis"""
-        return self._directions
+        return self.geometry._directions
 
     def _get_spectral_data_shape(self, n_steps: int, elements):
         dims = [] if n_steps == 1 else ["time"]

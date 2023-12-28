@@ -336,7 +336,6 @@ class DataArray:
             problems.append("Number of timesteps must be the same")
         if self.start_time != other.start_time:
             problems.append("start_time must be the same")
-        # if type(self.geometry) != type(other.geometry):
         if not isinstance(self.geometry, other.geometry.__class__):
             problems.append("The type of geometry must be the same")
         if hasattr(self.geometry, "__eq__"):

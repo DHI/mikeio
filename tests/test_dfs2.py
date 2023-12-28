@@ -431,7 +431,7 @@ def test_write_selected_item_to_new_file(dfs2_random_2items, tmp_path):
 
     ds = dfs.read(items=["Untitled"])
 
-    dfs.write(fp, ds)
+    ds.to_dfs(fp)
 
     dfs2 = mikeio.open(fp)
 
@@ -442,9 +442,9 @@ def test_write_selected_item_to_new_file(dfs2_random_2items, tmp_path):
     assert dfs.start_time == dfs2.start_time
     assert dfs.end_time == dfs2.end_time
     assert dfs.projection_string == dfs2.projection_string
-    assert dfs.longitude == dfs2.longitude
-    assert dfs.latitude == dfs2.latitude
-    assert dfs.orientation == dfs2.orientation
+    assert dfs.longitude == pytest.approx(dfs2.longitude)
+    assert dfs.latitude == pytest.approx(dfs2.latitude)
+    assert dfs.orientation == pytest.approx(dfs2.orientation)
 
 
 def test_repr(dfs2_gebco):
@@ -486,7 +486,7 @@ def test_write_modified_data_to_new_file(dfs2_gebco, tmp_path):
 
     ds[0] = ds[0] + 10.0
 
-    dfs.write(fp, ds)
+    ds.to_dfs(fp)
 
     dfsmod = mikeio.open(fp)
 
@@ -651,12 +651,18 @@ def test_incremental_write_from_dfs2(tmp_path):
 
     ds = dfs.read(time=[0], keepdims=True)
     # assert ds.timestep == dfs.timestep, # ds.timestep is undefined
+    
+    # TODO find a better way to do this, without having to create a new dfs2 object
     dfs_to_write = Dfs2()
-    dfs_to_write.write(fp, ds, dt=dfs.timestep, keep_open=True)
+    
+    with pytest.warns(FutureWarning):
+        dfs_to_write.write(fp, ds, dt=dfs.timestep, keep_open=True)
 
     for i in range(1, nt):
         ds = dfs.read(time=[i], keepdims=True)
-        dfs_to_write.append(ds)
+        
+        with pytest.warns(FutureWarning):
+            dfs_to_write.append(ds) 
 
     dfs_to_write.close()
 
@@ -677,11 +683,14 @@ def test_incremental_write_from_dfs2_context_manager(tmp_path):
     ds = dfs.read(time=[0], keepdims=True)
 
     dfs_to_write = Dfs2()
-    with dfs_to_write.write(fp, ds, dt=dfs.timestep, keep_open=True) as f:
+    
+    with pytest.warns(FutureWarning):
+        with dfs_to_write.write(fp, ds, dt=dfs.timestep, keep_open=True) as f:
 
-        for i in range(1, nt):
-            ds = dfs.read(time=[i], keepdims=True)
-            f.append(ds)
+            for i in range(1, nt):
+                ds = dfs.read(time=[i], keepdims=True)
+                with pytest.warns(FutureWarning):
+                    f.append(ds)
 
         # dfs_to_write.close() # called automagically by context manager
 
@@ -861,3 +870,17 @@ def test_MIKE_SHE_output():
     assert g2.x[0] == g.x[0] + 30 * g.dx
     assert g2.y[0] == g.y[0] + 35 * g.dy
     assert g2.origin == pytest.approx((g2.x[0], g2.y[0]))
+
+
+def test_read_dfs2_static_dt_zero():
+
+    with pytest.warns(UserWarning, match="positive"):
+        ds = mikeio.read("tests/testdata/single_time_dt_zero.dfs2")
+    assert ds.n_timesteps == 1
+    assert ds.shape == (1, 2, 2)
+
+    with pytest.warns(UserWarning, match="positive"):
+        ds2 = mikeio.read("tests/testdata/single_time_dt_zero.dfs2", time=0)
+    
+    assert ds2.shape == (2,2)
+    assert "time" not in ds2.dims
