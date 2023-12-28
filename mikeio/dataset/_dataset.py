@@ -8,6 +8,7 @@ from typing import (
     Iterator,
     List,
     Mapping,
+    MutableMapping,
     Optional,
     Sequence,
     Tuple,

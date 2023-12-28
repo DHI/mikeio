@@ -558,9 +558,6 @@ class _Dfs123:
             if n_timesteps > 1:
                 warnings.warn("No timestep supplied. Using 1s.")
 
-        if items is None:
-            items = [ItemInfo(f"Item {i+1}") for i in range(self._n_items)]
-
         header = DfsHeader(n_items=n_items, n_timesteps=n_timesteps, dt=dt, start_time=start_time, coordinates=coordinate, items=items)
         return header, data
 
