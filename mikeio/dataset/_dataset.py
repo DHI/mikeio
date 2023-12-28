@@ -15,14 +15,18 @@ from typing import (
     Any,
     overload,
     Hashable,
-    Set
+    Set,
+    TYPE_CHECKING
     ,
 )
 
 
 import numpy as np
 import pandas as pd
-from mikecore.DfsFile import DfsSimpleType  # type: ignore
+from mikecore.DfsFile import DfsSimpleType
+
+if TYPE_CHECKING:
+    import xarray
 
 from ._dataarray import DataArray
 from ._data_utils import _to_safe_name, _get_time_idx_list, _n_selected_timesteps
@@ -85,7 +89,7 @@ class Dataset:
 
     def __init__(
         self,
-        data: Mapping[str, DataArray] | Iterable[DataArray] | Sequence[np.ndarray],
+        data: Mapping[str, DataArray] | Sequence[DataArray] | Sequence[np.ndarray],
         time=None,
         items=None,
         geometry=None,
@@ -97,7 +101,7 @@ class Dataset:
             data = self._create_dataarrays(
                 data=data, time=time, items=items, geometry=geometry, zn=zn, dims=dims
             )  # type: ignore
-        self._data_vars = self._init_from_DataArrays(data, validate=validate)
+        self._data_vars = self._init_from_DataArrays(data, validate=validate) # type: ignore
         self.plot = _DatasetPlotter(self)
 
     @staticmethod
@@ -126,7 +130,7 @@ class Dataset:
         geometry=None,
         zn=None,
         dims=None,
-    ):
+    ) -> Mapping[str, DataArray]:
         if not isinstance(data, Iterable):
             data = [data]
         items = Dataset._parse_items(items, len(data))
@@ -139,7 +143,7 @@ class Dataset:
             )
         return data_vars
 
-    def _init_from_DataArrays(self, data, validate=True) -> MutableMapping[str, DataArray]:
+    def _init_from_DataArrays(self, data: Sequence[DataArray] | Mapping[str, DataArray], validate:bool=True) -> MutableMapping[str, DataArray]:
         """Initialize Dataset object with Iterable of DataArrays"""
         data_vars = self._DataArrays_as_mapping(data)
 
@@ -148,7 +152,7 @@ class Dataset:
             for da in data_vars.values():
                 first._is_compatible(da, raise_error=True)
 
-        self._check_all_different_ids(data_vars.values())
+        self._check_all_different_ids(list(data_vars.values()))
 
         # TODO is it necessary to keep track of item names?
         self.__itemattr: Set[str] = set()
@@ -210,16 +214,14 @@ class Dataset:
         return item_infos
 
     @staticmethod
-    def _DataArrays_as_mapping(data: Any) -> MutableMapping[str, DataArray]:
+    def _DataArrays_as_mapping(data: DataArray| Sequence[DataArray] | Mapping[str,DataArray]) -> MutableMapping[str, DataArray]:
         """Create dict of DataArrays if necessary"""
         if isinstance(data, Mapping):
-            if isinstance(data, Dataset):
-                return data
-            data = Dataset._validate_item_names_and_keys(
+            data_vars = Dataset._validate_item_names_and_keys(
                 data
             )  # TODO is this necessary?
-            _ = Dataset._unique_item_names(data.values())
-            return data
+            _ = Dataset._unique_item_names(data_vars.values())
+            return data_vars
 
         if isinstance(data, DataArray):
             data = [data]
@@ -249,7 +251,7 @@ class Dataset:
         return item_names
 
     @staticmethod
-    def _check_all_different_ids(das: Iterable[DataArray]) -> None:
+    def _check_all_different_ids(das: Sequence[DataArray]) -> None:
         """Are all the DataArrays different objects or are some referring to the same"""
         ids = np.zeros(len(das), dtype=np.int64)
         ids_val = np.zeros(len(das), dtype=np.int64)
@@ -471,16 +473,16 @@ class Dataset:
 
     # TODO: delete this?
     @staticmethod
-    def create_empty_data(n_items:int=1, n_timesteps:int=1, n_elements:int|None=None, shape:Tuple[int,...] | None=None) -> List[np.ndarray[np.float64]]:
+    def create_empty_data(n_items:int=1, n_timesteps:int=1, n_elements:int|None=None, shape:Tuple[int,...] | None=None): # type: ignore
         data = []
         if shape is None:
             if n_elements is None:
                 raise ValueError("n_elements and shape cannot both be None")
             else:
-                shape = n_elements
+                shape = n_elements # type: ignore
         if np.isscalar(shape):
-            shape = [shape]
-        dati = np.empty(shape=(n_timesteps, *shape))
+            shape = [shape] # type: ignore
+        dati = np.empty(shape=(n_timesteps, *shape)) # type: ignore
         dati[:] = np.nan
         for _ in range(n_items):
             data.append(dati.copy())
@@ -685,7 +687,11 @@ class Dataset:
                 return False
         return True
 
-    def _is_key_time(self, key: Any) -> bool:
+    def _is_key_time(self, key): # type: ignore
+        if isinstance(key, slice):
+            return False
+        if isinstance(key, (int, float)):
+            return False
         if isinstance(key, str) and key in self.names:
             return False
         if isinstance(key, str) and len(key) > 0 and key[0].isnumeric():
@@ -693,6 +699,7 @@ class Dataset:
             return True
         if isinstance(key, (datetime, np.datetime64, pd.Timestamp)):
             return True
+        
         return False
 
     def _multi_indexing_attempted(self, key: Any) -> bool:
@@ -1139,6 +1146,7 @@ class Dataset:
     def _append_items(self, other: DataArray| "Dataset", copy:bool=True) -> "Dataset":
         if isinstance(other, DataArray):
             other = other._to_dataset()
+        assert isinstance(other, Dataset)
         item_names = {item.name for item in self.items}
         other_names = {item.name for item in other.items}
 
@@ -1316,7 +1324,7 @@ class Dataset:
             return Dataset(data=res, validate=False)
 
     @staticmethod
-    def _agg_item_from_items(items: Iterable[ItemInfo], name: str) -> ItemInfo:
+    def _agg_item_from_items(items: Sequence[ItemInfo], name: str) -> ItemInfo:
         it_type = (
             items[0].type
             if all([it.type == items[0].type for it in items])

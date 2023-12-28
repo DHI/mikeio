@@ -40,7 +40,7 @@ from ..spatial import Grid2D
 from .._track import _extract_track
 
 
-def _write_dfsu(filename: str, data: Dataset) -> None:
+def _write_dfsu(filename: str | Path, data: Dataset) -> None:
 
     filename = str(filename)
 
