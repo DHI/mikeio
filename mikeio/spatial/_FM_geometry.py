@@ -2,7 +2,7 @@ from __future__ import annotations
 import warnings
 from collections import namedtuple
 from functools import cached_property
-from typing import Collection, Optional, List
+from typing import Collection, Optional, List, Any
 
 import numpy as np
 from mikecore.DfsuFile import DfsuFileType  # type: ignore
@@ -636,9 +636,9 @@ class GeometryFM2D(_GeometryFM):
         """
         return interp2d(data, elem_ids, weights, shape)
 
-    def _find_n_nearest_2d_elements(self, x, y=None, n=1):
+    def _find_n_nearest_2d_elements(self, x, y=None, n=1) -> tuple[Any, Any]:
 
-        # TODO
+        # TODO return arguments in the same order than cKDTree.query?
 
         if n > self.n_elements:
             raise ValueError(

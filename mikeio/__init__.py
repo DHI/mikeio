@@ -48,7 +48,7 @@ from .xyz import read_xyz
 def read(
     filename: str | Path,
     *,
-    items: str | int | Sequence[str] | Sequence[int] | None = None,
+    items: str | int | Sequence[str |int] | None = None,
     time: int | str | slice | None = None,
     keepdims: bool = False,
     **kwargs,
