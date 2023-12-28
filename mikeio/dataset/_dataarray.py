@@ -10,7 +10,6 @@ from typing import (
     Sequence,
     Tuple,
     Mapping,
-    TypeAlias,
     Union,
     Sized,
     Literal,
@@ -66,7 +65,7 @@ from ._data_plot import (
     _DataArrayPlotterLineSpectrum,
 )
 
-GeometryType: TypeAlias = Union[
+GeometryType = Union[
     GeometryUndefined,
     GeometryPoint2D,
     GeometryPoint3D,

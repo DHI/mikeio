@@ -5,7 +5,7 @@ import pathlib
 from copy import deepcopy
 from datetime import datetime, timedelta
 from shutil import copyfile
-from typing import Iterable, List, Optional, Sequence, Tuple, Union, TypeAlias
+from typing import Iterable, List, Optional, Sequence, Tuple, Union
 
 import numpy as np
 from numpy.typing import NDArray
@@ -21,7 +21,7 @@ from .dfs._dfs import _get_item_info, _valid_item_numbers
 from .eum import ItemInfo
 
 
-TimeAxis : TypeAlias = Union[DfsEqTimeAxis, DfsNonEqTimeAxis, DfsEqCalendarAxis, DfsNonEqCalendarAxis]
+TimeAxis = Union[DfsEqTimeAxis, DfsNonEqTimeAxis, DfsEqCalendarAxis, DfsNonEqCalendarAxis]
 
 show_progress = True
 
