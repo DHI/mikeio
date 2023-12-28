@@ -1,10 +1,12 @@
+from __future__ import annotations
+from typing import Tuple
 import numpy as np
+from numpy.typing import NDArray
 
 from .spatial import GeometryUndefined
 
 
-# class Interpolation2D:
-def get_idw_interpolant(distances, p=2):
+def get_idw_interpolant(distances:NDArray[np.floating], p:float=2) -> NDArray[np.floating]:
     """IDW interpolant for 2d array of distances
 
     https://pro.arcgis.com/en/pro-app/help/analysis/geostatistical-analyst/how-inverse-distance-weighted-interpolation-works.htm
@@ -40,7 +42,7 @@ def get_idw_interpolant(distances, p=2):
     return weights
 
 
-def interp2d(data, elem_ids, weights=None, shape=None):
+def interp2d(data: NDArray[np.floating], elem_ids: NDArray[np.integer], weights:NDArray[np.floating] | None=None, shape:Tuple[int,...]|None=None) -> NDArray[np.floating]:
     """interp spatially in data (2d only)
 
     Parameters
@@ -124,7 +126,7 @@ def interp2d(data, elem_ids, weights=None, shape=None):
     return idatitem
 
 
-def _interp_itemstep(data, elem_ids, weights=None):
+def _interp_itemstep(data: NDArray[np.floating], elem_ids: NDArray[np.integer], weights:NDArray[np.floating] | None =None) -> NDArray[np.floating]:
     """Interpolate a single item and time step
 
     Parameters
