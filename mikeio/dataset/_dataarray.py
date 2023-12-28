@@ -3,12 +3,13 @@ import warnings
 from copy import deepcopy
 from datetime import datetime
 from functools import cached_property
-from typing import Any, Iterable, Optional, Sequence, Tuple, Mapping
+from typing import Any, Iterable, Optional, Sequence, Tuple, Mapping, TypeAlias, Union, Sized
 
 
 import numpy as np
+from numpy.typing import NDArray, ArrayLike, DTypeLike
 import pandas as pd
-from mikecore.DfsuFile import DfsuFileType  # type: ignore
+from mikecore.DfsuFile import DfsuFileType
 
 from ..eum import EUMType, EUMUnit, ItemInfo
 from ._data_utils import _get_time_idx_list, _n_selected_timesteps
@@ -46,12 +47,14 @@ from ._data_plot import (
     _DataArrayPlotterLineSpectrum,
 )
 
+GeometryType: TypeAlias = Union[GeometryUndefined, GeometryPoint2D, GeometryPoint3D, GeometryFM2D, GeometryFM3D, GeometryFMAreaSpectrum, GeometryFMLineSpectrum, GeometryFMPointSpectrum, GeometryFMVerticalColumn, GeometryFMVerticalProfile, Grid1D, Grid2D, Grid3D]
+
 
 class _DataArraySpectrumToHm0:
     def __init__(self, da: "DataArray") -> None:
         self.da = da
 
-    def __call__(self, tail=True) -> "DataArray":
+    def __call__(self, tail:bool=True) -> "DataArray":
         # TODO: if action_density
         m0 = calc_m0_from_spectrum(
             self.da.to_numpy(),
@@ -104,12 +107,12 @@ class DataArray:
 
     def __init__(
         self,
-        data : np.ndarray,
+        data : NDArray[np.floating],
         *,
         time: Optional[pd.DatetimeIndex | str] = None,
         item: Optional[ItemInfo] = None,
-        geometry=GeometryUndefined(),
-        zn=None,
+        geometry: GeometryType = GeometryUndefined(),
+        zn:Optional[NDArray[np.floating]]=None,
         dims: Optional[Sequence[str]] = None,
     ) -> None:
         # TODO: add optional validation validate=True
@@ -126,7 +129,7 @@ class DataArray:
         self.plot = self._get_plotter_by_geometry()
 
     @staticmethod
-    def _parse_data(data):
+    def _parse_data(data: ArrayLike) -> Any: # NDArray[np.floating] | float:
         validation_errors = []
         for p in ("shape", "ndim", "dtype"):
             if not hasattr(data, p):
@@ -138,7 +141,7 @@ class DataArray:
             )
         return data
 
-    def _parse_dims(self, dims, geometry) -> Tuple[str, ...]:
+    def _parse_dims(self, dims: Sequence[str] | None, geometry: GeometryType) -> Tuple[str, ...]:
         if dims is None:
             return self._guess_dims(self.ndim, self.shape, self.n_timesteps, geometry)
         else:
@@ -153,7 +156,7 @@ class DataArray:
             return tuple(dims)
 
     @staticmethod
-    def _guess_dims(ndim, shape, n_timesteps, geometry) -> Tuple[str, ...]:
+    def _guess_dims(ndim: int, shape: Tuple[int,...], n_timesteps: int, geometry: GeometryType) -> Tuple[str, ...]:
 
         # TODO delete default dims to geometry
 
@@ -199,21 +202,27 @@ class DataArray:
                 dims.append("x")
         return tuple(dims)
 
-    def _check_time_data_length(self, time):
+    def _check_time_data_length(self, time: Sized) -> None:
         if "time" in self.dims and len(time) != self._values.shape[0]:
             raise ValueError(
                 f"Number of timesteps ({len(time)}) does not fit with data shape {self.values.shape}"
             )
 
     @staticmethod
-    def _parse_item(item) -> ItemInfo:
+    def _parse_item(item: ItemInfo| str| EUMType| None) -> ItemInfo:
+        
+        if isinstance(item, ItemInfo):
+            return item
+        
         if item is None:
             return ItemInfo("NoName")
 
-        if not isinstance(item, ItemInfo):
+        if isinstance(item, (str,EUMType,EUMUnit)):
             return ItemInfo(item)
         
-        return item
+        
+        
+        raise ValueError("item must be str, EUMType or EUMUnit")
 
     @staticmethod
     def _parse_geometry(geometry: Any, dims: Tuple[str,...], shape: Tuple[int,...]) -> Any:
@@ -264,7 +273,7 @@ class DataArray:
         return geometry
 
     @staticmethod
-    def _parse_zn(zn: np.ndarray, geometry, n_timesteps) -> Optional[np.ndarray]:
+    def _parse_zn(zn: NDArray[np.floating] | None, geometry: GeometryType, n_timesteps:int) -> Optional[NDArray[np.floating]]:
         if zn is not None:
             if isinstance(geometry, _GeometryFMLayered):
                 # TODO: np.squeeze(zn) if n_timesteps=1 ?
@@ -315,9 +324,9 @@ class DataArray:
 
         return len(problems) == 0
 
-    def _get_plotter_by_geometry(self):
+    def _get_plotter_by_geometry(self) -> Any:
         # TODO: this is explicit, but with consistent naming, we could create this mapping automatically
-        PLOTTER_MAP = {
+        PLOTTER_MAP: Any = {
             GeometryFMVerticalProfile: _DataArrayPlotterFMVerticalProfile,
             GeometryFMVerticalColumn: _DataArrayPlotterFMVerticalColumn,
             GeometryFMPointSpectrum: _DataArrayPlotterPointSpectrum,
@@ -332,12 +341,12 @@ class DataArray:
         plotter = PLOTTER_MAP.get(type(self.geometry), _DataArrayPlotter)
         return plotter(self)
 
-    def _set_spectral_attributes(self, geometry) -> None:
+    def _set_spectral_attributes(self, geometry: GeometryType) -> None:
         if hasattr(geometry, "frequencies") and hasattr(geometry, "directions"):
             self.frequencies = geometry.frequencies
-            self.n_frequencies = geometry.n_frequencies
+            self.n_frequencies = geometry.n_frequencies # type: ignore
             self.directions = geometry.directions
-            self.n_directions = geometry.n_directions
+            self.n_directions = geometry.n_directions # type: ignore
             self.to_Hm0 = _DataArraySpectrumToHm0(self)
 
     # ============= Basic properties/methods ===========
@@ -345,10 +354,11 @@ class DataArray:
     @property
     def name(self) -> str:
         """Name of this DataArray (=da.item.name)"""
+        assert isinstance(self.item.name, str)
         return self.item.name
 
     @name.setter
-    def name(self, value):
+    def name(self, value:str) -> None:
         self.item.name = value
 
     @property
@@ -387,8 +397,8 @@ class DataArray:
         """
         dt = None
         if len(self.time) > 1 and self.is_equidistant:
-            first: pd.Timestamp = self.time[0]  # type: ignore
-            second: pd.Timestamp = self.time[1]  # type: ignore
+            first: pd.Timestamp = self.time[0]
+            second: pd.Timestamp = self.time[1]
             dt = (second - first).total_seconds()
         return dt
 
@@ -398,36 +408,37 @@ class DataArray:
         return len(self.time)
 
     @property
-    def shape(self) -> Tuple[int, ...]:
+    def shape(self) -> Any:
         """Tuple of array dimensions"""
         return self.values.shape
 
     @property
     def ndim(self) -> int:
         """Number of array dimensions"""
+        assert isinstance(self.values.ndim, int)
         return self.values.ndim
 
     @property
-    def dtype(self):
+    def dtype(self) -> DTypeLike:
         """Data-type of the array elements"""
         return self.values.dtype
 
     @property
-    def values(self) -> np.ndarray:
+    def values(self) -> NDArray[np.floating]:
         """Values as a np.ndarray (equivalent to to_numpy())"""
         return self._values
 
     @values.setter
-    def values(self, value) -> None:
+    def values(self, value: NDArray[np.floating]| float) -> None:
         if np.isscalar(self._values):
             if not np.isscalar(value):
                 raise ValueError("Shape of new data is wrong (should be scalar)")
-        elif value.shape != self._values.shape:
+        elif value.shape != self._values.shape: # type: ignore
             raise ValueError("Shape of new data is wrong")
 
-        self._values = value
+        self._values = value # type: ignore
 
-    def to_numpy(self) -> np.ndarray:
+    def to_numpy(self) -> NDArray[np.floating]:
         """Values as a np.ndarray (equivalent to values)"""
         return self._values
 
@@ -454,7 +465,7 @@ class DataArray:
         self.values = np.flip(self.values, axis=first_non_t_axis)
         return self
 
-    def describe(self, **kwargs) -> pd.DataFrame:
+    def describe(self, **kwargs: Any) -> pd.DataFrame:
         """Generate descriptive statistics by wrapping :py:meth:`pandas.DataFrame.describe`
         
         Parameters
@@ -509,7 +520,7 @@ class DataArray:
     #    else:
     #        raise ValueError("Invalid mask")
 
-    def __getitem__(self, key) -> "DataArray":
+    def __getitem__(self, key: Any) -> "DataArray":
 
         da = self
         dims = self.dims
@@ -524,7 +535,7 @@ class DataArray:
                 da = da.isel(k, axis=dims[j])
         return da
 
-    def _getitem_parse_key(self, key):
+    def _getitem_parse_key(self, key: Any) -> Any:
         if isinstance(key, tuple):
             # is it multiindex or just a tuple of indexes for first axis?
             # da[2,3,4] and da[(2,3,4)] both have the key=(2,3,4)
@@ -551,13 +562,13 @@ class DataArray:
             )
         return key
 
-    def __setitem__(self, key, value):
+    def __setitem__(self, key: Any, value: NDArray[np.floating]) -> None:
         if self._is_boolean_mask(key):
             mask = key if isinstance(key, np.ndarray) else key.values
             return self._set_by_boolean_mask(self._values, mask, value)
         self._values[key] = value
 
-    def isel(self, idx=None, axis=0, **kwargs) -> "DataArray":
+    def isel(self, idx: int| Sequence[int]| slice| None=None, axis:int|str=0, **kwargs:Any) -> "DataArray":
         """Return a new DataArray whose data is given by
         integer indexing along the specified dimension(s).
 
@@ -671,7 +682,7 @@ class DataArray:
             idx_slice = idx
             assert isinstance(axis, int)
             idx = list(range(*idx.indices(self.shape[axis])))
-        if idx is None or (not np.isscalar(idx) and len(idx) == 0):
+        if idx is None or (not np.isscalar(idx) and len(idx) == 0): # type: ignore
             raise ValueError(
                 "Empty index is not allowed"
             )  # TODO other option would be to have a NullDataArray
@@ -1916,7 +1927,7 @@ class DataArray:
         return _get_time_idx_list(time, steps)
 
     @staticmethod
-    def _n_selected_timesteps(time, k):
+    def _n_selected_timesteps(time: Sized, k: slice | Sized) -> int:
         return _n_selected_timesteps(time, k)
 
     @staticmethod

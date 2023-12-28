@@ -2,6 +2,7 @@ from __future__ import annotations
 from typing import Sequence, Tuple, Literal
 import numpy as np
 from matplotlib.axes import Axes
+from matplotlib.projections.polar import PolarAxes
 from numpy.typing import NDArray
 
 
@@ -87,9 +88,10 @@ def plot_2dspectrum(
         spectrum = np.fliplr(spectrum)
 
     fig = plt.figure(figsize=figsize)
-    ax = plt.subplot(111, polar=True)
-    ax.set_theta_direction(-1) # type: ignore
-    ax.set_theta_zero_location("N") # type: ignore
+    ax = plt.subplot(111, polar=True) # type: ignore
+    assert isinstance(ax, PolarAxes)
+    ax.set_theta_direction(-1)
+    ax.set_theta_zero_location("N")
 
     ddir = dirs[1] - dirs[0]
 
