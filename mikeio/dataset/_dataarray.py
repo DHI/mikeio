@@ -3,7 +3,7 @@ import warnings
 from copy import deepcopy
 from datetime import datetime
 from functools import cached_property
-from typing import Any, Iterable, Optional, Sequence, Tuple, Mapping, TypeAlias, Union, Sized, Literal, TYPE_CHECKING, overload, MutableMapping
+from typing import Any, Iterable, Optional, Sequence, Tuple, Mapping, TypeAlias, Union, Sized, Literal, TYPE_CHECKING, overload, MutableMapping, Callable
 
 
 import numpy as np
@@ -1483,7 +1483,7 @@ class DataArray:
         """
         return self.aggregate(axis=axis, func=np.nanstd, **kwargs)
 
-    def aggregate(self, axis:int | str = 0, func: Any=np.nanmean, **kwargs:Any) -> "DataArray":
+    def aggregate(self, axis:int | str = 0, func: Callable[...,Any]=np.nanmean, **kwargs:Any) -> "DataArray":
         """Aggregate along an axis
 
         Parameters
