@@ -1,7 +1,7 @@
 from __future__ import annotations
 from copy import deepcopy
 from pathlib import Path
-from typing import List, Tuple, Optional
+from typing import List, Tuple
 import warnings
 
 import numpy as np
@@ -32,7 +32,7 @@ def write_dfs2(filename: str | Path, ds: Dataset, title="") -> None:
     _write_dfs_data(dfs=dfs, ds=ds, n_spatial_dims=2)
 
 
-def _write_dfs2_header(filename: str| Path, ds: Dataset, title="") -> DfsFile:
+def _write_dfs2_header(filename: str | Path, ds: Dataset, title="") -> DfsFile:
     builder = DfsBuilder.Create(title, "mikeio", __dfs_version__)
     builder.SetDataType(0)
 
@@ -106,7 +106,6 @@ def _write_dfs2_spatial_axis(builder, factory, geometry):
 
 
 class Dfs2(_Dfs123):
-
     _ndim = 2
 
     def __init__(self, filename=None, type: str = "horizontal"):
@@ -241,7 +240,6 @@ class Dfs2(_Dfs123):
 
         for i, it in enumerate(tqdm(time_steps, disable=not self.show_progress)):
             for item in range(n_items):
-
                 itemdata = self._dfs.ReadItemTimeStep(item_numbers[item] + 1, int(it))
                 d = itemdata.Data
 
@@ -286,13 +284,14 @@ class Dfs2(_Dfs123):
         self,
         filename: str,
         data: Dataset,
-        dt: Optional[float] = None,
-        title: Optional[str]=None,
-        keep_open: bool =False,
+        dt: float | None = None,
+        title: str | None = None,
+        keep_open: bool = False,
     ):
-        
         # this method is deprecated
-        warnings.warn(FutureWarning("Dfs2.write() is deprecated, use Dataset.to_dfs() instead"))
+        warnings.warn(
+            FutureWarning("Dfs2.write() is deprecated, use Dataset.to_dfs() instead")
+        )
 
         filename = str(filename)
 

@@ -1,4 +1,4 @@
-from typing import Collection, Optional
+from typing import Collection
 from functools import wraps
 
 import numpy as np
@@ -96,7 +96,7 @@ class DfsuLayered(_Dfsu):
         *,
         items=None,
         time=None,
-        elements: Optional[Collection[int]] = None,
+        elements: Collection[int] | None = None,
         area=None,
         x=None,
         y=None,
@@ -209,7 +209,6 @@ class DfsuLayered(_Dfsu):
         for i in trange(n_steps, disable=not self.show_progress):
             it = time_steps[i]
             for item in range(n_items):
-
                 dfs, d = _read_item_time_step(
                     dfs=dfs,
                     filename=self._filename,

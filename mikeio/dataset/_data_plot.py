@@ -1,4 +1,5 @@
-from typing import Any, Optional, Tuple, TYPE_CHECKING
+from __future__ import annotations
+from typing import Any, Tuple, TYPE_CHECKING
 
 import numpy as np
 from matplotlib.axes import Axes
@@ -16,7 +17,7 @@ class _DataArrayPlotter:
     def __init__(self, da: "DataArray") -> None:
         self.da = da
 
-    def __call__(self, ax:Optional[Axes]=None, figsize=None, **kwargs):
+    def __call__(self, ax:Axes | None=None, figsize=None, **kwargs):
         """Plot DataArray according to geometry
 
         Parameters
@@ -64,7 +65,7 @@ class _DataArrayPlotter:
             fig = plt.gcf()
         return fig, ax
 
-    def hist(self, ax: Optional[Axes]=None, figsize:Optional[Tuple[float,float]]=None, title:Optional[str]=None, **kwargs: Any) -> Axes:
+    def hist(self, ax: Axes| None=None, figsize:Tuple[float,float] | None=None, title: str | None=None, **kwargs: Any) -> Axes:
         """Plot DataArray as histogram (using ax.hist)
 
         Parameters

@@ -1,6 +1,6 @@
 from __future__ import annotations
 import warnings
-from typing import Optional, Sequence, Tuple
+from typing import Sequence, Tuple
 from dataclasses import dataclass
 import numpy as np
 from numpy.typing import ArrayLike, NDArray
@@ -140,7 +140,6 @@ class Grid1D(_Geometry):
         return int(np.argmin(d))
 
     def get_spatial_interpolant(self, coords, **kwargs):
-
         x = coords[0][0]  # TODO accept list of points
 
         assert self.nx > 1, "Interpolation not possible for Grid1D with one point"
@@ -229,10 +228,10 @@ class Grid1D(_Geometry):
             coords = self._nc[idx, :]
             if len(coords) == 3:
                 x, y, z = coords
-                return GeometryPoint3D(x=x,y=y,z=z, projection=self.projection)
+                return GeometryPoint3D(x=x, y=y, z=z, projection=self.projection)
             else:
                 x, y = coords
-                return GeometryPoint2D(x=x,y=y, projection=self.projection)
+                return GeometryPoint2D(x=x, y=y, projection=self.projection)
 
 
 class _Grid2DPlotter:
@@ -351,17 +350,17 @@ class Grid2D(_Geometry):
     def __init__(
         self,
         *,
-        x: Optional[Sequence[float]] = None,
+        x: Sequence[float] | None = None,
         x0: float = 0.0,
-        dx: Optional[float] = None,
-        nx: Optional[int] = None,
-        y: Optional[Sequence[float]] = None,
+        dx: float | None = None,
+        nx: int | None = None,
+        y: Sequence[float] | None = None,
         y0: float = 0.0,
-        dy: Optional[float] = None,
-        ny: Optional[int] = None,
+        dy: float | None = None,
+        ny: int | None = None,
         bbox=None,
         projection="NON-UTM",
-        origin: Optional[Tuple[float, float]] = None,
+        origin: Tuple[float, float] | None = None,
         orientation=0.0,
         axis_names=("x", "y"),
         is_spectral=False,
@@ -709,8 +708,8 @@ class Grid2D(_Geometry):
 
     def find_index(
         self,
-        x: Optional[float] = None,
-        y: Optional[float] = None,
+        x: float | None = None,
+        y: float | None = None,
         coords=None,
         area=None,
     ):
@@ -780,7 +779,7 @@ class Grid2D(_Geometry):
         return ii, jj
 
     def _bbox_to_index(
-        self, bbox: Tuple[float,float,float,float] | BoundingBox
+        self, bbox: Tuple[float, float, float, float] | BoundingBox
     ) -> Tuple[range, range]:
         """Find subarea within this geometry"""
         if not (len(bbox) == 4):
@@ -802,9 +801,7 @@ class Grid2D(_Geometry):
 
         return i, j
 
-    def isel(
-        self, idx, axis: int | str
-    ) -> "Grid2D | Grid1D | GeometryUndefined":
+    def isel(self, idx, axis: int | str) -> "Grid2D | Grid1D | GeometryUndefined":
         """Return a new geometry as a subset of Grid2D along the given axis."""
         if isinstance(axis, str):
             if axis == "y":
@@ -850,7 +847,7 @@ class Grid2D(_Geometry):
         ):
             # warnings.warn("Axis not equidistant! Will return GeometryUndefined()")
             raise ValueError()
-            #return GeometryUndefined()
+            # return GeometryUndefined()
         else:
             dx = self.dx * di[0]
             dy = self.dy * dj[0]
@@ -881,7 +878,6 @@ class Grid2D(_Geometry):
             )
 
     def _to_element_table(self, index_base=0):
-
         elem_table = []
         for elx in range(self.nx - 1):
             # each col
@@ -1031,7 +1027,6 @@ class Grid3D(_Geometry):
         origin: Tuple[float, float] = (0.0, 0.0),
         orientation=0.0,
     ) -> None:
-
         super().__init__(projection=projection)
         self._origin = (0.0, 0.0) if origin is None else (origin[0], origin[1])
         assert len(self._origin) == 2, "origin must be a tuple of length 2"

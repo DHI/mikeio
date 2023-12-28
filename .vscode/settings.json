@@ -9,4 +9,5 @@
     "restructuredtext.confPath": "${workspaceFolder}\\docs",
     "files.eol": "\n",
     "python.formatting.provider": "black",
+    "editor.formatOnSave": true
 }

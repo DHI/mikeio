@@ -9,15 +9,13 @@ from typing import (
     List,
     Mapping,
     MutableMapping,
-    Optional,
     Sequence,
     Tuple,
     Any,
     overload,
     Hashable,
     Set,
-    TYPE_CHECKING
-    ,
+    TYPE_CHECKING,
 )
 
 
@@ -101,7 +99,7 @@ class Dataset:
             data = self._create_dataarrays(
                 data=data, time=time, items=items, geometry=geometry, zn=zn, dims=dims
             )  # type: ignore
-        self._data_vars = self._init_from_DataArrays(data, validate=validate) # type: ignore
+        self._data_vars = self._init_from_DataArrays(data, validate=validate)  # type: ignore
         self.plot = _DatasetPlotter(self)
 
     @staticmethod
@@ -143,7 +141,9 @@ class Dataset:
             )
         return data_vars
 
-    def _init_from_DataArrays(self, data: Sequence[DataArray] | Mapping[str, DataArray], validate:bool=True) -> MutableMapping[str, DataArray]:
+    def _init_from_DataArrays(
+        self, data: Sequence[DataArray] | Mapping[str, DataArray], validate: bool = True
+    ) -> MutableMapping[str, DataArray]:
         """Initialize Dataset object with Iterable of DataArrays"""
         data_vars = self._DataArrays_as_mapping(data)
 
@@ -187,7 +187,9 @@ class Dataset:
         return modified_list
 
     @staticmethod
-    def _parse_items(items: None| Sequence[ItemInfo| EUMType| str], n_items_data: int) -> List[ItemInfo]:
+    def _parse_items(
+        items: None | Sequence[ItemInfo | EUMType | str], n_items_data: int
+    ) -> List[ItemInfo]:
         if items is None:
             # default Undefined items
             item_infos = [ItemInfo(f"Item_{j+1}") for j in range(n_items_data)]
@@ -214,7 +216,9 @@ class Dataset:
         return item_infos
 
     @staticmethod
-    def _DataArrays_as_mapping(data: DataArray| Sequence[DataArray] | Mapping[str,DataArray]) -> MutableMapping[str, DataArray]:
+    def _DataArrays_as_mapping(
+        data: DataArray | Sequence[DataArray] | Mapping[str, DataArray]
+    ) -> MutableMapping[str, DataArray]:
         """Create dict of DataArrays if necessary"""
         if isinstance(data, Mapping):
             data_vars = Dataset._validate_item_names_and_keys(
@@ -308,19 +312,19 @@ class Dataset:
             da.time = new_time
 
     @property
-    def start_time(self) -> Optional[pd.Timestamp]:
+    def start_time(self) -> datetime:
         """First time instance (as datetime)"""
         # TODO: use pd.Timestamp instead
         return self.time[0].to_pydatetime()
 
     @property
-    def end_time(self) -> Optional[pd.Timestamp]:
+    def end_time(self) -> datetime:
         """Last time instance (as datetime)"""
         # TODO: use pd.Timestamp instead
         return self.time[-1].to_pydatetime()
 
     @property
-    def timestep(self) -> Optional[float]:
+    def timestep(self) -> float | None:
         """Time step in seconds if equidistant (and at
         least two time instances); otherwise None
         """
@@ -394,7 +398,7 @@ class Dataset:
         return self[0].geometry
 
     @property
-    def _zn(self) -> Optional[np.ndarray]:
+    def _zn(self) -> np.ndarray | None:
         return self[0]._zn
 
     # TODO: remove this
@@ -473,16 +477,16 @@ class Dataset:
 
     # TODO: delete this?
     @staticmethod
-    def create_empty_data(n_items:int=1, n_timesteps:int=1, n_elements:int|None=None, shape:Tuple[int,...] | None=None): # type: ignore
+    def create_empty_data(n_items: int = 1, n_timesteps: int = 1, n_elements: int | None = None, shape: Tuple[int, ...] | None = None):  # type: ignore
         data = []
         if shape is None:
             if n_elements is None:
                 raise ValueError("n_elements and shape cannot both be None")
             else:
-                shape = n_elements # type: ignore
+                shape = n_elements  # type: ignore
         if np.isscalar(shape):
-            shape = [shape] # type: ignore
-        dati = np.empty(shape=(n_timesteps, *shape)) # type: ignore
+            shape = [shape]  # type: ignore
+        dati = np.empty(shape=(n_timesteps, *shape))  # type: ignore
         dati[:] = np.nan
         for _ in range(n_items):
             data.append(dati.copy())
@@ -687,7 +691,7 @@ class Dataset:
                 return False
         return True
 
-    def _is_key_time(self, key): # type: ignore
+    def _is_key_time(self, key):  # type: ignore
         if isinstance(key, slice):
             return False
         if isinstance(key, (int, float)):
@@ -699,7 +703,7 @@ class Dataset:
             return True
         if isinstance(key, (datetime, np.datetime64, pd.Timestamp)):
             return True
-        
+
         return False
 
     def _multi_indexing_attempted(self, key: Any) -> bool:
@@ -864,10 +868,10 @@ class Dataset:
     def interp(
         self,
         *,
-        time: Optional[pd.DatetimeIndex | "DataArray"] = None,
-        x: Optional[float] = None,
-        y: Optional[float] = None,
-        z: Optional[float] = None,
+        time: pd.DatetimeIndex | "DataArray" | None = None,
+        x: float | None = None,
+        y: float | None = None,
+        z: float | None = None,
         n_nearest: int = 3,
         **kwargs,
     ) -> "Dataset":
@@ -1002,12 +1006,12 @@ class Dataset:
 
     def interp_time(
         self,
-        dt: Optional[float | pd.DatetimeIndex | "Dataset" | DataArray] = None,
+        dt: float | pd.DatetimeIndex | "Dataset" | DataArray | None = None,
         *,
-        freq: Optional[str] = None,
-        method="linear",
-        extrapolate=True,
-        fill_value=np.nan,
+        freq: str | None = None,
+        method: str = "linear",
+        extrapolate: bool = True,
+        fill_value: float = np.nan,
     ) -> "Dataset":
         """Temporal interpolation
 
@@ -1143,7 +1147,9 @@ class Dataset:
 
     # ============= Combine/concat ===========
 
-    def _append_items(self, other: DataArray| "Dataset", copy:bool=True) -> "Dataset":
+    def _append_items(
+        self, other: DataArray | "Dataset", copy: bool = True
+    ) -> "Dataset":
         if isinstance(other, DataArray):
             other = other._to_dataset()
         assert isinstance(other, Dataset)
@@ -1831,18 +1837,18 @@ class Dataset:
 
         write_dfs2(filename, self)
 
-    def _to_dfs3(self, filename : str | Path) -> None:
+    def _to_dfs3(self, filename: str | Path) -> None:
         # assumes Grid3D geometry
         from ..dfs._dfs3 import write_dfs3
 
         write_dfs3(filename, self)
 
-    def _to_dfs1(self, filename : str | Path) -> None:
+    def _to_dfs1(self, filename: str | Path) -> None:
         from ..dfs._dfs1 import write_dfs1
 
-        write_dfs1(filename=filename,ds=self)
+        write_dfs1(filename=filename, ds=self)
 
-    def _to_dfsu(self, filename : str | Path) -> None:
+    def _to_dfsu(self, filename: str | Path) -> None:
         from ..dfsu._dfsu import _write_dfsu
 
         _write_dfsu(filename, self)

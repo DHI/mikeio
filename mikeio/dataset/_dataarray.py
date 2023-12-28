@@ -6,7 +6,6 @@ from functools import cached_property
 from typing import (
     Any,
     Iterable,
-    Optional,
     Sequence,
     Tuple,
     Mapping,
@@ -141,11 +140,11 @@ class DataArray:
         self,
         data: NDArray[np.floating],
         *,
-        time: Optional[pd.DatetimeIndex | str] = None,
-        item: Optional[ItemInfo] = None,
+        time: pd.DatetimeIndex | str | None = None,
+        item: ItemInfo | None = None,
         geometry: GeometryType = GeometryUndefined(),
-        zn: Optional[NDArray[np.floating]] = None,
-        dims: Optional[Sequence[str]] = None,
+        zn: NDArray[np.floating] | None = None,
+        dims: Sequence[str] | None = None,
     ) -> None:
         # TODO: add optional validation validate=True
         self._values = self._parse_data(data)
@@ -309,7 +308,7 @@ class DataArray:
     @staticmethod
     def _parse_zn(
         zn: NDArray[np.floating] | None, geometry: GeometryType, n_timesteps: int
-    ) -> Optional[NDArray[np.floating]]:
+    ) -> NDArray[np.floating] | None:
         if zn is not None:
             if isinstance(geometry, _GeometryFMLayered):
                 # TODO: np.squeeze(zn) if n_timesteps=1 ?
@@ -415,13 +414,12 @@ class DataArray:
         return self.item.unit
 
     @property
-    def start_time(self) -> Optional[pd.Timestamp]:
+    def start_time(self) -> datetime:
         """First time instance (as datetime)"""
-        # TODO: use pd.Timestamp instead
         return self.time[0].to_pydatetime()
 
     @property
-    def end_time(self) -> Optional[pd.Timestamp]:
+    def end_time(self) -> datetime:
         """Last time instance (as datetime)"""
         # TODO: use pd.Timestamp instead
         return self.time[-1].to_pydatetime()
@@ -434,7 +432,7 @@ class DataArray:
         return len(self.time.to_series().diff().dropna().unique()) == 1
 
     @property
-    def timestep(self) -> Optional[float]:
+    def timestep(self) -> float | None:
         """Time step in seconds if equidistant (and at
         least two time instances); otherwise None
         """
@@ -792,7 +790,7 @@ class DataArray:
     def sel(
         self,
         *,
-        time: Optional[str | pd.DatetimeIndex | "DataArray"] = None,
+        time: str | pd.DatetimeIndex | "DataArray" | None = None,
         **kwargs: Any,
     ) -> "DataArray":
         """Return a new DataArray whose data is given by
@@ -955,10 +953,10 @@ class DataArray:
         # TODO find out optimal syntax to allow interpolation to single point, new time, grid, mesh...
         self,
         # *, # TODO: make this a keyword-only argument in the future
-        time: Optional[pd.DatetimeIndex | "DataArray"] = None,
-        x: Optional[float] = None,
-        y: Optional[float] = None,
-        z: Optional[float] = None,
+        time: pd.DatetimeIndex | "DataArray" | None = None,
+        x: float | None = None,
+        y: float | None = None,
+        z: float | None = None,
         n_nearest: int = 3,
         interpolant: Tuple[Any, Any] | None = None,
         **kwargs: Any,

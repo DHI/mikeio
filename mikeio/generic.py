@@ -5,13 +5,20 @@ import pathlib
 from copy import deepcopy
 from datetime import datetime, timedelta
 from shutil import copyfile
-from typing import Iterable, List, Optional, Sequence, Tuple, Union
+from typing import Iterable, List, Sequence, Tuple, Union
 
 import numpy as np
 from numpy.typing import NDArray
 import pandas as pd
 from mikecore.DfsBuilder import DfsBuilder
-from mikecore.DfsFile import DfsDynamicItemInfo, DfsFile, DfsEqTimeAxis, DfsNonEqTimeAxis, DfsEqCalendarAxis, DfsNonEqCalendarAxis
+from mikecore.DfsFile import (
+    DfsDynamicItemInfo,
+    DfsFile,
+    DfsEqTimeAxis,
+    DfsNonEqTimeAxis,
+    DfsEqCalendarAxis,
+    DfsNonEqCalendarAxis,
+)
 from mikecore.DfsFileFactory import DfsFileFactory
 from mikecore.eum import eumQuantity
 from tqdm import tqdm, trange
@@ -21,7 +28,9 @@ from .dfs._dfs import _get_item_info, _valid_item_numbers
 from .eum import ItemInfo
 
 
-TimeAxis = Union[DfsEqTimeAxis, DfsNonEqTimeAxis, DfsEqCalendarAxis, DfsNonEqCalendarAxis]
+TimeAxis = Union[
+    DfsEqTimeAxis, DfsNonEqTimeAxis, DfsEqCalendarAxis, DfsNonEqCalendarAxis
+]
 
 show_progress = True
 
@@ -199,7 +208,7 @@ def scale(
     outfilename: str | pathlib.Path,
     offset: float = 0.0,
     factor: float = 1.0,
-    items: Optional[List[str] | List[int]] = None,
+    items: Sequence[int | str] | None = None,
 ) -> None:
     """Apply scaling to any dfs file
 
@@ -250,7 +259,7 @@ def fill_corrupt(
     infilename: str | pathlib.Path,
     outfilename: str | pathlib.Path,
     fill_value: float = np.nan,
-    items: Optional[List[str] | List[int]] = None,
+    items: Sequence[str | int] | None = None,
 ) -> None:
     """
     Replace corrupt (unreadable) data with fill_value, default delete value.
@@ -621,7 +630,11 @@ def extract(
     dfs_o.Close()
 
 
-def _parse_start_end(time_axis: TimeAxis, start: int| float | str | datetime, end: int| float| str | datetime) -> Tuple[datetime | None, int, float, int, float]: # TODO better return type
+def _parse_start_end(
+    time_axis: TimeAxis,
+    start: int | float | str | datetime,
+    end: int | float | str | datetime,
+) -> Tuple[datetime | None, int, float, int, float]:  # TODO better return type
     """Helper function for parsing start and end arguments"""
     n_time_steps = time_axis.NumberOfTimeSteps
     file_start_datetime = time_axis.StartDateTime
@@ -716,7 +729,7 @@ def _parse_step(time_axis: TimeAxis, step: int) -> float | None:
 def avg_time(
     infilename: str | pathlib.Path,
     outfilename: str | pathlib.Path,
-    skipna:bool=True,
+    skipna: bool = True,
 ) -> None:
     """Create a temporally averaged dfs file
 
@@ -781,11 +794,11 @@ def avg_time(
 def quantile(
     infilename: str | pathlib.Path,
     outfilename: str | pathlib.Path,
-    q : float | Sequence[float],
+    q: float | Sequence[float],
     *,
-    items: Sequence[int | str] | None =None,
-    skipna:bool=True,
-    buffer_size:float=1.0e9,
+    items: Sequence[int | str] | None = None,
+    skipna: bool = True,
+    buffer_size: float = 1.0e9,
 ) -> None:
     """Create temporal quantiles of all items in dfs file
 
@@ -834,7 +847,7 @@ def quantile(
 
     ci = _ChunkInfo.from_dfs(dfs_i, item_numbers, buffer_size)
 
-    qvec : Sequence[float] = [q] if isinstance(q, float) else q
+    qvec: Sequence[float] = [q] if isinstance(q, float) else q
     qtxt = [f"Quantile {q!r}" for q in qvec]
     core_items = [dfs_i.ItemInfo[i] for i in item_numbers]
     items = _get_repeated_items(core_items, prefixes=qtxt)
