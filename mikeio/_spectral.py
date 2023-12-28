@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import Sequence, Tuple
+from typing import Sequence, Tuple, Literal
 import numpy as np
 from matplotlib.axes import Axes
 from numpy.typing import NDArray
@@ -88,8 +88,8 @@ def plot_2dspectrum(
 
     fig = plt.figure(figsize=figsize)
     ax = plt.subplot(111, polar=True)
-    ax.set_theta_direction(-1)
-    ax.set_theta_zero_location("N")
+    ax.set_theta_direction(-1) # type: ignore
+    ax.set_theta_zero_location("N") # type: ignore
 
     ddir = dirs[1] - dirs[0]
 
@@ -122,7 +122,7 @@ def plot_2dspectrum(
         n_levels = 10
     if isinstance(levels, int):
         n_levels = levels
-        levels = np.linspace(vmin, vmax, n_levels)
+        levels = np.linspace(vmin, vmax, n_levels) # type: ignore
 
     if plot_type != "shaded":
         spectrum[spectrum < vmin] = np.nan
@@ -132,7 +132,7 @@ def plot_2dspectrum(
             dirs, freq, spectrum.T, levels=levels, cmap=cmap, vmin=vmin, vmax=vmax
         )
     elif plot_type == "contour":
-        colorax = ax.contour(
+        colorax = ax.contour( # type: ignore
             dirs, freq, spectrum.T, levels=levels, cmap=cmap, vmin=vmin, vmax=vmax
         )
         # ax.clabel(colorax, fmt="%1.2f", inline=1, fontsize=9)
@@ -140,9 +140,9 @@ def plot_2dspectrum(
             ax.set_title(label)
 
     elif plot_type in ("patch", "shaded", "box"):
-        shading = "gouraud" if plot_type == "shaded" else "auto"
+        shading:  Literal['flat', 'nearest', 'gouraud', 'auto'] = "gouraud" if plot_type == "shaded" else "auto"
         ax.grid(False)  # Remove major grid
-        colorax = ax.pcolormesh(
+        colorax = ax.pcolormesh( # type: ignore
             dirs,
             freq,
             spectrum.T,
@@ -151,14 +151,14 @@ def plot_2dspectrum(
             vmin=vmin,
             vmax=vmax,
         )
-        ax.grid("on")
+        ax.grid("on") # type: ignore
     else:
         raise ValueError(
             f"plot_type '{plot_type}' not supported (contour, contourf, patch, shaded)"
         )
 
     # TODO: optional
-    ax.set_thetagrids(
+    ax.set_thetagrids( # type: ignore
         [0.0, 45, 90.0, 135, 180.0, 225, 270.0, 315],
         labels=["N", "N-E", "E", "S-E", "S", "S-W", "W", "N-W"],
     )
@@ -175,9 +175,9 @@ def plot_2dspectrum(
     # ax.set_xticks(dfs.directions, minor=True);
 
     if rmin is not None:
-        ax.set_rmin(rmin)
+        ax.set_rmin(rmin) # type: ignore
     if rmax is not None:
-        ax.set_rmax(rmax)
+        ax.set_rmax(rmax) # type: ignore
 
     if add_colorbar:
         cbar = fig.colorbar(colorax)
@@ -192,7 +192,7 @@ def plot_2dspectrum(
     return ax
 
 
-def calc_m0_from_spectrum(spec: NDArray[np.floating], f: NDArray[np.floating], dir: NDArray[np.floating] | None =None, tail:bool=True) -> NDArray[np.floating]:
+def calc_m0_from_spectrum(spec: NDArray[np.floating], f: NDArray[np.floating] | None, dir: NDArray[np.floating] | None =None, tail:bool=True) -> NDArray[np.floating]:
     if f is None:
         assert dir is not None
         nd = len(dir)

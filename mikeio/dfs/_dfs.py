@@ -71,7 +71,7 @@ def _fuzzy_item_search(
 
 def _valid_item_numbers(
     dfsItemInfo: List[DfsDynamicItemInfo],
-    items: Optional[str | int | List[int] | List[str]] = None,
+    items: Optional[str | int | Sequence[int |str]] = None,
     ignore_first: bool = False,
 ) -> List[int]:
     start_idx = 1 if ignore_first else 0

@@ -5,7 +5,7 @@ import pathlib
 from copy import deepcopy
 from datetime import datetime, timedelta
 from shutil import copyfile
-from typing import Iterable, List, Optional, Sequence, Any, Tuple, Union, TypeAlias
+from typing import Iterable, List, Optional, Sequence, Tuple, Union, TypeAlias
 
 import numpy as np
 from numpy.typing import NDArray
@@ -96,7 +96,7 @@ def _clone(
     outfilename: str | pathlib.Path,
     start_time: datetime | None = None,
     timestep: float | None = None,
-    items: Sequence[int | str] | None = None,
+    items: Sequence[int | str | DfsDynamicItemInfo] | None = None,
 ) -> DfsFile:
     """Clone a dfs file
 
@@ -574,7 +574,7 @@ def extract(
     file_start_new, start_step, start_sec, end_step, end_sec = _parse_start_end(
         dfs_i.FileInfo.TimeAxis, start, end
     )
-    timestep = _parse_step(dfs_i.FileInfo.t_axis, step)
+    timestep = _parse_step(dfs_i.FileInfo.TimeAxis, step)
     item_numbers = _valid_item_numbers(
         dfs_i.ItemInfo, items, ignore_first=is_layered_dfsu
     )
@@ -621,7 +621,7 @@ def extract(
     dfs_o.Close()
 
 
-def _parse_start_end(time_axis: TimeAxis, start: int| float | str | datetime, end: int| float| str | datetime) -> Tuple[datetime, int, float, int, float]:
+def _parse_start_end(time_axis: TimeAxis, start: int| float | str | datetime, end: int| float| str | datetime) -> Tuple[datetime | None, int, float, int, float]: # TODO better return type
     """Helper function for parsing start and end arguments"""
     n_time_steps = time_axis.NumberOfTimeSteps
     file_start_datetime = time_axis.StartDateTime
@@ -686,6 +686,7 @@ def _parse_start_end(time_axis: TimeAxis, start: int| float | str | datetime, en
     if end_sec > file_end_sec:
         raise ValueError(f"end cannot be after end of file. end={end_sec} is invalid.")
 
+    file_start_new = None
     if time_axis.TimeAxisType == 3:
         dt = time_axis.TimeStep
         if (start_sec > file_start_sec) and (start_step == 0):

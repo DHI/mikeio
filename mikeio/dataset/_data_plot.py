@@ -1,4 +1,4 @@
-from typing import Any, TYPE_CHECKING, Optional, Tuple
+from typing import Any, Optional, Tuple
 
 import numpy as np
 from matplotlib.axes import Axes
@@ -7,13 +7,13 @@ from ..spatial._FM_utils import _plot_map, _plot_vertical_profile
 
 from .._spectral import plot_2dspectrum
 
-if TYPE_CHECKING:
-    from ..dataset import DataArray
+#if TYPE_CHECKING:
+#    from ..dataset import DataArray
 
 class _DataArrayPlotter:
     """Context aware plotter (sensible plotting according to geometry)"""
 
-    def __init__(self, da: DataArray) -> None:
+    def __init__(self, da) -> None:
         self.da = da
 
     def __call__(self, ax:Optional[Axes]=None, figsize=None, **kwargs):

@@ -1,7 +1,10 @@
 from __future__ import annotations
-from typing import Tuple
+from typing import Tuple, TYPE_CHECKING
 import numpy as np
 from numpy.typing import NDArray
+
+if TYPE_CHECKING:
+    from .dataset import Dataset, DataArray
 
 from .spatial import GeometryUndefined
 
@@ -42,7 +45,7 @@ def get_idw_interpolant(distances:NDArray[np.floating], p:float=2) -> NDArray[np
     return weights
 
 
-def interp2d(data: NDArray[np.floating], elem_ids: NDArray[np.integer], weights:NDArray[np.floating] | None=None, shape:Tuple[int,...]|None=None) -> NDArray[np.floating]:
+def interp2d(data: NDArray[np.floating] | Dataset | DataArray, elem_ids: NDArray[np.integer], weights:NDArray[np.floating] | None=None, shape:Tuple[int,...]|None=None) -> NDArray[np.floating] | Dataset:
     """interp spatially in data (2d only)
 
     Parameters
