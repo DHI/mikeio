@@ -4,7 +4,7 @@ from pathlib import Path
 import warnings
 from datetime import datetime, timedelta
 from functools import wraps
-from typing import Collection, List, Optional, Tuple
+from typing import Collection, List, Tuple
 
 import numpy as np
 import pandas as pd
@@ -40,8 +40,7 @@ from ..spatial import Grid2D
 from .._track import _extract_track
 
 
-def _write_dfsu(filename: str, data: Dataset):
-
+def _write_dfsu(filename: str | Path, data: Dataset) -> None:
     filename = str(filename)
 
     if len(data.time) == 1:
@@ -91,6 +90,7 @@ def _write_dfsu(filename: str, data: Dataset):
     for i in range(n_time_steps):
         if geometry.is_layered:
             if "time" in data.dims:
+                assert data._zn is not None
                 zn = data._zn[i]
             else:
                 zn = data._zn
@@ -572,7 +572,6 @@ class _UnstructuredFile:
         ax=None,
         add_colorbar=True,
     ):
-
         warnings.warn(
             FutureWarning(
                 "Dfsu.plot() have been deprecated, please use DataArray.plot() instead"
@@ -696,7 +695,7 @@ class _Dfsu(_UnstructuredFile):
         *,
         items=None,
         time=None,
-        elements: Optional[Collection[int]] = None,
+        elements: Collection[int] | None = None,
         area=None,
         x=None,
         y=None,
@@ -705,7 +704,6 @@ class _Dfsu(_UnstructuredFile):
         error_bad_data=True,
         fill_bad_data_value=np.nan,
     ) -> Dataset:
-        
         if dtype not in [np.float32, np.float64]:
             raise ValueError("Invalid data type. Choose np.float32 or np.float64")
 
@@ -761,7 +759,6 @@ class _Dfsu(_UnstructuredFile):
         for i in trange(n_steps, disable=not self.show_progress):
             it = time_steps[i]
             for item in range(n_items):
-
                 dfs, d = _read_item_time_step(
                     dfs=dfs,
                     filename=self._filename,
@@ -1182,7 +1179,6 @@ class _Dfsu(_UnstructuredFile):
                 return self
 
         except Exception as e:
-
             print(e)
             self._dfs.Close()
             os.remove(filename)
@@ -1244,13 +1240,12 @@ class _Dfsu(_UnstructuredFile):
 
 
 class Dfsu2DH(_Dfsu):
-
     def read(
         self,
         *,
         items=None,
         time=None,
-        elements: Optional[Collection[int]] = None,
+        elements: Collection[int] | None = None,
         area=None,
         x=None,
         y=None,
@@ -1291,17 +1286,19 @@ class Dfsu2DH(_Dfsu):
         Dataset
             A Dataset with data dimensions [t,elements]
         """
-        
-        return self._read(items=items,
-                          time=time,
-                          elements=elements,
-                          area=area,
-                          x=x,
-                          y=y,
-                          keepdims=keepdims,
-                          dtype=dtype,
-                          error_bad_data=error_bad_data,
-                          fill_bad_data_value=fill_bad_data_value)
+
+        return self._read(
+            items=items,
+            time=time,
+            elements=elements,
+            area=area,
+            x=x,
+            y=y,
+            keepdims=keepdims,
+            dtype=dtype,
+            error_bad_data=error_bad_data,
+            fill_bad_data_value=fill_bad_data_value,
+        )
 
     def _dfs_read_item_time_func(self, item: int, step: int):
         dfs = DfsuFile.Open(self._filename)

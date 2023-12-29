@@ -1,6 +1,7 @@
+from __future__ import annotations
 from datetime import datetime
 from types import SimpleNamespace
-from typing import Any, Callable, List, Mapping, MutableMapping, Optional, Sequence
+from typing import Any, Callable, List, Mapping, MutableMapping, Sequence
 
 import pandas as pd
 
@@ -175,10 +176,10 @@ class PfsSection(SimpleNamespace, MutableMapping):
 
     def search(
         self,
-        text: Optional[str] = None,
+        text: str | None = None,
         *,
-        key: Optional[str] = None,
-        section: Optional[str] = None,
+        key: str | None = None,
+        section: str | None = None,
         param=None,
         case: bool = False,
     ):
@@ -302,7 +303,6 @@ class PfsSection(SimpleNamespace, MutableMapping):
         """
         lvl_prefix = "   "
         for k, v in self.items():
-
             # check for empty sections
             if v is None:
                 func(f"{lvl_prefix * level}[{k}]{newline}")
@@ -350,7 +350,6 @@ class PfsSection(SimpleNamespace, MutableMapping):
         """
         # some crude checks and corrections
         if isinstance(v, str):
-
             if len(v) > 5 and not ("PROJ" in v or "<CLOB:" in v):
                 v = v.replace('"', "''")
                 v = v.replace("\U0001F600", "'")
@@ -385,7 +384,7 @@ class PfsSection(SimpleNamespace, MutableMapping):
                 d[key] = value.to_dict()
         return d
 
-    def to_dataframe(self, prefix: Optional[str] = None) -> pd.DataFrame:
+    def to_dataframe(self, prefix: str | None = None) -> pd.DataFrame:
         """Output enumerated subsections to a DataFrame
 
         Parameters

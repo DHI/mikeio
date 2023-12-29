@@ -3,7 +3,7 @@ import warnings
 from abc import abstractmethod
 from dataclasses import dataclass
 from datetime import datetime
-from typing import List, Optional, Tuple, Sequence
+from typing import List, Tuple, Sequence
 import numpy as np
 import pandas as pd
 from tqdm import tqdm, trange
@@ -26,9 +26,9 @@ from ..exceptions import DataDimensionMismatch, ItemsError
 from ..spatial import GeometryUndefined
 from .._time import DateTimeSelector
 
+
 @dataclass
 class DfsHeader:
-
     n_items: int
     n_timesteps: int
     start_time: datetime
@@ -82,7 +82,7 @@ def _fuzzy_item_search(
 
 def _valid_item_numbers(
     dfsItemInfo: List[DfsDynamicItemInfo],
-    items: Optional[str | int | List[int] | List[str]] = None,
+    items: str | int | Sequence[int | str] | None = None,
     ignore_first: bool = False,
 ) -> List[int]:
     start_idx = 1 if ignore_first else 0
@@ -127,7 +127,6 @@ def _valid_item_numbers(
 
 
 def _valid_timesteps(dfsFileInfo: DfsFileInfo, time_steps) -> Tuple[bool, List[int]]:
-
     time_axis = dfsFileInfo.TimeAxis
 
     single_time_selected = False
@@ -149,10 +148,11 @@ def _valid_timesteps(dfsFileInfo: DfsFileInfo, time_steps) -> Tuple[bool, List[i
         time_step_file = time_axis.TimeStep
 
         if time_step_file <= 0:
-
             if nt > 1:
-                raise ValueError(f"Time step must be a positive number. Time step in the file is {time_step_file} seconds.")
-            
+                raise ValueError(
+                    f"Time step must be a positive number. Time step in the file is {time_step_file} seconds."
+                )
+
             warnings.warn(
                 f"Time step is {time_step_file} seconds. This must be a positive number. Setting to 1 second."
             )
@@ -214,7 +214,7 @@ def _item_numbers_by_name(
 
 def _get_item_info(
     dfsItemInfo: List[DfsDynamicItemInfo],
-    item_numbers: Optional[List[int]] = None,
+    item_numbers: List[int] | None = None,
     ignore_first: bool = False,
 ) -> ItemInfoList:
     """Read DFS ItemInfo for specific item numbers
@@ -243,7 +243,6 @@ def _get_item_info(
 
 
 def _write_dfs_data(*, dfs: DfsFile, ds: Dataset, n_spatial_dims: int) -> None:
-
     deletevalue = dfs.FileInfo.DeleteValueFloat  # ds.deletevalue
     has_no_time = "time" not in ds.dims
     if ds.is_equidistant:
@@ -253,7 +252,6 @@ def _write_dfs_data(*, dfs: DfsFile, ds: Dataset, n_spatial_dims: int) -> None:
 
     for i in range(ds.n_timesteps):
         for item in range(ds.n_items):
-
             if has_no_time:
                 d = ds[item].values
             else:
@@ -346,7 +344,6 @@ class _Dfs123:
 
         for i, it in enumerate(tqdm(time_steps, disable=not self.show_progress)):
             for item in range(n_items):
-
                 itemdata = self._dfs.ReadItemTimeStep(item_numbers[item] + 1, int(it))
 
                 src = itemdata.Data
@@ -410,7 +407,6 @@ class _Dfs123:
         title,
         keep_open=False,
     ):
-        
         assert isinstance(ds, Dataset)
 
         neq_datetimes = None
@@ -421,7 +417,6 @@ class _Dfs123:
             title=title, data=ds, dt=dt, coordinate=coordinate
         )
 
-        
         shape = np.shape(data[0])
         t_offset = 0 if len(shape) == self._ndim else 1
 
@@ -464,7 +459,6 @@ class _Dfs123:
 
         for i in trange(header.n_timesteps, disable=not self.show_progress):
             for item in range(header.n_items):
-
                 d = data[item][i] if t_offset == 1 else data[item]
                 d = d.copy()  # to avoid modifying the input
                 d[np.isnan(d)] = deletevalue
@@ -482,19 +476,17 @@ class _Dfs123:
             return self
 
     def append(self, data: Dataset) -> None:
-        
         warnings.warn(FutureWarning("append() is deprecated."))
 
         if not data.dims == ("time", "y", "x"):
             raise NotImplementedError(
-                    "Append is only available for 2D files with dims ('time', 'y', 'x')"
-                )
+                "Append is only available for 2D files with dims ('time', 'y', 'x')"
+            )
 
         deletevalue = self._dfs.FileInfo.DeleteValueFloat  # -1.0000000031710769e-30
 
         for i in trange(data.n_timesteps, disable=not self.show_progress):
             for da in data:
-
                 values = da.to_numpy()
                 d = values[i]
                 d = d.copy()  # to avoid modifying the input
@@ -503,8 +495,7 @@ class _Dfs123:
                 d = d.reshape(data.shape[1:])
                 darray = d.reshape(d.size, 1)[:, 0]
                 self._dfs.WriteItemTimeStepNext(0, darray.astype(np.float32))
-                
-                   
+
     def __enter__(self):
         return self
 
@@ -515,8 +506,9 @@ class _Dfs123:
         "Finalize write for a dfs file opened with `write(...,keep_open=True)`"
         self._dfs.Close()
 
-    def _write_handle_common_arguments(self, *, title: Optional[str], data: Dataset, coordinate, dt: Optional[float] = None):
-
+    def _write_handle_common_arguments(
+        self, *, title: str | None, data: Dataset, coordinate, dt: float | None = None
+    ):
         if title is None:
             self._title = ""
 
@@ -544,7 +536,9 @@ class _Dfs123:
         else:
             self._override_coordinates = True
 
-        assert isinstance(data, Dataset), "data must be supplied in the form of a mikeio.Dataset"
+        assert isinstance(
+            data, Dataset
+        ), "data must be supplied in the form of a mikeio.Dataset"
 
         items = data.items
         start_time = data.time[0]
@@ -558,14 +552,17 @@ class _Dfs123:
             if n_timesteps > 1:
                 warnings.warn("No timestep supplied. Using 1s.")
 
-        if items is None:
-            items = [ItemInfo(f"Item {i+1}") for i in range(self._n_items)]
-
-        header = DfsHeader(n_items=n_items, n_timesteps=n_timesteps, dt=dt, start_time=start_time, coordinates=coordinate, items=items)
+        header = DfsHeader(
+            n_items=n_items,
+            n_timesteps=n_timesteps,
+            dt=dt,
+            start_time=start_time,
+            coordinates=coordinate,
+            items=items,
+        )
         return header, data
 
     def _setup_header(self, filename: str, header: DfsHeader):
-
         system_start_time = header.start_time
 
         self._builder.SetDataType(0)

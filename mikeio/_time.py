@@ -1,7 +1,7 @@
 from __future__ import annotations
 from datetime import datetime
 from dataclasses import dataclass
-from typing import List, Iterable, Optional
+from typing import List, Iterable
 
 import pandas as pd
 
@@ -14,9 +14,7 @@ class DateTimeSelector:
 
     def isel(
         self,
-        x: Optional[
-            int | Iterable[int] | str | datetime | pd.DatetimeIndex | slice
-        ] = None,
+        x: int | Iterable[int] | str | datetime | pd.DatetimeIndex | slice | None = None,
     ) -> List[int]:
         """Select time steps from a pandas DatetimeIndex
 

@@ -19,7 +19,7 @@ degree Celsius
 from __future__ import annotations
 import warnings
 from enum import IntEnum
-from typing import Dict, List, Sequence
+from typing import Dict, List, Sequence, Literal
 
 import pandas as pd
 from mikecore.DfsFile import DataValueType, DfsDynamicItemInfo
@@ -1429,8 +1429,9 @@ class ItemInfo:
     """
 
     def __init__(
-        self, name=None, itemtype=None, unit=None, data_value_type="Instantaneous"
-    ):
+        self, name: str | EUMType | None =None, itemtype: EUMType | EUMUnit| None =None, unit: EUMUnit | None=None,
+          data_value_type:Literal["Instantaneous","Accumulated","StepAccumulated","MeanStepBackWard"]="Instantaneous"
+    ) -> None:
 
         # Handle arguments in the wrong place
         if isinstance(name, EUMType):
@@ -1476,7 +1477,7 @@ class ItemInfo:
 
         if not isinstance(name, str):
             raise ValueError("Invalid name, name should be a string")
-        self.name = name
+        self.name : str = name
 
     def __eq__(self, other):
         if not isinstance(other, ItemInfo):
