@@ -92,7 +92,6 @@
 <li class="toctree-l4"><a class="reference internal" href="#mikeio.Dataset.nanquantile"><code class="docutils literal notranslate"><span class="pre">Dataset.nanquantile()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#mikeio.Dataset.nanstd"><code class="docutils literal notranslate"><span class="pre">Dataset.nanstd()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#mikeio.Dataset.ndim"><code class="docutils literal notranslate"><span class="pre">Dataset.ndim</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#mikeio.Dataset.popitem"><code class="docutils literal notranslate"><span class="pre">Dataset.popitem()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#mikeio.Dataset.ptp"><code class="docutils literal notranslate"><span class="pre">Dataset.ptp()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#mikeio.Dataset.quantile"><code class="docutils literal notranslate"><span class="pre">Dataset.quantile()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#mikeio.Dataset.remove"><code class="docutils literal notranslate"><span class="pre">Dataset.remove()</span></code></a></li>
@@ -109,7 +108,6 @@
 <li class="toctree-l4"><a class="reference internal" href="#mikeio.Dataset.to_numpy"><code class="docutils literal notranslate"><span class="pre">Dataset.to_numpy()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#mikeio.Dataset.to_pandas"><code class="docutils literal notranslate"><span class="pre">Dataset.to_pandas()</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#mikeio.Dataset.to_xarray"><code class="docutils literal notranslate"><span class="pre">Dataset.to_xarray()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#mikeio.Dataset.values"><code class="docutils literal notranslate"><span class="pre">Dataset.values</span></code></a></li>
 </ul>
 </li>
 </ul>
@@ -945,16 +943,6 @@ which must be between 0 and 1 inclusive.</p></li>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="mikeio.Dataset.popitem">
-<span class="sig-name descname"><span class="pre">popitem</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/mikeio/dataset/_dataset.html#Dataset.popitem"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mikeio.Dataset.popitem" title="Link to this definition"></a></dt>
-<dd><p>Pop first DataArray from Dataset</p>
-<div class="admonition seealso">
-<p class="admonition-title">See also</p>
-<p><code class="xref py py-obj docutils literal notranslate"><span class="pre">pop</span></code></p>
-</div>
-</dd></dl>
-
-<dl class="py method">
 <dt class="sig sig-object py" id="mikeio.Dataset.ptp">
 <span class="sig-name descname"><span class="pre">ptp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">axis</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mikeio/dataset/_dataset.html#Dataset.ptp"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mikeio.Dataset.ptp" title="Link to this definition"></a></dt>
 <dd><p>Range (max - min) a.k.a Peak to Peak along an axis
@@ -1208,11 +1196,6 @@ to e.g. np.float64, by default: DfsSimpleType.Float (=np.float32)</p></li>
 <span class="sig-name descname"><span class="pre">to_xarray</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/mikeio/dataset/_dataset.html#Dataset.to_xarray"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mikeio.Dataset.to_xarray" title="Link to this definition"></a></dt>
 <dd><p>Export to xarray.Dataset</p>
 </dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py" id="mikeio.Dataset.values">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">values</span></span><a class="headerlink" href="#mikeio.Dataset.values" title="Link to this definition"></a></dt>
-<dd></dd></dl>
 
 </section>
 </dd></dl>

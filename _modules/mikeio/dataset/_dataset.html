@@ -94,27 +94,30 @@
 <span></span><span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">annotations</span>
 <span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
 <span class="kn">import</span> <span class="nn">warnings</span>
-<span class="kn">from</span> <span class="nn">copy</span> <span class="kn">import</span> <span class="n">deepcopy</span>
 <span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">datetime</span>
+<span class="kn">from</span> <span class="nn">copy</span> <span class="kn">import</span> <span class="n">deepcopy</span>
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="p">(</span>
     <span class="n">Iterable</span><span class="p">,</span>
+    <span class="n">Iterator</span><span class="p">,</span>
     <span class="n">List</span><span class="p">,</span>
     <span class="n">Mapping</span><span class="p">,</span>
-    <span class="n">Optional</span><span class="p">,</span>
+    <span class="n">MutableMapping</span><span class="p">,</span>
     <span class="n">Sequence</span><span class="p">,</span>
     <span class="n">Tuple</span><span class="p">,</span>
-    <span class="n">MutableMapping</span><span class="p">,</span>
     <span class="n">Any</span><span class="p">,</span>
     <span class="n">overload</span><span class="p">,</span>
     <span class="n">Hashable</span><span class="p">,</span>
-    <span class="n">Set</span>
-    
+    <span class="n">Set</span><span class="p">,</span>
+    <span class="n">TYPE_CHECKING</span><span class="p">,</span>
 <span class="p">)</span>
 
 
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
-<span class="kn">from</span> <span class="nn">mikecore.DfsFile</span> <span class="kn">import</span> <span class="n">DfsSimpleType</span>  <span class="c1"># type: ignore</span>
+<span class="kn">from</span> <span class="nn">mikecore.DfsFile</span> <span class="kn">import</span> <span class="n">DfsSimpleType</span>
+
+<span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
+    <span class="kn">import</span> <span class="nn">xarray</span>
 
 <span class="kn">from</span> <span class="nn">._dataarray</span> <span class="kn">import</span> <span class="n">DataArray</span>
 <span class="kn">from</span> <span class="nn">._data_utils</span> <span class="kn">import</span> <span class="n">_to_safe_name</span><span class="p">,</span> <span class="n">_get_time_idx_list</span><span class="p">,</span> <span class="n">_n_selected_timesteps</span>
@@ -136,7 +139,7 @@
 
 <div class="viewcode-block" id="Dataset">
 <a class="viewcode-back" href="../../../dataset.html#mikeio.Dataset">[docs]</a>
-<span class="k">class</span> <span class="nc">Dataset</span><span class="p">(</span><span class="n">MutableMapping</span><span class="p">):</span>
+<span class="k">class</span> <span class="nc">Dataset</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Dataset containing one or more DataArrays with common geometry and time</span>
 
 <span class="sd">    Most often obtained by reading a dfs file. But can also be</span>
@@ -179,7 +182,7 @@
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
-        <span class="n">data</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">DataArray</span><span class="p">]</span> <span class="o">|</span> <span class="n">Iterable</span><span class="p">[</span><span class="n">DataArray</span><span class="p">]</span> <span class="o">|</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span>
+        <span class="n">data</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">DataArray</span><span class="p">]</span> <span class="o">|</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">DataArray</span><span class="p">]</span> <span class="o">|</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span>
         <span class="n">time</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">items</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">geometry</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
@@ -191,11 +194,11 @@
             <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_create_dataarrays</span><span class="p">(</span>
                 <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">,</span> <span class="n">time</span><span class="o">=</span><span class="n">time</span><span class="p">,</span> <span class="n">items</span><span class="o">=</span><span class="n">items</span><span class="p">,</span> <span class="n">geometry</span><span class="o">=</span><span class="n">geometry</span><span class="p">,</span> <span class="n">zn</span><span class="o">=</span><span class="n">zn</span><span class="p">,</span> <span class="n">dims</span><span class="o">=</span><span class="n">dims</span>
             <span class="p">)</span>  <span class="c1"># type: ignore</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_data_vars</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_init_from_DataArrays</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">validate</span><span class="o">=</span><span class="n">validate</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_data_vars</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_init_from_DataArrays</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">validate</span><span class="o">=</span><span class="n">validate</span><span class="p">)</span>  <span class="c1"># type: ignore</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">plot</span> <span class="o">=</span> <span class="n">_DatasetPlotter</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
 
     <span class="nd">@staticmethod</span>
-    <span class="k">def</span> <span class="nf">_is_DataArrays</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_is_DataArrays</span><span class="p">(</span><span class="n">data</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Check if input is Sequence/Mapping of DataArrays&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="p">(</span><span class="n">Dataset</span><span class="p">,</span> <span class="n">DataArray</span><span class="p">)):</span>
             <span class="k">return</span> <span class="kc">True</span>
@@ -220,7 +223,7 @@
         <span class="n">geometry</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">zn</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">dims</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-    <span class="p">):</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">DataArray</span><span class="p">]:</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">Iterable</span><span class="p">):</span>
             <span class="n">data</span> <span class="o">=</span> <span class="p">[</span><span class="n">data</span><span class="p">]</span>
         <span class="n">items</span> <span class="o">=</span> <span class="n">Dataset</span><span class="o">.</span><span class="n">_parse_items</span><span class="p">(</span><span class="n">items</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">))</span>
@@ -233,7 +236,9 @@
             <span class="p">)</span>
         <span class="k">return</span> <span class="n">data_vars</span>
 
-    <span class="k">def</span> <span class="nf">_init_from_DataArrays</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">validate</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">MutableMapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">DataArray</span><span class="p">]:</span>
+    <span class="k">def</span> <span class="nf">_init_from_DataArrays</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">DataArray</span><span class="p">]</span> <span class="o">|</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">DataArray</span><span class="p">],</span> <span class="n">validate</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">MutableMapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">DataArray</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Initialize Dataset object with Iterable of DataArrays&quot;&quot;&quot;</span>
         <span class="n">data_vars</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_DataArrays_as_mapping</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
 
@@ -242,7 +247,7 @@
             <span class="k">for</span> <span class="n">da</span> <span class="ow">in</span> <span class="n">data_vars</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
                 <span class="n">first</span><span class="o">.</span><span class="n">_is_compatible</span><span class="p">(</span><span class="n">da</span><span class="p">,</span> <span class="n">raise_error</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">_check_all_different_ids</span><span class="p">(</span><span class="n">data_vars</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_check_all_different_ids</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">data_vars</span><span class="o">.</span><span class="n">values</span><span class="p">()))</span>
 
         <span class="c1"># TODO is it necessary to keep track of item names?</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__itemattr</span><span class="p">:</span> <span class="n">Set</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
@@ -257,30 +262,29 @@
             <span class="s2">&quot;Dataset has no property &#39;values&#39; - use to_numpy() instead or maybe you were looking for DataArray.values?&quot;</span>
         <span class="p">)</span>
 
-    <span class="c1"># remove values and keys from dir to avoid confusion</span>
-    <span class="k">def</span> <span class="fm">__dir__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="n">keys</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__dir__</span><span class="p">())</span> <span class="o">+</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">keys</span><span class="p">()))</span>
-        <span class="k">return</span> <span class="nb">set</span><span class="p">([</span><span class="n">d</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">keys</span> <span class="k">if</span> <span class="n">d</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;values&quot;</span><span class="p">,</span> <span class="s2">&quot;keys&quot;</span><span class="p">)])</span>
-
     <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">_modify_list</span><span class="p">(</span><span class="n">lst</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
         <span class="n">modified_list</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="n">count_dict</span> <span class="o">=</span> <span class="p">{}</span>
-        
+
         <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">lst</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">item</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">count_dict</span><span class="p">:</span>
                 <span class="n">modified_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
                 <span class="n">count_dict</span><span class="p">[</span><span class="n">item</span><span class="p">]</span> <span class="o">=</span> <span class="mi">2</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Duplicate item name: </span><span class="si">{</span><span class="n">item</span><span class="si">}</span><span class="s2">. Renaming to </span><span class="si">{</span><span class="n">item</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">count_dict</span><span class="p">[</span><span class="n">item</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;Duplicate item name: </span><span class="si">{</span><span class="n">item</span><span class="si">}</span><span class="s2">. Renaming to </span><span class="si">{</span><span class="n">item</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">count_dict</span><span class="p">[</span><span class="n">item</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span>
+                <span class="p">)</span>
                 <span class="n">modified_item</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">item</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">count_dict</span><span class="p">[</span><span class="n">item</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span>
                 <span class="n">modified_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">modified_item</span><span class="p">)</span>
                 <span class="n">count_dict</span><span class="p">[</span><span class="n">item</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
-        
+
         <span class="k">return</span> <span class="n">modified_list</span>
 
     <span class="nd">@staticmethod</span>
-    <span class="k">def</span> <span class="nf">_parse_items</span><span class="p">(</span><span class="n">items</span><span class="p">,</span> <span class="n">n_items_data</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_parse_items</span><span class="p">(</span>
+        <span class="n">items</span><span class="p">:</span> <span class="kc">None</span> <span class="o">|</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">ItemInfo</span> <span class="o">|</span> <span class="n">EUMType</span> <span class="o">|</span> <span class="nb">str</span><span class="p">],</span> <span class="n">n_items_data</span><span class="p">:</span> <span class="nb">int</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">ItemInfo</span><span class="p">]:</span>
         <span class="k">if</span> <span class="n">items</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="c1"># default Undefined items</span>
             <span class="n">item_infos</span> <span class="o">=</span> <span class="p">[</span><span class="n">ItemInfo</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Item_</span><span class="si">{</span><span class="n">j</span><span class="o">+</span><span class="mi">1</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span> <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_items_data</span><span class="p">)]</span>
@@ -303,20 +307,20 @@
             <span class="n">item_names</span> <span class="o">=</span> <span class="n">Dataset</span><span class="o">.</span><span class="n">_modify_list</span><span class="p">(</span><span class="n">item_names</span><span class="p">)</span>
             <span class="k">for</span> <span class="n">it</span><span class="p">,</span> <span class="n">item_name</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">item_infos</span><span class="p">,</span> <span class="n">item_names</span><span class="p">):</span>
                 <span class="n">it</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">item_name</span>
-            
+
         <span class="k">return</span> <span class="n">item_infos</span>
 
     <span class="nd">@staticmethod</span>
-    <span class="k">def</span> <span class="nf">_DataArrays_as_mapping</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_DataArrays_as_mapping</span><span class="p">(</span>
+        <span class="n">data</span><span class="p">:</span> <span class="n">DataArray</span> <span class="o">|</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">DataArray</span><span class="p">]</span> <span class="o">|</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">DataArray</span><span class="p">]</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">MutableMapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">DataArray</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Create dict of DataArrays if necessary&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">Mapping</span><span class="p">):</span>
-            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">Dataset</span><span class="p">):</span>
-                <span class="k">return</span> <span class="n">data</span>
-            <span class="n">data</span> <span class="o">=</span> <span class="n">Dataset</span><span class="o">.</span><span class="n">_validate_item_names_and_keys</span><span class="p">(</span>
+            <span class="n">data_vars</span> <span class="o">=</span> <span class="n">Dataset</span><span class="o">.</span><span class="n">_validate_item_names_and_keys</span><span class="p">(</span>
                 <span class="n">data</span>
             <span class="p">)</span>  <span class="c1"># TODO is this necessary?</span>
-            <span class="n">_</span> <span class="o">=</span> <span class="n">Dataset</span><span class="o">.</span><span class="n">_unique_item_names</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
-            <span class="k">return</span> <span class="n">data</span>
+            <span class="n">_</span> <span class="o">=</span> <span class="n">Dataset</span><span class="o">.</span><span class="n">_unique_item_names</span><span class="p">(</span><span class="n">data_vars</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
+            <span class="k">return</span> <span class="n">data_vars</span>
 
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">DataArray</span><span class="p">):</span>
             <span class="n">data</span> <span class="o">=</span> <span class="p">[</span><span class="n">data</span><span class="p">]</span>
@@ -346,7 +350,7 @@
         <span class="k">return</span> <span class="n">item_names</span>
 
     <span class="nd">@staticmethod</span>
-    <span class="k">def</span> <span class="nf">_check_all_different_ids</span><span class="p">(</span><span class="n">das</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_check_all_different_ids</span><span class="p">(</span><span class="n">das</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">DataArray</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Are all the DataArrays different objects or are some referring to the same&quot;&quot;&quot;</span>
         <span class="n">ids</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">das</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int64</span><span class="p">)</span>
         <span class="n">ids_val</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">das</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int64</span><span class="p">)</span>
@@ -372,7 +376,7 @@
                 <span class="n">Dataset</span><span class="o">.</span><span class="n">_id_of_DataArrays_equal</span><span class="p">(</span><span class="n">das</span><span class="p">[</span><span class="n">jj</span><span class="p">[</span><span class="mi">0</span><span class="p">]],</span> <span class="n">das</span><span class="p">[</span><span class="n">jj</span><span class="p">[</span><span class="mi">1</span><span class="p">]])</span>
 
     <span class="nd">@staticmethod</span>
-    <span class="k">def</span> <span class="nf">_id_of_DataArrays_equal</span><span class="p">(</span><span class="n">da1</span><span class="p">,</span> <span class="n">da2</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_id_of_DataArrays_equal</span><span class="p">(</span><span class="n">da1</span><span class="p">:</span> <span class="n">DataArray</span><span class="p">,</span> <span class="n">da2</span><span class="p">:</span> <span class="n">DataArray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Check if two DataArrays are actually the same object&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="nb">id</span><span class="p">(</span><span class="n">da1</span><span class="p">)</span> <span class="o">==</span> <span class="nb">id</span><span class="p">(</span><span class="n">da2</span><span class="p">):</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
@@ -383,7 +387,7 @@
                 <span class="sa">f</span><span class="s2">&quot;DataArrays </span><span class="si">{</span><span class="n">da1</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> and </span><span class="si">{</span><span class="n">da2</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> refer to the same data! Create a copy first.&quot;</span>
             <span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">_check_already_present</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_da</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_check_already_present</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_da</span><span class="p">:</span> <span class="n">DataArray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Is the DataArray already present in the Dataset?&quot;&quot;&quot;</span>
         <span class="k">for</span> <span class="n">da</span> <span class="ow">in</span> <span class="bp">self</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_id_of_DataArrays_equal</span><span class="p">(</span><span class="n">da</span><span class="p">,</span> <span class="n">new_da</span><span class="p">)</span>
@@ -398,24 +402,24 @@
         <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">time</span>
 
     <span class="nd">@time</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span> <span class="nf">time</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_time</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">time</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_time</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">for</span> <span class="n">da</span> <span class="ow">in</span> <span class="bp">self</span><span class="p">:</span>
             <span class="n">da</span><span class="o">.</span><span class="n">time</span> <span class="o">=</span> <span class="n">new_time</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">start_time</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">start_time</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">datetime</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;First time instance (as datetime)&quot;&quot;&quot;</span>
         <span class="c1"># TODO: use pd.Timestamp instead</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">time</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">to_pydatetime</span><span class="p">()</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">end_time</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">end_time</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">datetime</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Last time instance (as datetime)&quot;&quot;&quot;</span>
         <span class="c1"># TODO: use pd.Timestamp instead</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">time</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">to_pydatetime</span><span class="p">()</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">timestep</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]:</span>
+    <span class="k">def</span> <span class="nf">timestep</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Time step in seconds if equidistant (and at</span>
 <span class="sd">        least two time instances); otherwise None</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -449,7 +453,7 @@
         <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">time</span><span class="p">)</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">items</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">items</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">ItemInfo</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;ItemInfo for each of the DataArrays as a list&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="p">[</span><span class="n">x</span><span class="o">.</span><span class="n">item</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="p">]</span>
 
@@ -459,7 +463,7 @@
         <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_data_vars</span><span class="p">)</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">names</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">names</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Name of each of the DataArrays as a list&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="p">[</span><span class="n">da</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">da</span> <span class="ow">in</span> <span class="bp">self</span><span class="p">]</span>
 
@@ -477,29 +481,29 @@
         <span class="k">return</span> <span class="bp">self</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">dims</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">shape</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">shape</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="o">...</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Shape of each DataArray&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">deletevalue</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">deletevalue</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;File delete value&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">deletevalue</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">geometry</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">geometry</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Geometry of each DataArray&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">geometry</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">_zn</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">_zn</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">return</span> <span class="bp">self</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">_zn</span>
 
     <span class="c1"># TODO: remove this</span>
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">n_elements</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Number of spatial elements/points&quot;&quot;&quot;</span>
-        <span class="n">n_elem</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">prod</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+        <span class="n">n_elem</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">prod</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">shape</span><span class="p">))</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_timesteps</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
             <span class="n">n_elem</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">n_elem</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_timesteps</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">n_elem</span>
@@ -589,16 +593,16 @@
 
     <span class="c1"># TODO: delete this?</span>
     <span class="nd">@staticmethod</span>
-    <span class="k">def</span> <span class="nf">create_empty_data</span><span class="p">(</span><span class="n">n_items</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">n_timesteps</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">n_elements</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">create_empty_data</span><span class="p">(</span><span class="n">n_items</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">n_timesteps</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">n_elements</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">shape</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>  <span class="c1"># type: ignore</span>
         <span class="n">data</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">if</span> <span class="n">shape</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">n_elements</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;n_elements and shape cannot both be None&quot;</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="n">shape</span> <span class="o">=</span> <span class="n">n_elements</span>
+                <span class="n">shape</span> <span class="o">=</span> <span class="n">n_elements</span>  <span class="c1"># type: ignore</span>
         <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">isscalar</span><span class="p">(</span><span class="n">shape</span><span class="p">):</span>
-            <span class="n">shape</span> <span class="o">=</span> <span class="p">[</span><span class="n">shape</span><span class="p">]</span>
-        <span class="n">dati</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="n">n_timesteps</span><span class="p">,</span> <span class="o">*</span><span class="n">shape</span><span class="p">))</span>
+            <span class="n">shape</span> <span class="o">=</span> <span class="p">[</span><span class="n">shape</span><span class="p">]</span>  <span class="c1"># type: ignore</span>
+        <span class="n">dati</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="n">n_timesteps</span><span class="p">,</span> <span class="o">*</span><span class="n">shape</span><span class="p">))</span>  <span class="c1"># type: ignore</span>
         <span class="n">dati</span><span class="p">[:]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
         <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_items</span><span class="p">):</span>
             <span class="n">data</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">dati</span><span class="o">.</span><span class="n">copy</span><span class="p">())</span>
@@ -606,23 +610,16 @@
 
     <span class="c1"># ============= Dataset is (almost) a MutableMapping ===========</span>
 
-    <span class="k">def</span> <span class="fm">__len__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__len__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
         <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_data_vars</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="fm">__iter__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__iter__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterator</span><span class="p">[</span><span class="n">DataArray</span><span class="p">]:</span>
         <span class="k">yield from</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data_vars</span><span class="o">.</span><span class="n">values</span><span class="p">()</span>
 
-    <span class="k">def</span> <span class="fm">__setitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__setitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__set_or_insert_item</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">insert</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">__set_or_insert_item</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">insert</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">DataArray</span><span class="p">):</span>
-            <span class="k">try</span><span class="p">:</span>
-                <span class="n">value</span> <span class="o">=</span> <span class="n">DataArray</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
-                <span class="c1"># TODO: warn that this is not the preferred way!</span>
-            <span class="k">except</span> <span class="ne">TypeError</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Input could not be interpreted as a DataArray&quot;</span><span class="p">)</span>
-
+    <span class="k">def</span> <span class="nf">__set_or_insert_item</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="n">DataArray</span><span class="p">,</span> <span class="n">insert</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
             <span class="bp">self</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">_is_compatible</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
 
@@ -665,7 +662,7 @@
 
 <div class="viewcode-block" id="Dataset.insert">
 <a class="viewcode-back" href="../../../dataset.html#mikeio.Dataset.insert">[docs]</a>
-    <span class="k">def</span> <span class="nf">insert</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="n">DataArray</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">insert</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="n">DataArray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Insert DataArray in a specific position</span>
 
 <span class="sd">        Parameters</span>
@@ -676,17 +673,12 @@
 <span class="sd">            DataArray to be inserted, must comform with with existing DataArrays</span>
 <span class="sd">            and must have a unique item name</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">__set_or_insert_item</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">insert</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-
-        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="nb">slice</span><span class="p">):</span>
-            <span class="n">s</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">time</span><span class="o">.</span><span class="n">slice_indexer</span><span class="p">(</span><span class="n">key</span><span class="o">.</span><span class="n">start</span><span class="p">,</span> <span class="n">key</span><span class="o">.</span><span class="n">stop</span><span class="p">)</span>
-            <span class="n">time_steps</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">s</span><span class="o">.</span><span class="n">start</span><span class="p">,</span> <span class="n">s</span><span class="o">.</span><span class="n">stop</span><span class="p">))</span>
-            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">isel</span><span class="p">(</span><span class="n">time_steps</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__set_or_insert_item</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">insert</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="Dataset.remove">
 <a class="viewcode-back" href="../../../dataset.html#mikeio.Dataset.remove">[docs]</a>
-    <span class="k">def</span> <span class="nf">remove</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="nb">str</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">remove</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Remove DataArray from Dataset</span>
 
 <span class="sd">        Parameters</span>
@@ -701,21 +693,9 @@
         <span class="bp">self</span><span class="o">.</span><span class="fm">__delitem__</span><span class="p">(</span><span class="n">key</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="Dataset.popitem">
-<a class="viewcode-back" href="../../../dataset.html#mikeio.Dataset.popitem">[docs]</a>
-    <span class="k">def</span> <span class="nf">popitem</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Pop first DataArray from Dataset</span>
-
-<span class="sd">        See also</span>
-<span class="sd">        --------</span>
-<span class="sd">        pop</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span></div>
-
-
 <div class="viewcode-block" id="Dataset.rename">
 <a class="viewcode-back" href="../../../dataset.html#mikeio.Dataset.rename">[docs]</a>
-    <span class="k">def</span> <span class="nf">rename</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mapper</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">],</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">rename</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mapper</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">],</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;Dataset&quot;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Rename items (DataArrays) in Dataset</span>
 
 <span class="sd">        Parameters</span>
@@ -751,13 +731,13 @@
         <span class="k">return</span> <span class="n">ds</span></div>
 
 
-    <span class="k">def</span> <span class="nf">_set_name_attr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="n">DataArray</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_set_name_attr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="n">DataArray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">name</span> <span class="o">=</span> <span class="n">_to_safe_name</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__itemattr</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">__itemattr</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>  <span class="c1"># keep track of what we insert</span>
         <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">_del_name_attr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_del_name_attr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">name</span> <span class="o">=</span> <span class="n">_to_safe_name</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__itemattr</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">__itemattr</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
@@ -772,9 +752,7 @@
     <span class="k">def</span> <span class="fm">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span><span class="n">Hashable</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="s2">&quot;Dataset&quot;</span><span class="p">:</span>
         <span class="o">...</span>
 
-
     <span class="k">def</span> <span class="fm">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DataArray</span> <span class="o">|</span> <span class="s2">&quot;Dataset&quot;</span><span class="p">:</span>
-
         <span class="c1"># select time steps</span>
         <span class="k">if</span> <span class="p">(</span>
             <span class="nb">isinstance</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span>
@@ -827,7 +805,7 @@
 
         <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;indexing with a </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">key</span><span class="p">)</span><span class="si">}</span><span class="s2"> is not (yet) supported&quot;</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">_is_slice_time_slice</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">s</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_is_slice_time_slice</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">s</span><span class="p">:</span> <span class="nb">slice</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
         <span class="k">if</span> <span class="p">(</span><span class="n">s</span><span class="o">.</span><span class="n">start</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">s</span><span class="o">.</span><span class="n">stop</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">):</span>
             <span class="k">return</span> <span class="kc">False</span>
         <span class="k">if</span> <span class="n">s</span><span class="o">.</span><span class="n">start</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
@@ -838,7 +816,11 @@
                 <span class="k">return</span> <span class="kc">False</span>
         <span class="k">return</span> <span class="kc">True</span>
 
-    <span class="k">def</span> <span class="nf">_is_key_time</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_is_key_time</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>  <span class="c1"># type: ignore</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="nb">slice</span><span class="p">):</span>
+            <span class="k">return</span> <span class="kc">False</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">)):</span>
+            <span class="k">return</span> <span class="kc">False</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="ow">and</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">names</span><span class="p">:</span>
             <span class="k">return</span> <span class="kc">False</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">key</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">key</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">isnumeric</span><span class="p">():</span>
@@ -846,9 +828,10 @@
             <span class="k">return</span> <span class="kc">True</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="p">(</span><span class="n">datetime</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">datetime64</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">Timestamp</span><span class="p">)):</span>
             <span class="k">return</span> <span class="kc">True</span>
+
         <span class="k">return</span> <span class="kc">False</span>
 
-    <span class="k">def</span> <span class="nf">_multi_indexing_attempted</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">_multi_indexing_attempted</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
         <span class="c1"># find out if user is attempting ds[2, :, 1] or similar (not allowed)</span>
         <span class="c1"># this is not bullet-proof, but a good estimate</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">):</span>
@@ -886,8 +869,7 @@
             <span class="k">return</span> <span class="n">key</span><span class="o">.</span><span class="n">name</span>
         <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;indexing with type </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">key</span><span class="p">)</span><span class="si">}</span><span class="s2"> is not supported&quot;</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="fm">__delitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
-
+    <span class="k">def</span> <span class="fm">__delitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="n">Hashable</span> <span class="o">|</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">key</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_key_to_str</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_data_vars</span><span class="o">.</span><span class="fm">__delitem__</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_del_name_attr</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
@@ -896,7 +878,7 @@
 
 <div class="viewcode-block" id="Dataset.isel">
 <a class="viewcode-back" href="../../../dataset.html#mikeio.Dataset.isel">[docs]</a>
-    <span class="k">def</span> <span class="nf">isel</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">idx</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">isel</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">idx</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;Dataset&quot;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Return a new Dataset whose data is given by</span>
 <span class="sd">        integer indexing along the specified dimension(s).</span>
 
@@ -1019,10 +1001,10 @@
     <span class="k">def</span> <span class="nf">interp</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="o">*</span><span class="p">,</span>
-        <span class="n">time</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">pd</span><span class="o">.</span><span class="n">DatetimeIndex</span> <span class="o">|</span> <span class="s2">&quot;DataArray&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">x</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">y</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">z</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">time</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DatetimeIndex</span> <span class="o">|</span> <span class="s2">&quot;DataArray&quot;</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">x</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">y</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">z</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">n_nearest</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">3</span><span class="p">,</span>
         <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;Dataset&quot;</span><span class="p">:</span>
@@ -1083,7 +1065,6 @@
             <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">geometry</span><span class="p">,</span> <span class="n">GeometryFM2D</span>
             <span class="p">):</span>  <span class="c1"># TODO remove this when all geometries implements the same method</span>
-
                 <span class="n">interpolant</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">geometry</span><span class="o">.</span><span class="n">get_2d_interpolant</span><span class="p">(</span>
                     <span class="n">xy</span><span class="p">,</span> <span class="n">n_nearest</span><span class="o">=</span><span class="n">n_nearest</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
                 <span class="p">)</span>
@@ -1113,7 +1094,7 @@
 
 <div class="viewcode-block" id="Dataset.extract_track">
 <a class="viewcode-back" href="../../../dataset.html#mikeio.Dataset.extract_track">[docs]</a>
-    <span class="k">def</span> <span class="nf">extract_track</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">track</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s2">&quot;nearest&quot;</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">extract_track</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">track</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s2">&quot;nearest&quot;</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;Dataset&quot;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Extract data along a moving track</span>
 
@@ -1139,6 +1120,10 @@
         <span class="n">item_numbers</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_items</span><span class="p">))</span>
         <span class="n">time_steps</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_timesteps</span><span class="p">))</span>
 
+        <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">start_time</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+        <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">end_time</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+        <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">timestep</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+
         <span class="k">return</span> <span class="n">_extract_track</span><span class="p">(</span>
             <span class="n">deletevalue</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">deletevalue</span><span class="p">,</span>
             <span class="n">start_time</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">start_time</span><span class="p">,</span>
@@ -1160,12 +1145,12 @@
 <a class="viewcode-back" href="../../../dataset.html#mikeio.Dataset.interp_time">[docs]</a>
     <span class="k">def</span> <span class="nf">interp_time</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
-        <span class="n">dt</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span> <span class="o">|</span> <span class="n">pd</span><span class="o">.</span><span class="n">DatetimeIndex</span> <span class="o">|</span> <span class="s2">&quot;Dataset&quot;</span> <span class="o">|</span> <span class="n">DataArray</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">dt</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="n">pd</span><span class="o">.</span><span class="n">DatetimeIndex</span> <span class="o">|</span> <span class="s2">&quot;Dataset&quot;</span> <span class="o">|</span> <span class="n">DataArray</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="o">*</span><span class="p">,</span>
-        <span class="n">freq</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">method</span><span class="o">=</span><span class="s2">&quot;linear&quot;</span><span class="p">,</span>
-        <span class="n">extrapolate</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-        <span class="n">fill_value</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">,</span>
+        <span class="n">freq</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">method</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;linear&quot;</span><span class="p">,</span>
+        <span class="n">extrapolate</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="n">fill_value</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;Dataset&quot;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Temporal interpolation</span>
 
@@ -1305,9 +1290,12 @@
 
     <span class="c1"># ============= Combine/concat ===========</span>
 
-    <span class="k">def</span> <span class="nf">_append_items</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">,</span> <span class="n">copy</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_append_items</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">:</span> <span class="n">DataArray</span> <span class="o">|</span> <span class="s2">&quot;Dataset&quot;</span><span class="p">,</span> <span class="n">copy</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;Dataset&quot;</span><span class="p">:</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="n">DataArray</span><span class="p">):</span>
             <span class="n">other</span> <span class="o">=</span> <span class="n">other</span><span class="o">.</span><span class="n">_to_dataset</span><span class="p">()</span>
+        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="n">Dataset</span><span class="p">)</span>
         <span class="n">item_names</span> <span class="o">=</span> <span class="p">{</span><span class="n">item</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">items</span><span class="p">}</span>
         <span class="n">other_names</span> <span class="o">=</span> <span class="p">{</span><span class="n">item</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">other</span><span class="o">.</span><span class="n">items</span><span class="p">}</span>
 
@@ -1430,7 +1418,7 @@
             <span class="n">newdata</span><span class="p">,</span> <span class="n">time</span><span class="o">=</span><span class="n">newtime</span><span class="p">,</span> <span class="n">items</span><span class="o">=</span><span class="n">ds</span><span class="o">.</span><span class="n">items</span><span class="p">,</span> <span class="n">geometry</span><span class="o">=</span><span class="n">ds</span><span class="o">.</span><span class="n">geometry</span><span class="p">,</span> <span class="n">zn</span><span class="o">=</span><span class="n">zn</span>
         <span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">_check_all_items_match</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_check_all_items_match</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">:</span> <span class="s2">&quot;Dataset&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_items</span> <span class="o">!=</span> <span class="n">other</span><span class="o">.</span><span class="n">n_items</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
                 <span class="sa">f</span><span class="s2">&quot;Number of items must match (</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">n_items</span><span class="si">}</span><span class="s2"> and </span><span class="si">{</span><span class="n">other</span><span class="o">.</span><span class="n">n_items</span><span class="si">}</span><span class="s2">)&quot;</span>
@@ -1453,9 +1441,7 @@
 
 <div class="viewcode-block" id="Dataset.aggregate">
 <a class="viewcode-back" href="../../../dataset.html#mikeio.Dataset.aggregate">[docs]</a>
-    <span class="k">def</span> <span class="nf">aggregate</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">func</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">nanmean</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
-    <span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;Dataset&quot;</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">aggregate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">func</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">nanmean</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;Dataset&quot;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Aggregate along an axis</span>
 
 <span class="sd">        Parameters</span>
@@ -1485,7 +1471,7 @@
                 <span class="n">dims</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">dims</span><span class="p">,</span>
                 <span class="n">zn</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_zn</span><span class="p">,</span>
             <span class="p">)</span>
-            
+
             <span class="k">return</span> <span class="n">Dataset</span><span class="p">([</span><span class="n">da</span><span class="p">],</span> <span class="n">validate</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">res</span> <span class="o">=</span> <span class="p">{</span>
@@ -1496,7 +1482,7 @@
 
 
     <span class="nd">@staticmethod</span>
-    <span class="k">def</span> <span class="nf">_agg_item_from_items</span><span class="p">(</span><span class="n">items</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_agg_item_from_items</span><span class="p">(</span><span class="n">items</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">ItemInfo</span><span class="p">],</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ItemInfo</span><span class="p">:</span>
         <span class="n">it_type</span> <span class="o">=</span> <span class="p">(</span>
             <span class="n">items</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">type</span>
             <span class="k">if</span> <span class="nb">all</span><span class="p">([</span><span class="n">it</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="n">items</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">type</span> <span class="k">for</span> <span class="n">it</span> <span class="ow">in</span> <span class="n">items</span><span class="p">])</span>
@@ -1571,10 +1557,7 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_quantile</span><span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="n">axis</span><span class="p">,</span> <span class="n">func</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">nanquantile</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
 
 
-    <span class="k">def</span> <span class="nf">_quantile</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span> <span class="n">q</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">func</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">quantile</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
-    <span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;Dataset&quot;</span><span class="p">:</span>
-
+    <span class="k">def</span> <span class="nf">_quantile</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">q</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">func</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">quantile</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;Dataset&quot;</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">axis</span> <span class="o">==</span> <span class="s2">&quot;items&quot;</span><span class="p">:</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_items</span> <span class="o">&lt;=</span> <span class="mi">1</span><span class="p">:</span>
                 <span class="k">return</span> <span class="bp">self</span>  <span class="c1"># or raise ValueError?</span>
@@ -1880,7 +1863,7 @@
             <span class="n">newds</span><span class="p">[</span><span class="n">j</span><span class="p">]</span><span class="o">.</span><span class="n">values</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">j</span><span class="p">]</span>  <span class="c1"># type: ignore</span>
         <span class="k">return</span> <span class="n">newds</span>
 
-    <span class="k">def</span> <span class="nf">_check_datasets_match</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_check_datasets_match</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">:</span> <span class="s2">&quot;Dataset&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_items</span> <span class="o">!=</span> <span class="n">other</span><span class="o">.</span><span class="n">n_items</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
                 <span class="sa">f</span><span class="s2">&quot;Number of items must match (</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">n_items</span><span class="si">}</span><span class="s2"> and </span><span class="si">{</span><span class="n">other</span><span class="o">.</span><span class="n">n_items</span><span class="si">}</span><span class="s2">)&quot;</span>
@@ -2004,7 +1987,6 @@
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">geometry</span><span class="p">,</span> <span class="p">(</span><span class="n">GeometryPoint2D</span><span class="p">,</span> <span class="n">GeometryPoint3D</span><span class="p">,</span> <span class="n">GeometryUndefined</span><span class="p">)</span>
         <span class="p">):</span>
-
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">ndim</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>  <span class="c1"># Not very common, but still...</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">_validate_extension</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="s2">&quot;.dfs0&quot;</span><span class="p">)</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">_to_dfs0</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
@@ -2033,44 +2015,44 @@
 
 
     <span class="nd">@staticmethod</span>
-    <span class="k">def</span> <span class="nf">_validate_extension</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">valid_extension</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_validate_extension</span><span class="p">(</span><span class="n">filename</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Path</span><span class="p">,</span> <span class="n">valid_extension</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
         <span class="n">ext</span> <span class="o">=</span> <span class="n">path</span><span class="o">.</span><span class="n">suffix</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
         <span class="k">if</span> <span class="n">ext</span> <span class="o">!=</span> <span class="n">valid_extension</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;File extension must be </span><span class="si">{</span><span class="n">valid_extension</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">_to_dfs0</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_to_dfs0</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Path</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="kn">from</span> <span class="nn">..dfs._dfs0</span> <span class="kn">import</span> <span class="n">_write_dfs0</span>
 
         <span class="n">dtype</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;dtype&quot;</span><span class="p">,</span> <span class="n">DfsSimpleType</span><span class="o">.</span><span class="n">Float</span><span class="p">)</span>
 
         <span class="n">_write_dfs0</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="bp">self</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">_to_dfs2</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_to_dfs2</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="c1"># assumes Grid2D geometry</span>
         <span class="kn">from</span> <span class="nn">..dfs._dfs2</span> <span class="kn">import</span> <span class="n">write_dfs2</span>
 
         <span class="n">write_dfs2</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">_to_dfs3</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_to_dfs3</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="c1"># assumes Grid3D geometry</span>
         <span class="kn">from</span> <span class="nn">..dfs._dfs3</span> <span class="kn">import</span> <span class="n">write_dfs3</span>
 
         <span class="n">write_dfs3</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">_to_dfs1</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_to_dfs1</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="kn">from</span> <span class="nn">..dfs._dfs1</span> <span class="kn">import</span> <span class="n">write_dfs1</span>
 
-        <span class="n">write_dfs1</span><span class="p">(</span><span class="n">filename</span><span class="o">=</span><span class="n">filename</span><span class="p">,</span><span class="n">ds</span><span class="o">=</span><span class="bp">self</span><span class="p">)</span>
+        <span class="n">write_dfs1</span><span class="p">(</span><span class="n">filename</span><span class="o">=</span><span class="n">filename</span><span class="p">,</span> <span class="n">ds</span><span class="o">=</span><span class="bp">self</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">_to_dfsu</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_to_dfsu</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="kn">from</span> <span class="nn">..dfsu._dfsu</span> <span class="kn">import</span> <span class="n">_write_dfsu</span>
 
         <span class="n">_write_dfsu</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
 
 <div class="viewcode-block" id="Dataset.to_xarray">
 <a class="viewcode-back" href="../../../dataset.html#mikeio.Dataset.to_xarray">[docs]</a>
-    <span class="k">def</span> <span class="nf">to_xarray</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">to_xarray</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;xarray.Dataset&quot;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Export to xarray.Dataset&quot;&quot;&quot;</span>
         <span class="kn">import</span> <span class="nn">xarray</span>
 

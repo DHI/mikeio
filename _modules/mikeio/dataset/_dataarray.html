@@ -96,15 +96,33 @@
 <span class="kn">from</span> <span class="nn">copy</span> <span class="kn">import</span> <span class="n">deepcopy</span>
 <span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">datetime</span>
 <span class="kn">from</span> <span class="nn">functools</span> <span class="kn">import</span> <span class="n">cached_property</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Iterable</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Mapping</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">Any</span><span class="p">,</span>
+    <span class="n">Iterable</span><span class="p">,</span>
+    <span class="n">Sequence</span><span class="p">,</span>
+    <span class="n">Tuple</span><span class="p">,</span>
+    <span class="n">Mapping</span><span class="p">,</span>
+    <span class="n">Union</span><span class="p">,</span>
+    <span class="n">Sized</span><span class="p">,</span>
+    <span class="n">Literal</span><span class="p">,</span>
+    <span class="n">TYPE_CHECKING</span><span class="p">,</span>
+    <span class="n">overload</span><span class="p">,</span>
+    <span class="n">MutableMapping</span><span class="p">,</span>
+    <span class="n">Callable</span><span class="p">,</span>
+<span class="p">)</span>
 
 
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">numpy.typing</span> <span class="kn">import</span> <span class="n">NDArray</span><span class="p">,</span> <span class="n">ArrayLike</span><span class="p">,</span> <span class="n">DTypeLike</span>
 <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
-<span class="kn">from</span> <span class="nn">mikecore.DfsuFile</span> <span class="kn">import</span> <span class="n">DfsuFileType</span>  <span class="c1"># type: ignore</span>
+<span class="kn">from</span> <span class="nn">mikecore.DfsuFile</span> <span class="kn">import</span> <span class="n">DfsuFileType</span>
 
-<span class="kn">from</span> <span class="nn">._data_utils</span> <span class="kn">import</span> <span class="n">DataUtilsMixin</span>
 <span class="kn">from</span> <span class="nn">..eum</span> <span class="kn">import</span> <span class="n">EUMType</span><span class="p">,</span> <span class="n">EUMUnit</span><span class="p">,</span> <span class="n">ItemInfo</span>
+<span class="kn">from</span> <span class="nn">._data_utils</span> <span class="kn">import</span> <span class="n">_get_time_idx_list</span><span class="p">,</span> <span class="n">_n_selected_timesteps</span>
+
+<span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">._dataset</span> <span class="kn">import</span> <span class="n">Dataset</span>
+    <span class="kn">import</span> <span class="nn">xarray</span>
 
 
 <span class="kn">from</span> <span class="nn">..spatial</span> <span class="kn">import</span> <span class="p">(</span>
@@ -139,12 +157,28 @@
     <span class="n">_DataArrayPlotterLineSpectrum</span><span class="p">,</span>
 <span class="p">)</span>
 
+<span class="n">GeometryType</span> <span class="o">=</span> <span class="n">Union</span><span class="p">[</span>
+    <span class="n">GeometryUndefined</span><span class="p">,</span>
+    <span class="n">GeometryPoint2D</span><span class="p">,</span>
+    <span class="n">GeometryPoint3D</span><span class="p">,</span>
+    <span class="n">GeometryFM2D</span><span class="p">,</span>
+    <span class="n">GeometryFM3D</span><span class="p">,</span>
+    <span class="n">GeometryFMAreaSpectrum</span><span class="p">,</span>
+    <span class="n">GeometryFMLineSpectrum</span><span class="p">,</span>
+    <span class="n">GeometryFMPointSpectrum</span><span class="p">,</span>
+    <span class="n">GeometryFMVerticalColumn</span><span class="p">,</span>
+    <span class="n">GeometryFMVerticalProfile</span><span class="p">,</span>
+    <span class="n">Grid1D</span><span class="p">,</span>
+    <span class="n">Grid2D</span><span class="p">,</span>
+    <span class="n">Grid3D</span><span class="p">,</span>
+<span class="p">]</span>
+
 
 <span class="k">class</span> <span class="nc">_DataArraySpectrumToHm0</span><span class="p">:</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">da</span><span class="p">:</span> <span class="s2">&quot;DataArray&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">da</span> <span class="o">=</span> <span class="n">da</span>
 
-    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tail</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tail</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;DataArray&quot;</span><span class="p">:</span>
         <span class="c1"># TODO: if action_density</span>
         <span class="n">m0</span> <span class="o">=</span> <span class="n">calc_m0_from_spectrum</span><span class="p">(</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">da</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">(),</span>
@@ -157,7 +191,7 @@
         <span class="n">item</span> <span class="o">=</span> <span class="n">ItemInfo</span><span class="p">(</span><span class="n">EUMType</span><span class="o">.</span><span class="n">Significant_wave_height</span><span class="p">)</span>
         <span class="n">g</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">da</span><span class="o">.</span><span class="n">geometry</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">g</span><span class="p">,</span> <span class="n">GeometryFMPointSpectrum</span><span class="p">):</span>
-            <span class="n">geometry</span> <span class="o">=</span> <span class="n">GeometryPoint2D</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">g</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">g</span><span class="o">.</span><span class="n">y</span><span class="p">)</span>
+            <span class="n">geometry</span><span class="p">:</span> <span class="n">Any</span> <span class="o">=</span> <span class="n">GeometryPoint2D</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">g</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">g</span><span class="o">.</span><span class="n">y</span><span class="p">)</span>
         <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">g</span><span class="p">,</span> <span class="n">GeometryFMLineSpectrum</span><span class="p">):</span>
             <span class="n">geometry</span> <span class="o">=</span> <span class="n">Grid1D</span><span class="p">(</span>
                 <span class="n">nx</span><span class="o">=</span><span class="n">g</span><span class="o">.</span><span class="n">n_nodes</span><span class="p">,</span>
@@ -184,7 +218,7 @@
 
 <div class="viewcode-block" id="DataArray">
 <a class="viewcode-back" href="../../../dataarray.html#mikeio.DataArray">[docs]</a>
-<span class="k">class</span> <span class="nc">DataArray</span><span class="p">(</span><span class="n">DataUtilsMixin</span><span class="p">):</span>
+<span class="k">class</span> <span class="nc">DataArray</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;DataArray with data and metadata for a single item in a dfs file</span>
 
 <span class="sd">    The DataArray has these main properties:</span>
@@ -199,14 +233,14 @@
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
-        <span class="n">data</span><span class="p">,</span>
+        <span class="n">data</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">floating</span><span class="p">],</span>
         <span class="o">*</span><span class="p">,</span>
-        <span class="n">time</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">pd</span><span class="o">.</span><span class="n">DatetimeIndex</span> <span class="o">|</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">item</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">ItemInfo</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">geometry</span><span class="o">=</span><span class="n">GeometryUndefined</span><span class="p">(),</span>
-        <span class="n">zn</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-        <span class="n">dims</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Sequence</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="p">):</span>
+        <span class="n">time</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DatetimeIndex</span> <span class="o">|</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">item</span><span class="p">:</span> <span class="n">ItemInfo</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">geometry</span><span class="p">:</span> <span class="n">GeometryType</span> <span class="o">=</span> <span class="n">GeometryUndefined</span><span class="p">(),</span>
+        <span class="n">zn</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">floating</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">dims</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="c1"># TODO: add optional validation validate=True</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_values</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parse_data</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">time</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DatetimeIndex</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parse_time</span><span class="p">(</span><span class="n">time</span><span class="p">)</span>
@@ -221,7 +255,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">plot</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_plotter_by_geometry</span><span class="p">()</span>
 
     <span class="nd">@staticmethod</span>
-    <span class="k">def</span> <span class="nf">_parse_data</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_parse_data</span><span class="p">(</span><span class="n">data</span><span class="p">:</span> <span class="n">ArrayLike</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>  <span class="c1"># NDArray[np.floating] | float:</span>
         <span class="n">validation_errors</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;shape&quot;</span><span class="p">,</span> <span class="s2">&quot;ndim&quot;</span><span class="p">,</span> <span class="s2">&quot;dtype&quot;</span><span class="p">):</span>
             <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">p</span><span class="p">):</span>
@@ -233,7 +267,9 @@
             <span class="p">)</span>
         <span class="k">return</span> <span class="n">data</span>
 
-    <span class="k">def</span> <span class="nf">_parse_dims</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dims</span><span class="p">,</span> <span class="n">geometry</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="o">...</span><span class="p">]:</span>
+    <span class="k">def</span> <span class="nf">_parse_dims</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">dims</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span> <span class="n">geometry</span><span class="p">:</span> <span class="n">GeometryType</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="o">...</span><span class="p">]:</span>
         <span class="k">if</span> <span class="n">dims</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_guess_dims</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ndim</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_timesteps</span><span class="p">,</span> <span class="n">geometry</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
@@ -248,8 +284,9 @@
             <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">dims</span><span class="p">)</span>
 
     <span class="nd">@staticmethod</span>
-    <span class="k">def</span> <span class="nf">_guess_dims</span><span class="p">(</span><span class="n">ndim</span><span class="p">,</span> <span class="n">shape</span><span class="p">,</span> <span class="n">n_timesteps</span><span class="p">,</span> <span class="n">geometry</span><span class="p">):</span>
-
+    <span class="k">def</span> <span class="nf">_guess_dims</span><span class="p">(</span>
+        <span class="n">ndim</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">shape</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="o">...</span><span class="p">],</span> <span class="n">n_timesteps</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">geometry</span><span class="p">:</span> <span class="n">GeometryType</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="o">...</span><span class="p">]:</span>
         <span class="c1"># TODO delete default dims to geometry</span>
 
         <span class="c1"># This is not very robust, but is probably a reasonable guess</span>
@@ -294,24 +331,29 @@
                 <span class="n">dims</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;x&quot;</span><span class="p">)</span>
         <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">dims</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">_check_time_data_length</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">time</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_check_time_data_length</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">time</span><span class="p">:</span> <span class="n">Sized</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">if</span> <span class="s2">&quot;time&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">dims</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">time</span><span class="p">)</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_values</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
                 <span class="sa">f</span><span class="s2">&quot;Number of timesteps (</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">time</span><span class="p">)</span><span class="si">}</span><span class="s2">) does not fit with data shape </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s2">&quot;</span>
             <span class="p">)</span>
 
     <span class="nd">@staticmethod</span>
-    <span class="k">def</span> <span class="nf">_parse_item</span><span class="p">(</span><span class="n">item</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ItemInfo</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">_parse_item</span><span class="p">(</span><span class="n">item</span><span class="p">:</span> <span class="n">ItemInfo</span> <span class="o">|</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">EUMType</span> <span class="o">|</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ItemInfo</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">item</span><span class="p">,</span> <span class="n">ItemInfo</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">item</span>
+
         <span class="k">if</span> <span class="n">item</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">ItemInfo</span><span class="p">(</span><span class="s2">&quot;NoName&quot;</span><span class="p">)</span>
 
-        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">item</span><span class="p">,</span> <span class="n">ItemInfo</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">item</span><span class="p">,</span> <span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">EUMType</span><span class="p">,</span> <span class="n">EUMUnit</span><span class="p">)):</span>
             <span class="k">return</span> <span class="n">ItemInfo</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
-        
-        <span class="k">return</span> <span class="n">item</span>
+
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;item must be str, EUMType or EUMUnit&quot;</span><span class="p">)</span>
 
     <span class="nd">@staticmethod</span>
-    <span class="k">def</span> <span class="nf">_parse_geometry</span><span class="p">(</span><span class="n">geometry</span><span class="p">,</span> <span class="n">dims</span><span class="p">,</span> <span class="n">shape</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_parse_geometry</span><span class="p">(</span>
+        <span class="n">geometry</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">dims</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="o">...</span><span class="p">],</span> <span class="n">shape</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">dims</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span> <span class="ow">and</span> <span class="p">(</span>
             <span class="n">geometry</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">geometry</span><span class="p">,</span> <span class="n">GeometryUndefined</span><span class="p">)</span>
         <span class="p">):</span>
@@ -359,7 +401,9 @@
         <span class="k">return</span> <span class="n">geometry</span>
 
     <span class="nd">@staticmethod</span>
-    <span class="k">def</span> <span class="nf">_parse_zn</span><span class="p">(</span><span class="n">zn</span><span class="p">,</span> <span class="n">geometry</span><span class="p">,</span> <span class="n">n_timesteps</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_parse_zn</span><span class="p">(</span>
+        <span class="n">zn</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">floating</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span> <span class="n">geometry</span><span class="p">:</span> <span class="n">GeometryType</span><span class="p">,</span> <span class="n">n_timesteps</span><span class="p">:</span> <span class="nb">int</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">floating</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">zn</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">geometry</span><span class="p">,</span> <span class="n">_GeometryFMLayered</span><span class="p">):</span>
                 <span class="c1"># TODO: np.squeeze(zn) if n_timesteps=1 ?</span>
@@ -375,11 +419,10 @@
                 <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;zn can only be provided for layered dfsu data&quot;</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">zn</span>
 
-    <span class="k">def</span> <span class="nf">_is_compatible</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">,</span> <span class="n">raise_error</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_is_compatible</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">:</span> <span class="s2">&quot;DataArray&quot;</span><span class="p">,</span> <span class="n">raise_error</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;check if other DataArray has equivalent dimensions, time and geometry&quot;&quot;&quot;</span>
         <span class="n">problems</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="n">DataArray</span><span class="p">):</span>
-            <span class="k">return</span> <span class="kc">False</span>
+        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="n">DataArray</span><span class="p">)</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">shape</span> <span class="o">!=</span> <span class="n">other</span><span class="o">.</span><span class="n">shape</span><span class="p">:</span>
             <span class="n">problems</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;shape of data must be the same&quot;</span><span class="p">)</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_timesteps</span> <span class="o">!=</span> <span class="n">other</span><span class="o">.</span><span class="n">n_timesteps</span><span class="p">:</span>
@@ -410,9 +453,9 @@
 
         <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="n">problems</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span>
 
-    <span class="k">def</span> <span class="nf">_get_plotter_by_geometry</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_get_plotter_by_geometry</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
         <span class="c1"># TODO: this is explicit, but with consistent naming, we could create this mapping automatically</span>
-        <span class="n">PLOTTER_MAP</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="n">PLOTTER_MAP</span><span class="p">:</span> <span class="n">Any</span> <span class="o">=</span> <span class="p">{</span>
             <span class="n">GeometryFMVerticalProfile</span><span class="p">:</span> <span class="n">_DataArrayPlotterFMVerticalProfile</span><span class="p">,</span>
             <span class="n">GeometryFMVerticalColumn</span><span class="p">:</span> <span class="n">_DataArrayPlotterFMVerticalColumn</span><span class="p">,</span>
             <span class="n">GeometryFMPointSpectrum</span><span class="p">:</span> <span class="n">_DataArrayPlotterPointSpectrum</span><span class="p">,</span>
@@ -427,8 +470,16 @@
         <span class="n">plotter</span> <span class="o">=</span> <span class="n">PLOTTER_MAP</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">geometry</span><span class="p">),</span> <span class="n">_DataArrayPlotter</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">plotter</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">_set_spectral_attributes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">geometry</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_set_spectral_attributes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">geometry</span><span class="p">:</span> <span class="n">GeometryType</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">geometry</span><span class="p">,</span> <span class="s2">&quot;frequencies&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">geometry</span><span class="p">,</span> <span class="s2">&quot;directions&quot;</span><span class="p">):</span>
+            <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span>
+                <span class="n">geometry</span><span class="p">,</span>
+                <span class="p">(</span>
+                    <span class="n">GeometryFMAreaSpectrum</span><span class="p">,</span>
+                    <span class="n">GeometryFMLineSpectrum</span><span class="p">,</span>
+                    <span class="n">GeometryFMPointSpectrum</span><span class="p">,</span>
+                <span class="p">),</span>
+            <span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">frequencies</span> <span class="o">=</span> <span class="n">geometry</span><span class="o">.</span><span class="n">frequencies</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">n_frequencies</span> <span class="o">=</span> <span class="n">geometry</span><span class="o">.</span><span class="n">n_frequencies</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">directions</span> <span class="o">=</span> <span class="n">geometry</span><span class="o">.</span><span class="n">directions</span>
@@ -440,6 +491,7 @@
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">name</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Name of this DataArray (=da.item.name)&quot;&quot;&quot;</span>
+        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">item</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">item</span><span class="o">.</span><span class="n">name</span>
 
     <span class="nd">@name</span><span class="o">.</span><span class="n">setter</span>
@@ -457,13 +509,12 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">item</span><span class="o">.</span><span class="n">unit</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">start_time</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">start_time</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">datetime</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;First time instance (as datetime)&quot;&quot;&quot;</span>
-        <span class="c1"># TODO: use pd.Timestamp instead</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">time</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">to_pydatetime</span><span class="p">()</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">end_time</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">end_time</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">datetime</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Last time instance (as datetime)&quot;&quot;&quot;</span>
         <span class="c1"># TODO: use pd.Timestamp instead</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">time</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">to_pydatetime</span><span class="p">()</span>
@@ -476,14 +527,14 @@
         <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">time</span><span class="o">.</span><span class="n">to_series</span><span class="p">()</span><span class="o">.</span><span class="n">diff</span><span class="p">()</span><span class="o">.</span><span class="n">dropna</span><span class="p">()</span><span class="o">.</span><span class="n">unique</span><span class="p">())</span> <span class="o">==</span> <span class="mi">1</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">timestep</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]:</span>
+    <span class="k">def</span> <span class="nf">timestep</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Time step in seconds if equidistant (and at</span>
 <span class="sd">        least two time instances); otherwise None</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">dt</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">time</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_equidistant</span><span class="p">:</span>
-            <span class="n">first</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">Timestamp</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">time</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>  <span class="c1"># type: ignore</span>
-            <span class="n">second</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">Timestamp</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">time</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>  <span class="c1"># type: ignore</span>
+            <span class="n">first</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">Timestamp</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">time</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">second</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">Timestamp</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">time</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
             <span class="n">dt</span> <span class="o">=</span> <span class="p">(</span><span class="n">second</span> <span class="o">-</span> <span class="n">first</span><span class="p">)</span><span class="o">.</span><span class="n">total_seconds</span><span class="p">()</span>
         <span class="k">return</span> <span class="n">dt</span>
 
@@ -493,44 +544,45 @@
         <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">time</span><span class="p">)</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">shape</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">shape</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Tuple of array dimensions&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="n">shape</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">ndim</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Number of array dimensions&quot;&quot;&quot;</span>
+        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="n">ndim</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="n">ndim</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">dtype</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">dtype</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DTypeLike</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Data-type of the array elements&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="n">dtype</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">values</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">values</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">floating</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Values as a np.ndarray (equivalent to to_numpy())&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_values</span>
 
     <span class="nd">@values</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span> <span class="nf">values</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">values</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">floating</span><span class="p">]</span> <span class="o">|</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">isscalar</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_values</span><span class="p">):</span>
             <span class="k">if</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">isscalar</span><span class="p">(</span><span class="n">value</span><span class="p">):</span>
                 <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Shape of new data is wrong (should be scalar)&quot;</span><span class="p">)</span>
-        <span class="k">elif</span> <span class="n">value</span><span class="o">.</span><span class="n">shape</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_values</span><span class="o">.</span><span class="n">shape</span><span class="p">:</span>
+        <span class="k">elif</span> <span class="n">value</span><span class="o">.</span><span class="n">shape</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_values</span><span class="o">.</span><span class="n">shape</span><span class="p">:</span>  <span class="c1"># type: ignore</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Shape of new data is wrong&quot;</span><span class="p">)</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">_values</span> <span class="o">=</span> <span class="n">value</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_values</span> <span class="o">=</span> <span class="n">value</span>  <span class="c1"># type: ignore</span>
 
 <div class="viewcode-block" id="DataArray.to_numpy">
 <a class="viewcode-back" href="../../../dataarray.html#mikeio.DataArray.to_numpy">[docs]</a>
-    <span class="k">def</span> <span class="nf">to_numpy</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">to_numpy</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">floating</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Values as a np.ndarray (equivalent to values)&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_values</span></div>
 
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">_has_time_axis</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_has_time_axis</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">dims</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;t&quot;</span>
 
 <div class="viewcode-block" id="DataArray.dropna">
@@ -560,14 +612,14 @@
 
 <div class="viewcode-block" id="DataArray.describe">
 <a class="viewcode-back" href="../../../dataarray.html#mikeio.DataArray.describe">[docs]</a>
-    <span class="k">def</span> <span class="nf">describe</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">describe</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Generate descriptive statistics by wrapping :py:meth:`pandas.DataFrame.describe`</span>
-<span class="sd">        </span>
+
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
 <span class="sd">        **kwargs</span>
 <span class="sd">            Keyword arguments passed to :py:meth:`pandas.DataFrame.describe`</span>
-<span class="sd">        </span>
+
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
 <span class="sd">        pd.DataFrame</span>
@@ -622,8 +674,7 @@
     <span class="c1">#    else:</span>
     <span class="c1">#        raise ValueError(&quot;Invalid mask&quot;)</span>
 
-    <span class="k">def</span> <span class="fm">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;DataArray&quot;</span><span class="p">:</span>
-
+    <span class="k">def</span> <span class="fm">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;DataArray&quot;</span><span class="p">:</span>
         <span class="n">da</span> <span class="o">=</span> <span class="bp">self</span>
         <span class="n">dims</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dims</span>
         <span class="n">key</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_getitem_parse_key</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
@@ -637,7 +688,7 @@
                 <span class="n">da</span> <span class="o">=</span> <span class="n">da</span><span class="o">.</span><span class="n">isel</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="n">dims</span><span class="p">[</span><span class="n">j</span><span class="p">])</span>
         <span class="k">return</span> <span class="n">da</span>
 
-    <span class="k">def</span> <span class="nf">_getitem_parse_key</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_getitem_parse_key</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">):</span>
             <span class="c1"># is it multiindex or just a tuple of indexes for first axis?</span>
             <span class="c1"># da[2,3,4] and da[(2,3,4)] both have the key=(2,3,4)</span>
@@ -664,7 +715,7 @@
             <span class="p">)</span>
         <span class="k">return</span> <span class="n">key</span>
 
-    <span class="k">def</span> <span class="fm">__setitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__setitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">floating</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_boolean_mask</span><span class="p">(</span><span class="n">key</span><span class="p">):</span>
             <span class="n">mask</span> <span class="o">=</span> <span class="n">key</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="k">else</span> <span class="n">key</span><span class="o">.</span><span class="n">values</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_set_by_boolean_mask</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_values</span><span class="p">,</span> <span class="n">mask</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
@@ -672,7 +723,12 @@
 
 <div class="viewcode-block" id="DataArray.isel">
 <a class="viewcode-back" href="../../../dataarray.html#mikeio.DataArray.isel">[docs]</a>
-    <span class="k">def</span> <span class="nf">isel</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">idx</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;DataArray&quot;</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">isel</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">idx</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">|</span> <span class="nb">slice</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">axis</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="nb">str</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;DataArray&quot;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Return a new DataArray whose data is given by</span>
 <span class="sd">        integer indexing along the specified dimension(s).</span>
 
@@ -784,8 +840,9 @@
         <span class="n">idx_slice</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">idx</span><span class="p">,</span> <span class="nb">slice</span><span class="p">):</span>
             <span class="n">idx_slice</span> <span class="o">=</span> <span class="n">idx</span>
+            <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">axis</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span>
             <span class="n">idx</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="o">*</span><span class="n">idx</span><span class="o">.</span><span class="n">indices</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="n">axis</span><span class="p">])))</span>
-        <span class="k">if</span> <span class="n">idx</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="p">(</span><span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">isscalar</span><span class="p">(</span><span class="n">idx</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">idx</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">idx</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="p">(</span><span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">isscalar</span><span class="p">(</span><span class="n">idx</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">idx</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">):</span>  <span class="c1"># type: ignore</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
                 <span class="s2">&quot;Empty index is not allowed&quot;</span>
             <span class="p">)</span>  <span class="c1"># TODO other option would be to have a NullDataArray</span>
@@ -803,7 +860,8 @@
             <span class="n">geometry</span> <span class="o">=</span> <span class="n">GeometryUndefined</span><span class="p">()</span>
             <span class="n">zn</span> <span class="o">=</span> <span class="kc">None</span>
             <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">geometry</span><span class="p">,</span> <span class="s2">&quot;isel&quot;</span><span class="p">):</span>
-                <span class="n">spatial_axis</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_axis_to_spatial_axis</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dims</span><span class="p">,</span> <span class="n">axis</span><span class="p">)</span>
+                <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">axis</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span>
+                <span class="n">spatial_axis</span> <span class="o">=</span> <span class="n">axis</span> <span class="o">-</span> <span class="mi">1</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">dims</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;time&quot;</span> <span class="k">else</span> <span class="n">axis</span>
                 <span class="n">geometry</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">geometry</span><span class="o">.</span><span class="n">isel</span><span class="p">(</span><span class="n">idx</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="n">spatial_axis</span><span class="p">)</span>
 
             <span class="c1"># TOOD this is ugly</span>
@@ -811,7 +869,7 @@
                 <span class="n">node_ids</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">geometry</span><span class="o">.</span><span class="n">_get_nodes_and_table_for_elements</span><span class="p">(</span>
                     <span class="n">idx</span><span class="p">,</span> <span class="n">node_layers</span><span class="o">=</span><span class="s2">&quot;all&quot;</span>
                 <span class="p">)</span>
-                <span class="n">zn</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_zn</span><span class="p">[:,</span> <span class="n">node_ids</span><span class="p">]</span>
+                <span class="n">zn</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_zn</span><span class="p">[:,</span> <span class="n">node_ids</span><span class="p">]</span>  <span class="c1"># type: ignore</span>
 
         <span class="c1"># reduce dims only if singleton idx</span>
         <span class="n">dims</span> <span class="o">=</span> <span class="p">(</span>
@@ -850,8 +908,8 @@
     <span class="k">def</span> <span class="nf">sel</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="o">*</span><span class="p">,</span>
-        <span class="n">time</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span> <span class="o">|</span> <span class="n">pd</span><span class="o">.</span><span class="n">DatetimeIndex</span> <span class="o">|</span> <span class="s2">&quot;DataArray&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+        <span class="n">time</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">pd</span><span class="o">.</span><span class="n">DatetimeIndex</span> <span class="o">|</span> <span class="s2">&quot;DataArray&quot;</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;DataArray&quot;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Return a new DataArray whose data is given by</span>
 <span class="sd">        selecting index labels along the specified dimension(s).</span>
@@ -959,12 +1017,11 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="nb">any</span><span class="p">([</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="nb">slice</span><span class="p">)</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">values</span><span class="p">()]):</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sel_with_slice</span><span class="p">(</span><span class="n">kwargs</span><span class="p">)</span>
-        
+
         <span class="n">da</span> <span class="o">=</span> <span class="bp">self</span>
 
         <span class="c1"># select in space</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-
             <span class="n">idx</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">geometry</span><span class="o">.</span><span class="n">find_index</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
             <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">idx</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">):</span>
                 <span class="c1"># TODO: support for dfs3</span>
@@ -989,24 +1046,24 @@
 
         <span class="k">return</span> <span class="n">da</span></div>
 
-    
-    <span class="k">def</span> <span class="nf">_sel_with_slice</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span><span class="nb">slice</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="s2">&quot;DataArray&quot;</span><span class="p">:</span>
+
+    <span class="k">def</span> <span class="nf">_sel_with_slice</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">slice</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="s2">&quot;DataArray&quot;</span><span class="p">:</span>
         <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
             <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="nb">slice</span><span class="p">):</span>
-                <span class="n">idx_start</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">geometry</span><span class="o">.</span><span class="n">find_index</span><span class="p">(</span><span class="o">**</span><span class="p">{</span><span class="n">k</span><span class="p">:</span><span class="n">v</span><span class="o">.</span><span class="n">start</span><span class="p">})</span>
-                <span class="n">idx_stop</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">geometry</span><span class="o">.</span><span class="n">find_index</span><span class="p">(</span><span class="o">**</span><span class="p">{</span><span class="n">k</span><span class="p">:</span><span class="n">v</span><span class="o">.</span><span class="n">stop</span><span class="p">})</span>
+                <span class="n">idx_start</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">geometry</span><span class="o">.</span><span class="n">find_index</span><span class="p">(</span><span class="o">**</span><span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">v</span><span class="o">.</span><span class="n">start</span><span class="p">})</span>
+                <span class="n">idx_stop</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">geometry</span><span class="o">.</span><span class="n">find_index</span><span class="p">(</span><span class="o">**</span><span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">v</span><span class="o">.</span><span class="n">stop</span><span class="p">})</span>
                 <span class="n">pos</span> <span class="o">=</span> <span class="mi">0</span>
                 <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">idx_start</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">):</span>
                     <span class="k">if</span> <span class="n">k</span> <span class="o">==</span> <span class="s2">&quot;x&quot;</span><span class="p">:</span>
                         <span class="n">pos</span> <span class="o">=</span> <span class="mi">0</span>
                     <span class="k">if</span> <span class="n">k</span> <span class="o">==</span> <span class="s2">&quot;y&quot;</span><span class="p">:</span>
                         <span class="n">pos</span> <span class="o">=</span> <span class="mi">1</span>
-                
+
                 <span class="n">start</span> <span class="o">=</span> <span class="n">idx_start</span><span class="p">[</span><span class="n">pos</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="k">if</span> <span class="n">idx_start</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="kc">None</span>
                 <span class="n">stop</span> <span class="o">=</span> <span class="n">idx_stop</span><span class="p">[</span><span class="n">pos</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="k">if</span> <span class="n">idx_stop</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="kc">None</span>
 
                 <span class="n">idx</span> <span class="o">=</span> <span class="nb">slice</span><span class="p">(</span><span class="n">start</span><span class="p">,</span> <span class="n">stop</span><span class="p">)</span>
-                
+
                 <span class="bp">self</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">isel</span><span class="p">(</span><span class="n">idx</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="n">k</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="bp">self</span>
@@ -1017,13 +1074,13 @@
         <span class="c1"># TODO find out optimal syntax to allow interpolation to single point, new time, grid, mesh...</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="c1"># *, # TODO: make this a keyword-only argument in the future</span>
-        <span class="n">time</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">pd</span><span class="o">.</span><span class="n">DatetimeIndex</span> <span class="o">|</span> <span class="s2">&quot;DataArray&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">x</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">y</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">z</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">time</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DatetimeIndex</span> <span class="o">|</span> <span class="s2">&quot;DataArray&quot;</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">x</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">y</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">z</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">n_nearest</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">3</span><span class="p">,</span>
-        <span class="n">interpolant</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-        <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+        <span class="n">interpolant</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Any</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;DataArray&quot;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Interpolate data in time and space</span>
 
@@ -1075,7 +1132,9 @@
         <span class="k">if</span> <span class="n">z</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">()</span>
 
-        <span class="n">geometry</span><span class="p">:</span> <span class="n">GeometryPoint2D</span> <span class="o">|</span> <span class="n">GeometryPoint3D</span> <span class="o">|</span> <span class="n">GeometryUndefined</span> <span class="o">=</span> <span class="n">GeometryUndefined</span><span class="p">()</span>
+        <span class="n">geometry</span><span class="p">:</span> <span class="n">GeometryPoint2D</span> <span class="o">|</span> <span class="n">GeometryPoint3D</span> <span class="o">|</span> <span class="n">GeometryUndefined</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">GeometryUndefined</span><span class="p">()</span>
+        <span class="p">)</span>
 
         <span class="c1"># interp in space</span>
         <span class="k">if</span> <span class="p">(</span><span class="n">x</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="n">y</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="n">z</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">):</span>
@@ -1111,7 +1170,7 @@
                         <span class="n">x</span><span class="o">=</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">,</span> <span class="n">projection</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">geometry</span><span class="o">.</span><span class="n">projection</span>
                     <span class="p">)</span>
                 <span class="c1"># this is not supported yet (see above)</span>
-                <span class="c1">#else:</span>
+                <span class="c1"># else:</span>
                 <span class="c1">#    geometry = GeometryPoint3D(</span>
                 <span class="c1">#        x=x, y=y, z=z, projection=self.geometry.projection</span>
                 <span class="c1">#    )</span>
@@ -1131,7 +1190,7 @@
 
     <span class="k">def</span> <span class="nf">__dataarray_read_item_time_func</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">step</span><span class="p">:</span> <span class="nb">int</span>
-    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">NDArray</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">floating</span><span class="p">],</span> <span class="nb">float</span><span class="p">]:</span>
         <span class="s2">&quot;Used by _extract_track&quot;</span>
         <span class="c1"># Ignore item argument</span>
         <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">isel</span><span class="p">(</span><span class="n">time</span><span class="o">=</span><span class="n">step</span><span class="p">)</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">()</span>
@@ -1141,7 +1200,12 @@
 
 <div class="viewcode-block" id="DataArray.extract_track">
 <a class="viewcode-back" href="../../../dataarray.html#mikeio.DataArray.extract_track">[docs]</a>
-    <span class="k">def</span> <span class="nf">extract_track</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">track</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s2">&quot;nearest&quot;</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">extract_track</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">track</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
+        <span class="n">method</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;nearest&quot;</span><span class="p">,</span> <span class="s2">&quot;inverse_distance&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;nearest&quot;</span><span class="p">,</span>
+        <span class="n">dtype</span><span class="p">:</span> <span class="n">DTypeLike</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;Dataset&quot;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Extract data along a moving track</span>
 
@@ -1163,6 +1227,8 @@
 <span class="sd">            The first two items will be x- and y- coordinates of track</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="kn">from</span> <span class="nn">.._track</span> <span class="kn">import</span> <span class="n">_extract_track</span>
+
+        <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">timestep</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
 
         <span class="k">return</span> <span class="n">_extract_track</span><span class="p">(</span>
             <span class="n">deletevalue</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">deletevalue</span><span class="p">,</span>
@@ -1187,9 +1253,9 @@
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">dt</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="n">pd</span><span class="o">.</span><span class="n">DatetimeIndex</span> <span class="o">|</span> <span class="s2">&quot;DataArray&quot;</span><span class="p">,</span>
         <span class="o">*</span><span class="p">,</span>
-        <span class="n">method</span><span class="o">=</span><span class="s2">&quot;linear&quot;</span><span class="p">,</span>
-        <span class="n">extrapolate</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-        <span class="n">fill_value</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">,</span>
+        <span class="n">method</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;linear&quot;</span><span class="p">,</span>
+        <span class="n">extrapolate</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="n">fill_value</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;DataArray&quot;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Temporal interpolation</span>
 
@@ -1210,20 +1276,32 @@
 <span class="sd">        -------</span>
 <span class="sd">        DataArray</span>
 <span class="sd">        &quot;&quot;&quot;</span>
+        <span class="kn">from</span> <span class="nn">scipy.interpolate</span> <span class="kn">import</span> <span class="n">interp1d</span>  <span class="c1"># type: ignore</span>
+
         <span class="n">t_out_index</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parse_interp_time</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">time</span><span class="p">,</span> <span class="n">dt</span><span class="p">)</span>
         <span class="n">t_in</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">time</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">float</span><span class="p">)</span>
         <span class="n">t_out</span> <span class="o">=</span> <span class="n">t_out_index</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">float</span><span class="p">)</span>
 
-        <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_interpolate_time</span><span class="p">(</span>
-            <span class="n">t_in</span><span class="p">,</span> <span class="n">t_out</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">(),</span> <span class="n">method</span><span class="p">,</span> <span class="n">extrapolate</span><span class="p">,</span> <span class="n">fill_value</span>
-        <span class="p">)</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">interp1d</span><span class="p">(</span>
+            <span class="n">t_in</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">(),</span>
+            <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+            <span class="n">kind</span><span class="o">=</span><span class="n">method</span><span class="p">,</span>
+            <span class="n">bounds_error</span><span class="o">=</span><span class="ow">not</span> <span class="n">extrapolate</span><span class="p">,</span>
+            <span class="n">fill_value</span><span class="o">=</span><span class="n">fill_value</span><span class="p">,</span>
+        <span class="p">)(</span><span class="n">t_out</span><span class="p">)</span>
 
         <span class="n">zn</span> <span class="o">=</span> <span class="p">(</span>
             <span class="kc">None</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_zn</span> <span class="ow">is</span> <span class="kc">None</span>
-            <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">_interpolate_time</span><span class="p">(</span>
-                <span class="n">t_in</span><span class="p">,</span> <span class="n">t_out</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_zn</span><span class="p">,</span> <span class="n">method</span><span class="p">,</span> <span class="n">extrapolate</span><span class="p">,</span> <span class="n">fill_value</span>
-            <span class="p">)</span>
+            <span class="k">else</span> <span class="n">interp1d</span><span class="p">(</span>
+                <span class="n">t_in</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_zn</span><span class="p">,</span>
+                <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+                <span class="n">kind</span><span class="o">=</span><span class="n">method</span><span class="p">,</span>
+                <span class="n">bounds_error</span><span class="o">=</span><span class="ow">not</span> <span class="n">extrapolate</span><span class="p">,</span>
+                <span class="n">fill_value</span><span class="o">=</span><span class="n">fill_value</span><span class="p">,</span>
+            <span class="p">)(</span><span class="n">t_out</span><span class="p">)</span>
         <span class="p">)</span>
 
         <span class="k">return</span> <span class="n">DataArray</span><span class="p">(</span>
@@ -1237,7 +1315,7 @@
 
 <div class="viewcode-block" id="DataArray.interp_na">
 <a class="viewcode-back" href="../../../dataarray.html#mikeio.DataArray.interp_na">[docs]</a>
-    <span class="k">def</span> <span class="nf">interp_na</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="s2">&quot;time&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;DataArray&quot;</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">interp_na</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">axis</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;time&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;DataArray&quot;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Fill in NaNs by interpolating according to different methods.</span>
 
 <span class="sd">        Wrapper of :py:meth:`xarray.DataArray.interpolate_na`</span>
@@ -1271,8 +1349,8 @@
     <span class="k">def</span> <span class="nf">interp_like</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">other</span><span class="p">:</span> <span class="s2">&quot;DataArray&quot;</span> <span class="o">|</span> <span class="n">Grid2D</span> <span class="o">|</span> <span class="n">GeometryFM2D</span> <span class="o">|</span> <span class="n">pd</span><span class="o">.</span><span class="n">DatetimeIndex</span><span class="p">,</span>
-        <span class="n">interpolant</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-        <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+        <span class="n">interpolant</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Any</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;DataArray&quot;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Interpolate in space (and in time) to other geometry (and time axis)</span>
 
@@ -1343,13 +1421,17 @@
         <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="s2">&quot;time&quot;</span><span class="p">):</span>
             <span class="n">dai</span> <span class="o">=</span> <span class="n">dai</span><span class="o">.</span><span class="n">interp_time</span><span class="p">(</span><span class="n">other</span><span class="o">.</span><span class="n">time</span><span class="p">)</span>
 
+        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">dai</span><span class="p">,</span> <span class="n">DataArray</span><span class="p">)</span>
+
         <span class="k">return</span> <span class="n">dai</span></div>
 
 
 <div class="viewcode-block" id="DataArray.concat">
 <a class="viewcode-back" href="../../../dataarray.html#mikeio.DataArray.concat">[docs]</a>
     <span class="nd">@staticmethod</span>
-    <span class="k">def</span> <span class="nf">concat</span><span class="p">(</span><span class="n">dataarrays</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="s2">&quot;DataArray&quot;</span><span class="p">],</span> <span class="n">keep</span><span class="o">=</span><span class="s2">&quot;last&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;DataArray&quot;</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">concat</span><span class="p">(</span>
+        <span class="n">dataarrays</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="s2">&quot;DataArray&quot;</span><span class="p">],</span> <span class="n">keep</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;last&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;last&quot;</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;DataArray&quot;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Concatenate DataArrays along the time axis</span>
 
 <span class="sd">        Parameters</span>
@@ -1388,7 +1470,7 @@
 
 <div class="viewcode-block" id="DataArray.max">
 <a class="viewcode-back" href="../../../dataarray.html#mikeio.DataArray.max">[docs]</a>
-    <span class="k">def</span> <span class="nf">max</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;DataArray&quot;</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">max</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">axis</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="nb">str</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;DataArray&quot;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Max value along an axis</span>
 
 <span class="sd">        Parameters</span>
@@ -1410,7 +1492,7 @@
 
 <div class="viewcode-block" id="DataArray.min">
 <a class="viewcode-back" href="../../../dataarray.html#mikeio.DataArray.min">[docs]</a>
-    <span class="k">def</span> <span class="nf">min</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;DataArray&quot;</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">min</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">axis</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="nb">str</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;DataArray&quot;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Min value along an axis</span>
 
 <span class="sd">        Parameters</span>
@@ -1432,7 +1514,7 @@
 
 <div class="viewcode-block" id="DataArray.mean">
 <a class="viewcode-back" href="../../../dataarray.html#mikeio.DataArray.mean">[docs]</a>
-    <span class="k">def</span> <span class="nf">mean</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;DataArray&quot;</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">mean</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">axis</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="nb">str</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;DataArray&quot;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Mean value along an axis</span>
 
 <span class="sd">        Parameters</span>
@@ -1454,7 +1536,7 @@
 
 <div class="viewcode-block" id="DataArray.std">
 <a class="viewcode-back" href="../../../dataarray.html#mikeio.DataArray.std">[docs]</a>
-    <span class="k">def</span> <span class="nf">std</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;DataArray&quot;</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">std</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">axis</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="nb">str</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;DataArray&quot;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Standard deviation values along an axis</span>
 
 <span class="sd">        Parameters</span>
@@ -1476,7 +1558,7 @@
 
 <div class="viewcode-block" id="DataArray.ptp">
 <a class="viewcode-back" href="../../../dataarray.html#mikeio.DataArray.ptp">[docs]</a>
-    <span class="k">def</span> <span class="nf">ptp</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;DataArray&quot;</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">ptp</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">axis</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="nb">str</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;DataArray&quot;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Range (max - min) a.k.a Peak to Peak along an axis</span>
 
 <span class="sd">        Parameters</span>
@@ -1494,7 +1576,9 @@
 
 <div class="viewcode-block" id="DataArray.average">
 <a class="viewcode-back" href="../../../dataarray.html#mikeio.DataArray.average">[docs]</a>
-    <span class="k">def</span> <span class="nf">average</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">weights</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;DataArray&quot;</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">average</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">weights</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">floating</span><span class="p">],</span> <span class="n">axis</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="nb">str</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;DataArray&quot;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Compute the weighted average along the specified axis.</span>
 
 <span class="sd">        Parameters</span>
@@ -1519,7 +1603,7 @@
 <span class="sd">        &gt;&gt;&gt; da2 = da.average(axis=&quot;space&quot;, weights=area)</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="k">def</span> <span class="nf">func</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">axis</span><span class="p">,</span> <span class="n">keepdims</span><span class="p">):</span>
+        <span class="k">def</span> <span class="nf">func</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">axis</span><span class="p">,</span> <span class="n">keepdims</span><span class="p">):</span>  <span class="c1"># type: ignore</span>
             <span class="k">if</span> <span class="n">keepdims</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">()</span>
 
@@ -1530,7 +1614,7 @@
 
 <div class="viewcode-block" id="DataArray.nanmax">
 <a class="viewcode-back" href="../../../dataarray.html#mikeio.DataArray.nanmax">[docs]</a>
-    <span class="k">def</span> <span class="nf">nanmax</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;DataArray&quot;</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">nanmax</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">axis</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="nb">str</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;DataArray&quot;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Max value along an axis (NaN removed)</span>
 
 <span class="sd">        Parameters</span>
@@ -1552,7 +1636,7 @@
 
 <div class="viewcode-block" id="DataArray.nanmin">
 <a class="viewcode-back" href="../../../dataarray.html#mikeio.DataArray.nanmin">[docs]</a>
-    <span class="k">def</span> <span class="nf">nanmin</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;DataArray&quot;</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">nanmin</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">axis</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="nb">str</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;DataArray&quot;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Min value along an axis (NaN removed)</span>
 
 <span class="sd">        Parameters</span>
@@ -1574,7 +1658,7 @@
 
 <div class="viewcode-block" id="DataArray.nanmean">
 <a class="viewcode-back" href="../../../dataarray.html#mikeio.DataArray.nanmean">[docs]</a>
-    <span class="k">def</span> <span class="nf">nanmean</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;DataArray&quot;</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">nanmean</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">axis</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="nb">str</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;DataArray&quot;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Mean value along an axis (NaN removed)</span>
 
 <span class="sd">        Parameters</span>
@@ -1596,7 +1680,7 @@
 
 <div class="viewcode-block" id="DataArray.nanstd">
 <a class="viewcode-back" href="../../../dataarray.html#mikeio.DataArray.nanstd">[docs]</a>
-    <span class="k">def</span> <span class="nf">nanstd</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;DataArray&quot;</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">nanstd</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">axis</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="nb">str</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;DataArray&quot;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Standard deviation value along an axis (NaN removed)</span>
 
 <span class="sd">        Parameters</span>
@@ -1618,7 +1702,9 @@
 
 <div class="viewcode-block" id="DataArray.aggregate">
 <a class="viewcode-back" href="../../../dataarray.html#mikeio.DataArray.aggregate">[docs]</a>
-    <span class="k">def</span> <span class="nf">aggregate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">func</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">nanmean</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;DataArray&quot;</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">aggregate</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">axis</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="nb">str</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">func</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nanmean</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;DataArray&quot;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Aggregate along an axis</span>
 
 <span class="sd">        Parameters</span>
@@ -1642,14 +1728,12 @@
         <span class="n">axis</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parse_axis</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">dims</span><span class="p">,</span> <span class="n">axis</span><span class="p">)</span>
         <span class="n">time</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_time_by_agg_axis</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">time</span><span class="p">,</span> <span class="n">axis</span><span class="p">)</span>
 
-        
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">axis</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
             <span class="n">axes</span> <span class="o">=</span> <span class="p">(</span><span class="n">axis</span><span class="p">,)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">axes</span> <span class="o">=</span> <span class="n">axis</span>
 
         <span class="n">dims</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">([</span><span class="n">d</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">d</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dims</span><span class="p">)</span> <span class="k">if</span> <span class="n">i</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">axes</span><span class="p">])</span>
-        
 
         <span class="n">item</span> <span class="o">=</span> <span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">item</span><span class="p">)</span>
         <span class="k">if</span> <span class="s2">&quot;name&quot;</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">:</span>
@@ -1677,9 +1761,19 @@
         <span class="p">)</span></div>
 
 
+    <span class="nd">@overload</span>
+    <span class="k">def</span> <span class="nf">quantile</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">q</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;DataArray&quot;</span><span class="p">:</span>
+        <span class="o">...</span>
+
+    <span class="nd">@overload</span>
+    <span class="k">def</span> <span class="nf">quantile</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">q</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">float</span><span class="p">],</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;Dataset&quot;</span><span class="p">:</span>
+        <span class="o">...</span>
+
 <div class="viewcode-block" id="DataArray.quantile">
 <a class="viewcode-back" href="../../../dataarray.html#mikeio.DataArray.quantile">[docs]</a>
-    <span class="k">def</span> <span class="nf">quantile</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">q</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">quantile</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">q</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">float</span><span class="p">],</span> <span class="o">*</span><span class="p">,</span> <span class="n">axis</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="nb">str</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;DataArray&quot;</span> <span class="o">|</span> <span class="s2">&quot;Dataset&quot;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Compute the q-th quantile of the data along the specified axis.</span>
 
 <span class="sd">        Wrapping np.quantile</span>
@@ -1710,9 +1804,19 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_quantile</span><span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="n">axis</span><span class="p">,</span> <span class="n">func</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">quantile</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
 
 
+    <span class="nd">@overload</span>
+    <span class="k">def</span> <span class="nf">nanquantile</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">q</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;DataArray&quot;</span><span class="p">:</span>
+        <span class="o">...</span>
+
+    <span class="nd">@overload</span>
+    <span class="k">def</span> <span class="nf">nanquantile</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">q</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">float</span><span class="p">],</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;Dataset&quot;</span><span class="p">:</span>
+        <span class="o">...</span>
+
 <div class="viewcode-block" id="DataArray.nanquantile">
 <a class="viewcode-back" href="../../../dataarray.html#mikeio.DataArray.nanquantile">[docs]</a>
-    <span class="k">def</span> <span class="nf">nanquantile</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">q</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">nanquantile</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">q</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">float</span><span class="p">],</span> <span class="o">*</span><span class="p">,</span> <span class="n">axis</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="nb">str</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;DataArray&quot;</span> <span class="o">|</span> <span class="s2">&quot;Dataset&quot;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Compute the q-th quantile of the data along the specified axis, while ignoring nan values.</span>
 
 <span class="sd">        Wrapping np.nanquantile</span>
@@ -1743,11 +1847,11 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_quantile</span><span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="n">axis</span><span class="p">,</span> <span class="n">func</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">nanquantile</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
 
 
-    <span class="k">def</span> <span class="nf">_quantile</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">q</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">func</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">quantile</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-
+    <span class="k">def</span> <span class="nf">_quantile</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">q</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">axis</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="nb">str</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">func</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">quantile</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">):</span>  <span class="c1"># type: ignore</span>
         <span class="kn">from</span> <span class="nn">mikeio</span> <span class="kn">import</span> <span class="n">Dataset</span>
 
         <span class="n">axis</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parse_axis</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">dims</span><span class="p">,</span> <span class="n">axis</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">axis</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span>
         <span class="n">time</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_time_by_agg_axis</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">time</span><span class="p">,</span> <span class="n">axis</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">isscalar</span><span class="p">(</span><span class="n">q</span><span class="p">):</span>
@@ -1814,7 +1918,7 @@
     <span class="k">def</span> <span class="nf">_apply_unary_math_operation</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">func</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;DataArray&quot;</span><span class="p">:</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="n">data</span> <span class="o">=</span> <span class="n">func</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">values</span><span class="p">)</span>
-        
+
         <span class="k">except</span> <span class="ne">TypeError</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;Math operation could not be applied to DataArray&quot;</span><span class="p">)</span>
 
@@ -1912,7 +2016,7 @@
 
 <div class="viewcode-block" id="DataArray.to_dfs">
 <a class="viewcode-back" href="../../../dataarray.html#mikeio.DataArray.to_dfs">[docs]</a>
-    <span class="k">def</span> <span class="nf">to_dfs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">to_dfs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Write data to a new dfs file</span>
 
 <span class="sd">        Parameters</span>
@@ -1965,12 +2069,12 @@
 
 <div class="viewcode-block" id="DataArray.to_xarray">
 <a class="viewcode-back" href="../../../dataarray.html#mikeio.DataArray.to_xarray">[docs]</a>
-    <span class="k">def</span> <span class="nf">to_xarray</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">to_xarray</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;xarray.DataArray&quot;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Export to xarray.DataArray&quot;&quot;&quot;</span>
 
         <span class="kn">import</span> <span class="nn">xarray</span> <span class="k">as</span> <span class="nn">xr</span>
 
-        <span class="n">coords</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">coords</span><span class="p">:</span> <span class="n">MutableMapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_has_time_axis</span><span class="p">:</span>
             <span class="n">coords</span><span class="p">[</span><span class="s2">&quot;time&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">xr</span><span class="o">.</span><span class="n">DataArray</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">time</span><span class="p">,</span> <span class="n">dims</span><span class="o">=</span><span class="s2">&quot;time&quot;</span><span class="p">)</span>
 
@@ -2013,7 +2117,6 @@
     <span class="c1"># ===============================================</span>
 
     <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-
         <span class="n">out</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;&lt;mikeio.DataArray&gt;&quot;</span><span class="p">]</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">out</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;name: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
@@ -2046,7 +2149,6 @@
         <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;geometry: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">geometry</span><span class="si">}</span><span class="s2">&quot;</span>
 
     <span class="k">def</span> <span class="nf">_values_txt</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">ndim</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">or</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ndim</span> <span class="o">==</span> <span class="mi">1</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">values</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">):</span>
             <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;values: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">values</span><span class="si">}</span><span class="s2">&quot;</span>
         <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">ndim</span> <span class="o">==</span> <span class="mi">1</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">values</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">5</span><span class="p">:</span>
@@ -2055,7 +2157,111 @@
         <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">ndim</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
             <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;values: [</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">values</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">:</span><span class="s2">0.4g</span><span class="si">}</span><span class="s2">, </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">values</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="si">:</span><span class="s2">0.4g</span><span class="si">}</span><span class="s2">, ..., </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">values</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="si">:</span><span class="s2">0.4g</span><span class="si">}</span><span class="s2">]&quot;</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="k">return</span> <span class="s2">&quot;&quot;</span>  <span class="c1"># raise NotImplementedError()</span></div>
+            <span class="k">return</span> <span class="s2">&quot;&quot;</span>  <span class="c1"># raise NotImplementedError()</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_parse_interp_time</span><span class="p">(</span>
+        <span class="n">old_time</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DatetimeIndex</span><span class="p">,</span> <span class="n">new_time</span><span class="p">:</span> <span class="n">Any</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DatetimeIndex</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">new_time</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">DatetimeIndex</span><span class="p">):</span>
+            <span class="n">t_out_index</span> <span class="o">=</span> <span class="n">new_time</span>
+        <span class="k">elif</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">new_time</span><span class="p">,</span> <span class="s2">&quot;time&quot;</span><span class="p">):</span>
+            <span class="n">t_out_index</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DatetimeIndex</span><span class="p">(</span><span class="n">new_time</span><span class="o">.</span><span class="n">time</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># offset = pd.tseries.offsets.DateOffset(seconds=new_time) # This seems identical, but doesn&#39;t work with slicing</span>
+            <span class="n">offset</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">Timedelta</span><span class="p">(</span><span class="n">seconds</span><span class="o">=</span><span class="n">new_time</span><span class="p">)</span>
+            <span class="n">t_out_index</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">date_range</span><span class="p">(</span>
+                <span class="n">start</span><span class="o">=</span><span class="n">old_time</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">end</span><span class="o">=</span><span class="n">old_time</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">freq</span><span class="o">=</span><span class="n">offset</span>
+            <span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">t_out_index</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_time_by_agg_axis</span><span class="p">(</span>
+        <span class="n">time</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DatetimeIndex</span><span class="p">,</span> <span class="n">axis</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DatetimeIndex</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;New DatetimeIndex after aggregating over time axis&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">axis</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">or</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">axis</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">)</span> <span class="ow">and</span> <span class="mi">0</span> <span class="ow">in</span> <span class="n">axis</span><span class="p">):</span>
+            <span class="n">time</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DatetimeIndex</span><span class="p">([</span><span class="n">time</span><span class="p">[</span><span class="mi">0</span><span class="p">]])</span>
+
+        <span class="k">return</span> <span class="n">time</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_get_time_idx_list</span><span class="p">(</span><span class="n">time</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DatetimeIndex</span><span class="p">,</span> <span class="n">steps</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Find list of idx in DatetimeIndex&quot;&quot;&quot;</span>
+
+        <span class="k">return</span> <span class="n">_get_time_idx_list</span><span class="p">(</span><span class="n">time</span><span class="p">,</span> <span class="n">steps</span><span class="p">)</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_n_selected_timesteps</span><span class="p">(</span><span class="n">time</span><span class="p">:</span> <span class="n">Sized</span><span class="p">,</span> <span class="n">k</span><span class="p">:</span> <span class="nb">slice</span> <span class="o">|</span> <span class="n">Sized</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">_n_selected_timesteps</span><span class="p">(</span><span class="n">time</span><span class="p">,</span> <span class="n">k</span><span class="p">)</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_is_boolean_mask</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="s2">&quot;dtype&quot;</span><span class="p">):</span>  <span class="c1"># isinstance(x, (np.ndarray, DataArray)):</span>
+            <span class="k">return</span> <span class="n">x</span><span class="o">.</span><span class="n">dtype</span> <span class="o">==</span> <span class="n">np</span><span class="o">.</span><span class="n">dtype</span><span class="p">(</span><span class="s2">&quot;bool&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="kc">False</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_get_by_boolean_mask</span><span class="p">(</span><span class="n">data</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">mask</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">data</span><span class="o">.</span><span class="n">shape</span> <span class="o">!=</span> <span class="n">mask</span><span class="o">.</span><span class="n">shape</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">data</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">broadcast_to</span><span class="p">(</span><span class="n">mask</span><span class="p">,</span> <span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">)]</span>
+        <span class="k">return</span> <span class="n">data</span><span class="p">[</span><span class="n">mask</span><span class="p">]</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_set_by_boolean_mask</span><span class="p">(</span><span class="n">data</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">mask</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">data</span><span class="o">.</span><span class="n">shape</span> <span class="o">!=</span> <span class="n">mask</span><span class="o">.</span><span class="n">shape</span><span class="p">:</span>
+            <span class="n">data</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">broadcast_to</span><span class="p">(</span><span class="n">mask</span><span class="p">,</span> <span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">)]</span> <span class="o">=</span> <span class="n">value</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">data</span><span class="p">[</span><span class="n">mask</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_parse_time</span><span class="p">(</span><span class="n">time</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DatetimeIndex</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Allow anything that we can create a DatetimeIndex from&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">time</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">time</span> <span class="o">=</span> <span class="p">[</span><span class="n">pd</span><span class="o">.</span><span class="n">Timestamp</span><span class="p">(</span><span class="mi">2018</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)]</span>  <span class="c1"># TODO is this the correct epoch?</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">time</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">time</span><span class="p">,</span> <span class="n">Iterable</span><span class="p">)):</span>
+            <span class="n">time</span> <span class="o">=</span> <span class="p">[</span><span class="n">time</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">time</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">DatetimeIndex</span><span class="p">):</span>
+            <span class="n">index</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DatetimeIndex</span><span class="p">(</span><span class="n">time</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">index</span> <span class="o">=</span> <span class="n">time</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">index</span><span class="o">.</span><span class="n">is_monotonic_increasing</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s2">&quot;Time must be monotonic increasing (only equal or increasing) instances.&quot;</span>
+            <span class="p">)</span>
+        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">index</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">DatetimeIndex</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">index</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_parse_axis</span><span class="p">(</span><span class="n">data_shape</span><span class="p">,</span> <span class="n">dims</span><span class="p">,</span> <span class="n">axis</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span> <span class="o">|</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">]:</span>
+        <span class="c1"># TODO change to return tuple always</span>
+        <span class="c1"># axis = 0 if axis == &quot;time&quot; else axis</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">axis</span> <span class="o">==</span> <span class="s2">&quot;spatial&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="n">axis</span> <span class="o">==</span> <span class="s2">&quot;space&quot;</span><span class="p">):</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">data_shape</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">dims</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;t&quot;</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;space axis cannot be selected from dims </span><span class="si">{</span><span class="n">dims</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                <span class="k">return</span> <span class="mi">0</span>
+            <span class="k">if</span> <span class="s2">&quot;frequency&quot;</span> <span class="ow">in</span> <span class="n">dims</span> <span class="ow">or</span> <span class="s2">&quot;directions&quot;</span> <span class="ow">in</span> <span class="n">dims</span><span class="p">:</span>
+                <span class="n">space_name</span> <span class="o">=</span> <span class="s2">&quot;node&quot;</span> <span class="k">if</span> <span class="s2">&quot;node&quot;</span> <span class="ow">in</span> <span class="n">dims</span> <span class="k">else</span> <span class="s2">&quot;element&quot;</span>
+                <span class="k">return</span> <span class="n">dims</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">space_name</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">axis</span> <span class="o">=</span> <span class="mi">1</span> <span class="k">if</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">data_shape</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span><span class="p">)</span> <span class="k">else</span> <span class="nb">tuple</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">data_shape</span><span class="p">)))</span>
+        <span class="k">if</span> <span class="n">axis</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">axis</span> <span class="o">=</span> <span class="mi">0</span> <span class="k">if</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">data_shape</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">)</span> <span class="k">else</span> <span class="nb">tuple</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">data_shape</span><span class="p">)))</span>
+
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">axis</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="n">axis</span> <span class="o">=</span> <span class="s2">&quot;time&quot;</span> <span class="k">if</span> <span class="n">axis</span> <span class="o">==</span> <span class="s2">&quot;t&quot;</span> <span class="k">else</span> <span class="n">axis</span>
+            <span class="k">if</span> <span class="n">axis</span> <span class="ow">in</span> <span class="n">dims</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">dims</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">axis</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;axis argument &#39;</span><span class="si">{</span><span class="n">axis</span><span class="si">}</span><span class="s2">&#39; not supported! Must be None, int, list of int or &#39;time&#39; or &#39;space&#39;&quot;</span>
+                <span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">axis</span></div>
 
 </pre></div>
 

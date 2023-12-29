@@ -98,19 +98,32 @@
 <span class="kn">from</span> <span class="nn">copy</span> <span class="kn">import</span> <span class="n">deepcopy</span>
 <span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">datetime</span><span class="p">,</span> <span class="n">timedelta</span>
 <span class="kn">from</span> <span class="nn">shutil</span> <span class="kn">import</span> <span class="n">copyfile</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Iterable</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Sequence</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Iterable</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Union</span>
 
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">numpy.typing</span> <span class="kn">import</span> <span class="n">NDArray</span>
 <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
-<span class="kn">from</span> <span class="nn">mikecore.DfsBuilder</span> <span class="kn">import</span> <span class="n">DfsBuilder</span>  <span class="c1"># type: ignore</span>
-<span class="kn">from</span> <span class="nn">mikecore.DfsFile</span> <span class="kn">import</span> <span class="n">DfsDynamicItemInfo</span><span class="p">,</span> <span class="n">DfsFile</span>  <span class="c1"># type: ignore</span>
-<span class="kn">from</span> <span class="nn">mikecore.DfsFileFactory</span> <span class="kn">import</span> <span class="n">DfsFileFactory</span>  <span class="c1"># type: ignore</span>
-<span class="kn">from</span> <span class="nn">mikecore.eum</span> <span class="kn">import</span> <span class="n">eumQuantity</span>  <span class="c1"># type: ignore</span>
+<span class="kn">from</span> <span class="nn">mikecore.DfsBuilder</span> <span class="kn">import</span> <span class="n">DfsBuilder</span>
+<span class="kn">from</span> <span class="nn">mikecore.DfsFile</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">DfsDynamicItemInfo</span><span class="p">,</span>
+    <span class="n">DfsFile</span><span class="p">,</span>
+    <span class="n">DfsEqTimeAxis</span><span class="p">,</span>
+    <span class="n">DfsNonEqTimeAxis</span><span class="p">,</span>
+    <span class="n">DfsEqCalendarAxis</span><span class="p">,</span>
+    <span class="n">DfsNonEqCalendarAxis</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span> <span class="nn">mikecore.DfsFileFactory</span> <span class="kn">import</span> <span class="n">DfsFileFactory</span>
+<span class="kn">from</span> <span class="nn">mikecore.eum</span> <span class="kn">import</span> <span class="n">eumQuantity</span>
 <span class="kn">from</span> <span class="nn">tqdm</span> <span class="kn">import</span> <span class="n">tqdm</span><span class="p">,</span> <span class="n">trange</span>
 
 <span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">__dfs_version__</span>
 <span class="kn">from</span> <span class="nn">.dfs._dfs</span> <span class="kn">import</span> <span class="n">_get_item_info</span><span class="p">,</span> <span class="n">_valid_item_numbers</span>
 <span class="kn">from</span> <span class="nn">.eum</span> <span class="kn">import</span> <span class="n">ItemInfo</span>
+
+
+<span class="n">TimeAxis</span> <span class="o">=</span> <span class="n">Union</span><span class="p">[</span>
+    <span class="n">DfsEqTimeAxis</span><span class="p">,</span> <span class="n">DfsNonEqTimeAxis</span><span class="p">,</span> <span class="n">DfsEqCalendarAxis</span><span class="p">,</span> <span class="n">DfsNonEqCalendarAxis</span>
+<span class="p">]</span>
 
 <span class="n">show_progress</span> <span class="o">=</span> <span class="kc">True</span>
 
@@ -145,15 +158,14 @@
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n_data</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">n_chunks</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
-
         <span class="bp">self</span><span class="o">.</span><span class="n">n_data</span> <span class="o">=</span> <span class="n">n_data</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">n_chunks</span> <span class="o">=</span> <span class="n">n_chunks</span>
 
-    <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
         <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;_ChunkInfo(n_chunks=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">n_chunks</span><span class="si">}</span><span class="s2">, n_data=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">n_data</span><span class="si">}</span><span class="s2">, chunk_size=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">chunk_size</span><span class="si">}</span><span class="s2">)&quot;</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">chunk_size</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">chunk_size</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;number of data points per chunk&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="n">math</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_data</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_chunks</span><span class="p">)</span>
 
@@ -161,7 +173,7 @@
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Return the stop index for a chunk&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="nb">min</span><span class="p">(</span><span class="n">start</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">chunk_size</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_data</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">chunk_end</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">start</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">chunk_end</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">start</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Return the end index for a chunk&quot;&quot;&quot;</span>
         <span class="n">e2</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">stop</span><span class="p">(</span><span class="n">start</span><span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">chunk_size</span> <span class="o">-</span> <span class="p">((</span><span class="n">start</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">chunk_size</span><span class="p">)</span> <span class="o">-</span> <span class="n">e2</span><span class="p">)</span>
@@ -173,7 +185,7 @@
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Calculate chunk info based on # of elements in dfs file and selected buffer size&quot;&quot;&quot;</span>
 
         <span class="n">n_time_steps</span> <span class="o">=</span> <span class="n">dfs</span><span class="o">.</span><span class="n">FileInfo</span><span class="o">.</span><span class="n">TimeAxis</span><span class="o">.</span><span class="n">NumberOfTimeSteps</span>
-        <span class="n">n_data_all</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">([</span><span class="n">dfs</span><span class="o">.</span><span class="n">ItemInfo</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">ElementCount</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">item_numbers</span><span class="p">])</span>
+        <span class="n">n_data_all</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">([</span><span class="n">dfs</span><span class="o">.</span><span class="n">ItemInfo</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">ElementCount</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">item_numbers</span><span class="p">])</span>
         <span class="n">mem_need</span> <span class="o">=</span> <span class="mi">8</span> <span class="o">*</span> <span class="n">n_time_steps</span> <span class="o">*</span> <span class="n">n_data_all</span>  <span class="c1"># n_items *</span>
         <span class="n">n_chunks</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">mem_need</span> <span class="o">/</span> <span class="n">buffer_size</span><span class="p">)</span>
         <span class="n">n_data</span> <span class="o">=</span> <span class="n">n_data_all</span> <span class="o">//</span> <span class="nb">len</span><span class="p">(</span><span class="n">item_numbers</span><span class="p">)</span>
@@ -184,9 +196,9 @@
 <span class="k">def</span> <span class="nf">_clone</span><span class="p">(</span>
     <span class="n">infilename</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span><span class="p">,</span>
     <span class="n">outfilename</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span><span class="p">,</span>
-    <span class="n">start_time</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-    <span class="n">timestep</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-    <span class="n">items</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">start_time</span><span class="p">:</span> <span class="n">datetime</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">timestep</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">items</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">int</span> <span class="o">|</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">DfsDynamicItemInfo</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DfsFile</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Clone a dfs file</span>
 
@@ -291,7 +303,7 @@
     <span class="n">outfilename</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span><span class="p">,</span>
     <span class="n">offset</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">,</span>
     <span class="n">factor</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span>
-    <span class="n">items</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">items</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">int</span> <span class="o">|</span> <span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Apply scaling to any dfs file</span>
 
@@ -323,7 +335,6 @@
 
     <span class="k">for</span> <span class="n">timestep</span> <span class="ow">in</span> <span class="n">trange</span><span class="p">(</span><span class="n">n_time_steps</span><span class="p">,</span> <span class="n">disable</span><span class="o">=</span><span class="ow">not</span> <span class="n">show_progress</span><span class="p">):</span>
         <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_items</span><span class="p">):</span>
-
             <span class="n">itemdata</span> <span class="o">=</span> <span class="n">dfs</span><span class="o">.</span><span class="n">ReadItemTimeStep</span><span class="p">(</span><span class="n">item_numbers</span><span class="p">[</span><span class="n">item</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">timestep</span><span class="p">)</span>
             <span class="n">time</span> <span class="o">=</span> <span class="n">itemdata</span><span class="o">.</span><span class="n">Time</span>
             <span class="n">d</span> <span class="o">=</span> <span class="n">itemdata</span><span class="o">.</span><span class="n">Data</span>
@@ -346,7 +357,7 @@
     <span class="n">infilename</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span><span class="p">,</span>
     <span class="n">outfilename</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span><span class="p">,</span>
     <span class="n">fill_value</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">,</span>
-    <span class="n">items</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">items</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">str</span> <span class="o">|</span> <span class="nb">int</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Replace corrupt (unreadable) data with fill_value, default delete value.</span>
@@ -380,7 +391,6 @@
 
     <span class="k">for</span> <span class="n">timestep</span> <span class="ow">in</span> <span class="n">trange</span><span class="p">(</span><span class="n">n_time_steps</span><span class="p">,</span> <span class="n">disable</span><span class="o">=</span><span class="ow">not</span> <span class="n">show_progress</span><span class="p">):</span>
         <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_items</span><span class="p">):</span>
-
             <span class="n">itemdata</span> <span class="o">=</span> <span class="n">dfs_i</span><span class="o">.</span><span class="n">ReadItemTimeStep</span><span class="p">(</span><span class="n">item_numbers</span><span class="p">[</span><span class="n">item</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">timestep</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">itemdata</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="n">time</span> <span class="o">=</span> <span class="n">itemdata</span><span class="o">.</span><span class="n">Time</span>
@@ -440,7 +450,6 @@
 
     <span class="k">for</span> <span class="n">timestep</span> <span class="ow">in</span> <span class="n">trange</span><span class="p">(</span><span class="n">n_time_steps</span><span class="p">):</span>
         <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_items</span><span class="p">):</span>
-
             <span class="n">itemdata_a</span> <span class="o">=</span> <span class="n">dfs_i_a</span><span class="o">.</span><span class="n">ReadItemTimeStep</span><span class="p">(</span><span class="n">item</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">timestep</span><span class="p">)</span>
             <span class="n">d_a</span> <span class="o">=</span> <span class="n">itemdata_a</span><span class="o">.</span><span class="n">Data</span>
             <span class="n">d_a</span><span class="p">[</span><span class="n">d_a</span> <span class="o">==</span> <span class="n">deletevalue</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
@@ -498,7 +507,6 @@
 
     <span class="k">for</span> <span class="n">timestep</span> <span class="ow">in</span> <span class="n">trange</span><span class="p">(</span><span class="n">n_time_steps</span><span class="p">):</span>
         <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_items</span><span class="p">):</span>
-
             <span class="n">itemdata_a</span> <span class="o">=</span> <span class="n">dfs_i_a</span><span class="o">.</span><span class="n">ReadItemTimeStep</span><span class="p">(</span><span class="n">item</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">timestep</span><span class="p">)</span>
             <span class="n">d_a</span> <span class="o">=</span> <span class="n">itemdata_a</span><span class="o">.</span><span class="n">Data</span>
             <span class="n">d_a</span><span class="p">[</span><span class="n">d_a</span> <span class="o">==</span> <span class="n">deletevalue</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
@@ -526,7 +534,7 @@
 <span class="k">def</span> <span class="nf">concat</span><span class="p">(</span>
     <span class="n">infilenames</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">str</span> <span class="o">|</span> <span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span><span class="p">],</span>
     <span class="n">outfilename</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span><span class="p">,</span>
-    <span class="n">keep</span><span class="o">=</span><span class="s2">&quot;last&quot;</span><span class="p">,</span>
+    <span class="n">keep</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;last&quot;</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Concatenates files along the time axis</span>
 
@@ -558,7 +566,6 @@
     <span class="n">current_time</span> <span class="o">=</span> <span class="n">datetime</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>  <span class="c1"># beginning of time...</span>
 
     <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">infilename</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">tqdm</span><span class="p">(</span><span class="n">infilenames</span><span class="p">,</span> <span class="n">disable</span><span class="o">=</span><span class="ow">not</span> <span class="n">show_progress</span><span class="p">)):</span>
-
         <span class="n">dfs_i</span> <span class="o">=</span> <span class="n">DfsFileFactory</span><span class="o">.</span><span class="n">DfsGenericOpen</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">infilename</span><span class="p">))</span>
         <span class="n">t_axis</span> <span class="o">=</span> <span class="n">dfs_i</span><span class="o">.</span><span class="n">FileInfo</span><span class="o">.</span><span class="n">TimeAxis</span>
         <span class="n">n_time_steps</span> <span class="o">=</span> <span class="n">t_axis</span><span class="o">.</span><span class="n">NumberOfTimeSteps</span>
@@ -573,7 +580,6 @@
         <span class="n">current_time</span> <span class="o">=</span> <span class="n">start_time</span>
 
         <span class="k">if</span> <span class="n">keep</span> <span class="o">==</span> <span class="s2">&quot;last&quot;</span><span class="p">:</span>
-
             <span class="k">if</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">infilenames</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">):</span>
                 <span class="n">dfs_n</span> <span class="o">=</span> <span class="n">DfsFileFactory</span><span class="o">.</span><span class="n">DfsGenericOpen</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">infilenames</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]))</span>
                 <span class="n">nf</span> <span class="o">=</span> <span class="n">dfs_n</span><span class="o">.</span><span class="n">FileInfo</span><span class="o">.</span><span class="n">TimeAxis</span><span class="o">.</span><span class="n">StartDateTime</span>
@@ -583,14 +589,12 @@
                 <span class="n">dfs_n</span><span class="o">.</span><span class="n">Close</span><span class="p">()</span>
 
             <span class="k">for</span> <span class="n">timestep</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_time_steps</span><span class="p">):</span>
-
                 <span class="n">current_time</span> <span class="o">=</span> <span class="n">start_time</span> <span class="o">+</span> <span class="n">timedelta</span><span class="p">(</span><span class="n">seconds</span><span class="o">=</span><span class="n">timestep</span> <span class="o">*</span> <span class="n">dt</span><span class="p">)</span>
                 <span class="k">if</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">infilenames</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">):</span>
                     <span class="k">if</span> <span class="n">current_time</span> <span class="o">&gt;=</span> <span class="n">next_start_time</span><span class="p">:</span>
                         <span class="k">break</span>
 
                 <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_items</span><span class="p">):</span>
-
                     <span class="n">itemdata</span> <span class="o">=</span> <span class="n">dfs_i</span><span class="o">.</span><span class="n">ReadItemTimeStep</span><span class="p">(</span><span class="n">item</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">timestep</span><span class="p">)</span>
                     <span class="n">d</span> <span class="o">=</span> <span class="n">itemdata</span><span class="o">.</span><span class="n">Data</span>
 
@@ -600,7 +604,6 @@
             <span class="n">dfs_i</span><span class="o">.</span><span class="n">Close</span><span class="p">()</span>
 
         <span class="k">if</span> <span class="n">keep</span> <span class="o">==</span> <span class="s2">&quot;first&quot;</span><span class="p">:</span>
-
             <span class="k">if</span> <span class="p">(</span>
                 <span class="n">i</span> <span class="o">==</span> <span class="mi">0</span>
             <span class="p">):</span>  <span class="c1"># all timesteps in first file are kept (is there a more efficient way to do this without the loop?)</span>
@@ -608,7 +611,6 @@
                     <span class="n">current_time</span> <span class="o">=</span> <span class="n">start_time</span> <span class="o">+</span> <span class="n">timedelta</span><span class="p">(</span><span class="n">seconds</span><span class="o">=</span><span class="n">timestep</span> <span class="o">*</span> <span class="n">dt</span><span class="p">)</span>
 
                     <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_items</span><span class="p">):</span>
-
                         <span class="n">itemdata</span> <span class="o">=</span> <span class="n">dfs_i</span><span class="o">.</span><span class="n">ReadItemTimeStep</span><span class="p">(</span><span class="n">item</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">timestep</span><span class="p">)</span>
                         <span class="n">d</span> <span class="o">=</span> <span class="n">itemdata</span><span class="o">.</span><span class="n">Data</span>
 
@@ -630,7 +632,6 @@
                     <span class="n">current_time</span> <span class="o">=</span> <span class="n">start_time</span> <span class="o">+</span> <span class="n">timedelta</span><span class="p">(</span><span class="n">seconds</span><span class="o">=</span><span class="n">timestep</span> <span class="o">*</span> <span class="n">dt</span><span class="p">)</span>
 
                     <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_items</span><span class="p">):</span>
-
                         <span class="n">itemdata</span> <span class="o">=</span> <span class="n">dfs_i</span><span class="o">.</span><span class="n">ReadItemTimeStep</span><span class="p">(</span><span class="n">item</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">timestep</span><span class="p">)</span>
                         <span class="n">d</span> <span class="o">=</span> <span class="n">itemdata</span><span class="o">.</span><span class="n">Data</span>
 
@@ -651,10 +652,10 @@
 <span class="k">def</span> <span class="nf">extract</span><span class="p">(</span>
     <span class="n">infilename</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span><span class="p">,</span>
     <span class="n">outfilename</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span><span class="p">,</span>
-    <span class="n">start</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
-    <span class="n">end</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span>
-    <span class="n">step</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
-    <span class="n">items</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">start</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+    <span class="n">end</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span>
+    <span class="n">step</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
+    <span class="n">items</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">int</span> <span class="o">|</span> <span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Extract timesteps and/or items to a new dfs file</span>
 
@@ -690,9 +691,9 @@
     <span class="n">is_layered_dfsu</span> <span class="o">=</span> <span class="n">dfs_i</span><span class="o">.</span><span class="n">ItemInfo</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">Name</span> <span class="o">==</span> <span class="s2">&quot;Z coordinate&quot;</span>
 
     <span class="n">file_start_new</span><span class="p">,</span> <span class="n">start_step</span><span class="p">,</span> <span class="n">start_sec</span><span class="p">,</span> <span class="n">end_step</span><span class="p">,</span> <span class="n">end_sec</span> <span class="o">=</span> <span class="n">_parse_start_end</span><span class="p">(</span>
-        <span class="n">dfs_i</span><span class="p">,</span> <span class="n">start</span><span class="p">,</span> <span class="n">end</span>
+        <span class="n">dfs_i</span><span class="o">.</span><span class="n">FileInfo</span><span class="o">.</span><span class="n">TimeAxis</span><span class="p">,</span> <span class="n">start</span><span class="p">,</span> <span class="n">end</span>
     <span class="p">)</span>
-    <span class="n">timestep</span> <span class="o">=</span> <span class="n">_parse_step</span><span class="p">(</span><span class="n">dfs_i</span><span class="p">,</span> <span class="n">step</span><span class="p">)</span>
+    <span class="n">timestep</span> <span class="o">=</span> <span class="n">_parse_step</span><span class="p">(</span><span class="n">dfs_i</span><span class="o">.</span><span class="n">FileInfo</span><span class="o">.</span><span class="n">TimeAxis</span><span class="p">,</span> <span class="n">step</span><span class="p">)</span>
     <span class="n">item_numbers</span> <span class="o">=</span> <span class="n">_valid_item_numbers</span><span class="p">(</span>
         <span class="n">dfs_i</span><span class="o">.</span><span class="n">ItemInfo</span><span class="p">,</span> <span class="n">items</span><span class="p">,</span> <span class="n">ignore_first</span><span class="o">=</span><span class="n">is_layered_dfsu</span>
     <span class="p">)</span>
@@ -740,18 +741,22 @@
 
 
 
-<span class="k">def</span> <span class="nf">_parse_start_end</span><span class="p">(</span><span class="n">dfs_i</span><span class="p">,</span> <span class="n">start</span><span class="p">,</span> <span class="n">end</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">_parse_start_end</span><span class="p">(</span>
+    <span class="n">time_axis</span><span class="p">:</span> <span class="n">TimeAxis</span><span class="p">,</span>
+    <span class="n">start</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="nb">float</span> <span class="o">|</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">datetime</span><span class="p">,</span>
+    <span class="n">end</span><span class="p">:</span> <span class="nb">int</span> <span class="o">|</span> <span class="nb">float</span> <span class="o">|</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">datetime</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">datetime</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>  <span class="c1"># TODO better return type</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Helper function for parsing start and end arguments&quot;&quot;&quot;</span>
-    <span class="n">n_time_steps</span> <span class="o">=</span> <span class="n">dfs_i</span><span class="o">.</span><span class="n">FileInfo</span><span class="o">.</span><span class="n">TimeAxis</span><span class="o">.</span><span class="n">NumberOfTimeSteps</span>
-    <span class="n">file_start_datetime</span> <span class="o">=</span> <span class="n">dfs_i</span><span class="o">.</span><span class="n">FileInfo</span><span class="o">.</span><span class="n">TimeAxis</span><span class="o">.</span><span class="n">StartDateTime</span>
-    <span class="n">file_start_sec</span> <span class="o">=</span> <span class="n">dfs_i</span><span class="o">.</span><span class="n">FileInfo</span><span class="o">.</span><span class="n">TimeAxis</span><span class="o">.</span><span class="n">StartTimeOffset</span>
+    <span class="n">n_time_steps</span> <span class="o">=</span> <span class="n">time_axis</span><span class="o">.</span><span class="n">NumberOfTimeSteps</span>
+    <span class="n">file_start_datetime</span> <span class="o">=</span> <span class="n">time_axis</span><span class="o">.</span><span class="n">StartDateTime</span>
+    <span class="n">file_start_sec</span> <span class="o">=</span> <span class="n">time_axis</span><span class="o">.</span><span class="n">StartTimeOffset</span>
     <span class="n">start_sec</span> <span class="o">=</span> <span class="n">file_start_sec</span>
 
     <span class="n">timespan</span> <span class="o">=</span> <span class="mi">0</span>
-    <span class="k">if</span> <span class="n">dfs_i</span><span class="o">.</span><span class="n">FileInfo</span><span class="o">.</span><span class="n">TimeAxis</span><span class="o">.</span><span class="n">TimeAxisType</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
-        <span class="n">timespan</span> <span class="o">=</span> <span class="n">dfs_i</span><span class="o">.</span><span class="n">FileInfo</span><span class="o">.</span><span class="n">TimeAxis</span><span class="o">.</span><span class="n">TimeStep</span> <span class="o">*</span> <span class="p">(</span><span class="n">n_time_steps</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
-    <span class="k">elif</span> <span class="n">dfs_i</span><span class="o">.</span><span class="n">FileInfo</span><span class="o">.</span><span class="n">TimeAxis</span><span class="o">.</span><span class="n">TimeAxisType</span> <span class="o">==</span> <span class="mi">4</span><span class="p">:</span>
-        <span class="n">timespan</span> <span class="o">=</span> <span class="n">dfs_i</span><span class="o">.</span><span class="n">FileInfo</span><span class="o">.</span><span class="n">TimeAxis</span><span class="o">.</span><span class="n">TimeSpan</span>
+    <span class="k">if</span> <span class="n">time_axis</span><span class="o">.</span><span class="n">TimeAxisType</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
+        <span class="n">timespan</span> <span class="o">=</span> <span class="n">time_axis</span><span class="o">.</span><span class="n">TimeStep</span> <span class="o">*</span> <span class="p">(</span><span class="n">n_time_steps</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">time_axis</span><span class="o">.</span><span class="n">TimeAxisType</span> <span class="o">==</span> <span class="mi">4</span><span class="p">:</span>
+        <span class="n">timespan</span> <span class="o">=</span> <span class="n">time_axis</span><span class="o">.</span><span class="n">TimeSpan</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;TimeAxisType not supported&quot;</span><span class="p">)</span>
 
@@ -806,26 +811,26 @@
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;end cannot be after end of file. end=</span><span class="si">{</span><span class="n">end_sec</span><span class="si">}</span><span class="s2"> is invalid.&quot;</span><span class="p">)</span>
 
     <span class="n">file_start_new</span> <span class="o">=</span> <span class="kc">None</span>
-    <span class="k">if</span> <span class="n">dfs_i</span><span class="o">.</span><span class="n">FileInfo</span><span class="o">.</span><span class="n">TimeAxis</span><span class="o">.</span><span class="n">TimeAxisType</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
-        <span class="n">dt</span> <span class="o">=</span> <span class="n">dfs_i</span><span class="o">.</span><span class="n">FileInfo</span><span class="o">.</span><span class="n">TimeAxis</span><span class="o">.</span><span class="n">TimeStep</span>
+    <span class="k">if</span> <span class="n">time_axis</span><span class="o">.</span><span class="n">TimeAxisType</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
+        <span class="n">dt</span> <span class="o">=</span> <span class="n">time_axis</span><span class="o">.</span><span class="n">TimeStep</span>
         <span class="k">if</span> <span class="p">(</span><span class="n">start_sec</span> <span class="o">&gt;</span> <span class="n">file_start_sec</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">start_step</span> <span class="o">==</span> <span class="mi">0</span><span class="p">):</span>
             <span class="c1"># we can find the coresponding step</span>
             <span class="n">start_step</span> <span class="o">=</span> <span class="nb">int</span><span class="p">((</span><span class="n">start_sec</span> <span class="o">-</span> <span class="n">file_start_sec</span><span class="p">)</span> <span class="o">/</span> <span class="n">dt</span><span class="p">)</span>
         <span class="n">file_start_new</span> <span class="o">=</span> <span class="n">file_start_datetime</span> <span class="o">+</span> <span class="n">timedelta</span><span class="p">(</span><span class="n">seconds</span><span class="o">=</span><span class="n">start_step</span> <span class="o">*</span> <span class="n">dt</span><span class="p">)</span>
-    <span class="k">elif</span> <span class="n">dfs_i</span><span class="o">.</span><span class="n">FileInfo</span><span class="o">.</span><span class="n">TimeAxis</span><span class="o">.</span><span class="n">TimeAxisType</span> <span class="o">==</span> <span class="mi">4</span><span class="p">:</span>
+    <span class="k">elif</span> <span class="n">time_axis</span><span class="o">.</span><span class="n">TimeAxisType</span> <span class="o">==</span> <span class="mi">4</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">start_sec</span> <span class="o">&gt;</span> <span class="n">file_start_sec</span><span class="p">:</span>
             <span class="n">file_start_new</span> <span class="o">=</span> <span class="n">file_start_datetime</span> <span class="o">+</span> <span class="n">timedelta</span><span class="p">(</span><span class="n">seconds</span><span class="o">=</span><span class="n">start_sec</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">file_start_new</span><span class="p">,</span> <span class="n">start_step</span><span class="p">,</span> <span class="n">start_sec</span><span class="p">,</span> <span class="n">end_step</span><span class="p">,</span> <span class="n">end_sec</span>
 
 
-<span class="k">def</span> <span class="nf">_parse_step</span><span class="p">(</span><span class="n">dfs_i</span><span class="p">,</span> <span class="n">step</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">_parse_step</span><span class="p">(</span><span class="n">time_axis</span><span class="p">:</span> <span class="n">TimeAxis</span><span class="p">,</span> <span class="n">step</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Helper function for parsing step argument&quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="n">step</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
         <span class="n">timestep</span> <span class="o">=</span> <span class="kc">None</span>
-    <span class="k">elif</span> <span class="n">dfs_i</span><span class="o">.</span><span class="n">FileInfo</span><span class="o">.</span><span class="n">TimeAxis</span><span class="o">.</span><span class="n">TimeAxisType</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
-        <span class="n">timestep</span> <span class="o">=</span> <span class="n">dfs_i</span><span class="o">.</span><span class="n">FileInfo</span><span class="o">.</span><span class="n">TimeAxis</span><span class="o">.</span><span class="n">TimeStep</span> <span class="o">*</span> <span class="n">step</span>
-    <span class="k">elif</span> <span class="n">dfs_i</span><span class="o">.</span><span class="n">FileInfo</span><span class="o">.</span><span class="n">TimeAxis</span><span class="o">.</span><span class="n">TimeAxisType</span> <span class="o">==</span> <span class="mi">4</span><span class="p">:</span>
+    <span class="k">elif</span> <span class="n">time_axis</span><span class="o">.</span><span class="n">TimeAxisType</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
+        <span class="n">timestep</span> <span class="o">=</span> <span class="n">time_axis</span><span class="o">.</span><span class="n">TimeStep</span> <span class="o">*</span> <span class="n">step</span>
+    <span class="k">elif</span> <span class="n">time_axis</span><span class="o">.</span><span class="n">TimeAxisType</span> <span class="o">==</span> <span class="mi">4</span><span class="p">:</span>
         <span class="n">timestep</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;TimeAxisType not supported&quot;</span><span class="p">)</span>
@@ -837,8 +842,8 @@
 <span class="k">def</span> <span class="nf">avg_time</span><span class="p">(</span>
     <span class="n">infilename</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span><span class="p">,</span>
     <span class="n">outfilename</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span><span class="p">,</span>
-    <span class="n">skipna</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-<span class="p">):</span>
+    <span class="n">skipna</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Create a temporally averaged dfs file</span>
 
 <span class="sd">    Parameters</span>
@@ -877,7 +882,6 @@
 
     <span class="k">for</span> <span class="n">timestep</span> <span class="ow">in</span> <span class="n">trange</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">n_time_steps</span><span class="p">,</span> <span class="n">disable</span><span class="o">=</span><span class="ow">not</span> <span class="n">show_progress</span><span class="p">):</span>
         <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_items</span><span class="p">):</span>
-
             <span class="n">itemdata</span> <span class="o">=</span> <span class="n">dfs_i</span><span class="o">.</span><span class="n">ReadItemTimeStep</span><span class="p">(</span><span class="n">item_numbers</span><span class="p">[</span><span class="n">item</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">timestep</span><span class="p">)</span>
             <span class="n">d</span> <span class="o">=</span> <span class="n">itemdata</span><span class="o">.</span><span class="n">Data</span>
             <span class="n">has_value</span> <span class="o">=</span> <span class="n">d</span> <span class="o">!=</span> <span class="n">deletevalue</span>
@@ -906,12 +910,12 @@
 <span class="k">def</span> <span class="nf">quantile</span><span class="p">(</span>
     <span class="n">infilename</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span><span class="p">,</span>
     <span class="n">outfilename</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span><span class="p">,</span>
-    <span class="n">q</span><span class="p">,</span>
+    <span class="n">q</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">float</span><span class="p">],</span>
     <span class="o">*</span><span class="p">,</span>
-    <span class="n">items</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-    <span class="n">skipna</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-    <span class="n">buffer_size</span><span class="o">=</span><span class="mf">1.0e9</span><span class="p">,</span>
-<span class="p">):</span>
+    <span class="n">items</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">int</span> <span class="o">|</span> <span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">skipna</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="n">buffer_size</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1.0e9</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Create temporal quantiles of all items in dfs file</span>
 
 <span class="sd">    Parameters</span>
@@ -959,8 +963,8 @@
 
     <span class="n">ci</span> <span class="o">=</span> <span class="n">_ChunkInfo</span><span class="o">.</span><span class="n">from_dfs</span><span class="p">(</span><span class="n">dfs_i</span><span class="p">,</span> <span class="n">item_numbers</span><span class="p">,</span> <span class="n">buffer_size</span><span class="p">)</span>
 
-    <span class="n">qvec</span> <span class="o">=</span> <span class="p">[</span><span class="n">q</span><span class="p">]</span> <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">isscalar</span><span class="p">(</span><span class="n">q</span><span class="p">)</span> <span class="k">else</span> <span class="n">q</span>
-    <span class="n">qtxt</span> <span class="o">=</span> <span class="p">[</span><span class="sa">f</span><span class="s2">&quot;Quantile </span><span class="si">{</span><span class="n">q</span><span class="si">}</span><span class="s2">&quot;</span> <span class="k">for</span> <span class="n">q</span> <span class="ow">in</span> <span class="n">qvec</span><span class="p">]</span>
+    <span class="n">qvec</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">q</span><span class="p">]</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="nb">float</span><span class="p">)</span> <span class="k">else</span> <span class="n">q</span>
+    <span class="n">qtxt</span> <span class="o">=</span> <span class="p">[</span><span class="sa">f</span><span class="s2">&quot;Quantile </span><span class="si">{</span><span class="n">q</span><span class="si">!r}</span><span class="s2">&quot;</span> <span class="k">for</span> <span class="n">q</span> <span class="ow">in</span> <span class="n">qvec</span><span class="p">]</span>
     <span class="n">core_items</span> <span class="o">=</span> <span class="p">[</span><span class="n">dfs_i</span><span class="o">.</span><span class="n">ItemInfo</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">item_numbers</span><span class="p">]</span>
     <span class="n">items</span> <span class="o">=</span> <span class="n">_get_repeated_items</span><span class="p">(</span><span class="n">core_items</span><span class="p">,</span> <span class="n">prefixes</span><span class="o">=</span><span class="n">qtxt</span><span class="p">)</span>
 
@@ -1021,7 +1025,7 @@
 
 
 
-<span class="k">def</span> <span class="nf">_read_item</span><span class="p">(</span><span class="n">dfs</span><span class="p">:</span> <span class="n">DfsFile</span><span class="p">,</span> <span class="n">item</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">timestep</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="k">def</span> <span class="nf">_read_item</span><span class="p">(</span><span class="n">dfs</span><span class="p">:</span> <span class="n">DfsFile</span><span class="p">,</span> <span class="n">item</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">timestep</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Read item data from dfs file</span>
 
 <span class="sd">    Parameters</span>

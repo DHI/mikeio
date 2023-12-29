@@ -92,9 +92,10 @@
            <div itemprop="articleBody">
              
   <h1>Source code for mikeio.pfs._pfssection</h1><div class="highlight"><pre>
-<span></span><span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">datetime</span>
+<span></span><span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">annotations</span>
+<span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">datetime</span>
 <span class="kn">from</span> <span class="nn">types</span> <span class="kn">import</span> <span class="n">SimpleNamespace</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Mapping</span><span class="p">,</span> <span class="n">MutableMapping</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Sequence</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Mapping</span><span class="p">,</span> <span class="n">MutableMapping</span><span class="p">,</span> <span class="n">Sequence</span>
 
 <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
 
@@ -297,10 +298,10 @@
 <a class="viewcode-back" href="../../../pfs.html#mikeio.PfsSection.search">[docs]</a>
     <span class="k">def</span> <span class="nf">search</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
-        <span class="n">text</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">text</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="o">*</span><span class="p">,</span>
-        <span class="n">key</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">section</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">key</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">section</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">param</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">case</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="p">):</span>
@@ -431,7 +432,6 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">lvl_prefix</span> <span class="o">=</span> <span class="s2">&quot;   &quot;</span>
         <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-
             <span class="c1"># check for empty sections</span>
             <span class="k">if</span> <span class="n">v</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="n">func</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">lvl_prefix</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">level</span><span class="si">}</span><span class="s2">[</span><span class="si">{</span><span class="n">k</span><span class="si">}</span><span class="s2">]</span><span class="si">{</span><span class="n">newline</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
@@ -479,7 +479,6 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># some crude checks and corrections</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
-
             <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">5</span> <span class="ow">and</span> <span class="ow">not</span> <span class="p">(</span><span class="s2">&quot;PROJ&quot;</span> <span class="ow">in</span> <span class="n">v</span> <span class="ow">or</span> <span class="s2">&quot;&lt;CLOB:&quot;</span> <span class="ow">in</span> <span class="n">v</span><span class="p">):</span>
                 <span class="n">v</span> <span class="o">=</span> <span class="n">v</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;&quot;&#39;</span><span class="p">,</span> <span class="s2">&quot;&#39;&#39;&quot;</span><span class="p">)</span>
                 <span class="n">v</span> <span class="o">=</span> <span class="n">v</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\U0001F600</span><span class="s2">&quot;</span><span class="p">,</span> <span class="s2">&quot;&#39;&quot;</span><span class="p">)</span>
@@ -519,7 +518,7 @@
 
 <div class="viewcode-block" id="PfsSection.to_dataframe">
 <a class="viewcode-back" href="../../../pfs.html#mikeio.PfsSection.to_dataframe">[docs]</a>
-    <span class="k">def</span> <span class="nf">to_dataframe</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">prefix</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">to_dataframe</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">prefix</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Output enumerated subsections to a DataFrame</span>
 
 <span class="sd">        Parameters</span>
