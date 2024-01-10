@@ -180,11 +180,11 @@ def test_isel_list_of_indices_simple_domain():
     el = [(0, 1, 2), (0, 2, 3), (3, 2, 4)]
 
     g = GeometryFM2D(node_coordinates=nc, element_table=el, projection="LONG/LAT")
-    gp = g.isel([0, 1])
-    assert gp.element_coordinates[0, 0] == pytest.approx(0.6666666666666666)
+    g1 = g.isel([0, 1])
+    assert g1.element_coordinates[0, 0] == pytest.approx(0.6666666666666666)
 
-    gp2 = g.isel([1, 0])
-    assert gp2.element_coordinates[1, 0] == pytest.approx(0.6666666666666666)
+    g2 = g.isel([1, 0])
+    assert g2.element_coordinates[1, 0] == pytest.approx(0.6666666666666666)
 
 
 def test_plot_mesh():

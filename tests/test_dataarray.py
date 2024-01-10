@@ -709,6 +709,12 @@ def test_da_isel_order_is_important_dfsu2d():
     assert da2.values[1] == pytest.approx(-3.2252840995788574)
     assert da2.geometry.element_coordinates[1, 0] == pytest.approx(-0.61049269425)
 
+    # select same elements multiple times, not sure why, but consistent with NumPy, xarray
+    da3 = da.isel(element=[1, 0, 1])
+    assert da3.values[1] == pytest.approx(-3.2252840995788574)
+    assert da3.geometry.element_coordinates[1, 0] == pytest.approx(-0.61049269425)
+    assert len(da3.geometry.element_coordinates) == 3
+
 
 def test_da_sel_area_grid2d():
     filename = "tests/testdata/gebco_sound.dfs2"
