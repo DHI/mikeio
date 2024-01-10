@@ -852,11 +852,8 @@ def test_modify_values_1d(da1):
     assert da1.values[4] == 12.0
 
     # values is scalar, therefore copy by definition. Original is not changed.
-    da1.isel(
-        4
-    ).values = (
-        11.0  # TODO is the treatment of scalar sensible, i.e. consistent with xarray?
-    )
+    # TODO is the treatment of scalar sensible, i.e. consistent with xarray?
+    da1.isel(4).values = 11.0
     assert da1.values[4] != 11.0
 
     # fancy indexing will return copy! Original is *not* changed.
