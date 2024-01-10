@@ -1,6 +1,6 @@
 from __future__ import annotations
 from functools import cached_property
-from typing import Collection, Sequence, List
+from typing import Any, Sequence, List, overload
 
 import numpy as np
 from mikecore.DfsuFile import DfsuFileType  # type: ignore
@@ -22,7 +22,7 @@ class _GeometryFMLayered(_GeometryFM):
         node_coordinates,
         element_table,
         codes=None,
-        projection:str = "LONG/LAT",
+        projection: str = "LONG/LAT",
         dfsu_type=DfsuFileType.Dfsu3DSigma,
         element_ids=None,
         node_ids=None,
@@ -31,7 +31,6 @@ class _GeometryFMLayered(_GeometryFM):
         validate=True,
         reindex=False,
     ) -> None:
-
         super().__init__(
             node_coordinates=node_coordinates,
             element_table=element_table,
@@ -68,14 +67,23 @@ class _GeometryFMLayered(_GeometryFM):
     def geometry2d(self):
         return self.to_2d_geometry()
 
-    def isel(self, idx: Collection[int], keepdims=False, **kwargs):
+    @overload
+    def isel(self, idx: int, keepdims: bool = False, **kwargs: Any) -> GeometryPoint3D:
+        ...
 
+    @overload
+    def isel(
+        self, idx: Sequence[int], keepdims: bool = False, **kwargs: Any
+    ) -> _GeometryFMLayered:
+        ...
+
+    def isel(self, idx: int | Sequence[int], keepdims=False, **kwargs):
         return self.elements_to_geometry(
             elements=idx, node_layers=None, keepdims=keepdims
         )
 
     def elements_to_geometry(
-        self, elements: int | Collection[int], node_layers="all", keepdims=False
+        self, elements: int | Sequence[int], node_layers="all", keepdims=False
     ):
         sel_elements: List[int]
 
@@ -88,20 +96,16 @@ class _GeometryFMLayered(_GeometryFM):
 
             return GeometryPoint3D(x=x, y=y, z=z, projection=self.projection)
 
-        sorted_elements = np.sort(
-            sel_elements
-        )  # make sure elements are sorted! # TODO is this necessary?
-
         # create new geometry
         new_type = self._type
 
-        layers_used = self.layer_ids[sorted_elements]
+        layers_used = self.layer_ids[sel_elements]
         unique_layer_ids = np.unique(layers_used)
         n_layers = len(unique_layer_ids)
 
         if n_layers > 1:
             elem_bot = self.get_layer_elements("bottom")
-            if np.all(np.in1d(sorted_elements, elem_bot)):
+            if np.all(np.in1d(sel_elements, elem_bot)):
                 n_layers = 1
 
         if (
@@ -115,7 +119,7 @@ class _GeometryFMLayered(_GeometryFM):
 
         # extract information for selected elements
         if n_layers == 1:
-            elem2d = self.elem2d_ids[sorted_elements]
+            elem2d = self.elem2d_ids[sel_elements]
             geom2d = self.geometry2d
             node_ids, elem_tbl = geom2d._get_nodes_and_table_for_elements(elem2d)
             assert len(elem_tbl[0]) <= 4, "Not a 2D element"
@@ -124,48 +128,53 @@ class _GeometryFMLayered(_GeometryFM):
             elem_ids = self._element_ids[elem2d]
         else:
             node_ids, elem_tbl = self._get_nodes_and_table_for_elements(
-                sorted_elements, node_layers=node_layers
+                sel_elements, node_layers=node_layers
             )
             node_coords = self.node_coordinates[node_ids]
             codes = self.codes[node_ids]
-            elem_ids = self._element_ids[sorted_elements]
-        
+            elem_ids = self._element_ids[sel_elements]
+
         if new_type == DfsuFileType.Dfsu2D:
-            return GeometryFM2D(node_coordinates=node_coords,
-                                codes=codes,
-                                node_ids=node_ids,
-                                projection=self.projection_string,
-                                element_table=elem_tbl,
-                                element_ids=elem_ids,
-                                dfsu_type=DfsuFileType.Dfsu2D,
-                                reindex=True)
+            return GeometryFM2D(
+                node_coordinates=node_coords,
+                codes=codes,
+                node_ids=node_ids,
+                projection=self.projection_string,
+                element_table=elem_tbl,
+                element_ids=elem_ids,
+                dfsu_type=DfsuFileType.Dfsu2D,
+                reindex=True,
+            )
         else:
             lowest_sigma = self.n_layers - self.n_sigma_layers
             n_sigma = sum(unique_layer_ids >= lowest_sigma)
             if n_layers == len(elem_tbl):
-                return GeometryFMVerticalColumn(node_coordinates=node_coords,
-                                                codes=codes,
-                                                node_ids=node_ids,
-                                                projection=self.projection_string,
-                                                element_table=elem_tbl,
-                                                element_ids=elem_ids,
-                                                dfsu_type=self._type,
-                                                reindex=True,
-                                                n_layers=n_layers,
-                                                n_sigma=n_sigma)
+                return GeometryFMVerticalColumn(
+                    node_coordinates=node_coords,
+                    codes=codes,
+                    node_ids=node_ids,
+                    projection=self.projection_string,
+                    element_table=elem_tbl,
+                    element_ids=elem_ids,
+                    dfsu_type=self._type,
+                    reindex=True,
+                    n_layers=n_layers,
+                    n_sigma=n_sigma,
+                )
             else:
                 klass = self.__class__
-                return klass(node_coordinates=node_coords,
-                                    codes=codes,
-                                    node_ids=node_ids,
-                                    projection=self.projection_string,
-                                    element_table=elem_tbl,
-                                    element_ids=elem_ids,
-                                    dfsu_type=self._type,
-                                    reindex=True,
-                                    n_layers=n_layers,
-                                    n_sigma=n_sigma)
-
+                return klass(
+                    node_coordinates=node_coords,
+                    codes=codes,
+                    node_ids=node_ids,
+                    projection=self.projection_string,
+                    element_table=elem_tbl,
+                    element_ids=elem_ids,
+                    dfsu_type=self._type,
+                    reindex=True,
+                    n_layers=n_layers,
+                    n_sigma=n_sigma,
+                )
 
     @cached_property
     def element_coordinates(self):
@@ -173,7 +182,6 @@ class _GeometryFMLayered(_GeometryFM):
         return self._calc_element_coordinates()
 
     def _calc_element_coordinates(self):
-
         node_coordinates = self.node_coordinates
 
         element_table = self.element_table
@@ -571,7 +579,6 @@ class _GeometryFMLayered(_GeometryFM):
         return elem3d
 
     def _find_3d_from_2d_points(self, elem2d, z=None, layer=None):
-
         was_scalar = np.isscalar(elem2d)
         if was_scalar:
             elem2d = np.array([elem2d])
@@ -603,7 +610,9 @@ class _GeometryFMLayered(_GeometryFM):
                         id = row[list(layer_ids).index(layer)]
                         idx[j] = id
                     except IndexError:
-                        raise IndexError(f"Layer {layer} not present for 2d element {elem2d[j]}")
+                        raise IndexError(
+                            f"Layer {layer} not present for 2d element {elem2d[j]}"
+                        )
             else:
                 # sigma layer
                 idx = self.get_layer_elements(layer)[elem2d]
@@ -669,7 +678,7 @@ class GeometryFM3D(_GeometryFMLayered):
         node_coordinates,
         element_table,
         codes=None,
-        projection:str = "LONG/LAT",
+        projection: str = "LONG/LAT",
         dfsu_type=DfsuFileType.Dfsu3DSigma,
         element_ids=None,
         node_ids=None,
@@ -704,7 +713,6 @@ class GeometryFM3D(_GeometryFMLayered):
         return self.geometry2d.to_mesh(outfilename)
 
     def find_index(self, x=None, y=None, z=None, coords=None, area=None, layers=None):
-
         if layers is not None:
             idx = self.get_layer_elements(layers)
         else:
@@ -749,7 +757,7 @@ class GeometryFMVerticalProfile(_GeometryFMLayered):
         node_coordinates,
         element_table,
         codes=None,
-        projection:str = "LONG/LAT",
+        projection: str = "LONG/LAT",
         dfsu_type=None,
         element_ids=None,
         node_ids=None,
@@ -800,7 +808,6 @@ class GeometryFMVerticalProfile(_GeometryFMLayered):
         return self.relative_element_distance[idx]
 
     def find_index(self, x=None, y=None, z=None, coords=None, layers=None):
-
         if layers is not None:
             idx = self.get_layer_elements(layers)
         else:
@@ -931,7 +938,6 @@ class _GeometryFMVerticalProfilePlotter:
         return ax
 
     def mesh(self, title="Mesh", edge_color="0.5", **kwargs):
-
         v = np.full_like(self.g.element_coordinates[:, 0], np.nan)
         return _plot_vertical_profile(
             node_coordinates=self.g.node_coordinates,
