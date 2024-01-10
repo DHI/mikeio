@@ -2,9 +2,10 @@ from __future__ import annotations
 import warnings
 from collections import namedtuple
 from functools import cached_property
-from typing import List, Any, Sequence
+from typing import List, Any, Sequence, overload
 
 import numpy as np
+
 from mikecore.DfsuFile import DfsuFileType  # type: ignore
 from mikecore.eum import eumQuantity  # type: ignore
 from mikecore.MeshBuilder import MeshBuilder  # type: ignore
@@ -935,8 +936,18 @@ class GeometryFM2D(_GeometryFM):
         bnd_face_id = face_counts == 1
         return all_faces[uf_id[bnd_face_id]]
 
+    @overload
+    def isel(self, idx: int, keepdims: bool = False, **kwargs: Any) -> GeometryPoint2D:
+        ...
+
+    @overload
     def isel(
-        self, idx: Sequence[int], keepdims=False, **kwargs
+        self, idx: Sequence[int], keepdims: bool = False, **kwargs: Any
+    ) -> "GeometryFM2D":
+        ...
+
+    def isel(
+        self, idx: int | Sequence[int], keepdims=False, **kwargs: Any
     ) -> "GeometryFM2D" | GeometryPoint2D:
         """export a selection of elements to a new geometry
 
@@ -951,6 +962,8 @@ class GeometryFM2D(_GeometryFM):
             Should the original Geometry type be kept (keepdims=True)
             or should it be reduced e.g. to a GeometryPoint2D if possible
             (keepdims=False), by default False
+        **kwargs: optional
+            Not used
 
         Returns
         -------
@@ -1080,7 +1093,9 @@ class GeometryFM2D(_GeometryFM):
                 elements.append(j)
 
         assert len(elements) > 0, "no elements found"
-        elements = np.sort(elements)  # make sure elements are sorted!
+        elements = sorted(
+            elements
+        )  # make sure elements are sorted! # TODO: should this be here?
 
         node_ids, elem_tbl = self._get_nodes_and_table_for_elements(elements)
         node_coords = self.node_coordinates[node_ids]
@@ -1109,10 +1124,6 @@ class GeometryFM2D(_GeometryFM):
 
             return GeometryPoint2D(x=x, y=y, projection=self.projection)
 
-        # sorted_elements = np.sort(
-        #    sel_elements
-        # )  # make sure elements are sorted! # TODO is this necessary? If so, should be done in the initialiser
-
         # extract information for selected elements
 
         node_ids, elem_tbl = self._get_nodes_and_table_for_elements(sel_elements)
@@ -1131,7 +1142,7 @@ class GeometryFM2D(_GeometryFM):
             reindex=True,
         )
 
-    def _get_nodes_and_table_for_elements(self, elements):
+    def _get_nodes_and_table_for_elements(self, elements: Sequence[int]):
         """list of nodes and element table for a list of elements
 
         Parameters
@@ -1143,13 +1154,10 @@ class GeometryFM2D(_GeometryFM):
         -------
         np.array(int)
             array of node ids (unique)
-        list(list(int))
+        list(np.array(int))
             element table with a list of nodes for each element
         """
-        elem_tbl = np.empty(len(elements), dtype=np.dtype("O"))
-
-        for j, eid in enumerate(elements):
-            elem_tbl[j] = np.asarray(self.element_table[eid])
+        elem_tbl = [np.asarray(self.element_table[eid]) for eid in elements]
 
         nodes = np.unique(np.hstack(elem_tbl))
         return nodes, elem_tbl
