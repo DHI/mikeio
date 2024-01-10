@@ -707,7 +707,7 @@ def test_da_isel_order_is_important_dfsu2d():
     # select elements in arbitrary order
     da2 = da.isel(element=[1, 0])
     assert da2.values[1] == pytest.approx(-3.2252840995788574)
-    assert da1.geometry.element_coordinates[1, 0] == pytest.approx(-0.61049269425)
+    assert da2.geometry.element_coordinates[1, 0] == pytest.approx(-0.61049269425)
 
 
 def test_da_sel_area_grid2d():

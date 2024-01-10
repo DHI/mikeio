@@ -2,7 +2,7 @@ from __future__ import annotations
 import warnings
 from collections import namedtuple
 from functools import cached_property
-from typing import Collection, List, Any
+from typing import List, Any, Sequence
 
 import numpy as np
 from mikecore.DfsuFile import DfsuFileType  # type: ignore
@@ -936,7 +936,7 @@ class GeometryFM2D(_GeometryFM):
         return all_faces[uf_id[bnd_face_id]]
 
     def isel(
-        self, idx: Collection[int], keepdims=False, **kwargs
+        self, idx: Sequence[int], keepdims=False, **kwargs
     ) -> "GeometryFM2D" | GeometryPoint2D:
         """export a selection of elements to a new geometry
 
@@ -945,8 +945,8 @@ class GeometryFM2D(_GeometryFM):
 
         Parameters
         ----------
-        idx : collection(int)
-            collection of element indicies
+        idx : list(int)
+            element ids to be selected
         keepdims : bool, optional
             Should the original Geometry type be kept (keepdims=True)
             or should it be reduced e.g. to a GeometryPoint2D if possible
@@ -1098,7 +1098,7 @@ class GeometryFM2D(_GeometryFM):
         )
 
     def elements_to_geometry(
-        self, elements: int | Collection[int], keepdims=False
+        self, elements: int | Sequence[int], keepdims=False
     ) -> "GeometryFM2D" | GeometryPoint2D:
         if isinstance(elements, (int, np.integer)):
             sel_elements: List[int] = [elements]
@@ -1109,16 +1109,16 @@ class GeometryFM2D(_GeometryFM):
 
             return GeometryPoint2D(x=x, y=y, projection=self.projection)
 
-        sorted_elements = np.sort(
-            sel_elements
-        )  # make sure elements are sorted! # TODO is this necessary? If so, should be done in the initialiser
+        # sorted_elements = np.sort(
+        #    sel_elements
+        # )  # make sure elements are sorted! # TODO is this necessary? If so, should be done in the initialiser
 
         # extract information for selected elements
 
-        node_ids, elem_tbl = self._get_nodes_and_table_for_elements(sorted_elements)
+        node_ids, elem_tbl = self._get_nodes_and_table_for_elements(sel_elements)
         node_coords = self.node_coordinates[node_ids]
         codes = self.codes[node_ids]
-        elem_ids = self.element_ids[sorted_elements]
+        elem_ids = self.element_ids[sel_elements]
 
         return GeometryFM2D(
             node_coordinates=node_coords,
