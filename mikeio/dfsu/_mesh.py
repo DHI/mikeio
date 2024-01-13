@@ -91,6 +91,7 @@ class Mesh:
         ]
         return str.join("\n", out)
 
+    # TODO re-consider if all of these properties are needed, since they all are available in the geometry
     @property
     def n_elements(self) -> int:
         """Number of elements"""
@@ -110,6 +111,11 @@ class Mesh:
     def n_nodes(self) -> int:
         """Number of nodes"""
         return self.geometry.n_nodes
+
+    @property
+    def codes(self) -> np.ndarray:
+        """Codes of nodes"""
+        return self.geometry.codes
 
     @property
     def element_table(self) -> np.ndarray:
@@ -133,7 +139,7 @@ class Mesh:
         elements: Collection[int] | None = None,
         unit: EUMUnit = EUMUnit.meter,
     ) -> None:
-        """write mesh to file (will overwrite if file exists)
+        """write mesh to file
 
         Parameters
         ----------
@@ -142,6 +148,7 @@ class Mesh:
         elements : list(int)
             list of element ids (subset) to be saved to new mesh
         """
+        # TODO reconsider if selection of elements should be done here, it is possible to do with geometry.isel and then write the mesh
         builder = MeshBuilder()
 
         if elements is not None:

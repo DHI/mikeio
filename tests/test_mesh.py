@@ -132,6 +132,17 @@ def test_write_part(tri_mesh, tmp_path):
     assert outfilename.exists()
 
 
+def test_write_part_isel(tri_mesh, tmp_path):
+    outfilename = tmp_path / "simple_sub.mesh"
+
+    msh = tri_mesh
+
+    gsub = msh.geometry.isel(range(50, 100))
+    gsub.to_mesh(outfilename)
+
+    assert outfilename.exists()
+
+
 def test_write_mesh_from_dfsu(tmp_path):
     outfilename = tmp_path / "quad_tri.mesh"
     dfsufilename = "tests/testdata/FakeLake.dfsu"
