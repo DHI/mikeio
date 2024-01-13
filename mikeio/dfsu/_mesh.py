@@ -1,11 +1,10 @@
 from __future__ import annotations
 from pathlib import Path
+from typing import TYPE_CHECKING
 from collections.abc import Collection
 import warnings
 
-
 import numpy as np
-
 
 from mikecore.eum import eumQuantity
 from mikecore.MeshBuilder import MeshBuilder
@@ -19,6 +18,9 @@ from ._common import (
     element_table_to_mikecore,
 )
 
+if TYPE_CHECKING:
+    from shapely.geometry import MultiPolygon
+
 
 class Mesh:
     """
@@ -28,6 +30,11 @@ class Mesh:
     ---------
     filename: str
         mesh filename
+
+    Attributes
+    ----------
+    geometry: GeometryFM2D
+        Flexible Mesh geometry
 
     Examples
     --------
@@ -41,10 +48,12 @@ class Mesh:
     """
 
     def __init__(self, filename: str | Path) -> None:
-        # Mesh used to be able to read dfsu files, but not anymore
         ext = Path(filename).suffix.lower()
 
-        if ext == ".dfsu":
+        if ext == ".mesh":
+            self.geometry: GeometryFM2D = self._read_header(filename)
+        elif ext == ".dfsu":
+            # TODO remove in v 1.8
             import mikeio
 
             warnings.warn(
@@ -52,8 +61,6 @@ class Mesh:
                 FutureWarning,
             )
             self.geometry = mikeio.open(str(filename)).geometry
-        elif ext == ".mesh":
-            self.geometry = self._read_header(filename)
 
         self.plot = self.geometry.plot
 
@@ -77,7 +84,7 @@ class Mesh:
 
     def __repr__(self) -> str:
         out = [
-            "Flexible Mesh",
+            "<Mesh>",
             f"number of elements: {self.n_elements}",
             f"number of nodes: {self.n_nodes}",
             f"projection: {self.geometry.projection_string}",
@@ -159,3 +166,21 @@ class Mesh:
 
     def plot_boundary_nodes(self, boundary_names=None, figsize=None, ax=None) -> None:
         return self.geometry.plot.boundary_nodes(boundary_names, figsize, ax)
+
+    def to_shapely(self) -> MultiPolygon:
+        """Convert Mesh geometry to shapely MultiPolygon
+
+        Returns
+        -------
+        MultiPolygon
+            mesh as shapely MultiPolygon
+
+        Examples
+        --------
+        >>> import mikeio
+        >>> msh = mikeio.read("tests/testdata/odense_rough.mesh")
+        >>> shp = msh.to_shapely()
+        >>> shp.area
+        0.5
+        """
+        return self.geometry.to_shapely()
