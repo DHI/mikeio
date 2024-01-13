@@ -41,7 +41,7 @@ class Mesh:
     >>> import mikeio
     >>> msh = mikeio.Mesh("tests/testdata/odense_rough.mesh")
     >>> msh
-    Flexible Mesh
+    <Mesh>
     number of elements: 654
     number of nodes: 399
     projection: UTM-33
@@ -185,9 +185,9 @@ class Mesh:
         Examples
         --------
         >>> import mikeio
-        >>> msh = mikeio.read("tests/testdata/odense_rough.mesh")
+        >>> msh = mikeio.open("tests/testdata/odense_rough.mesh")
         >>> shp = msh.to_shapely()
-        >>> shp.area
-        0.5
+        >>> shp
+        <MULTIPOLYGON (((216684.622 6157771.834, 216427.002 6157497.909, 216833.036 ...>
         """
         return self.geometry.to_shapely()
