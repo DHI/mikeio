@@ -148,7 +148,8 @@ class _Dfsu:
                 out.append(f"      {self._start_time} -- {self.end_time}")
         return str.join("\n", out)
 
-    def _read_header(self, input: DfsuFile | str | Path):
+    def _read_header(self, input: DfsuFile | str | Path) -> None:
+        # TODO set instance variables in __init__ instead of here
         if isinstance(input, DfsuFile):
             # input is a dfsu file object (already open)
             self._read_dfsu_header(input)
@@ -296,15 +297,6 @@ class _Dfsu:
     @property
     def geometry(self):
         return self._geometry
-
-    @property
-    def _geometry2d(self):
-        """The 2d geometry for a 3d object or geometry for a 2d object"""
-        if self.geometry.is_2d:
-            return self.geometry
-        if self._geom2d is None:
-            self._geom2d = self.geometry.to_2d_geometry()
-        return self._geom2d
 
     @property
     def n_nodes(self):
@@ -478,7 +470,7 @@ class _Dfsu:
         <mikeio.Grid2D>
             2d grid
         """
-        nc = self._geometry2d.node_coordinates
+        nc = self.geometry.geometry2d.node_coordinates
         bbox = xy_to_bbox(nc, buffer=buffer)
         return Grid2D(
             bbox=bbox,
@@ -525,12 +517,10 @@ class _Dfsu:
             )
         )
         if elements is None:
-            if self.is_2d:
-                geometry = self.geometry
-            else:
-                geometry = self._geometry2d
+            geometry = self.geometry.geometry2d
         else:
             # spatial subset
+            # TODO split subset and plot
             if self.is_2d:
                 geometry = self.geometry.elements_to_geometry(elements)
             else:
@@ -581,9 +571,6 @@ class _Dfsu:
         self._filename = str(filename)
         input = self._filename if dfs is None else dfs
         self._read_header(input)
-
-        # Caching
-        self._geom2d = None
 
     @property
     def deletevalue(self):
@@ -1173,14 +1160,7 @@ class _Dfsu:
         outfilename : str
             path to file to be written
         """
-        if self.is_2d:
-            # make sure element table has been constructured
-            _ = self.element_table
-            geometry = self.geometry
-        else:
-            geometry = self._geometry2d
-
-        geometry.to_mesh(outfilename)
+        self.geometry.geometry2d.to_mesh(outfilename)
 
 
 class Dfsu2DH(_Dfsu):

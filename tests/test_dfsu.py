@@ -144,7 +144,6 @@ def test_read_selected_item_names_returns_correct_items():
 
 
 def test_read_all_time_steps():
-
     filename = "tests/testdata/HD2D.dfsu"
     dfs = mikeio.open(filename)
 
@@ -155,7 +154,6 @@ def test_read_all_time_steps():
 
 
 def test_read_all_time_steps_without_reading_items():
-
     filename = "tests/testdata/HD2D.dfsu"
     dfs = mikeio.open(filename)
     assert isinstance(dfs.time, pd.DatetimeIndex)
@@ -163,7 +161,6 @@ def test_read_all_time_steps_without_reading_items():
 
 
 def test_read_item_range():
-
     filename = "tests/testdata/HD2D.dfsu"
     dfs = mikeio.open(filename)
 
@@ -174,7 +171,6 @@ def test_read_item_range():
 
 
 def test_read_all_time_steps_without_progressbar():
-
     Dfsu.show_progress = True
 
     filename = "tests/testdata/HD2D.dfsu"
@@ -188,7 +184,6 @@ def test_read_all_time_steps_without_progressbar():
 
 
 def test_read_single_time_step():
-
     filename = "tests/testdata/HD2D.dfsu"
     dfs = mikeio.open(filename)
 
@@ -200,7 +195,6 @@ def test_read_single_time_step():
 
 
 def test_read_single_time_step_scalar():
-
     filename = "tests/testdata/HD2D.dfsu"
     dfs = mikeio.open(filename)
 
@@ -211,17 +205,14 @@ def test_read_single_time_step_scalar():
 
 
 def test_read_single_time_step_outside_bounds_fails():
-
     filename = "tests/testdata/HD2D.dfsu"
     dfs = mikeio.open(filename)
 
     with pytest.raises(Exception):
-
         dfs.read(items=[0, 3], time=[100])
 
 
 def test_read_area():
-
     filename = "tests/testdata/FakeLake.dfsu"
     dfs = mikeio.open(filename)
 
@@ -231,7 +222,6 @@ def test_read_area():
 
 
 def test_read_area_polygon():
-
     polygon = [
         [7.78, 55.20],
         [7.03, 55.46],
@@ -273,7 +263,6 @@ def test_find_index_on_island():
 
 
 def test_read_area_single_element():
-
     filename = "tests/testdata/FakeLake.dfsu"
     dfs = mikeio.open(filename)
 
@@ -287,7 +276,6 @@ def test_read_area_single_element():
 
 
 def test_read_empty_area_fails():
-
     filename = "tests/testdata/FakeLake.dfsu"
     dfs = mikeio.open(filename)
 
@@ -446,7 +434,6 @@ def find_nearest_profile_elements():
 
 
 def test_read_and_select_single_element():
-
     filename = "tests/testdata/HD2D.dfsu"
     ds = mikeio.read(filename)
 
@@ -457,7 +444,6 @@ def test_read_and_select_single_element():
 
 
 def test_is_2d():
-
     filename = "tests/testdata/HD2D.dfsu"
     dfs = mikeio.open(filename)
 
@@ -511,7 +497,6 @@ def test_get_element_area_tri_quad():
 
 
 def test_write(tmp_path):
-
     fp = tmp_path / "simple.dfsu"
     meshfilename = "tests/testdata/odense_rough.mesh"
 
@@ -534,7 +519,6 @@ def test_write(tmp_path):
 
 
 def test_write_from_dfsu(tmp_path):
-
     sourcefilename = "tests/testdata/HD2D.dfsu"
     fp = tmp_path / "simple.dfsu"
     dfs = mikeio.open(sourcefilename)
@@ -577,7 +561,6 @@ def test_incremental_write_from_dfsu(tmp_path):
 
 
 def test_incremental_write_from_dfsu_context_manager(tmp_path):
-
     sourcefilename = "tests/testdata/HD2D.dfsu"
     fp = tmp_path / "simple.dfsu"
     dfs = mikeio.open(sourcefilename)
@@ -600,7 +583,6 @@ def test_incremental_write_from_dfsu_context_manager(tmp_path):
 
 
 def test_incremental_write_from_dfsu_context_manager_3d(tmp_path):
-
     sourcefilename = "tests/testdata/oresund_sigma_z.dfsu"
     fp = tmp_path / "3d.dfsu"
     dfs = mikeio.open(sourcefilename)
@@ -623,7 +605,6 @@ def test_incremental_write_from_dfsu_context_manager_3d(tmp_path):
 
 
 def test_write_big_file(tmp_path):
-
     fp = tmp_path / "big.dfsu"
     meshfilename = "tests/testdata/odense_rough.mesh"
 
@@ -667,7 +648,6 @@ def test_write_big_file(tmp_path):
 
 
 def test_write_from_dfsu_2_time_steps(tmp_path):
-
     sourcefilename = "tests/testdata/HD2D.dfsu"
     fp = tmp_path / "simple.dfsu"
     dfs = mikeio.open(sourcefilename)
@@ -685,7 +665,6 @@ def test_write_from_dfsu_2_time_steps(tmp_path):
 
 
 def test_write_non_equidistant_is_not_possible(tmp_path):
-
     sourcefilename = "tests/testdata/HD2D.dfsu"
     fp = tmp_path / "simple.dfsu"
     ds = mikeio.read(sourcefilename, time=[0, 1, 3])
@@ -695,7 +674,6 @@ def test_write_non_equidistant_is_not_possible(tmp_path):
 
 
 def test_temporal_resample_by_reading_selected_timesteps(tmp_path):
-
     sourcefilename = "tests/testdata/HD2D.dfsu"
     fp = tmp_path / "simple.dfsu"
     dfs = mikeio.open(sourcefilename)
@@ -711,7 +689,6 @@ def test_temporal_resample_by_reading_selected_timesteps(tmp_path):
 
 
 def test_read_temporal_subset():
-
     sourcefilename = "tests/testdata/HD2D.dfsu"
     dfs = mikeio.open(sourcefilename)
 
@@ -733,7 +710,6 @@ def test_read_temporal_subset():
 
 
 def test_read_temporal_subset_string():
-
     sourcefilename = "tests/testdata/HD2D.dfsu"
     dfs = mikeio.open(sourcefilename)
 
@@ -757,7 +733,6 @@ def test_read_temporal_subset_string():
 
 
 def test_write_temporal_subset(tmp_path):
-
     sourcefilename = "tests/testdata/HD2D.dfsu"
     fp = tmp_path / "simple.dfsu"
     dfs = mikeio.open(sourcefilename)
@@ -775,14 +750,17 @@ def test_write_temporal_subset(tmp_path):
 
 
 def test_geometry_2d():
-
     filename = "tests/testdata/oresund_sigma_z.dfsu"
 
     dfs = mikeio.open(filename)
 
-    geom = dfs.to_2d_geometry()
-
+    with pytest.warns(FutureWarning, match="geometry2d"):
+        geom = dfs.to_2d_geometry()
     assert geom.is_2d
+
+    g2 = dfs.geometry2d
+    assert g2.is_2d
+
 
 def test_to_mesh_2d(tmp_path):
     filename = "tests/testdata/HD2D.dfsu"
@@ -951,7 +929,6 @@ def test_e2_e3_table_2d_file():
 
 
 def test_dataset_write_dfsu(tmp_path):
-
     fp = tmp_path / "HD2D_start.dfsu"
     ds = mikeio.read("tests/testdata/HD2D.dfsu", time=[0, 1])
     ds.to_dfs(fp)
@@ -1006,7 +983,6 @@ def test_interp_like_grid():
 
 
 def test_interp_like_grid_time_invariant():
-
     ds = mikeio.read("tests/testdata/wind_north_sea.dfsu", time=-1)
     assert "time" not in ds.dims
     grid = ds.geometry.get_overset_grid(dx=0.1)
@@ -1026,7 +1002,6 @@ def test_interp_like_grid_time_invariant():
 
 
 def test_interp_like_dataarray(tmp_path):
-
     tmp_path / "interp.dfs2"
 
     da = mikeio.read("tests/testdata/consistency/oresundHD.dfsu")[0]
@@ -1046,7 +1021,6 @@ def test_interp_like_dataarray(tmp_path):
 
 
 def test_interp_like_dataset(tmp_path):
-
     fp = tmp_path / "interp.dfs2"
 
     ds = mikeio.read("tests/testdata/consistency/oresundHD.dfsu")
@@ -1121,15 +1095,13 @@ def test_write_header(tmp_path):
                 data.append(d)
                 f.append(data)
 
-def test_writing_non_equdistant_dfsu_is_not_possible(tmp_path):
 
+def test_writing_non_equdistant_dfsu_is_not_possible(tmp_path):
     ds = mikeio.read("tests/testdata/wind_north_sea.dfsu")
-    dss = ds.isel(time=[0,2,3])
+    dss = ds.isel(time=[0, 2, 3])
     assert not dss.is_equidistant
 
     # TODO which exception should be raised, when trying to write non-equidistant dfsu? This operation is not supported
     with pytest.raises(ValueError, match="equidistant"):
         fp = tmp_path / "not_gonna_work.dfsu"
         dss.to_dfs(fp)
-
-    

@@ -442,6 +442,11 @@ class GeometryFM2D(_GeometryFM):
         return 2
 
     @property
+    def geometry2d(self) -> GeometryFM2D:
+        """Return self"""
+        return self
+
+    @property
     def is_2d(self) -> bool:
         """Type is either mesh or Dfsu2D (2 horizontal dimensions)"""
         return self._type in (

@@ -1,6 +1,7 @@
 from __future__ import annotations
 from typing import Collection
 from functools import wraps
+import warnings
 
 import numpy as np
 from mikecore.DfsuFile import DfsuFile, DfsuFileType
@@ -342,12 +343,13 @@ class Dfsu2DV(DfsuLayered):
 class Dfsu3D(DfsuLayered):
     @wraps(GeometryFM3D.to_2d_geometry)
     def to_2d_geometry(self):
-        return self.geometry2d
+        warnings.warn("Deprecated. Use geometry2d instead", FutureWarning)
+        return self.geometry.geometry2d
 
     @property
     def geometry2d(self):
         """The 2d geometry for a 3d object"""
-        return self._geometry2d
+        return self.geometry.geometry2d
 
     def extract_surface_elevation_from_3d(self, filename=None, n_nearest=4):
         """
