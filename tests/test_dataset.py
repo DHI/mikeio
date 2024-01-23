@@ -41,7 +41,6 @@ def ds2():
 
 @pytest.fixture
 def ds3():
-
     nt = 100
     d1 = np.zeros([nt, 100, 30]) + 1.5
     d2 = np.zeros([nt, 100, 30]) + 2.0
@@ -55,7 +54,6 @@ def ds3():
 
 
 def test_create_wrong_data_type_error():
-
     data = ["item 1", "item 2"]
 
     nt = 2
@@ -66,7 +64,6 @@ def test_create_wrong_data_type_error():
 
 
 def test_get_names():
-
     nt = 100
     d = np.zeros([nt, 100, 30]) + 1.0
     time = pd.date_range(start=datetime(2000, 1, 1), freq="S", periods=nt)
@@ -104,7 +101,6 @@ def test_properties(ds1):
     assert isinstance(ds1.items[0], ItemInfo)
 
 
-
 def test_insert(ds1):
     da = ds1[0].copy()
     da.name = "Baz"
@@ -137,7 +133,6 @@ def test_remove(ds1):
 
 
 def test_index_with_attribute():
-
     nt = 10000
     d = np.zeros([nt, 100, 30]) + 1.0
     time = pd.date_range(start=datetime(2000, 1, 1), freq="S", periods=nt)
@@ -207,7 +202,6 @@ def test_getitem_multi_indexing_attempted(ds3):
 
 
 def test_select_subset_isel():
-
     nt = 100
     d1 = np.zeros([nt, 100, 30]) + 1.5
     d2 = np.zeros([nt, 100, 30]) + 2.0
@@ -245,7 +239,6 @@ def test_select_subset_isel():
 
 
 def test_select_subset_isel_axis_out_of_range_error(ds2):
-
     assert len(ds2.shape) == 2
     dss = ds2.isel(idx=0)
 
@@ -262,7 +255,6 @@ def test_isel_named_axis(ds2: mikeio.Dataset):
 
 
 def test_select_temporal_subset_by_idx():
-
     nt = 100
     d1 = np.zeros([nt, 100, 30]) + 1.5
     d2 = np.zeros([nt, 100, 30]) + 2.0
@@ -282,7 +274,6 @@ def test_select_temporal_subset_by_idx():
 
 
 def test_temporal_subset_fancy():
-
     nt = (24 * 31) + 1
     d1 = np.zeros([nt, 100, 30]) + 1.5
     d2 = np.zeros([nt, 100, 30]) + 2.0
@@ -431,7 +422,6 @@ def test_select_item_by_iteminfo():
 
 
 def test_select_subset_isel_multiple_idxs():
-
     nt = 100
     d1 = np.zeros([nt, 100, 30]) + 1.5
     d2 = np.zeros([nt, 100, 30]) + 2.0
@@ -457,7 +447,6 @@ def test_decribe(ds1):
 
 
 def test_create_undefined():
-
     nt = 100
     d1 = np.zeros([nt])
     d2 = np.zeros([nt])
@@ -479,7 +468,6 @@ def test_create_undefined():
 
 
 def test_create_named_undefined():
-
     nt = 100
     d1 = np.zeros([nt])
     d2 = np.zeros([nt])
@@ -496,7 +484,6 @@ def test_create_named_undefined():
 
 
 def test_to_dataframe_single_timestep():
-
     nt = 1
     d1 = np.zeros([nt])
     d2 = np.zeros([nt])
@@ -516,7 +503,6 @@ def test_to_dataframe_single_timestep():
 
 
 def test_to_dataframe():
-
     nt = 100
     d1 = np.zeros([nt])
     d2 = np.zeros([nt])
@@ -533,7 +519,6 @@ def test_to_dataframe():
 
 
 def test_to_pandas_single_item_dataset():
-
     da = mikeio.DataArray(
         data=np.zeros(5), time=pd.date_range("2000", freq="D", periods=5), item="Foo"
     )
@@ -546,7 +531,6 @@ def test_to_pandas_single_item_dataset():
 
 
 def test_multidimensional_to_dataframe_no_supported():
-
     nt = 100
     d1 = np.zeros([nt, 2])
 
@@ -559,7 +543,6 @@ def test_multidimensional_to_dataframe_no_supported():
 
 
 def test_get_data():
-
     data = []
     nt = 100
     d = np.zeros([nt, 100, 30]) + 1.0
@@ -572,7 +555,6 @@ def test_get_data():
 
 
 def test_interp_time():
-
     nt = 4
     d = np.zeros([nt, 10, 3])
     d[1] = 2.0
@@ -594,7 +576,6 @@ def test_interp_time():
 
 
 def test_interp_time_to_other_dataset():
-
     # Arrange
     ## mikeio.Dataset 1
     nt = 4
@@ -677,7 +658,6 @@ def test_extrapolate_not_allowed():
 
 
 def test_get_data_2():
-
     nt = 100
     data = []
     d = np.zeros([nt, 100, 30]) + 1.0
@@ -690,7 +670,6 @@ def test_get_data_2():
 
 
 def test_get_data_name():
-
     nt = 100
     data = []
     d = np.zeros([nt, 100, 30]) + 1.0
@@ -703,7 +682,6 @@ def test_get_data_name():
 
 
 def test_modify_selected_variable():
-
     nt = 100
 
     time = pd.date_range("2000-1-2", freq="H", periods=nt)
@@ -733,7 +711,6 @@ def test_get_bad_name():
 
 
 def test_flipud():
-
     nt = 2
     d = np.random.random([nt, 100, 30])
     time = pd.date_range("2000-1-2", freq="H", periods=nt)
@@ -798,7 +775,6 @@ def test_aggregations():
 
 
 def test_to_dfs_extension_validation(tmp_path):
-
     outfilename = tmp_path / "not_gonna_happen.dfs2"
 
     ds = mikeio.read(
@@ -881,7 +857,6 @@ def test_nanquantile():
 
 
 def test_aggregate_across_items():
-
     ds = mikeio.read("tests/testdata/State_wlbc_north_err.dfs1")
 
     dsm = ds.mean(axis="items")
@@ -890,7 +865,7 @@ def test_aggregate_across_items():
     assert dsm.geometry == ds.geometry
     assert dsm.dims == ds.dims
 
-    dsq = ds.quantile(q=[0.1,0.5,0.9], axis="items")
+    dsq = ds.quantile(q=[0.1, 0.5, 0.9], axis="items")
     assert isinstance(dsq, mikeio.Dataset)
     assert dsq[0].name == "Quantile 0.1"
     assert dsq[1].name == "Quantile 0.5"
@@ -900,12 +875,10 @@ def test_aggregate_across_items():
 
 
 def test_aggregate_selected_items_dfsu_save_to_new_file(tmp_path):
-
     ds = mikeio.read("tests/testdata/State_Area.dfsu", items="*Level*")
 
     assert ds.n_items == 5
 
-    
     dsm = ds.max(axis="items", name="Max Water Level")  # add a nice name
     assert len(dsm) == 1
     assert dsm[0].name == "Max Water Level"
@@ -963,14 +936,12 @@ def test_dropna():
 
 
 def test_default_type():
-
     item = ItemInfo("Foo")
     assert item.type == EUMType.Undefined
     assert repr(item.unit) == "undefined"
 
 
 def test_int_is_valid_type_info():
-
     item = ItemInfo("Foo", 100123)
     assert item.type == EUMType.Viscosity
 
@@ -979,7 +950,6 @@ def test_int_is_valid_type_info():
 
 
 def test_int_is_valid_unit_info():
-
     item = ItemInfo("U", 100002, 2000)
     assert item.type == EUMType.Wind_Velocity
     assert item.unit == EUMUnit.meter_per_sec
@@ -987,7 +957,6 @@ def test_int_is_valid_unit_info():
 
 
 def test_default_unit_from_type():
-
     item = ItemInfo("Foo", EUMType.Water_Level)
     assert item.type == EUMType.Water_Level
     assert item.unit == EUMUnit.meter
@@ -1005,7 +974,6 @@ def test_default_unit_from_type():
 
 
 def test_default_name_from_type():
-
     item = ItemInfo(EUMType.Current_Speed)
     assert item.name == "Current Speed"
     assert item.unit == EUMUnit.meter_per_sec
@@ -1020,14 +988,11 @@ def test_default_name_from_type():
 
 
 def test_iteminfo_string_type_should_fail_with_helpful_message():
-
     with pytest.raises(ValueError):
-
         ItemInfo("Water level", "Water level")
 
 
 def test_item_search():
-
     res = EUMType.search("level")
 
     assert len(res) > 0
@@ -1035,7 +1000,6 @@ def test_item_search():
 
 
 def test_dfsu3d_dataset():
-
     filename = "tests/testdata/oresund_sigma_z.dfsu"
 
     dfsu = mikeio.open(filename)
@@ -1064,7 +1028,6 @@ def test_dfsu3d_dataset():
 
 
 def test_items_data_mismatch():
-
     nt = 100
     d = np.zeros([nt, 100, 30]) + 1.0
     time = pd.date_range("2000-1-2", freq="H", periods=nt)
@@ -1075,7 +1038,6 @@ def test_items_data_mismatch():
 
 
 def test_time_data_mismatch():
-
     nt = 100
     d = np.zeros([nt, 100, 30]) + 1.0
     time = pd.date_range(
@@ -1136,7 +1098,6 @@ def test_create_empty_data():
 
 
 def test_create_infer_name_from_eum():
-
     nt = 100
     d = np.random.uniform(size=nt)
 
@@ -1160,8 +1121,25 @@ def test_add_scalar(ds1):
     assert np.all(ds3[1].to_numpy() == ds2[1].to_numpy())
 
 
-def test_add_inconsistent_dataset(ds1):
+def test_subtract_two_datasets(ds1):
+    ds2 = ds1.mean("time")
 
+    ds3 = ds1 - ds2
+    assert ds3.shape == ds1.shape
+
+
+def test_add_two_datasets(ds1):
+    ds2 = ds1.mean("time")
+
+    ds3 = ds1 + ds2
+    assert ds3.shape == ds1.shape
+
+    # + is commutative
+    ds4 = ds2 + ds1
+    assert ds4.shape == ds1.shape
+
+
+def test_add_inconsistent_dataset(ds1):
     ds2 = ds1[[0]]
 
     assert len(ds1) != len(ds2)
@@ -1174,13 +1152,11 @@ def test_add_inconsistent_dataset(ds1):
 
 
 def test_add_bad_value(ds1):
-
     with pytest.raises(TypeError):
         ds1 + ["one"]
 
 
 def test_multiple_bad_value(ds1):
-
     with pytest.raises(TypeError):
         ds1 * ["pi"]
 
@@ -1378,7 +1354,6 @@ def test_merge_by_item_dfsu_3d():
 
 
 def test_to_numpy(ds2):
-
     X = ds2.to_numpy()
 
     assert X.shape == (ds2.n_items,) + ds2.shape
@@ -1454,7 +1429,6 @@ def test_merge_same_name_error():
 
 
 def test_incompatible_data_not_allowed():
-
     da1 = mikeio.read("tests/testdata/HD2D.dfsu")[0]
     da2 = mikeio.read("tests/testdata/oresundHD_run1.dfsu")[1]
 
@@ -1537,7 +1511,6 @@ def test_create_dataset_with_many_items():
 
 
 def test_create_array_with_defaults_from_dataset():
-
     filename = "tests/testdata/oresund_sigma_z.dfsu"
     ds: mikeio.Dataset = mikeio.read(filename)
 
