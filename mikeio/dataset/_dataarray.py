@@ -1750,7 +1750,9 @@ class DataArray:
         new_da.values = data
         return new_da
 
-    def _apply_math_operation(self, other, func, txt="with") -> "DataArray":
+    def _apply_math_operation(
+        self, other: DataArray | float, func, txt="with"
+    ) -> "DataArray":
         """Apply a binary math operation with a scalar, an array or another DataArray"""
         try:
             other_values = other.values if hasattr(other, "values") else other
@@ -1760,8 +1762,16 @@ class DataArray:
 
         # TODO: check if geometry etc match if other is DataArray?
 
-        new_da = self.copy()  # TODO: alternatively: create new dataset (will validate)
-        new_da.values = data
+        # new_da = self.copy()  # TODO: alternatively: create new dataset (will validate)
+        # new_da.values = data
+
+        time = self.time
+        if isinstance(other, DataArray):
+            time = other.time if len(self.time) == 1 else self.time
+
+        new_da = DataArray(
+            data=data, time=time, geometry=self.geometry, item=self.item, zn=self._zn
+        )
 
         if not self._keep_EUM_after_math_operation(other, func):
             other_name = other.name if hasattr(other, "name") else "array"

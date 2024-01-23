@@ -1663,17 +1663,12 @@ class Dataset:
 
     def _add_dataset(self, other, sign=1.0) -> "Dataset":
         self._check_datasets_match(other)
-        try:
-            data = [
-                self[x].to_numpy() + sign * other[y].to_numpy()
-                for x, y in zip(self.items, other.items)
-            ]
-        except TypeError:
-            raise TypeError("Could not add data in Dataset")
-        newds = self.copy()
-        for j in range(len(self)):
-            newds[j].values = data[j]  # type: ignore
-        return newds
+        das = []
+        for da1, da2 in zip(self, other):
+            da = da1 + sign * da2
+            das.append(da)
+
+        return Dataset(das, validate=False)
 
     def _check_datasets_match(self, other: "Dataset") -> None:
         if self.n_items != other.n_items:
@@ -1689,10 +1684,9 @@ class Dataset:
                 raise ValueError(
                     f"Item units must match. Item {j}: {self.items[j].unit} != {other.items[j].unit}"
                 )
-        if not np.all(self.time == other.time):
-            raise ValueError("All timesteps must match")
-        if self.shape != other.shape:
-            raise ValueError("shape must match")
+        if len(self.time) > 1 and len(other.time) > 1:
+            if not np.all(self.time == other.time):
+                raise ValueError("All timesteps must match")
 
     def _add_value(self, value) -> "Dataset":
         try:
