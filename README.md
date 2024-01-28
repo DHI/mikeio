@@ -4,6 +4,7 @@
  ![Python version](https://img.shields.io/pypi/pyversions/mikeio.svg)
  [![Full test](https://github.com/DHI/mikeio/actions/workflows/full_test.yml/badge.svg)](https://github.com/DHI/mikeio/actions/workflows/full_test.yml)
 [![PyPI version](https://badge.fury.io/py/mikeio.svg)](https://badge.fury.io/py/mikeio)
+![OS](https://img.shields.io/badge/OS-Windows%20%7C%20Linux-blue)
 
 
 Read, write and manipulate dfs0, dfs1, dfs2, dfs3, dfsu and mesh files.
