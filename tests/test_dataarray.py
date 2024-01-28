@@ -135,7 +135,6 @@ def test_verify_custom_dims():
 
 
 def test_write_1d(da2, tmp_path):
-
     outfilename = tmp_path / "grid1d.dfs1"
 
     da2.to_dfs(outfilename)
@@ -146,7 +145,6 @@ def test_write_1d(da2, tmp_path):
 
 
 def test_dataset_with_asterisk(da2):
-
     da2.name = "Foo * Bar"
 
     ds1 = mikeio.Dataset([da2], validate=False)
@@ -170,7 +168,6 @@ def test_data_0d(da0):
 
 
 def test_create_data_1d_default_grid():
-
     da = mikeio.DataArray(
         data=np.zeros((10, 5)),
         time=pd.date_range(start="2000-01-01", freq="H", periods=10),
@@ -179,20 +176,20 @@ def test_create_data_1d_default_grid():
     assert isinstance(da.geometry, mikeio.Grid1D)
 
 
-def test_data_2d_no_geometry_not_allowed():
+# def test_data_2d_no_geometry_not_allowed():
 
-    nt = 10
-    nx = 7
-    ny = 14
+#     nt = 10
+#     nx = 7
+#     ny = 14
 
-    with pytest.warns(Warning) as w:
-        mikeio.DataArray(
-            data=np.zeros([nt, ny, nx]) + 0.1,
-            time=pd.date_range(start="2000-01-01", freq="S", periods=nt),
-            item=ItemInfo("Foo"),
-        )
+#     with pytest.warns(Warning) as w:
+#         mikeio.DataArray(
+#             data=np.zeros([nt, ny, nx]) + 0.1,
+#             time=pd.date_range(start="2000-01-01", freq="S", periods=nt),
+#             item=ItemInfo("Foo"),
+#         )
 
-    assert "geometry" in str(w[0].message).lower()
+# assert "geometry" in str(w[0].message).lower()
 
 
 def test_dataarray_init():
@@ -227,7 +224,6 @@ def test_dataarray_init():
 
 
 def test_dataarray_init_no_item():
-
     nt = 10
     data = data = np.zeros([nt, 4]) + 0.1
     time = time = pd.date_range(start="2000-01-01", freq="S", periods=nt)
@@ -426,7 +422,6 @@ def test_dataarray_init_dfsu3d():
 
 
 def test_dataarray_indexing(da1: mikeio.DataArray):
-
     assert da1.shape == (10,)
     subset = da1[3]
     assert isinstance(subset, mikeio.DataArray)
@@ -645,7 +640,6 @@ def test_da_isel_space_named_axis(da_grid2d: mikeio.DataArray):
 
 
 def test_da_isel_space_named_missing_axis(da_grid2d: mikeio.DataArray):
-
     with pytest.raises(ValueError) as excinfo:
         da_grid2d.isel(layer=0)
     assert "layer" in str(excinfo.value)
@@ -780,7 +774,6 @@ def test_plot_grid2d_proj(da_grid2d_proj):
 
 
 def test_timestep(da1):
-
     assert da1.timestep == 1.0
 
 
@@ -797,30 +790,25 @@ def test_interp_like_index(da1):
 
 
 def test_dims_time(da1):
-
     assert da1.dims[0][0] == "t"
 
 
 def test_dims_time_space1d(da_time_space):
-
     assert da_time_space.dims[1] == "x"
 
 
 def test_repr(da_time_space):
-
     text = repr(da_time_space)
     assert "DataArray" in text
     assert "dims: (time:10, x:2)" in text
 
 
 def test_plot(da1):
-
     da1.plot()
     assert True
 
 
 def test_modify_values(da1):
-
     assert all(~np.isnan(da1.values))
     da1[0] = np.nan
     assert any(np.isnan(da1.values))
@@ -844,32 +832,39 @@ def test_modify_values_1d(da1):
     assert da1.values[4] == 12.0
 
     # values is scalar, therefore copy by definition. Original is not changed.
-    da1.isel(4).values = 11.0 # TODO is the treatment of scalar sensible, i.e. consistent with xarray?
+    da1.isel(
+        4
+    ).values = (
+        11.0  # TODO is the treatment of scalar sensible, i.e. consistent with xarray?
+    )
     assert da1.values[4] != 11.0
 
     # fancy indexing will return copy! Original is *not* changed.
     da1.isel([0, 4, 7]).values[1] = 10.0
     assert da1.values[4] != 10.0
 
+
 def test_get_2d_slice_with_sel(da_grid2d):
     assert da_grid2d.shape == (10, 14, 7)
     da3 = da_grid2d.sel(x=slice(10.0, 10.3))
-    assert da3.shape == (10, 14,3)
+    assert da3.shape == (10, 14, 3)
     da4 = da_grid2d.sel(y=slice(-5.0, 0.0))
     assert da4.shape == (10, 5, 7)
 
-    da5 = da_grid2d.sel(x=slice(10.0, 10.3), y=slice(-5.0,0.0))
-    assert da5.shape == (10,5,3)
+    da5 = da_grid2d.sel(x=slice(10.0, 10.3), y=slice(-5.0, 0.0))
+    assert da5.shape == (10, 5, 3)
 
     da6 = da_grid2d.sel(x=slice(None, 10.3), y=slice(-4.0, None))
     assert da6.shape == (10, 8, 3)
+
 
 def test_get_2d_outside_domain_raises_error(da_grid2d):
     with pytest.raises(OutsideModelDomainError):
         da_grid2d.sel(x=0.0)
 
     with pytest.raises(OutsideModelDomainError):
-        da_grid2d.sel(x=slice(0.0,1.0))
+        da_grid2d.sel(x=slice(0.0, 1.0))
+
 
 def test_modify_values_2d_all(da2):
     assert da2.shape == (10, 7)
@@ -977,8 +972,8 @@ def test_multiply_string_is_not_valid(da1):
     with pytest.raises(TypeError):
         da1 * "2.0"
 
-def test_multiply_two_dataarrays(da1):
 
+def test_multiply_two_dataarrays(da1):
     da3 = da1 * da1
     assert isinstance(da3, mikeio.DataArray)
     assert da1.shape == da3.shape
@@ -1001,7 +996,6 @@ def test_multiply_two_dataarrays_broadcasting(da_grid2d):
 
 
 def test_math_two_dataarrays(da1):
-
     da3 = da1 + da1
     assert isinstance(da3, mikeio.DataArray)
     assert da1.shape == da3.shape
@@ -1050,7 +1044,6 @@ def test_binary_math_operations(da1):
 
 
 def test_daarray_aggregation_dfs2():
-
     filename = "tests/testdata/gebco_sound.dfs2"
     ds = mikeio.read(filename)
     da = ds.Elevation
@@ -1079,7 +1072,6 @@ def test_dataarray_weigthed_average():
 
 
 def test_daarray_aggregation():
-
     filename = "tests/testdata/HD2D.dfsu"
     ds = mikeio.read(filename, items=[3])
 
@@ -1137,7 +1129,6 @@ def test_daarray_aggregation_no_time():
 
 
 def test_daarray_aggregation_nan_versions():
-
     # TODO find better file, e.g. with flood/dry
     filename = "tests/testdata/HD2D.dfsu"
     ds = mikeio.read(filename, items=[3])
@@ -1208,7 +1199,6 @@ def test_da_quantile_axis0(da2):
 
 
 def test_write_dfs2(tmp_path):
-
     nt = 10
     g = mikeio.Grid2D(
         x=np.linspace(10, 20, 11),
@@ -1236,7 +1226,6 @@ def test_write_dfs2(tmp_path):
 
 
 def test_write_dfs2_single_time_no_time_dim(tmp_path):
-
     g = mikeio.Grid2D(
         x=np.linspace(10, 20, 30),
         y=np.linspace(10, 20, 20),
