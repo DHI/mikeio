@@ -1,6 +1,7 @@
 from __future__ import annotations
 import warnings
 from copy import deepcopy
+from pathlib import Path
 from datetime import datetime
 from functools import cached_property
 from typing import (
@@ -1562,7 +1563,7 @@ class DataArray:
         if isinstance(axis, int):
             axes = (axis,)
         else:
-            axes = axis
+            axes = axis  # type: ignore
 
         dims = tuple([d for i, d in enumerate(self.dims) if i not in axes])
 
@@ -1700,35 +1701,37 @@ class DataArray:
 
     # ============= MATH operations ===========
 
-    def __radd__(self, other) -> "DataArray":
+    def __radd__(self, other: "DataArray" | float) -> "DataArray":
         return self.__add__(other)
 
-    def __add__(self, other) -> "DataArray":
-        return self._apply_math_operation(other, np.add, "+")
+    def __add__(self, other: "DataArray" | float) -> "DataArray":
+        return self._apply_math_operation(other, np.add, txt="+")
 
-    def __rsub__(self, other) -> "DataArray":
+    def __rsub__(self, other: "DataArray" | float) -> "DataArray":
         return other + self.__neg__()
 
-    def __sub__(self, other) -> "DataArray":
-        return self._apply_math_operation(other, np.subtract, "-")
+    def __sub__(self, other: "DataArray" | float) -> "DataArray":
+        return self._apply_math_operation(other, np.subtract, txt="-")
 
-    def __rmul__(self, other) -> "DataArray":
+    def __rmul__(self, other: "DataArray" | float) -> "DataArray":
         return self.__mul__(other)
 
-    def __mul__(self, other) -> "DataArray":
-        return self._apply_math_operation(other, np.multiply, "x")  # x in place of *
+    def __mul__(self, other: "DataArray" | float) -> "DataArray":
+        return self._apply_math_operation(
+            other, np.multiply, txt="x"
+        )  # x in place of *
 
-    def __pow__(self, other) -> "DataArray":
-        return self._apply_math_operation(other, np.power, "**")
+    def __pow__(self, other: float) -> "DataArray":
+        return self._apply_math_operation(other, np.power, txt="**")
 
-    def __truediv__(self, other) -> "DataArray":
-        return self._apply_math_operation(other, np.divide, "/")
+    def __truediv__(self, other: "DataArray" | float) -> "DataArray":
+        return self._apply_math_operation(other, np.divide, txt="/")
 
-    def __floordiv__(self, other) -> "DataArray":
-        return self._apply_math_operation(other, np.floor_divide, "//")
+    def __floordiv__(self, other: "DataArray" | float) -> "DataArray":
+        return self._apply_math_operation(other, np.floor_divide, txt="//")
 
-    def __mod__(self, other) -> "DataArray":
-        return self._apply_math_operation(other, np.mod, "%")
+    def __mod__(self, other: float) -> "DataArray":
+        return self._apply_math_operation(other, np.mod, txt="%")
 
     def __neg__(self) -> "DataArray":
         return self._apply_unary_math_operation(np.negative)
@@ -1739,7 +1742,7 @@ class DataArray:
     def __abs__(self) -> "DataArray":
         return self._apply_unary_math_operation(np.abs)
 
-    def _apply_unary_math_operation(self, func) -> "DataArray":
+    def _apply_unary_math_operation(self, func: Callable) -> "DataArray":
         try:
             data = func(self.values)
 
@@ -1750,7 +1753,9 @@ class DataArray:
         new_da.values = data
         return new_da
 
-    def _apply_math_operation(self, other, func, txt="with") -> "DataArray":
+    def _apply_math_operation(
+        self, other: "DataArray" | float, func: Callable, *, txt: str
+    ) -> "DataArray":
         """Apply a binary math operation with a scalar, an array or another DataArray"""
         try:
             other_values = other.values if hasattr(other, "values") else other
@@ -1771,7 +1776,9 @@ class DataArray:
 
         return new_da
 
-    def _keep_EUM_after_math_operation(self, other, func) -> bool:
+    def _keep_EUM_after_math_operation(
+        self, other: "DataArray" | float, func: Callable
+    ) -> bool:
         """Does the math operation falsify the EUM?"""
         if hasattr(other, "shape") and hasattr(other, "ndim"):
             # other is array-like, so maybe we cannot keep EUM
@@ -1791,19 +1798,19 @@ class DataArray:
 
     # ============= Logical indexing ===========
 
-    def __lt__(self, other) -> "DataArray":
+    def __lt__(self, other) -> "DataArray":  # type: ignore
         bmask = self.values < self._other_to_values(other)
         return self._boolmask_to_new_DataArray(bmask)
 
-    def __gt__(self, other) -> "DataArray":
+    def __gt__(self, other) -> "DataArray":  # type: ignore
         bmask = self.values > self._other_to_values(other)
         return self._boolmask_to_new_DataArray(bmask)
 
-    def __le__(self, other) -> "DataArray":
+    def __le__(self, other) -> "DataArray":  # type: ignore
         bmask = self.values <= self._other_to_values(other)
         return self._boolmask_to_new_DataArray(bmask)
 
-    def __ge__(self, other) -> "DataArray":
+    def __ge__(self, other) -> "DataArray":  # type: ignore
         bmask = self.values >= self._other_to_values(other)
         return self._boolmask_to_new_DataArray(bmask)
 
@@ -1816,10 +1823,12 @@ class DataArray:
         return self._boolmask_to_new_DataArray(bmask)
 
     @staticmethod
-    def _other_to_values(other):
+    def _other_to_values(
+        other: "DataArray" | NDArray[np.floating],
+    ) -> NDArray[np.floating]:
         return other.values if isinstance(other, DataArray) else other
 
-    def _boolmask_to_new_DataArray(self, bmask) -> "DataArray":
+    def _boolmask_to_new_DataArray(self, bmask) -> "DataArray":  # type: ignore
         return DataArray(
             data=bmask,
             time=self.time,
@@ -1838,7 +1847,7 @@ class DataArray:
             {self.name: self}
         )  # Single-item Dataset (All info is contained in the DataArray, no need for additional info)
 
-    def to_dfs(self, filename, **kwargs: Any) -> None:
+    def to_dfs(self, filename: str | Path, **kwargs: Any) -> None:
         """Write data to a new dfs file
 
         Parameters
@@ -1999,7 +2008,10 @@ class DataArray:
         return time
 
     @staticmethod
-    def _get_time_idx_list(time: pd.DatetimeIndex, steps):
+    def _get_time_idx_list(
+        time: pd.DatetimeIndex,
+        steps: int | Iterable[int] | str | datetime | pd.DatetimeIndex | slice,
+    ) -> list[int] | slice:
         """Find list of idx in DatetimeIndex"""
 
         return _get_time_idx_list(time, steps)
@@ -2009,7 +2021,7 @@ class DataArray:
         return _n_selected_timesteps(time, k)
 
     @staticmethod
-    def _is_boolean_mask(x) -> bool:
+    def _is_boolean_mask(x: Any) -> bool:
         if hasattr(x, "dtype"):  # isinstance(x, (np.ndarray, DataArray)):
             return x.dtype == np.dtype("bool")
         return False
@@ -2021,14 +2033,16 @@ class DataArray:
         return data[mask]
 
     @staticmethod
-    def _set_by_boolean_mask(data: np.ndarray, mask: np.ndarray, value) -> None:
+    def _set_by_boolean_mask(
+        data: np.ndarray, mask: np.ndarray, value: np.ndarray
+    ) -> None:
         if data.shape != mask.shape:
             data[np.broadcast_to(mask, data.shape)] = value
         else:
             data[mask] = value
 
     @staticmethod
-    def _parse_time(time) -> pd.DatetimeIndex:
+    def _parse_time(time: Any) -> pd.DatetimeIndex:
         """Allow anything that we can create a DatetimeIndex from"""
         if time is None:
             time = [pd.Timestamp(2018, 1, 1)]  # TODO is this the correct epoch?
@@ -2048,7 +2062,11 @@ class DataArray:
         return index
 
     @staticmethod
-    def _parse_axis(data_shape, dims, axis) -> int | Tuple[int]:
+    def _parse_axis(
+        data_shape: Tuple[int, ...],
+        dims: Tuple[str, ...],
+        axis: int | Tuple[int, ...] | str | None,
+    ) -> int | Tuple[int, ...]:
         # TODO change to return tuple always
         # axis = 0 if axis == "time" else axis
         if (axis == "spatial") or (axis == "space"):
