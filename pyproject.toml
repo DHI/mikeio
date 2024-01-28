@@ -75,33 +75,6 @@ notebooks= [
 "Homepage" = "https://github.com/DHI/mikeio"
 "Bug Tracker" = "https://github.com/DHI/mikeio/issues"
 
-# mypy global options:
-
-[tool.mypy]
-python_version = "3.10"
-warn_return_any = false
-allow_redefinition = true
-warn_unreachable = true
-
-
-[[tool.mypy.overrides]]
-module = ["mikeio.spatial", "mikeio.dataset"]
-warn_return_any = true
-
-[[tool.mypy.overrides]]
-module = [
-    "mikecore.*",
-    "pandas.*",
-    "matplotlib.*",
-    "shapely.*",
-    "mpl_toolkits.*",
-    "scipy.*",
-    "tqdm.*",
-    "yaml.*"
-]
-
-ignore_missing_imports = true
-
 
 [tool.ruff]
 
