@@ -941,8 +941,6 @@ class _Dfsu:
                 "argument dt is deprecated, please supply data in the form of a Dataset",
                 FutureWarning,
             )
-        if keep_open and not dt:
-            warnings.warn("argument dt missing, should be provided when keep_open=True")
 
         filename = str(filename)
 

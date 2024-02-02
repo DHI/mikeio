@@ -37,7 +37,7 @@ class DfsuSpectral(_Dfsu):
         dims = [] if n_steps == 1 else ["time"]
         n_freq = self.n_frequencies
         n_dir = self.n_directions
-        shape: Tuple[int,...] = (n_dir, n_freq)
+        shape: Tuple[int, ...] = (n_dir, n_freq)
         if n_dir == 0:
             shape = (n_freq,)
         elif n_freq == 0:
