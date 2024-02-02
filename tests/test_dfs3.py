@@ -31,11 +31,11 @@ def test_dfs3_geometry():
 def test_dfs_to_xarray():
     ds = mikeio.read("tests/testdata/test_dfs3.dfs3")
     xr_ds = ds.to_xarray()
-    assert xr_ds.dims["time"] == 2
+    assert xr_ds.sizes["time"] == 2
 
     ds_1d = ds.isel(z=0).isel(y=0)
     xr_ds_1d = ds_1d.to_xarray()
-    assert xr_ds_1d.dims["time"] == 2
+    assert xr_ds_1d.sizes["time"] == 2
 
 
 def test_dfs3_read():
