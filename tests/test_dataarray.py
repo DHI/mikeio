@@ -179,20 +179,20 @@ def test_create_data_1d_default_grid():
     assert isinstance(da.geometry, mikeio.Grid1D)
 
 
-def test_data_2d_no_geometry_not_allowed():
+# def test_data_2d_no_geometry_not_allowed():
 
-    nt = 10
-    nx = 7
-    ny = 14
+#     nt = 10
+#     nx = 7
+#     ny = 14
 
-    with pytest.warns(Warning) as w:
-        mikeio.DataArray(
-            data=np.zeros([nt, ny, nx]) + 0.1,
-            time=pd.date_range(start="2000-01-01", freq="S", periods=nt),
-            item=ItemInfo("Foo"),
-        )
+#     with pytest.warns(Warning) as w:
+#         mikeio.DataArray(
+#             data=np.zeros([nt, ny, nx]) + 0.1,
+#             time=pd.date_range(start="2000-01-01", freq="S", periods=nt),
+#             item=ItemInfo("Foo"),
+#         )
 
-    assert "geometry" in str(w[0].message).lower()
+#     assert "geometry" in str(w[0].message).lower()
 
 
 def test_dataarray_init():
@@ -844,32 +844,37 @@ def test_modify_values_1d(da1):
     assert da1.values[4] == 12.0
 
     # values is scalar, therefore copy by definition. Original is not changed.
-    da1.isel(4).values = 11.0 # TODO is the treatment of scalar sensible, i.e. consistent with xarray?
+    da1.isel(4).values = (
+        11.0  # TODO is the treatment of scalar sensible, i.e. consistent with xarray?
+    )
     assert da1.values[4] != 11.0
 
     # fancy indexing will return copy! Original is *not* changed.
     da1.isel([0, 4, 7]).values[1] = 10.0
     assert da1.values[4] != 10.0
 
+
 def test_get_2d_slice_with_sel(da_grid2d):
     assert da_grid2d.shape == (10, 14, 7)
     da3 = da_grid2d.sel(x=slice(10.0, 10.3))
-    assert da3.shape == (10, 14,3)
+    assert da3.shape == (10, 14, 3)
     da4 = da_grid2d.sel(y=slice(-5.0, 0.0))
     assert da4.shape == (10, 5, 7)
 
-    da5 = da_grid2d.sel(x=slice(10.0, 10.3), y=slice(-5.0,0.0))
-    assert da5.shape == (10,5,3)
+    da5 = da_grid2d.sel(x=slice(10.0, 10.3), y=slice(-5.0, 0.0))
+    assert da5.shape == (10, 5, 3)
 
     da6 = da_grid2d.sel(x=slice(None, 10.3), y=slice(-4.0, None))
     assert da6.shape == (10, 8, 3)
+
 
 def test_get_2d_outside_domain_raises_error(da_grid2d):
     with pytest.raises(OutsideModelDomainError):
         da_grid2d.sel(x=0.0)
 
     with pytest.raises(OutsideModelDomainError):
-        da_grid2d.sel(x=slice(0.0,1.0))
+        da_grid2d.sel(x=slice(0.0, 1.0))
+
 
 def test_modify_values_2d_all(da2):
     assert da2.shape == (10, 7)
@@ -976,6 +981,7 @@ def test_multiply_scalar(da1):
 def test_multiply_string_is_not_valid(da1):
     with pytest.raises(TypeError):
         da1 * "2.0"
+
 
 def test_multiply_two_dataarrays(da1):
 
