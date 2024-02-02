@@ -84,7 +84,7 @@ def _write_dfs0(filename, dataset: Dataset, title="", dtype=DfsSimpleType.Float)
 
 
 class Dfs0:
-    def __init__(self, filename:str | Path):
+    def __init__(self, filename: str | Path):
         """Create a Dfs0 object for reading, writing
 
         Parameters
@@ -148,7 +148,7 @@ class Dfs0:
         -------
         Dataset
             A Dataset with data dimensions [t]
-        """        
+        """
         path = Path(self._filename)
         if not path.exists():
             raise FileNotFoundError(f"File {path} not found")
@@ -244,7 +244,15 @@ class Dfs0:
         raise TypeError("Dfs files only support float or double")
 
     @staticmethod
-    def _setup_header(title:str, filename:str, start_time, dt:float, is_equidistant: bool, dtype, items: Sequence[ItemInfo]):
+    def _setup_header(
+        title: str,
+        filename: str,
+        start_time,
+        dt: float,
+        is_equidistant: bool,
+        dtype,
+        items: Sequence[ItemInfo],
+    ):
         factory = DfsFactory()
         builder = DfsBuilder.Create(title, "mikeio", __dfs_version__)
         builder.SetDataType(1)
@@ -375,15 +383,14 @@ class Dfs0:
             self._dt = float(self._dt)
             t_seconds = self._dt * np.arange(float(self._n_timesteps))
 
-        
         dfs = self._setup_header(
             title=self._title,
-            filename=self._filename, 
-            dt = self._dt,
-            start_time = self._start_time,
-            is_equidistant = self._is_equidistant,
+            filename=self._filename,
+            dt=self._dt,
+            start_time=self._start_time,
+            is_equidistant=self._is_equidistant,
             dtype=self._dtype,
-            items=self._items
+            items=self._items,
         )
 
         delete_value = dfs.FileInfo.DeleteValueFloat
@@ -471,7 +478,7 @@ class Dfs0:
 
     @cached_property
     def end_time(self):
-        
+
         if self._source.FileInfo.TimeAxis.IsEquidistant():
             dt = self._source.FileInfo.TimeAxis.TimeStep
             n_steps = self._source.FileInfo.TimeAxis.NumberOfTimeSteps
@@ -568,7 +575,10 @@ def dataframe_to_dfs0(
             else:
                 items = [ItemInfo(name, itemtype, unit) for name in self.columns]
 
-    das = {item.name: DataArray(data=d, item=item, time=self.index) for d, item in zip(data, items)}
+    das = {
+        item.name: DataArray(data=d, item=item, time=self.index)
+        for d, item in zip(data, items)
+    }
     ds = Dataset(das)
     _write_dfs0(filename=filename, dataset=ds, title=title, dtype=dtype)
 

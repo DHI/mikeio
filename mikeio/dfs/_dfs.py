@@ -705,7 +705,7 @@ class _Dfs123:
         if not self._is_equidistant:
             raise NotImplementedError("Not implemented for non-equidistant files")
         return pd.date_range(
-            start=self.start_time, periods=self.n_timesteps, freq=f"{self.timestep}S"
+            start=self.start_time, periods=self.n_timesteps, freq=f"{self.timestep}s"
         )
 
     @property

@@ -619,13 +619,11 @@ class Dataset:
             delattr(self, name)
 
     @overload
-    def __getitem__(self, key: Hashable | int) -> DataArray:
-        ...
+    def __getitem__(self, key: Hashable | int) -> DataArray: ...
 
     # Mapping is Iterable
     @overload
-    def __getitem__(self, key: Iterable[Hashable]) -> "Dataset":
-        ...
+    def __getitem__(self, key: Iterable[Hashable]) -> "Dataset": ...
 
     def __getitem__(self, key) -> DataArray | "Dataset":
         # select time steps
