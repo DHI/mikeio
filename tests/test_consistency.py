@@ -427,8 +427,8 @@ def test_read_dfs_time_selection_str_slice():
     extensions = ["dfs0", "dfs2", "dfs1", "dfs0"]
     for ext in extensions:
         filename = f"tests/testdata/consistency/oresundHD.{ext}"
-        
-        time = slice("2018-03-08","2018-03-10")
+
+        time = slice("2018-03-08", "2018-03-10")
         ds = mikeio.read(filename=filename)
         dssel = ds.sel(time=time)
         assert dssel.n_timesteps == 3
@@ -580,3 +580,39 @@ def test_concat_dfsu3d_single_timesteps_generic_vs_dataset(tmp_path):
     assert ds3.end_time == ds4.end_time
     assert ds3.n_items == ds4.n_items
     assert ds3.n_timesteps == ds4.n_timesteps
+
+
+def test_da_from_dfsu():
+    ds = mikeio.read("tests/testdata/consistency/oresundHD.dfsu")
+
+    da = ds["Surface elevation"]
+    assert da.name == "Surface elevation"
+    assert da.item.type == mikeio.EUMType.Surface_Elevation
+
+    dfs = mikeio.open("tests/testdata/consistency/oresundHD.dfsu")
+    da = dfs["Surface elevation"]
+    assert da.item.type == mikeio.EUMType.Surface_Elevation
+
+
+def test_da_from_dfsu3d():
+    ds = mikeio.read("tests/testdata/oresund_sigma_z.dfsu")
+
+    da = ds["Salinity"]
+    assert da.name == "Salinity"
+    assert da.item.type == mikeio.EUMType.Salinity
+
+    dfs = mikeio.open("tests/testdata/oresund_sigma_z.dfsu")
+    da = dfs["Salinity"]
+    assert da.item.type == mikeio.EUMType.Salinity
+
+
+def test_da_from_dfs2():
+    ds = mikeio.read("tests/testdata/consistency/oresundHD.dfs2")
+
+    da = ds["Surface elevation"]
+    assert da.name == "Surface elevation"
+    assert da.item.type == mikeio.EUMType.Surface_Elevation
+
+    dfs = mikeio.open("tests/testdata/consistency/oresundHD.dfs2")
+    da = dfs["Surface elevation"]
+    assert da.item.type == mikeio.EUMType.Surface_Elevation

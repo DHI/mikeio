@@ -20,7 +20,7 @@ from mikecore.DfsFileFactory import DfsFileFactory
 from mikecore.eum import eumQuantity
 from mikecore.Projections import Cartography
 
-from ..dataset import Dataset
+from ..dataset import Dataset, DataArray
 from ..eum import EUMType, EUMUnit, ItemInfo, ItemInfoList, TimeStepUnit
 from ..exceptions import DataDimensionMismatch, ItemsError
 from ..spatial import GeometryUndefined
@@ -673,6 +673,9 @@ class _Dfs123:
     def items(self):
         "List of items"
         return self._items
+
+    def __getitem__(self, key: int | str) -> DataArray:
+        return self.read(items=key)[key]
 
     @property
     def start_time(self):

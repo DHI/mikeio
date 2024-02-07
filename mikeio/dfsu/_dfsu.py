@@ -658,6 +658,10 @@ class _Dfsu(_UnstructuredFile):
         """List of items"""
         return self._items
 
+    def __getitem__(self, key: int | str) -> DataArray:
+        # TODO add _Dfsu.read() method
+        return self.read(items=key)[key]  # type: ignore
+
     @property
     def start_time(self):
         """File start time"""
