@@ -8,7 +8,6 @@ from shutil import copyfile
 from typing import Iterable, List, Sequence, Tuple, Union
 
 import numpy as np
-from numpy.typing import NDArray
 import pandas as pd
 from mikecore.DfsBuilder import DfsBuilder
 from mikecore.DfsFile import (
@@ -908,7 +907,7 @@ def quantile(
     dfs_o.Close()
 
 
-def _read_item(dfs: DfsFile, item: int, timestep: int) -> NDArray[np.float64]:
+def _read_item(dfs: DfsFile, item: int, timestep: int) -> np.ndarray:
     """Read item data from dfs file
 
     Parameters
