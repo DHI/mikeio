@@ -1819,8 +1819,8 @@ class DataArray:
 
     @staticmethod
     def _other_to_values(
-        other: "DataArray" | NDArray[np.floating],
-    ) -> NDArray[np.floating]:
+        other: "DataArray" | np.ndarray,
+    ) -> np.ndarray:
         return other.values if isinstance(other, DataArray) else other
 
     def _boolmask_to_new_DataArray(self, bmask) -> "DataArray":  # type: ignore
