@@ -25,7 +25,7 @@ from ..eum import TimeStepUnit
 from ..spatial import Grid3D
 
 
-def write_dfs3(filename: str| Path, ds: Dataset, title="") -> None:
+def write_dfs3(filename: str | Path, ds: Dataset, title="") -> None:
     dfs = _write_dfs3_header(filename, ds, title)
     _write_dfs_data(dfs=dfs, ds=ds, n_spatial_dims=3)
 
@@ -141,7 +141,6 @@ class Dfs3(_Dfs123):
 
     def __repr__(self):
         out = ["<mikeio.Dfs3>"]
-
 
         if self._filename:
             out.append(f"geometry: {self.geometry}")

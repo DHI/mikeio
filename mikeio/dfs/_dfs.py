@@ -704,6 +704,8 @@ class _Dfs123:
         # this will fail if the TimeAxisType is not calendar and equidistant, but that is ok
         if not self._is_equidistant:
             raise NotImplementedError("Not implemented for non-equidistant files")
+
+        # TODO using 'S' works in Python 3.8, but is deprecated, 's' doesn't work in 3.8
         return pd.date_range(
             start=self.start_time, periods=self.n_timesteps, freq=f"{self.timestep}S"
         )

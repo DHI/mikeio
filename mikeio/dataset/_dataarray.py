@@ -21,7 +21,6 @@ from typing import (
 
 
 import numpy as np
-from numpy.typing import NDArray, ArrayLike, DTypeLike
 import pandas as pd
 from mikecore.DfsuFile import DfsuFileType
 
@@ -139,12 +138,12 @@ class DataArray:
 
     def __init__(
         self,
-        data: NDArray[np.floating],
+        data: np.ndarray,
         *,
         time: pd.DatetimeIndex | str | None = None,
         item: ItemInfo | None = None,
         geometry: GeometryType = GeometryUndefined(),
-        zn: NDArray[np.floating] | None = None,
+        zn: np.ndarray | None = None,
         dims: Sequence[str] | None = None,
     ) -> None:
         # TODO: add optional validation validate=True
@@ -161,14 +160,14 @@ class DataArray:
         self.plot = self._get_plotter_by_geometry()
 
     @staticmethod
-    def _parse_data(data: ArrayLike) -> Any:  # NDArray[np.floating] | float:
+    def _parse_data(data: Any) -> Any:  # np.ndarray | float:
         validation_errors = []
         for p in ("shape", "ndim", "dtype"):
             if not hasattr(data, p):
                 validation_errors.append(p)
         if len(validation_errors) > 0:
             raise TypeError(
-                "Data must be ArrayLike, e.g. numpy array, but it lacks properties: "
+                "Data must be np.ndarray, e.g. numpy array, but it lacks properties: "
                 + ", ".join(validation_errors)
             )
         return data
@@ -308,8 +307,8 @@ class DataArray:
 
     @staticmethod
     def _parse_zn(
-        zn: NDArray[np.floating] | None, geometry: GeometryType, n_timesteps: int
-    ) -> NDArray[np.floating] | None:
+        zn: np.ndarray | None, geometry: GeometryType, n_timesteps: int
+    ) -> np.ndarray | None:
         if zn is not None:
             if isinstance(geometry, _GeometryFMLayered):
                 # TODO: np.squeeze(zn) if n_timesteps=1 ?
@@ -461,17 +460,17 @@ class DataArray:
         return self.values.ndim
 
     @property
-    def dtype(self) -> DTypeLike:
+    def dtype(self) -> Any:
         """Data-type of the array elements"""
         return self.values.dtype
 
     @property
-    def values(self) -> NDArray[np.floating]:
+    def values(self) -> np.ndarray:
         """Values as a np.ndarray (equivalent to to_numpy())"""
         return self._values
 
     @values.setter
-    def values(self, value: NDArray[np.floating] | float) -> None:
+    def values(self, value: np.ndarray | float) -> None:
         if np.isscalar(self._values):
             if not np.isscalar(value):
                 raise ValueError("Shape of new data is wrong (should be scalar)")
@@ -480,7 +479,7 @@ class DataArray:
 
         self._values = value  # type: ignore
 
-    def to_numpy(self) -> NDArray[np.floating]:
+    def to_numpy(self) -> np.ndarray:
         """Values as a np.ndarray (equivalent to values)"""
         return self._values
 
@@ -603,7 +602,7 @@ class DataArray:
             )
         return key
 
-    def __setitem__(self, key: Any, value: NDArray[np.floating]) -> None:
+    def __setitem__(self, key: Any, value: np.ndarray) -> None:
         if self._is_boolean_mask(key):
             mask = key if isinstance(key, np.ndarray) else key.values
             return self._set_by_boolean_mask(self._values, mask, value)
@@ -1069,7 +1068,7 @@ class DataArray:
 
     def __dataarray_read_item_time_func(
         self, item: int, step: int
-    ) -> Tuple[NDArray[np.floating], float]:
+    ) -> Tuple[np.ndarray, float]:
         "Used by _extract_track"
         # Ignore item argument
         data = self.isel(time=step).to_numpy()
@@ -1081,7 +1080,7 @@ class DataArray:
         self,
         track: pd.DataFrame,
         method: Literal["nearest", "inverse_distance"] = "nearest",
-        dtype: DTypeLike = np.float32,
+        dtype: Any = np.float32,
     ) -> "Dataset":
         """
         Extract data along a moving track
@@ -1424,7 +1423,7 @@ class DataArray:
         return self.aggregate(axis=axis, func=np.ptp, **kwargs)
 
     def average(
-        self, weights: NDArray[np.floating], axis: int | str = 0, **kwargs: Any
+        self, weights: np.ndarray, axis: int | str = 0, **kwargs: Any
     ) -> "DataArray":
         """Compute the weighted average along the specified axis.
 
@@ -1593,12 +1592,10 @@ class DataArray:
         )
 
     @overload
-    def quantile(self, q: float, **kwargs: Any) -> "DataArray":
-        ...
+    def quantile(self, q: float, **kwargs: Any) -> "DataArray": ...
 
     @overload
-    def quantile(self, q: Sequence[float], **kwargs: Any) -> "Dataset":
-        ...
+    def quantile(self, q: Sequence[float], **kwargs: Any) -> "Dataset": ...
 
     def quantile(
         self, q: float | Sequence[float], *, axis: int | str = 0, **kwargs: Any
@@ -1633,12 +1630,10 @@ class DataArray:
         return self._quantile(q, axis=axis, func=np.quantile, **kwargs)
 
     @overload
-    def nanquantile(self, q: float, **kwargs: Any) -> "DataArray":
-        ...
+    def nanquantile(self, q: float, **kwargs: Any) -> "DataArray": ...
 
     @overload
-    def nanquantile(self, q: Sequence[float], **kwargs: Any) -> "Dataset":
-        ...
+    def nanquantile(self, q: Sequence[float], **kwargs: Any) -> "Dataset": ...
 
     def nanquantile(
         self, q: float | Sequence[float], *, axis: int | str = 0, **kwargs: Any

@@ -651,18 +651,18 @@ def test_incremental_write_from_dfs2(tmp_path):
 
     ds = dfs.read(time=[0], keepdims=True)
     # assert ds.timestep == dfs.timestep, # ds.timestep is undefined
-    
+
     # TODO find a better way to do this, without having to create a new dfs2 object
     dfs_to_write = Dfs2()
-    
+
     with pytest.warns(FutureWarning):
         dfs_to_write.write(fp, ds, dt=dfs.timestep, keep_open=True)
 
     for i in range(1, nt):
         ds = dfs.read(time=[i], keepdims=True)
-        
+
         with pytest.warns(FutureWarning):
-            dfs_to_write.append(ds) 
+            dfs_to_write.append(ds)
 
     dfs_to_write.close()
 
@@ -683,7 +683,7 @@ def test_incremental_write_from_dfs2_context_manager(tmp_path):
     ds = dfs.read(time=[0], keepdims=True)
 
     dfs_to_write = Dfs2()
-    
+
     with pytest.warns(FutureWarning):
         with dfs_to_write.write(fp, ds, dt=dfs.timestep, keep_open=True) as f:
 
@@ -881,6 +881,6 @@ def test_read_dfs2_static_dt_zero():
 
     with pytest.warns(UserWarning, match="positive"):
         ds2 = mikeio.read("tests/testdata/single_time_dt_zero.dfs2", time=0)
-    
-    assert ds2.shape == (2,2)
+
+    assert ds2.shape == (2, 2)
     assert "time" not in ds2.dims
