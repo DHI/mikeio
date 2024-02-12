@@ -20,9 +20,9 @@ from typing import Sequence
 # 'X.Y.dev0' is the canonical version of 'X.Y.dev'
 #
 
-__version__ = "1.7.dev1"  # TODO use git hash instead for dev version?
+__version__ = "1.7.0"  # TODO use git hash instead for dev version?
 # __version__ = "1.5.0"
-__dfs_version__: int = 160
+__dfs_version__: int = 170
 
 
 if "64" not in architecture()[0]:
@@ -48,7 +48,7 @@ from .xyz import read_xyz
 def read(
     filename: str | Path,
     *,
-    items: str | int | Sequence[str |int] | None = None,
+    items: str | int | Sequence[str | int] | None = None,
     time: int | str | slice | None = None,
     keepdims: bool = False,
     **kwargs,
