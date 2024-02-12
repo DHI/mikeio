@@ -14,7 +14,7 @@ test:
 	pytest --disable-warnings
 
 typecheck:
-	mypy $(LIB)/ --config-file pyproject.toml
+	mypy $(LIB)/
 
 coverage: 
 	pytest --cov-report html --cov=$(LIB) tests/
