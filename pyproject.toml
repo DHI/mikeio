@@ -7,7 +7,7 @@ exclude = ["notebooks", "tests", "images"]
 
 [project]
 name="mikeio"
-version="1.8.dev0"
+version="1.7.1"
 dependencies = [
     "mikecore>=0.2.1",
     "numpy>=1.22.0",
