@@ -7,11 +7,12 @@ exclude = ["notebooks", "tests", "images"]
 
 [project]
 name="mikeio"
-version="1.8.dev0"
+version="1.7.1"
 dependencies = [
     "mikecore>=0.2.1",
     "numpy>=1.22.0",
     "pandas>=1.3",
+    "matplotlib>=3.6.0",
     "scipy>=1.0",
     "PyYAML",
     "tqdm",
@@ -50,12 +51,11 @@ dev = ["pytest",
        "pyproj",
        "xarray",
        "netcdf4",
-       "matplotlib",
        "ruff",
        "mypy==1.6.1",
        ]
 
-test = ["pytest", "pytest-cov", "matplotlib!=3.5.0", "xarray","mypy==1.6.1","shapely","pyproj"]
+test = ["pytest", "pytest-cov", "xarray","mypy==1.6.1","shapely","pyproj"]
 
 notebooks= [
             "nbformat",
