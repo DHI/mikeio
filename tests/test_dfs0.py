@@ -584,3 +584,15 @@ def test_non_equidistant_time_can_read_correctly_with_open(tmp_path):
     ds = dfs.read()
 
     assert all(dfs.time == ds.time)
+
+
+def test_locations_in_item_name_to_xarray():
+
+    ds = mikeio.read("tests/testdata/sw_points.dfs0")
+    assert ds.n_timesteps == 11
+
+    xr_ds = ds.to_xarray(add_location_dim=True)
+    assert xr_ds.sizes["time"] == 11
+    assert xr_ds["Sign. Wave Height"].sel(location="Buoy 2").values[0] == pytest.approx(
+        2.09833
+    )

@@ -90,9 +90,11 @@ class Dataset:
 
     def __init__(
         self,
-        data: Mapping[str, DataArray]
-        | Sequence[DataArray]
-        | Sequence[NDArray[np.floating]],
+        data: (
+            Mapping[str, DataArray]
+            | Sequence[DataArray]
+            | Sequence[NDArray[np.floating]]
+        ),
         time: pd.DatetimeIndex | None = None,
         items: Sequence[ItemInfo] | None = None,
         geometry: Any = None,
@@ -1883,11 +1885,37 @@ class Dataset:
 
         _write_dfsu(filename, self)
 
-    def to_xarray(self) -> "xarray.Dataset":
-        """Export to xarray.Dataset"""
+    def to_xarray(self, add_location_dim: bool = False) -> "xarray.Dataset":
+        """Export to xarray.Dataset
+
+        Parameters
+        ----------
+        add_location_dim: bool, optional
+            If True, add a location dimension to the dataset, by default False
+        """
         import xarray
 
-        data = {da.name: da.to_xarray() for da in self}
+        if add_location_dim:
+            item_names = [item.name.split(":") for item in self.items]
+            if not all(len(item) == 2 for item in item_names):
+                raise ValueError(
+                    "All items must have a location and variable name separated by ':'."
+                )
+            locations, variables = zip(*item_names)
+            locations = list(set([loc.strip() for loc in locations]))
+            variables = list(set([var.strip() for var in variables]))
+
+            data = {}
+            for var in variables:
+                var_items = [f"{loc}: {var}" for loc in locations]
+                var_data = np.array([self[item].to_numpy() for item in var_items])
+                data[var] = xarray.DataArray(
+                    var_data,
+                    dims=("location", "time"),
+                    coords=[locations, self.time],
+                )
+        else:
+            data = {da.name: da.to_xarray() for da in self}
         return xarray.Dataset(data)
 
     # ===============================================
