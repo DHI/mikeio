@@ -1,7 +1,8 @@
 from __future__ import annotations
 from datetime import datetime
 import re
-from typing import Iterable, Sized,  List
+from typing import List
+from collections.abc import Iterable, Sized
 
 import pandas as pd
 
@@ -19,7 +20,10 @@ def _n_selected_timesteps(x: Sized, k: slice | Sized) -> int:
     return len(k)
 
 
-def _get_time_idx_list(time: pd.DatetimeIndex, steps: int | Iterable[int] | str | datetime | pd.DatetimeIndex | slice) -> List[int] | slice:
+def _get_time_idx_list(
+    time: pd.DatetimeIndex,
+    steps: int | Iterable[int] | str | datetime | pd.DatetimeIndex | slice,
+) -> List[int] | slice:
     """Find list of idx in DatetimeIndex"""
 
     # indexing with a slice needs to be handled differently, since slicing returns a view
@@ -30,9 +34,3 @@ def _get_time_idx_list(time: pd.DatetimeIndex, steps: int | Iterable[int] | str 
 
     dts = DateTimeSelector(time)
     return dts.isel(steps)
-
-
-
-
-
-

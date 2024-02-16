@@ -5,7 +5,9 @@ import pathlib
 from copy import deepcopy
 from datetime import datetime, timedelta
 from shutil import copyfile
-from typing import Iterable, List, Sequence, Tuple, Union
+from collections.abc import Iterable, Sequence
+from typing import Union, List, Tuple
+
 
 import numpy as np
 import pandas as pd
