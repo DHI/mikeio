@@ -1,5 +1,6 @@
 from __future__ import annotations
-from typing import Sequence, Tuple, Literal
+from collections.abc import Sequence
+from typing import Literal, Tuple
 import numpy as np
 from matplotlib.axes import Axes
 from matplotlib.projections.polar import PolarAxes

@@ -4,20 +4,14 @@ from copy import deepcopy
 from pathlib import Path
 from datetime import datetime
 from functools import cached_property
-from typing import (
-    Any,
+from collections.abc import (
     Iterable,
-    Sequence,
-    Tuple,
-    Mapping,
-    Union,
     Sized,
-    Literal,
-    TYPE_CHECKING,
-    overload,
+    Sequence,
+    Mapping,
     MutableMapping,
-    Callable,
 )
+from typing import Any, Union, Literal, TYPE_CHECKING, overload, Callable, Tuple
 
 
 import numpy as np
