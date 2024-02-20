@@ -27,6 +27,7 @@ from tqdm import tqdm, trange
 from . import __dfs_version__
 from .dfs._dfs import _get_item_info, _valid_item_numbers
 from .eum import ItemInfo
+import mikeio
 
 
 TimeAxis = Union[
@@ -449,6 +450,13 @@ def concat(
 
     The list of input files have to be sorted, i.e. in chronological order
     """
+    # fast path for Dfs0
+    suffix = pathlib.Path(infilenames[0]).suffix
+    if suffix == ".dfs0":
+        dss = [mikeio.read(f) for f in infilenames]
+        ds = mikeio.Dataset.concat(dss, keep=keep)  # type: ignore
+        ds.to_dfs(outfilename)
+        return
 
     dfs_i_a = DfsFileFactory.DfsGenericOpen(str(infilenames[0]))
 
