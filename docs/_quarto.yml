@@ -54,11 +54,13 @@ quartodoc:
   style: pkgdown
   dir: api
   package: mikeio
+  options:
+    include_inherited: true
   renderer:
     style: markdown
     display_name: relative
 
-  sidebar: "_sidebar.yml"
+  #sidebar: "_sidebar.yml"
 
   sections:
     - title: Main
@@ -80,6 +82,10 @@ quartodoc:
         - Grid2D
         - Grid3D
         - Mesh
+        - spatial.GeometryFM2D
+        - spatial.GeometryFM3D
+        - spatial.GeometryFMVerticalProfile
+        - spatial.GeometryFMVerticalColumn
     - title: EUM
       desc: ""
       contents:
@@ -94,6 +100,7 @@ quartodoc:
         - Dfs2
         - Dfs3
         - Dfsu
+        - dfsu.Dfsu2DH
     - title: Pfs
       desc: ""
       contents:
