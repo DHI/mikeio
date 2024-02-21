@@ -161,22 +161,4 @@ Other methods that also return a DataArray:
 * [`to_dfs()`](DataArray.to_dfs) - Write DataArray to a Dfs file
 
 
-## DataArray API
-
-```{eval-rst}
-.. autoclass:: mikeio.DataArray
-	:members:
-```
-
-
-
-## DataArray Plotter API
-
-A DataArray `da` can be plotted using `da.plot`. 
-
-```{eval-rst}
-.. autoclass:: mikeio.dataset._data_plot._DataArrayPlotter
-	:members:
-```
-
 

@@ -127,11 +127,14 @@ def test_insert_fail(ds1):
 
 
 def test_remove(ds1):
-    ds1.remove(-1)
+    # deprecated
+    with pytest.warns(FutureWarning):
+        ds1.remove(-1)
     assert len(ds1) == 1
     assert ds1.names == ["Foo"]
 
-    ds1.remove("Foo")
+    with pytest.raises(ValueError):
+        ds1.remove("Foo")
     assert len(ds1) == 0
 
 

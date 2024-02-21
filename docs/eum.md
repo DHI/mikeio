@@ -48,10 +48,3 @@ It is also possible to do a string based search, e.g. to find all EUM types cont
 [Wave period, Return period, Update Period, Threshold period]
 ```
 
-
-## EUM API
-
-```{eval-rst}
-.. automodule:: mikeio.eum
-	:members:
-```

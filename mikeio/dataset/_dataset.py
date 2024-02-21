@@ -90,9 +90,11 @@ class Dataset:
 
     def __init__(
         self,
-        data: Mapping[str, DataArray]
-        | Sequence[DataArray]
-        | Sequence[NDArray[np.floating]],
+        data: (
+            Mapping[str, DataArray]
+            | Sequence[DataArray]
+            | Sequence[NDArray[np.floating]]
+        ),
         time: pd.DatetimeIndex | None = None,
         items: Sequence[ItemInfo] | None = None,
         geometry: Any = None,
@@ -578,6 +580,8 @@ class Dataset:
         --------
         pop
         """
+        # deprecated
+        warnings.warn("Dataset.remove is deprecated", FutureWarning)
         self.__delitem__(key)
 
     def rename(self, mapper: Mapping[str, str], inplace: bool = False) -> "Dataset":

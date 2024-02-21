@@ -178,19 +178,3 @@ Other methods that also return a Dataset:
 
 
 
-## Dataset API
-
-```{eval-rst}
-.. autoclass:: mikeio.Dataset
-	:members:
-```
-
-
-## Dataset Plotter API
-
-```{eval-rst}
-.. autoclass:: mikeio.dataset._data_plot._DatasetPlotter
-	:members:
-```
-
-

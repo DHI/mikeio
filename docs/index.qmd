@@ -1,5 +1,5 @@
 
-![](../images/logo/SVG/MIKE-IO-Logo-Pos-RGB.svg)
+![](MIKE-IO-Logo-Pos-RGB.svg)
 
 # MIKE IO: input/output of MIKE files in Python
  ![Python version](https://img.shields.io/pypi/pyversions/mikeio.svg)
@@ -33,36 +33,8 @@ $ pip install mikeio
 Read more in the [getting started guide](getting-started).
 
 
-Where can I get help?
----------------------
+## Where can I get help?
 
 * New ideas and feature requests - [GitHub Discussions](https://github.com/DHI/mikeio/discussions)
 * Bugs - [GitHub Issues](https://github.com/DHI/mikeio/issues)
 
-```{eval-rst}
-.. toctree::
-   :maxdepth: 1
-   :caption: Contents:
-   :hidden:
-
-   getting-started
-   design
-   data-structures
-   dataset
-   dataarray
-   dfs-overview
-   dfs0
-   dfs1
-   dfs2
-   dfs3
-   dfsu-mesh-overview
-   mesh
-   dfsu-2d
-   dfsu-3d
-   dfsu-1dv-vertical-column
-   dfsu-2dv-vertical-profile
-   dfsu-spectral
-   eum
-   pfs
-   generic
-```

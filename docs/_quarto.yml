@@ -1,0 +1,108 @@
+project:
+  type: website
+
+website:
+  title: "MIKE IO"
+  page-footer: "© 2024 DHI Group"
+  repo-url: https://github.com/DHI/mikeio
+  repo-actions: [edit]
+  repo-subdir: docs
+  page-navigation: true
+  
+  navbar:
+    tools:
+    - icon: github
+      menu:
+      - text: Source Code
+        url:  https://github.com/DHI/mikeio
+      - text: Report a Bug
+        url:  https://github.com/DHI/mikeio/issues
+    left:
+      - href: index.qmd
+        text: Home
+      - href: api/index.qmd
+        text: API Reference 
+    
+  sidebar:
+    style: docked
+    search: true
+    contents: 
+      - section: "User Guide"
+        href: index.qmd
+        contents:
+        - getting-started.md 
+        - data-structures.md
+        - dataarray.md
+        - dataset.md
+        - eum.md
+        - generic.md
+        - pfs.md
+        
+
+      
+filters:
+  - interlinks
+interlinks:
+  sources:
+      xarray: 
+        url: https://xarray.pydata.org/en/stable/
+      pandas: 
+        url: https://pandas.pydata.org/docs/
+
+
+quartodoc:
+  style: pkgdown
+  dir: api
+  package: mikeio
+  renderer:
+    style: markdown
+    display_name: relative
+
+  sidebar: "_sidebar.yml"
+
+  sections:
+    - title: Main
+      desc: ""
+      contents:
+        - open
+        - read
+        - read_pfs
+        - read_xyz
+    - title: Dataset
+      desc: ""
+      contents:
+        - DataArray
+        - Dataset
+    - title: Geometry
+      desc: ""
+      contents:
+        - Grid1D
+        - Grid2D
+        - Grid3D
+        - Mesh
+    - title: EUM
+      desc: ""
+      contents:
+        - ItemInfo
+        - EUMType
+        - EUMUnit
+    - title: Dfs
+      desc: ""
+      contents:
+        - Dfs0
+        - Dfs1
+        - Dfs2
+        - Dfs3
+        - Dfsu
+    - title: Pfs
+      desc: ""
+      contents:
+        - Pfs
+        - PfsDocument
+        - PfsSection
+
+    
+format:
+  html:
+    theme: cosmo
+    toc: true

@@ -24,7 +24,7 @@ cov_html
 cov_annotate
 htmlcov
 
-docs/_build
+docs/_site
 \tmp
 .venv/
 
