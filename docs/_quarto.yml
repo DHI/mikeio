@@ -8,6 +8,7 @@ website:
   repo-actions: [edit]
   repo-subdir: docs
   page-navigation: true
+  bread-crumbs: false # I can\'t get this to work properly, disabled for now
   
   navbar:
     tools:
@@ -20,6 +21,8 @@ website:
     left:
       - href: index.qmd
         text: Home
+      - href: examples/index.qmd
+        text: Examples
       - href: api/index.qmd
         text: API Reference 
     
@@ -30,7 +33,7 @@ website:
       - section: "User Guide"
         href: index.qmd
         contents:
-        - getting-started.md 
+        - getting-started.qmd 
         - data-structures.md
         - dataarray.md
         - dataset.md
@@ -44,6 +47,8 @@ filters:
   - interlinks
 interlinks:
   sources:
+      numpy: 
+        url: https://numpy.org/doc/stable/
       xarray: 
         url: https://xarray.pydata.org/en/stable/
       pandas: 
@@ -75,6 +80,11 @@ quartodoc:
       contents:
         - DataArray
         - Dataset
+        - dataset._data_plot._DataArrayPlotter # TODO alias?
+        - dataset._data_plot._DataArrayPlotterGrid1D
+        - dataset._data_plot._DataArrayPlotterGrid2D
+        - dataset._data_plot._DataArrayPlotterFM
+        - dataset._data_plot._DataArrayPlotterFMVerticalProfile
     - title: Geometry
       desc: ""
       contents:
@@ -86,6 +96,13 @@ quartodoc:
         - spatial.GeometryFM3D
         - spatial.GeometryFMVerticalProfile
         - spatial.GeometryFMVerticalColumn
+        
+    - title: Spectra
+      desc: ""
+      contents:
+        - spatial.GeometryFMPointSpectrum
+        - spatial.GeometryFMLineSpectrum
+        - spatial.GeometryFMAreaSpectrum
     - title: EUM
       desc: ""
       contents:
@@ -101,10 +118,13 @@ quartodoc:
         - Dfs3
         - Dfsu
         - dfsu.Dfsu2DH
+    - title: Generic
+      desc: ""
+      contents:
+        - generic
     - title: Pfs
       desc: ""
       contents:
-        - Pfs
         - PfsDocument
         - PfsSection
 

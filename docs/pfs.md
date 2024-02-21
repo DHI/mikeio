@@ -184,20 +184,3 @@ Multiple targets can be achieved by providing list of dictionaries.
 
 
 
-
-## PfsDocument API
-
-```{eval-rst}
-.. autofunction:: mikeio.read_pfs
-.. autoclass:: mikeio.PfsDocument
-	:members:
-	:inherited-members:
-```
-
-## PfsSection API
-
-```{eval-rst}
-.. autoclass:: mikeio.PfsSection
-	:members:
-	:inherited-members:
-```

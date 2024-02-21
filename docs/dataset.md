@@ -1,13 +1,13 @@
 # Dataset
 
-The [Dataset](mikeio.Dataset) is the MIKE IO data structure 
+The [Dataset](`mikeio.Dataset`) is the MIKE IO data structure 
 for data from dfs files. 
-The {py:meth}`mikeio.read` methods returns a Dataset as a container of [DataArrays](mikeio.DataArray) (Dfs items). Each DataArray has the properties, *item*, *time*, *geometry* and *values*. The time and geometry are common to all DataArrays in the Dataset. 
+The [](`mikeio.read`) methods returns a Dataset as a container of [DataArray](`mikeio.DataArray`) (Dfs items). Each DataArray has the properties, *item*, *time*, *geometry* and *values*. The time and geometry are common to all DataArrays in the Dataset. 
 
 The Dataset has the following primary properties: 
 
-* **items** - a list of {py:class}`mikeio.eum.ItemInfo` items for each dataarray
-* **time** - a {py:class}`pandas.DatetimeIndex` with the time instances of the data
+* **items** - a list of [](`mikeio.eum.ItemInfo`) items for each dataarray
+* **time** - a [](`pandas.DatetimeIndex`) with the time instances of the data
 * **geometry** - a Geometry object with the spatial description of the data
 
 
@@ -136,23 +136,23 @@ The Dataset (and DataArray) has several properties:
 Dataset (and DataArray) has several useful methods for working with data, 
 including different ways of *selecting* data:
 
-* [`sel()`](Dataset.sel) - Select subset along an axis
-* [`isel()`](Dataset.isel) - Select subset along an axis with an integer
+* [`sel()`](`mikeio.Dataset.sel`) - Select subset along an axis
+* [`isel()`](`mikeio.Dataset.isel`) - Select subset along an axis with an integer
 
 *Aggregations* along an axis:
 
-* [`mean()`](Dataset.mean) - Mean value along an axis
-* [`nanmean()`](Dataset.nanmean) - Mean value along an axis (NaN removed)
-* [`max()`](Dataset.max) - Max value along an axis
-* [`nanmax()`](Dataset.nanmax) - Max value along an axis (NaN removed)
-* [`min()`](Dataset.min) - Min value along an axis
-* [`nanmin()`](Dataset.nanmin) - Min value along an axis (NaN removed)
-* [`average()`](Dataset.average) - Compute the weighted average along the specified axis.
-* [`aggregate()`](Dataset.aggregate) - Aggregate along an axis
-* [`quantile()`](Dataset.quantile) - Quantiles along an axis
-* [`nanquantile()`](Dataset.nanquantile) - Quantiles along an axis (NaN ignored)
+* [`mean()`](`mikeio.Dataset.mean`) - Mean value along an axis
+* [`nanmean()`](`mikeio.Dataset.nanmean`) - Mean value along an axis (NaN removed)
+* [`max()`](`mikeio.Dataset.max`) - Max value along an axis
+* [`nanmax()`](`mikeio.Dataset.nanmax`) - Max value along an axis (NaN removed)
+* [`min()`](`mikeio.Dataset.min`) - Min value along an axis
+* [`nanmin()`](`mikeio.Dataset.nanmin`) - Min value along an axis (NaN removed)
+* [`average()`](`mikeio.Dataset.average`) - Compute the weighted average along the specified axis.
+* [`aggregate()`](`mikeio.Dataset.aggregate`) - Aggregate along an axis
+* [`quantile()`](`mikeio.Dataset.quantile`) - Quantiles along an axis
+* [`nanquantile()`](`mikeio.Dataset.nanquantile`) - Quantiles along an axis (NaN ignored)
 
-*Mathematical operations* +, - and * with numerical values:
+### Mathematical operations
 
 * ds + value
 * ds - value
@@ -165,16 +165,16 @@ and + and - between two Datasets (if number of items and shapes conform):
 
 Other methods that also return a Dataset:
 
-* [`interp_like`](Dataset.interp_like) - Spatio (temporal) interpolation (see [Dfsu interpolation notebook](https://nbviewer.jupyter.org/github/DHI/mikeio/blob/main/notebooks/Dfsu%20-%202D%20interpolation.ipynb))
-* [`interp_time()`](Dataset.interp_time) - Temporal interpolation (see [Time interpolation notebook](https://nbviewer.jupyter.org/github/DHI/mikeio/blob/main/notebooks/Time%20interpolation.ipynb))
-* [`dropna()`](Dataset.dropna) - Remove time steps where all items are NaN
-* [`squeeze()`](Dataset.squeeze) - Remove axes of length 1
+* [`interp_like`](`mikeio.Dataset.interp_like) - Spatio (temporal) interpolation (see [Dfsu interpolation notebook](https://nbviewer.jupyter.org/github/DHI/mikeio/blob/main/notebooks/Dfsu%20-%202D%20interpolation.ipynb))
+* [`interp_time()`](`mikeio.Dataset.interp_time) - Temporal interpolation (see [Time interpolation notebook](https://nbviewer.jupyter.org/github/DHI/mikeio/blob/main/notebooks/Time%20interpolation.ipynb))
+* [`dropna()`](`mikeio.Dataset.dropna) - Remove time steps where all items are NaN
+* [`squeeze()`](`mikeio.Dataset.squeeze) - Remove axes of length 1
 
-*Conversion* methods:
+### Conversion:
 
-* [`to_dataframe()`](Dataset.to_dataframe) - Convert Dataset to a {py:class}`pandas.DataFrame`
-* [`to_xarray()`](Dataset.to_xarray) - Convert Dataset to a {py:class}`xarray.Dataset` (great for Dfs2)
-* [`to_dfs()`](Dataset.to_dfs) - Write Dataset to a Dfs file
+* [`to_dataframe()`](`mikeio.Dataset.to_dataframe) - Convert Dataset to a {py:class}`pandas.DataFrame`
+* [`to_xarray()`](`mikeio.Dataset.to_xarray) - Convert Dataset to a {py:class}`xarray.Dataset` (great for Dfs2)
+* [`to_dfs()`](`mikeio.Dataset.to_dfs) - Write Dataset to a Dfs file
 
 
 

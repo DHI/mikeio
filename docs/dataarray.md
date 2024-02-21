@@ -1,14 +1,15 @@
 # DataArray
 
-The [DataArray](mikeio.DataArray) is the common MIKE IO data structure 
+The [DataArray](`mikeio.DataArray`) is the common MIKE IO data structure 
 for *item* data from dfs files. 
-The {py:meth}`mikeio.read` methods returns a Dataset as a container of DataArrays (Dfs items)
+The [](`mikeio.read`) methods returns a Dataset as a container of DataArrays (Dfs items)
 
 Each DataArray have the following properties:
-* **item** - an  {py:class}`mikeio.eum.ItemInfo` with name, type and unit
-* **time** - a {py:class}`pandas.DatetimeIndex` with the time instances of the data
+
+* **item** - an  [](`mikeio.ItemInfo`) with name, type and unit
+* **time** - a [](`pandas.DatetimeIndex`) with the time instances of the data
 * **geometry** - a Geometry object with the spatial description of the data
-* **values** - a {py:class}`numpy.ndarray`
+* **values** - a [](`numpy.ndarray`)
 
 Use DataArray's string representation to get an overview of the DataArray
 
@@ -47,8 +48,8 @@ geometry: Dfsu2D (884 elements, 529 nodes)
 ```
 
 ## Spatial selection
-
-The `sel` method finds the nearest element.
+             
+The [`sel`](`mikeio.`mikeio.DataArray.sel`) method finds the nearest element.
 
 ```python
 >>> da.sel(x=607002, y=6906734)
@@ -62,7 +63,7 @@ values: [0.4591, 0.8078, ..., -0.6311]
 
 ## Modifying values
 
-You can modify the values of a DataArray by changing its `values`: 
+You can modify the values of a DataArray by changing its [`values`](`mikeio.`mikeio.DataArray.values`): 
 
 ```python
 >>> da.values[0, 3] = 5.0
@@ -98,7 +99,7 @@ The plotting of a DataArray is context-aware meaning that plotting behaviour dep
 >>> da.plot.mesh()
 ```
 
-See details in the [API specification](mikeio.dataset._data_plot._DataArrayPlotter) below and in the bottom of the relevant pages e.g. [DataArray Plotter Grid2D API](dfs2.md#dataarray-plotter-grid2d-api) on the dfs2 page.
+See details in the [API specification](`mikeio.dataset._data_plot._DataArrayPlotter`) below and in the bottom of the relevant pages e.g. [DataArray Plotter Grid2D API](`mikeio.dataset._data_plot._DataArrayPlotterGrid2D`).
 
 
 
@@ -123,22 +124,21 @@ The DataArray has several properties:
 DataArray has several useful methods for working with data, 
 including different ways of *selecting* data:
 
-* [`sel()`](DataArray.sel) - Select subset along an axis
-* [`isel()`](DataArray.isel) - Select subset along an axis with an integer
+* [`sel()`](`mikeio.DataArray.sel`) - Select subset along an axis
+* [`isel()`](`mikeio.DataArray.isel`) - Select subset along an axis with an integer
 
-*Aggregations* along an axis:
+###  Aggregations along an axis
 
-* [`mean()`](DataArray.mean) - Mean value along an axis
-* [`nanmean()`](DataArray.nanmean) - Mean value along an axis (NaN removed)
-* [`max()`](DataArray.max) - Max value along an axis
-* [`nanmax()`](DataArray.nanmax) - Max value along an axis (NaN removed)
-* [`min()`](DataArray.min) - Min value along an axis
-* [`nanmin()`](DataArray.nanmin) - Min value along an axis (NaN removed)
-* [`aggregate()`](DataArray.aggregate) - Aggregate along an axis
-* [`quantile()`](DataArray.quantile) - Quantiles along an axis
+* [`mean()`](`mikeio.DataArray.mean`) - Mean value along an axis
+* [`nanmean()`](`mikeio.DataArray.nanmean`) - Mean value along an axis (NaN removed)
+* [`max()`](`mikeio.DataArray.max`) - Max value along an axis
+* [`nanmax()`](`mikeio.DataArray.nanmax`) - Max value along an axis (NaN removed)
+* [`min()`](`mikeio.DataArray.min`) - Min value along an axis
+* [`nanmin()`](`mikeio.DataArray.nanmin`) - Min value along an axis (NaN removed)
+* [`aggregate()`](`mikeio.DataArray.aggregate`) - Aggregate along an axis
+* [`quantile()`](`mikeio.DataArray.quantile`) - Quantiles along an axis
 
-*Mathematical operations* +, - and * with numerical values:
-
+### Mathematical operations
 * ds + value
 * ds - value
 * ds * value
@@ -150,15 +150,15 @@ and + and - between two DataArrays (if number of items and shapes conform):
 
 Other methods that also return a DataArray:
 
-* [`interp_like`](DataArray.interp_like) - Spatio (temporal) interpolation (see [Dfsu interpolation notebook](https://nbviewer.jupyter.org/github/DHI/mikeio/blob/main/notebooks/Dfsu%20-%202D%20interpolation.ipynb))
-* [`interp_time()`](DataArray.interp_time) - Temporal interpolation (see [Time interpolation notebook](https://nbviewer.jupyter.org/github/DHI/mikeio/blob/main/notebooks/Time%20interpolation.ipynb))
-* [`dropna()`](DataArray.dropna) - Remove time steps where all items are NaN
-* [`squeeze()`](DataArray.squeeze) - Remove axes of length 1
+* [`interp_like`](`mikeio.DataArray.interp_like`) - Spatio (temporal) interpolation (see example [Dfsu interpolation](examples/Dfsu-2D-interpolation.qmd))
+* [`interp_time()`](`mikeio.DataArray.interp_time) - Temporal interpolation (see example [Time interpolation](examples/Time-interpolation.qmd))
+* [`dropna()`](`mikeio.DataArray.dropna`) - Remove time steps where all items are NaN
+* [`squeeze()`](`mikeio.DataArray.squeeze) - Remove axes of length 1
 
-*Conversion* methods:
+### Conversion:
 
-* [`to_xarray()`](DataArray.to_xarray) - Convert DataArray to a xarray DataArray (great for Dfs2)
-* [`to_dfs()`](DataArray.to_dfs) - Write DataArray to a Dfs file
+* [`to_xarray()`](`mikeio.DataArray.to_xarray`) - Convert DataArray to a xarray DataArray (great for Dfs2)
+* [`to_dfs()`](`mikeio.DataArray.to_dfs`) - Write DataArray to a Dfs file
 
 
 
