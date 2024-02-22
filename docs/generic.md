@@ -21,11 +21,5 @@ All methods in the generic module creates a new dfs file.
 
 ## Generic example notebooks
 
-See the [Generic notebook](https://nbviewer.jupyter.org/github/DHI/mikeio/blob/main/notebooks/Generic.ipynb) for more examples.
+See the [Generic notebook](examples/Generic.qmd) for more examples.
 
-## Generic API
-
-```{eval-rst}
-.. automodule:: mikeio.generic
-	:members:
-```

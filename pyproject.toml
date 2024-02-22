@@ -44,9 +44,8 @@ classifiers = [
 [project.optional-dependencies]
 dev = ["pytest",
        "black==22.3.0",
-       "sphinx",
-       "sphinx-rtd-theme",
-       "myst-parser",
+       "quarto-cli",
+       "quartodoc@git+https://github.com/machow/quartodoc#d4140b4f804ebc6ec249699d52e3efa62cf53127",
        "shapely",
        "pyproj",
        "xarray",

@@ -37,6 +37,9 @@ website:
         - data-structures.md
         - dataarray.md
         - dataset.md
+        - dfs0.qmd
+        - dfs1.qmd
+        - dfs2.qmd
         - eum.md
         - generic.md
         - pfs.md
@@ -96,6 +99,7 @@ quartodoc:
         - spatial.GeometryFM3D
         - spatial.GeometryFMVerticalProfile
         - spatial.GeometryFMVerticalColumn
+        - spatial._FM_geometry._GeometryFMPlotter
         
     - title: Spectra
       desc: ""

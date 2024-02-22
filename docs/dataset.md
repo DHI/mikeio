@@ -165,16 +165,16 @@ and + and - between two Datasets (if number of items and shapes conform):
 
 Other methods that also return a Dataset:
 
-* [`interp_like`](`mikeio.Dataset.interp_like) - Spatio (temporal) interpolation (see [Dfsu interpolation notebook](https://nbviewer.jupyter.org/github/DHI/mikeio/blob/main/notebooks/Dfsu%20-%202D%20interpolation.ipynb))
-* [`interp_time()`](`mikeio.Dataset.interp_time) - Temporal interpolation (see [Time interpolation notebook](https://nbviewer.jupyter.org/github/DHI/mikeio/blob/main/notebooks/Time%20interpolation.ipynb))
-* [`dropna()`](`mikeio.Dataset.dropna) - Remove time steps where all items are NaN
-* [`squeeze()`](`mikeio.Dataset.squeeze) - Remove axes of length 1
+* [`interp_like`](`mikeio.Dataset.interp_like`) - Spatio (temporal) interpolation (see [Dfsu interpolation notebook](examples/Dfsu-2D-interpolation.qmd))
+* [`interp_time()`](`mikeio.Dataset.interp_time`) - Temporal interpolation (see [Time interpolation notebook](examples/Time-interpolation.qmd))
+* [`dropna()`](`mikeio.Dataset.dropna`) - Remove time steps where all items are NaN
+* [`squeeze()`](`mikeio.Dataset.squeeze`) - Remove axes of length 1
 
 ### Conversion:
 
-* [`to_dataframe()`](`mikeio.Dataset.to_dataframe) - Convert Dataset to a {py:class}`pandas.DataFrame`
-* [`to_xarray()`](`mikeio.Dataset.to_xarray) - Convert Dataset to a {py:class}`xarray.Dataset` (great for Dfs2)
-* [`to_dfs()`](`mikeio.Dataset.to_dfs) - Write Dataset to a Dfs file
+* [`to_dataframe()`](`mikeio.Dataset.to_dataframe`) - Convert Dataset to a [](`pandas.DataFrame`).
+* [`to_xarray()`](`mikeio.Dataset.to_xarray`) - Convert Dataset to a [](`xarray.Dataset`) (great for Dfs2, Dfs3).
+* [`to_dfs()`](`mikeio.Dataset.to_dfs`) - Write Dataset to a Dfs file
 
 
 

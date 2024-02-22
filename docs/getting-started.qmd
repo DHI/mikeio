@@ -40,7 +40,7 @@ ds = mikeio.read("data/da_diagnostic.dfs0")
 ds
 ```
 
-Read more on the [Dfs0 page](dfs0.md).
+Read more on the [Dfs0 page](dfs0.qmd).
 
 Convert the timeseries dataset to a pandas DataFrame:
 
@@ -59,7 +59,7 @@ ds = mikeio.read("data/gebco_sound.dfs2")
 ds
 ```
 
-Read more on the [Dfs2 page](dfs2.md).
+Read more on the [Dfs2 page](dfs2.qmd).
 
 
 ## Generic dfs
