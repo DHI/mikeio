@@ -151,9 +151,9 @@ and + and - between two DataArrays (if number of items and shapes conform):
 Other methods that also return a DataArray:
 
 * [`interp_like`](`mikeio.DataArray.interp_like`) - Spatio (temporal) interpolation (see example [Dfsu interpolation](examples/Dfsu-2D-interpolation.qmd))
-* [`interp_time()`](`mikeio.DataArray.interp_time) - Temporal interpolation (see example [Time interpolation](examples/Time-interpolation.qmd))
+* [`interp_time()`](`mikeio.DataArray.interp_time`) - Temporal interpolation (see example [Time interpolation](examples/Time-interpolation.qmd))
 * [`dropna()`](`mikeio.DataArray.dropna`) - Remove time steps where all items are NaN
-* [`squeeze()`](`mikeio.DataArray.squeeze) - Remove axes of length 1
+* [`squeeze()`](`mikeio.DataArray.squeeze`) - Remove axes of length 1
 
 ### Conversion:
 
