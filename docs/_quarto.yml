@@ -89,7 +89,6 @@ quartodoc:
         - open
         - read
         - read_pfs
-        - read_xyz
     - title: Dataset
       desc: ""
       contents:
