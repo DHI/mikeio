@@ -1,14 +1,14 @@
 # Generic
 
-The generic module contains functionality that works for all dfs files: 
+The generic module contains functionality that works for all types of dfs (dfs0, dfs1, dfs2, dfs3, dfsu) files: 
 
-* [`concat()`](generic.concat) - Concatenates files along the time axis
-* [`extract()`](generic.extract) - Extract timesteps and/or items to a new dfs file
-* [`diff()`](generic.diff) - Calculate difference between two dfs files with identical geometry
-* [`sum()`](generic.sum) - Calculate the sum of two dfs files
-* [`scale()`](generic.scale) - Apply scaling to any dfs file
-* [`avg_time()`](generic.avg_time) - Create a temporally averaged dfs file
-* [`quantile()`](generic.quantile) - Create a dfs file with temporal quantiles
+* [`concat()`](`mikeio.generic.concat`) - Concatenates files along the time axis
+* [`extract()`](`mikeio.generic.extract`) - Extract timesteps and/or items to a new dfs file
+* [`diff()`](`mikeio.generic.diff`) - Calculate difference between two dfs files with identical geometry
+* [`sum()`](`mikeio.generic.sum`) - Calculate the sum of two dfs files
+* [`scale()`](`mikeio.generic.scale`) - Apply scaling to any dfs file
+* [`avg_time()`](`mikeio.generic.avg_time`) - Create a temporally averaged dfs file
+* [`quantile()`](`mikeio.generic.quantile`) - Create a dfs file with temporal quantiles
 
 
 

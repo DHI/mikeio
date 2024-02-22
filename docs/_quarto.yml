@@ -51,6 +51,8 @@ website:
         - examples/Dfsu-2D-interpolation.qmd
         - examples/Time-interpolation.qmd
         - examples/Generic.qmd
+      - text: Design philosophy
+        href: design.md
       - text: API Reference
         href: api/index.qmd
           

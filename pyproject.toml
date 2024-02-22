@@ -66,6 +66,7 @@ notebooks= [
             "jupyter",
             "xarray",
             "netcdf4",
+            "rasterio",
             "geopandas",
             "scikit-learn",
             "matplotlib",

@@ -437,11 +437,11 @@ def concat(
 
     Parameters
     ----------
-    infilenames: List[str]
+    infilenames:
         filenames to concatenate
-    outfilename: str | pathlib.Path
+    outfilename:
         filename of output
-    keep: str | pathlib.Path
+    keep:
         either 'first' (keep older), 'last' (keep newer)
         or 'average' can be selected. By default 'last'
 

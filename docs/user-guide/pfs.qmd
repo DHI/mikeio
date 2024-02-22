@@ -30,7 +30,7 @@ EndSect  // TARGET2
 
 When a PFS file is read with MIKE IO, a `PfsDocument` object is created. It will contain one or more `PfsSection` objects - one for each target. The PfsSections will typically contain other PfsSections together with a number of key-value pairs. 
 
-A PFS file is read using `mikeio.read_pfs()`:
+A PFS file is read using [](`mikeio.read_pfs`):
 
 ```{python}
 import mikeio
@@ -41,7 +41,7 @@ pfs
 
 ### PfsDocument
 
-The `PfsDocument` is the MIKE IO equivalent to a PFS file. Its targets can be accessed by their name (as properties), like this:  
+The [](`-mikeio.PfsDocument`) is the MIKE IO equivalent to a PFS file. Its targets can be accessed by their name (as properties), like this:  
 
 ```{python}
 pfs.txconc
@@ -49,12 +49,12 @@ pfs.txconc
 
 Or by the `pfs.targets` object (which is a list of PfsSections). Each of the targets is a `PfsSection` object consisting of key-value pairs (keyword-parameter) and other PfsSections. 
 
-The `PfsDocument` object is similar to a dictionary. You can loop over its contents with `items()`, `keys()` and `values()` like a dictionary. 
+The [](`-mikeio.PfsDocument`) object is similar to a dictionary. You can loop over its contents with `items()`, `keys()` and `values()` like a dictionary. 
 
 
 ### PfsSection
 
-The `PfsSection` object is also similar to a dictionary. You can loop over its contents with `items()`, `keys()` and `values()` like a dictionary. 
+The [](`-mikeio.PfsSection`) object is also similar to a dictionary. You can loop over its contents with `items()`, `keys()` and `values()` like a dictionary. 
 
 ```{python}
 pfs.txconc.keys()
@@ -88,7 +88,7 @@ pfs.txconc.Setup.to_dataframe(prefix="File_")
 
 ### Unique or non-unique keywords
 
-Depending on the engine intended for reading the PFS file it may or may not make sense to have multiple identical keywords in the same PfsSection. MIKE 21/3 and the marine tools does *not* support non-unique keywords---if non-unique keywords are present, only the first will be read and the presence is most likely a mistake made by hand-editing the file. In other tools, e.g. MIKE Plot Composer, non-unique keywords are used a lot. How MIKE IO shall deal with non-unique keywords can be specified using the `unique_keywords` argument in the `read_pfs()` method: 
+Depending on the engine intended for reading the PFS file it may or may not make sense to have multiple identical keywords in the same PfsSection. MIKE 21/3 and the marine tools does *not* support non-unique keywords---if non-unique keywords are present, only the first will be read and the presence is most likely a mistake made by hand-editing the file. In other tools, e.g. MIKE Plot Composer, non-unique keywords are used a lot. How MIKE IO shall deal with non-unique keywords can be specified using the `unique_keywords` argument in the [](`-mikeio.read_pfs`) function: 
 
 ```python
 pfs = mikeio.read_pfs("myplot.plt", unique_keywords=False)

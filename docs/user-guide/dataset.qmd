@@ -1,4 +1,4 @@
-# {{< fa database >}} Dataset
+# Dataset
 
 The [Dataset](`mikeio.Dataset`) is the MIKE IO data structure 
 for data from dfs files. 
