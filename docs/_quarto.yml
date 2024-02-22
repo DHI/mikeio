@@ -11,6 +11,7 @@ website:
   bread-crumbs: false # I can\'t get this to work properly, disabled for now
   
   navbar:
+    logo: MIKE-IO-Icon-Pos-RGB.png
     tools:
     - icon: github
       menu:
@@ -44,6 +45,16 @@ website:
         - eum.md
         - generic.md
         - pfs.md
+      - section: Examples
+        href: examples/index.qmd
+        contents:
+        - examples/Dfsu-2D-interpolation.qmd
+        - examples/Mesh.qmd
+        - examples/Time-interpolation.qmd
+        - examples/Generic.qmd
+      - text: API Reference
+        href: api/index.qmd
+          
         
 
       
@@ -61,6 +72,7 @@ interlinks:
 
 quartodoc:
   style: pkgdown
+  title: API Reference
   dir: api
   package: mikeio
   options:

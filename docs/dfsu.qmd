@@ -25,9 +25,9 @@ Each element has:
 (the number of nodes defines the type: triangular, quadrilateral, prism etc.)
 
 
-```{warning} 
+::: callout-note
 In MIKE Zero, node ids, element ids and layer ids are 1-based.  In MIKE IO, all ids are **0-based** following standard Python indexing. That means, as an example, that when finding the element closest to a point its id will be 1 lower in MIKE IO compared to examining the file in MIKE Zero.
-```
+:::
 
 ## MIKE IO Flexible Mesh Geometry 
 
@@ -64,7 +64,7 @@ MIKE IO has a Flexible Mesh Geometry class, [`GeometryFM`](`mikeio.spatial.Geome
 
 These properties and methods are accessible from the geometry, but also from the Mesh/Dfsu object. 
 
-If a .dfsu file is *read* with {py:meth}`mikeio.read`, the returned Dataset ds will contain a Flexible Mesh Geometry `geometry`. If a .dfsu or a .mesh file is *opened* with {py:meth}`mikeio.open`, the returned object will also contain a Flexible Mesh Geometry `geometry`. 
+If a .dfsu file is *read* with [](`mikeio.read`), the returned Dataset ds will contain a Flexible Mesh Geometry `geometry`. If a .dfsu or a .mesh file is *opened* with [](`mikeio.open`), the returned object will also contain a Flexible Mesh Geometry `geometry`. 
 
 ```{python}
 import mikeio
