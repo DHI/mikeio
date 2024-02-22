@@ -5,6 +5,9 @@ build-backend = "hatchling.build"
 [tool.hatch.build.targets.sdist]
 exclude = ["notebooks", "tests", "images"]
 
+[tool.hatch.metadata]
+allow-direct-references = true
+
 [project]
 name="mikeio"
 version="1.8.dev1"
