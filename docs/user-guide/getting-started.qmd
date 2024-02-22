@@ -1,7 +1,7 @@
 # Getting started
 
-## Dataset
-The [Dataset](dataset.md) is the common MIKE IO data structure for data read from dfs files. 
+## {{< fa database >}} Dataset
+The [Dataset](dataset.qmd) is the common MIKE IO data structure for data read from dfs files. 
 The  [](`mikeio.read`) method returns a Dataset with a [DataArray](dataarray.qmd) for each item.
 
 Each DataArray have the following properties:
@@ -11,7 +11,7 @@ Each DataArray have the following properties:
 * **geometry** - a Geometry object with the spatial description of the data
 * **values** - a [](`numpy.ndarray`)
 
-## Items, ItemInfo and EUM
+## {{< fa weight-hanging >}} Types and units
 
 The dfs items in MIKE IO are represented by the [ItemInfo class](eum.ItemInfo).
 An ItemInfo consists of:
@@ -30,7 +30,7 @@ mikeio.ItemInfo("Viken", mikeio.EUMType.Water_Level)
 mikeio.ItemInfo(mikeio.EUMType.Wind_speed)
 ```
 
-## Dfs0
+## {{< fa chart-line >}} Dfs0
 A dfs0 file is also called a time series file. 
 
 Read Dfs0 to Dataset:
@@ -50,7 +50,7 @@ df.head()
 ```
 
 
-## Dfs2
+## {{< fa map >}} Dfs2
 
 A dfs2 file is also called a grid series file. Values in a dfs2 file are ‘element based’, i.e. values are defined in the centre of each grid cell. 
 
@@ -62,7 +62,7 @@ ds
 Read more on the [Dfs2 page](dfs2.qmd).
 
 
-## Generic dfs
+## {{< fa toolbox >}} Generic dfs
 MIKE IO has [`generic`](generic.md) functionality that works for all dfs files: 
 
 * [`concat()`](`mikeio.generic.concat`) - Concatenates files along the time axis
@@ -80,9 +80,7 @@ from mikeio import generic
 generic.concat(["fileA.dfs2", "fileB.dfs2"], "new_file.dfs2")
 ```
 
-See [Generic page](generic.md) and the [`generic` example](examples/Generic.qmd) for more examples.
-
-## Additional resources
+## {{< fa book >}} Additional resources
 
 * Online book: [Getting started with Dfs files in Python using MIKE IO](https://dhi.github.io/getting-started-with-mikeio)
 * Online book: [Python for marine modelers using MIKE IO and ModellSkill](https://dhi.github.io/book-learn-mikeio-modelskill)

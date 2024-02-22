@@ -37,12 +37,12 @@ website:
         - user-guide/getting-started.qmd 
         - user-guide/data-structures.md
         - user-guide/dataarray.qmd
-        - user-guide/dataset.md
+        - user-guide/dataset.qmd
         - user-guide/dfs0.qmd
         - user-guide/dfs1.qmd
         - user-guide/dfs2.qmd
         - user-guide/dfsu.qmd
-        - user-guide/eum.md
+        - user-guide/eum.qmd
         - user-guide/generic.md
         - user-guide/pfs.qmd
       - section: Examples

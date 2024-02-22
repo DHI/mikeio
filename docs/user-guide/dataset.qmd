@@ -1,4 +1,4 @@
-# Dataset
+# {{< fa database >}} Dataset
 
 The [Dataset](`mikeio.Dataset`) is the MIKE IO data structure 
 for data from dfs files. 
@@ -29,7 +29,7 @@ items:
   3:  Current speed <Current Speed> (meter per sec)
 ```
 
-## Selecting items
+## {{< fa filter >}} Selecting items
 
 Selecting a specific item "itemA" (at position 0) from a Dataset ds can be done with:
 
@@ -53,13 +53,13 @@ geometry: Dfsu2D (884 elements, 529 nodes)
 Negative index e.g. ds[-1] can also be used to select from the end. 
 Several items ("itemA" at 0 and "itemC" at 2) can be selected with the notation:
 
-* ds[["itemA", "itemC"]]
-* ds[[0, 2]]
+* `ds[["itemA", "itemC"]]`
+* `ds[[0, 2]]`
 
 Note that this behavior is similar to pandas and xarray.
 
 
-## Temporal selection
+## {{< fa calendar >}} Temporal selection
 
 A time slice of a Dataset can be selected in several different ways. 
 
@@ -88,7 +88,7 @@ items:
 
 ```
 
-## Spatial selection
+## {{< fa map >}} Spatial selection
 
 The `sel` method finds the nearest element.
 
@@ -106,7 +106,7 @@ items:
 ```
 
 
-## Plotting
+## {{< fa chart-line >}} Plotting
 
 In most cases, you will *not* plot the Dataset, but rather it's DataArrays. But there are two exceptions: 
 
@@ -152,7 +152,7 @@ including different ways of *selecting* data:
 * [`quantile()`](`mikeio.Dataset.quantile`) - Quantiles along an axis
 * [`nanquantile()`](`mikeio.Dataset.nanquantile`) - Quantiles along an axis (NaN ignored)
 
-### Mathematical operations
+### {{< fa calculator >}} Mathematical operations
 
 * ds + value
 * ds - value

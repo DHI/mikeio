@@ -2,7 +2,7 @@
 
 MIKE IO has these primary data structures: 
 
-* [**Dataset**](dataset.md) - a collection of DataArrays corresponding to the contents of a dfs file; typically obtained from {py:meth}`mikeio.read`
+* [**Dataset**](dataset.qmd) - a collection of DataArrays corresponding to the contents of a dfs file; typically obtained from {py:meth}`mikeio.read`
 * [**DataArray**](dataarray.qmd) - data and metadata corresponding to one "item" in a dfs file. 
 * **Geometry** - spatial description of the data in a dfs file; comes in different flavours: 
 [Grid1D](`mikeio.Grid1D`), [Grid2D](`mikeio.Grid2D`), [Grid3D](`mikeio.Grid3D`), [GeometryFM2](`mikeio.spatial.GeometryFM2D`), [GeometryFM3D](`mikeio.spatial.GeometryFM3D`), etc. corresponding to different types of dfs files. 

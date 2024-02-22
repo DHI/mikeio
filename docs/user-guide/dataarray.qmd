@@ -1,4 +1,4 @@
-# DataArray
+# {{< fa database >}} DataArray
 
 The [DataArray](`mikeio.DataArray`) is the common MIKE IO data structure 
 for *item* data from dfs files. 
@@ -23,7 +23,7 @@ da
 ```
 
 
-## Temporal selection
+## {{< fa calendar >}} Temporal selection
 
 ```{python}
 da.sel(time="1985-08-06 12:00")
@@ -33,7 +33,7 @@ da.sel(time="1985-08-06 12:00")
 da["1985-8-7":]
 ```
 
-## Spatial selection
+## {{< fa map >}} Spatial selection
              
 The [`sel`](`mikeio.DataArray.sel`) method finds the nearest element.
 
@@ -68,7 +68,7 @@ da_sub.values[:] = 5.0    # will NOT change da
 
 
 
-## Plotting
+## {{< fa chart-line >}} Plotting
 
 The plotting of a DataArray is context-aware meaning that plotting behaviour depends on the geometry of the DataArray being plotted. 
 
@@ -123,7 +123,7 @@ including different ways of *selecting* data:
 * [`aggregate()`](`mikeio.DataArray.aggregate`) - Aggregate along an axis
 * [`quantile()`](`mikeio.DataArray.quantile`) - Quantiles along an axis
 
-### Mathematical operations
+### {{< fa calculator >}} Mathematical operations
 * ds + value
 * ds - value
 * ds * value
