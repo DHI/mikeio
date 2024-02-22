@@ -44,7 +44,7 @@ website:
         - user-guide/dfsu.qmd
         - user-guide/eum.md
         - user-guide/generic.md
-        - user-guide/quarto pfs.md
+        - user-guide/pfs.qmd
       - section: Examples
         href: examples/index.qmd
         contents:
