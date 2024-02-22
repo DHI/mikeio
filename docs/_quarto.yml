@@ -32,24 +32,23 @@ website:
     search: true
     contents: 
       - section: "User Guide"
-        href: index.qmd
+        href: user-guide/getting-started.qmd
         contents:
-        - getting-started.qmd 
-        - data-structures.md
-        - dataarray.md
-        - dataset.md
-        - dfs0.qmd
-        - dfs1.qmd
-        - dfs2.qmd
-        - dfsu.qmd
-        - eum.md
-        - generic.md
-        - pfs.md
+        - user-guide/getting-started.qmd 
+        - user-guide/data-structures.md
+        - user-guide/dataarray.qmd
+        - user-guide/dataset.md
+        - user-guide/dfs0.qmd
+        - user-guide/dfs1.qmd
+        - user-guide/dfs2.qmd
+        - user-guide/dfsu.qmd
+        - user-guide/eum.md
+        - user-guide/generic.md
+        - user-guide/quarto pfs.md
       - section: Examples
         href: examples/index.qmd
         contents:
         - examples/Dfsu-2D-interpolation.qmd
-        - examples/Mesh.qmd
         - examples/Time-interpolation.qmd
         - examples/Generic.qmd
       - text: API Reference

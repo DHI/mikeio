@@ -27,13 +27,14 @@ $ pip install mikeio
 
 ## Getting started
 
-```python
->>>  import
->>>  ds = mikeio.read('simple.dfs0')
->>>  df = ds.to_dataframe()
+```{python}
+import mikeio
+
+ds = mikeio.read("data/FakeLake.dfsu")
+ds.Bathymetry.plot()
 ```
 
-Read more in the [getting started guide](getting-started.qmd).
+Read more in the [getting started guide](user-guide/getting-started.qmd).
 
 
 ## Where can I get help?

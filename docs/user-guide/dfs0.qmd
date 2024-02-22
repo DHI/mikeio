@@ -13,7 +13,8 @@ Working with data from dfs0 files are conveniently done in one of two ways:
 
 ```{python}
 import mikeio
-ds = mikeio.read("data/da_diagnostic.dfs0")
+
+ds = mikeio.read("../data/da_diagnostic.dfs0")
 ds
 ```
 
@@ -35,7 +36,7 @@ MIKE IO adds a new method to the DataFrame called `to_dfs0`. This method is used
 import pandas as pd
 
 df = pd.read_csv(
-    "data/co2-mm-mlo.csv", parse_dates=True, index_col="Date", na_values=-99.99
+    "../data/co2-mm-mlo.csv", parse_dates=True, index_col="Date", na_values=-99.99
 )
 df.to_dfs0("mauna_loa_co2.dfs0")
 ```

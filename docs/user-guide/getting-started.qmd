@@ -2,7 +2,7 @@
 
 ## Dataset
 The [Dataset](dataset.md) is the common MIKE IO data structure for data read from dfs files. 
-The  [](`mikeio.read`) method returns a Dataset with a [DataArray](dataarray.md) for each item.
+The  [](`mikeio.read`) method returns a Dataset with a [DataArray](dataarray.qmd) for each item.
 
 Each DataArray have the following properties:
 
@@ -36,7 +36,7 @@ A dfs0 file is also called a time series file.
 Read Dfs0 to Dataset:
 
 ```{python}
-ds = mikeio.read("data/da_diagnostic.dfs0")
+ds = mikeio.read("../data/da_diagnostic.dfs0")
 ds
 ```
 
@@ -55,7 +55,7 @@ df.head()
 A dfs2 file is also called a grid series file. Values in a dfs2 file are ‘element based’, i.e. values are defined in the centre of each grid cell. 
 
 ```{python}
-ds = mikeio.read("data/gebco_sound.dfs2") 
+ds = mikeio.read("../data/gebco_sound.dfs2")
 ds
 ```
 

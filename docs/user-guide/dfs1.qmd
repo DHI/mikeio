@@ -5,7 +5,8 @@ A dfs1 file contains node-based line series data. Dfs1 files do not contain enou
 
 ```{python}
 import mikeio
-ds = mikeio.read("data/tide1.dfs1")
+
+ds = mikeio.read("../data/tide1.dfs1")
 ds
 ```
 

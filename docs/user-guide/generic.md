@@ -21,5 +21,5 @@ All methods in the generic module creates a new dfs file.
 
 ## Generic example notebooks
 
-See the [Generic notebook](examples/Generic.qmd) for more examples.
+See the [Generic notebook](../examples/Generic.qmd) for more examples.
 

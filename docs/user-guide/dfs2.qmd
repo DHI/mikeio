@@ -6,7 +6,7 @@ A dfs2 file is also called a grid series file. Values in a dfs2 file are ‘elem
 
 ```{python}
 import mikeio
-ds = mikeio.read("data/gebco_sound.dfs2")
+ds = mikeio.read("../data/gebco_sound.dfs2")
 ds
 ```
 

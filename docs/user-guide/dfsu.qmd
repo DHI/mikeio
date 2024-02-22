@@ -69,12 +69,12 @@ If a .dfsu file is *read* with [](`mikeio.read`), the returned Dataset ds will c
 ```{python}
 import mikeio
 
-ds = mikeio.read("data/oresundHD_run1.dfsu")
+ds = mikeio.read("../data/oresundHD_run1.dfsu")
 ds.geometry
 ```
 
 ```{python}
-dfs = mikeio.open("data/oresundHD_run1.dfsu")
+dfs = mikeio.open("../data/oresundHD_run1.dfsu")
 dfs.geometry
 ```
 
