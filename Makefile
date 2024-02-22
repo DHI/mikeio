@@ -28,7 +28,10 @@ perftest:
 	pytest tests/performance/ --durations=0
 
 docs: FORCE
-	cd docs && quartodoc build && quarto render && cd -
+	cd docs && quarto add --no-prompt .
+	cd docs && quartodoc build
+	cd docs && quartodoc interlinks
+	quarto render docs
 
 FORCE:
 

@@ -40,6 +40,7 @@ website:
         - dfs0.qmd
         - dfs1.qmd
         - dfs2.qmd
+        - dfsu.qmd
         - eum.md
         - generic.md
         - pfs.md
@@ -101,9 +102,10 @@ quartodoc:
         - spatial.GeometryFMVerticalColumn
         - spatial._FM_geometry._GeometryFMPlotter
         
-    - title: Spectra
+    - title: Spectral
       desc: ""
       contents:
+        - dfsu.DfsuSpectral # TODO Spectral vs Spectrum (naming inconsistency?)
         - spatial.GeometryFMPointSpectrum
         - spatial.GeometryFMLineSpectrum
         - spatial.GeometryFMAreaSpectrum
@@ -122,6 +124,8 @@ quartodoc:
         - Dfs3
         - Dfsu
         - dfsu.Dfsu2DH
+        - dfsu.Dfsu2DV
+        - dfsu.Dfsu3D
     - title: Generic
       desc: ""
       contents:
