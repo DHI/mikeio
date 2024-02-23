@@ -349,11 +349,11 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <li>change z values</li>
 <li>change boundary codes</li>
 </ul>
-<div id="dd9e7104" class="cell" data-execution_count="1">
+<div id="2ec887e3" class="cell" data-execution_count="1">
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> mikeio</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<div id="691cf96d" class="cell" data-execution_count="2">
+<div id="c0c8b8bb" class="cell" data-execution_count="2">
 <div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>msh <span class="op">=</span> mikeio.Mesh(<span class="st">"../data/odense_rough.mesh"</span>)</span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>msh</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="2">
@@ -363,7 +363,7 @@ number of nodes: 399
 projection: UTM-33</code></pre>
 </div>
 </div>
-<div id="fcabf418" class="cell" data-execution_count="3">
+<div id="010b96a7" class="cell" data-execution_count="3">
 <div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>msh.plot()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display">
 <div>
@@ -373,7 +373,7 @@ projection: UTM-33</code></pre>
 </div>
 </div>
 </div>
-<div id="4ba85b9d" class="cell" data-execution_count="4">
+<div id="6218b79f" class="cell" data-execution_count="4">
 <div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>msh.plot.boundary_nodes(boundary_names<span class="op">=</span>[<span class="st">'Land'</span>,<span class="st">'Open boundary'</span>])<span class="op">;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display">
 <div>
@@ -386,7 +386,7 @@ projection: UTM-33</code></pre>
 <section id="convert-mesh-to-shapely" class="level1">
 <h1>Convert mesh to shapely</h1>
 <p>Convert mesh to <a href="https://shapely.readthedocs.io/en/latest/manual.html">shapely</a> MultiPolygon object, requires that the <code>shapely</code> library is installed.</p>
-<div id="65acc8ff" class="cell" data-execution_count="5">
+<div id="ed2a6926" class="cell" data-execution_count="5">
 <div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>mp <span class="op">=</span> msh.to_shapely()</span>
 <span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>mp</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="5">
@@ -398,19 +398,19 @@ projection: UTM-33</code></pre>
 </div>
 </div>
 <p>Now a lot of methods are available</p>
-<div id="ed53d2db" class="cell" data-execution_count="6">
+<div id="9b7af7cc" class="cell" data-execution_count="6">
 <div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>mp.area</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="6">
 <pre><code>68931409.58160606</code></pre>
 </div>
 </div>
-<div id="be4ebac9" class="cell" data-execution_count="7">
+<div id="90d3e582" class="cell" data-execution_count="7">
 <div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>mp.bounds</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="7">
 <pre><code>(211068.501175313, 6153077.66681803, 224171.617336507, 6164499.42751662)</code></pre>
 </div>
 </div>
-<div id="fed659a0" class="cell" data-execution_count="8">
+<div id="b022ad31" class="cell" data-execution_count="8">
 <div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>domain <span class="op">=</span> mp.<span class="bu">buffer</span>(<span class="dv">0</span>)</span>
 <span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>domain</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="8">
@@ -421,7 +421,7 @@ projection: UTM-33</code></pre>
 </div>
 </div>
 </div>
-<div id="e931d396" class="cell" data-execution_count="9">
+<div id="ee1f2a58" class="cell" data-execution_count="9">
 <div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>open_water <span class="op">=</span> domain.<span class="bu">buffer</span>(<span class="op">-</span><span class="dv">500</span>)</span>
 <span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>coastalzone <span class="op">=</span> domain <span class="op">-</span> open_water</span>
@@ -435,7 +435,7 @@ projection: UTM-33</code></pre>
 </div>
 </div>
 <p>Find if points are inside the domain</p>
-<div id="0f2cbfe3" class="cell" data-tags="[]" data-execution_count="10">
+<div id="434dc56b" class="cell" data-tags="[]" data-execution_count="10">
 <div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> shapely.geometry <span class="im">import</span> Point</span>
 <span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>p1 <span class="op">=</span> Point(<span class="dv">216000</span>, <span class="dv">6162000</span>)</span>
@@ -449,14 +449,14 @@ False</code></pre>
 </div>
 <section id="mesh-class-can-also-check-if-a-mesh-contains-points" class="level2">
 <h2 class="anchored" data-anchor-id="mesh-class-can-also-check-if-a-mesh-contains-points">Mesh class can also check if a mesh contains points</h2>
-<div id="89140997" class="cell" data-execution_count="11">
+<div id="8cc2714d" class="cell" data-execution_count="11">
 <div class="sourceCode cell-code" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>p1p2 <span class="op">=</span> [[<span class="dv">216000</span>, <span class="dv">6162000</span>], [<span class="dv">220000</span>, <span class="dv">6156000</span>]]</span>
 <span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>msh.contains(p1p2)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="11">
 <pre><code>array([ True, False])</code></pre>
 </div>
 </div>
-<div id="dcff4009" class="cell" data-execution_count="12">
+<div id="34632551" class="cell" data-execution_count="12">
 <div class="sourceCode cell-code" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>ax <span class="op">=</span> msh.plot()</span>
 <span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>ax.scatter(p1.x, p1.y, marker<span class="op">=</span><span class="st">"*"</span>, s<span class="op">=</span><span class="dv">200</span>, c<span class="op">=</span><span class="st">"red"</span>, label<span class="op">=</span><span class="st">"inside"</span>)</span>
 <span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>ax.scatter(p2.x, p2.y, marker<span class="op">=</span><span class="st">"+"</span>, s<span class="op">=</span><span class="dv">200</span>, c<span class="op">=</span><span class="st">"green"</span>, label<span class="op">=</span><span class="st">"outside"</span>)</span>
@@ -474,7 +474,7 @@ False</code></pre>
 <section id="change-z-values-and-boundary-code" class="level1">
 <h1>Change z values and boundary code</h1>
 <p>Assume that we want to have a minimum depth of 2 meters and change the open boundary (code 2) to a closed one (code 1).</p>
-<div id="4e087889" class="cell" data-execution_count="13">
+<div id="0368fac8" class="cell" data-execution_count="13">
 <div class="sourceCode cell-code" id="cb18"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f'max z before: </span><span class="sc">{</span>msh<span class="sc">.</span>node_coordinates[:,<span class="dv">2</span>]<span class="sc">.</span><span class="bu">max</span>()<span class="sc">}</span><span class="ss">'</span>)</span>
 <span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>zc <span class="op">=</span> msh.node_coordinates[:,<span class="dv">2</span>]</span>
 <span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>zc[zc<span class="op">&gt;-</span><span class="dv">2</span>] <span class="op">=</span> <span class="op">-</span><span class="dv">2</span></span>
@@ -485,7 +485,7 @@ False</code></pre>
 max z after: -2.0</code></pre>
 </div>
 </div>
-<div id="4cd7ef6e" class="cell" data-execution_count="14">
+<div id="65c3b3d6" class="cell" data-execution_count="14">
 <div class="sourceCode cell-code" id="cb20"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f'valid codes before: </span><span class="sc">{</span>msh<span class="sc">.</span>valid_codes<span class="sc">}</span><span class="ss">'</span>)</span>
 <span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>c <span class="op">=</span> msh.geometry.codes</span>
 <span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>c[c<span class="op">==</span><span class="dv">2</span>] <span class="op">=</span> <span class="dv">1</span></span>
@@ -496,7 +496,7 @@ max z after: -2.0</code></pre>
 valid codes after: [0, 1]</code></pre>
 </div>
 </div>
-<div id="95e97d35" class="cell" data-execution_count="15">
+<div id="fd7415c7" class="cell" data-execution_count="15">
 <div class="sourceCode cell-code" id="cb22"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>msh.plot()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display">
 <div>
