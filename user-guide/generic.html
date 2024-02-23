@@ -75,8 +75,6 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <script src="../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
 <link href="../site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
-<link href="../site_libs/quarto-contrib/fontawesome6-0.1.0/all.css" rel="stylesheet">
-<link href="../site_libs/quarto-contrib/fontawesome6-0.1.0/latex-fontsize.css" rel="stylesheet">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -210,13 +208,13 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../user-guide/dataarray.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"> DataArray</span></a>
+ <span class="menu-text">DataArray</span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../user-guide/dataset.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"> Dataset</span></a>
+ <span class="menu-text">Dataset</span></a>
   </div>
 </li>
           <li class="sidebar-item">
@@ -294,6 +292,12 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   </li>
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
+  <a href="../design.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Design philosophy</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
   <a href="../api/index.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">API Reference</span></a>
   </div>
@@ -323,15 +327,15 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 <section id="generic" class="level1">
 <h1>Generic</h1>
-<p>The generic module contains functionality that works for all dfs files:</p>
+<p>The generic module contains functionality that works for all types of dfs (dfs0, dfs1, dfs2, dfs3, dfsu) files:</p>
 <ul>
-<li><a href="generic.concat"><code>concat()</code></a> - Concatenates files along the time axis</li>
-<li><a href="generic.extract"><code>extract()</code></a> - Extract timesteps and/or items to a new dfs file</li>
-<li><a href="generic.diff"><code>diff()</code></a> - Calculate difference between two dfs files with identical geometry</li>
-<li><a href="generic.sum"><code>sum()</code></a> - Calculate the sum of two dfs files</li>
-<li><a href="generic.scale"><code>scale()</code></a> - Apply scaling to any dfs file</li>
-<li><a href="generic.avg_time"><code>avg_time()</code></a> - Create a temporally averaged dfs file</li>
-<li><a href="generic.quantile"><code>quantile()</code></a> - Create a dfs file with temporal quantiles</li>
+<li><a href="../api/generic.html#mikeio.generic.concat"><code>concat()</code></a> - Concatenates files along the time axis</li>
+<li><a href="../api/generic.html#mikeio.generic.extract"><code>extract()</code></a> - Extract timesteps and/or items to a new dfs file</li>
+<li><a href="../api/generic.html#mikeio.generic.diff"><code>diff()</code></a> - Calculate difference between two dfs files with identical geometry</li>
+<li><a href="../api/generic.html#mikeio.generic.sum"><code>sum()</code></a> - Calculate the sum of two dfs files</li>
+<li><a href="../api/generic.html#mikeio.generic.scale"><code>scale()</code></a> - Apply scaling to any dfs file</li>
+<li><a href="../api/generic.html#mikeio.generic.avg_time"><code>avg_time()</code></a> - Create a temporally averaged dfs file</li>
+<li><a href="../api/generic.html#mikeio.generic.quantile"><code>quantile()</code></a> - Create a dfs file with temporal quantiles</li>
 </ul>
 <p>All methods in the generic module creates a new dfs file.</p>
 <div class="sourceCode" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> <span class="im">from</span> mikeio <span class="im">import</span> generic</span>

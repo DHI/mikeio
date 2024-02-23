@@ -75,8 +75,6 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <script src="../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
 <link href="../site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
-<link href="../site_libs/quarto-contrib/fontawesome6-0.1.0/all.css" rel="stylesheet">
-<link href="../site_libs/quarto-contrib/fontawesome6-0.1.0/latex-fontsize.css" rel="stylesheet">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -210,13 +208,13 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../user-guide/dataarray.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"> DataArray</span></a>
+ <span class="menu-text">DataArray</span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../user-guide/dataset.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"> Dataset</span></a>
+ <span class="menu-text">Dataset</span></a>
   </div>
 </li>
           <li class="sidebar-item">
@@ -292,6 +290,12 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </li>
       </ul>
   </li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../design.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Design philosophy</span></a>
+  </div>
+</li>
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../api/index.html" class="sidebar-item-text sidebar-link">
@@ -484,7 +488,7 @@ Note
 </table>
 <p>These properties and methods are accessible from the geometry, but also from the Mesh/Dfsu object.</p>
 <p>If a .dfsu file is <em>read</em> with <a href="../api/read.html#mikeio.read"><code>mikeio.read</code></a>, the returned Dataset ds will contain a Flexible Mesh Geometry <code>geometry</code>. If a .dfsu or a .mesh file is <em>opened</em> with <a href="../api/open.html#mikeio.open"><code>mikeio.open</code></a>, the returned object will also contain a Flexible Mesh Geometry <code>geometry</code>.</p>
-<div id="e7d836e3" class="cell" data-execution_count="1">
+<div id="667f8cb7" class="cell" data-execution_count="1">
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> mikeio</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>ds <span class="op">=</span> mikeio.read(<span class="st">"../data/oresundHD_run1.dfsu"</span>)</span>
@@ -496,7 +500,7 @@ number of elements: 3612
 projection: UTM-33</code></pre>
 </div>
 </div>
-<div id="65a33147" class="cell" data-execution_count="2">
+<div id="df2684b3" class="cell" data-execution_count="2">
 <div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>dfs <span class="op">=</span> mikeio.<span class="bu">open</span>(<span class="st">"../data/oresundHD_run1.dfsu"</span>)</span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>dfs.geometry</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="2">
