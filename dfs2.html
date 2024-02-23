@@ -1,694 +1,809 @@
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" data-content_root="./">
-<head>
-  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Dfs2 &mdash; MIKE IO  documentation</title>
-      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=80d5e7a1" />
-      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.4.550">
 
-  
-  <!--[if lt IE 9]>
-    <script src="_static/js/html5shiv.min.js"></script>
-  <![endif]-->
-  
-        <script src="_static/jquery.js?v=5d32c60e"></script>
-        <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-        <script src="_static/documentation_options.js?v=5929fcd5"></script>
-        <script src="_static/doctools.js?v=888ff710"></script>
-        <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
-    <script src="_static/js/theme.js"></script>
-    <link rel="index" title="Index" href="genindex.html" />
-    <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Dfs3" href="dfs3.html" />
-    <link rel="prev" title="Dfs1" href="dfs1.html" /> 
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>MIKE IO - Dfs2</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="site_libs/quarto-nav/headroom.min.js"></script>
+<script src="site_libs/clipboard/clipboard.min.js"></script>
+<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="site_libs/quarto-search/fuse.min.js"></script>
+<script src="site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="./">
+<script src="site_libs/quarto-html/quarto.js"></script>
+<script src="site_libs/quarto-html/popper.min.js"></script>
+<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="site_libs/quarto-html/anchor.min.js"></script>
+<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<link href="site_libs/quarto-contrib/fontawesome6-0.1.0/all.css" rel="stylesheet">
+<link href="site_libs/quarto-contrib/fontawesome6-0.1.0/latex-fontsize.css" rel="stylesheet">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+
 </head>
 
-<body class="wy-body-for-nav"> 
-  <div class="wy-grid-for-nav">
-    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
-      <div class="wy-side-scroll">
-        <div class="wy-side-nav-search" >
+<body class="nav-sidebar docked nav-fixed">
 
-          
-          
-          <a href="index.html" class="icon icon-home">
-            MIKE IO
-          </a>
-<div role="search">
-  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
-    <input type="hidden" name="check_keywords" value="yes" />
-    <input type="hidden" name="area" value="default" />
-  </form>
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a href="./index.html" class="navbar-brand navbar-brand-logo">
+    <img src="./MIKE-IO-Icon-Pos-RGB.png" alt="" class="navbar-logo">
+    </a>
+    <a class="navbar-brand" href="./index.html">
+    <span class="navbar-title">MIKE IO</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll me-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="./index.html"> 
+<span class="menu-text">Home</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link active" href="./examples/index.html" aria-current="page"> 
+<span class="menu-text">Examples</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="./api/index.html"> 
+<span class="menu-text">API Reference</span></a>
+  </li>  
+</ul>
+          </div> <!-- /navcollapse -->
+          <div class="quarto-navbar-tools">
+    <div class="dropdown">
+      <a href="" title="" id="quarto-navigation-tool-dropdown-0" class="quarto-navigation-tool dropdown-toggle px-1" data-bs-toggle="dropdown" aria-expanded="false" aria-label=""><i class="bi bi-github"></i></a>
+      <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="quarto-navigation-tool-dropdown-0">
+          <li>
+            <a class="dropdown-item quarto-navbar-tools-item" href="https://github.com/DHI/mikeio">
+            Source Code
+            </a>
+          </li>
+          <li>
+            <a class="dropdown-item quarto-navbar-tools-item" href="https://github.com/DHI/mikeio/issues">
+            Report a Bug
+            </a>
+          </li>
+      </ul>
+    </div>
 </div>
-        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
-              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
-<ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="getting-started.html">Getting started</a></li>
-<li class="toctree-l1"><a class="reference internal" href="design.html">Design philosophy</a></li>
-<li class="toctree-l1"><a class="reference internal" href="data-structures.html">Data Structures</a></li>
-<li class="toctree-l1"><a class="reference internal" href="dataset.html">Dataset</a></li>
-<li class="toctree-l1"><a class="reference internal" href="dataarray.html">DataArray</a></li>
-<li class="toctree-l1"><a class="reference internal" href="dfs-overview.html">Dfs Overview</a></li>
-<li class="toctree-l1"><a class="reference internal" href="dfs0.html">Dfs0</a></li>
-<li class="toctree-l1"><a class="reference internal" href="dfs1.html">Dfs1</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Dfs2</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#subset-in-space">Subset in space</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#grid2d">Grid2D</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#dfs2-example-notebooks">Dfs2 Example notebooks</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#dfs2-api">Dfs2 API</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#mikeio.Dfs2"><code class="docutils literal notranslate"><span class="pre">Dfs2</span></code></a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#mikeio.Dfs2.close"><code class="docutils literal notranslate"><span class="pre">Dfs2.close()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#mikeio.Dfs2.deletevalue"><code class="docutils literal notranslate"><span class="pre">Dfs2.deletevalue</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#mikeio.Dfs2.dx"><code class="docutils literal notranslate"><span class="pre">Dfs2.dx</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#mikeio.Dfs2.dy"><code class="docutils literal notranslate"><span class="pre">Dfs2.dy</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#mikeio.Dfs2.end_time"><code class="docutils literal notranslate"><span class="pre">Dfs2.end_time</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#mikeio.Dfs2.is_geo"><code class="docutils literal notranslate"><span class="pre">Dfs2.is_geo</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#mikeio.Dfs2.items"><code class="docutils literal notranslate"><span class="pre">Dfs2.items</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#mikeio.Dfs2.latitude"><code class="docutils literal notranslate"><span class="pre">Dfs2.latitude</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#mikeio.Dfs2.longitude"><code class="docutils literal notranslate"><span class="pre">Dfs2.longitude</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#mikeio.Dfs2.n_items"><code class="docutils literal notranslate"><span class="pre">Dfs2.n_items</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#mikeio.Dfs2.n_timesteps"><code class="docutils literal notranslate"><span class="pre">Dfs2.n_timesteps</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#mikeio.Dfs2.nx"><code class="docutils literal notranslate"><span class="pre">Dfs2.nx</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#mikeio.Dfs2.ny"><code class="docutils literal notranslate"><span class="pre">Dfs2.ny</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#mikeio.Dfs2.orientation"><code class="docutils literal notranslate"><span class="pre">Dfs2.orientation</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#mikeio.Dfs2.origin"><code class="docutils literal notranslate"><span class="pre">Dfs2.origin</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#mikeio.Dfs2.read"><code class="docutils literal notranslate"><span class="pre">Dfs2.read()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#mikeio.Dfs2.shape"><code class="docutils literal notranslate"><span class="pre">Dfs2.shape</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#mikeio.Dfs2.start_time"><code class="docutils literal notranslate"><span class="pre">Dfs2.start_time</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#mikeio.Dfs2.time"><code class="docutils literal notranslate"><span class="pre">Dfs2.time</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#mikeio.Dfs2.timestep"><code class="docutils literal notranslate"><span class="pre">Dfs2.timestep</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#mikeio.Dfs2.x0"><code class="docutils literal notranslate"><span class="pre">Dfs2.x0</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#mikeio.Dfs2.y0"><code class="docutils literal notranslate"><span class="pre">Dfs2.y0</span></code></a></li>
-</ul>
-</li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="#grid2d-api">Grid2D API</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#mikeio.Grid2D"><code class="docutils literal notranslate"><span class="pre">Grid2D</span></code></a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#mikeio.Grid2D.bbox"><code class="docutils literal notranslate"><span class="pre">Grid2D.bbox</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#mikeio.Grid2D.contains"><code class="docutils literal notranslate"><span class="pre">Grid2D.contains()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#mikeio.Grid2D.coordinates"><code class="docutils literal notranslate"><span class="pre">Grid2D.coordinates</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#mikeio.Grid2D.dx"><code class="docutils literal notranslate"><span class="pre">Grid2D.dx</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#mikeio.Grid2D.dy"><code class="docutils literal notranslate"><span class="pre">Grid2D.dy</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#mikeio.Grid2D.find_index"><code class="docutils literal notranslate"><span class="pre">Grid2D.find_index()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#mikeio.Grid2D.get_node_coordinates"><code class="docutils literal notranslate"><span class="pre">Grid2D.get_node_coordinates()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#mikeio.Grid2D.is_geo"><code class="docutils literal notranslate"><span class="pre">Grid2D.is_geo</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#mikeio.Grid2D.is_local_coordinates"><code class="docutils literal notranslate"><span class="pre">Grid2D.is_local_coordinates</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#mikeio.Grid2D.isel"><code class="docutils literal notranslate"><span class="pre">Grid2D.isel()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#mikeio.Grid2D.nx"><code class="docutils literal notranslate"><span class="pre">Grid2D.nx</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#mikeio.Grid2D.ny"><code class="docutils literal notranslate"><span class="pre">Grid2D.ny</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#mikeio.Grid2D.orientation"><code class="docutils literal notranslate"><span class="pre">Grid2D.orientation</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#mikeio.Grid2D.origin"><code class="docutils literal notranslate"><span class="pre">Grid2D.origin</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#mikeio.Grid2D.projection"><code class="docutils literal notranslate"><span class="pre">Grid2D.projection</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#mikeio.Grid2D.projection_string"><code class="docutils literal notranslate"><span class="pre">Grid2D.projection_string</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#mikeio.Grid2D.to_geometryFM"><code class="docutils literal notranslate"><span class="pre">Grid2D.to_geometryFM()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#mikeio.Grid2D.to_mesh"><code class="docutils literal notranslate"><span class="pre">Grid2D.to_mesh()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#mikeio.Grid2D.x"><code class="docutils literal notranslate"><span class="pre">Grid2D.x</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#mikeio.Grid2D.xy"><code class="docutils literal notranslate"><span class="pre">Grid2D.xy</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#mikeio.Grid2D.y"><code class="docutils literal notranslate"><span class="pre">Grid2D.y</span></code></a></li>
-</ul>
-</li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="#dataarray-plotter-grid2d-api">DataArray Plotter Grid2D API</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#mikeio.dataset._data_plot._DataArrayPlotterGrid2D"><code class="docutils literal notranslate"><span class="pre">_DataArrayPlotterGrid2D</span></code></a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#mikeio.dataset._data_plot._DataArrayPlotterGrid2D.contour"><code class="docutils literal notranslate"><span class="pre">_DataArrayPlotterGrid2D.contour()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#mikeio.dataset._data_plot._DataArrayPlotterGrid2D.contourf"><code class="docutils literal notranslate"><span class="pre">_DataArrayPlotterGrid2D.contourf()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#mikeio.dataset._data_plot._DataArrayPlotterGrid2D.hist"><code class="docutils literal notranslate"><span class="pre">_DataArrayPlotterGrid2D.hist()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#mikeio.dataset._data_plot._DataArrayPlotterGrid2D.line"><code class="docutils literal notranslate"><span class="pre">_DataArrayPlotterGrid2D.line()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#mikeio.dataset._data_plot._DataArrayPlotterGrid2D.pcolormesh"><code class="docutils literal notranslate"><span class="pre">_DataArrayPlotterGrid2D.pcolormesh()</span></code></a></li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="dfs3.html">Dfs3</a></li>
-<li class="toctree-l1"><a class="reference internal" href="dfsu-mesh-overview.html">Dfsu and Mesh Overview</a></li>
-<li class="toctree-l1"><a class="reference internal" href="mesh.html">Mesh</a></li>
-<li class="toctree-l1"><a class="reference internal" href="dfsu-2d.html">Dfsu 2D</a></li>
-<li class="toctree-l1"><a class="reference internal" href="dfsu-3d.html">Dfsu 3D</a></li>
-<li class="toctree-l1"><a class="reference internal" href="dfsu-1dv-vertical-column.html">Dfsu 1DV Vertical Column</a></li>
-<li class="toctree-l1"><a class="reference internal" href="dfsu-2dv-vertical-profile.html">Dfsu 2DV Vertical Profile</a></li>
-<li class="toctree-l1"><a class="reference internal" href="dfsu-spectral.html">Dfsu Spectral</a></li>
-<li class="toctree-l1"><a class="reference internal" href="eum.html">EUM</a></li>
-<li class="toctree-l1"><a class="reference internal" href="pfs.html">Pfs</a></li>
-<li class="toctree-l1"><a class="reference internal" href="generic.html">Generic</a></li>
-</ul>
-
-        </div>
-      </div>
+      </div> <!-- /container-fluid -->
     </nav>
-
-    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
-          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-          <a href="index.html">MIKE IO</a>
-      </nav>
-
-      <div class="wy-nav-content">
-        <div class="rst-content">
-          <div role="navigation" aria-label="Page navigation">
-  <ul class="wy-breadcrumbs">
-      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
-      <li class="breadcrumb-item active">Dfs2</li>
-      <li class="wy-breadcrumbs-aside">
-            <a href="_sources/dfs2.md.txt" rel="nofollow"> View page source</a>
-      </li>
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <a class="flex-grow-1 no-decor" role="button" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+          <h1 class="quarto-secondary-nav-title">Dfs2</h1>
+        </a>     
+      <button type="button" class="btn quarto-search-button" aria-label="" onclick="window.quartoOpenSearch();">
+        <i class="bi bi-search"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation docked overflow-auto">
+        <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="Search"></div>
+        </div>
+        </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="./user-guide/getting-started.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">User Guide</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./user-guide/getting-started.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Getting started</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./user-guide/data-structures.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Data Structures</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./user-guide/dataarray.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"> DataArray</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./user-guide/dataset.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"> Dataset</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./user-guide/dfs0.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Dfs0</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./user-guide/dfs1.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Dfs1</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./user-guide/dfs2.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Dfs2</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./user-guide/dfsu.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Dfsu and Mesh Overview</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./user-guide/eum.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">EUM</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./user-guide/generic.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Generic</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./user-guide/pfs.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Pfs</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="./examples/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Examples</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./examples/Dfsu-2D-interpolation.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Dfsu - 2D interpolation</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./examples/Time-interpolation.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Time interpolation</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./examples/Generic.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Generic dfs processing</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./api/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">API Reference</span></a>
+  </div>
+</li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#dfs2" id="toc-dfs2" class="nav-link active" data-scroll-target="#dfs2">Dfs2</a>
+  <ul class="collapse">
+  <li><a href="#subset-in-space" id="toc-subset-in-space" class="nav-link" data-scroll-target="#subset-in-space">Subset in space</a></li>
+  <li><a href="#grid2d" id="toc-grid2d" class="nav-link" data-scroll-target="#grid2d">Grid2D</a></li>
+  <li><a href="#dfs2-example-notebooks" id="toc-dfs2-example-notebooks" class="nav-link" data-scroll-target="#dfs2-example-notebooks">Dfs2 Example notebooks</a></li>
+  </ul></li>
   </ul>
-  <hr/>
+<div class="toc-actions"><ul><li><a href="https://github.dev/DHI/mikeio/blob/main/docs/dfs2.ipynb" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li></ul></div></nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title d-none d-lg-block">Dfs2</h1>
 </div>
-          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
-           <div itemprop="articleBody">
-             
-  <section id="dfs2">
-<h1>Dfs2<a class="headerlink" href="#dfs2" title="Link to this heading"></a></h1>
-<p>A dfs2 file is also called a grid series file. Values in a dfs2 file are ‘element based’, i.e. values are defined in the centre of each grid cell.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">mikeio</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">ds</span> <span class="o">=</span> <span class="n">mikeio</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="s2">&quot;gebco_sound.dfs2&quot;</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">ds</span>
-<span class="go">&lt;mikeio.Dataset&gt;</span>
-<span class="go">dims: (time:1, y:264, x:216)</span>
-<span class="go">time: 2020-05-15 11:04:52 (time-invariant)</span>
-<span class="go">geometry: Grid2D (ny=264, nx=216)</span>
-<span class="go">items:</span>
-<span class="go">  0:  Elevation &lt;Total Water Depth&gt; (meter)</span>
-</pre></div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<section id="dfs2" class="level1">
+<h1>Dfs2</h1>
+<p>A dfs2 file is also called a grid series file. Values in a dfs2 file are ‘element based’, i.e.&nbsp;values are defined in the centre of each grid cell.</p>
+<div id="cf4eb7cd" class="cell">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> mikeio</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>ds <span class="op">=</span> mikeio.read(<span class="st">"data/gebco_sound.dfs2"</span>)</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>ds</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<section id="subset-in-space">
-<h2>Subset in space<a class="headerlink" href="#subset-in-space" title="Link to this heading"></a></h2>
-<p>The most convenient way to subset in space is to use the <code class="docutils literal notranslate"><span class="pre">sel</span></code> method, which returns a new (smaller) dataset, which can be further processed or written to disk using the <code class="docutils literal notranslate"><span class="pre">to_dfs</span></code> method.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">ds</span><span class="o">.</span><span class="n">geometry</span>
-<span class="go">&lt;mikeio.Grid2D&gt;</span>
-<span class="go">x: [12.2, 12.21, ..., 13.1] (nx=216, dx=0.004167)</span>
-<span class="go">y: [55.2, 55.21, ..., 56.3] (ny=264, dy=0.004167)</span>
-<span class="go">projection: LONG/LAT</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">ds_aoi</span> <span class="o">=</span> <span class="n">ds</span><span class="o">.</span><span class="n">sel</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="nb">slice</span><span class="p">(</span><span class="mf">12.5</span><span class="p">,</span> <span class="mf">13.0</span><span class="p">),</span> <span class="n">y</span><span class="o">=</span><span class="nb">slice</span><span class="p">(</span><span class="mf">55.5</span><span class="p">,</span> <span class="mf">56.0</span><span class="p">))</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">ds_aoi</span><span class="o">.</span><span class="n">geometry</span>
-<span class="go">&lt;mikeio.Grid2D&gt;</span>
-<span class="go">x: [12.5, 12.5, ..., 12.99] (nx=120, dx=0.004167)</span>
-<span class="go">y: [55.5, 55.5, ..., 55.99] (ny=120, dy=0.004167)</span>
-<span class="go">projection: LONG/LAT</span>
-</pre></div>
+<section id="subset-in-space" class="level2">
+<h2 class="anchored" data-anchor-id="subset-in-space">Subset in space</h2>
+<p>The most convenient way to subset in space is to use the <code>sel</code> method, which returns a new (smaller) dataset, which can be further processed or written to disk using the <code>to_dfs</code> method.</p>
+<div id="d583110f" class="cell">
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>ds.geometry</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<p>In order to specify an open-ended subset (i.e. where the end of the subset is the end of the domain), use <code class="docutils literal notranslate"><span class="pre">None</span></code> as the end of the slice.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">ds</span><span class="o">.</span><span class="n">sel</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="nb">slice</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span><span class="mf">13.0</span><span class="p">))</span>
-<span class="go">&lt;mikeio.Dataset&gt;</span>
-<span class="go">dims: (time:1, y:264, x:191)</span>
-<span class="go">time: 2020-05-15 11:04:52 (time-invariant)</span>
-<span class="go">geometry: Grid2D (ny=264, nx=191)</span>
-<span class="go">items:</span>
-<span class="go">  0:  Elevation &lt;Total Water Depth&gt; (meter)</span>
-</pre></div>
+<div id="9cc2c8ba" class="cell">
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>ds_aoi <span class="op">=</span> ds.sel(x<span class="op">=</span><span class="bu">slice</span>(<span class="fl">12.5</span>, <span class="fl">13.0</span>), y<span class="op">=</span><span class="bu">slice</span>(<span class="fl">55.5</span>, <span class="fl">56.0</span>))</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>ds_aoi.geometry</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>In order to specify an open-ended subset (i.e.&nbsp;where the end of the subset is the end of the domain), use <code>None</code> as the end of the slice.</p>
+<div id="ed58485f" class="cell">
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>ds.sel(x<span class="op">=</span><span class="bu">slice</span>(<span class="va">None</span>, <span class="fl">13.0</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </section>
-<section id="grid2d">
-<h2>Grid2D<a class="headerlink" href="#grid2d" title="Link to this heading"></a></h2>
-<p>The spatial information is available in the <code class="docutils literal notranslate"><span class="pre">geometry</span></code> attribute (accessible from Dfs2, Dataset, and DataArray), which in the case of a dfs2 file is a <a class="reference internal" href="#mikeio.Grid2D" title="mikeio.Grid2D"><span class="xref myst py py-class"><code class="docutils literal notranslate"><span class="pre">Grid2D</span></code></span></a> geometry.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">ds</span><span class="o">.</span><span class="n">geometry</span>
-<span class="go">&lt;mikeio.Grid2D&gt;</span>
-<span class="go">x: [12.2, 12.21, ..., 13.1] (nx=216, dx=0.004167)</span>
-<span class="go">y: [55.2, 55.21, ..., 56.3] (ny=264, dy=0.004167)</span>
-<span class="go">projection: LONG/LAT</span>
-</pre></div>
+<section id="grid2d" class="level2">
+<h2 class="anchored" data-anchor-id="grid2d">Grid2D</h2>
+<p>The spatial information is available in the <code>geometry</code> attribute (accessible from Dfs2, Dataset, and DataArray), which in the case of a dfs2 file is a <a href="./api/Grid2D.html#mikeio.Grid2D"><code>Grid2D</code></a> geometry.</p>
+<div id="02cf910d" class="cell">
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>ds.geometry</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>Grid2D’s primary properties and methods are:</p>
-<ul class="simple">
-<li><p><code class="docutils literal notranslate"><span class="pre">x</span></code></p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">nx</span></code></p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">dx</span></code></p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">y</span></code></p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">ny</span></code></p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">dy</span></code></p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">origin</span></code></p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">projection</span></code></p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">xy</span></code></p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">bbox</span></code></p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">contains()</span></code></p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">find_index()</span></code></p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">isel()</span></code></p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">to_mesh()</span></code></p></li>
+<ul>
+<li><code>x</code></li>
+<li><code>nx</code></li>
+<li><code>dx</code></li>
+<li><code>y</code></li>
+<li><code>ny</code></li>
+<li><code>dy</code></li>
+<li><code>origin</code></li>
+<li><code>projection</code></li>
+<li><code>xy</code></li>
+<li><code>bbox</code></li>
+<li><code>contains()</code></li>
+<li><code>find_index()</code></li>
+<li><code>isel()</code></li>
+<li><code>to_mesh()</code></li>
 </ul>
-<p>See <a class="reference internal" href="#mikeio.Grid2D" title="mikeio.Grid2D"><span class="xref myst py py-class">API specification</span></a> below for details.</p>
+<p>See <a href="./api/Grid2D.html#mikeio.Grid2D">API specification</a> for details.</p>
 </section>
-<section id="dfs2-example-notebooks">
-<h2>Dfs2 Example notebooks<a class="headerlink" href="#dfs2-example-notebooks" title="Link to this heading"></a></h2>
-<ul class="simple">
-<li><p><a class="reference external" href="https://dhi.github.io/getting-started-with-mikeio/dfs2.html">Dfs2 | getting-started-with-mikeio</a></p></li>
-<li><p><a class="reference external" href="https://nbviewer.jupyter.org/github/DHI/mikeio/blob/main/notebooks/Dfs2%20-%20Bathymetry.ipynb">Dfs2-Bathymetry</a> - GEBCO NetCDF/xarray to dfs2</p></li>
-<li><p><a class="reference external" href="https://nbviewer.jupyter.org/github/DHI/mikeio/blob/main/notebooks/Dfs2%20-%20Boundary.ipynb">Dfs2-Boundary</a> - Vertical transect dfs2, interpolation in time</p></li>
-<li><p><a class="reference external" href="https://nbviewer.jupyter.org/github/DHI/mikeio/blob/main/notebooks/Dfs2%20-%20Export%20to%20netcdf.ipynb">Dfs2-Export-to-netCDF</a> Export dfs2 to NetCDF</p></li>
-<li><p><a class="reference external" href="https://nbviewer.jupyter.org/github/DHI/mikeio/blob/main/notebooks/Dfs2%20-%20Global%20Forecasting%20System.ipynb">Dfs2-GFS</a> - GFS NetCDF/xarray to dfs2</p></li>
-<li><p><a class="reference external" href="https://nbviewer.jupyter.org/github/DHI/mikeio/blob/main/notebooks/Dfs2%20-%20Sea%20surface%20temperature.ipynb">Dfs2-SST</a> - DMI NetCDF/xarray to dfs2</p></li>
+<section id="dfs2-example-notebooks" class="level2">
+<h2 class="anchored" data-anchor-id="dfs2-example-notebooks">Dfs2 Example notebooks</h2>
+<ul>
+<li><a href="https://dhi.github.io/getting-started-with-mikeio/dfs2.html">Dfs2 | getting-started-with-mikeio</a></li>
+<li><a href="https://nbviewer.jupyter.org/github/DHI/mikeio/blob/main/notebooks/Dfs2%20-%20Bathymetry.ipynb">Dfs2-Bathymetry</a> - GEBCO NetCDF/xarray to dfs2</li>
+<li><a href="https://nbviewer.jupyter.org/github/DHI/mikeio/blob/main/notebooks/Dfs2%20-%20Boundary.ipynb">Dfs2-Boundary</a> - Vertical transect dfs2, interpolation in time</li>
+<li><a href="https://nbviewer.jupyter.org/github/DHI/mikeio/blob/main/notebooks/Dfs2%20-%20Export%20to%20netcdf.ipynb">Dfs2-Export-to-netCDF</a> Export dfs2 to NetCDF</li>
+<li><a href="https://nbviewer.jupyter.org/github/DHI/mikeio/blob/main/notebooks/Dfs2%20-%20Global%20Forecasting%20System.ipynb">Dfs2-GFS</a> - GFS NetCDF/xarray to dfs2</li>
+<li><a href="https://nbviewer.jupyter.org/github/DHI/mikeio/blob/main/notebooks/Dfs2%20-%20Sea%20surface%20temperature.ipynb">Dfs2-SST</a> - DMI NetCDF/xarray to dfs2</li>
 </ul>
-</section>
-<section id="dfs2-api">
-<h2>Dfs2 API<a class="headerlink" href="#dfs2-api" title="Link to this heading"></a></h2>
-<dl class="py class">
-<dt class="sig sig-object py" id="mikeio.Dfs2">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mikeio.</span></span><span class="sig-name descname"><span class="pre">Dfs2</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'horizontal'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mikeio/dfs/_dfs2.html#Dfs2"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mikeio.Dfs2" title="Link to this definition"></a></dt>
-<dd><dl class="py method">
-<dt class="sig sig-object py" id="mikeio.Dfs2.close">
-<span class="sig-name descname"><span class="pre">close</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.Dfs2.close" title="Link to this definition"></a></dt>
-<dd><p>Finalize write for a dfs file opened with <cite>write(…,keep_open=True)</cite></p>
-</dd></dl>
 
-<dl class="py property">
-<dt class="sig sig-object py" id="mikeio.Dfs2.deletevalue">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">deletevalue</span></span><a class="headerlink" href="#mikeio.Dfs2.deletevalue" title="Link to this definition"></a></dt>
-<dd><p>File delete value</p>
-</dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py" id="mikeio.Dfs2.dx">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">dx</span></span><a class="headerlink" href="#mikeio.Dfs2.dx" title="Link to this definition"></a></dt>
-<dd><p>Step size in x direction</p>
-</dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py" id="mikeio.Dfs2.dy">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">dy</span></span><a class="headerlink" href="#mikeio.Dfs2.dy" title="Link to this definition"></a></dt>
-<dd><p>Step size in y direction</p>
-</dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py" id="mikeio.Dfs2.end_time">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">end_time</span></span><a class="headerlink" href="#mikeio.Dfs2.end_time" title="Link to this definition"></a></dt>
-<dd><p>File end time</p>
-</dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py" id="mikeio.Dfs2.is_geo">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">is_geo</span></span><a class="headerlink" href="#mikeio.Dfs2.is_geo" title="Link to this definition"></a></dt>
-<dd><p>Are coordinates geographical (LONG/LAT)?</p>
-</dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py" id="mikeio.Dfs2.items">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">items</span></span><a class="headerlink" href="#mikeio.Dfs2.items" title="Link to this definition"></a></dt>
-<dd><p>List of items</p>
-</dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py" id="mikeio.Dfs2.latitude">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">latitude</span></span><a class="headerlink" href="#mikeio.Dfs2.latitude" title="Link to this definition"></a></dt>
-<dd><p>Origin latitude</p>
-</dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py" id="mikeio.Dfs2.longitude">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">longitude</span></span><a class="headerlink" href="#mikeio.Dfs2.longitude" title="Link to this definition"></a></dt>
-<dd><p>Origin longitude</p>
-</dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py" id="mikeio.Dfs2.n_items">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">n_items</span></span><a class="headerlink" href="#mikeio.Dfs2.n_items" title="Link to this definition"></a></dt>
-<dd><p>Number of items</p>
-</dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py" id="mikeio.Dfs2.n_timesteps">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">n_timesteps</span></span><a class="headerlink" href="#mikeio.Dfs2.n_timesteps" title="Link to this definition"></a></dt>
-<dd><p>Number of time steps</p>
-</dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py" id="mikeio.Dfs2.nx">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">nx</span></span><a class="headerlink" href="#mikeio.Dfs2.nx" title="Link to this definition"></a></dt>
-<dd><p>Number of values in the x-direction</p>
-</dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py" id="mikeio.Dfs2.ny">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ny</span></span><a class="headerlink" href="#mikeio.Dfs2.ny" title="Link to this definition"></a></dt>
-<dd><p>Number of values in the y-direction</p>
-</dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py" id="mikeio.Dfs2.orientation">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">orientation</span></span><a class="headerlink" href="#mikeio.Dfs2.orientation" title="Link to this definition"></a></dt>
-<dd><p>Orientation (in own CRS)</p>
-</dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py" id="mikeio.Dfs2.origin">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">origin</span></span><a class="headerlink" href="#mikeio.Dfs2.origin" title="Link to this definition"></a></dt>
-<dd><p>Origin (in own CRS)</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="mikeio.Dfs2.read">
-<span class="sig-name descname"><span class="pre">read</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">items=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">time=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">area=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">keepdims=False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dtype=&lt;class</span> <span class="pre">'numpy.float32'&gt;</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mikeio/dfs/_dfs2.html#Dfs2.read"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mikeio.Dfs2.read" title="Link to this definition"></a></dt>
-<dd><p>Read data from a dfs2 file</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>items</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">list[int]</span></code> or <code class="xref py py-class docutils literal notranslate"><span class="pre">list[str]</span></code>, <em>optional</em>) – Read only selected items, by number (0-based), or by name</p></li>
-<li><p><strong>time</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">datetime</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">pd.TimeStamp</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">sequence</span></code>, <a class="reference external" href="https://docs.python.org/3/library/functions.html#slice" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">slice</span></code></a> or <code class="xref py py-class docutils literal notranslate"><span class="pre">pd.DatetimeIndex</span></code>, <em>optional</em>) – Read only selected time steps, by default None (=all)</p></li>
-<li><p><strong>keepdims</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a>, <em>optional</em>) – When reading a single time step only, should the time-dimension be kept
-in the returned Dataset? by default: False</p></li>
-<li><p><strong>area</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">array[float]</span></code>, <em>optional</em>) – Read only data inside (horizontal) area given as a
-bounding box (tuple with left, lower, right, upper) coordinates</p></li>
-<li><p><strong>dtype</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">data-type</span></code>, <em>optional</em>) – Define the dtype of the returned dataset (default = np.float32)</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference internal" href="dataset.html#mikeio.Dataset" title="mikeio.Dataset"><code class="xref py py-class docutils literal notranslate"><span class="pre">Dataset</span></code></a></p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py" id="mikeio.Dfs2.shape">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">shape</span></span><a class="headerlink" href="#mikeio.Dfs2.shape" title="Link to this definition"></a></dt>
-<dd><p>Tuple with number of values in the t-, y-, x-direction</p>
-</dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py" id="mikeio.Dfs2.start_time">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">start_time</span></span><a class="headerlink" href="#mikeio.Dfs2.start_time" title="Link to this definition"></a></dt>
-<dd><p>File start time</p>
-</dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py" id="mikeio.Dfs2.time">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">time</span></span><a class="headerlink" href="#mikeio.Dfs2.time" title="Link to this definition"></a></dt>
-<dd><p>File all datetimes</p>
-</dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py" id="mikeio.Dfs2.timestep">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">timestep</span></span><a class="headerlink" href="#mikeio.Dfs2.timestep" title="Link to this definition"></a></dt>
-<dd><p>Time step size in seconds</p>
-</dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py" id="mikeio.Dfs2.x0">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">x0</span></span><a class="headerlink" href="#mikeio.Dfs2.x0" title="Link to this definition"></a></dt>
-<dd><p>Start point of x values (often 0)</p>
-</dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py" id="mikeio.Dfs2.y0">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">y0</span></span><a class="headerlink" href="#mikeio.Dfs2.y0" title="Link to this definition"></a></dt>
-<dd><p>Start point of y values (often 0)</p>
-</dd></dl>
-
-</dd></dl>
-
-</section>
-<section id="grid2d-api">
-<h2>Grid2D API<a class="headerlink" href="#grid2d-api" title="Link to this heading"></a></h2>
-<dl class="py class">
-<dt class="sig sig-object py" id="mikeio.Grid2D">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mikeio.</span></span><span class="sig-name descname"><span class="pre">Grid2D</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x0</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dx</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nx</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y0</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dy</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ny</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bbox</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">projection</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'NON-UTM'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">origin</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">orientation</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">axis_names</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">('x',</span> <span class="pre">'y')</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_spectral</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mikeio/spatial/_grid_geometry.html#Grid2D"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mikeio.Grid2D" title="Link to this definition"></a></dt>
-<dd><p>2D grid
-Origin in the center of cell in lower-left corner
-x and y axes are increasing and equidistant</p>
-<dl class="py property">
-<dt class="sig sig-object py" id="mikeio.Grid2D.bbox">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">bbox</span></span><a class="headerlink" href="#mikeio.Grid2D.bbox" title="Link to this definition"></a></dt>
-<dd><p>bounding box (left, bottom, right, top)
-Note: not the same as the cell center values (x0,y0,x1,y1)!</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="mikeio.Grid2D.contains">
-<span class="sig-name descname"><span class="pre">contains</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">coords</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mikeio/spatial/_grid_geometry.html#Grid2D.contains"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mikeio.Grid2D.contains" title="Link to this definition"></a></dt>
-<dd><p>test if a list of points are inside grid</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>coords</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">array(float)</span></code>) – xy-coordinate of points given as n-by-2 array</p>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span> <span class="pre">array</span></code> – True for points inside, False otherwise</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py" id="mikeio.Grid2D.coordinates">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">coordinates</span></span><a class="headerlink" href="#mikeio.Grid2D.coordinates" title="Link to this definition"></a></dt>
-<dd><p>n-by-2 array of x- and y-coordinates</p>
-</dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py" id="mikeio.Grid2D.dx">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">dx</span></span><a class="headerlink" href="#mikeio.Grid2D.dx" title="Link to this definition"></a></dt>
-<dd><p>x grid spacing</p>
-</dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py" id="mikeio.Grid2D.dy">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">dy</span></span><a class="headerlink" href="#mikeio.Grid2D.dy" title="Link to this definition"></a></dt>
-<dd><p>y grid spacing</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="mikeio.Grid2D.find_index">
-<span class="sig-name descname"><span class="pre">find_index</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">coords</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">area</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mikeio/spatial/_grid_geometry.html#Grid2D.find_index"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mikeio.Grid2D.find_index" title="Link to this definition"></a></dt>
-<dd><p>Find nearest index (i,j) of point(s)</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>x</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a>) – x-coordinate of point</p></li>
-<li><p><strong>y</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a>) – y-coordinate of point</p></li>
-<li><p><strong>coords</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">array(float)</span></code>) – xy-coordinate of points given as n-by-2 array</p></li>
-<li><p><strong>area</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">array(float)</span></code>) – xy-coordinates of bounding box</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">array(int)</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">array(int)</span></code> – i- and j-index of nearest cell</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="mikeio.Grid2D.get_node_coordinates">
-<span class="sig-name descname"><span class="pre">get_node_coordinates</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/mikeio/spatial/_grid_geometry.html#Grid2D.get_node_coordinates"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mikeio.Grid2D.get_node_coordinates" title="Link to this definition"></a></dt>
-<dd><p>node coordinates for this grid</p>
-<dl class="field-list simple">
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">array(float)</span></code> – 2d array with x,y-coordinates, length=(nx+1)*(ny+1)</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py" id="mikeio.Grid2D.is_geo">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">is_geo</span></span><a class="headerlink" href="#mikeio.Grid2D.is_geo" title="Link to this definition"></a></dt>
-<dd><p>Are coordinates geographical (LONG/LAT)?</p>
-</dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py" id="mikeio.Grid2D.is_local_coordinates">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">is_local_coordinates</span></span><a class="headerlink" href="#mikeio.Grid2D.is_local_coordinates" title="Link to this definition"></a></dt>
-<dd><p>Are coordinates relative (NON-UTM)?</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="mikeio.Grid2D.isel">
-<span class="sig-name descname"><span class="pre">isel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">idx</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">axis</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mikeio/spatial/_grid_geometry.html#Grid2D.isel"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mikeio.Grid2D.isel" title="Link to this definition"></a></dt>
-<dd><p>Return a new geometry as a subset of Grid2D along the given axis.</p>
-</dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py" id="mikeio.Grid2D.nx">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">nx</span></span><a class="headerlink" href="#mikeio.Grid2D.nx" title="Link to this definition"></a></dt>
-<dd><p>number of x grid points</p>
-</dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py" id="mikeio.Grid2D.ny">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ny</span></span><a class="headerlink" href="#mikeio.Grid2D.ny" title="Link to this definition"></a></dt>
-<dd><p>number of y grid points</p>
-</dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py" id="mikeio.Grid2D.orientation">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">orientation</span></span><a class="headerlink" href="#mikeio.Grid2D.orientation" title="Link to this definition"></a></dt>
-<dd><p>Grid orientation</p>
-</dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py" id="mikeio.Grid2D.origin">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">origin</span></span><a class="headerlink" href="#mikeio.Grid2D.origin" title="Link to this definition"></a></dt>
-<dd><p>Coordinates of grid origo (in projection)</p>
-</dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py" id="mikeio.Grid2D.projection">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">projection</span></span><a class="headerlink" href="#mikeio.Grid2D.projection" title="Link to this definition"></a></dt>
-<dd><p>The projection</p>
-</dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py" id="mikeio.Grid2D.projection_string">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">projection_string</span></span><a class="headerlink" href="#mikeio.Grid2D.projection_string" title="Link to this definition"></a></dt>
-<dd><p>The projection string</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="mikeio.Grid2D.to_geometryFM">
-<span class="sig-name descname"><span class="pre">to_geometryFM</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">z</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">west</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">east</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">4</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">north</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">south</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">3</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mikeio/spatial/_grid_geometry.html#Grid2D.to_geometryFM"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mikeio.Grid2D.to_geometryFM" title="Link to this definition"></a></dt>
-<dd><p>convert Grid2D to GeometryFM</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>z</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a>, <em>optional</em>) – bathymetry values for each node, by default 0</p></li>
-<li><p><strong>west</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>, <em>optional</em>) – code value for west boundary</p></li>
-<li><p><strong>east</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>, <em>optional</em>) – code value for east boundary</p></li>
-<li><p><strong>north</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>, <em>optional</em>) – code value for north boundary</p></li>
-<li><p><strong>south</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>, <em>optional</em>) – code value for south boundary</p></li>
-</ul>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="mikeio.Grid2D.to_mesh">
-<span class="sig-name descname"><span class="pre">to_mesh</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">outfilename</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">z</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mikeio/spatial/_grid_geometry.html#Grid2D.to_mesh"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mikeio.Grid2D.to_mesh" title="Link to this definition"></a></dt>
-<dd><p>export grid to mesh file</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>outfilename</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>) – path of new mesh file</p></li>
-<li><p><strong>z</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a> or <code class="xref py py-class docutils literal notranslate"><span class="pre">array(float)</span></code>, <em>optional</em>) – bathymetry values for each node, by default 0
-if array: must have length=(nx+1)*(ny+1)</p></li>
-</ul>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py" id="mikeio.Grid2D.x">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">x</span></span><a class="headerlink" href="#mikeio.Grid2D.x" title="Link to this definition"></a></dt>
-<dd><p>array of x coordinates (element center)</p>
-</dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py" id="mikeio.Grid2D.xy">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">xy</span></span><a class="headerlink" href="#mikeio.Grid2D.xy" title="Link to this definition"></a></dt>
-<dd><p>n-by-2 array of x- and y-coordinates</p>
-</dd></dl>
-
-<dl class="py property">
-<dt class="sig sig-object py" id="mikeio.Grid2D.y">
-<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">y</span></span><a class="headerlink" href="#mikeio.Grid2D.y" title="Link to this definition"></a></dt>
-<dd><p>array of y coordinates (element center)</p>
-</dd></dl>
-
-</dd></dl>
-
-</section>
-<section id="dataarray-plotter-grid2d-api">
-<h2>DataArray Plotter Grid2D API<a class="headerlink" href="#dataarray-plotter-grid2d-api" title="Link to this heading"></a></h2>
-<p>A DataArray <code class="docutils literal notranslate"><span class="pre">da</span></code> with a Grid2D geometry can be plotted using <code class="docutils literal notranslate"><span class="pre">da.plot</span></code>.</p>
-<dl class="py class">
-<dt class="sig sig-object py" id="mikeio.dataset._data_plot._DataArrayPlotterGrid2D">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mikeio.dataset._data_plot.</span></span><span class="sig-name descname"><span class="pre">_DataArrayPlotterGrid2D</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">da</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mikeio/dataset/_data_plot.html#_DataArrayPlotterGrid2D"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mikeio.dataset._data_plot._DataArrayPlotterGrid2D" title="Link to this definition"></a></dt>
-<dd><p>Plot a DataArray with a Grid2D geometry</p>
-<p>If DataArray has multiple time steps, the first step will be plotted.</p>
-<p class="rubric">Examples</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">da</span> <span class="o">=</span> <span class="n">mikeio</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="s2">&quot;gebco_sound.dfs2&quot;</span><span class="p">)[</span><span class="s2">&quot;Elevation&quot;</span><span class="p">]</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">da</span><span class="o">.</span><span class="n">plot</span><span class="p">()</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">da</span><span class="o">.</span><span class="n">plot</span><span class="o">.</span><span class="n">contour</span><span class="p">()</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">da</span><span class="o">.</span><span class="n">plot</span><span class="o">.</span><span class="n">contourf</span><span class="p">()</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">da</span><span class="o">.</span><span class="n">plot</span><span class="o">.</span><span class="n">pcolormesh</span><span class="p">()</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">da</span><span class="o">.</span><span class="n">plot</span><span class="o">.</span><span class="n">hist</span><span class="p">()</span>
-</pre></div>
-</div>
-<dl class="py method">
-<dt class="sig sig-object py" id="mikeio.dataset._data_plot._DataArrayPlotterGrid2D.contour">
-<span class="sig-name descname"><span class="pre">contour</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">figsize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">title</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mikeio/dataset/_data_plot.html#_DataArrayPlotterGrid2D.contour"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mikeio.dataset._data_plot._DataArrayPlotterGrid2D.contour" title="Link to this definition"></a></dt>
-<dd><p>Plot data as contour lines</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="mikeio.dataset._data_plot._DataArrayPlotterGrid2D.contourf">
-<span class="sig-name descname"><span class="pre">contourf</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">figsize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">label</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">title</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mikeio/dataset/_data_plot.html#_DataArrayPlotterGrid2D.contourf"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mikeio.dataset._data_plot._DataArrayPlotterGrid2D.contourf" title="Link to this definition"></a></dt>
-<dd><p>Plot data as filled contours</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="mikeio.dataset._data_plot._DataArrayPlotterGrid2D.hist">
-<span class="sig-name descname"><span class="pre">hist</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">figsize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">title</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.dataset._data_plot._DataArrayPlotterGrid2D.hist" title="Link to this definition"></a></dt>
-<dd><p>Plot DataArray as histogram (using ax.hist)</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>bins</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a> or <code class="xref py py-class docutils literal notranslate"><span class="pre">sequence</span></code> or <code class="xref py py-class docutils literal notranslate"><span class="pre">str,</span></code>) – If bins is an integer, it defines the number
-of equal-width bins in the range.
-If bins is a sequence, it defines the bin edges,
-including the left edge of the first bin and the
-right edge of the last bin.
-by default: rcParams[“hist.bins”] (default: 10)</p></li>
-<li><p><strong>ax</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">matplotlib.axes</span></code>, <em>optional</em>) – Adding to existing axis, instead of creating new fig</p></li>
-<li><p><strong>figsize</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">(float</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">float)</span></code>, <em>optional</em>) – specify size of figure</p></li>
-<li><p><strong>title</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.12)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <em>optional</em>) – axes title</p></li>
-</ul>
-</dd>
-</dl>
-<div class="admonition seealso">
-<p class="admonition-title">See also</p>
-<p><a class="reference external" href="https://matplotlib.org/stable/api/_as_gen/matplotlib.pyplot.hist.html#matplotlib.pyplot.hist" title="(in Matplotlib v3.8.3)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">matplotlib.pyplot.hist</span></code></a></p>
-</div>
-<dl class="field-list simple">
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">&lt;matplotlib.axes&gt;</span></code></p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="mikeio.dataset._data_plot._DataArrayPlotterGrid2D.line">
-<span class="sig-name descname"><span class="pre">line</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">figsize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mikeio.dataset._data_plot._DataArrayPlotterGrid2D.line" title="Link to this definition"></a></dt>
-<dd><p>Plot data as lines (timeseries if time is present)</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="mikeio.dataset._data_plot._DataArrayPlotterGrid2D.pcolormesh">
-<span class="sig-name descname"><span class="pre">pcolormesh</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">figsize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">label</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">title</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mikeio/dataset/_data_plot.html#_DataArrayPlotterGrid2D.pcolormesh"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mikeio.dataset._data_plot._DataArrayPlotterGrid2D.pcolormesh" title="Link to this definition"></a></dt>
-<dd><p>Plot data as coloured patches</p>
-</dd></dl>
-
-</dd></dl>
 
 </section>
 </section>
 
-
-           </div>
-          </div>
-          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="dfs1.html" class="btn btn-neutral float-left" title="Dfs1" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="dfs3.html" class="btn btn-neutral float-right" title="Dfs3" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
-    </div>
-
-  <hr/>
-
-  <div role="contentinfo">
-    <p>&#169; Copyright 2023, DHI.</p>
-  </div>
-
-  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
-    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
-    provided by <a href="https://readthedocs.org">Read the Docs</a>.
-   
-
-</footer>
-        </div>
-      </div>
-    </section>
-  </div>
-  <script>
-      jQuery(function () {
-          SphinxRtdTheme.Navigation.enable(true);
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    text: function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+    const config = {
+      allowHTML: true,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start',
+    };
+    if (contentFn) {
+      config.content = contentFn;
+    }
+    if (onTriggerFn) {
+      config.onTrigger = onTriggerFn;
+    }
+    if (onUntriggerFn) {
+      config.onUntrigger = onUntriggerFn;
+    }
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      return note.innerHTML;
+    });
+  }
+  const xrefs = window.document.querySelectorAll('a.quarto-xref');
+  const processXRef = (id, note) => {
+    // Strip column container classes
+    const stripColumnClz = (el) => {
+      el.classList.remove("page-full", "page-columns");
+      if (el.children) {
+        for (const child of el.children) {
+          stripColumnClz(child);
+        }
+      }
+    }
+    stripColumnClz(note)
+    if (id === null || id.startsWith('sec-')) {
+      // Special case sections, only their first couple elements
+      const container = document.createElement("div");
+      if (note.children && note.children.length > 2) {
+        container.appendChild(note.children[0].cloneNode(true));
+        for (let i = 1; i < note.children.length; i++) {
+          const child = note.children[i];
+          if (child.tagName === "P" && child.innerText === "") {
+            continue;
+          } else {
+            container.appendChild(child.cloneNode(true));
+            break;
+          }
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(container);
+        }
+        return container.innerHTML
+      } else {
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        return note.innerHTML;
+      }
+    } else {
+      // Remove any anchor links if they are present
+      const anchorLink = note.querySelector('a.anchorjs-link');
+      if (anchorLink) {
+        anchorLink.remove();
+      }
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(note);
+      }
+      // TODO in 1.5, we should make sure this works without a callout special case
+      if (note.classList.contains("callout")) {
+        return note.outerHTML;
+      } else {
+        return note.innerHTML;
+      }
+    }
+  }
+  for (var i=0; i<xrefs.length; i++) {
+    const xref = xrefs[i];
+    tippyHover(xref, undefined, function(instance) {
+      instance.disable();
+      let url = xref.getAttribute('href');
+      let hash = undefined; 
+      if (url.startsWith('#')) {
+        hash = url;
+      } else {
+        try { hash = new URL(url).hash; } catch {}
+      }
+      if (hash) {
+        const id = hash.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note !== null) {
+          try {
+            const html = processXRef(id, note.cloneNode(true));
+            instance.setContent(html);
+          } finally {
+            instance.enable();
+            instance.show();
+          }
+        } else {
+          // See if we can fetch this
+          fetch(url.split('#')[0])
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.getElementById(id);
+            if (note !== null) {
+              const html = processXRef(id, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      } else {
+        // See if we can fetch a full url (with no hash to target)
+        // This is a special case and we should probably do some content thinning / targeting
+        fetch(url)
+        .then(res => res.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const htmlDoc = parser.parseFromString(html, "text/html");
+          const note = htmlDoc.querySelector('main.content');
+          if (note !== null) {
+            // This should only happen for chapter cross references
+            // (since there is no id in the URL)
+            // remove the first header
+            if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+              note.children[0].remove();
+            }
+            const html = processXRef(null, note);
+            instance.setContent(html);
+          } 
+        }).finally(() => {
+          instance.enable();
+          instance.show();
+        });
+      }
+    }, function(instance) {
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            div.style.left = 0;
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+        // Handle positioning of the toggle
+    window.addEventListener(
+      "resize",
+      throttle(() => {
+        elRect = undefined;
+        if (selectedAnnoteEl) {
+          selectCodeLines(selectedAnnoteEl);
+        }
+      }, 10)
+    );
+    function throttle(fn, ms) {
+    let throttle = false;
+    let timer;
+      return (...args) => {
+        if(!throttle) { // first call gets through
+            fn.apply(this, args);
+            throttle = true;
+        } else { // all the others get throttled
+            if(timer) clearTimeout(timer); // cancel #2
+            timer = setTimeout(() => {
+              fn.apply(this, args);
+              timer = throttle = false;
+            }, ms);
+        }
+      };
+    }
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
       });
-  </script> 
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+<footer class="footer">
+  <div class="nav-footer">
+    <div class="nav-footer-left">
+      &nbsp;
+    </div>   
+    <div class="nav-footer-center">
+<p>© 2024 DHI Group</p>
+<div class="toc-actions d-sm-block d-md-none"><ul><li><a href="https://github.dev/DHI/mikeio/blob/main/docs/dfs2.ipynb" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li></ul></div></div>
+    <div class="nav-footer-right">
+      &nbsp;
+    </div>
+  </div>
+</footer>
 
-</body>
-</html>
+
+
+
+</body></html>

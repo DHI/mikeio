@@ -57,24 +57,26 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </style>
 
 
-<script src="site_libs/quarto-nav/quarto-nav.js"></script>
-<script src="site_libs/quarto-nav/headroom.min.js"></script>
-<script src="site_libs/clipboard/clipboard.min.js"></script>
-<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
-<script src="site_libs/quarto-search/fuse.min.js"></script>
-<script src="site_libs/quarto-search/quarto-search.js"></script>
-<meta name="quarto:offset" content="./">
-<script src="site_libs/quarto-html/quarto.js"></script>
-<script src="site_libs/quarto-html/popper.min.js"></script>
-<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
-<script src="site_libs/quarto-html/anchor.min.js"></script>
-<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
-<script src="site_libs/bootstrap/bootstrap.min.js"></script>
-<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
-<link href="site_libs/quarto-contrib/fontawesome6-0.1.0/all.css" rel="stylesheet">
-<link href="site_libs/quarto-contrib/fontawesome6-0.1.0/latex-fontsize.css" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js" integrity="sha512-bLT0Qm9VnAYZDflyKcBaQ2gg0hSYNQrJ8RilYldYQ1FxQYoCLtUjuuRuZo+fjqhx/qtq/1itJ0C2ejDxltZVFg==" crossorigin="anonymous"></script><script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../">
+<link href="../examples/index.html" rel="next">
+<link href="../user-guide/generic.html" rel="prev">
+<script src="../site_libs/quarto-html/quarto.js"></script>
+<script src="../site_libs/quarto-html/popper.min.js"></script>
+<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<link href="../site_libs/quarto-contrib/fontawesome6-0.1.0/all.css" rel="stylesheet">
+<link href="../site_libs/quarto-contrib/fontawesome6-0.1.0/latex-fontsize.css" rel="stylesheet">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -102,6 +104,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     "search-label": "Search"
   }
 }</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" integrity="sha512-c3Nl8+7g4LMSTdrm621y7kf9v3SDPnhxLNhcjFJbKECVnmZHTdo+IRO05sNLTH/D3vA6u1X32ehoLC7WFVdheg==" crossorigin="anonymous"></script>
+
+<script type="application/javascript">define('jquery', [],function() {return window.jQuery;})</script>
 
 
 </head>
@@ -113,10 +118,10 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
       <div class="navbar-container container-fluid">
       <div class="navbar-brand-container mx-auto">
-    <a href="./index.html" class="navbar-brand navbar-brand-logo">
-    <img src="./MIKE-IO-Icon-Pos-RGB.png" alt="" class="navbar-logo">
+    <a href="../index.html" class="navbar-brand navbar-brand-logo">
+    <img src="../MIKE-IO-Icon-Pos-RGB.png" alt="" class="navbar-logo">
     </a>
-    <a class="navbar-brand" href="./index.html">
+    <a class="navbar-brand" href="../index.html">
     <span class="navbar-title">MIKE IO</span>
     </a>
   </div>
@@ -127,15 +132,15 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
           <div class="collapse navbar-collapse" id="navbarCollapse">
             <ul class="navbar-nav navbar-nav-scroll me-auto">
   <li class="nav-item">
-    <a class="nav-link active" href="./index.html" aria-current="page"> 
+    <a class="nav-link" href="../index.html"> 
 <span class="menu-text">Home</span></a>
   </li>  
   <li class="nav-item">
-    <a class="nav-link" href="./examples/index.html"> 
+    <a class="nav-link active" href="../examples/index.html" aria-current="page"> 
 <span class="menu-text">Examples</span></a>
   </li>  
   <li class="nav-item">
-    <a class="nav-link" href="./api/index.html"> 
+    <a class="nav-link" href="../api/index.html"> 
 <span class="menu-text">API Reference</span></a>
   </li>  
 </ul>
@@ -165,7 +170,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
         <i class="bi bi-layout-text-sidebar-reverse"></i>
       </button>
         <a class="flex-grow-1 no-decor" role="button" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
-          <h1 class="quarto-secondary-nav-title"></h1>
+          <h1 class="quarto-secondary-nav-title">Pfs</h1>
         </a>     
       <button type="button" class="btn quarto-search-button" aria-label="" onclick="window.quartoOpenSearch();">
         <i class="bi bi-search"></i>
@@ -186,7 +191,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     <ul class="list-unstyled mt-1">
         <li class="sidebar-item sidebar-item-section">
       <div class="sidebar-item-container"> 
-            <a href="./user-guide/getting-started.html" class="sidebar-item-text sidebar-link">
+            <a href="../user-guide/getting-started.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">User Guide</span></a>
           <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" aria-expanded="true" aria-label="Toggle section">
             <i class="bi bi-chevron-right ms-2"></i>
@@ -195,67 +200,67 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
       <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="./user-guide/getting-started.html" class="sidebar-item-text sidebar-link">
+  <a href="../user-guide/getting-started.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">Getting started</span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="./user-guide/data-structures.html" class="sidebar-item-text sidebar-link">
+  <a href="../user-guide/data-structures.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">Data Structures</span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="./user-guide/dataarray.html" class="sidebar-item-text sidebar-link">
+  <a href="../user-guide/dataarray.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text"> DataArray</span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="./user-guide/dataset.html" class="sidebar-item-text sidebar-link">
+  <a href="../user-guide/dataset.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text"> Dataset</span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="./user-guide/dfs0.html" class="sidebar-item-text sidebar-link">
+  <a href="../user-guide/dfs0.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">Dfs0</span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="./user-guide/dfs1.html" class="sidebar-item-text sidebar-link">
+  <a href="../user-guide/dfs1.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">Dfs1</span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="./user-guide/dfs2.html" class="sidebar-item-text sidebar-link">
+  <a href="../user-guide/dfs2.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">Dfs2</span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="./user-guide/dfsu.html" class="sidebar-item-text sidebar-link">
+  <a href="../user-guide/dfsu.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">Dfsu and Mesh Overview</span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="./user-guide/eum.html" class="sidebar-item-text sidebar-link">
+  <a href="../user-guide/eum.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">EUM</span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="./user-guide/generic.html" class="sidebar-item-text sidebar-link">
+  <a href="../user-guide/generic.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">Generic</span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="./user-guide/pfs.html" class="sidebar-item-text sidebar-link">
+  <a href="../user-guide/pfs.html" class="sidebar-item-text sidebar-link active">
  <span class="menu-text">Pfs</span></a>
   </div>
 </li>
@@ -263,7 +268,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   </li>
         <li class="sidebar-item sidebar-item-section">
       <div class="sidebar-item-container"> 
-            <a href="./examples/index.html" class="sidebar-item-text sidebar-link">
+            <a href="../examples/index.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">Examples</span></a>
           <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" aria-expanded="true" aria-label="Toggle section">
             <i class="bi bi-chevron-right ms-2"></i>
@@ -272,19 +277,19 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
       <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 show">  
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="./examples/Dfsu-2D-interpolation.html" class="sidebar-item-text sidebar-link">
+  <a href="../examples/Dfsu-2D-interpolation.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">Dfsu - 2D interpolation</span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="./examples/Time-interpolation.html" class="sidebar-item-text sidebar-link">
+  <a href="../examples/Time-interpolation.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">Time interpolation</span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="./examples/Generic.html" class="sidebar-item-text sidebar-link">
+  <a href="../examples/Generic.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">Generic dfs processing</span></a>
   </div>
 </li>
@@ -292,7 +297,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   </li>
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="./api/index.html" class="sidebar-item-text sidebar-link">
+  <a href="../api/index.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">API Reference</span></a>
   </div>
 </li>
@@ -306,79 +311,281 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     <h2 id="toc-title">On this page</h2>
    
   <ul>
-  <li><a href="#mike-io-inputoutput-of-mike-files-in-python" id="toc-mike-io-inputoutput-of-mike-files-in-python" class="nav-link active" data-scroll-target="#mike-io-inputoutput-of-mike-files-in-python">MIKE IO: input/output of MIKE files in Python</a>
+  <li><a href="#the-pfs-file" id="toc-the-pfs-file" class="nav-link active" data-scroll-target="#the-pfs-file">The PFS file</a></li>
+  <li><a href="#read" id="toc-read" class="nav-link" data-scroll-target="#read">Read</a>
   <ul class="collapse">
-  <li><a href="#requirements" id="toc-requirements" class="nav-link" data-scroll-target="#requirements">Requirements</a></li>
-  <li><a href="#installation" id="toc-installation" class="nav-link" data-scroll-target="#installation">Installation</a></li>
-  <li><a href="#getting-started" id="toc-getting-started" class="nav-link" data-scroll-target="#getting-started">Getting started</a></li>
-  <li><a href="#where-can-i-get-help" id="toc-where-can-i-get-help" class="nav-link" data-scroll-target="#where-can-i-get-help">Where can I get help?</a></li>
+  <li><a href="#pfsdocument" id="toc-pfsdocument" class="nav-link" data-scroll-target="#pfsdocument">PfsDocument</a></li>
+  <li><a href="#pfssection" id="toc-pfssection" class="nav-link" data-scroll-target="#pfssection">PfsSection</a></li>
+  <li><a href="#unique-or-non-unique-keywords" id="toc-unique-or-non-unique-keywords" class="nav-link" data-scroll-target="#unique-or-non-unique-keywords">Unique or non-unique keywords</a></li>
   </ul></li>
+  <li><a href="#update" id="toc-update" class="nav-link" data-scroll-target="#update">Update</a>
+  <ul class="collapse">
+  <li><a href="#modify-existing-keyword" id="toc-modify-existing-keyword" class="nav-link" data-scroll-target="#modify-existing-keyword">Modify existing keyword</a></li>
+  <li><a href="#add-new-key-value-pair" id="toc-add-new-key-value-pair" class="nav-link" data-scroll-target="#add-new-key-value-pair">Add new key-value pair</a></li>
+  <li><a href="#add-new-section-as-a-copy-of-another-section" id="toc-add-new-section-as-a-copy-of-another-section" class="nav-link" data-scroll-target="#add-new-section-as-a-copy-of-another-section">Add new section as a copy of another section</a></li>
+  <li><a href="#add-new-section-from-a-dictionary" id="toc-add-new-section-from-a-dictionary" class="nav-link" data-scroll-target="#add-new-section-from-a-dictionary">Add new section from a dictionary</a></li>
+  </ul></li>
+  <li><a href="#write-to-file" id="toc-write-to-file" class="nav-link" data-scroll-target="#write-to-file">Write to file</a></li>
+  <li><a href="#create-new-pfs-files" id="toc-create-new-pfs-files" class="nav-link" data-scroll-target="#create-new-pfs-files">Create new Pfs files</a></li>
   </ul>
-<div class="toc-actions"><ul><li><a href="https://github.com/DHI/mikeio/edit/main/docs/index.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li></ul></div></nav>
+<div class="toc-actions"><ul><li><a href="https://github.com/DHI/mikeio/edit/main/docs/user-guide/pfs.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li></ul></div></nav>
     </div>
 <!-- main -->
 <main class="content" id="quarto-document-content">
 
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title d-none d-lg-block">Pfs</h1>
+</div>
 
 
 
-<p><img src="MIKE-IO-Logo-Pos-RGB.svg" class="img-fluid"></p>
-<section id="mike-io-inputoutput-of-mike-files-in-python" class="level1">
-<h1>MIKE IO: input/output of MIKE files in Python</h1>
-<p><img src="https://img.shields.io/pypi/pyversions/mikeio.svg" class="img-fluid" alt="Python version"> <a href="https://badge.fury.io/py/mikeio"><img src="https://badge.fury.io/py/mikeio.svg" class="img-fluid" alt="PyPI version"></a></p>
-<p>Read, write and manipulate dfs0, dfs1, dfs2, dfs3, dfsu and mesh files.</p>
-<p>See our sister library <a href="https://github.com/DHI/mikeio1d">MIKE IO 1D</a> for .res1d and .xns11 files.</p>
-<section id="requirements" class="level2">
-<h2 class="anchored" data-anchor-id="requirements">Requirements</h2>
-<ul>
-<li>Windows or Linux operating system</li>
-<li>Python x64 3.8 - 3.11</li>
-<li>(Windows) <a href="https://support.microsoft.com/en-us/help/2977003/the-latest-supported-visual-c-downloads%3E">VC++ redistributables</a> (already installed if you have MIKE)</li>
-</ul>
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<p>A PFS file is a text file with a tree structure that contains parameters and settings for MIKE tools and engines. MIKE IO can read, modify and create PFS files.</p>
+<section id="the-pfs-file" class="level2">
+<h2 class="anchored" data-anchor-id="the-pfs-file">The PFS file</h2>
+<p>The content of the PFS file is similar to a nested dictionary. The root element is often called the <em>target</em>. Some PFS files have multiple root elements. The below sections are called <em>PFS Sections</em> which can be nested and contain key-value pairs called <em>keywords</em> and <em>parameters</em>.</p>
+<pre><code>[TARGET1]
+   keywordA = parameterA
+   [SECTION1]
+      keywordB = parameterB
+      keywordC = parameterC
+      [SECTION2]
+         keywordD = parameterD         
+      EndSect  // SECTION2 
+   EndSect  // SECTION1 
+EndSect  // TARGET1
+
+[TARGET2]
+   keywordE = parameterE 
+   [SECTION3]
+      keywordF = parameterF
+   EndSect  // SECTION3 
+EndSect  // TARGET2</code></pre>
 </section>
-<section id="installation" class="level2">
-<h2 class="anchored" data-anchor-id="installation">Installation</h2>
-<pre><code>$ pip install mikeio</code></pre>
-<div class="callout callout-style-default callout-warning callout-titled">
-<div class="callout-header d-flex align-content-center">
-<div class="callout-icon-container">
-<i class="callout-icon"></i>
-</div>
-<div class="callout-title-container flex-fill">
-Warning
-</div>
-</div>
-<div class="callout-body-container callout-body">
-<p><strong>Don’t use conda to install MIKE IO!</strong>, the version on conda is outdated.</p>
-</div>
-</div>
-</section>
-<section id="getting-started" class="level2">
-<h2 class="anchored" data-anchor-id="getting-started">Getting started</h2>
-<div id="7ec450e3" class="cell" data-execution_count="1">
+<section id="read" class="level2">
+<h2 class="anchored" data-anchor-id="read">Read</h2>
+<p>When a PFS file is read with MIKE IO, a <code>PfsDocument</code> object is created. It will contain one or more <code>PfsSection</code> objects - one for each target. The PfsSections will typically contain other PfsSections together with a number of key-value pairs.</p>
+<p>A PFS file is read using <code>mikeio.read_pfs()</code>:</p>
+<div id="5a0b4485" class="cell" data-execution_count="1">
 <div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> mikeio</span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>ds <span class="op">=</span> mikeio.read(<span class="st">"data/FakeLake.dfsu"</span>)</span>
-<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>ds.Bathymetry.plot()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display">
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>pfs <span class="op">=</span> mikeio.read_pfs(<span class="st">"../data/pfs/concat.mzt"</span>)</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>pfs</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="1">
+<pre><code>[txconc]
+   CLSID = 'TxConc.dll'
+   TypeName = 'txconc'
+   CREATEDTIME = '2020-03-11T15:24:45'
+   MODIFIEDTIME = '2020-03-11T15:24:45'
+   NOTES = ''
+   [Setup]
+      Name = 'Setup Name'
+      NumberFiles = 2
+      NumberDimensions = 1
+      NumberItems = 1
+      InsertDelIfGabs = 0
+      UseTimeRange = 1
+      TimeRange = 0, 145, 1
+      FirstFileTimeDef = 0
+      OverwriteWithLatest = 1
+      [File_1]
+         InputFile = |.\tide1.dfs1|
+         Items = 1
+      EndSect  // File_1
+      [File_2]
+         InputFile = |.\tide2.dfs1|
+         Items = 1
+      EndSect  // File_2
+      [File_Out]
+         OutputFile = |.\txconc.dfs1|
+         OutputFileTitle = ''
+      EndSect  // File_Out
+   EndSect  // Setup
+EndSect  // txconc</code></pre>
+</div>
+</div>
+<section id="pfsdocument" class="level3">
+<h3 class="anchored" data-anchor-id="pfsdocument">PfsDocument</h3>
+<p>The <code>PfsDocument</code> is the MIKE IO equivalent to a PFS file. Its targets can be accessed by their name (as properties), like this:</p>
+<div id="034465be" class="cell" data-execution_count="2">
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>pfs.txconc</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="2">
+<pre><code>CLSID = 'TxConc.dll'
+TypeName = 'txconc'
+CREATEDTIME = '2020-03-11T15:24:45'
+MODIFIEDTIME = '2020-03-11T15:24:45'
+NOTES = ''
+[Setup]
+   Name = 'Setup Name'
+   NumberFiles = 2
+   NumberDimensions = 1
+   NumberItems = 1
+   InsertDelIfGabs = 0
+   UseTimeRange = 1
+   TimeRange = 0, 145, 1
+   FirstFileTimeDef = 0
+   OverwriteWithLatest = 1
+   [File_1]
+      InputFile = |.\tide1.dfs1|
+      Items = 1
+   EndSect  // File_1
+   [File_2]
+      InputFile = |.\tide2.dfs1|
+      Items = 1
+   EndSect  // File_2
+   [File_Out]
+      OutputFile = |.\txconc.dfs1|
+      OutputFileTitle = ''
+   EndSect  // File_Out
+EndSect  // Setup</code></pre>
+</div>
+</div>
+<p>Or by the <code>pfs.targets</code> object (which is a list of PfsSections). Each of the targets is a <code>PfsSection</code> object consisting of key-value pairs (keyword-parameter) and other PfsSections.</p>
+<p>The <code>PfsDocument</code> object is similar to a dictionary. You can loop over its contents with <code>items()</code>, <code>keys()</code> and <code>values()</code> like a dictionary.</p>
+</section>
+<section id="pfssection" class="level3">
+<h3 class="anchored" data-anchor-id="pfssection">PfsSection</h3>
+<p>The <code>PfsSection</code> object is also similar to a dictionary. You can loop over its contents with <code>items()</code>, <code>keys()</code> and <code>values()</code> like a dictionary.</p>
+<div id="197d641d" class="cell" data-execution_count="3">
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>pfs.txconc.keys()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="3">
+<pre><code>dict_keys(['CLSID', 'TypeName', 'CREATEDTIME', 'MODIFIEDTIME', 'NOTES', 'Setup'])</code></pre>
+</div>
+</div>
+<p>You can access a specific parameter with the <code>get()</code> method:</p>
+<div id="31aa48fb" class="cell" data-execution_count="4">
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>pfs.txconc.get(<span class="st">"CLSID"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="4">
+<pre><code>'TxConc.dll'</code></pre>
+</div>
+</div>
+<p>Or as a property with dot-notation—which is prefered in most cases as it is more readable:</p>
+<div id="4b6794c5" class="cell" data-execution_count="5">
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>pfs.txconc.CLSID</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="5">
+<pre><code>'TxConc.dll'</code></pre>
+</div>
+</div>
+<p>A PfsSection can be converted to a dictionary with the to_dict() method:</p>
+<div id="17544fb0" class="cell" data-execution_count="6">
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>pfs.txconc.Setup.File_1.to_dict()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="6">
+<pre><code>{'InputFile': '|.\\tide1.dfs1|', 'Items': 1}</code></pre>
+</div>
+</div>
+<p>If a PfsSection contains enumerated subsections, they can be converted to a pandas DataFrame with the <code>to_dataframe()</code> method:</p>
+<div id="6a21f8aa" class="cell" data-execution_count="7">
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>pfs.txconc.Setup.to_dataframe(prefix<span class="op">=</span><span class="st">"File_"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="7">
 <div>
-<figure class="figure">
-<p><img src="index_files/figure-html/cell-2-output-1.png" width="677" height="324" class="figure-img"></p>
-</figure>
-</div>
-</div>
-</div>
-<p>Read more in the <a href="./user-guide/getting-started.html">getting started guide</a>.</p>
-</section>
-<section id="where-can-i-get-help" class="level2">
-<h2 class="anchored" data-anchor-id="where-can-i-get-help">Where can I get help?</h2>
-<ul>
-<li>New ideas and feature requests - <a href="https://github.com/DHI/mikeio/discussions">GitHub Discussions</a></li>
-<li>Bugs - <a href="https://github.com/DHI/mikeio/issues">GitHub Issues</a></li>
-</ul>
+<div>
 
 
+<table class="dataframe table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">InputFile</th>
+<th data-quarto-table-cell-role="th">Items</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">1</td>
+<td>|.\tide1.dfs1|</td>
+<td>1</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">2</td>
+<td>|.\tide2.dfs1|</td>
+<td>1</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
+</div>
 </section>
+<section id="unique-or-non-unique-keywords" class="level3">
+<h3 class="anchored" data-anchor-id="unique-or-non-unique-keywords">Unique or non-unique keywords</h3>
+<p>Depending on the engine intended for reading the PFS file it may or may not make sense to have multiple identical keywords in the same PfsSection. MIKE 21/3 and the marine tools does <em>not</em> support non-unique keywords—if non-unique keywords are present, only the first will be read and the presence is most likely a mistake made by hand-editing the file. In other tools, e.g.&nbsp;MIKE Plot Composer, non-unique keywords are used a lot. How MIKE IO shall deal with non-unique keywords can be specified using the <code>unique_keywords</code> argument in the <code>read_pfs()</code> method:</p>
+<div class="sourceCode" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>pfs <span class="op">=</span> mikeio.read_pfs(<span class="st">"myplot.plt"</span>, unique_keywords<span class="op">=</span><span class="va">False</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>If a PfsSection contains non-unique PfsSections or keywords and <code>unique_keywords=False</code>, the repeated key will only appear once and the corresponding value will be a list.</p>
+</section>
+</section>
+<section id="update" class="level2">
+<h2 class="anchored" data-anchor-id="update">Update</h2>
+<p>The PfsSection object can be modified. Existing values can be changed, new key-value pairs can be added, subsections can added or removed.</p>
+<section id="modify-existing-keyword" class="level3">
+<h3 class="anchored" data-anchor-id="modify-existing-keyword">Modify existing keyword</h3>
+<p>It is very simple to modify an existing keyword:</p>
+<div class="sourceCode" id="cb16"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>pfs.txconc.Setup.Name <span class="op">=</span> <span class="st">"new name"</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+<section id="add-new-key-value-pair" class="level3">
+<h3 class="anchored" data-anchor-id="add-new-key-value-pair">Add new key-value pair</h3>
+<p>A new key-value pair can be added, like in a dictionary, in this way:</p>
+<div class="sourceCode" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>pfs.txconc.Setup[<span class="st">"NewKeyword"</span>] <span class="op">=</span> <span class="fl">12.0</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+<section id="add-new-section-as-a-copy-of-another-section" class="level3">
+<h3 class="anchored" data-anchor-id="add-new-section-as-a-copy-of-another-section">Add new section as a copy of another section</h3>
+<p>Often a PfsSection is added using an existing PfsSection as a template.</p>
+<div class="sourceCode" id="cb18"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>s <span class="op">=</span> pfs.txconc.Setup.File_1.copy()</span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>s.InputFile <span class="op">=</span> <span class="st">'|.</span><span class="ch">\t</span><span class="st">ide3.dfs1|'</span></span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>pfs.txconc.Setup[<span class="st">"File_3"</span>] <span class="op">=</span> s</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+<section id="add-new-section-from-a-dictionary" class="level3">
+<h3 class="anchored" data-anchor-id="add-new-section-from-a-dictionary">Add new section from a dictionary</h3>
+<p>A PfsSection can be created from a dictionary and then added to another PfsSection like any other key-value pair:</p>
+<div class="sourceCode" id="cb19"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>d <span class="op">=</span> {<span class="st">'InputFile'</span>: <span class="st">'|.</span><span class="ch">\\</span><span class="st">tide4.dfs1|'</span>, <span class="st">'Items'</span>: <span class="dv">1</span>}</span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>s <span class="op">=</span> mikeio.PfsSection(d)</span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>pfs.txconc.Setup[<span class="st">"File_4"</span>] <span class="op">=</span> s</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+</section>
+<section id="write-to-file" class="level2">
+<h2 class="anchored" data-anchor-id="write-to-file">Write to file</h2>
+<p>A Pfs object can be written to a PFS file using the <code>write</code> method.</p>
+<div class="sourceCode" id="cb20"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>pfs.write(<span class="st">"new.pfs"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+<section id="create-new-pfs-files" class="level2">
+<h2 class="anchored" data-anchor-id="create-new-pfs-files">Create new Pfs files</h2>
+<p>A new PFS file can be created from dictionary in the following way:</p>
+<div id="438ead8d" class="cell" data-execution_count="8">
+<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> datetime <span class="im">import</span> datetime</span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>d <span class="op">=</span> <span class="bu">dict</span>(</span>
+<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a>    key1<span class="op">=</span><span class="dv">1</span>,</span>
+<span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a>    lst<span class="op">=</span>[<span class="fl">0.3</span>, <span class="fl">0.7</span>],</span>
+<span id="cb21-6"><a href="#cb21-6" aria-hidden="true" tabindex="-1"></a>    file_name<span class="op">=</span><span class="vs">r"|path\file.dfs0|"</span>,</span>
+<span id="cb21-7"><a href="#cb21-7" aria-hidden="true" tabindex="-1"></a>    start_time<span class="op">=</span>datetime(<span class="dv">2019</span>, <span class="dv">7</span>, <span class="dv">1</span>, <span class="dv">0</span>, <span class="dv">0</span>, <span class="dv">0</span>),</span>
+<span id="cb21-8"><a href="#cb21-8" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb21-9"><a href="#cb21-9" aria-hidden="true" tabindex="-1"></a>pfs <span class="op">=</span> mikeio.PfsDocument({<span class="st">"MYTOOL"</span>: d})</span>
+<span id="cb21-10"><a href="#cb21-10" aria-hidden="true" tabindex="-1"></a>pfs</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="8">
+<pre><code>[MYTOOL]
+   key1 = 1
+   lst = 0.3, 0.7
+   file_name = |path\file.dfs0|
+   start_time = 2019, 7, 1, 0, 0, 0
+EndSect  // MYTOOL</code></pre>
+</div>
+</div>
+<p>Multiple targets can be achieved by providing list of dictionaries.</p>
+
+
 </section>
 
 </main> <!-- /main -->
@@ -769,6 +976,18 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
   }
 });
 </script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="../user-guide/generic.html" class="pagination-link" aria-label="Generic">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text">Generic</span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="../examples/index.html" class="pagination-link" aria-label="Examples">
+        <span class="nav-page-text">Examples</span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
 </div> <!-- /content -->
 <footer class="footer">
   <div class="nav-footer">
@@ -777,7 +996,7 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
     </div>   
     <div class="nav-footer-center">
 <p>© 2024 DHI Group</p>
-<div class="toc-actions d-sm-block d-md-none"><ul><li><a href="https://github.com/DHI/mikeio/edit/main/docs/index.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li></ul></div></div>
+<div class="toc-actions d-sm-block d-md-none"><ul><li><a href="https://github.com/DHI/mikeio/edit/main/docs/user-guide/pfs.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li></ul></div></div>
     <div class="nav-footer-right">
       &nbsp;
     </div>
