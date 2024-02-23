@@ -1,0 +1,7 @@
+---
+title: Examples
+listing:
+  type: table
+  fields: ['title', 'description']
+  categories: true
+---
