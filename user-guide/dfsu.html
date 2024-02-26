@@ -488,7 +488,7 @@ Note
 </table>
 <p>These properties and methods are accessible from the geometry, but also from the Mesh/Dfsu object.</p>
 <p>If a .dfsu file is <em>read</em> with <a href="../api/read.html#mikeio.read"><code>mikeio.read</code></a>, the returned Dataset ds will contain a Flexible Mesh Geometry <code>geometry</code>. If a .dfsu or a .mesh file is <em>opened</em> with <a href="../api/open.html#mikeio.open"><code>mikeio.open</code></a>, the returned object will also contain a Flexible Mesh Geometry <code>geometry</code>.</p>
-<div id="1dedc922" class="cell" data-execution_count="1">
+<div id="7940f27c" class="cell" data-execution_count="1">
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> mikeio</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>ds <span class="op">=</span> mikeio.read(<span class="st">"../data/oresundHD_run1.dfsu"</span>)</span>
@@ -500,7 +500,7 @@ number of elements: 3612
 projection: UTM-33</code></pre>
 </div>
 </div>
-<div id="64e4496a" class="cell" data-execution_count="2">
+<div id="e01acd03" class="cell" data-execution_count="2">
 <div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>dfs <span class="op">=</span> mikeio.<span class="bu">open</span>(<span class="st">"../data/oresundHD_run1.dfsu"</span>)</span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>dfs.geometry</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="2">
