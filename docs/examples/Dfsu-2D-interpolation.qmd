@@ -57,14 +57,11 @@ xr_da.to_netcdf("wind_north_sea_interpolated.nc")
 
 ## Save to GeoTiff
 
-Install [rasterio](https://rasterio.readthedocs.io/en/latest/index.html) by running this in a command prompt before running this notebook
+::: callout-note
 
-```
-$ conda install -c conda-forge rasterio
-```
+This section requires the [`rasterio`](https://rasterio.readthedocs.io/en/latest/installation.html) package.
 
-Or if you prefer to avoid conda, here is how:
-https://rasterio.readthedocs.io/en/latest/installation.html#windows
+:::
 
 ```{python}
 import numpy as np
