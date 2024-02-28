@@ -1808,16 +1808,18 @@ class Dataset:
 
         return df
 
-    def to_dfs(self, filename: str | Path, **kwargs: Any) -> None:
+    def to_dfs(
+        self, filename: str | Path, dtype: DfsSimpleType = DfsSimpleType.Float
+    ) -> None:
         """Write dataset to a new dfs file
 
         Parameters
         ----------
         filename: str
             full path to the new dfs file
-        dtype: str, np.dtype, DfsSimpleType, optional
+        dtype: DfsSimpleType, optional
             Dfs0 only: set the dfs data type of the written data
-            to e.g. np.float64, by default: DfsSimpleType.Float (=np.float32)
+            default: DfsSimpleType.Float
         """
 
         filename = str(filename)
@@ -1827,10 +1829,10 @@ class Dataset:
         ):
             if self.ndim == 0:  # Not very common, but still...
                 self._validate_extension(filename, ".dfs0")
-                self._to_dfs0(filename, **kwargs)
+                self._to_dfs0(filename, dtype=dtype)
             elif self.ndim == 1 and self[0]._has_time_axis:
                 self._validate_extension(filename, ".dfs0")
-                self._to_dfs0(filename, **kwargs)
+                self._to_dfs0(filename, dtype=dtype)
             else:
                 raise ValueError("Cannot write Dataset with no geometry to file!")
         elif isinstance(self.geometry, Grid2D):
@@ -1858,10 +1860,8 @@ class Dataset:
         if ext != valid_extension:
             raise ValueError(f"File extension must be {valid_extension}")
 
-    def _to_dfs0(self, filename: str | Path, **kwargs: Any) -> None:
+    def _to_dfs0(self, filename: str | Path, dtype: DfsSimpleType.Float) -> None:
         from ..dfs._dfs0 import _write_dfs0
-
-        dtype = kwargs.get("dtype", DfsSimpleType.Float)
 
         _write_dfs0(filename, self, dtype=dtype)
 

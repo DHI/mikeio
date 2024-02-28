@@ -334,8 +334,6 @@ class Dfs3(_Dfs123):
             e.g. ['LONG/LAT', 12.4387, 55.2257, 327]
         title: str, optional
             title of the dfs3 file. Default is blank.
-        keep_open: bool, optional
-            Keep file open for appending
         """
 
         if isinstance(data, list):

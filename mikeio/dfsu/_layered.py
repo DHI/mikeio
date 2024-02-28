@@ -290,7 +290,14 @@ class DfsuLayered(_Dfsu):
 
 class Dfsu2DV(DfsuLayered):
     def plot_vertical_profile(
-        self, values, time_step=None, cmin=None, cmax=None, label="", **kwargs
+        self,
+        values,
+        time_step=None,
+        cmin=None,
+        cmax=None,
+        label="",
+        title=None,
+        **kwargs,
     ):
         """
         Plot unstructured vertical profile
@@ -335,6 +342,7 @@ class Dfsu2DV(DfsuLayered):
             cmin=cmin,
             cmax=cmax,
             label=label,
+            title=title,
             **kwargs,
         )
 

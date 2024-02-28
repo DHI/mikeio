@@ -16,6 +16,7 @@ degree Celsius
 >>>
 
 """
+
 from __future__ import annotations
 import warnings
 from enum import IntEnum
@@ -1411,7 +1412,7 @@ class ItemInfo:
     Parameters
     ----------
     name: str or EUMType, optional
-    type: EUMType or int, optional
+    itemtype: EUMType or int, optional
         Default EUMType.Undefined
     unit: EUMUnit or int, optional
         Default unit matching EUMType
@@ -1429,8 +1430,13 @@ class ItemInfo:
     """
 
     def __init__(
-        self, name: str | EUMType | None =None, itemtype: EUMType | EUMUnit| None =None, unit: EUMUnit | None=None,
-          data_value_type:Literal["Instantaneous","Accumulated","StepAccumulated","MeanStepBackWard"]="Instantaneous"
+        self,
+        name: str | EUMType | None = None,
+        itemtype: EUMType | EUMUnit | None = None,
+        unit: EUMUnit | None = None,
+        data_value_type: Literal[
+            "Instantaneous", "Accumulated", "StepAccumulated", "MeanStepBackWard"
+        ] = "Instantaneous",
     ) -> None:
 
         # Handle arguments in the wrong place
@@ -1477,7 +1483,7 @@ class ItemInfo:
 
         if not isinstance(name, str):
             raise ValueError("Invalid name, name should be a string")
-        self.name : str = name
+        self.name: str = name
 
     def __eq__(self, other):
         if not isinstance(other, ItemInfo):
@@ -1497,7 +1503,7 @@ class ItemInfo:
             return f"{self.name} <{self.type.display_name}> ({self.unit.display_name})"
         else:
             return f"{self.name} <{self.type.display_name}> ({self.unit.display_name}) - {self.data_value_type}"
-    
+
     @staticmethod
     def from_mikecore_dynamic_item_info(dfsItemInfo: DfsDynamicItemInfo) -> "ItemInfo":
         """Create ItemInfo from a mikecore.DfsDynamicItemInfo object"""

@@ -2,6 +2,7 @@ from __future__ import annotations
 from pathlib import Path
 from platform import architecture
 from collections.abc import Sequence
+from typing import TYPE_CHECKING, Any
 
 # PEP0440 compatible formatted version, see:
 # https://www.python.org/dev/peps/pep-0440/
@@ -33,6 +34,9 @@ from .dfs import Dfs0, Dfs1, Dfs2, Dfs3
 from .dfsu import Dfsu, Mesh
 from .eum import EUMType, EUMUnit, ItemInfo
 from .pfs import Pfs, PfsDocument, PfsSection, read_pfs
+
+if TYPE_CHECKING:
+    import mikeio.dfsu as dfsu
 
 # Grid geometries are imported into the main module, since they are used to create dfs files
 # Other geometries are available in the spatial module
@@ -132,10 +136,12 @@ def read(
 
     dfs = open(filename)
 
-    return dfs.read(items=items, time=time, keepdims=keepdims, **kwargs)
+    return dfs.read(items=items, time=time, keepdims=keepdims, **kwargs)  # type: ignore
 
 
-def open(filename: str | Path, **kwargs):
+def open(
+    filename: str | Path, **kwargs: Any
+) -> Dfs0 | Dfs1 | Dfs2 | Dfs3 | dfsu.Dfsu2DH | dfsu.Dfsu2DV | dfsu.Dfsu3D | Mesh:
     """Open a dfs/mesh file (and read the header)
 
     The typical workflow for small dfs files is to read all data
@@ -147,10 +153,7 @@ def open(filename: str | Path, **kwargs):
     Parameters
     ----------
     filename
-        full path and file name to the dfs file.
-    type : str, optional
-        Dfs2 only. Additional information about the file, e.g.
-        "spectral" for spectral dfs2 files. By default: None.
+        full path and file name to the dfs file
 
     See also
     --------

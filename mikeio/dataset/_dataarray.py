@@ -1221,7 +1221,7 @@ class DataArray:
         Parameters
         ----------
         other: Dataset, DataArray, Grid2D, GeometryFM, pd.DatetimeIndex
-        interpolant, optional
+        interpolant: optional
             Reuse pre-calculated index and weights
         kwargs: additional kwargs are passed to interpolation method
 

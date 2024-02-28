@@ -1,7 +1,7 @@
 from __future__ import annotations
 from copy import deepcopy
 from pathlib import Path
-from typing import List, Tuple
+from typing import List, Literal, Tuple
 import warnings
 
 import numpy as np
@@ -106,9 +106,32 @@ def _write_dfs2_spatial_axis(builder, factory, geometry):
 
 
 class Dfs2(_Dfs123):
+    """Open a dfs2 file and read the header
+
+    Parameters
+    ----------
+    filename: str or Path
+        dfs2 file to open
+    type: str, optional
+        "horizontal" or "spectral". Default is "horizontal"
+
+    Examples
+    --------
+    ```{python}
+    from mikeio import Dfs2
+
+    dfs = Dfs2("../data/pt_spectra.dfs2", type="spectral")
+    dfs
+    ```
+    """
+
     _ndim = 2
 
-    def __init__(self, filename=None, type: str = "horizontal"):
+    def __init__(
+        self,
+        filename: str | Path | None = None,
+        type: Literal["horizontal", "spectral"] = "horizontal",
+    ) -> None:
         super().__init__(filename)
 
         # TODO find a better way to avoid initializing these non-sensical values

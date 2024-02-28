@@ -247,10 +247,10 @@ class Dfs0:
     def _setup_header(
         title: str,
         filename: str,
-        start_time,
+        start_time: datetime,
         dt: float,
         is_equidistant: bool,
-        dtype,
+        dtype: np.dtype | DfsSimpleType,
         items: Sequence[ItemInfo],
     ):
         factory = DfsFactory()

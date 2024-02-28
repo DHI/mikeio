@@ -721,6 +721,7 @@ def _plot_vertical_profile(
     cmin=None,
     cmax=None,
     label="",
+    title: str | None = None,
     add_colorbar=True,
     **kwargs,
 ):
@@ -810,8 +811,8 @@ def _plot_vertical_profile(
     ax.set_xlabel("relative distance [m]")
     ax.set_ylabel("z [m]")
 
-    if "title" in kwargs:
-        ax.set_title(kwargs["title"])
+    if title is not None:
+        ax.set_title(title)
 
     return ax
 

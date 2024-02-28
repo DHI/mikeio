@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import Any, Tuple, TYPE_CHECKING
+from typing import Any, Sequence, Tuple, TYPE_CHECKING
 
 import numpy as np
 from matplotlib.axes import Axes
@@ -73,6 +73,7 @@ class _DataArrayPlotter:
 
     def hist(
         self,
+        bins: int | Sequence[float] | str | None = None,
         ax: Axes | None = None,
         figsize: Tuple[float, float] | None = None,
         title: str | None = None,
@@ -107,10 +108,12 @@ class _DataArrayPlotter:
         ax = self._get_ax(ax, figsize)
         if title is not None:
             ax.set_title(title)
-        return self._hist(ax, **kwargs)
+        return self._hist(ax, bins, **kwargs)
 
-    def _hist(self, ax: Axes, **kwargs: Any) -> Any:
-        result = ax.hist(self.da.values.ravel(), **kwargs)
+    def _hist(
+        self, ax: Axes, bins: int | Sequence[float] | str | None, **kwargs: Any
+    ) -> Any:
+        result = ax.hist(self.da.values.ravel(), bins, **kwargs)
         ax.set_xlabel(self._label_txt())
         return result
 
