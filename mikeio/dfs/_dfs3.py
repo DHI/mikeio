@@ -209,15 +209,15 @@ class Dfs3(_Dfs123):
         dims: Tuple[str, ...]
         shape: Tuple[int, ...]
 
-        nz = nz if layers is None else len(layers)
-        if nz == 1 and (not keepdims):
+        nzl = nz if layers is None else len(layers)
+        if nzl == 1 and (not keepdims):
             geometry = self.geometry._geometry_for_layers([0])
             dims = ("time", "y", "x")
             shape = (nt, ny, nx)
         else:
             geometry = self.geometry._geometry_for_layers(layers, keepdims)
             dims = ("time", "z", "y", "x")
-            shape = (nt, nz, ny, nx)
+            shape = (nt, nzl, ny, nx)
 
         for item in range(n_items):
             data: np.ndarray = np.ndarray(shape=shape, dtype=dtype)
