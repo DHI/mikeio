@@ -1,4 +1,5 @@
 from __future__ import annotations
+from abc import abstractmethod
 from pathlib import Path
 import warnings
 from functools import wraps
@@ -172,47 +173,9 @@ class _Dfsu:
                 out.append(f"      {self.start_time} -- {self.end_time}")
         return str.join("\n", out)
 
+    @abstractmethod
     def _read_geometry(self, input: str | Path) -> Any:
-        filename = str(input)
-        dfs = DfsuFile.Open(filename)
-        dfsu_type = DfsuFileType(dfs.DfsuFileType)
-
-        node_table = get_nodes_from_source(dfs)
-        el_table = get_elements_from_source(dfs)
-
-        if self._is_layered(dfsu_type):
-            geom_cls: Any = GeometryFM3D
-            if dfsu_type in (
-                DfsuFileType.DfsuVerticalProfileSigma,
-                DfsuFileType.DfsuVerticalProfileSigmaZ,
-            ):
-                geom_cls = GeometryFMVerticalProfile
-
-            geometry = geom_cls(
-                node_coordinates=node_table.coordinates,
-                element_table=el_table.connectivity,
-                codes=node_table.codes,
-                projection=dfs.Projection.WKTString,
-                dfsu_type=dfsu_type,
-                element_ids=el_table.ids,
-                node_ids=node_table.ids,
-                n_layers=dfs.NumberOfLayers,
-                n_sigma=min(dfs.NumberOfSigmaLayers, dfs.NumberOfLayers),
-                validate=False,
-            )
-        else:
-            geometry = GeometryFM2D(
-                node_coordinates=node_table.coordinates,
-                element_table=el_table.connectivity,
-                codes=node_table.codes,
-                projection=dfs.Projection.WKTString,
-                dfsu_type=dfsu_type,
-                element_ids=el_table.ids,
-                node_ids=node_table.ids,
-                validate=False,
-            )
-        dfs.Close()
-        return geometry
+        pass
 
     def _read_header(
         self, input: str | Path
@@ -697,6 +660,27 @@ class _Dfsu:
 
 
 class Dfsu2DH(_Dfsu):
+    def _read_geometry(self, input: str | Path) -> Any:
+        filename = str(input)
+        dfs = DfsuFile.Open(filename)
+        dfsu_type = DfsuFileType(dfs.DfsuFileType)
+
+        node_table = get_nodes_from_source(dfs)
+        el_table = get_elements_from_source(dfs)
+
+        geometry = GeometryFM2D(
+            node_coordinates=node_table.coordinates,
+            element_table=el_table.connectivity,
+            codes=node_table.codes,
+            projection=dfs.Projection.WKTString,
+            dfsu_type=dfsu_type,
+            element_ids=el_table.ids,
+            node_ids=node_table.ids,
+            validate=False,
+        )
+        dfs.Close()
+        return geometry
+
     def read(
         self,
         *,
