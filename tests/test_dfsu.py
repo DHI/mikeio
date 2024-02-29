@@ -1,5 +1,6 @@
 from pathlib import Path
 from datetime import datetime
+import shutil
 
 import numpy as np
 import pandas as pd
@@ -535,117 +536,28 @@ def test_write_from_dfsu(tmp_path):
     assert dfs.end_time == newdfs.end_time
 
 
-# def test_incremental_write_from_dfsu(tmp_path):
-#     "Useful for writing datasets with many timesteps to avoid problems with out of memory"
+def test_incremental_write_using_mikecore(tmp_path):
+    from mikecore.DfsFileFactory import DfsFileFactory
 
-#     sourcefilename = "tests/testdata/HD2D.dfsu"
-#     fp = tmp_path / "simple.dfsu"
-#     dfs = mikeio.open(sourcefilename)
+    sourcefilename = "tests/testdata/HD2D.dfsu"
 
-#     nt = dfs.n_timesteps
+    # copy to tmp_path
+    fp = str(tmp_path / "simple.dfsu")
+    shutil.copy(sourcefilename, fp)
 
-#     ds = dfs.read(time=[0], keepdims=True)
+    nt = 10
 
-#     dfs.write(fp, ds, keep_open=True)
+    dfs = DfsFileFactory.DfsGenericOpenEdit(fp)
+    n_items = len(dfs.ItemInfo)
+    n_elements = dfs.ItemInfo[0].ElementCount
 
-#     for i in range(1, nt):
-#         ds = dfs.read(time=[i], keepdims=True)
-#         dfs.append(ds)
-
-#     dfs.close()
-
-#     newdfs = mikeio.open(fp)
-#     assert dfs.start_time == newdfs.start_time
-#     assert dfs.timestep == newdfs.timestep
-#     assert dfs.end_time == newdfs.end_time
-
-
-# def test_incremental_write_from_dfsu_context_manager(tmp_path):
-#     sourcefilename = "tests/testdata/HD2D.dfsu"
-#     fp = tmp_path / "simple.dfsu"
-#     dfs = mikeio.open(sourcefilename)
-
-#     nt = dfs.n_timesteps
-
-#     ds = dfs.read(time=[0], keepdims=True)
-
-#     with dfs.write(fp, ds, keep_open=True) as f:
-#         for i in range(1, nt):
-#             ds = dfs.read(time=[i], keepdims=True)
-#             f.append(ds)
-
-#         # dfs.close() # should be called automagically by context manager
-
-#     newdfs = mikeio.open(fp)
-#     assert dfs.start_time == newdfs.start_time
-#     assert dfs.timestep == newdfs.timestep
-#     assert dfs.end_time == newdfs.end_time
-
-
-# def test_incremental_write_from_dfsu_context_manager_3d(tmp_path):
-#     sourcefilename = "tests/testdata/oresund_sigma_z.dfsu"
-#     fp = tmp_path / "3d.dfsu"
-#     dfs = mikeio.open(sourcefilename)
-
-#     nt = dfs.n_timesteps
-
-#     ds = dfs.read(time=[0], keepdims=True)
-
-#     with dfs.write(fp, ds, keep_open=True) as f:
-#         for i in range(1, nt):
-#             ds = dfs.read(time=[i], keepdims=True)
-#             f.append(ds)
-
-#         # dfs.close() # should be called automagically by context manager
-
-#     newdfs = mikeio.open(fp)
-#     assert dfs.start_time == newdfs.start_time
-#     assert dfs.timestep == newdfs.timestep
-#     assert dfs.end_time == newdfs.end_time
-
-
-# TODO add workaround to write big file
-# def test_write_big_file(tmp_path):
-#     fp = tmp_path / "big.dfsu"
-#     meshfilename = "tests/testdata/odense_rough.mesh"
-
-#     msh = Mesh(meshfilename)
-
-#     n_elements = msh.n_elements
-
-#     dfs = Dfsu(meshfilename)
-
-#     nt = 5  # or some big number 50000
-
-#     n_items = 10
-
-#     das = [
-#         DataArray(
-#             data=np.random.random((1, n_elements)),
-#             geometry=msh.geometry,
-#             time="2000-1-1",
-#             item=f"Item {i+1}",
-#         )
-#         for i in range(n_items)
-#     ]
-
-#     ds = Dataset(das)
-
-#     with dfs.write(fp, data=ds, dt=3600, keep_open=True) as f:
-#         for _ in range(1, nt):
-#             data = []
-#             for i in range(n_items):
-#                 d = np.random.random((1, n_elements))
-#                 da = DataArray(data=d, geometry=msh.geometry, item=f"Item {i+1}")
-#                 data.append(da)
-#             dst = Dataset(data)
-#             f.append(dst)
-
-#     dfsu = mikeio.open(fp)
-
-#     assert dfsu.n_items == n_items
-#     assert dfsu.n_timesteps == nt
-#     assert dfsu.start_time.year == 2000
+    for _ in range(nt):
+        for _ in range(n_items):
+            data = np.random.random(size=n_elements).astype(
+                np.float32
+            )  # Replace with actual data
+            dfs.WriteItemTimeStepNext(0.0, data)
+    dfs.Close()
 
 
 def test_write_from_dfsu_2_time_steps(tmp_path):
@@ -1065,35 +977,6 @@ def test_interp_like_fm_dataset():
     dsi = ds.interp_like(geometry)
     assert isinstance(dsi, Dataset)
     assert isinstance(dsi.geometry, GeometryFM2D)
-
-
-# TODO add workaround to write big file
-# def test_write_header(tmp_path):
-#     meshfilename = "tests/testdata/north_sea_2.mesh"
-#     fp = tmp_path / "NS_write_header.dfsu"
-#     dfs = mikeio.Dfsu(meshfilename)
-#     n_elements = dfs.n_elements
-#     nt = 3
-#     n_items = 2
-#     items = [ItemInfo(f"Item {i+1}") for i in range(n_items)]
-#     time0 = datetime(2021, 1, 1)
-#     with dfs.write_header(fp, items=items, start_time=time0, dt=3600) as f:
-#         for _ in range(nt):
-#             data = []
-#             for _ in range(n_items):
-#                 d = np.random.random((1, n_elements))  # 2d
-#                 data.append(d)
-#                 f.append(data)
-
-#     # append also works for data without time axis
-#     fp = tmp_path / "NS_write_header2.dfsu"
-#     with dfs.write_header(fp, items=items, start_time=time0, dt=3600) as f:
-#         for _ in range(nt):
-#             data = []
-#             for _ in range(n_items):
-#                 d = np.random.random((n_elements))  # 1d
-#                 data.append(d)
-#                 f.append(data)
 
 
 def test_writing_non_equdistant_dfsu_is_not_possible(tmp_path):
