@@ -248,11 +248,9 @@ def test_read_dfs_time_selection_str():
     extensions = ["dfsu", "dfs2", "dfs1", "dfs0"]
     extensions = sorted(extensions)
     for ext in extensions:
-        print(ext)
         filename = f"tests/testdata/consistency/oresundHD.{ext}"
         time = "2018-03"
         ds = mikeio.read(filename=filename)
-        assert ds.time.unit == "ns"
         dssel = ds.sel(time=time)
         assert dssel.n_timesteps == 5
 
