@@ -127,10 +127,12 @@ class _Dfsu:
         self._type = DfsuFileType(dfs.DfsuFileType)
         self._deletevalue = dfs.DeleteValueFloat
 
+        freq = pd.Timedelta(seconds=dfs.TimeStepInSeconds)
+
         self._time = pd.date_range(
             start=dfs.StartDateTime,
             periods=dfs.NumberOfTimeSteps,
-            freq=f"{dfs.TimeStepInSeconds}S",
+            freq=freq,
         )
         self._timestep = dfs.TimeStepInSeconds
         dfs.Close()
@@ -270,32 +272,15 @@ class _Dfsu:
             DfsuFileType.DfsuSpectral2D,
         )
 
-    @staticmethod
-    def _is_layered(dfsu_type: DfsuFileType) -> bool:
-        return dfsu_type in (
-            DfsuFileType.DfsuVerticalProfileSigma,
-            DfsuFileType.DfsuVerticalProfileSigmaZ,
-            DfsuFileType.Dfsu3DSigma,
-            DfsuFileType.Dfsu3DSigmaZ,
-        )
-
     @property
     def is_layered(self) -> bool:
         """Type is layered dfsu (3d, vertical profile or vertical column)"""
-        return self._is_layered(self._type)
-
-    @staticmethod
-    def _is_spectral(dfsu_type: DfsuFileType) -> bool:
-        return dfsu_type in (
-            DfsuFileType.DfsuSpectral0D,
-            DfsuFileType.DfsuSpectral1D,
-            DfsuFileType.DfsuSpectral2D,
-        )
+        return self.geometry.is_layered
 
     @property
     def is_spectral(self) -> bool:
         """Type is spectral dfsu (point, line or area spectrum)"""
-        return self._is_spectral(self._type)
+        return self.geometry.is_spectral
 
     @property
     def is_tri_only(self) -> bool:
@@ -306,29 +291,6 @@ class _Dfsu:
     def boundary_polylines(self):
         """Lists of closed polylines defining domain outline"""
         return self.geometry.boundary_polylines
-
-    def get_node_coords(self, code=None):
-        """Get the coordinates of each node.
-
-        Parameters
-        ----------
-        code: int
-            Get only nodes with specific code, e.g. land == 1
-
-        Returns
-        -------
-        np.array
-            x,y,z of each node
-        """
-        nc = self.node_coordinates
-        if code is not None:
-            if code not in self.geometry.valid_codes:
-                print(
-                    f"Selected code: {code} is not valid. Valid codes: {self.valid_codes}"
-                )
-                raise Exception
-            return nc[self.geometry.codes == code]
-        return nc
 
     @wraps(GeometryFM2D.elements_to_geometry)
     def elements_to_geometry(self, elements, node_layers="all"):
@@ -343,42 +305,6 @@ class _Dfsu:
     def contains(self, points):
         return self.geometry.contains(points)
 
-    def get_overset_grid(self, dx=None, dy=None, nx=None, ny=None, buffer=None):
-        """get a 2d grid that covers the domain by specifying spacing or shape
-
-        Parameters
-        ----------
-        dx : float, optional
-            grid resolution in x-direction (or in x- and y-direction)
-        dy : float, optional
-            grid resolution in y-direction
-        nx : int, optional
-            number of points in x-direction,
-            by default None (the value will be inferred)
-        ny : int, optional
-            number of points in y-direction,
-            by default None (the value will be inferred)
-        buffer : float, optional
-            positive to make the area larger, default=0
-            can be set to a small negative value to avoid NaN
-            values all around the domain.
-
-        Returns
-        -------
-        <mikeio.Grid2D>
-            2d grid
-        """
-        nc = self.geometry.geometry2d.node_coordinates
-        bbox = xy_to_bbox(nc, buffer=buffer)
-        return Grid2D(
-            bbox=bbox,
-            dx=dx,
-            dy=dy,
-            nx=nx,
-            ny=ny,
-            projection=self.geometry.projection_string,
-        )
-
     @wraps(GeometryFM2D.get_element_area)
     def get_element_area(self):
         return self.geometry.get_element_area()
@@ -392,42 +318,42 @@ class _Dfsu:
         return self.geometry.get_node_centered_data(data, extrapolate)
 
     @property
-    def deletevalue(self):
+    def deletevalue(self) -> float:
         """File delete value"""
         return self._deletevalue
 
     @property
-    def n_items(self):
+    def n_items(self) -> int:
         """Number of items"""
         return len(self.items)
 
     @property
-    def items(self):
+    def items(self) -> list[ItemInfo]:
         """List of items"""
         return self._items
 
     @property
-    def start_time(self):
+    def start_time(self) -> pd.Timestamp:
         """File start time"""
         return self._time[0]
 
     @property
-    def n_timesteps(self):
+    def n_timesteps(self) -> int:
         """Number of time steps"""
         return len(self._time)
 
     @property
-    def timestep(self):
+    def timestep(self) -> float:
         """Time step size in seconds"""
         return self._timestep
 
     @property
-    def end_time(self):
+    def end_time(self) -> pd.Timestamp:
         """File end time"""
         return self._time[-1]
 
     @property
-    def time(self):
+    def time(self) -> pd.DatetimeIndex:
         return self._time
 
     def _read(
@@ -716,7 +642,45 @@ class Dfsu2DH(_Dfsu):
             fill_bad_data_value=fill_bad_data_value,
         )
 
-    def _dfs_read_item_time_func(self, item: int, step: int):
+    def get_overset_grid(self, dx=None, dy=None, nx=None, ny=None, buffer=None):
+        """get a 2d grid that covers the domain by specifying spacing or shape
+
+        Parameters
+        ----------
+        dx : float, optional
+            grid resolution in x-direction (or in x- and y-direction)
+        dy : float, optional
+            grid resolution in y-direction
+        nx : int, optional
+            number of points in x-direction,
+            by default None (the value will be inferred)
+        ny : int, optional
+            number of points in y-direction,
+            by default None (the value will be inferred)
+        buffer : float, optional
+            positive to make the area larger, default=0
+            can be set to a small negative value to avoid NaN
+            values all around the domain.
+
+        Returns
+        -------
+        <mikeio.Grid2D>
+            2d grid
+        """
+        nc = self.geometry.geometry2d.node_coordinates
+        bbox = xy_to_bbox(nc, buffer=buffer)
+        return Grid2D(
+            bbox=bbox,
+            dx=dx,
+            dy=dy,
+            nx=nx,
+            ny=ny,
+            projection=self.geometry.projection_string,
+        )
+
+    def _dfs_read_item_time_func(
+        self, item: int, step: int
+    ) -> Tuple[np.ndarray, pd.Timestamp]:
         dfs = DfsuFile.Open(self._filename)
         itemdata = dfs.ReadItemTimeStep(item + 1, step)
 
@@ -760,14 +724,10 @@ class Dfsu2DH(_Dfsu):
           2:  Surface elevation <Surface Elevation> (meter)
           3:  Wind speed <Wind speed> (meter per sec)
         """
-        if self.is_spectral:
-            raise ValueError("Method not supported for spectral dfsu!")
-
         dfs = DfsuFile.Open(self._filename)
 
         item_numbers = _valid_item_numbers(dfs.ItemInfo, items)
         items = _get_item_info(dfs.ItemInfo, item_numbers)
-        # self._n_timesteps = dfs.NumberOfTimeSteps
         _, time_steps = _valid_timesteps(dfs, time_steps=None)
 
         res = _extract_track(

@@ -27,7 +27,13 @@ from ._utils import xy_to_bbox
 
 
 class GeometryFMPointSpectrum(_Geometry):
-    def __init__(self, frequencies=None, directions=None, x=None, y=None) -> None:
+    def __init__(
+        self,
+        frequencies: np.ndarray,
+        directions: np.ndarray | None = None,
+        x: float | None = None,
+        y: float | None = None,
+    ) -> None:
         super().__init__()
         self.n_nodes = 0
         self.n_elements = 0
@@ -38,6 +44,10 @@ class GeometryFMPointSpectrum(_Geometry):
         self._directions = directions
         self.x = x
         self.y = y
+
+    @property
+    def is_layered(self) -> bool:
+        return False
 
     @property
     def type_name(self):
@@ -299,6 +309,10 @@ class _GeometryFM(_Geometry):
 
         self._node_ids = new_node_ids
         self._element_ids = new_element_ids
+
+    @property
+    def is_spectral(self) -> bool:
+        return False
 
     @property
     def n_nodes(self) -> int:

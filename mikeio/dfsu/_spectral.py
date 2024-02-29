@@ -39,7 +39,7 @@ class DfsuSpectral(_Dfsu):
         if dfsu_type == DfsuFileType.DfsuSpectral0D:
             geometry: Any = GeometryFMPointSpectrum(
                 frequencies=frequencies, directions=directions
-            )
+            )  # No x,y coordinates
         else:
             # nc, codes, node_ids = get_nodes_from_source(dfs)
             node_table = get_nodes_from_source(dfs)
