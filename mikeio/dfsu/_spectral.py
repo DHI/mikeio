@@ -8,7 +8,7 @@ from tqdm import trange
 
 from ..dataset import DataArray, Dataset
 from ..dfs._dfs import _get_item_info, _valid_item_numbers, _valid_timesteps
-from .._spectral import calc_m0_from_spectrum, plot_2dspectrum
+from .._spectral import calc_m0_from_spectrum
 from ._dfsu import _Dfsu
 
 
@@ -241,88 +241,88 @@ class DfsuSpectral(_Dfsu):
                 geometry = self.geometry.elements_to_geometry(elements)
             return geometry, elements
 
-    def plot_spectrum(
-        self,
-        spectrum,
-        plot_type="contourf",
-        title=None,
-        label=None,
-        cmap="Reds",
-        vmin=1e-5,
-        vmax=None,
-        r_as_periods=True,
-        rmin=None,
-        rmax=None,
-        levels=None,
-        figsize=(7, 7),
-        add_colorbar=True,
-    ):
-        """
-        Plot spectrum in polar coordinates
+    # def plot_spectrum(
+    #     self,
+    #     spectrum,
+    #     plot_type="contourf",
+    #     title=None,
+    #     label=None,
+    #     cmap="Reds",
+    #     vmin=1e-5,
+    #     vmax=None,
+    #     r_as_periods=True,
+    #     rmin=None,
+    #     rmax=None,
+    #     levels=None,
+    #     figsize=(7, 7),
+    #     add_colorbar=True,
+    # ):
+    #     """
+    #     Plot spectrum in polar coordinates
 
-        Parameters
-        ----------
-        spectrum: np.array
-            spectral values as 2d array with dimensions: directions, frequencies
-        plot_type: str, optional
-            type of plot: 'contour', 'contourf', 'patch', 'shaded',
-            by default: 'contourf'
-        title: str, optional
-            axes title
-        label: str, optional
-            colorbar label (or title if contour plot)
-        cmap: matplotlib.cm.cmap, optional
-            colormap, default Reds
-        vmin: real, optional
-            lower bound of values to be shown on plot, default: 1e-5
-        vmax: real, optional
-            upper bound of values to be shown on plot, default:None
-        r_as_periods: bool, optional
-            show radial axis as periods instead of frequency, default: True
-        rmin: float, optional
-            mininum frequency/period to be shown, default: None
-        rmax: float, optional
-            maximum frequency/period to be shown, default: None
-        levels: int, list(float), optional
-            for contour plots: how many levels, default:10
-            or a list of discrete levels e.g. [0.03, 0.04, 0.05]
-        figsize: (float, float), optional
-            specify size of figure, default (7, 7)
-        add_colorbar: bool, optional
-            Add colorbar to plot, default True
+    #     Parameters
+    #     ----------
+    #     spectrum: np.array
+    #         spectral values as 2d array with dimensions: directions, frequencies
+    #     plot_type: str, optional
+    #         type of plot: 'contour', 'contourf', 'patch', 'shaded',
+    #         by default: 'contourf'
+    #     title: str, optional
+    #         axes title
+    #     label: str, optional
+    #         colorbar label (or title if contour plot)
+    #     cmap: matplotlib.cm.cmap, optional
+    #         colormap, default Reds
+    #     vmin: real, optional
+    #         lower bound of values to be shown on plot, default: 1e-5
+    #     vmax: real, optional
+    #         upper bound of values to be shown on plot, default:None
+    #     r_as_periods: bool, optional
+    #         show radial axis as periods instead of frequency, default: True
+    #     rmin: float, optional
+    #         mininum frequency/period to be shown, default: None
+    #     rmax: float, optional
+    #         maximum frequency/period to be shown, default: None
+    #     levels: int, list(float), optional
+    #         for contour plots: how many levels, default:10
+    #         or a list of discrete levels e.g. [0.03, 0.04, 0.05]
+    #     figsize: (float, float), optional
+    #         specify size of figure, default (7, 7)
+    #     add_colorbar: bool, optional
+    #         Add colorbar to plot, default True
 
-        Returns
-        -------
-        <matplotlib.axes>
+    #     Returns
+    #     -------
+    #     <matplotlib.axes>
 
-        Examples
-        --------
-        >>> dfs = mikeio.Dfsu("tests/testdata/area_spectra.dfsu")
-        >>> ds = dfs.read(items="Energy density")
-        >>> spectrum = ds[0][0, 0, :, :] # first timestep, element 0
-        >>> ax = dfs.plot_spectrum(spectrum, plot_type="patch")
-        >>> ax = dfs.plot_spectrum(spectrum, rmax=9, title="Wave spectrum T<9s");
-        """
-        if isinstance(spectrum, DataArray):
-            spectrum = spectrum.to_numpy()
+    #     Examples
+    #     --------
+    #     >>> dfs = mikeio.Dfsu("tests/testdata/area_spectra.dfsu")
+    #     >>> ds = dfs.read(items="Energy density")
+    #     >>> spectrum = ds[0][0, 0, :, :] # first timestep, element 0
+    #     >>> ax = dfs.plot_spectrum(spectrum, plot_type="patch")
+    #     >>> ax = dfs.plot_spectrum(spectrum, rmax=9, title="Wave spectrum T<9s");
+    #     """
+    #     if isinstance(spectrum, DataArray):
+    #         spectrum = spectrum.to_numpy()
 
-        return plot_2dspectrum(
-            spectrum,
-            frequencies=self.frequencies,
-            directions=self.directions,
-            plot_type=plot_type,
-            title=title,
-            label=label,
-            cmap=cmap,
-            vmin=vmin,
-            vmax=vmax,
-            r_as_periods=r_as_periods,
-            rmin=rmin,
-            rmax=rmax,
-            levels=levels,
-            figsize=figsize,
-            add_colorbar=add_colorbar,
-        )
+    #     return plot_2dspectrum(
+    #         spectrum,
+    #         frequencies=self.frequencies,
+    #         directions=self.directions,
+    #         plot_type=plot_type,
+    #         title=title,
+    #         label=label,
+    #         cmap=cmap,
+    #         vmin=vmin,
+    #         vmax=vmax,
+    #         r_as_periods=r_as_periods,
+    #         rmin=rmin,
+    #         rmax=rmax,
+    #         levels=levels,
+    #         figsize=figsize,
+    #         add_colorbar=add_colorbar,
+    #     )
 
     def calc_Hm0_from_spectrum(
         self, spectrum: np.ndarray | DataArray, tail=True

@@ -61,15 +61,6 @@ def plot_2dspectrum(
     Returns
     -------
     <matplotlib.axes>
-
-    Examples
-    --------
-    >>> dfs = Dfsu("area_spectrum.dfsu")
-    >>> ds = dfs.read(items="Energy density")
-    >>> spectrum = ds[0][0, 0, :, :] # first timestep, element 0
-    >>> dfs.plot_spectrum(spectrum, plot_type="patch")
-
-    >>> dfs.plot_spectrum(spectrum, rmax=9, title="Wave spectrum T<9s")
     """
 
     import matplotlib.pyplot as plt
