@@ -36,7 +36,16 @@ from .._track import _extract_track
 from ._common import get_elements_from_source, get_nodes_from_source
 
 
-def _write_dfsu(filename: str | Path, data: Dataset) -> None:
+def write_dfsu(filename: str | Path, data: Dataset) -> None:
+    """Write a dfsu file
+
+    Parameters
+    ----------
+    filename: str
+        dfsu filename
+    data: Dataset
+        Dataset to be written
+    """
     filename = str(filename)
 
     if len(data.time) == 1:

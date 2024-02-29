@@ -14,12 +14,6 @@ from ._dfsu import _Dfsu
 
 class DfsuSpectral(_Dfsu):
 
-    def __init__(self, filename: str):
-        super().__init__(filename)
-        dfs = DfsuFile.Open(filename)
-        self._type = DfsuFileType(dfs.DfsuFileType)
-        dfs.Close()
-
     @property
     def n_frequencies(self):
         """Number of frequencies"""
