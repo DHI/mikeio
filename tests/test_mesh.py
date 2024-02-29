@@ -1,16 +1,25 @@
+from pathlib import Path
 import numpy as np
 import pytest
+import mikeio
 from mikeio import Mesh
 
 
 @pytest.fixture
-def tri_mesh():
+def tri_mesh() -> Mesh:
     return Mesh("tests/testdata/odense_rough.mesh")
 
 
 @pytest.fixture
-def mixed_mesh():
+def mixed_mesh() -> Mesh:
     return Mesh("tests/testdata/quad_tri.mesh")
+
+
+def test_read_mesh_from_path():
+    testdata = Path("tests/testdata")
+    fp = testdata / "odense_rough.mesh"
+    msh = Mesh(fp)
+    assert msh.n_nodes == 399
 
 
 def test_get_number_of_elements(tri_mesh):
@@ -61,7 +70,6 @@ def test_node_coordinates(tri_mesh):
 
 
 def test_get_land_node_coordinates(tri_mesh):
-
     msh = tri_mesh
 
     nc = msh.node_coordinates[msh.geometry.codes == 1]
@@ -124,16 +132,44 @@ def test_write_part(tri_mesh, tmp_path):
     assert outfilename.exists()
 
 
+def test_write_part_isel(tri_mesh, tmp_path):
+    outfilename = tmp_path / "simple_sub.mesh"
+
+    msh = tri_mesh
+
+    gsub = msh.geometry.isel(range(50, 100))
+    gsub.to_mesh(outfilename)
+
+    assert outfilename.exists()
+
+
 def test_write_mesh_from_dfsu(tmp_path):
     outfilename = tmp_path / "quad_tri.mesh"
     dfsufilename = "tests/testdata/FakeLake.dfsu"
 
-    msh = Mesh(dfsufilename)
+    dfs = mikeio.open(dfsufilename)
 
-    msh.write(outfilename)
+    geometry = dfs.geometry
+
+    geometry.to_mesh(outfilename)
 
     msh2 = Mesh(outfilename)
 
     assert outfilename.exists()
 
-    assert np.all(np.hstack(msh2.element_table) == np.hstack(msh.element_table))
+    assert np.all(np.hstack(msh2.element_table) == np.hstack(geometry.element_table))
+
+
+def test_open_dfsu_as_mesh_is_removed_give_hint():
+    dfsufilename = "tests/testdata/FakeLake.dfsu"
+    with pytest.warns(FutureWarning):
+        msh = Mesh(dfsufilename)
+
+    msh.plot()
+
+
+def test_to_shapely(tri_mesh) -> None:
+    msh = tri_mesh
+    shp = msh.to_shapely()
+    assert shp.geom_type == "MultiPolygon"
+    assert shp.area == pytest.approx(68931409.58160606)

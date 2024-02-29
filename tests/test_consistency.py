@@ -245,8 +245,8 @@ def test_read_dfsu2d_single_time():
 
 
 def test_read_dfs_time_selection_str():
-
     extensions = ["dfsu", "dfs2", "dfs1", "dfs0"]
+    extensions = sorted(extensions)
     for ext in extensions:
         filename = f"tests/testdata/consistency/oresundHD.{ext}"
         time = "2018-03"
@@ -264,7 +264,6 @@ def test_read_dfs_time_selection_str():
 
 
 def test_read_dfs_time_selection_str_specific():
-
     extensions = ["dfsu", "dfs2", "dfs1", "dfs0"]
     for ext in extensions:
         filename = f"tests/testdata/consistency/oresundHD.{ext}"
@@ -284,7 +283,6 @@ def test_read_dfs_time_selection_str_specific():
 
 
 def test_read_dfs_time_selection_list_str():
-
     extensions = ["dfsu", "dfs2", "dfs1", "dfs0"]
     for ext in extensions:
         filename = f"tests/testdata/consistency/oresundHD.{ext}"
@@ -303,7 +301,6 @@ def test_read_dfs_time_selection_list_str():
 
 
 def test_read_dfs_time_selection_pdTimestamp():
-
     extensions = ["dfsu", "dfs2", "dfs1", "dfs0"]
     for ext in extensions:
         filename = f"tests/testdata/consistency/oresundHD.{ext}"
@@ -323,7 +320,6 @@ def test_read_dfs_time_selection_pdTimestamp():
 
 
 def test_read_dfs_time_selection_pdDatetimeIndex():
-
     extensions = ["dfsu", "dfs2", "dfs1", "dfs0"]
     for ext in extensions:
         filename = f"tests/testdata/consistency/oresundHD.{ext}"
@@ -342,7 +338,6 @@ def test_read_dfs_time_selection_pdDatetimeIndex():
 
 
 def test_read_dfs_time_selection_datetime():
-
     extensions = ["dfsu", "dfs2", "dfs1", "dfs0"]
     for ext in extensions:
         filename = f"tests/testdata/consistency/oresundHD.{ext}"
@@ -366,7 +361,6 @@ def test_read_dfs_time_selection_datetime():
 
 
 def test_read_dfs_time_list_datetime():
-
     extensions = ["dfsu", "dfs2", "dfs1", "dfs0"]
     for ext in extensions:
         filename = f"tests/testdata/consistency/oresundHD.{ext}"
@@ -385,7 +379,6 @@ def test_read_dfs_time_list_datetime():
 
 
 def test_read_dfs_time_slice_datetime():
-
     extensions = ["dfsu", "dfs2", "dfs1", "dfs0"]
     for ext in extensions:
         filename = f"tests/testdata/consistency/oresundHD.{ext}"
@@ -404,7 +397,6 @@ def test_read_dfs_time_slice_datetime():
 
 
 def test_read_dfs_time_slice_str():
-
     extensions = ["dfsu", "dfs2", "dfs1", "dfs0"]
     for ext in extensions:
         filename = f"tests/testdata/consistency/oresundHD.{ext}"
@@ -423,12 +415,11 @@ def test_read_dfs_time_slice_str():
 
 
 def test_read_dfs_time_selection_str_slice():
-
     extensions = ["dfs0", "dfs2", "dfs1", "dfs0"]
     for ext in extensions:
         filename = f"tests/testdata/consistency/oresundHD.{ext}"
-        
-        time = slice("2018-03-08","2018-03-10")
+
+        time = slice("2018-03-08", "2018-03-10")
         ds = mikeio.read(filename=filename)
         dssel = ds.sel(time=time)
         assert dssel.n_timesteps == 3
@@ -443,7 +434,6 @@ def test_read_dfs_time_selection_str_slice():
 
 
 def test_read_dfs_time_int():
-
     extensions = ["dfsu", "dfs2", "dfs1", "dfs0"]
     for ext in extensions:
         filename = f"tests/testdata/consistency/oresundHD.{ext}"
@@ -464,7 +454,6 @@ def test_read_dfs_time_int():
 
 
 def test_read_dfs_time_list_int():
-
     extensions = ["dfsu", "dfs2", "dfs1", "dfs0"]
     for ext in extensions:
         filename = f"tests/testdata/consistency/oresundHD.{ext}"
@@ -484,7 +473,6 @@ def test_read_dfs_time_list_int():
 
 
 def test_read_dfs_time_slice_int():
-
     extensions = ["dfsu", "dfs2", "dfs1", "dfs0"]
     for ext in extensions:
         filename = f"tests/testdata/consistency/oresundHD.{ext}"
@@ -513,7 +501,6 @@ def test_read_dfs_time_slice_int():
 
 
 def test_filter_items_dfs0():
-
     ds = mikeio.read("tests/testdata/sw_points.dfs0", items="*Point 42*")
     assert ds.n_items == 15
 
@@ -540,13 +527,11 @@ def test_filter_items_wildcard_getitem():
 
 
 def test_filter_items_dfsu():
-
     ds = mikeio.read("tests/testdata/wind_north_sea.dfsu", items="*direction*")
     assert ds.n_items == 1
 
 
 def test_filter_items_dfsu_getitem():
-
     dsall = mikeio.read("tests/testdata/wind_north_sea.dfsu")
     ds = dsall["*direction*"]
     assert ds.n_items == 1

@@ -12,7 +12,6 @@ from mikecore.DfsFactory import DfsFactory
 from mikecore.DfsuBuilder import DfsuBuilder
 from mikecore.DfsuFile import DfsuFile, DfsuFileType
 from mikecore.eum import eumQuantity, eumUnit
-from mikecore.MeshBuilder import MeshBuilder
 from mikecore.MeshFile import MeshFile
 from tqdm import trange
 
@@ -38,6 +37,7 @@ from ..spatial import (
 from ..spatial._FM_utils import _plot_map
 from ..spatial import Grid2D
 from .._track import _extract_track
+from ._common import get_elements_from_source, get_nodes_from_source
 
 
 def _write_dfsu(filename: str | Path, data: Dataset) -> None:
@@ -105,29 +105,8 @@ def _write_dfsu(filename: str | Path, data: Dataset) -> None:
     dfs.Close()
 
 
-class _UnstructuredFile:
-    """
-    _UnstructuredFile is base class for Mesh and Dfsu
-    has file handle, items and timesteps and reads file header
-    """
-
+class _Dfsu:
     show_progress = False
-
-    def __init__(self) -> None:
-        self._type = None  # -1: mesh, 0: 2d-dfsu, 4:dfsu3dsigma, ...
-        self._geometry = None
-        self._geom2d = None
-        # self._shapely_domain_obj = None
-
-        self._filename = None
-        self._source = None
-        self._deletevalue = None
-
-        self._n_timesteps = None
-        self._start_time = None
-        self._timestep_in_seconds = None
-
-        self._items = None
 
     def __repr__(self):
         out = []
@@ -169,7 +148,8 @@ class _UnstructuredFile:
                 out.append(f"      {self._start_time} -- {self.end_time}")
         return str.join("\n", out)
 
-    def _read_header(self, input):
+    def _read_header(self, input: DfsuFile | str | Path) -> None:
+        # TODO set instance variables in __init__ instead of here
         if isinstance(input, DfsuFile):
             # input is a dfsu file object (already open)
             self._read_dfsu_header(input)
@@ -183,6 +163,7 @@ class _UnstructuredFile:
         ext = path.suffix.lower()
 
         if ext == ".mesh":
+            # TODO remove the possibility to read mesh files from this class
             self._read_mesh_header(filename)
 
         elif ext == ".dfsu":
@@ -199,17 +180,17 @@ class _UnstructuredFile:
         self._source = msh
         self._type = None  # =DfsuFileType.Mesh
 
-        nc, codes, node_ids = self._get_nodes_from_source(msh)
-        el_table, el_ids = self._get_elements_from_source(msh)
+        node_table = get_nodes_from_source(msh)
+        el_table = get_elements_from_source(msh)
 
         self._geometry = GeometryFM2D(
-            node_coordinates=nc,
-            element_table=el_table,
-            codes=codes,
+            node_coordinates=node_table.coordinates,
+            element_table=el_table.connectivity,
+            codes=node_table.codes,
             projection=msh.ProjectionString,
             dfsu_type=self._type,
-            element_ids=el_ids,
-            node_ids=node_ids,
+            element_ids=el_table.ids,
+            node_ids=node_table.ids,
             validate=False,
         )
 
@@ -232,8 +213,9 @@ class _UnstructuredFile:
                 frequencies=frequencies, directions=directions
             )
         else:
-            nc, codes, node_ids = self._get_nodes_from_source(dfs)
-            el_table, el_ids = self._get_elements_from_source(dfs)
+            # nc, codes, node_ids = get_nodes_from_source(dfs)
+            node_table = get_nodes_from_source(dfs)
+            el_table = get_elements_from_source(dfs)
 
             if self.is_layered:
                 geom_cls = GeometryFM3D
@@ -244,52 +226,52 @@ class _UnstructuredFile:
                     geom_cls = GeometryFMVerticalProfile
 
                 self._geometry = geom_cls(
-                    node_coordinates=nc,
-                    element_table=el_table,
-                    codes=codes,
+                    node_coordinates=node_table.coordinates,
+                    element_table=el_table.connectivity,
+                    codes=node_table.codes,
                     projection=dfs.Projection.WKTString,
                     dfsu_type=self._type,
-                    element_ids=el_ids,
-                    node_ids=node_ids,
+                    element_ids=el_table.ids,
+                    node_ids=node_table.ids,
                     n_layers=dfs.NumberOfLayers,
                     n_sigma=min(dfs.NumberOfSigmaLayers, dfs.NumberOfLayers),
                     validate=False,
                 )
             elif self._type == DfsuFileType.DfsuSpectral1D:
                 self._geometry = GeometryFMLineSpectrum(
-                    node_coordinates=nc,
-                    element_table=el_table,
-                    codes=codes,
+                    node_coordinates=node_table.coordinates,
+                    element_table=el_table.connectivity,
+                    codes=node_table.codes,
                     projection=dfs.Projection.WKTString,
                     dfsu_type=self._type,
-                    element_ids=el_ids,
-                    node_ids=node_ids,
+                    element_ids=el_table.ids,
+                    node_ids=node_table.ids,
                     validate=False,
                     frequencies=frequencies,
                     directions=directions,
                 )
             elif self._type == DfsuFileType.DfsuSpectral2D:
                 self._geometry = GeometryFMAreaSpectrum(
-                    node_coordinates=nc,
-                    element_table=el_table,
-                    codes=codes,
+                    node_coordinates=node_table.coordinates,
+                    element_table=el_table.connectivity,
+                    codes=node_table.codes,
                     projection=dfs.Projection.WKTString,
                     dfsu_type=self._type,
-                    element_ids=el_ids,
-                    node_ids=node_ids,
+                    element_ids=el_table.ids,
+                    node_ids=node_table.ids,
                     validate=False,
                     frequencies=frequencies,
                     directions=directions,
                 )
             else:
                 self._geometry = GeometryFM2D(
-                    node_coordinates=nc,
-                    element_table=el_table,
-                    codes=codes,
+                    node_coordinates=node_table.coordinates,
+                    element_table=el_table.connectivity,
+                    codes=node_table.codes,
                     projection=dfs.Projection.WKTString,
                     dfsu_type=self._type,
-                    element_ids=el_ids,
-                    node_ids=node_ids,
+                    element_ids=el_table.ids,
+                    node_ids=node_table.ids,
                     validate=False,
                 )
 
@@ -307,40 +289,6 @@ class _UnstructuredFile:
 
         dfs.Close()
 
-    @staticmethod
-    def _get_nodes_from_source(source):
-        xn = source.X
-        yn = source.Y
-        zn = source.Z
-        nc = np.column_stack([xn, yn, zn])
-        codes = np.array(list(source.Code))
-        node_ids = source.NodeIds - 1
-        return nc, codes, node_ids
-
-    @staticmethod
-    def _get_elements_from_source(source):
-        element_table = _UnstructuredFile._get_element_table_from_mikecore(
-            source.ElementTable
-        )
-        element_ids = source.ElementIds - 1
-        return element_table, element_ids
-
-    @staticmethod
-    def _offset_element_table_by(element_table, offset, copy=True):
-        offset = int(offset)
-        new_elem_table = element_table.copy() if copy else element_table
-        for j in range(len(element_table)):
-            new_elem_table[j] = element_table[j] + offset
-        return new_elem_table
-
-    @staticmethod
-    def _get_element_table_from_mikecore(element_table):
-        return _UnstructuredFile._offset_element_table_by(element_table, -1)
-
-    @staticmethod
-    def _element_table_to_mikecore(element_table):
-        return _UnstructuredFile._offset_element_table_by(element_table, 1)
-
     @property
     def type_name(self):
         """Type name, e.g. Mesh, Dfsu2D"""
@@ -349,15 +297,6 @@ class _UnstructuredFile:
     @property
     def geometry(self):
         return self._geometry
-
-    @property
-    def _geometry2d(self):
-        """The 2d geometry for a 3d object or geometry for a 2d object"""
-        if self.geometry.is_2d:
-            return self.geometry
-        if self._geom2d is None:
-            self._geom2d = self.geometry.to_2d_geometry()
-        return self._geom2d
 
     @property
     def n_nodes(self):
@@ -531,7 +470,7 @@ class _UnstructuredFile:
         <mikeio.Grid2D>
             2d grid
         """
-        nc = self._geometry2d.node_coordinates
+        nc = self.geometry.geometry2d.node_coordinates
         bbox = xy_to_bbox(nc, buffer=buffer)
         return Grid2D(
             bbox=bbox,
@@ -578,12 +517,10 @@ class _UnstructuredFile:
             )
         )
         if elements is None:
-            if self.is_2d:
-                geometry = self.geometry
-            else:
-                geometry = self._geometry2d
+            geometry = self.geometry.geometry2d
         else:
             # spatial subset
+            # TODO split subset and plot
             if self.is_2d:
                 geometry = self.geometry.elements_to_geometry(elements)
             else:
@@ -618,9 +555,7 @@ class _UnstructuredFile:
             add_colorbar=add_colorbar,
         )
 
-
-class _Dfsu(_UnstructuredFile):
-    def __init__(self, filename, dfs=None):
+    def __init__(self, filename, dfs: DfsuFile | None = None):
         """
         Create a Dfsu object
 
@@ -630,18 +565,12 @@ class _Dfsu(_UnstructuredFile):
             dfsu or mesh filename
         dfs :
         """
-        super().__init__()
+        # placeholder
+        self._timestep_in_seconds = None
+
         self._filename = str(filename)
         input = self._filename if dfs is None else dfs
         self._read_header(input)
-
-        # show progress bar for large files
-        # if self._type == UnstructuredType.Mesh:
-        #    tot_size = self.n_elements
-        # else:
-        #    tot_size = self.n_elements * self.n_timesteps * self.n_items
-        # if tot_size > 1e6:
-        #    self.show_progress = True
 
     @property
     def deletevalue(self):
@@ -1036,7 +965,9 @@ class _Dfsu(_UnstructuredFile):
             n_time_steps = np.shape(data[0])[0]
 
         if dt is None:
-            if self.timestep is None:
+            if (
+                self.timestep is None
+            ):  # TODO this is a sign that this method needs to be removed
                 dt = 1
             else:
                 dt = self.timestep  # 1 # Arbitrary if there is only a single timestep
@@ -1227,14 +1158,7 @@ class _Dfsu(_UnstructuredFile):
         outfilename : str
             path to file to be written
         """
-        if self.is_2d:
-            # make sure element table has been constructured
-            _ = self.element_table
-            geometry = self.geometry
-        else:
-            geometry = self._geometry2d
-
-        geometry.to_mesh(outfilename)
+        self.geometry.geometry2d.to_mesh(outfilename)
 
 
 class Dfsu2DH(_Dfsu):
@@ -1369,103 +1293,3 @@ class Dfsu2DH(_Dfsu):
         )
         dfs.Close()
         return res
-
-
-class Mesh(_UnstructuredFile):
-    """
-    The Mesh class is initialized with a mesh or a dfsu file.
-
-    Parameters
-    ---------
-    filename: str
-        dfsu or mesh filename
-
-    Examples
-    --------
-
-    >>> import mikeio
-    >>> msh = mikeio.Mesh("tests/testdata/odense_rough.mesh")
-    >>> msh
-    Flexible Mesh
-    number of elements: 654
-    number of nodes: 399
-    projection: UTM-33
-    """
-
-    def __init__(self, filename):
-        super().__init__()
-        self._filename = filename
-        self._read_header(filename)
-        self._n_timesteps = None
-        self._type = None  # DfsuFileType.Mesh
-        self.plot = self.geometry.plot
-
-    @property
-    def zn(self):
-        """Static bathymetry values (depth) at nodes"""
-        return self.node_coordinates[:, 2]
-
-    @zn.setter
-    def zn(self, v):
-        if len(v) != self.n_nodes:
-            raise ValueError(f"zn must have length of nodes ({self.n_nodes})")
-        self._geometry._nc[:, 2] = v
-        self._geometry._ec = None
-
-    def write(self, outfilename, elements=None):
-        """write mesh to file (will overwrite if file exists)
-
-        Parameters
-        ----------
-        outfilename : str
-            path to file
-        elements : list(int)
-            list of element ids (subset) to be saved to new mesh
-        """
-        builder = MeshBuilder()
-
-        if elements is None:
-            geometry = self.geometry
-            if hasattr(self._source, "EumQuantity"):
-                quantity = self._source.EumQuantity
-            else:
-                quantity = eumQuantity.Create(EUMType.Bathymetry, self._source.ZUnit)
-            elem_table = self._source.ElementTable
-        else:
-            geometry = self.geometry.elements_to_geometry(elements)
-            quantity = eumQuantity.Create(EUMType.Bathymetry, EUMUnit.meter)
-            elem_table = _UnstructuredFile._element_table_to_mikecore(
-                geometry.element_table
-            )
-
-        nc = geometry.node_coordinates
-        builder.SetNodes(nc[:, 0], nc[:, 1], nc[:, 2], geometry.codes)
-
-        builder.SetElements(elem_table)
-        builder.SetProjection(geometry.projection_string)
-        builder.SetEumQuantity(quantity)
-
-        newMesh = builder.CreateMesh()
-        newMesh.Write(outfilename)
-
-    # @wraps(GeometryFM.plot.boundary_nodes)
-    def plot_boundary_nodes(self, boundary_names=None, figsize=None, ax=None):
-        return self.geometry.plot.boundary_nodes(boundary_names, figsize, ax)
-
-    # @staticmethod
-    # def _geometry_to_mesh(outfilename, geometry):
-
-    #     builder = MeshBuilder()
-
-    #     nc = geometry.node_coordinates
-    #     builder.SetNodes(nc[:, 0], nc[:, 1], nc[:, 2], geometry.codes)
-    #     # builder.SetNodeIds(geometry.node_ids+1)
-    #     # builder.SetElementIds(geometry.elements+1)
-    #     builder.SetElements(
-    #         _UnstructuredFile._element_table_to_mikecore(geometry.element_table)
-    #     )
-    #     builder.SetProjection(geometry.projection_string)
-    #     quantity = eumQuantity.Create(EUMType.Bathymetry, EUMUnit.meter)
-    #     builder.SetEumQuantity(quantity)
-    #     newMesh = builder.CreateMesh()
-    #     newMesh.Write(outfilename)
