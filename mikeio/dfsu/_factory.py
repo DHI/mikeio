@@ -22,7 +22,7 @@ DFSU_MAPPING = {
 }
 
 
-def dfsu(filename: str | Path, *args: Any, **kwargs: Any) -> Any:
+def dfsu(filename: str | Path) -> Any:
     filename = str(filename)
     dfs = DfsuFile.Open(filename)
     type = DfsuFileType(dfs.DfsuFileType)
@@ -33,9 +33,9 @@ def dfsu(filename: str | Path, *args: Any, **kwargs: Any) -> Any:
     if klass is None:
         raise ValueError(f"Unsupported dfsu type: {type}")
 
-    return klass(filename, *args, **kwargs)
+    return klass(filename)
 
 
 class Dfsu:
-    def __new__(self, filename: str | Path, *args: Any, **kwargs: Any):
-        return dfsu(filename, *args, **kwargs)
+    def __new__(self, filename: str | Path) -> Any:
+        return dfsu(filename)
