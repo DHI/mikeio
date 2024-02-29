@@ -1,10 +1,8 @@
 from __future__ import annotations
-import os
 from pathlib import Path
 import warnings
-from datetime import datetime, timedelta
 from functools import wraps
-from typing import Collection, List, Tuple
+from typing import Any, Collection, List, Tuple
 
 import numpy as np
 import pandas as pd
@@ -12,7 +10,6 @@ from mikecore.DfsFactory import DfsFactory
 from mikecore.DfsuBuilder import DfsuBuilder
 from mikecore.DfsuFile import DfsuFile, DfsuFileType
 from mikecore.eum import eumQuantity, eumUnit
-from mikecore.MeshFile import MeshFile
 from tqdm import trange
 
 from mikeio.spatial._utils import xy_to_bbox
@@ -25,7 +22,7 @@ from ..dfs._dfs import (
     _valid_item_numbers,
     _valid_timesteps,
 )
-from ..eum import EUMType, EUMUnit, ItemInfo
+from ..eum import ItemInfo
 from ..spatial import (
     GeometryFM2D,
     GeometryFM3D,
@@ -117,18 +114,15 @@ class _Dfsu:
         filename: str
             dfsu filename
         """
-        # placeholder
-        # self._timestep_in_seconds = None
-
-        # TODO remove
         self._filename = str(filename)
-        # input = self._filename if dfs is None else dfs
-        # self._read_header(filename)
-        # self.time = ...
-        self._geometry, self._time, self._timestep, self._items = self._read_header(
-            filename
-        )
-        # self.items = ...
+        (
+            self._geometry,
+            self._time,
+            self._timestep,
+            self._items,
+            self._type,
+            self._deletevalue,
+        ) = self._read_header(filename)
 
     def __repr__(self):
         out = []
@@ -170,65 +164,27 @@ class _Dfsu:
                 out.append(f"      {self.start_time} -- {self.end_time}")
         return str.join("\n", out)
 
-    def _read_header(self, input: str | Path) -> None:
-        # TODO set instance variables in __init__ instead of here
+    # TODO return type DfsHeader?
+    def _read_header(
+        self, input: str | Path
+    ) -> Tuple[Any, pd.DatetimeIndex, float, List[ItemInfo], DfsuFileType, float]:
         filename = input
         path = Path(input)
         if not path.exists():
             raise FileNotFoundError(f"file {path} does not exist!")
 
-        ext = path.suffix.lower()
+        dfs = DfsuFile.Open(filename)
+        dfsu_type = DfsuFileType(dfs.DfsuFileType)
+        deletevalue = dfs.DeleteValueFloat
 
-        if ext == ".mesh":
-            raise ValueError("Not supported")
-            # TODO remove the possibility to read mesh files from this class
-            self._read_mesh_header(filename)
-
-        elif ext == ".dfsu":
-            dfs = DfsuFile.Open(filename)
-            geometry, time, timestep, items = self._read_dfsu_header(dfs)
-            return geometry, time, timestep, items
-        else:
-            raise Exception(f"Filetype {ext} not supported (mesh,dfsu)")
-
-    def _read_mesh_header(self, filename):
-        """
-        Read header of mesh file and set object properties
-        """
-        msh = MeshFile.ReadMesh(filename)
-        self._source = msh
-        self._type = None  # =DfsuFileType.Mesh
-
-        node_table = get_nodes_from_source(msh)
-        el_table = get_elements_from_source(msh)
-
-        self._geometry = GeometryFM2D(
-            node_coordinates=node_table.coordinates,
-            element_table=el_table.connectivity,
-            codes=node_table.codes,
-            projection=msh.ProjectionString,
-            dfsu_type=self._type,
-            element_ids=el_table.ids,
-            node_ids=node_table.ids,
-            validate=False,
-        )
-
-    def _read_dfsu_header(self, dfs):
-        """
-        Read header of dfsu file and set object properties
-        """
-        self._source = dfs
-        self._type = DfsuFileType(dfs.DfsuFileType)
-        self._deletevalue = dfs.DeleteValueFloat
-
-        if self.is_spectral:
+        if self._is_spectral(dfsu_type):
             dir = dfs.Directions
             directions = None if dir is None else dir * (180 / np.pi)
             frequencies = dfs.Frequencies
 
         # geometry
-        if self._type == DfsuFileType.DfsuSpectral0D:
-            geometry = GeometryFMPointSpectrum(
+        if dfsu_type == DfsuFileType.DfsuSpectral0D:
+            geometry: Any = GeometryFMPointSpectrum(
                 frequencies=frequencies, directions=directions
             )
         else:
@@ -236,9 +192,9 @@ class _Dfsu:
             node_table = get_nodes_from_source(dfs)
             el_table = get_elements_from_source(dfs)
 
-            if self.is_layered:
-                geom_cls = GeometryFM3D
-                if self._type in (
+            if self._is_layered(dfsu_type):
+                geom_cls: Any = GeometryFM3D
+                if dfsu_type in (
                     DfsuFileType.DfsuVerticalProfileSigma,
                     DfsuFileType.DfsuVerticalProfileSigmaZ,
                 ):
@@ -249,33 +205,33 @@ class _Dfsu:
                     element_table=el_table.connectivity,
                     codes=node_table.codes,
                     projection=dfs.Projection.WKTString,
-                    dfsu_type=self._type,
+                    dfsu_type=dfsu_type,
                     element_ids=el_table.ids,
                     node_ids=node_table.ids,
                     n_layers=dfs.NumberOfLayers,
                     n_sigma=min(dfs.NumberOfSigmaLayers, dfs.NumberOfLayers),
                     validate=False,
                 )
-            elif self._type == DfsuFileType.DfsuSpectral1D:
+            elif dfsu_type == DfsuFileType.DfsuSpectral1D:
                 geometry = GeometryFMLineSpectrum(
                     node_coordinates=node_table.coordinates,
                     element_table=el_table.connectivity,
                     codes=node_table.codes,
                     projection=dfs.Projection.WKTString,
-                    dfsu_type=self._type,
+                    dfsu_type=dfsu_type,
                     element_ids=el_table.ids,
                     node_ids=node_table.ids,
                     validate=False,
                     frequencies=frequencies,
                     directions=directions,
                 )
-            elif self._type == DfsuFileType.DfsuSpectral2D:
+            elif dfsu_type == DfsuFileType.DfsuSpectral2D:
                 geometry = GeometryFMAreaSpectrum(
                     node_coordinates=node_table.coordinates,
                     element_table=el_table.connectivity,
                     codes=node_table.codes,
                     projection=dfs.Projection.WKTString,
-                    dfsu_type=self._type,
+                    dfsu_type=dfsu_type,
                     element_ids=el_table.ids,
                     node_ids=node_table.ids,
                     validate=False,
@@ -288,7 +244,7 @@ class _Dfsu:
                     element_table=el_table.connectivity,
                     codes=node_table.codes,
                     projection=dfs.Projection.WKTString,
-                    dfsu_type=self._type,
+                    dfsu_type=dfsu_type,
                     element_ids=el_table.ids,
                     node_ids=node_table.ids,
                     validate=False,
@@ -296,9 +252,11 @@ class _Dfsu:
 
         # items
         n_items = len(dfs.ItemInfo)
-        first_idx = 1 if self.is_layered else 0
+        first_idx = 1 if self._is_layered(dfsu_type) else 0
         items = _get_item_info(
-            dfs.ItemInfo, list(range(n_items - first_idx)), ignore_first=self.is_layered
+            dfs.ItemInfo,
+            list(range(n_items - first_idx)),
+            ignore_first=self._is_layered(dfsu_type),
         )
 
         # time
@@ -307,13 +265,10 @@ class _Dfsu:
             periods=dfs.NumberOfTimeSteps,
             freq=f"{dfs.TimeStepInSeconds}S",
         )
-        # self._start_time = dfs.StartDateTime
-        # self._n_timesteps = dfs.NumberOfTimeSteps
-        # self._timestep_in_seconds = dfs.TimeStepInSeconds
         timestep = dfs.TimeStepInSeconds
 
         dfs.Close()
-        return geometry, time, timestep, items
+        return geometry, time, timestep, items, dfsu_type, deletevalue
 
     @property
     def type_name(self):
@@ -405,11 +360,9 @@ class _Dfsu:
             None,
         )
 
-    @property
-    def is_layered(self):
-        """Type is layered dfsu (3d, vertical profile or vertical column)"""
-        return self._type in (
-            DfsuFileType.DfsuVerticalColumn,
+    @staticmethod
+    def _is_layered(dfsu_type: DfsuFileType) -> bool:
+        return dfsu_type in (
             DfsuFileType.DfsuVerticalProfileSigma,
             DfsuFileType.DfsuVerticalProfileSigmaZ,
             DfsuFileType.Dfsu3DSigma,
@@ -417,13 +370,22 @@ class _Dfsu:
         )
 
     @property
-    def is_spectral(self):
-        """Type is spectral dfsu (point, line or area spectrum)"""
-        return self._type in (
+    def is_layered(self):
+        """Type is layered dfsu (3d, vertical profile or vertical column)"""
+        return self._is_layered(self._type)
+
+    @staticmethod
+    def _is_spectral(dfsu_type: DfsuFileType) -> bool:
+        return dfsu_type in (
             DfsuFileType.DfsuSpectral0D,
             DfsuFileType.DfsuSpectral1D,
             DfsuFileType.DfsuSpectral2D,
         )
+
+    @property
+    def is_spectral(self):
+        """Type is spectral dfsu (point, line or area spectrum)"""
+        return self._is_spectral(self._type)
 
     @property
     def is_tri_only(self):
@@ -657,8 +619,6 @@ class _Dfsu:
         # (if engine is continuously writing to this file)
         # TODO: add more checks that this is actually still the same file
         # (could have been replaced in the meantime)
-
-        self._n_timesteps = dfs.NumberOfTimeSteps
 
         single_time_selected, time_steps = _valid_timesteps(dfs, time)
 
@@ -916,253 +876,255 @@ class _Dfsu:
             keep_open=keep_open,
         )
 
-    def _write(
-        self,
-        filename,
-        data,
-        start_time=None,
-        dt=None,
-        items=None,
-        elements=None,
-        title=None,
-        keep_open=False,
-    ):
-        """Write a new dfsu file
+    # def _write(
+    #     self,
+    #     filename,
+    #     data,
+    #     start_time=None,
+    #     dt=None,
+    #     items=None,
+    #     elements=None,
+    #     title=None,
+    #     keep_open=False,
+    # ):
+    #     """Write a new dfsu file
 
-        Parameters
-        -----------
-        filename: str
-            full path to the new dfsu file
-        data: list[np.array] or Dataset
-            list of matrices, one for each item. Matrix dimension: time, x
-        start_time: datetime, optional, deprecated
-            start date of type datetime.
-        dt: float, optional, deprecated
-            The time step (in seconds)
-        items: list[ItemInfo], optional, deprecated
-        elements: list[int], optional
-            write only these element ids to file
-        title: str
-            title of the dfsu file. Default is blank.
-        keep_open: bool, optional
-            Keep file open for appending
-        """
-        if self.is_spectral:
-            raise ValueError("write() is not supported for spectral dfsu!")
+    #     Parameters
+    #     -----------
+    #     filename: str
+    #         full path to the new dfsu file
+    #     data: list[np.array] or Dataset
+    #         list of matrices, one for each item. Matrix dimension: time, x
+    #     start_time: datetime, optional, deprecated
+    #         start date of type datetime.
+    #     dt: float, optional, deprecated
+    #         The time step (in seconds)
+    #     items: list[ItemInfo], optional, deprecated
+    #     elements: list[int], optional
+    #         write only these element ids to file
+    #     title: str
+    #         title of the dfsu file. Default is blank.
+    #     keep_open: bool, optional
+    #         Keep file open for appending
+    #     """
+    #     raise NotImplementedError("use _write_dfsu() instead")
 
-        if dt and not keep_open:
-            warnings.warn(
-                "argument dt is deprecated, please supply data in the form of a Dataset",
-                FutureWarning,
-            )
+    #     if self.is_spectral:
+    #         raise ValueError("write() is not supported for spectral dfsu!")
 
-        filename = str(filename)
+    #     if dt and not keep_open:
+    #         warnings.warn(
+    #             "argument dt is deprecated, please supply data in the form of a Dataset",
+    #             FutureWarning,
+    #         )
 
-        if isinstance(data, Dataset):
-            items = data.items
-            start_time = data.time[0]
-            if dt is None and len(data.time) > 1:
-                if not data.is_equidistant:
-                    raise ValueError(
-                        "Data is not equidistant in time. Dfsu requires equidistant temporal axis!"
-                    )
-                dt = (data.time[1] - data.time[0]).total_seconds()
-            if data.geometry.is_layered:
-                zn_dynamic = data[0]._zn
+    #     filename = str(filename)
 
-            # data needs to be a list so we can fit zn later
-            data = [np.atleast_2d(x.to_numpy()) for x in data]
+    #     if isinstance(data, Dataset):
+    #         items = data.items
+    #         start_time = data.time[0]
+    #         if dt is None and len(data.time) > 1:
+    #             if not data.is_equidistant:
+    #                 raise ValueError(
+    #                     "Data is not equidistant in time. Dfsu requires equidistant temporal axis!"
+    #                 )
+    #             dt = (data.time[1] - data.time[0]).total_seconds()
+    #         if data.geometry.is_layered:
+    #             zn_dynamic = data[0]._zn
 
-        n_items = len(data)
-        n_time_steps = 0
-        if n_items > 0:
-            n_time_steps = np.shape(data[0])[0]
+    #         # data needs to be a list so we can fit zn later
+    #         data = [np.atleast_2d(x.to_numpy()) for x in data]
 
-        if dt is None:
-            if (
-                self.timestep is None
-            ):  # TODO this is a sign that this method needs to be removed
-                dt = 1
-            else:
-                dt = self.timestep  # 1 # Arbitrary if there is only a single timestep
+    #     n_items = len(data)
+    #     n_time_steps = 0
+    #     if n_items > 0:
+    #         n_time_steps = np.shape(data[0])[0]
 
-        if start_time is None:
-            if self.start_time is None:
-                start_time = datetime.now()
-                warnings.warn(
-                    f"No start time supplied. Using current time: {start_time} as start time."
-                )
-            else:
-                start_time = self.start_time
-                warnings.warn(
-                    f"No start time supplied. Using start time from source: {start_time} as start time."
-                )
+    #     if dt is None:
+    #         if (
+    #             self.timestep is None
+    #         ):  # TODO this is a sign that this method needs to be removed
+    #             dt = 1
+    #         else:
+    #             dt = self.timestep  # 1 # Arbitrary if there is only a single timestep
 
-        if items is None:
-            if n_items == 0:
-                raise ValueError(
-                    "Number of items unknown. Add (..., items=[ItemInfo(...)]"
-                )
-            items = [ItemInfo(f"Item {i + 1}") for i in range(n_items)]
+    #     if start_time is None:
+    #         if self.start_time is None:
+    #             start_time = datetime.now()
+    #             warnings.warn(
+    #                 f"No start time supplied. Using current time: {start_time} as start time."
+    #             )
+    #         else:
+    #             start_time = self.start_time
+    #             warnings.warn(
+    #                 f"No start time supplied. Using start time from source: {start_time} as start time."
+    #             )
 
-        if title is None:
-            title = ""
+    #     if items is None:
+    #         if n_items == 0:
+    #             raise ValueError(
+    #                 "Number of items unknown. Add (..., items=[ItemInfo(...)]"
+    #             )
+    #         items = [ItemInfo(f"Item {i + 1}") for i in range(n_items)]
 
-        file_start_time = start_time
+    #     if title is None:
+    #         title = ""
 
-        # spatial subset
-        if elements is None:
-            geometry = self.geometry
-        else:
-            geometry = self.geometry.elements_to_geometry(elements)
-            if (not self.is_2d) and (geometry._type == DfsuFileType.Dfsu2D):
-                # redo extraction as 2d:
-                # print("will redo extraction in 2d!")
-                geometry = self.geometry.elements_to_geometry(
-                    elements, node_layers="bottom"
-                )
-                if (items[0].name == "Z coordinate") and (
-                    items[0].type == EUMType.ItemGeometry3D
-                ):
-                    # get rid of z-item
-                    items = items[1 : (n_items + 1)]
-                    n_items = n_items - 1
-                    new_data = []
-                    for j in range(n_items):
-                        new_data.append(data[j + 1])
-                    data = new_data
+    #     file_start_time = start_time
 
-        if geometry.is_layered:
-            z_item = ItemInfo(
-                "Z coordinate", itemtype=EUMType.ItemGeometry3D, unit=EUMUnit.meter
-            )
-            items.insert(0, z_item)
-            n_items = len(items)
-            zn_dynamic = geometry.node_coordinates[:, 2]
-            data.insert(0, zn_dynamic)
+    #     # spatial subset
+    #     if elements is None:
+    #         geometry = self.geometry
+    #     else:
+    #         geometry = self.geometry.elements_to_geometry(elements)
+    #         if (not self.is_2d) and (geometry._type == DfsuFileType.Dfsu2D):
+    #             # redo extraction as 2d:
+    #             # print("will redo extraction in 2d!")
+    #             geometry = self.geometry.elements_to_geometry(
+    #                 elements, node_layers="bottom"
+    #             )
+    #             if (items[0].name == "Z coordinate") and (
+    #                 items[0].type == EUMType.ItemGeometry3D
+    #             ):
+    #                 # get rid of z-item
+    #                 items = items[1 : (n_items + 1)]
+    #                 n_items = n_items - 1
+    #                 new_data = []
+    #                 for j in range(n_items):
+    #                     new_data.append(data[j + 1])
+    #                 data = new_data
 
-        # Default filetype;
-        if geometry._type is None:  # == DfsuFileType.Mesh:
-            # create dfs2d from mesh
-            dfsu_filetype = DfsuFileType.Dfsu2D
-        else:
-            #    # TODO: if subset is slice...
-            dfsu_filetype = geometry._type.value
+    #     if geometry.is_layered:
+    #         z_item = ItemInfo(
+    #             "Z coordinate", itemtype=EUMType.ItemGeometry3D, unit=EUMUnit.meter
+    #         )
+    #         items.insert(0, z_item)
+    #         n_items = len(items)
+    #         zn_dynamic = geometry.node_coordinates[:, 2]
+    #         data.insert(0, zn_dynamic)
 
-        if dfsu_filetype != DfsuFileType.Dfsu2D:
-            if (items[0].name != "Z coordinate") and (
-                items[0].type == EUMType.ItemGeometry3D
-            ):
-                raise Exception("First item must be z coordinates of the nodes!")
+    #     # Default filetype;
+    #     if geometry._type is None:  # == DfsuFileType.Mesh:
+    #         # create dfs2d from mesh
+    #         dfsu_filetype = DfsuFileType.Dfsu2D
+    #     else:
+    #         #    # TODO: if subset is slice...
+    #         dfsu_filetype = geometry._type.value
 
-        xn = geometry.node_coordinates[:, 0]
-        yn = geometry.node_coordinates[:, 1]
+    #     if dfsu_filetype != DfsuFileType.Dfsu2D:
+    #         if (items[0].name != "Z coordinate") and (
+    #             items[0].type == EUMType.ItemGeometry3D
+    #         ):
+    #             raise Exception("First item must be z coordinates of the nodes!")
 
-        # zn have to be Single precision??
-        zn = geometry.node_coordinates[:, 2]
+    #     xn = geometry.node_coordinates[:, 0]
+    #     yn = geometry.node_coordinates[:, 1]
 
-        # TODO verify this
-        # elem_table = geometry.element_table
-        elem_table = []
-        for j in range(geometry.n_elements):
-            elem_nodes = geometry.element_table[j]
-            elem_nodes = [nd + 1 for nd in elem_nodes]
-            elem_table.append(np.array(elem_nodes))
-        elem_table = elem_table
+    #     # zn have to be Single precision??
+    #     zn = geometry.node_coordinates[:, 2]
 
-        builder = DfsuBuilder.Create(dfsu_filetype)
+    #     # TODO verify this
+    #     # elem_table = geometry.element_table
+    #     elem_table = []
+    #     for j in range(geometry.n_elements):
+    #         elem_nodes = geometry.element_table[j]
+    #         elem_nodes = [nd + 1 for nd in elem_nodes]
+    #         elem_table.append(np.array(elem_nodes))
+    #     elem_table = elem_table
 
-        builder.SetNodes(xn, yn, zn, geometry.codes)
-        builder.SetElements(elem_table)
-        # builder.SetNodeIds(geometry.node_ids+1)
-        # builder.SetElementIds(geometry.elements+1)
+    #     builder = DfsuBuilder.Create(dfsu_filetype)
 
-        factory = DfsFactory()
-        proj = factory.CreateProjection(geometry.projection_string)
-        builder.SetProjection(proj)
-        builder.SetTimeInfo(file_start_time, dt)
-        builder.SetZUnit(eumUnit.eumUmeter)
+    #     builder.SetNodes(xn, yn, zn, geometry.codes)
+    #     builder.SetElements(elem_table)
+    #     # builder.SetNodeIds(geometry.node_ids+1)
+    #     # builder.SetElementIds(geometry.elements+1)
 
-        if dfsu_filetype != DfsuFileType.Dfsu2D:
-            builder.SetNumberOfSigmaLayers(geometry.n_sigma_layers)
+    #     factory = DfsFactory()
+    #     proj = factory.CreateProjection(geometry.projection_string)
+    #     builder.SetProjection(proj)
+    #     builder.SetTimeInfo(file_start_time, dt)
+    #     builder.SetZUnit(eumUnit.eumUmeter)
 
-        for item in items:
-            if item.name != "Z coordinate":
-                builder.AddDynamicItem(
-                    item.name, eumQuantity.Create(item.type, item.unit)
-                )
+    #     if dfsu_filetype != DfsuFileType.Dfsu2D:
+    #         builder.SetNumberOfSigmaLayers(geometry.n_sigma_layers)
 
-        builder.ApplicationTitle = "mikeio"
-        builder.ApplicationVersion = __dfs_version__
+    #     for item in items:
+    #         if item.name != "Z coordinate":
+    #             builder.AddDynamicItem(
+    #                 item.name, eumQuantity.Create(item.type, item.unit)
+    #             )
 
-        try:
-            # TODO self._dfs is used by append, can we handle this better?
-            self._dfs = builder.CreateFile(filename)
-        except IOError:
-            print("cannot create dfsu file: ", filename)
+    #     builder.ApplicationTitle = "mikeio"
+    #     builder.ApplicationVersion = __dfs_version__
 
-        deletevalue = self._dfs.DeleteValueFloat
+    #     try:
+    #         # TODO self._dfs is used by append, can we handle this better?
+    #         self._dfs = builder.CreateFile(filename)
+    #     except IOError:
+    #         print("cannot create dfsu file: ", filename)
 
-        try:
-            # Add data for all item-timesteps, copying from source
+    #     deletevalue = self._dfs.DeleteValueFloat
 
-            for i in trange(n_time_steps, disable=not self.show_progress):
-                if geometry.is_layered and len(data) > 0:
-                    self._dfs.WriteItemTimeStepNext(0, data[0].astype(np.float32))
+    #     try:
+    #         # Add data for all item-timesteps, copying from source
 
-                for item in range(len(items)):
-                    if items[item].name != "Z coordinate":
-                        d = data[item][i, :]
-                        d[np.isnan(d)] = deletevalue
-                        darray = d
-                        self._dfs.WriteItemTimeStepNext(0, darray.astype(np.float32))
-            if not keep_open:
-                self._dfs.Close()
-            else:
-                return self
+    #         for i in trange(n_time_steps, disable=not self.show_progress):
+    #             if geometry.is_layered and len(data) > 0:
+    #                 self._dfs.WriteItemTimeStepNext(0, data[0].astype(np.float32))
 
-        except Exception as e:
-            print(e)
-            self._dfs.Close()
-            os.remove(filename)
+    #             for item in range(len(items)):
+    #                 if items[item].name != "Z coordinate":
+    #                     d = data[item][i, :]
+    #                     d[np.isnan(d)] = deletevalue
+    #                     darray = d
+    #                     self._dfs.WriteItemTimeStepNext(0, darray.astype(np.float32))
+    #         if not keep_open:
+    #             self._dfs.Close()
+    #         else:
+    #             return self
 
-    def append(self, data: List[np.ndarray] | Dataset) -> None:
-        """Append to a dfsu file opened with `write(...,keep_open=True)`
+    #     except Exception as e:
+    #         print(e)
+    #         self._dfs.Close()
+    #         os.remove(filename)
 
-        Parameters
-        -----------
-        data: list[np.array] or Dataset
-            list of matrices, one for each item. Matrix dimension: time, x
-        """
+    # def append(self, data: List[np.ndarray] | Dataset) -> None:
+    #     """Append to a dfsu file opened with `write(...,keep_open=True)`
 
-        deletevalue = self._dfs.DeleteValueFloat
-        n_items = len(data)
-        has_time_axis = len(np.shape(data[0])) == 2  # type: ignore
-        n_timesteps = np.shape(data[0])[0] if has_time_axis else 1  # type: ignore
-        for i in trange(n_timesteps, disable=not self.show_progress):
-            if self.geometry.is_layered:
-                zn = self.geometry.node_coordinates[:, 2]
-                self._dfs.WriteItemTimeStepNext(0, zn.astype(np.float32))
-            for item in range(n_items):
-                dai: np.ndarray | DataArray | Dataset = data[item]
-                if isinstance(dai, DataArray):
-                    di: np.ndarray = dai.to_numpy()
-                elif isinstance(dai, np.ndarray):  # TODO is this too restrictive?
-                    di = dai
-                d: np.ndarray = di[i, :] if has_time_axis else di
-                d[np.isnan(d)] = deletevalue
-                darray = d.astype(np.float32)
-                self._dfs.WriteItemTimeStepNext(0, darray)
+    #     Parameters
+    #     -----------
+    #     data: list[np.array] or Dataset
+    #         list of matrices, one for each item. Matrix dimension: time, x
+    #     """
 
-    def close(self):
-        "Finalize write for a dfsu file opened with `write(...,keep_open=True)`"
-        self._dfs.Close()
+    #     deletevalue = self._dfs.DeleteValueFloat
+    #     n_items = len(data)
+    #     has_time_axis = len(np.shape(data[0])) == 2  # type: ignore
+    #     n_timesteps = np.shape(data[0])[0] if has_time_axis else 1  # type: ignore
+    #     for i in trange(n_timesteps, disable=not self.show_progress):
+    #         if self.geometry.is_layered:
+    #             zn = self.geometry.node_coordinates[:, 2]
+    #             self._dfs.WriteItemTimeStepNext(0, zn.astype(np.float32))
+    #         for item in range(n_items):
+    #             dai: np.ndarray | DataArray | Dataset = data[item]
+    #             if isinstance(dai, DataArray):
+    #                 di: np.ndarray = dai.to_numpy()
+    #             elif isinstance(dai, np.ndarray):  # TODO is this too restrictive?
+    #                 di = dai
+    #             d: np.ndarray = di[i, :] if has_time_axis else di
+    #             d[np.isnan(d)] = deletevalue
+    #             darray = d.astype(np.float32)
+    #             self._dfs.WriteItemTimeStepNext(0, darray)
 
-    def __enter__(self):
-        return self
+    # def close(self):
+    #     "Finalize write for a dfsu file opened with `write(...,keep_open=True)`"
+    #     self._dfs.Close()
 
-    def __exit__(self, type, value, traceback):
-        self._dfs.Close()
+    # def __enter__(self):
+    #     return self
+
+    # def __exit__(self, type, value, traceback):
+    #     self._dfs.Close()
 
     def to_mesh(self, outfilename):
         """write object to mesh file
@@ -1287,7 +1249,7 @@ class Dfsu2DH(_Dfsu):
 
         item_numbers = _valid_item_numbers(dfs.ItemInfo, items)
         items = _get_item_info(dfs.ItemInfo, item_numbers)
-        self._n_timesteps = dfs.NumberOfTimeSteps
+        # self._n_timesteps = dfs.NumberOfTimeSteps
         _, time_steps = _valid_timesteps(dfs, time_steps=None)
 
         res = _extract_track(

@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import Tuple
+from typing import Sized, Tuple
 
 import numpy as np
 import pandas as pd
@@ -13,6 +13,13 @@ from ._dfsu import _Dfsu
 
 
 class DfsuSpectral(_Dfsu):
+
+    def __init__(self, filename: str):
+        super().__init__(filename)
+        dfs = DfsuFile.Open(filename)
+        self._type = DfsuFileType(dfs.DfsuFileType)
+        dfs.Close()
+
     @property
     def n_frequencies(self):
         """Number of frequencies"""
@@ -33,7 +40,9 @@ class DfsuSpectral(_Dfsu):
         """Directional axis"""
         return self.geometry._directions
 
-    def _get_spectral_data_shape(self, n_steps: int, elements):
+    def _get_spectral_data_shape(
+        self, n_steps: int, elements: Sized | None, dfsu_type: DfsuFileType
+    ) -> Tuple[Tuple[int, ...], Tuple[int, ...], Tuple[str, ...]]:
         dims = [] if n_steps == 1 else ["time"]
         n_freq = self.n_frequencies
         n_dir = self.n_directions
@@ -42,9 +51,9 @@ class DfsuSpectral(_Dfsu):
             shape = (n_freq,)
         elif n_freq == 0:
             shape = (n_dir,)
-        if self._type == DfsuFileType.DfsuSpectral0D:
+        if dfsu_type == DfsuFileType.DfsuSpectral0D:
             read_shape = (n_steps, *shape)
-        elif self._type == DfsuFileType.DfsuSpectral1D:
+        elif dfsu_type == DfsuFileType.DfsuSpectral1D:
             # node-based, FE-style
             n_nodes = self.n_nodes if elements is None else len(elements)
             if n_nodes == 1:
@@ -136,8 +145,6 @@ class DfsuSpectral(_Dfsu):
         # self._read_dfsu_header(self._filename)
         dfs = DfsuFile.Open(self._filename)
 
-        self._n_timesteps = dfs.NumberOfTimeSteps
-
         single_time_selected, time_steps = _valid_timesteps(dfs, time)
 
         if self._type == DfsuFileType.DfsuSpectral2D:
@@ -163,7 +170,9 @@ class DfsuSpectral(_Dfsu):
         data_list = []
 
         n_steps = len(time_steps)
-        read_shape, shape, dims = self._get_spectral_data_shape(n_steps, pts)
+        read_shape, shape, dims = self._get_spectral_data_shape(
+            n_steps, pts, self._type
+        )
         for item in range(n_items):
             # Initialize an empty data block
             data: np.ndarray = np.ndarray(shape=read_shape, dtype=dtype)

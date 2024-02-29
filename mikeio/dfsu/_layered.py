@@ -154,8 +154,6 @@ class DfsuLayered(_Dfsu):
         # TODO: add more checks that this is actually still the same file
         # (could have been replaced in the meantime)
 
-        self._n_timesteps = dfs.NumberOfTimeSteps
-
         single_time_selected, time_steps = _valid_timesteps(dfs, time)
 
         self._validate_elements_and_geometry_sel(

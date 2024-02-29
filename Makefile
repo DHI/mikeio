@@ -10,6 +10,9 @@ build: typecheck test
 lint:
 	ruff .
 
+pylint:
+	pylint --disable=all --enable=attribute-defined-outside-init mikeio/
+
 test:
 	pytest --disable-warnings
 

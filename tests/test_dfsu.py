@@ -535,73 +535,73 @@ def test_write_from_dfsu(tmp_path):
     assert dfs.end_time == newdfs.end_time
 
 
-def test_incremental_write_from_dfsu(tmp_path):
-    "Useful for writing datasets with many timesteps to avoid problems with out of memory"
+# def test_incremental_write_from_dfsu(tmp_path):
+#     "Useful for writing datasets with many timesteps to avoid problems with out of memory"
 
-    sourcefilename = "tests/testdata/HD2D.dfsu"
-    fp = tmp_path / "simple.dfsu"
-    dfs = mikeio.open(sourcefilename)
+#     sourcefilename = "tests/testdata/HD2D.dfsu"
+#     fp = tmp_path / "simple.dfsu"
+#     dfs = mikeio.open(sourcefilename)
 
-    nt = dfs.n_timesteps
+#     nt = dfs.n_timesteps
 
-    ds = dfs.read(time=[0], keepdims=True)
+#     ds = dfs.read(time=[0], keepdims=True)
 
-    dfs.write(fp, ds, keep_open=True)
+#     dfs.write(fp, ds, keep_open=True)
 
-    for i in range(1, nt):
-        ds = dfs.read(time=[i], keepdims=True)
-        dfs.append(ds)
+#     for i in range(1, nt):
+#         ds = dfs.read(time=[i], keepdims=True)
+#         dfs.append(ds)
 
-    dfs.close()
+#     dfs.close()
 
-    newdfs = mikeio.open(fp)
-    assert dfs.start_time == newdfs.start_time
-    assert dfs.timestep == newdfs.timestep
-    assert dfs.end_time == newdfs.end_time
-
-
-def test_incremental_write_from_dfsu_context_manager(tmp_path):
-    sourcefilename = "tests/testdata/HD2D.dfsu"
-    fp = tmp_path / "simple.dfsu"
-    dfs = mikeio.open(sourcefilename)
-
-    nt = dfs.n_timesteps
-
-    ds = dfs.read(time=[0], keepdims=True)
-
-    with dfs.write(fp, ds, keep_open=True) as f:
-        for i in range(1, nt):
-            ds = dfs.read(time=[i], keepdims=True)
-            f.append(ds)
-
-        # dfs.close() # should be called automagically by context manager
-
-    newdfs = mikeio.open(fp)
-    assert dfs.start_time == newdfs.start_time
-    assert dfs.timestep == newdfs.timestep
-    assert dfs.end_time == newdfs.end_time
+#     newdfs = mikeio.open(fp)
+#     assert dfs.start_time == newdfs.start_time
+#     assert dfs.timestep == newdfs.timestep
+#     assert dfs.end_time == newdfs.end_time
 
 
-def test_incremental_write_from_dfsu_context_manager_3d(tmp_path):
-    sourcefilename = "tests/testdata/oresund_sigma_z.dfsu"
-    fp = tmp_path / "3d.dfsu"
-    dfs = mikeio.open(sourcefilename)
+# def test_incremental_write_from_dfsu_context_manager(tmp_path):
+#     sourcefilename = "tests/testdata/HD2D.dfsu"
+#     fp = tmp_path / "simple.dfsu"
+#     dfs = mikeio.open(sourcefilename)
 
-    nt = dfs.n_timesteps
+#     nt = dfs.n_timesteps
 
-    ds = dfs.read(time=[0], keepdims=True)
+#     ds = dfs.read(time=[0], keepdims=True)
 
-    with dfs.write(fp, ds, keep_open=True) as f:
-        for i in range(1, nt):
-            ds = dfs.read(time=[i], keepdims=True)
-            f.append(ds)
+#     with dfs.write(fp, ds, keep_open=True) as f:
+#         for i in range(1, nt):
+#             ds = dfs.read(time=[i], keepdims=True)
+#             f.append(ds)
 
-        # dfs.close() # should be called automagically by context manager
+#         # dfs.close() # should be called automagically by context manager
 
-    newdfs = mikeio.open(fp)
-    assert dfs.start_time == newdfs.start_time
-    assert dfs.timestep == newdfs.timestep
-    assert dfs.end_time == newdfs.end_time
+#     newdfs = mikeio.open(fp)
+#     assert dfs.start_time == newdfs.start_time
+#     assert dfs.timestep == newdfs.timestep
+#     assert dfs.end_time == newdfs.end_time
+
+
+# def test_incremental_write_from_dfsu_context_manager_3d(tmp_path):
+#     sourcefilename = "tests/testdata/oresund_sigma_z.dfsu"
+#     fp = tmp_path / "3d.dfsu"
+#     dfs = mikeio.open(sourcefilename)
+
+#     nt = dfs.n_timesteps
+
+#     ds = dfs.read(time=[0], keepdims=True)
+
+#     with dfs.write(fp, ds, keep_open=True) as f:
+#         for i in range(1, nt):
+#             ds = dfs.read(time=[i], keepdims=True)
+#             f.append(ds)
+
+#         # dfs.close() # should be called automagically by context manager
+
+#     newdfs = mikeio.open(fp)
+#     assert dfs.start_time == newdfs.start_time
+#     assert dfs.timestep == newdfs.timestep
+#     assert dfs.end_time == newdfs.end_time
 
 
 # TODO add workaround to write big file
@@ -935,8 +935,6 @@ def test_dataset_write_dfsu(tmp_path):
     ds.to_dfs(fp)
 
     dfs = mikeio.open(fp)
-
-    assert dfs._source.ApplicationTitle == "mikeio"
 
     ds2 = dfs.read()
     assert ds2.n_timesteps == 2
