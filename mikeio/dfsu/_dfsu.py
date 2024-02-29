@@ -123,9 +123,11 @@ class _Dfsu:
         # TODO remove
         self._filename = str(filename)
         # input = self._filename if dfs is None else dfs
-        self._read_header(filename)
+        # self._read_header(filename)
         # self.time = ...
-        # self.geometry = ...
+        self._geometry, self._time, self._timestep, self._items = self._read_header(
+            filename
+        )
         # self.items = ...
 
     def __repr__(self):
@@ -158,14 +160,14 @@ class _Dfsu:
                     out.append(f"  {i}:  {item}")
             else:
                 out.append(f"number of items: {self.n_items}")
-        if self._n_timesteps is not None:
-            if self._n_timesteps == 1:
+        if self.n_timesteps is not None:
+            if self.n_timesteps == 1:
                 out.append(f"time: time-invariant file (1 step) at {self._start_time}")
             else:
                 out.append(
-                    f"time: {self._n_timesteps} steps with dt={self._timestep_in_seconds}s"
+                    f"time: {str(self.time[0])} - {str(self.time[-1])} ({self.n_timesteps} records)"
                 )
-                out.append(f"      {self._start_time} -- {self.end_time}")
+                out.append(f"      {self.start_time} -- {self.end_time}")
         return str.join("\n", out)
 
     def _read_header(self, input: str | Path) -> None:
@@ -184,7 +186,8 @@ class _Dfsu:
 
         elif ext == ".dfsu":
             dfs = DfsuFile.Open(filename)
-            self._read_dfsu_header(dfs)
+            geometry, time, timestep, items = self._read_dfsu_header(dfs)
+            return geometry, time, timestep, items
         else:
             raise Exception(f"Filetype {ext} not supported (mesh,dfsu)")
 
@@ -225,7 +228,7 @@ class _Dfsu:
 
         # geometry
         if self._type == DfsuFileType.DfsuSpectral0D:
-            self._geometry = GeometryFMPointSpectrum(
+            geometry = GeometryFMPointSpectrum(
                 frequencies=frequencies, directions=directions
             )
         else:
@@ -241,7 +244,7 @@ class _Dfsu:
                 ):
                     geom_cls = GeometryFMVerticalProfile
 
-                self._geometry = geom_cls(
+                geometry = geom_cls(
                     node_coordinates=node_table.coordinates,
                     element_table=el_table.connectivity,
                     codes=node_table.codes,
@@ -254,7 +257,7 @@ class _Dfsu:
                     validate=False,
                 )
             elif self._type == DfsuFileType.DfsuSpectral1D:
-                self._geometry = GeometryFMLineSpectrum(
+                geometry = GeometryFMLineSpectrum(
                     node_coordinates=node_table.coordinates,
                     element_table=el_table.connectivity,
                     codes=node_table.codes,
@@ -267,7 +270,7 @@ class _Dfsu:
                     directions=directions,
                 )
             elif self._type == DfsuFileType.DfsuSpectral2D:
-                self._geometry = GeometryFMAreaSpectrum(
+                geometry = GeometryFMAreaSpectrum(
                     node_coordinates=node_table.coordinates,
                     element_table=el_table.connectivity,
                     codes=node_table.codes,
@@ -280,7 +283,7 @@ class _Dfsu:
                     directions=directions,
                 )
             else:
-                self._geometry = GeometryFM2D(
+                geometry = GeometryFM2D(
                     node_coordinates=node_table.coordinates,
                     element_table=el_table.connectivity,
                     codes=node_table.codes,
@@ -294,16 +297,23 @@ class _Dfsu:
         # items
         n_items = len(dfs.ItemInfo)
         first_idx = 1 if self.is_layered else 0
-        self._items = _get_item_info(
+        items = _get_item_info(
             dfs.ItemInfo, list(range(n_items - first_idx)), ignore_first=self.is_layered
         )
 
         # time
-        self._start_time = dfs.StartDateTime
-        self._n_timesteps = dfs.NumberOfTimeSteps
-        self._timestep_in_seconds = dfs.TimeStepInSeconds
+        time = pd.date_range(
+            start=dfs.StartDateTime,
+            periods=dfs.NumberOfTimeSteps,
+            freq=f"{dfs.TimeStepInSeconds}S",
+        )
+        # self._start_time = dfs.StartDateTime
+        # self._n_timesteps = dfs.NumberOfTimeSteps
+        # self._timestep_in_seconds = dfs.TimeStepInSeconds
+        timestep = dfs.TimeStepInSeconds
 
         dfs.Close()
+        return geometry, time, timestep, items
 
     @property
     def type_name(self):
@@ -589,34 +599,39 @@ class _Dfsu:
     @property
     def start_time(self):
         """File start time"""
-        return self._start_time
+        return self._time[0]
 
     @property
     def n_timesteps(self):
         """Number of time steps"""
-        return self._n_timesteps
+        return len(self._time)
 
     @property
     def timestep(self):
         """Time step size in seconds"""
-        return self._timestep_in_seconds
+        return self._timestep
 
     @property
     def end_time(self):
         """File end time"""
-        return self.start_time + timedelta(
-            seconds=((self.n_timesteps - 1) * self.timestep)
-        )
+        return self._time[-1]
+        # return self.start_time + timedelta(
+        #    seconds=((self.n_timesteps - 1) * self.timestep)
+        # )
 
     @property
     def time(self):
-        """File all datetimes"""
-        return pd.to_datetime(
-            [
-                self.start_time + timedelta(seconds=i * self.timestep)
-                for i in range(self.n_timesteps)
-            ]
-        )
+        return self._time
+
+    # @property
+    # def time(self):
+    #    """File all datetimes"""
+    #    return pd.to_datetime(
+    #        [
+    #            self.start_time + timedelta(seconds=i * self.timestep)
+    #            for i in range(self.n_timesteps)
+    #        ]
+    #    )
 
     def _read(
         self,
