@@ -124,13 +124,13 @@ class _Dfsu:
         """
         self._filename = str(filename)
         (
-            self._geometry,
             self._time,
             self._timestep,
             self._items,
             self._type,
             self._deletevalue,
         ) = self._read_header(filename)
+        self._geometry = self._read_geometry(filename)
 
     def __repr__(self):
         out = []
@@ -172,18 +172,10 @@ class _Dfsu:
                 out.append(f"      {self.start_time} -- {self.end_time}")
         return str.join("\n", out)
 
-    # TODO return type DfsHeader?
-    def _read_header(
-        self, input: str | Path
-    ) -> Tuple[Any, pd.DatetimeIndex, float, List[ItemInfo], DfsuFileType, float]:
-        filename = input
-        path = Path(input)
-        if not path.exists():
-            raise FileNotFoundError(f"file {path} does not exist!")
-
+    def _read_geometry(self, input: str | Path) -> Any:
+        filename = str(input)
         dfs = DfsuFile.Open(filename)
         dfsu_type = DfsuFileType(dfs.DfsuFileType)
-        deletevalue = dfs.DeleteValueFloat
 
         if self._is_spectral(dfsu_type):
             dir = dfs.Directions
@@ -257,6 +249,21 @@ class _Dfsu:
                     node_ids=node_table.ids,
                     validate=False,
                 )
+        dfs.Close()
+        return geometry
+
+    def _read_header(
+        self, input: str | Path
+    ) -> Tuple[pd.DatetimeIndex, float, List[ItemInfo], DfsuFileType, float]:
+        filename = input
+        path = Path(input)
+        if not path.exists():
+            raise FileNotFoundError(f"file {path} does not exist!")
+
+        filename = str(input)
+        dfs = DfsuFile.Open(filename)
+        dfsu_type = DfsuFileType(dfs.DfsuFileType)
+        deletevalue = dfs.DeleteValueFloat
 
         # items
         n_items = len(dfs.ItemInfo)
@@ -276,7 +283,7 @@ class _Dfsu:
         timestep = dfs.TimeStepInSeconds
 
         dfs.Close()
-        return geometry, time, timestep, items, dfsu_type, deletevalue
+        return time, timestep, items, dfsu_type, deletevalue
 
     @property
     def type_name(self):
