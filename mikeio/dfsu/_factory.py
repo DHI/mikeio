@@ -1,3 +1,5 @@
+from pathlib import Path
+from typing import Any
 from mikecore.DfsuFile import DfsuFile, DfsuFileType
 
 from ._dfsu import Dfsu2DH
@@ -19,12 +21,20 @@ DFSU_MAPPING = {
 }
 
 
-class Dfsu:
-    def __new__(self, filename, *args, **kwargs):
-        filename = str(filename)
-        dfs = DfsuFile.Open(filename)
-        type = DfsuFileType(dfs.DfsuFileType)
-        dfs.Close()
+def dfsu(filename: str | Path, *args: Any, **kwargs: Any) -> Any:
+    filename = str(filename)
+    dfs = DfsuFile.Open(filename)
+    type = DfsuFileType(dfs.DfsuFileType)
+    dfs.Close()
 
-        klass = DFSU_MAPPING.get(type)
-        return klass(filename, *args, **kwargs)
+    klass = DFSU_MAPPING.get(type)
+
+    if klass is None:
+        raise ValueError(f"Unsupported dfsu type: {type}")
+
+    return klass(filename, *args, **kwargs)
+
+
+class Dfsu:
+    def __new__(self, filename: str | Path, *args: Any, **kwargs: Any):
+        return dfsu(filename, *args, **kwargs)
