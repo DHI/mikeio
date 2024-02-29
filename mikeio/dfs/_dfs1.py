@@ -10,7 +10,7 @@ from .. import __dfs_version__
 from ..dataset import Dataset
 from ._dfs import (
     _Dfs123,
-    _write_dfs_data,
+    write_dfs_data,
 )
 from ..eum import TimeStepUnit
 from ..spatial import Grid1D
@@ -18,7 +18,7 @@ from ..spatial import Grid1D
 
 def write_dfs1(filename: str | Path, ds: Dataset, title="") -> None:
     dfs = _write_dfs1_header(filename, ds, title)
-    _write_dfs_data(dfs=dfs, ds=ds, n_spatial_dims=1)
+    write_dfs_data(dfs=dfs, ds=ds, n_spatial_dims=1)
 
 
 def _write_dfs1_header(filename: str | Path, ds: Dataset, title="") -> DfsFile:

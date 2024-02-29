@@ -36,17 +36,17 @@ class DfsHeader:
 
 def _read_item_time_step(
     *,
-    dfs,
-    filename,
-    time,
-    item_numbers,
-    deletevalue,
-    shape,
-    item,
-    it,
-    error_bad_data=True,
-    fill_bad_data_value=np.nan,
-):
+    dfs: DfsFile,
+    filename: str,
+    time: pd.DatetimeIndex,
+    item_numbers: List[int],
+    deletevalue: float,
+    shape: Tuple[int, ...],
+    item: int,
+    it: int,
+    error_bad_data: bool = True,
+    fill_bad_data_value: float = np.nan,
+) -> Tuple[DfsFile, np.ndarray]:
     itemdata = dfs.ReadItemTimeStep(item_numbers[item] + 1, it)
     if itemdata is not None:
         d = itemdata.Data
@@ -65,7 +65,7 @@ def _read_item_time_step(
 
 def _fuzzy_item_search(
     *, dfsItemInfo: List[DfsDynamicItemInfo], search: str, start_idx: int = 0
-):
+) -> List[int]:
     import fnmatch
 
     names = [info.Name for info in dfsItemInfo]
@@ -123,7 +123,9 @@ def _valid_item_numbers(
     return item_numbers
 
 
-def _valid_timesteps(dfsFileInfo: DfsFileInfo, time_steps) -> Tuple[bool, List[int]]:
+def _valid_timesteps(
+    dfsFileInfo: DfsFileInfo, time_steps: int | Sequence[int] | str | slice | None
+) -> Tuple[bool, List[int]]:
     time_axis = dfsFileInfo.TimeAxis
 
     single_time_selected = False
@@ -176,7 +178,7 @@ def _valid_timesteps(dfsFileInfo: DfsFileInfo, time_steps) -> Tuple[bool, List[i
 
 
 def _item_numbers_by_name(
-    dfsItemInfo, item_names: List[str], ignore_first: bool = False
+    dfsItemInfo: DfsDynamicItemInfo, item_names: List[str], ignore_first: bool = False
 ) -> List[int]:
     """Utility function to find item numbers
 
@@ -239,7 +241,7 @@ def _get_item_info(
     return ItemInfoList(items)
 
 
-def _write_dfs_data(*, dfs: DfsFile, ds: Dataset, n_spatial_dims: int) -> None:
+def write_dfs_data(*, dfs: DfsFile, ds: Dataset, n_spatial_dims: int) -> None:
     deletevalue = dfs.FileInfo.DeleteValueFloat  # ds.deletevalue
     has_no_time = "time" not in ds.dims
     if ds.is_equidistant:

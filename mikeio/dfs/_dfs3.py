@@ -20,7 +20,7 @@ from ._dfs import (
     _get_item_info,
     _valid_item_numbers,
     _valid_timesteps,
-    _write_dfs_data,
+    write_dfs_data,
 )
 from ..eum import TimeStepUnit
 from ..spatial import Grid3D
@@ -28,7 +28,7 @@ from ..spatial import Grid3D
 
 def write_dfs3(filename: str | Path, ds: Dataset, title: str = "") -> None:
     dfs = _write_dfs3_header(filename, ds, title)
-    _write_dfs_data(dfs=dfs, ds=ds, n_spatial_dims=3)
+    write_dfs_data(dfs=dfs, ds=ds, n_spatial_dims=3)
 
 
 def _write_dfs3_header(filename: str | Path, ds: Dataset, title: str) -> DfsFile:
