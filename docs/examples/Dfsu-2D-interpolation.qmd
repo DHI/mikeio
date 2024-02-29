@@ -110,7 +110,7 @@ dsi[0].plot(figsize=(9,7), show_mesh=True);
 ### Note: 3 of the new elements are outside the original mesh and data are therefore NaN by default
 
 ```{python}
-nan_elements = msh.element_ids[np.isnan(dsi[0].to_numpy())]
+nan_elements = np.where(np.isnan(dsi[0].to_numpy()))[0]
 nan_elements
 ```
 
