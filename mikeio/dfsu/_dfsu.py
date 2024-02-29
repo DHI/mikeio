@@ -783,58 +783,58 @@ class _Dfsu:
 
         return elements
 
-    def write_header(
-        self,
-        filename,
-        start_time=None,
-        dt=None,
-        items=None,
-        elements=None,
-        title=None,
-    ):
-        """Write the header of a new dfsu file (for writing huge files)
+    # def write_header(
+    #     self,
+    #     filename,
+    #     start_time=None,
+    #     dt=None,
+    #     items=None,
+    #     elements=None,
+    #     title=None,
+    # ):
+    #     """Write the header of a new dfsu file (for writing huge files)
 
-        Parameters
-        -----------
-        filename: str
-            full path to the new dfsu file
-        start_time: datetime, optional
-            start datetime, default is datetime.now()
-        dt: float, optional
-            The time step (in seconds)
-        items: list[mikeio.ItemInfo], optional
-        elements: list[int], optional
-            write only these element ids to file
-        title: str
-            title of the dfsu file. Default is blank.
+    #     Parameters
+    #     -----------
+    #     filename: str
+    #         full path to the new dfsu file
+    #     start_time: datetime, optional
+    #         start datetime, default is datetime.now()
+    #     dt: float, optional
+    #         The time step (in seconds)
+    #     items: list[mikeio.ItemInfo], optional
+    #     elements: list[int], optional
+    #         write only these element ids to file
+    #     title: str
+    #         title of the dfsu file. Default is blank.
 
-        Examples
-        --------
-        >>> from datetime import datetime
-        >>> meshfilename = "tests/testdata/north_sea_2.mesh"
-        >>> outfilename = "bigfile.dfsu"
-        >>> dfs = mikeio.Dfsu(meshfilename)
-        >>> n_elements = dfs.n_elements
-        >>> nt = 1000
-        >>> n_items = 10
-        >>> items = [mikeio.ItemInfo(f"Item {i+1}") for i in range(n_items)]
-        >>> with dfs.write_header(outfilename, items=items, start_time=datetime(2000,1,1), dt=3600) as f:
-        ...     for _ in range(nt):
-        ...         # get a list of data
-        ...         data = [np.random.random((1, n_elements)) for _ in range(n_items)]
-        ...         f.append(data)
-        """
+    #     Examples
+    #     --------
+    #     >>> from datetime import datetime
+    #     >>> meshfilename = "tests/testdata/north_sea_2.mesh"
+    #     >>> outfilename = "bigfile.dfsu"
+    #     >>> dfs = mikeio.Dfsu(meshfilename)
+    #     >>> n_elements = dfs.n_elements
+    #     >>> nt = 1000
+    #     >>> n_items = 10
+    #     >>> items = [mikeio.ItemInfo(f"Item {i+1}") for i in range(n_items)]
+    #     >>> with dfs.write_header(outfilename, items=items, start_time=datetime(2000,1,1), dt=3600) as f:
+    #     ...     for _ in range(nt):
+    #     ...         # get a list of data
+    #     ...         data = [np.random.random((1, n_elements)) for _ in range(n_items)]
+    #     ...         f.append(data)
+    #     """
 
-        return self._write(
-            filename=filename,
-            data=[],
-            start_time=start_time,
-            dt=dt,
-            items=items,
-            elements=elements,
-            title=title,
-            keep_open=True,
-        )
+    #     return self._write(
+    #         filename=filename,
+    #         data=[],
+    #         start_time=start_time,
+    #         dt=dt,
+    #         items=items,
+    #         elements=elements,
+    #         title=title,
+    #         keep_open=True,
+    #     )
 
     def write(
         self,
