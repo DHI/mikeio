@@ -5,10 +5,11 @@ import pathlib
 from copy import deepcopy
 from datetime import datetime, timedelta
 from shutil import copyfile
-from typing import Iterable, List, Sequence, Tuple, Union
+from collections.abc import Iterable, Sequence
+from typing import Union, List, Tuple
+
 
 import numpy as np
-from numpy.typing import NDArray
 import pandas as pd
 from mikecore.DfsBuilder import DfsBuilder
 from mikecore.DfsFile import (
@@ -26,6 +27,7 @@ from tqdm import tqdm, trange
 from . import __dfs_version__
 from .dfs._dfs import _get_item_info, _valid_item_numbers
 from .eum import ItemInfo
+import mikeio
 
 
 TimeAxis = Union[
@@ -435,11 +437,11 @@ def concat(
 
     Parameters
     ----------
-    infilenames: List[str]
+    infilenames:
         filenames to concatenate
-    outfilename: str | pathlib.Path
+    outfilename:
         filename of output
-    keep: str | pathlib.Path
+    keep:
         either 'first' (keep older), 'last' (keep newer)
         or 'average' can be selected. By default 'last'
 
@@ -448,6 +450,13 @@ def concat(
 
     The list of input files have to be sorted, i.e. in chronological order
     """
+    # fast path for Dfs0
+    suffix = pathlib.Path(infilenames[0]).suffix
+    if suffix == ".dfs0":
+        dss = [mikeio.read(f) for f in infilenames]
+        ds = mikeio.Dataset.concat(dss, keep=keep)  # type: ignore
+        ds.to_dfs(outfilename)
+        return
 
     dfs_i_a = DfsFileFactory.DfsGenericOpen(str(infilenames[0]))
 
@@ -908,7 +917,7 @@ def quantile(
     dfs_o.Close()
 
 
-def _read_item(dfs: DfsFile, item: int, timestep: int) -> NDArray[np.float64]:
+def _read_item(dfs: DfsFile, item: int, timestep: int) -> np.ndarray:
     """Read item data from dfs file
 
     Parameters

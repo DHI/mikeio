@@ -32,8 +32,9 @@ By providing many examples to cut/paste from.
 
 Examples are available in two forms:
 
+* [Example notebooks](examples/index.qmd)
 * [Unit tests](https://github.com/DHI/mikeio/tree/main/tests)
-* [Jupyter notebooks](https://nbviewer.jupyter.org/github/DHI/mikeio/tree/main/notebooks/)
+
 
 ## Open Source​
 MIKE IO is an open source project licensed under the [BSD-3 license](https://github.com/DHI/mikeio/blob/main/License.txt).

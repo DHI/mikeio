@@ -2,7 +2,7 @@ from __future__ import annotations
 import warnings
 from abc import abstractmethod
 from dataclasses import dataclass
-from datetime import datetime
+from datetime import datetime, timedelta
 from typing import List, Tuple, Sequence
 import numpy as np
 import pandas as pd
@@ -705,10 +705,8 @@ class _Dfs123:
         if not self._is_equidistant:
             raise NotImplementedError("Not implemented for non-equidistant files")
 
-        # TODO using 'S' works in Python 3.8, but is deprecated, 's' doesn't work in 3.8
-        return pd.date_range(
-            start=self.start_time, periods=self.n_timesteps, freq=f"{self.timestep}S"
-        )
+        dt = timedelta(seconds=self.timestep)
+        return pd.date_range(start=self.start_time, periods=self.n_timesteps, freq=dt)
 
     @property
     def projection_string(self):

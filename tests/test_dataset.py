@@ -132,6 +132,8 @@ def test_remove(ds1):
     assert ds1.names == ["Foo"]
 
     ds1.remove("Foo")
+    with pytest.raises(KeyError):
+        ds1.remove("Foo")
     assert len(ds1) == 0
 
 

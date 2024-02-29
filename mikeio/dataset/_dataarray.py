@@ -1,26 +1,20 @@
 from __future__ import annotations
 import warnings
 from copy import deepcopy
+from pathlib import Path
 from datetime import datetime
 from functools import cached_property
-from typing import (
-    Any,
+from collections.abc import (
     Iterable,
-    Sequence,
-    Tuple,
-    Mapping,
-    Union,
     Sized,
-    Literal,
-    TYPE_CHECKING,
-    overload,
+    Sequence,
+    Mapping,
     MutableMapping,
-    Callable,
 )
+from typing import Any, Union, Literal, TYPE_CHECKING, overload, Callable, Tuple
 
 
 import numpy as np
-from numpy.typing import NDArray, ArrayLike, DTypeLike
 import pandas as pd
 from mikecore.DfsuFile import DfsuFileType
 
@@ -138,12 +132,12 @@ class DataArray:
 
     def __init__(
         self,
-        data: NDArray[np.floating],
+        data: np.ndarray,
         *,
         time: pd.DatetimeIndex | str | None = None,
         item: ItemInfo | None = None,
         geometry: GeometryType = GeometryUndefined(),
-        zn: NDArray[np.floating] | None = None,
+        zn: np.ndarray | None = None,
         dims: Sequence[str] | None = None,
     ) -> None:
         # TODO: add optional validation validate=True
@@ -160,14 +154,14 @@ class DataArray:
         self.plot = self._get_plotter_by_geometry()
 
     @staticmethod
-    def _parse_data(data: ArrayLike) -> Any:  # NDArray[np.floating] | float:
+    def _parse_data(data: Any) -> Any:  # np.ndarray | float:
         validation_errors = []
         for p in ("shape", "ndim", "dtype"):
             if not hasattr(data, p):
                 validation_errors.append(p)
         if len(validation_errors) > 0:
             raise TypeError(
-                "Data must be ArrayLike, e.g. numpy array, but it lacks properties: "
+                "Data must be np.ndarray, e.g. numpy array, but it lacks properties: "
                 + ", ".join(validation_errors)
             )
         return data
@@ -307,8 +301,8 @@ class DataArray:
 
     @staticmethod
     def _parse_zn(
-        zn: NDArray[np.floating] | None, geometry: GeometryType, n_timesteps: int
-    ) -> NDArray[np.floating] | None:
+        zn: np.ndarray | None, geometry: GeometryType, n_timesteps: int
+    ) -> np.ndarray | None:
         if zn is not None:
             if isinstance(geometry, _GeometryFMLayered):
                 # TODO: np.squeeze(zn) if n_timesteps=1 ?
@@ -460,17 +454,17 @@ class DataArray:
         return self.values.ndim
 
     @property
-    def dtype(self) -> DTypeLike:
+    def dtype(self) -> Any:
         """Data-type of the array elements"""
         return self.values.dtype
 
     @property
-    def values(self) -> NDArray[np.floating]:
+    def values(self) -> np.ndarray:
         """Values as a np.ndarray (equivalent to to_numpy())"""
         return self._values
 
     @values.setter
-    def values(self, value: NDArray[np.floating] | float) -> None:
+    def values(self, value: np.ndarray | float) -> None:
         if np.isscalar(self._values):
             if not np.isscalar(value):
                 raise ValueError("Shape of new data is wrong (should be scalar)")
@@ -479,7 +473,7 @@ class DataArray:
 
         self._values = value  # type: ignore
 
-    def to_numpy(self) -> NDArray[np.floating]:
+    def to_numpy(self) -> np.ndarray:
         """Values as a np.ndarray (equivalent to values)"""
         return self._values
 
@@ -602,7 +596,7 @@ class DataArray:
             )
         return key
 
-    def __setitem__(self, key: Any, value: NDArray[np.floating]) -> None:
+    def __setitem__(self, key: Any, value: np.ndarray) -> None:
         if self._is_boolean_mask(key):
             mask = key if isinstance(key, np.ndarray) else key.values
             return self._set_by_boolean_mask(self._values, mask, value)
@@ -1068,7 +1062,7 @@ class DataArray:
 
     def __dataarray_read_item_time_func(
         self, item: int, step: int
-    ) -> Tuple[NDArray[np.floating], float]:
+    ) -> Tuple[np.ndarray, float]:
         "Used by _extract_track"
         # Ignore item argument
         data = self.isel(time=step).to_numpy()
@@ -1080,7 +1074,7 @@ class DataArray:
         self,
         track: pd.DataFrame,
         method: Literal["nearest", "inverse_distance"] = "nearest",
-        dtype: DTypeLike = np.float32,
+        dtype: Any = np.float32,
     ) -> "Dataset":
         """
         Extract data along a moving track
@@ -1423,7 +1417,7 @@ class DataArray:
         return self.aggregate(axis=axis, func=np.ptp, **kwargs)
 
     def average(
-        self, weights: NDArray[np.floating], axis: int | str = 0, **kwargs: Any
+        self, weights: np.ndarray, axis: int | str = 0, **kwargs: Any
     ) -> "DataArray":
         """Compute the weighted average along the specified axis.
 
@@ -1562,7 +1556,7 @@ class DataArray:
         if isinstance(axis, int):
             axes = (axis,)
         else:
-            axes = axis
+            axes = axis  # type: ignore
 
         dims = tuple([d for i, d in enumerate(self.dims) if i not in axes])
 
@@ -1592,12 +1586,10 @@ class DataArray:
         )
 
     @overload
-    def quantile(self, q: float, **kwargs: Any) -> "DataArray":
-        ...
+    def quantile(self, q: float, **kwargs: Any) -> "DataArray": ...
 
     @overload
-    def quantile(self, q: Sequence[float], **kwargs: Any) -> "Dataset":
-        ...
+    def quantile(self, q: Sequence[float], **kwargs: Any) -> "Dataset": ...
 
     def quantile(
         self, q: float | Sequence[float], *, axis: int | str = 0, **kwargs: Any
@@ -1632,12 +1624,10 @@ class DataArray:
         return self._quantile(q, axis=axis, func=np.quantile, **kwargs)
 
     @overload
-    def nanquantile(self, q: float, **kwargs: Any) -> "DataArray":
-        ...
+    def nanquantile(self, q: float, **kwargs: Any) -> "DataArray": ...
 
     @overload
-    def nanquantile(self, q: Sequence[float], **kwargs: Any) -> "Dataset":
-        ...
+    def nanquantile(self, q: Sequence[float], **kwargs: Any) -> "Dataset": ...
 
     def nanquantile(
         self, q: float | Sequence[float], *, axis: int | str = 0, **kwargs: Any
@@ -1700,35 +1690,37 @@ class DataArray:
 
     # ============= MATH operations ===========
 
-    def __radd__(self, other) -> "DataArray":
+    def __radd__(self, other: "DataArray" | float) -> "DataArray":
         return self.__add__(other)
 
-    def __add__(self, other) -> "DataArray":
-        return self._apply_math_operation(other, np.add, "+")
+    def __add__(self, other: "DataArray" | float) -> "DataArray":
+        return self._apply_math_operation(other, np.add, txt="+")
 
-    def __rsub__(self, other) -> "DataArray":
+    def __rsub__(self, other: "DataArray" | float) -> "DataArray":
         return other + self.__neg__()
 
-    def __sub__(self, other) -> "DataArray":
-        return self._apply_math_operation(other, np.subtract, "-")
+    def __sub__(self, other: "DataArray" | float) -> "DataArray":
+        return self._apply_math_operation(other, np.subtract, txt="-")
 
-    def __rmul__(self, other) -> "DataArray":
+    def __rmul__(self, other: "DataArray" | float) -> "DataArray":
         return self.__mul__(other)
 
-    def __mul__(self, other) -> "DataArray":
-        return self._apply_math_operation(other, np.multiply, "x")  # x in place of *
+    def __mul__(self, other: "DataArray" | float) -> "DataArray":
+        return self._apply_math_operation(
+            other, np.multiply, txt="x"
+        )  # x in place of *
 
-    def __pow__(self, other) -> "DataArray":
-        return self._apply_math_operation(other, np.power, "**")
+    def __pow__(self, other: float) -> "DataArray":
+        return self._apply_math_operation(other, np.power, txt="**")
 
-    def __truediv__(self, other) -> "DataArray":
-        return self._apply_math_operation(other, np.divide, "/")
+    def __truediv__(self, other: "DataArray" | float) -> "DataArray":
+        return self._apply_math_operation(other, np.divide, txt="/")
 
-    def __floordiv__(self, other) -> "DataArray":
-        return self._apply_math_operation(other, np.floor_divide, "//")
+    def __floordiv__(self, other: "DataArray" | float) -> "DataArray":
+        return self._apply_math_operation(other, np.floor_divide, txt="//")
 
-    def __mod__(self, other) -> "DataArray":
-        return self._apply_math_operation(other, np.mod, "%")
+    def __mod__(self, other: float) -> "DataArray":
+        return self._apply_math_operation(other, np.mod, txt="%")
 
     def __neg__(self) -> "DataArray":
         return self._apply_unary_math_operation(np.negative)
@@ -1739,7 +1731,7 @@ class DataArray:
     def __abs__(self) -> "DataArray":
         return self._apply_unary_math_operation(np.abs)
 
-    def _apply_unary_math_operation(self, func) -> "DataArray":
+    def _apply_unary_math_operation(self, func: Callable) -> "DataArray":
         try:
             data = func(self.values)
 
@@ -1750,7 +1742,9 @@ class DataArray:
         new_da.values = data
         return new_da
 
-    def _apply_math_operation(self, other, func, txt="with") -> "DataArray":
+    def _apply_math_operation(
+        self, other: "DataArray" | float, func: Callable, *, txt: str
+    ) -> "DataArray":
         """Apply a binary math operation with a scalar, an array or another DataArray"""
         try:
             other_values = other.values if hasattr(other, "values") else other
@@ -1771,7 +1765,9 @@ class DataArray:
 
         return new_da
 
-    def _keep_EUM_after_math_operation(self, other, func) -> bool:
+    def _keep_EUM_after_math_operation(
+        self, other: "DataArray" | float, func: Callable
+    ) -> bool:
         """Does the math operation falsify the EUM?"""
         if hasattr(other, "shape") and hasattr(other, "ndim"):
             # other is array-like, so maybe we cannot keep EUM
@@ -1791,19 +1787,19 @@ class DataArray:
 
     # ============= Logical indexing ===========
 
-    def __lt__(self, other) -> "DataArray":
+    def __lt__(self, other) -> "DataArray":  # type: ignore
         bmask = self.values < self._other_to_values(other)
         return self._boolmask_to_new_DataArray(bmask)
 
-    def __gt__(self, other) -> "DataArray":
+    def __gt__(self, other) -> "DataArray":  # type: ignore
         bmask = self.values > self._other_to_values(other)
         return self._boolmask_to_new_DataArray(bmask)
 
-    def __le__(self, other) -> "DataArray":
+    def __le__(self, other) -> "DataArray":  # type: ignore
         bmask = self.values <= self._other_to_values(other)
         return self._boolmask_to_new_DataArray(bmask)
 
-    def __ge__(self, other) -> "DataArray":
+    def __ge__(self, other) -> "DataArray":  # type: ignore
         bmask = self.values >= self._other_to_values(other)
         return self._boolmask_to_new_DataArray(bmask)
 
@@ -1816,10 +1812,12 @@ class DataArray:
         return self._boolmask_to_new_DataArray(bmask)
 
     @staticmethod
-    def _other_to_values(other):
+    def _other_to_values(
+        other: "DataArray" | np.ndarray,
+    ) -> np.ndarray:
         return other.values if isinstance(other, DataArray) else other
 
-    def _boolmask_to_new_DataArray(self, bmask) -> "DataArray":
+    def _boolmask_to_new_DataArray(self, bmask) -> "DataArray":  # type: ignore
         return DataArray(
             data=bmask,
             time=self.time,
@@ -1838,7 +1836,7 @@ class DataArray:
             {self.name: self}
         )  # Single-item Dataset (All info is contained in the DataArray, no need for additional info)
 
-    def to_dfs(self, filename, **kwargs: Any) -> None:
+    def to_dfs(self, filename: str | Path, **kwargs: Any) -> None:
         """Write data to a new dfs file
 
         Parameters
@@ -1999,7 +1997,10 @@ class DataArray:
         return time
 
     @staticmethod
-    def _get_time_idx_list(time: pd.DatetimeIndex, steps):
+    def _get_time_idx_list(
+        time: pd.DatetimeIndex,
+        steps: int | Iterable[int] | str | datetime | pd.DatetimeIndex | slice,
+    ) -> list[int] | slice:
         """Find list of idx in DatetimeIndex"""
 
         return _get_time_idx_list(time, steps)
@@ -2009,7 +2010,7 @@ class DataArray:
         return _n_selected_timesteps(time, k)
 
     @staticmethod
-    def _is_boolean_mask(x) -> bool:
+    def _is_boolean_mask(x: Any) -> bool:
         if hasattr(x, "dtype"):  # isinstance(x, (np.ndarray, DataArray)):
             return x.dtype == np.dtype("bool")
         return False
@@ -2021,14 +2022,16 @@ class DataArray:
         return data[mask]
 
     @staticmethod
-    def _set_by_boolean_mask(data: np.ndarray, mask: np.ndarray, value) -> None:
+    def _set_by_boolean_mask(
+        data: np.ndarray, mask: np.ndarray, value: np.ndarray
+    ) -> None:
         if data.shape != mask.shape:
             data[np.broadcast_to(mask, data.shape)] = value
         else:
             data[mask] = value
 
     @staticmethod
-    def _parse_time(time) -> pd.DatetimeIndex:
+    def _parse_time(time: Any) -> pd.DatetimeIndex:
         """Allow anything that we can create a DatetimeIndex from"""
         if time is None:
             time = [pd.Timestamp(2018, 1, 1)]  # TODO is this the correct epoch?
@@ -2048,7 +2051,11 @@ class DataArray:
         return index
 
     @staticmethod
-    def _parse_axis(data_shape, dims, axis) -> int | Tuple[int]:
+    def _parse_axis(
+        data_shape: Tuple[int, ...],
+        dims: Tuple[str, ...],
+        axis: int | Tuple[int, ...] | str | None,
+    ) -> int | Tuple[int, ...]:
         # TODO change to return tuple always
         # axis = 0 if axis == "time" else axis
         if (axis == "spatial") or (axis == "space"):

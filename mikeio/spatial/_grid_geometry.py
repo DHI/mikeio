@@ -1,9 +1,8 @@
 from __future__ import annotations
 import warnings
-from typing import Sequence, Tuple
+from typing import Any, Sequence, Tuple
 from dataclasses import dataclass
 import numpy as np
-from numpy.typing import ArrayLike, NDArray
 
 from mikecore.Projections import Cartography  # type: ignore
 
@@ -682,7 +681,7 @@ class Grid2D(_Geometry):
             self._x0, self._y0 = 0.0, 0.0
             self._origin = (self._origin[0] + x0, self._origin[1] + y0)
 
-    def contains(self, coords: ArrayLike) -> NDArray[np.bool_]:
+    def contains(self, coords: np.ndarray) -> Any:
         """test if a list of points are inside grid
 
         Parameters
@@ -703,7 +702,7 @@ class Grid2D(_Geometry):
         yinside = (self.bbox.bottom <= y) & (y <= self.bbox.top)
         return xinside & yinside
 
-    def __contains__(self, pt) -> NDArray[np.bool_]:
+    def __contains__(self, pt) -> Any:
         return self.contains(pt)
 
     def find_index(

@@ -1,0 +1,39 @@
+website:
+  sidebar:
+  - contents:
+    - api/index.qmd
+    - contents:
+      - api/open.qmd
+      - api/read.qmd
+      - api/read_pfs.qmd
+      - api/read_xyz.qmd
+      section: Main
+    - contents:
+      - api/DataArray.qmd
+      - api/Dataset.qmd
+      section: Dataset
+    - contents:
+      - api/Grid1D.qmd
+      - api/Grid2D.qmd
+      - api/Grid3D.qmd
+      - api/Mesh.qmd
+      section: Geometry
+    - contents:
+      - api/ItemInfo.qmd
+      - api/EUMType.qmd
+      - api/EUMUnit.qmd
+      section: EUM
+    - contents:
+      - api/Dfs0.qmd
+      - api/Dfs1.qmd
+      - api/Dfs2.qmd
+      - api/Dfs3.qmd
+      - api/Dfsu.qmd
+      section: Dfs
+    - contents:
+      - api/Pfs.qmd
+      - api/PfsDocument.qmd
+      - api/PfsSection.qmd
+      section: Pfs
+    id: api
+  - id: dummy-sidebar

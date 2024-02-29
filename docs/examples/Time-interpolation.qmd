@@ -1,0 +1,95 @@
+---
+title: Time interpolation
+jupyter: python3
+description: Interpolate data to a specific time axis
+---
+
+
+```{python}
+import numpy as np
+import mikeio
+```
+
+```{python}
+ds = mikeio.read("../data/waves.dfs2")
+ds
+```
+
+## Interpolate to specific timestep
+
+A common use case is to interpolate to a shorter timestep, in this case 1h.
+
+```{python}
+ds_h = ds.interp_time(3600)
+ds_h
+```
+
+And to store the interpolated data in a new file.
+
+```{python}
+ds_h.to_dfs("waves_3h.dfs2")
+```
+
+## Interpolate to time axis of another dataset
+
+Read some non-equidistant data typically found in observed data.
+
+```{python}
+ts = mikeio.read("../data/waves.dfs0")
+ts
+```
+
+The observed timeseries is longer than the modelled data. Default is to fill values with NaN.
+
+```{python}
+dsi = ds.interp_time(ts)
+```
+
+```{python}
+dsi.time
+```
+
+```{python}
+dsi["Sign. Wave Height"].shape
+```
+
+```{python}
+ax = dsi["Sign. Wave Height"].sel(x=250, y=1200).plot(marker='+')
+ts["Sign. Wave Height"].plot(ax=ax,marker='+')
+```
+
+## Model validation
+
+A common metric for model validation is mean absolute error (MAE).
+
+In the example below we calculate this metric using the model data interpolated to the observed times.
+
+For a more elaborate model validation library which takes care of these things for you as well as calculating a number of relevant metrics, take a look at [`ModelSkill](https://dhi.github.io/modelskill).
+
+Use `np.nanmean` to skip NaN.
+
+```{python}
+ts["Sign. Wave Height"]
+```
+
+```{python}
+dsi["Sign. Wave Height"].sel(x=250, y=1200)
+```
+
+```{python}
+diff = (ts["Sign. Wave Height"]  - dsi["Sign. Wave Height"].sel(x=250, y=1200))
+diff.plot()
+```
+
+```{python}
+mae = np.abs(diff).nanmean().to_numpy()
+mae
+```
+
+# Clean up
+
+```{python}
+import os
+os.remove("waves_3h.dfs2")
+```
+

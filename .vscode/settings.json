@@ -9,5 +9,8 @@
     "restructuredtext.confPath": "${workspaceFolder}\\docs",
     "files.eol": "\n",
     "python.formatting.provider": "black",
-    "editor.formatOnSave": true
+    "editor.formatOnSave": true,
+    "mypy-type-checker.args": [
+        "--disallow-incomplete-defs",
+    ],
 }

@@ -1,0 +1,223 @@
+---
+title: Generic dfs processing
+jupyter: python3
+---
+
+Tools and methods that applies to any type of dfs files. 
+
+* mikeio.read()
+* mikeio.generic: methods that read any dfs file and outputs a new dfs file of the same type
+   - concat: Concatenates files along the time axis  
+   - scale: Apply scaling to any dfs file
+   - sum: Sum two dfs files 
+   - diff: Calculate difference between two dfs files
+   - extract: Extract timesteps and/or items to a new dfs file
+   - time-avg: Create a temporally averaged dfs file
+   - quantile: Create temporal quantiles of dfs file
+
+
+```{python}
+import matplotlib.pyplot as plt
+import mikeio
+import mikeio.generic
+```
+
+## Concatenation
+
+Take a look at these two files with overlapping timesteps.
+
+```{python}
+t1 = mikeio.read("../data/tide1.dfs1")
+t1
+```
+
+```{python}
+t2 = mikeio.read("../data/tide2.dfs1")
+t2
+```
+
+Plot one of the points along the line.
+
+```{python}
+plt.plot(t1.time,t1[0].isel(x=1).values, label="File 1")
+plt.plot(t2.time,t2[0].isel(x=1).values,'k+', label="File 2")
+plt.legend()
+```
+
+```{python}
+mikeio.generic.concat(infilenames=["../data/tide1.dfs1",
+                                   "../data/tide2.dfs1"],
+                     outfilename="concat.dfs1")
+```
+
+```{python}
+c = mikeio.read("concat.dfs1")
+c[0].isel(x=1).plot()
+c
+```
+
+## Difference between two files
+
+Take difference between two dfs files with same structure - e.g. to see the difference in result between two calibration runs
+
+```{python}
+fn1 = "../data/oresundHD_run1.dfsu"
+fn2 = "../data/oresundHD_run2.dfsu"
+fn_diff = "oresundHD_difference.dfsu"
+mikeio.generic.diff(fn1, fn2, fn_diff)
+```
+
+```{python}
+_, ax = plt.subplots(1,3, sharey=True, figsize=(12,5))
+da = mikeio.read(fn1, time=-1)[0]
+da.plot(vmin=0.06, vmax=0.27, ax=ax[0], title='run 1')
+da = mikeio.read(fn2, time=-1)[0]
+da.plot(vmin=0.06, vmax=0.27, ax=ax[1], title='run 2')
+da = mikeio.read(fn_diff, time=-1)[0]
+da.plot(vmin=-0.1, vmax=0.1, cmap='coolwarm', ax=ax[2], title='difference');
+```
+
+## Extract time steps or items
+
+The extract() method can extract a part of a file:
+
+* **time slice** by specifying *start* and/or *end*
+* specific **items**
+
+```{python}
+infile = "../data/tide1.dfs1"
+mikeio.generic.extract(infile, "extracted.dfs1", start='2019-01-02')
+```
+
+```{python}
+e = mikeio.read("extracted.dfs1")
+e
+```
+
+```{python}
+infile = "../data/oresund_vertical_slice.dfsu"
+mikeio.generic.extract(infile, "extracted.dfsu", items='Salinity', end=-2)
+```
+
+```{python}
+e = mikeio.read("extracted.dfsu")
+e
+```
+
+## Scaling
+
+Adding a constant e.g to adjust datum
+
+```{python}
+ds = mikeio.read("../data/gebco_sound.dfs2")
+ds.Elevation[0].plot();
+```
+
+```{python}
+ds['Elevation'][0,104,131].to_numpy()
+```
+
+This is the processing step.
+
+```{python}
+mikeio.generic.scale("../data/gebco_sound.dfs2", 
+                     "gebco_sound_local_datum.dfs2",
+                     offset=-2.1
+                     )
+```
+
+```{python}
+ds2 = mikeio.read("gebco_sound_local_datum.dfs2")
+ds2['Elevation'][0].plot()
+```
+
+```{python}
+ds2['Elevation'][0,104,131].to_numpy()
+```
+
+### Spatially varying correction
+
+```{python}
+import numpy as np
+factor = np.ones_like(ds['Elevation'][0].to_numpy())
+factor.shape
+```
+
+Add some spatially varying factors, exaggerated values for educational purpose.
+
+```{python}
+factor[:,0:100] = 5.3
+factor[0:40,] = 0.1
+factor[150:,150:] = 10.7
+plt.imshow(factor)
+plt.colorbar();
+```
+
+The 2d array must first be flipped upside down and then converted to a 1d vector using [numpy.ndarray.flatten](https://numpy.org/doc/stable/reference/generated/numpy.ndarray.flatten.html) to match how data is stored in dfs files.
+
+```{python}
+factor_ud = np.flipud(factor)
+factor_vec  = factor_ud.flatten()
+mikeio.generic.scale("../data/gebco_sound.dfs2", 
+                     "gebco_sound_spatial.dfs2",
+                     factor=factor_vec
+                     )
+```
+
+```{python}
+ds3 = mikeio.read("gebco_sound_spatial.dfs2")
+ds3.Elevation[0].plot();
+```
+
+## Time average
+
+```{python}
+fn = "../data/NorthSea_HD_and_windspeed.dfsu"
+fn_avg = "Avg_NorthSea_HD_and_windspeed.dfsu"
+mikeio.generic.avg_time(fn, fn_avg)
+```
+
+```{python}
+ds = mikeio.read(fn)
+ds.mean(axis=0).describe()   # alternative way of getting the time average
+```
+
+```{python}
+ds_avg = mikeio.read(fn_avg)
+ds_avg.describe()
+```
+
+## Quantile
+
+Example that calculates the 25%, 50% and 75% percentile for all items in a dfsu file.
+
+```{python}
+fn = "../data/NorthSea_HD_and_windspeed.dfsu"
+fn_q = "Q_NorthSea_HD_and_windspeed.dfsu"
+mikeio.generic.quantile(fn, fn_q, q=[0.25,0.5,0.75])
+```
+
+```{python}
+ds = mikeio.read(fn_q)
+ds
+```
+
+```{python}
+da_q75 = ds["Quantile 0.75, Wind speed"]
+da_q75.plot(title="75th percentile, wind speed", label="m/s")
+```
+
+## Clean up
+
+```{python}
+import os
+os.remove("concat.dfs1")
+os.remove("oresundHD_difference.dfsu")
+os.remove("extracted.dfs1")
+os.remove("extracted.dfsu")
+os.remove("gebco_sound_local_datum.dfs2")
+os.remove("gebco_sound_spatial.dfs2")
+os.remove("Avg_NorthSea_HD_and_windspeed.dfsu")
+os.remove(fn_q)
+```
+
