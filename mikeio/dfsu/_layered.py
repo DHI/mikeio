@@ -25,8 +25,26 @@ from ._dfsu import _Dfsu, get_nodes_from_source, get_elements_from_source
 
 
 class DfsuLayered(_Dfsu):
-    def _read_geometry(self, input: str | Path) -> Any:
-        filename = str(input)
+    def __init__(self, filename: str | Path) -> None:
+        super().__init__(filename)
+        self._geometry = self._read_geometry(self._filename)
+        self._items = self._read_items(self._filename)
+
+    @staticmethod
+    def _read_items(filename: str) -> list[ItemInfo]:
+        dfs = DfsuFile.Open(filename)
+        n_items = len(dfs.ItemInfo)
+        first_idx = 1
+        items = _get_item_info(
+            dfs.ItemInfo,
+            list(range(n_items - first_idx)),
+            ignore_first=True,
+        )
+        dfs.Close()
+        return items
+
+    @staticmethod
+    def _read_geometry(filename: str) -> GeometryFM3D | GeometryFMVerticalProfile:
         dfs = DfsuFile.Open(filename)
         dfsu_type = DfsuFileType(dfs.DfsuFileType)
 

@@ -1,9 +1,8 @@
 from __future__ import annotations
-from abc import abstractmethod
 from pathlib import Path
 import warnings
 from functools import wraps
-from typing import Any, Collection, List, Tuple
+from typing import Any, Collection, Sequence, Tuple
 
 import numpy as np
 import pandas as pd
@@ -23,18 +22,13 @@ from ..dfs._dfs import (
     _valid_item_numbers,
     _valid_timesteps,
 )
-from ..eum import ItemInfo
 from ..spatial import (
     GeometryFM2D,
-    GeometryFM3D,
-    GeometryFMAreaSpectrum,
-    GeometryFMLineSpectrum,
-    GeometryFMPointSpectrum,
-    GeometryFMVerticalProfile,
 )
 from ..spatial import Grid2D
 from .._track import _extract_track
 from ._common import get_elements_from_source, get_nodes_from_source
+from ..eum import ItemInfo
 
 
 def write_dfsu(filename: str | Path, data: Dataset) -> None:
@@ -123,15 +117,24 @@ class _Dfsu:
         filename: str
             dfsu filename
         """
-        self._filename = str(filename)
-        (
-            self._time,
-            self._timestep,
-            self._items,
-            self._type,
-            self._deletevalue,
-        ) = self._read_header(filename)
-        self._geometry = self._read_geometry(filename)
+        filename = str(filename)
+        self._filename = filename
+        path = Path(filename)
+        if not path.exists():
+            raise FileNotFoundError(f"file {path} does not exist!")
+
+        dfs = DfsuFile.Open(filename)
+        self._type = DfsuFileType(dfs.DfsuFileType)
+        self._deletevalue = dfs.DeleteValueFloat
+
+        self._time = pd.date_range(
+            start=dfs.StartDateTime,
+            periods=dfs.NumberOfTimeSteps,
+            freq=f"{dfs.TimeStepInSeconds}S",
+        )
+        self._timestep = dfs.TimeStepInSeconds
+        dfs.Close()
+        self._items = self._read_items(filename)
 
     def __repr__(self):
         out = []
@@ -149,7 +152,7 @@ class _Dfsu:
                 out.append(f"number of frequencies: {self.n_frequencies}")
         if self.geometry.projection_string:
             out.append(f"projection: {self.projection_string}")
-        if self.is_layered:
+        if self.geometry.is_layered:
             out.append(f"number of sigma layers: {self.n_sigma_layers}")
         if (
             self._type == DfsuFileType.DfsuVerticalProfileSigmaZ
@@ -173,42 +176,11 @@ class _Dfsu:
                 out.append(f"      {self.start_time} -- {self.end_time}")
         return str.join("\n", out)
 
-    @abstractmethod
-    def _read_geometry(self, input: str | Path) -> Any:
-        pass
-
-    def _read_header(
-        self, input: str | Path
-    ) -> Tuple[pd.DatetimeIndex, float, List[ItemInfo], DfsuFileType, float]:
-        filename = input
-        path = Path(input)
-        if not path.exists():
-            raise FileNotFoundError(f"file {path} does not exist!")
-
-        filename = str(input)
+    def _read_items(self, filename: str) -> list[ItemInfo]:
         dfs = DfsuFile.Open(filename)
-        dfsu_type = DfsuFileType(dfs.DfsuFileType)
-        deletevalue = dfs.DeleteValueFloat
-
-        # items
-        n_items = len(dfs.ItemInfo)
-        first_idx = 1 if self._is_layered(dfsu_type) else 0
-        items = _get_item_info(
-            dfs.ItemInfo,
-            list(range(n_items - first_idx)),
-            ignore_first=self._is_layered(dfsu_type),
-        )
-
-        # time
-        time = pd.date_range(
-            start=dfs.StartDateTime,
-            periods=dfs.NumberOfTimeSteps,
-            freq=f"{dfs.TimeStepInSeconds}S",
-        )
-        timestep = dfs.TimeStepInSeconds
-
+        items = _get_item_info(dfs.ItemInfo)
         dfs.Close()
-        return time, timestep, items, dfsu_type, deletevalue
+        return items
 
     @property
     def type_name(self):
@@ -292,12 +264,10 @@ class _Dfsu:
         return self.geometry.max_nodes_per_element
 
     @property
-    def is_2d(self):
-        """Type is either mesh or Dfsu2D (2 horizontal dimensions)"""
+    def is_2d(self) -> bool:
         return self._type in (
             DfsuFileType.Dfsu2D,
             DfsuFileType.DfsuSpectral2D,
-            None,
         )
 
     @staticmethod
@@ -310,7 +280,7 @@ class _Dfsu:
         )
 
     @property
-    def is_layered(self):
+    def is_layered(self) -> bool:
         """Type is layered dfsu (3d, vertical profile or vertical column)"""
         return self._is_layered(self._type)
 
@@ -323,12 +293,12 @@ class _Dfsu:
         )
 
     @property
-    def is_spectral(self):
+    def is_spectral(self) -> bool:
         """Type is spectral dfsu (point, line or area spectrum)"""
         return self._is_spectral(self._type)
 
     @property
-    def is_tri_only(self):
+    def is_tri_only(self) -> bool:
         """Does the mesh consist of triangles only?"""
         return self.geometry.is_tri_only
 
@@ -463,16 +433,16 @@ class _Dfsu:
     def _read(
         self,
         *,
-        items=None,
-        time=None,
+        items: str | int | Sequence[str | int] | None = None,
+        time: int | str | slice | None = None,
         elements: Collection[int] | None = None,
-        area=None,
-        x=None,
-        y=None,
-        keepdims=False,
-        dtype=np.float32,
-        error_bad_data=True,
-        fill_bad_data_value=np.nan,
+        area: Tuple[float, float, float, float] | None = None,
+        x: float | None = None,
+        y: float | None = None,
+        keepdims: bool = False,
+        dtype: Any = np.float32,
+        error_bad_data: bool = True,
+        fill_bad_data_value: float = np.nan,
     ) -> Dataset:
         if dtype not in [np.float32, np.float64]:
             raise ValueError("Invalid data type. Choose np.float32 or np.float64")
@@ -660,8 +630,13 @@ class _Dfsu:
 
 
 class Dfsu2DH(_Dfsu):
-    def _read_geometry(self, input: str | Path) -> Any:
-        filename = str(input)
+
+    def __init__(self, filename: str | Path) -> None:
+        super().__init__(filename)
+        self._geometry = self._read_geometry(self._filename)
+
+    @staticmethod
+    def _read_geometry(filename: str) -> GeometryFM2D:
         dfs = DfsuFile.Open(filename)
         dfsu_type = DfsuFileType(dfs.DfsuFileType)
 
@@ -684,16 +659,16 @@ class Dfsu2DH(_Dfsu):
     def read(
         self,
         *,
-        items=None,
-        time=None,
+        items: str | int | Sequence[str | int] | None = None,
+        time: int | str | slice | None = None,
         elements: Collection[int] | None = None,
-        area=None,
-        x=None,
-        y=None,
-        keepdims=False,
-        dtype=np.float32,
-        error_bad_data=True,
-        fill_bad_data_value=np.nan,
+        area: Tuple[float, float, float, float] | None = None,
+        x: float | None = None,
+        y: float | None = None,
+        keepdims: bool = False,
+        dtype: Any = np.float32,
+        error_bad_data: bool = True,
+        fill_bad_data_value: float = np.nan,
     ) -> Dataset:
         """
         Read data from a dfsu file

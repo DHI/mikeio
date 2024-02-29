@@ -20,8 +20,14 @@ from ..spatial import (
 
 class DfsuSpectral(_Dfsu):
 
-    def _read_geometry(self, input: str | Path) -> Any:
-        filename = str(input)
+    def __init__(self, filename: str | Path) -> None:
+        super().__init__(filename)
+        self._geometry = self._read_geometry(self._filename)
+
+    @staticmethod
+    def _read_geometry(
+        filename: str,
+    ) -> GeometryFMPointSpectrum | GeometryFMLineSpectrum | GeometryFMAreaSpectrum:
         dfs = DfsuFile.Open(filename)
         dfsu_type = DfsuFileType(dfs.DfsuFileType)
 
