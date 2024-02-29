@@ -185,19 +185,19 @@ class Dfs3(_Dfs123):
         # if keepdims is not False:
         #    return NotImplementedError("keepdims is not yet implemented for Dfs3")
 
-        # Open the dfs file for reading
         dfs = DfsFileFactory.DfsGenericOpen(self._filename)
 
         item_numbers = _valid_item_numbers(dfs.ItemInfo, items)
         n_items = len(item_numbers)
 
-        single_time_selected, time_steps = _valid_timesteps(dfs.FileInfo, time)
+        single_time_selected, time_steps = _valid_timesteps(
+            dfs.FileInfo, time_steps=time
+        )
         nt = len(time_steps) if not single_time_selected else 1
 
-        # Determine the size of the grid
-        zNum = self.geometry.nz
-        yNum = self.geometry.ny
-        xNum = self.geometry.nx
+        nz = self.geometry.nz
+        ny = self.geometry.ny
+        nx = self.geometry.nx
         deleteValue = dfs.FileInfo.DeleteValueFloat
 
         data_list = []
@@ -209,15 +209,15 @@ class Dfs3(_Dfs123):
         dims: Tuple[str, ...]
         shape: Tuple[int, ...]
 
-        nz = zNum if layers is None else len(layers)
+        nz = nz if layers is None else len(layers)
         if nz == 1 and (not keepdims):
             geometry = self.geometry._geometry_for_layers([0])
             dims = ("time", "y", "x")
-            shape = (nt, yNum, xNum)
+            shape = (nt, ny, nx)
         else:
             geometry = self.geometry._geometry_for_layers(layers, keepdims)
             dims = ("time", "z", "y", "x")
-            shape = (nt, nz, yNum, xNum)
+            shape = (nt, nz, ny, nx)
 
         for item in range(n_items):
             data: np.ndarray = np.ndarray(shape=shape, dtype=dtype)
@@ -234,7 +234,7 @@ class Dfs3(_Dfs123):
                 itemdata = dfs.ReadItemTimeStep(item_numbers[item] + 1, int(it))
                 d = itemdata.Data
 
-                d = d.reshape(zNum, yNum, xNum)
+                d = d.reshape(nz, ny, nx)
                 d[d == deleteValue] = np.nan
 
                 if layers is None:
@@ -318,8 +318,3 @@ class Dfs3(_Dfs123):
     @property
     def shape(self):
         return (self._n_timesteps, self._nz, self._ny, self._nx)
-
-    @property
-    def is_geo(self):
-        """Are coordinates geographical (LONG/LAT)?"""
-        return self._projstr == "LONG/LAT"

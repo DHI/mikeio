@@ -294,8 +294,3 @@ class Dfs2(_Dfs123):
     def ny(self):
         """Number of values in the y-direction"""
         return self.geometry.ny
-
-    @property
-    def is_geo(self):
-        """Are coordinates geographical (LONG/LAT)?"""
-        return self._projstr == "LONG/LAT"

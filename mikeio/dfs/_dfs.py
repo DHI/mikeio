@@ -520,6 +520,11 @@ class _Dfs123:
         return self.geometry.orientation
 
     @property
+    def is_geo(self):
+        """Are coordinates geographical (LONG/LAT)?"""
+        return self._projstr == "LONG/LAT"
+
+    @property
     @abstractmethod
     def shape(self) -> Tuple[int, ...]:
         """Shape of the data array"""
