@@ -727,7 +727,7 @@ def dfs2_props_to_list(d):
         d._n_timesteps,
         d._start_time,
         d._dfs.FileInfo.TimeAxis.TimeAxisType,
-        d._n_items,
+        d.n_items,
         # d._deletevalue,
     ]
 

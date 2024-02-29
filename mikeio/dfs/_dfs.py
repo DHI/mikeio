@@ -3,7 +3,7 @@ from pathlib import Path
 import warnings
 from abc import abstractmethod
 from dataclasses import dataclass
-from datetime import datetime, timedelta
+from datetime import datetime
 from typing import Any, List, Tuple, Sequence
 import numpy as np
 import pandas as pd
@@ -279,10 +279,9 @@ class _Dfs123:
         self._geometry = None  # handled by subclass
         dfs = DfsFileFactory.DfsGenericOpen(self._filename)
         self._dfs = dfs
-        self._n_items = len(dfs.ItemInfo)
-        self._items = self._get_item_info(list(range(self._n_items)))
-        self._timeaxistype = dfs.FileInfo.TimeAxis.TimeAxisType
-        if self._timeaxistype in {
+        n_items = len(dfs.ItemInfo)
+        self._items = self._get_item_info(list(range(n_items)))
+        if dfs.FileInfo.TimeAxis.TimeAxisType in {
             TimeAxisType.CalendarEquidistant,
             TimeAxisType.CalendarNonEquidistant,
         }:
@@ -291,10 +290,24 @@ class _Dfs123:
             self._start_time = datetime(
                 1970, 1, 1
             )  # TODO is this the proper epoch, should this magic number be somewhere else?
+
         if hasattr(dfs.FileInfo.TimeAxis, "TimeStep"):
-            self._timestep_in_seconds = (
-                dfs.FileInfo.TimeAxis.TimeStep
+            self._timestep = (
+                # some files have dt = 0 😳
+                dfs.FileInfo.TimeAxis.TimeStepInSeconds()
+                if dfs.FileInfo.TimeAxis.TimeStepInSeconds() > 0
+                else 1
             )  # TODO handle other timeunits
+
+            freq = pd.Timedelta(seconds=self._timestep)
+            self._time = pd.date_range(
+                start=self._start_time,
+                periods=dfs.FileInfo.TimeAxis.NumberOfTimeSteps,
+                freq=freq,
+            )
+        else:
+            self._timestep = None
+            self._time = None
         self._n_timesteps = dfs.FileInfo.TimeAxis.NumberOfTimeSteps
         projstr = dfs.FileInfo.Projection.WKTString
         self._projstr = "NON-UTM" if not projstr else projstr
@@ -310,12 +323,12 @@ class _Dfs123:
         out = [f"<mikeio.{name}>"]
 
         out.append(f"geometry: {self.geometry}")
-        if self._n_items < 10:
+        if self.n_items < 10:
             out.append("items:")
             for i, item in enumerate(self.items):
                 out.append(f"  {i}:  {item}")
         else:
-            out.append(f"number of items: {self._n_items}")
+            out.append(f"number of items: {self.n_items}")
 
         if self._n_timesteps == 1:
             out.append("time: time-invariant file (1 step)")
@@ -438,27 +451,31 @@ class _Dfs123:
         return self._geometry
 
     @property
-    def deletevalue(self):
+    def deletevalue(self) -> float:
         "File delete value"
         return self._deletevalue
 
     @property
-    def n_items(self):
+    def n_items(self) -> int:
         "Number of items"
-        return self._n_items
+        return len(self.items)
 
     @property
-    def items(self):
+    def items(self) -> List[ItemInfo]:
         "List of items"
         return self._items
 
     @property
-    def start_time(self):
+    def time(self) -> pd.DatetimeIndex | None:
+        return self._time
+
+    @property
+    def start_time(self) -> pd.Timestamp:
         """File start time"""
         return self._start_time
 
     @property
-    def end_time(self):
+    def end_time(self) -> pd.Timestamp:
         """File end time"""
         if self._end_time is None:
             self._end_time = self.read(items=[0]).time[-1].to_pydatetime()
@@ -475,16 +492,6 @@ class _Dfs123:
         """Time step size in seconds"""
         # this will fail if the TimeAxisType is not calendar and equidistant, but that is ok
         return self._dfs.FileInfo.TimeAxis.TimeStepInSeconds()
-
-    @property
-    def time(self) -> pd.DatetimeIndex:
-        """File all datetimes"""
-        # this will fail if the TimeAxisType is not calendar and equidistant, but that is ok
-        if not self._is_equidistant:
-            raise NotImplementedError("Not implemented for non-equidistant files")
-
-        dt = timedelta(seconds=self.timestep)
-        return pd.date_range(start=self.start_time, periods=self.n_timesteps, freq=dt)
 
     @property
     def projection_string(self):
