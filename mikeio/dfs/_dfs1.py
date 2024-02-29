@@ -70,16 +70,11 @@ class Dfs1(_Dfs123):
 
     def __init__(self, filename):
         super().__init__(filename)
-        path = Path(filename)
-        if not path.exists():
-            raise FileNotFoundError(path)
 
         self._dfs = DfsFileFactory.Dfs1FileOpen(str(filename))
         self._x0 = self._dfs.SpatialAxis.X0
         self._dx = self._dfs.SpatialAxis.Dx
         self._nx = self._dfs.SpatialAxis.XCount
-
-        self._read_header(str(filename))
 
         origin = self._longitude, self._latitude
         self._geometry = Grid1D(

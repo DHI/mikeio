@@ -116,13 +116,6 @@ class Dfs2(_Dfs123):
         filename = str(filename)
         super().__init__(filename)
 
-        # TODO move to base class
-        self._read_header(filename)
-
-        # TODO
-        # self._x0 = 0.0
-        # self._y0 = 0.0
-
         is_spectral = type == "spectral"
         dfs = DfsFileFactory.Dfs2FileOpen(str(filename))
 

@@ -145,7 +145,6 @@ class Dfs3(_Dfs123):
         self._nx = self._dfs.SpatialAxis.XCount
         self._ny = self._dfs.SpatialAxis.YCount
         self._nz = self._dfs.SpatialAxis.ZCount
-        self._read_header(self._filename)
 
     def read(
         self,

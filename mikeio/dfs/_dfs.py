@@ -1,4 +1,5 @@
 from __future__ import annotations
+from pathlib import Path
 import warnings
 from abc import abstractmethod
 from dataclasses import dataclass
@@ -18,9 +19,8 @@ from mikecore.DfsFileFactory import DfsFileFactory
 from mikecore.Projections import Cartography
 
 from ..dataset import Dataset
-from ..eum import EUMType, EUMUnit, ItemInfo, ItemInfoList, TimeStepUnit
+from ..eum import EUMType, EUMUnit, ItemInfo, ItemInfoList
 from ..exceptions import ItemsError
-from ..spatial import GeometryUndefined
 from .._time import DateTimeSelector
 
 
@@ -269,23 +269,41 @@ class _Dfs123:
 
     show_progress = False
 
-    # TODO add all common arguments
     def __init__(self, filename=None):
+        path = Path(filename)
+        if not path.exists():
+            raise FileNotFoundError(path)
         self._filename = str(filename) if filename else None
-        self._projstr = None
-        self._start_time = None
         self._end_time = None
         self._is_equidistant = True
-        self._items = None
-        self._builder = None
-        self._factory = None
-        self._deletevalue = None
-        self._override_coordinates = False
-        self._timeseries_unit = TimeStepUnit.SECOND
-        self._dt = None
-        self._geometry = GeometryUndefined()
-        self._dfs = None
-        self._source = None
+        self._geometry = None  # handled by subclass
+        dfs = DfsFileFactory.DfsGenericOpen(self._filename)
+        self._dfs = dfs
+        self._n_items = len(dfs.ItemInfo)
+        self._items = self._get_item_info(list(range(self._n_items)))
+        self._timeaxistype = dfs.FileInfo.TimeAxis.TimeAxisType
+        if self._timeaxistype in {
+            TimeAxisType.CalendarEquidistant,
+            TimeAxisType.CalendarNonEquidistant,
+        }:
+            self._start_time = dfs.FileInfo.TimeAxis.StartDateTime
+        else:  # relative time axis
+            self._start_time = datetime(
+                1970, 1, 1
+            )  # TODO is this the proper epoch, should this magic number be somewhere else?
+        if hasattr(dfs.FileInfo.TimeAxis, "TimeStep"):
+            self._timestep_in_seconds = (
+                dfs.FileInfo.TimeAxis.TimeStep
+            )  # TODO handle other timeunits
+        self._n_timesteps = dfs.FileInfo.TimeAxis.NumberOfTimeSteps
+        projstr = dfs.FileInfo.Projection.WKTString
+        self._projstr = "NON-UTM" if not projstr else projstr
+        self._longitude = dfs.FileInfo.Projection.Longitude
+        self._latitude = dfs.FileInfo.Projection.Latitude
+        self._orientation = dfs.FileInfo.Projection.Orientation
+        self._deletevalue = dfs.FileInfo.DeleteValueFloat
+
+        dfs.Close()
 
     def __repr__(self):
         name = self.__class__.__name__
@@ -384,37 +402,6 @@ class _Dfs123:
 
         self._dfs.Close()
         return Dataset(data_list, time, items, geometry=self.geometry, validate=False)
-
-    def _read_header(self, filename: str) -> None:
-        dfs = DfsFileFactory.DfsGenericOpen(filename)
-        # TODO remove _dfs attribute
-        self._dfs = dfs
-        self._n_items = len(dfs.ItemInfo)
-        self._items = self._get_item_info(list(range(self._n_items)))
-        self._timeaxistype = dfs.FileInfo.TimeAxis.TimeAxisType
-        if self._timeaxistype in {
-            TimeAxisType.CalendarEquidistant,
-            TimeAxisType.CalendarNonEquidistant,
-        }:
-            self._start_time = dfs.FileInfo.TimeAxis.StartDateTime
-        else:  # relative time axis
-            self._start_time = datetime(
-                1970, 1, 1
-            )  # TODO is this the proper epoch, should this magic number be somewhere else?
-        if hasattr(dfs.FileInfo.TimeAxis, "TimeStep"):
-            self._timestep_in_seconds = (
-                dfs.FileInfo.TimeAxis.TimeStep
-            )  # TODO handle other timeunits
-            # TODO to get the EndTime
-        self._n_timesteps = dfs.FileInfo.TimeAxis.NumberOfTimeSteps
-        projstr = dfs.FileInfo.Projection.WKTString
-        self._projstr = "NON-UTM" if not projstr else projstr
-        self._longitude = dfs.FileInfo.Projection.Longitude
-        self._latitude = dfs.FileInfo.Projection.Latitude
-        self._orientation = dfs.FileInfo.Projection.Orientation
-        self._deletevalue = dfs.FileInfo.DeleteValueFloat
-
-        dfs.Close()
 
     def _open(self):
         raise NotImplementedError("Should be implemented by subclass")
