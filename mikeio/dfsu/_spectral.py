@@ -1,5 +1,6 @@
 from __future__ import annotations
-from typing import Sized, Tuple
+from typing import Sized, Tuple, Any
+from pathlib import Path
 
 import numpy as np
 import pandas as pd
@@ -9,10 +10,63 @@ from tqdm import trange
 from ..dataset import DataArray, Dataset
 from ..dfs._dfs import _get_item_info, _valid_item_numbers, _valid_timesteps
 from .._spectral import calc_m0_from_spectrum
-from ._dfsu import _Dfsu
+from ._dfsu import _Dfsu, get_elements_from_source, get_nodes_from_source
+from ..spatial import (
+    GeometryFMAreaSpectrum,
+    GeometryFMLineSpectrum,
+    GeometryFMPointSpectrum,
+)
 
 
 class DfsuSpectral(_Dfsu):
+
+    def _read_geometry(self, input: str | Path) -> Any:
+        filename = str(input)
+        dfs = DfsuFile.Open(filename)
+        dfsu_type = DfsuFileType(dfs.DfsuFileType)
+
+        dir = dfs.Directions
+        directions = None if dir is None else dir * (180 / np.pi)
+        frequencies = dfs.Frequencies
+
+        # geometry
+        if dfsu_type == DfsuFileType.DfsuSpectral0D:
+            geometry: Any = GeometryFMPointSpectrum(
+                frequencies=frequencies, directions=directions
+            )
+        else:
+            # nc, codes, node_ids = get_nodes_from_source(dfs)
+            node_table = get_nodes_from_source(dfs)
+            el_table = get_elements_from_source(dfs)
+
+            if dfsu_type == DfsuFileType.DfsuSpectral1D:
+                geometry = GeometryFMLineSpectrum(
+                    node_coordinates=node_table.coordinates,
+                    element_table=el_table.connectivity,
+                    codes=node_table.codes,
+                    projection=dfs.Projection.WKTString,
+                    dfsu_type=dfsu_type,
+                    element_ids=el_table.ids,
+                    node_ids=node_table.ids,
+                    validate=False,
+                    frequencies=frequencies,
+                    directions=directions,
+                )
+            elif dfsu_type == DfsuFileType.DfsuSpectral2D:
+                geometry = GeometryFMAreaSpectrum(
+                    node_coordinates=node_table.coordinates,
+                    element_table=el_table.connectivity,
+                    codes=node_table.codes,
+                    projection=dfs.Projection.WKTString,
+                    dfsu_type=dfsu_type,
+                    element_ids=el_table.ids,
+                    node_ids=node_table.ids,
+                    validate=False,
+                    frequencies=frequencies,
+                    directions=directions,
+                )
+        dfs.Close()
+        return geometry
 
     @property
     def n_frequencies(self):

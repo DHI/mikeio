@@ -177,78 +177,40 @@ class _Dfsu:
         dfs = DfsuFile.Open(filename)
         dfsu_type = DfsuFileType(dfs.DfsuFileType)
 
-        if self._is_spectral(dfsu_type):
-            dir = dfs.Directions
-            directions = None if dir is None else dir * (180 / np.pi)
-            frequencies = dfs.Frequencies
+        node_table = get_nodes_from_source(dfs)
+        el_table = get_elements_from_source(dfs)
 
-        # geometry
-        if dfsu_type == DfsuFileType.DfsuSpectral0D:
-            geometry: Any = GeometryFMPointSpectrum(
-                frequencies=frequencies, directions=directions
+        if self._is_layered(dfsu_type):
+            geom_cls: Any = GeometryFM3D
+            if dfsu_type in (
+                DfsuFileType.DfsuVerticalProfileSigma,
+                DfsuFileType.DfsuVerticalProfileSigmaZ,
+            ):
+                geom_cls = GeometryFMVerticalProfile
+
+            geometry = geom_cls(
+                node_coordinates=node_table.coordinates,
+                element_table=el_table.connectivity,
+                codes=node_table.codes,
+                projection=dfs.Projection.WKTString,
+                dfsu_type=dfsu_type,
+                element_ids=el_table.ids,
+                node_ids=node_table.ids,
+                n_layers=dfs.NumberOfLayers,
+                n_sigma=min(dfs.NumberOfSigmaLayers, dfs.NumberOfLayers),
+                validate=False,
             )
         else:
-            # nc, codes, node_ids = get_nodes_from_source(dfs)
-            node_table = get_nodes_from_source(dfs)
-            el_table = get_elements_from_source(dfs)
-
-            if self._is_layered(dfsu_type):
-                geom_cls: Any = GeometryFM3D
-                if dfsu_type in (
-                    DfsuFileType.DfsuVerticalProfileSigma,
-                    DfsuFileType.DfsuVerticalProfileSigmaZ,
-                ):
-                    geom_cls = GeometryFMVerticalProfile
-
-                geometry = geom_cls(
-                    node_coordinates=node_table.coordinates,
-                    element_table=el_table.connectivity,
-                    codes=node_table.codes,
-                    projection=dfs.Projection.WKTString,
-                    dfsu_type=dfsu_type,
-                    element_ids=el_table.ids,
-                    node_ids=node_table.ids,
-                    n_layers=dfs.NumberOfLayers,
-                    n_sigma=min(dfs.NumberOfSigmaLayers, dfs.NumberOfLayers),
-                    validate=False,
-                )
-            elif dfsu_type == DfsuFileType.DfsuSpectral1D:
-                geometry = GeometryFMLineSpectrum(
-                    node_coordinates=node_table.coordinates,
-                    element_table=el_table.connectivity,
-                    codes=node_table.codes,
-                    projection=dfs.Projection.WKTString,
-                    dfsu_type=dfsu_type,
-                    element_ids=el_table.ids,
-                    node_ids=node_table.ids,
-                    validate=False,
-                    frequencies=frequencies,
-                    directions=directions,
-                )
-            elif dfsu_type == DfsuFileType.DfsuSpectral2D:
-                geometry = GeometryFMAreaSpectrum(
-                    node_coordinates=node_table.coordinates,
-                    element_table=el_table.connectivity,
-                    codes=node_table.codes,
-                    projection=dfs.Projection.WKTString,
-                    dfsu_type=dfsu_type,
-                    element_ids=el_table.ids,
-                    node_ids=node_table.ids,
-                    validate=False,
-                    frequencies=frequencies,
-                    directions=directions,
-                )
-            else:
-                geometry = GeometryFM2D(
-                    node_coordinates=node_table.coordinates,
-                    element_table=el_table.connectivity,
-                    codes=node_table.codes,
-                    projection=dfs.Projection.WKTString,
-                    dfsu_type=dfsu_type,
-                    element_ids=el_table.ids,
-                    node_ids=node_table.ids,
-                    validate=False,
-                )
+            geometry = GeometryFM2D(
+                node_coordinates=node_table.coordinates,
+                element_table=el_table.connectivity,
+                codes=node_table.codes,
+                projection=dfs.Projection.WKTString,
+                dfsu_type=dfsu_type,
+                element_ids=el_table.ids,
+                node_ids=node_table.ids,
+                validate=False,
+            )
         dfs.Close()
         return geometry
 
