@@ -286,7 +286,7 @@ class _Dfs123:
         self._override_coordinates = False
         self._timeseries_unit = TimeStepUnit.SECOND
         self._dt = None
-        self.geometry = GeometryUndefined()
+        self._geometry = GeometryUndefined()
         self._dfs = None
         self._source = None
 
@@ -368,8 +368,10 @@ class _Dfs123:
         self._dfs.Close()
         return Dataset(data_list, time, items, geometry=self.geometry, validate=False)
 
-    def _read_header(self):
-        dfs = self._dfs
+    def _read_header(self, filename: str) -> None:
+        dfs = DfsFileFactory.DfsGenericOpen(filename)
+        # TODO remove _dfs attribute
+        self._dfs = dfs
         self._n_items = len(dfs.ItemInfo)
         self._items = self._get_item_info(list(range(self._n_items)))
         self._timeaxistype = dfs.FileInfo.TimeAxis.TimeAxisType
