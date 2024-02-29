@@ -8,7 +8,6 @@ import xarray
 
 import mikeio
 
-from mikeio import Dfs2
 from mikeio import EUMType, ItemInfo, EUMUnit
 from mikeio.exceptions import ItemsError
 from mikeio.spatial import GeometryPoint2D, Grid2D
@@ -457,7 +456,7 @@ def test_repr(dfs2_gebco):
 
     assert "Dfs2" in text
     assert "items" in text
-    assert "dx" in text
+    # assert "dx" in text
 
 
 def test_repr_time(dfs2_random):
@@ -467,7 +466,7 @@ def test_repr_time(dfs2_random):
 
     assert "Dfs2" in text
     assert "items" in text
-    assert "dx" in text
+    # assert "dx" in text
     assert "steps" in text
 
 

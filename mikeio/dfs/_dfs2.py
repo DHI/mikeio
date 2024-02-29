@@ -1,7 +1,7 @@
 from __future__ import annotations
 from copy import deepcopy
 from pathlib import Path
-from typing import List, Tuple
+from typing import Any, List, Literal, Tuple
 from collections.abc import Sequence
 
 import numpy as np
@@ -108,7 +108,11 @@ def _write_dfs2_spatial_axis(builder, factory, geometry):
 class Dfs2(_Dfs123):
     _ndim = 2
 
-    def __init__(self, filename: str | Path, type: str = "horizontal"):
+    def __init__(
+        self,
+        filename: str | Path,
+        type: Literal["horizontal", "spectral"] = "horizontal",
+    ):
         filename = str(filename)
         super().__init__(filename)
 
@@ -116,52 +120,10 @@ class Dfs2(_Dfs123):
         self._read_header(filename)
 
         # TODO
-        self._x0 = 0.0
-        self._y0 = 0.0
+        # self._x0 = 0.0
+        # self._y0 = 0.0
 
-        is_spectral = type.lower() in ["spectral", "spectra", "spectrum"]
-        # self._read_dfs2_header(filename=filename, read_x0y0=is_spectral)
-        self._geometry = self._read_geometry(filename=filename, is_spectral=is_spectral)
-        self._validate_no_orientation_in_geo()
-        # origin, orientation = self._origin_and_orientation_in_CRS()
-
-        # self.geometry = Grid2D(
-        #     dx=self._dx,
-        #     dy=self._dy,
-        #     nx=self._nx,
-        #     ny=self._ny,
-        #     x0=self._x0,
-        #     y0=self._y0,
-        #     orientation=orientation,
-        #     origin=origin,
-        #     projection=self._projstr,
-        #     is_spectral=is_spectral,
-        # )
-
-    def __repr__(self):
-        out = ["<mikeio.Dfs2>"]
-
-        if self._filename:
-            out.append(f"dx: {self.dx:.5f}")
-            out.append(f"dy: {self.dy:.5f}")
-
-            if self._n_items is not None:
-                if self._n_items < 10:
-                    out.append("items:")
-                    for i, item in enumerate(self.items):
-                        out.append(f"  {i}:  {item}")
-                else:
-                    out.append(f"number of items: {self._n_items}")
-
-                if self._n_timesteps == 1:
-                    out.append("time: time-invariant file (1 step)")
-                else:
-                    out.append(f"time: {self._n_timesteps} steps")
-                    out.append(f"start time: {self._start_time}")
-
-        return str.join("\n", out)
-
-    def _read_geometry(self, filename: str | Path, is_spectral: bool = False) -> Grid2D:
+        is_spectral = type == "spectral"
         dfs = DfsFileFactory.Dfs2FileOpen(str(filename))
 
         x0 = dfs.SpatialAxis.X0 if is_spectral else 0.0
@@ -169,7 +131,7 @@ class Dfs2(_Dfs123):
 
         origin, orientation = self._origin_and_orientation_in_CRS()
 
-        geometry = Grid2D(
+        self._geometry = Grid2D(
             dx=dfs.SpatialAxis.Dx,
             dy=dfs.SpatialAxis.Dy,
             nx=dfs.SpatialAxis.XCount,
@@ -182,22 +144,7 @@ class Dfs2(_Dfs123):
             is_spectral=is_spectral,
         )
         dfs.Close()
-        return geometry
-
-    def _read_dfs2_header(self, filename: str | Path, read_x0y0: bool = False) -> None:
-        self._dfs = DfsFileFactory.Dfs2FileOpen(str(filename))
-        self._source = self._dfs
-        if read_x0y0:
-            self._x0 = self._dfs.SpatialAxis.X0
-            self._y0 = self._dfs.SpatialAxis.Y0
-        self._dx = self._dfs.SpatialAxis.Dx
-        self._dy = self._dfs.SpatialAxis.Dy
-        self._nx = self._dfs.SpatialAxis.XCount
-        self._ny = self._dfs.SpatialAxis.YCount
-        if self._dfs.FileInfo.TimeAxis.TimeAxisType == 4:
-            self._is_equidistant = False
-
-        self._read_header()
+        self._validate_no_orientation_in_geo()
 
     def read(
         self,

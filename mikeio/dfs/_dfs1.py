@@ -28,7 +28,12 @@ def _write_dfs1_header(filename: str | Path, ds: Dataset, title="") -> DfsFile:
     geometry: Grid1D = ds.geometry
 
     factory = DfsFactory()
-    proj = factory.CreateProjectionGeoOrigin(ds.geometry.projection_string,ds.geometry.origin[0],ds.geometry.origin[1],ds.geometry.orientation)
+    proj = factory.CreateProjectionGeoOrigin(
+        ds.geometry.projection_string,
+        ds.geometry.origin[0],
+        ds.geometry.origin[1],
+        ds.geometry.orientation,
+    )
     builder.SetGeographicalProjection(proj)
     builder.SetSpatialAxis(
         factory.CreateAxisEqD1(
@@ -41,9 +46,7 @@ def _write_dfs1_header(filename: str | Path, ds: Dataset, title="") -> DfsFile:
 
     timestep_unit = TimeStepUnit.SECOND
     dt = ds.timestep or 1.0  # It can not be None
-    time_axis = factory.CreateTemporalEqCalendarAxis(
-        timestep_unit, ds.time[0], 0, dt
-    )
+    time_axis = factory.CreateTemporalEqCalendarAxis(timestep_unit, ds.time[0], 0, dt)
     builder.SetTemporalAxis(time_axis)
 
     for item in ds.items:
@@ -60,7 +63,7 @@ def _write_dfs1_header(filename: str | Path, ds: Dataset, title="") -> DfsFile:
         print("cannot create dfs file: ", filename)
 
     return builder.GetFile()
-    
+
 
 class Dfs1(_Dfs123):
     _ndim = 1
@@ -76,10 +79,10 @@ class Dfs1(_Dfs123):
         self._dx = self._dfs.SpatialAxis.Dx
         self._nx = self._dfs.SpatialAxis.XCount
 
-        self._read_header()
+        self._read_header(str(filename))
 
         origin = self._longitude, self._latitude
-        self.geometry = Grid1D(
+        self._geometry = Grid1D(
             x0=self._x0,
             dx=self._dx,
             nx=self._nx,
@@ -87,27 +90,6 @@ class Dfs1(_Dfs123):
             origin=origin,
             orientation=self._orientation,
         )
-
-    def __repr__(self):
-        out = ["<mikeio.Dfs1>"]
-
-        out.append(f"dx: {self.dx:.5f}")
-
-        if self._n_items < 10:
-            out.append("items:")
-            for i, item in enumerate(self.items):
-                out.append(f"  {i}:  {item}")
-        else:
-            out.append(f"number of items: {self._n_items}")
-        
-        if self._n_timesteps == 1:
-            out.append("time: time-invariant file (1 step)")
-        else:
-            out.append(f"time: {self._n_timesteps} steps")
-            out.append(f"start time: {self._start_time}")
-
-        return str.join("\n", out)
-    
 
     def _open(self):
         self._dfs = DfsFileFactory.Dfs1FileOpen(self._filename)
@@ -118,6 +100,10 @@ class Dfs1(_Dfs123):
                 eumUnit.eumUmeter, self._nx, self._x0, self._dx
             )
         )
+
+    @property
+    def geometry(self):
+        return self._geometry
 
     @property
     def x0(self):
