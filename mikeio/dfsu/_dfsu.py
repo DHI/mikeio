@@ -108,6 +108,26 @@ def _write_dfsu(filename: str | Path, data: Dataset) -> None:
 class _Dfsu:
     show_progress = False
 
+    def __init__(self, filename: str | Path) -> None:
+        """
+        Create a Dfsu object
+
+        Parameters
+        ---------
+        filename: str
+            dfsu filename
+        """
+        # placeholder
+        # self._timestep_in_seconds = None
+
+        # TODO remove
+        self._filename = str(filename)
+        # input = self._filename if dfs is None else dfs
+        self._read_header(filename)
+        # self.time = ...
+        # self.geometry = ...
+        # self.items = ...
+
     def __repr__(self):
         out = []
         type_name = "Flexible Mesh" if self._type is None else self.type_name
@@ -148,13 +168,8 @@ class _Dfsu:
                 out.append(f"      {self._start_time} -- {self.end_time}")
         return str.join("\n", out)
 
-    def _read_header(self, input: DfsuFile | str | Path) -> None:
+    def _read_header(self, input: str | Path) -> None:
         # TODO set instance variables in __init__ instead of here
-        if isinstance(input, DfsuFile):
-            # input is a dfsu file object (already open)
-            self._read_dfsu_header(input)
-            return
-
         filename = input
         path = Path(input)
         if not path.exists():
@@ -163,6 +178,7 @@ class _Dfsu:
         ext = path.suffix.lower()
 
         if ext == ".mesh":
+            raise ValueError("Not supported")
             # TODO remove the possibility to read mesh files from this class
             self._read_mesh_header(filename)
 
@@ -292,7 +308,7 @@ class _Dfsu:
     @property
     def type_name(self):
         """Type name, e.g. Mesh, Dfsu2D"""
-        return self._type.name if self._type else "Mesh"
+        return self._type.name
 
     @property
     def geometry(self):
@@ -554,23 +570,6 @@ class _Dfsu:
             ax=ax,
             add_colorbar=add_colorbar,
         )
-
-    def __init__(self, filename, dfs: DfsuFile | None = None):
-        """
-        Create a Dfsu object
-
-        Parameters
-        ---------
-        filename: str
-            dfsu or mesh filename
-        dfs :
-        """
-        # placeholder
-        self._timestep_in_seconds = None
-
-        self._filename = str(filename)
-        input = self._filename if dfs is None else dfs
-        self._read_header(input)
 
     @property
     def deletevalue(self):

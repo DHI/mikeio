@@ -13,13 +13,13 @@ class Dfsu:
         type, dfs = self._get_DfsuFileType_n_Obj(filename)
 
         if self._type_is_spectral(type):
-            return DfsuSpectral(filename, dfs, *args, **kwargs)
+            return DfsuSpectral(filename, *args, **kwargs)
         elif self._type_is_2d_horizontal(type):
-            return Dfsu2DH(filename, dfs, *args, **kwargs)
+            return Dfsu2DH(filename, *args, **kwargs)
         elif self._type_is_2d_vertical(type):
-            return Dfsu2DV(filename, dfs, *args, **kwargs)
+            return Dfsu2DV(filename, *args, **kwargs)
         elif self._type_is_3d(type):
-            return Dfsu3D(filename, dfs, *args, **kwargs)
+            return Dfsu3D(filename, *args, **kwargs)
         else:
             raise ValueError(f"Type {type} is unsupported!")
 
