@@ -1574,7 +1574,12 @@ class DataArray:
         if axis == 0 and "time" in self.dims:  # time
             geometry = self.geometry
             zn = None if self._zn is None else self._zn[0]
-
+        # TODO we need something like this to handle collapsing of spatial axes
+        # geometry = self.geometry.isel(idx, axis=spatial_axis)
+        # start with this hack
+        elif axis != 0 and isinstance(self.geometry, GeometryFM3D):
+            geometry = self.geometry.geometry2d
+            zn = None
         else:
             geometry = GeometryUndefined()
             zn = None

@@ -157,6 +157,7 @@ class DfsuLayered(_Dfsu):
         dtype=np.float32,
         error_bad_data=True,
         fill_bad_data_value=np.nan,
+        expand_layers=False,
     ) -> Dataset:
         """
         Read data from a dfsu file
@@ -205,6 +206,16 @@ class DfsuLayered(_Dfsu):
 
         single_time_selected, time_steps = _valid_timesteps(dfs, time)
 
+        dims = (
+            ("time", "element")
+            if not (single_time_selected and not keepdims)  # TODO extract variable
+            else ("element",)
+        )
+
+        # TODO fix single time selected
+        if expand_layers:
+            dims = ("time", "layer", "element")
+
         self._validate_elements_and_geometry_sel(
             elements, area=area, layers=layers, x=x, y=y, z=z
         )
@@ -247,7 +258,15 @@ class DfsuLayered(_Dfsu):
                 item0_is_node_based = True
                 data: np.ndarray = np.ndarray(shape=(n_steps, n_nodes), dtype=dtype)
             else:
-                data = np.ndarray(shape=(n_steps, n_elems), dtype=dtype)
+                if "layer" in dims:
+                    n_2d_elements = self.geometry.geometry2d.n_elements
+                    n_layers = self.geometry.n_layers
+                    data = np.ndarray(
+                        shape=(n_steps, n_layers, n_2d_elements), dtype=dtype
+                    )
+                    data[:] = np.nan
+                else:
+                    data = np.ndarray(shape=(n_steps, n_elems), dtype=dtype)
             data_list.append(data)
 
         if single_time_selected and not keepdims:
@@ -264,7 +283,7 @@ class DfsuLayered(_Dfsu):
                     time=time,
                     item_numbers=item_numbers,
                     deletevalue=deletevalue,
-                    shape=(data.shape[-1],),
+                    shape=(self.geometry.n_elements,) if item != 0 else (n_nodes,),
                     item=item,
                     it=it,
                     error_bad_data=error_bad_data,
@@ -280,17 +299,23 @@ class DfsuLayered(_Dfsu):
                 if single_time_selected and not keepdims:
                     data_list[item] = d
                 else:
-                    data_list[item][i] = d
+                    if item == 0:
+                        data_list[item][i] = d
+                    else:
+                        if "layer" in dims:
+
+                            # TODO avoid loop, this is ere to be able to start thinking about (time, layer, element_2d) instead of (time, element)
+                            idx = 0
+                            for ne in range(n_2d_elements):
+                                n = self.geometry.n_layers_per_column[ne]
+                                data_list[item][i, :n, ne] = d[idx : idx + n]
+                                idx += n
+                        else:
+                            data_list[item][i] = d
 
         time = self.time[time_steps]
 
         dfs.Close()
-
-        dims = (
-            ("time", "element")
-            if not (single_time_selected and not keepdims)  # TODO extract variable
-            else ("element",)
-        )
 
         if elements is not None and len(elements) == 1:
             # squeeze point data

@@ -14,6 +14,22 @@ def test_read_simple_3d():
     filename = "tests/testdata/basin_3d.dfsu"
     ds = mikeio.read(filename)
 
+    # TODO how to name the element_2d dimension?
+    assert ds.dims == ("time", "element")
+
+    assert ds.to_numpy().shape[0] == 3
+    assert len(ds.items) == 3
+
+    assert ds.items[0].name != "Z coordinate"
+    assert ds.items[2].name == "W velocity"
+
+
+def test_read_simple_3d_with_layer_dimension():
+    filename = "tests/testdata/basin_3d.dfsu"
+    ds = mikeio.read(filename, expand_layers=True)
+
+    assert ds.dims == ("time", "layer", "element")
+
     assert ds.to_numpy().shape[0] == 3
     assert len(ds.items) == 3
 
@@ -38,11 +54,25 @@ def test_read_returns_correct_items_sigma_z():
     filename = "tests/testdata/oresund_sigma_z.dfsu"
     dfs = mikeio.open(filename)
 
-    ds = dfs.read()
+    ds = dfs.read(expand_layers=True)
 
     assert len(ds) == 2
     assert ds.items[0].name == "Temperature"
     assert ds.items[1].name == "Salinity"
+
+
+def test_vertical_max(tmp_path):
+    filename = "tests/testdata/oresund_sigma_z.dfsu"
+    dfs = mikeio.open(filename)
+
+    ds = dfs.read(expand_layers=True)
+    assert ds.geometry.geometry2d.n_elements == 3700
+
+    ds_max = ds.max("layer")
+    assert ds_max.shape == (3, 3700)
+    assert ds_max.dims == ("time", "element")
+    fp = tmp_path / "oresund_sigma_z_max.dfsu"
+    ds_max.to_dfs(fp)
 
 
 def test_read_top_layer():
@@ -176,7 +206,6 @@ def test_read_dfsu3d_column_save(tmp_path):
     dfs = mikeio.open(filename)
     assert dfs.geometry.n_sigma_layers == 4
     assert dfs.geometry.n_z_layers == 5
-
 
     (x, y) = (333934.1, 6158101.5)
 
