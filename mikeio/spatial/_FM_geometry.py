@@ -1,5 +1,4 @@
 from __future__ import annotations
-import warnings
 from collections import namedtuple
 from functools import cached_property
 from typing import Collection, List, Any
@@ -27,7 +26,13 @@ from ._utils import xy_to_bbox
 
 
 class GeometryFMPointSpectrum(_Geometry):
-    def __init__(self, frequencies=None, directions=None, x=None, y=None) -> None:
+    def __init__(
+        self,
+        frequencies: np.ndarray,
+        directions: np.ndarray | None = None,
+        x: float | None = None,
+        y: float | None = None,
+    ) -> None:
         super().__init__()
         self.n_nodes = 0
         self.n_elements = 0
@@ -38,6 +43,10 @@ class GeometryFMPointSpectrum(_Geometry):
         self._directions = directions
         self.x = x
         self.y = y
+
+    @property
+    def is_layered(self) -> bool:
+        return False
 
     @property
     def type_name(self):
@@ -299,6 +308,10 @@ class _GeometryFM(_Geometry):
 
         self._node_ids = new_node_ids
         self._element_ids = new_element_ids
+
+    @property
+    def is_spectral(self) -> bool:
+        return False
 
     @property
     def n_nodes(self) -> int:
@@ -1224,36 +1237,6 @@ class GeometryFM2D(_GeometryFM):
         builder.SetEumQuantity(quantity)
         newMesh = builder.CreateMesh()
         newMesh.Write(outfilename)
-
-
-class GeometryFM(GeometryFM2D):
-    """Deprecated, use GeometryFM2D instead"""
-
-    def __init__(
-        self,
-        node_coordinates,
-        element_table,
-        codes=None,
-        projection: str = "LONG/LAT",
-        dfsu_type=None,
-        element_ids=None,
-        node_ids=None,
-        validate=True,
-        reindex=False,
-    ) -> None:
-        super().__init__(
-            node_coordinates=node_coordinates,
-            element_table=element_table,
-            codes=codes,
-            projection=projection,
-            dfsu_type=dfsu_type,
-            element_ids=element_ids,
-            node_ids=node_ids,
-            validate=validate,
-            reindex=reindex,
-        )
-
-        warnings.warn("GeometryFM is deprecated, use GeometryFM2D instead")
 
 
 class _GeometryFMSpectrum(GeometryFM2D):

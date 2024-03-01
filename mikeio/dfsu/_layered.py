@@ -1,5 +1,6 @@
 from __future__ import annotations
-from typing import Collection
+from pathlib import Path
+from typing import Any, Collection
 from functools import wraps
 import warnings
 
@@ -18,12 +19,60 @@ from ..dfs._dfs import (
 from ..eum import EUMType, ItemInfo
 from ..exceptions import InvalidGeometry
 from .._interpolation import get_idw_interpolant, interp2d
-from ..spatial import GeometryFM3D
+from ..spatial import GeometryFM3D, GeometryFMVerticalProfile
 from ..spatial._FM_utils import _plot_vertical_profile
-from ._dfsu import _Dfsu
+from ._dfsu import _Dfsu, get_nodes_from_source, get_elements_from_source
 
 
 class DfsuLayered(_Dfsu):
+    def __init__(self, filename: str | Path) -> None:
+        super().__init__(filename)
+        self._geometry = self._read_geometry(self._filename)
+        self._items = self._read_items(self._filename)
+
+    @staticmethod
+    def _read_items(filename: str) -> list[ItemInfo]:
+        dfs = DfsuFile.Open(filename)
+        n_items = len(dfs.ItemInfo)
+        first_idx = 1
+        items = _get_item_info(
+            dfs.ItemInfo,
+            list(range(n_items - first_idx)),
+            ignore_first=True,
+        )
+        dfs.Close()
+        return items
+
+    @staticmethod
+    def _read_geometry(filename: str) -> GeometryFM3D | GeometryFMVerticalProfile:
+        dfs = DfsuFile.Open(filename)
+        dfsu_type = DfsuFileType(dfs.DfsuFileType)
+
+        node_table = get_nodes_from_source(dfs)
+        el_table = get_elements_from_source(dfs)
+
+        geom_cls: Any = GeometryFM3D
+        if dfsu_type in (
+            DfsuFileType.DfsuVerticalProfileSigma,
+            DfsuFileType.DfsuVerticalProfileSigmaZ,
+        ):
+            geom_cls = GeometryFMVerticalProfile
+
+        geometry = geom_cls(
+            node_coordinates=node_table.coordinates,
+            element_table=el_table.connectivity,
+            codes=node_table.codes,
+            projection=dfs.Projection.WKTString,
+            dfsu_type=dfsu_type,
+            element_ids=el_table.ids,
+            node_ids=node_table.ids,
+            n_layers=dfs.NumberOfLayers,
+            n_sigma=min(dfs.NumberOfSigmaLayers, dfs.NumberOfLayers),
+            validate=False,
+        )
+        dfs.Close()
+        return geometry
+
     @property
     def n_layers(self):
         """Maximum number of layers"""
@@ -153,8 +202,6 @@ class DfsuLayered(_Dfsu):
         # (if engine is continuously writing to this file)
         # TODO: add more checks that this is actually still the same file
         # (could have been replaced in the meantime)
-
-        self._n_timesteps = dfs.NumberOfTimeSteps
 
         single_time_selected, time_steps = _valid_timesteps(dfs, time)
 

@@ -16,8 +16,8 @@ degree Celsius
 >>>
 
 """
+
 from __future__ import annotations
-import warnings
 from enum import IntEnum
 from typing import Dict, List, Sequence, Literal
 
@@ -69,11 +69,6 @@ def _type_list(search=None):
     return items
 
 
-def type_list(search=None):
-    warnings.warn("type_list is deprecated use EUMType.search instead", FutureWarning)
-    return _type_list(search=search)
-
-
 def _unit_list(eum_type: int) -> Dict[str, eumUnit]:
     """Get a dictionary of valid units
 
@@ -94,11 +89,6 @@ def _unit_list(eum_type: int) -> Dict[str, eumUnit]:
         items[key] = value
 
     return items
-
-
-def unit_list(type_eum):
-    warnings.warn("unit_list is deprecated use EUMType.units instead", FutureWarning)
-    return _type_list(type_eum)
 
 
 class TimeAxisType(IntEnum):
@@ -1429,8 +1419,13 @@ class ItemInfo:
     """
 
     def __init__(
-        self, name: str | EUMType | None =None, itemtype: EUMType | EUMUnit| None =None, unit: EUMUnit | None=None,
-          data_value_type:Literal["Instantaneous","Accumulated","StepAccumulated","MeanStepBackWard"]="Instantaneous"
+        self,
+        name: str | EUMType | None = None,
+        itemtype: EUMType | EUMUnit | None = None,
+        unit: EUMUnit | None = None,
+        data_value_type: Literal[
+            "Instantaneous", "Accumulated", "StepAccumulated", "MeanStepBackWard"
+        ] = "Instantaneous",
     ) -> None:
 
         # Handle arguments in the wrong place
@@ -1477,7 +1472,7 @@ class ItemInfo:
 
         if not isinstance(name, str):
             raise ValueError("Invalid name, name should be a string")
-        self.name : str = name
+        self.name: str = name
 
     def __eq__(self, other):
         if not isinstance(other, ItemInfo):
@@ -1497,7 +1492,7 @@ class ItemInfo:
             return f"{self.name} <{self.type.display_name}> ({self.unit.display_name})"
         else:
             return f"{self.name} <{self.type.display_name}> ({self.unit.display_name}) - {self.data_value_type}"
-    
+
     @staticmethod
     def from_mikecore_dynamic_item_info(dfsItemInfo: DfsDynamicItemInfo) -> "ItemInfo":
         """Create ItemInfo from a mikecore.DfsDynamicItemInfo object"""
