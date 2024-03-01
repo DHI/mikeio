@@ -92,7 +92,10 @@ class _DataArraySpectrumToHm0:
         item = ItemInfo(EUMType.Significant_wave_height)
         g = self.da.geometry
         if isinstance(g, GeometryFMPointSpectrum):
-            geometry: Any = GeometryPoint2D(x=g.x, y=g.y)
+            if g.x is not None and g.y is not None:
+                geometry: Any = GeometryPoint2D(x=g.x, y=g.y)
+            else:
+                geometry = GeometryUndefined()
         elif isinstance(g, GeometryFMLineSpectrum):
             geometry = Grid1D(
                 nx=g.n_nodes,

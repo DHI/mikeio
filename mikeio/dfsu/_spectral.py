@@ -1,5 +1,6 @@
 from __future__ import annotations
-from typing import Tuple
+from typing import Sized, Tuple, Any
+from pathlib import Path
 
 import numpy as np
 import pandas as pd
@@ -8,11 +9,71 @@ from tqdm import trange
 
 from ..dataset import DataArray, Dataset
 from ..dfs._dfs import _get_item_info, _valid_item_numbers, _valid_timesteps
-from .._spectral import calc_m0_from_spectrum, plot_2dspectrum
-from ._dfsu import _Dfsu
+from .._spectral import calc_m0_from_spectrum
+from ._dfsu import _Dfsu, get_elements_from_source, get_nodes_from_source
+from ..spatial import (
+    GeometryFMAreaSpectrum,
+    GeometryFMLineSpectrum,
+    GeometryFMPointSpectrum,
+)
 
 
 class DfsuSpectral(_Dfsu):
+
+    def __init__(self, filename: str | Path) -> None:
+        super().__init__(filename)
+        self._geometry = self._read_geometry(self._filename)
+
+    @staticmethod
+    def _read_geometry(
+        filename: str,
+    ) -> GeometryFMPointSpectrum | GeometryFMLineSpectrum | GeometryFMAreaSpectrum:
+        dfs = DfsuFile.Open(filename)
+        dfsu_type = DfsuFileType(dfs.DfsuFileType)
+
+        dir = dfs.Directions
+        directions = None if dir is None else dir * (180 / np.pi)
+        frequencies = dfs.Frequencies
+
+        # geometry
+        if dfsu_type == DfsuFileType.DfsuSpectral0D:
+            geometry: Any = GeometryFMPointSpectrum(
+                frequencies=frequencies, directions=directions
+            )  # No x,y coordinates
+        else:
+            # nc, codes, node_ids = get_nodes_from_source(dfs)
+            node_table = get_nodes_from_source(dfs)
+            el_table = get_elements_from_source(dfs)
+
+            if dfsu_type == DfsuFileType.DfsuSpectral1D:
+                geometry = GeometryFMLineSpectrum(
+                    node_coordinates=node_table.coordinates,
+                    element_table=el_table.connectivity,
+                    codes=node_table.codes,
+                    projection=dfs.Projection.WKTString,
+                    dfsu_type=dfsu_type,
+                    element_ids=el_table.ids,
+                    node_ids=node_table.ids,
+                    validate=False,
+                    frequencies=frequencies,
+                    directions=directions,
+                )
+            elif dfsu_type == DfsuFileType.DfsuSpectral2D:
+                geometry = GeometryFMAreaSpectrum(
+                    node_coordinates=node_table.coordinates,
+                    element_table=el_table.connectivity,
+                    codes=node_table.codes,
+                    projection=dfs.Projection.WKTString,
+                    dfsu_type=dfsu_type,
+                    element_ids=el_table.ids,
+                    node_ids=node_table.ids,
+                    validate=False,
+                    frequencies=frequencies,
+                    directions=directions,
+                )
+        dfs.Close()
+        return geometry
+
     @property
     def n_frequencies(self):
         """Number of frequencies"""
@@ -33,7 +94,9 @@ class DfsuSpectral(_Dfsu):
         """Directional axis"""
         return self.geometry._directions
 
-    def _get_spectral_data_shape(self, n_steps: int, elements):
+    def _get_spectral_data_shape(
+        self, n_steps: int, elements: Sized | None, dfsu_type: DfsuFileType
+    ) -> Tuple[Tuple[int, ...], Tuple[int, ...], Tuple[str, ...]]:
         dims = [] if n_steps == 1 else ["time"]
         n_freq = self.n_frequencies
         n_dir = self.n_directions
@@ -42,9 +105,9 @@ class DfsuSpectral(_Dfsu):
             shape = (n_freq,)
         elif n_freq == 0:
             shape = (n_dir,)
-        if self._type == DfsuFileType.DfsuSpectral0D:
+        if dfsu_type == DfsuFileType.DfsuSpectral0D:
             read_shape = (n_steps, *shape)
-        elif self._type == DfsuFileType.DfsuSpectral1D:
+        elif dfsu_type == DfsuFileType.DfsuSpectral1D:
             # node-based, FE-style
             n_nodes = self.n_nodes if elements is None else len(elements)
             if n_nodes == 1:
@@ -136,8 +199,6 @@ class DfsuSpectral(_Dfsu):
         # self._read_dfsu_header(self._filename)
         dfs = DfsuFile.Open(self._filename)
 
-        self._n_timesteps = dfs.NumberOfTimeSteps
-
         single_time_selected, time_steps = _valid_timesteps(dfs, time)
 
         if self._type == DfsuFileType.DfsuSpectral2D:
@@ -163,7 +224,9 @@ class DfsuSpectral(_Dfsu):
         data_list = []
 
         n_steps = len(time_steps)
-        read_shape, shape, dims = self._get_spectral_data_shape(n_steps, pts)
+        read_shape, shape, dims = self._get_spectral_data_shape(
+            n_steps, pts, self._type
+        )
         for item in range(n_items):
             # Initialize an empty data block
             data: np.ndarray = np.ndarray(shape=read_shape, dtype=dtype)
@@ -238,91 +301,8 @@ class DfsuSpectral(_Dfsu):
                 geometry = self.geometry.elements_to_geometry(elements)
             return geometry, elements
 
-    def plot_spectrum(
-        self,
-        spectrum,
-        plot_type="contourf",
-        title=None,
-        label=None,
-        cmap="Reds",
-        vmin=1e-5,
-        vmax=None,
-        r_as_periods=True,
-        rmin=None,
-        rmax=None,
-        levels=None,
-        figsize=(7, 7),
-        add_colorbar=True,
-    ):
-        """
-        Plot spectrum in polar coordinates
-
-        Parameters
-        ----------
-        spectrum: np.array
-            spectral values as 2d array with dimensions: directions, frequencies
-        plot_type: str, optional
-            type of plot: 'contour', 'contourf', 'patch', 'shaded',
-            by default: 'contourf'
-        title: str, optional
-            axes title
-        label: str, optional
-            colorbar label (or title if contour plot)
-        cmap: matplotlib.cm.cmap, optional
-            colormap, default Reds
-        vmin: real, optional
-            lower bound of values to be shown on plot, default: 1e-5
-        vmax: real, optional
-            upper bound of values to be shown on plot, default:None
-        r_as_periods: bool, optional
-            show radial axis as periods instead of frequency, default: True
-        rmin: float, optional
-            mininum frequency/period to be shown, default: None
-        rmax: float, optional
-            maximum frequency/period to be shown, default: None
-        levels: int, list(float), optional
-            for contour plots: how many levels, default:10
-            or a list of discrete levels e.g. [0.03, 0.04, 0.05]
-        figsize: (float, float), optional
-            specify size of figure, default (7, 7)
-        add_colorbar: bool, optional
-            Add colorbar to plot, default True
-
-        Returns
-        -------
-        <matplotlib.axes>
-
-        Examples
-        --------
-        >>> dfs = mikeio.Dfsu("tests/testdata/area_spectra.dfsu")
-        >>> ds = dfs.read(items="Energy density")
-        >>> spectrum = ds[0][0, 0, :, :] # first timestep, element 0
-        >>> ax = dfs.plot_spectrum(spectrum, plot_type="patch")
-        >>> ax = dfs.plot_spectrum(spectrum, rmax=9, title="Wave spectrum T<9s");
-        """
-        if isinstance(spectrum, DataArray):
-            spectrum = spectrum.to_numpy()
-
-        return plot_2dspectrum(
-            spectrum,
-            frequencies=self.frequencies,
-            directions=self.directions,
-            plot_type=plot_type,
-            title=title,
-            label=label,
-            cmap=cmap,
-            vmin=vmin,
-            vmax=vmax,
-            r_as_periods=r_as_periods,
-            rmin=rmin,
-            rmax=rmax,
-            levels=levels,
-            figsize=figsize,
-            add_colorbar=add_colorbar,
-        )
-
     def calc_Hm0_from_spectrum(
-        self, spectrum: np.ndarray | DataArray, tail=True
+        self, spectrum: np.ndarray | DataArray, tail: bool = True
     ) -> np.ndarray:
         """Calculate significant wave height (Hm0) from spectrum
 

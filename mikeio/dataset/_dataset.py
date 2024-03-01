@@ -1883,9 +1883,9 @@ class Dataset:
         write_dfs1(filename=filename, ds=self)
 
     def _to_dfsu(self, filename: str | Path) -> None:
-        from ..dfsu._dfsu import _write_dfsu
+        from ..dfsu import write_dfsu
 
-        _write_dfsu(filename, self)
+        write_dfsu(filename, self)
 
     def to_xarray(self) -> "xarray.Dataset":
         """Export to xarray.Dataset"""
