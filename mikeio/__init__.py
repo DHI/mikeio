@@ -20,9 +20,9 @@ from collections.abc import Sequence
 # 'X.Y.dev0' is the canonical version of 'X.Y.dev'
 #
 
-__version__ = "1.8.dev1"  # TODO use git hash instead for dev version?
+__version__ = "2.0.dev0"  # TODO use git hash instead for dev version?
 # __version__ = "1.5.0"
-__dfs_version__: int = 170
+__dfs_version__: int = 200
 
 
 if "64" not in architecture()[0]:
