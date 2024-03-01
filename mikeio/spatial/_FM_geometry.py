@@ -1,5 +1,4 @@
 from __future__ import annotations
-import warnings
 from collections import namedtuple
 from functools import cached_property
 from typing import Collection, List, Any
@@ -1238,36 +1237,6 @@ class GeometryFM2D(_GeometryFM):
         builder.SetEumQuantity(quantity)
         newMesh = builder.CreateMesh()
         newMesh.Write(outfilename)
-
-
-class GeometryFM(GeometryFM2D):
-    """Deprecated, use GeometryFM2D instead"""
-
-    def __init__(
-        self,
-        node_coordinates,
-        element_table,
-        codes=None,
-        projection: str = "LONG/LAT",
-        dfsu_type=None,
-        element_ids=None,
-        node_ids=None,
-        validate=True,
-        reindex=False,
-    ) -> None:
-        super().__init__(
-            node_coordinates=node_coordinates,
-            element_table=element_table,
-            codes=codes,
-            projection=projection,
-            dfsu_type=dfsu_type,
-            element_ids=element_ids,
-            node_ids=node_ids,
-            validate=validate,
-            reindex=reindex,
-        )
-
-        warnings.warn("GeometryFM is deprecated, use GeometryFM2D instead")
 
 
 class _GeometryFMSpectrum(GeometryFM2D):
