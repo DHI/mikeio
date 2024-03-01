@@ -42,7 +42,7 @@ def _parse_grid_axis(name, x, x0=0.0, dx=None, nx=None):
     return x0, dx, nx
 
 
-def _print_axis_txt(name, x, dx) -> str:
+def _print_axis_txt(name: str, x: Sequence[float], dx: float) -> str:
     n = len(x)
     txt = f"{name}: [{x[0]:0.4g}"
     if n > 1:

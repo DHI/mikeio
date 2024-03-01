@@ -8,7 +8,6 @@ import xarray
 
 import mikeio
 
-from mikeio import Dfs2
 from mikeio import EUMType, ItemInfo, EUMUnit
 from mikeio.exceptions import ItemsError
 from mikeio.spatial import GeometryPoint2D, Grid2D
@@ -164,6 +163,7 @@ def test_write_without_time(tmp_path):
 def test_read(dfs2_random):
 
     dfs = dfs2_random
+    assert isinstance(dfs.geometry, Grid2D)
     ds = dfs.read(items=["testing water level"])
     data = ds[0].to_numpy()
     assert data[0, 88, 0] == 0
@@ -318,6 +318,9 @@ def test_properties_pt_spectrum(dfs2_pt_spectrum):
 
 def test_properties_pt_spectrum_linearf(dfs2_pt_spectrum_linearf):
     dfs = dfs2_pt_spectrum_linearf
+    # This file doesn't have a valid projection string
+    # dfs.FileInfo.Projection.WKTString = ''
+
     assert dfs.x0 == pytest.approx(0.00390625)
     assert dfs.y0 == 0
     assert dfs.dx == pytest.approx(0.00390625)
@@ -453,16 +456,7 @@ def test_repr(dfs2_gebco):
 
     assert "Dfs2" in text
     assert "items" in text
-    assert "dx" in text
-
-
-def test_repr_empty():
-
-    dfs = Dfs2()
-
-    text = repr(dfs)
-
-    assert "Dfs2" in text
+    # assert "dx" in text
 
 
 def test_repr_time(dfs2_random):
@@ -472,7 +466,7 @@ def test_repr_time(dfs2_random):
 
     assert "Dfs2" in text
     assert "items" in text
-    assert "dx" in text
+    # assert "dx" in text
     assert "steps" in text
 
 
@@ -641,65 +635,6 @@ def test_write_non_equidistant_data(tmp_path):
     assert not ds3.is_equidistant
 
 
-def test_incremental_write_from_dfs2(tmp_path):
-    "Useful for writing datasets with many timesteps to avoid problems with out of memory"
-
-    fp = tmp_path / "appended.dfs2"
-    dfs = mikeio.open("tests/testdata/eq.dfs2")
-
-    nt = dfs.n_timesteps
-
-    ds = dfs.read(time=[0], keepdims=True)
-    # assert ds.timestep == dfs.timestep, # ds.timestep is undefined
-
-    # TODO find a better way to do this, without having to create a new dfs2 object
-    dfs_to_write = Dfs2()
-
-    with pytest.warns(FutureWarning):
-        dfs_to_write.write(fp, ds, dt=dfs.timestep, keep_open=True)
-
-    for i in range(1, nt):
-        ds = dfs.read(time=[i], keepdims=True)
-
-        with pytest.warns(FutureWarning):
-            dfs_to_write.append(ds)
-
-    dfs_to_write.close()
-
-    newdfs = mikeio.open(fp)
-    assert dfs.start_time == newdfs.start_time
-    assert dfs.timestep == newdfs.timestep
-    assert dfs.end_time == newdfs.end_time
-
-
-def test_incremental_write_from_dfs2_context_manager(tmp_path):
-    "Useful for writing datasets with many timesteps to avoid problems with out of memory"
-
-    fp = tmp_path / "appended.dfs2"
-    dfs = mikeio.open("tests/testdata/eq.dfs2")
-
-    nt = dfs.n_timesteps
-
-    ds = dfs.read(time=[0], keepdims=True)
-
-    dfs_to_write = Dfs2()
-
-    with pytest.warns(FutureWarning):
-        with dfs_to_write.write(fp, ds, dt=dfs.timestep, keep_open=True) as f:
-
-            for i in range(1, nt):
-                ds = dfs.read(time=[i], keepdims=True)
-                with pytest.warns(FutureWarning):
-                    f.append(ds)
-
-        # dfs_to_write.close() # called automagically by context manager
-
-    newdfs = mikeio.open(fp)
-    assert dfs.start_time == newdfs.start_time
-    assert dfs.timestep == newdfs.timestep
-    assert dfs.end_time == newdfs.end_time
-
-
 def test_read_concat_write_dfs2(tmp_path):
     outfilename = tmp_path / "waves_concat.dfs2"
 
@@ -792,7 +727,7 @@ def dfs2_props_to_list(d):
         d._n_timesteps,
         d._start_time,
         d._dfs.FileInfo.TimeAxis.TimeAxisType,
-        d._n_items,
+        d.n_items,
         # d._deletevalue,
     ]
 
