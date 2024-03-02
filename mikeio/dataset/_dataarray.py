@@ -129,6 +129,18 @@ class DataArray:
     * geometry - a geometry object e.g. Grid2D or GeometryFM
     * values - a numpy array containing the data
     * item - an ItemInfo with name, type and unit
+
+    Examples
+    --------
+    ```{python}
+    import pandas as pd
+    import mikeio
+
+    da = mikeio.DataArray([0.0, 1.0],
+        time=pd.date_range("2020-01-01", periods=2),
+        item=mikeio.ItemInfo("Water level", mikeio.EUMType.Water_Level))
+    da
+    ```
     """
 
     deletevalue = 1.0e-35
@@ -158,15 +170,11 @@ class DataArray:
 
     @staticmethod
     def _parse_data(data: Any) -> Any:  # np.ndarray | float:
-        validation_errors = []
-        for p in ("shape", "ndim", "dtype"):
-            if not hasattr(data, p):
-                validation_errors.append(p)
-        if len(validation_errors) > 0:
-            raise TypeError(
-                "Data must be np.ndarray, e.g. numpy array, but it lacks properties: "
-                + ", ".join(validation_errors)
-            )
+        if not hasattr(data, "shape"):
+            try:
+                data = np.array(data, dtype=float)
+            except ValueError:
+                raise ValueError("Data must be convertible to a numpy array")
         return data
 
     def _parse_dims(
@@ -503,13 +511,12 @@ class DataArray:
         self.values = np.flip(self.values, axis=first_non_t_axis)
         return self
 
-    def describe(self, **kwargs: Any) -> pd.DataFrame:
-        """Generate descriptive statistics by wrapping :py:meth:`pandas.DataFrame.describe`
+    def describe(self, percentiles=None, include=None, exclude=None) -> pd.DataFrame:  # type: ignore
+        """Generate descriptive statistics by wrapping [](`pandas.DataFrame.describe`)
 
         Parameters
         ----------
-        **kwargs
-            Keyword arguments passed to :py:meth:`pandas.DataFrame.describe`
+
 
         Returns
         -------
@@ -518,7 +525,9 @@ class DataArray:
 
         data = {}
         data[self.name] = self.to_numpy().ravel()
-        df = pd.DataFrame(data).describe(**kwargs)
+        df = pd.DataFrame(data).describe(
+            percentiles=percentiles, include=include, exclude=exclude
+        )
 
         return df
 
@@ -655,52 +664,23 @@ class DataArray:
 
         Examples
         --------
-        >>> da = mikeio.read("europe_wind_long_lat.dfs2")[0]
-        >>> da
-        <mikeio.DataArray>
-        name: Mean Sea Level Pressure
-        dims: (time:1, y:101, x:221)
-        time: 2012-01-01 00:00:00 (time-invariant)
-        geometry: Grid2D (ny=101, nx=221)
-        >>> da.isel(time=-1)
-        <mikeio.DataArray>
-        name: Mean Sea Level Pressure
-        dims: (y:101, x:221)
-        time: 2012-01-01 00:00:00 (time-invariant)
-        geometry: Grid2D (ny=101, nx=221)
-        >>> da.isel(x=slice(10,20), y=slice(40,60))
-        <mikeio.DataArray>
-        name: Mean Sea Level Pressure
-        dims: (time:1, y:20, x:10)
-        time: 2012-01-01 00:00:00 (time-invariant)
-        geometry: Grid2D (ny=20, nx=10)
-        >>> da.isel(y=34)
-        <mikeio.DataArray>
-        name: Mean Sea Level Pressure
-        dims: (time:1, x:221)
-        time: 2012-01-01 00:00:00 (time-invariant)
-        geometry: Grid1D (n=221, dx=0.25)
+        ```{python}
+        da = mikeio.read("../data/europe_wind_long_lat.dfs2")[0]
+        da
+        ```
 
-        >>> da = mikeio.read("oresund_sigma_z.dfsu").Temperature
-        >>> da
-        <mikeio.DataArray>
-        name: Temperature
-        dims: (time:3, element:17118)
-        time: 1997-09-15 21:00:00 - 1997-09-16 03:00:00 (3 records)
-        geometry: Dfsu3DSigmaZ (17118 elements, 4 sigma-layers, 5 z-layers)
-        >>> da.isel(element=45)
-        <mikeio.DataArray>
-        name: Temperature
-        dims: (time:3)
-        time: 1997-09-15 21:00:00 - 1997-09-16 03:00:00 (3 records)
-        geometry: GeometryPoint3D(x=328717.05429134873, y=6143529.158495431, z=-4.0990404685338335)
-        values: [17.29, 17.25, 17.19]
-        >>> da.isel(element=range(200))
-        <mikeio.DataArray>
-        name: Temperature
-        dims: (time:3, element:200)
-        time: 1997-09-15 21:00:00 - 1997-09-16 03:00:00 (3 records)
-        geometry: Dfsu3DSigmaZ (200 elements, 3 sigma-layers, 3 z-layers)
+        ```{python}
+        da.isel(time=-1)
+        ```
+
+        ```{python}
+        da.isel(x=slice(10,20), y=slice(40,60))
+        ```
+
+        ```{python}
+        da = mikeio.read("../data/oresund_sigma_z.dfsu").Temperature
+        da.isel(element=range(200))
+        ```
         """
         if isinstance(self.geometry, Grid2D) and ("x" in kwargs and "y" in kwargs):
             idx_x = kwargs["x"]
@@ -1129,7 +1109,7 @@ class DataArray:
     ) -> "DataArray":
         """Temporal interpolation
 
-        Wrapper of :py:class:`scipy.interpolate.interp1d`
+        Wrapper of [](`scipy.interpolate.interp1d`)
 
         Parameters
         ----------
