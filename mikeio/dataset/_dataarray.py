@@ -820,59 +820,32 @@ class DataArray:
 
         Examples
         --------
-        >>> da = mikeio.read("random.dfs1")[0]
-        >>> da
-        <mikeio.DataArray>
-        name: testing water level
-        dims: (time:100, x:3)
-        time: 2012-01-01 00:00:00 - 2012-01-01 00:19:48 (100 records)
-        geometry: Grid1D (n=3, dx=100)
-        >>> da.sel(time=slice(None, "2012-1-1 00:02"))
-        <mikeio.DataArray>
-        name: testing water level
-        dims: (time:15, x:3)
-        time: 2012-01-01 00:00:00 - 2012-01-01 00:02:48 (15 records)
-        geometry: Grid1D (n=3, dx=100)
-        >>> da.sel(x=100)
-        <mikeio.DataArray>
-        name: testing water level
-        dims: (time:100)
-        time: 2012-01-01 00:00:00 - 2012-01-01 00:19:48 (100 records)
-        values: [0.3231, 0.6315, ..., 0.7506]
+        ```{python}
+        da = mikeio.read("../data/random.dfs1")[0]
+        da
+        ```
+        ```{python}
+        da.sel(time=slice(None, "2012-1-1 00:02"))
+        ```
 
-        >>> da = mikeio.read("oresund_sigma_z.dfsu").Temperature
-        >>> da
-        <mikeio.DataArray>
-        name: Temperature
-        dims: (time:3, element:17118)
-        time: 1997-09-15 21:00:00 - 1997-09-16 03:00:00 (3 records)
-        geometry: Dfsu3DSigmaZ (17118 elements, 4 sigma-layers, 5 z-layers)
-        >>> da.sel(time="1997-09-15")
-        <mikeio.DataArray>
-        name: Temperature
-        dims: (element:17118)
-        time: 1997-09-15 21:00:00 (time-invariant)
-        geometry: Dfsu3DSigmaZ (17118 elements, 4 sigma-layers, 5 z-layers)
-        values: [16.31, 16.43, ..., 16.69]
-        >>> da.sel(x=340000, y=6160000, z=-3)
-        <mikeio.DataArray>
-        name: Temperature
-        dims: (time:3)
-        time: 1997-09-15 21:00:00 - 1997-09-16 03:00:00 (3 records)
-        geometry: GeometryPoint3D(x=340028.1116933554, y=6159980.070243686, z=-3.0)
-        values: [17.54, 17.31, 17.08]
-        >>> da.sel(area=(340000, 6160000, 350000, 6170000))
-        <mikeio.DataArray>
-        name: Temperature
-        dims: (time:3, element:224)
-        time: 1997-09-15 21:00:00 - 1997-09-16 03:00:00 (3 records)
-        geometry: Dfsu3DSigmaZ (224 elements, 3 sigma-layers, 1 z-layers)
-        >>> da.sel(layers="bottom")
-        <mikeio.DataArray>
-        name: Temperature
-        dims: (time:3, element:3700)
-        time: 1997-09-15 21:00:00 - 1997-09-16 03:00:00 (3 records)
-        geometry: Dfsu2D (3700 elements, 2090 nodes)
+        ```{python}
+        da.sel(x=100)
+        ```
+        ```{python}
+        da = mikeio.read("../data/oresund_sigma_z.dfsu").Temperature
+        da
+        ```
+
+        ```{python}
+        da.sel(time="1997-09-15")
+        ```
+
+        ```{python}
+        da.sel(x=340000, y=6160000, z=-3)
+        ```
+        ```{python}
+        da.sel(layers="bottom")
+        ```
         """
         if any([isinstance(v, slice) for v in kwargs.values()]):
             return self._sel_with_slice(kwargs)
@@ -1165,25 +1138,22 @@ class DataArray:
     def interp_na(self, axis: str = "time", **kwargs: Any) -> "DataArray":
         """Fill in NaNs by interpolating according to different methods.
 
-        Wrapper of :py:meth:`xarray.DataArray.interpolate_na`
+        Wrapper of [](`xarray.DataArray.interpolate_na`)
 
         Examples
         --------
 
-        >>> time = pd.date_range("2000", periods=3, freq="D")
-        >>> da = mikeio.DataArray(data=np.array([0.0, np.nan, 2.0]), time=time)
-        >>> da
-        <mikeio.DataArray>
-        name: NoName
-        dims: (time:3)
-        time: 2000-01-01 00:00:00 - 2000-01-03 00:00:00 (3 records)
-        values: [0, nan, 2]
-        >>> da.interp_na()
-        <mikeio.DataArray>
-        name: NoName
-        dims: (time:3)
-        time: 2000-01-01 00:00:00 - 2000-01-03 00:00:00 (3 records)
-        values: [0, 1, 2]
+        ```{python}
+        import numpy as np
+        import pandas as pd
+        time = pd.date_range("2000", periods=3, freq="D")
+        da = mikeio.DataArray(data=np.array([0.0, np.nan, 2.0]), time=time)
+        da
+        ```
+
+        ```{python}
+        da.interp_na()
+        ```
         """
 
         xr_da = self.to_xarray().interpolate_na(dim=axis, **kwargs)
@@ -1288,14 +1258,16 @@ class DataArray:
 
         Examples
         --------
-        >>> import mikeio
-        >>> da1 = mikeio.read("HD2D.dfsu", time=[0,1])[0]
-        >>> da2 = mikeio.read("HD2D.dfsu", time=[2,3])[0]
-        >>> da1.n_timesteps
-        2
-        >>> da3 = DataArray.concat([da1,da2])
-        >>> da3.n_timesteps
-        4
+        ```{python}
+        da1 = mikeio.read("HD2D.dfsu", time=[0,1])[0]
+        da2 = mikeio.read("HD2D.dfsu", time=[2,3])[0]
+        da1.time
+        ```
+
+        ```{python}
+        da3 = DataArray.concat([da1,da2])
+        da3
+        ```
         """
         from mikeio import Dataset
 
