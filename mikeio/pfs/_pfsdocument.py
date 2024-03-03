@@ -2,9 +2,10 @@ from __future__ import annotations
 import re
 import warnings
 from collections import Counter
+from collections.abc import Mapping, Sequence
 from datetime import datetime
 from pathlib import Path
-from typing import Callable, Dict, List, Mapping, TextIO, Tuple
+from typing import Callable, Dict, List, TextIO, Tuple
 
 import yaml
 
@@ -82,11 +83,11 @@ class PfsDocument(PfsSection):
 
     def __init__(
         self,
-        data: TextIO | PfsSection | Dict,
+        data: TextIO | PfsSection | Dict | str | Path,
         *,
-        encoding="cp1252",
-        names=None,
-        unique_keywords=False,
+        encoding: str = "cp1252",
+        names: Sequence[str] | None = None,
+        unique_keywords: bool = False,
     ):
 
         if isinstance(data, (str, Path)) or hasattr(data, "read"):
@@ -164,11 +165,23 @@ class PfsDocument(PfsSection):
         rkeys, _ = self._unravel_items(self.items)
         return rkeys
 
+    def copy(self) -> PfsDocument:
+        """Return a deep copy of the PfsDocument"""
+
+        # this seems like a convoluted way to copy the object, but it works
+        import tempfile
+
+        fnn = tempfile.NamedTemporaryFile(mode="w", suffix=".pfs")
+        self.write(fnn.name)
+        return PfsDocument(fnn.name)
+
     def _read_pfs_file(self, filename, encoding, unique_keywords=False):
         try:
             yml = self._pfs2yaml(filename, encoding)
             target_list = parse_yaml_preserving_duplicates(yml, unique_keywords)
-        except AttributeError:  # This is the error raised if parsing fails, try again with the normal loader
+        except (
+            AttributeError
+        ):  # This is the error raised if parsing fails, try again with the normal loader
             target_list = yaml.load(yml, Loader=yaml.CFullLoader)
         except FileNotFoundError as e:
             raise FileNotFoundError(str(e))
@@ -250,7 +263,7 @@ class PfsDocument(PfsSection):
         if hasattr(filename, "read"):  # To read in memory strings StringIO
             pfsstring = filename.read()
         else:
-            with (open(filename, encoding=encoding)) as f:
+            with open(filename, encoding=encoding) as f:
                 pfsstring = f.read()
 
         lines = pfsstring.split("\n")
