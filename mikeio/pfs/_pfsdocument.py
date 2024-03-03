@@ -5,7 +5,7 @@ from collections import Counter
 from collections.abc import Mapping, Sequence
 from datetime import datetime
 from pathlib import Path
-from typing import Callable, Dict, List, TextIO, Tuple
+from typing import Callable, Dict, List, TextIO, Tuple, overload
 
 import yaml
 
@@ -105,6 +105,14 @@ class PfsDocument(PfsSection):
             self._add_all_FM_aliases()
 
     @staticmethod
+    def from_text(text: str) -> PfsDocument:
+        """Create a PfsDocument from a string"""
+        from io import StringIO
+
+        f = StringIO(text)
+        return PfsDocument(f)
+
+    @staticmethod
     def _to_nonunique_key_dict(keys, vals):
         key_count = Counter(keys)
         data = {}
@@ -168,12 +176,10 @@ class PfsDocument(PfsSection):
     def copy(self) -> PfsDocument:
         """Return a deep copy of the PfsDocument"""
 
-        # this seems like a convoluted way to copy the object, but it works
-        import tempfile
+        lines = self.write()
+        text = "\n".join(lines)
 
-        fnn = tempfile.NamedTemporaryFile(mode="w", suffix=".pfs")
-        self.write(fnn.name)
-        return PfsDocument(fnn.name)
+        return PfsDocument.from_text(text)
 
     def _read_pfs_file(self, filename, encoding, unique_keywords=False):
         try:
@@ -373,7 +379,13 @@ class PfsDocument(PfsSection):
 
         return s
 
-    def write(self, filename=None):
+    @overload
+    def write(self) -> list[str]: ...
+
+    @overload
+    def write(self, filename: str) -> None: ...
+
+    def write(self, filename: str | None = None) -> list[str] | None:
         """Write object to a pfs file
 
         Parameters
@@ -397,6 +409,8 @@ class PfsDocument(PfsSection):
             f.write("\n\n")
 
             self._write_with_func(f.write, level=0)
+
+        return None
 
 
 # TODO remove this alias
