@@ -1259,13 +1259,13 @@ class DataArray:
         Examples
         --------
         ```{python}
-        da1 = mikeio.read("HD2D.dfsu", time=[0,1])[0]
-        da2 = mikeio.read("HD2D.dfsu", time=[2,3])[0]
+        da1 = mikeio.read("../data/HD2D.dfsu", time=[0,1])[0]
+        da2 = mikeio.read("../data/HD2D.dfsu", time=[2,3])[0]
         da1.time
         ```
 
         ```{python}
-        da3 = DataArray.concat([da1,da2])
+        da3 = mikeio.DataArray.concat([da1,da2])
         da3
         ```
         """

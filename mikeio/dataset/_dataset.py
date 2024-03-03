@@ -75,17 +75,10 @@ class Dataset:
 
     Examples
     --------
-    >>> mikeio.read("europe_wind_long_lat.dfs2")
-    <mikeio.Dataset>
-    dims: (time:1, y:101, x:221)
-    time: 2012-01-01 00:00:00 (time-invariant)
-    geometry: Grid2D (ny=101, nx=221)
-    items:
-    0:  Mean Sea Level Pressure <Air Pressure> (hectopascal)
-    1:  Wind x-comp (10m) <Wind Velocity> (meter per sec)
-    2:  Wind y-comp (10m) <Wind Velocity> (meter per sec)
-
-    >>> mikeio.Dataset([da1, da2])
+    ```{python}
+    import mikeio
+    mikeio.read("europe_wind_long_lat.dfs2")
+    ```
     """
 
     def __init__(
