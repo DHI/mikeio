@@ -1027,7 +1027,7 @@ class DataArray:
                 )
             elif isinstance(self.geometry, Grid1D):
                 if interpolant is None:
-                    interpolant = self.geometry.get_spatial_interpolant(coords)
+                    interpolant = self.geometry.get_spatial_interpolant(coords)  # type: ignore
                 dai = self.geometry.interp(self.to_numpy(), *interpolant).flatten()
                 geometry = GeometryUndefined()
             elif isinstance(self.geometry, GeometryFM3D):
