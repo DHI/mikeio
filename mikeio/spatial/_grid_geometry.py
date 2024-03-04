@@ -486,7 +486,7 @@ class Grid2D(_Geometry):
     def _create_in_bbox(
         self,
         bbox: Tuple[float, float, float, float],
-        dx: float | None = None,
+        dx: float | Tuple[float, float] | None = None,
         dy: float | None = None,
         nx: int | None = None,
         ny: int | None = None,
@@ -895,10 +895,10 @@ class Grid2D(_Geometry):
         if axis == 0:
             # y is first axis! if we select an element from y-axis (axis 0),
             # we return a "copy" of the x-axis
-            nc = np.column_stack([self.x, self.y[idx] * np.ones_like(self.x)])
+            nc = np.column_stack([self.x, self.y[idx] * np.ones_like(self.x)])  # type: ignore
             return Grid1D(x=self.x, projection=self.projection, node_coordinates=nc)
         elif axis == 1:
-            nc = np.column_stack([self.x[idx] * np.ones_like(self.y), self.y])
+            nc = np.column_stack([self.x[idx] * np.ones_like(self.y), self.y])  # type: ignore
             return Grid1D(
                 x=self.y, projection=self.projection, node_coordinates=nc, axis_name="y"
             )
