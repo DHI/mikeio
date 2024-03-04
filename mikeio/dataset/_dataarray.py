@@ -1038,9 +1038,9 @@ class DataArray:
 
                 if interpolant is None:
                     interpolant = self.geometry.get_2d_interpolant(
-                        coords, n_nearest=n_nearest, **kwargs
+                        coords, n_nearest=n_nearest, **kwargs  # type: ignore
                     )
-                dai = self.geometry.interp2d(self, *interpolant).flatten()
+                dai = self.geometry.interp2d(self, *interpolant).flatten()  # type: ignore
                 if z is None:
                     geometry = GeometryPoint2D(
                         x=x, y=y, projection=self.geometry.projection
@@ -1274,12 +1274,16 @@ class DataArray:
         if isinstance(geom, (Grid2D, GeometryFM2D)):
             shape = (geom.ny, geom.nx) if isinstance(geom, Grid2D) else None
 
-            dai = self.geometry.interp2d(
+            ari = self.geometry.interp2d(
                 data=self.to_numpy(), elem_ids=elem_ids, weights=weights, shape=shape
             )
-
+        else:
+            raise NotImplementedError(
+                "Interpolation to other geometry not yet supported"
+            )
+        assert isinstance(ari, np.ndarray)
         dai = DataArray(
-            data=dai, time=self.time, geometry=geom, item=deepcopy(self.item)
+            data=ari, time=self.time, geometry=geom, item=deepcopy(self.item)
         )
 
         if hasattr(other, "time"):
