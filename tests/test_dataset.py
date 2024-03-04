@@ -61,7 +61,7 @@ def test_create_wrong_data_type_error():
     nt = 2
     time = pd.date_range(start=datetime(2000, 1, 1), freq="s", periods=nt)
 
-    with pytest.raises(TypeError, match="numpy"):
+    with pytest.raises(ValueError, match="numpy"):
         mikeio.Dataset(data=data, time=time)
 
 
