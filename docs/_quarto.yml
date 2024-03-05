@@ -49,9 +49,14 @@ website:
       - section: Examples
         href: examples/index.qmd
         contents:
-        - examples/Dfsu-2D-interpolation.qmd
-        - examples/Time-interpolation.qmd
-        - examples/Generic.qmd
+          - section: Dfs2
+            href: examples/dfs2/index.qmd
+            contents:
+              - examples/dfs2/bathy.qmd
+              - examples/dfs2/gfs.qmd
+          - examples/Dfsu-2D-interpolation.qmd
+          - examples/Time-interpolation.qmd
+          - examples/Generic.qmd
       - text: Design philosophy
         href: design.md
       - text: API Reference
