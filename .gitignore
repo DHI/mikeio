@@ -33,3 +33,4 @@ docs/api/
 .venv/
 
 .testmondata
+objects.json
