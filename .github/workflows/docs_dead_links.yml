@@ -14,6 +14,7 @@ jobs:
       with:
         website_url: 'https://dhi.github.io/mikeio/'
         exclude_url_prefix: 'https://github.com/DHI/mikeio/edit/main/docs/api/'
+        verbose: true
         max_retry_time: 30
         max_retries: 2
         max_depth: -1
