@@ -1,9 +1,0 @@
-{
-  "listing": "/examples/index.html",
-  "items": [
-    "/examples/Dfs2-Bathymetry.html",
-    "/examples/Dfsu-2D-interpolation.html",
-    "/examples/Generic.html",
-    "/examples/Time-interpolation.html"
-  ]
-}

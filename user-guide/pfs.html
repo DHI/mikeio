@@ -6,9 +6,8 @@
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
-<meta name="description" content="Interpolate data to a specific time axis">
 
-<title>MIKE IO - Time interpolation</title>
+<title>MIKE IO</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -58,15 +57,15 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </style>
 
 
-<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js" integrity="sha512-bLT0Qm9VnAYZDflyKcBaQ2gg0hSYNQrJ8RilYldYQ1FxQYoCLtUjuuRuZo+fjqhx/qtq/1itJ0C2ejDxltZVFg==" crossorigin="anonymous"></script><script src="../site_libs/quarto-nav/quarto-nav.js"></script>
 <script src="../site_libs/quarto-nav/headroom.min.js"></script>
 <script src="../site_libs/clipboard/clipboard.min.js"></script>
 <script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
 <script src="../site_libs/quarto-search/fuse.min.js"></script>
 <script src="../site_libs/quarto-search/quarto-search.js"></script>
 <meta name="quarto:offset" content="../">
-<link href="../examples/Generic.html" rel="next">
-<link href="../examples/Dfsu-2D-interpolation.html" rel="prev">
+<link href="../examples/index.html" rel="next">
+<link href="../user-guide/generic.html" rel="prev">
 <script src="../site_libs/quarto-html/quarto.js"></script>
 <script src="../site_libs/quarto-html/popper.min.js"></script>
 <script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
@@ -103,6 +102,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     "search-label": "Search"
   }
 }</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" integrity="sha512-c3Nl8+7g4LMSTdrm621y7kf9v3SDPnhxLNhcjFJbKECVnmZHTdo+IRO05sNLTH/D3vA6u1X32ehoLC7WFVdheg==" crossorigin="anonymous"></script>
+
+<script type="application/javascript">define('jquery', [],function() {return window.jQuery;})</script>
 
 
 </head>
@@ -166,7 +168,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
         <i class="bi bi-layout-text-sidebar-reverse"></i>
       </button>
         <a class="flex-grow-1 no-decor" role="button" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
-          <h1 class="quarto-secondary-nav-title">Time interpolation</h1>
+          <h1 class="quarto-secondary-nav-title">Pfs</h1>
         </a>     
       <button type="button" class="btn quarto-search-button" aria-label="" onclick="window.quartoOpenSearch();">
         <i class="bi bi-search"></i>
@@ -256,7 +258,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../user-guide/pfs.html" class="sidebar-item-text sidebar-link">
+  <a href="../user-guide/pfs.html" class="sidebar-item-text sidebar-link active">
  <span class="menu-text">Pfs</span></a>
   </div>
 </li>
@@ -279,7 +281,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../examples/Time-interpolation.html" class="sidebar-item-text sidebar-link active">
+  <a href="../examples/Time-interpolation.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">Time interpolation</span></a>
   </div>
 </li>
@@ -313,26 +315,33 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     <h2 id="toc-title">On this page</h2>
    
   <ul>
-  <li><a href="#interpolate-to-specific-timestep" id="toc-interpolate-to-specific-timestep" class="nav-link active" data-scroll-target="#interpolate-to-specific-timestep">Interpolate to specific timestep</a></li>
-  <li><a href="#interpolate-to-time-axis-of-another-dataset" id="toc-interpolate-to-time-axis-of-another-dataset" class="nav-link" data-scroll-target="#interpolate-to-time-axis-of-another-dataset">Interpolate to time axis of another dataset</a></li>
-  <li><a href="#model-validation" id="toc-model-validation" class="nav-link" data-scroll-target="#model-validation">Model validation</a></li>
-  <li><a href="#clean-up" id="toc-clean-up" class="nav-link" data-scroll-target="#clean-up">Clean up</a></li>
+  <li><a href="#the-pfs-file" id="toc-the-pfs-file" class="nav-link active" data-scroll-target="#the-pfs-file">The PFS file</a></li>
+  <li><a href="#read" id="toc-read" class="nav-link" data-scroll-target="#read">Read</a>
+  <ul class="collapse">
+  <li><a href="#pfsdocument" id="toc-pfsdocument" class="nav-link" data-scroll-target="#pfsdocument">PfsDocument</a></li>
+  <li><a href="#pfssection" id="toc-pfssection" class="nav-link" data-scroll-target="#pfssection">PfsSection</a></li>
+  <li><a href="#unique-or-non-unique-keywords" id="toc-unique-or-non-unique-keywords" class="nav-link" data-scroll-target="#unique-or-non-unique-keywords">Unique or non-unique keywords</a></li>
+  </ul></li>
+  <li><a href="#update" id="toc-update" class="nav-link" data-scroll-target="#update">Update</a>
+  <ul class="collapse">
+  <li><a href="#modify-existing-keyword" id="toc-modify-existing-keyword" class="nav-link" data-scroll-target="#modify-existing-keyword">Modify existing keyword</a></li>
+  <li><a href="#add-new-key-value-pair" id="toc-add-new-key-value-pair" class="nav-link" data-scroll-target="#add-new-key-value-pair">Add new key-value pair</a></li>
+  <li><a href="#add-new-section-as-a-copy-of-another-section" id="toc-add-new-section-as-a-copy-of-another-section" class="nav-link" data-scroll-target="#add-new-section-as-a-copy-of-another-section">Add new section as a copy of another section</a></li>
+  <li><a href="#add-new-section-from-a-dictionary" id="toc-add-new-section-from-a-dictionary" class="nav-link" data-scroll-target="#add-new-section-from-a-dictionary">Add new section from a dictionary</a></li>
+  </ul></li>
+  <li><a href="#write-to-file" id="toc-write-to-file" class="nav-link" data-scroll-target="#write-to-file">Write to file</a></li>
+  <li><a href="#create-new-pfs-files" id="toc-create-new-pfs-files" class="nav-link" data-scroll-target="#create-new-pfs-files">Create new Pfs files</a></li>
   </ul>
-<div class="toc-actions"><ul><li><a href="https://github.com/DHI/mikeio/edit/main/docs/examples/Time-interpolation.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li></ul></div></nav>
+<div class="toc-actions"><ul><li><a href="https://github.com/DHI/mikeio/edit/main/docs/user-guide/pfs.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li></ul></div></nav>
     </div>
 <!-- main -->
 <main class="content" id="quarto-document-content">
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<h1 class="title d-none d-lg-block">Time interpolation</h1>
+<h1 class="title d-none d-lg-block">Pfs</h1>
 </div>
 
-<div>
-  <div class="description">
-    Interpolate data to a specific time axis
-  </div>
-</div>
 
 
 <div class="quarto-title-meta">
@@ -347,156 +356,238 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </header>
 
 
-<div id="b2eeffb1" class="cell" data-execution_count="1">
-<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> mikeio</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>A PFS file is a text file with a tree structure that contains parameters and settings for MIKE tools and engines. MIKE IO can read, modify and create PFS files.</p>
+<section id="the-pfs-file" class="level2">
+<h2 class="anchored" data-anchor-id="the-pfs-file">The PFS file</h2>
+<p>The content of the PFS file is similar to a nested dictionary. The root element is often called the <em>target</em>. Some PFS files have multiple root elements. The below sections are called <em>PFS Sections</em> which can be nested and contain key-value pairs called <em>keywords</em> and <em>parameters</em>.</p>
+<pre><code>[TARGET1]
+   keywordA = parameterA
+   [SECTION1]
+      keywordB = parameterB
+      keywordC = parameterC
+      [SECTION2]
+         keywordD = parameterD         
+      EndSect  // SECTION2 
+   EndSect  // SECTION1 
+EndSect  // TARGET1
+
+[TARGET2]
+   keywordE = parameterE 
+   [SECTION3]
+      keywordF = parameterF
+   EndSect  // SECTION3 
+EndSect  // TARGET2</code></pre>
+</section>
+<section id="read" class="level2">
+<h2 class="anchored" data-anchor-id="read">Read</h2>
+<p>When a PFS file is read with MIKE IO, a <code>PfsDocument</code> object is created. It will contain one or more <code>PfsSection</code> objects - one for each target. The PfsSections will typically contain other PfsSections together with a number of key-value pairs.</p>
+<p>A PFS file is read using <a href="../api/read_pfs.html#mikeio.read_pfs"><code>mikeio.read_pfs</code></a>:</p>
+<div id="784eb5c9" class="cell" data-execution_count="1">
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> mikeio</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>pfs <span class="op">=</span> mikeio.read_pfs(<span class="st">"../data/pfs/concat.mzt"</span>)</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>pfs</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="1">
+<pre><code>[txconc]
+   CLSID = 'TxConc.dll'
+   TypeName = 'txconc'
+   CREATEDTIME = '2020-03-11T15:24:45'
+   MODIFIEDTIME = '2020-03-11T15:24:45'
+   NOTES = ''
+   [Setup]
+      Name = 'Setup Name'
+      NumberFiles = 2
+      NumberDimensions = 1
+      NumberItems = 1
+      InsertDelIfGabs = 0
+      UseTimeRange = 1
+      TimeRange = 0, 145, 1
+      FirstFileTimeDef = 0
+      OverwriteWithLatest = 1
+      [File_1]
+         InputFile = |.\tide1.dfs1|
+         Items = 1
+      EndSect  // File_1
+      [File_2]
+         InputFile = |.\tide2.dfs1|
+         Items = 1
+      EndSect  // File_2
+      [File_Out]
+         OutputFile = |.\txconc.dfs1|
+         OutputFileTitle = ''
+      EndSect  // File_Out
+   EndSect  // Setup
+EndSect  // txconc</code></pre>
 </div>
-<div id="cb0b1bc9" class="cell" data-execution_count="2">
-<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>ds <span class="op">=</span> mikeio.read(<span class="st">"../data/waves.dfs2"</span>)</span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>ds</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<section id="pfsdocument" class="level3">
+<h3 class="anchored" data-anchor-id="pfsdocument">PfsDocument</h3>
+<p>The <a href="../api/PfsDocument.html#mikeio.PfsDocument"><code>mikeio.PfsDocument</code></a> is the MIKE IO equivalent to a PFS file. Its targets can be accessed by their name (as properties), like this:</p>
+<div id="a98ce5e0" class="cell" data-execution_count="2">
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>pfs.txconc</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="2">
-<pre><code>&lt;mikeio.Dataset&gt;
-dims: (time:3, y:31, x:31)
-time: 2004-01-01 00:00:00 - 2004-01-03 00:00:00 (3 records)
-geometry: Grid2D (ny=31, nx=31)
-items:
-  0:  Sign. Wave Height &lt;Significant wave height&gt; (meter)
-  1:  Peak Wave Period &lt;Wave period&gt; (second)
-  2:  Mean Wave Direction &lt;Mean Wave Direction&gt; (degree)</code></pre>
+<pre><code>CLSID = 'TxConc.dll'
+TypeName = 'txconc'
+CREATEDTIME = '2020-03-11T15:24:45'
+MODIFIEDTIME = '2020-03-11T15:24:45'
+NOTES = ''
+[Setup]
+   Name = 'Setup Name'
+   NumberFiles = 2
+   NumberDimensions = 1
+   NumberItems = 1
+   InsertDelIfGabs = 0
+   UseTimeRange = 1
+   TimeRange = 0, 145, 1
+   FirstFileTimeDef = 0
+   OverwriteWithLatest = 1
+   [File_1]
+      InputFile = |.\tide1.dfs1|
+      Items = 1
+   EndSect  // File_1
+   [File_2]
+      InputFile = |.\tide2.dfs1|
+      Items = 1
+   EndSect  // File_2
+   [File_Out]
+      OutputFile = |.\txconc.dfs1|
+      OutputFileTitle = ''
+   EndSect  // File_Out
+EndSect  // Setup</code></pre>
 </div>
 </div>
-<section id="interpolate-to-specific-timestep" class="level2">
-<h2 class="anchored" data-anchor-id="interpolate-to-specific-timestep">Interpolate to specific timestep</h2>
-<p>A common use case is to interpolate to a shorter timestep, in this case 1h.</p>
-<div id="812a8833" class="cell" data-execution_count="3">
-<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>ds_h <span class="op">=</span> ds.interp_time(<span class="dv">3600</span>)</span>
-<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>ds_h</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>Or by the <code>pfs.targets</code> object (which is a list of PfsSections). Each of the targets is a <code>PfsSection</code> object consisting of key-value pairs (keyword-parameter) and other PfsSections.</p>
+<p>The <a href="../api/PfsDocument.html#mikeio.PfsDocument"><code>mikeio.PfsDocument</code></a> object is similar to a dictionary. You can loop over its contents with <code>items()</code>, <code>keys()</code> and <code>values()</code> like a dictionary.</p>
+</section>
+<section id="pfssection" class="level3">
+<h3 class="anchored" data-anchor-id="pfssection">PfsSection</h3>
+<p>The <a href="../api/PfsSection.html#mikeio.PfsSection"><code>mikeio.PfsSection</code></a> object is also similar to a dictionary. You can loop over its contents with <code>items()</code>, <code>keys()</code> and <code>values()</code> like a dictionary.</p>
+<div id="308204cd" class="cell" data-execution_count="3">
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>pfs.txconc.keys()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="3">
-<pre><code>&lt;mikeio.Dataset&gt;
-dims: (time:49, y:31, x:31)
-time: 2004-01-01 00:00:00 - 2004-01-03 00:00:00 (49 records)
-geometry: Grid2D (ny=31, nx=31)
-items:
-  0:  Sign. Wave Height &lt;Significant wave height&gt; (meter)
-  1:  Peak Wave Period &lt;Wave period&gt; (second)
-  2:  Mean Wave Direction &lt;Mean Wave Direction&gt; (degree)</code></pre>
+<pre><code>dict_keys(['CLSID', 'TypeName', 'CREATEDTIME', 'MODIFIEDTIME', 'NOTES', 'Setup'])</code></pre>
 </div>
 </div>
-<p>And to store the interpolated data in a new file.</p>
-<div id="5ef94e75" class="cell" data-execution_count="4">
-<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>ds_h.to_dfs(<span class="st">"waves_3h.dfs2"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>You can access a specific parameter with the <code>get()</code> method:</p>
+<div id="ae5f7bd4" class="cell" data-execution_count="4">
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>pfs.txconc.get(<span class="st">"CLSID"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="4">
+<pre><code>'TxConc.dll'</code></pre>
 </div>
-</section>
-<section id="interpolate-to-time-axis-of-another-dataset" class="level2">
-<h2 class="anchored" data-anchor-id="interpolate-to-time-axis-of-another-dataset">Interpolate to time axis of another dataset</h2>
-<p>Read some non-equidistant data typically found in observed data.</p>
-<div id="c6106276" class="cell" data-execution_count="5">
-<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>ts <span class="op">=</span> mikeio.read(<span class="st">"../data/waves.dfs0"</span>)</span>
-<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>ts</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Or as a property with dot-notation—which is prefered in most cases as it is more readable:</p>
+<div id="8b7bf8ac" class="cell" data-execution_count="5">
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>pfs.txconc.CLSID</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="5">
-<pre><code>&lt;mikeio.Dataset&gt;
-dims: (time:24)
-time: 2004-01-01 01:00:00 - 2004-01-03 12:00:10 (24 non-equidistant records)
-geometry: GeometryUndefined()
-items:
-  0:  Sign. Wave Height &lt;Undefined&gt; (undefined)
-  1:  Peak Wave Period &lt;Undefined&gt; (undefined)
-  2:  Mean Wave Direction &lt;Undefined&gt; (undefined)</code></pre>
+<pre><code>'TxConc.dll'</code></pre>
 </div>
 </div>
-<p>The observed timeseries is longer than the modelled data. Default is to fill values with NaN.</p>
-<div id="eed70813" class="cell" data-execution_count="6">
-<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>dsi <span class="op">=</span> ds.interp_time(ts)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>A PfsSection can be converted to a dictionary with the to_dict() method:</p>
+<div id="18f89a02" class="cell" data-execution_count="6">
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>pfs.txconc.Setup.File_1.to_dict()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="6">
+<pre><code>{'InputFile': '|.\\tide1.dfs1|', 'Items': 1}</code></pre>
 </div>
-<div id="7009eb84" class="cell" data-execution_count="7">
-<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>dsi.time</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>If a PfsSection contains enumerated subsections, they can be converted to a pandas DataFrame with the <code>to_dataframe()</code> method:</p>
+<div id="4463dfba" class="cell" data-execution_count="7">
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>pfs.txconc.Setup.to_dataframe(prefix<span class="op">=</span><span class="st">"File_"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="7">
-<pre><code>DatetimeIndex(['2004-01-01 01:00:00', '2004-01-01 02:00:00',
-               '2004-01-01 03:00:00', '2004-01-01 04:00:00',
-               '2004-01-01 05:00:00', '2004-01-01 06:00:00',
-               '2004-01-01 07:00:00', '2004-01-01 08:00:00',
-               '2004-01-01 23:00:00', '2004-01-02 00:00:00',
-               '2004-01-02 01:00:00', '2004-01-02 02:00:00',
-               '2004-01-02 03:00:00', '2004-01-02 04:00:00',
-               '2004-01-02 05:00:00', '2004-01-02 06:00:00',
-               '2004-01-02 07:00:00', '2004-01-02 08:00:00',
-               '2004-01-02 09:00:00', '2004-01-02 20:00:00',
-               '2004-01-02 21:00:00', '2004-01-02 23:00:00',
-               '2004-01-03 00:00:00', '2004-01-03 12:00:10'],
-              dtype='datetime64[ns]', freq=None)</code></pre>
+<div>
+<div>
+
+
+<table class="dataframe table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">InputFile</th>
+<th data-quarto-table-cell-role="th">Items</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">1</td>
+<td>|.\tide1.dfs1|</td>
+<td>1</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">2</td>
+<td>|.\tide2.dfs1|</td>
+<td>1</td>
+</tr>
+</tbody>
+</table>
+
 </div>
 </div>
-<div id="d43009e1" class="cell" data-execution_count="8">
-<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>dsi[<span class="st">"Sign. Wave Height"</span>].shape</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</div>
+</section>
+<section id="unique-or-non-unique-keywords" class="level3">
+<h3 class="anchored" data-anchor-id="unique-or-non-unique-keywords">Unique or non-unique keywords</h3>
+<p>Depending on the engine intended for reading the PFS file it may or may not make sense to have multiple identical keywords in the same PfsSection. MIKE 21/3 and the marine tools does <em>not</em> support non-unique keywords—if non-unique keywords are present, only the first will be read and the presence is most likely a mistake made by hand-editing the file. In other tools, e.g.&nbsp;MIKE Plot Composer, non-unique keywords are used a lot. How MIKE IO shall deal with non-unique keywords can be specified using the <code>unique_keywords</code> argument in the <a href="../api/read_pfs.html#mikeio.read_pfs"><code>mikeio.read_pfs</code></a> function:</p>
+<div class="sourceCode" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>pfs <span class="op">=</span> mikeio.read_pfs(<span class="st">"myplot.plt"</span>, unique_keywords<span class="op">=</span><span class="va">False</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>If a PfsSection contains non-unique PfsSections or keywords and <code>unique_keywords=False</code>, the repeated key will only appear once and the corresponding value will be a list.</p>
+</section>
+</section>
+<section id="update" class="level2">
+<h2 class="anchored" data-anchor-id="update">Update</h2>
+<p>The PfsSection object can be modified. Existing values can be changed, new key-value pairs can be added, subsections can added or removed.</p>
+<section id="modify-existing-keyword" class="level3">
+<h3 class="anchored" data-anchor-id="modify-existing-keyword">Modify existing keyword</h3>
+<p>It is very simple to modify an existing keyword:</p>
+<div class="sourceCode" id="cb16"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>pfs.txconc.Setup.Name <span class="op">=</span> <span class="st">"new name"</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+<section id="add-new-key-value-pair" class="level3">
+<h3 class="anchored" data-anchor-id="add-new-key-value-pair">Add new key-value pair</h3>
+<p>A new key-value pair can be added, like in a dictionary, in this way:</p>
+<div class="sourceCode" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>pfs.txconc.Setup[<span class="st">"NewKeyword"</span>] <span class="op">=</span> <span class="fl">12.0</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+<section id="add-new-section-as-a-copy-of-another-section" class="level3">
+<h3 class="anchored" data-anchor-id="add-new-section-as-a-copy-of-another-section">Add new section as a copy of another section</h3>
+<p>Often a PfsSection is added using an existing PfsSection as a template.</p>
+<div class="sourceCode" id="cb18"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>s <span class="op">=</span> pfs.txconc.Setup.File_1.copy()</span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>s.InputFile <span class="op">=</span> <span class="st">'|.</span><span class="ch">\t</span><span class="st">ide3.dfs1|'</span></span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>pfs.txconc.Setup[<span class="st">"File_3"</span>] <span class="op">=</span> s</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+<section id="add-new-section-from-a-dictionary" class="level3">
+<h3 class="anchored" data-anchor-id="add-new-section-from-a-dictionary">Add new section from a dictionary</h3>
+<p>A PfsSection can be created from a dictionary and then added to another PfsSection like any other key-value pair:</p>
+<div class="sourceCode" id="cb19"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>d <span class="op">=</span> {<span class="st">'InputFile'</span>: <span class="st">'|.</span><span class="ch">\\</span><span class="st">tide4.dfs1|'</span>, <span class="st">'Items'</span>: <span class="dv">1</span>}</span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>s <span class="op">=</span> mikeio.PfsSection(d)</span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>pfs.txconc.Setup[<span class="st">"File_4"</span>] <span class="op">=</span> s</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+</section>
+<section id="write-to-file" class="level2">
+<h2 class="anchored" data-anchor-id="write-to-file">Write to file</h2>
+<p>A Pfs object can be written to a PFS file using the <code>write</code> method.</p>
+<div class="sourceCode" id="cb20"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>pfs.write(<span class="st">"new.pfs"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+<section id="create-new-pfs-files" class="level2">
+<h2 class="anchored" data-anchor-id="create-new-pfs-files">Create new Pfs files</h2>
+<p>A new PFS file can be created from dictionary in the following way:</p>
+<div id="d706dc20" class="cell" data-execution_count="8">
+<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> datetime <span class="im">import</span> datetime</span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>d <span class="op">=</span> <span class="bu">dict</span>(</span>
+<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a>    key1<span class="op">=</span><span class="dv">1</span>,</span>
+<span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a>    lst<span class="op">=</span>[<span class="fl">0.3</span>, <span class="fl">0.7</span>],</span>
+<span id="cb21-6"><a href="#cb21-6" aria-hidden="true" tabindex="-1"></a>    file_name<span class="op">=</span><span class="vs">r"|path\file.dfs0|"</span>,</span>
+<span id="cb21-7"><a href="#cb21-7" aria-hidden="true" tabindex="-1"></a>    start_time<span class="op">=</span>datetime(<span class="dv">2019</span>, <span class="dv">7</span>, <span class="dv">1</span>, <span class="dv">0</span>, <span class="dv">0</span>, <span class="dv">0</span>),</span>
+<span id="cb21-8"><a href="#cb21-8" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb21-9"><a href="#cb21-9" aria-hidden="true" tabindex="-1"></a>pfs <span class="op">=</span> mikeio.PfsDocument({<span class="st">"MYTOOL"</span>: d})</span>
+<span id="cb21-10"><a href="#cb21-10" aria-hidden="true" tabindex="-1"></a>pfs</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="8">
-<pre><code>(24, 31, 31)</code></pre>
+<pre><code>[MYTOOL]
+   key1 = 1
+   lst = 0.3, 0.7
+   file_name = |path\file.dfs0|
+   start_time = 2019, 7, 1, 0, 0, 0
+EndSect  // MYTOOL</code></pre>
 </div>
 </div>
-<div id="25ea8571" class="cell" data-execution_count="9">
-<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>ax <span class="op">=</span> dsi[<span class="st">"Sign. Wave Height"</span>].sel(x<span class="op">=</span><span class="dv">250</span>, y<span class="op">=</span><span class="dv">1200</span>).plot(marker<span class="op">=</span><span class="st">'+'</span>)</span>
-<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>ts[<span class="st">"Sign. Wave Height"</span>].plot(ax<span class="op">=</span>ax,marker<span class="op">=</span><span class="st">'+'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display">
-<div>
-<figure class="figure">
-<p><img src="Time-interpolation_files/figure-html/cell-10-output-1.png" width="597" height="414" class="figure-img"></p>
-</figure>
-</div>
-</div>
-</div>
-</section>
-<section id="model-validation" class="level2">
-<h2 class="anchored" data-anchor-id="model-validation">Model validation</h2>
-<p>A common metric for model validation is mean absolute error (MAE).</p>
-<p>In the example below we calculate this metric using the model data interpolated to the observed times.</p>
-<p>For a more elaborate model validation library which takes care of these things for you as well as calculating a number of relevant metrics, take a look at <a href="https://dhi.github.io/modelskill">`ModelSkill</a>.</p>
-<p>Use <code>np.nanmean</code> to skip NaN.</p>
-<div id="365f354b" class="cell" data-execution_count="10">
-<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>ts[<span class="st">"Sign. Wave Height"</span>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display" data-execution_count="10">
-<pre><code>&lt;mikeio.DataArray&gt;
-name: Sign. Wave Height
-dims: (time:24)
-time: 2004-01-01 01:00:00 - 2004-01-03 12:00:10 (24 non-equidistant records)
-geometry: GeometryUndefined()
-values: [0.06521, 0.06771, ..., 0.0576]</code></pre>
-</div>
-</div>
-<div id="0ec2c70f" class="cell" data-execution_count="11">
-<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>dsi[<span class="st">"Sign. Wave Height"</span>].sel(x<span class="op">=</span><span class="dv">250</span>, y<span class="op">=</span><span class="dv">1200</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display" data-execution_count="11">
-<pre><code>&lt;mikeio.DataArray&gt;
-name: Sign. Wave Height
-dims: (time:24)
-time: 2004-01-01 01:00:00 - 2004-01-03 12:00:10 (24 non-equidistant records)
-geometry: GeometryPoint2D(x=275.0, y=1225.0)
-values: [0.0387, 0.03939, ..., nan]</code></pre>
-</div>
-</div>
-<div id="ce813d70" class="cell" data-execution_count="12">
-<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>diff <span class="op">=</span> (ts[<span class="st">"Sign. Wave Height"</span>]  <span class="op">-</span> dsi[<span class="st">"Sign. Wave Height"</span>].sel(x<span class="op">=</span><span class="dv">250</span>, y<span class="op">=</span><span class="dv">1200</span>))</span>
-<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>diff.plot()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display">
-<div>
-<figure class="figure">
-<p><img src="Time-interpolation_files/figure-html/cell-13-output-1.png" width="606" height="414" class="figure-img"></p>
-</figure>
-</div>
-</div>
-</div>
-<div id="246a572b" class="cell" data-execution_count="13">
-<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>mae <span class="op">=</span> np.<span class="bu">abs</span>(diff).nanmean().to_numpy()</span>
-<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>mae</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display" data-execution_count="13">
-<pre><code>0.030895043650399082</code></pre>
-</div>
-</div>
-</section>
-<section id="clean-up" class="level1">
-<h1>Clean up</h1>
-<div id="571f15f6" class="cell" data-execution_count="14">
-<div class="sourceCode cell-code" id="cb22"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> os</span>
-<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a>os.remove(<span class="st">"waves_3h.dfs2"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</div>
+<p>Multiple targets can be achieved by providing list of dictionaries.</p>
 
 
 </section>
@@ -891,13 +982,13 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 </script>
 <nav class="page-navigation">
   <div class="nav-page nav-page-previous">
-      <a href="../examples/Dfsu-2D-interpolation.html" class="pagination-link" aria-label="Dfsu - 2D interpolation">
-        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text">Dfsu - 2D interpolation</span>
+      <a href="../user-guide/generic.html" class="pagination-link" aria-label="Generic">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text">Generic</span>
       </a>          
   </div>
   <div class="nav-page nav-page-next">
-      <a href="../examples/Generic.html" class="pagination-link" aria-label="Generic dfs processing">
-        <span class="nav-page-text">Generic dfs processing</span> <i class="bi bi-arrow-right-short"></i>
+      <a href="../examples/index.html" class="pagination-link" aria-label="Examples">
+        <span class="nav-page-text">Examples</span> <i class="bi bi-arrow-right-short"></i>
       </a>
   </div>
 </nav>
@@ -909,7 +1000,7 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
     </div>   
     <div class="nav-footer-center">
 <p>© 2024 DHI Group</p>
-<div class="toc-actions d-sm-block d-md-none"><ul><li><a href="https://github.com/DHI/mikeio/edit/main/docs/examples/Time-interpolation.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li></ul></div></div>
+<div class="toc-actions d-sm-block d-md-none"><ul><li><a href="https://github.com/DHI/mikeio/edit/main/docs/user-guide/pfs.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li></ul></div></div>
     <div class="nav-footer-right">
       &nbsp;
     </div>

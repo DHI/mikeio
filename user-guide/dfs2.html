@@ -6,9 +6,8 @@
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
-<meta name="description" content="Interpolate data to a specific time axis">
 
-<title>MIKE IO - Time interpolation</title>
+<title>MIKE IO</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -65,8 +64,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <script src="../site_libs/quarto-search/fuse.min.js"></script>
 <script src="../site_libs/quarto-search/quarto-search.js"></script>
 <meta name="quarto:offset" content="../">
-<link href="../examples/Generic.html" rel="next">
-<link href="../examples/Dfsu-2D-interpolation.html" rel="prev">
+<link href="../user-guide/dfsu.html" rel="next">
+<link href="../user-guide/dfs1.html" rel="prev">
 <script src="../site_libs/quarto-html/quarto.js"></script>
 <script src="../site_libs/quarto-html/popper.min.js"></script>
 <script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
@@ -166,7 +165,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
         <i class="bi bi-layout-text-sidebar-reverse"></i>
       </button>
         <a class="flex-grow-1 no-decor" role="button" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
-          <h1 class="quarto-secondary-nav-title">Time interpolation</h1>
+          <h1 class="quarto-secondary-nav-title">Dfs2</h1>
         </a>     
       <button type="button" class="btn quarto-search-button" aria-label="" onclick="window.quartoOpenSearch();">
         <i class="bi bi-search"></i>
@@ -232,7 +231,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../user-guide/dfs2.html" class="sidebar-item-text sidebar-link">
+  <a href="../user-guide/dfs2.html" class="sidebar-item-text sidebar-link active">
  <span class="menu-text">Dfs2</span></a>
   </div>
 </li>
@@ -279,7 +278,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../examples/Time-interpolation.html" class="sidebar-item-text sidebar-link active">
+  <a href="../examples/Time-interpolation.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">Time interpolation</span></a>
   </div>
 </li>
@@ -313,26 +312,20 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     <h2 id="toc-title">On this page</h2>
    
   <ul>
-  <li><a href="#interpolate-to-specific-timestep" id="toc-interpolate-to-specific-timestep" class="nav-link active" data-scroll-target="#interpolate-to-specific-timestep">Interpolate to specific timestep</a></li>
-  <li><a href="#interpolate-to-time-axis-of-another-dataset" id="toc-interpolate-to-time-axis-of-another-dataset" class="nav-link" data-scroll-target="#interpolate-to-time-axis-of-another-dataset">Interpolate to time axis of another dataset</a></li>
-  <li><a href="#model-validation" id="toc-model-validation" class="nav-link" data-scroll-target="#model-validation">Model validation</a></li>
-  <li><a href="#clean-up" id="toc-clean-up" class="nav-link" data-scroll-target="#clean-up">Clean up</a></li>
+  <li><a href="#subset-in-space" id="toc-subset-in-space" class="nav-link active" data-scroll-target="#subset-in-space">Subset in space</a></li>
+  <li><a href="#grid2d" id="toc-grid2d" class="nav-link" data-scroll-target="#grid2d">Grid2D</a></li>
+  <li><a href="#dfs2-example-notebooks" id="toc-dfs2-example-notebooks" class="nav-link" data-scroll-target="#dfs2-example-notebooks">Dfs2 Example notebooks</a></li>
   </ul>
-<div class="toc-actions"><ul><li><a href="https://github.com/DHI/mikeio/edit/main/docs/examples/Time-interpolation.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li></ul></div></nav>
+<div class="toc-actions"><ul><li><a href="https://github.com/DHI/mikeio/edit/main/docs/user-guide/dfs2.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li></ul></div></nav>
     </div>
 <!-- main -->
 <main class="content" id="quarto-document-content">
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<h1 class="title d-none d-lg-block">Time interpolation</h1>
+<h1 class="title d-none d-lg-block">Dfs2</h1>
 </div>
 
-<div>
-  <div class="description">
-    Interpolate data to a specific time axis
-  </div>
-</div>
 
 
 <div class="quarto-title-meta">
@@ -347,156 +340,96 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </header>
 
 
-<div id="b2eeffb1" class="cell" data-execution_count="1">
-<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> mikeio</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>A dfs2 file is also called a grid series file. Values in a dfs2 file are ‘element based’, i.e.&nbsp;values are defined in the centre of each grid cell.</p>
+<div id="90b71812" class="cell" data-execution_count="1">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> mikeio</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>ds <span class="op">=</span> mikeio.read(<span class="st">"../data/gebco_sound.dfs2"</span>)</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>ds</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="1">
+<pre><code>&lt;mikeio.Dataset&gt;
+dims: (time:1, y:264, x:216)
+time: 2020-05-15 11:04:52 (time-invariant)
+geometry: Grid2D (ny=264, nx=216)
+items:
+  0:  Elevation &lt;Total Water Depth&gt; (meter)</code></pre>
 </div>
-<div id="cb0b1bc9" class="cell" data-execution_count="2">
-<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>ds <span class="op">=</span> mikeio.read(<span class="st">"../data/waves.dfs2"</span>)</span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>ds</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<section id="subset-in-space" class="level2">
+<h2 class="anchored" data-anchor-id="subset-in-space">Subset in space</h2>
+<p>The most convenient way to subset in space is to use the <code>sel</code> method, which returns a new (smaller) dataset, which can be further processed or written to disk using the <code>to_dfs</code> method.</p>
+<div id="0983b7e7" class="cell" data-execution_count="2">
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>ds.geometry</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="2">
-<pre><code>&lt;mikeio.Dataset&gt;
-dims: (time:3, y:31, x:31)
-time: 2004-01-01 00:00:00 - 2004-01-03 00:00:00 (3 records)
-geometry: Grid2D (ny=31, nx=31)
-items:
-  0:  Sign. Wave Height &lt;Significant wave height&gt; (meter)
-  1:  Peak Wave Period &lt;Wave period&gt; (second)
-  2:  Mean Wave Direction &lt;Mean Wave Direction&gt; (degree)</code></pre>
+<pre><code>&lt;mikeio.Grid2D&gt;
+x: [12.2, 12.21, ..., 13.1] (nx=216, dx=0.004167)
+y: [55.2, 55.21, ..., 56.3] (ny=264, dy=0.004167)
+projection: LONG/LAT</code></pre>
 </div>
 </div>
-<section id="interpolate-to-specific-timestep" class="level2">
-<h2 class="anchored" data-anchor-id="interpolate-to-specific-timestep">Interpolate to specific timestep</h2>
-<p>A common use case is to interpolate to a shorter timestep, in this case 1h.</p>
-<div id="812a8833" class="cell" data-execution_count="3">
-<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>ds_h <span class="op">=</span> ds.interp_time(<span class="dv">3600</span>)</span>
-<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>ds_h</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div id="2b958d0f" class="cell" data-execution_count="3">
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>ds_aoi <span class="op">=</span> ds.sel(x<span class="op">=</span><span class="bu">slice</span>(<span class="fl">12.5</span>, <span class="fl">13.0</span>), y<span class="op">=</span><span class="bu">slice</span>(<span class="fl">55.5</span>, <span class="fl">56.0</span>))</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>ds_aoi.geometry</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="3">
+<pre><code>&lt;mikeio.Grid2D&gt;
+x: [12.5, 12.5, ..., 12.99] (nx=120, dx=0.004167)
+y: [55.5, 55.5, ..., 55.99] (ny=120, dy=0.004167)
+projection: LONG/LAT</code></pre>
+</div>
+</div>
+<p>In order to specify an open-ended subset (i.e.&nbsp;where the end of the subset is the end of the domain), use <code>None</code> as the end of the slice.</p>
+<div id="b6fb5047" class="cell" data-execution_count="4">
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>ds.sel(x<span class="op">=</span><span class="bu">slice</span>(<span class="va">None</span>, <span class="fl">13.0</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="4">
 <pre><code>&lt;mikeio.Dataset&gt;
-dims: (time:49, y:31, x:31)
-time: 2004-01-01 00:00:00 - 2004-01-03 00:00:00 (49 records)
-geometry: Grid2D (ny=31, nx=31)
+dims: (time:1, y:264, x:191)
+time: 2020-05-15 11:04:52 (time-invariant)
+geometry: Grid2D (ny=264, nx=191)
 items:
-  0:  Sign. Wave Height &lt;Significant wave height&gt; (meter)
-  1:  Peak Wave Period &lt;Wave period&gt; (second)
-  2:  Mean Wave Direction &lt;Mean Wave Direction&gt; (degree)</code></pre>
+  0:  Elevation &lt;Total Water Depth&gt; (meter)</code></pre>
 </div>
-</div>
-<p>And to store the interpolated data in a new file.</p>
-<div id="5ef94e75" class="cell" data-execution_count="4">
-<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>ds_h.to_dfs(<span class="st">"waves_3h.dfs2"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </section>
-<section id="interpolate-to-time-axis-of-another-dataset" class="level2">
-<h2 class="anchored" data-anchor-id="interpolate-to-time-axis-of-another-dataset">Interpolate to time axis of another dataset</h2>
-<p>Read some non-equidistant data typically found in observed data.</p>
-<div id="c6106276" class="cell" data-execution_count="5">
-<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>ts <span class="op">=</span> mikeio.read(<span class="st">"../data/waves.dfs0"</span>)</span>
-<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>ts</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<section id="grid2d" class="level2">
+<h2 class="anchored" data-anchor-id="grid2d">Grid2D</h2>
+<p>The spatial information is available in the <code>geometry</code> attribute (accessible from Dfs2, Dataset, and DataArray), which in the case of a dfs2 file is a <a href="../api/Grid2D.html#mikeio.Grid2D"><code>Grid2D</code></a> geometry.</p>
+<div id="2ded2a52" class="cell" data-execution_count="5">
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>ds.geometry</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="5">
-<pre><code>&lt;mikeio.Dataset&gt;
-dims: (time:24)
-time: 2004-01-01 01:00:00 - 2004-01-03 12:00:10 (24 non-equidistant records)
-geometry: GeometryUndefined()
-items:
-  0:  Sign. Wave Height &lt;Undefined&gt; (undefined)
-  1:  Peak Wave Period &lt;Undefined&gt; (undefined)
-  2:  Mean Wave Direction &lt;Undefined&gt; (undefined)</code></pre>
+<pre><code>&lt;mikeio.Grid2D&gt;
+x: [12.2, 12.21, ..., 13.1] (nx=216, dx=0.004167)
+y: [55.2, 55.21, ..., 56.3] (ny=264, dy=0.004167)
+projection: LONG/LAT</code></pre>
 </div>
 </div>
-<p>The observed timeseries is longer than the modelled data. Default is to fill values with NaN.</p>
-<div id="eed70813" class="cell" data-execution_count="6">
-<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>dsi <span class="op">=</span> ds.interp_time(ts)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</div>
-<div id="7009eb84" class="cell" data-execution_count="7">
-<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>dsi.time</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display" data-execution_count="7">
-<pre><code>DatetimeIndex(['2004-01-01 01:00:00', '2004-01-01 02:00:00',
-               '2004-01-01 03:00:00', '2004-01-01 04:00:00',
-               '2004-01-01 05:00:00', '2004-01-01 06:00:00',
-               '2004-01-01 07:00:00', '2004-01-01 08:00:00',
-               '2004-01-01 23:00:00', '2004-01-02 00:00:00',
-               '2004-01-02 01:00:00', '2004-01-02 02:00:00',
-               '2004-01-02 03:00:00', '2004-01-02 04:00:00',
-               '2004-01-02 05:00:00', '2004-01-02 06:00:00',
-               '2004-01-02 07:00:00', '2004-01-02 08:00:00',
-               '2004-01-02 09:00:00', '2004-01-02 20:00:00',
-               '2004-01-02 21:00:00', '2004-01-02 23:00:00',
-               '2004-01-03 00:00:00', '2004-01-03 12:00:10'],
-              dtype='datetime64[ns]', freq=None)</code></pre>
-</div>
-</div>
-<div id="d43009e1" class="cell" data-execution_count="8">
-<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>dsi[<span class="st">"Sign. Wave Height"</span>].shape</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display" data-execution_count="8">
-<pre><code>(24, 31, 31)</code></pre>
-</div>
-</div>
-<div id="25ea8571" class="cell" data-execution_count="9">
-<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>ax <span class="op">=</span> dsi[<span class="st">"Sign. Wave Height"</span>].sel(x<span class="op">=</span><span class="dv">250</span>, y<span class="op">=</span><span class="dv">1200</span>).plot(marker<span class="op">=</span><span class="st">'+'</span>)</span>
-<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>ts[<span class="st">"Sign. Wave Height"</span>].plot(ax<span class="op">=</span>ax,marker<span class="op">=</span><span class="st">'+'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display">
-<div>
-<figure class="figure">
-<p><img src="Time-interpolation_files/figure-html/cell-10-output-1.png" width="597" height="414" class="figure-img"></p>
-</figure>
-</div>
-</div>
-</div>
+<p>Grid2D’s primary properties and methods are:</p>
+<ul>
+<li><code>x</code></li>
+<li><code>nx</code></li>
+<li><code>dx</code></li>
+<li><code>y</code></li>
+<li><code>ny</code></li>
+<li><code>dy</code></li>
+<li><code>origin</code></li>
+<li><code>projection</code></li>
+<li><code>xy</code></li>
+<li><code>bbox</code></li>
+<li><code>contains()</code></li>
+<li><code>find_index()</code></li>
+<li><code>isel()</code></li>
+<li><code>to_mesh()</code></li>
+</ul>
+<p>See <a href="../api/Grid2D.html#mikeio.Grid2D">API specification</a> for details.</p>
 </section>
-<section id="model-validation" class="level2">
-<h2 class="anchored" data-anchor-id="model-validation">Model validation</h2>
-<p>A common metric for model validation is mean absolute error (MAE).</p>
-<p>In the example below we calculate this metric using the model data interpolated to the observed times.</p>
-<p>For a more elaborate model validation library which takes care of these things for you as well as calculating a number of relevant metrics, take a look at <a href="https://dhi.github.io/modelskill">`ModelSkill</a>.</p>
-<p>Use <code>np.nanmean</code> to skip NaN.</p>
-<div id="365f354b" class="cell" data-execution_count="10">
-<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>ts[<span class="st">"Sign. Wave Height"</span>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display" data-execution_count="10">
-<pre><code>&lt;mikeio.DataArray&gt;
-name: Sign. Wave Height
-dims: (time:24)
-time: 2004-01-01 01:00:00 - 2004-01-03 12:00:10 (24 non-equidistant records)
-geometry: GeometryUndefined()
-values: [0.06521, 0.06771, ..., 0.0576]</code></pre>
-</div>
-</div>
-<div id="0ec2c70f" class="cell" data-execution_count="11">
-<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>dsi[<span class="st">"Sign. Wave Height"</span>].sel(x<span class="op">=</span><span class="dv">250</span>, y<span class="op">=</span><span class="dv">1200</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display" data-execution_count="11">
-<pre><code>&lt;mikeio.DataArray&gt;
-name: Sign. Wave Height
-dims: (time:24)
-time: 2004-01-01 01:00:00 - 2004-01-03 12:00:10 (24 non-equidistant records)
-geometry: GeometryPoint2D(x=275.0, y=1225.0)
-values: [0.0387, 0.03939, ..., nan]</code></pre>
-</div>
-</div>
-<div id="ce813d70" class="cell" data-execution_count="12">
-<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>diff <span class="op">=</span> (ts[<span class="st">"Sign. Wave Height"</span>]  <span class="op">-</span> dsi[<span class="st">"Sign. Wave Height"</span>].sel(x<span class="op">=</span><span class="dv">250</span>, y<span class="op">=</span><span class="dv">1200</span>))</span>
-<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>diff.plot()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display">
-<div>
-<figure class="figure">
-<p><img src="Time-interpolation_files/figure-html/cell-13-output-1.png" width="606" height="414" class="figure-img"></p>
-</figure>
-</div>
-</div>
-</div>
-<div id="246a572b" class="cell" data-execution_count="13">
-<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>mae <span class="op">=</span> np.<span class="bu">abs</span>(diff).nanmean().to_numpy()</span>
-<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>mae</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display" data-execution_count="13">
-<pre><code>0.030895043650399082</code></pre>
-</div>
-</div>
-</section>
-<section id="clean-up" class="level1">
-<h1>Clean up</h1>
-<div id="571f15f6" class="cell" data-execution_count="14">
-<div class="sourceCode cell-code" id="cb22"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> os</span>
-<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a>os.remove(<span class="st">"waves_3h.dfs2"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</div>
+<section id="dfs2-example-notebooks" class="level2">
+<h2 class="anchored" data-anchor-id="dfs2-example-notebooks">Dfs2 Example notebooks</h2>
+<ul>
+<li><a href="https://dhi.github.io/getting-started-with-mikeio/dfs2.html">Dfs2 | getting-started-with-mikeio</a></li>
+<li><a href="https://nbviewer.jupyter.org/github/DHI/mikeio/blob/main/notebooks/Dfs2%20-%20Bathymetry.ipynb">Dfs2-Bathymetry</a> - GEBCO NetCDF/xarray to dfs2</li>
+<li><a href="https://nbviewer.jupyter.org/github/DHI/mikeio/blob/main/notebooks/Dfs2%20-%20Boundary.ipynb">Dfs2-Boundary</a> - Vertical transect dfs2, interpolation in time</li>
+<li><a href="https://nbviewer.jupyter.org/github/DHI/mikeio/blob/main/notebooks/Dfs2%20-%20Export%20to%20netcdf.ipynb">Dfs2-Export-to-netCDF</a> Export dfs2 to NetCDF</li>
+<li><a href="https://nbviewer.jupyter.org/github/DHI/mikeio/blob/main/notebooks/Dfs2%20-%20Global%20Forecasting%20System.ipynb">Dfs2-GFS</a> - GFS NetCDF/xarray to dfs2</li>
+<li><a href="https://nbviewer.jupyter.org/github/DHI/mikeio/blob/main/notebooks/Dfs2%20-%20Sea%20surface%20temperature.ipynb">Dfs2-SST</a> - DMI NetCDF/xarray to dfs2</li>
+</ul>
 
 
 </section>
@@ -891,13 +824,13 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 </script>
 <nav class="page-navigation">
   <div class="nav-page nav-page-previous">
-      <a href="../examples/Dfsu-2D-interpolation.html" class="pagination-link" aria-label="Dfsu - 2D interpolation">
-        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text">Dfsu - 2D interpolation</span>
+      <a href="../user-guide/dfs1.html" class="pagination-link" aria-label="Dfs1">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text">Dfs1</span>
       </a>          
   </div>
   <div class="nav-page nav-page-next">
-      <a href="../examples/Generic.html" class="pagination-link" aria-label="Generic dfs processing">
-        <span class="nav-page-text">Generic dfs processing</span> <i class="bi bi-arrow-right-short"></i>
+      <a href="../user-guide/dfsu.html" class="pagination-link" aria-label="Dfsu and Mesh Overview">
+        <span class="nav-page-text">Dfsu and Mesh Overview</span> <i class="bi bi-arrow-right-short"></i>
       </a>
   </div>
 </nav>
@@ -909,7 +842,7 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
     </div>   
     <div class="nav-footer-center">
 <p>© 2024 DHI Group</p>
-<div class="toc-actions d-sm-block d-md-none"><ul><li><a href="https://github.com/DHI/mikeio/edit/main/docs/examples/Time-interpolation.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li></ul></div></div>
+<div class="toc-actions d-sm-block d-md-none"><ul><li><a href="https://github.com/DHI/mikeio/edit/main/docs/user-guide/dfs2.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li></ul></div></div>
     <div class="nav-footer-right">
       &nbsp;
     </div>

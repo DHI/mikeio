@@ -6,9 +6,8 @@
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
-<meta name="description" content="Interpolate data to a specific time axis">
 
-<title>MIKE IO - Time interpolation</title>
+<title>MIKE IO</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -58,24 +57,24 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </style>
 
 
-<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
-<script src="../site_libs/quarto-nav/headroom.min.js"></script>
-<script src="../site_libs/clipboard/clipboard.min.js"></script>
-<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
-<script src="../site_libs/quarto-search/fuse.min.js"></script>
-<script src="../site_libs/quarto-search/quarto-search.js"></script>
-<meta name="quarto:offset" content="../">
-<link href="../examples/Generic.html" rel="next">
-<link href="../examples/Dfsu-2D-interpolation.html" rel="prev">
-<script src="../site_libs/quarto-html/quarto.js"></script>
-<script src="../site_libs/quarto-html/popper.min.js"></script>
-<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
-<script src="../site_libs/quarto-html/anchor.min.js"></script>
-<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="../site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
-<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
-<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="../site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<script src="site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="site_libs/quarto-nav/headroom.min.js"></script>
+<script src="site_libs/clipboard/clipboard.min.js"></script>
+<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="site_libs/quarto-search/fuse.min.js"></script>
+<script src="site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="./">
+<link href="./api/index.html" rel="next">
+<link href="./examples/Generic.html" rel="prev">
+<script src="site_libs/quarto-html/quarto.js"></script>
+<script src="site_libs/quarto-html/popper.min.js"></script>
+<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="site_libs/quarto-html/anchor.min.js"></script>
+<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -114,10 +113,10 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
       <div class="navbar-container container-fluid">
       <div class="navbar-brand-container mx-auto">
-    <a href="../index.html" class="navbar-brand navbar-brand-logo">
-    <img src="../MIKE-IO-Icon-Pos-RGB.png" alt="" class="navbar-logo">
+    <a href="./index.html" class="navbar-brand navbar-brand-logo">
+    <img src="./MIKE-IO-Icon-Pos-RGB.png" alt="" class="navbar-logo">
     </a>
-    <a class="navbar-brand" href="../index.html">
+    <a class="navbar-brand" href="./index.html">
     <span class="navbar-title">MIKE IO</span>
     </a>
   </div>
@@ -128,15 +127,15 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
           <div class="collapse navbar-collapse" id="navbarCollapse">
             <ul class="navbar-nav navbar-nav-scroll me-auto">
   <li class="nav-item">
-    <a class="nav-link" href="../index.html"> 
+    <a class="nav-link" href="./index.html"> 
 <span class="menu-text">Home</span></a>
   </li>  
   <li class="nav-item">
-    <a class="nav-link active" href="../examples/index.html" aria-current="page"> 
+    <a class="nav-link active" href="./examples/index.html" aria-current="page"> 
 <span class="menu-text">Examples</span></a>
   </li>  
   <li class="nav-item">
-    <a class="nav-link" href="../api/index.html"> 
+    <a class="nav-link" href="./api/index.html"> 
 <span class="menu-text">API Reference</span></a>
   </li>  
 </ul>
@@ -166,7 +165,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
         <i class="bi bi-layout-text-sidebar-reverse"></i>
       </button>
         <a class="flex-grow-1 no-decor" role="button" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
-          <h1 class="quarto-secondary-nav-title">Time interpolation</h1>
+          <h1 class="quarto-secondary-nav-title"></h1>
         </a>     
       <button type="button" class="btn quarto-search-button" aria-label="" onclick="window.quartoOpenSearch();">
         <i class="bi bi-search"></i>
@@ -187,7 +186,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     <ul class="list-unstyled mt-1">
         <li class="sidebar-item sidebar-item-section">
       <div class="sidebar-item-container"> 
-            <a href="../user-guide/getting-started.html" class="sidebar-item-text sidebar-link">
+            <a href="./user-guide/getting-started.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">User Guide</span></a>
           <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" aria-expanded="true" aria-label="Toggle section">
             <i class="bi bi-chevron-right ms-2"></i>
@@ -196,67 +195,67 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
       <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../user-guide/getting-started.html" class="sidebar-item-text sidebar-link">
+  <a href="./user-guide/getting-started.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">Getting started</span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../user-guide/data-structures.html" class="sidebar-item-text sidebar-link">
+  <a href="./user-guide/data-structures.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">Data Structures</span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../user-guide/dataarray.html" class="sidebar-item-text sidebar-link">
+  <a href="./user-guide/dataarray.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">DataArray</span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../user-guide/dataset.html" class="sidebar-item-text sidebar-link">
+  <a href="./user-guide/dataset.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">Dataset</span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../user-guide/dfs0.html" class="sidebar-item-text sidebar-link">
+  <a href="./user-guide/dfs0.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">Dfs0</span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../user-guide/dfs1.html" class="sidebar-item-text sidebar-link">
+  <a href="./user-guide/dfs1.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">Dfs1</span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../user-guide/dfs2.html" class="sidebar-item-text sidebar-link">
+  <a href="./user-guide/dfs2.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">Dfs2</span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../user-guide/dfsu.html" class="sidebar-item-text sidebar-link">
+  <a href="./user-guide/dfsu.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">Dfsu and Mesh Overview</span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../user-guide/eum.html" class="sidebar-item-text sidebar-link">
+  <a href="./user-guide/eum.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">EUM</span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../user-guide/generic.html" class="sidebar-item-text sidebar-link">
+  <a href="./user-guide/generic.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">Generic</span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../user-guide/pfs.html" class="sidebar-item-text sidebar-link">
+  <a href="./user-guide/pfs.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">Pfs</span></a>
   </div>
 </li>
@@ -264,7 +263,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   </li>
         <li class="sidebar-item sidebar-item-section">
       <div class="sidebar-item-container"> 
-            <a href="../examples/index.html" class="sidebar-item-text sidebar-link">
+            <a href="./examples/index.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">Examples</span></a>
           <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" aria-expanded="true" aria-label="Toggle section">
             <i class="bi bi-chevron-right ms-2"></i>
@@ -273,19 +272,19 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
       <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 show">  
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../examples/Dfsu-2D-interpolation.html" class="sidebar-item-text sidebar-link">
+  <a href="./examples/Dfsu-2D-interpolation.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">Dfsu - 2D interpolation</span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../examples/Time-interpolation.html" class="sidebar-item-text sidebar-link active">
+  <a href="./examples/Time-interpolation.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">Time interpolation</span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../examples/Generic.html" class="sidebar-item-text sidebar-link">
+  <a href="./examples/Generic.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">Generic dfs processing</span></a>
   </div>
 </li>
@@ -293,13 +292,13 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   </li>
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../design.html" class="sidebar-item-text sidebar-link">
+  <a href="./design.html" class="sidebar-item-text sidebar-link active">
  <span class="menu-text">Design philosophy</span></a>
   </div>
 </li>
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../api/index.html" class="sidebar-item-text sidebar-link">
+  <a href="./api/index.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">API Reference</span></a>
   </div>
 </li>
@@ -313,192 +312,83 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     <h2 id="toc-title">On this page</h2>
    
   <ul>
-  <li><a href="#interpolate-to-specific-timestep" id="toc-interpolate-to-specific-timestep" class="nav-link active" data-scroll-target="#interpolate-to-specific-timestep">Interpolate to specific timestep</a></li>
-  <li><a href="#interpolate-to-time-axis-of-another-dataset" id="toc-interpolate-to-time-axis-of-another-dataset" class="nav-link" data-scroll-target="#interpolate-to-time-axis-of-another-dataset">Interpolate to time axis of another dataset</a></li>
-  <li><a href="#model-validation" id="toc-model-validation" class="nav-link" data-scroll-target="#model-validation">Model validation</a></li>
-  <li><a href="#clean-up" id="toc-clean-up" class="nav-link" data-scroll-target="#clean-up">Clean up</a></li>
+  <li><a href="#design-philosophy" id="toc-design-philosophy" class="nav-link active" data-scroll-target="#design-philosophy">Design philosophy</a>
+  <ul class="collapse">
+  <li><a href="#easy-to-use" id="toc-easy-to-use" class="nav-link" data-scroll-target="#easy-to-use">Easy to use</a></li>
+  <li><a href="#familiar" id="toc-familiar" class="nav-link" data-scroll-target="#familiar">Familiar</a></li>
+  <li><a href="#easy-to-install" id="toc-easy-to-install" class="nav-link" data-scroll-target="#easy-to-install">Easy to install</a></li>
+  <li><a href="#easy-to-get-started" id="toc-easy-to-get-started" class="nav-link" data-scroll-target="#easy-to-get-started">Easy to get started</a></li>
+  <li><a href="#open-source" id="toc-open-source" class="nav-link" data-scroll-target="#open-source">Open Source​</a></li>
+  <li><a href="#easy-to-collaborate" id="toc-easy-to-collaborate" class="nav-link" data-scroll-target="#easy-to-collaborate">Easy to collaborate</a></li>
+  <li><a href="#reproducible" id="toc-reproducible" class="nav-link" data-scroll-target="#reproducible">Reproducible</a></li>
+  <li><a href="#easy-access-to-new-features" id="toc-easy-access-to-new-features" class="nav-link" data-scroll-target="#easy-access-to-new-features">Easy access to new features</a></li>
+  </ul></li>
   </ul>
-<div class="toc-actions"><ul><li><a href="https://github.com/DHI/mikeio/edit/main/docs/examples/Time-interpolation.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li></ul></div></nav>
+<div class="toc-actions"><ul><li><a href="https://github.com/DHI/mikeio/edit/main/docs/design.md" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li></ul></div></nav>
     </div>
 <!-- main -->
 <main class="content" id="quarto-document-content">
 
-<header id="title-block-header" class="quarto-title-block default">
-<div class="quarto-title">
-<h1 class="title d-none d-lg-block">Time interpolation</h1>
-</div>
-
-<div>
-  <div class="description">
-    Interpolate data to a specific time axis
-  </div>
-</div>
 
 
-<div class="quarto-title-meta">
 
-    
-  
-    
-  </div>
-  
-
-
-</header>
-
-
-<div id="b2eeffb1" class="cell" data-execution_count="1">
-<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> mikeio</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</div>
-<div id="cb0b1bc9" class="cell" data-execution_count="2">
-<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>ds <span class="op">=</span> mikeio.read(<span class="st">"../data/waves.dfs2"</span>)</span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>ds</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display" data-execution_count="2">
-<pre><code>&lt;mikeio.Dataset&gt;
-dims: (time:3, y:31, x:31)
-time: 2004-01-01 00:00:00 - 2004-01-03 00:00:00 (3 records)
-geometry: Grid2D (ny=31, nx=31)
-items:
-  0:  Sign. Wave Height &lt;Significant wave height&gt; (meter)
-  1:  Peak Wave Period &lt;Wave period&gt; (second)
-  2:  Mean Wave Direction &lt;Mean Wave Direction&gt; (degree)</code></pre>
-</div>
-</div>
-<section id="interpolate-to-specific-timestep" class="level2">
-<h2 class="anchored" data-anchor-id="interpolate-to-specific-timestep">Interpolate to specific timestep</h2>
-<p>A common use case is to interpolate to a shorter timestep, in this case 1h.</p>
-<div id="812a8833" class="cell" data-execution_count="3">
-<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>ds_h <span class="op">=</span> ds.interp_time(<span class="dv">3600</span>)</span>
-<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>ds_h</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display" data-execution_count="3">
-<pre><code>&lt;mikeio.Dataset&gt;
-dims: (time:49, y:31, x:31)
-time: 2004-01-01 00:00:00 - 2004-01-03 00:00:00 (49 records)
-geometry: Grid2D (ny=31, nx=31)
-items:
-  0:  Sign. Wave Height &lt;Significant wave height&gt; (meter)
-  1:  Peak Wave Period &lt;Wave period&gt; (second)
-  2:  Mean Wave Direction &lt;Mean Wave Direction&gt; (degree)</code></pre>
-</div>
-</div>
-<p>And to store the interpolated data in a new file.</p>
-<div id="5ef94e75" class="cell" data-execution_count="4">
-<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>ds_h.to_dfs(<span class="st">"waves_3h.dfs2"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</div>
+<section id="design-philosophy" class="level1">
+<h1>Design philosophy</h1>
+<ul>
+<li><a href="#easy-to-use">Easy to use</a></li>
+<li><a href="#familiar">Familiar</a></li>
+<li><a href="#easy-to-install">Easy to install</a></li>
+<li><a href="#easy-to-get-started">Easy to get started</a></li>
+<li><a href="#open-source">Open Source​</a></li>
+<li><a href="#easy-to-collaborate">Easy to collaborate​</a></li>
+<li><a href="#reproducible">Reproducible</a></li>
+<li><a href="#easy-access-to-new-features">Easy access to new features</a></li>
+</ul>
+<section id="easy-to-use" class="level2">
+<h2 class="anchored" data-anchor-id="easy-to-use">Easy to use</h2>
+<p>Common operations such as reading a file should only need a few lines of code.</p>
+<p>Make extensive use of existing standard libraries for scientific computing such as numpy, matplotlib and pandas.</p>
 </section>
-<section id="interpolate-to-time-axis-of-another-dataset" class="level2">
-<h2 class="anchored" data-anchor-id="interpolate-to-time-axis-of-another-dataset">Interpolate to time axis of another dataset</h2>
-<p>Read some non-equidistant data typically found in observed data.</p>
-<div id="c6106276" class="cell" data-execution_count="5">
-<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>ts <span class="op">=</span> mikeio.read(<span class="st">"../data/waves.dfs0"</span>)</span>
-<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>ts</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display" data-execution_count="5">
-<pre><code>&lt;mikeio.Dataset&gt;
-dims: (time:24)
-time: 2004-01-01 01:00:00 - 2004-01-03 12:00:10 (24 non-equidistant records)
-geometry: GeometryUndefined()
-items:
-  0:  Sign. Wave Height &lt;Undefined&gt; (undefined)
-  1:  Peak Wave Period &lt;Undefined&gt; (undefined)
-  2:  Mean Wave Direction &lt;Undefined&gt; (undefined)</code></pre>
-</div>
-</div>
-<p>The observed timeseries is longer than the modelled data. Default is to fill values with NaN.</p>
-<div id="eed70813" class="cell" data-execution_count="6">
-<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>dsi <span class="op">=</span> ds.interp_time(ts)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</div>
-<div id="7009eb84" class="cell" data-execution_count="7">
-<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>dsi.time</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display" data-execution_count="7">
-<pre><code>DatetimeIndex(['2004-01-01 01:00:00', '2004-01-01 02:00:00',
-               '2004-01-01 03:00:00', '2004-01-01 04:00:00',
-               '2004-01-01 05:00:00', '2004-01-01 06:00:00',
-               '2004-01-01 07:00:00', '2004-01-01 08:00:00',
-               '2004-01-01 23:00:00', '2004-01-02 00:00:00',
-               '2004-01-02 01:00:00', '2004-01-02 02:00:00',
-               '2004-01-02 03:00:00', '2004-01-02 04:00:00',
-               '2004-01-02 05:00:00', '2004-01-02 06:00:00',
-               '2004-01-02 07:00:00', '2004-01-02 08:00:00',
-               '2004-01-02 09:00:00', '2004-01-02 20:00:00',
-               '2004-01-02 21:00:00', '2004-01-02 23:00:00',
-               '2004-01-03 00:00:00', '2004-01-03 12:00:10'],
-              dtype='datetime64[ns]', freq=None)</code></pre>
-</div>
-</div>
-<div id="d43009e1" class="cell" data-execution_count="8">
-<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>dsi[<span class="st">"Sign. Wave Height"</span>].shape</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display" data-execution_count="8">
-<pre><code>(24, 31, 31)</code></pre>
-</div>
-</div>
-<div id="25ea8571" class="cell" data-execution_count="9">
-<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>ax <span class="op">=</span> dsi[<span class="st">"Sign. Wave Height"</span>].sel(x<span class="op">=</span><span class="dv">250</span>, y<span class="op">=</span><span class="dv">1200</span>).plot(marker<span class="op">=</span><span class="st">'+'</span>)</span>
-<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>ts[<span class="st">"Sign. Wave Height"</span>].plot(ax<span class="op">=</span>ax,marker<span class="op">=</span><span class="st">'+'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display">
-<div>
-<figure class="figure">
-<p><img src="Time-interpolation_files/figure-html/cell-10-output-1.png" width="597" height="414" class="figure-img"></p>
-</figure>
-</div>
-</div>
-</div>
+<section id="familiar" class="level2">
+<h2 class="anchored" data-anchor-id="familiar">Familiar</h2>
+<p>MIKE IO aims to use a syntax familiar to users of scientific computing libraries such as NumPy, Pandas and xarray.</p>
 </section>
-<section id="model-validation" class="level2">
-<h2 class="anchored" data-anchor-id="model-validation">Model validation</h2>
-<p>A common metric for model validation is mean absolute error (MAE).</p>
-<p>In the example below we calculate this metric using the model data interpolated to the observed times.</p>
-<p>For a more elaborate model validation library which takes care of these things for you as well as calculating a number of relevant metrics, take a look at <a href="https://dhi.github.io/modelskill">`ModelSkill</a>.</p>
-<p>Use <code>np.nanmean</code> to skip NaN.</p>
-<div id="365f354b" class="cell" data-execution_count="10">
-<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>ts[<span class="st">"Sign. Wave Height"</span>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display" data-execution_count="10">
-<pre><code>&lt;mikeio.DataArray&gt;
-name: Sign. Wave Height
-dims: (time:24)
-time: 2004-01-01 01:00:00 - 2004-01-03 12:00:10 (24 non-equidistant records)
-geometry: GeometryUndefined()
-values: [0.06521, 0.06771, ..., 0.0576]</code></pre>
-</div>
-</div>
-<div id="0ec2c70f" class="cell" data-execution_count="11">
-<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>dsi[<span class="st">"Sign. Wave Height"</span>].sel(x<span class="op">=</span><span class="dv">250</span>, y<span class="op">=</span><span class="dv">1200</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display" data-execution_count="11">
-<pre><code>&lt;mikeio.DataArray&gt;
-name: Sign. Wave Height
-dims: (time:24)
-time: 2004-01-01 01:00:00 - 2004-01-03 12:00:10 (24 non-equidistant records)
-geometry: GeometryPoint2D(x=275.0, y=1225.0)
-values: [0.0387, 0.03939, ..., nan]</code></pre>
-</div>
-</div>
-<div id="ce813d70" class="cell" data-execution_count="12">
-<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>diff <span class="op">=</span> (ts[<span class="st">"Sign. Wave Height"</span>]  <span class="op">-</span> dsi[<span class="st">"Sign. Wave Height"</span>].sel(x<span class="op">=</span><span class="dv">250</span>, y<span class="op">=</span><span class="dv">1200</span>))</span>
-<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>diff.plot()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display">
-<div>
-<figure class="figure">
-<p><img src="Time-interpolation_files/figure-html/cell-13-output-1.png" width="606" height="414" class="figure-img"></p>
-</figure>
-</div>
-</div>
-</div>
-<div id="246a572b" class="cell" data-execution_count="13">
-<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>mae <span class="op">=</span> np.<span class="bu">abs</span>(diff).nanmean().to_numpy()</span>
-<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>mae</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display" data-execution_count="13">
-<pre><code>0.030895043650399082</code></pre>
-</div>
-</div>
+<section id="easy-to-install" class="level2">
+<h2 class="anchored" data-anchor-id="easy-to-install">Easy to install</h2>
+<div class="sourceCode" id="cb1"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="ex">$</span> pip install mikeio</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </section>
-<section id="clean-up" class="level1">
-<h1>Clean up</h1>
-<div id="571f15f6" class="cell" data-execution_count="14">
-<div class="sourceCode cell-code" id="cb22"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> os</span>
-<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a>os.remove(<span class="st">"waves_3h.dfs2"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</div>
+<section id="easy-to-get-started" class="level2">
+<h2 class="anchored" data-anchor-id="easy-to-get-started">Easy to get started</h2>
+<p>By providing many examples to cut/paste from.</p>
+<p>Examples are available in two forms:</p>
+<ul>
+<li><a href="./examples/index.html">Example notebooks</a></li>
+<li><a href="https://github.com/DHI/mikeio/tree/main/tests">Unit tests</a></li>
+</ul>
+</section>
+<section id="open-source" class="level2">
+<h2 class="anchored" data-anchor-id="open-source">Open Source​</h2>
+<p>MIKE IO is an open source project licensed under the <a href="https://github.com/DHI/mikeio/blob/main/License.txt">BSD-3 license</a>. The software is provided free of charge with the source code available for inspection and modification.</p>
+<p>Contributions are welcome, more details can be found in our <a href="https://github.com/DHI/mikeio/blob/main/CONTRIBUTING.md">contribution guidelines</a>.</p>
+</section>
+<section id="easy-to-collaborate" class="level2">
+<h2 class="anchored" data-anchor-id="easy-to-collaborate">Easy to collaborate</h2>
+<p>By developing MIKE IO on GitHub along with a completely open discussion, we believe that the collaboration between developers and end-users results in a useful library.</p>
+</section>
+<section id="reproducible" class="level2">
+<h2 class="anchored" data-anchor-id="reproducible">Reproducible</h2>
+<p>By providing the historical versions of MIKE IO on PyPI it is possible to reproduce the behaviour of an older existing system, based on an older version.</p>
+<p><strong>Install specific version</strong></p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="ex">pip</span> install mikeio==1.4.0</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+<section id="easy-access-to-new-features" class="level2">
+<h2 class="anchored" data-anchor-id="easy-access-to-new-features">Easy access to new features</h2>
+<p>Features are being added all the time, by developers at DHI in offices all around the globe as well as external contributors using MIKE IO in their work. These new features are always available from the <a href="https://github.com/DHI/mikeio">main branch on GitHub</a> and thanks to automated testing, it is always possible to verify that the tests passes before downloading a new development version.</p>
+<p><strong>Install development version</strong></p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="ex">$</span> pip install https://github.com/DHI/mikeio/archive/main.zip</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 
 
+</section>
 </section>
 
 </main> <!-- /main -->
@@ -891,13 +781,13 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 </script>
 <nav class="page-navigation">
   <div class="nav-page nav-page-previous">
-      <a href="../examples/Dfsu-2D-interpolation.html" class="pagination-link" aria-label="Dfsu - 2D interpolation">
-        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text">Dfsu - 2D interpolation</span>
+      <a href="./examples/Generic.html" class="pagination-link" aria-label="Generic dfs processing">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text">Generic dfs processing</span>
       </a>          
   </div>
   <div class="nav-page nav-page-next">
-      <a href="../examples/Generic.html" class="pagination-link" aria-label="Generic dfs processing">
-        <span class="nav-page-text">Generic dfs processing</span> <i class="bi bi-arrow-right-short"></i>
+      <a href="./api/index.html" class="pagination-link" aria-label="API Reference">
+        <span class="nav-page-text">API Reference</span> <i class="bi bi-arrow-right-short"></i>
       </a>
   </div>
 </nav>
@@ -909,7 +799,7 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
     </div>   
     <div class="nav-footer-center">
 <p>© 2024 DHI Group</p>
-<div class="toc-actions d-sm-block d-md-none"><ul><li><a href="https://github.com/DHI/mikeio/edit/main/docs/examples/Time-interpolation.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li></ul></div></div>
+<div class="toc-actions d-sm-block d-md-none"><ul><li><a href="https://github.com/DHI/mikeio/edit/main/docs/design.md" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li></ul></div></div>
     <div class="nav-footer-right">
       &nbsp;
     </div>
