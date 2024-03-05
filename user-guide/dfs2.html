@@ -276,6 +276,29 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
           </a> 
       </div>
       <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../examples/dfs2/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Dfs2</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-3" class="collapse list-unstyled sidebar-section depth2 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../examples/dfs2/bathy.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Dfs2 - Bathymetric data</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../examples/dfs2/gfs.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Dfs2 - Meteo data</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../examples/Dfsu-2D-interpolation.html" class="sidebar-item-text sidebar-link">
@@ -320,7 +343,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <ul>
   <li><a href="#subset-in-space" id="toc-subset-in-space" class="nav-link active" data-scroll-target="#subset-in-space">Subset in space</a></li>
   <li><a href="#grid2d" id="toc-grid2d" class="nav-link" data-scroll-target="#grid2d">Grid2D</a></li>
-  <li><a href="#dfs2-example-notebooks" id="toc-dfs2-example-notebooks" class="nav-link" data-scroll-target="#dfs2-example-notebooks">Dfs2 Example notebooks</a></li>
+  <li><a href="#dfs2-resources" id="toc-dfs2-resources" class="nav-link" data-scroll-target="#dfs2-resources">Dfs2 resources</a></li>
   </ul>
 <div class="toc-actions"><ul><li><a href="https://github.com/DHI/mikeio/edit/main/docs/user-guide/dfs2.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li></ul></div></nav>
     </div>
@@ -347,7 +370,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 
 <p>A dfs2 file is also called a grid series file. Values in a dfs2 file are ‘element based’, i.e.&nbsp;values are defined in the centre of each grid cell.</p>
-<div id="57d024bd" class="cell" data-execution_count="1">
+<div id="91d5f057" class="cell" data-execution_count="1">
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> mikeio</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>ds <span class="op">=</span> mikeio.read(<span class="st">"../data/gebco_sound.dfs2"</span>)</span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>ds</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
@@ -363,7 +386,7 @@ items:
 <section id="subset-in-space" class="level2">
 <h2 class="anchored" data-anchor-id="subset-in-space">Subset in space</h2>
 <p>The most convenient way to subset in space is to use the <code>sel</code> method, which returns a new (smaller) dataset, which can be further processed or written to disk using the <code>to_dfs</code> method.</p>
-<div id="d03daf6a" class="cell" data-execution_count="2">
+<div id="6d5825d8" class="cell" data-execution_count="2">
 <div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>ds.geometry</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="2">
 <pre><code>&lt;mikeio.Grid2D&gt;
@@ -372,7 +395,7 @@ y: [55.2, 55.21, ..., 56.3] (ny=264, dy=0.004167)
 projection: LONG/LAT</code></pre>
 </div>
 </div>
-<div id="2ec2cb5d" class="cell" data-execution_count="3">
+<div id="6830a7fd" class="cell" data-execution_count="3">
 <div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>ds_aoi <span class="op">=</span> ds.sel(x<span class="op">=</span><span class="bu">slice</span>(<span class="fl">12.5</span>, <span class="fl">13.0</span>), y<span class="op">=</span><span class="bu">slice</span>(<span class="fl">55.5</span>, <span class="fl">56.0</span>))</span>
 <span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>ds_aoi.geometry</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="3">
@@ -383,7 +406,7 @@ projection: LONG/LAT</code></pre>
 </div>
 </div>
 <p>In order to specify an open-ended subset (i.e.&nbsp;where the end of the subset is the end of the domain), use <code>None</code> as the end of the slice.</p>
-<div id="b7b2328a" class="cell" data-execution_count="4">
+<div id="902d0639" class="cell" data-execution_count="4">
 <div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>ds.sel(x<span class="op">=</span><span class="bu">slice</span>(<span class="va">None</span>, <span class="fl">13.0</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="4">
 <pre><code>&lt;mikeio.Dataset&gt;
@@ -398,7 +421,7 @@ items:
 <section id="grid2d" class="level2">
 <h2 class="anchored" data-anchor-id="grid2d">Grid2D</h2>
 <p>The spatial information is available in the <code>geometry</code> attribute (accessible from Dfs2, Dataset, and DataArray), which in the case of a dfs2 file is a <a href="../api/Grid2D.html#mikeio.Grid2D"><code>Grid2D</code></a> geometry.</p>
-<div id="734deee1" class="cell" data-execution_count="5">
+<div id="7951846d" class="cell" data-execution_count="5">
 <div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>ds.geometry</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="5">
 <pre><code>&lt;mikeio.Grid2D&gt;
@@ -426,15 +449,12 @@ projection: LONG/LAT</code></pre>
 </ul>
 <p>See <a href="../api/Grid2D.html#mikeio.Grid2D">API specification</a> for details.</p>
 </section>
-<section id="dfs2-example-notebooks" class="level2">
-<h2 class="anchored" data-anchor-id="dfs2-example-notebooks">Dfs2 Example notebooks</h2>
+<section id="dfs2-resources" class="level2">
+<h2 class="anchored" data-anchor-id="dfs2-resources">Dfs2 resources</h2>
 <ul>
 <li><a href="https://dhi.github.io/getting-started-with-mikeio/dfs2.html">Dfs2 | getting-started-with-mikeio</a></li>
-<li><a href="https://nbviewer.jupyter.org/github/DHI/mikeio/blob/main/notebooks/Dfs2%20-%20Bathymetry.ipynb">Dfs2-Bathymetry</a> - GEBCO NetCDF/xarray to dfs2</li>
-<li><a href="https://nbviewer.jupyter.org/github/DHI/mikeio/blob/main/notebooks/Dfs2%20-%20Boundary.ipynb">Dfs2-Boundary</a> - Vertical transect dfs2, interpolation in time</li>
-<li><a href="https://nbviewer.jupyter.org/github/DHI/mikeio/blob/main/notebooks/Dfs2%20-%20Export%20to%20netcdf.ipynb">Dfs2-Export-to-netCDF</a> Export dfs2 to NetCDF</li>
-<li><a href="https://nbviewer.jupyter.org/github/DHI/mikeio/blob/main/notebooks/Dfs2%20-%20Global%20Forecasting%20System.ipynb">Dfs2-GFS</a> - GFS NetCDF/xarray to dfs2</li>
-<li><a href="https://nbviewer.jupyter.org/github/DHI/mikeio/blob/main/notebooks/Dfs2%20-%20Sea%20surface%20temperature.ipynb">Dfs2-SST</a> - DMI NetCDF/xarray to dfs2</li>
+<li><a href="../examples/dfs2/bathy.html">Dfs2-Bathymetry</a> - GEBCO NetCDF/xarray to dfs2</li>
+<li><a href="../examples/dfs2/gfs.html">Dfs2-GFS</a> - GFS NetCDF/xarray to dfs2</li>
 </ul>
 
 
