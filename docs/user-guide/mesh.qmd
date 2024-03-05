@@ -1,26 +1,20 @@
 ---
 title: Mesh
-jupyter: python3
 ---
-
-* read mesh file
-* plot mesh 
-* convert to shapely
-* check if point is inside or outside mesh
-* subset mesh, plot subset
-* change z values
-* change boundary codes
-
 
 ```{python}
 import matplotlib.pyplot as plt
 import mikeio
 ```
 
+## Read mesh file
+
 ```{python}
 msh = mikeio.Mesh("../data/odense_rough.mesh")
 msh
 ```
+
+## Plot mesh
 
 ```{python}
 msh.plot()
@@ -60,7 +54,7 @@ coastalzone = domain - open_water
 coastalzone
 ```
 
-Find if points are inside the domain
+## Check if points are inside the domain
 
 ```{python}
 from shapely.geometry import Point
@@ -86,7 +80,7 @@ ax.legend();
 ```
 
 
-# Change z values and boundary code
+## Change z values and boundary code
 Assume that we want to have a minimum depth of 2 meters and change the open boundary (code 2) to a closed one (code 1). 
 
 ```{python}
@@ -105,7 +99,7 @@ c[c==2] = 1
 g.codes = c
 ```
 
-Save the modfied geometry to a new mesh file
+## Save the modfied geometry to a new mesh file
 
 ```{python}
 g.to_mesh("new_mesh.mesh")
