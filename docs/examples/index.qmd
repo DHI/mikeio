@@ -10,7 +10,7 @@ listing:
 
 If you want to try one of the examples you need to first download some data files.
 
-The files are stored on GitHub in the [MIKE IO repo](https:github.com/DHI/mikeio).
+The files are stored on GitHub in the [MIKE IO repo](https://github.com/DHI/mikeio).
 
 The easiest way is to the download the repo as a [zip file](https://github.com/DHI/mikeio/archive/main.zip) and extract the files you need.
 
