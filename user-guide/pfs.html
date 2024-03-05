@@ -6,8 +6,9 @@
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
+<meta name="description" content="A configuration file format used in MIKE software">
 
-<title>MIKE IO</title>
+<title>MIKE IO - PFS</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -168,7 +169,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
         <i class="bi bi-layout-text-sidebar-reverse"></i>
       </button>
         <a class="flex-grow-1 no-decor" role="button" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
-          <h1 class="quarto-secondary-nav-title">Pfs</h1>
+          <h1 class="quarto-secondary-nav-title">PFS</h1>
         </a>     
       <button type="button" class="btn quarto-search-button" aria-label="" onclick="window.quartoOpenSearch();">
         <i class="bi bi-search"></i>
@@ -265,7 +266,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../user-guide/pfs.html" class="sidebar-item-text sidebar-link active">
- <span class="menu-text">Pfs</span></a>
+ <span class="menu-text">PFS</span></a>
   </div>
 </li>
       </ul>
@@ -368,9 +369,14 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<h1 class="title d-none d-lg-block">Pfs</h1>
+<h1 class="title d-none d-lg-block">PFS</h1>
 </div>
 
+<div>
+  <div class="description">
+    A configuration file format used in MIKE software
+  </div>
+</div>
 
 
 <div class="quarto-title-meta">
@@ -389,33 +395,56 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <section id="the-pfs-file" class="level2">
 <h2 class="anchored" data-anchor-id="the-pfs-file">The PFS file</h2>
 <p>The content of the PFS file is similar to a nested dictionary. The root element is often called the <em>target</em>. Some PFS files have multiple root elements. The below sections are called <em>PFS Sections</em> which can be nested and contain key-value pairs called <em>keywords</em> and <em>parameters</em>.</p>
-<pre><code>[TARGET1]
-   keywordA = parameterA
-   [SECTION1]
-      keywordB = parameterB
-      keywordC = parameterC
-      [SECTION2]
-         keywordD = parameterD         
-      EndSect  // SECTION2 
-   EndSect  // SECTION1 
-EndSect  // TARGET1
-
-[TARGET2]
-   keywordE = parameterE 
-   [SECTION3]
-      keywordF = parameterF
-   EndSect  // SECTION3 
-EndSect  // TARGET2</code></pre>
+<div class="sourceCode" id="annotated-cell-1"><pre class="sourceCode ini code-annotation-code code-with-copy code-annotated"><code class="sourceCode ini"><button class="code-annotation-anchor" data-target-cell="annotated-cell-1" data-target-annotation="1">1</button><span id="annotated-cell-1-1" class="code-annotation-target"><a href="#annotated-cell-1-1" aria-hidden="true" tabindex="-1"></a><span class="kw">[TARGET1]</span></span>
+<span id="annotated-cell-1-2"><a href="#annotated-cell-1-2" aria-hidden="true" tabindex="-1"></a><span class="dt">   keywordA </span><span class="ot">=</span><span class="st"> parameterA</span></span>
+<span id="annotated-cell-1-3"><a href="#annotated-cell-1-3" aria-hidden="true" tabindex="-1"></a><span class="dt">   </span><span class="kw">[SECTION1]</span></span>
+<span id="annotated-cell-1-4"><a href="#annotated-cell-1-4" aria-hidden="true" tabindex="-1"></a><span class="dt">      keywordB </span><span class="ot">=</span><span class="st"> parameterB</span></span>
+<span id="annotated-cell-1-5"><a href="#annotated-cell-1-5" aria-hidden="true" tabindex="-1"></a><span class="dt">      keywordC </span><span class="ot">=</span><span class="st"> parameterC</span></span>
+<span id="annotated-cell-1-6"><a href="#annotated-cell-1-6" aria-hidden="true" tabindex="-1"></a><span class="dt">      </span><span class="kw">[SECTION2]</span></span>
+<span id="annotated-cell-1-7"><a href="#annotated-cell-1-7" aria-hidden="true" tabindex="-1"></a><span class="dt">         keywordD </span><span class="ot">=</span><span class="st"> parameterD</span></span>
+<span id="annotated-cell-1-8"><a href="#annotated-cell-1-8" aria-hidden="true" tabindex="-1"></a><span class="dt">      EndSect  // SECTION2</span></span>
+<span id="annotated-cell-1-9"><a href="#annotated-cell-1-9" aria-hidden="true" tabindex="-1"></a><span class="dt">   EndSect  // SECTION1</span></span>
+<span id="annotated-cell-1-10"><a href="#annotated-cell-1-10" aria-hidden="true" tabindex="-1"></a><span class="dt">EndSect  // TARGET1</span></span>
+<span id="annotated-cell-1-11"><a href="#annotated-cell-1-11" aria-hidden="true" tabindex="-1"></a></span>
+<button class="code-annotation-anchor" data-target-cell="annotated-cell-1" data-target-annotation="2">2</button><span id="annotated-cell-1-12" class="code-annotation-target"><a href="#annotated-cell-1-12" aria-hidden="true" tabindex="-1"></a><span class="kw">[TARGET2]</span></span>
+<span id="annotated-cell-1-13"><a href="#annotated-cell-1-13" aria-hidden="true" tabindex="-1"></a><span class="dt">   keywordE </span><span class="ot">=</span><span class="st"> parameterE</span></span>
+<span id="annotated-cell-1-14"><a href="#annotated-cell-1-14" aria-hidden="true" tabindex="-1"></a><span class="dt">   </span><span class="kw">[SECTION3]</span></span>
+<span id="annotated-cell-1-15"><a href="#annotated-cell-1-15" aria-hidden="true" tabindex="-1"></a><span class="dt">      keywordF </span><span class="ot">=</span><span class="st"> parameterF</span></span>
+<span id="annotated-cell-1-16"><a href="#annotated-cell-1-16" aria-hidden="true" tabindex="-1"></a><span class="dt">   EndSect  // SECTION3</span></span>
+<span id="annotated-cell-1-17"><a href="#annotated-cell-1-17" aria-hidden="true" tabindex="-1"></a><span class="dt">EndSect  // TARGET2</span></span><div class="code-annotation-gutter-bg"></div><div class="code-annotation-gutter"></div></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<dl class="code-annotation-container-hidden code-annotation-container-grid">
+<dt data-target-cell="annotated-cell-1" data-target-annotation="1">1</dt>
+<dd>
+<span data-code-cell="annotated-cell-1" data-code-lines="1,2,3,4,5,6,7,8,9,10" data-code-annotation="1">First target, access this part with <code>pfs.targets[0]</code></span>
+</dd>
+<dt data-target-cell="annotated-cell-1" data-target-annotation="2">2</dt>
+<dd>
+<span data-code-cell="annotated-cell-1" data-code-lines="12,13,14,15,16,17" data-code-annotation="2">Second target, access this part with <code>pfs.targets[1]</code></span>
+</dd>
+</dl>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Note
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p><strong>Comments</strong> <code>//</code> is used to add comments to the PFS file (e.g.&nbsp;<code>// SECTION2</code>), the comments are ignored by MIKE IO.</p>
+</div>
+</div>
 </section>
 <section id="read" class="level2">
 <h2 class="anchored" data-anchor-id="read">Read</h2>
 <p>When a PFS file is read with MIKE IO, a <code>PfsDocument</code> object is created. It will contain one or more <code>PfsSection</code> objects - one for each target. The PfsSections will typically contain other PfsSections together with a number of key-value pairs.</p>
 <p>A PFS file is read using <a href="../api/read_pfs.html#mikeio.read_pfs"><code>mikeio.read_pfs</code></a>:</p>
-<div id="9ef0bf81" class="cell" data-execution_count="1">
-<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> mikeio</span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>pfs <span class="op">=</span> mikeio.read_pfs(<span class="st">"../data/pfs/concat.mzt"</span>)</span>
-<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>pfs</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div id="a98f6f05" class="cell" data-execution_count="1">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> mikeio</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>pfs <span class="op">=</span> mikeio.read_pfs(<span class="st">"../data/pfs/concat.mzt"</span>)</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>pfs</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="1">
 <pre><code>[txconc]
    CLSID = 'TxConc.dll'
@@ -452,8 +481,8 @@ EndSect  // txconc</code></pre>
 <section id="pfsdocument" class="level3">
 <h3 class="anchored" data-anchor-id="pfsdocument">PfsDocument</h3>
 <p>The <a href="../api/PfsDocument.html#mikeio.PfsDocument"><code>mikeio.PfsDocument</code></a> is the MIKE IO equivalent to a PFS file. Its targets can be accessed by their name (as properties), like this:</p>
-<div id="f3e9fb8e" class="cell" data-execution_count="2">
-<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>pfs.txconc</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div id="0b4ac437" class="cell" data-execution_count="2">
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>pfs.txconc</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="2">
 <pre><code>CLSID = 'TxConc.dll'
 TypeName = 'txconc'
@@ -491,36 +520,36 @@ EndSect  // Setup</code></pre>
 <section id="pfssection" class="level3">
 <h3 class="anchored" data-anchor-id="pfssection">PfsSection</h3>
 <p>The <a href="../api/PfsSection.html#mikeio.PfsSection"><code>mikeio.PfsSection</code></a> object is also similar to a dictionary. You can loop over its contents with <code>items()</code>, <code>keys()</code> and <code>values()</code> like a dictionary.</p>
-<div id="3eb0b24b" class="cell" data-execution_count="3">
-<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>pfs.txconc.keys()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div id="9c430567" class="cell" data-execution_count="3">
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>pfs.txconc.keys()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="3">
 <pre><code>dict_keys(['CLSID', 'TypeName', 'CREATEDTIME', 'MODIFIEDTIME', 'NOTES', 'Setup'])</code></pre>
 </div>
 </div>
 <p>You can access a specific parameter with the <code>get()</code> method:</p>
-<div id="ae8c0f0d" class="cell" data-execution_count="4">
-<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>pfs.txconc.get(<span class="st">"CLSID"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div id="21fd652d" class="cell" data-execution_count="4">
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>pfs.txconc.get(<span class="st">"CLSID"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="4">
 <pre><code>'TxConc.dll'</code></pre>
 </div>
 </div>
 <p>Or as a property with dot-notation—which is prefered in most cases as it is more readable:</p>
-<div id="99f7f3be" class="cell" data-execution_count="5">
-<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>pfs.txconc.CLSID</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div id="4895435a" class="cell" data-execution_count="5">
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>pfs.txconc.CLSID</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="5">
 <pre><code>'TxConc.dll'</code></pre>
 </div>
 </div>
 <p>A PfsSection can be converted to a dictionary with the to_dict() method:</p>
-<div id="6d20a3fa" class="cell" data-execution_count="6">
-<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>pfs.txconc.Setup.File_1.to_dict()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div id="c53ce0ba" class="cell" data-execution_count="6">
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>pfs.txconc.Setup.File_1.to_dict()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="6">
 <pre><code>{'InputFile': '|.\\tide1.dfs1|', 'Items': 1}</code></pre>
 </div>
 </div>
 <p>If a PfsSection contains enumerated subsections, they can be converted to a pandas DataFrame with the <code>to_dataframe()</code> method:</p>
-<div id="7e6f3a8d" class="cell" data-execution_count="7">
-<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>pfs.txconc.Setup.to_dataframe(prefix<span class="op">=</span><span class="st">"File_"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div id="e2f65563" class="cell" data-execution_count="7">
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>pfs.txconc.Setup.to_dataframe(prefix<span class="op">=</span><span class="st">"File_"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="7">
 <div>
 <div>
@@ -556,7 +585,7 @@ EndSect  // Setup</code></pre>
 <section id="unique-or-non-unique-keywords" class="level3">
 <h3 class="anchored" data-anchor-id="unique-or-non-unique-keywords">Unique or non-unique keywords</h3>
 <p>Depending on the engine intended for reading the PFS file it may or may not make sense to have multiple identical keywords in the same PfsSection. MIKE 21/3 and the marine tools does <em>not</em> support non-unique keywords—if non-unique keywords are present, only the first will be read and the presence is most likely a mistake made by hand-editing the file. In other tools, e.g.&nbsp;MIKE Plot Composer, non-unique keywords are used a lot. How MIKE IO shall deal with non-unique keywords can be specified using the <code>unique_keywords</code> argument in the <a href="../api/read_pfs.html#mikeio.read_pfs"><code>mikeio.read_pfs</code></a> function:</p>
-<div class="sourceCode" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>pfs <span class="op">=</span> mikeio.read_pfs(<span class="st">"myplot.plt"</span>, unique_keywords<span class="op">=</span><span class="va">False</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>pfs <span class="op">=</span> mikeio.read_pfs(<span class="st">"myplot.plt"</span>, unique_keywords<span class="op">=</span><span class="va">False</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <p>If a PfsSection contains non-unique PfsSections or keywords and <code>unique_keywords=False</code>, the repeated key will only appear once and the corresponding value will be a list.</p>
 </section>
 </section>
@@ -566,48 +595,48 @@ EndSect  // Setup</code></pre>
 <section id="modify-existing-keyword" class="level3">
 <h3 class="anchored" data-anchor-id="modify-existing-keyword">Modify existing keyword</h3>
 <p>It is very simple to modify an existing keyword:</p>
-<div class="sourceCode" id="cb16"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>pfs.txconc.Setup.Name <span class="op">=</span> <span class="st">"new name"</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>pfs.txconc.Setup.Name <span class="op">=</span> <span class="st">"new name"</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </section>
 <section id="add-new-key-value-pair" class="level3">
 <h3 class="anchored" data-anchor-id="add-new-key-value-pair">Add new key-value pair</h3>
 <p>A new key-value pair can be added, like in a dictionary, in this way:</p>
-<div class="sourceCode" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>pfs.txconc.Setup[<span class="st">"NewKeyword"</span>] <span class="op">=</span> <span class="fl">12.0</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb16"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>pfs.txconc.Setup[<span class="st">"NewKeyword"</span>] <span class="op">=</span> <span class="fl">12.0</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </section>
 <section id="add-new-section-as-a-copy-of-another-section" class="level3">
 <h3 class="anchored" data-anchor-id="add-new-section-as-a-copy-of-another-section">Add new section as a copy of another section</h3>
 <p>Often a PfsSection is added using an existing PfsSection as a template.</p>
-<div class="sourceCode" id="cb18"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>s <span class="op">=</span> pfs.txconc.Setup.File_1.copy()</span>
-<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>s.InputFile <span class="op">=</span> <span class="st">'|.</span><span class="ch">\t</span><span class="st">ide3.dfs1|'</span></span>
-<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>pfs.txconc.Setup[<span class="st">"File_3"</span>] <span class="op">=</span> s</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>s <span class="op">=</span> pfs.txconc.Setup.File_1.copy()</span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>s.InputFile <span class="op">=</span> <span class="st">'|.</span><span class="ch">\t</span><span class="st">ide3.dfs1|'</span></span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>pfs.txconc.Setup[<span class="st">"File_3"</span>] <span class="op">=</span> s</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </section>
 <section id="add-new-section-from-a-dictionary" class="level3">
 <h3 class="anchored" data-anchor-id="add-new-section-from-a-dictionary">Add new section from a dictionary</h3>
 <p>A PfsSection can be created from a dictionary and then added to another PfsSection like any other key-value pair:</p>
-<div class="sourceCode" id="cb19"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>d <span class="op">=</span> {<span class="st">'InputFile'</span>: <span class="st">'|.</span><span class="ch">\\</span><span class="st">tide4.dfs1|'</span>, <span class="st">'Items'</span>: <span class="dv">1</span>}</span>
-<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>s <span class="op">=</span> mikeio.PfsSection(d)</span>
-<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>pfs.txconc.Setup[<span class="st">"File_4"</span>] <span class="op">=</span> s</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div id="00c8d565" class="cell" data-execution_count="8">
+<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>d <span class="op">=</span> {<span class="st">'InputFile'</span>: <span class="st">'|.</span><span class="ch">\\</span><span class="st">tide4.dfs1|'</span>, <span class="st">'Items'</span>: <span class="dv">1</span>}</span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>s <span class="op">=</span> mikeio.PfsSection(d)</span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>pfs.txconc.Setup[<span class="st">"File_4"</span>] <span class="op">=</span> s</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
 </section>
 </section>
 <section id="write-to-file" class="level2">
 <h2 class="anchored" data-anchor-id="write-to-file">Write to file</h2>
-<p>A Pfs object can be written to a PFS file using the <code>write</code> method.</p>
-<div class="sourceCode" id="cb20"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>pfs.write(<span class="st">"new.pfs"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>A Pfs document can be written to a file using the <code>write</code> method.</p>
+<div class="sourceCode" id="cb19"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>pfs.write(<span class="st">"new.pfs"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </section>
 <section id="create-new-pfs-files" class="level2">
 <h2 class="anchored" data-anchor-id="create-new-pfs-files">Create new Pfs files</h2>
 <p>A new PFS file can be created from dictionary in the following way:</p>
-<div id="13f6c93d" class="cell" data-execution_count="8">
-<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> datetime <span class="im">import</span> datetime</span>
-<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>d <span class="op">=</span> <span class="bu">dict</span>(</span>
-<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a>    key1<span class="op">=</span><span class="dv">1</span>,</span>
-<span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a>    lst<span class="op">=</span>[<span class="fl">0.3</span>, <span class="fl">0.7</span>],</span>
-<span id="cb21-6"><a href="#cb21-6" aria-hidden="true" tabindex="-1"></a>    file_name<span class="op">=</span><span class="vs">r"|path\file.dfs0|"</span>,</span>
-<span id="cb21-7"><a href="#cb21-7" aria-hidden="true" tabindex="-1"></a>    start_time<span class="op">=</span>datetime(<span class="dv">2019</span>, <span class="dv">7</span>, <span class="dv">1</span>, <span class="dv">0</span>, <span class="dv">0</span>, <span class="dv">0</span>),</span>
-<span id="cb21-8"><a href="#cb21-8" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb21-9"><a href="#cb21-9" aria-hidden="true" tabindex="-1"></a>pfs <span class="op">=</span> mikeio.PfsDocument({<span class="st">"MYTOOL"</span>: d})</span>
-<span id="cb21-10"><a href="#cb21-10" aria-hidden="true" tabindex="-1"></a>pfs</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display" data-execution_count="8">
+<div id="34145d44" class="cell" data-execution_count="9">
+<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>d <span class="op">=</span> <span class="bu">dict</span>(</span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>    key1<span class="op">=</span><span class="dv">1</span>,</span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>    lst<span class="op">=</span>[<span class="fl">0.3</span>, <span class="fl">0.7</span>],</span>
+<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a>    file_name<span class="op">=</span><span class="vs">r"|path\file.dfs0|"</span>,</span>
+<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a>    start_time<span class="op">=</span>[<span class="dv">2019</span>, <span class="dv">7</span>, <span class="dv">1</span>, <span class="dv">0</span>, <span class="dv">0</span>, <span class="dv">0</span>],</span>
+<span id="cb20-6"><a href="#cb20-6" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb20-7"><a href="#cb20-7" aria-hidden="true" tabindex="-1"></a>pfs <span class="op">=</span> mikeio.PfsDocument({<span class="st">"MYTOOL"</span>: d})</span>
+<span id="cb20-8"><a href="#cb20-8" aria-hidden="true" tabindex="-1"></a>pfs</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="9">
 <pre><code>[MYTOOL]
    key1 = 1
    lst = 0.3, 0.7
@@ -616,7 +645,22 @@ EndSect  // Setup</code></pre>
 EndSect  // MYTOOL</code></pre>
 </div>
 </div>
-<p>Multiple targets can be achieved by providing list of dictionaries.</p>
+<p>Multiple targets can be achieved by providing list of dictionaries, in this way you can create a PFS file with multiple targets for the same tool.</p>
+<div id="154f7cd4" class="cell" data-execution_count="10">
+<div class="sourceCode cell-code" id="cb22"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>t1 <span class="op">=</span> {<span class="st">"file_name"</span>: <span class="vs">r"|path\file1.dfs0|"</span>}</span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a>t2 <span class="op">=</span> {<span class="st">"file_name"</span>: <span class="vs">r"|path\file2.dfs0|"</span>}</span>
+<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a>pfs <span class="op">=</span> mikeio.PfsDocument([t1, t2], names<span class="op">=</span>[<span class="st">"ATOOL"</span>, <span class="st">"ATOOL"</span>])</span>
+<span id="cb22-5"><a href="#cb22-5" aria-hidden="true" tabindex="-1"></a>pfs</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="10">
+<pre><code>[ATOOL]
+   file_name = |path\file1.dfs0|
+EndSect  // ATOOL
+[ATOOL]
+   file_name = |path\file2.dfs0|
+EndSect  // ATOOL</code></pre>
+</div>
+</div>
 
 
 </section>
@@ -950,25 +994,64 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
         }
       };
     }
-      // Attach click handler to the DT
-      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
-      for (const annoteDlNode of annoteDls) {
-        annoteDlNode.addEventListener('click', (event) => {
-          const clickedEl = event.target;
-          if (clickedEl !== selectedAnnoteEl) {
-            unselectCodeLines();
-            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
-            if (activeEl) {
-              activeEl.classList.remove('code-annotation-active');
-            }
-            selectCodeLines(clickedEl);
-            clickedEl.classList.add('code-annotation-active');
-          } else {
-            // Unselect the line
-            unselectCodeLines();
-            clickedEl.classList.remove('code-annotation-active');
+      const annoteTargets = window.document.querySelectorAll('.code-annotation-anchor');
+      for (let i=0; i<annoteTargets.length; i++) {
+        const annoteTarget = annoteTargets[i];
+        const targetCell = annoteTarget.getAttribute("data-target-cell");
+        const targetAnnotation = annoteTarget.getAttribute("data-target-annotation");
+        const contentFn = () => {
+          const content = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          if (content) {
+            const tipContent = content.cloneNode(true);
+            tipContent.classList.add("code-annotation-tip-content");
+            return tipContent.outerHTML;
           }
-        });
+        }
+        const config = {
+          allowHTML: true,
+          content: contentFn,
+          onShow: (instance) => {
+            selectCodeLines(instance.reference);
+            instance.reference.classList.add('code-annotation-active');
+            window.tippy.hideAll();
+          },
+          onHide: (instance) => {
+            unselectCodeLines();
+            instance.reference.classList.remove('code-annotation-active');
+          },
+          maxWidth: 300,
+          delay: [50, 0],
+          duration: [200, 0],
+          offset: [5, 10],
+          arrow: true,
+          appendTo: function(el) {
+            return el.parentElement.parentElement.parentElement;
+          },
+          interactive: true,
+          interactiveBorder: 10,
+          theme: 'quarto',
+          placement: 'right',
+          popperOptions: {
+            modifiers: [
+            {
+              name: 'flip',
+              options: {
+                flipVariations: false, // true by default
+                allowedAutoPlacements: ['right'],
+                fallbackPlacements: ['right', 'top', 'top-start', 'top-end', 'bottom', 'bottom-start', 'bottom-end', 'left'],
+              },
+            },
+            {
+              name: 'preventOverflow',
+              options: {
+                mainAxis: false,
+                altAxis: false
+              }
+            }
+            ]        
+          }      
+        };
+        window.tippy(annoteTarget, config); 
       }
   const findCites = (el) => {
     const parentEl = el.parentElement;
