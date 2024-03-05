@@ -6,7 +6,7 @@ The [](`mikeio.read`) methods returns a Dataset as a container of [DataArray](`m
 
 The Dataset has the following primary properties: 
 
-* **items** - a list of [](`mikeio.eum.ItemInfo`) items for each dataarray
+* **items** - a list of [](`mikeio.ItemInfo`) items for each dataarray
 * **time** - a [](`pandas.DatetimeIndex`) with the time instances of the data
 * **geometry** - a Geometry object with the spatial description of the data
 
