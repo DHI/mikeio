@@ -64,7 +64,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <script src="../site_libs/quarto-search/fuse.min.js"></script>
 <script src="../site_libs/quarto-search/quarto-search.js"></script>
 <meta name="quarto:offset" content="../">
-<link href="../user-guide/eum.html" rel="next">
+<link href="../user-guide/mesh.html" rel="next">
 <link href="../user-guide/dfs2.html" rel="prev">
 <script src="../site_libs/quarto-html/quarto.js"></script>
 <script src="../site_libs/quarto-html/popper.min.js"></script>
@@ -239,6 +239,12 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <div class="sidebar-item-container"> 
   <a href="../user-guide/dfsu.html" class="sidebar-item-text sidebar-link active">
  <span class="menu-text">Dfsu and Mesh Overview</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../user-guide/mesh.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Mesh</span></a>
   </div>
 </li>
           <li class="sidebar-item">
@@ -488,7 +494,7 @@ Note
 </table>
 <p>These properties and methods are accessible from the geometry, but also from the Mesh/Dfsu object.</p>
 <p>If a .dfsu file is <em>read</em> with <a href="../api/read.html#mikeio.read"><code>mikeio.read</code></a>, the returned Dataset ds will contain a Flexible Mesh Geometry <code>geometry</code>. If a .dfsu or a .mesh file is <em>opened</em> with <a href="../api/open.html#mikeio.open"><code>mikeio.open</code></a>, the returned object will also contain a Flexible Mesh Geometry <code>geometry</code>.</p>
-<div id="d689fcda" class="cell" data-execution_count="1">
+<div id="d84b99c2" class="cell" data-execution_count="1">
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> mikeio</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>ds <span class="op">=</span> mikeio.read(<span class="st">"../data/oresundHD_run1.dfsu"</span>)</span>
@@ -500,7 +506,7 @@ number of elements: 3612
 projection: UTM-33</code></pre>
 </div>
 </div>
-<div id="63e2040c" class="cell" data-execution_count="2">
+<div id="297d0454" class="cell" data-execution_count="2">
 <div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>dfs <span class="op">=</span> mikeio.<span class="bu">open</span>(<span class="st">"../data/oresundHD_run1.dfsu"</span>)</span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>dfs.geometry</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="2">
@@ -932,8 +938,8 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
       </a>          
   </div>
   <div class="nav-page nav-page-next">
-      <a href="../user-guide/eum.html" class="pagination-link" aria-label="EUM">
-        <span class="nav-page-text">EUM</span> <i class="bi bi-arrow-right-short"></i>
+      <a href="../user-guide/mesh.html" class="pagination-link" aria-label="Mesh">
+        <span class="nav-page-text">Mesh</span> <i class="bi bi-arrow-right-short"></i>
       </a>
   </div>
 </nav>

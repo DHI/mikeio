@@ -246,6 +246,12 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
+  <a href="../user-guide/mesh.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Mesh</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
   <a href="../user-guide/eum.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">EUM</span></a>
   </div>
@@ -382,7 +388,7 @@ EndSect  // TARGET2</code></pre>
 <h2 class="anchored" data-anchor-id="read">Read</h2>
 <p>When a PFS file is read with MIKE IO, a <code>PfsDocument</code> object is created. It will contain one or more <code>PfsSection</code> objects - one for each target. The PfsSections will typically contain other PfsSections together with a number of key-value pairs.</p>
 <p>A PFS file is read using <a href="../api/read_pfs.html#mikeio.read_pfs"><code>mikeio.read_pfs</code></a>:</p>
-<div id="784eb5c9" class="cell" data-execution_count="1">
+<div id="8464364c" class="cell" data-execution_count="1">
 <div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> mikeio</span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>pfs <span class="op">=</span> mikeio.read_pfs(<span class="st">"../data/pfs/concat.mzt"</span>)</span>
@@ -423,7 +429,7 @@ EndSect  // txconc</code></pre>
 <section id="pfsdocument" class="level3">
 <h3 class="anchored" data-anchor-id="pfsdocument">PfsDocument</h3>
 <p>The <a href="../api/PfsDocument.html#mikeio.PfsDocument"><code>mikeio.PfsDocument</code></a> is the MIKE IO equivalent to a PFS file. Its targets can be accessed by their name (as properties), like this:</p>
-<div id="a98ce5e0" class="cell" data-execution_count="2">
+<div id="707f1581" class="cell" data-execution_count="2">
 <div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>pfs.txconc</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="2">
 <pre><code>CLSID = 'TxConc.dll'
@@ -462,35 +468,35 @@ EndSect  // Setup</code></pre>
 <section id="pfssection" class="level3">
 <h3 class="anchored" data-anchor-id="pfssection">PfsSection</h3>
 <p>The <a href="../api/PfsSection.html#mikeio.PfsSection"><code>mikeio.PfsSection</code></a> object is also similar to a dictionary. You can loop over its contents with <code>items()</code>, <code>keys()</code> and <code>values()</code> like a dictionary.</p>
-<div id="308204cd" class="cell" data-execution_count="3">
+<div id="1f857bf0" class="cell" data-execution_count="3">
 <div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>pfs.txconc.keys()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="3">
 <pre><code>dict_keys(['CLSID', 'TypeName', 'CREATEDTIME', 'MODIFIEDTIME', 'NOTES', 'Setup'])</code></pre>
 </div>
 </div>
 <p>You can access a specific parameter with the <code>get()</code> method:</p>
-<div id="ae5f7bd4" class="cell" data-execution_count="4">
+<div id="eedc1488" class="cell" data-execution_count="4">
 <div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>pfs.txconc.get(<span class="st">"CLSID"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="4">
 <pre><code>'TxConc.dll'</code></pre>
 </div>
 </div>
 <p>Or as a property with dot-notation—which is prefered in most cases as it is more readable:</p>
-<div id="8b7bf8ac" class="cell" data-execution_count="5">
+<div id="db24d330" class="cell" data-execution_count="5">
 <div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>pfs.txconc.CLSID</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="5">
 <pre><code>'TxConc.dll'</code></pre>
 </div>
 </div>
 <p>A PfsSection can be converted to a dictionary with the to_dict() method:</p>
-<div id="18f89a02" class="cell" data-execution_count="6">
+<div id="06f79447" class="cell" data-execution_count="6">
 <div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>pfs.txconc.Setup.File_1.to_dict()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="6">
 <pre><code>{'InputFile': '|.\\tide1.dfs1|', 'Items': 1}</code></pre>
 </div>
 </div>
 <p>If a PfsSection contains enumerated subsections, they can be converted to a pandas DataFrame with the <code>to_dataframe()</code> method:</p>
-<div id="4463dfba" class="cell" data-execution_count="7">
+<div id="56e01a9e" class="cell" data-execution_count="7">
 <div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>pfs.txconc.Setup.to_dataframe(prefix<span class="op">=</span><span class="st">"File_"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="7">
 <div>
@@ -567,7 +573,7 @@ EndSect  // Setup</code></pre>
 <section id="create-new-pfs-files" class="level2">
 <h2 class="anchored" data-anchor-id="create-new-pfs-files">Create new Pfs files</h2>
 <p>A new PFS file can be created from dictionary in the following way:</p>
-<div id="d706dc20" class="cell" data-execution_count="8">
+<div id="e2a03c0c" class="cell" data-execution_count="8">
 <div class="sourceCode cell-code" id="cb21"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> datetime <span class="im">import</span> datetime</span>
 <span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>d <span class="op">=</span> <span class="bu">dict</span>(</span>
