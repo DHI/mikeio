@@ -75,6 +75,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <script src="site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
 <link href="site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<link href="site_libs/quarto-contrib/fontawesome6-0.1.0/all.css" rel="stylesheet">
+<link href="site_libs/quarto-contrib/fontawesome6-0.1.0/latex-fontsize.css" rel="stylesheet">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -343,17 +345,17 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <ul>
   <li><a href="#design-philosophy" id="toc-design-philosophy" class="nav-link active" data-scroll-target="#design-philosophy">Design philosophy</a>
   <ul class="collapse">
-  <li><a href="#easy-to-use" id="toc-easy-to-use" class="nav-link" data-scroll-target="#easy-to-use">Easy to use</a></li>
-  <li><a href="#familiar" id="toc-familiar" class="nav-link" data-scroll-target="#familiar">Familiar</a></li>
-  <li><a href="#easy-to-install" id="toc-easy-to-install" class="nav-link" data-scroll-target="#easy-to-install">Easy to install</a></li>
-  <li><a href="#easy-to-get-started" id="toc-easy-to-get-started" class="nav-link" data-scroll-target="#easy-to-get-started">Easy to get started</a></li>
-  <li><a href="#open-source" id="toc-open-source" class="nav-link" data-scroll-target="#open-source">Open Source​</a></li>
-  <li><a href="#easy-to-collaborate" id="toc-easy-to-collaborate" class="nav-link" data-scroll-target="#easy-to-collaborate">Easy to collaborate</a></li>
-  <li><a href="#reproducible" id="toc-reproducible" class="nav-link" data-scroll-target="#reproducible">Reproducible</a></li>
-  <li><a href="#easy-access-to-new-features" id="toc-easy-access-to-new-features" class="nav-link" data-scroll-target="#easy-access-to-new-features">Easy access to new features</a></li>
+  <li><a href="#easy-to-use" id="toc-easy-to-use" class="nav-link" data-scroll-target="#easy-to-use"><i class="fa-solid fa-code" aria-label="code"></i> Easy to use</a></li>
+  <li><a href="#familiar" id="toc-familiar" class="nav-link" data-scroll-target="#familiar"><i class="fa-brands fa-python" aria-label="python"></i> Familiar</a></li>
+  <li><a href="#easy-to-install" id="toc-easy-to-install" class="nav-link" data-scroll-target="#easy-to-install"><i class="fa-solid fa-download" aria-label="download"></i> Easy to install</a></li>
+  <li><a href="#easy-to-get-started" id="toc-easy-to-get-started" class="nav-link" data-scroll-target="#easy-to-get-started"><i class="fa-solid fa-book" aria-label="book"></i> Easy to get started</a></li>
+  <li><a href="#open-source" id="toc-open-source" class="nav-link" data-scroll-target="#open-source"><i class="fa-brands fa-osi" aria-label="osi"></i> Open Source​</a></li>
+  <li><a href="#easy-to-collaborate" id="toc-easy-to-collaborate" class="nav-link" data-scroll-target="#easy-to-collaborate"><i class="fa-solid fa-comments" aria-label="comments"></i> Easy to collaborate</a></li>
+  <li><a href="#reproducible" id="toc-reproducible" class="nav-link" data-scroll-target="#reproducible"><i class="fa-solid fa-list-ol" aria-label="list-ol"></i> Reproducible</a></li>
+  <li><a href="#easy-access-to-new-features" id="toc-easy-access-to-new-features" class="nav-link" data-scroll-target="#easy-access-to-new-features"><i class="fa-brands fa-github" aria-label="github"></i> Easy access to new features</a></li>
   </ul></li>
   </ul>
-<div class="toc-actions"><ul><li><a href="https://github.com/DHI/mikeio/edit/main/docs/design.md" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li></ul></div></nav>
+<div class="toc-actions"><ul><li><a href="https://github.com/DHI/mikeio/edit/main/docs/design.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li></ul></div></nav>
     </div>
 <!-- main -->
 <main class="content" id="quarto-document-content">
@@ -363,31 +365,21 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 <section id="design-philosophy" class="level1">
 <h1>Design philosophy</h1>
-<ul>
-<li><a href="#easy-to-use">Easy to use</a></li>
-<li><a href="#familiar">Familiar</a></li>
-<li><a href="#easy-to-install">Easy to install</a></li>
-<li><a href="#easy-to-get-started">Easy to get started</a></li>
-<li><a href="#open-source">Open Source​</a></li>
-<li><a href="#easy-to-collaborate">Easy to collaborate​</a></li>
-<li><a href="#reproducible">Reproducible</a></li>
-<li><a href="#easy-access-to-new-features">Easy access to new features</a></li>
-</ul>
 <section id="easy-to-use" class="level2">
-<h2 class="anchored" data-anchor-id="easy-to-use">Easy to use</h2>
+<h2 class="anchored" data-anchor-id="easy-to-use"><i class="fa-solid fa-code" aria-label="code"></i> Easy to use</h2>
 <p>Common operations such as reading a file should only need a few lines of code.</p>
 <p>Make extensive use of existing standard libraries for scientific computing such as numpy, matplotlib and pandas.</p>
 </section>
 <section id="familiar" class="level2">
-<h2 class="anchored" data-anchor-id="familiar">Familiar</h2>
+<h2 class="anchored" data-anchor-id="familiar"><i class="fa-brands fa-python" aria-label="python"></i> Familiar</h2>
 <p>MIKE IO aims to use a syntax familiar to users of scientific computing libraries such as NumPy, Pandas and xarray.</p>
 </section>
 <section id="easy-to-install" class="level2">
-<h2 class="anchored" data-anchor-id="easy-to-install">Easy to install</h2>
+<h2 class="anchored" data-anchor-id="easy-to-install"><i class="fa-solid fa-download" aria-label="download"></i> Easy to install</h2>
 <div class="sourceCode" id="cb1"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="ex">$</span> pip install mikeio</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </section>
 <section id="easy-to-get-started" class="level2">
-<h2 class="anchored" data-anchor-id="easy-to-get-started">Easy to get started</h2>
+<h2 class="anchored" data-anchor-id="easy-to-get-started"><i class="fa-solid fa-book" aria-label="book"></i> Easy to get started</h2>
 <p>By providing many examples to cut/paste from.</p>
 <p>Examples are available in two forms:</p>
 <ul>
@@ -396,22 +388,22 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </ul>
 </section>
 <section id="open-source" class="level2">
-<h2 class="anchored" data-anchor-id="open-source">Open Source​</h2>
+<h2 class="anchored" data-anchor-id="open-source"><i class="fa-brands fa-osi" aria-label="osi"></i> Open Source​</h2>
 <p>MIKE IO is an open source project licensed under the <a href="https://github.com/DHI/mikeio/blob/main/License.txt">BSD-3 license</a>. The software is provided free of charge with the source code available for inspection and modification.</p>
 <p>Contributions are welcome, more details can be found in our <a href="https://github.com/DHI/mikeio/blob/main/CONTRIBUTING.md">contribution guidelines</a>.</p>
 </section>
 <section id="easy-to-collaborate" class="level2">
-<h2 class="anchored" data-anchor-id="easy-to-collaborate">Easy to collaborate</h2>
+<h2 class="anchored" data-anchor-id="easy-to-collaborate"><i class="fa-solid fa-comments" aria-label="comments"></i> Easy to collaborate</h2>
 <p>By developing MIKE IO on GitHub along with a completely open discussion, we believe that the collaboration between developers and end-users results in a useful library.</p>
 </section>
 <section id="reproducible" class="level2">
-<h2 class="anchored" data-anchor-id="reproducible">Reproducible</h2>
+<h2 class="anchored" data-anchor-id="reproducible"><i class="fa-solid fa-list-ol" aria-label="list-ol"></i> Reproducible</h2>
 <p>By providing the historical versions of MIKE IO on PyPI it is possible to reproduce the behaviour of an older existing system, based on an older version.</p>
 <p><strong>Install specific version</strong></p>
 <div class="sourceCode" id="cb2"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="ex">pip</span> install mikeio==1.4.0</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </section>
 <section id="easy-access-to-new-features" class="level2">
-<h2 class="anchored" data-anchor-id="easy-access-to-new-features">Easy access to new features</h2>
+<h2 class="anchored" data-anchor-id="easy-access-to-new-features"><i class="fa-brands fa-github" aria-label="github"></i> Easy access to new features</h2>
 <p>Features are being added all the time, by developers at DHI in offices all around the globe as well as external contributors using MIKE IO in their work. These new features are always available from the <a href="https://github.com/DHI/mikeio">main branch on GitHub</a> and thanks to automated testing, it is always possible to verify that the tests passes before downloading a new development version.</p>
 <p><strong>Install development version</strong></p>
 <div class="sourceCode" id="cb3"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="ex">$</span> pip install https://github.com/DHI/mikeio/archive/main.zip</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
@@ -828,7 +820,7 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
     </div>   
     <div class="nav-footer-center">
 <p>© 2024 DHI Group</p>
-<div class="toc-actions d-sm-block d-md-none"><ul><li><a href="https://github.com/DHI/mikeio/edit/main/docs/design.md" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li></ul></div></div>
+<div class="toc-actions d-sm-block d-md-none"><ul><li><a href="https://github.com/DHI/mikeio/edit/main/docs/design.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li></ul></div></div>
     <div class="nav-footer-right">
       &nbsp;
     </div>
