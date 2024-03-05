@@ -58,7 +58,7 @@ website:
           - examples/Time-interpolation.qmd
           - examples/Generic.qmd
       - text: Design philosophy
-        href: design.md
+        href: design.qmd
       - text: API Reference
         href: api/index.qmd
           
