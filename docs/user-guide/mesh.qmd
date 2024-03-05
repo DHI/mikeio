@@ -24,7 +24,7 @@ msh.plot()
 msh.plot.boundary_nodes(boundary_names=['Land','Open boundary']);
 ```
 
-# Convert mesh to shapely
+## Convert mesh to shapely
 Convert mesh to [shapely](https://shapely.readthedocs.io/en/latest/manual.html) MultiPolygon object, requires that the `shapely` library is installed.
 
 ```{python}
