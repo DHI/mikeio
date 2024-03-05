@@ -12,7 +12,8 @@ import mikeio
 ```
 
 ```{python}
-#| echo: false
+# | echo: false
+# | output: false
 xarray.set_options(display_expand_attrs=False, display_expand_coords=False)
 ```
 
