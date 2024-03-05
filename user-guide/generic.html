@@ -343,7 +343,10 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <ul>
   <li><a href="#generic" id="toc-generic" class="nav-link active" data-scroll-target="#generic">Generic</a>
   <ul class="collapse">
-  <li><a href="#generic-example-notebooks" id="toc-generic-example-notebooks" class="nav-link" data-scroll-target="#generic-example-notebooks">Generic example notebooks</a></li>
+  <li><a href="#when-to-use-the-generic-module" id="toc-when-to-use-the-generic-module" class="nav-link" data-scroll-target="#when-to-use-the-generic-module">When to use the generic module</a></li>
+  <li><a href="#when-not-to-use-the-generic-module" id="toc-when-not-to-use-the-generic-module" class="nav-link" data-scroll-target="#when-not-to-use-the-generic-module">When not to use the generic module</a></li>
+  <li><a href="#example" id="toc-example" class="nav-link" data-scroll-target="#example">Example</a></li>
+  <li><a href="#more-examples" id="toc-more-examples" class="nav-link" data-scroll-target="#more-examples">More examples</a></li>
   </ul></li>
   </ul>
 <div class="toc-actions"><ul><li><a href="https://github.com/DHI/mikeio/edit/main/docs/user-guide/generic.md" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li></ul></div></nav>
@@ -366,11 +369,29 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <li><a href="../api/generic.html#mikeio.generic.avg_time"><code>avg_time()</code></a> - Create a temporally averaged dfs file</li>
 <li><a href="../api/generic.html#mikeio.generic.quantile"><code>quantile()</code></a> - Create a dfs file with temporal quantiles</li>
 </ul>
-<p>All methods in the generic module creates a new dfs file.</p>
+<section id="when-to-use-the-generic-module" class="level2">
+<h2 class="anchored" data-anchor-id="when-to-use-the-generic-module">When to use the generic module</h2>
+<ul>
+<li>The processing is not tied to the spatial dimension of the data</li>
+<li>When the files are large and you want to avoid reading the entire file into memory</li>
+</ul>
+</section>
+<section id="when-not-to-use-the-generic-module" class="level2">
+<h2 class="anchored" data-anchor-id="when-not-to-use-the-generic-module">When not to use the generic module</h2>
+<ul>
+<li>When you need processing depending on the spatial information in the file. For example, spatial interpolation, subsetting, etc.</li>
+<li>When you need more complex processing, not covered by the generic module</li>
+<li>When the input files data are not dfs files</li>
+<li>When the end result is not a dfs file</li>
+</ul>
+</section>
+<section id="example" class="level2">
+<h2 class="anchored" data-anchor-id="example">Example</h2>
 <div class="sourceCode" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> <span class="im">from</span> mikeio <span class="im">import</span> generic</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> generic.concat([<span class="st">"fileA.dfs2"</span>, <span class="st">"fileB.dfs2"</span>], <span class="st">"new_file.dfs2"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<section id="generic-example-notebooks" class="level2">
-<h2 class="anchored" data-anchor-id="generic-example-notebooks">Generic example notebooks</h2>
+</section>
+<section id="more-examples" class="level2">
+<h2 class="anchored" data-anchor-id="more-examples">More examples</h2>
 <p>See the <a href="../examples/Generic.html">Generic notebook</a> for more examples.</p>
 
 
