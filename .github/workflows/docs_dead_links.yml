@@ -13,7 +13,7 @@ jobs:
       uses: ScholliYT/Broken-Links-Crawler-Action@v3
       with:
         website_url: 'https://dhi.github.io/mikeio/'
-        verbose: 'true'
+        exclude_url_prefix: 'https://github.com/DHI/mikeio/edit/main/docs/api/'
         max_retry_time: 30
         max_retries: 2
         max_depth: -1
