@@ -183,7 +183,7 @@ class Mesh:
         --------
         ```{python}
         import mikeio
-        msh = mikeio.open("tests/testdata/odense_rough.mesh")
+        msh = mikeio.open("../data/odense_rough.mesh")
         msh.to_shapely()
         ```
         """

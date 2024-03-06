@@ -77,7 +77,7 @@ class Dataset:
     --------
     ```{python}
     import mikeio
-    mikeio.read("europe_wind_long_lat.dfs2")
+    mikeio.read("../data/europe_wind_long_lat.dfs2")
     ```
     """
 
