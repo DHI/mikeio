@@ -42,17 +42,23 @@ website:
         - user-guide/dfs1.qmd
         - user-guide/dfs2.qmd
         - user-guide/dfsu.qmd
+        - user-guide/mesh.qmd
         - user-guide/eum.qmd
         - user-guide/generic.md
         - user-guide/pfs.qmd
       - section: Examples
         href: examples/index.qmd
         contents:
-        - examples/Dfsu-2D-interpolation.qmd
-        - examples/Time-interpolation.qmd
-        - examples/Generic.qmd
+          - section: Dfs2
+            href: examples/dfs2/index.qmd
+            contents:
+              - examples/dfs2/bathy.qmd
+              - examples/dfs2/gfs.qmd
+          - examples/Dfsu-2D-interpolation.qmd
+          - examples/Time-interpolation.qmd
+          - examples/Generic.qmd
       - text: Design philosophy
-        href: design.md
+        href: design.qmd
       - text: API Reference
         href: api/index.qmd
           
@@ -97,7 +103,8 @@ quartodoc:
       contents:
         - DataArray
         - Dataset
-        - dataset._data_plot._DataArrayPlotter # TODO alias?
+        - dataset._data_plot._DatasetPlotter  # TODO alias?
+        - dataset._data_plot._DataArrayPlotter
         - dataset._data_plot._DataArrayPlotterGrid1D
         - dataset._data_plot._DataArrayPlotterGrid2D
         - dataset._data_plot._DataArrayPlotterFM

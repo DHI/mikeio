@@ -13,7 +13,7 @@ Each DataArray have the following properties:
 
 ## {{< fa weight-hanging >}} Types and units
 
-The dfs items in MIKE IO are represented by the [ItemInfo class](eum.ItemInfo).
+The dfs items in MIKE IO are represented by the [ItemInfo class](`mikeio.ItemInfo`).
 An ItemInfo consists of:
 
 * name - a user-defined string 
