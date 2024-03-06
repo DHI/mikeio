@@ -1,0 +1,20 @@
+name: Check docs for broken links
+on: 
+  workflow_dispatch: # allow manual trigger
+  schedule:
+    # run daily at 4 am
+    - cron:  '0 4 * * *'
+jobs:
+  crawl_for_broken_links:
+    runs-on: ubuntu-latest
+    name: Broken-Links-Crawler
+    steps:
+    - name: Checking links
+      uses: ScholliYT/Broken-Links-Crawler-Action@v3
+      with:
+        website_url: 'https://dhi.github.io/mikeio/'
+        exclude_url_prefix: 'https://github.com/DHI/mikeio/edit/main/docs/api/,https://docs.mikepoweredbydhi.com/'
+        verbose: true
+        max_retry_time: 30
+        max_retries: 2
+        max_depth: -1
