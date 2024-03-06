@@ -57,11 +57,8 @@ Grid2D's primary properties and methods are:
 See [API specification](`mikeio.Grid2D`) for details.
 
 
-## Dfs2 Example notebooks
+## Dfs2 resources
 
 * [Dfs2 | getting-started-with-mikeio](https://dhi.github.io/getting-started-with-mikeio/dfs2.html)
-* [Dfs2-Bathymetry](https://nbviewer.jupyter.org/github/DHI/mikeio/blob/main/notebooks/Dfs2%20-%20Bathymetry.ipynb) - GEBCO NetCDF/xarray to dfs2 
-* [Dfs2-Boundary](https://nbviewer.jupyter.org/github/DHI/mikeio/blob/main/notebooks/Dfs2%20-%20Boundary.ipynb) - Vertical transect dfs2, interpolation in time 
-* [Dfs2-Export-to-netCDF](https://nbviewer.jupyter.org/github/DHI/mikeio/blob/main/notebooks/Dfs2%20-%20Export%20to%20netcdf.ipynb) Export dfs2 to NetCDF
-* [Dfs2-GFS](https://nbviewer.jupyter.org/github/DHI/mikeio/blob/main/notebooks/Dfs2%20-%20Global%20Forecasting%20System.ipynb) - GFS NetCDF/xarray to dfs2
-* [Dfs2-SST](https://nbviewer.jupyter.org/github/DHI/mikeio/blob/main/notebooks/Dfs2%20-%20Sea%20surface%20temperature.ipynb) - DMI NetCDF/xarray to dfs2 
+* [Dfs2-Bathymetry](../examples/dfs2/bathy.qmd) - GEBCO NetCDF/xarray to dfs2 
+* [Dfs2-GFS](../examples/dfs2/gfs.qmd) - GFS NetCDF/xarray to dfs2

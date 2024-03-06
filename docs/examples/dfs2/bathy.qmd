@@ -14,7 +14,13 @@ import mikeio
 ```
 
 ```{python}
-ds = xarray.open_dataset("../data/gebco_2020_n56.3_s55.2_w12.2_e13.1.nc")
+# | echo: false
+# | output: false
+xarray.set_options(display_expand_attrs=False, display_expand_coords=False)
+```
+
+```{python}
+ds = xarray.open_dataset("../../data/gebco_2020_n56.3_s55.2_w12.2_e13.1.nc")
 ds
 ```
 

@@ -1,26 +1,20 @@
 ---
 title: Mesh
-jupyter: python3
 ---
-
-* read mesh file
-* plot mesh 
-* convert to shapely
-* check if point is inside or outside mesh
-* subset mesh, plot subset
-* change z values
-* change boundary codes
-
 
 ```{python}
 import matplotlib.pyplot as plt
 import mikeio
 ```
 
+## Read mesh file
+
 ```{python}
 msh = mikeio.Mesh("../data/odense_rough.mesh")
 msh
 ```
+
+## Plot mesh
 
 ```{python}
 msh.plot()
@@ -30,7 +24,7 @@ msh.plot()
 msh.plot.boundary_nodes(boundary_names=['Land','Open boundary']);
 ```
 
-# Convert mesh to shapely
+## Convert mesh to shapely
 Convert mesh to [shapely](https://shapely.readthedocs.io/en/latest/manual.html) MultiPolygon object, requires that the `shapely` library is installed.
 
 ```{python}
@@ -60,10 +54,9 @@ coastalzone = domain - open_water
 coastalzone
 ```
 
-Find if points are inside the domain
+## Check if points are inside the domain
 
 ```{python}
-#| tags: []
 from shapely.geometry import Point
 
 p1 = Point(216000, 6162000)
@@ -72,11 +65,11 @@ print(mp.contains(p1))
 print(mp.contains(p2))
 ```
 
-## Mesh class can also check if a mesh contains points 
+We can get similar functionality from the `.geometry` attribute of the mesh object.
 
 ```{python}
 p1p2 = [[216000, 6162000], [220000, 6156000]]
-msh.contains(p1p2)
+msh.geometry.contains(p1p2)
 ```
 
 ```{python}
@@ -87,27 +80,38 @@ ax.legend();
 ```
 
 
-# Change z values and boundary code
+## Change z values and boundary code
 Assume that we want to have a minimum depth of 2 meters and change the open boundary (code 2) to a closed one (code 1). 
 
 ```{python}
-print(f'max z before: {msh.node_coordinates[:,2].max()}')
-zc = msh.node_coordinates[:,2]
+g = msh.geometry
+print(f'max z before: {g.node_coordinates[:,2].max()}')
+zc = g.node_coordinates[:,2]
 zc[zc>-2] = -2
-msh.zn = zc
-print(f'max z after: {msh.node_coordinates[:,2].max()}')
+g.node_coordinates[:,2] = zc
+print(f'max z after: {g.node_coordinates[:,2].max()}')
 ```
 
+
 ```{python}
-print(f'valid codes before: {msh.valid_codes}')
-c = msh.geometry.codes
+c = g.codes
 c[c==2] = 1
-msh.codes = c
-print(f'valid codes after: {msh.valid_codes}')
+g.codes = c
 ```
 
+## Save the modfied geometry to a new mesh file
+
 ```{python}
-msh.plot()
+g.to_mesh("new_mesh.mesh")
 ```
+
+Cleanup
+
+```{python}
+import os
+
+os.remove("new_mesh.mesh")
+```
+
 
 
