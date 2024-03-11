@@ -32,7 +32,7 @@ from .dataset import DataArray, Dataset
 from .dfs import Dfs0, Dfs1, Dfs2, Dfs3
 from .dfsu import Dfsu, Mesh
 from .eum import EUMType, EUMUnit, ItemInfo
-from .pfs import Pfs, PfsDocument, PfsSection, read_pfs
+from .pfs import PfsDocument, PfsSection, read_pfs
 
 # Grid geometries are imported into the main module, since they are used to create dfs files
 # Other geometries are available in the spatial module

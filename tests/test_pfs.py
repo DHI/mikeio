@@ -357,6 +357,7 @@ def test_read_write_she2(tmp_path):
         pfs2 = mikeio.PfsDocument(outfilename)
     assert pfs1.MIKESHE_FLOWMODEL == pfs2.MIKESHE_FLOWMODEL
 
+
 def test_read_write_filenames(tmp_path):
     infilename = "tests/testdata/pfs/filenames.pfs"
     pfs1 = mikeio.PfsDocument(infilename)
@@ -1095,7 +1096,7 @@ def test_search_keyword(pfs_ABC_text):
     assert "A2" in pfs.ROOT
 
     r0 = pfs.search(key="not_there")
-    assert r0 is None
+    assert len(r0) == 0
 
     r1 = pfs.search(key="float")
     assert r1.ROOT.A1.B.float_1 == 4.5
@@ -1124,7 +1125,7 @@ def test_search_param(pfs_ABC_text):
     pfs = mikeio.PfsDocument(StringIO(pfs_ABC_text))
 
     r0 = pfs.search(param="not_there")
-    assert r0 is None
+    assert len(r0) == 0
 
     r1 = pfs.search(param=0)
     assert len(r1.ROOT) == 2
@@ -1143,7 +1144,7 @@ def test_search_section(pfs_ABC_text):
     pfs = mikeio.PfsDocument(StringIO(pfs_ABC_text))
 
     r0 = pfs.search(section="not_there")
-    assert r0 is None
+    assert len(r0) == 0
 
     r1 = pfs.search(section="A")
     assert len(r1.ROOT) == 2
@@ -1207,6 +1208,7 @@ def test_clob_can_contain_pipe_characters():
         sct.Clob
         == '<CLOB:22,1,1,false,1,0,"",0,"",0,"",0,"",0,"",0,"",0,"",0,"",||,false>'
     )
+
 
 def test_write_read_clob(tmp_path):
     clob_text = """

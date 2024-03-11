@@ -1,12 +1,12 @@
 from __future__ import annotations
 from datetime import datetime
 from types import SimpleNamespace
-from typing import Any, Callable, List, Mapping, MutableMapping, Sequence
+from typing import Any, Callable, Dict, List, Mapping, MutableMapping, Sequence
 
 import pandas as pd
 
 
-def _merge_dict(a: MutableMapping[str, Any], b: Mapping[str, Any]) -> Mapping[str, Any]:
+def _merge_dict(a: Dict[str, Any], b: Mapping[str, Any]) -> Dict[str, Any]:
     """merges dict b into dict a; handling non-unique keys"""
     for key in b:
         if key in a:
@@ -180,9 +180,9 @@ class PfsSection(SimpleNamespace, MutableMapping):
         *,
         key: str | None = None,
         section: str | None = None,
-        param=None,
+        param: str | bool | int | float | None = None,
         case: bool = False,
-    ):
+    ) -> PfsSection:
         """Find recursively all keys, sections or parameters
            matching a pattern
 
@@ -225,7 +225,11 @@ class PfsSection(SimpleNamespace, MutableMapping):
             keypat=key, parampat=param, secpat=section, case=case
         ):
             results.append(item)
-        return self.__class__._merge_PfsSections(results) if len(results) > 0 else None
+        return (
+            self.__class__._merge_PfsSections(results)
+            if len(results) > 0
+            else PfsSection({})
+        )
 
     def _find_patterns_generator(
         self, keypat=None, parampat=None, secpat=None, keylist=[], case=False
@@ -256,7 +260,7 @@ class PfsSection(SimpleNamespace, MutableMapping):
         yield d
 
     @staticmethod
-    def _param_match(parampat, v, case):
+    def _param_match(parampat: Any, v: Any, case: bool) -> bool:
         if parampat is None:
             return False
         if type(v) != type(parampat):
@@ -267,7 +271,7 @@ class PfsSection(SimpleNamespace, MutableMapping):
         else:
             return parampat == v
 
-    def find_replace(self, old_value, new_value):
+    def find_replace(self, old_value: Any, new_value: Any) -> None:
         """Update recursively all old_value with new_value"""
         for k, v in self.items():
             if isinstance(v, PfsSection):
@@ -284,12 +288,14 @@ class PfsSection(SimpleNamespace, MutableMapping):
                 d[key] = value.to_dict().copy()
         return self.__class__(d)
 
-    def _to_txt_lines(self):
-        lines = []
+    def _to_txt_lines(self) -> List[str]:
+        lines: List[str] = []
         self._write_with_func(lines.append, newline="")
         return lines
 
-    def _write_with_func(self, func: Callable, level: int = 0, newline: str = "\n"):
+    def _write_with_func(
+        self, func: Callable, level: int = 0, newline: str = "\n"
+    ) -> None:
         """Write pfs nested objects
 
         Parameters
@@ -432,7 +438,7 @@ class PfsSection(SimpleNamespace, MutableMapping):
         return pd.DataFrame(res, index=range(1, n_sections + 1))
 
     @classmethod
-    def _merge_PfsSections(cls, sections: Sequence) -> "PfsSection":
+    def _merge_PfsSections(cls, sections: Sequence[Dict]) -> "PfsSection":
         """Merge a list of PfsSections/dict"""
         assert len(sections) > 0
         a = sections[0]
