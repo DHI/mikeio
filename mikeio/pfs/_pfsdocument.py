@@ -5,7 +5,7 @@ from collections import Counter
 from collections.abc import Mapping, Sequence
 from datetime import datetime
 from pathlib import Path
-from typing import Callable, Dict, List, Sequence, TextIO, Tuple, overload
+from typing import Callable, Dict, List, TextIO, Tuple, overload
 
 import yaml
 
@@ -403,6 +403,7 @@ class PfsDocument(PfsSection):
             f.write("\n\n")
 
             self._write_with_func(f.write, level=0)
+        return None
 
 
 # TODO remove this alias
