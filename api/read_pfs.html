@@ -327,10 +327,10 @@ ul.task-list li input[type="checkbox"] {
 <h2 class="anchored" data-anchor-id="parameters">Parameters</h2>
 <table class="table">
 <colgroup>
-<col style="width: 6%">
-<col style="width: 2%">
-<col style="width: 85%">
-<col style="width: 4%">
+<col style="width: 5%">
+<col style="width: 25%">
+<col style="width: 65%">
+<col style="width: 3%">
 </colgroup>
 <thead>
 <tr class="header">
@@ -343,19 +343,19 @@ ul.task-list li input[type="checkbox"] {
 <tbody>
 <tr class="odd">
 <td><code>filename</code></td>
-<td></td>
+<td>str | pathlib.Path | typing.TextIO | typing.Dict | mikeio.pfs._pfssection.PfsSection</td>
 <td>File name including full path to the pfs file.</td>
 <td><em>required</em></td>
 </tr>
 <tr class="even">
 <td><code>encoding</code></td>
-<td></td>
+<td>str</td>
 <td>How is the pfs file encoded? By default ‘cp1252’</td>
 <td><code>'cp1252'</code></td>
 </tr>
 <tr class="odd">
 <td><code>unique_keywords</code></td>
-<td></td>
+<td>bool</td>
 <td>Should the keywords in a section be unique? Some tools e.g.&nbsp;the MIKE Plot Composer allows non-unique keywords. If True: warnings will be issued if non-unique keywords are present and the first occurence will be used by default False</td>
 <td><code>False</code></td>
 </tr>
@@ -365,10 +365,6 @@ ul.task-list li input[type="checkbox"] {
 <section id="returns" class="level2">
 <h2 class="anchored" data-anchor-id="returns">Returns</h2>
 <table class="table">
-<colgroup>
-<col style="width: 21%">
-<col style="width: 78%">
-</colgroup>
 <thead>
 <tr class="header">
 <th>Type</th>
@@ -377,8 +373,8 @@ ul.task-list li input[type="checkbox"] {
 </thead>
 <tbody>
 <tr class="odd">
-<td>mikeio.mikeio.Pfs</td>
-<td>Pfs object which can be used for inspection, manipulation and writing</td>
+<td>mikeio.pfs._pfsdocument.PfsDocument</td>
+<td>A PfsDocument object</td>
 </tr>
 </tbody>
 </table>

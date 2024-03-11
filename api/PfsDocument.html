@@ -379,8 +379,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <table class="table">
 <colgroup>
 <col style="width: 5%">
-<col style="width: 20%">
-<col style="width: 70%">
+<col style="width: 25%">
+<col style="width: 65%">
 <col style="width: 3%">
 </colgroup>
 <thead>
@@ -394,19 +394,19 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <tbody>
 <tr class="odd">
 <td><code>data</code></td>
-<td>typing.TextIO | mikeio.pfs._pfssection.PfsSection | typing.Dict</td>
+<td>typing.TextIO | mikeio.pfs._pfssection.PfsSection | typing.Dict | str | pathlib.Path</td>
 <td>Either a file name (including full path) to the pfs file to be read or dictionary-like structure.</td>
 <td><em>required</em></td>
 </tr>
 <tr class="even">
 <td><code>encoding</code></td>
-<td></td>
+<td>str</td>
 <td>How is the pfs file encoded? By default cp1252</td>
 <td><code>'cp1252'</code></td>
 </tr>
 <tr class="odd">
 <td><code>unique_keywords</code></td>
-<td></td>
+<td>bool</td>
 <td>Should the keywords in a section be unique? Some tools e.g.&nbsp;the MIKE Plot Composer allows non-unique keywords. If True: warnings will be issued if non-unique keywords are present and the first occurence will be used by default False</td>
 <td><code>False</code></td>
 </tr>
