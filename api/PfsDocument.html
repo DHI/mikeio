@@ -349,6 +349,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <li><a href="#mikeio.PfsDocument.copy" id="toc-mikeio.PfsDocument.copy" class="nav-link" data-scroll-target="#mikeio.PfsDocument.copy">copy</a></li>
   <li><a href="#mikeio.PfsDocument.find_replace" id="toc-mikeio.PfsDocument.find_replace" class="nav-link" data-scroll-target="#mikeio.PfsDocument.find_replace">find_replace</a></li>
   <li><a href="#mikeio.PfsDocument.from_dataframe" id="toc-mikeio.PfsDocument.from_dataframe" class="nav-link" data-scroll-target="#mikeio.PfsDocument.from_dataframe">from_dataframe</a></li>
+  <li><a href="#mikeio.PfsDocument.from_text" id="toc-mikeio.PfsDocument.from_text" class="nav-link" data-scroll-target="#mikeio.PfsDocument.from_text">from_text</a></li>
   <li><a href="#mikeio.PfsDocument.get" id="toc-mikeio.PfsDocument.get" class="nav-link" data-scroll-target="#mikeio.PfsDocument.get">get</a></li>
   <li><a href="#mikeio.PfsDocument.items" id="toc-mikeio.PfsDocument.items" class="nav-link" data-scroll-target="#mikeio.PfsDocument.items">items</a></li>
   <li><a href="#mikeio.PfsDocument.keys" id="toc-mikeio.PfsDocument.keys" class="nav-link" data-scroll-target="#mikeio.PfsDocument.keys">keys</a></li>
@@ -400,13 +401,13 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </tr>
 <tr class="even">
 <td><code>encoding</code></td>
-<td>str</td>
+<td></td>
 <td>How is the pfs file encoded? By default cp1252</td>
 <td><code>'cp1252'</code></td>
 </tr>
 <tr class="odd">
 <td><code>unique_keywords</code></td>
-<td>bool</td>
+<td></td>
 <td>Should the keywords in a section be unique? Some tools e.g.&nbsp;the MIKE Plot Composer allows non-unique keywords. If True: warnings will be issued if non-unique keywords are present and the first occurence will be used by default False</td>
 <td><code>False</code></td>
 </tr>
@@ -458,7 +459,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </tr>
 <tr class="even">
 <td><a href="#mikeio.PfsDocument.copy">copy</a></td>
-<td>Return a copy of the PfsSection.</td>
+<td>Return a deep copy of the PfsDocument</td>
 </tr>
 <tr class="odd">
 <td><a href="#mikeio.PfsDocument.find_replace">find_replace</a></td>
@@ -469,42 +470,46 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <td>Create a PfsSection from a DataFrame</td>
 </tr>
 <tr class="odd">
+<td><a href="#mikeio.PfsDocument.from_text">from_text</a></td>
+<td>Create a PfsDocument from a string</td>
+</tr>
+<tr class="even">
 <td><a href="#mikeio.PfsDocument.get">get</a></td>
 <td>Return the value for key if key is in the PfsSection,</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td><a href="#mikeio.PfsDocument.items">items</a></td>
 <td>Return a new view of the PfsDocument’s items ((key, value) pairs)</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td><a href="#mikeio.PfsDocument.keys">keys</a></td>
 <td>Return a list of the PfsDocument’s keys (target names)</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td><a href="#mikeio.PfsDocument.pop">pop</a></td>
 <td>If key is in the dictionary, remove it and return its</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td><a href="#mikeio.PfsDocument.search">search</a></td>
 <td>Find recursively all keys, sections or parameters</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td><a href="#mikeio.PfsDocument.to_dataframe">to_dataframe</a></td>
 <td>Output enumerated subsections to a DataFrame</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td><a href="#mikeio.PfsDocument.to_dict">to_dict</a></td>
 <td>Convert to (nested) dict (as a copy)</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td><a href="#mikeio.PfsDocument.update_recursive">update_recursive</a></td>
 <td>Update recursively all matches of key with value</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td><a href="#mikeio.PfsDocument.values">values</a></td>
 <td>Return a list of the PfsDocument’s values (targets).</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td><a href="#mikeio.PfsDocument.write">write</a></td>
 <td>Write object to a pfs file</td>
 </tr>
@@ -518,7 +523,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <section id="mikeio.PfsDocument.copy" class="level3">
 <h3 class="anchored" data-anchor-id="mikeio.PfsDocument.copy">copy</h3>
 <p><code>PfsDocument.copy()</code></p>
-<p>Return a copy of the PfsSection.</p>
+<p>Return a deep copy of the PfsDocument</p>
 </section>
 <section id="mikeio.PfsDocument.find_replace" class="level3">
 <h3 class="anchored" data-anchor-id="mikeio.PfsDocument.find_replace">find_replace</h3>
@@ -580,6 +585,11 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>    include <span class="op">=</span> <span class="dv">1</span></span>
 <span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>EndSect  <span class="op">//</span> STATION_2</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </section>
+</section>
+<section id="mikeio.PfsDocument.from_text" class="level3">
+<h3 class="anchored" data-anchor-id="mikeio.PfsDocument.from_text">from_text</h3>
+<p><code>PfsDocument.from_text(text)</code></p>
+<p>Create a PfsDocument from a string</p>
 </section>
 <section id="mikeio.PfsDocument.get" class="level3">
 <h3 class="anchored" data-anchor-id="mikeio.PfsDocument.get">get</h3>
@@ -757,9 +767,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <table class="table">
 <colgroup>
 <col style="width: 8%">
-<col style="width: 5%">
-<col style="width: 77%">
-<col style="width: 8%">
+<col style="width: 9%">
+<col style="width: 74%">
+<col style="width: 7%">
 </colgroup>
 <thead>
 <tr class="header">
@@ -772,7 +782,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <tbody>
 <tr class="odd">
 <td><code>filename</code></td>
-<td></td>
+<td>str | None</td>
 <td>Full path and filename of pfs to be created. If None, the content will be returned as a list of strings.</td>
 <td><code>None</code></td>
 </tr>
