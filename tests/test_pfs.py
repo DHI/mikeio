@@ -283,6 +283,16 @@ def test_basic():
     assert data.POINT_1.y == 50
 
 
+def test_pfsdocument_copy():
+
+    pfs = mikeio.PfsDocument("tests/testdata/pfs/simple.pfs")
+    pfs2 = pfs.copy()
+    data = pfs.targets[0]
+    data.z_min = -4000
+
+    assert pfs2.BoundaryExtractor.z_min == -3000
+
+
 def test_ecolab():
     pfs = mikeio.PfsDocument("tests/testdata/pfs/minimal.ecolab")
     assert pfs.ECO_LAB_SETUP.MISC.DESCRIPTION == "Miscellaneous Description"

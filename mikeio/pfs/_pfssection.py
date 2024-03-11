@@ -281,12 +281,7 @@ class PfsSection(SimpleNamespace, MutableMapping):
 
     def copy(self) -> "PfsSection":
         """Return a copy of the PfsSection."""
-        # is all this necessary???
-        d = self.__dict__.copy()
-        for key, value in d.items():
-            if isinstance(value, PfsSection):
-                d[key] = value.to_dict().copy()
-        return self.__class__(d)
+        return PfsSection(self.to_dict())
 
     def _to_txt_lines(self) -> List[str]:
         lines: List[str] = []
