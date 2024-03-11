@@ -642,7 +642,7 @@ class Dfsu2DH(_Dfsu):
             fill_bad_data_value=fill_bad_data_value,
         )
 
-    def get_overset_grid(self, dx=None, dy=None, nx=None, ny=None, buffer=None):
+    def get_overset_grid(self, dx=None, dy=None, nx=None, ny=None, buffer=0.0):
         """get a 2d grid that covers the domain by specifying spacing or shape
 
         Parameters

@@ -45,11 +45,11 @@ def get_idw_interpolant(distances: np.ndarray, p: float = 2) -> np.ndarray:
 
 
 def interp2d(
-    data: np.ndarray | Dataset | DataArray,
+    data: Dataset | DataArray | np.ndarray,
     elem_ids: np.ndarray,
     weights: np.ndarray | None = None,
     shape: Tuple[int, ...] | None = None,
-) -> np.ndarray | Dataset:
+) -> Dataset | np.ndarray:
     """interp spatially in data (2d only)
 
     Parameters
@@ -112,6 +112,7 @@ def interp2d(
         return new_ds
 
     if isinstance(data, DataArray):
+        # TODO why doesn't this return a DataArray?
         data = data.to_numpy()
 
     if isinstance(data, np.ndarray):
