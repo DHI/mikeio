@@ -724,10 +724,10 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <h4 class="anchored" data-anchor-id="parameters-3">Parameters</h4>
 <table class="table">
 <colgroup>
-<col style="width: 16%">
-<col style="width: 6%">
-<col style="width: 67%">
-<col style="width: 9%">
+<col style="width: 13%">
+<col style="width: 24%">
+<col style="width: 54%">
+<col style="width: 7%">
 </colgroup>
 <thead>
 <tr class="header">
@@ -740,13 +740,13 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <tbody>
 <tr class="odd">
 <td><code>x</code></td>
-<td></td>
+<td>float | numpy.numpy.ndarray</td>
 <td>X coordinate(s) (easting or longitude)</td>
 <td><em>required</em></td>
 </tr>
 <tr class="even">
 <td><code>y</code></td>
-<td></td>
+<td>float | numpy.numpy.ndarray | None</td>
 <td>Y coordinate(s) (northing or latitude)</td>
 <td><code>None</code></td>
 </tr>
@@ -952,7 +952,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </section>
 <section id="mikeio.spatial.GeometryFMAreaSpectrum.get_overset_grid" class="level3">
 <h3 class="anchored" data-anchor-id="mikeio.spatial.GeometryFMAreaSpectrum.get_overset_grid">get_overset_grid</h3>
-<p><code>spatial.GeometryFMAreaSpectrum.get_overset_grid(dx=None, dy=None, nx=None, ny=None, buffer=None)</code></p>
+<p><code>spatial.GeometryFMAreaSpectrum.get_overset_grid(dx=None, dy=None, nx=None, ny=None, buffer=0.0)</code></p>
 <p>get a 2d grid that covers the domain by specifying spacing or shape</p>
 <section id="parameters-6" class="level4">
 <h4 class="anchored" data-anchor-id="parameters-6">Parameters</h4>
@@ -1000,7 +1000,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <td><code>buffer</code></td>
 <td>float</td>
 <td>positive to make the area larger, default=0 can be set to a small negative value to avoid NaN values all around the domain.</td>
-<td><code>None</code></td>
+<td><code>0.0</code></td>
 </tr>
 </tbody>
 </table>
@@ -1031,10 +1031,10 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <h4 class="anchored" data-anchor-id="parameters-7">Parameters</h4>
 <table class="table">
 <colgroup>
-<col style="width: 10%">
-<col style="width: 23%">
-<col style="width: 55%">
-<col style="width: 10%">
+<col style="width: 9%">
+<col style="width: 28%">
+<col style="width: 52%">
+<col style="width: 9%">
 </colgroup>
 <thead>
 <tr class="header">
@@ -1065,7 +1065,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </tr>
 <tr class="even">
 <td><code>shape</code></td>
-<td></td>
+<td>typing.Tuple[int, …] | None</td>
 <td>reshape output</td>
 <td><code>None</code></td>
 </tr>
