@@ -182,7 +182,7 @@ class PfsSection(SimpleNamespace, MutableMapping):
         section: str | None = None,
         param: str | bool | int | float | None = None,
         case: bool = False,
-    ) -> PfsSection | None:
+    ) -> PfsSection:
         """Find recursively all keys, sections or parameters
            matching a pattern
 
@@ -225,8 +225,11 @@ class PfsSection(SimpleNamespace, MutableMapping):
             keypat=key, parampat=param, secpat=section, case=case
         ):
             results.append(item)
-        # TODO avoid returning None
-        return self.__class__._merge_PfsSections(results) if len(results) > 0 else None
+        return (
+            self.__class__._merge_PfsSections(results)
+            if len(results) > 0
+            else PfsSection({})
+        )
 
     def _find_patterns_generator(
         self, keypat=None, parampat=None, secpat=None, keylist=[], case=False
@@ -257,7 +260,7 @@ class PfsSection(SimpleNamespace, MutableMapping):
         yield d
 
     @staticmethod
-    def _param_match(parampat, v, case):
+    def _param_match(parampat: Any, v: Any, case: bool) -> bool:
         if parampat is None:
             return False
         if type(v) != type(parampat):
@@ -268,7 +271,7 @@ class PfsSection(SimpleNamespace, MutableMapping):
         else:
             return parampat == v
 
-    def find_replace(self, old_value, new_value):
+    def find_replace(self, old_value: Any, new_value: Any) -> None:
         """Update recursively all old_value with new_value"""
         for k, v in self.items():
             if isinstance(v, PfsSection):
@@ -285,8 +288,8 @@ class PfsSection(SimpleNamespace, MutableMapping):
                 d[key] = value.to_dict().copy()
         return self.__class__(d)
 
-    def _to_txt_lines(self):
-        lines = []
+    def _to_txt_lines(self) -> List[str]:
+        lines: List[str] = []
         self._write_with_func(lines.append, newline="")
         return lines
 
