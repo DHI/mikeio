@@ -8,7 +8,7 @@ build: typecheck test
 	python -m build
 
 lint:
-	ruff .
+	ruff check .
 
 pylint:
 	pylint --disable=all --enable=attribute-defined-outside-init mikeio/

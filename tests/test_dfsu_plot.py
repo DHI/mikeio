@@ -73,8 +73,8 @@ def test_plot_mesh_ax():
 
 def test_plot_mesh_boundary_nodes():
     msh = Mesh("tests/testdata/odense_rough.mesh")
-    msh.plot_boundary_nodes()
-    msh.plot_boundary_nodes(["Land", "Sea"])
+    msh.plot.boundary_nodes()
+    msh.plot.boundary_nodes(["Land", "Sea"])
     assert True
 
 
