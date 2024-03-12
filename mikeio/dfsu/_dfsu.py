@@ -139,9 +139,7 @@ class _Dfsu:
         self._items = self._read_items(filename)
 
     def __repr__(self):
-        out = []
-        type_name = "Flexible Mesh" if self._type is None else self.type_name
-        out.append(type_name)
+        out = [f"<mikeio.{self.__class__.__name__}>"]
 
         if self._type is not DfsuFileType.DfsuSpectral0D:
             if self._type is not DfsuFileType.DfsuSpectral1D:
@@ -161,21 +159,18 @@ class _Dfsu:
             or self._type == DfsuFileType.Dfsu3DSigmaZ
         ):
             out.append(f"max number of z layers: {self.n_layers - self.n_sigma_layers}")
-        if hasattr(self, "items") and self.items is not None:
-            if self.n_items < 10:
-                out.append("items:")
-                for i, item in enumerate(self.items):
-                    out.append(f"  {i}:  {item}")
-            else:
-                out.append(f"number of items: {self.n_items}")
-        if self.n_timesteps is not None:
-            if self.n_timesteps == 1:
-                out.append(f"time: time-invariant file (1 step) at {self._start_time}")
-            else:
-                out.append(
-                    f"time: {str(self.time[0])} - {str(self.time[-1])} ({self.n_timesteps} records)"
-                )
-                out.append(f"      {self.start_time} -- {self.end_time}")
+        if self.n_items < 10:
+            out.append("items:")
+            for i, item in enumerate(self.items):
+                out.append(f"  {i}:  {item}")
+        else:
+            out.append(f"number of items: {self.n_items}")
+        if self.n_timesteps == 1:
+            out.append(f"time: time-invariant file (1 step) at {self.time[0]}")
+        else:
+            out.append(
+                f"time: {str(self.time[0])} - {str(self.time[-1])} ({self.n_timesteps} records)"
+            )
         return str.join("\n", out)
 
     def _read_items(self, filename: str) -> list[ItemInfo]:
