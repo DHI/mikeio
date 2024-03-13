@@ -835,3 +835,32 @@ def test_write_read_local_coordinates(tmp_path):
 
     ds = mikeio.read(fp)
     assert da.geometry == ds.geometry
+
+
+def test_to_xarray():
+    # data is not important here
+    data = np.array([[1, 2, 3], [4, 5, 6]])
+
+    # geographic coordinates
+    dag = mikeio.DataArray(
+        data=data,
+        geometry=mikeio.Grid2D(nx=3, ny=2, dx=0.5, projection="LONG/LAT"),
+    )
+    assert dag.geometry.x[0] == pytest.approx(0.0)
+    assert dag.geometry.y[0] == pytest.approx(0.0)
+    xr_dag = dag.to_xarray()
+    assert xr_dag.x[0] == pytest.approx(0.0)
+    assert xr_dag.y[0] == pytest.approx(0.0)
+
+    # local coordinates
+    da = mikeio.DataArray(
+        data=data,
+        geometry=mikeio.Grid2D(nx=3, ny=2, dx=0.5, projection="NON-UTM"),
+    )
+    # local coordinates (=NON-UTM) have a different convention, geometry.x still refers to element centers
+    assert da.geometry.x[0] == pytest.approx(0.25)
+    assert da.geometry.y[0] == pytest.approx(0.25)
+
+    xr_da = da.to_xarray()
+    assert xr_da.x[0] == pytest.approx(0.25)
+    assert xr_da.y[0] == pytest.approx(0.25)
