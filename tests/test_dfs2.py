@@ -40,7 +40,7 @@ def dfs2_pt_spectrum_linearf():
 @pytest.fixture
 def dfs2_vertical_nonutm():
     filepath = Path("tests/testdata/hd_vertical_slice.dfs2")
-    return mikeio.open(filepath)
+    return mikeio.open(filepath, type="vertical")
 
 
 @pytest.fixture
@@ -50,7 +50,7 @@ def dfs2_gebco():
 
 
 def test_get_time_without_reading_data():
-    dfs = mikeio.open("tests/testdata/hd_vertical_slice.dfs2")
+    dfs = mikeio.open("tests/testdata/hd_vertical_slice.dfs2", type="vertical")
 
     assert isinstance(dfs.time, pd.DatetimeIndex)
     assert len(dfs.time) == 13
@@ -281,8 +281,10 @@ def test_properties_vertical_nonutm(dfs2_vertical_nonutm):
 
 def test_isel_vertical_nonutm(dfs2_vertical_nonutm):
     ds = dfs2_vertical_nonutm.read()
+    assert ds.geometry.is_vertical
     dssel = ds.isel(y=slice(45, None))
     g = dssel.geometry
+    assert g.is_vertical
     assert g._x0 == 0
     assert g._y0 == 0  # TODO: should this be 45?
     assert g.x[0] == 0
@@ -346,7 +348,9 @@ def test_properties_pt_spectrum_linearf(dfs2_pt_spectrum_linearf):
 
 
 def test_dir_wave_spectra_relative_time_axis():
-    ds = mikeio.read("tests/testdata/dir_wave_analysis_spectra.dfs2")
+    ds = mikeio.open(
+        "tests/testdata/dir_wave_analysis_spectra.dfs2", type="spectral"
+    ).read()
     assert ds.n_items == 1
     assert ds.geometry.nx == 128
     assert ds.geometry.ny == 37

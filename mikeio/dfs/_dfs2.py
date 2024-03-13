@@ -111,12 +111,13 @@ class Dfs2(_Dfs123):
     def __init__(
         self,
         filename: str | Path,
-        type: Literal["horizontal", "spectral"] = "horizontal",
+        type: Literal["horizontal", "spectral", "vertical"] = "horizontal",
     ):
         filename = str(filename)
         super().__init__(filename)
 
         is_spectral = type == "spectral"
+        is_vertical = type == "vertical"
         dfs = DfsFileFactory.Dfs2FileOpen(str(filename))
 
         x0 = dfs.SpatialAxis.X0 if is_spectral else 0.0
@@ -135,6 +136,7 @@ class Dfs2(_Dfs123):
             orientation=orientation,
             origin=origin,
             is_spectral=is_spectral,
+            is_vertical=is_vertical,
         )
         dfs.Close()
         self._validate_no_orientation_in_geo()

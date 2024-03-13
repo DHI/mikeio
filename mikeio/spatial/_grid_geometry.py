@@ -420,11 +420,12 @@ class Grid2D(_Geometry):
         dy: float | None = None,
         ny: int | None = None,
         bbox: Tuple[float, float, float, float] | None = None,
-        projection: str = "NON-UTM",
+        projection: str = "LONG/LAT",
         origin: Tuple[float, float] | None = None,
         orientation: float = 0.0,
         axis_names: Tuple[str, str] = ("x", "y"),
         is_spectral: bool = False,
+        is_vertical: bool = False,
     ):
         """Create equidistant 2D spatial geometry
 
@@ -458,6 +459,8 @@ class Grid2D(_Geometry):
             names of x and y axes, by default ("x", "y")
         is_spectral : bool, optional
             if True, the grid is spectral, by default False
+        is_vertical : bool, optional
+            if True, the grid is vertical, by default False
 
         Examples
         --------
@@ -485,7 +488,12 @@ class Grid2D(_Geometry):
             dy = self._dx if dy is None else dy
             self._y0, self._dy, self._ny = _parse_grid_axis("y", y, y0, dy, ny)
 
+        if self.is_local_coordinates and not (is_spectral or is_vertical):
+            self._x0 = self._x0 + self._dx / 2
+            self._y0 = self._y0 + self._dy / 2
+
         self.is_spectral = is_spectral
+        self.is_vertical = is_vertical
 
         self.plot = _Grid2DPlotter(self)
 
@@ -960,6 +968,7 @@ class Grid2D(_Geometry):
                 projection=self.projection,
                 orientation=self._orientation,
                 is_spectral=self.is_spectral,
+                is_vertical=self.is_vertical,
                 origin=origin,
             )
 
