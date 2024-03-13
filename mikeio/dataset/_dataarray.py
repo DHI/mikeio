@@ -195,50 +195,18 @@ class DataArray:
 
     @staticmethod
     def _guess_dims(
-        ndim: int, shape: Tuple[int, ...], n_timesteps: int, geometry: GeometryType
+        ndim: int, shape: Tuple[int, ...], n_timesteps: int, geometry: Any
     ) -> Tuple[str, ...]:
-        # TODO delete default dims to geometry
-
         # This is not very robust, but is probably a reasonable guess
         time_is_first = (n_timesteps > 1) or (shape[0] == 1 and n_timesteps == 1)
         dims = ["time"] if time_is_first else []
         ndim_no_time = ndim if (len(dims) == 0) else ndim - 1
 
-        if isinstance(geometry, GeometryFMPointSpectrum):
-            if ndim_no_time == 1:
-                dims.append("frequency")
-            if ndim_no_time == 2:
-                dims.append("direction")
-                dims.append("frequency")
-        elif isinstance(geometry, GeometryFM3D):
-            if ndim_no_time > 0:
-                dims.append("element")
-        elif isinstance(geometry, GeometryFM2D):
-            if geometry._type == DfsuFileType.DfsuSpectral1D:
-                if ndim_no_time > 0:
-                    dims.append("node")
-            else:
-                if ndim_no_time > 0:
-                    dims.append("element")
-            if geometry.is_spectral:
-                if ndim_no_time == 2:
-                    dims.append("frequency")
-                elif ndim_no_time == 3:
-                    dims.append("direction")
-                    dims.append("frequency")
-        elif isinstance(geometry, Grid1D):
-            dims.append("x")
-        elif isinstance(geometry, Grid2D):
-            dims.append("y")
-            dims.append("x")
-        else:
-            # gridded
-            if ndim_no_time > 2:
-                dims.append("z")
-            if ndim_no_time > 1:
-                dims.append("y")
-            if ndim_no_time > 0:
-                dims.append("x")
+        # TODO geometry should not be None
+        if geometry is None:
+            geometry = GeometryUndefined()
+        spdims = geometry.default_dims(ndim_no_time)
+        dims.extend(spdims)
         return tuple(dims)
 
     def _check_time_data_length(self, time: Sized) -> None:

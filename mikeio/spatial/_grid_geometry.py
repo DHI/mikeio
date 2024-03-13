@@ -140,6 +140,9 @@ class Grid1D(_Geometry):
     def ndim(self) -> int:
         return 1
 
+    def default_dims(self, ndim_no_time: int) -> List[str]:
+        return ["x"]
+
     def __repr__(self) -> str:
         out = ["<mikeio.Grid1D>", _print_axis_txt("x", self.x, self.dx)]
         return "\n".join(out)
@@ -488,6 +491,9 @@ class Grid2D(_Geometry):
         self.is_spectral = is_spectral
 
         self.plot = _Grid2DPlotter(self)
+
+    def default_dims(self, ndim_no_time: int) -> List[str]:
+        return ["y", "x"]
 
     @property
     def ndim(self) -> int:
@@ -1132,6 +1138,9 @@ class Grid3D(_Geometry):
         self._origin = origin
         self._orientation = orientation
 
+    def default_dims(self, ndim_no_time: int) -> List[str]:
+        return ["z", "y", "x"]
+    
     @property
     def ndim(self) -> int:
         return 3

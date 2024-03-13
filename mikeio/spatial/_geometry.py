@@ -1,6 +1,7 @@
 from abc import ABC, abstractmethod
 
 from collections import namedtuple
+from typing import List
 
 from mikecore.Projections import MapProjection
 
@@ -14,6 +15,9 @@ class _Geometry(ABC):
             raise ValueError(f"{projection=} is not a valid projection string")
 
         self._projstr = projection
+
+    def default_dims(self, ndim_no_time: int) -> List[str]:
+        return {0: [], 1: ["x"], 2: ["y", "x"], 3: ["z", "y", "x"]}[ndim_no_time]  # type: ignore
 
     @property
     def projection_string(self) -> str:
@@ -41,13 +45,17 @@ class _Geometry(ABC):
         pass
 
 
-class GeometryUndefined:
+class GeometryUndefined(_Geometry):
     def __repr__(self):
         return "GeometryUndefined()"
 
+    @property
+    def ndim(self) -> int:
+        return 0
+
 
 class GeometryPoint2D(_Geometry):
-    def __init__(self, x: float, y: float, projection:str = "LONG/LAT"):
+    def __init__(self, x: float, y: float, projection: str = "LONG/LAT"):
         super().__init__(projection)
         self.x = x
         self.y = y
@@ -75,7 +83,7 @@ class GeometryPoint2D(_Geometry):
 
 
 class GeometryPoint3D(_Geometry):
-    def __init__(self, x: float, y: float, z: float, projection:str = "LONG/LAT"):
+    def __init__(self, x: float, y: float, z: float, projection: str = "LONG/LAT"):
         super().__init__(projection)
 
         self.x = x

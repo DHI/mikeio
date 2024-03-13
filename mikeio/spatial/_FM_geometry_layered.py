@@ -700,6 +700,9 @@ class GeometryFM3D(_GeometryFMLayered):
         )
         self.plot = _GeometryFMPlotter(self)
 
+    def default_dims(self, ndim_no_time: int) -> List[str]:
+        return ["element"]
+
     @property
     def boundary_polylines(self):
         return self.geometry2d.boundary_polylines
