@@ -11,7 +11,15 @@ from collections.abc import (
     Mapping,
     MutableMapping,
 )
-from typing import Any, Union, Literal, TYPE_CHECKING, overload, Callable, Tuple
+from typing import (
+    Any,
+    Union,
+    Literal,
+    TYPE_CHECKING,
+    overload,
+    Callable,
+    Tuple,
+)
 
 
 import numpy as np
@@ -151,13 +159,15 @@ class DataArray:
         *,
         time: pd.DatetimeIndex | str | None = None,
         item: ItemInfo | None = None,
-        geometry: GeometryType = GeometryUndefined(),
+        geometry: GeometryType | None = None,
         zn: np.ndarray | None = None,
         dims: Sequence[str] | None = None,
     ) -> None:
         # TODO: add optional validation validate=True
         self._values = self._parse_data(data)
         self.time: pd.DatetimeIndex = self._parse_time(time)
+
+        geometry = GeometryUndefined() if geometry is None else geometry
         self.dims = self._parse_dims(dims, geometry)
 
         self._check_time_data_length(self.time)
@@ -195,18 +205,24 @@ class DataArray:
 
     @staticmethod
     def _guess_dims(
-        ndim: int, shape: Tuple[int, ...], n_timesteps: int, geometry: Any
+        ndim: int, shape: Tuple[int, ...], n_timesteps: int, geometry: GeometryType
     ) -> Tuple[str, ...]:
         # This is not very robust, but is probably a reasonable guess
         time_is_first = (n_timesteps > 1) or (shape[0] == 1 and n_timesteps == 1)
         dims = ["time"] if time_is_first else []
         ndim_no_time = ndim if (len(dims) == 0) else ndim - 1
 
-        # TODO geometry should not be None
-        if geometry is None:
-            geometry = GeometryUndefined()
-        spdims = geometry.default_dims(ndim_no_time)
-        dims.extend(spdims)
+        if isinstance(geometry, GeometryUndefined):
+            DIMS_MAPPING = {
+                0: [],
+                1: ["x"],
+                2: ["y", "x"],
+                3: ["z", "y", "x"],
+            }
+            spdims = DIMS_MAPPING[ndim_no_time]
+        else:
+            spdims = geometry.default_dims
+        dims.extend(spdims)  # type: ignore
         return tuple(dims)
 
     def _check_time_data_length(self, time: Sized) -> None:

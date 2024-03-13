@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 
 from collections import namedtuple
-from typing import List
+from typing import Tuple
 
 from mikecore.Projections import MapProjection
 
@@ -15,9 +15,6 @@ class _Geometry(ABC):
             raise ValueError(f"{projection=} is not a valid projection string")
 
         self._projstr = projection
-
-    def default_dims(self, ndim_no_time: int) -> List[str]:
-        return {0: [], 1: ["x"], 2: ["y", "x"], 3: ["z", "y", "x"]}[ndim_no_time]  # type: ignore
 
     @property
     def projection_string(self) -> str:
@@ -44,6 +41,11 @@ class _Geometry(ABC):
     def ndim(self) -> int:
         pass
 
+    @property
+    @abstractmethod
+    def default_dims(self) -> Tuple[str, ...]:
+        pass
+
 
 class GeometryUndefined(_Geometry):
     def __repr__(self):
@@ -53,12 +55,20 @@ class GeometryUndefined(_Geometry):
     def ndim(self) -> int:
         return 0
 
+    @property
+    def default_dims(self) -> Tuple[str, ...]:
+        raise NotImplementedError()
+
 
 class GeometryPoint2D(_Geometry):
     def __init__(self, x: float, y: float, projection: str = "LONG/LAT"):
         super().__init__(projection)
         self.x = x
         self.y = y
+
+    @property
+    def default_dims(self) -> Tuple[str, ...]:
+        return ()
 
     def __repr__(self) -> str:
         return f"GeometryPoint2D(x={self.x}, y={self.y})"
@@ -92,6 +102,10 @@ class GeometryPoint3D(_Geometry):
 
     def __repr__(self):
         return f"GeometryPoint3D(x={self.x}, y={self.y}, z={self.z})"
+
+    @property
+    def default_dims(self) -> Tuple[str, ...]:
+        return ()
 
     @property
     def wkt(self) -> str:

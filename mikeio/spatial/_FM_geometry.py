@@ -57,11 +57,12 @@ class GeometryFMPointSpectrum(_Geometry):
         self.x = x
         self.y = y
 
-    def default_dims(self, ndim_no_time: int) -> List[str]:
-        if ndim_no_time == 1:
-            return ["frequency"]
+    @property
+    def default_dims(self) -> Tuple[str, ...]:
+        if self.directions is None:
+            return ("frequency",)
         else:
-            return ["direction", "frequency"]
+            return ("direction", "frequency")
 
     @property
     def is_layered(self) -> bool:
@@ -329,6 +330,10 @@ class _GeometryFM(_Geometry):
         self._element_ids = new_element_ids
 
     @property
+    def default_dims(self) -> Tuple[str, ...]:
+        return ("element",)
+
+    @property
     def is_spectral(self) -> bool:
         return False
 
@@ -454,22 +459,6 @@ class GeometryFM2D(_GeometryFM):
                 return False
 
         return True
-
-    def default_dims(self, ndim_no_time: int) -> List[str]:
-        dims = []
-        if self._type == DfsuFileType.DfsuSpectral1D:
-            if ndim_no_time > 0:
-                dims.append("node")
-        else:
-            if ndim_no_time > 0:
-                dims.append("element")
-        if self.is_spectral:
-            if ndim_no_time == 2:
-                dims.append("frequency")
-            elif ndim_no_time == 3:
-                dims.append("direction")
-                dims.append("frequency")
-        return dims
 
     @property
     def type_name(self):
