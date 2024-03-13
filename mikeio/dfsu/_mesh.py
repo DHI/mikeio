@@ -1,21 +1,18 @@
 from __future__ import annotations
 from pathlib import Path
 from typing import TYPE_CHECKING
-from collections.abc import Collection
-import warnings
+
 
 import numpy as np
 
-from mikecore.eum import eumQuantity
-from mikecore.MeshBuilder import MeshBuilder
+
 from mikecore.MeshFile import MeshFile
 
-from ..eum import EUMType, EUMUnit
+
 from ..spatial import GeometryFM2D
 from ._common import (
     get_elements_from_source,
     get_nodes_from_source,
-    element_table_to_mikecore,
 )
 
 if TYPE_CHECKING:
@@ -48,20 +45,8 @@ class Mesh:
     """
 
     def __init__(self, filename: str | Path) -> None:
-        ext = Path(filename).suffix.lower()
 
-        if ext == ".mesh":
-            self.geometry: GeometryFM2D = self._read_header(filename)
-        elif ext == ".dfsu":
-            # TODO remove in v 1.8
-            import mikeio
-
-            warnings.warn(
-                f'Reading dfsu with `Mesh` is deprecated. Read a .dfsu geometry with `geom = mikeio.open("{filename}").geometry`',
-                FutureWarning,
-            )
-            self.geometry = mikeio.open(str(filename)).geometry
-
+        self.geometry: GeometryFM2D = self._read_header(filename)
         self.plot = self.geometry.plot
 
     def _read_header(self, filename: str | Path) -> GeometryFM2D:
@@ -128,7 +113,7 @@ class Mesh:
         return self.geometry.node_coordinates[:, 2]
 
     @zn.setter
-    def zn(self, v: np.ndarray):
+    def zn(self, v: np.ndarray) -> None:
         if len(v) != self.n_nodes:
             raise ValueError(f"zn must have length of nodes ({self.n_nodes})")
         self.geometry._nc[:, 2] = v
@@ -136,8 +121,6 @@ class Mesh:
     def write(
         self,
         outfilename: str | Path,
-        elements: Collection[int] | None = None,
-        unit: EUMUnit = EUMUnit.meter,
     ) -> None:
         """write mesh to file
 
@@ -145,34 +128,13 @@ class Mesh:
         ----------
         outfilename : str
             path to file
-        elements : list(int)
-            list of element ids (subset) to be saved to new mesh
         """
-        # TODO reconsider if selection of elements should be done here, it is possible to do with geometry.isel and then write the mesh
-        builder = MeshBuilder()
 
-        if elements is not None:
-            geometry = self.geometry.isel(elements)
-        else:
-            geometry = self.geometry
+        geometry = self.geometry
 
         assert isinstance(geometry, GeometryFM2D)  # i.e. not a GeometryPoint2d
 
-        quantity = eumQuantity.Create(EUMType.Bathymetry, unit)
-        elem_table = element_table_to_mikecore(geometry.element_table)
-
-        nc = geometry.node_coordinates
-        builder.SetNodes(nc[:, 0], nc[:, 1], nc[:, 2], geometry.codes)
-
-        builder.SetElements(elem_table)
-        builder.SetProjection(geometry.projection_string)
-        builder.SetEumQuantity(quantity)
-
-        newMesh = builder.CreateMesh()
-        newMesh.Write(outfilename)
-
-    def plot_boundary_nodes(self, boundary_names=None, figsize=None, ax=None) -> None:
-        return self.geometry.plot.boundary_nodes(boundary_names, figsize, ax)
+        self.geometry.to_mesh(outfilename=outfilename)
 
     def to_shapely(self) -> MultiPolygon:
         """Convert Mesh geometry to shapely MultiPolygon
