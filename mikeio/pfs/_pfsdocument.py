@@ -89,7 +89,6 @@ class PfsDocument(PfsSection):
         names=None,
         unique_keywords=False,
     ):
-
         if isinstance(data, (str, Path)) or hasattr(data, "read"):
             if names is not None:
                 raise ValueError("names cannot be given as argument if input is a file")
@@ -136,6 +135,12 @@ class PfsDocument(PfsSection):
     def items(self):
         """Return a new view of the PfsDocument's items ((key, value) pairs)"""
         return [(k, v) for k, v in self.__dict__.items() if k not in self._ALIAS_LIST]
+
+    def to_dict(self) -> dict:
+        """Convert to (nested) dict (as a copy)"""
+        d = super().to_dict()
+        _ = d.pop("_ALIAS_LIST")
+        return d
 
     @staticmethod
     def _unravel_items(items: Callable) -> Tuple[List, List]:
@@ -312,11 +317,6 @@ class PfsDocument(PfsSection):
                 key = s[0:idx]
                 key = key.strip()
                 value = s[(idx + 1) :].strip()
-
-                if key == "start_time":
-                    value = datetime.strptime(value, "%Y, %m, %d, %H, %M, %S").strftime(
-                        "%Y-%m-%d %H:%M:%S"
-                    )
                 value = self._parse_param(value)
                 s = f"{key}: {value}"
 
