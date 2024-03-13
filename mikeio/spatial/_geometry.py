@@ -53,7 +53,7 @@ class GeometryUndefined(_Geometry):
 
     @property
     def ndim(self) -> int:
-        return NotImplementedError()
+        raise NotImplementedError()
 
     @property
     def default_dims(self) -> Tuple[str, ...]:
