@@ -823,3 +823,15 @@ def test_read_dfs2_static_dt_zero():
 
     assert ds2.shape == (2, 2)
     assert "time" not in ds2.dims
+
+
+def test_write_read_local_coordinates(tmp_path):
+    da = mikeio.DataArray(
+        np.array([[1, 2, 3], [4, 5, 6]]),
+        geometry=mikeio.Grid2D(nx=3, ny=2, dx=0.5, projection="NON-UTM"),
+    )
+    fp = tmp_path / "local_coordinates.dfs2"
+    da.to_dfs(fp)
+
+    ds = mikeio.read(fp)
+    assert da.geometry == ds.geometry

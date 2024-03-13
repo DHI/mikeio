@@ -491,6 +491,7 @@ class Grid2D(_Geometry):
         if self.is_local_coordinates and not (is_spectral or is_vertical):
             self._x0 = self._x0 + self._dx / 2
             self._y0 = self._y0 + self._dy / 2
+            self._shift_origin_on_write = False
 
         self.is_spectral = is_spectral
         self.is_vertical = is_vertical
