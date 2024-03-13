@@ -163,7 +163,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
         <i class="bi bi-layout-text-sidebar-reverse"></i>
       </button>
         <a class="flex-grow-1 no-decor" role="button" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
-          <h1 class="quarto-secondary-nav-title"></h1>
+          <h1 class="quarto-secondary-nav-title">Dataset</h1>
         </a>     
       <button type="button" class="btn quarto-search-button" aria-label="" onclick="window.quartoOpenSearch();">
         <i class="bi bi-search"></i>
@@ -339,9 +339,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     <h2 id="toc-title">On this page</h2>
    
   <ul>
-  <li><a href="#mikeio.Dataset" id="toc-mikeio.Dataset" class="nav-link active" data-scroll-target="#mikeio.Dataset">Dataset</a>
-  <ul class="collapse">
-  <li><a href="#selecting-items" id="toc-selecting-items" class="nav-link" data-scroll-target="#selecting-items">Selecting Items</a></li>
+  <li><a href="#selecting-items" id="toc-selecting-items" class="nav-link active" data-scroll-target="#selecting-items">Selecting Items</a></li>
   <li><a href="#examples" id="toc-examples" class="nav-link" data-scroll-target="#examples">Examples</a></li>
   <li><a href="#attributes" id="toc-attributes" class="nav-link" data-scroll-target="#attributes">Attributes</a></li>
   <li><a href="#methods" id="toc-methods" class="nav-link" data-scroll-target="#methods">Methods</a>
@@ -382,18 +380,31 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <li><a href="#mikeio.Dataset.to_pandas" id="toc-mikeio.Dataset.to_pandas" class="nav-link" data-scroll-target="#mikeio.Dataset.to_pandas">to_pandas</a></li>
   <li><a href="#mikeio.Dataset.to_xarray" id="toc-mikeio.Dataset.to_xarray" class="nav-link" data-scroll-target="#mikeio.Dataset.to_xarray">to_xarray</a></li>
   </ul></li>
-  </ul></li>
   </ul>
 <div class="toc-actions"><ul><li><a href="https://github.com/DHI/mikeio/edit/main/docs/api/Dataset.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li></ul></div></nav>
     </div>
 <!-- main -->
 <main class="content" id="quarto-document-content">
 
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title d-none d-lg-block">Dataset</h1>
+</div>
 
 
 
-<section id="mikeio.Dataset" class="level1">
-<h1>Dataset</h1>
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
 <p><code>Dataset(self, data, time=None, items=None, geometry=None, zn=None, dims=None, validate=True)</code></p>
 <p>Dataset containing one or more DataArrays with common geometry and time</p>
 <p>Most often obtained by reading a dfs file. But can also be created a sequence or dictonary of DataArrays. The mikeio.Dataset is inspired by and similar to the xarray.Dataset.</p>
@@ -417,16 +428,20 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </section>
 <section id="examples" class="level2">
 <h2 class="anchored" data-anchor-id="examples">Examples</h2>
-<div class="sourceCode" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> mikeio.read(<span class="st">"europe_wind_long_lat.dfs2"</span>)</span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="op">&lt;</span>mikeio.Dataset<span class="op">&gt;</span></span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>dims: (time:<span class="dv">1</span>, y:<span class="dv">101</span>, x:<span class="dv">221</span>)</span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>time: <span class="dv">2012</span><span class="op">-</span><span class="dv">0</span><span class="er">1</span><span class="op">-</span><span class="dv">0</span><span class="er">1</span> <span class="dv">00</span>:<span class="dv">00</span>:<span class="dv">00</span> (time<span class="op">-</span>invariant)</span>
-<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>geometry: Grid2D (ny<span class="op">=</span><span class="dv">101</span>, nx<span class="op">=</span><span class="dv">221</span>)</span>
-<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>items:</span>
-<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="dv">0</span>:  Mean Sea Level Pressure <span class="op">&lt;</span>Air Pressure<span class="op">&gt;</span> (hectopascal)</span>
-<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="dv">1</span>:  Wind x<span class="op">-</span>comp (<span class="dv">10</span><span class="er">m</span>) <span class="op">&lt;</span>Wind Velocity<span class="op">&gt;</span> (meter per sec)</span>
-<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a><span class="dv">2</span>:  Wind y<span class="op">-</span>comp (<span class="dv">10</span><span class="er">m</span>) <span class="op">&lt;</span>Wind Velocity<span class="op">&gt;</span> (meter per sec)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="sourceCode" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> mikeio.Dataset([da1, da2])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div id="a648ad84" class="cell" data-execution_count="1">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> mikeio</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>mikeio.read(<span class="st">"../data/europe_wind_long_lat.dfs2"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="1">
+<pre><code>&lt;mikeio.Dataset&gt;
+dims: (time:1, y:101, x:221)
+time: 2012-01-01 00:00:00 (time-invariant)
+geometry: Grid2D (ny=101, nx=221)
+items:
+  0:  Mean Sea Level Pressure &lt;Air Pressure&gt; (hectopascal)
+  1:  Wind x-comp (10m) &lt;Wind Velocity&gt; (meter per sec)
+  2:  Wind y-comp (10m) &lt;Wind Velocity&gt; (meter per sec)</code></pre>
+</div>
+</div>
 </section>
 <section id="attributes" class="level2">
 <h2 class="anchored" data-anchor-id="attributes">Attributes</h2>
@@ -2340,7 +2355,6 @@ average : Weighted average</code></pre>
 <p>Export to xarray.Dataset</p>
 
 
-</section>
 </section>
 </section>
 

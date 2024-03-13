@@ -57,7 +57,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </style>
 
 
-<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js" integrity="sha512-bLT0Qm9VnAYZDflyKcBaQ2gg0hSYNQrJ8RilYldYQ1FxQYoCLtUjuuRuZo+fjqhx/qtq/1itJ0C2ejDxltZVFg==" crossorigin="anonymous"></script><script src="../site_libs/quarto-nav/quarto-nav.js"></script>
 <script src="../site_libs/quarto-nav/headroom.min.js"></script>
 <script src="../site_libs/clipboard/clipboard.min.js"></script>
 <script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
@@ -100,6 +100,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     "search-label": "Search"
   }
 }</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" integrity="sha512-c3Nl8+7g4LMSTdrm621y7kf9v3SDPnhxLNhcjFJbKECVnmZHTdo+IRO05sNLTH/D3vA6u1X32ehoLC7WFVdheg==" crossorigin="anonymous"></script>
+
+<script type="application/javascript">define('jquery', [],function() {return window.jQuery;})</script>
 
 
 </head>
@@ -163,7 +166,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
         <i class="bi bi-layout-text-sidebar-reverse"></i>
       </button>
         <a class="flex-grow-1 no-decor" role="button" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
-          <h1 class="quarto-secondary-nav-title"></h1>
+          <h1 class="quarto-secondary-nav-title">PfsSection</h1>
         </a>     
       <button type="button" class="btn quarto-search-button" aria-label="" onclick="window.quartoOpenSearch();">
         <i class="bi bi-search"></i>
@@ -339,9 +342,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     <h2 id="toc-title">On this page</h2>
    
   <ul>
-  <li><a href="#mikeio.PfsSection" id="toc-mikeio.PfsSection" class="nav-link active" data-scroll-target="#mikeio.PfsSection">PfsSection</a>
-  <ul class="collapse">
-  <li><a href="#methods" id="toc-methods" class="nav-link" data-scroll-target="#methods">Methods</a>
+  <li><a href="#methods" id="toc-methods" class="nav-link active" data-scroll-target="#methods">Methods</a>
   <ul class="collapse">
   <li><a href="#mikeio.PfsSection.clear" id="toc-mikeio.PfsSection.clear" class="nav-link" data-scroll-target="#mikeio.PfsSection.clear">clear</a></li>
   <li><a href="#mikeio.PfsSection.copy" id="toc-mikeio.PfsSection.copy" class="nav-link" data-scroll-target="#mikeio.PfsSection.copy">copy</a></li>
@@ -357,18 +358,31 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <li><a href="#mikeio.PfsSection.update_recursive" id="toc-mikeio.PfsSection.update_recursive" class="nav-link" data-scroll-target="#mikeio.PfsSection.update_recursive">update_recursive</a></li>
   <li><a href="#mikeio.PfsSection.values" id="toc-mikeio.PfsSection.values" class="nav-link" data-scroll-target="#mikeio.PfsSection.values">values</a></li>
   </ul></li>
-  </ul></li>
   </ul>
 <div class="toc-actions"><ul><li><a href="https://github.com/DHI/mikeio/edit/main/docs/api/PfsSection.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li></ul></div></nav>
     </div>
 <!-- main -->
 <main class="content" id="quarto-document-content">
 
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title d-none d-lg-block">PfsSection</h1>
+</div>
 
 
 
-<section id="mikeio.PfsSection" class="level1">
-<h1>PfsSection</h1>
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
 <p><code>PfsSection(self, dictionary, **kwargs)</code></p>
 <section id="methods" class="level2">
 <h2 class="anchored" data-anchor-id="methods">Methods</h2>
@@ -488,21 +502,55 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </section>
 <section id="examples" class="level4">
 <h4 class="anchored" data-anchor-id="examples">Examples</h4>
-<div class="sourceCode" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> df <span class="op">=</span> pd.DataFrame(<span class="bu">dict</span>(station<span class="op">=</span>[<span class="st">"Foo"</span>, <span class="st">"Bar"</span>],include<span class="op">=</span>[<span class="dv">0</span>,<span class="dv">1</span>]), index<span class="op">=</span>[<span class="dv">1</span>,<span class="dv">2</span>])</span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> df</span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>  station  include</span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="dv">1</span>     Foo        <span class="dv">0</span></span>
-<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="dv">2</span>     Bar        <span class="dv">1</span></span>
-<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> mikeio.PfsSection.from_dataframe(df,<span class="st">"STATION_"</span>)</span>
-<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>...</span>
-<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>[STATION_1]</span>
-<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>    station <span class="op">=</span> <span class="st">'Foo'</span></span>
-<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>    include <span class="op">=</span> <span class="dv">0</span></span>
-<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>EndSect  <span class="op">//</span> STATION_1</span>
-<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>[STATION_2]</span>
-<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>    station <span class="op">=</span> <span class="st">'Bar'</span></span>
-<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>    include <span class="op">=</span> <span class="dv">1</span></span>
-<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>EndSect  <span class="op">//</span> STATION_2</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div id="730bbafc" class="cell" data-execution_count="1">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> mikeio</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> pd.DataFrame(<span class="bu">dict</span>(station<span class="op">=</span>[<span class="st">"Foo"</span>, <span class="st">"Bar"</span>],include<span class="op">=</span>[<span class="dv">0</span>,<span class="dv">1</span>]), index<span class="op">=</span>[<span class="dv">1</span>,<span class="dv">2</span>])</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>df</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="1">
+<div>
+<div>
+
+
+<table class="dataframe table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">station</th>
+<th data-quarto-table-cell-role="th">include</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">1</td>
+<td>Foo</td>
+<td>0</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">2</td>
+<td>Bar</td>
+<td>1</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
+</div>
+<div id="55ed91d7" class="cell" data-execution_count="2">
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>mikeio.PfsSection.from_dataframe(df,<span class="st">"STATION_"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="2">
+<pre><code>[STATION_1]
+   station = 'Foo'
+   include = 0
+EndSect  // STATION_1
+[STATION_2]
+   station = 'Bar'
+   include = 1
+EndSect  // STATION_2</code></pre>
+</div>
+</div>
 </section>
 </section>
 <section id="mikeio.PfsSection.get" class="level3">
@@ -653,8 +701,146 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </section>
 <section id="examples-1" class="level4">
 <h4 class="anchored" data-anchor-id="examples-1">Examples</h4>
-<div class="sourceCode" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> pfs <span class="op">=</span> mikeio.read_pfs(<span class="st">"tests/testdata/pfs/lake.sw"</span>)</span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> df <span class="op">=</span> pfs.SW.OUTPUTS.to_dataframe(prefix<span class="op">=</span><span class="st">"OUTPUT_"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div id="c0e17765" class="cell" data-execution_count="3">
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>pfs <span class="op">=</span> mikeio.read_pfs(<span class="st">"../data/pfs/lake.sw"</span>)</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>pfs.SW.OUTPUTS.to_dataframe(prefix<span class="op">=</span><span class="st">"OUTPUT_"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="3">
+<div>
+<div>
+
+
+<table class="dataframe table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">Touched</th>
+<th data-quarto-table-cell-role="th">include</th>
+<th data-quarto-table-cell-role="th">title</th>
+<th data-quarto-table-cell-role="th">file_name</th>
+<th data-quarto-table-cell-role="th">type</th>
+<th data-quarto-table-cell-role="th">format</th>
+<th data-quarto-table-cell-role="th">flood_and_dry</th>
+<th data-quarto-table-cell-role="th">coordinate_type</th>
+<th data-quarto-table-cell-role="th">zone</th>
+<th data-quarto-table-cell-role="th">input_file_name</th>
+<th data-quarto-table-cell-role="th">...</th>
+<th data-quarto-table-cell-role="th">last_time_step</th>
+<th data-quarto-table-cell-role="th">time_step_frequency</th>
+<th data-quarto-table-cell-role="th">number_of_points</th>
+<th data-quarto-table-cell-role="th">POINT_1</th>
+<th data-quarto-table-cell-role="th">LINE</th>
+<th data-quarto-table-cell-role="th">AREA</th>
+<th data-quarto-table-cell-role="th">INTEGRAL_WAVE_PARAMETERS</th>
+<th data-quarto-table-cell-role="th">INPUT_PARAMETERS</th>
+<th data-quarto-table-cell-role="th">MODEL_PARAMETERS</th>
+<th data-quarto-table-cell-role="th">SPECTRAL_PARAMETERS</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">1</td>
+<td>1</td>
+<td>1</td>
+<td>Wave parameters in domain</td>
+<td>Wave_parameters.dfsu</td>
+<td>1</td>
+<td>2</td>
+<td>2</td>
+<td>UTM-32</td>
+<td>0</td>
+<td>||</td>
+<td>...</td>
+<td>450</td>
+<td>10</td>
+<td>1</td>
+<td>{'name': 'POINT_1', 'x': 20000.0, 'y': 20000.0}</td>
+<td>{'npoints': 3, 'x_first': 0.0, 'y_first': 0.0,...</td>
+<td>{'number_of_points': 4, 'POINT_1': {'x': -400....</td>
+<td>{'Touched': 1, 'type_of_spectrum': 1, 'minimum...</td>
+<td>{'Touched': 1, 'Surface_elevation': 0, 'Water_...</td>
+<td>{'Touched': 1, 'Wind_friction_speed': 0, 'Roug...</td>
+<td>{'Touched': 1, 'separation_of_wind_sea_and_swe...</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">2</td>
+<td>1</td>
+<td>0</td>
+<td>Wave parameters along line</td>
+<td>Wave_line.dfs1</td>
+<td>1</td>
+<td>1</td>
+<td>2</td>
+<td>UTM-32</td>
+<td>0</td>
+<td>||</td>
+<td>...</td>
+<td>450</td>
+<td>10</td>
+<td>1</td>
+<td>{'name': 'POINT_1', 'x': 20000.0, 'y': 20000.0}</td>
+<td>{'npoints': 41, 'x_first': 0.0, 'y_first': 200...</td>
+<td>{'number_of_points': 4, 'POINT_1': {'x': -400....</td>
+<td>{'Touched': 1, 'type_of_spectrum': 1, 'minimum...</td>
+<td>{'Touched': 1, 'Surface_elevation': 0, 'Water_...</td>
+<td>{'Touched': 1, 'Wind_friction_speed': 0, 'Roug...</td>
+<td>{'Touched': 1, 'separation_of_wind_sea_and_swe...</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">3</td>
+<td>1</td>
+<td>1</td>
+<td>Wave parameters in a point</td>
+<td>Waves_x20km_y20km.dfs0</td>
+<td>1</td>
+<td>0</td>
+<td>2</td>
+<td>UTM-32</td>
+<td>0</td>
+<td>||</td>
+<td>...</td>
+<td>450</td>
+<td>1</td>
+<td>1</td>
+<td>{'name': 'POINT_1', 'x': 38000.0, 'y': 20000.0}</td>
+<td>{'npoints': 3, 'x_first': 0.0, 'y_first': 0.0,...</td>
+<td>{'number_of_points': 4, 'POINT_1': {'x': -400....</td>
+<td>{'Touched': 1, 'type_of_spectrum': 1, 'minimum...</td>
+<td>{'Touched': 1, 'Surface_elevation': 0, 'Water_...</td>
+<td>{'Touched': 1, 'Wind_friction_speed': 0, 'Roug...</td>
+<td>{'Touched': 1, 'separation_of_wind_sea_and_swe...</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">4</td>
+<td>1</td>
+<td>1</td>
+<td>Spectrum in a point</td>
+<td>spectrum_x20km_y20km.dfsu</td>
+<td>4</td>
+<td>0</td>
+<td>2</td>
+<td>UTM-32</td>
+<td>0</td>
+<td>||</td>
+<td>...</td>
+<td>450</td>
+<td>10</td>
+<td>1</td>
+<td>{'name': 'POINT_1', 'x': 38000.0, 'y': 20000.0}</td>
+<td>{'npoints': 3, 'x_first': 0.0, 'y_first': 0.0,...</td>
+<td>{'number_of_points': 4, 'POINT_1': {'x': -400....</td>
+<td>{'Touched': 1, 'type_of_spectrum': 1, 'minimum...</td>
+<td>{'Touched': 1, 'Surface_elevation': 0, 'Water_...</td>
+<td>{'Touched': 1, 'Wind_friction_speed': 0, 'Roug...</td>
+<td>{'Touched': 1, 'separation_of_wind_sea_and_swe...</td>
+</tr>
+</tbody>
+</table>
+
+<p>4 rows × 24 columns</p>
+</div>
+</div>
+</div>
+</div>
 </section>
 </section>
 <section id="mikeio.PfsSection.to_dict" class="level3">
@@ -673,7 +859,6 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <p>Return a new view of the PfsSection’s values.</p>
 
 
-</section>
 </section>
 </section>
 

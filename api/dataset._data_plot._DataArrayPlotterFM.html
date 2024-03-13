@@ -163,7 +163,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
         <i class="bi bi-layout-text-sidebar-reverse"></i>
       </button>
         <a class="flex-grow-1 no-decor" role="button" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
-          <h1 class="quarto-secondary-nav-title"></h1>
+          <h1 class="quarto-secondary-nav-title">dataset._data_plot._DataArrayPlotterFM</h1>
         </a>     
       <button type="button" class="btn quarto-search-button" aria-label="" onclick="window.quartoOpenSearch();">
         <i class="bi bi-search"></i>
@@ -339,9 +339,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     <h2 id="toc-title">On this page</h2>
    
   <ul>
-  <li><a href="#mikeio.dataset._data_plot._DataArrayPlotterFM" id="toc-mikeio.dataset._data_plot._DataArrayPlotterFM" class="nav-link active" data-scroll-target="#mikeio.dataset._data_plot._DataArrayPlotterFM">dataset._data_plot._DataArrayPlotterFM</a>
-  <ul class="collapse">
-  <li><a href="#examples" id="toc-examples" class="nav-link" data-scroll-target="#examples">Examples</a></li>
+  <li><a href="#examples" id="toc-examples" class="nav-link active" data-scroll-target="#examples">Examples</a></li>
   <li><a href="#methods" id="toc-methods" class="nav-link" data-scroll-target="#methods">Methods</a>
   <ul class="collapse">
   <li><a href="#mikeio.dataset._data_plot._DataArrayPlotterFM.contour" id="toc-mikeio.dataset._data_plot._DataArrayPlotterFM.contour" class="nav-link" data-scroll-target="#mikeio.dataset._data_plot._DataArrayPlotterFM.contour">contour</a></li>
@@ -352,31 +350,49 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <li><a href="#mikeio.dataset._data_plot._DataArrayPlotterFM.outline" id="toc-mikeio.dataset._data_plot._DataArrayPlotterFM.outline" class="nav-link" data-scroll-target="#mikeio.dataset._data_plot._DataArrayPlotterFM.outline">outline</a></li>
   <li><a href="#mikeio.dataset._data_plot._DataArrayPlotterFM.patch" id="toc-mikeio.dataset._data_plot._DataArrayPlotterFM.patch" class="nav-link" data-scroll-target="#mikeio.dataset._data_plot._DataArrayPlotterFM.patch">patch</a></li>
   </ul></li>
-  </ul></li>
   </ul>
 <div class="toc-actions"><ul><li><a href="https://github.com/DHI/mikeio/edit/main/docs/api/dataset._data_plot._DataArrayPlotterFM.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li></ul></div></nav>
     </div>
 <!-- main -->
 <main class="content" id="quarto-document-content">
 
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title d-none d-lg-block">dataset._data_plot._DataArrayPlotterFM</h1>
+</div>
 
 
 
-<section id="mikeio.dataset._data_plot._DataArrayPlotterFM" class="level1">
-<h1>dataset._data_plot._DataArrayPlotterFM</h1>
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
 <p><code>dataset._data_plot._DataArrayPlotterFM(self, da)</code></p>
 <p>Plot a DataArray with a GeometryFM geometry</p>
 <p>If DataArray has multiple time steps, the first step will be plotted.</p>
 <p>If DataArray is 3D the surface layer will be plotted.</p>
 <section id="examples" class="level2">
 <h2 class="anchored" data-anchor-id="examples">Examples</h2>
-<div class="sourceCode" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> da <span class="op">=</span> mikeio.read(<span class="st">"HD2D.dfsu"</span>)[<span class="st">"Surface elevation"</span>]</span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> da.plot()</span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> da.plot.contour()</span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> da.plot.contourf()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="sourceCode" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> da.plot.mesh()</span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> da.plot.outline()</span>
-<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> da.plot.hist()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div id="fb7d1143" class="cell" data-execution_count="1">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> mikeio</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>da <span class="op">=</span> mikeio.read(<span class="st">"../data/HD2D.dfsu"</span>)[<span class="st">"Surface elevation"</span>]</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>da.plot()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="dataset._data_plot._DataArrayPlotterFM_files/figure-html/cell-2-output-1.png" width="299" height="463" class="figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
 </section>
 <section id="methods" class="level2">
 <h2 class="anchored" data-anchor-id="methods">Methods</h2>
@@ -422,11 +438,39 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <h3 class="anchored" data-anchor-id="mikeio.dataset._data_plot._DataArrayPlotterFM.contour">contour</h3>
 <p><code>dataset._data_plot._DataArrayPlotterFM.contour(ax=None, figsize=None, **kwargs)</code></p>
 <p>Plot data as contour lines</p>
+<section id="examples-1" class="level4">
+<h4 class="anchored" data-anchor-id="examples-1">Examples</h4>
+<div id="7f2b7428" class="cell" data-execution_count="2">
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>da <span class="op">=</span> mikeio.read(<span class="st">"../data/HD2D.dfsu"</span>)[<span class="st">"Surface elevation"</span>]</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>da.plot.contour()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="dataset._data_plot._DataArrayPlotterFM_files/figure-html/cell-3-output-1.png" width="234" height="463" class="figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
 </section>
 <section id="mikeio.dataset._data_plot._DataArrayPlotterFM.contourf" class="level3">
 <h3 class="anchored" data-anchor-id="mikeio.dataset._data_plot._DataArrayPlotterFM.contourf">contourf</h3>
 <p><code>dataset._data_plot._DataArrayPlotterFM.contourf(ax=None, figsize=None, **kwargs)</code></p>
 <p>Plot data as filled contours</p>
+<section id="examples-2" class="level4">
+<h4 class="anchored" data-anchor-id="examples-2">Examples</h4>
+<div id="1f7c5542" class="cell" data-execution_count="3">
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>da <span class="op">=</span> mikeio.read(<span class="st">"../data/HD2D.dfsu"</span>)[<span class="st">"Surface elevation"</span>]</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>da.plot.contourf()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="dataset._data_plot._DataArrayPlotterFM_files/figure-html/cell-4-output-1.png" width="299" height="463" class="figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
 </section>
 <section id="mikeio.dataset._data_plot._DataArrayPlotterFM.hist" class="level3">
 <h3 class="anchored" data-anchor-id="mikeio.dataset._data_plot._DataArrayPlotterFM.hist">hist</h3>
@@ -508,16 +552,57 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <h3 class="anchored" data-anchor-id="mikeio.dataset._data_plot._DataArrayPlotterFM.mesh">mesh</h3>
 <p><code>dataset._data_plot._DataArrayPlotterFM.mesh(ax=None, figsize=None, **kwargs)</code></p>
 <p>Plot mesh only</p>
+<section id="examples-3" class="level4">
+<h4 class="anchored" data-anchor-id="examples-3">Examples</h4>
+<div id="7d00b7d0" class="cell" data-execution_count="4">
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>da <span class="op">=</span> mikeio.read(<span class="st">"../data/HD2D.dfsu"</span>)[<span class="st">"Surface elevation"</span>]</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>da.plot.mesh()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="dataset._data_plot._DataArrayPlotterFM_files/figure-html/cell-5-output-1.png" width="213" height="449" class="figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
 </section>
 <section id="mikeio.dataset._data_plot._DataArrayPlotterFM.outline" class="level3">
 <h3 class="anchored" data-anchor-id="mikeio.dataset._data_plot._DataArrayPlotterFM.outline">outline</h3>
 <p><code>dataset._data_plot._DataArrayPlotterFM.outline(ax=None, figsize=None, **kwargs)</code></p>
 <p>Plot domain outline (using the boundary_polylines property)</p>
+<section id="examples-4" class="level4">
+<h4 class="anchored" data-anchor-id="examples-4">Examples</h4>
+<div id="45797d8b" class="cell" data-execution_count="5">
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>da <span class="op">=</span> mikeio.read(<span class="st">"../data/HD2D.dfsu"</span>)[<span class="st">"Surface elevation"</span>]</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>da.plot.outline()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="dataset._data_plot._DataArrayPlotterFM_files/figure-html/cell-6-output-1.png" width="195" height="431" class="figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
 </section>
 <section id="mikeio.dataset._data_plot._DataArrayPlotterFM.patch" class="level3">
 <h3 class="anchored" data-anchor-id="mikeio.dataset._data_plot._DataArrayPlotterFM.patch">patch</h3>
 <p><code>dataset._data_plot._DataArrayPlotterFM.patch(ax=None, figsize=None, **kwargs)</code></p>
 <p>Plot data as coloured patches</p>
+<section id="examples-5" class="level4">
+<h4 class="anchored" data-anchor-id="examples-5">Examples</h4>
+<div id="505f89fd" class="cell" data-execution_count="6">
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>da <span class="op">=</span> mikeio.read(<span class="st">"../data/HD2D.dfsu"</span>)[<span class="st">"Surface elevation"</span>]</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>da.plot.patch()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="dataset._data_plot._DataArrayPlotterFM_files/figure-html/cell-7-output-1.png" width="299" height="463" class="figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
 
 
 </section>

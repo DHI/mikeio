@@ -163,7 +163,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
         <i class="bi bi-layout-text-sidebar-reverse"></i>
       </button>
         <a class="flex-grow-1 no-decor" role="button" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
-          <h1 class="quarto-secondary-nav-title"></h1>
+          <h1 class="quarto-secondary-nav-title">DataArray</h1>
         </a>     
       <button type="button" class="btn quarto-search-button" aria-label="" onclick="window.quartoOpenSearch();">
         <i class="bi bi-search"></i>
@@ -339,8 +339,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     <h2 id="toc-title">On this page</h2>
    
   <ul>
-  <li><a href="#mikeio.DataArray" id="toc-mikeio.DataArray" class="nav-link active" data-scroll-target="#mikeio.DataArray">DataArray</a>
-  <ul class="collapse">
+  <li><a href="#examples" id="toc-examples" class="nav-link active" data-scroll-target="#examples">Examples</a></li>
   <li><a href="#attributes" id="toc-attributes" class="nav-link" data-scroll-target="#attributes">Attributes</a></li>
   <li><a href="#methods" id="toc-methods" class="nav-link" data-scroll-target="#methods">Methods</a>
   <ul class="collapse">
@@ -376,18 +375,31 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <li><a href="#mikeio.DataArray.to_pandas" id="toc-mikeio.DataArray.to_pandas" class="nav-link" data-scroll-target="#mikeio.DataArray.to_pandas">to_pandas</a></li>
   <li><a href="#mikeio.DataArray.to_xarray" id="toc-mikeio.DataArray.to_xarray" class="nav-link" data-scroll-target="#mikeio.DataArray.to_xarray">to_xarray</a></li>
   </ul></li>
-  </ul></li>
   </ul>
 <div class="toc-actions"><ul><li><a href="https://github.com/DHI/mikeio/edit/main/docs/api/DataArray.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li></ul></div></nav>
     </div>
 <!-- main -->
 <main class="content" id="quarto-document-content">
 
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title d-none d-lg-block">DataArray</h1>
+</div>
 
 
 
-<section id="mikeio.DataArray" class="level1">
-<h1>DataArray</h1>
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
 <p><code>DataArray(self, data, *, time=None, item=None, geometry=GeometryUndefined(), zn=None, dims=None)</code></p>
 <p>DataArray with data and metadata for a single item in a dfs file</p>
 <p>The DataArray has these main properties:</p>
@@ -397,6 +409,26 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <li>values - a numpy array containing the data</li>
 <li>item - an ItemInfo with name, type and unit</li>
 </ul>
+<section id="examples" class="level2">
+<h2 class="anchored" data-anchor-id="examples">Examples</h2>
+<div id="9c86757e" class="cell" data-execution_count="1">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> mikeio</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>da <span class="op">=</span> mikeio.DataArray([<span class="fl">0.0</span>, <span class="fl">1.0</span>],</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>    time<span class="op">=</span>pd.date_range(<span class="st">"2020-01-01"</span>, periods<span class="op">=</span><span class="dv">2</span>),</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>    item<span class="op">=</span>mikeio.ItemInfo(<span class="st">"Water level"</span>, mikeio.EUMType.Water_Level))</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>da</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="1">
+<pre><code>&lt;mikeio.DataArray&gt;
+name: Water level
+dims: (time:2)
+time: 2020-01-01 00:00:00 - 2020-01-02 00:00:00 (2 records)
+geometry: GeometryUndefined()
+values: [0, 1]</code></pre>
+</div>
+</div>
+</section>
 <section id="attributes" class="level2">
 <h2 class="anchored" data-anchor-id="attributes">Attributes</h2>
 <table class="table">
@@ -486,7 +518,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </tr>
 <tr class="odd">
 <td><a href="#mikeio.DataArray.describe">describe</a></td>
-<td>Generate descriptive statistics by wrapping :py:meth:<code>pandas.DataFrame.describe</code></td>
+<td>Generate descriptive statistics by wrapping <a href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.describe.html#pandas.DataFrame.describe"><code>pandas.DataFrame.describe</code></a></td>
 </tr>
 <tr class="even">
 <td><a href="#mikeio.DataArray.dropna">dropna</a></td>
@@ -714,12 +746,12 @@ nanmax : Max values with NaN values removed</code></pre>
 <h4 class="anchored" data-anchor-id="see-also-1">See Also</h4>
 <pre><code>aggregate : Weighted average</code></pre>
 </section>
-<section id="examples" class="level4">
-<h4 class="anchored" data-anchor-id="examples">Examples</h4>
-<div class="sourceCode" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> dfs <span class="op">=</span> Dfsu(<span class="st">"HD2D.dfsu"</span>)</span>
-<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> da <span class="op">=</span> dfs.read([<span class="st">"Current speed"</span>])[<span class="dv">0</span>]</span>
-<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> area <span class="op">=</span> dfs.get_element_area()</span>
-<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> da2 <span class="op">=</span> da.average(axis<span class="op">=</span><span class="st">"space"</span>, weights<span class="op">=</span>area)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<section id="examples-1" class="level4">
+<h4 class="anchored" data-anchor-id="examples-1">Examples</h4>
+<div class="sourceCode" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> dfs <span class="op">=</span> Dfsu(<span class="st">"HD2D.dfsu"</span>)</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> da <span class="op">=</span> dfs.read([<span class="st">"Current speed"</span>])[<span class="dv">0</span>]</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> area <span class="op">=</span> dfs.get_element_area()</span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> da2 <span class="op">=</span> da.average(axis<span class="op">=</span><span class="st">"space"</span>, weights<span class="op">=</span>area)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </section>
 </section>
 <section id="mikeio.DataArray.concat" class="level3">
@@ -776,16 +808,27 @@ nanmax : Max values with NaN values removed</code></pre>
 </tbody>
 </table>
 </section>
-<section id="examples-1" class="level4">
-<h4 class="anchored" data-anchor-id="examples-1">Examples</h4>
-<div class="sourceCode" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> <span class="im">import</span> mikeio</span>
-<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> da1 <span class="op">=</span> mikeio.read(<span class="st">"HD2D.dfsu"</span>, time<span class="op">=</span>[<span class="dv">0</span>,<span class="dv">1</span>])[<span class="dv">0</span>]</span>
-<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> da2 <span class="op">=</span> mikeio.read(<span class="st">"HD2D.dfsu"</span>, time<span class="op">=</span>[<span class="dv">2</span>,<span class="dv">3</span>])[<span class="dv">0</span>]</span>
-<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> da1.n_timesteps</span>
-<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a><span class="dv">2</span></span>
-<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> da3 <span class="op">=</span> DataArray.concat([da1,da2])</span>
-<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> da3.n_timesteps</span>
-<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a><span class="dv">4</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<section id="examples-2" class="level4">
+<h4 class="anchored" data-anchor-id="examples-2">Examples</h4>
+<div id="9e4eb819" class="cell" data-execution_count="2">
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>da1 <span class="op">=</span> mikeio.read(<span class="st">"../data/HD2D.dfsu"</span>, time<span class="op">=</span>[<span class="dv">0</span>,<span class="dv">1</span>])[<span class="dv">0</span>]</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>da2 <span class="op">=</span> mikeio.read(<span class="st">"../data/HD2D.dfsu"</span>, time<span class="op">=</span>[<span class="dv">2</span>,<span class="dv">3</span>])[<span class="dv">0</span>]</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>da1.time</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="2">
+<pre><code>DatetimeIndex(['1985-08-06 07:00:00', '1985-08-06 09:30:00'], dtype='datetime64[ns]', freq=None)</code></pre>
+</div>
+</div>
+<div id="529093d1" class="cell" data-execution_count="3">
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>da3 <span class="op">=</span> mikeio.DataArray.concat([da1,da2])</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>da3</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="3">
+<pre><code>&lt;mikeio.DataArray&gt;
+name: Surface elevation
+dims: (time:4, element:884)
+time: 1985-08-06 07:00:00 - 1985-08-06 14:30:00 (4 records)
+geometry: Dfsu2D (884 elements, 529 nodes)</code></pre>
+</div>
+</div>
 </section>
 </section>
 <section id="mikeio.DataArray.copy" class="level3">
@@ -795,17 +838,11 @@ nanmax : Max values with NaN values removed</code></pre>
 </section>
 <section id="mikeio.DataArray.describe" class="level3">
 <h3 class="anchored" data-anchor-id="mikeio.DataArray.describe">describe</h3>
-<p><code>DataArray.describe(**kwargs)</code></p>
-<p>Generate descriptive statistics by wrapping :py:meth:<code>pandas.DataFrame.describe</code></p>
+<p><code>DataArray.describe(percentiles=None, include=None, exclude=None)</code></p>
+<p>Generate descriptive statistics by wrapping <a href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.describe.html#pandas.DataFrame.describe"><code>pandas.DataFrame.describe</code></a></p>
 <section id="parameters-3" class="level4">
 <h4 class="anchored" data-anchor-id="parameters-3">Parameters</h4>
 <table class="table">
-<colgroup>
-<col style="width: 11%">
-<col style="width: 11%">
-<col style="width: 65%">
-<col style="width: 10%">
-</colgroup>
 <thead>
 <tr class="header">
 <th>Name</th>
@@ -816,27 +853,16 @@ nanmax : Max values with NaN values removed</code></pre>
 </thead>
 <tbody>
 <tr class="odd">
-<td><code>**kwargs</code></td>
-<td>typing.Any</td>
-<td>Keyword arguments passed to :py:meth:<code>pandas.DataFrame.describe</code></td>
-<td><code>{}</code></td>
-</tr>
-</tbody>
-</table>
-</section>
-<section id="returns-3" class="level4">
-<h4 class="anchored" data-anchor-id="returns-3">Returns</h4>
-<table class="table">
-<thead>
-<tr class="header">
-<th>Type</th>
-<th>Description</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td>pandas.pandas.DataFrame</td>
+<td><code>Returns</code></td>
 <td></td>
+<td></td>
+<td><em>required</em></td>
+</tr>
+<tr class="even">
+<td><code>pd</code></td>
+<td></td>
+<td></td>
+<td><em>required</em></td>
 </tr>
 </tbody>
 </table>
@@ -890,8 +916,8 @@ nanmax : Max values with NaN values removed</code></pre>
 </tbody>
 </table>
 </section>
-<section id="returns-4" class="level4">
-<h4 class="anchored" data-anchor-id="returns-4">Returns</h4>
+<section id="returns-3" class="level4">
+<h4 class="anchored" data-anchor-id="returns-3">Returns</h4>
 <table class="table">
 <colgroup>
 <col style="width: 26%">
@@ -975,8 +1001,8 @@ nanmax : Max values with NaN values removed</code></pre>
 </tbody>
 </table>
 </section>
-<section id="returns-5" class="level4">
-<h4 class="anchored" data-anchor-id="returns-5">Returns</h4>
+<section id="returns-4" class="level4">
+<h4 class="anchored" data-anchor-id="returns-4">Returns</h4>
 <table class="table">
 <colgroup>
 <col style="width: 52%">
@@ -1000,13 +1026,13 @@ nanmax : Max values with NaN values removed</code></pre>
 <h4 class="anchored" data-anchor-id="see-also-2">See Also</h4>
 <p>sel : Select data using label indexing interp_like : Interp to another time/space of another DataArray interp_time : Interp in the time direction only</p>
 </section>
-<section id="examples-2" class="level4">
-<h4 class="anchored" data-anchor-id="examples-2">Examples</h4>
-<div class="sourceCode" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> da <span class="op">=</span> mikeio.read(<span class="st">"random.dfs1"</span>)[<span class="dv">0</span>]</span>
-<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> da.interp(time<span class="op">=</span><span class="dv">3600</span>)</span>
-<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> da.interp(x<span class="op">=</span><span class="dv">110</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="sourceCode" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> da <span class="op">=</span> mikeio.read(<span class="st">"HD2D.dfsu"</span>).Salinity</span>
-<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> da.interp(x<span class="op">=</span><span class="dv">340000</span>, y<span class="op">=</span><span class="dv">6160000</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<section id="examples-3" class="level4">
+<h4 class="anchored" data-anchor-id="examples-3">Examples</h4>
+<div class="sourceCode" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> da <span class="op">=</span> mikeio.read(<span class="st">"random.dfs1"</span>)[<span class="dv">0</span>]</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> da.interp(time<span class="op">=</span><span class="dv">3600</span>)</span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> da.interp(x<span class="op">=</span><span class="dv">110</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> da <span class="op">=</span> mikeio.read(<span class="st">"HD2D.dfsu"</span>).Salinity</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> da.interp(x<span class="op">=</span><span class="dv">340000</span>, y<span class="op">=</span><span class="dv">6160000</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </section>
 </section>
 <section id="mikeio.DataArray.interp_like" class="level3">
@@ -1059,14 +1085,14 @@ nanmax : Max values with NaN values removed</code></pre>
 </tbody>
 </table>
 </section>
-<section id="examples-3" class="level4">
-<h4 class="anchored" data-anchor-id="examples-3">Examples</h4>
-<div class="sourceCode" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> dai <span class="op">=</span> da.interp_like(da2)</span>
-<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> dae <span class="op">=</span> da.interp_like(da2, extrapolate<span class="op">=</span><span class="va">True</span>)</span>
-<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> dat <span class="op">=</span> da.interp_like(da2.time)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<section id="examples-4" class="level4">
+<h4 class="anchored" data-anchor-id="examples-4">Examples</h4>
+<div class="sourceCode" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> dai <span class="op">=</span> da.interp_like(da2)</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> dae <span class="op">=</span> da.interp_like(da2, extrapolate<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> dat <span class="op">=</span> da.interp_like(da2.time)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </section>
-<section id="returns-6" class="level4">
-<h4 class="anchored" data-anchor-id="returns-6">Returns</h4>
+<section id="returns-5" class="level4">
+<h4 class="anchored" data-anchor-id="returns-5">Returns</h4>
 <table class="table">
 <thead>
 <tr class="header">
@@ -1087,30 +1113,42 @@ nanmax : Max values with NaN values removed</code></pre>
 <h3 class="anchored" data-anchor-id="mikeio.DataArray.interp_na">interp_na</h3>
 <p><code>DataArray.interp_na(axis='time', **kwargs)</code></p>
 <p>Fill in NaNs by interpolating according to different methods.</p>
-<p>Wrapper of :py:meth:<code>xarray.DataArray.interpolate_na</code></p>
-<section id="examples-4" class="level4">
-<h4 class="anchored" data-anchor-id="examples-4">Examples</h4>
-<div class="sourceCode" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> time <span class="op">=</span> pd.date_range(<span class="st">"2000"</span>, periods<span class="op">=</span><span class="dv">3</span>, freq<span class="op">=</span><span class="st">"D"</span>)</span>
-<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> da <span class="op">=</span> mikeio.DataArray(data<span class="op">=</span>np.array([<span class="fl">0.0</span>, np.nan, <span class="fl">2.0</span>]), time<span class="op">=</span>time)</span>
-<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> da</span>
-<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a><span class="op">&lt;</span>mikeio.DataArray<span class="op">&gt;</span></span>
-<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>name: NoName</span>
-<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>dims: (time:<span class="dv">3</span>)</span>
-<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>time: <span class="dv">2000</span><span class="op">-</span><span class="dv">0</span><span class="er">1</span><span class="op">-</span><span class="dv">0</span><span class="er">1</span> <span class="dv">00</span>:<span class="dv">00</span>:<span class="dv">00</span> <span class="op">-</span> <span class="dv">2000</span><span class="op">-</span><span class="dv">0</span><span class="er">1</span><span class="op">-</span><span class="dv">0</span><span class="er">3</span> <span class="dv">00</span>:<span class="dv">00</span>:<span class="dv">00</span> (<span class="dv">3</span> records)</span>
-<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>values: [<span class="dv">0</span>, nan, <span class="dv">2</span>]</span>
-<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> da.interp_na()</span>
-<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a><span class="op">&lt;</span>mikeio.DataArray<span class="op">&gt;</span></span>
-<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a>name: NoName</span>
-<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a>dims: (time:<span class="dv">3</span>)</span>
-<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a>time: <span class="dv">2000</span><span class="op">-</span><span class="dv">0</span><span class="er">1</span><span class="op">-</span><span class="dv">0</span><span class="er">1</span> <span class="dv">00</span>:<span class="dv">00</span>:<span class="dv">00</span> <span class="op">-</span> <span class="dv">2000</span><span class="op">-</span><span class="dv">0</span><span class="er">1</span><span class="op">-</span><span class="dv">0</span><span class="er">3</span> <span class="dv">00</span>:<span class="dv">00</span>:<span class="dv">00</span> (<span class="dv">3</span> records)</span>
-<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a>values: [<span class="dv">0</span>, <span class="dv">1</span>, <span class="dv">2</span>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>Wrapper of <a href="https://xarray.pydata.org/en/stable/generated/xarray.DataArray.interpolate_na.html#xarray.DataArray.interpolate_na"><code>xarray.DataArray.interpolate_na</code></a></p>
+<section id="examples-5" class="level4">
+<h4 class="anchored" data-anchor-id="examples-5">Examples</h4>
+<div id="7b1abc45" class="cell" data-execution_count="4">
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>time <span class="op">=</span> pd.date_range(<span class="st">"2000"</span>, periods<span class="op">=</span><span class="dv">3</span>, freq<span class="op">=</span><span class="st">"D"</span>)</span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>da <span class="op">=</span> mikeio.DataArray(data<span class="op">=</span>np.array([<span class="fl">0.0</span>, np.nan, <span class="fl">2.0</span>]), time<span class="op">=</span>time)</span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>da</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="4">
+<pre><code>&lt;mikeio.DataArray&gt;
+name: NoName
+dims: (time:3)
+time: 2000-01-01 00:00:00 - 2000-01-03 00:00:00 (3 records)
+geometry: GeometryUndefined()
+values: [0, nan, 2]</code></pre>
+</div>
+</div>
+<div id="0723f249" class="cell" data-execution_count="5">
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>da.interp_na()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="5">
+<pre><code>&lt;mikeio.DataArray&gt;
+name: NoName
+dims: (time:3)
+time: 2000-01-01 00:00:00 - 2000-01-03 00:00:00 (3 records)
+geometry: GeometryUndefined()
+values: [0, 1, 2]</code></pre>
+</div>
+</div>
 </section>
 </section>
 <section id="mikeio.DataArray.interp_time" class="level3">
 <h3 class="anchored" data-anchor-id="mikeio.DataArray.interp_time">interp_time</h3>
 <p><code>DataArray.interp_time(dt, *, method='linear', extrapolate=True, fill_value=np.nan)</code></p>
 <p>Temporal interpolation</p>
-<p>Wrapper of :py:class:<code>scipy.interpolate.interp1d</code></p>
+<p>Wrapper of <a href="https://docs.scipy.org/doc/scipy/reference/reference/generated/scipy.interpolate.interp1d.html#scipy.interpolate.interp1d"><code>scipy.interpolate.interp1d</code></a></p>
 <section id="parameters-7" class="level4">
 <h4 class="anchored" data-anchor-id="parameters-7">Parameters</h4>
 <table class="table">
@@ -1156,8 +1194,8 @@ nanmax : Max values with NaN values removed</code></pre>
 </tbody>
 </table>
 </section>
-<section id="returns-7" class="level4">
-<h4 class="anchored" data-anchor-id="returns-7">Returns</h4>
+<section id="returns-6" class="level4">
+<h4 class="anchored" data-anchor-id="returns-6">Returns</h4>
 <table class="table">
 <thead>
 <tr class="header">
@@ -1249,8 +1287,8 @@ nanmax : Max values with NaN values removed</code></pre>
 </tbody>
 </table>
 </section>
-<section id="returns-8" class="level4">
-<h4 class="anchored" data-anchor-id="returns-8">Returns</h4>
+<section id="returns-7" class="level4">
+<h4 class="anchored" data-anchor-id="returns-7">Returns</h4>
 <table class="table">
 <colgroup>
 <col style="width: 52%">
@@ -1274,53 +1312,55 @@ nanmax : Max values with NaN values removed</code></pre>
 <h4 class="anchored" data-anchor-id="see-also-3">See Also</h4>
 <p>dims : Get axis names sel : Select data using labels</p>
 </section>
-<section id="examples-5" class="level4">
-<h4 class="anchored" data-anchor-id="examples-5">Examples</h4>
-<div class="sourceCode" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> da <span class="op">=</span> mikeio.read(<span class="st">"europe_wind_long_lat.dfs2"</span>)[<span class="dv">0</span>]</span>
-<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> da</span>
-<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a><span class="op">&lt;</span>mikeio.DataArray<span class="op">&gt;</span></span>
-<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>name: Mean Sea Level Pressure</span>
-<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>dims: (time:<span class="dv">1</span>, y:<span class="dv">101</span>, x:<span class="dv">221</span>)</span>
-<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>time: <span class="dv">2012</span><span class="op">-</span><span class="dv">0</span><span class="er">1</span><span class="op">-</span><span class="dv">0</span><span class="er">1</span> <span class="dv">00</span>:<span class="dv">00</span>:<span class="dv">00</span> (time<span class="op">-</span>invariant)</span>
-<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>geometry: Grid2D (ny<span class="op">=</span><span class="dv">101</span>, nx<span class="op">=</span><span class="dv">221</span>)</span>
-<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> da.isel(time<span class="op">=-</span><span class="dv">1</span>)</span>
-<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a><span class="op">&lt;</span>mikeio.DataArray<span class="op">&gt;</span></span>
-<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a>name: Mean Sea Level Pressure</span>
-<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a>dims: (y:<span class="dv">101</span>, x:<span class="dv">221</span>)</span>
-<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a>time: <span class="dv">2012</span><span class="op">-</span><span class="dv">0</span><span class="er">1</span><span class="op">-</span><span class="dv">0</span><span class="er">1</span> <span class="dv">00</span>:<span class="dv">00</span>:<span class="dv">00</span> (time<span class="op">-</span>invariant)</span>
-<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a>geometry: Grid2D (ny<span class="op">=</span><span class="dv">101</span>, nx<span class="op">=</span><span class="dv">221</span>)</span>
-<span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> da.isel(x<span class="op">=</span><span class="bu">slice</span>(<span class="dv">10</span>,<span class="dv">20</span>), y<span class="op">=</span><span class="bu">slice</span>(<span class="dv">40</span>,<span class="dv">60</span>))</span>
-<span id="cb9-15"><a href="#cb9-15" aria-hidden="true" tabindex="-1"></a><span class="op">&lt;</span>mikeio.DataArray<span class="op">&gt;</span></span>
-<span id="cb9-16"><a href="#cb9-16" aria-hidden="true" tabindex="-1"></a>name: Mean Sea Level Pressure</span>
-<span id="cb9-17"><a href="#cb9-17" aria-hidden="true" tabindex="-1"></a>dims: (time:<span class="dv">1</span>, y:<span class="dv">20</span>, x:<span class="dv">10</span>)</span>
-<span id="cb9-18"><a href="#cb9-18" aria-hidden="true" tabindex="-1"></a>time: <span class="dv">2012</span><span class="op">-</span><span class="dv">0</span><span class="er">1</span><span class="op">-</span><span class="dv">0</span><span class="er">1</span> <span class="dv">00</span>:<span class="dv">00</span>:<span class="dv">00</span> (time<span class="op">-</span>invariant)</span>
-<span id="cb9-19"><a href="#cb9-19" aria-hidden="true" tabindex="-1"></a>geometry: Grid2D (ny<span class="op">=</span><span class="dv">20</span>, nx<span class="op">=</span><span class="dv">10</span>)</span>
-<span id="cb9-20"><a href="#cb9-20" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> da.isel(y<span class="op">=</span><span class="dv">34</span>)</span>
-<span id="cb9-21"><a href="#cb9-21" aria-hidden="true" tabindex="-1"></a><span class="op">&lt;</span>mikeio.DataArray<span class="op">&gt;</span></span>
-<span id="cb9-22"><a href="#cb9-22" aria-hidden="true" tabindex="-1"></a>name: Mean Sea Level Pressure</span>
-<span id="cb9-23"><a href="#cb9-23" aria-hidden="true" tabindex="-1"></a>dims: (time:<span class="dv">1</span>, x:<span class="dv">221</span>)</span>
-<span id="cb9-24"><a href="#cb9-24" aria-hidden="true" tabindex="-1"></a>time: <span class="dv">2012</span><span class="op">-</span><span class="dv">0</span><span class="er">1</span><span class="op">-</span><span class="dv">0</span><span class="er">1</span> <span class="dv">00</span>:<span class="dv">00</span>:<span class="dv">00</span> (time<span class="op">-</span>invariant)</span>
-<span id="cb9-25"><a href="#cb9-25" aria-hidden="true" tabindex="-1"></a>geometry: Grid1D (n<span class="op">=</span><span class="dv">221</span>, dx<span class="op">=</span><span class="fl">0.25</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="sourceCode" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> da <span class="op">=</span> mikeio.read(<span class="st">"oresund_sigma_z.dfsu"</span>).Temperature</span>
-<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> da</span>
-<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a><span class="op">&lt;</span>mikeio.DataArray<span class="op">&gt;</span></span>
-<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>name: Temperature</span>
-<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>dims: (time:<span class="dv">3</span>, element:<span class="dv">17118</span>)</span>
-<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>time: <span class="dv">1997</span><span class="op">-</span><span class="dv">0</span><span class="er">9</span><span class="op">-</span><span class="dv">15</span> <span class="dv">21</span>:<span class="dv">00</span>:<span class="dv">00</span> <span class="op">-</span> <span class="dv">1997</span><span class="op">-</span><span class="dv">0</span><span class="er">9</span><span class="op">-</span><span class="dv">16</span> <span class="dv">0</span><span class="er">3</span>:<span class="dv">00</span>:<span class="dv">00</span> (<span class="dv">3</span> records)</span>
-<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>geometry: Dfsu3DSigmaZ (<span class="dv">17118</span> elements, <span class="dv">4</span> sigma<span class="op">-</span>layers, <span class="dv">5</span> z<span class="op">-</span>layers)</span>
-<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> da.isel(element<span class="op">=</span><span class="dv">45</span>)</span>
-<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a><span class="op">&lt;</span>mikeio.DataArray<span class="op">&gt;</span></span>
-<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a>name: Temperature</span>
-<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a>dims: (time:<span class="dv">3</span>)</span>
-<span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a>time: <span class="dv">1997</span><span class="op">-</span><span class="dv">0</span><span class="er">9</span><span class="op">-</span><span class="dv">15</span> <span class="dv">21</span>:<span class="dv">00</span>:<span class="dv">00</span> <span class="op">-</span> <span class="dv">1997</span><span class="op">-</span><span class="dv">0</span><span class="er">9</span><span class="op">-</span><span class="dv">16</span> <span class="dv">0</span><span class="er">3</span>:<span class="dv">00</span>:<span class="dv">00</span> (<span class="dv">3</span> records)</span>
-<span id="cb10-13"><a href="#cb10-13" aria-hidden="true" tabindex="-1"></a>geometry: GeometryPoint3D(x<span class="op">=</span><span class="fl">328717.05429134873</span>, y<span class="op">=</span><span class="fl">6143529.158495431</span>, z<span class="op">=-</span><span class="fl">4.0990404685338335</span>)</span>
-<span id="cb10-14"><a href="#cb10-14" aria-hidden="true" tabindex="-1"></a>values: [<span class="fl">17.29</span>, <span class="fl">17.25</span>, <span class="fl">17.19</span>]</span>
-<span id="cb10-15"><a href="#cb10-15" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> da.isel(element<span class="op">=</span><span class="bu">range</span>(<span class="dv">200</span>))</span>
-<span id="cb10-16"><a href="#cb10-16" aria-hidden="true" tabindex="-1"></a><span class="op">&lt;</span>mikeio.DataArray<span class="op">&gt;</span></span>
-<span id="cb10-17"><a href="#cb10-17" aria-hidden="true" tabindex="-1"></a>name: Temperature</span>
-<span id="cb10-18"><a href="#cb10-18" aria-hidden="true" tabindex="-1"></a>dims: (time:<span class="dv">3</span>, element:<span class="dv">200</span>)</span>
-<span id="cb10-19"><a href="#cb10-19" aria-hidden="true" tabindex="-1"></a>time: <span class="dv">1997</span><span class="op">-</span><span class="dv">0</span><span class="er">9</span><span class="op">-</span><span class="dv">15</span> <span class="dv">21</span>:<span class="dv">00</span>:<span class="dv">00</span> <span class="op">-</span> <span class="dv">1997</span><span class="op">-</span><span class="dv">0</span><span class="er">9</span><span class="op">-</span><span class="dv">16</span> <span class="dv">0</span><span class="er">3</span>:<span class="dv">00</span>:<span class="dv">00</span> (<span class="dv">3</span> records)</span>
-<span id="cb10-20"><a href="#cb10-20" aria-hidden="true" tabindex="-1"></a>geometry: Dfsu3DSigmaZ (<span class="dv">200</span> elements, <span class="dv">3</span> sigma<span class="op">-</span>layers, <span class="dv">3</span> z<span class="op">-</span>layers)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<section id="examples-6" class="level4">
+<h4 class="anchored" data-anchor-id="examples-6">Examples</h4>
+<div id="28fcb9d7" class="cell" data-execution_count="6">
+<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>da <span class="op">=</span> mikeio.read(<span class="st">"../data/europe_wind_long_lat.dfs2"</span>)[<span class="dv">0</span>]</span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>da</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="6">
+<pre><code>&lt;mikeio.DataArray&gt;
+name: Mean Sea Level Pressure
+dims: (time:1, y:101, x:221)
+time: 2012-01-01 00:00:00 (time-invariant)
+geometry: Grid2D (ny=101, nx=221)</code></pre>
+</div>
+</div>
+<div id="37ef08dd" class="cell" data-execution_count="7">
+<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>da.isel(time<span class="op">=-</span><span class="dv">1</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="7">
+<pre><code>&lt;mikeio.DataArray&gt;
+name: Mean Sea Level Pressure
+dims: (y:101, x:221)
+time: 2012-01-01 00:00:00 (time-invariant)
+geometry: Grid2D (ny=101, nx=221)</code></pre>
+</div>
+</div>
+<div id="9698d91c" class="cell" data-execution_count="8">
+<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>da.isel(x<span class="op">=</span><span class="bu">slice</span>(<span class="dv">10</span>,<span class="dv">20</span>), y<span class="op">=</span><span class="bu">slice</span>(<span class="dv">40</span>,<span class="dv">60</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="8">
+<pre><code>&lt;mikeio.DataArray&gt;
+name: Mean Sea Level Pressure
+dims: (time:1, y:20, x:10)
+time: 2012-01-01 00:00:00 (time-invariant)
+geometry: Grid2D (ny=20, nx=10)</code></pre>
+</div>
+</div>
+<div id="939ba318" class="cell" data-execution_count="9">
+<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>da <span class="op">=</span> mikeio.read(<span class="st">"../data/oresund_sigma_z.dfsu"</span>).Temperature</span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>da.isel(element<span class="op">=</span><span class="bu">range</span>(<span class="dv">200</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="9">
+<pre><code>&lt;mikeio.DataArray&gt;
+name: Temperature
+dims: (time:3, element:200)
+time: 1997-09-15 21:00:00 - 1997-09-16 03:00:00 (3 records)
+geometry: Flexible Mesh Geometry: Dfsu3DSigmaZ
+number of nodes: 638
+number of elements: 200
+number of layers: 6
+number of sigma layers: 4
+projection: UTM-33</code></pre>
+</div>
+</div>
 </section>
 </section>
 <section id="mikeio.DataArray.max" class="level3">
@@ -1354,8 +1394,8 @@ nanmax : Max values with NaN values removed</code></pre>
 </tbody>
 </table>
 </section>
-<section id="returns-9" class="level4">
-<h4 class="anchored" data-anchor-id="returns-9">Returns</h4>
+<section id="returns-8" class="level4">
+<h4 class="anchored" data-anchor-id="returns-8">Returns</h4>
 <table class="table">
 <thead>
 <tr class="header">
@@ -1407,8 +1447,8 @@ nanmax : Max values with NaN values removed</code></pre>
 </tbody>
 </table>
 </section>
-<section id="returns-10" class="level4">
-<h4 class="anchored" data-anchor-id="returns-10">Returns</h4>
+<section id="returns-9" class="level4">
+<h4 class="anchored" data-anchor-id="returns-9">Returns</h4>
 <table class="table">
 <thead>
 <tr class="header">
@@ -1460,8 +1500,8 @@ nanmax : Max values with NaN values removed</code></pre>
 </tbody>
 </table>
 </section>
-<section id="returns-11" class="level4">
-<h4 class="anchored" data-anchor-id="returns-11">Returns</h4>
+<section id="returns-10" class="level4">
+<h4 class="anchored" data-anchor-id="returns-10">Returns</h4>
 <table class="table">
 <thead>
 <tr class="header">
@@ -1513,8 +1553,8 @@ nanmax : Max values with NaN values removed</code></pre>
 </tbody>
 </table>
 </section>
-<section id="returns-12" class="level4">
-<h4 class="anchored" data-anchor-id="returns-12">Returns</h4>
+<section id="returns-11" class="level4">
+<h4 class="anchored" data-anchor-id="returns-11">Returns</h4>
 <table class="table">
 <thead>
 <tr class="header">
@@ -1566,8 +1606,8 @@ nanmax : Max values with NaN values removed</code></pre>
 </tbody>
 </table>
 </section>
-<section id="returns-13" class="level4">
-<h4 class="anchored" data-anchor-id="returns-13">Returns</h4>
+<section id="returns-12" class="level4">
+<h4 class="anchored" data-anchor-id="returns-12">Returns</h4>
 <table class="table">
 <thead>
 <tr class="header">
@@ -1619,8 +1659,8 @@ nanmax : Max values with NaN values removed</code></pre>
 </tbody>
 </table>
 </section>
-<section id="returns-14" class="level4">
-<h4 class="anchored" data-anchor-id="returns-14">Returns</h4>
+<section id="returns-13" class="level4">
+<h4 class="anchored" data-anchor-id="returns-13">Returns</h4>
 <table class="table">
 <thead>
 <tr class="header">
@@ -1679,8 +1719,8 @@ nanmax : Max values with NaN values removed</code></pre>
 </tbody>
 </table>
 </section>
-<section id="returns-15" class="level4">
-<h4 class="anchored" data-anchor-id="returns-15">Returns</h4>
+<section id="returns-14" class="level4">
+<h4 class="anchored" data-anchor-id="returns-14">Returns</h4>
 <table class="table">
 <thead>
 <tr class="header">
@@ -1696,11 +1736,11 @@ nanmax : Max values with NaN values removed</code></pre>
 </tbody>
 </table>
 </section>
-<section id="examples-6" class="level4">
-<h4 class="anchored" data-anchor-id="examples-6">Examples</h4>
-<div class="sourceCode" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> da.nanquantile(q<span class="op">=</span>[<span class="fl">0.25</span>,<span class="fl">0.75</span>])</span>
-<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> da.nanquantile(q<span class="op">=</span><span class="fl">0.5</span>)</span>
-<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> da.nanquantile(q<span class="op">=</span>[<span class="fl">0.01</span>,<span class="fl">0.5</span>,<span class="fl">0.99</span>], axis<span class="op">=</span><span class="st">"space"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<section id="examples-7" class="level4">
+<h4 class="anchored" data-anchor-id="examples-7">Examples</h4>
+<div class="sourceCode" id="cb31"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> da.nanquantile(q<span class="op">=</span>[<span class="fl">0.25</span>,<span class="fl">0.75</span>])</span>
+<span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> da.nanquantile(q<span class="op">=</span><span class="fl">0.5</span>)</span>
+<span id="cb31-3"><a href="#cb31-3" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> da.nanquantile(q<span class="op">=</span>[<span class="fl">0.01</span>,<span class="fl">0.5</span>,<span class="fl">0.99</span>], axis<span class="op">=</span><span class="st">"space"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </section>
 <section id="see-also-10" class="level4">
 <h4 class="anchored" data-anchor-id="see-also-10">See Also</h4>
@@ -1738,8 +1778,8 @@ nanmax : Max values with NaN values removed</code></pre>
 </tbody>
 </table>
 </section>
-<section id="returns-16" class="level4">
-<h4 class="anchored" data-anchor-id="returns-16">Returns</h4>
+<section id="returns-15" class="level4">
+<h4 class="anchored" data-anchor-id="returns-15">Returns</h4>
 <table class="table">
 <colgroup>
 <col style="width: 49%">
@@ -1795,8 +1835,8 @@ nanmax : Max values with NaN values removed</code></pre>
 </tbody>
 </table>
 </section>
-<section id="returns-17" class="level4">
-<h4 class="anchored" data-anchor-id="returns-17">Returns</h4>
+<section id="returns-16" class="level4">
+<h4 class="anchored" data-anchor-id="returns-16">Returns</h4>
 <table class="table">
 <thead>
 <tr class="header">
@@ -1851,8 +1891,8 @@ nanmax : Max values with NaN values removed</code></pre>
 </tbody>
 </table>
 </section>
-<section id="returns-18" class="level4">
-<h4 class="anchored" data-anchor-id="returns-18">Returns</h4>
+<section id="returns-17" class="level4">
+<h4 class="anchored" data-anchor-id="returns-17">Returns</h4>
 <table class="table">
 <thead>
 <tr class="header">
@@ -1868,11 +1908,11 @@ nanmax : Max values with NaN values removed</code></pre>
 </tbody>
 </table>
 </section>
-<section id="examples-7" class="level4">
-<h4 class="anchored" data-anchor-id="examples-7">Examples</h4>
-<div class="sourceCode" id="cb19"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> da.quantile(q<span class="op">=</span>[<span class="fl">0.25</span>,<span class="fl">0.75</span>])</span>
-<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> da.quantile(q<span class="op">=</span><span class="fl">0.5</span>)</span>
-<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> da.quantile(q<span class="op">=</span>[<span class="fl">0.01</span>,<span class="fl">0.5</span>,<span class="fl">0.99</span>], axis<span class="op">=</span><span class="st">"space"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<section id="examples-8" class="level4">
+<h4 class="anchored" data-anchor-id="examples-8">Examples</h4>
+<div class="sourceCode" id="cb33"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> da.quantile(q<span class="op">=</span>[<span class="fl">0.25</span>,<span class="fl">0.75</span>])</span>
+<span id="cb33-2"><a href="#cb33-2" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> da.quantile(q<span class="op">=</span><span class="fl">0.5</span>)</span>
+<span id="cb33-3"><a href="#cb33-3" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> da.quantile(q<span class="op">=</span>[<span class="fl">0.01</span>,<span class="fl">0.5</span>,<span class="fl">0.99</span>], axis<span class="op">=</span><span class="st">"space"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </section>
 <section id="see-also-12" class="level4">
 <h4 class="anchored" data-anchor-id="see-also-12">See Also</h4>
@@ -1955,8 +1995,8 @@ nanmax : Max values with NaN values removed</code></pre>
 </tbody>
 </table>
 </section>
-<section id="returns-19" class="level4">
-<h4 class="anchored" data-anchor-id="returns-19">Returns</h4>
+<section id="returns-18" class="level4">
+<h4 class="anchored" data-anchor-id="returns-18">Returns</h4>
 <table class="table">
 <colgroup>
 <col style="width: 52%">
@@ -1980,68 +2020,101 @@ nanmax : Max values with NaN values removed</code></pre>
 <h4 class="anchored" data-anchor-id="see-also-13">See Also</h4>
 <p>isel : Select data using integer indexing interp : Interp data in time and space</p>
 </section>
-<section id="examples-8" class="level4">
-<h4 class="anchored" data-anchor-id="examples-8">Examples</h4>
-<div class="sourceCode" id="cb20"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> da <span class="op">=</span> mikeio.read(<span class="st">"random.dfs1"</span>)[<span class="dv">0</span>]</span>
-<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> da</span>
-<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a><span class="op">&lt;</span>mikeio.DataArray<span class="op">&gt;</span></span>
-<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a>name: testing water level</span>
-<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a>dims: (time:<span class="dv">100</span>, x:<span class="dv">3</span>)</span>
-<span id="cb20-6"><a href="#cb20-6" aria-hidden="true" tabindex="-1"></a>time: <span class="dv">2012</span><span class="op">-</span><span class="dv">0</span><span class="er">1</span><span class="op">-</span><span class="dv">0</span><span class="er">1</span> <span class="dv">00</span>:<span class="dv">00</span>:<span class="dv">00</span> <span class="op">-</span> <span class="dv">2012</span><span class="op">-</span><span class="dv">0</span><span class="er">1</span><span class="op">-</span><span class="dv">0</span><span class="er">1</span> <span class="dv">00</span>:<span class="dv">19</span>:<span class="dv">48</span> (<span class="dv">100</span> records)</span>
-<span id="cb20-7"><a href="#cb20-7" aria-hidden="true" tabindex="-1"></a>geometry: Grid1D (n<span class="op">=</span><span class="dv">3</span>, dx<span class="op">=</span><span class="dv">100</span>)</span>
-<span id="cb20-8"><a href="#cb20-8" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> da.sel(time<span class="op">=</span><span class="bu">slice</span>(<span class="va">None</span>, <span class="st">"2012-1-1 00:02"</span>))</span>
-<span id="cb20-9"><a href="#cb20-9" aria-hidden="true" tabindex="-1"></a><span class="op">&lt;</span>mikeio.DataArray<span class="op">&gt;</span></span>
-<span id="cb20-10"><a href="#cb20-10" aria-hidden="true" tabindex="-1"></a>name: testing water level</span>
-<span id="cb20-11"><a href="#cb20-11" aria-hidden="true" tabindex="-1"></a>dims: (time:<span class="dv">15</span>, x:<span class="dv">3</span>)</span>
-<span id="cb20-12"><a href="#cb20-12" aria-hidden="true" tabindex="-1"></a>time: <span class="dv">2012</span><span class="op">-</span><span class="dv">0</span><span class="er">1</span><span class="op">-</span><span class="dv">0</span><span class="er">1</span> <span class="dv">00</span>:<span class="dv">00</span>:<span class="dv">00</span> <span class="op">-</span> <span class="dv">2012</span><span class="op">-</span><span class="dv">0</span><span class="er">1</span><span class="op">-</span><span class="dv">0</span><span class="er">1</span> <span class="dv">00</span>:<span class="dv">0</span><span class="er">2</span>:<span class="dv">48</span> (<span class="dv">15</span> records)</span>
-<span id="cb20-13"><a href="#cb20-13" aria-hidden="true" tabindex="-1"></a>geometry: Grid1D (n<span class="op">=</span><span class="dv">3</span>, dx<span class="op">=</span><span class="dv">100</span>)</span>
-<span id="cb20-14"><a href="#cb20-14" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> da.sel(x<span class="op">=</span><span class="dv">100</span>)</span>
-<span id="cb20-15"><a href="#cb20-15" aria-hidden="true" tabindex="-1"></a><span class="op">&lt;</span>mikeio.DataArray<span class="op">&gt;</span></span>
-<span id="cb20-16"><a href="#cb20-16" aria-hidden="true" tabindex="-1"></a>name: testing water level</span>
-<span id="cb20-17"><a href="#cb20-17" aria-hidden="true" tabindex="-1"></a>dims: (time:<span class="dv">100</span>)</span>
-<span id="cb20-18"><a href="#cb20-18" aria-hidden="true" tabindex="-1"></a>time: <span class="dv">2012</span><span class="op">-</span><span class="dv">0</span><span class="er">1</span><span class="op">-</span><span class="dv">0</span><span class="er">1</span> <span class="dv">00</span>:<span class="dv">00</span>:<span class="dv">00</span> <span class="op">-</span> <span class="dv">2012</span><span class="op">-</span><span class="dv">0</span><span class="er">1</span><span class="op">-</span><span class="dv">0</span><span class="er">1</span> <span class="dv">00</span>:<span class="dv">19</span>:<span class="dv">48</span> (<span class="dv">100</span> records)</span>
-<span id="cb20-19"><a href="#cb20-19" aria-hidden="true" tabindex="-1"></a>values: [<span class="fl">0.3231</span>, <span class="fl">0.6315</span>, ..., <span class="fl">0.7506</span>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="sourceCode" id="cb21"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> da <span class="op">=</span> mikeio.read(<span class="st">"oresund_sigma_z.dfsu"</span>).Temperature</span>
-<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> da</span>
-<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a><span class="op">&lt;</span>mikeio.DataArray<span class="op">&gt;</span></span>
-<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a>name: Temperature</span>
-<span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a>dims: (time:<span class="dv">3</span>, element:<span class="dv">17118</span>)</span>
-<span id="cb21-6"><a href="#cb21-6" aria-hidden="true" tabindex="-1"></a>time: <span class="dv">1997</span><span class="op">-</span><span class="dv">0</span><span class="er">9</span><span class="op">-</span><span class="dv">15</span> <span class="dv">21</span>:<span class="dv">00</span>:<span class="dv">00</span> <span class="op">-</span> <span class="dv">1997</span><span class="op">-</span><span class="dv">0</span><span class="er">9</span><span class="op">-</span><span class="dv">16</span> <span class="dv">0</span><span class="er">3</span>:<span class="dv">00</span>:<span class="dv">00</span> (<span class="dv">3</span> records)</span>
-<span id="cb21-7"><a href="#cb21-7" aria-hidden="true" tabindex="-1"></a>geometry: Dfsu3DSigmaZ (<span class="dv">17118</span> elements, <span class="dv">4</span> sigma<span class="op">-</span>layers, <span class="dv">5</span> z<span class="op">-</span>layers)</span>
-<span id="cb21-8"><a href="#cb21-8" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> da.sel(time<span class="op">=</span><span class="st">"1997-09-15"</span>)</span>
-<span id="cb21-9"><a href="#cb21-9" aria-hidden="true" tabindex="-1"></a><span class="op">&lt;</span>mikeio.DataArray<span class="op">&gt;</span></span>
-<span id="cb21-10"><a href="#cb21-10" aria-hidden="true" tabindex="-1"></a>name: Temperature</span>
-<span id="cb21-11"><a href="#cb21-11" aria-hidden="true" tabindex="-1"></a>dims: (element:<span class="dv">17118</span>)</span>
-<span id="cb21-12"><a href="#cb21-12" aria-hidden="true" tabindex="-1"></a>time: <span class="dv">1997</span><span class="op">-</span><span class="dv">0</span><span class="er">9</span><span class="op">-</span><span class="dv">15</span> <span class="dv">21</span>:<span class="dv">00</span>:<span class="dv">00</span> (time<span class="op">-</span>invariant)</span>
-<span id="cb21-13"><a href="#cb21-13" aria-hidden="true" tabindex="-1"></a>geometry: Dfsu3DSigmaZ (<span class="dv">17118</span> elements, <span class="dv">4</span> sigma<span class="op">-</span>layers, <span class="dv">5</span> z<span class="op">-</span>layers)</span>
-<span id="cb21-14"><a href="#cb21-14" aria-hidden="true" tabindex="-1"></a>values: [<span class="fl">16.31</span>, <span class="fl">16.43</span>, ..., <span class="fl">16.69</span>]</span>
-<span id="cb21-15"><a href="#cb21-15" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> da.sel(x<span class="op">=</span><span class="dv">340000</span>, y<span class="op">=</span><span class="dv">6160000</span>, z<span class="op">=-</span><span class="dv">3</span>)</span>
-<span id="cb21-16"><a href="#cb21-16" aria-hidden="true" tabindex="-1"></a><span class="op">&lt;</span>mikeio.DataArray<span class="op">&gt;</span></span>
-<span id="cb21-17"><a href="#cb21-17" aria-hidden="true" tabindex="-1"></a>name: Temperature</span>
-<span id="cb21-18"><a href="#cb21-18" aria-hidden="true" tabindex="-1"></a>dims: (time:<span class="dv">3</span>)</span>
-<span id="cb21-19"><a href="#cb21-19" aria-hidden="true" tabindex="-1"></a>time: <span class="dv">1997</span><span class="op">-</span><span class="dv">0</span><span class="er">9</span><span class="op">-</span><span class="dv">15</span> <span class="dv">21</span>:<span class="dv">00</span>:<span class="dv">00</span> <span class="op">-</span> <span class="dv">1997</span><span class="op">-</span><span class="dv">0</span><span class="er">9</span><span class="op">-</span><span class="dv">16</span> <span class="dv">0</span><span class="er">3</span>:<span class="dv">00</span>:<span class="dv">00</span> (<span class="dv">3</span> records)</span>
-<span id="cb21-20"><a href="#cb21-20" aria-hidden="true" tabindex="-1"></a>geometry: GeometryPoint3D(x<span class="op">=</span><span class="fl">340028.1116933554</span>, y<span class="op">=</span><span class="fl">6159980.070243686</span>, z<span class="op">=-</span><span class="fl">3.0</span>)</span>
-<span id="cb21-21"><a href="#cb21-21" aria-hidden="true" tabindex="-1"></a>values: [<span class="fl">17.54</span>, <span class="fl">17.31</span>, <span class="fl">17.08</span>]</span>
-<span id="cb21-22"><a href="#cb21-22" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> da.sel(area<span class="op">=</span>(<span class="dv">340000</span>, <span class="dv">6160000</span>, <span class="dv">350000</span>, <span class="dv">6170000</span>))</span>
-<span id="cb21-23"><a href="#cb21-23" aria-hidden="true" tabindex="-1"></a><span class="op">&lt;</span>mikeio.DataArray<span class="op">&gt;</span></span>
-<span id="cb21-24"><a href="#cb21-24" aria-hidden="true" tabindex="-1"></a>name: Temperature</span>
-<span id="cb21-25"><a href="#cb21-25" aria-hidden="true" tabindex="-1"></a>dims: (time:<span class="dv">3</span>, element:<span class="dv">224</span>)</span>
-<span id="cb21-26"><a href="#cb21-26" aria-hidden="true" tabindex="-1"></a>time: <span class="dv">1997</span><span class="op">-</span><span class="dv">0</span><span class="er">9</span><span class="op">-</span><span class="dv">15</span> <span class="dv">21</span>:<span class="dv">00</span>:<span class="dv">00</span> <span class="op">-</span> <span class="dv">1997</span><span class="op">-</span><span class="dv">0</span><span class="er">9</span><span class="op">-</span><span class="dv">16</span> <span class="dv">0</span><span class="er">3</span>:<span class="dv">00</span>:<span class="dv">00</span> (<span class="dv">3</span> records)</span>
-<span id="cb21-27"><a href="#cb21-27" aria-hidden="true" tabindex="-1"></a>geometry: Dfsu3DSigmaZ (<span class="dv">224</span> elements, <span class="dv">3</span> sigma<span class="op">-</span>layers, <span class="dv">1</span> z<span class="op">-</span>layers)</span>
-<span id="cb21-28"><a href="#cb21-28" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> da.sel(layers<span class="op">=</span><span class="st">"bottom"</span>)</span>
-<span id="cb21-29"><a href="#cb21-29" aria-hidden="true" tabindex="-1"></a><span class="op">&lt;</span>mikeio.DataArray<span class="op">&gt;</span></span>
-<span id="cb21-30"><a href="#cb21-30" aria-hidden="true" tabindex="-1"></a>name: Temperature</span>
-<span id="cb21-31"><a href="#cb21-31" aria-hidden="true" tabindex="-1"></a>dims: (time:<span class="dv">3</span>, element:<span class="dv">3700</span>)</span>
-<span id="cb21-32"><a href="#cb21-32" aria-hidden="true" tabindex="-1"></a>time: <span class="dv">1997</span><span class="op">-</span><span class="dv">0</span><span class="er">9</span><span class="op">-</span><span class="dv">15</span> <span class="dv">21</span>:<span class="dv">00</span>:<span class="dv">00</span> <span class="op">-</span> <span class="dv">1997</span><span class="op">-</span><span class="dv">0</span><span class="er">9</span><span class="op">-</span><span class="dv">16</span> <span class="dv">0</span><span class="er">3</span>:<span class="dv">00</span>:<span class="dv">00</span> (<span class="dv">3</span> records)</span>
-<span id="cb21-33"><a href="#cb21-33" aria-hidden="true" tabindex="-1"></a>geometry: Dfsu2D (<span class="dv">3700</span> elements, <span class="dv">2090</span> nodes)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<section id="examples-9" class="level4">
+<h4 class="anchored" data-anchor-id="examples-9">Examples</h4>
+<div id="27394842" class="cell" data-execution_count="10">
+<div class="sourceCode cell-code" id="cb34"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a>da <span class="op">=</span> mikeio.read(<span class="st">"../data/random.dfs1"</span>)[<span class="dv">0</span>]</span>
+<span id="cb34-2"><a href="#cb34-2" aria-hidden="true" tabindex="-1"></a>da</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="10">
+<pre><code>&lt;mikeio.DataArray&gt;
+name: testing water level
+dims: (time:100, x:3)
+time: 2012-01-01 00:00:00 - 2012-01-01 00:19:48 (100 records)
+geometry: Grid1D (n=3, dx=100)</code></pre>
+</div>
+</div>
+<div id="31c96414" class="cell" data-execution_count="11">
+<div class="sourceCode cell-code" id="cb36"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a>da.sel(time<span class="op">=</span><span class="bu">slice</span>(<span class="va">None</span>, <span class="st">"2012-1-1 00:02"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="11">
+<pre><code>&lt;mikeio.DataArray&gt;
+name: testing water level
+dims: (time:15, x:3)
+time: 2012-01-01 00:00:00 - 2012-01-01 00:02:48 (15 records)
+geometry: Grid1D (n=3, dx=100)</code></pre>
+</div>
+</div>
+<div id="688c73c6" class="cell" data-execution_count="12">
+<div class="sourceCode cell-code" id="cb38"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a>da.sel(x<span class="op">=</span><span class="dv">100</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="12">
+<pre><code>&lt;mikeio.DataArray&gt;
+name: testing water level
+dims: (time:100)
+time: 2012-01-01 00:00:00 - 2012-01-01 00:19:48 (100 records)
+geometry: GeometryUndefined()
+values: [0.3231, 0.6315, ..., 0.7506]</code></pre>
+</div>
+</div>
+<div id="871191a9" class="cell" data-execution_count="13">
+<div class="sourceCode cell-code" id="cb40"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a>da <span class="op">=</span> mikeio.read(<span class="st">"../data/oresund_sigma_z.dfsu"</span>).Temperature</span>
+<span id="cb40-2"><a href="#cb40-2" aria-hidden="true" tabindex="-1"></a>da</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="13">
+<pre><code>&lt;mikeio.DataArray&gt;
+name: Temperature
+dims: (time:3, element:17118)
+time: 1997-09-15 21:00:00 - 1997-09-16 03:00:00 (3 records)
+geometry: Flexible Mesh Geometry: Dfsu3DSigmaZ
+number of nodes: 12042
+number of elements: 17118
+number of layers: 9
+number of sigma layers: 4
+projection: UTM-33</code></pre>
+</div>
+</div>
+<div id="5e0ef7db" class="cell" data-execution_count="14">
+<div class="sourceCode cell-code" id="cb42"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a>da.sel(time<span class="op">=</span><span class="st">"1997-09-15"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="14">
+<pre><code>&lt;mikeio.DataArray&gt;
+name: Temperature
+dims: (element:17118)
+time: 1997-09-15 21:00:00 (time-invariant)
+geometry: Flexible Mesh Geometry: Dfsu3DSigmaZ
+number of nodes: 12042
+number of elements: 17118
+number of layers: 9
+number of sigma layers: 4
+projection: UTM-33
+values: [16.31, 16.43, ..., 16.69]</code></pre>
+</div>
+</div>
+<div id="7710a946" class="cell" data-execution_count="15">
+<div class="sourceCode cell-code" id="cb44"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb44-1"><a href="#cb44-1" aria-hidden="true" tabindex="-1"></a>da.sel(x<span class="op">=</span><span class="dv">340000</span>, y<span class="op">=</span><span class="dv">6160000</span>, z<span class="op">=-</span><span class="dv">3</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="15">
+<pre><code>&lt;mikeio.DataArray&gt;
+name: Temperature
+dims: (time:3)
+time: 1997-09-15 21:00:00 - 1997-09-16 03:00:00 (3 records)
+geometry: GeometryPoint3D(x=340028.1116933554, y=6159980.070243686, z=-3.0)
+values: [17.54, 17.31, 17.08]</code></pre>
+</div>
+</div>
+<div id="e446250b" class="cell" data-execution_count="16">
+<div class="sourceCode cell-code" id="cb46"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb46-1"><a href="#cb46-1" aria-hidden="true" tabindex="-1"></a>da.sel(layers<span class="op">=</span><span class="st">"bottom"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="16">
+<pre><code>&lt;mikeio.DataArray&gt;
+name: Temperature
+dims: (time:3, element:3700)
+time: 1997-09-15 21:00:00 - 1997-09-16 03:00:00 (3 records)
+geometry: Dfsu2D (3700 elements, 2090 nodes)</code></pre>
+</div>
+</div>
 </section>
 </section>
 <section id="mikeio.DataArray.squeeze" class="level3">
 <h3 class="anchored" data-anchor-id="mikeio.DataArray.squeeze">squeeze</h3>
 <p><code>DataArray.squeeze()</code></p>
 <p>Remove axes of length 1</p>
-<section id="returns-20" class="level4">
-<h4 class="anchored" data-anchor-id="returns-20">Returns</h4>
+<section id="returns-19" class="level4">
+<h4 class="anchored" data-anchor-id="returns-19">Returns</h4>
 <table class="table">
 <thead>
 <tr class="header">
@@ -2089,8 +2162,8 @@ nanmax : Max values with NaN values removed</code></pre>
 </tbody>
 </table>
 </section>
-<section id="returns-21" class="level4">
-<h4 class="anchored" data-anchor-id="returns-21">Returns</h4>
+<section id="returns-20" class="level4">
+<h4 class="anchored" data-anchor-id="returns-20">Returns</h4>
 <table class="table">
 <colgroup>
 <col style="width: 49%">
@@ -2152,8 +2225,8 @@ nanmax : Max values with NaN values removed</code></pre>
 </tbody>
 </table>
 </section>
-<section id="returns-22" class="level4">
-<h4 class="anchored" data-anchor-id="returns-22">Returns</h4>
+<section id="returns-21" class="level4">
+<h4 class="anchored" data-anchor-id="returns-21">Returns</h4>
 <table class="table">
 <thead>
 <tr class="header">
@@ -2217,8 +2290,8 @@ nanmax : Max values with NaN values removed</code></pre>
 <h3 class="anchored" data-anchor-id="mikeio.DataArray.to_pandas">to_pandas</h3>
 <p><code>DataArray.to_pandas()</code></p>
 <p>Convert to Pandas Series</p>
-<section id="returns-23" class="level4">
-<h4 class="anchored" data-anchor-id="returns-23">Returns</h4>
+<section id="returns-22" class="level4">
+<h4 class="anchored" data-anchor-id="returns-22">Returns</h4>
 <table class="table">
 <thead>
 <tr class="header">
@@ -2241,7 +2314,6 @@ nanmax : Max values with NaN values removed</code></pre>
 <p>Export to xarray.DataArray</p>
 
 
-</section>
 </section>
 </section>
 
