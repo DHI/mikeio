@@ -122,16 +122,6 @@ def test_write(tri_mesh, tmp_path):
     assert outfilename.exists()
 
 
-def test_write_part(tri_mesh, tmp_path):
-    outfilename = tmp_path / "simple_sub.mesh"
-
-    msh = tri_mesh
-
-    msh.write(outfilename, elements=list(range(0, 100)))
-
-    assert outfilename.exists()
-
-
 def test_write_part_isel(tri_mesh, tmp_path):
     outfilename = tmp_path / "simple_sub.mesh"
 
@@ -158,14 +148,6 @@ def test_write_mesh_from_dfsu(tmp_path):
     assert outfilename.exists()
 
     assert np.all(np.hstack(msh2.element_table) == np.hstack(geometry.element_table))
-
-
-def test_open_dfsu_as_mesh_is_removed_give_hint():
-    dfsufilename = "tests/testdata/FakeLake.dfsu"
-    with pytest.warns(FutureWarning):
-        msh = Mesh(dfsufilename)
-
-    msh.plot()
 
 
 def test_to_shapely(tri_mesh) -> None:

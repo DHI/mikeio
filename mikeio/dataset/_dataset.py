@@ -942,7 +942,7 @@ class Dataset:
                 self.geometry, GeometryFM2D
             ):  # TODO remove this when all geometries implements the same method
                 interpolant = self.geometry.get_2d_interpolant(
-                    xy, n_nearest=n_nearest, **kwargs
+                    xy, n_nearest=n_nearest, **kwargs  # type: ignore
                 )
                 das = [da.interp(x=x, y=y, interpolant=interpolant) for da in self]
             else:

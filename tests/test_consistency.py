@@ -263,6 +263,15 @@ def test_read_dfs_time_selection_str():
         assert dsr.shape == dsgetitem.shape
 
 
+def test_open_dfs_repr():
+    extensions = ["dfsu", "dfs2", "dfs1", "dfs0"]
+    for ext in extensions:
+        filename = f"tests/testdata/consistency/oresundHD.{ext}"
+        dfs = mikeio.open(filename=filename)
+        text = repr(dfs)
+        assert "<mikeio" in text
+
+
 def test_read_dfs_time_selection_str_specific():
     extensions = ["dfsu", "dfs2", "dfs1", "dfs0"]
     for ext in extensions:
