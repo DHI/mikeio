@@ -118,10 +118,14 @@ class EUMType(IntEnum):
 
     Examples
     --------
-    >>> mikeio.EUMType.Temperature
-    Temperature
-    >>> EUMType.Temperature.units
-    [degree Celsius, degree Fahrenheit, degree Kelvin]
+    ```{python}
+    import mikeio
+    mikeio.EUMType.Temperature
+    ```
+
+    ```{python}
+    mikeio.EUMType.Temperature.units
+    ```
     """
 
     Water_Level = 100000
@@ -744,9 +748,10 @@ class EUMUnit(IntEnum):
 
     Examples
     --------
-    >>> from mikeio.eum import EUMUnit
-    >>> EUMUnit.degree_Kelvin
-    degree Kelvin
+    ```{python}
+    import mikeio
+    mikeio.EUMUnit.degree_Kelvin
+    ```
     """
 
     meter = 1000
@@ -1411,11 +1416,14 @@ class ItemInfo:
 
     Examples
     --------
-    >>> item = ItemInfo("Viken", EUMType.Water_Level)
-    >>> item
-    Viken <Water Level> (meter)
-    >>> ItemInfo(EUMType.Wind_speed)
-    Wind speed <Wind speed> (meter per sec)
+    ```{python}
+    import mikeio
+    mikeio.ItemInfo("Viken", mikeio.EUMType.Water_Level)
+    ```
+
+    ```{python}
+    mikeio.ItemInfo(mikeio.EUMType.Wind_speed)
+    ```
     """
 
     def __init__(

@@ -38,21 +38,16 @@ class PfsSection(SimpleNamespace, MutableMapping):
 
         Examples
         --------
-        >>> df = pd.DataFrame(dict(station=["Foo", "Bar"],include=[0,1]), index=[1,2])
-        >>> df
-          station  include
-        1     Foo        0
-        2     Bar        1
-        >>> mikeio.PfsSection.from_dataframe(df,"STATION_")
-        ... # doctest: +NORMALIZE_WHITESPACE
-        [STATION_1]
-            station = 'Foo'
-            include = 0
-        EndSect  // STATION_1
-        [STATION_2]
-            station = 'Bar'
-            include = 1
-        EndSect  // STATION_2
+        ```{python}
+        import pandas as pd
+        import mikeio
+        df = pd.DataFrame(dict(station=["Foo", "Bar"],include=[0,1]), index=[1,2])
+        df
+        ```
+
+        ```{python}
+        mikeio.PfsSection.from_dataframe(df,"STATION_")
+        ```
         """
         d = {f"{prefix}{idx}": row.to_dict() for idx, row in df.iterrows()}
 
@@ -402,8 +397,10 @@ class PfsSection(SimpleNamespace, MutableMapping):
 
         Examples
         --------
-        >>> pfs = mikeio.read_pfs("tests/testdata/pfs/lake.sw")
-        >>> df = pfs.SW.OUTPUTS.to_dataframe(prefix="OUTPUT_")
+        ```{python}
+        pfs = mikeio.read_pfs("../data/pfs/lake.sw")
+        pfs.SW.OUTPUTS.to_dataframe(prefix="OUTPUT_")
+        ```
         """
         if prefix is not None:
             sections = [
