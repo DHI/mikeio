@@ -1,0 +1,40 @@
+---
+title: Examples
+listing:
+  type: table
+  fields: ['title', 'description']
+  categories: true
+---
+
+::: {.callout-tip title="Example data" collapse="true"}
+
+If you want to try one of the examples you need to first download some data files.
+
+The files are stored on GitHub in the [MIKE IO repo](https://github.com/DHI/mikeio).
+
+The easiest way is to the download the repo as a [zip file](https://github.com/DHI/mikeio/archive/main.zip) and extract the files you need.
+
+
+In the zip file you find the files in `tests/testdata/` folder
+
+Some of the files:
+```
+tests/testdata
+├── FakeLake.dfsu
+├── HD2D.dfsu
+├── NorthSea_HD_and_windspeed.dfsu
+├── consistency
+│   ├── oresundHD.dfs2
+│   └── oresundHD.dfsu
+├── gebco_2020_n56.3_s55.2_w12.2_e13.1.nc
+├── gfs_wind.nc
+├── odense_rough.mesh
+├── oresund_sigma_z.dfsu
+├── pfs
+│   ├── concat.mzt
+│   └── t1_t0.mzt
+├── tide1.dfs1
+├── tide2.dfs1
+```
+
+:::

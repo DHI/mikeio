@@ -22,7 +22,7 @@ class _GeometryFMLayered(_GeometryFM):
         node_coordinates,
         element_table,
         codes=None,
-        projection=None,
+        projection: str = "LONG/LAT",
         dfsu_type=DfsuFileType.Dfsu3DSigma,
         element_ids=None,
         node_ids=None,
@@ -129,43 +129,48 @@ class _GeometryFMLayered(_GeometryFM):
             node_coords = self.node_coordinates[node_ids]
             codes = self.codes[node_ids]
             elem_ids = self._element_ids[sorted_elements]
-        
+
         if new_type == DfsuFileType.Dfsu2D:
-            return GeometryFM2D(node_coordinates=node_coords,
-                                codes=codes,
-                                node_ids=node_ids,
-                                projection=self.projection_string,
-                                element_table=elem_tbl,
-                                element_ids=elem_ids,
-                                dfsu_type=DfsuFileType.Dfsu2D,
-                                reindex=True)
+            return GeometryFM2D(
+                node_coordinates=node_coords,
+                codes=codes,
+                node_ids=node_ids,
+                projection=self.projection_string,
+                element_table=elem_tbl,
+                element_ids=elem_ids,
+                dfsu_type=DfsuFileType.Dfsu2D,
+                reindex=True,
+            )
         else:
             lowest_sigma = self.n_layers - self.n_sigma_layers
             n_sigma = sum(unique_layer_ids >= lowest_sigma)
             if n_layers == len(elem_tbl):
-                return GeometryFMVerticalColumn(node_coordinates=node_coords,
-                                                codes=codes,
-                                                node_ids=node_ids,
-                                                projection=self.projection_string,
-                                                element_table=elem_tbl,
-                                                element_ids=elem_ids,
-                                                dfsu_type=self._type,
-                                                reindex=True,
-                                                n_layers=n_layers,
-                                                n_sigma=n_sigma)
+                return GeometryFMVerticalColumn(
+                    node_coordinates=node_coords,
+                    codes=codes,
+                    node_ids=node_ids,
+                    projection=self.projection_string,
+                    element_table=elem_tbl,
+                    element_ids=elem_ids,
+                    dfsu_type=self._type,
+                    reindex=True,
+                    n_layers=n_layers,
+                    n_sigma=n_sigma,
+                )
             else:
                 klass = self.__class__
-                return klass(node_coordinates=node_coords,
-                                    codes=codes,
-                                    node_ids=node_ids,
-                                    projection=self.projection_string,
-                                    element_table=elem_tbl,
-                                    element_ids=elem_ids,
-                                    dfsu_type=self._type,
-                                    reindex=True,
-                                    n_layers=n_layers,
-                                    n_sigma=n_sigma)
-
+                return klass(
+                    node_coordinates=node_coords,
+                    codes=codes,
+                    node_ids=node_ids,
+                    projection=self.projection_string,
+                    element_table=elem_tbl,
+                    element_ids=elem_ids,
+                    dfsu_type=self._type,
+                    reindex=True,
+                    n_layers=n_layers,
+                    n_sigma=n_sigma,
+                )
 
     @cached_property
     def element_coordinates(self):
@@ -603,7 +608,9 @@ class _GeometryFMLayered(_GeometryFM):
                         id = row[list(layer_ids).index(layer)]
                         idx[j] = id
                     except IndexError:
-                        raise IndexError(f"Layer {layer} not present for 2d element {elem2d[j]}")
+                        raise IndexError(
+                            f"Layer {layer} not present for 2d element {elem2d[j]}"
+                        )
             else:
                 # sigma layer
                 idx = self.get_layer_elements(layer)[elem2d]
@@ -669,7 +676,7 @@ class GeometryFM3D(_GeometryFMLayered):
         node_coordinates,
         element_table,
         codes=None,
-        projection=None,
+        projection: str = "LONG/LAT",
         dfsu_type=DfsuFileType.Dfsu3DSigma,
         element_ids=None,
         node_ids=None,
@@ -749,7 +756,7 @@ class GeometryFMVerticalProfile(_GeometryFMLayered):
         node_coordinates,
         element_table,
         codes=None,
-        projection=None,
+        projection: str = "LONG/LAT",
         dfsu_type=None,
         element_ids=None,
         node_ids=None,

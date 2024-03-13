@@ -4,15 +4,17 @@
  ![Python version](https://img.shields.io/pypi/pyversions/mikeio.svg)
  [![Full test](https://github.com/DHI/mikeio/actions/workflows/full_test.yml/badge.svg)](https://github.com/DHI/mikeio/actions/workflows/full_test.yml)
 [![PyPI version](https://badge.fury.io/py/mikeio.svg)](https://badge.fury.io/py/mikeio)
+![OS](https://img.shields.io/badge/OS-Windows%20%7C%20Linux-blue)
 
 
 Read, write and manipulate dfs0, dfs1, dfs2, dfs3, dfsu and mesh files.
 
 MIKE IO facilitates common data processing workflows for [MIKE files in Python](https://www.mikepoweredbydhi.com/products/mike-for-developers#io).
 
-[![YouTube](https://raw.githubusercontent.com/DHI/mikeio/main/images/youtube1.png)](http://www.youtube.com/watch?v=Jm0iAeK8QW0)
+[![MIKEIO. Read, write and analyze MIKE dfs files with Python on Vimeo](https://raw.githubusercontent.com/DHI/mikeio/main/images/youtube1.png)](https://player.vimeo.com/video/708275619)
 
-[![YouTube](https://raw.githubusercontent.com/DHI/mikeio/main/images/youtube2.png)](http://www.youtube.com/watch?v=0oVedpx9zAQ)
+<!--[![MIKEIO. New workflow and data structures in MIKE IO 1.0 on Vimeo](https://raw.githubusercontent.com/DHI/mikeio/main/images/youtube2.png)](https://player.vimeo.com/video/708276337)-->
+
 
 ## Requirements
 * Windows or Linux operating system
@@ -20,11 +22,6 @@ MIKE IO facilitates common data processing workflows for [MIKE files in Python](
 * (Windows) [VC++ redistributables](https://support.microsoft.com/en-us/help/2977003/the-latest-supported-visual-c-downloads) (already installed if you have MIKE)
 
 [More info about dependencies](http://docs.mikepoweredbydhi.com/nuget/)
-
-## Where can I get help?
-* Documentation - [https://dhi.github.io/mikeio/](https://dhi.github.io/mikeio/)
-* General help, new ideas and feature requests - [GitHub Discussions](http://github.com/DHI/mikeio/discussions) 
-* Bugs - [GitHub Issues](http://github.com/DHI/mikeio/issues) 
 
 ## Installation
 
@@ -37,6 +34,16 @@ Or development version:
 `pip install https://github.com/DHI/mikeio/archive/main.zip`
 
 :warning: **Don't use conda to install MIKE IO!**, the version on conda is outdated.
+
+## Getting started
+
+The material from the last Academy by DHI course is available here: [Getting started with Dfs files in Python using MIKE IO](https://dhi.github.io/getting-started-with-mikeio/intro.html)
+
+## Where can I get help?
+* Documentation - [https://dhi.github.io/mikeio/](https://dhi.github.io/mikeio/)
+* General help, new ideas and feature requests - [GitHub Discussions](http://github.com/DHI/mikeio/discussions) 
+* Bugs - [GitHub Issues](http://github.com/DHI/mikeio/issues) 
+
 
 ## Tested
 

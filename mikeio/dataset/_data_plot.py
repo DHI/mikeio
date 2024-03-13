@@ -1,17 +1,29 @@
+from __future__ import annotations
+from typing import Any, Tuple, TYPE_CHECKING
+
 import numpy as np
+from matplotlib.axes import Axes
 
 from ..spatial._FM_utils import _plot_map, _plot_vertical_profile
 
 from .._spectral import plot_2dspectrum
 
+if TYPE_CHECKING:
+    from ..dataset import DataArray, Dataset
+
 
 class _DataArrayPlotter:
     """Context aware plotter (sensible plotting according to geometry)"""
 
-    def __init__(self, da) -> None:
+    def __init__(self, da: "DataArray") -> None:
         self.da = da
 
-    def __call__(self, ax=None, figsize=None, **kwargs):
+    def __call__(
+        self,
+        ax: Axes | None = None,
+        figsize: Tuple[float, float] | None = None,
+        **kwargs: Any,
+    ) -> Axes:
         """Plot DataArray according to geometry
 
         Parameters
@@ -59,7 +71,13 @@ class _DataArrayPlotter:
             fig = plt.gcf()
         return fig, ax
 
-    def hist(self, ax=None, figsize=None, title=None, **kwargs):
+    def hist(
+        self,
+        ax: Axes | None = None,
+        figsize: Tuple[float, float] | None = None,
+        title: str | None = None,
+        **kwargs: Any,
+    ) -> Axes:
         """Plot DataArray as histogram (using ax.hist)
 
         Parameters
@@ -91,7 +109,7 @@ class _DataArrayPlotter:
             ax.set_title(title)
         return self._hist(ax, **kwargs)
 
-    def _hist(self, ax, **kwargs):
+    def _hist(self, ax: Axes, **kwargs: Any) -> Any:
         result = ax.hist(self.da.values.ravel(), **kwargs)
         ax.set_xlabel(self._label_txt())
         return result
@@ -569,7 +587,7 @@ class _DataArrayPlotterPointSpectrum(_DataArrayPlotter):
             **kwargs,
         )
 
-    def _get_title(self):
+    def _get_title(self) -> str:
         txt = f"{self.da.time[0]}"
         x, y = self.da.geometry.x, self.da.geometry.y
         if x is not None and y is not None:
@@ -581,7 +599,7 @@ class _DataArrayPlotterPointSpectrum(_DataArrayPlotter):
 
 
 class _DataArrayPlotterLineSpectrum(_DataArrayPlotterGrid1D):
-    def __init__(self, da) -> None:
+    def __init__(self, da: DataArray) -> None:
         if da.n_timesteps > 1:
             Hm0 = da[0].to_Hm0()
         else:
@@ -590,7 +608,7 @@ class _DataArrayPlotterLineSpectrum(_DataArrayPlotterGrid1D):
 
 
 class _DataArrayPlotterAreaSpectrum(_DataArrayPlotterFM):
-    def __init__(self, da) -> None:
+    def __init__(self, da: DataArray) -> None:
         if da.n_timesteps > 1:
             Hm0 = da[0].to_Hm0()
         else:
@@ -599,7 +617,7 @@ class _DataArrayPlotterAreaSpectrum(_DataArrayPlotterFM):
 
 
 class _DatasetPlotter:
-    def __init__(self, ds) -> None:
+    def __init__(self, ds: Dataset) -> None:
         self.ds = ds
 
     def __call__(self, figsize=None, **kwargs):

@@ -4,7 +4,8 @@ import pytest
 
 # TODO this file tests private methods, Options: 1. declare methods as public, 2. Test at a higher level of abstraction
 
-from mikeio.dataset._data_utils import DataUtilsMixin as du
+from mikeio import DataArray as du
+from mikeio.dataset._data_utils import _to_safe_name
 
 
 def test_parse_time_None():
@@ -72,16 +73,12 @@ def test_parse_time_decreasing():
 
 
 def test_safe_name_noop():
-
     good_name = "MSLP"
 
-    assert du._to_safe_name(good_name) == good_name
+    assert _to_safe_name(good_name) == good_name
 
 
 def test_safe_name_bad():
-
-    # fmt: off
-    bad_name   = "MSLP., 1:st level\n 2nd chain"
-    safe_name  = "MSLP_1_st_level_2nd_chain"
-    assert du._to_safe_name(bad_name) == safe_name
-    # fmt : on
+    bad_name = "MSLP., 1:st level\n 2nd chain"
+    safe_name = "MSLP_1_st_level_2nd_chain"
+    assert _to_safe_name(bad_name) == safe_name

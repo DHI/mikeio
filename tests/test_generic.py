@@ -318,6 +318,39 @@ def test_concat_keep(tmp_path):
                     assert last_out, "overlap should be with last dataset"
 
 
+def test_concat_non_equidistant_dfs0(tmp_path):
+
+    # create two non-equidistant dfs0 files
+    da1 = mikeio.DataArray(
+        data=np.array([0.0, 0.1, 0.2]),
+        time=pd.DatetimeIndex(
+            ["2017-10-27 01:58", "2017-10-27 04:32", "2017-10-27 05:32"]
+        ),
+    )
+    assert not da1.is_equidistant
+    da2 = mikeio.DataArray(
+        data=np.array([0.9, 1.1, 0.2]),
+        time=pd.DatetimeIndex(
+            ["2017-10-28 01:59", "2017-10-29 04:32", "2017-11-01 05:32"]
+        ),
+    )
+    assert not da2.is_equidistant
+    files = [tmp_path / "da1.dfs0", tmp_path / "da2.dfs0"]
+    da1.to_dfs(tmp_path / "da1.dfs0")
+    da2.to_dfs(tmp_path / "da2.dfs0")
+
+    # concatenate
+    fp = tmp_path / "concat.dfs0"
+    mikeio.generic.concat(files, fp)
+
+    ds = mikeio.read(fp)
+    assert len(ds.time) == 6
+
+    assert ds.sel(time="2017-10-29 04:32").to_dataframe().iloc[0, 0] == pytest.approx(
+        1.1
+    )
+
+
 def test_extract_equidistant(tmp_path):
 
     infile = "tests/testdata/waves.dfs2"
@@ -550,9 +583,9 @@ def test_dfs_ext_capitalisation(tmp_path):
     ds = mikeio.open(filename)
     ds = mikeio.read(filename)
     ds.to_dfs(tmp_path / "void.DFS0")
-    filename = "tests/testdata/odense_rough2.MESH"
-    ds = mikeio.open(filename)
     filename = "tests/testdata/oresund_vertical_slice2.DFSU"
+    ds = mikeio.open(filename)
+    filename = "tests/testdata/odense_rough2.MESH"
     ds = mikeio.open(filename)
     assert True
 

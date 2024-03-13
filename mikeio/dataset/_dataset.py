@@ -1,25 +1,33 @@
 from __future__ import annotations
 from pathlib import Path
 import warnings
-from copy import deepcopy
 from datetime import datetime
+from copy import deepcopy
 from typing import (
     Iterable,
+    Iterator,
     List,
+    Literal,
     Mapping,
-    Optional,
+    MutableMapping,
     Sequence,
     Tuple,
-    MutableMapping,
     Any,
     overload,
-    Hashable
+    Hashable,
+    Set,
+    TYPE_CHECKING,
+    Callable,
 )
 
 
 import numpy as np
+from numpy.typing import NDArray
 import pandas as pd
-from mikecore.DfsFile import DfsSimpleType  # type: ignore
+from mikecore.DfsFile import DfsSimpleType
+
+if TYPE_CHECKING:
+    import xarray
 
 from ._dataarray import DataArray
 from ._data_utils import _to_safe_name, _get_time_idx_list, _n_selected_timesteps
@@ -39,7 +47,7 @@ from ..spatial._FM_geometry import _GeometryFM
 from ._data_plot import _DatasetPlotter
 
 
-class Dataset(MutableMapping):
+class Dataset:
     """Dataset containing one or more DataArrays with common geometry and time
 
     Most often obtained by reading a dfs file. But can also be
@@ -82,22 +90,27 @@ class Dataset(MutableMapping):
 
     def __init__(
         self,
-        data: Mapping[str, DataArray] | Iterable[DataArray] | Sequence[np.ndarray],
-        time=None,
-        items=None,
-        geometry=None,
-        zn=None,
-        dims=None,
-        validate=True,
+        data: (
+            Mapping[str, DataArray]
+            | Sequence[DataArray]
+            | Sequence[NDArray[np.floating]]
+        ),
+        time: pd.DatetimeIndex | None = None,
+        items: Sequence[ItemInfo] | None = None,
+        geometry: Any = None,
+        zn: NDArray[np.floating] | None = None,
+        dims: Tuple[str, ...] | None = None,
+        validate: bool = True,
     ):
         if not self._is_DataArrays(data):
             data = self._create_dataarrays(
-                data=data, time=time, items=items, geometry=geometry, zn=zn, dims=dims
-            )  # type: ignore
-        self._init_from_DataArrays(data, validate=validate)
+                data=data, time=time, items=items, geometry=geometry, zn=zn, dims=dims  # type: ignore
+            )
+        self._data_vars: MutableMapping[str, DataArray] = self._init_from_DataArrays(data, validate=validate)  # type: ignore
+        self.plot = _DatasetPlotter(self)
 
     @staticmethod
-    def _is_DataArrays(data):
+    def _is_DataArrays(data: Any) -> bool:
         """Check if input is Sequence/Mapping of DataArrays"""
         if isinstance(data, (Dataset, DataArray)):
             return True
@@ -116,13 +129,13 @@ class Dataset(MutableMapping):
 
     @staticmethod
     def _create_dataarrays(
-        data,
-        time=None,
-        items=None,
-        geometry=None,
-        zn=None,
-        dims=None,
-    ):
+        data: Sequence[NDArray[np.floating]] | NDArray[np.floating],
+        time: pd.DatetimeIndex | None = None,
+        items: Sequence[ItemInfo] | None = None,
+        geometry: Any = None,
+        zn: NDArray[np.floating] | None = None,
+        dims: Tuple[str, ...] | None = None,
+    ) -> Mapping[str, DataArray]:
         if not isinstance(data, Iterable):
             data = [data]
         items = Dataset._parse_items(items, len(data))
@@ -135,62 +148,55 @@ class Dataset(MutableMapping):
             )
         return data_vars
 
-    def _init_from_DataArrays(self, data, validate=True):
+    def _init_from_DataArrays(
+        self, data: Sequence[DataArray] | Mapping[str, DataArray], validate: bool = True
+    ) -> MutableMapping[str, DataArray]:
         """Initialize Dataset object with Iterable of DataArrays"""
-        self._data_vars = self._DataArrays_as_mapping(data)
+        data_vars = self._DataArrays_as_mapping(data)
 
-        if (len(self) > 1) and validate:
-            first = self[0]
-            for i in range(1, len(self)):
-                da = self[i]
+        if (len(data_vars) > 1) and validate:
+            first = list(data_vars.values())[0]
+            for da in data_vars.values():
                 first._is_compatible(da, raise_error=True)
 
-        self._check_all_different_ids(self._data_vars.values())
+        self._check_all_different_ids(list(data_vars.values()))
 
-        self.__itemattr = []
-        for key, value in self._data_vars.items():
+        # TODO is it necessary to keep track of item names?
+        self.__itemattr: Set[str] = set()
+        for key, value in data_vars.items():
             self._set_name_attr(key, value)
 
-        self.plot = _DatasetPlotter(self)
-
-        if len(self) > 0:
-            self._set_spectral_attributes(self.geometry)
-
-        # since Dataset is MutableMapping it has values and keys by default
-        # but we delete those to avoid confusion
-        # self.values = None
-        self.keys = None
+        return data_vars
 
     @property
-    def values(self):
+    def values(self) -> None:
         raise AttributeError(
             "Dataset has no property 'values' - use to_numpy() instead or maybe you were looking for DataArray.values?"
         )
-
-    # remove values and keys from dir to avoid confusion
-    def __dir__(self):
-        keys = sorted(list(super().__dir__()) + list(self.__dict__.keys()))
-        return set([d for d in keys if d not in ("values", "keys")])
 
     @staticmethod
     def _modify_list(lst: Iterable[str]) -> List[str]:
         modified_list = []
         count_dict = {}
-        
+
         for item in lst:
             if item not in count_dict:
                 modified_list.append(item)
                 count_dict[item] = 2
             else:
-                warnings.warn(f"Duplicate item name: {item}. Renaming to {item}_{count_dict[item]}")
+                warnings.warn(
+                    f"Duplicate item name: {item}. Renaming to {item}_{count_dict[item]}"
+                )
                 modified_item = f"{item}_{count_dict[item]}"
                 modified_list.append(modified_item)
                 count_dict[item] += 1
-        
+
         return modified_list
 
     @staticmethod
-    def _parse_items(items, n_items_data):
+    def _parse_items(
+        items: None | Sequence[ItemInfo | EUMType | str], n_items_data: int
+    ) -> List[ItemInfo]:
         if items is None:
             # default Undefined items
             item_infos = [ItemInfo(f"Item_{j+1}") for j in range(n_items_data)]
@@ -213,33 +219,31 @@ class Dataset(MutableMapping):
             item_names = Dataset._modify_list(item_names)
             for it, item_name in zip(item_infos, item_names):
                 it.name = item_name
-            
+
         return item_infos
 
     @staticmethod
-    def _DataArrays_as_mapping(data):
+    def _DataArrays_as_mapping(
+        data: DataArray | Sequence[DataArray] | Mapping[str, DataArray]
+    ) -> MutableMapping[str, DataArray]:
         """Create dict of DataArrays if necessary"""
-        if isinstance(data, Mapping):
-            if isinstance(data, Dataset):
-                return data
-            data = Dataset._validate_item_names_and_keys(
+        if isinstance(data, MutableMapping):
+            data_vars = Dataset._validate_item_names_and_keys(
                 data
             )  # TODO is this necessary?
-            _ = Dataset._unique_item_names(data.values())
-            return data
+            _ = Dataset._unique_item_names(list(data_vars.values()))
+            return data_vars
 
         if isinstance(data, DataArray):
             data = [data]
-
+        assert isinstance(data, Sequence)
         item_names = Dataset._unique_item_names(data)
-
-        data_map = {}
-        for n, da in zip(item_names, data):
-            data_map[n] = da
-        return data_map
+        return {key: da for key, da in zip(item_names, data)}
 
     @staticmethod
-    def _validate_item_names_and_keys(data_map: Mapping[str, DataArray]):
+    def _validate_item_names_and_keys(
+        data_map: MutableMapping[str, DataArray]
+    ) -> MutableMapping[str, DataArray]:
         for key, da in data_map.items():
             if da.name == "NoName":
                 da.name = key
@@ -251,17 +255,16 @@ class Dataset(MutableMapping):
         return data_map
 
     @staticmethod
-    def _unique_item_names(das: Sequence[DataArray]):
+    def _unique_item_names(das: Sequence[DataArray]) -> List[str]:
         item_names = [da.name for da in das]
         if len(set(item_names)) != len(item_names):
             raise ValueError(
                 f"Item names must be unique! ({item_names}). Please rename before constructing Dataset."
             )
-            # TODO: make a list of unique items names
         return item_names
 
     @staticmethod
-    def _check_all_different_ids(das):
+    def _check_all_different_ids(das: Sequence[DataArray]) -> None:
         """Are all the DataArrays different objects or are some referring to the same"""
         ids = np.zeros(len(das), dtype=np.int64)
         ids_val = np.zeros(len(das), dtype=np.int64)
@@ -287,7 +290,7 @@ class Dataset(MutableMapping):
                 Dataset._id_of_DataArrays_equal(das[jj[0]], das[jj[1]])
 
     @staticmethod
-    def _id_of_DataArrays_equal(da1, da2):
+    def _id_of_DataArrays_equal(da1: DataArray, da2: DataArray) -> None:
         """Check if two DataArrays are actually the same object"""
         if id(da1) == id(da2):
             raise ValueError(
@@ -298,17 +301,10 @@ class Dataset(MutableMapping):
                 f"DataArrays {da1.name} and {da2.name} refer to the same data! Create a copy first."
             )
 
-    def _check_already_present(self, new_da):
+    def _check_already_present(self, new_da: DataArray) -> None:
         """Is the DataArray already present in the Dataset?"""
         for da in self:
             self._id_of_DataArrays_equal(da, new_da)
-
-    def _set_spectral_attributes(self, geometry):
-        if hasattr(geometry, "frequencies") and hasattr(geometry, "directions"):
-            self.frequencies = geometry.frequencies
-            self.n_frequencies = geometry.n_frequencies
-            self.directions = geometry.directions
-            self.n_directions = geometry.n_directions
 
     # ============ end of init =============
 
@@ -320,30 +316,30 @@ class Dataset(MutableMapping):
         return list(self)[0].time
 
     @time.setter
-    def time(self, new_time):
+    def time(self, new_time: pd.DatetimeIndex) -> None:
         for da in self:
             da.time = new_time
 
     @property
-    def start_time(self):
+    def start_time(self) -> datetime:
         """First time instance (as datetime)"""
         # TODO: use pd.Timestamp instead
-        return self.time[0].to_pydatetime()
+        return self.time[0].to_pydatetime()  # type: ignore
 
     @property
-    def end_time(self):
+    def end_time(self) -> datetime:
         """Last time instance (as datetime)"""
         # TODO: use pd.Timestamp instead
-        return self.time[-1].to_pydatetime()
+        return self.time[-1].to_pydatetime()  # type: ignore
 
     @property
-    def timestep(self) -> Optional[float]:
+    def timestep(self) -> float | None:
         """Time step in seconds if equidistant (and at
         least two time instances); otherwise None
         """
         dt = None
         if len(self.time) > 1 and self.is_equidistant:
-            dt = (self.time[1] - self.time[0]).total_seconds()  # type: ignore
+            dt = (self.time[1] - self.time[0]).total_seconds()
         return dt
 
     @property
@@ -353,7 +349,7 @@ class Dataset(MutableMapping):
             return True
         return len(self.time.to_series().diff().dropna().unique()) == 1
 
-    def to_numpy(self) -> np.ndarray:
+    def to_numpy(self) -> NDArray[np.floating]:
         """Stack data to a single ndarray with shape (n_items, n_timesteps, ...)
 
         Returns
@@ -368,7 +364,7 @@ class Dataset(MutableMapping):
         return len(self.time)
 
     @property
-    def items(self):
+    def items(self) -> List[ItemInfo]:
         """ItemInfo for each of the DataArrays as a list"""
         return [x.item for x in self]
 
@@ -378,12 +374,12 @@ class Dataset(MutableMapping):
         return len(self._data_vars)
 
     @property
-    def names(self):
+    def names(self) -> List[str]:
         """Name of each of the DataArrays as a list"""
         return [da.name for da in self]
 
-    def _ipython_key_completions_(self):
-        return [x.name for x in self.items]
+    def _ipython_key_completions_(self):  # type: ignore
+        return [x.name for x in self.items]  # type: ignore
 
     @property
     def ndim(self) -> int:
@@ -391,39 +387,39 @@ class Dataset(MutableMapping):
         return self[0].ndim
 
     @property
-    def dims(self):
+    def dims(self) -> Tuple[str, ...]:
         """Named array dimensions of each DataArray"""
         return self[0].dims
 
     @property
-    def shape(self):
+    def shape(self) -> Any:
         """Shape of each DataArray"""
         return self[0].shape
 
     @property
-    def deletevalue(self):
+    def deletevalue(self) -> float:
         """File delete value"""
         return self[0].deletevalue
 
     @property
-    def geometry(self):
+    def geometry(self) -> Any:
         """Geometry of each DataArray"""
         return self[0].geometry
 
     @property
-    def _zn(self) -> np.ndarray:
+    def _zn(self) -> np.ndarray | None:
         return self[0]._zn
 
     # TODO: remove this
     @property
     def n_elements(self) -> int:
         """Number of spatial elements/points"""
-        n_elem = np.prod(self.shape)
+        n_elem = int(np.prod(self.shape))
         if self.n_timesteps > 1:
             n_elem = int(n_elem / self.n_timesteps)
         return n_elem
 
-    def describe(self, **kwargs) -> pd.DataFrame:
+    def describe(self, **kwargs: Any) -> pd.DataFrame:
         """Generate descriptive statistics by wrapping :py:meth:`pandas.DataFrame.describe`"""
         data = {x.name: x.to_numpy().ravel() for x in self}
         df = pd.DataFrame(data).describe(**kwargs)
@@ -472,7 +468,9 @@ class Dataset(MutableMapping):
 
         return Dataset(data=res, validate=False)
 
-    def create_data_array(self, data, item=None) -> DataArray:
+    def create_data_array(
+        self, data: NDArray[np.floating], item: ItemInfo | None = None
+    ) -> DataArray:
         """Create a new  DataArray with the same time and geometry as the dataset
 
         Examples
@@ -490,16 +488,16 @@ class Dataset(MutableMapping):
 
     # TODO: delete this?
     @staticmethod
-    def create_empty_data(n_items=1, n_timesteps=1, n_elements=None, shape=None):
+    def create_empty_data(n_items: int = 1, n_timesteps: int = 1, n_elements: int | None = None, shape: Tuple[int, ...] | None = None):  # type: ignore
         data = []
         if shape is None:
             if n_elements is None:
                 raise ValueError("n_elements and shape cannot both be None")
             else:
-                shape = n_elements
+                shape = n_elements  # type: ignore
         if np.isscalar(shape):
-            shape = [shape]
-        dati = np.empty(shape=(n_timesteps, *shape))
+            shape = [shape]  # type: ignore
+        dati = np.empty(shape=(n_timesteps, *shape))  # type: ignore
         dati[:] = np.nan
         for _ in range(n_items):
             data.append(dati.copy())
@@ -507,23 +505,16 @@ class Dataset(MutableMapping):
 
     # ============= Dataset is (almost) a MutableMapping ===========
 
-    def __len__(self):
+    def __len__(self) -> int:
         return len(self._data_vars)
 
-    def __iter__(self):
+    def __iter__(self) -> Iterator[DataArray]:
         yield from self._data_vars.values()
 
-    def __setitem__(self, key, value):
+    def __setitem__(self, key, value) -> None:  # type: ignore
         self.__set_or_insert_item(key, value, insert=False)
 
-    def __set_or_insert_item(self, key, value, insert=False):
-        if not isinstance(value, DataArray):
-            try:
-                value = DataArray(value)
-                # TODO: warn that this is not the preferred way!
-            except TypeError:
-                raise ValueError("Input could not be interpreted as a DataArray")
-
+    def __set_or_insert_item(self, key, value: DataArray, insert=False) -> None:  # type: ignore
         if len(self) > 0:
             self[0]._is_compatible(value)
 
@@ -564,7 +555,7 @@ class Dataset(MutableMapping):
             self._data_vars[key] = value
             self._set_name_attr(key, value)
 
-    def insert(self, key, value: DataArray):
+    def insert(self, key: int, value: DataArray) -> None:
         """Insert DataArray in a specific position
 
         Parameters
@@ -577,12 +568,7 @@ class Dataset(MutableMapping):
         """
         self.__set_or_insert_item(key, value, insert=True)
 
-        if isinstance(key, slice):
-            s = self.time.slice_indexer(key.start, key.stop)
-            time_steps = list(range(s.start, s.stop))
-            return self.isel(time_steps, axis=0)
-
-    def remove(self, key: int | str):
+    def remove(self, key: int | str) -> None:
         """Remove DataArray from Dataset
 
         Parameters
@@ -594,18 +580,11 @@ class Dataset(MutableMapping):
         --------
         pop
         """
+        # deprecated
+        warnings.warn("Dataset.remove is deprecated", FutureWarning)
         self.__delitem__(key)
 
-    def popitem(self):
-        """Pop first DataArray from Dataset
-
-        See also
-        --------
-        pop
-        """
-        return self.pop(0)
-
-    def rename(self, mapper: Mapping[str, str], inplace=False):
+    def rename(self, mapper: Mapping[str, str], inplace: bool = False) -> "Dataset":
         """Rename items (DataArrays) in Dataset
 
         Parameters
@@ -640,30 +619,26 @@ class Dataset(MutableMapping):
 
         return ds
 
-    def _set_name_attr(self, name: str, value: DataArray):
+    def _set_name_attr(self, name: str, value: DataArray) -> None:
         name = _to_safe_name(name)
         if name not in self.__itemattr:
-            self.__itemattr.append(name)  # keep track of what we insert
+            self.__itemattr.add(name)  # keep track of what we insert
         setattr(self, name, value)
 
-    def _del_name_attr(self, name: str):
+    def _del_name_attr(self, name: str) -> None:
         name = _to_safe_name(name)
         if name in self.__itemattr:
             self.__itemattr.remove(name)
             delattr(self, name)
 
     @overload
-    def __getitem__(self, key: Hashable | int) -> DataArray:
-        ...
+    def __getitem__(self, key: Hashable | int) -> DataArray: ...
 
     # Mapping is Iterable
     @overload
-    def __getitem__(self, key: Iterable[Hashable]) -> "Dataset":
-        ...
+    def __getitem__(self, key: Iterable[Hashable]) -> "Dataset": ...
 
-
-    def __getitem__(self, key) -> DataArray | "Dataset":
-
+    def __getitem__(self, key: Any) -> DataArray | "Dataset":
         # select time steps
         if (
             isinstance(key, Sequence) and not isinstance(key, str)
@@ -716,7 +691,7 @@ class Dataset(MutableMapping):
 
         raise TypeError(f"indexing with a {type(key)} is not (yet) supported")
 
-    def _is_slice_time_slice(self, s):
+    def _is_slice_time_slice(self, s: slice) -> bool:
         if (s.start is None) and (s.stop is None):
             return False
         if s.start is not None:
@@ -727,7 +702,11 @@ class Dataset(MutableMapping):
                 return False
         return True
 
-    def _is_key_time(self, key):
+    def _is_key_time(self, key):  # type: ignore
+        if isinstance(key, slice):
+            return False
+        if isinstance(key, (int, float)):
+            return False
         if isinstance(key, str) and key in self.names:
             return False
         if isinstance(key, str) and len(key) > 0 and key[0].isnumeric():
@@ -735,9 +714,10 @@ class Dataset(MutableMapping):
             return True
         if isinstance(key, (datetime, np.datetime64, pd.Timestamp)):
             return True
+
         return False
 
-    def _multi_indexing_attempted(self, key) -> bool:
+    def _multi_indexing_attempted(self, key: Any) -> bool:
         # find out if user is attempting ds[2, :, 1] or similar (not allowed)
         # this is not bullet-proof, but a good estimate
         if not isinstance(key, tuple):
@@ -775,15 +755,19 @@ class Dataset(MutableMapping):
             return key.name
         raise TypeError(f"indexing with type {type(key)} is not supported")
 
-    def __delitem__(self, key):
-
+    def __delitem__(self, key: Hashable | int) -> None:
         key = self._key_to_str(key)
         self._data_vars.__delitem__(key)
         self._del_name_attr(key)
 
     # ============ select/interp =============
 
-    def isel(self, idx=None, axis=0, **kwargs):
+    def isel(
+        self,
+        idx: int | Sequence[int] | slice | None = None,
+        axis: int | str = 0,
+        **kwargs: Any,
+    ) -> "Dataset":
         """Return a new Dataset whose data is given by
         integer indexing along the specified dimension(s).
 
@@ -833,7 +817,7 @@ class Dataset(MutableMapping):
 
     def sel(
         self,
-        **kwargs,
+        **kwargs: Any,
     ) -> "Dataset":
         """Return a new Dataset whose data is given by
         selecting index labels along the specified dimension(s).
@@ -900,12 +884,12 @@ class Dataset(MutableMapping):
     def interp(
         self,
         *,
-        time: Optional[pd.DatetimeIndex | "DataArray"] = None,
-        x: Optional[float] = None,
-        y: Optional[float] = None,
-        z: Optional[float] = None,
+        time: pd.DatetimeIndex | "DataArray" | None = None,
+        x: float | None = None,
+        y: float | None = None,
+        z: float | None = None,
         n_nearest: int = 3,
-        **kwargs,
+        **kwargs: Any,
     ) -> "Dataset":
         """Interpolate data in time and space
 
@@ -964,9 +948,8 @@ class Dataset(MutableMapping):
             if isinstance(
                 self.geometry, GeometryFM2D
             ):  # TODO remove this when all geometries implements the same method
-
                 interpolant = self.geometry.get_2d_interpolant(
-                    xy, n_nearest=n_nearest, **kwargs
+                    xy, n_nearest=n_nearest, **kwargs  # type: ignore
                 )
                 das = [da.interp(x=x, y=y, interpolant=interpolant) for da in self]
             else:
@@ -991,7 +974,12 @@ class Dataset(MutableMapping):
 
         return data, time
 
-    def extract_track(self, track, method="nearest", dtype=np.float32):
+    def extract_track(
+        self,
+        track: pd.DataFrame,
+        method: Literal["nearest", "inverse_distance"] = "nearest",
+        dtype: Any = np.float32,
+    ) -> "Dataset":
         """
         Extract data along a moving track
 
@@ -1017,6 +1005,10 @@ class Dataset(MutableMapping):
         item_numbers = list(range(self.n_items))
         time_steps = list(range(self.n_timesteps))
 
+        assert self.start_time is not None
+        assert self.end_time is not None
+        assert self.timestep is not None
+
         return _extract_track(
             deletevalue=self.deletevalue,
             start_time=self.start_time,
@@ -1035,12 +1027,12 @@ class Dataset(MutableMapping):
 
     def interp_time(
         self,
-        dt: Optional[float | pd.DatetimeIndex | "Dataset" | DataArray] = None,
+        dt: float | pd.DatetimeIndex | "Dataset" | DataArray | None = None,
         *,
-        freq: Optional[str] = None,
-        method="linear",
-        extrapolate=True,
-        fill_value=np.nan,
+        freq: str | None = None,
+        method: str = "linear",
+        extrapolate: bool = True,
+        fill_value: float = np.nan,
     ) -> "Dataset":
         """Temporal interpolation
 
@@ -1104,7 +1096,7 @@ class Dataset(MutableMapping):
 
         return Dataset(das)
 
-    def interp_na(self, axis="time", **kwargs) -> "Dataset":
+    def interp_na(self, axis: str = "time", **kwargs: Any) -> "Dataset":
         ds = self.copy()
         for da in ds:
             da.values = da.interp_na(axis=axis, **kwargs).values
@@ -1114,7 +1106,7 @@ class Dataset(MutableMapping):
     def interp_like(
         self,
         other: "Dataset" | DataArray | Grid2D | GeometryFM2D | pd.DatetimeIndex,
-        **kwargs,
+        **kwargs: Any,
     ) -> "Dataset":
         """Interpolate in space (and in time) to other geometry (and time axis)
 
@@ -1176,9 +1168,12 @@ class Dataset(MutableMapping):
 
     # ============= Combine/concat ===========
 
-    def _append_items(self, other, copy=True):
+    def _append_items(
+        self, other: DataArray | "Dataset", copy: bool = True
+    ) -> "Dataset":
         if isinstance(other, DataArray):
             other = other._to_dataset()
+        assert isinstance(other, Dataset)
         item_names = {item.name for item in self.items}
         other_names = {item.name for item in other.items}
 
@@ -1198,7 +1193,9 @@ class Dataset(MutableMapping):
         return ds
 
     @staticmethod
-    def concat(datasets: Sequence["Dataset"], keep="last") -> "Dataset":
+    def concat(
+        datasets: Sequence["Dataset"], keep: Literal["last"] = "last"
+    ) -> "Dataset":
         """Concatenate Datasets along the time axis
 
         Parameters
@@ -1253,7 +1250,7 @@ class Dataset(MutableMapping):
 
         return ds
 
-    def _concat_time(self, other, copy=True) -> "Dataset":
+    def _concat_time(self, other: "Dataset", copy: bool = True) -> "Dataset":
         self._check_all_items_match(other)
         # assuming time is always first dimension we can skip / keep it by bool
         start_dim = int("time" in self.dims)
@@ -1295,7 +1292,7 @@ class Dataset(MutableMapping):
             newdata, time=newtime, items=ds.items, geometry=ds.geometry, zn=zn
         )
 
-    def _check_all_items_match(self, other):
+    def _check_all_items_match(self, other: "Dataset") -> None:
         if self.n_items != other.n_items:
             raise ValueError(
                 f"Number of items must match ({self.n_items} and {other.n_items})"
@@ -1317,7 +1314,7 @@ class Dataset(MutableMapping):
     # ============ aggregate =============
 
     def aggregate(
-        self, axis=0, func=np.nanmean, **kwargs
+        self, axis: int | str = 0, func: Callable = np.nanmean, **kwargs: Any
     ) -> "Dataset":
         """Aggregate along an axis
 
@@ -1348,7 +1345,7 @@ class Dataset(MutableMapping):
                 dims=self.dims,
                 zn=self._zn,
             )
-            
+
             return Dataset([da], validate=False)
         else:
             res = {
@@ -1358,7 +1355,7 @@ class Dataset(MutableMapping):
             return Dataset(data=res, validate=False)
 
     @staticmethod
-    def _agg_item_from_items(items, name):
+    def _agg_item_from_items(items: Sequence[ItemInfo], name: str) -> ItemInfo:
         it_type = (
             items[0].type
             if all([it.type == items[0].type for it in items])
@@ -1371,7 +1368,9 @@ class Dataset(MutableMapping):
         )
         return ItemInfo(name, it_type, it_unit)
 
-    def quantile(self, q, *, axis=0, **kwargs) -> "Dataset":
+    def quantile(
+        self, q: float | Sequence[float], *, axis: int | str = 0, **kwargs: Any
+    ) -> "Dataset":
         """Compute the q-th quantile of the data along the specified axis.
 
         Wrapping np.quantile
@@ -1401,7 +1400,9 @@ class Dataset(MutableMapping):
         """
         return self._quantile(q, axis=axis, func=np.quantile, **kwargs)
 
-    def nanquantile(self, q, *, axis=0, **kwargs) -> "Dataset":
+    def nanquantile(
+        self, q: float | Sequence[float], *, axis: int | str = 0, **kwargs: Any
+    ) -> "Dataset":
         """Compute the q-th quantile of the data along the specified axis, while ignoring nan values.
 
         Wrapping np.nanquantile
@@ -1427,10 +1428,7 @@ class Dataset(MutableMapping):
         """
         return self._quantile(q, axis=axis, func=np.nanquantile, **kwargs)
 
-    def _quantile(
-        self, q, *, axis=0, func=np.quantile, **kwargs
-    ) -> "Dataset":
-
+    def _quantile(self, q, *, axis=0, func=np.quantile, **kwargs) -> "Dataset":  # type: ignore
         if axis == "items":
             if self.n_items <= 1:
                 return self  # or raise ValueError?
@@ -1469,7 +1467,7 @@ class Dataset(MutableMapping):
 
             return Dataset(data=res, validate=False)
 
-    def max(self, axis=0, **kwargs) -> "Dataset":
+    def max(self, axis: int | str = 0, **kwargs: Any) -> "Dataset":
         """Max value along an axis
 
         Parameters
@@ -1488,7 +1486,7 @@ class Dataset(MutableMapping):
         """
         return self.aggregate(axis=axis, func=np.max, **kwargs)
 
-    def min(self, axis=0, **kwargs) -> "Dataset":
+    def min(self, axis: int | str = 0, **kwargs: Any) -> "Dataset":
         """Min value along an axis
 
         Parameters
@@ -1507,7 +1505,7 @@ class Dataset(MutableMapping):
         """
         return self.aggregate(axis=axis, func=np.min, **kwargs)
 
-    def mean(self, axis=0, **kwargs) -> "Dataset":
+    def mean(self, axis: int | str = 0, **kwargs: Any) -> "Dataset":
         """Mean value along an axis
 
         Parameters
@@ -1527,7 +1525,7 @@ class Dataset(MutableMapping):
         """
         return self.aggregate(axis=axis, func=np.mean, **kwargs)
 
-    def std(self, axis=0, **kwargs) -> "Dataset":
+    def std(self, axis: int | str = 0, **kwargs: Any) -> "Dataset":
         """Standard deviation along an axis
 
         Parameters
@@ -1546,7 +1544,7 @@ class Dataset(MutableMapping):
         """
         return self.aggregate(axis=axis, func=np.std, **kwargs)
 
-    def ptp(self, axis=0, **kwargs) -> "Dataset":
+    def ptp(self, axis: int | str = 0, **kwargs: Any) -> "Dataset":
         """Range (max - min) a.k.a Peak to Peak along an axis
         Parameters
         ----------
@@ -1560,11 +1558,15 @@ class Dataset(MutableMapping):
         """
         return self.aggregate(axis=axis, func=np.ptp, **kwargs)
 
-    def average(self, weights, axis=0, **kwargs) -> "Dataset":
+    def average(self, *, weights, axis=0, **kwargs) -> "Dataset":  # type: ignore
         """Compute the weighted average along the specified axis.
+
+        Wraps :py:meth:`numpy.average`
 
         Parameters
         ----------
+        weights: array_like
+            weights to average over
         axis: (int, str, None), optional
             axis number or "time", "space" or "items", by default 0
 
@@ -1586,7 +1588,7 @@ class Dataset(MutableMapping):
         >>> ds2 = ds.average(axis="space", weights=area)
         """
 
-        def func(x, axis, keepdims):
+        def func(x, axis, keepdims):  # type: ignore
             if keepdims:
                 raise NotImplementedError()
 
@@ -1594,7 +1596,7 @@ class Dataset(MutableMapping):
 
         return self.aggregate(axis=axis, func=func, **kwargs)
 
-    def nanmax(self, axis=0, **kwargs) -> "Dataset":
+    def nanmax(self, axis: int | str = 0, **kwargs: Any) -> "Dataset":
         """Max value along an axis (NaN removed)
 
         Parameters
@@ -1613,7 +1615,7 @@ class Dataset(MutableMapping):
         """
         return self.aggregate(axis=axis, func=np.nanmax, **kwargs)
 
-    def nanmin(self, axis=0, **kwargs) -> "Dataset":
+    def nanmin(self, axis: int | str = 0, **kwargs: Any) -> "Dataset":
         """Min value along an axis (NaN removed)
 
         Parameters
@@ -1628,7 +1630,7 @@ class Dataset(MutableMapping):
         """
         return self.aggregate(axis=axis, func=np.nanmin, **kwargs)
 
-    def nanmean(self, axis=0, **kwargs) -> "Dataset":
+    def nanmean(self, axis: int | str = 0, **kwargs: Any) -> "Dataset":
         """Mean value along an axis (NaN removed)
 
         Parameters
@@ -1643,7 +1645,7 @@ class Dataset(MutableMapping):
         """
         return self.aggregate(axis=axis, func=np.nanmean, **kwargs)
 
-    def nanstd(self, axis=0, **kwargs) -> "Dataset":
+    def nanstd(self, axis: int | str = 0, **kwargs: Any) -> "Dataset":
         """Standard deviation along an axis (NaN removed)
 
         Parameters
@@ -1664,35 +1666,36 @@ class Dataset(MutableMapping):
 
     # ============ arithmetic/Math =============
 
-    def __radd__(self, other) -> "Dataset":
+    def __radd__(self, other: "Dataset" | float) -> "Dataset":
         return self.__add__(other)
 
-    def __add__(self, other) -> "Dataset":
+    def __add__(self, other: "Dataset" | float) -> "Dataset":
         if isinstance(other, self.__class__):
             return self._add_dataset(other)
         else:
-            return self._add_value(other)
+            # float-like
+            return self._add_value(other)  # type: ignore
 
-    def __rsub__(self, other) -> "Dataset":
+    def __rsub__(self, other: "Dataset" | float) -> "Dataset":
         ds = self.__mul__(-1.0)
         return other + ds
 
-    def __sub__(self, other) -> "Dataset":
+    def __sub__(self, other: "Dataset" | float) -> "Dataset":
         if isinstance(other, self.__class__):
             return self._add_dataset(other, sign=-1.0)
         else:
-            return self._add_value(-other)
+            return self._add_value(-other)  # type: ignore
 
-    def __rmul__(self, other) -> "Dataset":
+    def __rmul__(self, other: "Dataset" | float) -> "Dataset":
         return self.__mul__(other)
 
-    def __mul__(self, other) -> "Dataset":
+    def __mul__(self, other: "Dataset" | float) -> "Dataset":
         if isinstance(other, self.__class__):
             raise ValueError("Multiplication is not possible for two Datasets")
         else:
-            return self._multiply_value(other)
+            return self._multiply_value(other)  # type: ignore
 
-    def _add_dataset(self, other, sign=1.0) -> "Dataset":
+    def _add_dataset(self, other: "Dataset", sign: float = 1.0) -> "Dataset":
         self._check_datasets_match(other)
         try:
             data = [
@@ -1706,7 +1709,7 @@ class Dataset(MutableMapping):
             newds[j].values = data[j]  # type: ignore
         return newds
 
-    def _check_datasets_match(self, other):
+    def _check_datasets_match(self, other: "Dataset") -> None:
         if self.n_items != other.n_items:
             raise ValueError(
                 f"Number of items must match ({self.n_items} and {other.n_items})"
@@ -1725,7 +1728,7 @@ class Dataset(MutableMapping):
         if self.shape != other.shape:
             raise ValueError("shape must match")
 
-    def _add_value(self, value) -> "Dataset":
+    def _add_value(self, value: float) -> "Dataset":
         try:
             data = [value + self[x].to_numpy() for x in self.items]
         except TypeError:
@@ -1741,7 +1744,7 @@ class Dataset(MutableMapping):
             validate=False,
         )
 
-    def _multiply_value(self, value) -> "Dataset":
+    def _multiply_value(self, value: float) -> "Dataset":
         try:
             data = [value * self[x].to_numpy() for x in self.items]
         except TypeError:
@@ -1759,7 +1762,7 @@ class Dataset(MutableMapping):
 
     # ===============================================
 
-    def to_pandas(self, **kwargs) -> pd.Series | pd.DataFrame:
+    def to_pandas(self, **kwargs: Any) -> pd.Series | pd.DataFrame:
         """Convert Dataset to a Pandas DataFrame"""
 
         if self.n_items != 1:
@@ -1805,7 +1808,7 @@ class Dataset(MutableMapping):
 
         return df
 
-    def to_dfs(self, filename, **kwargs):
+    def to_dfs(self, filename: str | Path, **kwargs: Any) -> None:
         """Write dataset to a new dfs file
 
         Parameters
@@ -1822,7 +1825,6 @@ class Dataset(MutableMapping):
         if isinstance(
             self.geometry, (GeometryPoint2D, GeometryPoint3D, GeometryUndefined)
         ):
-
             if self.ndim == 0:  # Not very common, but still...
                 self._validate_extension(filename, ".dfs0")
                 self._to_dfs0(filename, **kwargs)
@@ -1850,43 +1852,42 @@ class Dataset(MutableMapping):
             )
 
     @staticmethod
-    def _validate_extension(filename, valid_extension):
+    def _validate_extension(filename: str | Path, valid_extension: str) -> None:
         path = Path(filename)
         ext = path.suffix.lower()
         if ext != valid_extension:
             raise ValueError(f"File extension must be {valid_extension}")
 
-    def _to_dfs0(self, filename, **kwargs):
+    def _to_dfs0(self, filename: str | Path, **kwargs: Any) -> None:
         from ..dfs._dfs0 import _write_dfs0
 
         dtype = kwargs.get("dtype", DfsSimpleType.Float)
 
         _write_dfs0(filename, self, dtype=dtype)
 
-    def _to_dfs2(self, filename):
+    def _to_dfs2(self, filename: str | Path) -> None:
         # assumes Grid2D geometry
         from ..dfs._dfs2 import write_dfs2
 
         write_dfs2(filename, self)
 
-    def _to_dfs3(self, filename):
+    def _to_dfs3(self, filename: str | Path) -> None:
         # assumes Grid3D geometry
         from ..dfs._dfs3 import write_dfs3
 
         write_dfs3(filename, self)
 
-    def _to_dfs1(self, filename):
-        from ..dfs._dfs1 import Dfs1
+    def _to_dfs1(self, filename: str | Path) -> None:
+        from ..dfs._dfs1 import write_dfs1
 
-        dfs = Dfs1()
-        dfs.write(filename, data=self, dx=self.geometry.dx, x0=self.geometry._x0)
+        write_dfs1(filename=filename, ds=self)
 
-    def _to_dfsu(self, filename):
-        from ..dfsu._dfsu import _write_dfsu
+    def _to_dfsu(self, filename: str | Path) -> None:
+        from ..dfsu import write_dfsu
 
-        _write_dfsu(filename, self)
+        write_dfsu(filename, self)
 
-    def to_xarray(self):
+    def to_xarray(self) -> "xarray.Dataset":
         """Export to xarray.Dataset"""
         import xarray
 

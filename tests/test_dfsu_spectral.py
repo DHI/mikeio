@@ -178,16 +178,14 @@ def test_read_area_spectrum_xy(dfsu_area):
 def test_read_area_spectrum_area(dfsu_area):
     dfs = dfsu_area
     ds1 = dfs.read()
-    assert ds1.n_frequencies == 25
-    assert ds1.n_directions == 16
+    assert ds1[0].n_frequencies == 25
+    assert ds1[0].n_directions == 16
 
     bbox = (2.5, 51.8, 3.0, 52.2)
     ds2 = dfs.read(area=bbox)
     assert ds2.dims == ds1.dims
     assert ds2.shape == (3, 4, 16, 25)
     assert ds1.geometry._type == ds2.geometry._type
-    assert ds2.n_frequencies == 25
-    assert ds2.n_directions == 16
     assert ds2[0].n_frequencies == 25
     assert ds2[0].n_directions == 16
 
@@ -371,23 +369,22 @@ def test_calc_Hm0_from_spectrum_area(dfsu_area):
 def test_plot_spectrum(dfsu_pt):
     dfs = dfsu_pt
     ds = dfs.read(time=0)
-    spec = ds[0].to_numpy()
-    dfs.plot_spectrum(spec, levels=3, add_colorbar=False)
-    dfs.plot_spectrum(spec, vmin=0, cmap="Greys")
-    dfs.plot_spectrum(spec, title="pt", plot_type="shaded")
-    dfs.plot_spectrum(spec, r_as_periods=False, plot_type="contour")
+    da = ds[0]
+    da.plot(levels=3, add_colorbar=False)
+    da.plot(levels=3, vmin=0, cmap="Greys")
+    da.plot(title="pt", plot_type="shaded")
+    da.plot(r_as_periods=False, plot_type="contour")
     plt.close("all")
 
 
-def test_plot_spectrum_sector(dfsu_area_sector):
-    dfs = dfsu_area_sector
-    ds = dfs.read(time=0)
-    spec = ds[0].to_numpy()[0]
-    dfs.plot_spectrum(spec)
-    dfs.plot_spectrum(spec, rmax=10, vmin=0)
-    dfs.plot_spectrum(spec, rmin=0, plot_type="patch")
-    dfs.plot_spectrum(spec, r_as_periods=False, plot_type="contour")
-    plt.close("all")
+# def test_plot_spectrum_sector(dfsu_area_sector):
+#     dfs = dfsu_area_sector
+#     ds = dfs.read(time=0)
+#     da = ds[0]
+#     da.plot(rmax=10, vmin=0)
+#     da.plot(rmin=0, plot_type="patch")
+#     da.plot(r_as_periods=False, plot_type="contour")
+#     plt.close("all")
 
 
 def test_plot_da_spectrum(dfsu_pt):

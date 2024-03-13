@@ -282,6 +282,16 @@ def test_basic():
     assert data.POINT_1.y == 50
 
 
+def test_pfsdocument_copy():
+
+    pfs = mikeio.PfsDocument("tests/testdata/pfs/simple.pfs")
+    pfs2 = pfs.copy()
+    data = pfs.targets[0]
+    data.z_min = -4000
+
+    assert pfs2.BoundaryExtractor.z_min == -3000
+
+
 def test_ecolab():
     pfs = mikeio.PfsDocument("tests/testdata/pfs/minimal.ecolab")
     assert pfs.ECO_LAB_SETUP.MISC.DESCRIPTION == "Miscellaneous Description"
@@ -1083,7 +1093,7 @@ def test_search_keyword(pfs_ABC_text):
     assert "A2" in pfs.ROOT
 
     r0 = pfs.search(key="not_there")
-    assert r0 is None
+    assert len(r0) == 0
 
     r1 = pfs.search(key="float")
     assert r1.ROOT.A1.B.float_1 == 4.5
@@ -1112,7 +1122,7 @@ def test_search_param(pfs_ABC_text):
     pfs = mikeio.PfsDocument(StringIO(pfs_ABC_text))
 
     r0 = pfs.search(param="not_there")
-    assert r0 is None
+    assert len(r0) == 0
 
     r1 = pfs.search(param=0)
     assert len(r1.ROOT) == 2
@@ -1131,7 +1141,7 @@ def test_search_section(pfs_ABC_text):
     pfs = mikeio.PfsDocument(StringIO(pfs_ABC_text))
 
     r0 = pfs.search(section="not_there")
-    assert r0 is None
+    assert len(r0) == 0
 
     r1 = pfs.search(section="A")
     assert len(r1.ROOT) == 2

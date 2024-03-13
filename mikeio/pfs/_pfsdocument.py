@@ -2,9 +2,10 @@ from __future__ import annotations
 import re
 import warnings
 from collections import Counter
+from collections.abc import Mapping, Sequence
 from datetime import datetime
 from pathlib import Path
-from typing import Callable, Dict, List, Mapping, TextIO, Tuple
+from typing import Callable, Dict, List, TextIO, Tuple, overload
 
 import yaml
 
@@ -82,7 +83,7 @@ class PfsDocument(PfsSection):
 
     def __init__(
         self,
-        data: TextIO | PfsSection | Dict,
+        data: TextIO | PfsSection | Dict | str | Path,
         *,
         encoding="cp1252",
         names=None,
@@ -101,6 +102,14 @@ class PfsDocument(PfsSection):
         self._ALIAS_LIST = ["_ALIAS_LIST"]  # ignore these in key list
         if self._is_FM_engine:
             self._add_all_FM_aliases()
+
+    @staticmethod
+    def from_text(text: str) -> PfsDocument:
+        """Create a PfsDocument from a string"""
+        from io import StringIO
+
+        f = StringIO(text)
+        return PfsDocument(f)
 
     @staticmethod
     def _to_nonunique_key_dict(keys, vals):
@@ -169,6 +178,14 @@ class PfsDocument(PfsSection):
         rkeys, _ = self._unravel_items(self.items)
         return rkeys
 
+    def copy(self) -> PfsDocument:
+        """Return a deep copy of the PfsDocument"""
+
+        lines = self.write()
+        text = "\n".join(lines)
+
+        return PfsDocument.from_text(text)
+
     def _read_pfs_file(self, filename, encoding, unique_keywords=False):
         try:
             yml = self._pfs2yaml(filename, encoding)
@@ -186,7 +203,10 @@ class PfsDocument(PfsSection):
         return names, sections
 
     @staticmethod
-    def _parse_non_file_input(input, names=None):
+    def _parse_non_file_input(
+        input: Dict | PfsSection | Sequence[PfsSection] | Sequence[Dict],
+        names: Sequence[str] | None = None,
+    ) -> Tuple[Sequence[str], List[PfsSection]]:
         """dict/PfsSection or lists of these can be parsed"""
         if names is None:
             assert isinstance(input, Mapping), "input must be a mapping"
@@ -196,11 +216,6 @@ class PfsDocument(PfsSection):
                     sec, Mapping
                 ), "all targets must be PfsSections/dict (no key-value pairs allowed in the root)"
             return names, sections
-        # else:
-        #     warnings.warn(
-        #         "Creating a PfsDocument with names argument is deprecated, provide instead the names as keys in a dictionary",
-        #         FutureWarning,
-        #     )
 
         if isinstance(names, str):
             names = [names]
@@ -209,9 +224,9 @@ class PfsDocument(PfsSection):
             sections = [input]
         elif isinstance(input, dict):
             sections = [PfsSection(input)]
-        elif isinstance(input, (List, Tuple)):
+        elif isinstance(input, Sequence):
             if isinstance(input[0], PfsSection):
-                sections = input
+                sections = input  # type: ignore
             elif isinstance(input[0], dict):
                 sections = [PfsSection(d) for d in input]
             else:
@@ -252,7 +267,10 @@ class PfsDocument(PfsSection):
                 setattr(self, alias, self.targets[0][module])
                 self._ALIAS_LIST.append(alias)
 
-    def _pfs2yaml(self, filename, encoding=None) -> str:
+    def _pfs2yaml(
+        self, filename: str | Path | TextIO, encoding: str | None = None
+    ) -> str:
+
         if hasattr(filename, "read"):  # To read in memory strings StringIO
             pfsstring = filename.read()
         else:
@@ -343,16 +361,10 @@ class PfsDocument(PfsSection):
 
     _COMMA_MATCHER = re.compile(r",(?=(?:[^\"']*[\"'][^\"']*[\"'])*[^\"']*$)")
 
-    def _split_line_by_comma(self, s: str):
+    def _split_line_by_comma(self, s: str) -> List[str]:
         return self._COMMA_MATCHER.split(s)
-        # import shlex
-        # lexer = shlex.shlex(s)
-        # lexer.whitespace += ","
-        # lexer.quotes += "|"
-        # lexer.wordchars += ",.-"
-        # return list(lexer)
 
-    def _parse_token(self, token: str, context="") -> str:
+    def _parse_token(self, token: str, context: str = "") -> str:
         s = token.strip()
 
         # Example of complicated string:
@@ -372,7 +384,13 @@ class PfsDocument(PfsSection):
 
         return s
 
-    def write(self, filename=None):
+    @overload
+    def write(self) -> list[str]: ...
+
+    @overload
+    def write(self, filename: str) -> None: ...
+
+    def write(self, filename: str | None = None) -> list[str] | None:
         """Write object to a pfs file
 
         Parameters
@@ -396,6 +414,7 @@ class PfsDocument(PfsSection):
             f.write("\n\n")
 
             self._write_with_func(f.write, level=0)
+        return None
 
 
 # TODO remove this alias
