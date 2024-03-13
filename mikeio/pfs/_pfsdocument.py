@@ -317,17 +317,6 @@ class PfsDocument(PfsSection):
                 key = s[0:idx]
                 key = key.strip()
                 value = s[(idx + 1) :].strip()
-
-                # Don't parse datetimes
-                # if key == "start_time":
-                #     try:
-                #         value = datetime.strptime(value, "%Y, %m, %d, %H, %M, %S").strftime(
-                #             "%Y-%m-%d %H:%M:%S"
-                #         )
-                #     except ValueError:
-                #         warnings.warn(
-                #             f"Could not parse start_time {value} as datetime"
-                #         )
                 value = self._parse_param(value)
                 s = f"{key}: {value}"
 
