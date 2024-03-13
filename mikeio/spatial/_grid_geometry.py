@@ -93,12 +93,14 @@ class Grid1D(_Geometry):
 
     Examples
     --------
-    >>> mikeio.Grid1D(nx=3,dx=0.1)
-    <mikeio.Grid1D>
-    x: [0, 0.1, 0.2] (nx=3, dx=0.1)
-    >>> mikeio.Grid1D(x=[0.1, 0.5, 0.9])
-    <mikeio.Grid1D>
-    x: [0.1, 0.5, 0.9] (nx=3, dx=0.4)
+    ```{python}
+    import mikeio
+    mikeio.Grid1D(nx=3,dx=0.1)
+    ```
+
+    ```{python}
+    mikeio.Grid1D(x=[0.1, 0.5, 0.9])
+    ```
     """
 
     _dx: float
@@ -233,15 +235,19 @@ class Grid1D(_Geometry):
 
         Examples
         --------
-        >>> g = mikeio.Grid1D(nx=3,dx=0.1)
-        >>> g
-        <mikeio.Grid1D>
-        x: [0, 0.1, 0.2] (nx=3, dx=0.1)
-        >>> g.isel([1,2])
-        <mikeio.Grid1D>
-        x: [0.1, 0.2] (nx=2, dx=0.1)
-        >>> g.isel(1)
-        GeometryUndefined()
+        ```{python}
+        import mikeio
+        g = mikeio.Grid1D(nx=3,dx=0.1)
+        g
+        ```
+
+        ```{python}
+        g.isel([1,2])
+        ```
+
+        ```{python}
+        g.isel(1)
+        ```
         """
 
         if not np.isscalar(idx):
@@ -267,14 +273,15 @@ class Grid1D(_Geometry):
 
 
 class _Grid2DPlotter:
-    """Plot GeometryFM
+    """Plot Grid2D
 
     Examples
     --------
-    >>> ds = mikeio.read("tests/testdata/waves.dfs2")
-    >>> g = ds.geometry
-    >>> ax = g.plot()
-    >>> ax = g.plot.outline()
+    ```{python}
+    import mikeio
+    g = mikeio.read("../data/waves.dfs2").geometry
+    ax = g.plot()
+    ```
     """
 
     def __init__(self, geometry: "Grid2D") -> None:
@@ -333,7 +340,15 @@ class _Grid2DPlotter:
         linewidth=1.2,
         **kwargs,
     ):
-        """Plot Grid2D outline"""
+        """Plot Grid2D outline
+
+        Examples
+        --------
+        ```{python}
+        g = mikeio.read("../data/waves.dfs2").geometry
+        g.plot.outline()
+        ```
+        """
         ax = self._get_ax(ax, figsize)
         g = self.g
         xn = g._centers_to_nodes(g.x)
@@ -446,11 +461,10 @@ class Grid2D(_Geometry):
 
         Examples
         --------
-        >>> mikeio.Grid2D(x0=12.0, nx=2, dx=0.25, y0=55.0, ny=3, dy=0.25, projection="LONG/LAT")
-        <mikeio.Grid2D>
-        x: [12, 12.25] (nx=2, dx=0.25)
-        y: [55, 55.25, 55.5] (ny=3, dy=0.25)
-        projection: LONG/LAT
+        ```{python}
+        import mikeio
+        mikeio.Grid2D(x0=12.0, nx=2, dx=0.25, y0=55.0, ny=3, dy=0.25, projection="LONG/LAT")
+        ```
         """
         super().__init__(projection=projection)
         self._shift_origin_on_write = origin is None  # user-constructed

@@ -35,13 +35,10 @@ class Mesh:
 
     Examples
     --------
-    >>> import mikeio
-    >>> msh = mikeio.Mesh("tests/testdata/odense_rough.mesh")
-    >>> msh
-    <Mesh>
-    number of elements: 654
-    number of nodes: 399
-    projection: UTM-33
+    ```{python}
+    import mikeio
+    mikeio.Mesh("../data/odense_rough.mesh")
+    ```
     """
 
     def __init__(self, filename: str | Path) -> None:
@@ -146,10 +143,10 @@ class Mesh:
 
         Examples
         --------
-        >>> import mikeio
-        >>> msh = mikeio.open("tests/testdata/odense_rough.mesh")
-        >>> shp = msh.to_shapely()
-        >>> shp
-        <MULTIPOLYGON (((216684.622 6157771.834, 216427.002 6157497.909, 216833.036 ...>
+        ```{python}
+        import mikeio
+        msh = mikeio.open("../data/odense_rough.mesh")
+        msh.to_shapely()
+        ```
         """
         return self.geometry.to_shapely()

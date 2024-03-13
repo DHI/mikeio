@@ -75,7 +75,8 @@ interlinks:
         url: https://xarray.pydata.org/en/stable/
       pandas: 
         url: https://pandas.pydata.org/docs/
-
+      scipy: 
+        url: https://docs.scipy.org/doc/scipy/reference/
 
 quartodoc:
   style: pkgdown
