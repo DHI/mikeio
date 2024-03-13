@@ -91,7 +91,9 @@ def _write_dfs2_header(filename: str | Path, ds: Dataset, title: str = "") -> Df
     return builder.GetFile()
 
 
-def _write_dfs2_spatial_axis(builder, factory, geometry):
+def _write_dfs2_spatial_axis(
+    builder: DfsBuilder, factory: DfsFactory, geometry: Grid2D
+) -> None:
     builder.SetSpatialAxis(
         factory.CreateAxisEqD2(
             eumUnit.eumUmeter,
@@ -220,7 +222,7 @@ class Dfs2(_Dfs123):
 
         self._dfs.Close()
 
-        time = pd.to_datetime(t_seconds, unit="s", origin=self.start_time)  # type: ignore
+        time = pd.to_datetime(t_seconds, unit="s", origin=self.start_time)
 
         dims: Tuple[str, ...]
 
@@ -238,22 +240,9 @@ class Dfs2(_Dfs123):
             validate=False,
         )
 
-    def _open(self):
+    def _open(self) -> None:
         self._dfs = DfsFileFactory.Dfs2FileOpen(self._filename)
         self._source = self._dfs
-
-    def _set_spatial_axis(self):
-        self._builder.SetSpatialAxis(
-            self._factory.CreateAxisEqD2(
-                eumUnit.eumUmeter,
-                self._nx,
-                self._x0,
-                self._dx,
-                self._ny,
-                self._y0,
-                self._dy,
-            )
-        )
 
     @property
     def geometry(self) -> Grid2D:

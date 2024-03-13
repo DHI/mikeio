@@ -421,9 +421,6 @@ class _Dfs123:
     def _open(self):
         raise NotImplementedError("Should be implemented by subclass")
 
-    def _set_spatial_axis(self):
-        raise NotImplementedError("Should be implemented by subclass")
-
     def _get_item_info(self, item_numbers):
         """Read DFS ItemInfo
 

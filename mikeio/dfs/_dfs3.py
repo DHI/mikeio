@@ -267,22 +267,6 @@ class Dfs3(_Dfs123):
             validate=False,
         )
 
-    def _set_spatial_axis(self):
-        self._builder.SetSpatialAxis(
-            self._factory.CreateAxisEqD3(
-                eumUnit.eumUmeter,
-                self._nx,
-                self._x0,
-                self._dx,
-                self._ny,
-                self._y0,
-                self._dy,
-                self._nz,
-                self._z0,
-                self._dz,
-            )
-        )
-
     @staticmethod
     def _get_bottom_values(data):
 

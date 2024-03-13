@@ -89,13 +89,6 @@ class Dfs1(_Dfs123):
     def _open(self):
         self._dfs = DfsFileFactory.Dfs1FileOpen(self._filename)
 
-    def _set_spatial_axis(self):
-        self._builder.SetSpatialAxis(
-            self._factory.CreateAxisEqD1(
-                eumUnit.eumUmeter, self._nx, self._x0, self._dx
-            )
-        )
-
     @property
     def geometry(self):
         return self._geometry

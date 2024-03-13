@@ -2,6 +2,7 @@ from __future__ import annotations
 from pathlib import Path
 from platform import architecture
 from collections.abc import Sequence
+from typing import Any
 
 # PEP0440 compatible formatted version, see:
 # https://www.python.org/dev/peps/pep-0440/
@@ -135,7 +136,7 @@ def read(
     return dfs.read(items=items, time=time, keepdims=keepdims, **kwargs)
 
 
-def open(filename: str | Path, **kwargs):
+def open(filename: str | Path, **kwargs: Any) -> Any:
     """Open a dfs/mesh file (and read the header)
 
     The typical workflow for small dfs files is to read all data
