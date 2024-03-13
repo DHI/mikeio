@@ -271,7 +271,7 @@ class _Dfs123:
 
     show_progress = False
 
-    def __init__(self, filename=None):
+    def __init__(self, filename: str | Path) -> None:
         path = Path(filename)
         if not path.exists():
             raise FileNotFoundError(path)
@@ -310,17 +310,17 @@ class _Dfs123:
         else:
             self._timestep = None
             self._time = None
-        self._n_timesteps = dfs.FileInfo.TimeAxis.NumberOfTimeSteps
+        self._n_timesteps: int = dfs.FileInfo.TimeAxis.NumberOfTimeSteps
         projstr = dfs.FileInfo.Projection.WKTString
-        self._projstr = "NON-UTM" if not projstr else projstr
-        self._longitude = dfs.FileInfo.Projection.Longitude
-        self._latitude = dfs.FileInfo.Projection.Latitude
-        self._orientation = dfs.FileInfo.Projection.Orientation
-        self._deletevalue = dfs.FileInfo.DeleteValueFloat
+        self._projstr: str = "NON-UTM" if not projstr else projstr
+        self._longitude: float = dfs.FileInfo.Projection.Longitude
+        self._latitude: float = dfs.FileInfo.Projection.Latitude
+        self._orientation: float = dfs.FileInfo.Projection.Orientation
+        self._deletevalue: float = dfs.FileInfo.DeleteValueFloat
 
         dfs.Close()
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         name = self.__class__.__name__
         out = [f"<mikeio.{name}>"]
 
@@ -411,17 +411,17 @@ class _Dfs123:
 
             t_seconds[i] = itemdata.Time
 
-        time = pd.to_datetime(t_seconds, unit="s", origin=self.start_time)  # type: ignore
+        time = pd.to_datetime(t_seconds, unit="s", origin=self.start_time)
 
         items = _get_item_info(self._dfs.ItemInfo, item_numbers)
 
         self._dfs.Close()
         return Dataset(data_list, time, items, geometry=self.geometry, validate=False)
 
-    def _open(self):
+    def _open(self) -> None:
         raise NotImplementedError("Should be implemented by subclass")
 
-    def _get_item_info(self, item_numbers):
+    def _get_item_info(self, item_numbers: Sequence[int]) -> List[ItemInfo]:
         """Read DFS ItemInfo
 
         Parameters
@@ -441,8 +441,8 @@ class _Dfs123:
             itemtype = EUMType(eumItem)
             unit = EUMUnit(eumUnit)
             data_value_type = self._dfs.ItemInfo[item].ValueType
-            item = ItemInfo(name, itemtype, unit, data_value_type)
-            items.append(item)
+            item_info = ItemInfo(name, itemtype, unit, data_value_type)
+            items.append(item_info)
         return items
 
     @property
@@ -487,37 +487,37 @@ class _Dfs123:
         return self._n_timesteps
 
     @property
-    def timestep(self) -> float:
+    def timestep(self) -> Any:
         """Time step size in seconds"""
         # this will fail if the TimeAxisType is not calendar and equidistant, but that is ok
         return self._dfs.FileInfo.TimeAxis.TimeStepInSeconds()
 
     @property
-    def projection_string(self):
+    def projection_string(self) -> str:
         return self._projstr
 
     @property
-    def longitude(self):
+    def longitude(self) -> float:
         """Origin longitude"""
         return self._longitude
 
     @property
-    def latitude(self):
+    def latitude(self) -> float:
         """Origin latitude"""
         return self._latitude
 
     @property
-    def origin(self):
+    def origin(self) -> Any:
         """Origin (in own CRS)"""
         return self.geometry.origin
 
     @property
-    def orientation(self):
+    def orientation(self) -> Any:
         """Orientation (in own CRS)"""
         return self.geometry.orientation
 
     @property
-    def is_geo(self):
+    def is_geo(self) -> bool:
         """Are coordinates geographical (LONG/LAT)?"""
         return self._projstr == "LONG/LAT"
 
@@ -527,17 +527,11 @@ class _Dfs123:
         """Shape of the data array"""
         pass
 
-    @property
-    @abstractmethod
-    def dx(self):
-        """Step size in x direction"""
-        pass
-
-    def _validate_no_orientation_in_geo(self):
+    def _validate_no_orientation_in_geo(self) -> None:
         if self.is_geo and abs(self._orientation) > 1e-6:
             raise ValueError("Orientation is not supported for LONG/LAT coordinates")
 
-    def _origin_and_orientation_in_CRS(self):
+    def _origin_and_orientation_in_CRS(self) -> Tuple[Any, float]:
         """Project origin and orientation to projected CRS (if not LONG/LAT)"""
         if self.is_geo:
             origin = self._longitude, self._latitude

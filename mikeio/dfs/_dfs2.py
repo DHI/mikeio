@@ -247,25 +247,26 @@ class Dfs2(_Dfs123):
     @property
     def geometry(self) -> Grid2D:
         """Spatial information"""
+        assert isinstance(self._geometry, Grid2D)
         return self._geometry
 
     @property
-    def x0(self):
+    def x0(self) -> Any:
         """Start point of x values (often 0)"""
         return self.geometry.x[0]
 
     @property
-    def y0(self):
+    def y0(self) -> Any:
         """Start point of y values (often 0)"""
         return self.geometry.y[0]
 
     @property
-    def dx(self):
+    def dx(self) -> float:
         """Step size in x direction"""
         return self.geometry.dx
 
     @property
-    def dy(self):
+    def dy(self) -> float:
         """Step size in y direction"""
         return self.geometry.dy
 
@@ -275,11 +276,11 @@ class Dfs2(_Dfs123):
         return (self._n_timesteps, self.geometry.ny, self.geometry.nx)
 
     @property
-    def nx(self):
+    def nx(self) -> int:
         """Number of values in the x-direction"""
         return self.geometry.nx
 
     @property
-    def ny(self):
+    def ny(self) -> int:
         """Number of values in the y-direction"""
         return self.geometry.ny

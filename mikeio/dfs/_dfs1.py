@@ -68,13 +68,13 @@ def _write_dfs1_header(filename: str | Path, ds: Dataset, title: str) -> DfsFile
 class Dfs1(_Dfs123):
     _ndim = 1
 
-    def __init__(self, filename):
+    def __init__(self, filename: str | Path) -> None:
         super().__init__(filename)
 
         self._dfs = DfsFileFactory.Dfs1FileOpen(str(filename))
-        self._x0 = self._dfs.SpatialAxis.X0
-        self._dx = self._dfs.SpatialAxis.Dx
-        self._nx = self._dfs.SpatialAxis.XCount
+        self._x0: float = self._dfs.SpatialAxis.X0
+        self._dx: float = self._dfs.SpatialAxis.Dx
+        self._nx: int = self._dfs.SpatialAxis.XCount
 
         origin = self._longitude, self._latitude
         self._geometry = Grid1D(
@@ -86,24 +86,25 @@ class Dfs1(_Dfs123):
             orientation=self._orientation,
         )
 
-    def _open(self):
+    def _open(self) -> None:
         self._dfs = DfsFileFactory.Dfs1FileOpen(self._filename)
 
     @property
-    def geometry(self):
+    def geometry(self) -> Grid1D:
+        assert isinstance(self._geometry, Grid1D)
         return self._geometry
 
     @property
-    def x0(self):
+    def x0(self) -> float:
         """Start point of x values (often 0)"""
         return self._x0
 
     @property
-    def dx(self):
+    def dx(self) -> float:
         """Step size in x direction"""
         return self._dx
 
     @property
-    def nx(self):
+    def nx(self) -> int:
         """Number of node values"""
         return self._nx
