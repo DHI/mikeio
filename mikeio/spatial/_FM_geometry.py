@@ -1,6 +1,7 @@
 from __future__ import annotations
 from collections import namedtuple
 from functools import cached_property
+from pathlib import Path
 from typing import (
     Collection,
     List,
@@ -1239,7 +1240,7 @@ class GeometryFM2D(_GeometryFM):
 
         return mp
 
-    def to_mesh(self, outfilename):
+    def to_mesh(self, outfilename: str | Path) -> None:
         """Export geometry to new mesh file
 
         Parameters
@@ -1248,6 +1249,7 @@ class GeometryFM2D(_GeometryFM):
             path to file to be written
         """
         builder = MeshBuilder()
+        outfilename = str(outfilename)
 
         nc = self.node_coordinates
         builder.SetNodes(nc[:, 0], nc[:, 1], nc[:, 2], self.codes)

@@ -154,7 +154,6 @@ def test_xx_yy():
     assert g._xx[0, 0] == 1.0
     assert g._yy[-1, -1] == 5.0
     assert np.all(g.xy[1] == [3.0, 3.0])
-    assert np.all(g.coordinates[1] == [3.0, 3.0])
 
     g2 = Grid2D(x=x, y=y)
 
