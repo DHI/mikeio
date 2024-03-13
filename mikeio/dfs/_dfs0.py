@@ -2,12 +2,12 @@ from __future__ import annotations
 from functools import cached_property
 from pathlib import Path
 from datetime import datetime, timedelta
-from typing import Sequence
+from typing import Any, Sequence
 
 import numpy as np
 import pandas as pd
 from mikecore.DfsFactory import DfsBuilder, DfsFactory
-from mikecore.DfsFile import DataValueType, DfsSimpleType, StatType, TimeAxisType
+from mikecore.DfsFile import DfsSimpleType, StatType, TimeAxisType
 from mikecore.DfsFileFactory import DfsFileFactory
 from mikecore.eum import eumQuantity
 
@@ -55,13 +55,7 @@ def _write_dfs0(
         newitem = builder.CreateDynamicItemBuilder()
         quantity = eumQuantity.Create(da.type, da.unit)
         newitem.Set(da.name, quantity, dfs_dtype)
-
-        # TODO set default on DataArray
-        if da.item.data_value_type is not None:
-            newitem.SetValueType(da.item.data_value_type)
-        else:
-            newitem.SetValueType(DataValueType.Instantaneous)
-
+        newitem.SetValueType(da.item.data_value_type)
         newitem.SetAxis(factory.CreateAxisEqD0())
         builder.AddDynamicItem(newitem.GetDynamicItemInfo())
 
@@ -141,7 +135,7 @@ class Dfs0:
         self,
         items: str | int | Sequence[str | int] | None = None,
         time: int | str | slice | None = None,
-        keepdims: bool = False,
+        **kwargs: Any,
     ) -> Dataset:
         """
         Read data from a dfs0 file.
@@ -305,7 +299,7 @@ class Dfs0:
         unit: EUMUnit, optional
             Same unit for all items
         items: list[ItemInfo]
-            Different types, units for each items, similar to `create`
+            Different types, units for each items
         """
         return dataframe_to_dfs0(df, filename, itemtype, unit, items)
 
