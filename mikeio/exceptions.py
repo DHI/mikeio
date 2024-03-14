@@ -35,9 +35,9 @@ class OutsideModelDomainError(ValueError):
     def __init__(
         self,
         *,
-        x: float,
-        y: float | None = None,
-        z: float | None = None,
+        x: Any,
+        y: Any = None,
+        z: Any = None,
         indices: Any = None,
         message: str | None = None,
     ) -> None:

@@ -1222,7 +1222,7 @@ class Grid3D(_Geometry):
             elif axis == "y":
                 axis_nr = 1
             elif axis == "x":
-                axis_rn = 2
+                axis_nr = 2
             else:
                 raise ValueError(f"axis must be 'x', 'y' or 'z', not {axis}")
         elif isinstance(axis, int):
