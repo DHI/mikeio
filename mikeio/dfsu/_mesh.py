@@ -113,7 +113,7 @@ class Mesh:
     def zn(self, v: np.ndarray) -> None:
         if len(v) != self.n_nodes:
             raise ValueError(f"zn must have length of nodes ({self.n_nodes})")
-        self.geometry._nc[:, 2] = v
+        self.geometry.node_coordinates[:, 2] = v
 
     def write(
         self,

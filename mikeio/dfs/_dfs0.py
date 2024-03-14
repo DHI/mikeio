@@ -36,7 +36,7 @@ def _write_dfs0(
         if len(dataset.time) == 1:
             dt = 1.0  # TODO
         else:
-            dt = (dataset.time[1] - dataset.time[0]).total_seconds()  # type: ignore
+            dt = (dataset.time[1] - dataset.time[0]).total_seconds()
 
         temporal_axis = factory.CreateTemporalEqCalendarAxis(
             TimeStepUnit.SECOND, system_start_time, 0, dt
@@ -65,7 +65,7 @@ def _write_dfs0(
 
     delete_value = dfs.FileInfo.DeleteValueFloat
 
-    t_seconds = (dataset.time - dataset.time[0]).total_seconds().values  # type: ignore
+    t_seconds = (dataset.time - dataset.time[0]).total_seconds().values
 
     data = np.array(dataset.to_numpy(), order="F").astype(np.float64).T
     data[np.isnan(data)] = delete_value
@@ -109,16 +109,16 @@ class Dfs0:
             TimeAxisType.CalendarEquidistant,
             TimeAxisType.CalendarNonEquidistant,
         }:
-            self._start_time = dfs.FileInfo.TimeAxis.StartDateTime
+            self._start_time: datetime = dfs.FileInfo.TimeAxis.StartDateTime
         else:  # relative time axis
             self._start_time = datetime(1970, 1, 1)
 
         # time
-        self._n_timesteps = dfs.FileInfo.TimeAxis.NumberOfTimeSteps
+        self._n_timesteps: int = dfs.FileInfo.TimeAxis.NumberOfTimeSteps
 
         dfs.Close()
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         out = ["<mikeio.Dfs0>"]
         out.append(f"timeaxis: {repr(self._timeaxistype)}")
 
@@ -199,7 +199,9 @@ class Dfs0:
 
         return ds
 
-    def _read(self, filename):
+    def _read(
+        self, filename: str
+    ) -> tuple[list[np.ndarray], pd.DatetimeIndex, list[ItemInfo]]:
         """
         Read all data from a dfs0 file.
         """
@@ -233,7 +235,7 @@ class Dfs0:
         return data, time, items
 
     @staticmethod
-    def _to_dfs_datatype(dtype):
+    def _to_dfs_datatype(dtype: Any = None) -> DfsSimpleType:
         if dtype is None:
             return DfsSimpleType.Float
 
@@ -339,7 +341,7 @@ class Dfs0:
     def timestep(self) -> float:
         """Time step size in seconds"""
         if self._timeaxistype == TimeAxisType.CalendarEquidistant:
-            return self._source.FileInfo.TimeAxis.TimeStep
+            return self._source.FileInfo.TimeAxis.TimeStep  # type: ignore
         else:
             raise ValueError("Time axis type not supported")
 
@@ -361,28 +363,28 @@ class Dfs0:
 
 
 def series_to_dfs0(
-    self,
-    filename,
-    itemtype=None,
-    unit=None,
-    items=None,
-    title=None,
-    dtype=None,
-):
+    self: pd.Series,
+    filename: str,
+    itemtype: EUMType | None = None,
+    unit: EUMUnit | None = None,
+    items: Sequence[ItemInfo] | None = None,
+    title: str | None = None,
+    dtype: Any | None = None,
+) -> None:
 
     df = pd.DataFrame(self)
     df.to_dfs0(filename, itemtype, unit, items, title, dtype)
 
 
 def dataframe_to_dfs0(
-    self,
-    filename,
-    itemtype=None,
-    unit=None,
-    items=None,
-    title=None,
-    dtype=None,
-):
+    self: pd.DataFrame,
+    filename: str,
+    itemtype: EUMType | None = None,
+    unit: EUMUnit | None = None,
+    items: Sequence[ItemInfo] | None = None,
+    title: str = "",
+    dtype: Any | None = None,
+) -> None:
     """
     Create a dfs0
 
@@ -427,6 +429,6 @@ def dataframe_to_dfs0(
 
 
 # Monkey patching onto Pandas classes
-pd.DataFrame.to_dfs0 = dataframe_to_dfs0  # type: ignore
+pd.DataFrame.to_dfs0 = dataframe_to_dfs0
 
-pd.Series.to_dfs0 = series_to_dfs0  # type: ignore
+pd.Series.to_dfs0 = series_to_dfs0

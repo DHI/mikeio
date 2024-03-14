@@ -215,7 +215,7 @@ class Dfs3(_Dfs123):
             dims = ("time", "y", "x")
             shape = (nt, ny, nx)
         else:
-            geometry = self.geometry._geometry_for_layers(layers, keepdims)
+            geometry = self.geometry._geometry_for_layers(layers, keepdims)  # type: ignore
             dims = ("time", "z", "y", "x")
             shape = (nt, nzl, ny, nx)
 
@@ -265,22 +265,6 @@ class Dfs3(_Dfs123):
             geometry=geometry,
             dims=dims,
             validate=False,
-        )
-
-    def _set_spatial_axis(self):
-        self._builder.SetSpatialAxis(
-            self._factory.CreateAxisEqD3(
-                eumUnit.eumUmeter,
-                self._nx,
-                self._x0,
-                self._dx,
-                self._ny,
-                self._y0,
-                self._dy,
-                self._nz,
-                self._z0,
-                self._dz,
-            )
         )
 
     @staticmethod
