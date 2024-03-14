@@ -278,9 +278,9 @@ class _Dfs123:
         self._filename = str(filename) if filename else None
         self._end_time = None
         self._is_equidistant = True
-        self._geometry = None  # handled by subclass
         dfs = DfsFileFactory.DfsGenericOpen(self._filename)
         self._dfs = dfs
+        self._geometry: Any = None  # Handled by subclass
         n_items = len(dfs.ItemInfo)
         self._items = self._get_item_info(list(range(n_items)))
         if dfs.FileInfo.TimeAxis.TimeAxisType in {
@@ -545,6 +545,6 @@ class _Dfs123:
                 orientation=self._orientation,
             )
             # convert origin and orientation to projected CRS
-            origin = tuple(np.round(cart.Geo2Proj(lon, lat), 6))
+            origin = tuple(np.round(cart.Geo2Proj(lon, lat), 6))  # type: ignore
             orientation = cart.OrientationProj
         return origin, orientation

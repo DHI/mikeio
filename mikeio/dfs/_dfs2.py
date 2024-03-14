@@ -185,7 +185,7 @@ class Dfs2(_Dfs123):
 
         if area is not None:
             take_subset = True
-            ii, jj = self.geometry.find_index(area=area)
+            ii, jj = self.geometry.find_index(area=area)  # type: ignore
             shape = (nt, len(jj), len(ii))
             geometry = self.geometry._index_to_Grid2D(ii, jj)
         else:

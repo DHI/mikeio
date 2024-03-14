@@ -215,7 +215,7 @@ class Dfs3(_Dfs123):
             dims = ("time", "y", "x")
             shape = (nt, ny, nx)
         else:
-            geometry = self.geometry._geometry_for_layers(layers, keepdims)
+            geometry = self.geometry._geometry_for_layers(layers, keepdims)  # type: ignore
             dims = ("time", "z", "y", "x")
             shape = (nt, nzl, ny, nx)
 

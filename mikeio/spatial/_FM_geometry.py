@@ -6,6 +6,7 @@ from typing import (
     Collection,
     List,
     Any,
+    Literal,
     Sequence,
     Sized,
     Tuple,
@@ -43,7 +44,7 @@ if TYPE_CHECKING:
 class GeometryFMPointSpectrum(_Geometry):
     def __init__(
         self,
-        frequencies: np.ndarray,
+        frequencies: np.ndarray | None = None,
         directions: np.ndarray | None = None,
         x: float | None = None,
         y: float | None = None,
@@ -80,7 +81,7 @@ class GeometryFMPointSpectrum(_Geometry):
         return 0 if self.frequencies is None else len(self.frequencies)
 
     @property
-    def frequencies(self) -> np.ndarray:
+    def frequencies(self) -> np.ndarray | None:
         """Frequency axis"""
         return self._frequencies
 
@@ -245,7 +246,7 @@ class _GeometryFMPlotter:
         if boundary_names is not None:
             if len(boundary_codes) != len(boundary_names):
                 raise Exception(
-                    f"Number of boundary names ({len(boundary_names)}) inconsistent with number of boundaries ({len(self.g.boundary_codes)})"
+                    f"Number of boundary names ({len(boundary_names)}) inconsistent with number of boundaries ({len(boundary_codes)})"
                 )
             user_defined_labels = dict(zip(boundary_codes, boundary_names))
 
@@ -270,7 +271,7 @@ class _GeometryFMPlotter:
         ax.set_ylim(bbox.bottom - xybuf, bbox.top + xybuf)
         return ax
 
-    def _plot_aspect(self) -> str | float:
+    def _plot_aspect(self) -> Literal["equal"] | float:
         if self.g.is_geo:
             mean_lat = np.mean(self.g.node_coordinates[:, 1])
             return 1.0 / np.cos(np.pi * mean_lat / 180)
@@ -404,7 +405,8 @@ class GeometryFM2D(_GeometryFM):
     def __init__(
         self,
         node_coordinates: np.ndarray,
-        element_table: np.ndarray | List[Sequence[int]] | List[np.ndarray],
+        # TODO settle on type for element_table
+        element_table: Any,
         codes: np.ndarray | None = None,
         projection: str = "LONG/LAT",
         dfsu_type: DfsuFileType = DfsuFileType.Dfsu2D,  # Reasonable default?
@@ -415,7 +417,7 @@ class GeometryFM2D(_GeometryFM):
     ) -> None:
         super().__init__(
             node_coordinates=node_coordinates,
-            element_table=element_table,
+            element_table=element_table,  # type: ignore
             codes=codes,
             projection=projection,
             dfsu_type=dfsu_type,
@@ -1099,9 +1101,9 @@ class GeometryFM2D(_GeometryFM):
                 )
             if coords is not None:
                 coords = np.atleast_2d(coords)
-                xy = coords[:, :2]
+                xy = coords[:, :2]  # type: ignore
             else:
-                xy = np.vstack((x, y)).T
+                xy = np.vstack((x, y)).T  # type: ignore
             idx = self._find_element_2d(coords=xy)
             return idx
         elif area is not None:
@@ -1135,7 +1137,9 @@ class GeometryFM2D(_GeometryFM):
         else:
             raise ValueError("'area' must be bbox [x0,y0,x1,y1] or polygon")
 
-    def _nodes_to_geometry(self, nodes: np.ndarray) -> "GeometryFM2D" | GeometryPoint2D:
+    def _nodes_to_geometry(
+        self, nodes: Collection[int]
+    ) -> "GeometryFM2D" | GeometryPoint2D:
         """export a selection of nodes to new flexible file geometry
 
         Note: takes only the elements for which all nodes are selected
@@ -1150,7 +1154,7 @@ class GeometryFM2D(_GeometryFM):
         UnstructuredGeometry
             which can be used for further extraction or saved to file
         """
-        nodes = np.atleast_1d(nodes)
+        nodes = np.atleast_1d(nodes)  # type: ignore
         if len(nodes) == 1:
             xy = self.node_coordinates[nodes[0], :2]
             return GeometryPoint2D(xy[0], xy[1])
@@ -1214,7 +1218,7 @@ class GeometryFM2D(_GeometryFM):
 
     def _get_nodes_and_table_for_elements(
         self, elements: np.ndarray | List[int]
-    ) -> tuple[np.ndarray, list[np.ndarray]]:
+    ) -> tuple[Any, Any]:
         """list of nodes and element table for a list of elements
 
         Parameters
@@ -1234,7 +1238,7 @@ class GeometryFM2D(_GeometryFM):
         for j, eid in enumerate(elements):
             elem_tbl[j] = np.asarray(self.element_table[eid])
 
-        nodes = np.unique(np.hstack(elem_tbl))
+        nodes = np.unique(np.hstack(elem_tbl))  # type: ignore
         return nodes, elem_tbl
 
     def get_node_centered_data(
@@ -1311,7 +1315,7 @@ class _GeometryFMSpectrum(GeometryFM2D):
     def __init__(
         self,
         node_coordinates: np.ndarray,
-        element_table: np.ndarray,
+        element_table: Any,
         codes: np.ndarray | None = None,
         projection: str = "LONG/LAT",
         dfsu_type: DfsuFileType | None = None,
@@ -1360,12 +1364,12 @@ class _GeometryFMSpectrum(GeometryFM2D):
 
 # TODO reconsider inheritance to avoid overriding method signature
 class GeometryFMAreaSpectrum(_GeometryFMSpectrum):
-    def isel(
+    def isel(  # type: ignore
         self, idx: Collection[int], **kwargs: Any
     ) -> "GeometryFMPointSpectrum" | "GeometryFMAreaSpectrum":
         return self.elements_to_geometry(elements=idx)
 
-    def elements_to_geometry(
+    def elements_to_geometry(  # type: ignore
         self, elements: Collection[int], keepdims: bool = False
     ) -> "GeometryFMPointSpectrum" | "GeometryFMAreaSpectrum":
         """export a selection of elements to new flexible file geometry
@@ -1380,7 +1384,7 @@ class GeometryFMAreaSpectrum(_GeometryFMSpectrum):
         GeometryFMAreaSpectrum or GeometryFMPointSpectrum
             which can be used for further extraction or saved to file
         """
-        elements = np.atleast_1d(elements)
+        elements = np.atleast_1d(elements)  # type: ignore
         if len(elements) == 1:
             coords = self.element_coordinates[elements[0], :]
             return GeometryFMPointSpectrum(

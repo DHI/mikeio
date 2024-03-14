@@ -769,7 +769,7 @@ class Grid2D(_Geometry):
         y: float | None = None,
         coords: np.ndarray | None = None,
         area: Tuple[float, float, float, float] | None = None,
-    ) -> Tuple[Any, Any]:
+    ) -> Tuple[Any, Any] | None:
         """Find nearest index (i,j) of point(s)
 
         Parameters
@@ -815,6 +815,8 @@ class Grid2D(_Geometry):
             return self._xy_to_index(coords)
         elif area is not None:
             return self._bbox_to_index(area)
+        else:
+            return None
 
     def _xy_to_index(self, xy: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
         """Find specific points in this geometry"""
@@ -1058,6 +1060,7 @@ class Grid2D(_Geometry):
 
         if z is not None:
             if not np.isscalar(z):
+                assert isinstance(z, np.ndarray), "z must be a numpy array"
                 if len(z) != g.n_nodes:
                     raise ValueError(
                         "z must either be scalar or have length of nodes ((nx+1)*(ny+1))"
@@ -1196,7 +1199,7 @@ class Grid3D(_Geometry):
         )
 
     def isel(
-        self, idx: int | slice, axis: str | int
+        self, idx: int | np.ndarray, axis: str | int
     ) -> Grid3D | Grid2D | GeometryUndefined:
         """Get a subset geometry from this geometry"""
         if isinstance(axis, str):
@@ -1214,6 +1217,7 @@ class Grid3D(_Geometry):
         axis_nr = axis_nr + 3 if axis_nr < 0 else axis_nr
 
         if not np.isscalar(idx):
+            assert isinstance(idx, np.ndarray), "idx must be a numpy array"
             d = np.diff(idx)
             if np.any(d < 1) or not np.allclose(d, d[0]):
                 return GeometryUndefined()
@@ -1260,9 +1264,9 @@ class Grid3D(_Geometry):
 
     def _index_to_Grid3D(
         self,
-        ii: range | None = None,
-        jj: range | None = None,
-        kk: range | None = None,
+        ii: np.ndarray | range | None = None,
+        jj: np.ndarray | range | None = None,
+        kk: np.ndarray | range | None = None,
     ) -> Grid3D | GeometryUndefined:
         ii = range(self.nx) if ii is None else ii
         jj = range(self.ny) if jj is None else jj
