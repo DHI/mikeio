@@ -1142,6 +1142,10 @@ class Grid3D(_Geometry):
         self._origin = origin
         self._orientation = orientation
 
+        if self.is_local_coordinates:
+            self._x0 = self._x0 + self._dx / 2
+            self._y0 = self._y0 + self._dy / 2
+
     @property
     def ndim(self) -> int:
         return 3
