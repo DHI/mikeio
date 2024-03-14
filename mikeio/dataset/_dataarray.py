@@ -558,15 +558,6 @@ class DataArray:
         )
 
     # ============= Select/interp ===========
-
-    # TODO implement def where() modelled after xarray
-    # def get_masked(self, key) -> np.ndarray:
-    #    if self._is_boolean_mask(key):
-    #        mask = key if isinstance(key, np.ndarray) else key.values
-    #        return self._get_by_boolean_mask(self.values, mask)
-    #    else:
-    #        raise ValueError("Invalid mask")
-
     def __getitem__(self, key: Any) -> "DataArray":
         da = self
         dims = self.dims
@@ -582,25 +573,6 @@ class DataArray:
         return da
 
     def _getitem_parse_key(self, key: Any) -> Any:
-        if isinstance(key, tuple):
-            # is it multiindex or just a tuple of indexes for first axis?
-            # da[2,3,4] and da[(2,3,4)] both have the key=(2,3,4)
-            # how do we know if user wants step 2,3,4 or t=2,y=3,x=4 ?
-            all_idx_int = True
-            any_idx_after_0_time = False
-            for j, k in enumerate(key):
-                if not isinstance(k, int):
-                    all_idx_int = False
-                if j >= 1 and isinstance(k, (str, pd.Timestamp, datetime)):
-                    any_idx_after_0_time = True
-            if all_idx_int and (len(key) > self.ndim):
-                if np.all(np.diff(key) >= 1):
-                    # tuple with increasing list of indexes larger than the number of dims
-                    key = (list(key),)
-            if any_idx_after_0_time and self._has_time_axis:
-                # tuple of times, must refer to time axis
-                key = (list(key),)
-
         key = key if isinstance(key, tuple) else (key,)
         if len(key) > len(self.dims):
             raise IndexError(
