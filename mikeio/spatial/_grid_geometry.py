@@ -1,4 +1,5 @@
 from __future__ import annotations
+from functools import cached_property
 from pathlib import Path
 import warnings
 from typing import Any, Sequence, Tuple, TYPE_CHECKING, List, overload
@@ -705,30 +706,12 @@ class Grid2D(_Geometry):
         top = self.y[-1] + self.dy / 2
         return BoundingBox(left, bottom, right, top)
 
-    @property
-    def _xx(self) -> np.ndarray:
-        """2d array of all x-coordinates"""
-        if self.__xx is None:
-            self._create_meshgrid(self.x, self.y)
-        assert isinstance(self.__xx, np.ndarray)
-        return self.__xx
-
-    @property
-    def _yy(self) -> np.ndarray:
-        """2d array of all y-coordinates"""
-        if self.__yy is None:
-            self._create_meshgrid(self.x, self.y)
-            assert isinstance(self.__yy, np.ndarray)
-        return self.__yy
-
-    def _create_meshgrid(self, x: np.ndarray, y: np.ndarray) -> None:
-        self.__xx, self.__yy = np.meshgrid(x, y)
-
-    @property
+    @cached_property
     def xy(self) -> np.ndarray:
         """n-by-2 array of x- and y-coordinates"""
-        xcol = self._xx.reshape(-1, 1)
-        ycol = self._yy.reshape(-1, 1)
+        xx, yy = np.meshgrid(self.x, self.y)
+        xcol = xx.reshape(-1, 1)
+        ycol = yy.reshape(-1, 1)
         return np.column_stack([xcol, ycol])
 
     @property
