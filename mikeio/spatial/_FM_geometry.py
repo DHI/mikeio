@@ -61,6 +61,13 @@ class GeometryFMPointSpectrum(_Geometry):
         self.y = y
 
     @property
+    def default_dims(self) -> Tuple[str, ...]:
+        if self.directions is None:
+            return ("frequency",)
+        else:
+            return ("direction", "frequency")
+
+    @property
     def is_layered(self) -> bool:
         return False
 
@@ -356,6 +363,10 @@ class _GeometryFM(_Geometry):
 
         self._node_ids = new_node_ids
         self._element_ids = new_element_ids
+
+    @property
+    def default_dims(self) -> Tuple[str, ...]:
+        return ("element",)
 
     @property
     def is_spectral(self) -> bool:

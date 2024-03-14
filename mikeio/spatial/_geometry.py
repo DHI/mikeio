@@ -1,6 +1,7 @@
 from abc import ABC, abstractmethod
 
 from collections import namedtuple
+from typing import Tuple
 
 from mikecore.Projections import MapProjection
 
@@ -40,17 +41,34 @@ class _Geometry(ABC):
     def ndim(self) -> int:
         pass
 
+    @property
+    @abstractmethod
+    def default_dims(self) -> Tuple[str, ...]:
+        pass
 
-class GeometryUndefined:
+
+class GeometryUndefined(_Geometry):
     def __repr__(self):
         return "GeometryUndefined()"
 
+    @property
+    def ndim(self) -> int:
+        raise NotImplementedError()
+
+    @property
+    def default_dims(self) -> Tuple[str, ...]:
+        raise NotImplementedError()
+
 
 class GeometryPoint2D(_Geometry):
-    def __init__(self, x: float, y: float, projection:str = "LONG/LAT"):
+    def __init__(self, x: float, y: float, projection: str = "LONG/LAT"):
         super().__init__(projection)
         self.x = x
         self.y = y
+
+    @property
+    def default_dims(self) -> Tuple[str, ...]:
+        return ()
 
     def __repr__(self) -> str:
         return f"GeometryPoint2D(x={self.x}, y={self.y})"
@@ -75,7 +93,7 @@ class GeometryPoint2D(_Geometry):
 
 
 class GeometryPoint3D(_Geometry):
-    def __init__(self, x: float, y: float, z: float, projection:str = "LONG/LAT"):
+    def __init__(self, x: float, y: float, z: float, projection: str = "LONG/LAT"):
         super().__init__(projection)
 
         self.x = x
@@ -84,6 +102,10 @@ class GeometryPoint3D(_Geometry):
 
     def __repr__(self):
         return f"GeometryPoint3D(x={self.x}, y={self.y}, z={self.z})"
+
+    @property
+    def default_dims(self) -> Tuple[str, ...]:
+        return ()
 
     @property
     def wkt(self) -> str:
