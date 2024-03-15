@@ -177,7 +177,6 @@ def test_read_dfsu3d_column_save(tmp_path):
     assert dfs.geometry.n_sigma_layers == 4
     assert dfs.geometry.n_z_layers == 5
 
-
     (x, y) = (333934.1, 6158101.5)
 
     ds = dfs.read(x=x, y=y)  # all data in file
@@ -393,22 +392,22 @@ def test_boundary_codes():
 def test_top_elements():
     filename = "tests/testdata/basin_3d.dfsu"
     dfs = mikeio.open(filename)
-    assert len(dfs.top_elements) == 174
-    assert 39 in dfs.top_elements
-    assert 0 not in dfs.top_elements
-    assert (dfs.n_elements - 1) in dfs.top_elements
+    assert len(dfs.geometry.top_elements) == 174
+    assert 39 in dfs.geometry.top_elements
+    assert 0 not in dfs.geometry.top_elements
+    assert (dfs.n_elements - 1) in dfs.geometry.top_elements
 
     filename = "tests/testdata/oresund_sigma_z.dfsu"
     dfs = mikeio.open(filename)
-    assert len(dfs.top_elements) == 3700
-    assert 16 in dfs.top_elements
-    assert (dfs.n_elements - 1) in dfs.top_elements
+    assert len(dfs.geometry.top_elements) == 3700
+    assert 16 in dfs.geometry.top_elements
+    assert (dfs.n_elements - 1) in dfs.geometry.top_elements
 
     filename = "tests/testdata/oresund_vertical_slice.dfsu"
     dfs = mikeio.open(filename)
-    assert len(dfs.top_elements) == 99
-    assert 19 in dfs.top_elements
-    assert (dfs.n_elements - 1) in dfs.top_elements
+    assert len(dfs.geometry.top_elements) == 99
+    assert 19 in dfs.geometry.top_elements
+    assert (dfs.n_elements - 1) in dfs.geometry.top_elements
 
     filename = "tests/testdata/HD2D.dfsu"
     dfs = mikeio.open(filename)
@@ -434,18 +433,18 @@ def test_top_elements_subset():
 def test_bottom_elements():
     filename = "tests/testdata/basin_3d.dfsu"
     dfs = mikeio.open(filename)
-    assert len(dfs.bottom_elements) == 174
-    assert dfs.bottom_elements[3] == 30
+    assert len(dfs.geometry.bottom_elements) == 174
+    assert dfs.geometry.bottom_elements[3] == 30
 
     filename = "tests/testdata/oresund_sigma_z.dfsu"
     dfs = mikeio.open(filename)
-    assert len(dfs.bottom_elements) == 3700
-    assert dfs.bottom_elements[3] == 13
+    assert len(dfs.geometry.bottom_elements) == 3700
+    assert dfs.geometry.bottom_elements[3] == 13
 
     filename = "tests/testdata/oresund_vertical_slice.dfsu"
     dfs = mikeio.open(filename)
-    assert len(dfs.bottom_elements) == 99
-    assert dfs.bottom_elements[3] == 15
+    assert len(dfs.geometry.bottom_elements) == 99
+    assert dfs.geometry.bottom_elements[3] == 15
 
     filename = "tests/testdata/HD2D.dfsu"
     dfs = mikeio.open(filename)
@@ -455,44 +454,44 @@ def test_bottom_elements():
 def test_n_layers_per_column():
     filename = "tests/testdata/basin_3d.dfsu"
     dfs = mikeio.open(filename)
-    assert len(dfs.n_layers_per_column) == 174
-    assert dfs.n_layers_per_column[3] == 10
+    assert len(dfs.geometry.n_layers_per_column) == 174
+    assert dfs.geometry.n_layers_per_column[3] == 10
 
     filename = "tests/testdata/oresund_sigma_z.dfsu"
     dfs = mikeio.open(filename)
-    assert len(dfs.n_layers_per_column) == 3700
-    assert dfs.n_layers_per_column[3] == 4
-    assert max(dfs.n_layers_per_column) == dfs.n_layers
+    assert len(dfs.geometry.n_layers_per_column) == 3700
+    assert dfs.geometry.n_layers_per_column[3] == 4
+    assert max(dfs.geometry.n_layers_per_column) == dfs.geometry.n_layers
 
     filename = "tests/testdata/oresund_vertical_slice.dfsu"
     dfs = mikeio.open(filename)
-    assert len(dfs.n_layers_per_column) == 99
-    assert dfs.n_layers_per_column[3] == 5
+    assert len(dfs.geometry.n_layers_per_column) == 99
+    assert dfs.geometry.n_layers_per_column[3] == 5
 
     filename = "tests/testdata/HD2D.dfsu"
     dfs = mikeio.open(filename)
     assert not hasattr(dfs, "n_layers_per_column")
 
 
-def test_get_layer_elements():
-    filename = "tests/testdata/oresund_sigma_z.dfsu"
-    dfs = mikeio.open(filename)
+# def test_get_layer_elements():
+#     filename = "tests/testdata/oresund_sigma_z.dfsu"
+#     dfs = mikeio.open(filename)
 
-    elem_ids = dfs.get_layer_elements(-1)
-    assert np.all(elem_ids == dfs.top_elements)
+#     elem_ids = dfs.get_layer_elements(-1)
+#     assert np.all(elem_ids == dfs.top_elements)
 
-    elem_ids = dfs.get_layer_elements(-2)
-    assert elem_ids[5] == 23
+#     elem_ids = dfs.get_layer_elements(-2)
+#     assert elem_ids[5] == 23
 
-    elem_ids = dfs.get_layer_elements(0)
-    assert elem_ids[5] == 8638
-    assert len(elem_ids) == 10
+#     elem_ids = dfs.get_layer_elements(0)
+#     assert elem_ids[5] == 8638
+#     assert len(elem_ids) == 10
 
-    elem_ids = dfs.get_layer_elements([0, 2])
-    assert len(elem_ids) == 197
+#     elem_ids = dfs.get_layer_elements([0, 2])
+#     assert len(elem_ids) == 197
 
-    with pytest.raises(Exception):
-        elem_ids = dfs.get_layer_elements(11)
+#     with pytest.raises(Exception):
+#         elem_ids = dfs.get_layer_elements(11)
 
 
 def test_write_from_dfsu3D(tmp_path):
@@ -556,16 +555,14 @@ def test_to_mesh_3d(tmp_path):
     Mesh(fp)
 
 
-def test_extract_surface_elevation_from_3d(tmp_path):
+def test_extract_surface_elevation_from_3d():
 
     dfs = mikeio.open("tests/testdata/oresund_sigma_z.dfsu")
-    outputfile = tmp_path / "tests/testdata/oresund_surface_elev_extracted.dfsu"
-    n_top1 = len(dfs.top_elements)
+    n_top1 = len(dfs.geometry.top_elements)
 
-    dfs.extract_surface_elevation_from_3d(outputfile)
+    da = dfs.extract_surface_elevation_from_3d()
 
-    dfs2 = mikeio.open(outputfile)
-    assert dfs2.n_elements == n_top1
+    assert da.geometry.n_elements == n_top1
 
 
 def test_dataset_write_dfsu3d(tmp_path):

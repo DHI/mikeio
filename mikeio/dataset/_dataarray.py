@@ -11,7 +11,15 @@ from collections.abc import (
     Mapping,
     MutableMapping,
 )
-from typing import Any, Union, Literal, TYPE_CHECKING, overload, Callable, Tuple
+from typing import (
+    Any,
+    Union,
+    Literal,
+    TYPE_CHECKING,
+    overload,
+    Callable,
+    Tuple,
+)
 
 
 import numpy as np
@@ -151,13 +159,15 @@ class DataArray:
         *,
         time: pd.DatetimeIndex | str | None = None,
         item: ItemInfo | None = None,
-        geometry: GeometryType = GeometryUndefined(),
+        geometry: GeometryType | None = None,
         zn: np.ndarray | None = None,
         dims: Sequence[str] | None = None,
     ) -> None:
         # TODO: add optional validation validate=True
         self._values = self._parse_data(data)
         self.time: pd.DatetimeIndex = self._parse_time(time)
+
+        geometry = GeometryUndefined() if geometry is None else geometry
         self.dims = self._parse_dims(dims, geometry)
 
         self._check_time_data_length(self.time)
@@ -197,48 +207,22 @@ class DataArray:
     def _guess_dims(
         ndim: int, shape: Tuple[int, ...], n_timesteps: int, geometry: GeometryType
     ) -> Tuple[str, ...]:
-        # TODO delete default dims to geometry
-
         # This is not very robust, but is probably a reasonable guess
         time_is_first = (n_timesteps > 1) or (shape[0] == 1 and n_timesteps == 1)
         dims = ["time"] if time_is_first else []
         ndim_no_time = ndim if (len(dims) == 0) else ndim - 1
 
-        if isinstance(geometry, GeometryFMPointSpectrum):
-            if ndim_no_time == 1:
-                dims.append("frequency")
-            if ndim_no_time == 2:
-                dims.append("direction")
-                dims.append("frequency")
-        elif isinstance(geometry, GeometryFM3D):
-            if ndim_no_time > 0:
-                dims.append("element")
-        elif isinstance(geometry, GeometryFM2D):
-            if geometry._type == DfsuFileType.DfsuSpectral1D:
-                if ndim_no_time > 0:
-                    dims.append("node")
-            else:
-                if ndim_no_time > 0:
-                    dims.append("element")
-            if geometry.is_spectral:
-                if ndim_no_time == 2:
-                    dims.append("frequency")
-                elif ndim_no_time == 3:
-                    dims.append("direction")
-                    dims.append("frequency")
-        elif isinstance(geometry, Grid1D):
-            dims.append("x")
-        elif isinstance(geometry, Grid2D):
-            dims.append("y")
-            dims.append("x")
+        if isinstance(geometry, GeometryUndefined):
+            DIMS_MAPPING = {
+                0: [],
+                1: ["x"],
+                2: ["y", "x"],
+                3: ["z", "y", "x"],
+            }
+            spdims = DIMS_MAPPING[ndim_no_time]
         else:
-            # gridded
-            if ndim_no_time > 2:
-                dims.append("z")
-            if ndim_no_time > 1:
-                dims.append("y")
-            if ndim_no_time > 0:
-                dims.append("x")
+            spdims = geometry.default_dims
+        dims.extend(spdims)  # type: ignore
         return tuple(dims)
 
     def _check_time_data_length(self, time: Sized) -> None:
@@ -558,15 +542,6 @@ class DataArray:
         )
 
     # ============= Select/interp ===========
-
-    # TODO implement def where() modelled after xarray
-    # def get_masked(self, key) -> np.ndarray:
-    #    if self._is_boolean_mask(key):
-    #        mask = key if isinstance(key, np.ndarray) else key.values
-    #        return self._get_by_boolean_mask(self.values, mask)
-    #    else:
-    #        raise ValueError("Invalid mask")
-
     def __getitem__(self, key: Any) -> "DataArray":
         da = self
         dims = self.dims
@@ -582,25 +557,6 @@ class DataArray:
         return da
 
     def _getitem_parse_key(self, key: Any) -> Any:
-        if isinstance(key, tuple):
-            # is it multiindex or just a tuple of indexes for first axis?
-            # da[2,3,4] and da[(2,3,4)] both have the key=(2,3,4)
-            # how do we know if user wants step 2,3,4 or t=2,y=3,x=4 ?
-            all_idx_int = True
-            any_idx_after_0_time = False
-            for j, k in enumerate(key):
-                if not isinstance(k, int):
-                    all_idx_int = False
-                if j >= 1 and isinstance(k, (str, pd.Timestamp, datetime)):
-                    any_idx_after_0_time = True
-            if all_idx_int and (len(key) > self.ndim):
-                if np.all(np.diff(key) >= 1):
-                    # tuple with increasing list of indexes larger than the number of dims
-                    key = (list(key),)
-            if any_idx_after_0_time and self._has_time_axis:
-                # tuple of times, must refer to time axis
-                key = (list(key),)
-
         key = key if isinstance(key, tuple) else (key,)
         if len(key) > len(self.dims):
             raise IndexError(

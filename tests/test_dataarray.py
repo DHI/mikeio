@@ -1346,3 +1346,12 @@ def test_to_pandas():
     assert series.index[-1].day == 5
     assert series.values[0] == 1.0
     assert series.name == "Foo"
+
+
+def test_set_by_mask():
+    fn = "tests/testdata/oresundHD_run1.dfsu"
+    da = mikeio.read(fn, items="Surface elevation", time=[0, 2, 4])[0]
+    threshold = 0.2
+    mask = da < threshold
+    wl_capped = da.copy()
+    wl_capped[mask] = np.nan

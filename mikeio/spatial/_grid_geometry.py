@@ -1,6 +1,8 @@
 from __future__ import annotations
+from functools import cached_property
+from pathlib import Path
 import warnings
-from typing import Any, Tuple, TYPE_CHECKING, List, overload
+from typing import Any, Sequence, Tuple, TYPE_CHECKING, List, overload
 from dataclasses import dataclass
 import numpy as np
 
@@ -139,6 +141,10 @@ class Grid1D(_Geometry):
     @property
     def ndim(self) -> int:
         return 1
+
+    @property
+    def default_dims(self) -> Tuple[str, ...]:
+        return ("x",)
 
     def __repr__(self) -> str:
         out = ["<mikeio.Grid1D>", _print_axis_txt("x", self.x, self.dx)]
@@ -333,13 +339,13 @@ class _Grid2DPlotter:
 
     def outline(
         self,
-        title="Outline",
-        ax=None,
-        figsize=None,
-        color="0.4",
-        linewidth=1.2,
-        **kwargs,
-    ):
+        title: str = "Outline",
+        ax: Axes | None = None,
+        figsize: Tuple[float, float] | None = None,
+        color: str = "0.4",
+        linewidth: float = 1.2,
+        **kwargs: Any,
+    ) -> Axes:
         """Plot Grid2D outline
 
         Examples
@@ -367,7 +373,7 @@ class _Grid2DPlotter:
 
         return ax
 
-    def _set_aspect_and_labels(self, ax):
+    def _set_aspect_and_labels(self, ax: Axes) -> None:
         g = self.g
         if g.is_spectral:
             ax.set_xlabel("Frequency [Hz]")
@@ -499,6 +505,10 @@ class Grid2D(_Geometry):
         self.plot = _Grid2DPlotter(self)
 
     @property
+    def default_dims(self) -> Tuple[str, ...]:
+        return ("y", "x")
+
+    @property
     def ndim(self) -> int:
         return 2
 
@@ -620,7 +630,7 @@ class Grid2D(_Geometry):
 
         return "\n".join(out)
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"Grid2D (ny={self.ny}, nx={self.nx})"
 
     @property
@@ -647,7 +657,9 @@ class Grid2D(_Geometry):
             return x_local + self._origin[0]
 
     @staticmethod
-    def _logarithmic_f(n=25, f0=0.055, freq_factor=1.1) -> np.ndarray:
+    def _logarithmic_f(
+        n: int = 25, f0: float = 0.055, freq_factor: float = 1.1
+    ) -> np.ndarray:
         """Generate logarithmic frequency axis
 
         Parameters
@@ -711,35 +723,13 @@ class Grid2D(_Geometry):
         top = self.y[-1] + self.dy / 2
         return BoundingBox(left, bottom, right, top)
 
-    @property
-    def _xx(self):
-        """2d array of all x-coordinates"""
-        if self.__xx is None:
-            self._create_meshgrid(self.x, self.y)
-        return self.__xx
-
-    @property
-    def _yy(self):
-        """2d array of all y-coordinates"""
-        if self.__yy is None:
-            self._create_meshgrid(self.x, self.y)
-        return self.__yy
-
-    def _create_meshgrid(self, x, y):
-        self.__xx, self.__yy = np.meshgrid(x, y)
-
-    @property
-    def xy(self):
+    @cached_property
+    def xy(self) -> np.ndarray:
         """n-by-2 array of x- and y-coordinates"""
-        xcol = self._xx.reshape(-1, 1)
-        ycol = self._yy.reshape(-1, 1)
+        xx, yy = np.meshgrid(self.x, self.y)
+        xcol = xx.reshape(-1, 1)
+        ycol = yy.reshape(-1, 1)
         return np.column_stack([xcol, ycol])
-
-    @property
-    def coordinates(self):
-        # TODO: remove this?
-        """n-by-2 array of x- and y-coordinates"""
-        return self.xy
 
     @property
     def _cart(self) -> Cartography:
@@ -787,16 +777,16 @@ class Grid2D(_Geometry):
         yinside = (self.bbox.bottom <= y) & (y <= self.bbox.top)
         return xinside & yinside
 
-    def __contains__(self, pt) -> Any:
+    def __contains__(self, pt: Any) -> Any:
         return self.contains(pt)
 
     def find_index(
         self,
         x: float | None = None,
         y: float | None = None,
-        coords=None,
-        area=None,
-    ):
+        coords: np.ndarray | None = None,
+        area: Tuple[float, float, float, float] | None = None,
+    ) -> Tuple[Any, Any] | None:
         """Find nearest index (i,j) of point(s)
 
         Parameters
@@ -842,8 +832,10 @@ class Grid2D(_Geometry):
             return self._xy_to_index(coords)
         elif area is not None:
             return self._bbox_to_index(area)
+        else:
+            return None
 
-    def _xy_to_index(self, xy):
+    def _xy_to_index(self, xy: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
         """Find specific points in this geometry"""
         xy = np.atleast_2d(xy)
         y = xy[:, 1]
@@ -886,22 +878,15 @@ class Grid2D(_Geometry):
         return i, j
 
     @overload
-    def isel(self, idx: int, axis: int | str) -> "Grid1D": ...
+    def isel(self, idx: int, axis: int) -> "Grid1D": ...
 
     @overload
-    def isel(self, idx: slice, axis: int | str) -> "Grid2D": ...
+    def isel(self, idx: slice, axis: int) -> "Grid2D": ...
 
     def isel(
-        self, idx: np.ndarray | int | slice, axis: int | str
+        self, idx: np.ndarray | int | slice, axis: int
     ) -> "Grid2D | Grid1D | GeometryUndefined":
         """Return a new geometry as a subset of Grid2D along the given axis."""
-        if isinstance(axis, str):
-            if axis == "y":
-                axis = 0
-            elif axis == "x":
-                axis = 1
-            else:
-                raise ValueError(f"axis must be 'x' or 'y', not {axis}")
         assert isinstance(axis, int), "axis must be an integer (or 'x' or 'y')"
         axis = axis + 2 if axis < 0 else axis
 
@@ -1069,7 +1054,9 @@ class Grid2D(_Geometry):
             projection=self.projection,
         )
 
-    def to_mesh(self, outfilename, z=None):
+    def to_mesh(
+        self, outfilename: str | Path, z: np.ndarray | float | None = None
+    ) -> None:
         """export grid to mesh file
 
         Parameters
@@ -1084,6 +1071,7 @@ class Grid2D(_Geometry):
 
         if z is not None:
             if not np.isscalar(z):
+                assert isinstance(z, np.ndarray), "z must be a numpy array"
                 if len(z) != g.n_nodes:
                     raise ValueError(
                         "z must either be scalar or have length of nodes ((nx+1)*(ny+1))"
@@ -1115,21 +1103,21 @@ class Grid3D(_Geometry):
     def __init__(
         self,
         *,
-        x=None,
-        x0=0.0,
-        dx=None,
-        nx=None,
-        y=None,
-        y0=0.0,
-        dy=None,
-        ny=None,
-        z=None,
-        z0=0.0,
-        dz=None,
-        nz=None,
-        projection="NON-UTM",
+        x: np.ndarray | None = None,
+        x0: float = 0.0,
+        dx: float | None = None,
+        nx: int | None = None,
+        y: np.ndarray | None = None,
+        y0: float = 0.0,
+        dy: float | None = None,
+        ny: int | None = None,
+        z: np.ndarray | None = None,
+        z0: float = 0.0,
+        dz: float | None = None,
+        nz: int | None = None,
+        projection: str = "NON-UTM",  # TODO LONG/LAT
         origin: Tuple[float, float] = (0.0, 0.0),
-        orientation=0.0,
+        orientation: float = 0.0,
     ) -> None:
         super().__init__(projection=projection)
         self._origin = (0.0, 0.0) if origin is None else (origin[0], origin[1])
@@ -1147,15 +1135,19 @@ class Grid3D(_Geometry):
             self._y0 = self._y0 + self._dy / 2
 
     @property
+    def default_dims(self) -> Tuple[str, ...]:
+        return ("z", "y", "x")
+
+    @property
     def ndim(self) -> int:
         return 3
 
     @property
-    def _is_rotated(self):
+    def _is_rotated(self) -> Any:
         return np.abs(self._orientation) > 1e-5
 
     @property
-    def x(self):
+    def x(self) -> np.ndarray:
         """array of x-axis coordinates (element center)"""
         x1 = self._x0 + self.dx * (self.nx - 1)
         x_local = np.linspace(self._x0, x1, self.nx)
@@ -1172,7 +1164,7 @@ class Grid3D(_Geometry):
         return self._nx
 
     @property
-    def y(self):
+    def y(self) -> np.ndarray:
         """array of y-axis coordinates (element center)"""
         y1 = self._y0 + self.dy * (self.ny - 1)
         y_local = np.linspace(self._y0, y1, self.ny)
@@ -1189,7 +1181,7 @@ class Grid3D(_Geometry):
         return self._ny
 
     @property
-    def z(self):
+    def z(self) -> np.ndarray:
         """array of z-axis node coordinates"""
         z1 = self._z0 + self.dz * (self.nz - 1)
         return np.linspace(self._z0, z1, self.nz)
@@ -1214,7 +1206,9 @@ class Grid3D(_Geometry):
         """Grid orientation"""
         return self._orientation
 
-    def find_index(self, coords=None, layers=None, area=None):
+    def find_index(
+        self, coords: Any = None, layers: Any = None, area: Any = None
+    ) -> Any:
         if layers is not None:
             raise NotImplementedError(
                 f"Layer slicing is not yet implemented. Use the mikeio.read('file.dfs3', layers='{layers}')"
@@ -1223,21 +1217,15 @@ class Grid3D(_Geometry):
             "Not yet implemented for Grid3D. Please use mikeio.read('file.dfs3') and its arguments instead."
         )
 
-    def isel(self, idx, axis):
+    def isel(
+        self, idx: int | np.ndarray, axis: int
+    ) -> Grid3D | Grid2D | GeometryUndefined:
         """Get a subset geometry from this geometry"""
-        if isinstance(axis, str):
-            if axis == "z":
-                axis = 0
-            elif axis == "y":
-                axis = 1
-            elif axis == "x":
-                axis = 2
-            else:
-                raise ValueError(f"axis must be 'x', 'y' or 'z', not {axis}")
         assert isinstance(axis, int), "axis must be an integer (or 'x', 'y' or 'z')"
         axis = axis + 3 if axis < 0 else axis
 
         if not np.isscalar(idx):
+            assert isinstance(idx, np.ndarray), "idx must be a numpy array"
             d = np.diff(idx)
             if np.any(d < 1) or not np.allclose(d, d[0]):
                 return GeometryUndefined()
@@ -1280,7 +1268,12 @@ class Grid3D(_Geometry):
         else:
             raise ValueError(f"axis must be 0, 1 or 2 (or 'x', 'y' or 'z'), not {axis}")
 
-    def _index_to_Grid3D(self, ii=None, jj=None, kk=None):
+    def _index_to_Grid3D(
+        self,
+        ii: np.ndarray | range | None = None,
+        jj: np.ndarray | range | None = None,
+        kk: np.ndarray | range | None = None,
+    ) -> Grid3D | GeometryUndefined:
         ii = range(self.nx) if ii is None else ii
         jj = range(self.ny) if jj is None else jj
         kk = range(self.nz) if kk is None else kk
@@ -1333,7 +1326,7 @@ class Grid3D(_Geometry):
                 origin=origin,
             )
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         out = ["<mikeio.Grid3D>"]
         out.append(_print_axis_txt("x", self.x, self.dx))
         out.append(_print_axis_txt("y", self.y, self.dy))
@@ -1345,11 +1338,11 @@ class Grid3D(_Geometry):
             out.append(f"projection: {self.projection_string}")
         return "\n".join(out)
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"Grid3D(nz={self.nz}, ny={self.ny}, nx={self.nx})"
 
     def _geometry_for_layers(
-        self, layers, keepdims=False
+        self, layers: Sequence[int] | None, keepdims: bool = False
     ) -> Grid2D | "Grid3D" | "GeometryUndefined":
         if layers is None:
             return self

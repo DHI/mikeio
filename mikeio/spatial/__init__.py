@@ -1,6 +1,9 @@
 from ._geometry import GeometryPoint3D, GeometryPoint2D, GeometryUndefined
 from ._FM_geometry import (
     GeometryFM2D,
+)
+
+from ._FM_geometry_spectral import (
     GeometryFMPointSpectrum,
     GeometryFMLineSpectrum,
     GeometryFMAreaSpectrum,

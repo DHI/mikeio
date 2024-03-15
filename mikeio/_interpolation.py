@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import Tuple, TYPE_CHECKING
+from typing import Tuple, TYPE_CHECKING, overload
 import numpy as np
 
 if TYPE_CHECKING:
@@ -42,6 +42,24 @@ def get_idw_interpolant(distances: np.ndarray, p: float = 2) -> np.ndarray:
     if is_1d:
         weights = weights[0]
     return weights
+
+
+@overload
+def interp2d(
+    data: np.ndarray | DataArray,
+    elem_ids: np.ndarray,
+    weights: np.ndarray | None = None,
+    shape: Tuple[int, ...] | None = None,
+) -> np.ndarray: ...
+
+
+@overload
+def interp2d(
+    data: Dataset,
+    elem_ids: np.ndarray,
+    weights: np.ndarray | None = None,
+    shape: Tuple[int, ...] | None = None,
+) -> Dataset: ...
 
 
 def interp2d(
