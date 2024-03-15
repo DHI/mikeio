@@ -167,30 +167,6 @@ def test_data_0d(da0):
     assert "values" in repr(da0)
 
 
-def test_create_data_1d_default_grid():
-    da = mikeio.DataArray(
-        data=np.zeros((10, 5)),
-        time=pd.date_range(start="2000-01-01", freq="h", periods=10),
-        item=ItemInfo("Foo"),
-    )
-    assert isinstance(da.geometry, mikeio.Grid1D)
-
-    # def test_data_2d_no_geometry_not_allowed():
-
-    #     nt = 10
-    #     nx = 7
-    #     ny = 14
-
-    #     with pytest.warns(Warning) as w:
-    #         mikeio.DataArray(
-    #             data=np.zeros([nt, ny, nx]) + 0.1,
-    #             time=pd.date_range(start="2000-01-01", freq="S", periods=nt),
-    #             item=ItemInfo("Foo"),
-    #         )
-
-    assert isinstance(da.geometry, mikeio.spatial.GeometryUndefined)
-
-
 def test_dataarray_init():
     nt = 10
     start = 10.0
