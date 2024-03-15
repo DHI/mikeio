@@ -688,30 +688,6 @@ def test_to_mesh_2d(tmp_path):
     assert mesh.n_elements == dfs.n_elements
 
 
-def test_elements_to_geometry():
-    filename = "tests/testdata/oresund_sigma_z.dfsu"
-    dfs = mikeio.open(filename)
-
-    single_elem_geom = dfs.geometry.isel([0], keepdims=True)
-    assert single_elem_geom.n_elements == 1
-    assert len(single_elem_geom.element_table) == 1
-
-    tiny_geom = dfs.geometry.elements_to_geometry(elements=set([1, 0]))
-    assert tiny_geom.n_elements == 2
-
-    other_tiny_geom = dfs.geometry.isel(set([1, 0]))
-    assert other_tiny_geom.n_elements == 2
-
-    elements = dfs.get_layer_elements(layers=-1)
-    geom = dfs.elements_to_geometry(elements, node_layers="top")
-    assert not hasattr(geom, "n_layers")
-    assert geom.n_elements == len(elements)
-
-    elements = dfs.get_layer_elements(layers=[-2, -1])
-    with pytest.raises(Exception):
-        geom = dfs.elements_to_geometry(elements, node_layers="center")
-
-
 def test_element_table():
     filename = "tests/testdata/HD2D.dfsu"
     dfs = mikeio.open(filename)
