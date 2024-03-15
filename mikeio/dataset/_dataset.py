@@ -1161,12 +1161,7 @@ class Dataset:
 
     # ============= Combine/concat ===========
 
-    def _append_items(
-        self, other: DataArray | "Dataset", copy: bool = True
-    ) -> "Dataset":
-        if isinstance(other, DataArray):
-            other = other._to_dataset()
-        assert isinstance(other, Dataset)
+    def _append_items(self, other: "Dataset") -> "Dataset":
         item_names = {item.name for item in self.items}
         other_names = {item.name for item in other.items}
 
@@ -1177,13 +1172,12 @@ class Dataset:
         if not np.all(self.time == other.time):
             # if not: create common time?
             raise ValueError("All timesteps must match")
-        ds = self.copy() if copy else self
 
         for key, value in other._data_vars.items():
             if key != "Z coordinate":
-                ds[key] = value
+                self[key] = value
 
-        return ds
+        return self
 
     @staticmethod
     def concat(
@@ -1238,8 +1232,20 @@ class Dataset:
             merged dataset
         """
         ds = datasets[0].copy()
-        for dsj in datasets[1:]:
-            ds = ds._append_items(dsj, copy=False)
+        for other in datasets[1:]:
+            item_names = {item.name for item in ds.items}
+            other_names = {item.name for item in other.items}
+
+            overlap = other_names.intersection(item_names)
+            if len(overlap) != 0:
+                raise ValueError("Can not append items, names are not unique")
+
+            if not np.all(ds.time == other.time):
+                raise ValueError("All timesteps must match")
+
+            for key, value in other._data_vars.items():
+                if key != "Z coordinate":
+                    ds[key] = value
 
         return ds
 
