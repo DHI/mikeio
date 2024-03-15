@@ -83,49 +83,43 @@ GeometryType = Union[
 ]
 
 
-class _DataArraySpectrumToHm0:
-    def __init__(self, da: "DataArray") -> None:
-        self.da = da
-
-    def __call__(self, tail: bool = True) -> "DataArray":
-        # TODO: if action_density
-        m0 = calc_m0_from_spectrum(
-            self.da.to_numpy(),
-            self.da.frequencies,
-            self.da.directions,
-            tail,
-        )
-        Hm0 = 4 * np.sqrt(m0)
-        dims = tuple([d for d in self.da.dims if d not in ("frequency", "direction")])
-        item = ItemInfo(EUMType.Significant_wave_height)
-        g = self.da.geometry
-        if isinstance(g, GeometryFMPointSpectrum):
-            if g.x is not None and g.y is not None:
-                geometry: Any = GeometryPoint2D(x=g.x, y=g.y)
-            else:
-                geometry = GeometryUndefined()
-        elif isinstance(g, GeometryFMLineSpectrum):
-            geometry = Grid1D(
-                nx=g.n_nodes,
-                dx=1.0,
-                node_coordinates=g.node_coordinates,
-                axis_name="node",
-            )
-        elif isinstance(g, GeometryFMAreaSpectrum):
-            geometry = GeometryFM2D(
-                node_coordinates=g.node_coordinates,
-                codes=g.codes,
-                node_ids=g.node_ids,
-                projection=g.projection_string,
-                element_table=g.element_table,
-                element_ids=g.element_ids,
-            )
+def _create_spec_da(da: "DataArray") -> "DataArray":
+    # TODO: if action_density
+    m0 = calc_m0_from_spectrum(
+        da.to_numpy(),
+        da.frequencies,
+        da.directions,
+        tail=True,
+    )
+    Hm0 = 4 * np.sqrt(m0)
+    dims = tuple([d for d in da.dims if d not in ("frequency", "direction")])
+    item = ItemInfo(EUMType.Significant_wave_height)
+    g = da.geometry
+    if isinstance(g, GeometryFMPointSpectrum):
+        if g.x is not None and g.y is not None:
+            geometry: Any = GeometryPoint2D(x=g.x, y=g.y)
         else:
             geometry = GeometryUndefined()
-
-        return DataArray(
-            data=Hm0, time=self.da.time, item=item, dims=dims, geometry=geometry
+    elif isinstance(g, GeometryFMLineSpectrum):
+        geometry = Grid1D(
+            nx=g.n_nodes,
+            dx=1.0,
+            node_coordinates=g.node_coordinates,
+            axis_name="node",
         )
+    elif isinstance(g, GeometryFMAreaSpectrum):
+        geometry = GeometryFM2D(
+            node_coordinates=g.node_coordinates,
+            codes=g.codes,
+            node_ids=g.node_ids,
+            projection=g.projection_string,
+            element_table=g.element_table,
+            element_ids=g.element_ids,
+        )
+    else:
+        geometry = GeometryUndefined()
+
+    return DataArray(data=Hm0, time=da.time, item=item, dims=dims, geometry=geometry)
 
 
 class DataArray:
@@ -378,7 +372,7 @@ class DataArray:
             self.n_frequencies = geometry.n_frequencies
             self.directions = geometry.directions
             self.n_directions = geometry.n_directions
-            self.to_Hm0 = _DataArraySpectrumToHm0(self)
+            self.to_Hm0 = _create_spec_da(self)
 
     # ============= Basic properties/methods ===========
 
