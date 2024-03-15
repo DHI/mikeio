@@ -167,4 +167,5 @@ def _extract_track(
     for item_info in items:
         items_out.append(item_info)
 
-    return Dataset(data_list, times, items_out)
+    # TODO update syntax
+    return Dataset.from_array_time_items(data_list, times, items_out)

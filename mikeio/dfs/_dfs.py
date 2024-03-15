@@ -416,7 +416,11 @@ class _Dfs123:
         items = _get_item_info(self._dfs.ItemInfo, item_numbers)
 
         self._dfs.Close()
-        return Dataset(data_list, time, items, geometry=self.geometry, validate=False)
+
+        # TODO update syntax
+        return Dataset.from_array_time_items(
+            data_list, time, items, geometry=self.geometry, validate=False
+        )
 
     def _open(self) -> None:
         raise NotImplementedError("Should be implemented by subclass")

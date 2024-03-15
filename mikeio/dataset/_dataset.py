@@ -83,11 +83,7 @@ class Dataset:
 
     def __init__(
         self,
-        data: (
-            Mapping[str, DataArray]
-            | Sequence[DataArray]
-            | Sequence[NDArray[np.floating]]
-        ),
+        data: Mapping[str, DataArray] | Sequence[DataArray],
         time: pd.DatetimeIndex | None = None,
         items: Sequence[ItemInfo] | None = None,
         geometry: Any = None,
@@ -95,12 +91,29 @@ class Dataset:
         dims: Tuple[str, ...] | None = None,
         validate: bool = True,
     ):
+        # Deprecated: delete in v 2.1
         if not self._is_DataArrays(data):
+            warnings.warn(
+                "Support for non-DataArray input is deprecated. Convert data to DataArray or use Dataset.from_array_time_items",
+                FutureWarning,
+            )
             data = self._create_dataarrays(
                 data=data, time=time, items=items, geometry=geometry, zn=zn, dims=dims  # type: ignore
             )
-        self._data_vars: MutableMapping[str, DataArray] = self._init_from_DataArrays(data, validate=validate)  # type: ignore
+        # end of deprecated
+        self._data_vars: MutableMapping[str, DataArray] = self._init_from_DataArrays(
+            data, validate=validate
+        )
         self.plot = _DatasetPlotter(self)
+
+    @classmethod
+    def from_array_time_items(
+        cls, data, time, items=None, geometry=None, zn=None, dims=None, validate=True
+    ):
+        data = cls._create_dataarrays(
+            data=data, time=time, items=items, geometry=geometry, zn=zn, dims=dims  # type: ignore
+        )
+        return Dataset(data, validate=validate)
 
     @staticmethod
     def _is_DataArrays(data: Any) -> bool:
@@ -1287,7 +1300,8 @@ class Dataset:
             zn[idx1, :] = self._zn
             zn[idx2, :] = other._zn
 
-        return Dataset(
+        # TODO update syntax
+        return Dataset.from_array_time_items(
             newdata, time=newtime, items=ds.items, geometry=ds.geometry, zn=zn
         )
 
@@ -1734,7 +1748,9 @@ class Dataset:
             raise TypeError(f"{value} could not be added to Dataset")
         items = deepcopy(self.items)
         time = self.time.copy()
-        return Dataset(
+        
+        # TODO update syntax
+        return Dataset.from_array_time_items(
             data,
             time=time,
             items=items,
@@ -1750,7 +1766,9 @@ class Dataset:
             raise TypeError(f"{value} could not be multiplied to Dataset")
         items = deepcopy(self.items)
         time = self.time.copy()
-        return Dataset(
+
+        # TODO update syntax
+        return Dataset.from_array_time_items(
             data,
             time=time,
             items=items,

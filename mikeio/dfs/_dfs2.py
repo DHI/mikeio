@@ -231,7 +231,8 @@ class Dfs2(_Dfs123):
         else:
             dims = ("time", "y", "x")
 
-        return Dataset(
+        # TODO update syntax
+        return Dataset.from_array_time_items(
             data_list,
             time=time,
             items=items,

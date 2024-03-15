@@ -504,19 +504,15 @@ def test_write(tmp_path):
     msh = Mesh(meshfilename)
 
     n_elements = msh.n_elements
-    d = np.zeros((1, n_elements))
-    data = []
-    data.append(d)
-
-    ds = Dataset(
-        data,
-        time=[datetime(2000, 1, 1)],
-        items=[ItemInfo("Zeros")],
+    da = DataArray(
+        data=np.zeros((1, n_elements)),
+        time="2000-01-01",
+        item=ItemInfo("Zeros"),
         geometry=msh.geometry,
     )
 
-    ds.to_dfs(fp)
-    ds.isel(time=0).to_dfs(fp)
+    da.to_dfs(fp)
+    da.isel(time=0).to_dfs(fp)
 
 
 def test_write_from_dfsu(tmp_path):

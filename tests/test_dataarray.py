@@ -1291,7 +1291,7 @@ def test_time_selection():
     data.append(d)
     time = pd.date_range("2000-1-2", freq="h", periods=nt)
     items = [ItemInfo("Foo")]
-    ds = mikeio.Dataset(data, time, items)
+    ds = mikeio.Dataset.from_array_time_items(data, time, items)
 
     das_t = ds.Foo.sel(time="2000-01-05")
 

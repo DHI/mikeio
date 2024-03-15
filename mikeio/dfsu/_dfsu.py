@@ -455,7 +455,8 @@ class _Dfsu:
             dims = tuple([d for d in dims if d != "element"])
             data_list = [np.squeeze(d, axis=-1) for d in data_list]
 
-        return Dataset(
+        # TODO update syntax
+        return Dataset.from_array_time_items(
             data_list, time, items, geometry=geometry, dims=dims, validate=False
         )
 

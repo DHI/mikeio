@@ -262,7 +262,8 @@ class DfsuSpectral(_Dfsu):
         dfs.Close()
 
         time = pd.to_datetime(t_seconds, unit="s", origin=self.start_time)
-        return Dataset(
+        # TODO update syntax
+        return Dataset.from_array_time_items(
             data_list, time, items, geometry=geometry, dims=dims, validate=False
         )
 

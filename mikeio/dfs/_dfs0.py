@@ -166,7 +166,9 @@ class Dfs0:
         if items is not None:
             fdata = [fdata[it] for it in item_numbers]
             fitems = [fitems[it] for it in item_numbers]
-        ds = Dataset(fdata, ftime, fitems, validate=False)
+
+        # TODO update syntax
+        ds = Dataset.from_array_time_items(fdata, ftime, fitems, validate=False)
 
         # select time steps
         self._n_timesteps = dfs.FileInfo.TimeAxis.NumberOfTimeSteps

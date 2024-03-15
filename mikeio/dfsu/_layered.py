@@ -245,7 +245,8 @@ class DfsuLayered(_Dfsu):
             data_list = [np.squeeze(d, axis=-1) for d in data_list]
 
         if hasattr(geometry, "is_layered") and geometry.is_layered:
-            return Dataset(
+            # TODO update syntax
+            return Dataset.from_array_time_items(
                 data_list[1:],  # skip zn item
                 time,
                 items,
@@ -255,7 +256,8 @@ class DfsuLayered(_Dfsu):
                 validate=False,
             )
         else:
-            return Dataset(
+            # TODO update syntax
+            return Dataset.from_array_time_items(
                 data_list, time, items, geometry=geometry, dims=dims, validate=False
             )
 
