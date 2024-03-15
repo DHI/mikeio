@@ -17,7 +17,6 @@ from ..dfs._dfs import (
     _valid_timesteps,
 )
 from ..eum import EUMType, ItemInfo
-from ..exceptions import InvalidGeometry
 from .._interpolation import get_idw_interpolant, interp2d
 from ..spatial import GeometryFM3D, GeometryFMVerticalProfile
 from ..spatial._FM_utils import _plot_vertical_profile
@@ -89,58 +88,6 @@ class DfsuLayered(_Dfsu):
         if self.n_layers is None:
             return None
         return self.n_layers - self.n_sigma_layers
-
-    @property
-    def e2_e3_table(self):
-        """The 2d-to-3d element connectivity table for a 3d object"""
-        if self.n_layers is None:
-            print("Object has no layers: cannot return e2_e3_table")
-            return None
-        return self.geometry.e2_e3_table
-
-    @property
-    def elem2d_ids(self):
-        """The associated 2d element id for each 3d element"""
-        if self.n_layers is None:
-            raise InvalidGeometry("Object has no layers: cannot return elem2d_ids")
-        return self.geometry.elem2d_ids
-
-    @property
-    def layer_ids(self):
-        """The layer number (0=bottom, 1, 2, ...) for each 3d element"""
-        if self.n_layers is None:
-            raise InvalidGeometry("Object has no layers: cannot return layer_ids")
-        return self.geometry.layer_ids
-
-    @property
-    def top_elements(self):
-        """List of 3d element ids of surface layer"""
-        if self.n_layers is None:
-            print("Object has no layers: cannot find top_elements")
-            return None
-        return self.geometry.top_elements
-
-    @property
-    def n_layers_per_column(self):
-        """List of number of layers for each column"""
-        if self.n_layers is None:
-            print("Object has no layers: cannot find n_layers_per_column")
-            return None
-        return self.geometry.n_layers_per_column
-
-    @property
-    def bottom_elements(self):
-        """List of 3d element ids of bottom layer"""
-        if self.n_layers is None:
-            print("Object has no layers: cannot find bottom_elements")
-            return None
-        return self.geometry.bottom_elements
-
-    @wraps(GeometryFM3D.get_layer_elements)
-    def get_layer_elements(self, layers):
-        if self.n_layers is None:
-            raise InvalidGeometry("Object has no layers: cannot get_layer_elements")
-        return self.geometry.get_layer_elements(layers)
 
     def read(
         self,
@@ -398,15 +345,13 @@ class Dfsu3D(DfsuLayered):
         """The 2d geometry for a 3d object"""
         return self.geometry.geometry2d
 
-    def extract_surface_elevation_from_3d(self, filename=None, n_nearest=4):
+    def extract_surface_elevation_from_3d(self, n_nearest: int = 4) -> DataArray:
         """
         Extract surface elevation from a 3d dfsu file (based on zn)
         to a new 2d dfsu file with a surface elevation item.
 
         Parameters
         ---------
-        filename: str
-            Output file name
         n_nearest: int, optional
             number of points for spatial interpolation (inverse_distance), default=4
         """
@@ -418,7 +363,7 @@ class Dfsu3D(DfsuLayered):
         assert n_nearest > 0
 
         # make 2d nodes-to-elements interpolator
-        top_el = self.top_elements
+        top_el = self.geometry.top_elements
         geom = self.geometry.elements_to_geometry(top_el, node_layers="top")
         xye = geom.element_coordinates[:, 0:2]
         xyn = geom.node_coordinates[:, 0:2]
@@ -434,6 +379,7 @@ class Dfsu3D(DfsuLayered):
         node_ids_surf, _ = self.geometry._get_nodes_and_table_for_elements(
             top_el, node_layers="top"
         )
+        assert isinstance(ds[0]._zn, np.ndarray)
         zn_surf = ds[0]._zn[:, node_ids_surf]  # surface
         surf2d = interp2d(zn_surf, node_ids, weights)
         surf_da = DataArray(
@@ -443,12 +389,4 @@ class Dfsu3D(DfsuLayered):
             item=ItemInfo(EUMType.Surface_Elevation),
         )
 
-        # create output
-        # items = [ItemInfo(EUMType.Surface_Elevation)]
-        # ds2 = Dataset([surf2d], ds.time, items, geometry=geom)
-        if filename is None:
-            return surf_da
-        else:
-            # title = "Surface extracted from 3D file"
-            surf_da.to_dfs(filename)
-            # self.write(filename, ds2, elements=top_el, title=title)
+        return surf_da

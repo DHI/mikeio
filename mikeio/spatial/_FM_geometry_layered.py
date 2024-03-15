@@ -5,7 +5,6 @@ from typing import Collection, Sequence, List
 import numpy as np
 from mikecore.DfsuFile import DfsuFileType  # type: ignore
 
-from mikeio.exceptions import InvalidGeometry
 
 from ._FM_geometry import GeometryFM2D, _GeometryFM, _GeometryFMPlotter
 from ._geometry import GeometryPoint3D
@@ -48,7 +47,6 @@ class _GeometryFMLayered(_GeometryFM):
         self._n_sigma: int = n_sigma if n_sigma is not None else n_layers
 
         # Lazy properties
-        self._n_layers_column = None
         self._bot_elems = None
         self._e2_e3_table = None
         self._2d_ids = None
@@ -430,20 +428,17 @@ class _GeometryFMLayered(_GeometryFM):
 
         return np.array(topLayerElments, dtype=np.int32)
 
-    @property
+    @cached_property
     def n_layers_per_column(self):
         """List of number of layers for each column"""
-        if self._n_layers is None:
-            print("Object has no layers: cannot find n_layers_per_column")
-            return None
-        elif self._n_layers_column is None:
-            top_elems = self.top_elements
-            n = len(top_elems)
-            tmp = top_elems.copy()
-            tmp[0] = -1
-            tmp[1:n] = top_elems[0 : (n - 1)]
-            self._n_layers_column = top_elems - tmp
-        return self._n_layers_column
+
+        top_elems = self.top_elements
+        n = len(top_elems)
+        tmp = top_elems.copy()
+        tmp[0] = -1
+        tmp[1:n] = top_elems[0 : (n - 1)]
+        n_layers_column = top_elems - tmp
+        return n_layers_column
 
     @cached_property
     def bottom_elements(self):
@@ -482,8 +477,6 @@ class _GeometryFMLayered(_GeometryFM):
             return np.sort(elem_ids)
 
         n_lay = self.n_layers
-        if n_lay is None:
-            raise InvalidGeometry("Object has no layers: cannot get_layer_elements")
 
         if layers < (-n_lay) or layers >= n_lay:
             raise Exception(
@@ -575,96 +568,78 @@ class _GeometryFMLayered(_GeometryFM):
             # elem3d[j] = (np.abs(z_col - z_vec[j])).argmin()  # nearest
         return elem3d
 
-    def _find_3d_from_2d_points(self, elem2d, z=None, layer=None):
+    # def _find_3d_from_2d_points(self, elem2d, z=None, layer=None):
 
-        was_scalar = np.isscalar(elem2d)
-        if was_scalar:
-            elem2d = np.array([elem2d])
-        else:
-            orig_shape = elem2d.shape
-            elem2d = np.reshape(elem2d, (elem2d.size,))
+    #     was_scalar = np.isscalar(elem2d)
+    #     if was_scalar:
+    #         elem2d = np.array([elem2d])
+    #     else:
+    #         orig_shape = elem2d.shape
+    #         elem2d = np.reshape(elem2d, (elem2d.size,))
 
-        if (layer is None) and (z is None):
-            # return top element
-            idx = self.top_elements[elem2d]  # TODO: return whole column instead
+    #     if (layer is None) and (z is None):
+    #         # return top element
+    #         idx = self.top_elements[elem2d]  # TODO: return whole column instead
 
-        elif layer is None:
-            idx = np.zeros_like(elem2d)
-            if np.isscalar(z):
-                z = z * np.ones_like(elem2d, dtype=float)
-            elem3d = self.e2_e3_table[elem2d]
-            for j, row in enumerate(elem3d):
-                zc = self.element_coordinates[row, 2]
-                d3d = np.abs(z[j] - zc)
-                idx[j] = row[d3d.argsort()[0]]
+    #     elif layer is None:
+    #         idx = np.zeros_like(elem2d)
+    #         if np.isscalar(z):
+    #             z = z * np.ones_like(elem2d, dtype=float)
+    #         elem3d = self.e2_e3_table[elem2d]
+    #         for j, row in enumerate(elem3d):
+    #             zc = self.element_coordinates[row, 2]
+    #             d3d = np.abs(z[j] - zc)
+    #             idx[j] = row[d3d.argsort()[0]]
 
-        elif z is None:
-            if 0 <= layer <= self.n_z_layers - 1:
-                idx = np.zeros_like(elem2d)
-                elem3d = self.e2_e3_table[elem2d]
-                for j, row in enumerate(elem3d):
-                    try:
-                        layer_ids = self.layer_ids[row]
-                        id = row[list(layer_ids).index(layer)]
-                        idx[j] = id
-                    except IndexError:
-                        raise IndexError(
-                            f"Layer {layer} not present for 2d element {elem2d[j]}"
-                        )
-            else:
-                # sigma layer
-                idx = self.get_layer_elements(layer)[elem2d]
+    #     elif z is None:
+    #         if 0 <= layer <= self.n_z_layers - 1:
+    #             idx = np.zeros_like(elem2d)
+    #             elem3d = self.e2_e3_table[elem2d]
+    #             for j, row in enumerate(elem3d):
+    #                 try:
+    #                     layer_ids = self.layer_ids[row]
+    #                     id = row[list(layer_ids).index(layer)]
+    #                     idx[j] = id
+    #                 except IndexError:
+    #                     raise IndexError(
+    #                         f"Layer {layer} not present for 2d element {elem2d[j]}"
+    #                     )
+    #         else:
+    #             # sigma layer
+    #             idx = self.get_layer_elements(layer)[elem2d]
 
-        else:
-            raise ValueError("layer and z cannot both be supplied!")
+    #     else:
+    #         raise ValueError("layer and z cannot both be supplied!")
 
-        if was_scalar:
-            idx = idx[0]
-        else:
-            idx = np.reshape(idx, orig_shape)
+    #     if was_scalar:
+    #         idx = idx[0]
+    #     else:
+    #         idx = np.reshape(idx, orig_shape)
 
-        return idx
+    #     return idx
 
     @cached_property
     def _dz(self):
         """Height of each 3d element (using static zn information)"""
         return self._calc_dz()
 
-    def _calc_dz(self, elements=None, zn=None):
+    def _calc_dz(self):
         """Height of 3d elements using static or dynamic zn information"""
-        if elements is None:
-            element_table = self.element_table
-        else:
-            element_table = self.element_table[elements]
+        element_table = self.element_table
         n_elements = len(element_table)
 
-        if zn is None:
-            if elements is None:
-                zn = self.node_coordinates[:, 2]
-            else:
-                nodes = np.unique(np.hstack(element_table))
-                zn = self.node_coordinates[nodes, 2]
-
+        zn = self.node_coordinates[:, 2]
         zn_is_2d = len(zn.shape) == 2
         shape = (zn.shape[0], n_elements) if zn_is_2d else (n_elements,)
         dz = np.full(shape=shape, fill_value=np.nan)
 
-        if zn_is_2d:
-            # dynamic zn
-            for j in range(n_elements):
-                nodes = element_table[j]
-                halfn = int(len(nodes) / 2)
-                z_bot = np.mean(zn[:, nodes[:halfn]], axis=1)
-                z_top = np.mean(zn[:, nodes[halfn:]], axis=1)
-                dz[:, j] = z_top - z_bot
-        else:
-            # static zn
-            for j in range(n_elements):
-                nodes = element_table[j]
-                halfn = int(len(nodes) / 2)
-                z_bot = np.mean(zn[nodes[:halfn]])
-                z_top = np.mean(zn[nodes[halfn:]])
-                dz[j] = z_top - z_bot
+        # static zn
+        for j in range(n_elements):
+            nodes = element_table[j]
+            halfn = int(len(nodes) / 2)
+            z_bot = np.mean(zn[nodes[:halfn]])
+            z_top = np.mean(zn[nodes[halfn:]])
+            dz[j] = z_top - z_bot
 
         return dz
 

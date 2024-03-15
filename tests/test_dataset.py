@@ -1279,6 +1279,12 @@ def test_concat_by_time_inconsistent_shape_not_possible():
     with pytest.raises(ValueError, match="Shape"):
         mikeio.Dataset.concat([ds1, ds2])
 
+def test_concat_dataset_different_items_not_possible():
+    ds1 = mikeio.read("tests/testdata/HD2D.dfsu")
+    ds2 = mikeio.read("tests/testdata/HD2D.dfsu", items=[1,2])
+    with pytest.raises(ValueError, match="items"):
+        mikeio.Dataset.concat([ds1, ds2])
+
 
 # TODO: implement this
 def test_concat_by_time_no_time():
