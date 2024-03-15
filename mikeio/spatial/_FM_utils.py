@@ -20,7 +20,6 @@ def _plot_map(
     boundary_polylines: BoundaryPolylines,
     projection="",
     z=None,
-    elements=None,
     plot_type="patch",
     title=None,
     label=None,
@@ -47,8 +46,6 @@ def _plot_map(
     projection,
     z: np.array or a Dataset with a single item, optional
         value for each element to plot, default bathymetry
-    elements: list(int), optional
-        list of element ids to be plotted
     plot_type: str, optional
         type of plot: 'patch' (default), 'mesh_only', 'shaded',
         'contour', 'contourf' or 'outline_only'
@@ -142,13 +139,6 @@ def _plot_map(
     if z is None:
         z = ec[:, 2]
         label = label or "Bathymetry (m)"
-
-    if elements is not None:
-        if plot_type.startswith("contour"):
-            raise ValueError("elements argument not possible with contour plots")
-        newz = np.full_like(z, fill_value=np.nan)
-        newz[elements] = z[elements]
-        z = newz
 
     assert len(z) == ec.shape[0]
 

@@ -869,22 +869,15 @@ class Grid2D(_Geometry):
         return i, j
 
     @overload
-    def isel(self, idx: int, axis: int | str) -> "Grid1D": ...
+    def isel(self, idx: int, axis: int) -> "Grid1D": ...
 
     @overload
-    def isel(self, idx: slice, axis: int | str) -> "Grid2D": ...
+    def isel(self, idx: slice, axis: int) -> "Grid2D": ...
 
     def isel(
-        self, idx: np.ndarray | int | slice, axis: int | str
+        self, idx: np.ndarray | int | slice, axis: int
     ) -> "Grid2D | Grid1D | GeometryUndefined":
         """Return a new geometry as a subset of Grid2D along the given axis."""
-        if isinstance(axis, str):
-            if axis == "y":
-                axis = 0
-            elif axis == "x":
-                axis = 1
-            else:
-                raise ValueError(f"axis must be 'x' or 'y', not {axis}")
         assert isinstance(axis, int), "axis must be an integer (or 'x' or 'y')"
         axis = axis + 2 if axis < 0 else axis
 
@@ -1211,22 +1204,11 @@ class Grid3D(_Geometry):
         )
 
     def isel(
-        self, idx: int | np.ndarray, axis: str | int
+        self, idx: int | np.ndarray, axis: int
     ) -> Grid3D | Grid2D | GeometryUndefined:
         """Get a subset geometry from this geometry"""
-        if isinstance(axis, str):
-            if axis == "z":
-                axis_nr = 0
-            elif axis == "y":
-                axis_nr = 1
-            elif axis == "x":
-                axis_nr = 2
-            else:
-                raise ValueError(f"axis must be 'x', 'y' or 'z', not {axis}")
-        elif isinstance(axis, int):
-            axis_nr = axis
-        assert isinstance(axis_nr, int), "axis must be an integer (or 'x', 'y' or 'z')"
-        axis_nr = axis_nr + 3 if axis_nr < 0 else axis_nr
+        assert isinstance(axis, int), "axis must be an integer (or 'x', 'y' or 'z')"
+        axis = axis + 3 if axis < 0 else axis
 
         if not np.isscalar(idx):
             assert isinstance(idx, np.ndarray), "idx must be a numpy array"
@@ -1234,12 +1216,12 @@ class Grid3D(_Geometry):
             if np.any(d < 1) or not np.allclose(d, d[0]):
                 return GeometryUndefined()
             else:
-                ii = idx if axis_nr == 2 else None
-                jj = idx if axis_nr == 1 else None
-                kk = idx if axis_nr == 0 else None
+                ii = idx if axis == 2 else None
+                jj = idx if axis == 1 else None
+                kk = idx if axis == 0 else None
                 return self._index_to_Grid3D(ii, jj, kk)
 
-        if axis_nr == 0:
+        if axis == 0:
             # z is the first axis! return x-y Grid2D
             # TODO: origin, how to pass self.z[idx]?
             return Grid2D(
@@ -1253,7 +1235,7 @@ class Grid3D(_Geometry):
                 origin=self.origin,
                 orientation=self.orientation,
             )
-        elif axis_nr == 1:
+        elif axis == 1:
             # y is the second axis! return x-z Grid2D
             # TODO: origin, how to pass self.y[idx]?
             return Grid2D(
@@ -1261,7 +1243,7 @@ class Grid3D(_Geometry):
                 y=self.z,
                 # projection=self._projection,
             )
-        elif axis_nr == 2:
+        elif axis == 2:
             # x is the last axis! return y-z Grid2D
             # TODO: origin, how to pass self.x[idx]?
             return Grid2D(
@@ -1270,9 +1252,7 @@ class Grid3D(_Geometry):
                 # projection=self._projection,
             )
         else:
-            raise ValueError(
-                f"axis must be 0, 1 or 2 (or 'x', 'y' or 'z'), not {axis_nr}"
-            )
+            raise ValueError(f"axis must be 0, 1 or 2 (or 'x', 'y' or 'z'), not {axis}")
 
     def _index_to_Grid3D(
         self,
