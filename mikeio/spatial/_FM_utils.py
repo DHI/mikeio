@@ -1,4 +1,3 @@
-
 import numpy as np
 from collections import namedtuple
 
@@ -469,7 +468,7 @@ def __add_colorbar(ax, cmap_ScMappable, fig_obj, label, levels, cbar_extend) -> 
     None
     """
 
-    from mpl_toolkits.axes_grid1 import make_axes_locatable
+    from mpl_toolkits.axes_grid1 import make_axes_locatable  # type: ignore
     import matplotlib.pyplot as plt
 
     cax = make_axes_locatable(ax).append_axes("right", size="5%", pad=0.05)

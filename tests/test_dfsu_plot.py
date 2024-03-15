@@ -9,8 +9,6 @@ mpl.use("Agg")
 mpl.rcParams.update({"figure.max_open_warning": 100})
 
 
-
-
 ##################################################
 # these tests will not run if matplotlib is not installed
 ##################################################
@@ -21,59 +19,12 @@ pytest.importorskip("matplotlib")
 def hd2d_dfs():
     return mikeio.open("tests/testdata/HD2D.dfsu")
 
-def test_plot_bathymetry():
-    filename = "tests/testdata/oresund_sigma_z.dfsu"
-    dfs = mikeio.open(filename)
-    with pytest.warns(FutureWarning):
-        dfs.plot()
-    assert True
-
-
-def test_plot_bathymetry_no_colorbar():
-    filename = "tests/testdata/oresund_sigma_z.dfsu"
-    dfs = mikeio.open(filename)
-    with pytest.warns(FutureWarning):
-        dfs.plot(add_colorbar=False)
-    assert True
-
-
-def test_plot_2d(hd2d_dfs):
-    dfs = hd2d_dfs
-    with pytest.warns(FutureWarning):
-        dfs.plot(cmap="plasma")
-    assert True
-
-
-def test_plot_3d():
-    filename = "tests/testdata/oresund_sigma_z.dfsu"
-    dfs = mikeio.open(filename)
-    with pytest.warns(FutureWarning):
-        dfs.plot()
-    assert True
-
-
-def test_plot_dfsu_contour(hd2d_dfs):
-    dfs = hd2d_dfs
-    with pytest.warns(FutureWarning):
-        dfs.plot(plot_type="contour", levels=5)
-    assert True
-
-
-def test_plot_dfsu_contourf_levels(hd2d_dfs):
-    dfs = hd2d_dfs
-    cmap = mpl.colors.ListedColormap(["red", "green", "blue"])
-    bounds = [-3, 1, 2, 100]
-    with pytest.warns(FutureWarning):
-        dfs.plot(levels=bounds, cmap=cmap)
-    with pytest.warns(FutureWarning):
-        dfs.plot(plot_type="contourf", levels=bounds, cmap=cmap)
-    assert True
-
 
 def test_plot_dfsu_contour_mixedmesh():
-    msh = Mesh("tests/testdata/FakeLake.dfsu")
-    msh.plot(plot_type="contour", levels=5)
-    msh.plot(
+    dfs = mikeio.open("tests/testdata/FakeLake.dfsu")
+    geometry = dfs.geometry
+    geometry.plot(plot_type="contour", levels=5)
+    geometry.plot(
         plot_type="contourf",
         title="contourf",
         show_mesh=False,
@@ -83,22 +34,11 @@ def test_plot_dfsu_contour_mixedmesh():
 
 
 def test_plot_dfsu_n_refinements():
-    msh = Mesh("tests/testdata/FakeLake.dfsu")
-    msh.plot(plot_type="contourf", levels=None, n_refinements=1)
+    dfs = mikeio.open("tests/testdata/FakeLake.dfsu")
+    geometry = dfs.geometry
+    geometry.plot(plot_type="contourf", levels=None, n_refinements=1)
     assert True
 
-
-def test_plot_dfsu_shaded(hd2d_dfs):
-    dfs = hd2d_dfs
-    da = dfs.read(items="Surface elevation", time=0)[0]
-    elem40 = np.arange(40)
-
-    ax = da.plot(elements=elem40) # this is ok
-    assert ax is not None
-
-    wl_40 = da.values[elem40]
-    with pytest.warns(FutureWarning):
-        dfs.plot(wl_40, elements=elem40, plot_type="shaded", levels=5)
 
 def test_plot_dfsu_contour_subset_not_allowed(hd2d_dfs):
     dfs = hd2d_dfs
@@ -106,31 +46,6 @@ def test_plot_dfsu_contour_subset_not_allowed(hd2d_dfs):
     elem40 = np.arange(40)
     with pytest.raises(Exception):
         da.plot.contour(elements=elem40)
-
-
-
-def test_plot_dfsu(hd2d_dfs):
-    dfs = hd2d_dfs
-    data = dfs.read()
-    with pytest.warns(FutureWarning):
-        dfs.plot(z=data[1][0, :], figsize=(3, 3), plot_type="mesh_only")
-    assert True
-
-
-def test_plot_dfsu_squeeze(hd2d_dfs):
-    dfs = hd2d_dfs
-    data = dfs.read(items=0, time=0)
-    with pytest.warns(FutureWarning):
-        dfs.plot(z=data)  # 1 item-dataset
-    assert True
-
-
-def test_plot_dfsu_arguments():
-    dfs = mikeio.open("tests/testdata/NorthSea_HD_and_windspeed.dfsu")
-    dfs.read()
-    with pytest.warns(FutureWarning):
-        dfs.plot(title="test", label="test", vmin=-23, vmax=23)
-    assert True
 
 
 def test_plot_mesh():
@@ -158,8 +73,8 @@ def test_plot_mesh_ax():
 
 def test_plot_mesh_boundary_nodes():
     msh = Mesh("tests/testdata/odense_rough.mesh")
-    msh.plot_boundary_nodes()
-    msh.plot_boundary_nodes(["Land", "Sea"])
+    msh.plot.boundary_nodes()
+    msh.plot.boundary_nodes(["Land", "Sea"])
     assert True
 
 
@@ -206,7 +121,7 @@ def test_da_plot():
     da.plot()
     da.plot(show_mesh=True)
     da.plot.contour()
-    da.plot.contourf(show_mesh=True,cmap='terrain', levels=[-30,-20,-10,0])
+    da.plot.contourf(show_mesh=True, cmap="terrain", levels=[-30, -20, -10, 0])
     da.plot.outline()
 
     dam = da.max()
@@ -218,8 +133,9 @@ def test_da_plot():
 
     plt.close("all")
 
+
 def test_plot_non_utm_file():
-    
+
     ds = mikeio.read("tests/testdata/FakeLake_NONUTM.dfsu")
     da = ds[0]
     da.plot()

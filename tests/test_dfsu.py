@@ -1,5 +1,6 @@
 from pathlib import Path
 from datetime import datetime
+import shutil
 
 import numpy as np
 import pandas as pd
@@ -144,7 +145,6 @@ def test_read_selected_item_names_returns_correct_items():
 
 
 def test_read_all_time_steps():
-
     filename = "tests/testdata/HD2D.dfsu"
     dfs = mikeio.open(filename)
 
@@ -155,7 +155,6 @@ def test_read_all_time_steps():
 
 
 def test_read_all_time_steps_without_reading_items():
-
     filename = "tests/testdata/HD2D.dfsu"
     dfs = mikeio.open(filename)
     assert isinstance(dfs.time, pd.DatetimeIndex)
@@ -163,7 +162,6 @@ def test_read_all_time_steps_without_reading_items():
 
 
 def test_read_item_range():
-
     filename = "tests/testdata/HD2D.dfsu"
     dfs = mikeio.open(filename)
 
@@ -174,7 +172,6 @@ def test_read_item_range():
 
 
 def test_read_all_time_steps_without_progressbar():
-
     Dfsu.show_progress = True
 
     filename = "tests/testdata/HD2D.dfsu"
@@ -188,7 +185,6 @@ def test_read_all_time_steps_without_progressbar():
 
 
 def test_read_single_time_step():
-
     filename = "tests/testdata/HD2D.dfsu"
     dfs = mikeio.open(filename)
 
@@ -200,7 +196,6 @@ def test_read_single_time_step():
 
 
 def test_read_single_time_step_scalar():
-
     filename = "tests/testdata/HD2D.dfsu"
     dfs = mikeio.open(filename)
 
@@ -211,17 +206,14 @@ def test_read_single_time_step_scalar():
 
 
 def test_read_single_time_step_outside_bounds_fails():
-
     filename = "tests/testdata/HD2D.dfsu"
     dfs = mikeio.open(filename)
 
     with pytest.raises(Exception):
-
         dfs.read(items=[0, 3], time=[100])
 
 
 def test_read_area():
-
     filename = "tests/testdata/FakeLake.dfsu"
     dfs = mikeio.open(filename)
 
@@ -231,7 +223,6 @@ def test_read_area():
 
 
 def test_read_area_polygon():
-
     polygon = [
         [7.78, 55.20],
         [7.03, 55.46],
@@ -273,7 +264,6 @@ def test_find_index_on_island():
 
 
 def test_read_area_single_element():
-
     filename = "tests/testdata/FakeLake.dfsu"
     dfs = mikeio.open(filename)
 
@@ -287,7 +277,6 @@ def test_read_area_single_element():
 
 
 def test_read_empty_area_fails():
-
     filename = "tests/testdata/FakeLake.dfsu"
     dfs = mikeio.open(filename)
 
@@ -446,7 +435,6 @@ def find_nearest_profile_elements():
 
 
 def test_read_and_select_single_element():
-
     filename = "tests/testdata/HD2D.dfsu"
     ds = mikeio.read(filename)
 
@@ -457,7 +445,6 @@ def test_read_and_select_single_element():
 
 
 def test_is_2d():
-
     filename = "tests/testdata/HD2D.dfsu"
     dfs = mikeio.open(filename)
 
@@ -511,7 +498,6 @@ def test_get_element_area_tri_quad():
 
 
 def test_write(tmp_path):
-
     fp = tmp_path / "simple.dfsu"
     meshfilename = "tests/testdata/odense_rough.mesh"
 
@@ -534,7 +520,6 @@ def test_write(tmp_path):
 
 
 def test_write_from_dfsu(tmp_path):
-
     sourcefilename = "tests/testdata/HD2D.dfsu"
     fp = tmp_path / "simple.dfsu"
     dfs = mikeio.open(sourcefilename)
@@ -551,123 +536,31 @@ def test_write_from_dfsu(tmp_path):
     assert dfs.end_time == newdfs.end_time
 
 
-def test_incremental_write_from_dfsu(tmp_path):
-    "Useful for writing datasets with many timesteps to avoid problems with out of memory"
+def test_incremental_write_using_mikecore(tmp_path):
+    from mikecore.DfsFileFactory import DfsFileFactory
 
     sourcefilename = "tests/testdata/HD2D.dfsu"
-    fp = tmp_path / "simple.dfsu"
-    dfs = mikeio.open(sourcefilename)
 
-    nt = dfs.n_timesteps
+    # copy to tmp_path
+    fp = str(tmp_path / "simple.dfsu")
+    shutil.copy(sourcefilename, fp)
 
-    ds = dfs.read(time=[0], keepdims=True)
+    nt = 10
 
-    dfs.write(fp, ds, keep_open=True)
+    dfs = DfsFileFactory.DfsGenericOpenEdit(fp)
+    n_items = len(dfs.ItemInfo)
+    n_elements = dfs.ItemInfo[0].ElementCount
 
-    for i in range(1, nt):
-        ds = dfs.read(time=[i], keepdims=True)
-        dfs.append(ds)
-
-    dfs.close()
-
-    newdfs = mikeio.open(fp)
-    assert dfs.start_time == newdfs.start_time
-    assert dfs.timestep == newdfs.timestep
-    assert dfs.end_time == newdfs.end_time
-
-
-def test_incremental_write_from_dfsu_context_manager(tmp_path):
-
-    sourcefilename = "tests/testdata/HD2D.dfsu"
-    fp = tmp_path / "simple.dfsu"
-    dfs = mikeio.open(sourcefilename)
-
-    nt = dfs.n_timesteps
-
-    ds = dfs.read(time=[0], keepdims=True)
-
-    with dfs.write(fp, ds, keep_open=True) as f:
-        for i in range(1, nt):
-            ds = dfs.read(time=[i], keepdims=True)
-            f.append(ds)
-
-        # dfs.close() # should be called automagically by context manager
-
-    newdfs = mikeio.open(fp)
-    assert dfs.start_time == newdfs.start_time
-    assert dfs.timestep == newdfs.timestep
-    assert dfs.end_time == newdfs.end_time
-
-
-def test_incremental_write_from_dfsu_context_manager_3d(tmp_path):
-
-    sourcefilename = "tests/testdata/oresund_sigma_z.dfsu"
-    fp = tmp_path / "3d.dfsu"
-    dfs = mikeio.open(sourcefilename)
-
-    nt = dfs.n_timesteps
-
-    ds = dfs.read(time=[0], keepdims=True)
-
-    with dfs.write(fp, ds, keep_open=True) as f:
-        for i in range(1, nt):
-            ds = dfs.read(time=[i], keepdims=True)
-            f.append(ds)
-
-        # dfs.close() # should be called automagically by context manager
-
-    newdfs = mikeio.open(fp)
-    assert dfs.start_time == newdfs.start_time
-    assert dfs.timestep == newdfs.timestep
-    assert dfs.end_time == newdfs.end_time
-
-
-def test_write_big_file(tmp_path):
-
-    fp = tmp_path / "big.dfsu"
-    meshfilename = "tests/testdata/odense_rough.mesh"
-
-    msh = Mesh(meshfilename)
-
-    n_elements = msh.n_elements
-
-    dfs = Dfsu(meshfilename)
-
-    nt = 5  # or some big number 50000
-
-    n_items = 10
-
-    das = [
-        DataArray(
-            data=np.random.random((1, n_elements)),
-            geometry=msh.geometry,
-            time="2000-1-1",
-            item=f"Item {i+1}",
-        )
-        for i in range(n_items)
-    ]
-
-    ds = Dataset(das)
-
-    with dfs.write(fp, data=ds, dt=3600, keep_open=True) as f:
-        for _ in range(1, nt):
-            data = []
-            for i in range(n_items):
-                d = np.random.random((1, n_elements))
-                da = DataArray(data=d, geometry=msh.geometry, item=f"Item {i+1}")
-                data.append(da)
-            dst = Dataset(data)
-            f.append(dst)
-
-    dfsu = mikeio.open(fp)
-
-    assert dfsu.n_items == n_items
-    assert dfsu.n_timesteps == nt
-    assert dfsu.start_time.year == 2000
+    for _ in range(nt):
+        for _ in range(n_items):
+            data = np.random.random(size=n_elements).astype(
+                np.float32
+            )  # Replace with actual data
+            dfs.WriteItemTimeStepNext(0.0, data)
+    dfs.Close()
 
 
 def test_write_from_dfsu_2_time_steps(tmp_path):
-
     sourcefilename = "tests/testdata/HD2D.dfsu"
     fp = tmp_path / "simple.dfsu"
     dfs = mikeio.open(sourcefilename)
@@ -685,7 +578,6 @@ def test_write_from_dfsu_2_time_steps(tmp_path):
 
 
 def test_write_non_equidistant_is_not_possible(tmp_path):
-
     sourcefilename = "tests/testdata/HD2D.dfsu"
     fp = tmp_path / "simple.dfsu"
     ds = mikeio.read(sourcefilename, time=[0, 1, 3])
@@ -695,7 +587,6 @@ def test_write_non_equidistant_is_not_possible(tmp_path):
 
 
 def test_temporal_resample_by_reading_selected_timesteps(tmp_path):
-
     sourcefilename = "tests/testdata/HD2D.dfsu"
     fp = tmp_path / "simple.dfsu"
     dfs = mikeio.open(sourcefilename)
@@ -711,7 +602,6 @@ def test_temporal_resample_by_reading_selected_timesteps(tmp_path):
 
 
 def test_read_temporal_subset():
-
     sourcefilename = "tests/testdata/HD2D.dfsu"
     dfs = mikeio.open(sourcefilename)
 
@@ -733,7 +623,6 @@ def test_read_temporal_subset():
 
 
 def test_read_temporal_subset_string():
-
     sourcefilename = "tests/testdata/HD2D.dfsu"
     dfs = mikeio.open(sourcefilename)
 
@@ -757,7 +646,6 @@ def test_read_temporal_subset_string():
 
 
 def test_write_temporal_subset(tmp_path):
-
     sourcefilename = "tests/testdata/HD2D.dfsu"
     fp = tmp_path / "simple.dfsu"
     dfs = mikeio.open(sourcefilename)
@@ -775,14 +663,17 @@ def test_write_temporal_subset(tmp_path):
 
 
 def test_geometry_2d():
-
     filename = "tests/testdata/oresund_sigma_z.dfsu"
 
     dfs = mikeio.open(filename)
 
-    geom = dfs.to_2d_geometry()
-
+    with pytest.warns(FutureWarning, match="geometry2d"):
+        geom = dfs.to_2d_geometry()
     assert geom.is_2d
+
+    g2 = dfs.geometry2d
+    assert g2.is_2d
+
 
 def test_to_mesh_2d(tmp_path):
     filename = "tests/testdata/HD2D.dfsu"
@@ -951,14 +842,11 @@ def test_e2_e3_table_2d_file():
 
 
 def test_dataset_write_dfsu(tmp_path):
-
     fp = tmp_path / "HD2D_start.dfsu"
     ds = mikeio.read("tests/testdata/HD2D.dfsu", time=[0, 1])
     ds.to_dfs(fp)
 
     dfs = mikeio.open(fp)
-
-    assert dfs._source.ApplicationTitle == "mikeio"
 
     ds2 = dfs.read()
     assert ds2.n_timesteps == 2
@@ -1006,7 +894,6 @@ def test_interp_like_grid():
 
 
 def test_interp_like_grid_time_invariant():
-
     ds = mikeio.read("tests/testdata/wind_north_sea.dfsu", time=-1)
     assert "time" not in ds.dims
     grid = ds.geometry.get_overset_grid(dx=0.1)
@@ -1026,7 +913,6 @@ def test_interp_like_grid_time_invariant():
 
 
 def test_interp_like_dataarray(tmp_path):
-
     tmp_path / "interp.dfs2"
 
     da = mikeio.read("tests/testdata/consistency/oresundHD.dfsu")[0]
@@ -1046,7 +932,6 @@ def test_interp_like_dataarray(tmp_path):
 
 
 def test_interp_like_dataset(tmp_path):
-
     fp = tmp_path / "interp.dfs2"
 
     ds = mikeio.read("tests/testdata/consistency/oresundHD.dfsu")
@@ -1094,42 +979,12 @@ def test_interp_like_fm_dataset():
     assert isinstance(dsi.geometry, GeometryFM2D)
 
 
-def test_write_header(tmp_path):
-    meshfilename = "tests/testdata/north_sea_2.mesh"
-    fp = tmp_path / "NS_write_header.dfsu"
-    dfs = mikeio.Dfsu(meshfilename)
-    n_elements = dfs.n_elements
-    nt = 3
-    n_items = 2
-    items = [ItemInfo(f"Item {i+1}") for i in range(n_items)]
-    time0 = datetime(2021, 1, 1)
-    with dfs.write_header(fp, items=items, start_time=time0, dt=3600) as f:
-        for _ in range(nt):
-            data = []
-            for _ in range(n_items):
-                d = np.random.random((1, n_elements))  # 2d
-                data.append(d)
-                f.append(data)
-
-    # append also works for data without time axis
-    fp = tmp_path / "NS_write_header2.dfsu"
-    with dfs.write_header(fp, items=items, start_time=time0, dt=3600) as f:
-        for _ in range(nt):
-            data = []
-            for _ in range(n_items):
-                d = np.random.random((n_elements))  # 1d
-                data.append(d)
-                f.append(data)
-
 def test_writing_non_equdistant_dfsu_is_not_possible(tmp_path):
-
     ds = mikeio.read("tests/testdata/wind_north_sea.dfsu")
-    dss = ds.isel(time=[0,2,3])
+    dss = ds.isel(time=[0, 2, 3])
     assert not dss.is_equidistant
 
     # TODO which exception should be raised, when trying to write non-equidistant dfsu? This operation is not supported
     with pytest.raises(ValueError, match="equidistant"):
         fp = tmp_path / "not_gonna_work.dfsu"
         dss.to_dfs(fp)
-
-    

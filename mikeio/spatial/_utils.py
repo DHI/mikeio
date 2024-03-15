@@ -3,11 +3,8 @@ import numpy as np
 from ._geometry import BoundingBox
 
 
-def xy_to_bbox(xy, buffer=None):
+def xy_to_bbox(xy: np.ndarray, buffer: float = 0.0) -> BoundingBox:
     """return bounding box for list of coordinates"""
-    if buffer is None:
-        buffer = 0
-
     left = xy[:, 0].min() - buffer
     bottom = xy[:, 1].min() - buffer
     right = xy[:, 0].max() + buffer

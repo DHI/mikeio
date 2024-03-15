@@ -1,3 +1,7 @@
+from __future__ import annotations
+from typing import Any
+
+
 class DataDimensionMismatch(ValueError):
     def __init__(self):
         self.message = (
@@ -29,7 +33,15 @@ class InvalidDataValueType(ValueError):
 
 
 class OutsideModelDomainError(ValueError):
-    def __init__(self, *, x, y, z=None, indices=None, message=None):
+    def __init__(
+        self,
+        *,
+        x: Any,
+        y: Any = None,
+        z: Any = None,
+        indices: Any = None,
+        message: str | None = None,
+    ) -> None:
         self.x = x
         self.y = y
         self.z = z

@@ -144,25 +144,6 @@ def test_x_y_is_increasing():
     assert "increasing" in str(excinfo.value)
 
 
-def test_xx_yy():
-    nx = 4
-    ny = 3
-    x = np.linspace(1, 7, nx)
-    y = np.linspace(3, 5, ny)
-    g = Grid2D(x=x, y=y)
-    # assert g.n == nx * ny
-    assert g._xx[0, 0] == 1.0
-    assert g._yy[-1, -1] == 5.0
-    assert np.all(g.xy[1] == [3.0, 3.0])
-    assert np.all(g.coordinates[1] == [3.0, 3.0])
-
-    g2 = Grid2D(x=x, y=y)
-
-    # Reverse order compared to above makes no difference
-    assert g2._yy[-1, -1] == 5.0
-    assert g2._xx[0, 0] == 1.0
-
-
 def test_create_in_bbox():
     bbox = [0, 0, 1, 5]
     g = Grid2D(bbox=bbox, nx=2, ny=5)

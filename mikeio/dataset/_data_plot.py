@@ -9,7 +9,8 @@ from ..spatial._FM_utils import _plot_map, _plot_vertical_profile
 from .._spectral import plot_2dspectrum
 
 if TYPE_CHECKING:
-    from ..dataset import DataArray
+    from ..dataset import DataArray, Dataset
+
 
 class _DataArrayPlotter:
     """Context aware plotter (sensible plotting according to geometry)"""
@@ -17,7 +18,12 @@ class _DataArrayPlotter:
     def __init__(self, da: "DataArray") -> None:
         self.da = da
 
-    def __call__(self, ax:Axes | None=None, figsize=None, **kwargs):
+    def __call__(
+        self,
+        ax: Axes | None = None,
+        figsize: Tuple[float, float] | None = None,
+        **kwargs: Any,
+    ) -> Axes:
         """Plot DataArray according to geometry
 
         Parameters
@@ -65,7 +71,13 @@ class _DataArrayPlotter:
             fig = plt.gcf()
         return fig, ax
 
-    def hist(self, ax: Axes| None=None, figsize:Tuple[float,float] | None=None, title: str | None=None, **kwargs: Any) -> Axes:
+    def hist(
+        self,
+        ax: Axes | None = None,
+        figsize: Tuple[float, float] | None = None,
+        title: str | None = None,
+        **kwargs: Any,
+    ) -> Axes:
         """Plot DataArray as histogram (using ax.hist)
 
         Parameters
@@ -97,7 +109,7 @@ class _DataArrayPlotter:
             ax.set_title(title)
         return self._hist(ax, **kwargs)
 
-    def _hist(self, ax: Axes, **kwargs):
+    def _hist(self, ax: Axes, **kwargs: Any) -> Any:
         result = ax.hist(self.da.values.ravel(), **kwargs)
         ax.set_xlabel(self._label_txt())
         return result
@@ -222,19 +234,26 @@ class _DataArrayPlotterGrid2D(_DataArrayPlotter):
 
     Examples
     --------
-    >>> da = mikeio.read("gebco_sound.dfs2")["Elevation"]
-    >>> da.plot()
-    >>> da.plot.contour()
-    >>> da.plot.contourf()
-    >>> da.plot.pcolormesh()
-    >>> da.plot.hist()
+    ```{python}
+    import mikeio
+    da = mikeio.read("../data/gebco_sound.dfs2")["Elevation"]
+    da.plot()
+    ```
     """
 
     def __call__(self, ax=None, figsize=None, **kwargs):
         return self.pcolormesh(ax, figsize, **kwargs)
 
     def contour(self, ax=None, figsize=None, title=None, **kwargs):
-        """Plot data as contour lines"""
+        """Plot data as contour lines
+
+        Examples
+        --------
+        ```{python}
+        da = mikeio.read("../data/gebco_sound.dfs2")["Elevation"]
+        da.plot.contour()
+        ```
+        """
         _, ax = self._get_fig_ax(ax, figsize)
 
         x, y = self._get_x_y()
@@ -249,7 +268,15 @@ class _DataArrayPlotterGrid2D(_DataArrayPlotter):
         return ax
 
     def contourf(self, ax=None, figsize=None, label=None, title=None, **kwargs):
-        """Plot data as filled contours"""
+        """Plot data as filled contours
+
+        Examples
+        --------
+        ```{python}
+        da = mikeio.read("../data/gebco_sound.dfs2")["Elevation"]
+        da.plot.contourf()
+        ```
+        """
         fig, ax = self._get_fig_ax(ax, figsize)
 
         x, y = self._get_x_y()
@@ -265,7 +292,15 @@ class _DataArrayPlotterGrid2D(_DataArrayPlotter):
         return ax
 
     def pcolormesh(self, ax=None, figsize=None, label=None, title=None, **kwargs):
-        """Plot data as coloured patches"""
+        """Plot data as coloured patches
+
+        Examples
+        --------
+        ```{python}
+        da = mikeio.read("../data/gebco_sound.dfs2")["Elevation"]
+        da.plot.pcolormesh()
+        ```
+        """
         fig, ax = self._get_fig_ax(ax, figsize)
 
         xn, yn = self._get_xn_yn()
@@ -322,14 +357,11 @@ class _DataArrayPlotterFM(_DataArrayPlotter):
 
     Examples
     --------
-    >>> da = mikeio.read("HD2D.dfsu")["Surface elevation"]
-    >>> da.plot()
-    >>> da.plot.contour()
-    >>> da.plot.contourf()
-
-    >>> da.plot.mesh()
-    >>> da.plot.outline()
-    >>> da.plot.hist()
+    ```{python}
+    import mikeio
+    da = mikeio.read("../data/HD2D.dfsu")["Surface elevation"]
+    da.plot()
+    ```
     """
 
     def __call__(self, ax=None, figsize=None, **kwargs):
@@ -338,29 +370,69 @@ class _DataArrayPlotterFM(_DataArrayPlotter):
         return self._plot_FM_map(ax, **kwargs)
 
     def patch(self, ax=None, figsize=None, **kwargs):
-        """Plot data as coloured patches"""
+        """Plot data as coloured patches
+
+        Examples
+        --------
+        ```{python}
+        da = mikeio.read("../data/HD2D.dfsu")["Surface elevation"]
+        da.plot.patch()
+        ```
+        """
         ax = self._get_ax(ax, figsize)
         kwargs["plot_type"] = "patch"
         return self._plot_FM_map(ax, **kwargs)
 
     def contour(self, ax=None, figsize=None, **kwargs):
-        """Plot data as contour lines"""
+        """Plot data as contour lines
+
+        Examples
+        --------
+        ```{python}
+        da = mikeio.read("../data/HD2D.dfsu")["Surface elevation"]
+        da.plot.contour()
+        ```
+        """
         ax = self._get_ax(ax, figsize)
         kwargs["plot_type"] = "contour"
         return self._plot_FM_map(ax, **kwargs)
 
     def contourf(self, ax=None, figsize=None, **kwargs):
-        """Plot data as filled contours"""
+        """Plot data as filled contours
+
+        Examples
+        --------
+        ```{python}
+        da = mikeio.read("../data/HD2D.dfsu")["Surface elevation"]
+        da.plot.contourf()
+        ```
+        """
         ax = self._get_ax(ax, figsize)
         kwargs["plot_type"] = "contourf"
         return self._plot_FM_map(ax, **kwargs)
 
     def mesh(self, ax=None, figsize=None, **kwargs):
-        """Plot mesh only"""
+        """Plot mesh only
+
+        Examples
+        --------
+        ```{python}
+        da = mikeio.read("../data/HD2D.dfsu")["Surface elevation"]
+        da.plot.mesh()
+        ```
+        """
         return self.da.geometry.plot.mesh(figsize=figsize, ax=ax, **kwargs)
 
     def outline(self, ax=None, figsize=None, **kwargs):
-        """Plot domain outline (using the boundary_polylines property)"""
+        """Plot domain outline (using the boundary_polylines property)
+
+        Examples
+        --------
+        ```{python}
+        da = mikeio.read("../data/HD2D.dfsu")["Surface elevation"]
+        da.plot.outline()
+        ```
+        """
         return self.da.geometry.plot.outline(figsize=figsize, ax=ax, **kwargs)
 
     def _plot_FM_map(self, ax, **kwargs):
@@ -575,7 +647,7 @@ class _DataArrayPlotterPointSpectrum(_DataArrayPlotter):
             **kwargs,
         )
 
-    def _get_title(self):
+    def _get_title(self) -> str:
         txt = f"{self.da.time[0]}"
         x, y = self.da.geometry.x, self.da.geometry.y
         if x is not None and y is not None:
@@ -587,7 +659,7 @@ class _DataArrayPlotterPointSpectrum(_DataArrayPlotter):
 
 
 class _DataArrayPlotterLineSpectrum(_DataArrayPlotterGrid1D):
-    def __init__(self, da) -> None:
+    def __init__(self, da: DataArray) -> None:
         if da.n_timesteps > 1:
             Hm0 = da[0].to_Hm0()
         else:
@@ -596,7 +668,7 @@ class _DataArrayPlotterLineSpectrum(_DataArrayPlotterGrid1D):
 
 
 class _DataArrayPlotterAreaSpectrum(_DataArrayPlotterFM):
-    def __init__(self, da) -> None:
+    def __init__(self, da: DataArray) -> None:
         if da.n_timesteps > 1:
             Hm0 = da[0].to_Hm0()
         else:
@@ -605,7 +677,7 @@ class _DataArrayPlotterAreaSpectrum(_DataArrayPlotterFM):
 
 
 class _DatasetPlotter:
-    def __init__(self, ds) -> None:
+    def __init__(self, ds: Dataset) -> None:
         self.ds = ds
 
     def __call__(self, figsize=None, **kwargs):

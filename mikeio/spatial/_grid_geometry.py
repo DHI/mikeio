@@ -1,11 +1,12 @@
 from __future__ import annotations
+from functools import cached_property
+from pathlib import Path
 import warnings
-from typing import Sequence, Tuple
+from typing import Any, Sequence, Tuple, TYPE_CHECKING, List, overload
 from dataclasses import dataclass
 import numpy as np
-from numpy.typing import ArrayLike, NDArray
 
-from mikecore.Projections import Cartography  # type: ignore
+from mikecore.Projections import Cartography
 
 from ..exceptions import OutsideModelDomainError
 
@@ -17,6 +18,10 @@ from ._geometry import (
     _Geometry,
 )
 
+if TYPE_CHECKING:
+    from matplotlib.axes import Axes
+    from ..spatial import GeometryFM2D
+
 
 def _check_equidistant(x: np.ndarray) -> None:
     d = np.diff(x)
@@ -24,7 +29,13 @@ def _check_equidistant(x: np.ndarray) -> None:
         raise NotImplementedError("values must be equidistant")
 
 
-def _parse_grid_axis(name, x, x0=0.0, dx=None, nx=None):
+def _parse_grid_axis(
+    name: str,
+    x: np.ndarray | None,
+    x0: float = 0.0,
+    dx: float | None = None,
+    nx: int | None = None,
+) -> Tuple[float, float, int]:
     if x is not None:
         x = np.asarray(x)
         _check_equidistant(x)
@@ -43,7 +54,7 @@ def _parse_grid_axis(name, x, x0=0.0, dx=None, nx=None):
     return x0, dx, nx
 
 
-def _print_axis_txt(name, x, dx) -> str:
+def _print_axis_txt(name: str, x: np.ndarray, dx: float) -> str:
     n = len(x)
     txt = f"{name}: [{x[0]:0.4g}"
     if n > 1:
@@ -77,15 +88,21 @@ class Grid1D(_Geometry):
         not commonly used
     orientation : float
         not commonly used
+    node_coordinates : array_like
+        coordinates of nodes in 2D or 3D space
+    axis_name : str
+        name of axis, by default "x"
 
     Examples
     --------
-    >>> mikeio.Grid1D(nx=3,dx=0.1)
-    <mikeio.Grid1D>
-    x: [0, 0.1, 0.2] (nx=3, dx=0.1)
-    >>> mikeio.Grid1D(x=[0.1, 0.5, 0.9])
-    <mikeio.Grid1D>
-    x: [0.1, 0.5, 0.9] (nx=3, dx=0.4)
+    ```{python}
+    import mikeio
+    mikeio.Grid1D(nx=3,dx=0.1)
+    ```
+
+    ```{python}
+    mikeio.Grid1D(x=[0.1, 0.5, 0.9])
+    ```
     """
 
     _dx: float
@@ -97,16 +114,16 @@ class Grid1D(_Geometry):
 
     def __init__(
         self,
-        x=None,
+        x: np.ndarray | None = None,
         *,
-        x0=0.0,
-        dx=None,
-        nx=None,
-        projection="NON-UTM",
+        x0: float = 0.0,
+        dx: float | None = None,
+        nx: int | None = None,
+        projection: str = "NON-UTM",
         origin: Tuple[float, float] = (0.0, 0.0),
-        orientation=0.0,
-        node_coordinates=None,
-        axis_name="x",
+        orientation: float = 0.0,
+        node_coordinates: np.ndarray | None = None,
+        axis_name: str = "x",
     ):
         """Create equidistant 1D spatial geometry"""
         super().__init__(projection=projection)
@@ -125,21 +142,44 @@ class Grid1D(_Geometry):
     def ndim(self) -> int:
         return 1
 
-    def __repr__(self):
+    @property
+    def default_dims(self) -> Tuple[str, ...]:
+        return ("x",)
+
+    def __repr__(self) -> str:
         out = ["<mikeio.Grid1D>", _print_axis_txt("x", self.x, self.dx)]
         return "\n".join(out)
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"Grid1D (n={self.nx}, dx={self.dx:.4g})"
 
-    def find_index(self, x: float, **kwargs) -> int:
-        """Find nearest point"""
+    def find_index(self, x: float, **kwargs: Any) -> int:
+        """Find nearest point
+
+        Parameters
+        ----------
+        x : float
+            x-coordinate of point
+
+        Returns
+        -------
+        int
+            index of nearest point
+        **kwargs : Any
+            Not used
+
+        See Also
+        --------
+        [](`mikeio.Dataset.sel`)
+        """
 
         d = (self.x - x) ** 2
 
         return int(np.argmin(d))
 
-    def get_spatial_interpolant(self, coords, **kwargs):
+    def get_spatial_interpolant(
+        self, coords: Tuple[np.ndarray, np.ndarray], **kwargs: Any
+    ) -> Tuple[np.ndarray, np.ndarray]:
         x = coords[0][0]  # TODO accept list of points
 
         assert self.nx > 1, "Interpolation not possible for Grid1D with one point"
@@ -155,7 +195,7 @@ class Grid1D(_Geometry):
         assert len(weights) == 2
         return ids, weights
 
-    def interp(self, data, ids, weights):
+    def interp(self, data: np.ndarray, ids: np.ndarray, weights: np.ndarray) -> Any:
         return np.dot(data[:, ids], weights)
 
     @property
@@ -164,7 +204,7 @@ class Grid1D(_Geometry):
         return self._dx
 
     @property
-    def x(self):
+    def x(self) -> np.ndarray:
         """array of node coordinates"""
         x1 = self._x0 + self.dx * (self.nx - 1)
         return np.linspace(self._x0, x1, self.nx)
@@ -183,7 +223,7 @@ class Grid1D(_Geometry):
         return self._orientation
 
     def isel(
-        self, idx, axis=None
+        self, idx: int | np.int64 | slice, axis: int | None = None
     ) -> "Grid1D" | GeometryPoint2D | GeometryPoint3D | GeometryUndefined:
         """Get a subset geometry from this geometry
 
@@ -201,15 +241,19 @@ class Grid1D(_Geometry):
 
         Examples
         --------
-        >>> g = mikeio.Grid1D(nx=3,dx=0.1)
-        >>> g
-        <mikeio.Grid1D>
-        x: [0, 0.1, 0.2] (nx=3, dx=0.1)
-        >>> g.isel([1,2])
-        <mikeio.Grid1D>
-        x: [0.1, 0.2] (nx=2, dx=0.1)
-        >>> g.isel(1)
-        GeometryUndefined()
+        ```{python}
+        import mikeio
+        g = mikeio.Grid1D(nx=3,dx=0.1)
+        g
+        ```
+
+        ```{python}
+        g.isel([1,2])
+        ```
+
+        ```{python}
+        g.isel(1)
+        ```
         """
 
         if not np.isscalar(idx):
@@ -225,7 +269,7 @@ class Grid1D(_Geometry):
         if self._nc is None:
             return GeometryUndefined()
         else:
-            coords = self._nc[idx, :]
+            coords = self._nc[idx, :]  # type: ignore
             if len(coords) == 3:
                 x, y, z = coords
                 return GeometryPoint3D(x=x, y=y, z=z, projection=self.projection)
@@ -235,33 +279,48 @@ class Grid1D(_Geometry):
 
 
 class _Grid2DPlotter:
-    """Plot GeometryFM
+    """Plot Grid2D
 
     Examples
     --------
-    >>> ds = mikeio.read("tests/testdata/waves.dfs2")
-    >>> g = ds.geometry
-    >>> ax = g.plot()
-    >>> ax = g.plot.outline()
+    ```{python}
+    import mikeio
+    g = mikeio.read("../data/waves.dfs2").geometry
+    ax = g.plot()
+    ```
     """
 
     def __init__(self, geometry: "Grid2D") -> None:
         self.g = geometry
 
-    def __call__(self, ax=None, figsize=None, **kwargs):
+    def __call__(
+        self,
+        ax: Axes | None = None,
+        figsize: Tuple[float, float] | None = None,
+        **kwargs: Any,
+    ) -> Any:
         """Plot bathymetry as coloured patches"""
         ax = self._get_ax(ax, figsize)
         return self._plot_grid(ax, **kwargs)
 
     @staticmethod
-    def _get_ax(ax=None, figsize=None):
-        import matplotlib.pyplot as plt  # type: ignore
+    def _get_ax(
+        ax: Axes | None = None, figsize: Tuple[float, float] | None = None
+    ) -> Axes:
+        import matplotlib.pyplot as plt
 
         if ax is None:
             _, ax = plt.subplots(figsize=figsize)
         return ax
 
-    def _plot_grid(self, ax, title=None, color="0.5", linewidth=0.6, **kwargs):
+    def _plot_grid(
+        self,
+        ax: Axes,
+        title: str | None = None,
+        color: str = "0.5",
+        linewidth: float = 0.6,
+        **kwargs: Any,
+    ) -> Axes:
         g = self.g
         xn = g._centers_to_nodes(g.x)
         yn = g._centers_to_nodes(g.y)
@@ -280,14 +339,22 @@ class _Grid2DPlotter:
 
     def outline(
         self,
-        title="Outline",
-        ax=None,
-        figsize=None,
-        color="0.4",
-        linewidth=1.2,
-        **kwargs,
-    ):
-        """Plot Grid2D outline"""
+        title: str = "Outline",
+        ax: Axes | None = None,
+        figsize: Tuple[float, float] | None = None,
+        color: str = "0.4",
+        linewidth: float = 1.2,
+        **kwargs: Any,
+    ) -> Axes:
+        """Plot Grid2D outline
+
+        Examples
+        --------
+        ```{python}
+        g = mikeio.read("../data/waves.dfs2").geometry
+        g.plot.outline()
+        ```
+        """
         ax = self._get_ax(ax, figsize)
         g = self.g
         xn = g._centers_to_nodes(g.x)
@@ -306,7 +373,7 @@ class _Grid2DPlotter:
 
         return ax
 
-    def _set_aspect_and_labels(self, ax):
+    def _set_aspect_and_labels(self, ax: Axes) -> None:
         g = self.g
         if g.is_spectral:
             ax.set_xlabel("Frequency [Hz]")
@@ -350,20 +417,20 @@ class Grid2D(_Geometry):
     def __init__(
         self,
         *,
-        x: Sequence[float] | None = None,
+        x: np.ndarray | None = None,
         x0: float = 0.0,
         dx: float | None = None,
         nx: int | None = None,
-        y: Sequence[float] | None = None,
+        y: np.ndarray | None = None,
         y0: float = 0.0,
         dy: float | None = None,
         ny: int | None = None,
-        bbox=None,
-        projection="NON-UTM",
+        bbox: Tuple[float, float, float, float] | None = None,
+        projection: str = "NON-UTM",
         origin: Tuple[float, float] | None = None,
-        orientation=0.0,
-        axis_names=("x", "y"),
-        is_spectral=False,
+        orientation: float = 0.0,
+        axis_names: Tuple[str, str] = ("x", "y"),
+        is_spectral: bool = False,
     ):
         """Create equidistant 2D spatial geometry
 
@@ -400,11 +467,10 @@ class Grid2D(_Geometry):
 
         Examples
         --------
-        >>> mikeio.Grid2D(x0=12.0, nx=2, dx=0.25, y0=55.0, ny=3, dy=0.25, projection="LONG/LAT")
-        <mikeio.Grid2D>
-        x: [12, 12.25] (nx=2, dx=0.25)
-        y: [55, 55.25, 55.5] (ny=3, dy=0.25)
-        projection: LONG/LAT
+        ```{python}
+        import mikeio
+        mikeio.Grid2D(x0=12.0, nx=2, dx=0.25, y0=55.0, ny=3, dy=0.25, projection="LONG/LAT")
+        ```
         """
         super().__init__(projection=projection)
         self._shift_origin_on_write = origin is None  # user-constructed
@@ -430,14 +496,25 @@ class Grid2D(_Geometry):
         self.plot = _Grid2DPlotter(self)
 
     @property
+    def default_dims(self) -> Tuple[str, ...]:
+        return ("y", "x")
+
+    @property
     def ndim(self) -> int:
         return 2
 
     @property
-    def _is_rotated(self):
+    def _is_rotated(self) -> Any:
         return np.abs(self._orientation) > 1e-5
 
-    def _create_in_bbox(self, bbox, dx=None, dy=None, nx=None, ny=None):
+    def _create_in_bbox(
+        self,
+        bbox: Tuple[float, float, float, float],
+        dx: float | Tuple[float, float] | None = None,
+        dy: float | None = None,
+        nx: int | None = None,
+        ny: int | None = None,
+    ) -> None:
         """create 2d grid in bounding box, specifying spacing or shape
 
         Parameters
@@ -482,7 +559,9 @@ class Grid2D(_Geometry):
         self._y0, self._dy, self._ny = self._create_in_bbox_1d("y", bottom, top, dy, ny)
 
     @staticmethod
-    def _parse_bbox(bbox):
+    def _parse_bbox(
+        bbox: Tuple[float, float, float, float]
+    ) -> Tuple[float, float, float, float]:
         left = bbox[0]
         bottom = bbox[1]
         right = bbox[2]
@@ -504,7 +583,13 @@ class Grid2D(_Geometry):
         return left, bottom, right, top
 
     @staticmethod
-    def _create_in_bbox_1d(axname, left, right, dx=None, nx=None):
+    def _create_in_bbox_1d(
+        axname: str,
+        left: float,
+        right: float,
+        dx: float | None = None,
+        nx: int | None = None,
+    ) -> Tuple[float, float, int]:
         xr = right - left
         if dx is not None:
             nx = int(np.ceil(xr / dx))
@@ -520,7 +605,7 @@ class Grid2D(_Geometry):
         x0 = left + dx / 2
         return x0, dx, nx
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         out = (
             ["<mikeio.Grid2D> (spectral)"] if self.is_spectral else ["<mikeio.Grid2D>"]
         )
@@ -536,7 +621,7 @@ class Grid2D(_Geometry):
 
         return "\n".join(out)
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"Grid2D (ny={self.ny}, nx={self.nx})"
 
     @property
@@ -550,7 +635,7 @@ class Grid2D(_Geometry):
         return self._dy
 
     @property
-    def x(self):
+    def x(self) -> np.ndarray:
         """array of x coordinates (element center)"""
         if self.is_spectral and self.dx > 1:
             return self._logarithmic_f(self.nx, self._x0, self.dx)
@@ -563,7 +648,9 @@ class Grid2D(_Geometry):
             return x_local + self._origin[0]
 
     @staticmethod
-    def _logarithmic_f(n=25, f0=0.055, freq_factor=1.1):
+    def _logarithmic_f(
+        n: int = 25, f0: float = 0.055, freq_factor: float = 1.1
+    ) -> np.ndarray:
         """Generate logarithmic frequency axis
 
         Parameters
@@ -586,7 +673,7 @@ class Grid2D(_Geometry):
         return np.exp(logf)
 
     @property
-    def y(self):
+    def y(self) -> np.ndarray:
         """array of y coordinates (element center)"""
         y1 = self._y0 + self.dy * (self.ny - 1)
         y_local = np.linspace(self._y0, y1, self.ny)
@@ -613,7 +700,7 @@ class Grid2D(_Geometry):
         return self._orientation
 
     @property
-    def bbox(self):
+    def bbox(self) -> BoundingBox:
         """bounding box (left, bottom, right, top)
         Note: not the same as the cell center values (x0,y0,x1,y1)!
         """
@@ -627,45 +714,23 @@ class Grid2D(_Geometry):
         top = self.y[-1] + self.dy / 2
         return BoundingBox(left, bottom, right, top)
 
-    @property
-    def _xx(self):
-        """2d array of all x-coordinates"""
-        if self.__xx is None:
-            self._create_meshgrid(self.x, self.y)
-        return self.__xx
-
-    @property
-    def _yy(self):
-        """2d array of all y-coordinates"""
-        if self.__yy is None:
-            self._create_meshgrid(self.x, self.y)
-        return self.__yy
-
-    def _create_meshgrid(self, x, y):
-        self.__xx, self.__yy = np.meshgrid(x, y)
-
-    @property
-    def xy(self):
+    @cached_property
+    def xy(self) -> np.ndarray:
         """n-by-2 array of x- and y-coordinates"""
-        xcol = self._xx.reshape(-1, 1)
-        ycol = self._yy.reshape(-1, 1)
+        xx, yy = np.meshgrid(self.x, self.y)
+        xcol = xx.reshape(-1, 1)
+        ycol = yy.reshape(-1, 1)
         return np.column_stack([xcol, ycol])
 
     @property
-    def coordinates(self):
-        # TODO: remove this?
-        """n-by-2 array of x- and y-coordinates"""
-        return self.xy
-
-    @property
-    def _cart(self):
+    def _cart(self) -> Cartography:
         """MIKE Core Cartography object"""
         factory = (
             Cartography.CreateGeoOrigin if self.is_geo else Cartography.CreateProjOrigin
         )
         return factory(self.projection_string, *self.origin, self.orientation)
 
-    def _shift_x0y0_to_origin(self):
+    def _shift_x0y0_to_origin(self) -> None:
         """Shift spatial axis to start at (0,0) adding the start to origin instead
         Note: this will not change the x or y properties.
         """
@@ -682,7 +747,7 @@ class Grid2D(_Geometry):
             self._x0, self._y0 = 0.0, 0.0
             self._origin = (self._origin[0] + x0, self._origin[1] + y0)
 
-    def contains(self, coords: ArrayLike) -> NDArray[np.bool_]:
+    def contains(self, coords: np.ndarray) -> Any:
         """test if a list of points are inside grid
 
         Parameters
@@ -703,16 +768,16 @@ class Grid2D(_Geometry):
         yinside = (self.bbox.bottom <= y) & (y <= self.bbox.top)
         return xinside & yinside
 
-    def __contains__(self, pt) -> NDArray[np.bool_]:
+    def __contains__(self, pt: Any) -> Any:
         return self.contains(pt)
 
     def find_index(
         self,
         x: float | None = None,
         y: float | None = None,
-        coords=None,
-        area=None,
-    ):
+        coords: np.ndarray | None = None,
+        area: Tuple[float, float, float, float] | None = None,
+    ) -> Tuple[Any, Any] | None:
         """Find nearest index (i,j) of point(s)
 
         Parameters
@@ -758,8 +823,10 @@ class Grid2D(_Geometry):
             return self._xy_to_index(coords)
         elif area is not None:
             return self._bbox_to_index(area)
+        else:
+            return None
 
-    def _xy_to_index(self, xy):
+    def _xy_to_index(self, xy: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
         """Find specific points in this geometry"""
         xy = np.atleast_2d(xy)
         y = xy[:, 1]
@@ -801,7 +868,15 @@ class Grid2D(_Geometry):
 
         return i, j
 
-    def isel(self, idx, axis: int | str) -> "Grid2D | Grid1D | GeometryUndefined":
+    @overload
+    def isel(self, idx: int, axis: int | str) -> "Grid1D": ...
+
+    @overload
+    def isel(self, idx: slice, axis: int | str) -> "Grid2D": ...
+
+    def isel(
+        self, idx: np.ndarray | int | slice, axis: int | str
+    ) -> "Grid2D | Grid1D | GeometryUndefined":
         """Return a new geometry as a subset of Grid2D along the given axis."""
         if isinstance(axis, str):
             if axis == "y":
@@ -814,28 +889,31 @@ class Grid2D(_Geometry):
         axis = axis + 2 if axis < 0 else axis
 
         if not np.isscalar(idx):
-            d = np.diff(idx)
+            d = np.diff(idx)  # type: ignore
             if np.any(d < 1) or not np.allclose(d, d[0]):
+                # non-equidistant grid is not supported by Dfs2
                 return GeometryUndefined()
             else:
                 ii = idx if axis == 1 else None
                 jj = idx if axis == 0 else None
-                return self._index_to_Grid2D(ii, jj)
+                return self._index_to_Grid2D(ii, jj)  # type: ignore
 
         if axis == 0:
             # y is first axis! if we select an element from y-axis (axis 0),
             # we return a "copy" of the x-axis
-            nc = np.column_stack([self.x, self.y[idx] * np.ones_like(self.x)])
+            nc = np.column_stack([self.x, self.y[idx] * np.ones_like(self.x)])  # type: ignore
             return Grid1D(x=self.x, projection=self.projection, node_coordinates=nc)
         elif axis == 1:
-            nc = np.column_stack([self.x[idx] * np.ones_like(self.y), self.y])
+            nc = np.column_stack([self.x[idx] * np.ones_like(self.y), self.y])  # type: ignore
             return Grid1D(
                 x=self.y, projection=self.projection, node_coordinates=nc, axis_name="y"
             )
         else:
             raise ValueError(f"axis must be 0 or 1 (or 'x' or 'y'), not {axis}")
 
-    def _index_to_Grid2D(self, ii=None, jj=None) -> "Grid2D | GeometryUndefined":
+    def _index_to_Grid2D(
+        self, ii: range | None = None, jj: range | None = None
+    ) -> "Grid2D | GeometryUndefined":
         ii = range(self.nx) if ii is None else ii
         jj = range(self.ny) if jj is None else jj
         assert len(ii) > 1 and len(jj) > 1, "Index must be at least len 2"
@@ -877,7 +955,7 @@ class Grid2D(_Geometry):
                 origin=origin,
             )
 
-    def _to_element_table(self, index_base=0):
+    def _to_element_table(self, index_base: int = 0) -> List[List[int]]:
         elem_table = []
         for elx in range(self.nx - 1):
             # each col
@@ -889,7 +967,7 @@ class Grid2D(_Geometry):
         return elem_table
 
     @staticmethod
-    def _centers_to_nodes(x):
+    def _centers_to_nodes(x: np.ndarray) -> np.ndarray:
         """Nodes will be placed mid-way between centers
         If non-equidistant, new centers will hence not equal old centers!
         """
@@ -901,10 +979,10 @@ class Grid2D(_Geometry):
         return np.array([left, *xinner, right])
 
     @staticmethod
-    def _nodes_to_centers(xn):
+    def _nodes_to_centers(xn: np.ndarray) -> Any:
         return (xn[1:] + xn[:-1]) / 2
 
-    def get_node_coordinates(self):
+    def get_node_coordinates(self) -> np.ndarray:
         """node coordinates for this grid
 
         Returns
@@ -917,8 +995,16 @@ class Grid2D(_Geometry):
         gn = Grid2D(x=xn, y=yn)
         return gn.xy
 
-    def to_geometryFM(self, *, z=None, west=2, east=4, north=5, south=3):
-        """convert Grid2D to GeometryFM
+    def to_geometryFM(
+        self,
+        *,
+        z: float | None = None,
+        west: int = 2,
+        east: int = 4,
+        north: int = 5,
+        south: int = 3,
+    ) -> GeometryFM2D:
+        """convert Grid2D to GeometryFM2D
 
         Parameters
         ----------
@@ -965,7 +1051,9 @@ class Grid2D(_Geometry):
             projection=self.projection,
         )
 
-    def to_mesh(self, outfilename, z=None):
+    def to_mesh(
+        self, outfilename: str | Path, z: np.ndarray | float | None = None
+    ) -> None:
         """export grid to mesh file
 
         Parameters
@@ -980,6 +1068,7 @@ class Grid2D(_Geometry):
 
         if z is not None:
             if not np.isscalar(z):
+                assert isinstance(z, np.ndarray), "z must be a numpy array"
                 if len(z) != g.n_nodes:
                     raise ValueError(
                         "z must either be scalar or have length of nodes ((nx+1)*(ny+1))"
@@ -1011,21 +1100,21 @@ class Grid3D(_Geometry):
     def __init__(
         self,
         *,
-        x=None,
-        x0=0.0,
-        dx=None,
-        nx=None,
-        y=None,
-        y0=0.0,
-        dy=None,
-        ny=None,
-        z=None,
-        z0=0.0,
-        dz=None,
-        nz=None,
-        projection="NON-UTM",
+        x: np.ndarray | None = None,
+        x0: float = 0.0,
+        dx: float | None = None,
+        nx: int | None = None,
+        y: np.ndarray | None = None,
+        y0: float = 0.0,
+        dy: float | None = None,
+        ny: int | None = None,
+        z: np.ndarray | None = None,
+        z0: float = 0.0,
+        dz: float | None = None,
+        nz: int | None = None,
+        projection: str = "NON-UTM",  # TODO LONG/LAT
         origin: Tuple[float, float] = (0.0, 0.0),
-        orientation=0.0,
+        orientation: float = 0.0,
     ) -> None:
         super().__init__(projection=projection)
         self._origin = (0.0, 0.0) if origin is None else (origin[0], origin[1])
@@ -1039,15 +1128,19 @@ class Grid3D(_Geometry):
         self._orientation = orientation
 
     @property
+    def default_dims(self) -> Tuple[str, ...]:
+        return ("z", "y", "x")
+
+    @property
     def ndim(self) -> int:
         return 3
 
     @property
-    def _is_rotated(self):
+    def _is_rotated(self) -> Any:
         return np.abs(self._orientation) > 1e-5
 
     @property
-    def x(self):
+    def x(self) -> np.ndarray:
         """array of x-axis coordinates (element center)"""
         x1 = self._x0 + self.dx * (self.nx - 1)
         x_local = np.linspace(self._x0, x1, self.nx)
@@ -1064,7 +1157,7 @@ class Grid3D(_Geometry):
         return self._nx
 
     @property
-    def y(self):
+    def y(self) -> np.ndarray:
         """array of y-axis coordinates (element center)"""
         y1 = self._y0 + self.dy * (self.ny - 1)
         y_local = np.linspace(self._y0, y1, self.ny)
@@ -1081,7 +1174,7 @@ class Grid3D(_Geometry):
         return self._ny
 
     @property
-    def z(self):
+    def z(self) -> np.ndarray:
         """array of z-axis node coordinates"""
         z1 = self._z0 + self.dz * (self.nz - 1)
         return np.linspace(self._z0, z1, self.nz)
@@ -1106,7 +1199,9 @@ class Grid3D(_Geometry):
         """Grid orientation"""
         return self._orientation
 
-    def find_index(self, coords=None, layers=None, area=None):
+    def find_index(
+        self, coords: Any = None, layers: Any = None, area: Any = None
+    ) -> Any:
         if layers is not None:
             raise NotImplementedError(
                 f"Layer slicing is not yet implemented. Use the mikeio.read('file.dfs3', layers='{layers}')"
@@ -1115,31 +1210,36 @@ class Grid3D(_Geometry):
             "Not yet implemented for Grid3D. Please use mikeio.read('file.dfs3') and its arguments instead."
         )
 
-    def isel(self, idx, axis):
+    def isel(
+        self, idx: int | np.ndarray, axis: str | int
+    ) -> Grid3D | Grid2D | GeometryUndefined:
         """Get a subset geometry from this geometry"""
         if isinstance(axis, str):
             if axis == "z":
-                axis = 0
+                axis_nr = 0
             elif axis == "y":
-                axis = 1
+                axis_nr = 1
             elif axis == "x":
-                axis = 2
+                axis_nr = 2
             else:
                 raise ValueError(f"axis must be 'x', 'y' or 'z', not {axis}")
-        assert isinstance(axis, int), "axis must be an integer (or 'x', 'y' or 'z')"
-        axis = axis + 3 if axis < 0 else axis
+        elif isinstance(axis, int):
+            axis_nr = axis
+        assert isinstance(axis_nr, int), "axis must be an integer (or 'x', 'y' or 'z')"
+        axis_nr = axis_nr + 3 if axis_nr < 0 else axis_nr
 
         if not np.isscalar(idx):
+            assert isinstance(idx, np.ndarray), "idx must be a numpy array"
             d = np.diff(idx)
             if np.any(d < 1) or not np.allclose(d, d[0]):
                 return GeometryUndefined()
             else:
-                ii = idx if axis == 2 else None
-                jj = idx if axis == 1 else None
-                kk = idx if axis == 0 else None
+                ii = idx if axis_nr == 2 else None
+                jj = idx if axis_nr == 1 else None
+                kk = idx if axis_nr == 0 else None
                 return self._index_to_Grid3D(ii, jj, kk)
 
-        if axis == 0:
+        if axis_nr == 0:
             # z is the first axis! return x-y Grid2D
             # TODO: origin, how to pass self.z[idx]?
             return Grid2D(
@@ -1153,7 +1253,7 @@ class Grid3D(_Geometry):
                 origin=self.origin,
                 orientation=self.orientation,
             )
-        elif axis == 1:
+        elif axis_nr == 1:
             # y is the second axis! return x-z Grid2D
             # TODO: origin, how to pass self.y[idx]?
             return Grid2D(
@@ -1161,7 +1261,7 @@ class Grid3D(_Geometry):
                 y=self.z,
                 # projection=self._projection,
             )
-        elif axis == 2:
+        elif axis_nr == 2:
             # x is the last axis! return y-z Grid2D
             # TODO: origin, how to pass self.x[idx]?
             return Grid2D(
@@ -1170,9 +1270,16 @@ class Grid3D(_Geometry):
                 # projection=self._projection,
             )
         else:
-            raise ValueError(f"axis must be 0, 1 or 2 (or 'x', 'y' or 'z'), not {axis}")
+            raise ValueError(
+                f"axis must be 0, 1 or 2 (or 'x', 'y' or 'z'), not {axis_nr}"
+            )
 
-    def _index_to_Grid3D(self, ii=None, jj=None, kk=None):
+    def _index_to_Grid3D(
+        self,
+        ii: np.ndarray | range | None = None,
+        jj: np.ndarray | range | None = None,
+        kk: np.ndarray | range | None = None,
+    ) -> Grid3D | GeometryUndefined:
         ii = range(self.nx) if ii is None else ii
         jj = range(self.ny) if jj is None else jj
         kk = range(self.nz) if kk is None else kk
@@ -1225,7 +1332,7 @@ class Grid3D(_Geometry):
                 origin=origin,
             )
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         out = ["<mikeio.Grid3D>"]
         out.append(_print_axis_txt("x", self.x, self.dx))
         out.append(_print_axis_txt("y", self.y, self.dy))
@@ -1237,11 +1344,11 @@ class Grid3D(_Geometry):
             out.append(f"projection: {self.projection_string}")
         return "\n".join(out)
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"Grid3D(nz={self.nz}, ny={self.ny}, nx={self.nx})"
 
     def _geometry_for_layers(
-        self, layers, keepdims=False
+        self, layers: Sequence[int] | None, keepdims: bool = False
     ) -> Grid2D | "Grid3D" | "GeometryUndefined":
         if layers is None:
             return self

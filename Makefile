@@ -8,13 +8,16 @@ build: typecheck test
 	python -m build
 
 lint:
-	ruff .
+	ruff check .
+
+pylint:
+	pylint --disable=all --enable=attribute-defined-outside-init mikeio/
 
 test:
 	pytest --disable-warnings
 
 typecheck:
-	mypy $(LIB)/ --config-file pyproject.toml
+	mypy $(LIB)/
 
 coverage: 
 	pytest --cov-report html --cov=$(LIB) tests/
@@ -28,7 +31,10 @@ perftest:
 	pytest tests/performance/ --durations=0
 
 docs: FORCE
-	cd docs; make html ;cd -
+	cd docs && quarto add --no-prompt .
+	cd docs && quartodoc build
+	cd docs && quartodoc interlinks
+	quarto render docs
 
 FORCE:
 
