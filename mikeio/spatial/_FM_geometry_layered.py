@@ -1,6 +1,6 @@
 from __future__ import annotations
 from functools import cached_property
-from typing import Collection, Sequence, List
+from typing import Any, Collection, Iterable, Literal, Sequence, List, Tuple
 
 import numpy as np
 from mikecore.DfsuFile import DfsuFileType  # type: ignore
@@ -13,22 +13,24 @@ from ._FM_utils import _plot_vertical_profile
 
 from ._utils import _relative_cumulative_distance
 
+Layer = Literal["all", "bottom", "top"]
+
 
 class _GeometryFMLayered(_GeometryFM):
     def __init__(
         self,
         *,
-        node_coordinates,
-        element_table,
-        codes=None,
+        node_coordinates: np.ndarray,
+        element_table: np.ndarray | List[Sequence[int]] | List[np.ndarray],
+        codes: np.ndarray | None = None,
         projection: str = "LONG/LAT",
-        dfsu_type=DfsuFileType.Dfsu3DSigma,
-        element_ids=None,
-        node_ids=None,
+        dfsu_type: DfsuFileType = DfsuFileType.Dfsu3DSigma,
+        element_ids: np.ndarray | None = None,
+        node_ids: np.ndarray | None = None,
         n_layers: int = 1,  # at least 1 layer
-        n_sigma=None,
-        validate=True,
-        reindex=False,
+        n_sigma: int | None = None,
+        validate: bool = True,
+        reindex: bool = False,
     ) -> None:
 
         super().__init__(
@@ -66,15 +68,18 @@ class _GeometryFMLayered(_GeometryFM):
     def geometry2d(self):
         return self.to_2d_geometry()
 
-    def isel(self, idx: Collection[int], keepdims=False, **kwargs):
+    def isel(
+        self, idx: Collection[int], keepdims: bool = False, **kwargs: Any
+    ) -> GeometryFM3D | GeometryPoint3D | GeometryFM2D | GeometryFMVerticalColumn:
 
-        return self.elements_to_geometry(
-            elements=idx, node_layers=None, keepdims=keepdims
-        )
+        return self.elements_to_geometry(elements=idx, keepdims=keepdims)
 
     def elements_to_geometry(
-        self, elements: int | Collection[int], node_layers="all", keepdims=False
-    ):
+        self,
+        elements: int | Collection[int],
+        node_layers: Layer = "all",
+        keepdims: bool = False,
+    ) -> GeometryFM3D | GeometryPoint3D | GeometryFM2D | GeometryFMVerticalColumn:
         sel_elements: List[int]
 
         if isinstance(elements, (int, np.integer)):
@@ -98,7 +103,8 @@ class _GeometryFMLayered(_GeometryFM):
         n_layers = len(unique_layer_ids)
 
         if n_layers > 1:
-            elem_bot = self.get_layer_elements("bottom")
+            bottom: Layer = "bottom"
+            elem_bot = self.get_layer_elements(layers=bottom)
             if np.all(np.in1d(sorted_elements, elem_bot)):
                 n_layers = 1
 
@@ -108,7 +114,7 @@ class _GeometryFMLayered(_GeometryFM):
         ) and n_layers == 1:
             new_type = DfsuFileType.Dfsu2D
 
-        if n_layers == 1 and node_layers in ("all", None):
+        if n_layers == 1 and node_layers == "all":
             node_layers = "bottom"
 
         # extract information for selected elements
@@ -157,7 +163,7 @@ class _GeometryFMLayered(_GeometryFM):
                 )
             else:
                 klass = self.__class__
-                return klass(
+                return klass(  # type: ignore
                     node_coordinates=node_coords,
                     codes=codes,
                     node_ids=node_ids,
@@ -209,7 +215,11 @@ class _GeometryFMLayered(_GeometryFM):
 
         return ec
 
-    def _get_nodes_and_table_for_elements(self, elements, node_layers="all"):
+    def _get_nodes_and_table_for_elements(
+        self,
+        elements: Collection[int] | np.ndarray,
+        node_layers: Layer = "all",
+    ) -> Tuple[Any, Any]:
         """list of nodes and element table for a list of elements
 
         Parameters
@@ -228,7 +238,7 @@ class _GeometryFMLayered(_GeometryFM):
             element table with a list of nodes for each element
         """
         elem_tbl = np.empty(len(elements), dtype=np.dtype("O"))
-        if (node_layers is None) or (node_layers == "all") or self.is_2d:
+        if (node_layers == "all") or self.is_2d:
             for j, eid in enumerate(elements):
                 elem_tbl[j] = np.asarray(self.element_table[eid])
 
@@ -246,10 +256,10 @@ class _GeometryFMLayered(_GeometryFM):
                     elem_nodes = elem_nodes[halfn:]
                 elem_tbl[j] = elem_nodes
 
-        nodes = np.unique(np.hstack(elem_tbl))
+        nodes = np.unique(np.hstack(elem_tbl))  # type: ignore
         return nodes, elem_tbl
 
-    def to_2d_geometry(self):
+    def to_2d_geometry(self) -> GeometryFM2D:
         """extract 2d geometry from 3d geometry
 
         Returns
@@ -445,7 +455,7 @@ class _GeometryFMLayered(_GeometryFM):
         """List of 3d element ids of bottom layer"""
         return self.top_elements - self.n_layers_per_column + 1
 
-    def get_layer_elements(self, layers, layer=None):
+    def get_layer_elements(self, layers: int | Layer | Iterable[int]) -> np.ndarray:
         """3d element ids for one (or more) specific layer(s)
 
         Parameters
@@ -460,9 +470,9 @@ class _GeometryFMLayered(_GeometryFM):
             element ids
         """
         if isinstance(layers, str):
-            if layers in ("surface", "top"):
+            if layers == "top":
                 return self.top_elements
-            elif layers in ("bottom"):
+            elif layers == "bottom":
                 return self.bottom_elements
             else:
                 raise ValueError(
@@ -470,17 +480,20 @@ class _GeometryFMLayered(_GeometryFM):
                 )
 
         if not np.isscalar(layers):
+            assert isinstance(layers, Iterable)
             elem_ids = []
             for layer in layers:
+                assert isinstance(layer, int)
                 elem_ids.append(self.get_layer_elements(layer))
             elem_ids = np.concatenate(elem_ids, axis=0)
             return np.sort(elem_ids)
 
         n_lay = self.n_layers
 
+        assert isinstance(layers, int)
         if layers < (-n_lay) or layers >= n_lay:
             raise Exception(
-                f"Layer {layers} not allowed; must be between -{n_lay} and {n_lay-1}"
+                f"Layer {layers!r} not allowed; must be between -{n_lay} and {n_lay-1}"
             )
 
         if layers < 0:
@@ -648,17 +661,17 @@ class GeometryFM3D(_GeometryFMLayered):
     def __init__(
         self,
         *,
-        node_coordinates,
-        element_table,
-        codes=None,
+        node_coordinates: np.ndarray,
+        element_table: np.ndarray | List[Sequence[int]] | List[np.ndarray],
+        codes: np.ndarray | None = None,
         projection: str = "LONG/LAT",
-        dfsu_type=DfsuFileType.Dfsu3DSigma,
-        element_ids=None,
-        node_ids=None,
+        dfsu_type: DfsuFileType = DfsuFileType.Dfsu3DSigma,
+        element_ids: np.ndarray | None = None,
+        node_ids: np.ndarray | None = None,
         n_layers: int = 1,  # at least 1 layer
-        n_sigma=None,
-        validate=True,
-        reindex=False,
+        n_sigma: int | None = None,
+        validate: bool = True,
+        reindex: bool = False,
     ) -> None:
         super().__init__(
             node_coordinates=node_coordinates,
@@ -728,17 +741,17 @@ class GeometryFM3D(_GeometryFMLayered):
 class GeometryFMVerticalProfile(_GeometryFMLayered):
     def __init__(
         self,
-        node_coordinates,
-        element_table,
-        codes=None,
+        node_coordinates: np.ndarray,
+        element_table: np.ndarray | List[Sequence[int]] | List[np.ndarray],
+        codes: np.ndarray | None = None,
         projection: str = "LONG/LAT",
-        dfsu_type=None,
-        element_ids=None,
-        node_ids=None,
-        n_layers: int = 1,
-        n_sigma=None,
-        validate=True,
-        reindex=False,
+        dfsu_type: DfsuFileType = DfsuFileType.Dfsu3DSigma,
+        element_ids: np.ndarray | None = None,
+        node_ids: np.ndarray | None = None,
+        n_layers: int = 1,  # at least 1 layer
+        n_sigma: int | None = None,
+        validate: bool = True,
+        reindex: bool = False,
     ) -> None:
         super().__init__(
             node_coordinates=node_coordinates,
@@ -761,7 +774,7 @@ class GeometryFMVerticalProfile(_GeometryFMLayered):
         nc0 = self.node_coordinates[0, :2]
         return _relative_cumulative_distance(ec, nc0, is_geo=self.is_geo)
 
-    def get_nearest_relative_distance(self, coords) -> float:
+    def get_nearest_relative_distance(self, coords: Tuple[float, float]) -> float:
         """For a point near a transect, find the nearest relative distance
         for showing position on transect plot.
 
