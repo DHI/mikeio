@@ -1,8 +1,6 @@
 from __future__ import annotations
 from pathlib import Path
-from typing import Any, Collection
-from functools import wraps
-import warnings
+from typing import Any, Collection, Sequence, Tuple
 
 import numpy as np
 from mikecore.DfsuFile import DfsuFile, DfsuFileType
@@ -92,18 +90,18 @@ class DfsuLayered(_Dfsu):
     def read(
         self,
         *,
-        items=None,
-        time=None,
+        items: str | int | Sequence[str | int] | None = None,
+        time: int | str | slice | None = None,
         elements: Collection[int] | None = None,
-        area=None,
-        x=None,
-        y=None,
-        z=None,
-        layers=None,
-        keepdims=False,
-        dtype=np.float32,
-        error_bad_data=True,
-        fill_bad_data_value=np.nan,
+        area: Tuple[float, float, float, float] | None = None,
+        x: float | None = None,
+        y: float | None = None,
+        z: float | None = None,
+        layers: int | str | Sequence[int] | None = None,
+        keepdims: bool = False,
+        dtype: Any = np.float32,
+        error_bad_data: bool = True,
+        fill_bad_data_value: float = np.nan,
     ) -> Dataset:
         """
         Read data from a dfsu file
@@ -121,9 +119,12 @@ class DfsuLayered(_Dfsu):
             Read only data inside (horizontal) area given as a
             bounding box (tuple with left, lower, right, upper)
             or as list of coordinates for a polygon, by default None
-        x, y, z: float, optional
-            Read only data for elements containing the (x,y,z) points(s),
-            by default None
+        x: float, optional
+            Read only data for elements containing the (x,y,z) points(s)
+        y: float, optional
+            Read only data for elements containing the (x,y,z) points(s)
+        z: float, optional
+            Read only data for elements containing the (x,y,z) points(s)
         layers: int, str, list[int], optional
             Read only data for specific layers, by default None
         elements: list[int], optional
@@ -142,13 +143,7 @@ class DfsuLayered(_Dfsu):
         if dtype not in [np.float32, np.float64]:
             raise ValueError("Invalid data type. Choose np.float32 or np.float64")
 
-        # Open the dfs file for reading
-        # self._read_dfsu_header(self._filename)
         dfs = DfsuFile.Open(self._filename)
-        # time may have changes since we read the header
-        # (if engine is continuously writing to this file)
-        # TODO: add more checks that this is actually still the same file
-        # (could have been replaced in the meantime)
 
         single_time_selected, time_steps = _valid_timesteps(dfs, time)
 
@@ -166,19 +161,16 @@ class DfsuLayered(_Dfsu):
             elements = list(elements)
             n_elems = len(elements)
             geometry = self.geometry.elements_to_geometry(elements)
-            if self.is_layered:  # and items[0].name == "Z coordinate":
-                node_ids, _ = self.geometry._get_nodes_and_table_for_elements(elements)
-                n_nodes = len(node_ids)
+            node_ids, _ = self.geometry._get_nodes_and_table_for_elements(elements)
+            n_nodes = len(node_ids)
 
         item_numbers = _valid_item_numbers(
             dfs.ItemInfo, items, ignore_first=self.is_layered
         )
         items = _get_item_info(dfs.ItemInfo, item_numbers, ignore_first=self.is_layered)
-        if self.is_layered:
-            # we need the zn item too
-            item_numbers = [it + 1 for it in item_numbers]
-            if hasattr(geometry, "is_layered") and geometry.is_layered:
-                item_numbers.insert(0, 0)
+        item_numbers = [it + 1 for it in item_numbers]
+        if layered_data := hasattr(geometry, "is_layered") and geometry.is_layered:
+            item_numbers.insert(0, 0)
         n_items = len(item_numbers)
 
         deletevalue = self.deletevalue
@@ -188,9 +180,7 @@ class DfsuLayered(_Dfsu):
         n_steps = len(time_steps)
         item0_is_node_based = False
         for item in range(n_items):
-            # Initialize an empty data block
-            if hasattr(geometry, "is_layered") and geometry.is_layered and item == 0:
-                # and items[item].name == "Z coordinate":
+            if layered_data and item == 0:
                 item0_is_node_based = True
                 data: np.ndarray = np.ndarray(shape=(n_steps, n_nodes), dtype=dtype)
             else:
@@ -244,7 +234,7 @@ class DfsuLayered(_Dfsu):
             dims = tuple([d for d in dims if d != "element"])
             data_list = [np.squeeze(d, axis=-1) for d in data_list]
 
-        if hasattr(geometry, "is_layered") and geometry.is_layered:
+        if layered_data:
             return Dataset(
                 data_list[1:],  # skip zn item
                 time,
@@ -260,8 +250,6 @@ class DfsuLayered(_Dfsu):
             )
 
     def _parse_geometry_sel(self, area, layers, x, y, z):
-        elements = None
-
         if (
             (x is not None)
             or (y is not None)
@@ -269,18 +257,11 @@ class DfsuLayered(_Dfsu):
             or (layers is not None)
         ):
             elements = self.geometry.find_index(x=x, y=y, z=z, area=area, layers=layers)
-
-        if (
-            (x is not None)
-            or (y is not None)
-            or (layers is not None)
-            or (area is not None)
-        ):
-            # selection was attempted
             if (elements is None) or len(elements) == 0:
                 raise ValueError("No elements in selection!")
+            return elements
 
-        return elements
+        return None
 
 
 class Dfsu2DV(DfsuLayered):
@@ -335,11 +316,6 @@ class Dfsu2DV(DfsuLayered):
 
 
 class Dfsu3D(DfsuLayered):
-    @wraps(GeometryFM3D.to_2d_geometry)
-    def to_2d_geometry(self):
-        warnings.warn("Deprecated. Use geometry2d instead", FutureWarning)
-        return self.geometry.geometry2d
-
     @property
     def geometry2d(self):
         """The 2d geometry for a 3d object"""

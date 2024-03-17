@@ -667,10 +667,6 @@ def test_geometry_2d():
 
     dfs = mikeio.open(filename)
 
-    with pytest.warns(FutureWarning, match="geometry2d"):
-        geom = dfs.to_2d_geometry()
-    assert geom.is_2d
-
     g2 = dfs.geometry2d
     assert g2.is_2d
 
