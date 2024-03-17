@@ -819,3 +819,16 @@ def test_read_dfs2_static_dt_zero():
 
     assert ds2.shape == (2, 2)
     assert "time" not in ds2.dims
+
+
+def test_add_custom_block_to_dfs2(tmp_path):
+    ds = mikeio.read("tests/testdata/gebco_sound.dfs2")
+    fp = tmp_path / "gebco_sound_with_custom_block.dfs2"
+    ds.to_dfs(
+        fp,
+        custom_blocks={"M21_Misc": np.array([327, 0.2, -900, 10, 0, 0, 0], np.float32)},
+    )
+
+    ds2 = mikeio.open(fp)
+    assert ds2._dfs.FileInfo.CustomBlocks[0].Name == "M21_Misc"
+    # builder.AddCustomBlock(factory.CreateCustomBlock("M21_Misc", np.array([ 327, 0.2, -900, 10, 0, 0, 0 ], np.float32)));
