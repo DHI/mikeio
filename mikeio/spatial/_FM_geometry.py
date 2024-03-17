@@ -261,6 +261,38 @@ class _GeometryFM(_Geometry):
         if reindex:
             self._reindex()
 
+    def _calc_element_coordinates(self, maxnodes: int = 4) -> np.ndarray:
+        element_table = self.element_table
+
+        n_elements = len(element_table)
+        ec = np.empty([n_elements, 3])
+
+        # pre-allocate for speed
+        idx = np.zeros(maxnodes, dtype=int)
+        xcoords = np.zeros([maxnodes, n_elements])
+        ycoords = np.zeros([maxnodes, n_elements])
+        zcoords = np.zeros([maxnodes, n_elements])
+        nnodes_per_elem = np.zeros(n_elements)
+
+        for j in range(n_elements):
+            nodes = element_table[j]
+            nnodes = len(nodes)
+            nnodes_per_elem[j] = nnodes
+            for i in range(nnodes):
+                idx[i] = nodes[i]  # - 1
+
+            x, y, z = self.node_coordinates[idx[:nnodes]].T
+
+            xcoords[:nnodes, j] = x
+            ycoords[:nnodes, j] = y
+            zcoords[:nnodes, j] = z
+
+        ec[:, 0] = np.sum(xcoords, axis=0) / nnodes_per_elem
+        ec[:, 1] = np.sum(ycoords, axis=0) / nnodes_per_elem
+        ec[:, 2] = np.sum(zcoords, axis=0) / nnodes_per_elem
+
+        return ec
+
     def _check_elements(
         self,
         element_table: np.ndarray | List[Sequence[int]] | List[np.ndarray],
@@ -462,39 +494,6 @@ class GeometryFM2D(_GeometryFM):
     def _tree2d(self) -> cKDTree:
         xy = self.element_coordinates[:, :2]
         return cKDTree(xy)
-
-    def _calc_element_coordinates(self) -> np.ndarray:
-        element_table = self.element_table
-
-        n_elements = len(element_table)
-        ec = np.empty([n_elements, 3])
-
-        # pre-allocate for speed
-        maxnodes = 4
-        idx = np.zeros(maxnodes, dtype=int)
-        xcoords = np.zeros([maxnodes, n_elements])
-        ycoords = np.zeros([maxnodes, n_elements])
-        zcoords = np.zeros([maxnodes, n_elements])
-        nnodes_per_elem = np.zeros(n_elements)
-
-        for j in range(n_elements):
-            nodes = element_table[j]
-            nnodes = len(nodes)
-            nnodes_per_elem[j] = nnodes
-            for i in range(nnodes):
-                idx[i] = nodes[i]  # - 1
-
-            x, y, z = self.node_coordinates[idx[:nnodes]].T
-
-            xcoords[:nnodes, j] = x
-            ycoords[:nnodes, j] = y
-            zcoords[:nnodes, j] = z
-
-        ec[:, 0] = np.sum(xcoords, axis=0) / nnodes_per_elem
-        ec[:, 1] = np.sum(ycoords, axis=0) / nnodes_per_elem
-        ec[:, 2] = np.sum(zcoords, axis=0) / nnodes_per_elem
-
-        return ec
 
     def find_nearest_elements(
         self,
