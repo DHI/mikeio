@@ -40,7 +40,7 @@ def dfs2_pt_spectrum_linearf():
 @pytest.fixture
 def dfs2_vertical_nonutm():
     filepath = Path("tests/testdata/hd_vertical_slice.dfs2")
-    return mikeio.open(filepath)
+    return mikeio.open(filepath, type="vertical")
 
 
 @pytest.fixture
@@ -50,7 +50,7 @@ def dfs2_gebco():
 
 
 def test_get_time_without_reading_data():
-    dfs = mikeio.open("tests/testdata/hd_vertical_slice.dfs2")
+    dfs = mikeio.open("tests/testdata/hd_vertical_slice.dfs2", type="vertical")
 
     assert isinstance(dfs.time, pd.DatetimeIndex)
     assert len(dfs.time) == 13
@@ -281,8 +281,10 @@ def test_properties_vertical_nonutm(dfs2_vertical_nonutm):
 
 def test_isel_vertical_nonutm(dfs2_vertical_nonutm):
     ds = dfs2_vertical_nonutm.read()
+    assert ds.geometry.is_vertical
     dssel = ds.isel(y=slice(45, None))
     g = dssel.geometry
+    assert g.is_vertical
     assert g._x0 == 0
     assert g._y0 == 0  # TODO: should this be 45?
     assert g.x[0] == 0
@@ -346,7 +348,9 @@ def test_properties_pt_spectrum_linearf(dfs2_pt_spectrum_linearf):
 
 
 def test_dir_wave_spectra_relative_time_axis():
-    ds = mikeio.read("tests/testdata/dir_wave_analysis_spectra.dfs2")
+    ds = mikeio.open(
+        "tests/testdata/dir_wave_analysis_spectra.dfs2", type="spectral"
+    ).read()
     assert ds.n_items == 1
     assert ds.geometry.nx == 128
     assert ds.geometry.ny == 37
@@ -819,3 +823,44 @@ def test_read_dfs2_static_dt_zero():
 
     assert ds2.shape == (2, 2)
     assert "time" not in ds2.dims
+
+
+def test_write_read_local_coordinates(tmp_path):
+    da = mikeio.DataArray(
+        np.array([[1, 2, 3], [4, 5, 6]]),
+        geometry=mikeio.Grid2D(nx=3, ny=2, dx=0.5, projection="NON-UTM"),
+    )
+    fp = tmp_path / "local_coordinates.dfs2"
+    da.to_dfs(fp)
+
+    ds = mikeio.read(fp)
+    assert da.geometry == ds.geometry
+
+
+def test_to_xarray():
+    # data is not important here
+    data = np.array([[1, 2, 3], [4, 5, 6]])
+
+    # geographic coordinates
+    dag = mikeio.DataArray(
+        data=data,
+        geometry=mikeio.Grid2D(nx=3, ny=2, dx=0.5, projection="LONG/LAT"),
+    )
+    assert dag.geometry.x[0] == pytest.approx(0.0)
+    assert dag.geometry.y[0] == pytest.approx(0.0)
+    xr_dag = dag.to_xarray()
+    assert xr_dag.x[0] == pytest.approx(0.0)
+    assert xr_dag.y[0] == pytest.approx(0.0)
+
+    # local coordinates
+    da = mikeio.DataArray(
+        data=data,
+        geometry=mikeio.Grid2D(nx=3, ny=2, dx=0.5, projection="NON-UTM"),
+    )
+    # local coordinates (=NON-UTM) have a different convention, geometry.x still refers to element centers
+    assert da.geometry.x[0] == pytest.approx(0.25)
+    assert da.geometry.y[0] == pytest.approx(0.25)
+
+    xr_da = da.to_xarray()
+    assert xr_da.x[0] == pytest.approx(0.25)
+    assert xr_da.y[0] == pytest.approx(0.25)

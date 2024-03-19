@@ -306,7 +306,7 @@ def test_to_geometryFM():
     assert isinstance(g, GeometryFM2D)
     assert g.n_elements == nx * ny
     assert g.n_nodes == (nx + 1) * (ny + 1)
-    assert g.projection_string == "NON-UTM"
+    assert g.projection_string == "LONG/LAT"
 
     xe = g.element_coordinates[:, 0]
     ye = g.element_coordinates[:, 1]
@@ -398,7 +398,7 @@ def test_grid2d_equality():
 
     assert g1 == g2
 
-    g3 = Grid2D(dx=0.1, nx=2, dy=0.2, ny=4, projection="LONG/LAT")
+    g3 = Grid2D(dx=0.1, nx=2, dy=0.2, ny=4, projection="NON-UTM")
     g4 = Grid2D(dx=0.1, nx=2, dy=0.2, ny=4)
 
     assert g3 != g4
