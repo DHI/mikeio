@@ -157,7 +157,7 @@ class Dfs0:
             raise FileNotFoundError(f"File {path} not found")
 
         # read data from file
-        fdata, ftime, fitems = self._read(self._filename)
+        fdata, ftime = self._read(self._filename)
         dfs = self._dfs
 
         # select items
@@ -165,7 +165,9 @@ class Dfs0:
         item_numbers = _valid_item_numbers(dfs.ItemInfo, items)
         if items is not None:
             fdata = [fdata[it] for it in item_numbers]
-            fitems = [fitems[it] for it in item_numbers]
+            fitems = [self.items[it] for it in item_numbers]
+        else:
+            fitems = self.items
         ds = Dataset(fdata, ftime, fitems, validate=False)
 
         # select time steps
@@ -199,9 +201,7 @@ class Dfs0:
 
         return ds
 
-    def _read(
-        self, filename: str
-    ) -> tuple[list[np.ndarray], pd.DatetimeIndex, list[ItemInfo]]:
+    def _read(self, filename: str) -> tuple[list[np.ndarray], pd.DatetimeIndex]:
         """
         Read all data from a dfs0 file.
         """
@@ -222,17 +222,7 @@ class Dfs0:
         time = pd.to_datetime(t_seconds, unit="s", origin=self.start_time)
         time = time.round(freq="ms")  # accept nothing finer than milliseconds
 
-        items = [
-            ItemInfo(
-                item.Name,
-                EUMType(item.Quantity.Item),
-                EUMUnit(item.Quantity.Unit),
-                data_value_type=item.ValueType,
-            )
-            for item in self._dfs.ItemInfo
-        ]
-
-        return data, time, items
+        return data, time
 
     @staticmethod
     def _to_dfs_datatype(dtype: Any = None) -> DfsSimpleType:
@@ -263,7 +253,8 @@ class Dfs0:
         -------
         pd.DataFrame
         """
-        data, time, items = self._read(self._filename)
+        data, time = self._read(self._filename)
+        items = self.items
         if unit_in_name:
             cols = [f"{item.name} ({item.unit.name})" for item in items]
         else:
