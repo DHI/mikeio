@@ -206,6 +206,7 @@ class DfsuSpectral(_Dfsu):
             if elements is None:
                 elements = self._parse_geometry_sel(area=area, x=x, y=y)
         else:
+            # TODO move to _parse_geometry_sel
             if (area is not None) or (x is not None) or (y is not None):
                 raise ValueError(
                     f"Arguments area/x/y are not supported for {self._type}"
@@ -265,6 +266,47 @@ class DfsuSpectral(_Dfsu):
         return Dataset(
             data_list, time, items, geometry=geometry, dims=dims, validate=False
         )
+
+    def _parse_geometry_sel(self, area, x, y):
+        """Parse geometry selection
+
+        Parameters
+        ----------
+        area : list[float], optional
+            Read only data inside (horizontal) area given as a
+            bounding box (tuple with left, lower, right, upper)
+            or as list of coordinates for a polygon, by default None
+        x : float, optional
+            Read only data for elements containing the (x,y) points(s),
+            by default None
+        y : float, optional
+            Read only data for elements containing the (x,y) points(s),
+            by default None
+
+        Returns
+        -------
+        list[int]
+            List of element ids
+
+        Raises
+        ------
+        ValueError
+            If no elements are found in selection
+        """
+        elements = None
+
+        if area is not None:
+            elements = self.geometry._elements_in_area(area)
+
+        if (x is not None) or (y is not None):
+            elements = self.geometry.find_index(x=x, y=y)
+
+        if (x is not None) or (y is not None) or (area is not None):
+            # selection was attempted
+            if (elements is None) or len(elements) == 0:
+                raise ValueError("No elements in selection!")
+
+        return elements
 
     def _parse_elements_nodes(self, elements, nodes):
         if self._type == DfsuFileType.DfsuSpectral0D:

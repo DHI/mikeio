@@ -300,17 +300,17 @@ class _GeometryFMLayered(_GeometryFM):
         return self._layer_ids
 
     @property
-    def n_layers(self):
+    def n_layers(self) -> int:
         """Maximum number of layers"""
         return self._n_layers
 
     @property
-    def n_sigma_layers(self):
+    def n_sigma_layers(self) -> int:
         """Number of sigma layers"""
         return self._n_sigma
 
     @property
-    def n_z_layers(self):
+    def n_z_layers(self) -> int:
         """Maximum number of z-layers"""
         return self.n_layers - self.n_sigma_layers
 
