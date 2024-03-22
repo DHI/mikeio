@@ -4,6 +4,7 @@ from typing import Any, Collection, Sequence, Tuple, TYPE_CHECKING
 
 import numpy as np
 from mikecore.DfsuFile import DfsuFile, DfsuFileType
+import pandas as pd
 from scipy.spatial import cKDTree
 from tqdm import trange
 
@@ -19,7 +20,7 @@ from .._interpolation import get_idw_interpolant, interp2d
 from ..spatial import GeometryFM3D, GeometryFMVerticalProfile, GeometryPoint3D
 from ..spatial._FM_utils import _plot_vertical_profile
 from ._dfsu import (
-    _Dfsu,
+    _get_dfsu_info,
     get_nodes_from_source,
     get_elements_from_source,
     _validate_elements_and_geometry_sel,
@@ -29,11 +30,90 @@ if TYPE_CHECKING:
     from ..spatial._FM_geometry_layered import Layer
 
 
-class DfsuLayered(_Dfsu):
+class DfsuLayered:
+    show_progress = False
+
     def __init__(self, filename: str | Path) -> None:
-        super().__init__(filename)
+        info = _get_dfsu_info(filename)
+        self._filename = info.filename
+        self._type = info.type
+        self._deletevalue = info.deletevalue
+        self._time = info.time
+        self._timestep = info.timestep
         self._geometry = self._read_geometry(self._filename)
+        # 3d files have a zn item
         self._items = self._read_items(self._filename)
+
+    def __repr__(self):
+        out = [f"<mikeio.{self.__class__.__name__}>"]
+
+        out.append(f"number of elements: {self.geometry.n_elements}")
+        out.append(f"number of nodes: {self.geometry.n_nodes}")
+        out.append(f"projection: {self.geometry.projection_string}")
+        out.append(f"number of sigma layers: {self.geometry.n_sigma_layers}")
+        if (
+            self._type == DfsuFileType.DfsuVerticalProfileSigmaZ
+            or self._type == DfsuFileType.Dfsu3DSigmaZ
+        ):
+            out.append(
+                f"max number of z layers: {self.geometry.n_layers - self.geometry.n_sigma_layers}"
+            )
+        if self.n_items < 10:
+            out.append("items:")
+            for i, item in enumerate(self.items):
+                out.append(f"  {i}:  {item}")
+        else:
+            out.append(f"number of items: {self.geometry.n_items}")
+        if self.n_timesteps == 1:
+            out.append(f"time: time-invariant file (1 step) at {self.time[0]}")
+        else:
+            out.append(
+                f"time: {str(self.time[0])} - {str(self.time[-1])} ({self.n_timesteps} records)"
+            )
+        return str.join("\n", out)
+
+    @property
+    def deletevalue(self) -> float:
+        """File delete value"""
+        return self._deletevalue
+
+    @property
+    def n_items(self) -> int:
+        """Number of items"""
+        return len(self.items)
+
+    @property
+    def items(self) -> list[ItemInfo]:
+        """List of items"""
+        return self._items
+
+    @property
+    def start_time(self) -> pd.Timestamp:
+        """File start time"""
+        return self._time[0]
+
+    @property
+    def n_timesteps(self) -> int:
+        """Number of time steps"""
+        return len(self._time)
+
+    @property
+    def timestep(self) -> float:
+        """Time step size in seconds"""
+        return self._timestep
+
+    @property
+    def end_time(self) -> pd.Timestamp:
+        """File end time"""
+        return self._time[-1]
+
+    @property
+    def time(self) -> pd.DatetimeIndex:
+        return self._time
+
+    @property
+    def geometry(self) -> GeometryFM3D | GeometryFMVerticalProfile:
+        return self._geometry
 
     @staticmethod
     def _read_items(filename: str) -> list[ItemInfo]:
@@ -163,7 +243,7 @@ class DfsuLayered(_Dfsu):
                 or (area is not None)
                 or (layers is not None)
             ):
-                elements = self.geometry.find_index(
+                elements = self.geometry.find_index(  # type: ignore
                     x=x, y=y, z=z, area=area, layers=layers
                 )
                 if len(elements) == 0:
@@ -348,8 +428,8 @@ class Dfsu3D(DfsuLayered):
         # make 2d nodes-to-elements interpolator
         top_el = self.geometry.top_elements
         geom = self.geometry.elements_to_geometry(top_el, node_layers="top")
-        xye = geom.element_coordinates[:, 0:2]
-        xyn = geom.node_coordinates[:, 0:2]
+        xye = geom.element_coordinates[:, 0:2]  # type: ignore
+        xyn = geom.node_coordinates[:, 0:2]  # type: ignore
         tree2d = cKDTree(xyn)
         dist, node_ids = tree2d.query(xye, k=n_nearest)
         if n_nearest == 1:

@@ -8,10 +8,11 @@ from mikecore.DfsuFile import DfsuFile, DfsuFileType
 from tqdm import trange
 
 from ..dataset import DataArray, Dataset
+from ..eum import ItemInfo
 from ..dfs._dfs import _get_item_info, _valid_item_numbers, _valid_timesteps
 from .._spectral import calc_m0_from_spectrum
 from ._dfsu import (
-    _Dfsu,
+    _get_dfsu_info,
     get_elements_from_source,
     get_nodes_from_source,
     _validate_elements_and_geometry_sel,
@@ -23,11 +24,92 @@ from ..spatial import (
 )
 
 
-class DfsuSpectral(_Dfsu):
+class DfsuSpectral:
+    show_progress = False
 
     def __init__(self, filename: str | Path) -> None:
-        super().__init__(filename)
+        info = _get_dfsu_info(filename)
+        self._filename = info.filename
+        self._type = info.type
+        self._deletevalue = info.deletevalue
+        self._time = info.time
+        self._timestep = info.timestep
+        self._items = info.items
         self._geometry = self._read_geometry(self._filename)
+
+    def __repr__(self):
+        out = [f"<mikeio.{self.__class__.__name__}>"]
+
+        if self._type is not DfsuFileType.DfsuSpectral0D:
+            if self._type is not DfsuFileType.DfsuSpectral1D:
+                out.append(f"number of elements: {self.geometry.n_elements}")
+            out.append(f"number of nodes: {self.geometry.n_nodes}")
+        if self.geometry.is_spectral:
+            if self.geometry.n_directions > 0:
+                out.append(f"number of directions: {self.geometry.n_directions}")
+            if self.geometry.n_frequencies > 0:
+                out.append(f"number of frequencies: {self.geometry.n_frequencies}")
+        if self.geometry.projection_string:
+            out.append(f"projection: {self.geometry.projection_string}")
+        if self.n_items < 10:
+            out.append("items:")
+            for i, item in enumerate(self.items):
+                out.append(f"  {i}:  {item}")
+        else:
+            out.append(f"number of items: {self.geometry.n_items}")
+        if self.n_timesteps == 1:
+            out.append(f"time: time-invariant file (1 step) at {self.time[0]}")
+        else:
+            out.append(
+                f"time: {str(self.time[0])} - {str(self.time[-1])} ({self.n_timesteps} records)"
+            )
+        return str.join("\n", out)
+
+    @property
+    def geometry(
+        self,
+    ) -> GeometryFMPointSpectrum | GeometryFMLineSpectrum | GeometryFMAreaSpectrum:
+        """Geometry"""
+        return self._geometry
+
+    @property
+    def deletevalue(self) -> float:
+        """File delete value"""
+        return self._deletevalue
+
+    @property
+    def n_items(self) -> int:
+        """Number of items"""
+        return len(self.items)
+
+    @property
+    def items(self) -> list[ItemInfo]:
+        """List of items"""
+        return self._items
+
+    @property
+    def start_time(self) -> pd.Timestamp:
+        """File start time"""
+        return self._time[0]
+
+    @property
+    def n_timesteps(self) -> int:
+        """Number of time steps"""
+        return len(self._time)
+
+    @property
+    def timestep(self) -> float:
+        """Time step size in seconds"""
+        return self._timestep
+
+    @property
+    def end_time(self) -> pd.Timestamp:
+        """File end time"""
+        return self._time[-1]
+
+    @property
+    def time(self) -> pd.DatetimeIndex:
+        return self._time
 
     @staticmethod
     def _read_geometry(
