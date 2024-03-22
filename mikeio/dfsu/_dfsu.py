@@ -353,14 +353,10 @@ class _Dfsu:
 
     def _validate_elements_and_geometry_sel(self, elements: Any, **kwargs: Any) -> None:
         """Check that only one of elements, area, x, y is selected"""
-        used_kwargs = []
-        for kw, val in kwargs.items():
-            if val is not None:
-                used_kwargs.append(kw)
+        used_kwargs = [key for key, val in kwargs.items() if val is not None]
 
-        if elements is not None:
-            for kw in used_kwargs:
-                raise ValueError(f"Cannot select both {kw} and elements!")
+        if elements is not None and len(used_kwargs) > 0:
+            raise ValueError(f"Cannot select both {used_kwargs} and elements!")
 
         if "area" in used_kwargs and ("x" in used_kwargs or "y" in used_kwargs):
             raise ValueError("Cannot select both x,y and area!")
