@@ -583,7 +583,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </section>
 <section id="examples" class="level4">
 <h4 class="anchored" data-anchor-id="examples">Examples</h4>
-<div id="904d379c" class="cell" data-execution_count="1">
+<div id="f7d6424c" class="cell" data-execution_count="1">
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> mikeio</span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> pd.DataFrame(<span class="bu">dict</span>(station<span class="op">=</span>[<span class="st">"Foo"</span>, <span class="st">"Bar"</span>],include<span class="op">=</span>[<span class="dv">0</span>,<span class="dv">1</span>]), index<span class="op">=</span>[<span class="dv">1</span>,<span class="dv">2</span>])</span>
@@ -619,7 +619,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 </div>
 </div>
-<div id="d244df08" class="cell" data-execution_count="2">
+<div id="2ce7fa62" class="cell" data-execution_count="2">
 <div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>mikeio.PfsSection.from_dataframe(df,<span class="st">"STATION_"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="2">
 <pre><code>[STATION_1]
@@ -787,7 +787,7 @@ EndSect  // STATION_2</code></pre>
 </section>
 <section id="examples-1" class="level4">
 <h4 class="anchored" data-anchor-id="examples-1">Examples</h4>
-<div id="c16de54b" class="cell" data-execution_count="3">
+<div id="3701c00b" class="cell" data-execution_count="3">
 <div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>pfs <span class="op">=</span> mikeio.read_pfs(<span class="st">"../data/pfs/lake.sw"</span>)</span>
 <span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>pfs.SW.OUTPUTS.to_dataframe(prefix<span class="op">=</span><span class="st">"OUTPUT_"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="3">
@@ -946,16 +946,16 @@ EndSect  // STATION_2</code></pre>
 </section>
 <section id="mikeio.PfsDocument.write" class="level3">
 <h3 class="anchored" data-anchor-id="mikeio.PfsDocument.write">write</h3>
-<p><code>PfsDocument.write(filename=None)</code></p>
+<p><code>PfsDocument.write(filename)</code></p>
 <p>Write object to a pfs file</p>
 <section id="parameters-4" class="level4">
 <h4 class="anchored" data-anchor-id="parameters-4">Parameters</h4>
 <table class="table">
 <colgroup>
-<col style="width: 8%">
-<col style="width: 9%">
-<col style="width: 74%">
-<col style="width: 7%">
+<col style="width: 15%">
+<col style="width: 10%">
+<col style="width: 58%">
+<col style="width: 15%">
 </colgroup>
 <thead>
 <tr class="header">
@@ -968,12 +968,16 @@ EndSect  // STATION_2</code></pre>
 <tbody>
 <tr class="odd">
 <td><code>filename</code></td>
-<td>str | None</td>
-<td>Full path and filename of pfs to be created. If None, the content will be returned as a list of strings.</td>
-<td><code>None</code></td>
+<td>str</td>
+<td>Full path and filename of pfs to be created.</td>
+<td><em>required</em></td>
 </tr>
 </tbody>
 </table>
+</section>
+<section id="notes" class="level4">
+<h4 class="anchored" data-anchor-id="notes">Notes</h4>
+<p>To return the content as a string, use repr()</p>
 
 
 </section>
