@@ -1,4 +1,5 @@
 from __future__ import annotations
+from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Collection, Sequence, Tuple
 
@@ -103,6 +104,54 @@ def write_dfsu(filename: str | Path, data: Dataset) -> None:
     dfs.Close()
 
 
+def _validate_elements_and_geometry_sel(elements: Any, **kwargs: Any) -> None:
+    """Check that only one of elements, area, x, y is selected"""
+    used_kwargs = [key for key, val in kwargs.items() if val is not None]
+
+    if elements is not None and len(used_kwargs) > 0:
+        raise ValueError(f"Cannot select both {used_kwargs} and elements!")
+
+    if "area" in used_kwargs and ("x" in used_kwargs or "y" in used_kwargs):
+        raise ValueError("Cannot select both x,y and area!")
+
+
+@dataclass
+class _DfsuInfo:
+    filename: str
+    type: DfsuFileType
+    time: pd.DatetimeIndex
+    timestep: float
+    items: list[ItemInfo]
+    deletevalue: float
+
+
+def _get_dfsu_info(filename: str | Path) -> _DfsuInfo:
+    filename = str(filename)
+    path = Path(filename)
+    if not path.exists():
+        raise FileNotFoundError(f"file {path} does not exist!")
+    dfs = DfsuFile.Open(filename)
+    type = DfsuFileType(dfs.DfsuFileType)
+    deletevalue = dfs.DeleteValueFloat
+    freq = pd.Timedelta(seconds=dfs.TimeStepInSeconds)
+    time = pd.date_range(
+        start=dfs.StartDateTime,
+        periods=dfs.NumberOfTimeSteps,
+        freq=freq,
+    )
+    timestep = dfs.TimeStepInSeconds
+    items = _get_item_info(dfs.ItemInfo)
+    dfs.Close()
+    return _DfsuInfo(
+        filename=filename,
+        type=type,
+        time=time,
+        timestep=timestep,
+        items=items,
+        deletevalue=deletevalue,
+    )
+
+
 class _Dfsu:
     show_progress = False
 
@@ -115,26 +164,13 @@ class _Dfsu:
         filename: str
             dfsu filename
         """
-        filename = str(filename)
-        self._filename = filename
-        path = Path(filename)
-        if not path.exists():
-            raise FileNotFoundError(f"file {path} does not exist!")
-
-        dfs = DfsuFile.Open(filename)
-        self._type = DfsuFileType(dfs.DfsuFileType)
-        self._deletevalue = dfs.DeleteValueFloat
-
-        freq = pd.Timedelta(seconds=dfs.TimeStepInSeconds)
-
-        self._time = pd.date_range(
-            start=dfs.StartDateTime,
-            periods=dfs.NumberOfTimeSteps,
-            freq=freq,
-        )
-        self._timestep = dfs.TimeStepInSeconds
-        dfs.Close()
-        self._items = self._read_items(filename)
+        info = _get_dfsu_info(filename)
+        self._filename = info.filename
+        self._type = info.type
+        self._deletevalue = info.deletevalue
+        self._time = info.time
+        self._timestep = info.timestep
+        self._items = info.items
 
     def __repr__(self):
         out = [f"<mikeio.{self.__class__.__name__}>"]
@@ -222,32 +258,62 @@ class _Dfsu:
     def time(self) -> pd.DatetimeIndex:
         return self._time
 
-    def _validate_elements_and_geometry_sel(self, elements: Any, **kwargs: Any) -> None:
-        """Check that only one of elements, area, x, y is selected"""
-        used_kwargs = [key for key, val in kwargs.items() if val is not None]
 
-        if elements is not None and len(used_kwargs) > 0:
-            raise ValueError(f"Cannot select both {used_kwargs} and elements!")
-
-        if "area" in used_kwargs and ("x" in used_kwargs or "y" in used_kwargs):
-            raise ValueError("Cannot select both x,y and area!")
-
-    def to_mesh(self, outfilename):
-        """write object to mesh file
-
-        Parameters
-        ----------
-        outfilename : str
-            path to file to be written
-        """
-        self.geometry.geometry2d.to_mesh(outfilename)
-
-
-class Dfsu2DH(_Dfsu):
+class Dfsu2DH:
+    show_progress = False
 
     def __init__(self, filename: str | Path) -> None:
-        super().__init__(filename)
+        info = _get_dfsu_info(filename)
+        self._filename = info.filename
+        self._type = info.type
+        self._deletevalue = info.deletevalue
+        self._time = info.time
+        self._timestep = info.timestep
+        self._items = info.items
         self._geometry = self._read_geometry(self._filename)
+
+    @property
+    def geometry(self):
+        return self._geometry
+
+    @property
+    def deletevalue(self) -> float:
+        """File delete value"""
+        return self._deletevalue
+
+    @property
+    def n_items(self) -> int:
+        """Number of items"""
+        return len(self.items)
+
+    @property
+    def items(self) -> list[ItemInfo]:
+        """List of items"""
+        return self._items
+
+    @property
+    def start_time(self) -> pd.Timestamp:
+        """File start time"""
+        return self._time[0]
+
+    @property
+    def n_timesteps(self) -> int:
+        """Number of time steps"""
+        return len(self._time)
+
+    @property
+    def timestep(self) -> float:
+        """Time step size in seconds"""
+        return self._timestep
+
+    @property
+    def end_time(self) -> pd.Timestamp:
+        """File end time"""
+        return self._time[-1]
+
+    @property
+    def time(self) -> pd.DatetimeIndex:
+        return self._time
 
     @staticmethod
     def _read_geometry(filename: str) -> GeometryFM2D:
@@ -323,7 +389,7 @@ class Dfsu2DH(_Dfsu):
 
         single_time_selected, time_steps = _valid_timesteps(dfs, time)
 
-        self._validate_elements_and_geometry_sel(elements, area=area, x=x, y=y)
+        _validate_elements_and_geometry_sel(elements, area=area, x=x, y=y)
         if elements is None:
             elements = self._parse_geometry_sel(area=area, x=x, y=y)
 

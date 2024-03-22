@@ -677,7 +677,7 @@ def test_to_mesh_2d(tmp_path):
 
     fp = tmp_path / "hd2d.mesh"
 
-    dfs.to_mesh(fp)
+    dfs.geometry.to_mesh(fp)
 
     mesh = Mesh(fp)
 

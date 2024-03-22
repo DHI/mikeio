@@ -10,7 +10,12 @@ from tqdm import trange
 from ..dataset import DataArray, Dataset
 from ..dfs._dfs import _get_item_info, _valid_item_numbers, _valid_timesteps
 from .._spectral import calc_m0_from_spectrum
-from ._dfsu import _Dfsu, get_elements_from_source, get_nodes_from_source
+from ._dfsu import (
+    _Dfsu,
+    get_elements_from_source,
+    get_nodes_from_source,
+    _validate_elements_and_geometry_sel,
+)
 from ..spatial import (
     GeometryFMAreaSpectrum,
     GeometryFMLineSpectrum,
@@ -202,7 +207,7 @@ class DfsuSpectral(_Dfsu):
         single_time_selected, time_steps = _valid_timesteps(dfs, time)
 
         if self._type == DfsuFileType.DfsuSpectral2D:
-            self._validate_elements_and_geometry_sel(elements, area=area, x=x, y=y)
+            _validate_elements_and_geometry_sel(elements, area=area, x=x, y=y)
             if elements is None:
                 elements = self._parse_geometry_sel(area=area, x=x, y=y)
         else:

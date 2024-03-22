@@ -18,7 +18,12 @@ from ..eum import EUMType, ItemInfo
 from .._interpolation import get_idw_interpolant, interp2d
 from ..spatial import GeometryFM3D, GeometryFMVerticalProfile, GeometryPoint3D
 from ..spatial._FM_utils import _plot_vertical_profile
-from ._dfsu import _Dfsu, get_nodes_from_source, get_elements_from_source
+from ._dfsu import (
+    _Dfsu,
+    get_nodes_from_source,
+    get_elements_from_source,
+    _validate_elements_and_geometry_sel,
+)
 
 if TYPE_CHECKING:
     from ..spatial._FM_geometry_layered import Layer
@@ -148,7 +153,7 @@ class DfsuLayered(_Dfsu):
 
         single_time_selected, time_steps = _valid_timesteps(dfs, time)
 
-        self._validate_elements_and_geometry_sel(
+        _validate_elements_and_geometry_sel(
             elements, area=area, layers=layers, x=x, y=y, z=z
         )
         if elements is None:

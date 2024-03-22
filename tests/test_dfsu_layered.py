@@ -545,7 +545,7 @@ def test_to_mesh_3d(tmp_path):
     dfs = mikeio.open(filename)
 
     fp = tmp_path / "oresund_from_dfs.mesh"
-    dfs.to_mesh(fp)
+    dfs.geometry.to_mesh(fp)
     assert fp.exists()
     Mesh(fp)
 
