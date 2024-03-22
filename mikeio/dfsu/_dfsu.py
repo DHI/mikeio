@@ -351,193 +351,15 @@ class _Dfsu:
     def time(self) -> pd.DatetimeIndex:
         return self._time
 
-    def _read(
-        self,
-        *,
-        items: str | int | Sequence[str | int] | None = None,
-        time: int | str | slice | None = None,
-        elements: Collection[int] | None = None,
-        area: Tuple[float, float, float, float] | None = None,
-        x: float | None = None,
-        y: float | None = None,
-        keepdims: bool = False,
-        dtype: Any = np.float32,
-        error_bad_data: bool = True,
-        fill_bad_data_value: float = np.nan,
-    ) -> Dataset:
-        if dtype not in [np.float32, np.float64]:
-            raise ValueError("Invalid data type. Choose np.float32 or np.float64")
+    def _validate_elements_and_geometry_sel(self, elements: Any, **kwargs: Any) -> None:
+        """Check that only one of elements, area, x, y is selected"""
+        used_kwargs = [key for key, val in kwargs.items() if val is not None]
 
-        # Open the dfs file for reading
-        # self._read_dfsu_header(self._filename)
-        dfs = DfsuFile.Open(self._filename)
-        # time may have changes since we read the header
-        # (if engine is continuously writing to this file)
-        # TODO: add more checks that this is actually still the same file
-        # (could have been replaced in the meantime)
-
-        single_time_selected, time_steps = _valid_timesteps(dfs, time)
-
-        self._validate_elements_and_geometry_sel(elements, area=area, x=x, y=y)
-        if elements is None:
-            elements = self._parse_geometry_sel(area=area, x=x, y=y)
-
-        if elements is None:
-            geometry = self.geometry
-            n_elems = geometry.n_elements
-        else:
-            elements = [elements] if np.isscalar(elements) else list(elements)  # type: ignore
-            n_elems = len(elements)
-            geometry = self.geometry.elements_to_geometry(elements)
-
-        item_numbers = _valid_item_numbers(
-            dfs.ItemInfo, items, ignore_first=self.is_layered
-        )
-        items = _get_item_info(dfs.ItemInfo, item_numbers, ignore_first=self.is_layered)
-        n_items = len(item_numbers)
-
-        deletevalue = self.deletevalue
-
-        data_list = []
-
-        shape: Tuple[int, ...]
-
-        n_steps = len(time_steps)
-        shape = (
-            (n_elems,)
-            if (single_time_selected and not keepdims)
-            else (n_steps, n_elems)
-        )
-        for item in range(n_items):
-            # Initialize an empty data block
-            data: np.ndarray = np.ndarray(shape=shape, dtype=dtype)
-            data_list.append(data)
-
-        time = self.time
-
-        for i in trange(n_steps, disable=not self.show_progress):
-            it = time_steps[i]
-            for item in range(n_items):
-                dfs, d = _read_item_time_step(
-                    dfs=dfs,
-                    filename=self._filename,
-                    time=time,
-                    item_numbers=item_numbers,
-                    deletevalue=deletevalue,
-                    shape=shape,
-                    item=item,
-                    it=it,
-                    error_bad_data=error_bad_data,
-                    fill_bad_data_value=fill_bad_data_value,
-                )
-
-                if elements is not None:
-                    d = d[elements]
-
-                if single_time_selected and not keepdims:
-                    data_list[item] = d
-                else:
-                    data_list[item][i] = d
-
-        time = self.time[time_steps]
-
-        dfs.Close()
-
-        dims: Tuple[str, ...]
-
-        dims = ("time", "element")
-
-        if single_time_selected and not keepdims:
-            dims = ("element",)
-
-        if elements is not None and len(elements) == 1:
-            # squeeze point data
-            dims = tuple([d for d in dims if d != "element"])
-            data_list = [np.squeeze(d, axis=-1) for d in data_list]
-
-        return Dataset(
-            data_list, time, items, geometry=geometry, dims=dims, validate=False
-        )
-
-    def _validate_elements_and_geometry_sel(self, elements, **kwargs):
-        """Check that only one of elements, area, x, y is selected
-
-        Parameters
-        ----------
-        elements : list[int], optional
-            Read only selected element ids, by default None
-        area : list[float], optional
-            Read only data inside (horizontal) area given as a
-            bounding box (tuple with left, lower, right, upper)
-            or as list of coordinates for a polygon, by default None
-        x : float, optional
-            Read only data for elements containing the (x,y) points(s),
-            by default None
-        y : float, optional
-            Read only data for elements containing the (x,y) points(s),
-            by default None
-
-        Returns
-        -------
-        None
-
-        Raises
-        ------
-        ValueError
-            If more than one of elements, area, x, y is selected
-        """
-        used_kwargs = []
-        for kw, val in kwargs.items():
-            if val is not None:
-                used_kwargs.append(kw)
-
-        if elements is not None:
-            for kw in used_kwargs:
-                raise ValueError(f"Cannot select both {kw} and elements!")
+        if elements is not None and len(used_kwargs) > 0:
+            raise ValueError(f"Cannot select both {used_kwargs} and elements!")
 
         if "area" in used_kwargs and ("x" in used_kwargs or "y" in used_kwargs):
             raise ValueError("Cannot select both x,y and area!")
-
-    def _parse_geometry_sel(self, area, x, y):
-        """Parse geometry selection
-
-        Parameters
-        ----------
-        area : list[float], optional
-            Read only data inside (horizontal) area given as a
-            bounding box (tuple with left, lower, right, upper)
-            or as list of coordinates for a polygon, by default None
-        x : float, optional
-            Read only data for elements containing the (x,y) points(s),
-            by default None
-        y : float, optional
-            Read only data for elements containing the (x,y) points(s),
-            by default None
-
-        Returns
-        -------
-        list[int]
-            List of element ids
-
-        Raises
-        ------
-        ValueError
-            If no elements are found in selection
-        """
-        elements = None
-
-        if area is not None:
-            elements = self.geometry._elements_in_area(area)
-
-        if (x is not None) or (y is not None):
-            elements = self.geometry.find_index(x=x, y=y)
-
-        if (x is not None) or (y is not None) or (area is not None):
-            # selection was attempted
-            if (elements is None) or len(elements) == 0:
-                raise ValueError("No elements in selection!")
-
-        return elements
 
     def to_mesh(self, outfilename):
         """write object to mesh file
@@ -624,18 +446,133 @@ class Dfsu2DH(_Dfsu):
             A Dataset with data dimensions [t,elements]
         """
 
-        return self._read(
-            items=items,
-            time=time,
-            elements=elements,
-            area=area,
-            x=x,
-            y=y,
-            keepdims=keepdims,
-            dtype=dtype,
-            error_bad_data=error_bad_data,
-            fill_bad_data_value=fill_bad_data_value,
+        if dtype not in [np.float32, np.float64]:
+            raise ValueError("Invalid data type. Choose np.float32 or np.float64")
+        dfs = DfsuFile.Open(self._filename)
+
+        single_time_selected, time_steps = _valid_timesteps(dfs, time)
+
+        self._validate_elements_and_geometry_sel(elements, area=area, x=x, y=y)
+        if elements is None:
+            elements = self._parse_geometry_sel(area=area, x=x, y=y)
+
+        if elements is None:
+            geometry = self.geometry
+            n_elems = geometry.n_elements
+        else:
+            elements = [elements] if np.isscalar(elements) else list(elements)  # type: ignore
+            n_elems = len(elements)
+            geometry = self.geometry.elements_to_geometry(elements)
+
+        item_numbers = _valid_item_numbers(
+            dfs.ItemInfo, items, ignore_first=self.is_layered
         )
+        items = _get_item_info(dfs.ItemInfo, item_numbers, ignore_first=self.is_layered)
+        n_items = len(item_numbers)
+
+        deletevalue = self.deletevalue
+
+        data_list = []
+
+        shape: Tuple[int, ...]
+
+        n_steps = len(time_steps)
+        shape = (
+            (n_elems,)
+            if (single_time_selected and not keepdims)
+            else (n_steps, n_elems)
+        )
+        for item in range(n_items):
+            # Initialize an empty data block
+            data: np.ndarray = np.ndarray(shape=shape, dtype=dtype)
+            data_list.append(data)
+
+        time = self.time
+
+        for i in trange(n_steps, disable=not self.show_progress):
+            it = time_steps[i]
+            for item in range(n_items):
+                dfs, d = _read_item_time_step(
+                    dfs=dfs,
+                    filename=self._filename,
+                    time=time,
+                    item_numbers=item_numbers,
+                    deletevalue=deletevalue,
+                    shape=shape,
+                    item=item,
+                    it=it,
+                    error_bad_data=error_bad_data,
+                    fill_bad_data_value=fill_bad_data_value,
+                )
+
+                if elements is not None:
+                    d = d[elements]
+
+                if single_time_selected and not keepdims:
+                    data_list[item] = d
+                else:
+                    data_list[item][i] = d
+
+        time = self.time[time_steps]
+
+        dfs.Close()
+
+        dims: Tuple[str, ...]
+
+        dims = ("time", "element")
+
+        if single_time_selected and not keepdims:
+            dims = ("element",)
+
+        if elements is not None and len(elements) == 1:
+            # squeeze point data
+            dims = tuple([d for d in dims if d != "element"])
+            data_list = [np.squeeze(d, axis=-1) for d in data_list]
+
+        return Dataset(
+            data_list, time, items, geometry=geometry, dims=dims, validate=False
+        )
+
+    def _parse_geometry_sel(self, area, x, y):
+        """Parse geometry selection
+
+        Parameters
+        ----------
+        area : list[float], optional
+            Read only data inside (horizontal) area given as a
+            bounding box (tuple with left, lower, right, upper)
+            or as list of coordinates for a polygon, by default None
+        x : float, optional
+            Read only data for elements containing the (x,y) points(s),
+            by default None
+        y : float, optional
+            Read only data for elements containing the (x,y) points(s),
+            by default None
+
+        Returns
+        -------
+        list[int]
+            List of element ids
+
+        Raises
+        ------
+        ValueError
+            If no elements are found in selection
+        """
+        elements = None
+
+        if area is not None:
+            elements = self.geometry._elements_in_area(area)
+
+        if (x is not None) or (y is not None):
+            elements = self.geometry.find_index(x=x, y=y)
+
+        if (x is not None) or (y is not None) or (area is not None):
+            # selection was attempted
+            if (elements is None) or len(elements) == 0:
+                raise ValueError("No elements in selection!")
+
+        return elements
 
     def get_overset_grid(self, dx=None, dy=None, nx=None, ny=None, buffer=0.0):
         """get a 2d grid that covers the domain by specifying spacing or shape

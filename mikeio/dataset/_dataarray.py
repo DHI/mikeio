@@ -837,8 +837,16 @@ class DataArray:
     def _sel_with_slice(self, kwargs: Mapping[str, slice]) -> "DataArray":
         for k, v in kwargs.items():
             if isinstance(v, slice):
-                idx_start = self.geometry.find_index(**{k: v.start})
-                idx_stop = self.geometry.find_index(**{k: v.stop})
+                idx_start = (
+                    self.geometry.find_index(**{k: v.start})
+                    if v.start is not None
+                    else None
+                )
+                idx_stop = (
+                    self.geometry.find_index(**{k: v.stop})
+                    if v.stop is not None
+                    else None
+                )
                 pos = 0
                 if isinstance(idx_start, tuple):
                     if k == "x":

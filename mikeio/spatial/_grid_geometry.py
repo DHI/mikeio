@@ -786,7 +786,7 @@ class Grid2D(_Geometry):
         y: float | None = None,
         coords: np.ndarray | None = None,
         area: Tuple[float, float, float, float] | None = None,
-    ) -> Tuple[Any, Any] | None:
+    ) -> Tuple[Any, Any]:
         """Find nearest index (i,j) of point(s)
 
         Parameters
@@ -833,7 +833,7 @@ class Grid2D(_Geometry):
         elif area is not None:
             return self._bbox_to_index(area)
         else:
-            return None
+            raise ValueError("Provide x,y or coords")
 
     def _xy_to_index(self, xy: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
         """Find specific points in this geometry"""

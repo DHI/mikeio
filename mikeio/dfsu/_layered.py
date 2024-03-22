@@ -1,6 +1,6 @@
 from __future__ import annotations
 from pathlib import Path
-from typing import Any, Collection, Sequence, Tuple
+from typing import Any, Collection, Sequence, Tuple, TYPE_CHECKING
 
 import numpy as np
 from mikecore.DfsuFile import DfsuFile, DfsuFileType
@@ -16,9 +16,12 @@ from ..dfs._dfs import (
 )
 from ..eum import EUMType, ItemInfo
 from .._interpolation import get_idw_interpolant, interp2d
-from ..spatial import GeometryFM3D, GeometryFMVerticalProfile
+from ..spatial import GeometryFM3D, GeometryFMVerticalProfile, GeometryPoint3D
 from ..spatial._FM_utils import _plot_vertical_profile
 from ._dfsu import _Dfsu, get_nodes_from_source, get_elements_from_source
+
+if TYPE_CHECKING:
+    from ..spatial._FM_geometry_layered import Layer
 
 
 class DfsuLayered(_Dfsu):
@@ -71,20 +74,18 @@ class DfsuLayered(_Dfsu):
         return geometry
 
     @property
-    def n_layers(self):
+    def n_layers(self) -> int:
         """Maximum number of layers"""
         return self.geometry._n_layers
 
     @property
-    def n_sigma_layers(self):
+    def n_sigma_layers(self) -> int:
         """Number of sigma layers"""
         return self.geometry.n_sigma_layers
 
     @property
-    def n_z_layers(self):
+    def n_z_layers(self) -> int:
         """Maximum number of z-layers"""
-        if self.n_layers is None:
-            return None
         return self.n_layers - self.n_sigma_layers
 
     def read(
@@ -97,7 +98,7 @@ class DfsuLayered(_Dfsu):
         x: float | None = None,
         y: float | None = None,
         z: float | None = None,
-        layers: int | str | Sequence[int] | None = None,
+        layers: int | Layer | Sequence[int] | None = None,
         keepdims: bool = False,
         dtype: Any = np.float32,
         error_bad_data: bool = True,
@@ -151,18 +152,31 @@ class DfsuLayered(_Dfsu):
             elements, area=area, layers=layers, x=x, y=y, z=z
         )
         if elements is None:
-            elements = self._parse_geometry_sel(area=area, layers=layers, x=x, y=y, z=z)
+            if (
+                (x is not None)
+                or (y is not None)
+                or (area is not None)
+                or (layers is not None)
+            ):
+                elements = self.geometry.find_index(
+                    x=x, y=y, z=z, area=area, layers=layers
+                )
+                if len(elements) == 0:
+                    raise ValueError("No elements in selection!")
 
-        if elements is None:
-            n_elems = self.n_elements
-            n_nodes = self.n_nodes
-            geometry = self.geometry
+        geometry = (
+            self.geometry
+            if elements is None
+            else self.geometry.elements_to_geometry(elements)
+        )
+
+        if isinstance(geometry, GeometryPoint3D):
+            n_elems = 1
+            n_nodes = 1
         else:
-            elements = list(elements)
-            n_elems = len(elements)
-            geometry = self.geometry.elements_to_geometry(elements)
-            node_ids, _ = self.geometry._get_nodes_and_table_for_elements(elements)
-            n_nodes = len(node_ids)
+            n_elems = geometry.n_elements
+            n_nodes = geometry.n_nodes
+            node_ids = geometry.node_ids
 
         item_numbers = _valid_item_numbers(
             dfs.ItemInfo, items, ignore_first=self.is_layered
@@ -212,7 +226,7 @@ class DfsuLayered(_Dfsu):
                     if item == 0 and item0_is_node_based:
                         d = d[node_ids]
                     else:
-                        d = d[elements]
+                        d = d[elements]  # type: ignore
 
                 if single_time_selected and not keepdims:
                     data_list[item] = d
@@ -248,20 +262,6 @@ class DfsuLayered(_Dfsu):
             return Dataset(
                 data_list, time, items, geometry=geometry, dims=dims, validate=False
             )
-
-    def _parse_geometry_sel(self, area, layers, x, y, z):
-        if (
-            (x is not None)
-            or (y is not None)
-            or (area is not None)
-            or (layers is not None)
-        ):
-            elements = self.geometry.find_index(x=x, y=y, z=z, area=area, layers=layers)
-            if (elements is None) or len(elements) == 0:
-                raise ValueError("No elements in selection!")
-            return elements
-
-        return None
 
 
 class Dfsu2DV(DfsuLayered):

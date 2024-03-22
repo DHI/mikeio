@@ -5,7 +5,7 @@ from collections import Counter
 from collections.abc import Mapping, Sequence
 from datetime import datetime
 from pathlib import Path
-from typing import Callable, Dict, List, TextIO, Tuple, overload
+from typing import Callable, Dict, List, TextIO, Tuple
 
 import yaml
 
@@ -181,8 +181,7 @@ class PfsDocument(PfsSection):
     def copy(self) -> PfsDocument:
         """Return a deep copy of the PfsDocument"""
 
-        lines = self.write()
-        text = "\n".join(lines)
+        text = repr(self)
 
         return PfsDocument.from_text(text)
 
@@ -373,26 +372,22 @@ class PfsDocument(PfsSection):
 
         return s
 
-    @overload
-    def write(self) -> list[str]: ...
-
-    @overload
-    def write(self, filename: str) -> None: ...
-
-    def write(self, filename: str | None = None) -> list[str] | None:
+    def write(self, filename: str) -> None:
         """Write object to a pfs file
 
         Parameters
         ----------
         filename: str, optional
             Full path and filename of pfs to be created.
-            If None, the content will be returned
-            as a list of strings.
+
+        Notes
+        -----
+        To return the content as a string, use repr()
         """
         from mikeio import __version__ as mikeio_version
 
-        if filename is None:
-            return self._to_txt_lines()
+        # if filename is None:
+        #    return self._to_txt_lines()
 
         with open(filename, "w") as f:
             now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
@@ -403,7 +398,6 @@ class PfsDocument(PfsSection):
             f.write("\n\n")
 
             self._write_with_func(f.write, level=0)
-        return None
 
 
 # TODO remove this alias
