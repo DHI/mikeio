@@ -179,9 +179,11 @@ class DfsuLayered(_Dfsu):
             node_ids = geometry.node_ids
 
         item_numbers = _valid_item_numbers(
-            dfs.ItemInfo, items, ignore_first=self.is_layered
+            dfs.ItemInfo, items, ignore_first=self.geometry.is_layered
         )
-        items = _get_item_info(dfs.ItemInfo, item_numbers, ignore_first=self.is_layered)
+        items = _get_item_info(
+            dfs.ItemInfo, item_numbers, ignore_first=self.geometry.is_layered
+        )
         item_numbers = [it + 1 for it in item_numbers]
         if layered_data := hasattr(geometry, "is_layered") and geometry.is_layered:
             item_numbers.insert(0, 0)

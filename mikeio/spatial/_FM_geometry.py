@@ -381,6 +381,12 @@ class _GeometryFM(_Geometry):
             raise ValueError(f"codes must have length of nodes ({self.n_nodes})")
         self._codes = np.array(v, dtype=np.int32)
 
+    @property
+    def boundary_codes(self):
+        """Unique list of boundary codes"""
+        valid = list(set(self.codes))
+        return [code for code in valid if code > 0]
+
 
 class GeometryFM2D(_GeometryFM):
     def __init__(

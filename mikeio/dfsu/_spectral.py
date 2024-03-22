@@ -98,8 +98,8 @@ class DfsuSpectral(_Dfsu):
         self, n_steps: int, elements: Sized | None, dfsu_type: DfsuFileType
     ) -> Tuple[Tuple[int, ...], Tuple[int, ...], Tuple[str, ...]]:
         dims = [] if n_steps == 1 else ["time"]
-        n_freq = self.n_frequencies
-        n_dir = self.n_directions
+        n_freq = self.geometry.n_frequencies
+        n_dir = self.geometry.n_directions
         shape: Tuple[int, ...] = (n_dir, n_freq)
         if n_dir == 0:
             shape = (n_freq,)
@@ -109,21 +109,21 @@ class DfsuSpectral(_Dfsu):
             read_shape = (n_steps, *shape)
         elif dfsu_type == DfsuFileType.DfsuSpectral1D:
             # node-based, FE-style
-            n_nodes = self.n_nodes if elements is None else len(elements)
+            n_nodes = self.geometry.n_nodes if elements is None else len(elements)
             if n_nodes == 1:
                 read_shape = (n_steps, *shape)
             else:
                 dims.append("node")
                 read_shape = (n_steps, n_nodes, *shape)
-            shape = (*shape, self.n_nodes)
+            shape = (*shape, self.geometry.n_nodes)
         else:
-            n_elems = self.n_elements if elements is None else len(elements)
+            n_elems = self.geometry.n_elements if elements is None else len(elements)
             if n_elems == 1:
                 read_shape = (n_steps, *shape)
             else:
                 dims.append("element")
                 read_shape = (n_steps, n_elems, *shape)
-            shape = (*shape, self.n_elements)
+            shape = (*shape, self.geometry.n_elements)
 
         if n_dir > 1:
             dims.append("direction")
@@ -214,10 +214,8 @@ class DfsuSpectral(_Dfsu):
 
         geometry, pts = self._parse_elements_nodes(elements, nodes)
 
-        item_numbers = _valid_item_numbers(
-            dfs.ItemInfo, items, ignore_first=self.is_layered
-        )
-        items = _get_item_info(dfs.ItemInfo, item_numbers, ignore_first=self.is_layered)
+        item_numbers = _valid_item_numbers(dfs.ItemInfo, items)
+        items = _get_item_info(dfs.ItemInfo, item_numbers)
         n_items = len(item_numbers)
 
         deletevalue = self.deletevalue
