@@ -1,6 +1,6 @@
 from __future__ import annotations
 from pathlib import Path
-from typing import Any, Collection, Sequence, Tuple
+from typing import Any, Collection, Sequence, Tuple, TYPE_CHECKING
 
 import numpy as np
 from mikecore.DfsuFile import DfsuFile, DfsuFileType
@@ -19,6 +19,9 @@ from .._interpolation import get_idw_interpolant, interp2d
 from ..spatial import GeometryFM3D, GeometryFMVerticalProfile, GeometryPoint3D
 from ..spatial._FM_utils import _plot_vertical_profile
 from ._dfsu import _Dfsu, get_nodes_from_source, get_elements_from_source
+
+if TYPE_CHECKING:
+    from ..spatial._FM_geometry_layered import Layer
 
 
 class DfsuLayered(_Dfsu):
@@ -95,7 +98,7 @@ class DfsuLayered(_Dfsu):
         x: float | None = None,
         y: float | None = None,
         z: float | None = None,
-        layers: int | str | Sequence[int] | None = None,
+        layers: int | Layer | Sequence[int] | None = None,
         keepdims: bool = False,
         dtype: Any = np.float32,
         error_bad_data: bool = True,
@@ -149,7 +152,17 @@ class DfsuLayered(_Dfsu):
             elements, area=area, layers=layers, x=x, y=y, z=z
         )
         if elements is None:
-            elements = self._parse_geometry_sel(area=area, layers=layers, x=x, y=y, z=z)
+            if (
+                (x is not None)
+                or (y is not None)
+                or (area is not None)
+                or (layers is not None)
+            ):
+                elements = self.geometry.find_index(
+                    x=x, y=y, z=z, area=area, layers=layers
+                )
+                if len(elements) == 0:
+                    raise ValueError("No elements in selection!")
 
         geometry = (
             self.geometry
@@ -249,21 +262,6 @@ class DfsuLayered(_Dfsu):
             return Dataset(
                 data_list, time, items, geometry=geometry, dims=dims, validate=False
             )
-
-    def _parse_geometry_sel(self, area, layers, x, y, z) -> list[int] | None:
-        if (
-            (x is not None)
-            or (y is not None)
-            or (area is not None)
-            or (layers is not None)
-        ):
-            elements = self.geometry.find_index(x=x, y=y, z=z, area=area, layers=layers)
-            if (elements is None) or len(elements) == 0:
-                raise ValueError("No elements in selection!")
-            return elements
-
-        # TODO refactor to avoid returning None
-        return None
 
 
 class Dfsu2DV(DfsuLayered):

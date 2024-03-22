@@ -655,7 +655,15 @@ class GeometryFM3D(_GeometryFMLayered):
     def to_mesh(self, outfilename):
         return self.geometry2d.to_mesh(outfilename)
 
-    def find_index(self, x=None, y=None, z=None, coords=None, area=None, layers=None):
+    def find_index(
+        self,
+        x: float | None = None,
+        y: float | None = None,
+        z: float | None = None,
+        coords: np.ndarray | None = None,
+        area: Tuple[float, float, float, float] | None = None,
+        layers: int | Layer | Sequence[int] | None = None,
+    ) -> np.ndarray:
 
         if layers is not None:
             idx = self.get_layer_elements(layers)
@@ -674,10 +682,10 @@ class GeometryFM3D(_GeometryFMLayered):
                 )
             if coords is not None:
                 coords = np.atleast_2d(coords)
-                xy = coords[:, :2]
-                z = coords[:, 2] if coords.shape[1] == 3 else None
+                xy = coords[:, :2]  # type: ignore
+                z = coords[:, 2] if coords.shape[1] == 3 else None  # type: ignore
             else:
-                xy = np.vstack((x, y)).T
+                xy = np.vstack((x, y)).T  # type: ignore
             idx_2d = self.geometry2d._find_element_2d(coords=xy)
             assert len(idx_2d) == len(xy)
             if z is None:
