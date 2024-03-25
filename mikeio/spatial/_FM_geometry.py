@@ -3,7 +3,6 @@ from collections import namedtuple
 from functools import cached_property
 from pathlib import Path
 from typing import (
-    Collection,
     List,
     Any,
     Literal,
@@ -11,6 +10,7 @@ from typing import (
     Sized,
     Tuple,
     TYPE_CHECKING,
+    overload,
 )
 
 
@@ -943,8 +943,18 @@ class GeometryFM2D(_GeometryFM):
         bnd_face_id = face_counts == 1
         return all_faces[uf_id[bnd_face_id]]
 
+    @overload
     def isel(
-        self, idx: Collection[int], keepdims: bool = False, **kwargs: Any
+        self, idx: int, keepdims: bool = False, **kwargs: Any
+    ) -> GeometryPoint2D: ...
+
+    @overload
+    def isel(
+        self, idx: Sequence[int], keepdims: bool = False, **kwargs: Any
+    ) -> "GeometryFM2D": ...
+
+    def isel(
+        self, idx: int | Sequence[int], keepdims=False, **kwargs: Any
     ) -> "GeometryFM2D" | GeometryPoint2D:
         """export a selection of elements to a new geometry
 
@@ -953,12 +963,14 @@ class GeometryFM2D(_GeometryFM):
 
         Parameters
         ----------
-        idx : collection(int)
-            collection of element indicies
+        idx : list(int)
+            element ids to be selected
         keepdims : bool, optional
             Should the original Geometry type be kept (keepdims=True)
             or should it be reduced e.g. to a GeometryPoint2D if possible
             (keepdims=False), by default False
+        **kwargs: optional
+            Not used
 
         Returns
         -------
@@ -1073,7 +1085,7 @@ class GeometryFM2D(_GeometryFM):
             raise ValueError("'area' must be bbox [x0,y0,x1,y1] or polygon")
 
     def _nodes_to_geometry(
-        self, nodes: Collection[int]
+        self, nodes: Sequence[int] | int
     ) -> "GeometryFM2D" | GeometryPoint2D:
         """export a selection of nodes to new flexible file geometry
 
@@ -1100,7 +1112,9 @@ class GeometryFM2D(_GeometryFM):
                 elements.append(j)
 
         assert len(elements) > 0, "no elements found"
-        elements = np.sort(elements)  # make sure elements are sorted!
+        elements = sorted(
+            elements
+        )  # make sure elements are sorted! # TODO: should this be here?
 
         node_ids, elem_tbl = self._get_nodes_and_table_for_elements(elements)
         node_coords = self.node_coordinates[node_ids]
@@ -1118,7 +1132,7 @@ class GeometryFM2D(_GeometryFM):
         )
 
     def elements_to_geometry(
-        self, elements: int | Collection[int], keepdims: bool = False
+        self, elements: int | Sequence[int], keepdims: bool = False
     ) -> "GeometryFM2D" | GeometryPoint2D:
         if isinstance(elements, (int, np.integer)):
             sel_elements: List[int] = [elements]
@@ -1129,16 +1143,12 @@ class GeometryFM2D(_GeometryFM):
 
             return GeometryPoint2D(x=x, y=y, projection=self.projection)
 
-        sorted_elements = np.sort(
-            sel_elements
-        )  # make sure elements are sorted! # TODO is this necessary? If so, should be done in the initialiser
-
         # extract information for selected elements
 
-        node_ids, elem_tbl = self._get_nodes_and_table_for_elements(sorted_elements)
+        node_ids, elem_tbl = self._get_nodes_and_table_for_elements(sel_elements)
         node_coords = self.node_coordinates[node_ids]
         codes = self.codes[node_ids]
-        elem_ids = self.element_ids[sorted_elements]
+        elem_ids = self.element_ids[sel_elements]
 
         return GeometryFM2D(
             node_coordinates=node_coords,
@@ -1152,8 +1162,8 @@ class GeometryFM2D(_GeometryFM):
         )
 
     def _get_nodes_and_table_for_elements(
-        self, elements: np.ndarray | List[int]
-    ) -> tuple[Any, Any]:
+        self, elements: Sequence[int] | np.ndarray
+    ) -> tuple[np.ndarray, list[np.ndarray]]:
         """list of nodes and element table for a list of elements
 
         Parameters
@@ -1165,15 +1175,12 @@ class GeometryFM2D(_GeometryFM):
         -------
         np.array(int)
             array of node ids (unique)
-        list(list(int))
+        list(np.array(int))
             element table with a list of nodes for each element
         """
-        elem_tbl = np.empty(len(elements), dtype=np.dtype("O"))
+        elem_tbl = [np.asarray(self.element_table[eid]) for eid in elements]
 
-        for j, eid in enumerate(elements):
-            elem_tbl[j] = np.asarray(self.element_table[eid])
-
-        nodes = np.unique(np.hstack(elem_tbl))  # type: ignore
+        nodes = np.unique(np.hstack(elem_tbl))
         return nodes, elem_tbl
 
     def get_node_centered_data(

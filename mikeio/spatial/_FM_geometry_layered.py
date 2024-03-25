@@ -1,6 +1,6 @@
 from __future__ import annotations
 from functools import cached_property
-from typing import Any, Collection, Iterable, Literal, Sequence, List, Tuple
+from typing import Any, Iterable, Literal, Sequence, List, Tuple, overload
 
 import numpy as np
 from mikecore.DfsuFile import DfsuFileType
@@ -32,7 +32,6 @@ class _GeometryFMLayered(_GeometryFM):
         validate: bool = True,
         reindex: bool = False,
     ) -> None:
-
         super().__init__(
             node_coordinates=node_coordinates,
             element_table=element_table,
@@ -68,18 +67,24 @@ class _GeometryFMLayered(_GeometryFM):
     def geometry2d(self) -> GeometryFM2D:
         return self.to_2d_geometry()
 
+    @overload
     def isel(
-        self, idx: Collection[int], keepdims: bool = False, **kwargs: Any
-    ) -> GeometryFM3D | GeometryPoint3D | GeometryFM2D | GeometryFMVerticalColumn:
+        self, idx: int, keepdims: bool = False, **kwargs: Any
+    ) -> GeometryPoint3D: ...
 
-        return self.elements_to_geometry(elements=idx, keepdims=keepdims)
+    @overload
+    def isel(
+        self, idx: Sequence[int], keepdims: bool = False, **kwargs: Any
+    ) -> _GeometryFMLayered: ...
+
+    def isel(self, idx: int | Sequence[int], keepdims=False, **kwargs):
+        return self.elements_to_geometry(
+            elements=idx, node_layers=None, keepdims=keepdims
+        )
 
     def elements_to_geometry(
-        self,
-        elements: int | Collection[int],
-        node_layers: Layer = "all",
-        keepdims: bool = False,
-    ) -> GeometryFM3D | GeometryPoint3D | GeometryFM2D | GeometryFMVerticalColumn:
+        self, elements: int | Sequence[int], node_layers="all", keepdims=False
+    ):
         sel_elements: List[int]
 
         if isinstance(elements, (int, np.integer)):
@@ -91,21 +96,16 @@ class _GeometryFMLayered(_GeometryFM):
 
             return GeometryPoint3D(x=x, y=y, z=z, projection=self.projection)
 
-        sorted_elements = np.sort(
-            sel_elements
-        )  # make sure elements are sorted! # TODO is this necessary?
-
         # create new geometry
         new_type = self._type
 
-        layers_used = self.layer_ids[sorted_elements]
+        layers_used = self.layer_ids[sel_elements]
         unique_layer_ids = np.unique(layers_used)
         n_layers = len(unique_layer_ids)
 
         if n_layers > 1:
-            bottom: Layer = "bottom"
-            elem_bot = self.get_layer_elements(layers=bottom)
-            if np.all(np.in1d(sorted_elements, elem_bot)):
+            elem_bot = self.get_layer_elements("bottom")
+            if np.all(np.in1d(sel_elements, elem_bot)):
                 n_layers = 1
 
         if (
@@ -119,7 +119,7 @@ class _GeometryFMLayered(_GeometryFM):
 
         # extract information for selected elements
         if n_layers == 1:
-            elem2d = self.elem2d_ids[sorted_elements]
+            elem2d = self.elem2d_ids[sel_elements]
             geom2d = self.geometry2d
             node_ids, elem_tbl = geom2d._get_nodes_and_table_for_elements(elem2d)
             assert len(elem_tbl[0]) <= 4, "Not a 2D element"
@@ -128,11 +128,11 @@ class _GeometryFMLayered(_GeometryFM):
             elem_ids = self._element_ids[elem2d]
         else:
             node_ids, elem_tbl = self._get_nodes_and_table_for_elements(
-                sorted_elements, node_layers=node_layers
+                sel_elements, node_layers=node_layers
             )
             node_coords = self.node_coordinates[node_ids]
             codes = self.codes[node_ids]
-            elem_ids = self._element_ids[sorted_elements]
+            elem_ids = self._element_ids[sel_elements]
 
         if new_type == DfsuFileType.Dfsu2D:
             return GeometryFM2D(
@@ -163,7 +163,7 @@ class _GeometryFMLayered(_GeometryFM):
                 )
             else:
                 klass = self.__class__
-                return klass(  # type: ignore
+                return klass(
                     node_coordinates=node_coords,
                     codes=codes,
                     node_ids=node_ids,
@@ -183,7 +183,7 @@ class _GeometryFMLayered(_GeometryFM):
 
     def _get_nodes_and_table_for_elements(
         self,
-        elements: Collection[int] | np.ndarray,
+        elements: Sequence[int] | np.ndarray,
         node_layers: Layer = "all",
     ) -> Tuple[Any, Any]:
         """list of nodes and element table for a list of elements
@@ -760,7 +760,6 @@ class GeometryFMVerticalProfile(_GeometryFMLayered):
         return self.relative_element_distance[idx]
 
     def find_index(self, x=None, y=None, z=None, coords=None, layers=None):
-
         if layers is not None:
             idx = self.get_layer_elements(layers)
         else:
@@ -893,7 +892,6 @@ class _GeometryFMVerticalProfilePlotter:
         return ax
 
     def mesh(self, title="Mesh", edge_color="0.5", **kwargs):
-
         v = np.full_like(self.g.element_coordinates[:, 0], np.nan)
         return _plot_vertical_profile(
             node_coordinates=self.g.node_coordinates,
