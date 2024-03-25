@@ -23,6 +23,7 @@ from ..eum import EUMType, ItemInfo
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
     from ..spatial import GeometryFM2D
+    from ..dataset import DataArray
 
 
 def _check_equidistant(x: np.ndarray) -> None:
@@ -415,7 +416,7 @@ class Grid2D(_Geometry):
     _origin: Tuple[float, float]
     _orientation: float
     is_spectral: bool
-    bathymetry: np.ndarray | None = None
+    bathymetry: DataArray | None = None
 
     def __init__(
         self,
