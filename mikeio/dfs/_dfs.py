@@ -1,29 +1,26 @@
 from __future__ import annotations
+from pathlib import Path
 import warnings
 from abc import abstractmethod
 from dataclasses import dataclass
 from datetime import datetime
-from typing import List, Tuple, Sequence
+from typing import Any, List, Tuple, Sequence
 import numpy as np
 import pandas as pd
-from tqdm import tqdm, trange
+from tqdm import tqdm
 
-from mikecore.DfsFactory import DfsFactory
 from mikecore.DfsFile import (
     DfsDynamicItemInfo,
     DfsFile,
     DfsFileInfo,
-    DfsSimpleType,
     TimeAxisType,
 )
 from mikecore.DfsFileFactory import DfsFileFactory
-from mikecore.eum import eumQuantity
 from mikecore.Projections import Cartography
 
 from ..dataset import Dataset
-from ..eum import EUMType, EUMUnit, ItemInfo, ItemInfoList, TimeStepUnit
-from ..exceptions import DataDimensionMismatch, ItemsError
-from ..spatial import GeometryUndefined
+from ..eum import EUMType, EUMUnit, ItemInfo, ItemInfoList
+from ..exceptions import ItemsError
 from .._time import DateTimeSelector
 
 
@@ -39,17 +36,17 @@ class DfsHeader:
 
 def _read_item_time_step(
     *,
-    dfs,
-    filename,
-    time,
-    item_numbers,
-    deletevalue,
-    shape,
-    item,
-    it,
-    error_bad_data=True,
-    fill_bad_data_value=np.nan,
-):
+    dfs: DfsFile,
+    filename: str,
+    time: pd.DatetimeIndex,
+    item_numbers: List[int],
+    deletevalue: float,
+    shape: Tuple[int, ...],
+    item: int,
+    it: int,
+    error_bad_data: bool = True,
+    fill_bad_data_value: float = np.nan,
+) -> Tuple[DfsFile, np.ndarray]:
     itemdata = dfs.ReadItemTimeStep(item_numbers[item] + 1, it)
     if itemdata is not None:
         d = itemdata.Data
@@ -68,7 +65,7 @@ def _read_item_time_step(
 
 def _fuzzy_item_search(
     *, dfsItemInfo: List[DfsDynamicItemInfo], search: str, start_idx: int = 0
-):
+) -> List[int]:
     import fnmatch
 
     names = [info.Name for info in dfsItemInfo]
@@ -126,7 +123,9 @@ def _valid_item_numbers(
     return item_numbers
 
 
-def _valid_timesteps(dfsFileInfo: DfsFileInfo, time_steps) -> Tuple[bool, List[int]]:
+def _valid_timesteps(
+    dfsFileInfo: DfsFileInfo, time_steps: int | Sequence[int] | str | slice | None
+) -> Tuple[bool, List[int]]:
     time_axis = dfsFileInfo.TimeAxis
 
     single_time_selected = False
@@ -179,7 +178,7 @@ def _valid_timesteps(dfsFileInfo: DfsFileInfo, time_steps) -> Tuple[bool, List[i
 
 
 def _item_numbers_by_name(
-    dfsItemInfo, item_names: List[str], ignore_first: bool = False
+    dfsItemInfo: DfsDynamicItemInfo, item_names: List[str], ignore_first: bool = False
 ) -> List[int]:
     """Utility function to find item numbers
 
@@ -242,7 +241,7 @@ def _get_item_info(
     return ItemInfoList(items)
 
 
-def _write_dfs_data(*, dfs: DfsFile, ds: Dataset, n_spatial_dims: int) -> None:
+def write_dfs_data(*, dfs: DfsFile, ds: Dataset, n_spatial_dims: int) -> None:
     deletevalue = dfs.FileInfo.DeleteValueFloat  # ds.deletevalue
     has_no_time = "time" not in ds.dims
     if ds.is_equidistant:
@@ -272,31 +271,82 @@ class _Dfs123:
 
     show_progress = False
 
-    # TODO add all common arguments
-    def __init__(self, filename=None):
+    def __init__(self, filename: str | Path) -> None:
+        path = Path(filename)
+        if not path.exists():
+            raise FileNotFoundError(path)
         self._filename = str(filename) if filename else None
-        self._projstr = None
-        self._start_time = None
         self._end_time = None
         self._is_equidistant = True
-        self._items = None
-        self._builder = None
-        self._factory = None
-        self._deletevalue = None
-        self._override_coordinates = False
-        self._timeseries_unit = TimeStepUnit.SECOND
-        self._dt = None
-        self.geometry = GeometryUndefined()
-        self._dfs = None
-        self._source = None
+        dfs = DfsFileFactory.DfsGenericOpen(self._filename)
+        self._dfs = dfs
+        self._geometry: Any = None  # Handled by subclass
+        n_items = len(dfs.ItemInfo)
+        self._items = self._get_item_info(list(range(n_items)))
+        if dfs.FileInfo.TimeAxis.TimeAxisType in {
+            TimeAxisType.CalendarEquidistant,
+            TimeAxisType.CalendarNonEquidistant,
+        }:
+            self._start_time = dfs.FileInfo.TimeAxis.StartDateTime
+        else:  # relative time axis
+            self._start_time = datetime(
+                1970, 1, 1
+            )  # TODO is this the proper epoch, should this magic number be somewhere else?
+
+        if hasattr(dfs.FileInfo.TimeAxis, "TimeStep"):
+            self._timestep = (
+                # some files have dt = 0 😳
+                dfs.FileInfo.TimeAxis.TimeStepInSeconds()
+                if dfs.FileInfo.TimeAxis.TimeStepInSeconds() > 0
+                else 1
+            )  # TODO handle other timeunits
+
+            freq = pd.Timedelta(seconds=self._timestep)
+            self._time = pd.date_range(
+                start=self._start_time,
+                periods=dfs.FileInfo.TimeAxis.NumberOfTimeSteps,
+                freq=freq,
+            )
+        else:
+            self._timestep = None
+            self._time = None
+        self._n_timesteps: int = dfs.FileInfo.TimeAxis.NumberOfTimeSteps
+        projstr = dfs.FileInfo.Projection.WKTString
+        self._projstr: str = "NON-UTM" if not projstr else projstr
+        self._longitude: float = dfs.FileInfo.Projection.Longitude
+        self._latitude: float = dfs.FileInfo.Projection.Latitude
+        self._orientation: float = dfs.FileInfo.Projection.Orientation
+        self._deletevalue: float = dfs.FileInfo.DeleteValueFloat
+
+        dfs.Close()
+
+    def __repr__(self) -> str:
+        name = self.__class__.__name__
+        out = [f"<mikeio.{name}>"]
+
+        out.append(f"geometry: {self.geometry}")
+        if self.n_items < 10:
+            out.append("items:")
+            for i, item in enumerate(self.items):
+                out.append(f"  {i}:  {item}")
+        else:
+            out.append(f"number of items: {self.n_items}")
+
+        if self._n_timesteps == 1:
+            out.append("time: time-invariant file (1 step)")
+        else:
+            out.append(f"time: {self._n_timesteps} steps")
+            out.append(f"start time: {self._start_time}")
+
+        return str.join("\n", out)
 
     def read(
         self,
         *,
-        items=None,
-        time=None,
-        keepdims=False,
-        dtype=np.float32,
+        items: str | int | Sequence[str | int] | None = None,
+        time: int | str | slice | None = None,
+        keepdims: bool = False,
+        dtype: Any = np.float32,
     ) -> Dataset:
         """
         Read data from a dfs file
@@ -327,11 +377,11 @@ class _Dfs123:
         shape: Tuple[int, ...]
 
         if self._ndim == 1:
-            shape = (nt, self._nx)
+            shape = (nt, self.nx)  # type: ignore
         elif self._ndim == 2:
-            shape = (nt, self._ny, self._nx)
+            shape = (nt, self.ny, self.nx)  # type: ignore
         else:
-            shape = (nt, self._nz, self._ny, self._nx)
+            shape = (nt, self.nz, self.ny, self.nx)  # type: ignore
 
         if single_time_selected and not keepdims:
             shape = shape[1:]
@@ -352,7 +402,7 @@ class _Dfs123:
                 d[d == self.deletevalue] = np.nan
 
                 if self._ndim == 2:
-                    d = d.reshape(self._ny, self._nx)
+                    d = d.reshape(self.ny, self.nx)  # type: ignore
 
                 if single_time_selected:
                     data_list[item] = d
@@ -361,281 +411,17 @@ class _Dfs123:
 
             t_seconds[i] = itemdata.Time
 
-        time = pd.to_datetime(t_seconds, unit="s", origin=self.start_time)  # type: ignore
+        time = pd.to_datetime(t_seconds, unit="s", origin=self.start_time)
 
         items = _get_item_info(self._dfs.ItemInfo, item_numbers)
 
         self._dfs.Close()
         return Dataset(data_list, time, items, geometry=self.geometry, validate=False)
 
-    def _read_header(self):
-        dfs = self._dfs
-        self._n_items = len(dfs.ItemInfo)
-        self._items = self._get_item_info(list(range(self._n_items)))
-        self._timeaxistype = dfs.FileInfo.TimeAxis.TimeAxisType
-        if self._timeaxistype in {
-            TimeAxisType.CalendarEquidistant,
-            TimeAxisType.CalendarNonEquidistant,
-        }:
-            self._start_time = dfs.FileInfo.TimeAxis.StartDateTime
-        else:  # relative time axis
-            self._start_time = datetime(
-                1970, 1, 1
-            )  # TODO is this the proper epoch, should this magic number be somewhere else?
-        if hasattr(dfs.FileInfo.TimeAxis, "TimeStep"):
-            self._timestep_in_seconds = (
-                dfs.FileInfo.TimeAxis.TimeStep
-            )  # TODO handle other timeunits
-            # TODO to get the EndTime
-        self._n_timesteps = dfs.FileInfo.TimeAxis.NumberOfTimeSteps
-        projstr = dfs.FileInfo.Projection.WKTString
-        self._projstr = "NON-UTM" if not projstr else projstr
-        self._longitude = dfs.FileInfo.Projection.Longitude
-        self._latitude = dfs.FileInfo.Projection.Latitude
-        self._orientation = dfs.FileInfo.Projection.Orientation
-        self._deletevalue = dfs.FileInfo.DeleteValueFloat
-
-        dfs.Close()
-
-    def _write(
-        self,
-        *,
-        filename,
-        ds,
-        dt,
-        coordinate=None,
-        title,
-        keep_open=False,
-    ):
-        assert isinstance(ds, Dataset)
-
-        neq_datetimes = None
-        if isinstance(ds, Dataset) and not ds.is_equidistant:
-            neq_datetimes = ds.time
-
-        header, data = self._write_handle_common_arguments(
-            title=title, data=ds, dt=dt, coordinate=coordinate
-        )
-
-        shape = np.shape(data[0])
-        t_offset = 0 if len(shape) == self._ndim else 1
-
-        # TODO find out a clever way to handle the grid dimensions
-        if self._ndim == 1:
-            self._nx = shape[t_offset + 0]
-        elif self._ndim == 2:
-            self._ny = shape[t_offset + 0]
-            self._nx = shape[t_offset + 1]
-        elif self._ndim == 3:
-            self._nz = shape[t_offset + 0]
-            self._ny = shape[t_offset + 1]
-            self._nx = shape[t_offset + 2]
-
-        self._factory = DfsFactory()
-
-        # TODO pass grid
-        self._set_spatial_axis()
-
-        if self._ndim == 1:
-            if not all(np.shape(d)[t_offset + 0] == self._nx for d in data):
-                raise DataDimensionMismatch()
-
-        if self._ndim == 2:
-            if not all(np.shape(d)[t_offset + 0] == self._ny for d in data):
-                raise DataDimensionMismatch()
-
-            if not all(np.shape(d)[t_offset + 1] == self._nx for d in data):
-                raise DataDimensionMismatch()
-
-        if neq_datetimes is not None:
-            self._is_equidistant = False
-            start_time = neq_datetimes[0]
-            self._start_time = start_time
-
-        dfs = self._setup_header(filename, header)
-        self._dfs = dfs
-
-        deletevalue = dfs.FileInfo.DeleteValueFloat  # -1.0000000031710769e-30
-
-        for i in trange(header.n_timesteps, disable=not self.show_progress):
-            for item in range(header.n_items):
-                d = data[item][i] if t_offset == 1 else data[item]
-                d = d.copy()  # to avoid modifying the input
-                d[np.isnan(d)] = deletevalue
-
-                if self._is_equidistant:
-                    dfs.WriteItemTimeStepNext(0, d.astype(np.float32))
-                else:
-                    t = neq_datetimes[i]
-                    relt = (t - self._start_time).total_seconds()
-                    dfs.WriteItemTimeStepNext(relt, d.astype(np.float32))
-
-        if not keep_open:
-            dfs.Close()
-        else:
-            return self
-
-    def append(self, data: Dataset) -> None:
-        warnings.warn(FutureWarning("append() is deprecated."))
-
-        if not data.dims == ("time", "y", "x"):
-            raise NotImplementedError(
-                "Append is only available for 2D files with dims ('time', 'y', 'x')"
-            )
-
-        deletevalue = self._dfs.FileInfo.DeleteValueFloat  # -1.0000000031710769e-30
-
-        for i in trange(data.n_timesteps, disable=not self.show_progress):
-            for da in data:
-                values = da.to_numpy()
-                d = values[i]
-                d = d.copy()  # to avoid modifying the input
-                d[np.isnan(d)] = deletevalue
-
-                d = d.reshape(data.shape[1:])
-                darray = d.reshape(d.size, 1)[:, 0]
-                self._dfs.WriteItemTimeStepNext(0, darray.astype(np.float32))
-
-    def __enter__(self):
-        return self
-
-    def __exit__(self, type, value, traceback):
-        self._dfs.Close()
-
-    def close(self):
-        "Finalize write for a dfs file opened with `write(...,keep_open=True)`"
-        self._dfs.Close()
-
-    def _write_handle_common_arguments(
-        self, *, title: str | None, data: Dataset, coordinate, dt: float | None = None
-    ):
-        if title is None:
-            self._title = ""
-
-        n_timesteps = data.n_timesteps
-        n_items = data.n_items
-
-        if coordinate is None:
-            if self._projstr is not None:
-                coordinate = [
-                    self._projstr,
-                    self._longitude,
-                    self._latitude,
-                    self._orientation,
-                ]
-            elif isinstance(data, Dataset) and (data.geometry is not None):
-                coordinate = [
-                    data.geometry.projection_string,
-                    data.geometry.origin[0],
-                    data.geometry.origin[1],
-                    data.geometry.orientation,
-                ]
-            else:
-                warnings.warn("No coordinate system provided")
-                coordinate = ["LONG/LAT", 0, 0, 0]
-        else:
-            self._override_coordinates = True
-
-        assert isinstance(
-            data, Dataset
-        ), "data must be supplied in the form of a mikeio.Dataset"
-
-        items = data.items
-        start_time = data.time[0]
-        n_timesteps = len(data.time)
-        if dt is None and len(data.time) > 1:
-            dt = (data.time[1] - data.time[0]).total_seconds()
-        data = data.to_numpy()
-
-        if dt is None:
-            dt = 1
-            if n_timesteps > 1:
-                warnings.warn("No timestep supplied. Using 1s.")
-
-        header = DfsHeader(
-            n_items=n_items,
-            n_timesteps=n_timesteps,
-            dt=dt,
-            start_time=start_time,
-            coordinates=coordinate,
-            items=items,
-        )
-        return header, data
-
-    def _setup_header(self, filename: str, header: DfsHeader):
-        system_start_time = header.start_time
-
-        self._builder.SetDataType(0)
-
-        proj = self._factory.CreateProjectionGeoOrigin(*header.coordinates)
-
-        self._builder.SetGeographicalProjection(proj)
-
-        if self._is_equidistant:
-            self._builder.SetTemporalAxis(
-                self._factory.CreateTemporalEqCalendarAxis(
-                    self._timeseries_unit, system_start_time, 0, header.dt
-                )
-            )
-        else:
-            self._builder.SetTemporalAxis(
-                self._factory.CreateTemporalNonEqCalendarAxis(
-                    self._timeseries_unit, system_start_time
-                )
-            )
-
-        for item in header.items:
-            self._builder.AddCreateDynamicItem(
-                item.name,
-                eumQuantity.Create(item.type, item.unit),
-                DfsSimpleType.Float,
-                item.data_value_type,
-            )
-
-        try:
-            self._builder.CreateFile(filename)
-        except IOError:
-            # TODO does this make sense?
-            print("cannot create dfs file: ", filename)
-
-        return self._builder.GetFile()
-
-    def _open(self):
+    def _open(self) -> None:
         raise NotImplementedError("Should be implemented by subclass")
 
-    def _set_spatial_axis(self):
-        raise NotImplementedError("Should be implemented by subclass")
-
-    def _find_item(self, item_names):
-        """Utility function to find item numbers
-
-        Parameters
-        ----------
-        dfs : DfsFile
-
-        item_names : list[str]
-            Names of items to be found
-
-        Returns
-        -------
-        list[int]
-            item numbers (0-based)
-
-        Raises
-        ------
-        KeyError
-            In case item is not found in the dfs file
-        """
-        names = [x.Name for x in self._dfs.ItemInfo]
-        item_lookup = {name: i for i, name in enumerate(names)}
-        try:
-            item_numbers = [item_lookup[x] for x in item_names]
-        except KeyError:
-            raise KeyError(f"Selected item name not found. Valid names are {names}")
-
-        return item_numbers
-
-    def _get_item_info(self, item_numbers):
+    def _get_item_info(self, item_numbers: Sequence[int]) -> List[ItemInfo]:
         """Read DFS ItemInfo
 
         Parameters
@@ -655,32 +441,40 @@ class _Dfs123:
             itemtype = EUMType(eumItem)
             unit = EUMUnit(eumUnit)
             data_value_type = self._dfs.ItemInfo[item].ValueType
-            item = ItemInfo(name, itemtype, unit, data_value_type)
-            items.append(item)
+            item_info = ItemInfo(name, itemtype, unit, data_value_type)
+            items.append(item_info)
         return items
 
     @property
-    def deletevalue(self):
+    def geometry(self) -> Any:
+        return self._geometry
+
+    @property
+    def deletevalue(self) -> float:
         "File delete value"
         return self._deletevalue
 
     @property
-    def n_items(self):
+    def n_items(self) -> int:
         "Number of items"
-        return self._n_items
+        return len(self.items)
 
     @property
-    def items(self):
+    def items(self) -> List[ItemInfo]:
         "List of items"
         return self._items
 
     @property
-    def start_time(self):
+    def time(self) -> pd.DatetimeIndex | None:
+        return self._time
+
+    @property
+    def start_time(self) -> pd.Timestamp:
         """File start time"""
         return self._start_time
 
     @property
-    def end_time(self):
+    def end_time(self) -> pd.Timestamp:
         """File end time"""
         if self._end_time is None:
             self._end_time = self.read(items=[0]).time[-1].to_pydatetime()
@@ -693,44 +487,39 @@ class _Dfs123:
         return self._n_timesteps
 
     @property
-    def timestep(self) -> float:
+    def timestep(self) -> Any:
         """Time step size in seconds"""
         # this will fail if the TimeAxisType is not calendar and equidistant, but that is ok
         return self._dfs.FileInfo.TimeAxis.TimeStepInSeconds()
 
     @property
-    def time(self) -> pd.DatetimeIndex:
-        """File all datetimes"""
-        # this will fail if the TimeAxisType is not calendar and equidistant, but that is ok
-        if not self._is_equidistant:
-            raise NotImplementedError("Not implemented for non-equidistant files")
-        return pd.date_range(
-            start=self.start_time, periods=self.n_timesteps, freq=f"{self.timestep}S"
-        )
-
-    @property
-    def projection_string(self):
+    def projection_string(self) -> str:
         return self._projstr
 
     @property
-    def longitude(self):
+    def longitude(self) -> float:
         """Origin longitude"""
         return self._longitude
 
     @property
-    def latitude(self):
+    def latitude(self) -> float:
         """Origin latitude"""
         return self._latitude
 
     @property
-    def origin(self):
+    def origin(self) -> Any:
         """Origin (in own CRS)"""
         return self.geometry.origin
 
     @property
-    def orientation(self):
+    def orientation(self) -> Any:
         """Orientation (in own CRS)"""
         return self.geometry.orientation
+
+    @property
+    def is_geo(self) -> bool:
+        """Are coordinates geographical (LONG/LAT)?"""
+        return self._projstr == "LONG/LAT"
 
     @property
     @abstractmethod
@@ -738,17 +527,11 @@ class _Dfs123:
         """Shape of the data array"""
         pass
 
-    @property
-    @abstractmethod
-    def dx(self):
-        """Step size in x direction"""
-        pass
-
-    def _validate_no_orientation_in_geo(self):
+    def _validate_no_orientation_in_geo(self) -> None:
         if self.is_geo and abs(self._orientation) > 1e-6:
             raise ValueError("Orientation is not supported for LONG/LAT coordinates")
 
-    def _origin_and_orientation_in_CRS(self):
+    def _origin_and_orientation_in_CRS(self) -> Tuple[Any, float]:
         """Project origin and orientation to projected CRS (if not LONG/LAT)"""
         if self.is_geo:
             origin = self._longitude, self._latitude
@@ -762,6 +545,6 @@ class _Dfs123:
                 orientation=self._orientation,
             )
             # convert origin and orientation to projected CRS
-            origin = tuple(np.round(cart.Geo2Proj(lon, lat), 6))
+            origin = tuple(np.round(cart.Geo2Proj(lon, lat), 6))  # type: ignore
             orientation = cart.OrientationProj
         return origin, orientation

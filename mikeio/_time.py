@@ -1,7 +1,8 @@
 from __future__ import annotations
 from datetime import datetime
 from dataclasses import dataclass
-from typing import List, Iterable
+from typing import List
+from collections.abc import Iterable
 
 import pandas as pd
 
@@ -14,7 +15,9 @@ class DateTimeSelector:
 
     def isel(
         self,
-        x: int | Iterable[int] | str | datetime | pd.DatetimeIndex | slice | None = None,
+        x: (
+            int | Iterable[int] | str | datetime | pd.DatetimeIndex | slice | None
+        ) = None,
     ) -> List[int]:
         """Select time steps from a pandas DatetimeIndex
 
@@ -29,14 +32,21 @@ class DateTimeSelector:
             List of indices in the range (0, len(index)
         Examples
         --------
-        >>> idx = pd.date_range("2000-01-01", periods=4, freq="D")
-        >>> dts = DateTimeSelector(idx)
-        >>> dts.isel(None)
-        [0, 1, 2, 3]
-        >>> dts.isel(0)
-        [0]
-        >>> dts.isel(-1)
-        [3]
+        ```{python}
+        import mikeio
+        import pandas as pd
+        idx = pd.date_range("2000-01-01", periods=4, freq="D")
+        dts = DateTimeSelector(idx)
+        dts.isel(None)
+        ```
+
+        ```{python}
+        dts.isel(0)
+        ```
+
+        ```{python}
+        dts.isel(-1)
+        ```
         """
 
         indices = list(range(len(self.index)))

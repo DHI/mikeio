@@ -10,25 +10,30 @@ from .. import __dfs_version__
 from ..dataset import Dataset
 from ._dfs import (
     _Dfs123,
-    _write_dfs_data,
+    write_dfs_data,
 )
 from ..eum import TimeStepUnit
 from ..spatial import Grid1D
 
 
-def write_dfs1(filename: str | Path, ds: Dataset, title="") -> None:
+def write_dfs1(filename: str | Path, ds: Dataset, title: str = "") -> None:
     dfs = _write_dfs1_header(filename, ds, title)
-    _write_dfs_data(dfs=dfs, ds=ds, n_spatial_dims=1)
+    write_dfs_data(dfs=dfs, ds=ds, n_spatial_dims=1)
 
 
-def _write_dfs1_header(filename: str | Path, ds: Dataset, title="") -> DfsFile:
+def _write_dfs1_header(filename: str | Path, ds: Dataset, title: str) -> DfsFile:
     builder = DfsBuilder.Create(title, "mikeio", __dfs_version__)
     builder.SetDataType(0)
 
     geometry: Grid1D = ds.geometry
 
     factory = DfsFactory()
-    proj = factory.CreateProjectionGeoOrigin(ds.geometry.projection_string,ds.geometry.origin[0],ds.geometry.origin[1],ds.geometry.orientation)
+    proj = factory.CreateProjectionGeoOrigin(
+        ds.geometry.projection_string,
+        ds.geometry.origin[0],
+        ds.geometry.origin[1],
+        ds.geometry.orientation,
+    )
     builder.SetGeographicalProjection(proj)
     builder.SetSpatialAxis(
         factory.CreateAxisEqD1(
@@ -41,9 +46,7 @@ def _write_dfs1_header(filename: str | Path, ds: Dataset, title="") -> DfsFile:
 
     timestep_unit = TimeStepUnit.SECOND
     dt = ds.timestep or 1.0  # It can not be None
-    time_axis = factory.CreateTemporalEqCalendarAxis(
-        timestep_unit, ds.time[0], 0, dt
-    )
+    time_axis = factory.CreateTemporalEqCalendarAxis(timestep_unit, ds.time[0], 0, dt)
     builder.SetTemporalAxis(time_axis)
 
     for item in ds.items:
@@ -60,26 +63,21 @@ def _write_dfs1_header(filename: str | Path, ds: Dataset, title="") -> DfsFile:
         print("cannot create dfs file: ", filename)
 
     return builder.GetFile()
-    
+
 
 class Dfs1(_Dfs123):
     _ndim = 1
 
-    def __init__(self, filename):
+    def __init__(self, filename: str | Path) -> None:
         super().__init__(filename)
-        path = Path(filename)
-        if not path.exists():
-            raise FileNotFoundError(path)
 
         self._dfs = DfsFileFactory.Dfs1FileOpen(str(filename))
-        self._x0 = self._dfs.SpatialAxis.X0
-        self._dx = self._dfs.SpatialAxis.Dx
-        self._nx = self._dfs.SpatialAxis.XCount
-
-        self._read_header()
+        self._x0: float = self._dfs.SpatialAxis.X0
+        self._dx: float = self._dfs.SpatialAxis.Dx
+        self._nx: int = self._dfs.SpatialAxis.XCount
 
         origin = self._longitude, self._latitude
-        self.geometry = Grid1D(
+        self._geometry = Grid1D(
             x0=self._x0,
             dx=self._dx,
             nx=self._nx,
@@ -88,48 +86,25 @@ class Dfs1(_Dfs123):
             orientation=self._orientation,
         )
 
-    def __repr__(self):
-        out = ["<mikeio.Dfs1>"]
-
-        out.append(f"dx: {self.dx:.5f}")
-
-        if self._n_items < 10:
-            out.append("items:")
-            for i, item in enumerate(self.items):
-                out.append(f"  {i}:  {item}")
-        else:
-            out.append(f"number of items: {self._n_items}")
-        
-        if self._n_timesteps == 1:
-            out.append("time: time-invariant file (1 step)")
-        else:
-            out.append(f"time: {self._n_timesteps} steps")
-            out.append(f"start time: {self._start_time}")
-
-        return str.join("\n", out)
-    
-
-    def _open(self):
+    def _open(self) -> None:
         self._dfs = DfsFileFactory.Dfs1FileOpen(self._filename)
 
-    def _set_spatial_axis(self):
-        self._builder.SetSpatialAxis(
-            self._factory.CreateAxisEqD1(
-                eumUnit.eumUmeter, self._nx, self._x0, self._dx
-            )
-        )
+    @property
+    def geometry(self) -> Grid1D:
+        assert isinstance(self._geometry, Grid1D)
+        return self._geometry
 
     @property
-    def x0(self):
+    def x0(self) -> float:
         """Start point of x values (often 0)"""
         return self._x0
 
     @property
-    def dx(self):
+    def dx(self) -> float:
         """Step size in x direction"""
         return self._dx
 
     @property
-    def nx(self):
+    def nx(self) -> int:
         """Number of node values"""
         return self._nx

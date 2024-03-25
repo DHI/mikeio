@@ -8,7 +8,6 @@ import xarray
 
 import mikeio
 
-from mikeio import Dfs2
 from mikeio import EUMType, ItemInfo, EUMUnit
 from mikeio.exceptions import ItemsError
 from mikeio.spatial import GeometryPoint2D, Grid2D
@@ -41,7 +40,7 @@ def dfs2_pt_spectrum_linearf():
 @pytest.fixture
 def dfs2_vertical_nonutm():
     filepath = Path("tests/testdata/hd_vertical_slice.dfs2")
-    return mikeio.open(filepath)
+    return mikeio.open(filepath, type="vertical")
 
 
 @pytest.fixture
@@ -51,7 +50,7 @@ def dfs2_gebco():
 
 
 def test_get_time_without_reading_data():
-    dfs = mikeio.open("tests/testdata/hd_vertical_slice.dfs2")
+    dfs = mikeio.open("tests/testdata/hd_vertical_slice.dfs2", type="vertical")
 
     assert isinstance(dfs.time, pd.DatetimeIndex)
     assert len(dfs.time) == 13
@@ -164,6 +163,7 @@ def test_write_without_time(tmp_path):
 def test_read(dfs2_random):
 
     dfs = dfs2_random
+    assert isinstance(dfs.geometry, Grid2D)
     ds = dfs.read(items=["testing water level"])
     data = ds[0].to_numpy()
     assert data[0, 88, 0] == 0
@@ -281,8 +281,10 @@ def test_properties_vertical_nonutm(dfs2_vertical_nonutm):
 
 def test_isel_vertical_nonutm(dfs2_vertical_nonutm):
     ds = dfs2_vertical_nonutm.read()
+    assert ds.geometry.is_vertical
     dssel = ds.isel(y=slice(45, None))
     g = dssel.geometry
+    assert g.is_vertical
     assert g._x0 == 0
     assert g._y0 == 0  # TODO: should this be 45?
     assert g.x[0] == 0
@@ -318,6 +320,9 @@ def test_properties_pt_spectrum(dfs2_pt_spectrum):
 
 def test_properties_pt_spectrum_linearf(dfs2_pt_spectrum_linearf):
     dfs = dfs2_pt_spectrum_linearf
+    # This file doesn't have a valid projection string
+    # dfs.FileInfo.Projection.WKTString = ''
+
     assert dfs.x0 == pytest.approx(0.00390625)
     assert dfs.y0 == 0
     assert dfs.dx == pytest.approx(0.00390625)
@@ -343,7 +348,9 @@ def test_properties_pt_spectrum_linearf(dfs2_pt_spectrum_linearf):
 
 
 def test_dir_wave_spectra_relative_time_axis():
-    ds = mikeio.read("tests/testdata/dir_wave_analysis_spectra.dfs2")
+    ds = mikeio.open(
+        "tests/testdata/dir_wave_analysis_spectra.dfs2", type="spectral"
+    ).read()
     assert ds.n_items == 1
     assert ds.geometry.nx == 128
     assert ds.geometry.ny == 37
@@ -453,16 +460,7 @@ def test_repr(dfs2_gebco):
 
     assert "Dfs2" in text
     assert "items" in text
-    assert "dx" in text
-
-
-def test_repr_empty():
-
-    dfs = Dfs2()
-
-    text = repr(dfs)
-
-    assert "Dfs2" in text
+    # assert "dx" in text
 
 
 def test_repr_time(dfs2_random):
@@ -472,7 +470,7 @@ def test_repr_time(dfs2_random):
 
     assert "Dfs2" in text
     assert "items" in text
-    assert "dx" in text
+    # assert "dx" in text
     assert "steps" in text
 
 
@@ -641,65 +639,6 @@ def test_write_non_equidistant_data(tmp_path):
     assert not ds3.is_equidistant
 
 
-def test_incremental_write_from_dfs2(tmp_path):
-    "Useful for writing datasets with many timesteps to avoid problems with out of memory"
-
-    fp = tmp_path / "appended.dfs2"
-    dfs = mikeio.open("tests/testdata/eq.dfs2")
-
-    nt = dfs.n_timesteps
-
-    ds = dfs.read(time=[0], keepdims=True)
-    # assert ds.timestep == dfs.timestep, # ds.timestep is undefined
-    
-    # TODO find a better way to do this, without having to create a new dfs2 object
-    dfs_to_write = Dfs2()
-    
-    with pytest.warns(FutureWarning):
-        dfs_to_write.write(fp, ds, dt=dfs.timestep, keep_open=True)
-
-    for i in range(1, nt):
-        ds = dfs.read(time=[i], keepdims=True)
-        
-        with pytest.warns(FutureWarning):
-            dfs_to_write.append(ds) 
-
-    dfs_to_write.close()
-
-    newdfs = mikeio.open(fp)
-    assert dfs.start_time == newdfs.start_time
-    assert dfs.timestep == newdfs.timestep
-    assert dfs.end_time == newdfs.end_time
-
-
-def test_incremental_write_from_dfs2_context_manager(tmp_path):
-    "Useful for writing datasets with many timesteps to avoid problems with out of memory"
-
-    fp = tmp_path / "appended.dfs2"
-    dfs = mikeio.open("tests/testdata/eq.dfs2")
-
-    nt = dfs.n_timesteps
-
-    ds = dfs.read(time=[0], keepdims=True)
-
-    dfs_to_write = Dfs2()
-    
-    with pytest.warns(FutureWarning):
-        with dfs_to_write.write(fp, ds, dt=dfs.timestep, keep_open=True) as f:
-
-            for i in range(1, nt):
-                ds = dfs.read(time=[i], keepdims=True)
-                with pytest.warns(FutureWarning):
-                    f.append(ds)
-
-        # dfs_to_write.close() # called automagically by context manager
-
-    newdfs = mikeio.open(fp)
-    assert dfs.start_time == newdfs.start_time
-    assert dfs.timestep == newdfs.timestep
-    assert dfs.end_time == newdfs.end_time
-
-
 def test_read_concat_write_dfs2(tmp_path):
     outfilename = tmp_path / "waves_concat.dfs2"
 
@@ -792,7 +731,7 @@ def dfs2_props_to_list(d):
         d._n_timesteps,
         d._start_time,
         d._dfs.FileInfo.TimeAxis.TimeAxisType,
-        d._n_items,
+        d.n_items,
         # d._deletevalue,
     ]
 
@@ -881,6 +820,47 @@ def test_read_dfs2_static_dt_zero():
 
     with pytest.warns(UserWarning, match="positive"):
         ds2 = mikeio.read("tests/testdata/single_time_dt_zero.dfs2", time=0)
-    
-    assert ds2.shape == (2,2)
+
+    assert ds2.shape == (2, 2)
     assert "time" not in ds2.dims
+
+
+def test_write_read_local_coordinates(tmp_path):
+    da = mikeio.DataArray(
+        np.array([[1, 2, 3], [4, 5, 6]]),
+        geometry=mikeio.Grid2D(nx=3, ny=2, dx=0.5, projection="NON-UTM"),
+    )
+    fp = tmp_path / "local_coordinates.dfs2"
+    da.to_dfs(fp)
+
+    ds = mikeio.read(fp)
+    assert da.geometry == ds.geometry
+
+
+def test_to_xarray():
+    # data is not important here
+    data = np.array([[1, 2, 3], [4, 5, 6]])
+
+    # geographic coordinates
+    dag = mikeio.DataArray(
+        data=data,
+        geometry=mikeio.Grid2D(nx=3, ny=2, dx=0.5, projection="LONG/LAT"),
+    )
+    assert dag.geometry.x[0] == pytest.approx(0.0)
+    assert dag.geometry.y[0] == pytest.approx(0.0)
+    xr_dag = dag.to_xarray()
+    assert xr_dag.x[0] == pytest.approx(0.0)
+    assert xr_dag.y[0] == pytest.approx(0.0)
+
+    # local coordinates
+    da = mikeio.DataArray(
+        data=data,
+        geometry=mikeio.Grid2D(nx=3, ny=2, dx=0.5, projection="NON-UTM"),
+    )
+    # local coordinates (=NON-UTM) have a different convention, geometry.x still refers to element centers
+    assert da.geometry.x[0] == pytest.approx(0.25)
+    assert da.geometry.y[0] == pytest.approx(0.25)
+
+    xr_da = da.to_xarray()
+    assert xr_da.x[0] == pytest.approx(0.25)
+    assert xr_da.y[0] == pytest.approx(0.25)

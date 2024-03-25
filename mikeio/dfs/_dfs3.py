@@ -1,6 +1,7 @@
 from __future__ import annotations
 from pathlib import Path
-from typing import Tuple
+from collections.abc import Sequence
+from typing import Any, Tuple
 
 import numpy as np
 import pandas as pd
@@ -19,25 +20,38 @@ from ._dfs import (
     _get_item_info,
     _valid_item_numbers,
     _valid_timesteps,
-    _write_dfs_data,
+    write_dfs_data,
 )
 from ..eum import TimeStepUnit
 from ..spatial import Grid3D
 
 
-def write_dfs3(filename: str| Path, ds: Dataset, title="") -> None:
+def write_dfs3(filename: str | Path, ds: Dataset, title: str = "") -> None:
     dfs = _write_dfs3_header(filename, ds, title)
-    _write_dfs_data(dfs=dfs, ds=ds, n_spatial_dims=3)
+    write_dfs_data(dfs=dfs, ds=ds, n_spatial_dims=3)
 
 
-def _write_dfs3_header(filename: str | Path, ds: Dataset, title="") -> DfsFile:
+def _write_dfs3_header(filename: str | Path, ds: Dataset, title: str) -> DfsFile:
     builder = DfsBuilder.Create(title, "mikeio", __dfs_version__)
     builder.SetDataType(0)
 
     geometry: Grid3D = ds.geometry
 
     factory = DfsFactory()
-    _write_dfs3_spatial_axis(builder, factory, geometry)
+    builder.SetSpatialAxis(
+        factory.CreateAxisEqD3(
+            eumUnit.eumUmeter,
+            geometry.nx,
+            geometry.x[0],
+            geometry.dx,
+            geometry.ny,
+            geometry.y[0],
+            geometry.dy,
+            geometry.nz,
+            geometry.z[0],
+            geometry.dz,
+        )
+    )
     origin = geometry.origin  # Origin in geographical coordinates
     orient = geometry.orientation
 
@@ -84,85 +98,38 @@ def _write_dfs3_header(filename: str | Path, ds: Dataset, title="") -> DfsFile:
     return builder.GetFile()
 
 
-def _write_dfs3_spatial_axis(builder, factory, geometry: Grid3D):
-    builder.SetSpatialAxis(
-        factory.CreateAxisEqD3(
-            eumUnit.eumUmeter,
-            geometry.nx,
-            geometry.x[0],
-            geometry.dx,
-            geometry.ny,
-            geometry.y[0],
-            geometry.dy,
-            geometry.nz,
-            geometry.z[0],
-            geometry.dz,
-        )
-    )
-
-
 class Dfs3(_Dfs123):
 
     _ndim = 3
 
-    def __init__(self, filename=None):
-        super().__init__(filename)
+    def __init__(self, filename: str | Path):
+        super().__init__(str(filename))
 
-        self._dx = None
-        self._dy = None
-        self._dz = None
-        self._nx = None
-        self._ny = None
-        self._nz = None
+        # TODO
         self._x0 = 0.0
         self._y0 = 0.0
         self._z0 = 0.0
-        self.geometry = None
 
-        if filename:
-            self._read_dfs3_header()
-            self._validate_no_orientation_in_geo()
-            origin, orientation = self._origin_and_orientation_in_CRS()
+        self._read_dfs3_header()
+        self._validate_no_orientation_in_geo()
+        origin, orientation = self._origin_and_orientation_in_CRS()
 
-            self.geometry = Grid3D(
-                x0=self._x0,
-                dx=self._dx,
-                nx=self._nx,
-                y0=self._y0,
-                dy=self._dy,
-                ny=self._ny,
-                z0=self._z0,
-                dz=self._dz,
-                nz=self._nz,
-                origin=origin,
-                projection=self._projstr,
-                orientation=orientation,
-            )
+        self._geometry = Grid3D(
+            x0=self._x0,
+            dx=self._dx,
+            nx=self._nx,
+            y0=self._y0,
+            dy=self._dy,
+            ny=self._ny,
+            z0=self._z0,
+            dz=self._dz,
+            nz=self._nz,
+            origin=origin,
+            projection=self._projstr,
+            orientation=orientation,
+        )
 
-    def __repr__(self):
-        out = ["<mikeio.Dfs3>"]
-
-
-        if self._filename:
-            out.append(f"geometry: {self.geometry}")
-
-            if self._n_items is not None:
-                if self._n_items < 10:
-                    out.append("items:")
-                    for i, item in enumerate(self.items):
-                        out.append(f"  {i}:  {item}")
-                else:
-                    out.append(f"number of items: {self._n_items}")
-
-                if self._n_timesteps == 1:
-                    out.append("time: time-invariant file (1 step)")
-                else:
-                    out.append(f"time: {self._n_timesteps} steps")
-                    out.append(f"start time: {self._start_time}")
-
-        return str.join("\n", out)
-
-    def _read_dfs3_header(self, read_x0y0z0: bool = False):
+    def _read_dfs3_header(self, read_x0y0z0: bool = False) -> None:
         self._dfs = DfsFileFactory.Dfs3FileOpen(self._filename)
 
         self._source = self._dfs
@@ -178,17 +145,16 @@ class Dfs3(_Dfs123):
         self._nx = self._dfs.SpatialAxis.XCount
         self._ny = self._dfs.SpatialAxis.YCount
         self._nz = self._dfs.SpatialAxis.ZCount
-        self._read_header()
 
     def read(
         self,
         *,
-        items=None,
-        time=None,
-        area=None,
-        layers=None,
-        keepdims=False,
-        dtype=np.float32,
+        items: str | int | Sequence[str | int] | None = None,
+        time: int | str | slice | None = None,
+        area: Tuple[float, float, float, float] | None = None,
+        layers: str | int | Sequence[int] | None = None,
+        keepdims: bool = False,
+        dtype: Any = np.float32,
     ) -> Dataset:
         """
         Read data from a dfs3 file
@@ -219,19 +185,19 @@ class Dfs3(_Dfs123):
         # if keepdims is not False:
         #    return NotImplementedError("keepdims is not yet implemented for Dfs3")
 
-        # Open the dfs file for reading
         dfs = DfsFileFactory.DfsGenericOpen(self._filename)
 
         item_numbers = _valid_item_numbers(dfs.ItemInfo, items)
         n_items = len(item_numbers)
 
-        single_time_selected, time_steps = _valid_timesteps(dfs.FileInfo, time)
+        single_time_selected, time_steps = _valid_timesteps(
+            dfs.FileInfo, time_steps=time
+        )
         nt = len(time_steps) if not single_time_selected else 1
 
-        # Determine the size of the grid
-        zNum = self.geometry.nz
-        yNum = self.geometry.ny
-        xNum = self.geometry.nx
+        nz = self.geometry.nz
+        ny = self.geometry.ny
+        nx = self.geometry.nx
         deleteValue = dfs.FileInfo.DeleteValueFloat
 
         data_list = []
@@ -243,15 +209,15 @@ class Dfs3(_Dfs123):
         dims: Tuple[str, ...]
         shape: Tuple[int, ...]
 
-        nz = zNum if layers is None else len(layers)
-        if nz == 1 and (not keepdims):
+        nzl = nz if layers is None else len(layers)
+        if nzl == 1 and (not keepdims):
             geometry = self.geometry._geometry_for_layers([0])
             dims = ("time", "y", "x")
-            shape = (nt, yNum, xNum)
+            shape = (nt, ny, nx)
         else:
-            geometry = self.geometry._geometry_for_layers(layers, keepdims)
+            geometry = self.geometry._geometry_for_layers(layers, keepdims)  # type: ignore
             dims = ("time", "z", "y", "x")
-            shape = (nt, nz, yNum, xNum)
+            shape = (nt, nzl, ny, nx)
 
         for item in range(n_items):
             data: np.ndarray = np.ndarray(shape=shape, dtype=dtype)
@@ -268,7 +234,7 @@ class Dfs3(_Dfs123):
                 itemdata = dfs.ReadItemTimeStep(item_numbers[item] + 1, int(it))
                 d = itemdata.Data
 
-                d = d.reshape(zNum, yNum, xNum)
+                d = d.reshape(nz, ny, nx)
                 d[d == deleteValue] = np.nan
 
                 if layers is None:
@@ -301,91 +267,6 @@ class Dfs3(_Dfs123):
             validate=False,
         )
 
-    def write(
-        self,
-        filename,
-        data,
-        dt=None,
-        dx=None,
-        dy=None,
-        dz=None,
-        coordinate=None,
-        title=None,
-    ):
-        """
-        Create a dfs3 file
-
-        Parameters
-        ----------
-
-        filename: str
-            Location to write the dfs3 file
-        data: Dataset
-            list of matrices, one for each item. Matrix dimension: time, y, x
-        dt: float, optional
-            The time step in seconds.
-        dx: float, optional
-            length of each grid in the x direction (projection units)
-        dy: float, optional
-            length of each grid in the y direction (projection units)
-        dz: float, optional
-            length of each grid in the z direction (projection units)
-        coordinate:
-            list of [projection, origin_x, origin_y, orientation]
-            e.g. ['LONG/LAT', 12.4387, 55.2257, 327]
-        title: str, optional
-            title of the dfs3 file. Default is blank.
-        keep_open: bool, optional
-            Keep file open for appending
-        """
-
-        if isinstance(data, list):
-            raise TypeError(
-                "supplying data as a list of numpy arrays is deprecated, please supply data in the form of a Dataset"
-            )
-
-        filename = str(filename)
-
-        self._builder = DfsBuilder.Create(title, "mikeio", __dfs_version__)
-        if not self._dx:
-            self._dx = 1
-        if dx:
-            self._dx = dx
-
-        if not self._dy:
-            self._dy = 1
-        if dy:
-            self._dy = dy
-
-        if not self._dz:
-            self._dz = 1
-        if dz:
-            self._dz = dz
-
-        self._write(
-            filename=filename,
-            ds=data,
-            dt=dt,
-            coordinate=coordinate,
-            title=title,
-        )
-
-    def _set_spatial_axis(self):
-        self._builder.SetSpatialAxis(
-            self._factory.CreateAxisEqD3(
-                eumUnit.eumUmeter,
-                self._nx,
-                self._x0,
-                self._dx,
-                self._ny,
-                self._y0,
-                self._dy,
-                self._nz,
-                self._z0,
-                self._dz,
-            )
-        )
-
     @staticmethod
     def _get_bottom_values(data):
 
@@ -398,6 +279,10 @@ class Dfs3(_Dfs123):
             b[~np.isnan(y)] = y[~np.isnan(y)]
 
         return b
+
+    @property
+    def geometry(self) -> Grid3D:
+        return self._geometry
 
     @property
     def dx(self):
@@ -417,8 +302,3 @@ class Dfs3(_Dfs123):
     @property
     def shape(self):
         return (self._n_timesteps, self._nz, self._ny, self._nx)
-
-    @property
-    def is_geo(self):
-        """Are coordinates geographical (LONG/LAT)?"""
-        return self._projstr == "LONG/LAT"

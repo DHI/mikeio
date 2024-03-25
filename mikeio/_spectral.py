@@ -1,27 +1,27 @@
 from __future__ import annotations
-from typing import Sequence, Tuple, Literal
+from collections.abc import Sequence
+from typing import Literal, Tuple
 import numpy as np
 from matplotlib.axes import Axes
 from matplotlib.projections.polar import PolarAxes
-from numpy.typing import NDArray
 
 
 def plot_2dspectrum(
-    spectrum :NDArray[np.floating], 
-    frequencies :NDArray[np.floating], 
-    directions :NDArray[np.floating], 
-    plot_type: str ="contourf",
-    title:str | None =None,
-    label:str | None=None,
-    cmap:str="Reds",
-    vmin:float | None =1e-5,
-    vmax:float | None =None,
-    r_as_periods:bool=True,
-    rmin:float | None=None,
-    rmax:float | None=None,
-    levels: int| Sequence[float] | None=None,
-    figsize: Tuple[float,float]=(7, 7),
-    add_colorbar:bool=True,
+    spectrum: np.ndarray,
+    frequencies: np.ndarray,
+    directions: np.ndarray,
+    plot_type: str = "contourf",
+    title: str | None = None,
+    label: str | None = None,
+    cmap: str = "Reds",
+    vmin: float | None = 1e-5,
+    vmax: float | None = None,
+    r_as_periods: bool = True,
+    rmin: float | None = None,
+    rmax: float | None = None,
+    levels: int | Sequence[float] | None = None,
+    figsize: Tuple[float, float] = (7, 7),
+    add_colorbar: bool = True,
 ) -> Axes:
     """
     Plot spectrum in polar coordinates
@@ -61,15 +61,6 @@ def plot_2dspectrum(
     Returns
     -------
     <matplotlib.axes>
-
-    Examples
-    --------
-    >>> dfs = Dfsu("area_spectrum.dfsu")
-    >>> ds = dfs.read(items="Energy density")
-    >>> spectrum = ds[0][0, 0, :, :] # first timestep, element 0
-    >>> dfs.plot_spectrum(spectrum, plot_type="patch")
-
-    >>> dfs.plot_spectrum(spectrum, rmax=9, title="Wave spectrum T<9s")
     """
 
     import matplotlib.pyplot as plt
@@ -88,14 +79,14 @@ def plot_2dspectrum(
         spectrum = np.fliplr(spectrum)
 
     fig = plt.figure(figsize=figsize)
-    ax = plt.subplot(111, polar=True) # type: ignore
+    ax = plt.subplot(111, polar=True)  # type: ignore
     assert isinstance(ax, PolarAxes)
     ax.set_theta_direction(-1)
     ax.set_theta_zero_location("N")
 
     ddir = dirs[1] - dirs[0]
 
-    def is_circular(dir: NDArray[np.floating]) -> bool:
+    def is_circular(dir: np.ndarray) -> bool:
         dir_diff = np.mod(dir[0], 2 * np.pi) - np.mod(dir[-1] + ddir, 2 * np.pi)
         return np.abs(dir_diff) < 1e-6
 
@@ -124,7 +115,7 @@ def plot_2dspectrum(
         n_levels = 10
     if isinstance(levels, int):
         n_levels = levels
-        levels = np.linspace(vmin, vmax, n_levels) # type: ignore
+        levels = np.linspace(vmin, vmax, n_levels)  # type: ignore
 
     if plot_type != "shaded":
         spectrum[spectrum < vmin] = np.nan
@@ -134,7 +125,7 @@ def plot_2dspectrum(
             dirs, freq, spectrum.T, levels=levels, cmap=cmap, vmin=vmin, vmax=vmax
         )
     elif plot_type == "contour":
-        colorax = ax.contour( # type: ignore
+        colorax = ax.contour(  # type: ignore
             dirs, freq, spectrum.T, levels=levels, cmap=cmap, vmin=vmin, vmax=vmax
         )
         # ax.clabel(colorax, fmt="%1.2f", inline=1, fontsize=9)
@@ -142,9 +133,11 @@ def plot_2dspectrum(
             ax.set_title(label)
 
     elif plot_type in ("patch", "shaded", "box"):
-        shading:  Literal['flat', 'nearest', 'gouraud', 'auto'] = "gouraud" if plot_type == "shaded" else "auto"
+        shading: Literal["flat", "nearest", "gouraud", "auto"] = (
+            "gouraud" if plot_type == "shaded" else "auto"
+        )
         ax.grid(False)  # Remove major grid
-        colorax = ax.pcolormesh( # type: ignore
+        colorax = ax.pcolormesh(  # type: ignore
             dirs,
             freq,
             spectrum.T,
@@ -153,14 +146,14 @@ def plot_2dspectrum(
             vmin=vmin,
             vmax=vmax,
         )
-        ax.grid("on") # type: ignore
+        ax.grid("on")  # type: ignore
     else:
         raise ValueError(
             f"plot_type '{plot_type}' not supported (contour, contourf, patch, shaded)"
         )
 
     # TODO: optional
-    ax.set_thetagrids( # type: ignore
+    ax.set_thetagrids(  # type: ignore
         [0.0, 45, 90.0, 135, 180.0, 225, 270.0, 315],
         labels=["N", "N-E", "E", "S-E", "S", "S-W", "W", "N-W"],
     )
@@ -177,9 +170,9 @@ def plot_2dspectrum(
     # ax.set_xticks(dfs.directions, minor=True);
 
     if rmin is not None:
-        ax.set_rmin(rmin) # type: ignore
+        ax.set_rmin(rmin)  # type: ignore
     if rmax is not None:
-        ax.set_rmax(rmax) # type: ignore
+        ax.set_rmax(rmax)  # type: ignore
 
     if add_colorbar:
         cbar = fig.colorbar(colorax)
@@ -194,7 +187,12 @@ def plot_2dspectrum(
     return ax
 
 
-def calc_m0_from_spectrum(spec: NDArray[np.floating], f: NDArray[np.floating] | None, dir: NDArray[np.floating] | None =None, tail:bool=True) -> NDArray[np.floating]:
+def calc_m0_from_spectrum(
+    spec: np.ndarray,
+    f: np.ndarray | None,
+    dir: np.ndarray | None = None,
+    tail: bool = True,
+) -> np.ndarray:
     if f is None:
         assert dir is not None
         nd = len(dir)
@@ -215,7 +213,7 @@ def calc_m0_from_spectrum(spec: NDArray[np.floating], f: NDArray[np.floating] | 
     return m0
 
 
-def _f_to_df(f: NDArray[np.floating]) -> NDArray[np.floating]:
+def _f_to_df(f: np.ndarray) -> np.ndarray:
     """Frequency bins for equidistant or logrithmic frequency axis"""
     if np.isclose(np.diff(f).min(), np.diff(f).max()):
         # equidistant frequency bins

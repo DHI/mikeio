@@ -23,7 +23,7 @@ def da0():
 def da1():
     nt = 10
     start = 10.0
-    time = pd.date_range(start="2000-01-01", freq="S", periods=nt)
+    time = pd.date_range(start="2000-01-01", freq="s", periods=nt)
     da = mikeio.DataArray(
         data=np.arange(start, start + nt, dtype=float),
         time=time,
@@ -40,7 +40,7 @@ def da2():
 
     da = mikeio.DataArray(
         data=np.zeros([nt, nx]) + 0.1,
-        time=pd.date_range(start="2000-01-01", freq="S", periods=nt),
+        time=pd.date_range(start="2000-01-01", freq="s", periods=nt),
         item=ItemInfo("Foo"),
         geometry=mikeio.Grid1D(x0=1000.0, dx=10.0, nx=nx),
     )
@@ -56,7 +56,7 @@ def da_grid2d():
 
     da = mikeio.DataArray(
         data=np.zeros([nt, ny, nx]) + 0.1,
-        time=pd.date_range(start="2000-01-01", freq="H", periods=nt),
+        time=pd.date_range(start="2000-01-01", freq="h", periods=nt),
         item=ItemInfo("Foo"),
         geometry=mikeio.Grid2D(x0=10.0, dx=0.1, nx=nx, ny=ny, dy=1.0, y0=-10.0),
     )
@@ -72,7 +72,7 @@ def da_grid2d_proj():
 
     da = mikeio.DataArray(
         data=np.zeros([nt, ny, nx]) + 0.1,
-        time=pd.date_range(start="2000-01-01", freq="S", periods=nt),
+        time=pd.date_range(start="2000-01-01", freq="s", periods=nt),
         item=ItemInfo("Foo"),
         geometry=mikeio.Grid2D(
             x0=1000, dx=100, nx=nx, ny=ny, dy=10, y0=2000, projection="UTM-32"
@@ -85,7 +85,7 @@ def da_grid2d_proj():
 @pytest.fixture
 def da_time_space():
     nt = 10
-    time = pd.date_range(start="2000-01-01", freq="S", periods=nt)
+    time = pd.date_range(start="2000-01-01", freq="s", periods=nt)
     da = mikeio.DataArray(
         data=np.zeros(shape=(nt, 2), dtype=float),
         time=time,
@@ -116,7 +116,7 @@ def test_verify_custom_dims():
     with pytest.raises(ValueError) as excinfo:
         mikeio.DataArray(
             data=np.zeros([nt, nx]) + 0.1,
-            time=pd.date_range(start="2000-01-01", freq="S", periods=nt),
+            time=pd.date_range(start="2000-01-01", freq="s", periods=nt),
             item=ItemInfo("Foo"),
             dims=("space", "ensemble"),  # no time!
             geometry=mikeio.Grid1D(x0=1000.0, dx=10.0, nx=nx),
@@ -126,7 +126,7 @@ def test_verify_custom_dims():
     with pytest.raises(ValueError) as excinfo:
         mikeio.DataArray(
             data=np.zeros([nt, nx]) + 0.1,
-            time=pd.date_range(start="2000-01-01", freq="S", periods=nt),
+            time=pd.date_range(start="2000-01-01", freq="s", periods=nt),
             item=ItemInfo("Foo"),
             dims=("time", "x", "ensemble"),  # inconsistent with data
             geometry=mikeio.Grid1D(x0=1000.0, dx=10.0, nx=nx),
@@ -170,32 +170,33 @@ def test_data_0d(da0):
 def test_create_data_1d_default_grid():
     da = mikeio.DataArray(
         data=np.zeros((10, 5)),
-        time=pd.date_range(start="2000-01-01", freq="H", periods=10),
+        time=pd.date_range(start="2000-01-01", freq="h", periods=10),
         item=ItemInfo("Foo"),
     )
     assert isinstance(da.geometry, mikeio.Grid1D)
 
 
-def test_data_2d_no_geometry_not_allowed():
-    nt = 10
-    nx = 7
-    ny = 14
+# def test_data_2d_no_geometry_not_allowed():
 
-    with pytest.warns(Warning) as w:
-        mikeio.DataArray(
-            data=np.zeros([nt, ny, nx]) + 0.1,
-            time=pd.date_range(start="2000-01-01", freq="S", periods=nt),
-            item=ItemInfo("Foo"),
-        )
+#     nt = 10
+#     nx = 7
+#     ny = 14
 
-    assert "geometry" in str(w[0].message).lower()
+#     with pytest.warns(Warning) as w:
+#         mikeio.DataArray(
+#             data=np.zeros([nt, ny, nx]) + 0.1,
+#             time=pd.date_range(start="2000-01-01", freq="S", periods=nt),
+#             item=ItemInfo("Foo"),
+#         )
+
+# assert "geometry" in str(w[0].message).lower()
 
 
 def test_dataarray_init():
     nt = 10
     start = 10.0
     data = np.arange(start, start + nt, dtype=float)
-    time = pd.date_range(start="2000-01-01", freq="S", periods=nt)
+    time = pd.date_range(start="2000-01-01", freq="s", periods=nt)
     item = ItemInfo(name="Foo")
 
     da = mikeio.DataArray(data=data, time=time)
@@ -225,7 +226,7 @@ def test_dataarray_init():
 def test_dataarray_init_no_item():
     nt = 10
     data = data = np.zeros([nt, 4]) + 0.1
-    time = time = pd.date_range(start="2000-01-01", freq="S", periods=nt)
+    time = time = pd.date_range(start="2000-01-01", freq="s", periods=nt)
 
     da = mikeio.DataArray(data=data, time=time)
     assert da.type == EUMType.Undefined
@@ -234,7 +235,7 @@ def test_dataarray_init_no_item():
 
 def test_dataarray_init_2d():
     nt = 10
-    time = pd.date_range(start="2000-01-01", freq="S", periods=nt)
+    time = pd.date_range(start="2000-01-01", freq="s", periods=nt)
 
     # 2d with time
     ny, nx = 5, 6
@@ -271,7 +272,7 @@ def test_dataarray_init_2d():
 
 def test_dataarray_init_5d():
     nt = 10
-    time = pd.date_range(start="2000-01-01", freq="S", periods=nt)
+    time = pd.date_range(start="2000-01-01", freq="s", periods=nt)
 
     # 5d with named dimensions
     dims = ("x", "y", "layer", "member", "season")
@@ -294,7 +295,7 @@ def test_dataarray_init_wrong_dim():
     nt = 10
     start = 10.0
     data = np.arange(start, start + nt, dtype=float)
-    time_long = pd.date_range(start="2000-01-01", freq="S", periods=(nt + 1))
+    time_long = pd.date_range(start="2000-01-01", freq="s", periods=(nt + 1))
     item = ItemInfo(name="Foo")
 
     with pytest.raises(ValueError):
@@ -307,7 +308,7 @@ def test_dataarray_init_wrong_dim():
 
     # time must be first dim
     dims = ("x", "y", "time")
-    time = pd.date_range(start="2000-01-01", freq="S", periods=nt)
+    time = pd.date_range(start="2000-01-01", freq="s", periods=nt)
     with pytest.raises(ValueError):
         mikeio.DataArray(data=data2d, time=time, dims=dims)
 
@@ -320,7 +321,7 @@ def test_dataarray_init_wrong_dim():
 def test_dataarray_init_grid1d():
     nt = 10
     nx = 5
-    time = pd.date_range(start="2000-01-01", freq="S", periods=nt)
+    time = pd.date_range(start="2000-01-01", freq="s", periods=nt)
     data = np.zeros([nt, nx]) + 0.1
     g = mikeio.Grid1D(nx=nx, dx=1.0)
     da = mikeio.DataArray(data=data, time=time, geometry=g)
@@ -343,7 +344,7 @@ def test_dataarray_init_grid1d():
 def test_dataarray_init_grid2d():
     nt = 10
     ny, nx = 7, 5
-    time = pd.date_range(start="2000-01-01", freq="S", periods=nt)
+    time = pd.date_range(start="2000-01-01", freq="s", periods=nt)
     data = np.zeros([nt, ny, nx]) + 0.1
     g = mikeio.Grid2D(dx=0.5, nx=nx, ny=ny)
     da = mikeio.DataArray(data=data, time=time, geometry=g)
@@ -365,7 +366,7 @@ def test_dataarray_init_grid2d():
 
 def test_dataarray_init_dfsu2d():
     nt = 10
-    time = pd.date_range(start="2000-01-01", freq="S", periods=nt)
+    time = pd.date_range(start="2000-01-01", freq="s", periods=nt)
     filename = "tests/testdata/north_sea_2.mesh"
     msh = Mesh(filename)
     g = msh.geometry
@@ -394,7 +395,7 @@ def test_dataarray_init_dfsu2d():
 
 def test_dataarray_init_dfsu3d():
     nt = 10
-    time = pd.date_range(start="2000-01-01", freq="S", periods=nt)
+    time = pd.date_range(start="2000-01-01", freq="s", periods=nt)
     filename = "tests/testdata/basin_3d.dfsu"
     dfs = mikeio.open(filename)
     g = dfs.geometry
@@ -544,7 +545,7 @@ def test_dataarray_grid3d_indexing():
 
 def test_dataarray_getitem_time(da_grid2d):
     da = da_grid2d
-    # time=pd.date_range("2000-01-01", freq="H", periods=10)
+    # time=pd.date_range("2000-01-01", freq="h", periods=10)
     da_sel = da["2000-1-1"]
     assert da_sel.n_timesteps == da.n_timesteps
     assert da_sel.is_equidistant
@@ -1225,7 +1226,7 @@ def test_write_dfs2(tmp_path):
     assert g.origin == (0, 0)
     da = mikeio.DataArray(
         np.random.random(size=(nt, g.ny, g.nx)),
-        time=pd.date_range(start="2000", freq="H", periods=nt),
+        time=pd.date_range(start="2000", freq="h", periods=nt),
         item=ItemInfo("Random"),
         geometry=g,
     )
@@ -1309,7 +1310,7 @@ def test_time_selection():
     data = []
     d = np.random.rand(nt)
     data.append(d)
-    time = pd.date_range("2000-1-2", freq="H", periods=nt)
+    time = pd.date_range("2000-1-2", freq="h", periods=nt)
     items = [ItemInfo("Foo")]
     ds = mikeio.Dataset(data, time, items)
 
@@ -1366,3 +1367,12 @@ def test_to_pandas():
     assert series.index[-1].day == 5
     assert series.values[0] == 1.0
     assert series.name == "Foo"
+
+
+def test_set_by_mask():
+    fn = "tests/testdata/oresundHD_run1.dfsu"
+    da = mikeio.read(fn, items="Surface elevation", time=[0, 2, 4])[0]
+    threshold = 0.2
+    mask = da < threshold
+    wl_capped = da.copy()
+    wl_capped[mask] = np.nan

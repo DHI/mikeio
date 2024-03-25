@@ -1,18 +1,18 @@
 from __future__ import annotations
 from copy import deepcopy
 from pathlib import Path
-from typing import List, Tuple
-import warnings
+from typing import Any, List, Literal, Tuple
+from collections.abc import Sequence
 
 import numpy as np
 import pandas as pd
 from tqdm import tqdm
 
-from mikecore.DfsFactory import DfsBuilder, DfsFactory  # type: ignore
-from mikecore.DfsFile import DfsFile, DfsSimpleType  # type: ignore
-from mikecore.DfsFileFactory import DfsFileFactory  # type: ignore
-from mikecore.eum import eumQuantity, eumUnit  # type: ignore
-from mikecore.Projections import Cartography  # type: ignore
+from mikecore.DfsFactory import DfsBuilder, DfsFactory
+from mikecore.DfsFile import DfsFile, DfsSimpleType
+from mikecore.DfsFileFactory import DfsFileFactory
+from mikecore.eum import eumQuantity, eumUnit
+from mikecore.Projections import Cartography
 
 from .. import __dfs_version__
 from ..dataset import Dataset
@@ -21,18 +21,18 @@ from ._dfs import (
     _get_item_info,
     _valid_item_numbers,
     _valid_timesteps,
-    _write_dfs_data,
+    write_dfs_data,
 )
 from ..eum import TimeStepUnit
 from ..spatial import Grid2D
 
 
-def write_dfs2(filename: str | Path, ds: Dataset, title="") -> None:
+def write_dfs2(filename: str | Path, ds: Dataset, title: str = "") -> None:
     dfs = _write_dfs2_header(filename, ds, title)
-    _write_dfs_data(dfs=dfs, ds=ds, n_spatial_dims=2)
+    write_dfs_data(dfs=dfs, ds=ds, n_spatial_dims=2)
 
 
-def _write_dfs2_header(filename: str | Path, ds: Dataset, title="") -> DfsFile:
+def _write_dfs2_header(filename: str | Path, ds: Dataset, title: str = "") -> DfsFile:
     builder = DfsBuilder.Create(title, "mikeio", __dfs_version__)
     builder.SetDataType(0)
 
@@ -91,7 +91,9 @@ def _write_dfs2_header(filename: str | Path, ds: Dataset, title="") -> DfsFile:
     return builder.GetFile()
 
 
-def _write_dfs2_spatial_axis(builder, factory, geometry):
+def _write_dfs2_spatial_axis(
+    builder: DfsBuilder, factory: DfsFactory, geometry: Grid2D
+) -> None:
     builder.SetSpatialAxis(
         factory.CreateAxisEqD2(
             eumUnit.eumUmeter,
@@ -108,83 +110,47 @@ def _write_dfs2_spatial_axis(builder, factory, geometry):
 class Dfs2(_Dfs123):
     _ndim = 2
 
-    def __init__(self, filename=None, type: str = "horizontal"):
+    def __init__(
+        self,
+        filename: str | Path,
+        type: Literal["horizontal", "spectral", "vertical"] = "horizontal",
+    ):
+        filename = str(filename)
         super().__init__(filename)
 
-        # TODO find a better way to avoid initializing these non-sensical values
-        self._dx = 0.0
-        self._dy = 0.0
-        self._nx = 0
-        self._ny = 0
-        self._x0 = 0.0
-        self._y0 = 0.0
-        self.geometry = None
+        is_spectral = type == "spectral"
+        is_vertical = type == "vertical"
+        dfs = DfsFileFactory.Dfs2FileOpen(str(filename))
 
-        if filename:
-            is_spectral = type.lower() in ["spectral", "spectra", "spectrum"]
-            self._read_dfs2_header(filename=filename, read_x0y0=is_spectral)
-            self._validate_no_orientation_in_geo()
-            origin, orientation = self._origin_and_orientation_in_CRS()
+        x0 = dfs.SpatialAxis.X0 if is_spectral else 0.0
+        y0 = dfs.SpatialAxis.Y0 if is_spectral else 0.0
 
-            self.geometry = Grid2D(
-                dx=self._dx,
-                dy=self._dy,
-                nx=self._nx,
-                ny=self._ny,
-                x0=self._x0,
-                y0=self._y0,
-                orientation=orientation,
-                origin=origin,
-                projection=self._projstr,
-                is_spectral=is_spectral,
-            )
+        origin, orientation = self._origin_and_orientation_in_CRS()
 
-    def __repr__(self):
-        out = ["<mikeio.Dfs2>"]
-
-        if self._filename:
-            out.append(f"dx: {self.dx:.5f}")
-            out.append(f"dy: {self.dy:.5f}")
-
-            if self._n_items is not None:
-                if self._n_items < 10:
-                    out.append("items:")
-                    for i, item in enumerate(self.items):
-                        out.append(f"  {i}:  {item}")
-                else:
-                    out.append(f"number of items: {self._n_items}")
-
-                if self._n_timesteps == 1:
-                    out.append("time: time-invariant file (1 step)")
-                else:
-                    out.append(f"time: {self._n_timesteps} steps")
-                    out.append(f"start time: {self._start_time}")
-
-        return str.join("\n", out)
-
-    def _read_dfs2_header(self, filename, read_x0y0: bool = False):
-        self._dfs = DfsFileFactory.Dfs2FileOpen(str(filename))
-        self._source = self._dfs
-        if read_x0y0:
-            self._x0 = self._dfs.SpatialAxis.X0
-            self._y0 = self._dfs.SpatialAxis.Y0
-        self._dx = self._dfs.SpatialAxis.Dx
-        self._dy = self._dfs.SpatialAxis.Dy
-        self._nx = self._dfs.SpatialAxis.XCount
-        self._ny = self._dfs.SpatialAxis.YCount
-        if self._dfs.FileInfo.TimeAxis.TimeAxisType == 4:
-            self._is_equidistant = False
-
-        self._read_header()
+        self._geometry = Grid2D(
+            dx=dfs.SpatialAxis.Dx,
+            dy=dfs.SpatialAxis.Dy,
+            nx=dfs.SpatialAxis.XCount,
+            ny=dfs.SpatialAxis.YCount,
+            x0=x0,
+            y0=y0,
+            projection=self._projstr,
+            orientation=orientation,
+            origin=origin,
+            is_spectral=is_spectral,
+            is_vertical=is_vertical,
+        )
+        dfs.Close()
+        self._validate_no_orientation_in_geo()
 
     def read(
         self,
         *,
-        items=None,
-        time=None,
-        area=None,
-        keepdims=False,
-        dtype=np.float32,
+        items: str | int | Sequence[str | int] | None = None,
+        time: int | str | slice | None = None,
+        area: Tuple[float, float, float, float] | None = None,
+        keepdims: bool = False,
+        dtype: Any = np.float32,
     ) -> Dataset:
         """
         Read data from a dfs2 file
@@ -221,12 +187,12 @@ class Dfs2(_Dfs123):
 
         if area is not None:
             take_subset = True
-            ii, jj = self.geometry.find_index(area=area)
+            ii, jj = self.geometry.find_index(area=area)  # type: ignore
             shape = (nt, len(jj), len(ii))
             geometry = self.geometry._index_to_Grid2D(ii, jj)
         else:
             take_subset = False
-            shape = (nt, self._ny, self._nx)
+            shape = (nt, self.ny, self.nx)
             geometry = self.geometry
 
         if single_time_selected and not keepdims:
@@ -244,7 +210,7 @@ class Dfs2(_Dfs123):
                 d = itemdata.Data
 
                 d[d == self.deletevalue] = np.nan
-                d = d.reshape(self._ny, self._nx)
+                d = d.reshape(self.ny, self.nx)
 
                 if take_subset:
                     d = np.take(np.take(d, jj, axis=0), ii, axis=-1)
@@ -258,7 +224,7 @@ class Dfs2(_Dfs123):
 
         self._dfs.Close()
 
-        time = pd.to_datetime(t_seconds, unit="s", origin=self.start_time)  # type: ignore
+        time = pd.to_datetime(t_seconds, unit="s", origin=self.start_time)
 
         dims: Tuple[str, ...]
 
@@ -276,89 +242,47 @@ class Dfs2(_Dfs123):
             validate=False,
         )
 
-    def _open(self):
+    def _open(self) -> None:
         self._dfs = DfsFileFactory.Dfs2FileOpen(self._filename)
         self._source = self._dfs
 
-    def write(
-        self,
-        filename: str,
-        data: Dataset,
-        dt: float | None = None,
-        title: str | None = None,
-        keep_open: bool = False,
-    ):
-        # this method is deprecated
-        warnings.warn(
-            FutureWarning("Dfs2.write() is deprecated, use Dataset.to_dfs() instead")
-        )
-
-        filename = str(filename)
-
-        self._builder = DfsBuilder.Create(title, "mikeio", __dfs_version__)
-        self._dx = data.geometry.dx
-        self._dy = data.geometry.dy
-
-        self._write(
-            filename=filename,
-            ds=data,
-            dt=dt,
-            title=title,
-            keep_open=keep_open,
-        )
-
-        if keep_open:
-            return self
-
-    def _set_spatial_axis(self):
-        self._builder.SetSpatialAxis(
-            self._factory.CreateAxisEqD2(
-                eumUnit.eumUmeter,
-                self._nx,
-                self._x0,
-                self._dx,
-                self._ny,
-                self._y0,
-                self._dy,
-            )
-        )
+    @property
+    def geometry(self) -> Grid2D:
+        """Spatial information"""
+        assert isinstance(self._geometry, Grid2D)
+        return self._geometry
 
     @property
-    def x0(self):
+    def x0(self) -> Any:
         """Start point of x values (often 0)"""
-        return self._x0
+        return self.geometry.x[0]
 
     @property
-    def y0(self):
+    def y0(self) -> Any:
         """Start point of y values (often 0)"""
-        return self._y0
+        return self.geometry.y[0]
 
     @property
-    def dx(self):
+    def dx(self) -> float:
         """Step size in x direction"""
-        return self._dx
+        return self.geometry.dx
 
     @property
-    def dy(self):
+    def dy(self) -> float:
         """Step size in y direction"""
-        return self._dy
+        return self.geometry.dy
 
     @property
     def shape(self) -> Tuple[int, ...]:
         """Tuple with number of values in the t-, y-, x-direction"""
-        return (self._n_timesteps, self._ny, self._nx)
+        return (self._n_timesteps, self.geometry.ny, self.geometry.nx)
 
     @property
-    def nx(self):
+    def nx(self) -> int:
         """Number of values in the x-direction"""
-        return self._nx
+        return self.geometry.nx
 
     @property
-    def ny(self):
+    def ny(self) -> int:
         """Number of values in the y-direction"""
-        return self._ny
-
-    @property
-    def is_geo(self):
-        """Are coordinates geographical (LONG/LAT)?"""
-        return self._projstr == "LONG/LAT"
+        return self.geometry.ny

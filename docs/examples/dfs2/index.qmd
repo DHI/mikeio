@@ -1,0 +1,7 @@
+---
+title: Dfs2 examples
+---
+
+* [Bathymetry](bathy.qmd)
+* [Meteo data](gfs.qmd)
+
