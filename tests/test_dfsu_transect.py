@@ -30,9 +30,9 @@ def test_transect_open(vslice):
     dfs = vslice
     assert dfs._type == DfsuFileType.DfsuVerticalProfileSigmaZ
     assert dfs.n_items == 2
-    assert dfs.n_elements == 441
-    assert dfs.n_sigma_layers == 4
-    assert dfs.n_z_layers == 5
+    assert dfs.geometry.n_elements == 441
+    assert dfs.geometry.n_sigma_layers == 4
+    assert dfs.geometry.n_z_layers == 5
     assert dfs.n_timesteps == 3
 
 

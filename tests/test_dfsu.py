@@ -202,7 +202,7 @@ def test_read_single_time_step_scalar():
     ds = dfs.read(items=[0, 3], time=1)
 
     assert len(ds.time) == 1
-    assert ds[0].to_numpy().shape[0] == dfs.n_elements
+    assert ds[0].to_numpy().shape[0] == dfs.geometry.n_elements
 
 
 def test_read_single_time_step_outside_bounds_fails():
@@ -307,7 +307,7 @@ def test_element_coordinates():
     filename = "tests/testdata/HD2D.dfsu"
     dfs = mikeio.open(filename)
 
-    ec = dfs.element_coordinates
+    ec = dfs.geometry.element_coordinates
     assert ec[1, 1] == pytest.approx(6906790.5928664245)
 
 
@@ -315,8 +315,8 @@ def test_element_coords_is_inside_nodes():
     filename = "tests/testdata/HD2D.dfsu"
     dfs = mikeio.open(filename)
 
-    nc = dfs.node_coordinates
-    ec = dfs.element_coordinates
+    nc = dfs.geometry.node_coordinates
+    ec = dfs.geometry.element_coordinates
     nc_min = nc.min(axis=0)
     nc_max = nc.max(axis=0)
     ec_max = ec.max(axis=0)
@@ -333,7 +333,7 @@ def test_contains():
     dfs = mikeio.open(filename)
 
     pts = [[4, 54], [0, 50]]
-    inside = dfs.contains(pts)
+    inside = dfs.geometry.contains(pts)
     assert inside[0]
     assert not inside[1]
 
@@ -448,36 +448,36 @@ def test_is_2d():
     filename = "tests/testdata/HD2D.dfsu"
     dfs = mikeio.open(filename)
 
-    assert dfs.is_2d
+    assert dfs.geometry.is_2d
 
     filename = "tests/testdata/basin_3d.dfsu"
     dfs = mikeio.open(filename)
 
-    assert not dfs.is_2d
+    assert not dfs.geometry.is_2d
 
 
 def test_is_geo_UTM():
     filename = "tests/testdata/HD2D.dfsu"
     dfs = mikeio.open(filename)
-    assert dfs.is_geo is False
+    assert dfs.geometry.is_geo is False
 
 
 def test_is_geo_LONGLAT():
     filename = "tests/testdata/wind_north_sea.dfsu"
     dfs = mikeio.open(filename)
-    assert dfs.is_geo is True
+    assert dfs.geometry.is_geo is True
 
 
 def test_is_local_coordinates():
     filename = "tests/testdata/wind_north_sea.dfsu"
     dfs = mikeio.open(filename)
-    assert dfs.is_local_coordinates is False
+    assert dfs.geometry.is_local_coordinates is False
 
 
 def test_get_element_area_UTM():
     filename = "tests/testdata/HD2D.dfsu"
     dfs = mikeio.open(filename)
-    areas = dfs.get_element_area()
+    areas = dfs.geometry.get_element_area()
     assert areas[0] == 4949.102548750438
 
 
@@ -485,7 +485,7 @@ def test_get_element_area_LONGLAT():
     filename = "tests/testdata/wind_north_sea.dfsu"
     dfs = mikeio.open(filename)
 
-    areas = dfs.get_element_area()
+    areas = dfs.geometry.get_element_area()
     assert areas[0] == 139524218.81411952
 
 
@@ -493,7 +493,7 @@ def test_get_element_area_tri_quad():
     filename = "tests/testdata/FakeLake.dfsu"
     dfs = mikeio.open(filename)
 
-    areas = dfs.get_element_area()
+    areas = dfs.geometry.get_element_area()
     assert areas[0] == 0.0006875642143608321
 
 
@@ -677,18 +677,18 @@ def test_to_mesh_2d(tmp_path):
 
     fp = tmp_path / "hd2d.mesh"
 
-    dfs.to_mesh(fp)
+    dfs.geometry.to_mesh(fp)
 
     mesh = Mesh(fp)
 
-    assert mesh.n_elements == dfs.n_elements
+    assert mesh.n_elements == dfs.geometry.n_elements
 
 
 def test_element_table():
     filename = "tests/testdata/HD2D.dfsu"
     dfs = mikeio.open(filename)
     eid = 31
-    nid = dfs.element_table[eid]
+    nid = dfs.geometry.element_table[eid]
     assert nid[0] == 32
     assert nid[1] == 28
     assert nid[2] == 23
@@ -700,11 +700,11 @@ def test_get_node_centered_data():
     ds = dfs.read(items="Surface elevation")
     time_step = 0
     wl_cc = ds[0].values[time_step, :]
-    wl_nodes = dfs.get_node_centered_data(wl_cc)
+    wl_nodes = dfs.geometry.get_node_centered_data(wl_cc)
 
     eid = 31
     assert wl_cc[eid] == pytest.approx(0.4593418836)
-    nid = dfs.element_table[eid]
+    nid = dfs.geometry.element_table[eid]
     assert wl_nodes[nid].mean() == pytest.approx(0.4593501736)
 
 

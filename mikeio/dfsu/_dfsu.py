@@ -1,7 +1,6 @@
 from __future__ import annotations
+from dataclasses import dataclass
 from pathlib import Path
-import warnings
-from functools import wraps
 from typing import Any, Collection, Sequence, Tuple
 
 import numpy as np
@@ -105,66 +104,186 @@ def write_dfsu(filename: str | Path, data: Dataset) -> None:
     dfs.Close()
 
 
-class _Dfsu:
+def _validate_elements_and_geometry_sel(elements: Any, **kwargs: Any) -> None:
+    """Check that only one of elements, area, x, y is selected"""
+    used_kwargs = [key for key, val in kwargs.items() if val is not None]
+
+    if elements is not None and len(used_kwargs) > 0:
+        raise ValueError(f"Cannot select both {used_kwargs} and elements!")
+
+    if "area" in used_kwargs and ("x" in used_kwargs or "y" in used_kwargs):
+        raise ValueError("Cannot select both x,y and area!")
+
+
+@dataclass
+class _DfsuInfo:
+    filename: str
+    type: DfsuFileType
+    time: pd.DatetimeIndex
+    timestep: float
+    items: list[ItemInfo]
+    deletevalue: float
+
+
+def _get_dfsu_info(filename: str | Path) -> _DfsuInfo:
+    filename = str(filename)
+    path = Path(filename)
+    if not path.exists():
+        raise FileNotFoundError(f"file {path} does not exist!")
+    dfs = DfsuFile.Open(filename)
+    type = DfsuFileType(dfs.DfsuFileType)
+    deletevalue = dfs.DeleteValueFloat
+    freq = pd.Timedelta(seconds=dfs.TimeStepInSeconds)
+    time = pd.date_range(
+        start=dfs.StartDateTime,
+        periods=dfs.NumberOfTimeSteps,
+        freq=freq,
+    )
+    timestep = dfs.TimeStepInSeconds
+    items = _get_item_info(dfs.ItemInfo)
+    dfs.Close()
+    return _DfsuInfo(
+        filename=filename,
+        type=type,
+        time=time,
+        timestep=timestep,
+        items=items,
+        deletevalue=deletevalue,
+    )
+
+
+# class _Dfsu:
+#     show_progress = False
+
+#     def __init__(self, filename: str | Path) -> None:
+#         """
+#         Create a Dfsu object
+
+#         Parameters
+#         ---------
+#         filename: str
+#             dfsu filename
+#         """
+#         info = _get_dfsu_info(filename)
+#         self._filename = info.filename
+#         self._type = info.type
+#         self._deletevalue = info.deletevalue
+#         self._time = info.time
+#         self._timestep = info.timestep
+#         self._items = info.items
+
+#     def __repr__(self):
+#         out = [f"<mikeio.{self.__class__.__name__}>"]
+
+#         if self._type is not DfsuFileType.DfsuSpectral0D:
+#             if self._type is not DfsuFileType.DfsuSpectral1D:
+#                 out.append(f"number of elements: {self.geometry.n_elements}")
+#             out.append(f"number of nodes: {self.geometry.n_nodes}")
+#         if self.geometry.is_spectral:
+#             if self.geometry.n_directions > 0:
+#                 out.append(f"number of directions: {self.geometry.n_directions}")
+#             if self.geometry.n_frequencies > 0:
+#                 out.append(f"number of frequencies: {self.geometry.n_frequencies}")
+#         if self.geometry.projection_string:
+#             out.append(f"projection: {self.geometry.projection_string}")
+#         if self.geometry.is_layered:
+#             out.append(f"number of sigma layers: {self.geometry.n_sigma_layers}")
+#         if (
+#             self._type == DfsuFileType.DfsuVerticalProfileSigmaZ
+#             or self._type == DfsuFileType.Dfsu3DSigmaZ
+#         ):
+#             out.append(
+#                 f"max number of z layers: {self.geometry.n_layers - self.geometry.n_sigma_layers}"
+#             )
+#         if self.n_items < 10:
+#             out.append("items:")
+#             for i, item in enumerate(self.items):
+#                 out.append(f"  {i}:  {item}")
+#         else:
+#             out.append(f"number of items: {self.geometry.n_items}")
+#         if self.n_timesteps == 1:
+#             out.append(f"time: time-invariant file (1 step) at {self.time[0]}")
+#         else:
+#             out.append(
+#                 f"time: {str(self.time[0])} - {str(self.time[-1])} ({self.n_timesteps} records)"
+#             )
+#         return str.join("\n", out)
+
+#     def _read_items(self, filename: str) -> list[ItemInfo]:
+#         dfs = DfsuFile.Open(filename)
+#         items = _get_item_info(dfs.ItemInfo)
+#         dfs.Close()
+#         return items
+
+#     @property
+#     def geometry(self):
+#         return self._geometry
+
+#     @property
+#     def deletevalue(self) -> float:
+#         """File delete value"""
+#         return self._deletevalue
+
+#     @property
+#     def n_items(self) -> int:
+#         """Number of items"""
+#         return len(self.items)
+
+#     @property
+#     def items(self) -> list[ItemInfo]:
+#         """List of items"""
+#         return self._items
+
+#     @property
+#     def start_time(self) -> pd.Timestamp:
+#         """File start time"""
+#         return self._time[0]
+
+#     @property
+#     def n_timesteps(self) -> int:
+#         """Number of time steps"""
+#         return len(self._time)
+
+#     @property
+#     def timestep(self) -> float:
+#         """Time step size in seconds"""
+#         return self._timestep
+
+#     @property
+#     def end_time(self) -> pd.Timestamp:
+#         """File end time"""
+#         return self._time[-1]
+
+#     @property
+#     def time(self) -> pd.DatetimeIndex:
+#        return self._time
+
+
+class Dfsu2DH:
     show_progress = False
 
     def __init__(self, filename: str | Path) -> None:
-        """
-        Create a Dfsu object
-
-        Parameters
-        ---------
-        filename: str
-            dfsu filename
-        """
-        filename = str(filename)
-        self._filename = filename
-        path = Path(filename)
-        if not path.exists():
-            raise FileNotFoundError(f"file {path} does not exist!")
-
-        dfs = DfsuFile.Open(filename)
-        self._type = DfsuFileType(dfs.DfsuFileType)
-        self._deletevalue = dfs.DeleteValueFloat
-
-        freq = pd.Timedelta(seconds=dfs.TimeStepInSeconds)
-
-        self._time = pd.date_range(
-            start=dfs.StartDateTime,
-            periods=dfs.NumberOfTimeSteps,
-            freq=freq,
-        )
-        self._timestep = dfs.TimeStepInSeconds
-        dfs.Close()
-        self._items = self._read_items(filename)
+        info = _get_dfsu_info(filename)
+        self._filename = info.filename
+        self._type = info.type
+        self._deletevalue = info.deletevalue
+        self._time = info.time
+        self._timestep = info.timestep
+        self._items = info.items
+        self._geometry = self._read_geometry(self._filename)
 
     def __repr__(self):
         out = [f"<mikeio.{self.__class__.__name__}>"]
 
-        if self._type is not DfsuFileType.DfsuSpectral0D:
-            if self._type is not DfsuFileType.DfsuSpectral1D:
-                out.append(f"number of elements: {self.n_elements}")
-            out.append(f"number of nodes: {self.n_nodes}")
-        if self.is_spectral:
-            if self.n_directions > 0:
-                out.append(f"number of directions: {self.n_directions}")
-            if self.n_frequencies > 0:
-                out.append(f"number of frequencies: {self.n_frequencies}")
-        if self.geometry.projection_string:
-            out.append(f"projection: {self.projection_string}")
-        if self.geometry.is_layered:
-            out.append(f"number of sigma layers: {self.n_sigma_layers}")
-        if (
-            self._type == DfsuFileType.DfsuVerticalProfileSigmaZ
-            or self._type == DfsuFileType.Dfsu3DSigmaZ
-        ):
-            out.append(f"max number of z layers: {self.n_layers - self.n_sigma_layers}")
+        out.append(f"number of elements: {self.geometry.n_elements}")
+        out.append(f"number of nodes: {self.geometry.n_nodes}")
+        out.append(f"projection: {self.geometry.projection_string}")
         if self.n_items < 10:
             out.append("items:")
             for i, item in enumerate(self.items):
                 out.append(f"  {i}:  {item}")
         else:
-            out.append(f"number of items: {self.n_items}")
+            out.append(f"number of items: {self.geometry.n_items}")
         if self.n_timesteps == 1:
             out.append(f"time: time-invariant file (1 step) at {self.time[0]}")
         else:
@@ -173,144 +292,9 @@ class _Dfsu:
             )
         return str.join("\n", out)
 
-    def _read_items(self, filename: str) -> list[ItemInfo]:
-        dfs = DfsuFile.Open(filename)
-        items = _get_item_info(dfs.ItemInfo)
-        dfs.Close()
-        return items
-
-    @property
-    def type_name(self):
-        """Type name, e.g. Mesh, Dfsu2D"""
-        return self._type.name
-
     @property
     def geometry(self):
         return self._geometry
-
-    @property
-    def n_nodes(self):
-        """Number of nodes"""
-        return self.geometry.n_nodes
-
-    @property
-    def node_coordinates(self):
-        """Coordinates (x,y,z) of all nodes"""
-        return self.geometry.node_coordinates
-
-    @property
-    def node_ids(self):
-        return self.geometry.node_ids
-
-    @property
-    def n_elements(self):
-        """Number of elements"""
-        return self.geometry.n_elements
-
-    @property
-    def element_ids(self):
-        return self.geometry.element_ids
-
-    @property
-    def codes(self):
-        warnings.warn(
-            "property codes is deprecated, use .geometry.codes instead",
-            FutureWarning,
-        )
-        return self.geometry.codes
-
-    @codes.setter
-    def codes(self, v):
-        if len(v) != self.n_nodes:
-            raise ValueError(f"codes must have length of nodes ({self.n_nodes})")
-        self._geometry._codes = np.array(v, dtype=np.int32)
-
-    @property
-    def valid_codes(self):
-        """Unique list of node codes"""
-        return list(set(self.geometry.codes))
-
-    @property
-    def boundary_codes(self):
-        """Unique list of boundary codes"""
-        return [code for code in self.valid_codes if code > 0]
-
-    @property
-    def projection_string(self):
-        """The projection string"""
-        return self.geometry.projection_string
-
-    @property
-    def is_geo(self):
-        """Are coordinates geographical (LONG/LAT)?"""
-        return self.geometry.projection_string == "LONG/LAT"
-
-    @property
-    def is_local_coordinates(self):
-        """Are coordinates relative (NON-UTM)?"""
-        return self.geometry.projection_string == "NON-UTM"
-
-    @property
-    def element_table(self):
-        """Element to node connectivity"""
-        return self.geometry.element_table
-
-    @property
-    def max_nodes_per_element(self):
-        """The maximum number of nodes for an element"""
-        return self.geometry.max_nodes_per_element
-
-    @property
-    def is_2d(self) -> bool:
-        return self._type in (
-            DfsuFileType.Dfsu2D,
-            DfsuFileType.DfsuSpectral2D,
-        )
-
-    @property
-    def is_layered(self) -> bool:
-        """Type is layered dfsu (3d, vertical profile or vertical column)"""
-        return self.geometry.is_layered
-
-    @property
-    def is_spectral(self) -> bool:
-        """Type is spectral dfsu (point, line or area spectrum)"""
-        return self.geometry.is_spectral
-
-    @property
-    def is_tri_only(self) -> bool:
-        """Does the mesh consist of triangles only?"""
-        return self.geometry.is_tri_only
-
-    @property
-    def boundary_polylines(self):
-        """Lists of closed polylines defining domain outline"""
-        return self.geometry.boundary_polylines
-
-    @wraps(GeometryFM2D.elements_to_geometry)
-    def elements_to_geometry(self, elements, node_layers="all"):
-        return self.geometry.elements_to_geometry(elements, node_layers)
-
-    @property
-    def element_coordinates(self):
-        """Center coordinates of each element"""
-        return self.geometry.element_coordinates
-
-    @wraps(GeometryFM2D.contains)
-    def contains(self, points):
-        return self.geometry.contains(points)
-
-    @wraps(GeometryFM2D.get_element_area)
-    def get_element_area(self):
-        return self.geometry.get_element_area()
-
-    @wraps(GeometryFM2D.to_shapely)
-    def to_shapely(self):
-        return self.geometry.to_shapely()
-
-    @wraps(GeometryFM2D.get_node_centered_data)
-    def get_node_centered_data(self, data, extrapolate=True):
-        return self.geometry.get_node_centered_data(data, extrapolate)
 
     @property
     def deletevalue(self) -> float:
@@ -350,33 +334,6 @@ class _Dfsu:
     @property
     def time(self) -> pd.DatetimeIndex:
         return self._time
-
-    def _validate_elements_and_geometry_sel(self, elements: Any, **kwargs: Any) -> None:
-        """Check that only one of elements, area, x, y is selected"""
-        used_kwargs = [key for key, val in kwargs.items() if val is not None]
-
-        if elements is not None and len(used_kwargs) > 0:
-            raise ValueError(f"Cannot select both {used_kwargs} and elements!")
-
-        if "area" in used_kwargs and ("x" in used_kwargs or "y" in used_kwargs):
-            raise ValueError("Cannot select both x,y and area!")
-
-    def to_mesh(self, outfilename):
-        """write object to mesh file
-
-        Parameters
-        ----------
-        outfilename : str
-            path to file to be written
-        """
-        self.geometry.geometry2d.to_mesh(outfilename)
-
-
-class Dfsu2DH(_Dfsu):
-
-    def __init__(self, filename: str | Path) -> None:
-        super().__init__(filename)
-        self._geometry = self._read_geometry(self._filename)
 
     @staticmethod
     def _read_geometry(filename: str) -> GeometryFM2D:
@@ -452,7 +409,7 @@ class Dfsu2DH(_Dfsu):
 
         single_time_selected, time_steps = _valid_timesteps(dfs, time)
 
-        self._validate_elements_and_geometry_sel(elements, area=area, x=x, y=y)
+        _validate_elements_and_geometry_sel(elements, area=area, x=x, y=y)
         if elements is None:
             elements = self._parse_geometry_sel(area=area, x=x, y=y)
 
@@ -464,10 +421,8 @@ class Dfsu2DH(_Dfsu):
             n_elems = len(elements)
             geometry = self.geometry.elements_to_geometry(elements)
 
-        item_numbers = _valid_item_numbers(
-            dfs.ItemInfo, items, ignore_first=self.is_layered
-        )
-        items = _get_item_info(dfs.ItemInfo, item_numbers, ignore_first=self.is_layered)
+        item_numbers = _valid_item_numbers(dfs.ItemInfo, items)
+        items = _get_item_info(dfs.ItemInfo, item_numbers)
         n_items = len(item_numbers)
 
         deletevalue = self.deletevalue
@@ -668,7 +623,7 @@ class Dfsu2DH(_Dfsu):
             end_time=self.end_time,
             timestep=self.timestep,
             geometry=self.geometry,
-            n_elements=self.n_elements,
+            n_elements=self.geometry.n_elements,
             track=track,
             items=items,
             time_steps=time_steps,

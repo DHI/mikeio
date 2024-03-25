@@ -304,8 +304,8 @@ def test_number_of_nodes_and_elements_sigma_z():
     filename = "tests/testdata/oresund_sigma_z.dfsu"
     dfs = mikeio.open(filename)
 
-    assert dfs.n_elements == 17118
-    assert dfs.n_nodes == 12042
+    assert dfs.geometry.n_elements == 17118
+    assert dfs.geometry.n_nodes == 12042
 
 
 def test_read_and_select_single_element_dfsu_3d():
@@ -381,12 +381,12 @@ def test_boundary_codes():
 
     filename = "tests/testdata/basin_3d.dfsu"
     dfs = mikeio.open(filename)
-    assert len(dfs.boundary_codes) == 1
+    assert len(dfs.geometry.boundary_codes) == 1
 
     filename = "tests/testdata/oresund_sigma_z.dfsu"
     dfs = mikeio.open(filename)
 
-    assert len(dfs.boundary_codes) == 3
+    assert len(dfs.geometry.boundary_codes) == 3
 
 
 def test_top_elements():
@@ -395,19 +395,19 @@ def test_top_elements():
     assert len(dfs.geometry.top_elements) == 174
     assert 39 in dfs.geometry.top_elements
     assert 0 not in dfs.geometry.top_elements
-    assert (dfs.n_elements - 1) in dfs.geometry.top_elements
+    assert (dfs.geometry.n_elements - 1) in dfs.geometry.top_elements
 
     filename = "tests/testdata/oresund_sigma_z.dfsu"
     dfs = mikeio.open(filename)
     assert len(dfs.geometry.top_elements) == 3700
     assert 16 in dfs.geometry.top_elements
-    assert (dfs.n_elements - 1) in dfs.geometry.top_elements
+    assert (dfs.geometry.n_elements - 1) in dfs.geometry.top_elements
 
     filename = "tests/testdata/oresund_vertical_slice.dfsu"
     dfs = mikeio.open(filename)
     assert len(dfs.geometry.top_elements) == 99
     assert 19 in dfs.geometry.top_elements
-    assert (dfs.n_elements - 1) in dfs.geometry.top_elements
+    assert (dfs.geometry.n_elements - 1) in dfs.geometry.top_elements
 
     filename = "tests/testdata/HD2D.dfsu"
     dfs = mikeio.open(filename)
@@ -519,7 +519,7 @@ def test_extract_top_layer_to_2d(tmp_path):
 
     newdfs = mikeio.open(fp)
 
-    assert newdfs.is_2d
+    assert newdfs.geometry.is_2d
 
 
 def test_modify_values_in_layer(tmp_path):
@@ -545,7 +545,7 @@ def test_to_mesh_3d(tmp_path):
     dfs = mikeio.open(filename)
 
     fp = tmp_path / "oresund_from_dfs.mesh"
-    dfs.to_mesh(fp)
+    dfs.geometry.to_mesh(fp)
     assert fp.exists()
     Mesh(fp)
 

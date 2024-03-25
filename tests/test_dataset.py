@@ -818,7 +818,7 @@ def test_weighted_average(tmp_path: Path):
 
     ds = dfs.read(items=["Surface elevation", "Current speed"])
 
-    area = dfs.get_element_area()
+    area = dfs.geometry.get_element_area()
     ds2 = ds.average(weights=area, axis=1)
 
     out_path = tmp_path / "average.dfs0"
@@ -1301,9 +1301,10 @@ def test_concat_by_time_inconsistent_shape_not_possible():
     with pytest.raises(ValueError, match="Shape"):
         mikeio.Dataset.concat([ds1, ds2])
 
+
 def test_concat_dataset_different_items_not_possible():
     ds1 = mikeio.read("tests/testdata/HD2D.dfsu")
-    ds2 = mikeio.read("tests/testdata/HD2D.dfsu", items=[1,2])
+    ds2 = mikeio.read("tests/testdata/HD2D.dfsu", items=[1, 2])
     with pytest.raises(ValueError, match="items"):
         mikeio.Dataset.concat([ds1, ds2])
 

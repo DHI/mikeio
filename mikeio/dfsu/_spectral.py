@@ -8,9 +8,15 @@ from mikecore.DfsuFile import DfsuFile, DfsuFileType
 from tqdm import trange
 
 from ..dataset import DataArray, Dataset
+from ..eum import ItemInfo
 from ..dfs._dfs import _get_item_info, _valid_item_numbers, _valid_timesteps
 from .._spectral import calc_m0_from_spectrum
-from ._dfsu import _Dfsu, get_elements_from_source, get_nodes_from_source
+from ._dfsu import (
+    _get_dfsu_info,
+    get_elements_from_source,
+    get_nodes_from_source,
+    _validate_elements_and_geometry_sel,
+)
 from ..spatial import (
     GeometryFMAreaSpectrum,
     GeometryFMLineSpectrum,
@@ -18,11 +24,92 @@ from ..spatial import (
 )
 
 
-class DfsuSpectral(_Dfsu):
+class DfsuSpectral:
+    show_progress = False
 
     def __init__(self, filename: str | Path) -> None:
-        super().__init__(filename)
+        info = _get_dfsu_info(filename)
+        self._filename = info.filename
+        self._type = info.type
+        self._deletevalue = info.deletevalue
+        self._time = info.time
+        self._timestep = info.timestep
+        self._items = info.items
         self._geometry = self._read_geometry(self._filename)
+
+    def __repr__(self):
+        out = [f"<mikeio.{self.__class__.__name__}>"]
+
+        if self._type is not DfsuFileType.DfsuSpectral0D:
+            if self._type is not DfsuFileType.DfsuSpectral1D:
+                out.append(f"number of elements: {self.geometry.n_elements}")
+            out.append(f"number of nodes: {self.geometry.n_nodes}")
+        if self.geometry.is_spectral:
+            if self.geometry.n_directions > 0:
+                out.append(f"number of directions: {self.geometry.n_directions}")
+            if self.geometry.n_frequencies > 0:
+                out.append(f"number of frequencies: {self.geometry.n_frequencies}")
+        if self.geometry.projection_string:
+            out.append(f"projection: {self.geometry.projection_string}")
+        if self.n_items < 10:
+            out.append("items:")
+            for i, item in enumerate(self.items):
+                out.append(f"  {i}:  {item}")
+        else:
+            out.append(f"number of items: {self.geometry.n_items}")
+        if self.n_timesteps == 1:
+            out.append(f"time: time-invariant file (1 step) at {self.time[0]}")
+        else:
+            out.append(
+                f"time: {str(self.time[0])} - {str(self.time[-1])} ({self.n_timesteps} records)"
+            )
+        return str.join("\n", out)
+
+    @property
+    def geometry(
+        self,
+    ) -> GeometryFMPointSpectrum | GeometryFMLineSpectrum | GeometryFMAreaSpectrum:
+        """Geometry"""
+        return self._geometry
+
+    @property
+    def deletevalue(self) -> float:
+        """File delete value"""
+        return self._deletevalue
+
+    @property
+    def n_items(self) -> int:
+        """Number of items"""
+        return len(self.items)
+
+    @property
+    def items(self) -> list[ItemInfo]:
+        """List of items"""
+        return self._items
+
+    @property
+    def start_time(self) -> pd.Timestamp:
+        """File start time"""
+        return self._time[0]
+
+    @property
+    def n_timesteps(self) -> int:
+        """Number of time steps"""
+        return len(self._time)
+
+    @property
+    def timestep(self) -> float:
+        """Time step size in seconds"""
+        return self._timestep
+
+    @property
+    def end_time(self) -> pd.Timestamp:
+        """File end time"""
+        return self._time[-1]
+
+    @property
+    def time(self) -> pd.DatetimeIndex:
+        return self._time
 
     @staticmethod
     def _read_geometry(
@@ -98,8 +185,8 @@ class DfsuSpectral(_Dfsu):
         self, n_steps: int, elements: Sized | None, dfsu_type: DfsuFileType
     ) -> Tuple[Tuple[int, ...], Tuple[int, ...], Tuple[str, ...]]:
         dims = [] if n_steps == 1 else ["time"]
-        n_freq = self.n_frequencies
-        n_dir = self.n_directions
+        n_freq = self.geometry.n_frequencies
+        n_dir = self.geometry.n_directions
         shape: Tuple[int, ...] = (n_dir, n_freq)
         if n_dir == 0:
             shape = (n_freq,)
@@ -109,21 +196,21 @@ class DfsuSpectral(_Dfsu):
             read_shape = (n_steps, *shape)
         elif dfsu_type == DfsuFileType.DfsuSpectral1D:
             # node-based, FE-style
-            n_nodes = self.n_nodes if elements is None else len(elements)
+            n_nodes = self.geometry.n_nodes if elements is None else len(elements)
             if n_nodes == 1:
                 read_shape = (n_steps, *shape)
             else:
                 dims.append("node")
                 read_shape = (n_steps, n_nodes, *shape)
-            shape = (*shape, self.n_nodes)
+            shape = (*shape, self.geometry.n_nodes)
         else:
-            n_elems = self.n_elements if elements is None else len(elements)
+            n_elems = self.geometry.n_elements if elements is None else len(elements)
             if n_elems == 1:
                 read_shape = (n_steps, *shape)
             else:
                 dims.append("element")
                 read_shape = (n_steps, n_elems, *shape)
-            shape = (*shape, self.n_elements)
+            shape = (*shape, self.geometry.n_elements)
 
         if n_dir > 1:
             dims.append("direction")
@@ -202,7 +289,7 @@ class DfsuSpectral(_Dfsu):
         single_time_selected, time_steps = _valid_timesteps(dfs, time)
 
         if self._type == DfsuFileType.DfsuSpectral2D:
-            self._validate_elements_and_geometry_sel(elements, area=area, x=x, y=y)
+            _validate_elements_and_geometry_sel(elements, area=area, x=x, y=y)
             if elements is None:
                 elements = self._parse_geometry_sel(area=area, x=x, y=y)
         else:
@@ -214,10 +301,8 @@ class DfsuSpectral(_Dfsu):
 
         geometry, pts = self._parse_elements_nodes(elements, nodes)
 
-        item_numbers = _valid_item_numbers(
-            dfs.ItemInfo, items, ignore_first=self.is_layered
-        )
-        items = _get_item_info(dfs.ItemInfo, item_numbers, ignore_first=self.is_layered)
+        item_numbers = _valid_item_numbers(dfs.ItemInfo, items)
+        items = _get_item_info(dfs.ItemInfo, item_numbers)
         n_items = len(item_numbers)
 
         deletevalue = self.deletevalue
