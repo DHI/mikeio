@@ -20,40 +20,6 @@ ul.task-list li input[type="checkbox"] {
   margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
 }
-/* CSS for syntax highlighting */
-pre > code.sourceCode { white-space: pre; position: relative; }
-pre > code.sourceCode > span { line-height: 1.25; }
-pre > code.sourceCode > span:empty { height: 1.2em; }
-.sourceCode { overflow: visible; }
-code.sourceCode > span { color: inherit; text-decoration: inherit; }
-div.sourceCode { margin: 1em 0; }
-pre.sourceCode { margin: 0; }
-@media screen {
-div.sourceCode { overflow: auto; }
-}
-@media print {
-pre > code.sourceCode { white-space: pre-wrap; }
-pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
-}
-pre.numberSource code
-  { counter-reset: source-line 0; }
-pre.numberSource code > span
-  { position: relative; left: -4em; counter-increment: source-line; }
-pre.numberSource code > span > a:first-child::before
-  { content: counter(source-line);
-    position: relative; left: -1em; text-align: right; vertical-align: baseline;
-    border: none; display: inline-block;
-    -webkit-touch-callout: none; -webkit-user-select: none;
-    -khtml-user-select: none; -moz-user-select: none;
-    -ms-user-select: none; user-select: none;
-    padding: 0 4px; width: 4em;
-  }
-pre.numberSource { margin-left: 3em;  padding-left: 4px; }
-div.sourceCode
-  {   }
-@media screen {
-pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
-}
 </style>
 
 
@@ -64,8 +30,6 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <script src="../site_libs/quarto-search/fuse.min.js"></script>
 <script src="../site_libs/quarto-search/quarto-search.js"></script>
 <meta name="quarto:offset" content="../">
-<link href="../user-guide/mesh.html" rel="next">
-<link href="../user-guide/dfs2.html" rel="prev">
 <script src="../site_libs/quarto-html/quarto.js"></script>
 <script src="../site_libs/quarto-html/popper.min.js"></script>
 <script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
@@ -165,7 +129,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
         <i class="bi bi-layout-text-sidebar-reverse"></i>
       </button>
         <a class="flex-grow-1 no-decor" role="button" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
-          <h1 class="quarto-secondary-nav-title">Dfsu and Mesh Overview</h1>
+          <h1 class="quarto-secondary-nav-title"></h1>
         </a>     
       <button type="button" class="btn quarto-search-button" aria-label="" onclick="window.quartoOpenSearch();">
         <i class="bi bi-search"></i>
@@ -237,7 +201,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../user-guide/dfsu.html" class="sidebar-item-text sidebar-link active">
+  <a href="../user-guide/dfsu.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">Dfsu and Mesh Overview</span></a>
   </div>
 </li>
@@ -341,229 +305,254 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     <h2 id="toc-title">On this page</h2>
    
   <ul>
-  <li><a href="#the-flexible-mesh" id="toc-the-flexible-mesh" class="nav-link active" data-scroll-target="#the-flexible-mesh">The flexible mesh</a></li>
-  <li><a href="#mike-io-flexible-mesh-geometry" id="toc-mike-io-flexible-mesh-geometry" class="nav-link" data-scroll-target="#mike-io-flexible-mesh-geometry">MIKE IO Flexible Mesh Geometry</a></li>
-  <li><a href="#common-dfsu-and-mesh-properties" id="toc-common-dfsu-and-mesh-properties" class="nav-link" data-scroll-target="#common-dfsu-and-mesh-properties">Common Dfsu and Mesh properties</a></li>
-  <li><a href="#dfsu-types" id="toc-dfsu-types" class="nav-link" data-scroll-target="#dfsu-types">Dfsu types</a></li>
+  <li><a href="#mikeio.spatial.GeometryFMVerticalProfile" id="toc-mikeio.spatial.GeometryFMVerticalProfile" class="nav-link active" data-scroll-target="#mikeio.spatial.GeometryFMVerticalProfile">spatial.GeometryFMVerticalProfile</a>
+  <ul class="collapse">
+  <li><a href="#attributes" id="toc-attributes" class="nav-link" data-scroll-target="#attributes">Attributes</a></li>
+  <li><a href="#methods" id="toc-methods" class="nav-link" data-scroll-target="#methods">Methods</a>
+  <ul class="collapse">
+  <li><a href="#mikeio.spatial.GeometryFMVerticalProfile.get_layer_elements" id="toc-mikeio.spatial.GeometryFMVerticalProfile.get_layer_elements" class="nav-link" data-scroll-target="#mikeio.spatial.GeometryFMVerticalProfile.get_layer_elements">get_layer_elements</a></li>
+  <li><a href="#mikeio.spatial.GeometryFMVerticalProfile.get_nearest_relative_distance" id="toc-mikeio.spatial.GeometryFMVerticalProfile.get_nearest_relative_distance" class="nav-link" data-scroll-target="#mikeio.spatial.GeometryFMVerticalProfile.get_nearest_relative_distance">get_nearest_relative_distance</a></li>
+  <li><a href="#mikeio.spatial.GeometryFMVerticalProfile.to_2d_geometry" id="toc-mikeio.spatial.GeometryFMVerticalProfile.to_2d_geometry" class="nav-link" data-scroll-target="#mikeio.spatial.GeometryFMVerticalProfile.to_2d_geometry">to_2d_geometry</a></li>
+  </ul></li>
+  </ul></li>
   </ul>
-<div class="toc-actions"><ul><li><a href="https://github.com/DHI/mikeio/edit/main/docs/user-guide/dfsu.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li></ul></div></nav>
+<div class="toc-actions"><ul><li><a href="https://github.com/DHI/mikeio/edit/main/docs/api/spatial.GeometryFMVerticalProfile.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li></ul></div></nav>
     </div>
 <!-- main -->
 <main class="content" id="quarto-document-content">
 
-<header id="title-block-header" class="quarto-title-block default">
-<div class="quarto-title">
-<h1 class="title d-none d-lg-block">Dfsu and Mesh Overview</h1>
-</div>
 
 
 
-<div class="quarto-title-meta">
-
-    
-  
-    
-  </div>
-  
-
-
-</header>
-
-
-<p>Dfsu and mesh files are both flexible mesh file formats used by MIKE 21/3 engines. The .mesh file is an ASCII file for storing the flexible mesh geometry. The .dfsu file is a binary dfs file with data on this mesh. The mesh geometry is available in a .dfsu file as static items.</p>
-<p>For a detailed description of the .mesh and .dfsu file specification see the <a href="https://manuals.mikepoweredbydhi.help/2024/General/FM_FileSpecification.pdf">flexible file format documentation</a>.</p>
-<section id="the-flexible-mesh" class="level2">
-<h2 class="anchored" data-anchor-id="the-flexible-mesh">The flexible mesh</h2>
-<p>The mesh geometry in a .mesh or a .dfsu file consists of a list of nodes and a list of elements.</p>
-<p>Each node has:</p>
-<ul>
-<li>Node id</li>
-<li>x,y,z coordinates</li>
-<li>Code (0 for internal water points, 1 for land, &gt;1 for open boundary)</li>
-</ul>
-<p>Each element has:</p>
-<ul>
-<li>Element id</li>
-<li>Element table; specifies for each element the nodes that defines the element. (the number of nodes defines the type: triangular, quadrilateral, prism etc.)</li>
-</ul>
-<div class="callout callout-style-default callout-note callout-titled">
-<div class="callout-header d-flex align-content-center">
-<div class="callout-icon-container">
-<i class="callout-icon"></i>
-</div>
-<div class="callout-title-container flex-fill">
-Note
-</div>
-</div>
-<div class="callout-body-container callout-body">
-<p>In MIKE Zero, node ids, element ids and layer ids are 1-based. In MIKE IO, all ids are <strong>0-based</strong> following standard Python indexing. That means, as an example, that when finding the element closest to a point its id will be 1 lower in MIKE IO compared to examining the file in MIKE Zero.</p>
-</div>
-</div>
-</section>
-<section id="mike-io-flexible-mesh-geometry" class="level2">
-<h2 class="anchored" data-anchor-id="mike-io-flexible-mesh-geometry">MIKE IO Flexible Mesh Geometry</h2>
-<p>MIKE IO has a Flexible Mesh Geometry class, <a href="../api/spatial.GeometryFM2D.html#mikeio.spatial.GeometryFM2D"><code>GeometryFM</code></a>, containing the list of node coordinates and the element table which defines the mesh, as well as a number of derived properties (e.g.&nbsp;element coordinates) and methods making it convenient to work with the mesh.</p>
+<section id="mikeio.spatial.GeometryFMVerticalProfile" class="level1">
+<h1>spatial.GeometryFMVerticalProfile</h1>
+<p><code>spatial.GeometryFMVerticalProfile(self, node_coordinates, element_table, codes=None, projection='LONG/LAT', dfsu_type=DfsuFileType.Dfsu3DSigma, element_ids=None, node_ids=None, n_layers=1, n_sigma=None, validate=True, reindex=False)</code></p>
+<section id="attributes" class="level2">
+<h2 class="anchored" data-anchor-id="attributes">Attributes</h2>
 <table class="table">
-<colgroup>
-<col style="width: 41%">
-<col style="width: 58%">
-</colgroup>
 <thead>
 <tr class="header">
-<th>Property</th>
+<th>Name</th>
 <th>Description</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
-<td><code>n_nodes</code></td>
-<td>Number of nodes</td>
+<td><a href="#mikeio.spatial.GeometryFMVerticalProfile.bottom_elements">bottom_elements</a></td>
+<td>List of 3d element ids of bottom layer</td>
 </tr>
 <tr class="even">
-<td><code>node_coordinates</code></td>
-<td>Coordinates (x,y,z) of all nodes</td>
+<td><a href="#mikeio.spatial.GeometryFMVerticalProfile.boundary_codes">boundary_codes</a></td>
+<td>Unique list of boundary codes</td>
 </tr>
 <tr class="odd">
-<td><code>codes</code></td>
-<td>Codes of all nodes (0:water, 1:land, &gt;=2:open boundary)</td>
+<td><a href="#mikeio.spatial.GeometryFMVerticalProfile.codes">codes</a></td>
+<td>Node codes of all nodes (0=water, 1=land, 2…=open boundaries)</td>
 </tr>
 <tr class="even">
-<td><code>boundary_polylines</code></td>
-<td>Lists of closed polylines defining domain outline</td>
+<td><a href="#mikeio.spatial.GeometryFMVerticalProfile.e2_e3_table">e2_e3_table</a></td>
+<td>The 2d-to-3d element connectivity table for a 3d object</td>
 </tr>
 <tr class="odd">
-<td><code>n_elements</code></td>
-<td>Number of elements</td>
+<td><a href="#mikeio.spatial.GeometryFMVerticalProfile.elem2d_ids">elem2d_ids</a></td>
+<td>The associated 2d element id for each 3d element</td>
 </tr>
 <tr class="even">
-<td><code>element_coordinates</code></td>
+<td><a href="#mikeio.spatial.GeometryFMVerticalProfile.element_coordinates">element_coordinates</a></td>
 <td>Center coordinates of each element</td>
 </tr>
 <tr class="odd">
-<td><code>element_table</code></td>
-<td>Element to node connectivity</td>
-</tr>
-<tr class="even">
-<td><code>max_nodes_per_element</code></td>
-<td>The maximum number of nodes for an element</td>
-</tr>
-<tr class="odd">
-<td><code>is_tri_only</code></td>
-<td>Does the mesh consist of triangles only?</td>
-</tr>
-<tr class="even">
-<td><code>projection_string</code></td>
-<td>The projection string</td>
-</tr>
-<tr class="odd">
-<td><code>is_geo</code></td>
+<td><a href="#mikeio.spatial.GeometryFMVerticalProfile.is_geo">is_geo</a></td>
 <td>Are coordinates geographical (LONG/LAT)?</td>
 </tr>
 <tr class="even">
-<td><code>is_local_coordinates</code></td>
+<td><a href="#mikeio.spatial.GeometryFMVerticalProfile.is_local_coordinates">is_local_coordinates</a></td>
 <td>Are coordinates relative (NON-UTM)?</td>
 </tr>
 <tr class="odd">
-<td><code>type_name</code></td>
-<td>Type name, e.g.&nbsp;Dfsu2D</td>
+<td><a href="#mikeio.spatial.GeometryFMVerticalProfile.layer_ids">layer_ids</a></td>
+<td>The layer number (0=bottom, 1, 2, …) for each 3d element</td>
+</tr>
+<tr class="even">
+<td><a href="#mikeio.spatial.GeometryFMVerticalProfile.max_nodes_per_element">max_nodes_per_element</a></td>
+<td>The maximum number of nodes for an element</td>
+</tr>
+<tr class="odd">
+<td><a href="#mikeio.spatial.GeometryFMVerticalProfile.n_elements">n_elements</a></td>
+<td>Number of 3d elements</td>
+</tr>
+<tr class="even">
+<td><a href="#mikeio.spatial.GeometryFMVerticalProfile.n_layers">n_layers</a></td>
+<td>Maximum number of layers</td>
+</tr>
+<tr class="odd">
+<td><a href="#mikeio.spatial.GeometryFMVerticalProfile.n_layers_per_column">n_layers_per_column</a></td>
+<td>List of number of layers for each column</td>
+</tr>
+<tr class="even">
+<td><a href="#mikeio.spatial.GeometryFMVerticalProfile.n_sigma_layers">n_sigma_layers</a></td>
+<td>Number of sigma layers</td>
+</tr>
+<tr class="odd">
+<td><a href="#mikeio.spatial.GeometryFMVerticalProfile.n_z_layers">n_z_layers</a></td>
+<td>Maximum number of z-layers</td>
+</tr>
+<tr class="even">
+<td><a href="#mikeio.spatial.GeometryFMVerticalProfile.projection">projection</a></td>
+<td>The projection</td>
+</tr>
+<tr class="odd">
+<td><a href="#mikeio.spatial.GeometryFMVerticalProfile.projection_string">projection_string</a></td>
+<td>The projection string</td>
+</tr>
+<tr class="even">
+<td><a href="#mikeio.spatial.GeometryFMVerticalProfile.top_elements">top_elements</a></td>
+<td>List of 3d element ids of surface layer</td>
 </tr>
 </tbody>
 </table>
+</section>
+<section id="methods" class="level2">
+<h2 class="anchored" data-anchor-id="methods">Methods</h2>
 <table class="table">
-<colgroup>
-<col style="width: 41%">
-<col style="width: 58%">
-</colgroup>
 <thead>
 <tr class="header">
-<th>Method</th>
+<th>Name</th>
 <th>Description</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
-<td><code>contains()</code></td>
-<td>test if a list of points are contained by mesh</td>
+<td><a href="#mikeio.spatial.GeometryFMVerticalProfile.get_layer_elements">get_layer_elements</a></td>
+<td>3d element ids for one (or more) specific layer(s)</td>
 </tr>
 <tr class="even">
-<td><code>find_index()</code></td>
-<td>Find index of elements containing points/area</td>
+<td><a href="#mikeio.spatial.GeometryFMVerticalProfile.get_nearest_relative_distance">get_nearest_relative_distance</a></td>
+<td>For a point near a transect, find the nearest relative distance</td>
 </tr>
 <tr class="odd">
-<td><code>isel()</code></td>
-<td>Get subset geometry for list of indicies</td>
-</tr>
-<tr class="even">
-<td><code>find_nearest_points()</code></td>
-<td>Find index of nearest elements (optionally for a list)</td>
-</tr>
-<tr class="odd">
-<td><code>plot</code></td>
-<td>Plot the geometry</td>
-</tr>
-<tr class="even">
-<td><code>get_overset_grid()</code></td>
-<td>Get a Grid2D covering the domain</td>
-</tr>
-<tr class="odd">
-<td><code>to_shapely()</code></td>
-<td>Export mesh as shapely MultiPolygon</td>
-</tr>
-<tr class="even">
-<td><code>get_element_area()</code></td>
-<td>Calculate the horizontal area of each element</td>
+<td><a href="#mikeio.spatial.GeometryFMVerticalProfile.to_2d_geometry">to_2d_geometry</a></td>
+<td>extract 2d geometry from 3d geometry</td>
 </tr>
 </tbody>
 </table>
-<p>These properties and methods are accessible from the geometry, but also from the Mesh/Dfsu object.</p>
-<p>If a .dfsu file is <em>read</em> with <a href="../api/read.html#mikeio.read"><code>mikeio.read</code></a>, the returned Dataset ds will contain a Flexible Mesh Geometry <code>geometry</code>. If a .dfsu or a .mesh file is <em>opened</em> with <a href="../api/open.html#mikeio.open"><code>mikeio.open</code></a>, the returned object will also contain a Flexible Mesh Geometry <code>geometry</code>.</p>
-<div id="17d0d275" class="cell" data-execution_count="1">
-<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> mikeio</span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>ds <span class="op">=</span> mikeio.read(<span class="st">"../data/oresundHD_run1.dfsu"</span>)</span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>ds.geometry</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display" data-execution_count="1">
-<pre><code>Flexible Mesh Geometry: Dfsu2D
-number of nodes: 2046
-number of elements: 3612
-projection: UTM-33</code></pre>
-</div>
-</div>
-<div id="dbe8ee89" class="cell" data-execution_count="2">
-<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>dfs <span class="op">=</span> mikeio.<span class="bu">open</span>(<span class="st">"../data/oresundHD_run1.dfsu"</span>)</span>
-<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>dfs.geometry</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display" data-execution_count="2">
-<pre><code>Flexible Mesh Geometry: Dfsu2D
-number of nodes: 2046
-number of elements: 3612
-projection: UTM-33</code></pre>
-</div>
-</div>
+<section id="mikeio.spatial.GeometryFMVerticalProfile.get_layer_elements" class="level3">
+<h3 class="anchored" data-anchor-id="mikeio.spatial.GeometryFMVerticalProfile.get_layer_elements">get_layer_elements</h3>
+<p><code>spatial.GeometryFMVerticalProfile.get_layer_elements(layers)</code></p>
+<p>3d element ids for one (or more) specific layer(s)</p>
+<section id="parameters" class="level4">
+<h4 class="anchored" data-anchor-id="parameters">Parameters</h4>
+<table class="table">
+<colgroup>
+<col style="width: 6%">
+<col style="width: 12%">
+<col style="width: 72%">
+<col style="width: 8%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Name</th>
+<th>Type</th>
+<th>Description</th>
+<th>Default</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>layers</code></td>
+<td>int or list(int)</td>
+<td>layer between 0 (bottom) and n_layers-1 (top) (can also be negative counting from -1 at the top layer)</td>
+<td><em>required</em></td>
+</tr>
+</tbody>
+</table>
 </section>
-<section id="common-dfsu-and-mesh-properties" class="level2">
-<h2 class="anchored" data-anchor-id="common-dfsu-and-mesh-properties">Common Dfsu and Mesh properties</h2>
-<p>MIKE IO has Dfsu classes for .dfsu files and a <a href="../api/Mesh.html#mikeio.Mesh">Mesh class</a> for .mesh files which both have a <a href="../api/spatial.GeometryFM2D.html#mikeio.spatial.GeometryFM2D"><code>mikeio.spatial.GeometryFM2D</code></a>/<a href="../api/spatial.GeometryFM3D.html#mikeio.spatial.GeometryFM3D"><code>mikeio.spatial.GeometryFM3D</code></a> accessible through the ´geometry´ accessor.</p>
+<section id="returns" class="level4">
+<h4 class="anchored" data-anchor-id="returns">Returns</h4>
+<table class="table">
+<thead>
+<tr class="header">
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>numpy.numpy.array(int)</td>
+<td>element ids</td>
+</tr>
+</tbody>
+</table>
 </section>
-<section id="dfsu-types" class="level2">
-<h2 class="anchored" data-anchor-id="dfsu-types">Dfsu types</h2>
-<p>The following dfsu file types are supported by MIKE IO.</p>
-<ul>
-<li>2D horizontal.</li>
-<li>3D layered.</li>
-<li>2D vertical profile - a vertical slice through a 3D layered file.</li>
-<li>1D vertical column - a vertical dfs1 file and is produced by taking out one column of a 3D layered file.</li>
-<li>3D/4D SW, two horizontal dimensions and 1-2 spectral dimensions. Output from MIKE 21 SW.</li>
-</ul>
-<p>When a dfsu file is opened with mikeio.open() the returned dfs object will be a specialized class <a href="../api/dfsu.Dfsu2DH.html#mikeio.dfsu.Dfsu2DH">Dfsu2DH</a>, <a href="../api/dfsu.Dfsu3D.html#mikeio.dfsu.Dfsu3D">Dfsu3D</a>, <a href="../api/dfsu.Dfsu2DV.html#mikeio.dfsu.Dfsu2DV">Dfsu2DV</a>, or <a href="../api/dfsu.DfsuSpectral.html#mikeio.dfsu.DfsuSpectral">DfsuSpectral</a> according to the type of dfsu file.</p>
-<p>The layered files (3d, 2d/1d vertical) can have both sigma- and z-layers or only sigma-layers.</p>
-<p>In most cases values are stored in cell centers and vertical (z) information in nodes, but the following values types exists:</p>
-<ul>
-<li>Standard value type, storing values on elements and/or nodes. This is the default type.</li>
-<li>Face value type, storing values on element faces. This is used e.g.&nbsp;for HD decoupling files, to store the discharge between elements.</li>
-<li>Spectral value type, for each node or element, storing vales for a number of frequencies and/or directions. This is the file type for spectral output from the MIKE 21 SW.</li>
-</ul>
+</section>
+<section id="mikeio.spatial.GeometryFMVerticalProfile.get_nearest_relative_distance" class="level3">
+<h3 class="anchored" data-anchor-id="mikeio.spatial.GeometryFMVerticalProfile.get_nearest_relative_distance">get_nearest_relative_distance</h3>
+<p><code>spatial.GeometryFMVerticalProfile.get_nearest_relative_distance(coords)</code></p>
+<p>For a point near a transect, find the nearest relative distance for showing position on transect plot.</p>
+<section id="parameters-1" class="level4">
+<h4 class="anchored" data-anchor-id="parameters-1">Parameters</h4>
+<table class="table">
+<thead>
+<tr class="header">
+<th>Name</th>
+<th>Type</th>
+<th>Description</th>
+<th>Default</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>coords</code></td>
+<td>[float, float]</td>
+<td>x,y-coordinate of point</td>
+<td><em>required</em></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="returns-1" class="level4">
+<h4 class="anchored" data-anchor-id="returns-1">Returns</h4>
+<table class="table">
+<thead>
+<tr class="header">
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>float</td>
+<td>relative distance in meters from start of transect</td>
+</tr>
+</tbody>
+</table>
+</section>
+</section>
+<section id="mikeio.spatial.GeometryFMVerticalProfile.to_2d_geometry" class="level3">
+<h3 class="anchored" data-anchor-id="mikeio.spatial.GeometryFMVerticalProfile.to_2d_geometry">to_2d_geometry</h3>
+<p><code>spatial.GeometryFMVerticalProfile.to_2d_geometry()</code></p>
+<p>extract 2d geometry from 3d geometry</p>
+<section id="returns-2" class="level4">
+<h4 class="anchored" data-anchor-id="returns-2">Returns</h4>
+<table class="table">
+<thead>
+<tr class="header">
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>UnstructuredGeometry</td>
+<td>2d geometry (bottom nodes)</td>
+</tr>
+</tbody>
+</table>
 
 
+</section>
+</section>
+</section>
 </section>
 
 </main> <!-- /main -->
@@ -954,18 +943,6 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
   }
 });
 </script>
-<nav class="page-navigation">
-  <div class="nav-page nav-page-previous">
-      <a href="../user-guide/dfs2.html" class="pagination-link" aria-label="Dfs2">
-        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text">Dfs2</span>
-      </a>          
-  </div>
-  <div class="nav-page nav-page-next">
-      <a href="../user-guide/mesh.html" class="pagination-link" aria-label="Mesh">
-        <span class="nav-page-text">Mesh</span> <i class="bi bi-arrow-right-short"></i>
-      </a>
-  </div>
-</nav>
 </div> <!-- /content -->
 <footer class="footer">
   <div class="nav-footer">
@@ -974,7 +951,7 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
     </div>   
     <div class="nav-footer-center">
 <p>© 2024 DHI Group</p>
-<div class="toc-actions d-sm-block d-md-none"><ul><li><a href="https://github.com/DHI/mikeio/edit/main/docs/user-guide/dfsu.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li></ul></div></div>
+<div class="toc-actions d-sm-block d-md-none"><ul><li><a href="https://github.com/DHI/mikeio/edit/main/docs/api/spatial.GeometryFMVerticalProfile.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li></ul></div></div>
     <div class="nav-footer-right">
       &nbsp;
     </div>

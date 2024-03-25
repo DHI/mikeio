@@ -64,8 +64,6 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <script src="../site_libs/quarto-search/fuse.min.js"></script>
 <script src="../site_libs/quarto-search/quarto-search.js"></script>
 <meta name="quarto:offset" content="../">
-<link href="../user-guide/mesh.html" rel="next">
-<link href="../user-guide/dfs2.html" rel="prev">
 <script src="../site_libs/quarto-html/quarto.js"></script>
 <script src="../site_libs/quarto-html/popper.min.js"></script>
 <script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
@@ -165,7 +163,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
         <i class="bi bi-layout-text-sidebar-reverse"></i>
       </button>
         <a class="flex-grow-1 no-decor" role="button" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
-          <h1 class="quarto-secondary-nav-title">Dfsu and Mesh Overview</h1>
+          <h1 class="quarto-secondary-nav-title"></h1>
         </a>     
       <button type="button" class="btn quarto-search-button" aria-label="" onclick="window.quartoOpenSearch();">
         <i class="bi bi-search"></i>
@@ -237,7 +235,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../user-guide/dfsu.html" class="sidebar-item-text sidebar-link active">
+  <a href="../user-guide/dfsu.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">Dfsu and Mesh Overview</span></a>
   </div>
 </li>
@@ -341,229 +339,765 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     <h2 id="toc-title">On this page</h2>
    
   <ul>
-  <li><a href="#the-flexible-mesh" id="toc-the-flexible-mesh" class="nav-link active" data-scroll-target="#the-flexible-mesh">The flexible mesh</a></li>
-  <li><a href="#mike-io-flexible-mesh-geometry" id="toc-mike-io-flexible-mesh-geometry" class="nav-link" data-scroll-target="#mike-io-flexible-mesh-geometry">MIKE IO Flexible Mesh Geometry</a></li>
-  <li><a href="#common-dfsu-and-mesh-properties" id="toc-common-dfsu-and-mesh-properties" class="nav-link" data-scroll-target="#common-dfsu-and-mesh-properties">Common Dfsu and Mesh properties</a></li>
-  <li><a href="#dfsu-types" id="toc-dfsu-types" class="nav-link" data-scroll-target="#dfsu-types">Dfsu types</a></li>
+  <li><a href="#mikeio.spatial.GeometryFMLineSpectrum" id="toc-mikeio.spatial.GeometryFMLineSpectrum" class="nav-link active" data-scroll-target="#mikeio.spatial.GeometryFMLineSpectrum">spatial.GeometryFMLineSpectrum</a>
+  <ul class="collapse">
+  <li><a href="#attributes" id="toc-attributes" class="nav-link" data-scroll-target="#attributes">Attributes</a></li>
+  <li><a href="#methods" id="toc-methods" class="nav-link" data-scroll-target="#methods">Methods</a>
+  <ul class="collapse">
+  <li><a href="#mikeio.spatial.GeometryFMLineSpectrum.contains" id="toc-mikeio.spatial.GeometryFMLineSpectrum.contains" class="nav-link" data-scroll-target="#mikeio.spatial.GeometryFMLineSpectrum.contains">contains</a></li>
+  <li><a href="#mikeio.spatial.GeometryFMLineSpectrum.find_index" id="toc-mikeio.spatial.GeometryFMLineSpectrum.find_index" class="nav-link" data-scroll-target="#mikeio.spatial.GeometryFMLineSpectrum.find_index">find_index</a></li>
+  <li><a href="#mikeio.spatial.GeometryFMLineSpectrum.find_nearest_elements" id="toc-mikeio.spatial.GeometryFMLineSpectrum.find_nearest_elements" class="nav-link" data-scroll-target="#mikeio.spatial.GeometryFMLineSpectrum.find_nearest_elements">find_nearest_elements</a></li>
+  <li><a href="#mikeio.spatial.GeometryFMLineSpectrum.get_2d_interpolant" id="toc-mikeio.spatial.GeometryFMLineSpectrum.get_2d_interpolant" class="nav-link" data-scroll-target="#mikeio.spatial.GeometryFMLineSpectrum.get_2d_interpolant">get_2d_interpolant</a></li>
+  <li><a href="#mikeio.spatial.GeometryFMLineSpectrum.get_element_area" id="toc-mikeio.spatial.GeometryFMLineSpectrum.get_element_area" class="nav-link" data-scroll-target="#mikeio.spatial.GeometryFMLineSpectrum.get_element_area">get_element_area</a></li>
+  <li><a href="#mikeio.spatial.GeometryFMLineSpectrum.get_node_centered_data" id="toc-mikeio.spatial.GeometryFMLineSpectrum.get_node_centered_data" class="nav-link" data-scroll-target="#mikeio.spatial.GeometryFMLineSpectrum.get_node_centered_data">get_node_centered_data</a></li>
+  <li><a href="#mikeio.spatial.GeometryFMLineSpectrum.get_overset_grid" id="toc-mikeio.spatial.GeometryFMLineSpectrum.get_overset_grid" class="nav-link" data-scroll-target="#mikeio.spatial.GeometryFMLineSpectrum.get_overset_grid">get_overset_grid</a></li>
+  <li><a href="#mikeio.spatial.GeometryFMLineSpectrum.interp2d" id="toc-mikeio.spatial.GeometryFMLineSpectrum.interp2d" class="nav-link" data-scroll-target="#mikeio.spatial.GeometryFMLineSpectrum.interp2d">interp2d</a></li>
+  <li><a href="#mikeio.spatial.GeometryFMLineSpectrum.to_mesh" id="toc-mikeio.spatial.GeometryFMLineSpectrum.to_mesh" class="nav-link" data-scroll-target="#mikeio.spatial.GeometryFMLineSpectrum.to_mesh">to_mesh</a></li>
+  <li><a href="#mikeio.spatial.GeometryFMLineSpectrum.to_shapely" id="toc-mikeio.spatial.GeometryFMLineSpectrum.to_shapely" class="nav-link" data-scroll-target="#mikeio.spatial.GeometryFMLineSpectrum.to_shapely">to_shapely</a></li>
+  </ul></li>
+  </ul></li>
   </ul>
-<div class="toc-actions"><ul><li><a href="https://github.com/DHI/mikeio/edit/main/docs/user-guide/dfsu.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li></ul></div></nav>
+<div class="toc-actions"><ul><li><a href="https://github.com/DHI/mikeio/edit/main/docs/api/spatial.GeometryFMLineSpectrum.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li></ul></div></nav>
     </div>
 <!-- main -->
 <main class="content" id="quarto-document-content">
 
-<header id="title-block-header" class="quarto-title-block default">
-<div class="quarto-title">
-<h1 class="title d-none d-lg-block">Dfsu and Mesh Overview</h1>
-</div>
 
 
 
-<div class="quarto-title-meta">
-
-    
-  
-    
-  </div>
-  
-
-
-</header>
-
-
-<p>Dfsu and mesh files are both flexible mesh file formats used by MIKE 21/3 engines. The .mesh file is an ASCII file for storing the flexible mesh geometry. The .dfsu file is a binary dfs file with data on this mesh. The mesh geometry is available in a .dfsu file as static items.</p>
-<p>For a detailed description of the .mesh and .dfsu file specification see the <a href="https://manuals.mikepoweredbydhi.help/2024/General/FM_FileSpecification.pdf">flexible file format documentation</a>.</p>
-<section id="the-flexible-mesh" class="level2">
-<h2 class="anchored" data-anchor-id="the-flexible-mesh">The flexible mesh</h2>
-<p>The mesh geometry in a .mesh or a .dfsu file consists of a list of nodes and a list of elements.</p>
-<p>Each node has:</p>
-<ul>
-<li>Node id</li>
-<li>x,y,z coordinates</li>
-<li>Code (0 for internal water points, 1 for land, &gt;1 for open boundary)</li>
-</ul>
-<p>Each element has:</p>
-<ul>
-<li>Element id</li>
-<li>Element table; specifies for each element the nodes that defines the element. (the number of nodes defines the type: triangular, quadrilateral, prism etc.)</li>
-</ul>
-<div class="callout callout-style-default callout-note callout-titled">
-<div class="callout-header d-flex align-content-center">
-<div class="callout-icon-container">
-<i class="callout-icon"></i>
-</div>
-<div class="callout-title-container flex-fill">
-Note
-</div>
-</div>
-<div class="callout-body-container callout-body">
-<p>In MIKE Zero, node ids, element ids and layer ids are 1-based. In MIKE IO, all ids are <strong>0-based</strong> following standard Python indexing. That means, as an example, that when finding the element closest to a point its id will be 1 lower in MIKE IO compared to examining the file in MIKE Zero.</p>
-</div>
-</div>
-</section>
-<section id="mike-io-flexible-mesh-geometry" class="level2">
-<h2 class="anchored" data-anchor-id="mike-io-flexible-mesh-geometry">MIKE IO Flexible Mesh Geometry</h2>
-<p>MIKE IO has a Flexible Mesh Geometry class, <a href="../api/spatial.GeometryFM2D.html#mikeio.spatial.GeometryFM2D"><code>GeometryFM</code></a>, containing the list of node coordinates and the element table which defines the mesh, as well as a number of derived properties (e.g.&nbsp;element coordinates) and methods making it convenient to work with the mesh.</p>
+<section id="mikeio.spatial.GeometryFMLineSpectrum" class="level1">
+<h1>spatial.GeometryFMLineSpectrum</h1>
+<p><code>spatial.GeometryFMLineSpectrum(self, node_coordinates, element_table, codes=None, projection='LONG/LAT', dfsu_type=None, element_ids=None, node_ids=None, validate=True, frequencies=None, directions=None, reindex=False)</code></p>
+<section id="attributes" class="level2">
+<h2 class="anchored" data-anchor-id="attributes">Attributes</h2>
 <table class="table">
-<colgroup>
-<col style="width: 41%">
-<col style="width: 58%">
-</colgroup>
 <thead>
 <tr class="header">
-<th>Property</th>
+<th>Name</th>
 <th>Description</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
-<td><code>n_nodes</code></td>
-<td>Number of nodes</td>
+<td><a href="#mikeio.spatial.GeometryFMLineSpectrum.boundary_codes">boundary_codes</a></td>
+<td>Unique list of boundary codes</td>
 </tr>
 <tr class="even">
-<td><code>node_coordinates</code></td>
-<td>Coordinates (x,y,z) of all nodes</td>
-</tr>
-<tr class="odd">
-<td><code>codes</code></td>
-<td>Codes of all nodes (0:water, 1:land, &gt;=2:open boundary)</td>
-</tr>
-<tr class="even">
-<td><code>boundary_polylines</code></td>
+<td><a href="#mikeio.spatial.GeometryFMLineSpectrum.boundary_polylines">boundary_polylines</a></td>
 <td>Lists of closed polylines defining domain outline</td>
 </tr>
 <tr class="odd">
-<td><code>n_elements</code></td>
-<td>Number of elements</td>
+<td><a href="#mikeio.spatial.GeometryFMLineSpectrum.codes">codes</a></td>
+<td>Node codes of all nodes (0=water, 1=land, 2…=open boundaries)</td>
 </tr>
 <tr class="even">
-<td><code>element_coordinates</code></td>
+<td><a href="#mikeio.spatial.GeometryFMLineSpectrum.directions">directions</a></td>
+<td>Directional axis</td>
+</tr>
+<tr class="odd">
+<td><a href="#mikeio.spatial.GeometryFMLineSpectrum.element_coordinates">element_coordinates</a></td>
 <td>Center coordinates of each element</td>
 </tr>
+<tr class="even">
+<td><a href="#mikeio.spatial.GeometryFMLineSpectrum.frequencies">frequencies</a></td>
+<td>Frequency axis</td>
+</tr>
 <tr class="odd">
-<td><code>element_table</code></td>
-<td>Element to node connectivity</td>
+<td><a href="#mikeio.spatial.GeometryFMLineSpectrum.geometry2d">geometry2d</a></td>
+<td>Return self</td>
 </tr>
 <tr class="even">
-<td><code>max_nodes_per_element</code></td>
-<td>The maximum number of nodes for an element</td>
+<td><a href="#mikeio.spatial.GeometryFMLineSpectrum.is_2d">is_2d</a></td>
+<td>Type is either mesh or Dfsu2D (2 horizontal dimensions)</td>
 </tr>
 <tr class="odd">
-<td><code>is_tri_only</code></td>
-<td>Does the mesh consist of triangles only?</td>
-</tr>
-<tr class="even">
-<td><code>projection_string</code></td>
-<td>The projection string</td>
-</tr>
-<tr class="odd">
-<td><code>is_geo</code></td>
+<td><a href="#mikeio.spatial.GeometryFMLineSpectrum.is_geo">is_geo</a></td>
 <td>Are coordinates geographical (LONG/LAT)?</td>
 </tr>
 <tr class="even">
-<td><code>is_local_coordinates</code></td>
-<td>Are coordinates relative (NON-UTM)?</td>
+<td><a href="#mikeio.spatial.GeometryFMLineSpectrum.is_layered">is_layered</a></td>
+<td>Type is layered dfsu (3d, vertical profile or vertical column)</td>
 </tr>
 <tr class="odd">
-<td><code>type_name</code></td>
-<td>Type name, e.g.&nbsp;Dfsu2D</td>
+<td><a href="#mikeio.spatial.GeometryFMLineSpectrum.is_local_coordinates">is_local_coordinates</a></td>
+<td>Are coordinates relative (NON-UTM)?</td>
+</tr>
+<tr class="even">
+<td><a href="#mikeio.spatial.GeometryFMLineSpectrum.is_spectral">is_spectral</a></td>
+<td>Type is spectral dfsu (point, line or area spectrum)</td>
+</tr>
+<tr class="odd">
+<td><a href="#mikeio.spatial.GeometryFMLineSpectrum.is_tri_only">is_tri_only</a></td>
+<td>Does the mesh consist of triangles only?</td>
+</tr>
+<tr class="even">
+<td><a href="#mikeio.spatial.GeometryFMLineSpectrum.max_nodes_per_element">max_nodes_per_element</a></td>
+<td>The maximum number of nodes for an element</td>
+</tr>
+<tr class="odd">
+<td><a href="#mikeio.spatial.GeometryFMLineSpectrum.n_directions">n_directions</a></td>
+<td>Number of directions</td>
+</tr>
+<tr class="even">
+<td><a href="#mikeio.spatial.GeometryFMLineSpectrum.n_elements">n_elements</a></td>
+<td>Number of elements</td>
+</tr>
+<tr class="odd">
+<td><a href="#mikeio.spatial.GeometryFMLineSpectrum.n_frequencies">n_frequencies</a></td>
+<td>Number of frequencies</td>
+</tr>
+<tr class="even">
+<td><a href="#mikeio.spatial.GeometryFMLineSpectrum.n_nodes">n_nodes</a></td>
+<td>Number of nodes</td>
+</tr>
+<tr class="odd">
+<td><a href="#mikeio.spatial.GeometryFMLineSpectrum.projection">projection</a></td>
+<td>The projection</td>
+</tr>
+<tr class="even">
+<td><a href="#mikeio.spatial.GeometryFMLineSpectrum.projection_string">projection_string</a></td>
+<td>The projection string</td>
+</tr>
+<tr class="odd">
+<td><a href="#mikeio.spatial.GeometryFMLineSpectrum.type_name">type_name</a></td>
+<td>Type name, e.g.&nbsp;Mesh, Dfsu2D</td>
 </tr>
 </tbody>
 </table>
+</section>
+<section id="methods" class="level2">
+<h2 class="anchored" data-anchor-id="methods">Methods</h2>
 <table class="table">
-<colgroup>
-<col style="width: 41%">
-<col style="width: 58%">
-</colgroup>
 <thead>
 <tr class="header">
-<th>Method</th>
+<th>Name</th>
 <th>Description</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
-<td><code>contains()</code></td>
+<td><a href="#mikeio.spatial.GeometryFMLineSpectrum.contains">contains</a></td>
 <td>test if a list of points are contained by mesh</td>
 </tr>
 <tr class="even">
-<td><code>find_index()</code></td>
-<td>Find index of elements containing points/area</td>
+<td><a href="#mikeio.spatial.GeometryFMLineSpectrum.find_index">find_index</a></td>
+<td>Find a <em>set</em> of element indicies for a number of points or within an area.</td>
 </tr>
 <tr class="odd">
-<td><code>isel()</code></td>
-<td>Get subset geometry for list of indicies</td>
-</tr>
-<tr class="even">
-<td><code>find_nearest_points()</code></td>
+<td><a href="#mikeio.spatial.GeometryFMLineSpectrum.find_nearest_elements">find_nearest_elements</a></td>
 <td>Find index of nearest elements (optionally for a list)</td>
 </tr>
+<tr class="even">
+<td><a href="#mikeio.spatial.GeometryFMLineSpectrum.get_2d_interpolant">get_2d_interpolant</a></td>
+<td>IDW interpolant for list of coordinates</td>
+</tr>
 <tr class="odd">
-<td><code>plot</code></td>
-<td>Plot the geometry</td>
+<td><a href="#mikeio.spatial.GeometryFMLineSpectrum.get_element_area">get_element_area</a></td>
+<td>Calculate the horizontal area of each element.</td>
 </tr>
 <tr class="even">
-<td><code>get_overset_grid()</code></td>
-<td>Get a Grid2D covering the domain</td>
+<td><a href="#mikeio.spatial.GeometryFMLineSpectrum.get_node_centered_data">get_node_centered_data</a></td>
+<td>convert cell-centered data to node-centered by pseudo-laplacian method</td>
 </tr>
 <tr class="odd">
-<td><code>to_shapely()</code></td>
+<td><a href="#mikeio.spatial.GeometryFMLineSpectrum.get_overset_grid">get_overset_grid</a></td>
+<td>get a 2d grid that covers the domain by specifying spacing or shape</td>
+</tr>
+<tr class="even">
+<td><a href="#mikeio.spatial.GeometryFMLineSpectrum.interp2d">interp2d</a></td>
+<td>interp spatially in data (2d only)</td>
+</tr>
+<tr class="odd">
+<td><a href="#mikeio.spatial.GeometryFMLineSpectrum.to_mesh">to_mesh</a></td>
+<td>Export geometry to new mesh file</td>
+</tr>
+<tr class="even">
+<td><a href="#mikeio.spatial.GeometryFMLineSpectrum.to_shapely">to_shapely</a></td>
 <td>Export mesh as shapely MultiPolygon</td>
-</tr>
-<tr class="even">
-<td><code>get_element_area()</code></td>
-<td>Calculate the horizontal area of each element</td>
 </tr>
 </tbody>
 </table>
-<p>These properties and methods are accessible from the geometry, but also from the Mesh/Dfsu object.</p>
-<p>If a .dfsu file is <em>read</em> with <a href="../api/read.html#mikeio.read"><code>mikeio.read</code></a>, the returned Dataset ds will contain a Flexible Mesh Geometry <code>geometry</code>. If a .dfsu or a .mesh file is <em>opened</em> with <a href="../api/open.html#mikeio.open"><code>mikeio.open</code></a>, the returned object will also contain a Flexible Mesh Geometry <code>geometry</code>.</p>
-<div id="17d0d275" class="cell" data-execution_count="1">
-<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> mikeio</span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>ds <span class="op">=</span> mikeio.read(<span class="st">"../data/oresundHD_run1.dfsu"</span>)</span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>ds.geometry</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display" data-execution_count="1">
-<pre><code>Flexible Mesh Geometry: Dfsu2D
-number of nodes: 2046
-number of elements: 3612
-projection: UTM-33</code></pre>
-</div>
-</div>
-<div id="dbe8ee89" class="cell" data-execution_count="2">
-<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>dfs <span class="op">=</span> mikeio.<span class="bu">open</span>(<span class="st">"../data/oresundHD_run1.dfsu"</span>)</span>
-<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>dfs.geometry</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display" data-execution_count="2">
-<pre><code>Flexible Mesh Geometry: Dfsu2D
-number of nodes: 2046
-number of elements: 3612
-projection: UTM-33</code></pre>
-</div>
-</div>
+<section id="mikeio.spatial.GeometryFMLineSpectrum.contains" class="level3">
+<h3 class="anchored" data-anchor-id="mikeio.spatial.GeometryFMLineSpectrum.contains">contains</h3>
+<p><code>spatial.GeometryFMLineSpectrum.contains(points)</code></p>
+<p>test if a list of points are contained by mesh</p>
+<section id="parameters" class="level4">
+<h4 class="anchored" data-anchor-id="parameters">Parameters</h4>
+<table class="table">
+<colgroup>
+<col style="width: 12%">
+<col style="width: 22%">
+<col style="width: 50%">
+<col style="width: 14%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Name</th>
+<th>Type</th>
+<th>Description</th>
+<th>Default</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>points</code></td>
+<td>array-like n-by-2</td>
+<td>x,y-coordinates of n points to be tested</td>
+<td><em>required</em></td>
+</tr>
+</tbody>
+</table>
 </section>
-<section id="common-dfsu-and-mesh-properties" class="level2">
-<h2 class="anchored" data-anchor-id="common-dfsu-and-mesh-properties">Common Dfsu and Mesh properties</h2>
-<p>MIKE IO has Dfsu classes for .dfsu files and a <a href="../api/Mesh.html#mikeio.Mesh">Mesh class</a> for .mesh files which both have a <a href="../api/spatial.GeometryFM2D.html#mikeio.spatial.GeometryFM2D"><code>mikeio.spatial.GeometryFM2D</code></a>/<a href="../api/spatial.GeometryFM3D.html#mikeio.spatial.GeometryFM3D"><code>mikeio.spatial.GeometryFM3D</code></a> accessible through the ´geometry´ accessor.</p>
+<section id="returns" class="level4">
+<h4 class="anchored" data-anchor-id="returns">Returns</h4>
+<table class="table">
+<thead>
+<tr class="header">
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>bool array</td>
+<td>True for points inside, False otherwise</td>
+</tr>
+</tbody>
+</table>
 </section>
-<section id="dfsu-types" class="level2">
-<h2 class="anchored" data-anchor-id="dfsu-types">Dfsu types</h2>
-<p>The following dfsu file types are supported by MIKE IO.</p>
-<ul>
-<li>2D horizontal.</li>
-<li>3D layered.</li>
-<li>2D vertical profile - a vertical slice through a 3D layered file.</li>
-<li>1D vertical column - a vertical dfs1 file and is produced by taking out one column of a 3D layered file.</li>
-<li>3D/4D SW, two horizontal dimensions and 1-2 spectral dimensions. Output from MIKE 21 SW.</li>
-</ul>
-<p>When a dfsu file is opened with mikeio.open() the returned dfs object will be a specialized class <a href="../api/dfsu.Dfsu2DH.html#mikeio.dfsu.Dfsu2DH">Dfsu2DH</a>, <a href="../api/dfsu.Dfsu3D.html#mikeio.dfsu.Dfsu3D">Dfsu3D</a>, <a href="../api/dfsu.Dfsu2DV.html#mikeio.dfsu.Dfsu2DV">Dfsu2DV</a>, or <a href="../api/dfsu.DfsuSpectral.html#mikeio.dfsu.DfsuSpectral">DfsuSpectral</a> according to the type of dfsu file.</p>
-<p>The layered files (3d, 2d/1d vertical) can have both sigma- and z-layers or only sigma-layers.</p>
-<p>In most cases values are stored in cell centers and vertical (z) information in nodes, but the following values types exists:</p>
-<ul>
-<li>Standard value type, storing values on elements and/or nodes. This is the default type.</li>
-<li>Face value type, storing values on element faces. This is used e.g.&nbsp;for HD decoupling files, to store the discharge between elements.</li>
-<li>Spectral value type, for each node or element, storing vales for a number of frequencies and/or directions. This is the file type for spectral output from the MIKE 21 SW.</li>
-</ul>
+</section>
+<section id="mikeio.spatial.GeometryFMLineSpectrum.find_index" class="level3">
+<h3 class="anchored" data-anchor-id="mikeio.spatial.GeometryFMLineSpectrum.find_index">find_index</h3>
+<p><code>spatial.GeometryFMLineSpectrum.find_index(x=None, y=None, coords=None, area=None)</code></p>
+<p>Find a <em>set</em> of element indicies for a number of points or within an area.</p>
+<p>The returned indices returned are the unique, unordered set of element indices that contain the points or area.</p>
+<p>This method will return elements <em>containing</em> the argument points/area, which is not necessarily the same as the nearest.</p>
+<p>Typically not called directly, but by Dataset/DataArray’s sel() method.</p>
+<section id="parameters-1" class="level4">
+<h4 class="anchored" data-anchor-id="parameters-1">Parameters</h4>
+<table class="table">
+<colgroup>
+<col style="width: 4%">
+<col style="width: 17%">
+<col style="width: 72%">
+<col style="width: 5%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Name</th>
+<th>Type</th>
+<th>Description</th>
+<th>Default</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>x</code></td>
+<td>float | numpy.numpy.ndarray | None</td>
+<td>X coordinate(s) (easting or longitude)</td>
+<td><code>None</code></td>
+</tr>
+<tr class="even">
+<td><code>y</code></td>
+<td>float | numpy.numpy.ndarray | None</td>
+<td>Y coordinate(s) (northing or latitude)</td>
+<td><code>None</code></td>
+</tr>
+<tr class="odd">
+<td><code>coords</code></td>
+<td>numpy.numpy.array(float, float)</td>
+<td>As an alternative to specifying x, and y individually, the argument coords can be used instead. (x,y)-coordinates of points to be found, by default None</td>
+<td><code>None</code></td>
+</tr>
+<tr class="even">
+<td><code>area</code></td>
+<td>(float, float, float, float)</td>
+<td>Bounding box of coordinates (left lower and right upper) to be selected, by default None</td>
+<td><code>None</code></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="returns-1" class="level4">
+<h4 class="anchored" data-anchor-id="returns-1">Returns</h4>
+<table class="table">
+<thead>
+<tr class="header">
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>numpy.numpy.array</td>
+<td>indicies of containing elements</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="raises" class="level4">
+<h4 class="anchored" data-anchor-id="raises">Raises</h4>
+<table class="table">
+<thead>
+<tr class="header">
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>ValueError</td>
+<td>if any point is outside the domain</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="examples" class="level4">
+<h4 class="anchored" data-anchor-id="examples">Examples</h4>
+<div class="sourceCode" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> g <span class="op">=</span> dfs.geometry</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> <span class="bu">id</span> <span class="op">=</span> dfs.find_index(x<span class="op">=</span><span class="fl">3.1</span>, y<span class="op">=</span><span class="fl">4.3</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+<section id="see-also" class="level4">
+<h4 class="anchored" data-anchor-id="see-also">See Also</h4>
+<p>isel : get subset geometry for specific indicies find_nearest_elements : find nearest instead of containing elements</p>
+</section>
+</section>
+<section id="mikeio.spatial.GeometryFMLineSpectrum.find_nearest_elements" class="level3">
+<h3 class="anchored" data-anchor-id="mikeio.spatial.GeometryFMLineSpectrum.find_nearest_elements">find_nearest_elements</h3>
+<p><code>spatial.GeometryFMLineSpectrum.find_nearest_elements(x, y=None, n_nearest=1, return_distances=False)</code></p>
+<p>Find index of nearest elements (optionally for a list)</p>
+<section id="parameters-2" class="level4">
+<h4 class="anchored" data-anchor-id="parameters-2">Parameters</h4>
+<table class="table">
+<colgroup>
+<col style="width: 13%">
+<col style="width: 24%">
+<col style="width: 54%">
+<col style="width: 7%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Name</th>
+<th>Type</th>
+<th>Description</th>
+<th>Default</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>x</code></td>
+<td>float | numpy.numpy.ndarray</td>
+<td>X coordinate(s) (easting or longitude)</td>
+<td><em>required</em></td>
+</tr>
+<tr class="even">
+<td><code>y</code></td>
+<td>float | numpy.numpy.ndarray | None</td>
+<td>Y coordinate(s) (northing or latitude)</td>
+<td><code>None</code></td>
+</tr>
+<tr class="odd">
+<td><code>n_nearest</code></td>
+<td>int</td>
+<td>return this many (horizontally) nearest points for each coordinate set, default=1</td>
+<td><code>1</code></td>
+</tr>
+<tr class="even">
+<td><code>return_distances</code></td>
+<td>bool</td>
+<td>should the horizontal distances to each point be returned? default=False</td>
+<td><code>False</code></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="returns-2" class="level4">
+<h4 class="anchored" data-anchor-id="returns-2">Returns</h4>
+<table class="table">
+<thead>
+<tr class="header">
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>numpy.numpy.array</td>
+<td>element ids of nearest element(s)</td>
+</tr>
+<tr class="even">
+<td>(numpy.numpy.array, optional)</td>
+<td>horizontal distances</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="examples-1" class="level4">
+<h4 class="anchored" data-anchor-id="examples-1">Examples</h4>
+<div class="sourceCode" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> g <span class="op">=</span> dfs.geometry</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> <span class="bu">id</span> <span class="op">=</span> g.find_nearest_elements(<span class="dv">3</span>, <span class="dv">4</span>)</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> ids <span class="op">=</span> g.find_nearest_elements([<span class="dv">3</span>, <span class="dv">8</span>], [<span class="dv">4</span>, <span class="dv">6</span>])</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> ids <span class="op">=</span> g.find_nearest_elements(xy)</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> ids <span class="op">=</span> g.find_nearest_elements(<span class="dv">3</span>, <span class="dv">4</span>, n_nearest<span class="op">=</span><span class="dv">4</span>)</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> ids, d <span class="op">=</span> g.find_nearest_elements(xy, return_distances<span class="op">=</span><span class="va">True</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+<section id="see-also-1" class="level4">
+<h4 class="anchored" data-anchor-id="see-also-1">See Also</h4>
+<p>find_index : find element indicies for points or an area</p>
+</section>
+</section>
+<section id="mikeio.spatial.GeometryFMLineSpectrum.get_2d_interpolant" class="level3">
+<h3 class="anchored" data-anchor-id="mikeio.spatial.GeometryFMLineSpectrum.get_2d_interpolant">get_2d_interpolant</h3>
+<p><code>spatial.GeometryFMLineSpectrum.get_2d_interpolant(xy, n_nearest=5, extrapolate=False, p=2, radius=None)</code></p>
+<p>IDW interpolant for list of coordinates</p>
+<section id="parameters-3" class="level4">
+<h4 class="anchored" data-anchor-id="parameters-3">Parameters</h4>
+<table class="table">
+<colgroup>
+<col style="width: 12%">
+<col style="width: 12%">
+<col style="width: 63%">
+<col style="width: 10%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Name</th>
+<th>Type</th>
+<th>Description</th>
+<th>Default</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>xy</code></td>
+<td>array - like</td>
+<td>x,y coordinates of new points</td>
+<td><em>required</em></td>
+</tr>
+<tr class="even">
+<td><code>n_nearest</code></td>
+<td>int</td>
+<td>number of nearest elements used for IDW, by default 5</td>
+<td><code>5</code></td>
+</tr>
+<tr class="odd">
+<td><code>extrapolate</code></td>
+<td>bool</td>
+<td>allow extrapolation, by default False</td>
+<td><code>False</code></td>
+</tr>
+<tr class="even">
+<td><code>p</code></td>
+<td>float</td>
+<td>power of inverse distance weighting, default=2</td>
+<td><code>2</code></td>
+</tr>
+<tr class="odd">
+<td><code>radius</code></td>
+<td>float | None</td>
+<td>an alternative to extrapolate=False, only include elements within radius</td>
+<td><code>None</code></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="returns-3" class="level4">
+<h4 class="anchored" data-anchor-id="returns-3">Returns</h4>
+<table class="table">
+<thead>
+<tr class="header">
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>(numpy.numpy.array, numpy.numpy.array)</td>
+<td>element ids and weights</td>
+</tr>
+</tbody>
+</table>
+</section>
+</section>
+<section id="mikeio.spatial.GeometryFMLineSpectrum.get_element_area" class="level3">
+<h3 class="anchored" data-anchor-id="mikeio.spatial.GeometryFMLineSpectrum.get_element_area">get_element_area</h3>
+<p><code>spatial.GeometryFMLineSpectrum.get_element_area()</code></p>
+<p>Calculate the horizontal area of each element.</p>
+<section id="returns-4" class="level4">
+<h4 class="anchored" data-anchor-id="returns-4">Returns</h4>
+<table class="table">
+<thead>
+<tr class="header">
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>numpy.numpy.array(float)</td>
+<td>areas in m2</td>
+</tr>
+</tbody>
+</table>
+</section>
+</section>
+<section id="mikeio.spatial.GeometryFMLineSpectrum.get_node_centered_data" class="level3">
+<h3 class="anchored" data-anchor-id="mikeio.spatial.GeometryFMLineSpectrum.get_node_centered_data">get_node_centered_data</h3>
+<p><code>spatial.GeometryFMLineSpectrum.get_node_centered_data(data, extrapolate=True)</code></p>
+<p>convert cell-centered data to node-centered by pseudo-laplacian method</p>
+<section id="parameters-4" class="level4">
+<h4 class="anchored" data-anchor-id="parameters-4">Parameters</h4>
+<table class="table">
+<colgroup>
+<col style="width: 15%">
+<col style="width: 26%">
+<col style="width: 47%">
+<col style="width: 12%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Name</th>
+<th>Type</th>
+<th>Description</th>
+<th>Default</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>data</code></td>
+<td>numpy.numpy.array(float)</td>
+<td>cell-centered data</td>
+<td><em>required</em></td>
+</tr>
+<tr class="even">
+<td><code>extrapolate</code></td>
+<td>bool</td>
+<td>allow the method to extrapolate, default:True</td>
+<td><code>True</code></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="returns-5" class="level4">
+<h4 class="anchored" data-anchor-id="returns-5">Returns</h4>
+<table class="table">
+<thead>
+<tr class="header">
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>numpy.numpy.array(float)</td>
+<td>node-centered data</td>
+</tr>
+</tbody>
+</table>
+</section>
+</section>
+<section id="mikeio.spatial.GeometryFMLineSpectrum.get_overset_grid" class="level3">
+<h3 class="anchored" data-anchor-id="mikeio.spatial.GeometryFMLineSpectrum.get_overset_grid">get_overset_grid</h3>
+<p><code>spatial.GeometryFMLineSpectrum.get_overset_grid(dx=None, dy=None, nx=None, ny=None, buffer=0.0)</code></p>
+<p>get a 2d grid that covers the domain by specifying spacing or shape</p>
+<section id="parameters-5" class="level4">
+<h4 class="anchored" data-anchor-id="parameters-5">Parameters</h4>
+<table class="table">
+<colgroup>
+<col style="width: 5%">
+<col style="width: 14%">
+<col style="width: 73%">
+<col style="width: 6%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Name</th>
+<th>Type</th>
+<th>Description</th>
+<th>Default</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>dx</code></td>
+<td>float or (float, float)</td>
+<td>grid resolution in x-direction (or in x- and y-direction)</td>
+<td><code>None</code></td>
+</tr>
+<tr class="even">
+<td><code>dy</code></td>
+<td>float</td>
+<td>grid resolution in y-direction</td>
+<td><code>None</code></td>
+</tr>
+<tr class="odd">
+<td><code>nx</code></td>
+<td>int</td>
+<td>number of points in x-direction, by default None, (the value will be inferred)</td>
+<td><code>None</code></td>
+</tr>
+<tr class="even">
+<td><code>ny</code></td>
+<td>int</td>
+<td>number of points in y-direction, by default None, (the value will be inferred)</td>
+<td><code>None</code></td>
+</tr>
+<tr class="odd">
+<td><code>buffer</code></td>
+<td>float</td>
+<td>positive to make the area larger, default=0 can be set to a small negative value to avoid NaN values all around the domain.</td>
+<td><code>0.0</code></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="returns-6" class="level4">
+<h4 class="anchored" data-anchor-id="returns-6">Returns</h4>
+<table class="table">
+<thead>
+<tr class="header">
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>&lt;mikeio.Grid2D&gt;</td>
+<td>2d grid</td>
+</tr>
+</tbody>
+</table>
+</section>
+</section>
+<section id="mikeio.spatial.GeometryFMLineSpectrum.interp2d" class="level3">
+<h3 class="anchored" data-anchor-id="mikeio.spatial.GeometryFMLineSpectrum.interp2d">interp2d</h3>
+<p><code>spatial.GeometryFMLineSpectrum.interp2d(data, elem_ids, weights=None, shape=None)</code></p>
+<p>interp spatially in data (2d only)</p>
+<section id="parameters-6" class="level4">
+<h4 class="anchored" data-anchor-id="parameters-6">Parameters</h4>
+<table class="table">
+<colgroup>
+<col style="width: 9%">
+<col style="width: 28%">
+<col style="width: 52%">
+<col style="width: 9%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Name</th>
+<th>Type</th>
+<th>Description</th>
+<th>Default</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>data</code></td>
+<td>ndarray or list(ndarray)</td>
+<td>dfsu data</td>
+<td><em>required</em></td>
+</tr>
+<tr class="even">
+<td><code>elem_ids</code></td>
+<td>ndarray(int)</td>
+<td>n sized array of 1 or more element ids used for interpolation</td>
+<td><em>required</em></td>
+</tr>
+<tr class="odd">
+<td><code>weights</code></td>
+<td>ndarray(float)</td>
+<td>weights with same size as elem_ids used for interpolation</td>
+<td><code>None</code></td>
+</tr>
+<tr class="even">
+<td><code>shape</code></td>
+<td>typing.Tuple[int, …] | None</td>
+<td>reshape output</td>
+<td><code>None</code></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="returns-7" class="level4">
+<h4 class="anchored" data-anchor-id="returns-7">Returns</h4>
+<table class="table">
+<thead>
+<tr class="header">
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>ndarray or list(ndarray)</td>
+<td>spatially interped data</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="examples-2" class="level4">
+<h4 class="anchored" data-anchor-id="examples-2">Examples</h4>
+<div class="sourceCode" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> ds <span class="op">=</span> dfsu.read()</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> g <span class="op">=</span> dfs.get_overset_grid(shape<span class="op">=</span>(<span class="dv">50</span>,<span class="dv">40</span>))</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> elem_ids, weights <span class="op">=</span> dfs.get_2d_interpolant(g.xy)</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> dsi <span class="op">=</span> dfs.interp2d(ds, elem_ids, weights)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+</section>
+<section id="mikeio.spatial.GeometryFMLineSpectrum.to_mesh" class="level3">
+<h3 class="anchored" data-anchor-id="mikeio.spatial.GeometryFMLineSpectrum.to_mesh">to_mesh</h3>
+<p><code>spatial.GeometryFMLineSpectrum.to_mesh(outfilename)</code></p>
+<p>Export geometry to new mesh file</p>
+<section id="parameters-7" class="level4">
+<h4 class="anchored" data-anchor-id="parameters-7">Parameters</h4>
+<table class="table">
+<thead>
+<tr class="header">
+<th>Name</th>
+<th>Type</th>
+<th>Description</th>
+<th>Default</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>outfilename</code></td>
+<td>str</td>
+<td>path to file to be written</td>
+<td><em>required</em></td>
+</tr>
+</tbody>
+</table>
+</section>
+</section>
+<section id="mikeio.spatial.GeometryFMLineSpectrum.to_shapely" class="level3">
+<h3 class="anchored" data-anchor-id="mikeio.spatial.GeometryFMLineSpectrum.to_shapely">to_shapely</h3>
+<p><code>spatial.GeometryFMLineSpectrum.to_shapely()</code></p>
+<p>Export mesh as shapely MultiPolygon</p>
+<section id="returns-8" class="level4">
+<h4 class="anchored" data-anchor-id="returns-8">Returns</h4>
+<table class="table">
+<colgroup>
+<col style="width: 65%">
+<col style="width: 34%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>shapely.shapely.geometry.shapely.geometry.MultiPolygon</td>
+<td>polygons with mesh elements</td>
+</tr>
+</tbody>
+</table>
 
 
+</section>
+</section>
+</section>
 </section>
 
 </main> <!-- /main -->
@@ -954,18 +1488,6 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
   }
 });
 </script>
-<nav class="page-navigation">
-  <div class="nav-page nav-page-previous">
-      <a href="../user-guide/dfs2.html" class="pagination-link" aria-label="Dfs2">
-        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text">Dfs2</span>
-      </a>          
-  </div>
-  <div class="nav-page nav-page-next">
-      <a href="../user-guide/mesh.html" class="pagination-link" aria-label="Mesh">
-        <span class="nav-page-text">Mesh</span> <i class="bi bi-arrow-right-short"></i>
-      </a>
-  </div>
-</nav>
 </div> <!-- /content -->
 <footer class="footer">
   <div class="nav-footer">
@@ -974,7 +1496,7 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
     </div>   
     <div class="nav-footer-center">
 <p>© 2024 DHI Group</p>
-<div class="toc-actions d-sm-block d-md-none"><ul><li><a href="https://github.com/DHI/mikeio/edit/main/docs/user-guide/dfsu.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li></ul></div></div>
+<div class="toc-actions d-sm-block d-md-none"><ul><li><a href="https://github.com/DHI/mikeio/edit/main/docs/api/spatial.GeometryFMLineSpectrum.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li></ul></div></div>
     <div class="nav-footer-right">
       &nbsp;
     </div>

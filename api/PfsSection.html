@@ -57,15 +57,13 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </style>
 
 
-<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js" integrity="sha512-bLT0Qm9VnAYZDflyKcBaQ2gg0hSYNQrJ8RilYldYQ1FxQYoCLtUjuuRuZo+fjqhx/qtq/1itJ0C2ejDxltZVFg==" crossorigin="anonymous"></script><script src="../site_libs/quarto-nav/quarto-nav.js"></script>
 <script src="../site_libs/quarto-nav/headroom.min.js"></script>
 <script src="../site_libs/clipboard/clipboard.min.js"></script>
 <script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
 <script src="../site_libs/quarto-search/fuse.min.js"></script>
 <script src="../site_libs/quarto-search/quarto-search.js"></script>
 <meta name="quarto:offset" content="../">
-<link href="../user-guide/mesh.html" rel="next">
-<link href="../user-guide/dfs2.html" rel="prev">
 <script src="../site_libs/quarto-html/quarto.js"></script>
 <script src="../site_libs/quarto-html/popper.min.js"></script>
 <script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
@@ -102,6 +100,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     "search-label": "Search"
   }
 }</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" integrity="sha512-c3Nl8+7g4LMSTdrm621y7kf9v3SDPnhxLNhcjFJbKECVnmZHTdo+IRO05sNLTH/D3vA6u1X32ehoLC7WFVdheg==" crossorigin="anonymous"></script>
+
+<script type="application/javascript">define('jquery', [],function() {return window.jQuery;})</script>
 
 
 </head>
@@ -165,7 +166,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
         <i class="bi bi-layout-text-sidebar-reverse"></i>
       </button>
         <a class="flex-grow-1 no-decor" role="button" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
-          <h1 class="quarto-secondary-nav-title">Dfsu and Mesh Overview</h1>
+          <h1 class="quarto-secondary-nav-title">PfsSection</h1>
         </a>     
       <button type="button" class="btn quarto-search-button" aria-label="" onclick="window.quartoOpenSearch();">
         <i class="bi bi-search"></i>
@@ -237,7 +238,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../user-guide/dfsu.html" class="sidebar-item-text sidebar-link active">
+  <a href="../user-guide/dfsu.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">Dfsu and Mesh Overview</span></a>
   </div>
 </li>
@@ -341,19 +342,31 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     <h2 id="toc-title">On this page</h2>
    
   <ul>
-  <li><a href="#the-flexible-mesh" id="toc-the-flexible-mesh" class="nav-link active" data-scroll-target="#the-flexible-mesh">The flexible mesh</a></li>
-  <li><a href="#mike-io-flexible-mesh-geometry" id="toc-mike-io-flexible-mesh-geometry" class="nav-link" data-scroll-target="#mike-io-flexible-mesh-geometry">MIKE IO Flexible Mesh Geometry</a></li>
-  <li><a href="#common-dfsu-and-mesh-properties" id="toc-common-dfsu-and-mesh-properties" class="nav-link" data-scroll-target="#common-dfsu-and-mesh-properties">Common Dfsu and Mesh properties</a></li>
-  <li><a href="#dfsu-types" id="toc-dfsu-types" class="nav-link" data-scroll-target="#dfsu-types">Dfsu types</a></li>
+  <li><a href="#methods" id="toc-methods" class="nav-link active" data-scroll-target="#methods">Methods</a>
+  <ul class="collapse">
+  <li><a href="#mikeio.PfsSection.clear" id="toc-mikeio.PfsSection.clear" class="nav-link" data-scroll-target="#mikeio.PfsSection.clear">clear</a></li>
+  <li><a href="#mikeio.PfsSection.copy" id="toc-mikeio.PfsSection.copy" class="nav-link" data-scroll-target="#mikeio.PfsSection.copy">copy</a></li>
+  <li><a href="#mikeio.PfsSection.find_replace" id="toc-mikeio.PfsSection.find_replace" class="nav-link" data-scroll-target="#mikeio.PfsSection.find_replace">find_replace</a></li>
+  <li><a href="#mikeio.PfsSection.from_dataframe" id="toc-mikeio.PfsSection.from_dataframe" class="nav-link" data-scroll-target="#mikeio.PfsSection.from_dataframe">from_dataframe</a></li>
+  <li><a href="#mikeio.PfsSection.get" id="toc-mikeio.PfsSection.get" class="nav-link" data-scroll-target="#mikeio.PfsSection.get">get</a></li>
+  <li><a href="#mikeio.PfsSection.items" id="toc-mikeio.PfsSection.items" class="nav-link" data-scroll-target="#mikeio.PfsSection.items">items</a></li>
+  <li><a href="#mikeio.PfsSection.keys" id="toc-mikeio.PfsSection.keys" class="nav-link" data-scroll-target="#mikeio.PfsSection.keys">keys</a></li>
+  <li><a href="#mikeio.PfsSection.pop" id="toc-mikeio.PfsSection.pop" class="nav-link" data-scroll-target="#mikeio.PfsSection.pop">pop</a></li>
+  <li><a href="#mikeio.PfsSection.search" id="toc-mikeio.PfsSection.search" class="nav-link" data-scroll-target="#mikeio.PfsSection.search">search</a></li>
+  <li><a href="#mikeio.PfsSection.to_dataframe" id="toc-mikeio.PfsSection.to_dataframe" class="nav-link" data-scroll-target="#mikeio.PfsSection.to_dataframe">to_dataframe</a></li>
+  <li><a href="#mikeio.PfsSection.to_dict" id="toc-mikeio.PfsSection.to_dict" class="nav-link" data-scroll-target="#mikeio.PfsSection.to_dict">to_dict</a></li>
+  <li><a href="#mikeio.PfsSection.update_recursive" id="toc-mikeio.PfsSection.update_recursive" class="nav-link" data-scroll-target="#mikeio.PfsSection.update_recursive">update_recursive</a></li>
+  <li><a href="#mikeio.PfsSection.values" id="toc-mikeio.PfsSection.values" class="nav-link" data-scroll-target="#mikeio.PfsSection.values">values</a></li>
+  </ul></li>
   </ul>
-<div class="toc-actions"><ul><li><a href="https://github.com/DHI/mikeio/edit/main/docs/user-guide/dfsu.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li></ul></div></nav>
+<div class="toc-actions"><ul><li><a href="https://github.com/DHI/mikeio/edit/main/docs/api/PfsSection.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li></ul></div></nav>
     </div>
 <!-- main -->
 <main class="content" id="quarto-document-content">
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<h1 class="title d-none d-lg-block">Dfsu and Mesh Overview</h1>
+<h1 class="title d-none d-lg-block">PfsSection</h1>
 </div>
 
 
@@ -370,200 +383,483 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </header>
 
 
-<p>Dfsu and mesh files are both flexible mesh file formats used by MIKE 21/3 engines. The .mesh file is an ASCII file for storing the flexible mesh geometry. The .dfsu file is a binary dfs file with data on this mesh. The mesh geometry is available in a .dfsu file as static items.</p>
-<p>For a detailed description of the .mesh and .dfsu file specification see the <a href="https://manuals.mikepoweredbydhi.help/2024/General/FM_FileSpecification.pdf">flexible file format documentation</a>.</p>
-<section id="the-flexible-mesh" class="level2">
-<h2 class="anchored" data-anchor-id="the-flexible-mesh">The flexible mesh</h2>
-<p>The mesh geometry in a .mesh or a .dfsu file consists of a list of nodes and a list of elements.</p>
-<p>Each node has:</p>
-<ul>
-<li>Node id</li>
-<li>x,y,z coordinates</li>
-<li>Code (0 for internal water points, 1 for land, &gt;1 for open boundary)</li>
-</ul>
-<p>Each element has:</p>
-<ul>
-<li>Element id</li>
-<li>Element table; specifies for each element the nodes that defines the element. (the number of nodes defines the type: triangular, quadrilateral, prism etc.)</li>
-</ul>
-<div class="callout callout-style-default callout-note callout-titled">
-<div class="callout-header d-flex align-content-center">
-<div class="callout-icon-container">
-<i class="callout-icon"></i>
-</div>
-<div class="callout-title-container flex-fill">
-Note
-</div>
-</div>
-<div class="callout-body-container callout-body">
-<p>In MIKE Zero, node ids, element ids and layer ids are 1-based. In MIKE IO, all ids are <strong>0-based</strong> following standard Python indexing. That means, as an example, that when finding the element closest to a point its id will be 1 lower in MIKE IO compared to examining the file in MIKE Zero.</p>
-</div>
-</div>
+<p><code>PfsSection(self, dictionary, **kwargs)</code></p>
+<section id="methods" class="level2">
+<h2 class="anchored" data-anchor-id="methods">Methods</h2>
+<table class="table">
+<thead>
+<tr class="header">
+<th>Name</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><a href="#mikeio.PfsSection.clear">clear</a></td>
+<td>Remove all items from the PfsSection.</td>
+</tr>
+<tr class="even">
+<td><a href="#mikeio.PfsSection.copy">copy</a></td>
+<td>Return a copy of the PfsSection.</td>
+</tr>
+<tr class="odd">
+<td><a href="#mikeio.PfsSection.find_replace">find_replace</a></td>
+<td>Update recursively all old_value with new_value</td>
+</tr>
+<tr class="even">
+<td><a href="#mikeio.PfsSection.from_dataframe">from_dataframe</a></td>
+<td>Create a PfsSection from a DataFrame</td>
+</tr>
+<tr class="odd">
+<td><a href="#mikeio.PfsSection.get">get</a></td>
+<td>Return the value for key if key is in the PfsSection,</td>
+</tr>
+<tr class="even">
+<td><a href="#mikeio.PfsSection.items">items</a></td>
+<td>Return a new view of the PfsSection’s items ((key, value) pairs)</td>
+</tr>
+<tr class="odd">
+<td><a href="#mikeio.PfsSection.keys">keys</a></td>
+<td>Return a new view of the PfsSection’s keys</td>
+</tr>
+<tr class="even">
+<td><a href="#mikeio.PfsSection.pop">pop</a></td>
+<td>If key is in the dictionary, remove it and return its</td>
+</tr>
+<tr class="odd">
+<td><a href="#mikeio.PfsSection.search">search</a></td>
+<td>Find recursively all keys, sections or parameters</td>
+</tr>
+<tr class="even">
+<td><a href="#mikeio.PfsSection.to_dataframe">to_dataframe</a></td>
+<td>Output enumerated subsections to a DataFrame</td>
+</tr>
+<tr class="odd">
+<td><a href="#mikeio.PfsSection.to_dict">to_dict</a></td>
+<td>Convert to (nested) dict (as a copy)</td>
+</tr>
+<tr class="even">
+<td><a href="#mikeio.PfsSection.update_recursive">update_recursive</a></td>
+<td>Update recursively all matches of key with value</td>
+</tr>
+<tr class="odd">
+<td><a href="#mikeio.PfsSection.values">values</a></td>
+<td>Return a new view of the PfsSection’s values.</td>
+</tr>
+</tbody>
+</table>
+<section id="mikeio.PfsSection.clear" class="level3">
+<h3 class="anchored" data-anchor-id="mikeio.PfsSection.clear">clear</h3>
+<p><code>PfsSection.clear()</code></p>
+<p>Remove all items from the PfsSection.</p>
 </section>
-<section id="mike-io-flexible-mesh-geometry" class="level2">
-<h2 class="anchored" data-anchor-id="mike-io-flexible-mesh-geometry">MIKE IO Flexible Mesh Geometry</h2>
-<p>MIKE IO has a Flexible Mesh Geometry class, <a href="../api/spatial.GeometryFM2D.html#mikeio.spatial.GeometryFM2D"><code>GeometryFM</code></a>, containing the list of node coordinates and the element table which defines the mesh, as well as a number of derived properties (e.g.&nbsp;element coordinates) and methods making it convenient to work with the mesh.</p>
+<section id="mikeio.PfsSection.copy" class="level3">
+<h3 class="anchored" data-anchor-id="mikeio.PfsSection.copy">copy</h3>
+<p><code>PfsSection.copy()</code></p>
+<p>Return a copy of the PfsSection.</p>
+</section>
+<section id="mikeio.PfsSection.find_replace" class="level3">
+<h3 class="anchored" data-anchor-id="mikeio.PfsSection.find_replace">find_replace</h3>
+<p><code>PfsSection.find_replace(old_value, new_value)</code></p>
+<p>Update recursively all old_value with new_value</p>
+</section>
+<section id="mikeio.PfsSection.from_dataframe" class="level3">
+<h3 class="anchored" data-anchor-id="mikeio.PfsSection.from_dataframe">from_dataframe</h3>
+<p><code>PfsSection.from_dataframe(df, prefix)</code></p>
+<p>Create a PfsSection from a DataFrame</p>
+<section id="parameters" class="level4">
+<h4 class="anchored" data-anchor-id="parameters">Parameters</h4>
 <table class="table">
 <colgroup>
-<col style="width: 41%">
-<col style="width: 58%">
+<col style="width: 14%">
+<col style="width: 35%">
+<col style="width: 32%">
+<col style="width: 17%">
 </colgroup>
 <thead>
 <tr class="header">
-<th>Property</th>
+<th>Name</th>
+<th>Type</th>
 <th>Description</th>
+<th>Default</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
-<td><code>n_nodes</code></td>
-<td>Number of nodes</td>
+<td><code>df</code></td>
+<td>pandas.pandas.DataFrame</td>
+<td>data</td>
+<td><em>required</em></td>
 </tr>
 <tr class="even">
-<td><code>node_coordinates</code></td>
-<td>Coordinates (x,y,z) of all nodes</td>
-</tr>
-<tr class="odd">
-<td><code>codes</code></td>
-<td>Codes of all nodes (0:water, 1:land, &gt;=2:open boundary)</td>
-</tr>
-<tr class="even">
-<td><code>boundary_polylines</code></td>
-<td>Lists of closed polylines defining domain outline</td>
-</tr>
-<tr class="odd">
-<td><code>n_elements</code></td>
-<td>Number of elements</td>
-</tr>
-<tr class="even">
-<td><code>element_coordinates</code></td>
-<td>Center coordinates of each element</td>
-</tr>
-<tr class="odd">
-<td><code>element_table</code></td>
-<td>Element to node connectivity</td>
-</tr>
-<tr class="even">
-<td><code>max_nodes_per_element</code></td>
-<td>The maximum number of nodes for an element</td>
-</tr>
-<tr class="odd">
-<td><code>is_tri_only</code></td>
-<td>Does the mesh consist of triangles only?</td>
-</tr>
-<tr class="even">
-<td><code>projection_string</code></td>
-<td>The projection string</td>
-</tr>
-<tr class="odd">
-<td><code>is_geo</code></td>
-<td>Are coordinates geographical (LONG/LAT)?</td>
-</tr>
-<tr class="even">
-<td><code>is_local_coordinates</code></td>
-<td>Are coordinates relative (NON-UTM)?</td>
-</tr>
-<tr class="odd">
-<td><code>type_name</code></td>
-<td>Type name, e.g.&nbsp;Dfsu2D</td>
+<td><code>prefix</code></td>
+<td>str</td>
+<td>section header prefix</td>
+<td><em>required</em></td>
 </tr>
 </tbody>
 </table>
-<table class="table">
-<colgroup>
-<col style="width: 41%">
-<col style="width: 58%">
-</colgroup>
-<thead>
-<tr class="header">
-<th>Method</th>
-<th>Description</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td><code>contains()</code></td>
-<td>test if a list of points are contained by mesh</td>
-</tr>
-<tr class="even">
-<td><code>find_index()</code></td>
-<td>Find index of elements containing points/area</td>
-</tr>
-<tr class="odd">
-<td><code>isel()</code></td>
-<td>Get subset geometry for list of indicies</td>
-</tr>
-<tr class="even">
-<td><code>find_nearest_points()</code></td>
-<td>Find index of nearest elements (optionally for a list)</td>
-</tr>
-<tr class="odd">
-<td><code>plot</code></td>
-<td>Plot the geometry</td>
-</tr>
-<tr class="even">
-<td><code>get_overset_grid()</code></td>
-<td>Get a Grid2D covering the domain</td>
-</tr>
-<tr class="odd">
-<td><code>to_shapely()</code></td>
-<td>Export mesh as shapely MultiPolygon</td>
-</tr>
-<tr class="even">
-<td><code>get_element_area()</code></td>
-<td>Calculate the horizontal area of each element</td>
-</tr>
-</tbody>
-</table>
-<p>These properties and methods are accessible from the geometry, but also from the Mesh/Dfsu object.</p>
-<p>If a .dfsu file is <em>read</em> with <a href="../api/read.html#mikeio.read"><code>mikeio.read</code></a>, the returned Dataset ds will contain a Flexible Mesh Geometry <code>geometry</code>. If a .dfsu or a .mesh file is <em>opened</em> with <a href="../api/open.html#mikeio.open"><code>mikeio.open</code></a>, the returned object will also contain a Flexible Mesh Geometry <code>geometry</code>.</p>
-<div id="17d0d275" class="cell" data-execution_count="1">
-<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> mikeio</span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>ds <span class="op">=</span> mikeio.read(<span class="st">"../data/oresundHD_run1.dfsu"</span>)</span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>ds.geometry</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+<section id="examples" class="level4">
+<h4 class="anchored" data-anchor-id="examples">Examples</h4>
+<div id="d1d567af" class="cell" data-execution_count="1">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> mikeio</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> pd.DataFrame(<span class="bu">dict</span>(station<span class="op">=</span>[<span class="st">"Foo"</span>, <span class="st">"Bar"</span>],include<span class="op">=</span>[<span class="dv">0</span>,<span class="dv">1</span>]), index<span class="op">=</span>[<span class="dv">1</span>,<span class="dv">2</span>])</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>df</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="1">
-<pre><code>Flexible Mesh Geometry: Dfsu2D
-number of nodes: 2046
-number of elements: 3612
-projection: UTM-33</code></pre>
+<div>
+<div>
+
+
+<table class="dataframe table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">station</th>
+<th data-quarto-table-cell-role="th">include</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">1</td>
+<td>Foo</td>
+<td>0</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">2</td>
+<td>Bar</td>
+<td>1</td>
+</tr>
+</tbody>
+</table>
+
 </div>
 </div>
-<div id="dbe8ee89" class="cell" data-execution_count="2">
-<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>dfs <span class="op">=</span> mikeio.<span class="bu">open</span>(<span class="st">"../data/oresundHD_run1.dfsu"</span>)</span>
-<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>dfs.geometry</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</div>
+<div id="c25cf703" class="cell" data-execution_count="2">
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>mikeio.PfsSection.from_dataframe(df,<span class="st">"STATION_"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="2">
-<pre><code>Flexible Mesh Geometry: Dfsu2D
-number of nodes: 2046
-number of elements: 3612
-projection: UTM-33</code></pre>
+<pre><code>[STATION_1]
+   station = 'Foo'
+   include = 0
+EndSect  // STATION_1
+[STATION_2]
+   station = 'Bar'
+   include = 1
+EndSect  // STATION_2</code></pre>
 </div>
 </div>
 </section>
-<section id="common-dfsu-and-mesh-properties" class="level2">
-<h2 class="anchored" data-anchor-id="common-dfsu-and-mesh-properties">Common Dfsu and Mesh properties</h2>
-<p>MIKE IO has Dfsu classes for .dfsu files and a <a href="../api/Mesh.html#mikeio.Mesh">Mesh class</a> for .mesh files which both have a <a href="../api/spatial.GeometryFM2D.html#mikeio.spatial.GeometryFM2D"><code>mikeio.spatial.GeometryFM2D</code></a>/<a href="../api/spatial.GeometryFM3D.html#mikeio.spatial.GeometryFM3D"><code>mikeio.spatial.GeometryFM3D</code></a> accessible through the ´geometry´ accessor.</p>
 </section>
-<section id="dfsu-types" class="level2">
-<h2 class="anchored" data-anchor-id="dfsu-types">Dfsu types</h2>
-<p>The following dfsu file types are supported by MIKE IO.</p>
-<ul>
-<li>2D horizontal.</li>
-<li>3D layered.</li>
-<li>2D vertical profile - a vertical slice through a 3D layered file.</li>
-<li>1D vertical column - a vertical dfs1 file and is produced by taking out one column of a 3D layered file.</li>
-<li>3D/4D SW, two horizontal dimensions and 1-2 spectral dimensions. Output from MIKE 21 SW.</li>
-</ul>
-<p>When a dfsu file is opened with mikeio.open() the returned dfs object will be a specialized class <a href="../api/dfsu.Dfsu2DH.html#mikeio.dfsu.Dfsu2DH">Dfsu2DH</a>, <a href="../api/dfsu.Dfsu3D.html#mikeio.dfsu.Dfsu3D">Dfsu3D</a>, <a href="../api/dfsu.Dfsu2DV.html#mikeio.dfsu.Dfsu2DV">Dfsu2DV</a>, or <a href="../api/dfsu.DfsuSpectral.html#mikeio.dfsu.DfsuSpectral">DfsuSpectral</a> according to the type of dfsu file.</p>
-<p>The layered files (3d, 2d/1d vertical) can have both sigma- and z-layers or only sigma-layers.</p>
-<p>In most cases values are stored in cell centers and vertical (z) information in nodes, but the following values types exists:</p>
-<ul>
-<li>Standard value type, storing values on elements and/or nodes. This is the default type.</li>
-<li>Face value type, storing values on element faces. This is used e.g.&nbsp;for HD decoupling files, to store the discharge between elements.</li>
-<li>Spectral value type, for each node or element, storing vales for a number of frequencies and/or directions. This is the file type for spectral output from the MIKE 21 SW.</li>
-</ul>
+<section id="mikeio.PfsSection.get" class="level3">
+<h3 class="anchored" data-anchor-id="mikeio.PfsSection.get">get</h3>
+<p><code>PfsSection.get(key, *args)</code></p>
+<p>Return the value for key if key is in the PfsSection, else default. If default is not given, it defaults to None, so that this method never raises a KeyError.</p>
+</section>
+<section id="mikeio.PfsSection.items" class="level3">
+<h3 class="anchored" data-anchor-id="mikeio.PfsSection.items">items</h3>
+<p><code>PfsSection.items()</code></p>
+<p>Return a new view of the PfsSection’s items ((key, value) pairs)</p>
+</section>
+<section id="mikeio.PfsSection.keys" class="level3">
+<h3 class="anchored" data-anchor-id="mikeio.PfsSection.keys">keys</h3>
+<p><code>PfsSection.keys()</code></p>
+<p>Return a new view of the PfsSection’s keys</p>
+</section>
+<section id="mikeio.PfsSection.pop" class="level3">
+<h3 class="anchored" data-anchor-id="mikeio.PfsSection.pop">pop</h3>
+<p><code>PfsSection.pop(key, *args)</code></p>
+<p>If key is in the dictionary, remove it and return its value, else return default. If default is not given and key is not in the dictionary, a KeyError is raised.</p>
+</section>
+<section id="mikeio.PfsSection.search" class="level3">
+<h3 class="anchored" data-anchor-id="mikeio.PfsSection.search">search</h3>
+<p><code>PfsSection.search(text=None, *, key=None, section=None, param=None, case=False)</code></p>
+<p>Find recursively all keys, sections or parameters matching a pattern</p>
+<p>NOTE: logical OR between multiple conditions</p>
+<section id="parameters-1" class="level4">
+<h4 class="anchored" data-anchor-id="parameters-1">Parameters</h4>
+<table class="table">
+<colgroup>
+<col style="width: 9%">
+<col style="width: 21%">
+<col style="width: 59%">
+<col style="width: 9%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Name</th>
+<th>Type</th>
+<th>Description</th>
+<th>Default</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>text</code></td>
+<td>str</td>
+<td>Search for text in either key, section or parameter, by default None</td>
+<td><code>None</code></td>
+</tr>
+<tr class="even">
+<td><code>key</code></td>
+<td>str</td>
+<td>text pattern to seach for in keywords, by default None</td>
+<td><code>None</code></td>
+</tr>
+<tr class="odd">
+<td><code>section</code></td>
+<td>str</td>
+<td>text pattern to seach for in sections, by default None</td>
+<td><code>None</code></td>
+</tr>
+<tr class="even">
+<td><code>param</code></td>
+<td>(str, bool, float, int)</td>
+<td>text or value in a parameter, by default None</td>
+<td><code>None</code></td>
+</tr>
+<tr class="odd">
+<td><code>case</code></td>
+<td>bool</td>
+<td>should the text search be case-sensitive?, by default False</td>
+<td><code>False</code></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="returns" class="level4">
+<h4 class="anchored" data-anchor-id="returns">Returns</h4>
+<table class="table">
+<colgroup>
+<col style="width: 47%">
+<col style="width: 52%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>mikeio.pfs._pfssection.PfsSection</td>
+<td>Search result as a nested PfsSection</td>
+</tr>
+</tbody>
+</table>
+</section>
+</section>
+<section id="mikeio.PfsSection.to_dataframe" class="level3">
+<h3 class="anchored" data-anchor-id="mikeio.PfsSection.to_dataframe">to_dataframe</h3>
+<p><code>PfsSection.to_dataframe(prefix=None)</code></p>
+<p>Output enumerated subsections to a DataFrame</p>
+<section id="parameters-2" class="level4">
+<h4 class="anchored" data-anchor-id="parameters-2">Parameters</h4>
+<table class="table">
+<colgroup>
+<col style="width: 5%">
+<col style="width: 4%">
+<col style="width: 84%">
+<col style="width: 5%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Name</th>
+<th>Type</th>
+<th>Description</th>
+<th>Default</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>prefix</code></td>
+<td>str</td>
+<td>The prefix of the enumerated sections, e.g.&nbsp;“File_”, which can be supplied if it fails without this argument, by default None (will try to “guess” the prefix)</td>
+<td><code>None</code></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="returns-1" class="level4">
+<h4 class="anchored" data-anchor-id="returns-1">Returns</h4>
+<table class="table">
+<thead>
+<tr class="header">
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>pandas.pandas.DataFrame</td>
+<td>The enumerated subsections as a DataFrame</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="examples-1" class="level4">
+<h4 class="anchored" data-anchor-id="examples-1">Examples</h4>
+<div id="e88ddbbe" class="cell" data-execution_count="3">
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>pfs <span class="op">=</span> mikeio.read_pfs(<span class="st">"../data/pfs/lake.sw"</span>)</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>pfs.SW.OUTPUTS.to_dataframe(prefix<span class="op">=</span><span class="st">"OUTPUT_"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="3">
+<div>
+<div>
 
 
+<table class="dataframe table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">Touched</th>
+<th data-quarto-table-cell-role="th">include</th>
+<th data-quarto-table-cell-role="th">title</th>
+<th data-quarto-table-cell-role="th">file_name</th>
+<th data-quarto-table-cell-role="th">type</th>
+<th data-quarto-table-cell-role="th">format</th>
+<th data-quarto-table-cell-role="th">flood_and_dry</th>
+<th data-quarto-table-cell-role="th">coordinate_type</th>
+<th data-quarto-table-cell-role="th">zone</th>
+<th data-quarto-table-cell-role="th">input_file_name</th>
+<th data-quarto-table-cell-role="th">...</th>
+<th data-quarto-table-cell-role="th">last_time_step</th>
+<th data-quarto-table-cell-role="th">time_step_frequency</th>
+<th data-quarto-table-cell-role="th">number_of_points</th>
+<th data-quarto-table-cell-role="th">POINT_1</th>
+<th data-quarto-table-cell-role="th">LINE</th>
+<th data-quarto-table-cell-role="th">AREA</th>
+<th data-quarto-table-cell-role="th">INTEGRAL_WAVE_PARAMETERS</th>
+<th data-quarto-table-cell-role="th">INPUT_PARAMETERS</th>
+<th data-quarto-table-cell-role="th">MODEL_PARAMETERS</th>
+<th data-quarto-table-cell-role="th">SPECTRAL_PARAMETERS</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">1</td>
+<td>1</td>
+<td>1</td>
+<td>Wave parameters in domain</td>
+<td>Wave_parameters.dfsu</td>
+<td>1</td>
+<td>2</td>
+<td>2</td>
+<td>UTM-32</td>
+<td>0</td>
+<td>||</td>
+<td>...</td>
+<td>450</td>
+<td>10</td>
+<td>1</td>
+<td>{'name': 'POINT_1', 'x': 20000.0, 'y': 20000.0}</td>
+<td>{'npoints': 3, 'x_first': 0.0, 'y_first': 0.0,...</td>
+<td>{'number_of_points': 4, 'POINT_1': {'x': -400....</td>
+<td>{'Touched': 1, 'type_of_spectrum': 1, 'minimum...</td>
+<td>{'Touched': 1, 'Surface_elevation': 0, 'Water_...</td>
+<td>{'Touched': 1, 'Wind_friction_speed': 0, 'Roug...</td>
+<td>{'Touched': 1, 'separation_of_wind_sea_and_swe...</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">2</td>
+<td>1</td>
+<td>0</td>
+<td>Wave parameters along line</td>
+<td>Wave_line.dfs1</td>
+<td>1</td>
+<td>1</td>
+<td>2</td>
+<td>UTM-32</td>
+<td>0</td>
+<td>||</td>
+<td>...</td>
+<td>450</td>
+<td>10</td>
+<td>1</td>
+<td>{'name': 'POINT_1', 'x': 20000.0, 'y': 20000.0}</td>
+<td>{'npoints': 41, 'x_first': 0.0, 'y_first': 200...</td>
+<td>{'number_of_points': 4, 'POINT_1': {'x': -400....</td>
+<td>{'Touched': 1, 'type_of_spectrum': 1, 'minimum...</td>
+<td>{'Touched': 1, 'Surface_elevation': 0, 'Water_...</td>
+<td>{'Touched': 1, 'Wind_friction_speed': 0, 'Roug...</td>
+<td>{'Touched': 1, 'separation_of_wind_sea_and_swe...</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">3</td>
+<td>1</td>
+<td>1</td>
+<td>Wave parameters in a point</td>
+<td>Waves_x20km_y20km.dfs0</td>
+<td>1</td>
+<td>0</td>
+<td>2</td>
+<td>UTM-32</td>
+<td>0</td>
+<td>||</td>
+<td>...</td>
+<td>450</td>
+<td>1</td>
+<td>1</td>
+<td>{'name': 'POINT_1', 'x': 38000.0, 'y': 20000.0}</td>
+<td>{'npoints': 3, 'x_first': 0.0, 'y_first': 0.0,...</td>
+<td>{'number_of_points': 4, 'POINT_1': {'x': -400....</td>
+<td>{'Touched': 1, 'type_of_spectrum': 1, 'minimum...</td>
+<td>{'Touched': 1, 'Surface_elevation': 0, 'Water_...</td>
+<td>{'Touched': 1, 'Wind_friction_speed': 0, 'Roug...</td>
+<td>{'Touched': 1, 'separation_of_wind_sea_and_swe...</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">4</td>
+<td>1</td>
+<td>1</td>
+<td>Spectrum in a point</td>
+<td>spectrum_x20km_y20km.dfsu</td>
+<td>4</td>
+<td>0</td>
+<td>2</td>
+<td>UTM-32</td>
+<td>0</td>
+<td>||</td>
+<td>...</td>
+<td>450</td>
+<td>10</td>
+<td>1</td>
+<td>{'name': 'POINT_1', 'x': 38000.0, 'y': 20000.0}</td>
+<td>{'npoints': 3, 'x_first': 0.0, 'y_first': 0.0,...</td>
+<td>{'number_of_points': 4, 'POINT_1': {'x': -400....</td>
+<td>{'Touched': 1, 'type_of_spectrum': 1, 'minimum...</td>
+<td>{'Touched': 1, 'Surface_elevation': 0, 'Water_...</td>
+<td>{'Touched': 1, 'Wind_friction_speed': 0, 'Roug...</td>
+<td>{'Touched': 1, 'separation_of_wind_sea_and_swe...</td>
+</tr>
+</tbody>
+</table>
+
+<p>4 rows × 24 columns</p>
+</div>
+</div>
+</div>
+</div>
+</section>
+</section>
+<section id="mikeio.PfsSection.to_dict" class="level3">
+<h3 class="anchored" data-anchor-id="mikeio.PfsSection.to_dict">to_dict</h3>
+<p><code>PfsSection.to_dict()</code></p>
+<p>Convert to (nested) dict (as a copy)</p>
+</section>
+<section id="mikeio.PfsSection.update_recursive" class="level3">
+<h3 class="anchored" data-anchor-id="mikeio.PfsSection.update_recursive">update_recursive</h3>
+<p><code>PfsSection.update_recursive(key, value)</code></p>
+<p>Update recursively all matches of key with value</p>
+</section>
+<section id="mikeio.PfsSection.values" class="level3">
+<h3 class="anchored" data-anchor-id="mikeio.PfsSection.values">values</h3>
+<p><code>PfsSection.values()</code></p>
+<p>Return a new view of the PfsSection’s values.</p>
+
+
+</section>
 </section>
 
 </main> <!-- /main -->
@@ -954,18 +1250,6 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
   }
 });
 </script>
-<nav class="page-navigation">
-  <div class="nav-page nav-page-previous">
-      <a href="../user-guide/dfs2.html" class="pagination-link" aria-label="Dfs2">
-        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text">Dfs2</span>
-      </a>          
-  </div>
-  <div class="nav-page nav-page-next">
-      <a href="../user-guide/mesh.html" class="pagination-link" aria-label="Mesh">
-        <span class="nav-page-text">Mesh</span> <i class="bi bi-arrow-right-short"></i>
-      </a>
-  </div>
-</nav>
 </div> <!-- /content -->
 <footer class="footer">
   <div class="nav-footer">
@@ -974,7 +1258,7 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
     </div>   
     <div class="nav-footer-center">
 <p>© 2024 DHI Group</p>
-<div class="toc-actions d-sm-block d-md-none"><ul><li><a href="https://github.com/DHI/mikeio/edit/main/docs/user-guide/dfsu.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li></ul></div></div>
+<div class="toc-actions d-sm-block d-md-none"><ul><li><a href="https://github.com/DHI/mikeio/edit/main/docs/api/PfsSection.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li></ul></div></div>
     <div class="nav-footer-right">
       &nbsp;
     </div>

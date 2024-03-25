@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>MIKE IO</title>
+<title>MIKE IO - Examples</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -20,40 +20,6 @@ ul.task-list li input[type="checkbox"] {
   margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
 }
-/* CSS for syntax highlighting */
-pre > code.sourceCode { white-space: pre; position: relative; }
-pre > code.sourceCode > span { line-height: 1.25; }
-pre > code.sourceCode > span:empty { height: 1.2em; }
-.sourceCode { overflow: visible; }
-code.sourceCode > span { color: inherit; text-decoration: inherit; }
-div.sourceCode { margin: 1em 0; }
-pre.sourceCode { margin: 0; }
-@media screen {
-div.sourceCode { overflow: auto; }
-}
-@media print {
-pre > code.sourceCode { white-space: pre-wrap; }
-pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
-}
-pre.numberSource code
-  { counter-reset: source-line 0; }
-pre.numberSource code > span
-  { position: relative; left: -4em; counter-increment: source-line; }
-pre.numberSource code > span > a:first-child::before
-  { content: counter(source-line);
-    position: relative; left: -1em; text-align: right; vertical-align: baseline;
-    border: none; display: inline-block;
-    -webkit-touch-callout: none; -webkit-user-select: none;
-    -khtml-user-select: none; -moz-user-select: none;
-    -ms-user-select: none; user-select: none;
-    padding: 0 4px; width: 4em;
-  }
-pre.numberSource { margin-left: 3em;  padding-left: 4px; }
-div.sourceCode
-  {   }
-@media screen {
-pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
-}
 </style>
 
 
@@ -64,8 +30,10 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <script src="../site_libs/quarto-search/fuse.min.js"></script>
 <script src="../site_libs/quarto-search/quarto-search.js"></script>
 <meta name="quarto:offset" content="../">
-<link href="../user-guide/mesh.html" rel="next">
-<link href="../user-guide/dfs2.html" rel="prev">
+<link href="../examples/dfs2/index.html" rel="next">
+<link href="../user-guide/pfs.html" rel="prev">
+<script src="../site_libs/quarto-listing/list.min.js"></script>
+<script src="../site_libs/quarto-listing/quarto-listing.js"></script>
 <script src="../site_libs/quarto-html/quarto.js"></script>
 <script src="../site_libs/quarto-html/popper.min.js"></script>
 <script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
@@ -102,7 +70,65 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     "search-label": "Search"
   }
 }</script>
+<script>
 
+  window.document.addEventListener("DOMContentLoaded", function (_event) {
+    const listingTargetEl = window.document.querySelector('#listing-listing .list');
+    if (!listingTargetEl) {
+      // No listing discovered, do not attach.
+      return; 
+    }
+
+    const options = {
+      valueNames: ['listing-title','listing-description',{ data: ['index'] },{ data: ['categories'] },{ data: ['listing-date-sort'] },{ data: ['listing-title-sort'] }],
+      
+      searchColumns: ["listing-title","listing-author"],
+    };
+
+    window['quarto-listings'] = window['quarto-listings'] || {};
+    window['quarto-listings']['listing-listing'] = new List('listing-listing', options);
+
+    if (window['quarto-listing-loaded']) {
+      window['quarto-listing-loaded']();
+    }
+  });
+
+  window.addEventListener('hashchange',() => {
+    if (window['quarto-listing-loaded']) {
+      window['quarto-listing-loaded']();
+    }
+  })
+  </script>
+
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
 
 </head>
 
@@ -165,7 +191,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
         <i class="bi bi-layout-text-sidebar-reverse"></i>
       </button>
         <a class="flex-grow-1 no-decor" role="button" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
-          <h1 class="quarto-secondary-nav-title">Dfsu and Mesh Overview</h1>
+          <h1 class="quarto-secondary-nav-title">Examples</h1>
         </a>     
       <button type="button" class="btn quarto-search-button" aria-label="" onclick="window.quartoOpenSearch();">
         <i class="bi bi-search"></i>
@@ -237,7 +263,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../user-guide/dfsu.html" class="sidebar-item-text sidebar-link active">
+  <a href="../user-guide/dfsu.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">Dfsu and Mesh Overview</span></a>
   </div>
 </li>
@@ -269,7 +295,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   </li>
         <li class="sidebar-item sidebar-item-section">
       <div class="sidebar-item-container"> 
-            <a href="../examples/index.html" class="sidebar-item-text sidebar-link">
+            <a href="../examples/index.html" class="sidebar-item-text sidebar-link active">
  <span class="menu-text">Examples</span></a>
           <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" aria-expanded="true" aria-label="Toggle section">
             <i class="bi bi-chevron-right ms-2"></i>
@@ -337,23 +363,14 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
 <!-- margin-sidebar -->
     <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
-        <nav id="TOC" role="doc-toc" class="toc-active">
-    <h2 id="toc-title">On this page</h2>
-   
-  <ul>
-  <li><a href="#the-flexible-mesh" id="toc-the-flexible-mesh" class="nav-link active" data-scroll-target="#the-flexible-mesh">The flexible mesh</a></li>
-  <li><a href="#mike-io-flexible-mesh-geometry" id="toc-mike-io-flexible-mesh-geometry" class="nav-link" data-scroll-target="#mike-io-flexible-mesh-geometry">MIKE IO Flexible Mesh Geometry</a></li>
-  <li><a href="#common-dfsu-and-mesh-properties" id="toc-common-dfsu-and-mesh-properties" class="nav-link" data-scroll-target="#common-dfsu-and-mesh-properties">Common Dfsu and Mesh properties</a></li>
-  <li><a href="#dfsu-types" id="toc-dfsu-types" class="nav-link" data-scroll-target="#dfsu-types">Dfsu types</a></li>
-  </ul>
-<div class="toc-actions"><ul><li><a href="https://github.com/DHI/mikeio/edit/main/docs/user-guide/dfsu.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li></ul></div></nav>
-    </div>
+        
+    <h5 class="quarto-listing-category-title">Categories</h5><div class="quarto-listing-category category-default"><div class="category" data-category="">All <span class="quarto-category-count">(6)</span></div></div></div>
 <!-- main -->
 <main class="content" id="quarto-document-content">
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<h1 class="title d-none d-lg-block">Dfsu and Mesh Overview</h1>
+<h1 class="title d-none d-lg-block">Examples</h1>
 </div>
 
 
@@ -370,203 +387,132 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </header>
 
 
-<p>Dfsu and mesh files are both flexible mesh file formats used by MIKE 21/3 engines. The .mesh file is an ASCII file for storing the flexible mesh geometry. The .dfsu file is a binary dfs file with data on this mesh. The mesh geometry is available in a .dfsu file as static items.</p>
-<p>For a detailed description of the .mesh and .dfsu file specification see the <a href="https://manuals.mikepoweredbydhi.help/2024/General/FM_FileSpecification.pdf">flexible file format documentation</a>.</p>
-<section id="the-flexible-mesh" class="level2">
-<h2 class="anchored" data-anchor-id="the-flexible-mesh">The flexible mesh</h2>
-<p>The mesh geometry in a .mesh or a .dfsu file consists of a list of nodes and a list of elements.</p>
-<p>Each node has:</p>
-<ul>
-<li>Node id</li>
-<li>x,y,z coordinates</li>
-<li>Code (0 for internal water points, 1 for land, &gt;1 for open boundary)</li>
-</ul>
-<p>Each element has:</p>
-<ul>
-<li>Element id</li>
-<li>Element table; specifies for each element the nodes that defines the element. (the number of nodes defines the type: triangular, quadrilateral, prism etc.)</li>
-</ul>
-<div class="callout callout-style-default callout-note callout-titled">
-<div class="callout-header d-flex align-content-center">
+<div class="callout callout-style-default callout-tip callout-titled" title="Example data">
+<div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-1-contents" aria-controls="callout-1" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
 <div class="callout-title-container flex-fill">
-Note
+Example data
 </div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
 </div>
+<div id="callout-1" class="callout-1-contents callout-collapse collapse">
 <div class="callout-body-container callout-body">
-<p>In MIKE Zero, node ids, element ids and layer ids are 1-based. In MIKE IO, all ids are <strong>0-based</strong> following standard Python indexing. That means, as an example, that when finding the element closest to a point its id will be 1 lower in MIKE IO compared to examining the file in MIKE Zero.</p>
+<p>If you want to try one of the examples you need to first download some data files.</p>
+<p>The files are stored on GitHub in the <a href="https://github.com/DHI/mikeio">MIKE IO repo</a>.</p>
+<p>The easiest way is to the download the repo as a <a href="https://github.com/DHI/mikeio/archive/main.zip">zip file</a> and extract the files you need.</p>
+<p>In the zip file you find the files in <code>tests/testdata/</code> folder</p>
+<p>Some of the files:</p>
+<pre><code>tests/testdata
+├── FakeLake.dfsu
+├── HD2D.dfsu
+├── NorthSea_HD_and_windspeed.dfsu
+├── consistency
+│&nbsp;&nbsp; ├── oresundHD.dfs2
+│&nbsp;&nbsp; └── oresundHD.dfsu
+├── gebco_2020_n56.3_s55.2_w12.2_e13.1.nc
+├── gfs_wind.nc
+├── odense_rough.mesh
+├── oresund_sigma_z.dfsu
+├── pfs
+│&nbsp;&nbsp; ├── concat.mzt
+│&nbsp;&nbsp; └── t1_t0.mzt
+├── tide1.dfs1
+├── tide2.dfs1</code></pre>
 </div>
 </div>
-</section>
-<section id="mike-io-flexible-mesh-geometry" class="level2">
-<h2 class="anchored" data-anchor-id="mike-io-flexible-mesh-geometry">MIKE IO Flexible Mesh Geometry</h2>
-<p>MIKE IO has a Flexible Mesh Geometry class, <a href="../api/spatial.GeometryFM2D.html#mikeio.spatial.GeometryFM2D"><code>GeometryFM</code></a>, containing the list of node coordinates and the element table which defines the mesh, as well as a number of derived properties (e.g.&nbsp;element coordinates) and methods making it convenient to work with the mesh.</p>
-<table class="table">
-<colgroup>
-<col style="width: 41%">
-<col style="width: 58%">
-</colgroup>
+</div>
+
+
+
+
+<div class="quarto-listing quarto-listing-container-table" id="listing-listing">
+<div class="listing-actions-group">
+   <div class="input-group input-group-sm quarto-listing-sort">
+     <span class="input-group-text"><i class="bi bi-sort-down"></i></span>
+     <select id="listing-listing-sort" class="form-select" aria-label="Order By" onchange="window['quarto-listings']['listing-listing'].sort(this.options[this.selectedIndex].value, { order: this.options[this.selectedIndex].getAttribute('data-direction')})">
+       <option value="" disabled="" selected="" hidden="">Order By</option>
+       <option value="index" data-direction="asc">Default</option>
+         <option value="listing-title-sort" data-direction="asc">
+          Title
+        </option>
+     </select>
+  </div>
+    <div class="input-group input-group-sm quarto-listing-filter">
+      <span class="input-group-text"><i class="bi bi-search"></i></span>
+      <input type="text" class="search form-control" placeholder="Filter">
+    </div>
+</div>
+<table class="quarto-listing-table table">
 <thead>
-<tr class="header">
-<th>Property</th>
-<th>Description</th>
+<tr>
+<th>
+<a class="sort" data-sort="listing-title-sort" onclick="if (this.classList.contains('sort-asc')) { this.classList.add('sort-desc'); this.classList.remove('sort-asc') } else { this.classList.add('sort-asc'); this.classList.remove('sort-desc')} return false;">Title</a>
+</th>
+<th>
+Description
+</th>
 </tr>
 </thead>
-<tbody>
-<tr class="odd">
-<td><code>n_nodes</code></td>
-<td>Number of nodes</td>
+<tbody class="list">
+<tr data-index="0" data-listing-file-modified-sort="1711361138615" data-listing-reading-time-sort="1" data-listing-word-count-sort="121" data-listing-title-sort="Dfs2 - Bathymetric data" data-listing-filename-sort="bathy.qmd">
+<td>
+<a href="../examples/dfs2/bathy.html" class="title listing-title">Dfs2 - Bathymetric data</a>
+</td>
+<td>
+<span class="listing-description">Convert GEBCO 2020 NetCDF to dfs2</span>
+</td>
 </tr>
-<tr class="even">
-<td><code>node_coordinates</code></td>
-<td>Coordinates (x,y,z) of all nodes</td>
+<tr data-index="1" data-listing-file-modified-sort="1711361138615" data-listing-reading-time-sort="1" data-listing-word-count-sort="115" data-listing-title-sort="Dfs2 - Meteo data" data-listing-filename-sort="gfs.qmd">
+<td>
+<a href="../examples/dfs2/gfs.html" class="title listing-title">Dfs2 - Meteo data</a>
+</td>
+<td>
+<span class="listing-description">Conversion of NetCDF from Global Forecasting System to Dfs2</span>
+</td>
 </tr>
-<tr class="odd">
-<td><code>codes</code></td>
-<td>Codes of all nodes (0:water, 1:land, &gt;=2:open boundary)</td>
+<tr data-index="2" data-listing-file-modified-sort="1711361138615" data-listing-reading-time-sort="1" data-listing-word-count-sort="4" data-listing-title-sort="Dfs2 examples" data-listing-filename-sort="index.qmd">
+<td>
+<a href="../examples/dfs2/index.html" class="title listing-title">Dfs2 examples</a>
+</td>
+<td>
+<span class="listing-description">
+<li>Bathymetry</li>
+<li>Meteo data</li>
+</span>
+</td>
 </tr>
-<tr class="even">
-<td><code>boundary_polylines</code></td>
-<td>Lists of closed polylines defining domain outline</td>
+<tr data-index="3" data-listing-file-modified-sort="1711361138615" data-listing-reading-time-sort="2" data-listing-word-count-sort="359" data-listing-title-sort="Dfsu - 2D interpolation" data-listing-filename-sort="Dfsu-2D-interpolation.qmd">
+<td>
+<a href="../examples/Dfsu-2D-interpolation.html" class="title listing-title">Dfsu - 2D interpolation</a>
+</td>
+<td>
+<span class="listing-description">Interpolate dfsu data to a grid, save as dfs2 and geotiff. Interpolate dfsu data to another mesh.</span>
+</td>
 </tr>
-<tr class="odd">
-<td><code>n_elements</code></td>
-<td>Number of elements</td>
+<tr data-index="4" data-listing-file-modified-sort="1711361138615" data-listing-reading-time-sort="3" data-listing-word-count-sort="541" data-listing-title-sort="Generic dfs processing" data-listing-filename-sort="Generic.qmd">
+<td>
+<a href="../examples/Generic.html" class="title listing-title">Generic dfs processing</a>
+</td>
+<td>
+<span class="listing-description">Tools and methods that applies to any type of dfs files.</span>
+</td>
 </tr>
-<tr class="even">
-<td><code>element_coordinates</code></td>
-<td>Center coordinates of each element</td>
-</tr>
-<tr class="odd">
-<td><code>element_table</code></td>
-<td>Element to node connectivity</td>
-</tr>
-<tr class="even">
-<td><code>max_nodes_per_element</code></td>
-<td>The maximum number of nodes for an element</td>
-</tr>
-<tr class="odd">
-<td><code>is_tri_only</code></td>
-<td>Does the mesh consist of triangles only?</td>
-</tr>
-<tr class="even">
-<td><code>projection_string</code></td>
-<td>The projection string</td>
-</tr>
-<tr class="odd">
-<td><code>is_geo</code></td>
-<td>Are coordinates geographical (LONG/LAT)?</td>
-</tr>
-<tr class="even">
-<td><code>is_local_coordinates</code></td>
-<td>Are coordinates relative (NON-UTM)?</td>
-</tr>
-<tr class="odd">
-<td><code>type_name</code></td>
-<td>Type name, e.g.&nbsp;Dfsu2D</td>
+<tr data-index="5" data-listing-file-modified-sort="1711361138615" data-listing-reading-time-sort="1" data-listing-word-count-sort="155" data-listing-title-sort="Time interpolation" data-listing-filename-sort="Time-interpolation.qmd">
+<td>
+<a href="../examples/Time-interpolation.html" class="title listing-title">Time interpolation</a>
+</td>
+<td>
+<span class="listing-description">Interpolate data to a specific time axis</span>
+</td>
 </tr>
 </tbody>
 </table>
-<table class="table">
-<colgroup>
-<col style="width: 41%">
-<col style="width: 58%">
-</colgroup>
-<thead>
-<tr class="header">
-<th>Method</th>
-<th>Description</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td><code>contains()</code></td>
-<td>test if a list of points are contained by mesh</td>
-</tr>
-<tr class="even">
-<td><code>find_index()</code></td>
-<td>Find index of elements containing points/area</td>
-</tr>
-<tr class="odd">
-<td><code>isel()</code></td>
-<td>Get subset geometry for list of indicies</td>
-</tr>
-<tr class="even">
-<td><code>find_nearest_points()</code></td>
-<td>Find index of nearest elements (optionally for a list)</td>
-</tr>
-<tr class="odd">
-<td><code>plot</code></td>
-<td>Plot the geometry</td>
-</tr>
-<tr class="even">
-<td><code>get_overset_grid()</code></td>
-<td>Get a Grid2D covering the domain</td>
-</tr>
-<tr class="odd">
-<td><code>to_shapely()</code></td>
-<td>Export mesh as shapely MultiPolygon</td>
-</tr>
-<tr class="even">
-<td><code>get_element_area()</code></td>
-<td>Calculate the horizontal area of each element</td>
-</tr>
-</tbody>
-</table>
-<p>These properties and methods are accessible from the geometry, but also from the Mesh/Dfsu object.</p>
-<p>If a .dfsu file is <em>read</em> with <a href="../api/read.html#mikeio.read"><code>mikeio.read</code></a>, the returned Dataset ds will contain a Flexible Mesh Geometry <code>geometry</code>. If a .dfsu or a .mesh file is <em>opened</em> with <a href="../api/open.html#mikeio.open"><code>mikeio.open</code></a>, the returned object will also contain a Flexible Mesh Geometry <code>geometry</code>.</p>
-<div id="17d0d275" class="cell" data-execution_count="1">
-<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> mikeio</span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>ds <span class="op">=</span> mikeio.read(<span class="st">"../data/oresundHD_run1.dfsu"</span>)</span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>ds.geometry</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display" data-execution_count="1">
-<pre><code>Flexible Mesh Geometry: Dfsu2D
-number of nodes: 2046
-number of elements: 3612
-projection: UTM-33</code></pre>
+<div class="listing-no-matching d-none">
+No matching items
 </div>
-</div>
-<div id="dbe8ee89" class="cell" data-execution_count="2">
-<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>dfs <span class="op">=</span> mikeio.<span class="bu">open</span>(<span class="st">"../data/oresundHD_run1.dfsu"</span>)</span>
-<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>dfs.geometry</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display" data-execution_count="2">
-<pre><code>Flexible Mesh Geometry: Dfsu2D
-number of nodes: 2046
-number of elements: 3612
-projection: UTM-33</code></pre>
-</div>
-</div>
-</section>
-<section id="common-dfsu-and-mesh-properties" class="level2">
-<h2 class="anchored" data-anchor-id="common-dfsu-and-mesh-properties">Common Dfsu and Mesh properties</h2>
-<p>MIKE IO has Dfsu classes for .dfsu files and a <a href="../api/Mesh.html#mikeio.Mesh">Mesh class</a> for .mesh files which both have a <a href="../api/spatial.GeometryFM2D.html#mikeio.spatial.GeometryFM2D"><code>mikeio.spatial.GeometryFM2D</code></a>/<a href="../api/spatial.GeometryFM3D.html#mikeio.spatial.GeometryFM3D"><code>mikeio.spatial.GeometryFM3D</code></a> accessible through the ´geometry´ accessor.</p>
-</section>
-<section id="dfsu-types" class="level2">
-<h2 class="anchored" data-anchor-id="dfsu-types">Dfsu types</h2>
-<p>The following dfsu file types are supported by MIKE IO.</p>
-<ul>
-<li>2D horizontal.</li>
-<li>3D layered.</li>
-<li>2D vertical profile - a vertical slice through a 3D layered file.</li>
-<li>1D vertical column - a vertical dfs1 file and is produced by taking out one column of a 3D layered file.</li>
-<li>3D/4D SW, two horizontal dimensions and 1-2 spectral dimensions. Output from MIKE 21 SW.</li>
-</ul>
-<p>When a dfsu file is opened with mikeio.open() the returned dfs object will be a specialized class <a href="../api/dfsu.Dfsu2DH.html#mikeio.dfsu.Dfsu2DH">Dfsu2DH</a>, <a href="../api/dfsu.Dfsu3D.html#mikeio.dfsu.Dfsu3D">Dfsu3D</a>, <a href="../api/dfsu.Dfsu2DV.html#mikeio.dfsu.Dfsu2DV">Dfsu2DV</a>, or <a href="../api/dfsu.DfsuSpectral.html#mikeio.dfsu.DfsuSpectral">DfsuSpectral</a> according to the type of dfsu file.</p>
-<p>The layered files (3d, 2d/1d vertical) can have both sigma- and z-layers or only sigma-layers.</p>
-<p>In most cases values are stored in cell centers and vertical (z) information in nodes, but the following values types exists:</p>
-<ul>
-<li>Standard value type, storing values on elements and/or nodes. This is the default type.</li>
-<li>Face value type, storing values on element faces. This is used e.g.&nbsp;for HD decoupling files, to store the discharge between elements.</li>
-<li>Spectral value type, for each node or element, storing vales for a number of frequencies and/or directions. This is the file type for spectral output from the MIKE 21 SW.</li>
-</ul>
-
-
-</section>
-
-</main> <!-- /main -->
+</div></main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
 window.document.addEventListener("DOMContentLoaded", function (event) {
   const toggleBodyColorMode = (bsSheetEl) => {
@@ -956,13 +902,13 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 </script>
 <nav class="page-navigation">
   <div class="nav-page nav-page-previous">
-      <a href="../user-guide/dfs2.html" class="pagination-link" aria-label="Dfs2">
-        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text">Dfs2</span>
+      <a href="../user-guide/pfs.html" class="pagination-link" aria-label="PFS">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text">PFS</span>
       </a>          
   </div>
   <div class="nav-page nav-page-next">
-      <a href="../user-guide/mesh.html" class="pagination-link" aria-label="Mesh">
-        <span class="nav-page-text">Mesh</span> <i class="bi bi-arrow-right-short"></i>
+      <a href="../examples/dfs2/index.html" class="pagination-link" aria-label="Dfs2">
+        <span class="nav-page-text">Dfs2</span> <i class="bi bi-arrow-right-short"></i>
       </a>
   </div>
 </nav>
@@ -974,7 +920,7 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
     </div>   
     <div class="nav-footer-center">
 <p>© 2024 DHI Group</p>
-<div class="toc-actions d-sm-block d-md-none"><ul><li><a href="https://github.com/DHI/mikeio/edit/main/docs/user-guide/dfsu.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li></ul></div></div>
+<div class="toc-actions"><ul><li><a href="https://github.com/DHI/mikeio/edit/main/docs/examples/index.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li></ul></div></div>
     <div class="nav-footer-right">
       &nbsp;
     </div>
