@@ -3,7 +3,6 @@ from collections import namedtuple
 from functools import cached_property
 from pathlib import Path
 from typing import (
-    Collection,
     List,
     Any,
     Literal,
@@ -11,6 +10,7 @@ from typing import (
     Sized,
     Tuple,
     TYPE_CHECKING,
+    overload,
 )
 
 
@@ -1085,7 +1085,7 @@ class GeometryFM2D(_GeometryFM):
             raise ValueError("'area' must be bbox [x0,y0,x1,y1] or polygon")
 
     def _nodes_to_geometry(
-        self, nodes: Collection[int]
+        self, nodes: Sequence[int] | int
     ) -> "GeometryFM2D" | GeometryPoint2D:
         """export a selection of nodes to new flexible file geometry
 
@@ -1161,7 +1161,9 @@ class GeometryFM2D(_GeometryFM):
             reindex=True,
         )
 
-    def _get_nodes_and_table_for_elements(self, elements: Sequence[int]):
+    def _get_nodes_and_table_for_elements(
+        self, elements: Sequence[int] | np.ndarray
+    ) -> tuple[np.ndarray, list[np.ndarray]]:
         """list of nodes and element table for a list of elements
 
         Parameters

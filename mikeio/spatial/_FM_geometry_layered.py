@@ -1,6 +1,6 @@
 from __future__ import annotations
 from functools import cached_property
-from typing import Any, Any, Iterable, Literal, Sequence, List, Tuple, overload
+from typing import Any, Iterable, Literal, Sequence, List, Tuple, overload
 
 import numpy as np
 from mikecore.DfsuFile import DfsuFileType
@@ -183,7 +183,7 @@ class _GeometryFMLayered(_GeometryFM):
 
     def _get_nodes_and_table_for_elements(
         self,
-        elements: Collection[int] | np.ndarray,
+        elements: Sequence[int] | np.ndarray,
         node_layers: Layer = "all",
     ) -> Tuple[Any, Any]:
         """list of nodes and element table for a list of elements
