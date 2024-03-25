@@ -130,11 +130,12 @@ class Dfs2(_Dfs123):
         bathy_data = None
         bathy = dfs.ReadStaticItem(1)
         # TODO validate that this is a bathymetry item
-        if bathy is not None:
-            if bathy.ElementCount == dfs.SpatialAxis.YCount * dfs.SpatialAxis.XCount:
-                bathy_data = bathy.Data.reshape(
-                    dfs.SpatialAxis.YCount, dfs.SpatialAxis.XCount
-                )
+        # TODO should we do the same with Topography?
+        if bathy is not None and bathy.Name == "Bathymetry":
+            assert bathy.ElementCount == dfs.SpatialAxis.YCount * dfs.SpatialAxis.XCount
+            bathy_data = bathy.Data.reshape(
+                dfs.SpatialAxis.YCount, dfs.SpatialAxis.XCount
+            )
         else:
             bathy_data = None
 
