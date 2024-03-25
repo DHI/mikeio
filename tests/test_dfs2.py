@@ -872,3 +872,8 @@ def test_read_static_bathymetry():
     assert dfs.geometry.dy == pytest.approx(4994.15966796)
 
     assert dfs.geometry.bathymetry.shape == (20, 13)
+    assert dfs.geometry.bathymetry.sel(x=345000, y=6150000).values == pytest.approx(
+        -13.49011
+    )
+    assert dfs.geometry.bathymetry.isel(x=4, y=4).values
+    dfs.geometry.bathymetry.type == EUMType.Bathymetry
