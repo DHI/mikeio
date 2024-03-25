@@ -864,3 +864,11 @@ def test_to_xarray():
     xr_da = da.to_xarray()
     assert xr_da.x[0] == pytest.approx(0.25)
     assert xr_da.y[0] == pytest.approx(0.25)
+
+
+def test_read_static_bathymetry():
+    dfs = mikeio.open("tests/testdata/flow.dfs2")
+    assert dfs.geometry.dx == pytest.approx(4994.15966796)
+    assert dfs.geometry.dy == pytest.approx(4994.15966796)
+
+    assert dfs.geometry.bathymetry.shape == (20, 13)

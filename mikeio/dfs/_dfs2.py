@@ -15,7 +15,7 @@ from mikecore.eum import eumQuantity, eumUnit
 from mikecore.Projections import Cartography
 
 from .. import __dfs_version__
-from ..dataset import Dataset
+from ..dataset import Dataset, DataArray
 from ._dfs import (
     _Dfs123,
     _get_item_info,
@@ -23,7 +23,7 @@ from ._dfs import (
     _valid_timesteps,
     write_dfs_data,
 )
-from ..eum import TimeStepUnit
+from ..eum import TimeStepUnit, EUMType
 from ..spatial import Grid2D
 
 
@@ -126,6 +126,13 @@ class Dfs2(_Dfs123):
         y0 = dfs.SpatialAxis.Y0 if is_spectral else 0.0
 
         origin, orientation = self._origin_and_orientation_in_CRS()
+        try:
+            bathy = dfs.ReadStaticItem(1)
+            bathy_data = bathy.Data.reshape(
+                dfs.SpatialAxis.YCount, dfs.SpatialAxis.XCount
+            )
+        except:
+            bathy_data = None
 
         self._geometry = Grid2D(
             dx=dfs.SpatialAxis.Dx,
@@ -139,6 +146,7 @@ class Dfs2(_Dfs123):
             origin=origin,
             is_spectral=is_spectral,
             is_vertical=is_vertical,
+            bathymetry=bathy_data,
         )
         dfs.Close()
         self._validate_no_orientation_in_geo()
