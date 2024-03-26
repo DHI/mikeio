@@ -1,5 +1,8 @@
-import os
+from __future__ import annotations
+from pathlib import Path
 from platform import architecture
+from collections.abc import Sequence
+from typing import Any
 
 # PEP0440 compatible formatted version, see:
 # https://www.python.org/dev/peps/pep-0440/
@@ -18,9 +21,9 @@ from platform import architecture
 # 'X.Y.dev0' is the canonical version of 'X.Y.dev'
 #
 
-__version__ = "1.7.dev0"  # TODO use git hash instead for dev version?
+__version__ = "2.0.dev0"  # TODO use git hash instead for dev version?
 # __version__ = "1.5.0"
-__dfs_version__: int = 160
+__dfs_version__: int = 200
 
 
 if "64" not in architecture()[0]:
@@ -30,7 +33,7 @@ from .dataset import DataArray, Dataset
 from .dfs import Dfs0, Dfs1, Dfs2, Dfs3
 from .dfsu import Dfsu, Mesh
 from .eum import EUMType, EUMUnit, ItemInfo
-from .pfs import Pfs, PfsDocument, PfsSection, read_pfs
+from .pfs import PfsDocument, PfsSection, read_pfs
 
 # Grid geometries are imported into the main module, since they are used to create dfs files
 # Other geometries are available in the spatial module
@@ -43,8 +46,14 @@ from .spatial import (
 from .xyz import read_xyz
 
 
-
-def read(filename, *, items=None, time=None, keepdims=False, **kwargs) -> Dataset:
+def read(
+    filename: str | Path,
+    *,
+    items: str | int | Sequence[str | int] | None = None,
+    time: int | str | slice | None = None,
+    keepdims: bool = False,
+    **kwargs,
+) -> Dataset:
     """Read all or a subset of the data from a dfs file
 
     All dfs files can be subsetted with the *items* and *time* arguments. But
@@ -117,7 +126,7 @@ def read(filename, *, items=None, time=None, keepdims=False, **kwargs) -> Datase
     >>> ds = mikeio.read("HD2D.dfsu", error_bad_data=False, fill_bad_data_value=0.0) # replace corrupt data with 0.0
     """
 
-    ext = os.path.splitext(filename)[1].lower()
+    ext = Path(filename).suffix.lower()
 
     if "dfs" not in ext:
         raise ValueError("mikeio.read() is only supported for Dfs files")
@@ -127,7 +136,7 @@ def read(filename, *, items=None, time=None, keepdims=False, **kwargs) -> Datase
     return dfs.read(items=items, time=time, keepdims=keepdims, **kwargs)
 
 
-def open(filename: str, **kwargs):
+def open(filename: str | Path, **kwargs: Any) -> Any:
     """Open a dfs/mesh file (and read the header)
 
     The typical workflow for small dfs files is to read all data
@@ -156,7 +165,7 @@ def open(filename: str, **kwargs):
 
     >>> dfs = mikeio.open("pt_spectra.dfs2", type="spectral")
     """
-    file_format = os.path.splitext(filename)[1].lower()[1:]
+    ext = Path(filename).suffix.lower()[1:]
 
     READERS = {
         "dfs0": Dfs0,
@@ -167,15 +176,16 @@ def open(filename: str, **kwargs):
         "mesh": Mesh,
     }
 
-    if file_format not in READERS:
+    if ext not in READERS:
         valid_formats = ", ".join(READERS.keys())
         raise Exception(
-            f"{file_format} is not a supported format for mikeio.open. Valid formats are {valid_formats}"
+            f"{ext} is not a supported format for mikeio.open. Valid formats are {valid_formats}"
         )
 
-    reader_klass = READERS[file_format]
+    reader_klass = READERS[ext]
 
     return reader_klass(filename, **kwargs)
+
 
 __all__ = [
     "DataArray",

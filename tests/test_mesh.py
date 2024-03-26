@@ -1,19 +1,25 @@
-import os
+from pathlib import Path
 import numpy as np
 import pytest
+import mikeio
 from mikeio import Mesh
 
 
 @pytest.fixture
-def tri_mesh():
-    filename = os.path.join("tests", "testdata", "odense_rough.mesh")
-    return Mesh(filename)
+def tri_mesh() -> Mesh:
+    return Mesh("tests/testdata/odense_rough.mesh")
 
 
 @pytest.fixture
-def mixed_mesh():
-    filename = os.path.join("tests", "testdata", "quad_tri.mesh")
-    return Mesh(filename)
+def mixed_mesh() -> Mesh:
+    return Mesh("tests/testdata/quad_tri.mesh")
+
+
+def test_read_mesh_from_path():
+    testdata = Path("tests/testdata")
+    fp = testdata / "odense_rough.mesh"
+    msh = Mesh(fp)
+    assert msh.n_nodes == 399
 
 
 def test_get_number_of_elements(tri_mesh):
@@ -42,14 +48,14 @@ def test_read_mixed_mesh(mixed_mesh):
     assert np.all(el_tbl_vec < msh.n_nodes)
 
 
-def test_read_write_mixed_mesh(mixed_mesh, tmpdir):
+def test_read_write_mixed_mesh(mixed_mesh, tmp_path):
     msh = mixed_mesh
-    outfilename = os.path.join(tmpdir.dirname, "quad_tri_v2.mesh")
+    outfilename = tmp_path / "quad_tri_v2.mesh"
     msh.write(outfilename)
 
     msh2 = Mesh(outfilename)
 
-    assert os.path.exists(outfilename)
+    assert outfilename.exists()
 
     assert np.all(np.hstack(msh2.element_table) == np.hstack(msh.element_table))
     assert np.all(msh2.element_coordinates == msh.element_coordinates)
@@ -64,7 +70,6 @@ def test_node_coordinates(tri_mesh):
 
 
 def test_get_land_node_coordinates(tri_mesh):
-
     msh = tri_mesh
 
     nc = msh.node_coordinates[msh.geometry.codes == 1]
@@ -80,7 +85,6 @@ def test_get_bad_node_coordinates(tri_mesh):
 
 
 def test_set_z(tri_mesh):
-    os.path.join("tests", "testdata", "odense_rough.mesh")
     msh = tri_mesh
     zn = msh.node_coordinates[:, 2]
     zn[zn < -3] = -3
@@ -109,35 +113,45 @@ def test_set_codes(tri_mesh):
         msh.geometry.codes = codes[0:4]
 
 
-def test_write(tri_mesh, tmpdir):
-    outfilename = os.path.join(tmpdir.dirname, "simple.mesh")
+def test_write(tri_mesh, tmp_path):
+    outfilename = tmp_path / "simple.mesh"
     msh = tri_mesh
 
     msh.write(outfilename)
 
-    assert os.path.exists(outfilename)
+    assert outfilename.exists()
 
 
-def test_write_part(tri_mesh, tmpdir):
-    outfilename = os.path.join(tmpdir.dirname, "simple_sub.mesh")
+def test_write_part_isel(tri_mesh, tmp_path):
+    outfilename = tmp_path / "simple_sub.mesh"
 
     msh = tri_mesh
 
-    msh.write(outfilename, elements=list(range(0, 100)))
+    gsub = msh.geometry.isel(range(50, 100))
+    gsub.to_mesh(outfilename)
 
-    assert os.path.exists(outfilename)
+    assert outfilename.exists()
 
 
-def test_write_mesh_from_dfsu(tmpdir):
-    outfilename = os.path.join(tmpdir.dirname, "quad_tri.mesh")
-    dfsufilename = os.path.join("tests", "testdata", "FakeLake.dfsu")
+def test_write_mesh_from_dfsu(tmp_path):
+    outfilename = tmp_path / "quad_tri.mesh"
+    dfsufilename = "tests/testdata/FakeLake.dfsu"
 
-    msh = Mesh(dfsufilename)
+    dfs = mikeio.open(dfsufilename)
 
-    msh.write(outfilename)
+    geometry = dfs.geometry
+
+    geometry.to_mesh(outfilename)
 
     msh2 = Mesh(outfilename)
 
-    assert os.path.exists(outfilename)
+    assert outfilename.exists()
 
-    assert np.all(np.hstack(msh2.element_table) == np.hstack(msh.element_table))
+    assert np.all(np.hstack(msh2.element_table) == np.hstack(geometry.element_table))
+
+
+def test_to_shapely(tri_mesh) -> None:
+    msh = tri_mesh
+    shp = msh.to_shapely()
+    assert shp.geom_type == "MultiPolygon"
+    assert shp.area == pytest.approx(68931409.58160606)

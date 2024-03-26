@@ -1,0 +1,212 @@
+---
+title: Dfsu - 2D interpolation
+jupyter: python3
+description: Interpolate dfsu data to a grid, save as dfs2 and geotiff. Interpolate dfsu data to another mesh.
+---
+
+
+```{python}
+import mikeio
+```
+
+```{python}
+ds = mikeio.read("../data/wind_north_sea.dfsu", items="Wind speed")
+ds
+```
+
+```{python}
+da = ds.Wind_speed
+da.plot();
+```
+
+## Interpolate to grid
+1. Get an overset grid covering the domain
+2. Then interpolate all data to the new grid and plot. 
+4. The interpolated data is then saved to a dfs2 file.
+
+```{python}
+g = da.geometry.get_overset_grid(dx=0.1)
+g
+```
+
+```{python}
+da_grid = da.interp_like(g)
+da_grid
+```
+
+```{python}
+da_grid.plot();
+```
+
+## Save to dfs2 file
+
+```{python}
+da_grid.to_dfs("wind_north_sea_interpolated.dfs2")
+```
+
+![](../images/dfsu_grid_interp.png)
+
+## Save to NetCDF
+
+```{python}
+xr_da = da_grid.to_xarray()
+xr_da.to_netcdf("wind_north_sea_interpolated.nc")
+```
+
+![](../images/dfsu_grid_netcdf.png)
+
+## Save to GeoTiff
+
+::: callout-note
+
+This section requires the [`rasterio`](https://rasterio.readthedocs.io/en/latest/installation.html) package.
+
+:::
+
+```{python}
+import numpy as np
+import rasterio
+from rasterio.transform import from_origin
+# Dcoumentation https://rasterio.readthedocs.io/en/latest/index.html
+
+with rasterio.open(
+     fp='wind.tif',
+     mode='w',
+     driver='GTiff',
+     height=g.ny,
+     width=g.nx,
+     count=1,
+     dtype=da.dtype,
+     crs='+proj=latlong', # adjust accordingly for projected coordinate systems
+     transform=from_origin(g.bbox.left, g.bbox.top, g.dx, g.dy)
+     ) as dst:
+        dst.write(np.flipud(da_grid[0].to_numpy()), 1) # first time_step
+    
+```
+
+![](../images/dfsu_grid_interp_tiff.png)
+
+# Interpolate to other mesh
+Interpolate the data from this coarse mesh onto a finer resolution mesh
+
+```{python}
+msh = mikeio.Mesh('../data/north_sea_2.mesh')
+msh
+```
+
+```{python}
+dsi = da.interp_like(msh)
+dsi
+```
+
+```{python}
+da[0].plot(figsize=(9,7), show_mesh=True);
+```
+
+```{python}
+dsi[0].plot(figsize=(9,7), show_mesh=True);
+```
+
+### Note: 3 of the new elements are outside the original mesh and data are therefore NaN by default
+
+```{python}
+nan_elements = np.where(np.isnan(dsi[0].to_numpy()))[0]
+nan_elements
+```
+
+```{python}
+da.geometry.contains(msh.element_coordinates[nan_elements,:2])
+```
+
+### We can force extrapolation to avoid the NaN values
+
+```{python}
+dat_interp = da.interp_like(msh, extrapolate=True)
+```
+
+```{python}
+n_nan_elements = np.sum(np.isnan(dat_interp.values))
+n_nan_elements
+```
+
+## Interpolate scatter data to mesh
+
+We want to interpolate scatter data onto an existing mesh and create a new dfsu with the interpolated data. 
+
+**This uses lower level private utility methods not part of the public API**.
+
+Interpolating from scatter data will soon be possible in a simpler way.
+
+```{python}
+from mikeio.spatial._utils import dist_in_meters
+from mikeio._interpolation import get_idw_interpolant
+```
+
+```{python}
+dfs = mikeio.open("../data/wind_north_sea.dfsu")
+```
+
+```{python}
+dfs.geometry.plot.mesh();
+```
+
+```{python}
+# scatter data: x,y,value for 4 points
+scatter= np.array([[1,50,1], [4, 52, 3], [8, 55, 2], [-1, 55, 1.5]])
+scatter
+```
+
+Let's first try the approx for a single element: 
+
+* calc distance to all interpolation points
+* calc IDW interpolatant weights
+* Interpolate
+
+```{python}
+dist = dist_in_meters(scatter[:,:2], dfs.geometry.element_coordinates[0,:2])
+dist
+```
+
+```{python}
+w = get_idw_interpolant(dist, p=2)
+w
+```
+
+```{python}
+np.dot(scatter[:,2], w) # interpolated value in element 0
+```
+
+Let's do the same for all points in the mesh and plot in the end
+
+```{python}
+dati = np.zeros((1, dfs.geometry.n_elements))
+for j in range(dfs.geometry.n_elements):
+    dist = dist_in_meters(scatter[:, :2], dfs.geometry.element_coordinates[j, :2])
+    w = get_idw_interpolant(dist, p=2)
+    dati[0, j] = np.dot(scatter[:, 2], w)
+```
+
+```{python}
+da = mikeio.DataArray(data=dati, geometry=dfs.geometry, time=dfs.start_time)
+da
+```
+
+```{python}
+da.plot(title="Interpolated scatter data");
+```
+
+```{python}
+da.to_dfs("interpolated_scatter.dfsu")
+```
+
+## Clean up
+
+```{python}
+import os
+
+os.remove("wind_north_sea_interpolated.dfs2")
+os.remove("wind_north_sea_interpolated.nc")
+os.remove("wind.tif")
+os.remove("interpolated_scatter.dfsu")
+```
+

@@ -144,25 +144,6 @@ def test_x_y_is_increasing():
     assert "increasing" in str(excinfo.value)
 
 
-def test_xx_yy():
-    nx = 4
-    ny = 3
-    x = np.linspace(1, 7, nx)
-    y = np.linspace(3, 5, ny)
-    g = Grid2D(x=x, y=y)
-    # assert g.n == nx * ny
-    assert g._xx[0, 0] == 1.0
-    assert g._yy[-1, -1] == 5.0
-    assert np.all(g.xy[1] == [3.0, 3.0])
-    assert np.all(g.coordinates[1] == [3.0, 3.0])
-
-    g2 = Grid2D(x=x, y=y)
-
-    # Reverse order compared to above makes no difference
-    assert g2._yy[-1, -1] == 5.0
-    assert g2._xx[0, 0] == 1.0
-
-
 def test_create_in_bbox():
     bbox = [0, 0, 1, 5]
     g = Grid2D(bbox=bbox, nx=2, ny=5)
@@ -325,7 +306,7 @@ def test_to_geometryFM():
     assert isinstance(g, GeometryFM2D)
     assert g.n_elements == nx * ny
     assert g.n_nodes == (nx + 1) * (ny + 1)
-    assert g.projection_string == "NON-UTM"
+    assert g.projection_string == "LONG/LAT"
 
     xe = g.element_coordinates[:, 0]
     ye = g.element_coordinates[:, 1]
@@ -417,7 +398,7 @@ def test_grid2d_equality():
 
     assert g1 == g2
 
-    g3 = Grid2D(dx=0.1, nx=2, dy=0.2, ny=4, projection="LONG/LAT")
+    g3 = Grid2D(dx=0.1, nx=2, dy=0.2, ny=4, projection="NON-UTM")
     g4 = Grid2D(dx=0.1, nx=2, dy=0.2, ny=4)
 
     assert g3 != g4

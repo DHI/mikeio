@@ -1,6 +1,5 @@
 from io import StringIO
 import sys
-import os
 import pytest
 import mikeio
 import pandas as pd
@@ -250,10 +249,10 @@ def test_pfssection_find_replace(d1):
     assert sct.FILE_6.lst == [0.11, 0.22, 0.33]
 
 
-def test_pfssection_write(d1, tmpdir):
+def test_pfssection_write(d1, tmp_path):
     sct = mikeio.PfsSection(d1)
     pfs = mikeio.PfsDocument({"root": sct})
-    fn = os.path.join(tmpdir.dirname, "pfssection.pfs")
+    fn = tmp_path / "pfssection.pfs"
     pfs.write(fn)
 
     pfs2 = mikeio.PfsDocument(fn)
@@ -274,7 +273,6 @@ def test_str_is_scientific_float(d1):
 
 
 def test_basic():
-
     pfs = mikeio.PfsDocument("tests/testdata/pfs/simple.pfs")
 
     data = pfs.targets[0]
@@ -282,6 +280,16 @@ def test_basic():
 
     assert data.z_min == -3000
     assert data.POINT_1.y == 50
+
+
+def test_pfsdocument_copy():
+
+    pfs = mikeio.PfsDocument("tests/testdata/pfs/simple.pfs")
+    pfs2 = pfs.copy()
+    data = pfs.targets[0]
+    data.z_min = -4000
+
+    assert pfs2.BoundaryExtractor.z_min == -3000
 
 
 def test_ecolab():
@@ -328,31 +336,30 @@ def assert_txt_files_match(f1, f2, comment="//") -> None:
         assert s1 == s2
 
 
-def test_read_write(tmpdir):
+def test_read_write(tmp_path):
     infilename = "tests/testdata/pfs/concat.mzt"
     pfs1 = mikeio.PfsDocument(infilename)
-    outfilename = os.path.join(tmpdir.dirname, "concat_out.mzt")
+    outfilename = tmp_path / "concat_out.mzt"
     pfs1.write(outfilename)
     assert_txt_files_match(infilename, outfilename)
     _ = mikeio.PfsDocument(outfilename)  # try to parse it also
 
 
-def test_read_write_she(tmpdir):
+def test_read_write_she(tmp_path):
     infilename = "tests/testdata/pfs/Karup_basic.she"
     pfs1 = mikeio.PfsDocument(infilename, unique_keywords=False)
-    outfilename = os.path.join(tmpdir.dirname, "Karup_basic_out.she")
+    outfilename = tmp_path / "Karup_basic_out.she"
     pfs1.write(outfilename)
-    # assert_txt_files_match(infilename, outfilename)
     pfs2 = mikeio.PfsDocument(outfilename)
     assert pfs1.MIKESHE_FLOWMODEL == pfs2.MIKESHE_FLOWMODEL
 
 
-def test_read_write_she2(tmpdir):
+def test_read_write_she2(tmp_path):
     infilename = "tests/testdata/pfs/Karup_mini.she"
     with pytest.warns(match="contains a single quote character"):
         pfs1 = mikeio.PfsDocument(infilename)
 
-    outfilename = os.path.join(tmpdir.dirname, "Karup_mini_out.she")
+    outfilename = tmp_path / "Karup_mini_out.she"
     pfs1.write(outfilename)
 
     with pytest.warns(match="contains a single quote character"):
@@ -360,21 +367,21 @@ def test_read_write_she2(tmpdir):
     assert pfs1.MIKESHE_FLOWMODEL == pfs2.MIKESHE_FLOWMODEL
 
 
-def test_read_write_filenames(tmpdir):
+def test_read_write_filenames(tmp_path):
     infilename = "tests/testdata/pfs/filenames.pfs"
     pfs1 = mikeio.PfsDocument(infilename)
-    outfilename = os.path.join(tmpdir.dirname, "filenames_out.pfs")
+    outfilename = tmp_path / "filenames_out.pfs"
     pfs1.write(outfilename)
     assert_txt_files_match(infilename, outfilename)
     _ = mikeio.PfsDocument(outfilename)  # try to parse it also
 
 
-def test_read_write_filenames_modified(tmpdir):
+def test_read_write_filenames_modified(tmp_path):
     infilename = "tests/testdata/pfs/filenames.pfs"
     pfs1 = mikeio.PfsDocument(infilename)
     pfs1.FILE_NAMES.file5 = r"..\..\newfile5.dfs0"
     pfs1.FILE_NAMES.file6 = "|../newfile6.dfs0|"
-    outfilename = os.path.join(tmpdir.dirname, "filenames_out.pfs")
+    outfilename = tmp_path / "filenames_out.pfs"
     pfs1.write(outfilename)
 
     pfs2 = mikeio.PfsDocument(outfilename)
@@ -384,7 +391,6 @@ def test_read_write_filenames_modified(tmpdir):
 
 
 def test_sw():
-
     pfs = mikeio.PfsDocument("tests/testdata/pfs/lake.sw")
     assert pfs.targets[0] == pfs.FemEngineSW
     root = pfs.targets[0]
@@ -398,8 +404,10 @@ def test_sw():
 
     assert root.TIME.number_of_time_steps == 450
 
-    assert root.TIME.start_time.year == 2002
-    assert root.TIME.start_time.month == 1
+    # we're no longer parsing datetimes in Pfs module
+    start_time = datetime(*root.TIME.start_time)
+    assert start_time.year == 2002
+    assert start_time.month == 1
 
 
 def test_pfssection_to_dataframe():
@@ -410,7 +418,6 @@ def test_pfssection_to_dataframe():
 
 
 def test_hd_outputs():
-
     with pytest.warns(match="defined multiple times"):
         pfs = mikeio.PfsDocument("tests/testdata/pfs/lake.m21fm", unique_keywords=True)
     df = pfs.HD.OUTPUTS.to_dataframe()
@@ -420,7 +427,6 @@ def test_hd_outputs():
 
 
 def test_included_outputs():
-
     pfs = mikeio.PfsDocument("tests/testdata/pfs/lake.sw")
     df = pfs.SW.OUTPUTS.to_dataframe(prefix="OUTPUT_")
     df = df[df.include == 1]
@@ -430,7 +436,6 @@ def test_included_outputs():
 
 
 def test_output_by_id():
-
     pfs = mikeio.PfsDocument("tests/testdata/pfs/lake.sw")
     df = pfs.SW.OUTPUTS.to_dataframe()
     # .loc refers to output_id irrespective of included or not
@@ -517,11 +522,11 @@ def test_non_unique_keywords_allowed():
     assert pfs.BoundaryExtractor.z_min == [-3000, 9, 19]
 
 
-def test_non_unique_keywords_read_write(tmpdir):
+def test_non_unique_keywords_read_write(tmp_path):
     fn1 = "tests/testdata/pfs/nonunique.pfs"
     pfs1 = mikeio.PfsDocument(fn1, unique_keywords=False)
 
-    fn2 = os.path.join(tmpdir.dirname, "nonunique_out.pfs")
+    fn2 = tmp_path / "nonunique_out.pfs"
     pfs1.write(fn2)
 
     pfs2 = mikeio.PfsDocument(fn2, unique_keywords=False)
@@ -549,7 +554,6 @@ def test_mdf():
 
 
 def test_read_in_memory_string():
-
     text = """
 [ENGINE]
   option = foo,bar
@@ -561,7 +565,6 @@ EndSect // ENGINE
 
 
 def test_read_mixed_array():
-
     text = """
 [ENGINE]
   advanced= false
@@ -578,7 +581,6 @@ EndSect // ENGINE
 
 
 def test_read_mixed_array2():
-
     text = """
 [ENGINE]
   fill_list = 'dsd', 0, 0.0, false
@@ -594,7 +596,6 @@ EndSect // ENGINE
 
 
 def test_read_mixed_array3():
-
     text = """
 [ENGINE]
   fill_list = 'dsd', 0, 0.0, "str2", false, 'str3'
@@ -612,7 +613,6 @@ EndSect // ENGINE
 
 
 def test_read_array():
-
     text = """
 [ENGINE]
   fill_list = 1, 2
@@ -626,8 +626,7 @@ EndSect // ENGINE
     assert pfs.ENGINE.fill_list[1] == 2
 
 
-def test_empty(tmpdir):
-
+def test_empty(tmp_path):
     text = """
 [ENGINE]
   A = 
@@ -642,7 +641,7 @@ EndSect // ENGINE
     assert isinstance(pfs.ENGINE.B, mikeio.PfsSection)
     assert len(pfs.ENGINE.B) == 0
 
-    outfile = os.path.join(tmpdir, "empty.pfs")
+    outfile = tmp_path / "empty.pfs"
     pfs.write(outfile)
 
     with open(outfile) as f:
@@ -653,8 +652,7 @@ EndSect // ENGINE
     assert outlines[7].strip() == "EndSect  // B"
 
 
-def test_difficult_chars_in_str(tmpdir):
-
+def test_difficult_chars_in_str(tmp_path):
     text = """
 [ENGINE]
   A = 'str,s/d\sd.dfs0'
@@ -678,7 +676,7 @@ EndSect // ENGINE
     assert isinstance(pfs.ENGINE.D, str)
     assert pfs.ENGINE.E == "|str,s\U0001F600+-s_d.dfs0|"
 
-    outfile = os.path.join(tmpdir, "difficult_chars_in_str.pfs")
+    outfile = tmp_path / "difficult_chars_in_str.pfs"
     pfs.write(outfile)
 
     with open(outfile) as f:
@@ -691,8 +689,7 @@ EndSect // ENGINE
     assert outlines[9].strip() == "E = |str,s'+-s_d.dfs0|"
 
 
-def test_difficult_chars_in_str2(tmpdir):
-
+def test_difficult_chars_in_str2(tmp_path):
     text = """
 [ENGINE]
    A = 'str,s/d\sd.dfs0'
@@ -704,7 +701,7 @@ EndSect // ENGINE"""
     with pytest.warns(match="contains a single quote character"):
         pfs = mikeio.PfsDocument(StringIO(text))
 
-    outfile = os.path.join(tmpdir, "difficult_chars_in_str2.pfs")
+    outfile = tmp_path / "difficult_chars_in_str2.pfs"
     pfs.write(outfile)
 
     with open(outfile) as f:
@@ -729,7 +726,6 @@ EndSect  // Results
 
 
 def test_read_string_array():
-
     text = """
 [ENGINE]
   fill_list = 'foo', 'bar', 'baz'
@@ -744,7 +740,7 @@ EndSect // ENGINE
     assert pfs.ENGINE.fill_list[2] == "baz"
 
 
-def test_read_write_list_list(tmpdir):
+def test_read_write_list_list(tmp_path):
     text = """
 [ENGINE]
   RGB_Color_Value = 128, 0, 128
@@ -755,7 +751,7 @@ EndSect // ENGINE
     assert len(pfs.ENGINE.RGB_Color_Value) == 2
     assert len(pfs.ENGINE.RGB_Color_Value[0]) == 3
 
-    outfile = os.path.join(tmpdir, "mini.pal")
+    outfile = tmp_path / "mini.pal"
 
     pfs.write(outfile)
 
@@ -780,7 +776,7 @@ EndSect // ENGINE
     assert "ENGINE" in text
 
 
-def test_double_single_quotes_in_string(tmpdir):
+def test_double_single_quotes_in_string(tmp_path):
     text = """
 [DERIVED_VARIABLE_106]
             name = 'alfa_PC_T'
@@ -800,7 +796,7 @@ EndSect  // DERIVED_VARIABLE_106
         == 'alfa_PC_T, "light" adjusted alfa_PC, ugC/gC*m2/uE'
     )
 
-    filename = os.path.join(tmpdir, "quotes.pfs")
+    filename = tmp_path / "quotes.pfs"
 
     pfs.write(filename)
 
@@ -813,7 +809,7 @@ EndSect  // DERIVED_VARIABLE_106
                 )
 
 
-def test_str_in_str_projection(tmpdir):
+def test_str_in_str_projection(tmp_path):
     text = """
    [ROOT]
       Proj = 'PROJCS["ETRS_1989",GEOGCS["GCS_1989",DATUM["D_ETRS_1"]]]'
@@ -824,7 +820,7 @@ def test_str_in_str_projection(tmpdir):
     assert isinstance(pfs.ROOT.Proj, str)
     assert pfs.ROOT.Proj[8] == "E"
 
-    filename = os.path.join(tmpdir, "str_in_str.pfs")
+    filename = tmp_path / "str_in_str.pfs"
     pfs.write(filename)
 
     with open(filename) as f:
@@ -836,7 +832,7 @@ def test_str_in_str_projection(tmpdir):
                 )
 
 
-def test_number_in_str(tmpdir):
+def test_number_in_str(tmp_path):
     text = """
    [ROOT]
       ID1 = '1'
@@ -850,7 +846,7 @@ def test_number_in_str(tmpdir):
     assert isinstance(pfs.ROOT.ID2, str)
     assert not isinstance(pfs.ROOT.Number, str)
 
-    filename = os.path.join(tmpdir, "number_in_str.pfs")
+    filename = tmp_path / "number_in_str.pfs"
     pfs.write(filename)
 
     with open(filename) as f:
@@ -861,7 +857,7 @@ def test_number_in_str(tmpdir):
                 assert line.strip() == "ID2 = '1'"
 
 
-def test_floatlike_strings(tmpdir):
+def test_floatlike_strings(tmp_path):
     text = """
     [WELLNO_424]
       ID_A = '1E-3'
@@ -874,7 +870,7 @@ def test_floatlike_strings(tmpdir):
     assert pfs.WELLNO_424.ID_B == "1-E"
     assert pfs.WELLNO_424.ID_C == "1-E3"
 
-    filename = os.path.join(tmpdir, "float_like_strings.pfs")
+    filename = tmp_path / "float_like_strings.pfs"
     pfs.write(filename)
     pfs = mikeio.read_pfs(filename)
     # assert pfs.WELLNO_424.ID_A == "1E-3"  # not possible to distinguish
@@ -882,7 +878,7 @@ def test_floatlike_strings(tmpdir):
     assert pfs.WELLNO_424.ID_C == "1-E3"
 
 
-def test_nested_quotes(tmpdir):
+def test_nested_quotes(tmp_path):
     text = """
   [Weir_0]
     Properties = '<CLOB:"1495_weir",0,0,false,0.0,0.0,0.0,0.0,1,0,0.5,1.0,1.0,0.5,1.0,1.0,0,0.0,0.0,"00000000-0000-0000-0000-000000000000",15.24018,5.181663,0.0,"","">'
@@ -894,7 +890,7 @@ def test_nested_quotes(tmpdir):
         == '<CLOB:"1495_weir",0,0,false,0.0,0.0,0.0,0.0,1,0,0.5,1.0,1.0,0.5,1.0,1.0,0,0.0,0.0,"00000000-0000-0000-0000-000000000000",15.24018,5.181663,0.0,"","">'
     )
 
-    filename = os.path.join(tmpdir, "nested_quotes.pfs")
+    filename = tmp_path / "nested_quotes.pfs"
     pfs.write(filename)
 
     with open(filename) as f:
@@ -906,7 +902,7 @@ def test_nested_quotes(tmpdir):
                 )
 
 
-def test_filename_in_list(tmpdir):
+def test_filename_in_list(tmp_path):
     text = """
    [EcolabTemplateSpecification]
       TemplateFile_A = |.\Test1_OLSZ_OL_WQsetups.ecolab|
@@ -921,7 +917,7 @@ def test_filename_in_list(tmpdir):
         == r"|.\Test1_OLSZ_OL_WQsetups.ecolab|"
     )
 
-    filename = os.path.join(tmpdir, "filename_in_list.pfs")
+    filename = tmp_path / "filename_in_list.pfs"
     pfs.write(filename)
 
     with open(filename) as f:
@@ -933,7 +929,7 @@ def test_filename_in_list(tmpdir):
                 )
 
 
-def test_multiple_empty_strings_in_list(tmpdir):
+def test_multiple_empty_strings_in_list(tmp_path):
     text = """
    [Engine]
       A = '', '', '', ''
@@ -950,7 +946,7 @@ def test_multiple_empty_strings_in_list(tmpdir):
     assert pfs.Engine.B[2] == "||"
     assert pfs.Engine.B[-1] == ""
 
-    filename = os.path.join(tmpdir, "multiple_empty_strings_in_list.pfs")
+    filename = tmp_path / "multiple_empty_strings_in_list.pfs"
     pfs.write(filename)
 
     with open(filename) as f:
@@ -961,7 +957,7 @@ def test_multiple_empty_strings_in_list(tmpdir):
                 assert line.strip() == "B = '', '', ||, ||, '', ''"
 
 
-def test_vertical_lines_in_list(tmpdir):
+def test_vertical_lines_in_list(tmp_path):
     text = """
    [EcolabTemplateSpecification]
       TemplateFile_OL = ||, -1, -1, ||, -1, -1, ||
@@ -975,7 +971,7 @@ def test_vertical_lines_in_list(tmpdir):
     assert pfs.EcolabTemplateSpecification.TemplateFile_OL[3] == "||"
     assert pfs.EcolabTemplateSpecification.TemplateFile_OL[-1] == "||"
 
-    filename = os.path.join(tmpdir, "vertical_lines_in_list.pfs")
+    filename = tmp_path / "vertical_lines_in_list.pfs"
     pfs.write(filename)
 
     with open(filename) as f:
@@ -984,7 +980,7 @@ def test_vertical_lines_in_list(tmpdir):
                 assert line.strip() == "TemplateFile_OL = ||, -1, -1, ||, -1, -1, ||"
 
 
-def test_nonunique_mixed_keywords_sections1(tmpdir):
+def test_nonunique_mixed_keywords_sections1(tmp_path):
     text = """
    [ROOT]
       A = '1'
@@ -1004,7 +1000,7 @@ def test_nonunique_mixed_keywords_sections1(tmpdir):
     assert pfs.ROOT.A[2].B[0] == 0
     assert pfs.ROOT.A[-1] == 3
 
-    filename = os.path.join(tmpdir, "nonunique_mixed_keywords_sections.pfs")
+    filename = tmp_path / "nonunique_mixed_keywords_sections.pfs"
     pfs.write(filename)
 
     with open(filename) as f:
@@ -1017,7 +1013,7 @@ def test_nonunique_mixed_keywords_sections1(tmpdir):
     assert outlines[9].strip() == "B = 2"
 
 
-def test_nonunique_mixed_keywords_sections2(tmpdir):
+def test_nonunique_mixed_keywords_sections2(tmp_path):
     text = """
    [ROOT]
       [A]
@@ -1043,12 +1039,11 @@ def test_nonunique_mixed_keywords_sections2(tmpdir):
     assert pfs.ROOT.A[2].B == 0
     assert pfs.ROOT.A[-1] == 3
 
-    filename = os.path.join(tmpdir, "nonunique_mixed_keywords_sections.pfs")
+    filename = tmp_path / "nonunique_mixed_keywords_sections.pfs"
     pfs.write(filename)
 
 
 def test_parse_mike_she_pfs():
-
     pfs = mikeio.PfsDocument("tests/testdata/pfs/Karup_basic.she")
 
     assert pfs.n_targets == 2
@@ -1057,9 +1052,9 @@ def test_parse_mike_she_pfs():
     )  # TODO Is this sensible to check?
 
 
-def test_read_write_grid_editor_color_palette(tmpdir):
+def test_read_write_grid_editor_color_palette(tmp_path):
     infile = "tests/testdata/pfs/grid1.gsf"
-    outfile = os.path.join(tmpdir, "grid.gsf")
+    outfile = tmp_path / "grid.gsf"
     pfs = mikeio.PfsDocument(infile)
     pal = pfs.GRID_EDITOR.GRID_EDIT_VIEW.MIKEZero_Palette_Definition
     assert len(pal.RGB_Color_Value) == 16
@@ -1098,7 +1093,7 @@ def test_search_keyword(pfs_ABC_text):
     assert "A2" in pfs.ROOT
 
     r0 = pfs.search(key="not_there")
-    assert r0 is None
+    assert len(r0) == 0
 
     r1 = pfs.search(key="float")
     assert r1.ROOT.A1.B.float_1 == 4.5
@@ -1127,7 +1122,7 @@ def test_search_param(pfs_ABC_text):
     pfs = mikeio.PfsDocument(StringIO(pfs_ABC_text))
 
     r0 = pfs.search(param="not_there")
-    assert r0 is None
+    assert len(r0) == 0
 
     r1 = pfs.search(param=0)
     assert len(r1.ROOT) == 2
@@ -1146,7 +1141,7 @@ def test_search_section(pfs_ABC_text):
     pfs = mikeio.PfsDocument(StringIO(pfs_ABC_text))
 
     r0 = pfs.search(section="not_there")
-    assert r0 is None
+    assert len(r0) == 0
 
     r1 = pfs.search(section="A")
     assert len(r1.ROOT) == 2
@@ -1210,6 +1205,7 @@ def test_clob_can_contain_pipe_characters():
         sct.Clob
         == '<CLOB:22,1,1,false,1,0,"",0,"",0,"",0,"",0,"",0,"",0,"",0,"",||,false>'
     )
+
 
 def test_write_read_clob(tmp_path):
     clob_text = """

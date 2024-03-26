@@ -1,0 +1,106 @@
+---
+title: Dfs2 - Bathymetric data
+description: Convert GEBCO 2020 NetCDF to dfs2
+jupyter: python3
+---
+
+
+[*GEBCO Compilation Group (2020) GEBCO 2020 Grid (doi:10.5285/a29c5465-b138-234d-e053-6c86abc040b9*)](https://www.gebco.net/data_and_products/gridded_bathymetry_data/)
+
+
+```{python}
+import xarray
+import mikeio
+```
+
+```{python}
+# | echo: false
+# | output: false
+xarray.set_options(display_expand_attrs=False, display_expand_coords=False)
+```
+
+```{python}
+ds = xarray.open_dataset("../../data/gebco_2020_n56.3_s55.2_w12.2_e13.1.nc")
+ds
+```
+
+```{python}
+ds.elevation.plot();
+```
+
+```{python}
+ds.elevation.sel(lon=12.74792, lat=55.865, method="nearest")
+```
+
+Check ordering of dimensions, should be (y,x)
+
+```{python}
+ds.elevation.dims
+```
+
+```{python}
+el = ds.elevation.values
+el.shape
+```
+
+Check that axes are increasing, S->N W->E
+
+```{python}
+ds.lat.values[0],ds.lat.values[-1] 
+```
+
+```{python}
+ds.lat.values[0] < ds.lat.values[-1] 
+```
+
+```{python}
+ds.lon.values[0],ds.lon.values[-1] 
+```
+
+```{python}
+el[0,0] # Bottom left
+```
+
+```{python}
+el[-1,0] # Top Left
+```
+
+```{python}
+geometry = mikeio.Grid2D(x=ds.lon.values, y=ds.lat.values, projection="LONG/LAT")
+geometry
+```
+
+```{python}
+da = mikeio.DataArray(data=el,
+               item=mikeio.ItemInfo("Elevation", mikeio.EUMType.Total_Water_Depth),
+               geometry=geometry,
+               dims=("y","x") # No time dimension
+               )
+da
+```
+
+```{python}
+da.plot();
+```
+
+```{python}
+da.plot(cmap='coolwarm', vmin=-100, vmax=100);
+```
+
+```{python}
+da.to_dfs("gebco.dfs2")
+```
+
+```{python}
+ds = mikeio.read("gebco.dfs2")
+ds.Elevation.plot()
+```
+
+# Clean up
+
+```{python}
+import os
+
+os.remove("gebco.dfs2")
+```
+

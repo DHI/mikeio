@@ -1,7 +1,7 @@
 from __future__ import annotations
-import os
-from datetime import datetime
-from typing import Callable, Sequence, Tuple
+from pathlib import Path
+from collections.abc import Sequence
+from typing import Callable, Tuple
 
 import numpy as np
 import pandas as pd
@@ -15,8 +15,8 @@ from .spatial import GeometryFM2D
 def _extract_track(
     *,
     deletevalue: float,
-    start_time: datetime,
-    end_time: datetime,
+    start_time: pd.Timestamp,
+    end_time: pd.Timestamp,
     timestep: float,
     geometry: GeometryFM2D,
     track: str | Dataset | pd.DataFrame,
@@ -36,20 +36,22 @@ def _extract_track(
 
     if isinstance(track, str):
         filename = track
-        if os.path.exists(filename):
-            ext = os.path.splitext(filename)[1].lower()
-            if ext == ".dfs0":
-                df = Dfs0(filename).to_dataframe()
-            elif ext == ".csv":
-                df = pd.read_csv(filename, index_col=0, parse_dates=True)
-                df.index = pd.DatetimeIndex(df.index)
-            else:
-                raise ValueError(f"{ext} files not supported (dfs0, csv)")
-
-            times = df.index
-            coords = df.iloc[:, 0:2].to_numpy(copy=True)
-        else:
+        path = Path(filename)
+        if not path.exists():
             raise ValueError(f"{filename} does not exist")
+
+        ext = path.suffix.lower()
+        if ext == ".dfs0":
+            df = Dfs0(filename).to_dataframe()
+        elif ext == ".csv":
+            df = pd.read_csv(filename, index_col=0, parse_dates=True)
+            df.index = pd.DatetimeIndex(df.index)
+        else:
+            raise ValueError(f"{ext} files not supported (dfs0, csv)")
+
+        times = df.index
+        coords = df.iloc[:, 0:2].to_numpy(copy=True)
+
     elif isinstance(track, Dataset):
         times = track.time
         coords = np.zeros(shape=(len(times), 2))

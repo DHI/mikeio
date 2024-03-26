@@ -16,10 +16,10 @@ degree Celsius
 >>>
 
 """
+
 from __future__ import annotations
-import warnings
 from enum import IntEnum
-from typing import Dict, List, Sequence
+from typing import Dict, List, Sequence, Literal
 
 import pandas as pd
 from mikecore.DfsFile import DataValueType, DfsDynamicItemInfo
@@ -69,11 +69,6 @@ def _type_list(search=None):
     return items
 
 
-def type_list(search=None):
-    warnings.warn("type_list is deprecated use EUMType.search instead", FutureWarning)
-    return _type_list(search=search)
-
-
 def _unit_list(eum_type: int) -> Dict[str, eumUnit]:
     """Get a dictionary of valid units
 
@@ -94,11 +89,6 @@ def _unit_list(eum_type: int) -> Dict[str, eumUnit]:
         items[key] = value
 
     return items
-
-
-def unit_list(type_eum):
-    warnings.warn("unit_list is deprecated use EUMType.units instead", FutureWarning)
-    return _type_list(type_eum)
 
 
 class TimeAxisType(IntEnum):
@@ -128,10 +118,14 @@ class EUMType(IntEnum):
 
     Examples
     --------
-    >>> mikeio.EUMType.Temperature
-    Temperature
-    >>> EUMType.Temperature.units
-    [degree Celsius, degree Fahrenheit, degree Kelvin]
+    ```{python}
+    import mikeio
+    mikeio.EUMType.Temperature
+    ```
+
+    ```{python}
+    mikeio.EUMType.Temperature.units
+    ```
     """
 
     Water_Level = 100000
@@ -754,9 +748,10 @@ class EUMUnit(IntEnum):
 
     Examples
     --------
-    >>> from mikeio.eum import EUMUnit
-    >>> EUMUnit.degree_Kelvin
-    degree Kelvin
+    ```{python}
+    import mikeio
+    mikeio.EUMUnit.degree_Kelvin
+    ```
     """
 
     meter = 1000
@@ -1421,16 +1416,25 @@ class ItemInfo:
 
     Examples
     --------
-    >>> item = ItemInfo("Viken", EUMType.Water_Level)
-    >>> item
-    Viken <Water Level> (meter)
-    >>> ItemInfo(EUMType.Wind_speed)
-    Wind speed <Wind speed> (meter per sec)
+    ```{python}
+    import mikeio
+    mikeio.ItemInfo("Viken", mikeio.EUMType.Water_Level)
+    ```
+
+    ```{python}
+    mikeio.ItemInfo(mikeio.EUMType.Wind_speed)
+    ```
     """
 
     def __init__(
-        self, name=None, itemtype=None, unit=None, data_value_type="Instantaneous"
-    ):
+        self,
+        name: str | EUMType | None = None,
+        itemtype: EUMType | EUMUnit | None = None,
+        unit: EUMUnit | None = None,
+        data_value_type: Literal[
+            "Instantaneous", "Accumulated", "StepAccumulated", "MeanStepBackWard"
+        ] = "Instantaneous",
+    ) -> None:
 
         # Handle arguments in the wrong place
         if isinstance(name, EUMType):
@@ -1476,7 +1480,7 @@ class ItemInfo:
 
         if not isinstance(name, str):
             raise ValueError("Invalid name, name should be a string")
-        self.name = name
+        self.name: str = name
 
     def __eq__(self, other):
         if not isinstance(other, ItemInfo):
@@ -1496,7 +1500,7 @@ class ItemInfo:
             return f"{self.name} <{self.type.display_name}> ({self.unit.display_name})"
         else:
             return f"{self.name} <{self.type.display_name}> ({self.unit.display_name}) - {self.data_value_type}"
-    
+
     @staticmethod
     def from_mikecore_dynamic_item_info(dfsItemInfo: DfsDynamicItemInfo) -> "ItemInfo":
         """Create ItemInfo from a mikecore.DfsDynamicItemInfo object"""

@@ -1,0 +1,117 @@
+---
+title: Mesh
+---
+
+```{python}
+import matplotlib.pyplot as plt
+import mikeio
+```
+
+## Read mesh file
+
+```{python}
+msh = mikeio.Mesh("../data/odense_rough.mesh")
+msh
+```
+
+## Plot mesh
+
+```{python}
+msh.plot()
+```
+
+```{python}
+msh.plot.boundary_nodes(boundary_names=['Land','Open boundary']);
+```
+
+## Convert mesh to shapely
+Convert mesh to [shapely](https://shapely.readthedocs.io/en/latest/manual.html) MultiPolygon object, requires that the `shapely` library is installed.
+
+```{python}
+mp = msh.to_shapely()
+mp
+```
+
+Now a lot of methods are available
+
+```{python}
+mp.area
+```
+
+```{python}
+mp.bounds
+```
+
+```{python}
+domain = mp.buffer(0)
+domain
+```
+
+```{python}
+open_water = domain.buffer(-500)
+
+coastalzone = domain - open_water
+coastalzone
+```
+
+## Check if points are inside the domain
+
+```{python}
+from shapely.geometry import Point
+
+p1 = Point(216000, 6162000)
+p2 = Point(220000, 6156000)
+print(mp.contains(p1))
+print(mp.contains(p2))
+```
+
+We can get similar functionality from the `.geometry` attribute of the mesh object.
+
+```{python}
+p1p2 = [[216000, 6162000], [220000, 6156000]]
+msh.geometry.contains(p1p2)
+```
+
+```{python}
+ax = msh.plot()
+ax.scatter(p1.x, p1.y, marker="*", s=200, c="red", label="inside")
+ax.scatter(p2.x, p2.y, marker="+", s=200, c="green", label="outside")
+ax.legend();
+```
+
+
+## Change z values and boundary code
+Assume that we want to have a minimum depth of 2 meters and change the open boundary (code 2) to a closed one (code 1). 
+
+```{python}
+g = msh.geometry
+print(f'max z before: {g.node_coordinates[:,2].max()}')
+zc = g.node_coordinates[:,2]
+zc[zc>-2] = -2
+g.node_coordinates[:,2] = zc
+print(f'max z after: {g.node_coordinates[:,2].max()}')
+```
+
+
+```{python}
+c = g.codes
+c[c==2] = 1
+g.codes = c
+```
+
+## Save the modfied geometry to a new mesh file
+
+```{python}
+g.to_mesh("new_mesh.mesh")
+```
+
+Cleanup
+
+```{python}
+import os
+
+os.remove("new_mesh.mesh")
+```
+
+
+

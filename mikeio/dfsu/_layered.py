@@ -1,8 +1,10 @@
-from typing import Collection, Optional
-from functools import wraps
+from __future__ import annotations
+from pathlib import Path
+from typing import Any, Collection, Sequence, Tuple, TYPE_CHECKING
 
 import numpy as np
 from mikecore.DfsuFile import DfsuFile, DfsuFileType
+import pandas as pd
 from scipy.spatial import cKDTree
 from tqdm import trange
 
@@ -14,98 +16,178 @@ from ..dfs._dfs import (
     _valid_timesteps,
 )
 from ..eum import EUMType, ItemInfo
-from ..exceptions import InvalidGeometry
 from .._interpolation import get_idw_interpolant, interp2d
-from ..spatial import GeometryFM3D
+from ..spatial import GeometryFM3D, GeometryFMVerticalProfile, GeometryPoint3D
 from ..spatial._FM_utils import _plot_vertical_profile
-from ._dfsu import _Dfsu
+from ._dfsu import (
+    _get_dfsu_info,
+    get_nodes_from_source,
+    get_elements_from_source,
+    _validate_elements_and_geometry_sel,
+)
+
+if TYPE_CHECKING:
+    from ..spatial._FM_geometry_layered import Layer
 
 
-class DfsuLayered(_Dfsu):
+class DfsuLayered:
+    show_progress = False
+
+    def __init__(self, filename: str | Path) -> None:
+        info = _get_dfsu_info(filename)
+        self._filename = info.filename
+        self._type = info.type
+        self._deletevalue = info.deletevalue
+        self._time = info.time
+        self._timestep = info.timestep
+        self._geometry = self._read_geometry(self._filename)
+        # 3d files have a zn item
+        self._items = self._read_items(self._filename)
+
+    def __repr__(self):
+        out = [f"<mikeio.{self.__class__.__name__}>"]
+
+        out.append(f"number of elements: {self.geometry.n_elements}")
+        out.append(f"number of nodes: {self.geometry.n_nodes}")
+        out.append(f"projection: {self.geometry.projection_string}")
+        out.append(f"number of sigma layers: {self.geometry.n_sigma_layers}")
+        if (
+            self._type == DfsuFileType.DfsuVerticalProfileSigmaZ
+            or self._type == DfsuFileType.Dfsu3DSigmaZ
+        ):
+            out.append(
+                f"max number of z layers: {self.geometry.n_layers - self.geometry.n_sigma_layers}"
+            )
+        if self.n_items < 10:
+            out.append("items:")
+            for i, item in enumerate(self.items):
+                out.append(f"  {i}:  {item}")
+        else:
+            out.append(f"number of items: {self.geometry.n_items}")
+        if self.n_timesteps == 1:
+            out.append(f"time: time-invariant file (1 step) at {self.time[0]}")
+        else:
+            out.append(
+                f"time: {str(self.time[0])} - {str(self.time[-1])} ({self.n_timesteps} records)"
+            )
+        return str.join("\n", out)
+
     @property
-    def n_layers(self):
+    def deletevalue(self) -> float:
+        """File delete value"""
+        return self._deletevalue
+
+    @property
+    def n_items(self) -> int:
+        """Number of items"""
+        return len(self.items)
+
+    @property
+    def items(self) -> list[ItemInfo]:
+        """List of items"""
+        return self._items
+
+    @property
+    def start_time(self) -> pd.Timestamp:
+        """File start time"""
+        return self._time[0]
+
+    @property
+    def n_timesteps(self) -> int:
+        """Number of time steps"""
+        return len(self._time)
+
+    @property
+    def timestep(self) -> float:
+        """Time step size in seconds"""
+        return self._timestep
+
+    @property
+    def end_time(self) -> pd.Timestamp:
+        """File end time"""
+        return self._time[-1]
+
+    @property
+    def time(self) -> pd.DatetimeIndex:
+        return self._time
+
+    @property
+    def geometry(self) -> GeometryFM3D | GeometryFMVerticalProfile:
+        return self._geometry
+
+    @staticmethod
+    def _read_items(filename: str) -> list[ItemInfo]:
+        dfs = DfsuFile.Open(filename)
+        n_items = len(dfs.ItemInfo)
+        first_idx = 1
+        items = _get_item_info(
+            dfs.ItemInfo,
+            list(range(n_items - first_idx)),
+            ignore_first=True,
+        )
+        dfs.Close()
+        return items
+
+    @staticmethod
+    def _read_geometry(filename: str) -> GeometryFM3D | GeometryFMVerticalProfile:
+        dfs = DfsuFile.Open(filename)
+        dfsu_type = DfsuFileType(dfs.DfsuFileType)
+
+        node_table = get_nodes_from_source(dfs)
+        el_table = get_elements_from_source(dfs)
+
+        geom_cls: Any = GeometryFM3D
+        if dfsu_type in (
+            DfsuFileType.DfsuVerticalProfileSigma,
+            DfsuFileType.DfsuVerticalProfileSigmaZ,
+        ):
+            geom_cls = GeometryFMVerticalProfile
+
+        geometry = geom_cls(
+            node_coordinates=node_table.coordinates,
+            element_table=el_table.connectivity,
+            codes=node_table.codes,
+            projection=dfs.Projection.WKTString,
+            dfsu_type=dfsu_type,
+            element_ids=el_table.ids,
+            node_ids=node_table.ids,
+            n_layers=dfs.NumberOfLayers,
+            n_sigma=min(dfs.NumberOfSigmaLayers, dfs.NumberOfLayers),
+            validate=False,
+        )
+        dfs.Close()
+        return geometry
+
+    @property
+    def n_layers(self) -> int:
         """Maximum number of layers"""
         return self.geometry._n_layers
 
     @property
-    def n_sigma_layers(self):
+    def n_sigma_layers(self) -> int:
         """Number of sigma layers"""
         return self.geometry.n_sigma_layers
 
     @property
-    def n_z_layers(self):
+    def n_z_layers(self) -> int:
         """Maximum number of z-layers"""
-        if self.n_layers is None:
-            return None
         return self.n_layers - self.n_sigma_layers
-
-    @property
-    def e2_e3_table(self):
-        """The 2d-to-3d element connectivity table for a 3d object"""
-        if self.n_layers is None:
-            print("Object has no layers: cannot return e2_e3_table")
-            return None
-        return self.geometry.e2_e3_table
-
-    @property
-    def elem2d_ids(self):
-        """The associated 2d element id for each 3d element"""
-        if self.n_layers is None:
-            raise InvalidGeometry("Object has no layers: cannot return elem2d_ids")
-        return self.geometry.elem2d_ids
-
-    @property
-    def layer_ids(self):
-        """The layer number (0=bottom, 1, 2, ...) for each 3d element"""
-        if self.n_layers is None:
-            raise InvalidGeometry("Object has no layers: cannot return layer_ids")
-        return self.geometry.layer_ids
-
-    @property
-    def top_elements(self):
-        """List of 3d element ids of surface layer"""
-        if self.n_layers is None:
-            print("Object has no layers: cannot find top_elements")
-            return None
-        return self.geometry.top_elements
-
-    @property
-    def n_layers_per_column(self):
-        """List of number of layers for each column"""
-        if self.n_layers is None:
-            print("Object has no layers: cannot find n_layers_per_column")
-            return None
-        return self.geometry.n_layers_per_column
-
-    @property
-    def bottom_elements(self):
-        """List of 3d element ids of bottom layer"""
-        if self.n_layers is None:
-            print("Object has no layers: cannot find bottom_elements")
-            return None
-        return self.geometry.bottom_elements
-
-    @wraps(GeometryFM3D.get_layer_elements)
-    def get_layer_elements(self, layers):
-        if self.n_layers is None:
-            raise InvalidGeometry("Object has no layers: cannot get_layer_elements")
-        return self.geometry.get_layer_elements(layers)
 
     def read(
         self,
         *,
-        items=None,
-        time=None,
-        elements: Optional[Collection[int]] = None,
-        area=None,
-        x=None,
-        y=None,
-        z=None,
-        layers=None,
-        keepdims=False,
-        dtype=np.float32,
-        error_bad_data=True,
-        fill_bad_data_value=np.nan,
+        items: str | int | Sequence[str | int] | None = None,
+        time: int | str | slice | None = None,
+        elements: Collection[int] | None = None,
+        area: Tuple[float, float, float, float] | None = None,
+        x: float | None = None,
+        y: float | None = None,
+        z: float | None = None,
+        layers: int | Layer | Sequence[int] | None = None,
+        keepdims: bool = False,
+        dtype: Any = np.float32,
+        error_bad_data: bool = True,
+        fill_bad_data_value: float = np.nan,
     ) -> Dataset:
         """
         Read data from a dfsu file
@@ -123,9 +205,12 @@ class DfsuLayered(_Dfsu):
             Read only data inside (horizontal) area given as a
             bounding box (tuple with left, lower, right, upper)
             or as list of coordinates for a polygon, by default None
-        x, y, z: float, optional
-            Read only data for elements containing the (x,y,z) points(s),
-            by default None
+        x: float, optional
+            Read only data for elements containing the (x,y,z) points(s)
+        y: float, optional
+            Read only data for elements containing the (x,y,z) points(s)
+        z: float, optional
+            Read only data for elements containing the (x,y,z) points(s)
         layers: int, str, list[int], optional
             Read only data for specific layers, by default None
         elements: list[int], optional
@@ -144,45 +229,49 @@ class DfsuLayered(_Dfsu):
         if dtype not in [np.float32, np.float64]:
             raise ValueError("Invalid data type. Choose np.float32 or np.float64")
 
-        # Open the dfs file for reading
-        # self._read_dfsu_header(self._filename)
         dfs = DfsuFile.Open(self._filename)
-        # time may have changes since we read the header
-        # (if engine is continuously writing to this file)
-        # TODO: add more checks that this is actually still the same file
-        # (could have been replaced in the meantime)
-
-        self._n_timesteps = dfs.NumberOfTimeSteps
 
         single_time_selected, time_steps = _valid_timesteps(dfs, time)
 
-        self._validate_elements_and_geometry_sel(
+        _validate_elements_and_geometry_sel(
             elements, area=area, layers=layers, x=x, y=y, z=z
         )
         if elements is None:
-            elements = self._parse_geometry_sel(area=area, layers=layers, x=x, y=y, z=z)
+            if (
+                (x is not None)
+                or (y is not None)
+                or (area is not None)
+                or (layers is not None)
+            ):
+                elements = self.geometry.find_index(  # type: ignore
+                    x=x, y=y, z=z, area=area, layers=layers
+                )
+                if len(elements) == 0:
+                    raise ValueError("No elements in selection!")
 
-        if elements is None:
-            n_elems = self.n_elements
-            n_nodes = self.n_nodes
-            geometry = self.geometry
+        geometry = (
+            self.geometry
+            if elements is None
+            else self.geometry.elements_to_geometry(elements)
+        )
+
+        if isinstance(geometry, GeometryPoint3D):
+            n_elems = 1
+            n_nodes = 1
         else:
-            elements = list(elements)
-            n_elems = len(elements)
-            geometry = self.geometry.elements_to_geometry(elements)
-            if self.is_layered:  # and items[0].name == "Z coordinate":
-                node_ids, _ = self.geometry._get_nodes_and_table_for_elements(elements)
-                n_nodes = len(node_ids)
+            n_elems = geometry.n_elements
+            n_nodes = geometry.n_nodes
+            node_ids = geometry.node_ids
 
         item_numbers = _valid_item_numbers(
-            dfs.ItemInfo, items, ignore_first=self.is_layered
+            dfs.ItemInfo, items, ignore_first=self.geometry.is_layered
         )
-        items = _get_item_info(dfs.ItemInfo, item_numbers, ignore_first=self.is_layered)
-        if self.is_layered:
-            # we need the zn item too
-            item_numbers = [it + 1 for it in item_numbers]
-            if hasattr(geometry, "is_layered") and geometry.is_layered:
-                item_numbers.insert(0, 0)
+        items = _get_item_info(
+            dfs.ItemInfo, item_numbers, ignore_first=self.geometry.is_layered
+        )
+        item_numbers = [it + 1 for it in item_numbers]
+        if layered_data := hasattr(geometry, "is_layered") and geometry.is_layered:
+            item_numbers.insert(0, 0)
         n_items = len(item_numbers)
 
         deletevalue = self.deletevalue
@@ -192,9 +281,7 @@ class DfsuLayered(_Dfsu):
         n_steps = len(time_steps)
         item0_is_node_based = False
         for item in range(n_items):
-            # Initialize an empty data block
-            if hasattr(geometry, "is_layered") and geometry.is_layered and item == 0:
-                # and items[item].name == "Z coordinate":
+            if layered_data and item == 0:
                 item0_is_node_based = True
                 data: np.ndarray = np.ndarray(shape=(n_steps, n_nodes), dtype=dtype)
             else:
@@ -209,7 +296,6 @@ class DfsuLayered(_Dfsu):
         for i in trange(n_steps, disable=not self.show_progress):
             it = time_steps[i]
             for item in range(n_items):
-
                 dfs, d = _read_item_time_step(
                     dfs=dfs,
                     filename=self._filename,
@@ -227,7 +313,7 @@ class DfsuLayered(_Dfsu):
                     if item == 0 and item0_is_node_based:
                         d = d[node_ids]
                     else:
-                        d = d[elements]
+                        d = d[elements]  # type: ignore
 
                 if single_time_selected and not keepdims:
                     data_list[item] = d
@@ -249,7 +335,7 @@ class DfsuLayered(_Dfsu):
             dims = tuple([d for d in dims if d != "element"])
             data_list = [np.squeeze(d, axis=-1) for d in data_list]
 
-        if hasattr(geometry, "is_layered") and geometry.is_layered:
+        if layered_data:
             return Dataset(
                 data_list[1:],  # skip zn item
                 time,
@@ -263,29 +349,6 @@ class DfsuLayered(_Dfsu):
             return Dataset(
                 data_list, time, items, geometry=geometry, dims=dims, validate=False
             )
-
-    def _parse_geometry_sel(self, area, layers, x, y, z):
-        elements = None
-
-        if (
-            (x is not None)
-            or (y is not None)
-            or (area is not None)
-            or (layers is not None)
-        ):
-            elements = self.geometry.find_index(x=x, y=y, z=z, area=area, layers=layers)
-
-        if (
-            (x is not None)
-            or (y is not None)
-            or (layers is not None)
-            or (area is not None)
-        ):
-            # selection was attempted
-            if (elements is None) or len(elements) == 0:
-                raise ValueError("No elements in selection!")
-
-        return elements
 
 
 class Dfsu2DV(DfsuLayered):
@@ -340,24 +403,18 @@ class Dfsu2DV(DfsuLayered):
 
 
 class Dfsu3D(DfsuLayered):
-    @wraps(GeometryFM3D.to_2d_geometry)
-    def to_2d_geometry(self):
-        return self.geometry2d
-
     @property
     def geometry2d(self):
         """The 2d geometry for a 3d object"""
-        return self._geometry2d
+        return self.geometry.geometry2d
 
-    def extract_surface_elevation_from_3d(self, filename=None, n_nearest=4):
+    def extract_surface_elevation_from_3d(self, n_nearest: int = 4) -> DataArray:
         """
         Extract surface elevation from a 3d dfsu file (based on zn)
         to a new 2d dfsu file with a surface elevation item.
 
         Parameters
         ---------
-        filename: str
-            Output file name
         n_nearest: int, optional
             number of points for spatial interpolation (inverse_distance), default=4
         """
@@ -369,10 +426,10 @@ class Dfsu3D(DfsuLayered):
         assert n_nearest > 0
 
         # make 2d nodes-to-elements interpolator
-        top_el = self.top_elements
+        top_el = self.geometry.top_elements
         geom = self.geometry.elements_to_geometry(top_el, node_layers="top")
-        xye = geom.element_coordinates[:, 0:2]
-        xyn = geom.node_coordinates[:, 0:2]
+        xye = geom.element_coordinates[:, 0:2]  # type: ignore
+        xyn = geom.node_coordinates[:, 0:2]  # type: ignore
         tree2d = cKDTree(xyn)
         dist, node_ids = tree2d.query(xye, k=n_nearest)
         if n_nearest == 1:
@@ -385,6 +442,7 @@ class Dfsu3D(DfsuLayered):
         node_ids_surf, _ = self.geometry._get_nodes_and_table_for_elements(
             top_el, node_layers="top"
         )
+        assert isinstance(ds[0]._zn, np.ndarray)
         zn_surf = ds[0]._zn[:, node_ids_surf]  # surface
         surf2d = interp2d(zn_surf, node_ids, weights)
         surf_da = DataArray(
@@ -394,12 +452,4 @@ class Dfsu3D(DfsuLayered):
             item=ItemInfo(EUMType.Surface_Elevation),
         )
 
-        # create output
-        # items = [ItemInfo(EUMType.Surface_Elevation)]
-        # ds2 = Dataset([surf2d], ds.time, items, geometry=geom)
-        if filename is None:
-            return surf_da
-        else:
-            # title = "Surface extracted from 3D file"
-            surf_da.to_dfs(filename)
-            # self.write(filename, ds2, elements=top_el, title=title)
+        return surf_da

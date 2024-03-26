@@ -1,0 +1,101 @@
+---
+title: Dfs2 - Meteo data
+description: Conversion of NetCDF from Global Forecasting System to Dfs2
+---
+
+
+
+```{python}
+import xarray
+import pandas as pd
+import mikeio
+```
+
+```{python}
+# | echo: false
+# | output: false
+xarray.set_options(display_expand_attrs=False, display_expand_coords=False)
+```
+
+
+The file `gfs_wind.nc` contains a small sample of the [GFS](https://nomads.ncep.noaa.gov/) forecast data downloaded via their OpenDAP service
+
+```{python}
+ds = xarray.open_dataset('../../data/gfs_wind.nc')
+ds
+```
+
+Running a Mike 21 HD model, needs at least three variables of meteorological forcing
+* Mean Sea Level Pressure
+* U 10m
+* V 10m
+
+Let's take a look the U 10m
+
+```{python}
+ds.ugrd10m.isel(time=0).plot();
+```
+
+## Convert to dfs2
+
+### Time
+
+```{python}
+time = pd.DatetimeIndex(ds.time)
+time
+```
+
+### Variable types
+
+```{python}
+mikeio.EUMType.Air_Pressure
+```
+
+```{python}
+mikeio.EUMType.Air_Pressure.units
+```
+
+```{python}
+mikeio.EUMType.Wind_Velocity
+```
+
+```{python}
+mikeio.EUMType.Wind_Velocity.units
+```
+
+```{python}
+mslp = ds.msletmsl.values / 100 # conversion from Pa to hPa
+u = ds.ugrd10m.values
+v = ds.vgrd10m.values
+```
+
+```{python}
+geometry = mikeio.Grid2D(x=ds.lon.values, y=ds.lat.values, projection="LONG/LAT")
+geometry
+```
+
+```{python}
+from mikeio import ItemInfo, EUMType, EUMUnit
+
+mslp_da = mikeio.DataArray(data=mslp,time=time, geometry=geometry, item=ItemInfo("Mean Sea Level Pressure", EUMType.Air_Pressure, EUMUnit.hectopascal))
+u_da = mikeio.DataArray(data=u,time=time, geometry=geometry, item=ItemInfo("Wind U", EUMType.Wind_Velocity, EUMUnit.meter_per_sec))
+v_da = mikeio.DataArray(data=v,time=time, geometry=geometry, item=ItemInfo("Wind V", EUMType.Wind_Velocity, EUMUnit.meter_per_sec))
+```
+
+```{python}
+mds = mikeio.Dataset([mslp_da, u_da, v_da])
+mds
+```
+
+```{python}
+mds.to_dfs("gfs.dfs2")
+```
+
+Clean up
+
+```{python}
+import os
+
+os.remove("gfs.dfs2")
+```
+

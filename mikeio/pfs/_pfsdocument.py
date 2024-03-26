@@ -2,9 +2,10 @@ from __future__ import annotations
 import re
 import warnings
 from collections import Counter
+from collections.abc import Mapping, Sequence
 from datetime import datetime
 from pathlib import Path
-from typing import Callable, Dict, List, Mapping, TextIO, Tuple
+from typing import Callable, Dict, List, TextIO, Tuple
 
 import yaml
 
@@ -82,13 +83,12 @@ class PfsDocument(PfsSection):
 
     def __init__(
         self,
-        data: TextIO | PfsSection | Dict,
+        data: TextIO | PfsSection | Dict | str | Path,
         *,
         encoding="cp1252",
         names=None,
         unique_keywords=False,
     ):
-
         if isinstance(data, (str, Path)) or hasattr(data, "read"):
             if names is not None:
                 raise ValueError("names cannot be given as argument if input is a file")
@@ -102,6 +102,14 @@ class PfsDocument(PfsSection):
         self._ALIAS_LIST = ["_ALIAS_LIST"]  # ignore these in key list
         if self._is_FM_engine:
             self._add_all_FM_aliases()
+
+    @staticmethod
+    def from_text(text: str) -> PfsDocument:
+        """Create a PfsDocument from a string"""
+        from io import StringIO
+
+        f = StringIO(text)
+        return PfsDocument(f)
 
     @staticmethod
     def _to_nonunique_key_dict(keys, vals):
@@ -127,6 +135,12 @@ class PfsDocument(PfsSection):
     def items(self):
         """Return a new view of the PfsDocument's items ((key, value) pairs)"""
         return [(k, v) for k, v in self.__dict__.items() if k not in self._ALIAS_LIST]
+
+    def to_dict(self) -> dict:
+        """Convert to (nested) dict (as a copy)"""
+        d = super().to_dict()
+        _ = d.pop("_ALIAS_LIST")
+        return d
 
     @staticmethod
     def _unravel_items(items: Callable) -> Tuple[List, List]:
@@ -164,11 +178,20 @@ class PfsDocument(PfsSection):
         rkeys, _ = self._unravel_items(self.items)
         return rkeys
 
+    def copy(self) -> PfsDocument:
+        """Return a deep copy of the PfsDocument"""
+
+        text = repr(self)
+
+        return PfsDocument.from_text(text)
+
     def _read_pfs_file(self, filename, encoding, unique_keywords=False):
         try:
             yml = self._pfs2yaml(filename, encoding)
             target_list = parse_yaml_preserving_duplicates(yml, unique_keywords)
-        except AttributeError:  # This is the error raised if parsing fails, try again with the normal loader
+        except (
+            AttributeError
+        ):  # This is the error raised if parsing fails, try again with the normal loader
             target_list = yaml.load(yml, Loader=yaml.CFullLoader)
         except FileNotFoundError as e:
             raise FileNotFoundError(str(e))
@@ -179,7 +202,10 @@ class PfsDocument(PfsSection):
         return names, sections
 
     @staticmethod
-    def _parse_non_file_input(input, names=None):
+    def _parse_non_file_input(
+        input: Dict | PfsSection | Sequence[PfsSection] | Sequence[Dict],
+        names: Sequence[str] | None = None,
+    ) -> Tuple[Sequence[str], List[PfsSection]]:
         """dict/PfsSection or lists of these can be parsed"""
         if names is None:
             assert isinstance(input, Mapping), "input must be a mapping"
@@ -189,11 +215,6 @@ class PfsDocument(PfsSection):
                     sec, Mapping
                 ), "all targets must be PfsSections/dict (no key-value pairs allowed in the root)"
             return names, sections
-        # else:
-        #     warnings.warn(
-        #         "Creating a PfsDocument with names argument is deprecated, provide instead the names as keys in a dictionary",
-        #         FutureWarning,
-        #     )
 
         if isinstance(names, str):
             names = [names]
@@ -202,9 +223,9 @@ class PfsDocument(PfsSection):
             sections = [input]
         elif isinstance(input, dict):
             sections = [PfsSection(input)]
-        elif isinstance(input, (List, Tuple)):
+        elif isinstance(input, Sequence):
             if isinstance(input[0], PfsSection):
-                sections = input
+                sections = input  # type: ignore
             elif isinstance(input[0], dict):
                 sections = [PfsSection(d) for d in input]
             else:
@@ -245,12 +266,14 @@ class PfsDocument(PfsSection):
                 setattr(self, alias, self.targets[0][module])
                 self._ALIAS_LIST.append(alias)
 
-    def _pfs2yaml(self, filename, encoding=None) -> str:
+    def _pfs2yaml(
+        self, filename: str | Path | TextIO, encoding: str | None = None
+    ) -> str:
 
         if hasattr(filename, "read"):  # To read in memory strings StringIO
             pfsstring = filename.read()
         else:
-            with (open(filename, encoding=encoding)) as f:
+            with open(filename, encoding=encoding) as f:
                 pfsstring = f.read()
 
         lines = pfsstring.split("\n")
@@ -293,11 +316,6 @@ class PfsDocument(PfsSection):
                 key = s[0:idx]
                 key = key.strip()
                 value = s[(idx + 1) :].strip()
-
-                if key == "start_time":
-                    value = datetime.strptime(value, "%Y, %m, %d, %H, %M, %S").strftime(
-                        "%Y-%m-%d %H:%M:%S"
-                    )
                 value = self._parse_param(value)
                 s = f"{key}: {value}"
 
@@ -331,16 +349,10 @@ class PfsDocument(PfsSection):
 
     _COMMA_MATCHER = re.compile(r",(?=(?:[^\"']*[\"'][^\"']*[\"'])*[^\"']*$)")
 
-    def _split_line_by_comma(self, s: str):
+    def _split_line_by_comma(self, s: str) -> List[str]:
         return self._COMMA_MATCHER.split(s)
-        # import shlex
-        # lexer = shlex.shlex(s)
-        # lexer.whitespace += ","
-        # lexer.quotes += "|"
-        # lexer.wordchars += ",.-"
-        # return list(lexer)
 
-    def _parse_token(self, token: str, context="") -> str:
+    def _parse_token(self, token: str, context: str = "") -> str:
         s = token.strip()
 
         # Example of complicated string:
@@ -360,20 +372,22 @@ class PfsDocument(PfsSection):
 
         return s
 
-    def write(self, filename=None):
+    def write(self, filename: str) -> None:
         """Write object to a pfs file
 
         Parameters
         ----------
         filename: str, optional
             Full path and filename of pfs to be created.
-            If None, the content will be returned
-            as a list of strings.
+
+        Notes
+        -----
+        To return the content as a string, use repr()
         """
         from mikeio import __version__ as mikeio_version
 
-        if filename is None:
-            return self._to_txt_lines()
+        # if filename is None:
+        #    return self._to_txt_lines()
 
         with open(filename, "w") as f:
             now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")

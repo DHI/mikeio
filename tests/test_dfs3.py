@@ -31,11 +31,11 @@ def test_dfs3_geometry():
 def test_dfs_to_xarray():
     ds = mikeio.read("tests/testdata/test_dfs3.dfs3")
     xr_ds = ds.to_xarray()
-    assert xr_ds.dims["time"] == 2
+    assert xr_ds.sizes["time"] == 2
 
     ds_1d = ds.isel(z=0).isel(y=0)
     xr_ds_1d = ds_1d.to_xarray()
-    assert xr_ds_1d.dims["time"] == 2
+    assert xr_ds_1d.sizes["time"] == 2
 
 
 def test_dfs3_read():
@@ -201,3 +201,50 @@ def test_MIKE_SHE_dfs3_output():
     assert g2.x[0] == g.x[0] + 30 * g.dx
     assert g2.y[0] == g.y[0]  # + 35 * g.dy
     assert g2.origin == pytest.approx((g2.x[0], g2.y[0]))
+
+
+def test_write_read_local_coordinates(tmp_path):
+    da = mikeio.DataArray(
+        np.array([[[1, 2, 3], [4, 5, 6]], [[7, 8, 9], [10, 11, 12]]]),
+        geometry=mikeio.Grid3D(
+            nx=3, ny=2, nz=2, dx=0.5, dy=1, dz=1, projection="NON-UTM"
+        ),
+    )
+    fp = tmp_path / "local_coordinates.dfs3"
+    da.to_dfs(fp)
+
+    ds = mikeio.read(fp)
+    assert da.geometry == ds.geometry
+
+
+def test_to_xarray():
+    # data is not important here
+    data = np.array([[[1, 2, 3], [4, 5, 6]], [[7, 8, 9], [10, 11, 12]]])
+
+    # geographic coordinates
+    dag = mikeio.DataArray(
+        data=data,
+        geometry=mikeio.Grid3D(
+            nx=3, ny=2, nz=2, dy=0.5, dz=1, dx=0.5, projection="LONG/LAT"
+        ),
+    )
+    assert dag.geometry.x[0] == pytest.approx(0.0)
+    assert dag.geometry.y[0] == pytest.approx(0.0)
+    xr_dag = dag.to_xarray()
+    assert xr_dag.x[0] == pytest.approx(0.0)
+    assert xr_dag.y[0] == pytest.approx(0.0)
+
+    # local coordinates
+    da = mikeio.DataArray(
+        data=data,
+        geometry=mikeio.Grid3D(
+            nx=3, ny=2, nz=2, dy=0.5, dz=1, dx=0.5, projection="NON-UTM"
+        ),
+    )
+    # local coordinates (=NON-UTM) have a different convention, geometry.x still refers to element centers
+    assert da.geometry.x[0] == pytest.approx(0.25)
+    assert da.geometry.y[0] == pytest.approx(0.25)
+
+    xr_da = da.to_xarray()
+    assert xr_da.x[0] == pytest.approx(0.25)
+    assert xr_da.y[0] == pytest.approx(0.25)
