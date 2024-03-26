@@ -861,7 +861,8 @@ def test_dataset_to_xarray():
     assert len(xr_ds["nodes_per_element"]) == ds.n_elements
     assert len(xr_ds["connectivity"]) == (xr_ds["nodes_per_element"]).sum()
 
-    # So can we reverse this and create a GeometryFM from this?
+    # TODO this doesn't belong in a test, just trying it out
+    # So can we reverse this and create a GeometryFM2D from this?
 
     node_coordinates = xr_ds.nc
     c = xr_ds["connectivity"].values
@@ -872,7 +873,9 @@ def test_dataset_to_xarray():
         nodes = c[idx : idx + nn]
         element_table.append(nodes)
         idx += nn
-    g2 = GeometryFM2D(node_coordinates=node_coordinates, element_table=element_table)
+    # TODO list comprehension, maybe not so readable
+    # element_table = [c[i : i + int(nn)] for i, nn in enumerate(xr_ds.nodes_per_element)]
+    GeometryFM2D(node_coordinates=node_coordinates, element_table=element_table)
 
 
 def test_interp_like_grid():

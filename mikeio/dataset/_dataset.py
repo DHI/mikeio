@@ -16,7 +16,6 @@ from typing import (
     overload,
     Hashable,
     Set,
-    TYPE_CHECKING,
     Callable,
 )
 
@@ -1884,9 +1883,9 @@ class Dataset:
 
         write_dfsu(filename, self)
 
-    def to_xarray(self, include_connectivity:bool=False) ->  xr.Dataset:
+    def to_xarray(self, include_connectivity: bool = False) -> xr.Dataset:
         """Export to xarray.Dataset
-        
+
         Parameters
         ----------
         include_connectivity: bool, optional
@@ -1907,25 +1906,24 @@ class Dataset:
         if include_connectivity:
             # Not very pretty, but could be very useful
             nodes_per_element = []
-            
+
             connectivity = []
             for el in self.geometry.element_table:
                 nodes_per_element.append(len(el))
                 connectivity.extend(el)
 
-            c = dict(element=data[self[0].name].coords["element"]) # TODO is there a cleaner way?
-            data["nodes_per_element"] = xr.DataArray(data=nodes_per_element, coords=c, dims="element")
+            c = dict(
+                element=data[self[0].name].coords["element"]
+            )  # TODO is there a cleaner way?
+            data["nodes_per_element"] = xr.DataArray(
+                data=nodes_per_element, coords=c, dims="element"
+            )
             data["connectivity"] = xr.DataArray(data=connectivity, dims="arbitrary")
-            
+
             nc = self.geometry.node_coordinates
-            xn = nc[:,0]
-            yn = nc[:,1]
-            zn = nc[:,2]
-            node_ids = self.geometry.node_ids
-            # data["xn"] = xr.DataArray(xn, coords=[node_ids], dims=["nodes"]) # TODO units
-            # data["yn"] = xr.DataArray(yn, coords=[node_ids], dims=["nodes"])
-            # data["zn"] = xr.DataArray(zn, coords=[node_ids], dims=["nodes"])
-            data["nc"] = xr.DataArray(nc, dims=["nodes","cell"]) # TODO how to name dim #2?
+            data["nc"] = xr.DataArray(
+                nc, dims=["nodes", "cell"]
+            )  # TODO how to name dim #2?
         return xr.Dataset(data)
 
     # ===============================================
