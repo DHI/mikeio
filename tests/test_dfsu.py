@@ -855,6 +855,29 @@ def test_dataset_interp_to_xarray():
     assert float(xr_dsi.y) == pytest.approx(y)
 
 
+def test_dataset_to_xarray():
+    ds = mikeio.read("tests/testdata/oresundHD_run1.dfsu")
+    xr_ds = ds.to_xarray(include_connectivity=True)
+    assert len(xr_ds["nodes_per_element"]) == ds.n_elements
+    assert len(xr_ds["connectivity"]) == (xr_ds["nodes_per_element"]).sum()
+
+    # TODO this doesn't belong in a test, just trying it out
+    # So can we reverse this and create a GeometryFM2D from this?
+
+    node_coordinates = xr_ds.nc
+    c = xr_ds["connectivity"].values
+    element_table = []
+    idx = 0
+    for nn in xr_ds.nodes_per_element:
+        nn = int(nn)
+        nodes = c[idx : idx + nn]
+        element_table.append(nodes)
+        idx += nn
+    # TODO list comprehension, maybe not so readable
+    # element_table = [c[i : i + int(nn)] for i, nn in enumerate(xr_ds.nodes_per_element)]
+    GeometryFM2D(node_coordinates=node_coordinates, element_table=element_table)
+
+
 def test_interp_like_grid():
     ds = mikeio.read("tests/testdata/wind_north_sea.dfsu")
     ws = ds[0]

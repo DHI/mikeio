@@ -16,7 +16,6 @@ from typing import (
     overload,
     Hashable,
     Set,
-    TYPE_CHECKING,
     Callable,
 )
 
@@ -24,10 +23,8 @@ from typing import (
 import numpy as np
 from numpy.typing import NDArray
 import pandas as pd
+import xarray as xr
 from mikecore.DfsFile import DfsSimpleType
-
-if TYPE_CHECKING:
-    import xarray
 
 from ._dataarray import DataArray
 from ._data_utils import _to_safe_name, _get_time_idx_list, _n_selected_timesteps
@@ -1886,12 +1883,48 @@ class Dataset:
 
         write_dfsu(filename, self)
 
-    def to_xarray(self) -> "xarray.Dataset":
-        """Export to xarray.Dataset"""
-        import xarray
+    def to_xarray(self, include_connectivity: bool = False) -> xr.Dataset:
+        """Export to xarray.Dataset
 
+        Parameters
+        ----------
+        include_connectivity: bool, optional
+            Include flexible mesh connectivity, default False
+
+        Returns
+        -------
+        xr.Dataset
+
+        Examples
+        --------
+        >>> ds = mikeio.read("tests/testdata/gebco_sound.dfs2")
+        >>> ds.to_xarray()
+        >>> ds = mikio.read("tests/testdata/HD2D.dfsu")
+        >>> ds.to_xarray(include_connectivity=True)
+        """
         data = {da.name: da.to_xarray() for da in self}
-        return xarray.Dataset(data)
+        if include_connectivity:
+            # Not very pretty, but could be very useful
+            nodes_per_element = []
+
+            connectivity = []
+            for el in self.geometry.element_table:
+                nodes_per_element.append(len(el))
+                connectivity.extend(el)
+
+            c = dict(
+                element=data[self[0].name].coords["element"]
+            )  # TODO is there a cleaner way?
+            data["nodes_per_element"] = xr.DataArray(
+                data=nodes_per_element, coords=c, dims="element"
+            )
+            data["connectivity"] = xr.DataArray(data=connectivity, dims="arbitrary")
+
+            nc = self.geometry.node_coordinates
+            data["nc"] = xr.DataArray(
+                nc, dims=["nodes", "cell"]
+            )  # TODO how to name dim #2?
+        return xr.Dataset(data)
 
     # ===============================================
 
