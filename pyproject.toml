@@ -10,7 +10,7 @@ allow-direct-references = true
 
 [project]
 name="mikeio"
-version="2.0.dev0"
+version="2.0.b0"
 dependencies = [
     "mikecore>=0.2.1",
     "numpy>=1.22.0",

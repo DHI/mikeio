@@ -573,8 +573,6 @@ class Dataset:
         --------
         pop
         """
-        # deprecated
-        warnings.warn("Dataset.remove is deprecated", FutureWarning)
         self.__delitem__(key)
 
     def rename(self, mapper: Mapping[str, str], inplace: bool = False) -> "Dataset":
