@@ -19,16 +19,16 @@ degree Celsius
 
 from __future__ import annotations
 from enum import IntEnum
-from typing import Dict, List, Sequence, Literal
+from typing import Any, Sequence, Literal
 
 import pandas as pd
 from mikecore.DfsFile import DataValueType, DfsDynamicItemInfo
-from mikecore.eum import eumUnit, eumWrapper
+from mikecore.eum import eumUnit, eumItem, eumWrapper
 
 from ..exceptions import InvalidDataValueType
 
 
-def _type_list(search=None):
+def _type_list(search: str | None = None) -> dict[eumItem, str]:
     """Get a dictionary of the EUM items
 
     Notes
@@ -69,7 +69,7 @@ def _type_list(search=None):
     return items
 
 
-def _unit_list(eum_type: int) -> Dict[str, eumUnit]:
+def _unit_list(eum_type: int) -> dict[str, eumUnit]:
     """Get a dictionary of valid units
 
     Parameters
@@ -98,7 +98,7 @@ class TimeAxisType(IntEnum):
     EquidistantCalendar = 3
     NonEquidistantCalendar = 4
 
-    def __repr__(self):
+    def __repr__(self) -> str:
 
         return self.name
 
@@ -717,30 +717,30 @@ class EUMType(IntEnum):
     DirectionalVariance = 110311
     SpecificDissipationRate = 110312
 
-    def __init__(self, code):
+    def __init__(self, code: int) -> None:
         self.code = code
 
     @property
-    def display_name(self):
+    def display_name(self) -> str:
         """Display friendly name"""
         name = self.name
         name = name.replace("_", " ")
         return name
 
-    def __repr__(self):
+    def __repr__(self) -> str:
 
         return self.display_name
 
     @property
-    def units(self):
+    def units(self) -> list[EUMUnit]:
         """List valid units for this EUM type"""
-        temp = _unit_list(self.code).items()
-        return [EUMUnit(value) for _, value in temp]
+        temp = _unit_list(self.code).values()
+        return [EUMUnit(value) for value in temp]
 
     @staticmethod
-    def search(pattern) -> List["EUMType"]:
-        temp = _type_list(pattern).items()
-        return [EUMType(key) for key, _ in temp]
+    def search(pattern: str) -> list[EUMType]:
+        temp = _type_list(pattern).keys()
+        return [EUMType(key) for key in temp]
 
 
 class EUMUnit(IntEnum):
@@ -1359,18 +1359,18 @@ class EUMUnit(IntEnum):
     lbf_sec_per_feet_pow_2 = 99265
     pound_per__sec_feet_ = 99266
 
-    def __init__(self, code):
+    def __init__(self, code: int) -> None:
         self.code = code
 
     @property
-    def display_name(self):
+    def display_name(self) -> str:
         """Display friendly name"""
         name = self.name
         name = name.replace("_", " ")
         return name
 
     @property
-    def short_name(self):
+    def short_name(self) -> str:
 
         unit_short_names = {
             "kilometer": "km",
@@ -1395,7 +1395,7 @@ class EUMUnit(IntEnum):
             name = name.replace(key, value)
         return name
 
-    def __repr__(self):
+    def __repr__(self) -> str:
 
         return self.display_name
 
@@ -1482,7 +1482,7 @@ class ItemInfo:
             raise ValueError("Invalid name, name should be a string")
         self.name: str = name
 
-    def __eq__(self, other):
+    def __eq__(self, other: Any) -> bool:
         if not isinstance(other, ItemInfo):
             return NotImplemented
 
@@ -1494,7 +1494,7 @@ class ItemInfo:
             and self.data_value_type == other.data_value_type
         )
 
-    def __repr__(self):
+    def __repr__(self) -> str:
 
         if self.data_value_type == DataValueType.Instantaneous:
             return f"{self.name} <{self.type.display_name}> ({self.unit.display_name})"
@@ -1518,7 +1518,7 @@ class ItemInfoList(list):
     def __init__(self, items: Sequence[ItemInfo]):
         super().__init__(items)
 
-    def to_dataframe(self):
+    def to_dataframe(self) -> pd.DataFrame:
         data = [
             {"name": item.name, "type": item.type.name, "unit": item.unit.name}
             for item in self

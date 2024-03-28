@@ -1,7 +1,17 @@
 from __future__ import annotations
+from collections.abc import KeysView, ValuesView
 from datetime import datetime
 from types import SimpleNamespace
-from typing import Any, Callable, Dict, List, Mapping, MutableMapping, Sequence
+from typing import (
+    Any,
+    Callable,
+    Dict,
+    ItemsView,
+    List,
+    Mapping,
+    MutableMapping,
+    Sequence,
+)
 
 import pandas as pd
 
@@ -20,11 +30,11 @@ def _merge_dict(a: Dict[str, Any], b: Mapping[str, Any]) -> Dict[str, Any]:
     return a
 
 
-class PfsNonUniqueList(list):
+class PfsNonUniqueList(list[Any]):
     pass
 
 
-class PfsSection(SimpleNamespace, MutableMapping):
+class PfsSection(SimpleNamespace, MutableMapping[str, Any]):
     @staticmethod
     def from_dataframe(df: pd.DataFrame, prefix: str) -> "PfsSection":
         """Create a PfsSection from a DataFrame
@@ -53,7 +63,7 @@ class PfsSection(SimpleNamespace, MutableMapping):
 
         return PfsSection(d)
 
-    def __init__(self, dictionary, **kwargs):
+    def __init__(self, dictionary: Mapping[str, Any], **kwargs: Any) -> None:
         super().__init__(**kwargs)
         for key, value in dictionary.items():
             self.__set_key_value(key, value, copy=True)
@@ -61,28 +71,28 @@ class PfsSection(SimpleNamespace, MutableMapping):
     def __repr__(self) -> str:
         return "\n".join(self._to_txt_lines())
 
-    def __len__(self):
+    def __len__(self) -> int:
         return len(self.__dict__)
 
-    def __iter__(self):
+    def __iter__(self) -> Any:
         iter(self)
 
-    def __contains__(self, key):
+    def __contains__(self, key: Any) -> bool:
         return key in self.keys()
 
-    def __getitem__(self, key):
+    def __getitem__(self, key: str) -> Any:
         return getattr(self, key)
 
-    def __setitem__(self, key, value):
+    def __setitem__(self, key: str, value: Any) -> None:
         self.__set_key_value(key, value)
 
-    def __delitem__(self, key):
+    def __delitem__(self, key: str) -> None:
         if key in self.keys():
             self.__delattr__(key)
         else:
             raise IndexError("Key not found")
 
-    def __set_key_value(self, key, value, copy=False):
+    def __set_key_value(self, key: str, value: Any, copy: bool = False) -> None:
         if value is None:
             value = {}
 
@@ -102,13 +112,13 @@ class PfsSection(SimpleNamespace, MutableMapping):
         else:
             self.__setattr__(key, self._parse_value(value))
 
-    def _parse_value(self, v):
+    def _parse_value(self, v: Any) -> Any:
         if isinstance(v, str) and self._str_is_scientific_float(v):
             return float(v)
         return v
 
     @staticmethod
-    def _str_is_scientific_float(s):
+    def _str_is_scientific_float(s: str) -> bool:
         """True: -1.0e2, 1E-4, -0.1E+0.5; False: E12, E-4"""
         if len(s) < 3:
             return False
@@ -132,36 +142,36 @@ class PfsSection(SimpleNamespace, MutableMapping):
         else:
             return False
 
-    def pop(self, key, *args):
+    def pop(self, key: Any, default: Any = None) -> Any:
         """If key is in the dictionary, remove it and return its
         value, else return default. If default is not given and
         key is not in the dictionary, a KeyError is raised."""
-        return self.__dict__.pop(key, *args)
+        return self.__dict__.pop(key, default)
 
-    def get(self, key, *args):
+    def get(self, key: Any, default: Any = None) -> Any:
         """Return the value for key if key is in the PfsSection,
         else default. If default is not given, it defaults to None,
         so that this method never raises a KeyError."""
-        return self.__dict__.get(key, *args)
+        return self.__dict__.get(key, default)
 
-    def clear(self):
+    def clear(self) -> None:
         """Remove all items from the PfsSection."""
         return self.__dict__.clear()
 
-    def keys(self):
+    def keys(self) -> KeysView[str]:
         """Return a new view of the PfsSection's keys"""
         return self.__dict__.keys()
 
-    def values(self):
+    def values(self) -> ValuesView[Any]:
         """Return a new view of the PfsSection's values."""
         return self.__dict__.values()
 
-    def items(self):
+    def items(self) -> ItemsView[str, Any]:
         """Return a new view of the PfsSection's items ((key, value) pairs)"""
         return self.__dict__.items()
 
     # TODO: better name
-    def update_recursive(self, key, value):
+    def update_recursive(self, key: Any, value: Any) -> None:
         """Update recursively all matches of key with value"""
         for k, v in self.items():
             if isinstance(v, PfsSection):
@@ -227,9 +237,16 @@ class PfsSection(SimpleNamespace, MutableMapping):
         )
 
     def _find_patterns_generator(
-        self, keypat=None, parampat=None, secpat=None, keylist=[], case=False
-    ):
+        self,
+        keypat: str | None = None,
+        parampat: Any = None,
+        secpat: str | None = None,
+        keylist: List[str] | None = None,
+        case: bool = False,
+    ) -> Any:
         """Look for patterns in either keys, params or sections"""
+
+        keylist = [] if keylist is None else keylist
         for k, v in self.items():
             kk = str(k) if case else str(k).lower()
 
@@ -247,7 +264,7 @@ class PfsSection(SimpleNamespace, MutableMapping):
                     yield from self._yield_deep_dict(keylist + [k], v)
 
     @staticmethod
-    def _yield_deep_dict(keys, val):
+    def _yield_deep_dict(keys: Sequence[str], val: Any) -> Any:
         """yield a deep nested dict with keys with a single deep value val"""
         for j in range(len(keys) - 1, -1, -1):
             d = {keys[j]: val}
@@ -255,7 +272,7 @@ class PfsSection(SimpleNamespace, MutableMapping):
         yield d
 
     @staticmethod
-    def _param_match(parampat: Any, v: Any, case: bool) -> bool:
+    def _param_match(parampat: Any, v: Any, case: bool) -> Any:
         if parampat is None:
             return False
         if type(v) != type(parampat):
@@ -284,7 +301,7 @@ class PfsSection(SimpleNamespace, MutableMapping):
         return lines
 
     def _write_with_func(
-        self, func: Callable, level: int = 0, newline: str = "\n"
+        self, func: Callable[[str], Any], level: int = 0, newline: str = "\n"
     ) -> None:
         """Write pfs nested objects
 
@@ -332,7 +349,9 @@ class PfsSection(SimpleNamespace, MutableMapping):
                 v = self._prepare_value_for_write(v)
                 func(f"{lvl_prefix * level}{k} = {v}{newline}")
 
-    def _prepare_value_for_write(self, v):
+    def _prepare_value_for_write(
+        self, v: str | bool | datetime | list[str | bool | datetime]
+    ) -> str:
         """catch peculiarities of string formatted pfs data
 
         Parameters
@@ -372,7 +391,7 @@ class PfsSection(SimpleNamespace, MutableMapping):
 
         return v
 
-    def to_dict(self) -> dict:
+    def to_dict(self) -> dict[str, Any]:
         """Convert to (nested) dict (as a copy)"""
         d = self.__dict__.copy()
         for key, value in d.items():
@@ -430,7 +449,7 @@ class PfsSection(SimpleNamespace, MutableMapping):
         return pd.DataFrame(res, index=range(1, n_sections + 1))
 
     @classmethod
-    def _merge_PfsSections(cls, sections: Sequence[Dict]) -> "PfsSection":
+    def _merge_PfsSections(cls, sections: Sequence[dict[str, Any]]) -> "PfsSection":
         """Merge a list of PfsSections/dict"""
         assert len(sections) > 0
         a = sections[0]
