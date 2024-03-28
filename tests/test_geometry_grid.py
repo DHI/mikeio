@@ -339,7 +339,7 @@ def test_to_mesh(tmp_path: Path):
 
     # 1
 
-    g = Grid2D(bbox=[0, 0, 1, 5])
+    g = Grid2D(bbox=(0, 0, 1, 5))
     g.to_mesh(outfilename)
 
     assert outfilename.exists()

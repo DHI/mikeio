@@ -13,15 +13,15 @@ def read_xyz(filename: str | Path) -> pd.DataFrame:
     ncol = df.shape[1]
     NAMES = ["x", "y", "z", "name"]
 
-    df.columns = NAMES[:ncol]  # type: ignore
+    df.columns = NAMES[:ncol]
 
     return df
 
 
-def dataframe_to_xyz(self, filename: str | Path) -> None:
+def dataframe_to_xyz(self: pd.DataFrame, filename: str | Path) -> None:
     # TODO validation
     self.to_csv(filename, sep="\t", header=False, index=False)
 
 
 # Monkey patch method on DataFrame for convenience
-pd.DataFrame.to_xyz = dataframe_to_xyz  # type: ignore
+pd.DataFrame.to_xyz = dataframe_to_xyz

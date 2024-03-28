@@ -5,18 +5,20 @@ from collections import Counter
 from collections.abc import Mapping, Sequence
 from datetime import datetime
 from pathlib import Path
-from typing import Callable, Dict, List, TextIO, Tuple
+from typing import Any, Callable, Dict, List, TextIO, Tuple
 
 import yaml
 
 from ._pfssection import PfsNonUniqueList, PfsSection
 
 
-def parse_yaml_preserving_duplicates(src, unique_keywords=False):
+def parse_yaml_preserving_duplicates(
+    src: Any, unique_keywords: bool = False
+) -> dict[str, Any]:
     class PreserveDuplicatesLoader(yaml.loader.Loader):
         pass
 
-    def map_constructor_duplicates(loader, node, deep=False):
+    def map_constructor_duplicates(loader: Any, node: Any, deep: bool = False) -> Any:
         keys = [loader.construct_object(node, deep=deep) for node, _ in node.value]
         vals = [loader.construct_object(node, deep=deep) for _, node in node.value]
         key_count = Counter(keys)
@@ -30,7 +32,9 @@ def parse_yaml_preserving_duplicates(src, unique_keywords=False):
                 data[key] = val
         return data
 
-    def map_constructor_duplicate_sections(loader, node, deep=False):
+    def map_constructor_duplicate_sections(
+        loader: Any, node: Any, deep: bool = False
+    ) -> Any:
         keys = [loader.construct_object(node, deep=deep) for node, _ in node.value]
         vals = [loader.construct_object(node, deep=deep) for _, node in node.value]
         key_count = Counter(keys)
@@ -85,14 +89,14 @@ class PfsDocument(PfsSection):
         self,
         data: TextIO | PfsSection | Dict | str | Path,
         *,
-        encoding="cp1252",
-        names=None,
-        unique_keywords=False,
-    ):
+        encoding: str = "cp1252",
+        names: Sequence[str] | None = None,
+        unique_keywords: bool = False,
+    ) -> None:
         if isinstance(data, (str, Path)) or hasattr(data, "read"):
             if names is not None:
                 raise ValueError("names cannot be given as argument if input is a file")
-            names, sections = self._read_pfs_file(data, encoding, unique_keywords)
+            names, sections = self._read_pfs_file(data, encoding, unique_keywords)  # type: ignore
         else:
             names, sections = self._parse_non_file_input(data, names)
 
@@ -112,7 +116,7 @@ class PfsDocument(PfsSection):
         return PfsDocument(f)
 
     @staticmethod
-    def _to_nonunique_key_dict(keys, vals):
+    def _to_nonunique_key_dict(keys: Any, vals: Any) -> dict[Any, Any]:
         key_count = Counter(keys)
         data = {}
         for key, val in zip(keys, vals):
@@ -124,15 +128,15 @@ class PfsDocument(PfsSection):
                 data[key] = val
         return data
 
-    def keys(self):
+    def keys(self) -> List[str]:  # type: ignore
         """Return a list of the PfsDocument's keys (target names)"""
         return [k for k, _ in self.items()]
 
-    def values(self):
+    def values(self) -> List[PfsSection]:  # type: ignore
         """Return a list of the PfsDocument's values (targets)."""
         return [v for _, v in self.items()]
 
-    def items(self):
+    def items(self) -> List[Tuple[str, PfsSection]]:  # type: ignore
         """Return a new view of the PfsDocument's items ((key, value) pairs)"""
         return [(k, v) for k, v in self.__dict__.items() if k not in self._ALIAS_LIST]
 
@@ -185,7 +189,12 @@ class PfsDocument(PfsSection):
 
         return PfsDocument.from_text(text)
 
-    def _read_pfs_file(self, filename, encoding, unique_keywords=False):
+    def _read_pfs_file(
+        self,
+        filename: str | Path | TextIO,
+        encoding: str | None,
+        unique_keywords: bool = False,
+    ) -> Tuple[List[str], List[PfsSection]]:
         try:
             yml = self._pfs2yaml(filename, encoding)
             target_list = parse_yaml_preserving_duplicates(yml, unique_keywords)
@@ -197,8 +206,8 @@ class PfsDocument(PfsSection):
             raise FileNotFoundError(str(e))
         except Exception as e:
             raise ValueError(f"{filename} could not be parsed. " + str(e))
-        sections = [PfsSection(list(d.values())[0]) for d in target_list]
-        names = [list(d.keys())[0] for d in target_list]
+        sections = [PfsSection(list(d.values())[0]) for d in target_list]  # type: ignore
+        names = [list(d.keys())[0] for d in target_list]  # type: ignore
         return names, sections
 
     @staticmethod
@@ -241,7 +250,7 @@ class PfsDocument(PfsSection):
         return names, sections
 
     @property
-    def _is_FM_engine(self):
+    def _is_FM_engine(self) -> bool:
         return "FemEngine" in self.names[0]
 
     def _add_all_FM_aliases(self) -> None:

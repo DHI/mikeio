@@ -1,5 +1,6 @@
 from __future__ import annotations
 from functools import cached_property
+from pathlib import Path
 from typing import Any, Iterable, Literal, Sequence, List, Tuple
 
 import numpy as np
@@ -9,7 +10,7 @@ from mikecore.DfsuFile import DfsuFileType
 from ._FM_geometry import GeometryFM2D, _GeometryFM, _GeometryFMPlotter
 from ._geometry import GeometryPoint3D
 
-from ._FM_utils import _plot_vertical_profile
+from ._FM_utils import _plot_vertical_profile, BoundaryPolylines
 
 from ._utils import _relative_cumulative_distance
 
@@ -265,16 +266,16 @@ class _GeometryFMLayered(_GeometryFM):
         return geom
 
     @cached_property
-    def n_elements(self):
+    def n_elements(self) -> int:
         """Number of 3d elements"""
         return len(self.element_table)
 
     @property
-    def n_nodes(self):
+    def n_nodes(self) -> int:
         return len(self.node_coordinates)
 
     @property
-    def is_2d(self):
+    def is_2d(self) -> bool:
         return False
 
     @property
@@ -286,7 +287,7 @@ class _GeometryFMLayered(_GeometryFM):
         return True
 
     @cached_property
-    def layer_ids(self):
+    def layer_ids(self) -> np.ndarray:
         """The layer number (0=bottom, 1, 2, ...) for each 3d element"""
         if self._layer_ids is None:
             res = self._get_2d_to_3d_association()
@@ -311,7 +312,7 @@ class _GeometryFMLayered(_GeometryFM):
         return self.n_layers - self.n_sigma_layers
 
     @cached_property
-    def top_elements(self):
+    def top_elements(self) -> np.ndarray:
         """List of 3d element ids of surface layer"""
         # note: if subset of elements is selected then this cannot be done!
 
@@ -326,7 +327,9 @@ class _GeometryFMLayered(_GeometryFM):
             # slow path
             return self._find_top_layer_elements(self.element_table)
 
-    def _elements_in_area(self, area):
+    def _elements_in_area(
+        self, area: Sequence[Tuple[float, float]] | Sequence[float]
+    ) -> np.ndarray:
         """Find element ids of elements inside area"""
         idx2d = self.geometry2d._elements_in_area(area)
         if len(idx2d) > 0:
@@ -642,13 +645,13 @@ class GeometryFM3D(_GeometryFMLayered):
         self.plot = _GeometryFMPlotter(self)
 
     @property
-    def boundary_polylines(self):
+    def boundary_polylines(self) -> BoundaryPolylines:
         return self.geometry2d.boundary_polylines
 
-    def contains(self, points) -> np.ndarray:
+    def contains(self, points: np.ndarray) -> np.ndarray:
         return self.geometry2d.contains(points)
 
-    def to_mesh(self, outfilename):
+    def to_mesh(self, outfilename: str | Path) -> None:
         return self.geometry2d.to_mesh(outfilename)
 
     def find_index(
