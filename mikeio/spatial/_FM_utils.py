@@ -1,3 +1,4 @@
+from __future__ import annotations
 from typing import Any, Literal, Sequence, Tuple
 from matplotlib.axes import Axes
 from matplotlib.colors import Colormap
