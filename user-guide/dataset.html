@@ -167,7 +167,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
         <i class="bi bi-layout-text-sidebar-reverse"></i>
       </button>
         <a class="flex-grow-1 no-decor" role="button" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
-          <h1 class="quarto-secondary-nav-title"></h1>
+          <h1 class="quarto-secondary-nav-title">Dataset</h1>
         </a>     
       <button type="button" class="btn quarto-search-button" aria-label="" onclick="window.quartoOpenSearch();">
         <i class="bi bi-search"></i>
@@ -343,9 +343,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     <h2 id="toc-title">On this page</h2>
    
   <ul>
-  <li><a href="#dataset" id="toc-dataset" class="nav-link active" data-scroll-target="#dataset">Dataset</a>
-  <ul class="collapse">
-  <li><a href="#selecting-items" id="toc-selecting-items" class="nav-link" data-scroll-target="#selecting-items"><i class="fa-solid fa-filter" aria-label="filter"></i> Selecting items</a></li>
+  <li><a href="#selecting-items" id="toc-selecting-items" class="nav-link active" data-scroll-target="#selecting-items"><i class="fa-solid fa-filter" aria-label="filter"></i> Selecting items</a></li>
   <li><a href="#temporal-selection" id="toc-temporal-selection" class="nav-link" data-scroll-target="#temporal-selection"><i class="fa-solid fa-calendar" aria-label="calendar"></i> Temporal selection</a></li>
   <li><a href="#spatial-selection" id="toc-spatial-selection" class="nav-link" data-scroll-target="#spatial-selection"><i class="fa-solid fa-map" aria-label="map"></i> Spatial selection</a></li>
   <li><a href="#plotting" id="toc-plotting" class="nav-link" data-scroll-target="#plotting"><i class="fa-solid fa-chart-line" aria-label="chart-line"></i> Plotting</a></li>
@@ -355,18 +353,31 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <li><a href="#mathematical-operations" id="toc-mathematical-operations" class="nav-link" data-scroll-target="#mathematical-operations"><i class="fa-solid fa-calculator" aria-label="calculator"></i> Mathematical operations</a></li>
   <li><a href="#conversion" id="toc-conversion" class="nav-link" data-scroll-target="#conversion">Conversion:</a></li>
   </ul></li>
-  </ul></li>
   </ul>
 <div class="toc-actions"><ul><li><a href="https://github.com/DHI/mikeio/edit/main/docs/user-guide/dataset.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li></ul></div></nav>
     </div>
 <!-- main -->
 <main class="content" id="quarto-document-content">
 
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title d-none d-lg-block">Dataset</h1>
+</div>
 
 
 
-<section id="dataset" class="level1">
-<h1>Dataset</h1>
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
 <p>The <a href="../api/Dataset.html#mikeio.Dataset">Dataset</a> is the MIKE IO data structure for data from dfs files. The <a href="../api/read.html#mikeio.read"><code>mikeio.read</code></a> methods returns a Dataset as a container of <a href="../api/DataArray.html#mikeio.DataArray">DataArray</a> (Dfs items). Each DataArray has the properties, <em>item</em>, <em>time</em>, <em>geometry</em> and <em>values</em>. The time and geometry are common to all DataArrays in the Dataset.</p>
 <p>The Dataset has the following primary properties:</p>
 <ul>
@@ -375,18 +386,22 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <li><strong>geometry</strong> - a Geometry object with the spatial description of the data</li>
 </ul>
 <p>Use Dataset’s string representation to get an overview of the Dataset</p>
-<div class="sourceCode" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> <span class="im">import</span> mikeio</span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> ds <span class="op">=</span> mikeio.read(<span class="st">"testdata/HD2D.dfsu"</span>)</span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> ds</span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="op">&lt;</span>mikeio.Dataset<span class="op">&gt;</span></span>
-<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>dims: (time:<span class="dv">9</span>, element:<span class="dv">884</span>)</span>
-<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>time: <span class="dv">1985</span><span class="op">-</span><span class="dv">0</span><span class="er">8</span><span class="op">-</span><span class="dv">0</span><span class="er">6</span> <span class="dv">0</span><span class="er">7</span>:<span class="dv">00</span>:<span class="dv">00</span> <span class="op">-</span> <span class="dv">1985</span><span class="op">-</span><span class="dv">0</span><span class="er">8</span><span class="op">-</span><span class="dv">0</span><span class="er">7</span> <span class="dv">0</span><span class="er">3</span>:<span class="dv">00</span>:<span class="dv">00</span> (<span class="dv">9</span> records)</span>
-<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>geometry: Dfsu2D (<span class="dv">884</span> elements, <span class="dv">529</span> nodes)</span>
-<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>items:</span>
-<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>  <span class="dv">0</span>:  Surface elevation <span class="op">&lt;</span>Surface Elevation<span class="op">&gt;</span> (meter)</span>
-<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>  <span class="dv">1</span>:  U velocity <span class="op">&lt;</span>u velocity component<span class="op">&gt;</span> (meter per sec)</span>
-<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>  <span class="dv">2</span>:  V velocity <span class="op">&lt;</span>v velocity component<span class="op">&gt;</span> (meter per sec)</span>
-<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>  <span class="dv">3</span>:  Current speed <span class="op">&lt;</span>Current Speed<span class="op">&gt;</span> (meter per sec)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div id="9b14251b" class="cell" data-execution_count="1">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> mikeio</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>ds <span class="op">=</span> mikeio.read(<span class="st">"../data/HD2D.dfsu"</span>)</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>ds</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="1">
+<pre><code>&lt;mikeio.Dataset&gt;
+dims: (time:9, element:884)
+time: 1985-08-06 07:00:00 - 1985-08-07 03:00:00 (9 records)
+geometry: Dfsu2D (884 elements, 529 nodes)
+items:
+  0:  Surface elevation &lt;Surface Elevation&gt; (meter)
+  1:  U velocity &lt;u velocity component&gt; (meter per sec)
+  2:  V velocity &lt;v velocity component&gt; (meter per sec)
+  3:  Current speed &lt;Current Speed&gt; (meter per sec)</code></pre>
+</div>
+</div>
 <section id="selecting-items" class="level2">
 <h2 class="anchored" data-anchor-id="selecting-items"><i class="fa-solid fa-filter" aria-label="filter"></i> Selecting items</h2>
 <p>Selecting a specific item “itemA” (at position 0) from a Dataset ds can be done with:</p>
@@ -398,12 +413,16 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <li><code>ds.itemA</code> - returns “itemA” DataArray</li>
 </ul>
 <p>We recommend the use <em>named</em> items for readability.</p>
-<pre><code>&gt;&gt;&gt; ds.Surface_elevation
-&lt;mikeio.DataArray&gt;
+<div id="26c5c0eb" class="cell" data-execution_count="2">
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>ds.Surface_elevation</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="2">
+<pre><code>&lt;mikeio.DataArray&gt;
 name: Surface elevation
 dims: (time:9, element:884)
 time: 1985-08-06 07:00:00 - 1985-08-07 03:00:00 (9 records)
 geometry: Dfsu2D (884 elements, 529 nodes)</code></pre>
+</div>
+</div>
 <p>Negative index e.g.&nbsp;ds[-1] can also be used to select from the end. Several items (“itemA” at 0 and “itemC” at 2) can be selected with the notation:</p>
 <ul>
 <li><code>ds[["itemA", "itemC"]]</code></li>
@@ -414,41 +433,52 @@ geometry: Dfsu2D (884 elements, 529 nodes)</code></pre>
 <section id="temporal-selection" class="level2">
 <h2 class="anchored" data-anchor-id="temporal-selection"><i class="fa-solid fa-calendar" aria-label="calendar"></i> Temporal selection</h2>
 <p>A time slice of a Dataset can be selected in several different ways.</p>
-<div class="sourceCode" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> ds.sel(time<span class="op">=</span><span class="st">"1985-08-06 12:00"</span>)</span>
-<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="op">&lt;</span>mikeio.Dataset<span class="op">&gt;</span></span>
-<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>dims: (element:<span class="dv">884</span>)</span>
-<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>time: <span class="dv">1985</span><span class="op">-</span><span class="dv">0</span><span class="er">8</span><span class="op">-</span><span class="dv">0</span><span class="er">6</span> <span class="dv">12</span>:<span class="dv">00</span>:<span class="dv">00</span> (time<span class="op">-</span>invariant)</span>
-<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>geometry: Dfsu2D (<span class="dv">884</span> elements, <span class="dv">529</span> nodes)</span>
-<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>items:</span>
-<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>  <span class="dv">0</span>:  Surface elevation <span class="op">&lt;</span>Surface Elevation<span class="op">&gt;</span> (meter)</span>
-<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>  <span class="dv">1</span>:  U velocity <span class="op">&lt;</span>u velocity component<span class="op">&gt;</span> (meter per sec)</span>
-<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>  <span class="dv">2</span>:  V velocity <span class="op">&lt;</span>v velocity component<span class="op">&gt;</span> (meter per sec)</span>
-<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>  <span class="dv">3</span>:  Current speed <span class="op">&lt;</span>Current Speed<span class="op">&gt;</span> (meter per sec)</span>
-<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> ds[<span class="st">"1985-8-7"</span>:]</span>
-<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a><span class="op">&lt;</span>mikeio.Dataset<span class="op">&gt;</span></span>
-<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a>dims: (time:<span class="dv">2</span>, element:<span class="dv">884</span>)</span>
-<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a>time: <span class="dv">1985</span><span class="op">-</span><span class="dv">0</span><span class="er">8</span><span class="op">-</span><span class="dv">0</span><span class="er">7</span> <span class="dv">00</span>:<span class="dv">30</span>:<span class="dv">00</span> <span class="op">-</span> <span class="dv">1985</span><span class="op">-</span><span class="dv">0</span><span class="er">8</span><span class="op">-</span><span class="dv">0</span><span class="er">7</span> <span class="dv">0</span><span class="er">3</span>:<span class="dv">00</span>:<span class="dv">00</span> (<span class="dv">2</span> records)</span>
-<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a>geometry: Dfsu2D (<span class="dv">884</span> elements, <span class="dv">529</span> nodes)</span>
-<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a>items:</span>
-<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a>  <span class="dv">0</span>:  Surface elevation <span class="op">&lt;</span>Surface Elevation<span class="op">&gt;</span> (meter)</span>
-<span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a>  <span class="dv">1</span>:  U velocity <span class="op">&lt;</span>u velocity component<span class="op">&gt;</span> (meter per sec)</span>
-<span id="cb3-20"><a href="#cb3-20" aria-hidden="true" tabindex="-1"></a>  <span class="dv">2</span>:  V velocity <span class="op">&lt;</span>v velocity component<span class="op">&gt;</span> (meter per sec)</span>
-<span id="cb3-21"><a href="#cb3-21" aria-hidden="true" tabindex="-1"></a>  <span class="dv">3</span>:  Current speed <span class="op">&lt;</span>Current Speed<span class="op">&gt;</span> (meter per sec)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div id="a24b0fc7" class="cell" data-execution_count="3">
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>ds.sel(time<span class="op">=</span><span class="st">"1985-08-06 12:00"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="3">
+<pre><code>&lt;mikeio.Dataset&gt;
+dims: (element:884)
+time: 1985-08-06 12:00:00 (time-invariant)
+geometry: Dfsu2D (884 elements, 529 nodes)
+items:
+  0:  Surface elevation &lt;Surface Elevation&gt; (meter)
+  1:  U velocity &lt;u velocity component&gt; (meter per sec)
+  2:  V velocity &lt;v velocity component&gt; (meter per sec)
+  3:  Current speed &lt;Current Speed&gt; (meter per sec)</code></pre>
+</div>
+</div>
+<div id="4aa154bf" class="cell" data-execution_count="4">
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>ds[<span class="st">"1985-8-7"</span>:]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="4">
+<pre><code>&lt;mikeio.Dataset&gt;
+dims: (time:2, element:884)
+time: 1985-08-07 00:30:00 - 1985-08-07 03:00:00 (2 records)
+geometry: Dfsu2D (884 elements, 529 nodes)
+items:
+  0:  Surface elevation &lt;Surface Elevation&gt; (meter)
+  1:  U velocity &lt;u velocity component&gt; (meter per sec)
+  2:  V velocity &lt;v velocity component&gt; (meter per sec)
+  3:  Current speed &lt;Current Speed&gt; (meter per sec)</code></pre>
+</div>
+</div>
 </section>
 <section id="spatial-selection" class="level2">
 <h2 class="anchored" data-anchor-id="spatial-selection"><i class="fa-solid fa-map" aria-label="map"></i> Spatial selection</h2>
-<p>The <code>sel</code> method finds the nearest element.</p>
-<div class="sourceCode" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> ds.sel(x<span class="op">=</span><span class="dv">607002</span>, y<span class="op">=</span><span class="dv">6906734</span>)</span>
-<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="op">&lt;</span>mikeio.Dataset<span class="op">&gt;</span></span>
-<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>dims: (time:<span class="dv">9</span>)</span>
-<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>time: <span class="dv">1985</span><span class="op">-</span><span class="dv">0</span><span class="er">8</span><span class="op">-</span><span class="dv">0</span><span class="er">6</span> <span class="dv">0</span><span class="er">7</span>:<span class="dv">00</span>:<span class="dv">00</span> <span class="op">-</span> <span class="dv">1985</span><span class="op">-</span><span class="dv">0</span><span class="er">8</span><span class="op">-</span><span class="dv">0</span><span class="er">7</span> <span class="dv">0</span><span class="er">3</span>:<span class="dv">00</span>:<span class="dv">00</span> (<span class="dv">9</span> records)</span>
-<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>geometry: GeometryPoint2D(x<span class="op">=</span><span class="fl">607002.7094112666</span>, y<span class="op">=</span><span class="fl">6906734.833048992</span>)</span>
-<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>items:</span>
-<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>  <span class="dv">0</span>:  Surface elevation <span class="op">&lt;</span>Surface Elevation<span class="op">&gt;</span> (meter)</span>
-<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>  <span class="dv">1</span>:  U velocity <span class="op">&lt;</span>u velocity component<span class="op">&gt;</span> (meter per sec)</span>
-<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>  <span class="dv">2</span>:  V velocity <span class="op">&lt;</span>v velocity component<span class="op">&gt;</span> (meter per sec)</span>
-<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>  <span class="dv">3</span>:  Current speed <span class="op">&lt;</span>Current Speed<span class="op">&gt;</span> (meter per sec)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>The <code>sel</code> method finds a single element.</p>
+<div id="f5ed4561" class="cell" data-execution_count="5">
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>ds.sel(x<span class="op">=</span><span class="dv">607002</span>, y<span class="op">=</span><span class="dv">6906734</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="5">
+<pre><code>&lt;mikeio.Dataset&gt;
+dims: (time:9)
+time: 1985-08-06 07:00:00 - 1985-08-07 03:00:00 (9 records)
+geometry: GeometryPoint2D(x=607002.7094112666, y=6906734.833048992)
+items:
+  0:  Surface elevation &lt;Surface Elevation&gt; (meter)
+  1:  U velocity &lt;u velocity component&gt; (meter per sec)
+  2:  V velocity &lt;v velocity component&gt; (meter per sec)
+  3:  Current speed &lt;Current Speed&gt; (meter per sec)</code></pre>
+</div>
+</div>
 </section>
 <section id="plotting" class="level2">
 <h2 class="anchored" data-anchor-id="plotting"><i class="fa-solid fa-chart-line" aria-label="chart-line"></i> Plotting</h2>
@@ -523,7 +553,6 @@ geometry: Dfsu2D (884 elements, 529 nodes)</code></pre>
 </ul>
 
 
-</section>
 </section>
 </section>
 
