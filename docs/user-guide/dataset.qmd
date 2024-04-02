@@ -14,19 +14,10 @@ The Dataset has the following primary properties:
 Use Dataset's string representation to get an overview of the Dataset
 
 
-```python
->>> import mikeio
->>> ds = mikeio.read("testdata/HD2D.dfsu")
->>> ds
-<mikeio.Dataset>
-dims: (time:9, element:884)
-time: 1985-08-06 07:00:00 - 1985-08-07 03:00:00 (9 records)
-geometry: Dfsu2D (884 elements, 529 nodes)
-items:
-  0:  Surface elevation <Surface Elevation> (meter)
-  1:  U velocity <u velocity component> (meter per sec)
-  2:  V velocity <v velocity component> (meter per sec)
-  3:  Current speed <Current Speed> (meter per sec)
+```{python}
+import mikeio
+ds = mikeio.read("../data/HD2D.dfsu")
+ds
 ```
 
 ## {{< fa filter >}} Selecting items
@@ -41,13 +32,8 @@ Selecting a specific item "itemA" (at position 0) from a Dataset ds can be done 
 
 We recommend the use *named* items for readability. 
 
-```
->>> ds.Surface_elevation
-<mikeio.DataArray>
-name: Surface elevation
-dims: (time:9, element:884)
-time: 1985-08-06 07:00:00 - 1985-08-07 03:00:00 (9 records)
-geometry: Dfsu2D (884 elements, 529 nodes)
+```{python}
+ds.Surface_elevation
 ```
 
 Negative index e.g. ds[-1] can also be used to select from the end. 
@@ -63,46 +49,20 @@ Note that this behavior is similar to pandas and xarray.
 
 A time slice of a Dataset can be selected in several different ways. 
 
-```python
->>> ds.sel(time="1985-08-06 12:00")
-<mikeio.Dataset>
-dims: (element:884)
-time: 1985-08-06 12:00:00 (time-invariant)
-geometry: Dfsu2D (884 elements, 529 nodes)
-items:
-  0:  Surface elevation <Surface Elevation> (meter)
-  1:  U velocity <u velocity component> (meter per sec)
-  2:  V velocity <v velocity component> (meter per sec)
-  3:  Current speed <Current Speed> (meter per sec)
+```{python}
+ds.sel(time="1985-08-06 12:00")
+```
 
->>> ds["1985-8-7":]
-<mikeio.Dataset>
-dims: (time:2, element:884)
-time: 1985-08-07 00:30:00 - 1985-08-07 03:00:00 (2 records)
-geometry: Dfsu2D (884 elements, 529 nodes)
-items:
-  0:  Surface elevation <Surface Elevation> (meter)
-  1:  U velocity <u velocity component> (meter per sec)
-  2:  V velocity <v velocity component> (meter per sec)
-  3:  Current speed <Current Speed> (meter per sec)
-
+```{python}
+ds["1985-8-7":]
 ```
 
 ## {{< fa map >}} Spatial selection
 
-The `sel` method finds the nearest element.
+The `sel` method finds a single element.
 
-```python
->>> ds.sel(x=607002, y=6906734)
-<mikeio.Dataset>
-dims: (time:9)
-time: 1985-08-06 07:00:00 - 1985-08-07 03:00:00 (9 records)
-geometry: GeometryPoint2D(x=607002.7094112666, y=6906734.833048992)
-items:
-  0:  Surface elevation <Surface Elevation> (meter)
-  1:  U velocity <u velocity component> (meter per sec)
-  2:  V velocity <v velocity component> (meter per sec)
-  3:  Current speed <Current Speed> (meter per sec)
+```{python}
+ds.sel(x=607002, y=6906734)
 ```
 
 
@@ -128,8 +88,6 @@ The Dataset (and DataArray) has several properties:
 * timestep - Time step in seconds (if is_equidistant)
 * shape - Shape of each item
 * deletevalue - File delete value (NaN value)
-
-
 
 ## Methods
 
