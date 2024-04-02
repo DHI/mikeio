@@ -30,7 +30,7 @@ def _merge_dict(a: Dict[str, Any], b: Mapping[str, Any]) -> Dict[str, Any]:
     return a
 
 
-class PfsNonUniqueList(list[Any]):
+class PfsNonUniqueList(list):
     pass
 
 
