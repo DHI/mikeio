@@ -76,7 +76,7 @@ interlinks:
       pandas: 
         url: https://pandas.pydata.org/docs/
       scipy: 
-        url: https://docs.scipy.org/doc/scipy/reference/
+        url: https://docs.scipy.org/doc/scipy/
 
 quartodoc:
   style: pkgdown
