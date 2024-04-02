@@ -87,7 +87,7 @@ class PfsDocument(PfsSection):
 
     def __init__(
         self,
-        data: TextIO | PfsSection | Dict | str | Path,
+        data: TextIO | PfsSection | Mapping[str | PfsSection, Any] | str | Path,
         *,
         encoding: str = "cp1252",
         names: Sequence[str] | None = None,
@@ -132,11 +132,11 @@ class PfsDocument(PfsSection):
         """Return a list of the PfsDocument's keys (target names)"""
         return [k for k, _ in self.items()]
 
-    def values(self) -> List[PfsSection]:  # type: ignore
+    def values(self) -> List[PfsSection | PfsNonUniqueList]:  # type: ignore
         """Return a list of the PfsDocument's values (targets)."""
         return [v for _, v in self.items()]
 
-    def items(self) -> List[Tuple[str, PfsSection]]:  # type: ignore
+    def items(self) -> List[Tuple[str, PfsSection | PfsNonUniqueList]]:  # type: ignore
         """Return a new view of the PfsDocument's items ((key, value) pairs)"""
         return [(k, v) for k, v in self.__dict__.items() if k not in self._ALIAS_LIST]
 
@@ -212,7 +212,12 @@ class PfsDocument(PfsSection):
 
     @staticmethod
     def _parse_non_file_input(
-        input: Dict | PfsSection | Sequence[PfsSection] | Sequence[Dict],
+        input: (
+            Mapping[str | PfsSection, Any]
+            | PfsSection
+            | Sequence[PfsSection]
+            | Sequence[Dict]
+        ),
         names: Sequence[str] | None = None,
     ) -> Tuple[Sequence[str], List[PfsSection]]:
         """dict/PfsSection or lists of these can be parsed"""

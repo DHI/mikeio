@@ -693,7 +693,7 @@ class Dataset:
                 return False
         return True
 
-    def _is_key_time(self, key):  # type: ignore
+    def _is_key_time(self, key: Any) -> bool:
         if isinstance(key, slice):
             return False
         if isinstance(key, (int, float)):
@@ -706,7 +706,7 @@ class Dataset:
         if isinstance(key, (datetime, np.datetime64, pd.Timestamp)):
             return True
 
-        return False
+        return False  # type: ignore
 
     def _multi_indexing_attempted(self, key: Any) -> bool:
         # find out if user is attempting ds[2, :, 1] or similar (not allowed)
