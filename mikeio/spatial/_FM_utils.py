@@ -1,3 +1,6 @@
+from typing import Any, Literal, Sequence, Tuple
+from matplotlib.axes import Axes
+from matplotlib.colors import Colormap
 import numpy as np
 from collections import namedtuple
 
@@ -14,26 +17,28 @@ BoundaryPolylines = namedtuple(
 
 
 def _plot_map(
-    node_coordinates,
-    element_table,
-    element_coordinates,
+    node_coordinates: np.ndarray,
+    element_table: np.ndarray,
+    element_coordinates: np.ndarray,
     boundary_polylines: BoundaryPolylines,
-    projection="",
-    z=None,
-    plot_type="patch",
-    title=None,
-    label=None,
-    cmap=None,
-    vmin=None,
-    vmax=None,
-    levels=None,
-    n_refinements=0,
-    show_mesh=False,
-    show_outline=True,
-    figsize=None,
-    ax=None,
-    add_colorbar=True,
-):
+    projection: str = "",
+    z: np.ndarray | None = None,
+    plot_type: Literal[
+        "patch", "mesh_only", "shaded", "contour", "contourf", "outline_only"
+    ] = "patch",
+    title: str | None = None,
+    label: str | None = None,
+    cmap: Colormap | None = None,
+    vmin: float | None = None,
+    vmax: float | None = None,
+    levels: int | Sequence[float] | None = None,
+    n_refinements: int = 0,
+    show_mesh: bool = False,
+    show_outline: bool = True,
+    figsize: Tuple[float, float] | None = None,
+    ax: Axes | None = None,
+    add_colorbar: bool = True,
+) -> Axes:
     """
     Plot unstructured data and/or mesh, mesh outline
 
@@ -213,7 +218,8 @@ def _plot_map(
 
     __set_plot_limits(ax, nc)
 
-    ax.set_title(title)
+    if title:
+        ax.set_title(title)
 
     return ax
 
@@ -474,7 +480,7 @@ def __add_colorbar(ax, cmap_ScMappable, fig_obj, label, levels, cbar_extend) -> 
     )
 
 
-def __set_aspect_ratio(ax, nc, projection):
+def __set_aspect_ratio(ax: Axes, nc: np.ndarray, projection: str) -> None:
     """set aspect ratio
 
     Parameters
@@ -498,7 +504,9 @@ def __set_aspect_ratio(ax, nc, projection):
         ax.set_aspect("equal")
 
 
-def __add_non_tri_mesh(ax, nc, element_table, plot_type) -> None:
+def __add_non_tri_mesh(
+    ax: Axes, nc: np.ndarray, element_table: np.ndarray, plot_type: str
+) -> None:
     """add non-triangular mesh to axes
 
     Parameters
@@ -533,7 +541,7 @@ def __add_non_tri_mesh(ax, nc, element_table, plot_type) -> None:
     ax.add_collection(p)
 
 
-def __add_outline(ax, boundary_polylines: BoundaryPolylines) -> None:
+def __add_outline(ax: Axes, boundary_polylines: BoundaryPolylines) -> None:
     """add outline to axes
 
     Parameters
@@ -553,7 +561,7 @@ def __add_outline(ax, boundary_polylines: BoundaryPolylines) -> None:
         ax.plot(*line.xy.T, color="0.4", linewidth=1.2)
 
 
-def _set_xy_label_by_projection(ax, projection):
+def _set_xy_label_by_projection(ax: Axes, projection: str) -> None:
     if (not projection) or projection == "NON-UTM":
         ax.set_xlabel("x [m]")
         ax.set_ylabel("y [m]")
@@ -565,11 +573,11 @@ def _set_xy_label_by_projection(ax, projection):
         ax.set_ylabel("Northing [m]")
 
 
-def __is_tri_only(element_table):
+def __is_tri_only(element_table: np.ndarray) -> bool:
     return max([len(el) for el in element_table]) == 3
 
 
-def _to_polygons(node_coordinates, element_table):
+def _to_polygons(node_coordinates: np.ndarray, element_table: np.ndarray) -> list[Any]:
     """generate matplotlib polygons from element table for plotting
 
     Returns
@@ -594,8 +602,12 @@ def _to_polygons(node_coordinates, element_table):
 
 
 def _get_node_centered_data(
-    node_coordinates, element_table, element_coordinates, data, extrapolate=True
-):
+    node_coordinates: np.ndarray,
+    element_table: np.ndarray,
+    element_coordinates: np.ndarray,
+    data: np.ndarray,
+    extrapolate: bool = True,
+) -> np.ndarray:
     """convert cell-centered data to node-centered by pseudo-laplacian method
 
     Parameters
@@ -654,13 +666,16 @@ def _get_node_centered_data(
 
 
 def __create_tri_only_element_table(
-    node_coordinates, element_table, element_coordinates, data
-):
+    node_coordinates: np.ndarray,
+    element_table: np.ndarray,
+    element_coordinates: np.ndarray,
+    data: np.ndarray,
+) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
     """Convert quad/tri mesh to pure tri-mesh"""
 
     if __is_tri_only(element_table):
         # already tri-only? just convert to 2d array
-        return np.stack(element_table), element_coordinates, data
+        return np.stack(element_table), element_coordinates, data  # type: ignore
 
     ec = element_coordinates.copy()
 
@@ -686,7 +701,9 @@ def __create_tri_only_element_table(
     return np.asarray(elem_table), ec, data
 
 
-def __cbar_extend(calc_data, vmin, vmax) -> str:
+def __cbar_extend(
+    calc_data: np.ndarray | None, vmin: float | None, vmax: float | None
+) -> str:
     if calc_data is None:
         return "neither"
     extend_min = calc_data.min() < vmin if vmin is not None else False
@@ -703,17 +720,17 @@ def __cbar_extend(calc_data, vmin, vmax) -> str:
 
 
 def _plot_vertical_profile(
-    node_coordinates,
-    element_table,
-    values,
-    zn=None,
-    is_geo=False,
-    cmin=None,
-    cmax=None,
-    label="",
-    add_colorbar=True,
-    **kwargs,
-):
+    node_coordinates: np.ndarray,
+    element_table: np.ndarray,
+    values: np.ndarray,
+    zn: np.ndarray | None = None,
+    is_geo: bool = False,
+    cmin: float | None = None,
+    cmax: float | None = None,
+    label: str = "",
+    add_colorbar: bool = True,
+    **kwargs: Any,
+) -> Axes:
     """
     Plot unstructured vertical profile
 
@@ -806,7 +823,7 @@ def _plot_vertical_profile(
     return ax
 
 
-def _Get_2DVertical_elements(element_table):
+def _Get_2DVertical_elements(element_table: np.ndarray) -> np.ndarray:
     # if (type == DfsuFileType.DfsuVerticalProfileSigmaZ) or (
     #     type == DfsuFileType.DfsuVerticalProfileSigma
     # ):
