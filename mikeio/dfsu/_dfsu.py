@@ -1,7 +1,7 @@
 from __future__ import annotations
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Sequence, Tuple
+from typing import Any, Literal, Sequence, Tuple
 
 import numpy as np
 import pandas as pd
@@ -272,7 +272,7 @@ class Dfsu2DH:
         self._items = info.items
         self._geometry = self._read_geometry(self._filename)
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         out = [f"<mikeio.{self.__class__.__name__}>"]
 
         out.append(f"number of elements: {self.geometry.n_elements}")
@@ -293,7 +293,7 @@ class Dfsu2DH:
         return str.join("\n", out)
 
     @property
-    def geometry(self):
+    def geometry(self) -> Any:
         return self._geometry
 
     @property
@@ -488,7 +488,12 @@ class Dfsu2DH:
             data_list, time, items, geometry=geometry, dims=dims, validate=False
         )
 
-    def _parse_geometry_sel(self, area, x, y):
+    def _parse_geometry_sel(
+        self,
+        area: Tuple[float, float, float, float] | None,
+        x: float | None,
+        y: float | None,
+    ) -> np.ndarray | None:
         """Parse geometry selection
 
         Parameters
@@ -529,7 +534,14 @@ class Dfsu2DH:
 
         return elements
 
-    def get_overset_grid(self, dx=None, dy=None, nx=None, ny=None, buffer=0.0):
+    def get_overset_grid(
+        self,
+        dx: float | None = None,
+        dy: float | None = None,
+        nx: int | None = None,
+        ny: int | None = None,
+        buffer: float = 0.0,
+    ) -> Grid2D:
         """get a 2d grid that covers the domain by specifying spacing or shape
 
         Parameters
@@ -573,7 +585,13 @@ class Dfsu2DH:
 
         return itemdata.Data, itemdata.Time
 
-    def extract_track(self, track, items=None, method="nearest", dtype=np.float32):
+    def extract_track(
+        self,
+        track: pd.DataFrame,
+        items: int | str | Sequence[int | str] | None = None,
+        method: Literal["nearest", "inverse_distance"] = "nearest",
+        dtype: Any = np.float32,
+    ) -> Dataset:
         """
         Extract track data from a dfsu file
 

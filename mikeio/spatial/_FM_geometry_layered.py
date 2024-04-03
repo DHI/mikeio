@@ -3,6 +3,7 @@ from functools import cached_property
 from pathlib import Path
 from typing import Any, Iterable, Literal, Sequence, List, Tuple
 
+from matplotlib.axes import Axes
 import numpy as np
 from mikecore.DfsuFile import DfsuFileType
 
@@ -411,7 +412,7 @@ class _GeometryFMLayered(_GeometryFM):
         """List of 3d element ids of bottom layer"""
         return self.top_elements - self.n_layers_per_column + 1
 
-    def get_layer_elements(self, layers: int | Layer | Iterable[int]) -> np.ndarray:
+    def get_layer_elements(self, layers: int | Layer | Sequence[int]) -> np.ndarray:
         """3d element ids for one (or more) specific layer(s)
 
         Parameters
@@ -508,7 +509,7 @@ class _GeometryFMLayered(_GeometryFM):
         layerid = np.array(layerid)
         return e2_to_e3, index2d, layerid
 
-    def _z_idx_in_column(self, e3_col, z):
+    def _z_idx_in_column(self, e3_col: np.ndarray, z: np.ndarray) -> np.ndarray:
         dz = self._dz[e3_col]
         z_col = self.element_coordinates[e3_col, 2]
         z_face = np.append(z_col - dz / 2, z_col[-1] + dz[-1] / 2)
@@ -520,7 +521,9 @@ class _GeometryFMLayered(_GeometryFM):
         idx = np.searchsorted(z_face, z) - 1
         return idx
 
-    def _find_elem3d_from_elem2d(self, elem2d, z):
+    def _find_elem3d_from_elem2d(
+        self, elem2d: int | np.ndarray, z: np.ndarray | float
+    ) -> np.ndarray:
         """Find 3d element ids from 2d element ids and z-values"""
 
         # TODO: coordinate with _find_3d_from_2d_points()
@@ -528,6 +531,7 @@ class _GeometryFMLayered(_GeometryFM):
         elem2d = [elem2d] if np.isscalar(elem2d) else elem2d
         elem2d = np.asarray(elem2d)
         z_vec = np.full(elem2d.shape, fill_value=z) if np.isscalar(z) else z
+        assert isinstance(z_vec, np.ndarray)
         elem3d = np.full_like(elem2d, fill_value=-1)
         for j, e2 in enumerate(elem2d):
             idx_3d = np.hstack(self.e2_e3_table[e2])
@@ -588,11 +592,11 @@ class _GeometryFMLayered(_GeometryFM):
     #     return idx
 
     @cached_property
-    def _dz(self):
+    def _dz(self) -> np.ndarray:
         """Height of each 3d element (using static zn information)"""
         return self._calc_dz()
 
-    def _calc_dz(self):
+    def _calc_dz(self) -> np.ndarray:
         """Height of 3d elements using static or dynamic zn information"""
         element_table = self.element_table
         n_elements = len(element_table)
@@ -733,7 +737,7 @@ class GeometryFMVerticalProfile(_GeometryFMLayered):
         self.plot = _GeometryFMVerticalProfilePlotter(self)
 
     @cached_property
-    def relative_element_distance(self):
+    def relative_element_distance(self) -> np.ndarray:
         ec = self.element_coordinates
         nc0 = self.node_coordinates[0, :2]
         return _relative_cumulative_distance(ec, nc0, is_geo=self.is_geo)
@@ -758,7 +762,14 @@ class GeometryFMVerticalProfile(_GeometryFMLayered):
         idx = np.argmin(dd2)
         return self.relative_element_distance[idx]
 
-    def find_index(self, x=None, y=None, z=None, coords=None, layers=None):
+    def find_index(
+        self,
+        x: float | None = None,
+        y: float | None = None,
+        z: float | None = None,
+        coords: np.ndarray | None = None,
+        layers: int | Sequence[int] | Layer | None = None,
+    ) -> np.ndarray:
 
         if layers is not None:
             idx = self.get_layer_elements(layers)
@@ -774,10 +785,10 @@ class GeometryFMVerticalProfile(_GeometryFMLayered):
         ):
             if coords is not None:
                 coords = np.atleast_2d(coords)
-                xy = coords[:, :2]
-                z = coords[:, 2] if coords.shape[1] == 3 else None
+                xy = coords[:, :2]  # type: ignore
+                z = coords[:, 2] if coords.shape[1] == 3 else None  # type: ignore
             else:
-                xy = np.vstack((x, y)).T
+                xy = np.vstack((x, y)).T  # type: ignore
 
             idx_2d = self._find_nearest_element_2d(coords=xy)
 
@@ -789,7 +800,7 @@ class GeometryFMVerticalProfile(_GeometryFMLayered):
 
         return idx
 
-    def _find_nearest_element_2d(self, coords):
+    def _find_nearest_element_2d(self, coords: np.ndarray) -> np.ndarray:
         ec2d = self.element_coordinates[self.top_elements, :2]
         xe, ye = ec2d[:, 0], ec2d[:, 1]
         coords = np.atleast_2d(coords)
@@ -881,7 +892,12 @@ class _GeometryFMVerticalProfilePlotter:
     def __init__(self, geometry: "GeometryFMVerticalProfile") -> None:
         self.g = geometry
 
-    def __call__(self, ax=None, figsize=None, **kwargs):
+    def __call__(
+        self,
+        ax: Axes | None = None,
+        figsize: Tuple[float, float] | None = None,
+        **kwargs: Any,
+    ) -> Axes:
         import matplotlib.pyplot as plt
 
         if ax is None:
@@ -891,7 +907,7 @@ class _GeometryFMVerticalProfilePlotter:
         ax.plot(x, y, **kwargs)
         return ax
 
-    def mesh(self, title="Mesh", edge_color="0.5", **kwargs):
+    def mesh(self, title: str = "Mesh", edge_color: str = "0.5", **kwargs: Any) -> Axes:
 
         v = np.full_like(self.g.element_coordinates[:, 0], np.nan)
         return _plot_vertical_profile(
