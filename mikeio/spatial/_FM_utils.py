@@ -1,7 +1,11 @@
 from __future__ import annotations
 from typing import Any, Literal, Sequence, Tuple
 from matplotlib.axes import Axes
-from matplotlib.colors import Colormap
+from matplotlib.cm import ScalarMappable
+from matplotlib.collections import PatchCollection
+from matplotlib.colors import Colormap, Normalize
+from matplotlib.figure import Figure
+from matplotlib.tri import Triangulation
 import numpy as np
 from collections import namedtuple
 
@@ -156,7 +160,7 @@ def _plot_map(
     cbar_extend = __cbar_extend(z, vmin, vmax)
 
     if plot_type == "patch":
-        fig_obj = __plot_patch(
+        fig_obj: Any = __plot_patch(
             ax, nc, element_table, show_mesh, cmap, cmap_norm, z, vmin, vmax
         )
 
@@ -225,7 +229,13 @@ def _plot_map(
     return ax
 
 
-def __set_colormap_levels(cmap, vmin, vmax, levels, z):
+def __set_colormap_levels(
+    cmap: Colormap | str,
+    vmin: float | None,
+    vmax: float | None,
+    levels: int | Sequence[float] | np.ndarray | None,
+    z: np.ndarray,
+) -> Tuple[float, float, Colormap, Normalize, ScalarMappable, np.ndarray]:
     """Set colormap, levels, vmin, vmax, and cmap_norm
 
     Parameters
@@ -273,11 +283,11 @@ def __set_colormap_levels(cmap, vmin, vmax, levels, z):
     if levels is not None:
         if np.isscalar(levels):
             n_levels = levels
-            levels = np.linspace(vmin, vmax, n_levels)
+            levels = np.linspace(vmin, vmax, n_levels)  # type: ignore
         else:
-            n_levels = len(levels)
-            vmin = min(levels)
-            vmax = max(levels)
+            n_levels = len(levels)  # type: ignore
+            vmin = min(levels)  # type: ignore
+            vmax = max(levels)  # type: ignore
 
         levels = np.array(levels)
 
@@ -289,10 +299,10 @@ def __set_colormap_levels(cmap, vmin, vmax, levels, z):
     if levels is None:
         levels = np.linspace(vmin, vmax, 10)
 
-    return vmin, vmax, cmap, cmap_norm, cmap_ScMappable, levels
+    return vmin, vmax, cmap, cmap_norm, cmap_ScMappable, levels  # type: ignore
 
 
-def __set_plot_limits(ax, nc) -> None:
+def __set_plot_limits(ax: Axes, nc: np.ndarray) -> None:
     """Set default plot limits
 
     Override with matplotlib ax.set_xlim, ax.set_ylim
@@ -305,7 +315,7 @@ def __set_plot_limits(ax, nc) -> None:
     ax.set_ylim(ymin - xybuf, ymax + xybuf)
 
 
-def __plot_mesh_only(ax, nc, element_table):
+def __plot_mesh_only(ax: Axes, nc: np.ndarray, element_table: np.ndarray) -> None:
     """plot mesh only (no data)
 
     Parameters
@@ -331,7 +341,7 @@ def __plot_mesh_only(ax, nc, element_table):
     ax.add_collection(fig_obj)
 
 
-def __plot_outline_only(ax, boundary_polylines: BoundaryPolylines):
+def __plot_outline_only(ax: Axes, boundary_polylines: BoundaryPolylines) -> Axes:
     """plot outline only (no data)
 
     Parameters
@@ -350,7 +360,17 @@ def __plot_outline_only(ax, boundary_polylines: BoundaryPolylines):
     return ax
 
 
-def __plot_patch(ax, nc, element_table, show_mesh, cmap, cmap_norm, z, vmin, vmax):
+def __plot_patch(
+    ax: Axes,
+    nc: np.ndarray,
+    element_table: np.ndarray,
+    show_mesh: bool,
+    cmap: Colormap,
+    cmap_norm: Normalize,
+    z: np.ndarray,
+    vmin: float,
+    vmax: float,
+) -> PatchCollection:
     """plot patch with data from z
 
     Parameters
@@ -380,8 +400,6 @@ def __plot_patch(ax, nc, element_table, show_mesh, cmap, cmap_norm, z, vmin, vma
         axes object
     """
 
-    from matplotlib.collections import PatchCollection
-
     patches = _to_polygons(nc, element_table)
 
     if show_mesh:
@@ -406,7 +424,13 @@ def __plot_patch(ax, nc, element_table, show_mesh, cmap, cmap_norm, z, vmin, vma
     return fig_obj
 
 
-def __get_tris(nc, element_table, ec, z, n_refinements):
+def __get_tris(
+    nc: np.ndarray,
+    element_table: np.ndarray,
+    ec: np.ndarray,
+    z: np.ndarray,
+    n_refinements: int,
+) -> Tuple[Triangulation, np.ndarray]:
     """get triangulation object and node-centered data
 
     Parameters
@@ -442,7 +466,14 @@ def __get_tris(nc, element_table, ec, z, n_refinements):
     return triang, zn
 
 
-def __add_colorbar(ax, cmap_ScMappable, fig_obj, label, levels, cbar_extend) -> None:
+def __add_colorbar(
+    ax: Axes,
+    cmap_ScMappable: ScalarMappable,
+    fig_obj: Figure,
+    label: str,
+    levels: np.ndarray,
+    cbar_extend: str,
+) -> None:
     """add colorbar to axes
 
     Parameters
@@ -472,7 +503,7 @@ def __add_colorbar(ax, cmap_ScMappable, fig_obj, label, levels, cbar_extend) -> 
     cmap_sm = cmap_ScMappable if cmap_ScMappable else fig_obj
 
     plt.colorbar(
-        cmap_sm,
+        cmap_sm,  # type: ignore
         label=label,
         cax=cax,
         ticks=levels,
