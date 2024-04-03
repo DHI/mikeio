@@ -2,6 +2,7 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Any, Collection, Sequence, Tuple, TYPE_CHECKING
 
+from matplotlib.axes import Axes
 import numpy as np
 from mikecore.DfsuFile import DfsuFile, DfsuFileType
 import pandas as pd
@@ -17,7 +18,12 @@ from ..dfs._dfs import (
 )
 from ..eum import EUMType, ItemInfo
 from .._interpolation import get_idw_interpolant, interp2d
-from ..spatial import GeometryFM3D, GeometryFMVerticalProfile, GeometryPoint3D
+from ..spatial import (
+    GeometryFM3D,
+    GeometryFMVerticalProfile,
+    GeometryPoint3D,
+    GeometryFM2D,
+)
 from ..spatial._FM_utils import _plot_vertical_profile
 from ._dfsu import (
     _get_dfsu_info,
@@ -44,7 +50,7 @@ class DfsuLayered:
         # 3d files have a zn item
         self._items = self._read_items(self._filename)
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         out = [f"<mikeio.{self.__class__.__name__}>"]
 
         out.append(f"number of elements: {self.geometry.n_elements}")
@@ -63,7 +69,7 @@ class DfsuLayered:
             for i, item in enumerate(self.items):
                 out.append(f"  {i}:  {item}")
         else:
-            out.append(f"number of items: {self.geometry.n_items}")
+            out.append(f"number of items: {self.n_items}")
         if self.n_timesteps == 1:
             out.append(f"time: time-invariant file (1 step) at {self.time[0]}")
         else:
@@ -353,8 +359,14 @@ class DfsuLayered:
 
 class Dfsu2DV(DfsuLayered):
     def plot_vertical_profile(
-        self, values, time_step=None, cmin=None, cmax=None, label="", **kwargs
-    ):
+        self,
+        values: np.ndarray | DataArray,
+        time_step: int | None = None,
+        cmin: float | None = None,
+        cmax: float | None = None,
+        label: str = "",
+        **kwargs: Any,
+    ) -> Axes:
         """
         Plot unstructured vertical profile
 
@@ -404,7 +416,7 @@ class Dfsu2DV(DfsuLayered):
 
 class Dfsu3D(DfsuLayered):
     @property
-    def geometry2d(self):
+    def geometry2d(self) -> GeometryFM2D:
         """The 2d geometry for a 3d object"""
         return self.geometry.geometry2d
 

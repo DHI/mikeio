@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import Sized, Tuple, Any
+from typing import Sequence, Sized, Tuple, Any
 from pathlib import Path
 
 import numpy as np
@@ -37,7 +37,7 @@ class DfsuSpectral:
         self._items = info.items
         self._geometry = self._read_geometry(self._filename)
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         out = [f"<mikeio.{self.__class__.__name__}>"]
 
         if self._type is not DfsuFileType.DfsuSpectral0D:
@@ -56,7 +56,7 @@ class DfsuSpectral:
             for i, item in enumerate(self.items):
                 out.append(f"  {i}:  {item}")
         else:
-            out.append(f"number of items: {self.geometry.n_items}")
+            out.append(f"number of items: {self.n_items}")
         if self.n_timesteps == 1:
             out.append(f"time: time-invariant file (1 step) at {self.time[0]}")
         else:
@@ -162,22 +162,22 @@ class DfsuSpectral:
         return geometry
 
     @property
-    def n_frequencies(self):
+    def n_frequencies(self) -> int | None:
         """Number of frequencies"""
         return 0 if self.frequencies is None else len(self.frequencies)
 
     @property
-    def frequencies(self):
+    def frequencies(self) -> np.ndarray | None:
         """Frequency axis"""
         return self.geometry._frequencies
 
     @property
-    def n_directions(self):
+    def n_directions(self) -> int | None:
         """Number of directions"""
         return 0 if self.directions is None else len(self.directions)
 
     @property
-    def directions(self):
+    def directions(self) -> np.ndarray | None:
         """Directional axis"""
         return self.geometry._directions
 
@@ -222,15 +222,15 @@ class DfsuSpectral:
     def read(
         self,
         *,
-        items=None,
-        time=None,
-        elements=None,
-        nodes=None,
-        area=None,
-        x=None,
-        y=None,
-        keepdims=False,
-        dtype=np.float32,
+        items: str | int | Sequence[str | int] | None = None,
+        time: int | str | slice | None = None,
+        elements: Sequence[int] | np.ndarray | None = None,
+        nodes: Sequence[int] | np.ndarray | None = None,
+        area: Tuple[float, float, float, float] | None = None,
+        x: float | None = None,
+        y: float | None = None,
+        keepdims: bool = False,
+        dtype: Any = np.float32,
     ) -> Dataset:
         """
         Read data from a spectral dfsu file
@@ -352,7 +352,12 @@ class DfsuSpectral:
             data_list, time, items, geometry=geometry, dims=dims, validate=False
         )
 
-    def _parse_geometry_sel(self, area, x, y):
+    def _parse_geometry_sel(
+        self,
+        area: Tuple[float, float, float, float] | None,
+        x: float | None,
+        y: float | None,
+    ) -> np.ndarray:
         """Parse geometry selection
 
         Parameters
@@ -381,19 +386,29 @@ class DfsuSpectral:
         elements = None
 
         if area is not None:
+            assert isinstance(
+                self.geometry, (GeometryFMLineSpectrum, GeometryFMAreaSpectrum)
+            )
             elements = self.geometry._elements_in_area(area)
 
         if (x is not None) or (y is not None):
+            assert isinstance(
+                self.geometry, (GeometryFMLineSpectrum, GeometryFMAreaSpectrum)
+            )
             elements = self.geometry.find_index(x=x, y=y)
 
         if (x is not None) or (y is not None) or (area is not None):
             # selection was attempted
             if (elements is None) or len(elements) == 0:
                 raise ValueError("No elements in selection!")
-
+        assert elements is not None
         return elements
 
-    def _parse_elements_nodes(self, elements, nodes):
+    def _parse_elements_nodes(
+        self,
+        elements: Sequence[int] | np.ndarray | None,
+        nodes: Sequence[int] | np.ndarray | None,
+    ) -> Tuple[Any, Any]:
         if self._type == DfsuFileType.DfsuSpectral0D:
             if elements is not None or nodes is not None:
                 raise ValueError(
@@ -410,8 +425,8 @@ class DfsuSpectral:
             if nodes is None:
                 geometry = self.geometry
             else:
-                geometry = self.geometry._nodes_to_geometry(nodes)
-                nodes = [nodes] if np.isscalar(nodes) else nodes
+                geometry = self.geometry._nodes_to_geometry(nodes)  # type: ignore
+                nodes = [nodes] if np.isscalar(nodes) else nodes  # type: ignore
             return geometry, nodes
 
         elif self._type == DfsuFileType.DfsuSpectral2D:
@@ -423,10 +438,12 @@ class DfsuSpectral:
                 geometry = self.geometry
             else:
                 elements = (
-                    [elements] if np.isscalar(elements) else list(elements)
+                    [elements] if np.isscalar(elements) else list(elements)  # type: ignore
                 )  # TODO check this
-                geometry = self.geometry.elements_to_geometry(elements)
-            return geometry, elements
+                geometry = self.geometry.elements_to_geometry(elements)  # type: ignore
+            return geometry, elements  # type: ignore
+
+        raise NotImplementedError(f"Not valid for type:{self._type}")
 
     def calc_Hm0_from_spectrum(
         self, spectrum: np.ndarray | DataArray, tail: bool = True
