@@ -357,7 +357,7 @@ class DfsuSpectral:
         area: Tuple[float, float, float, float] | None,
         x: float | None,
         y: float | None,
-    ) -> np.ndarray:
+    ) -> np.ndarray | None:
         """Parse geometry selection
 
         Parameters
@@ -401,7 +401,7 @@ class DfsuSpectral:
             # selection was attempted
             if (elements is None) or len(elements) == 0:
                 raise ValueError("No elements in selection!")
-        assert elements is not None
+
         return elements
 
     def _parse_elements_nodes(

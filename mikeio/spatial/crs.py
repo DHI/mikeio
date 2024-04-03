@@ -75,7 +75,7 @@ class CRS:
     def is_projected(self) -> bool:
         return not self.is_geographical
 
-    def to_pyproj(self) -> crs.CRS:
+    def to_pyproj(self) -> "crs.CRS":
         """
         Convert projection to pyptoj.CRS object.
 
@@ -96,7 +96,7 @@ class CRS:
             return pyproj.CRS.from_string(self.projection_string)
 
     @classmethod
-    def from_pyproj(cls, pyproj_crs: crs.CRS) -> "CRS":
+    def from_pyproj(cls, pyproj_crs: "crs.CRS") -> "CRS":
         """
         Create CRS object from pyproj.CRS object.
 

@@ -535,11 +535,11 @@ class _GeometryFMLayered(_GeometryFM):
         elem2d = [elem2d] if np.isscalar(elem2d) else elem2d
         elem2d = np.asarray(elem2d)
         z_vec = np.full(elem2d.shape, fill_value=z) if np.isscalar(z) else z
-        assert isinstance(z_vec, np.ndarray)
+
         elem3d = np.full_like(elem2d, fill_value=-1)
         for j, e2 in enumerate(elem2d):
             idx_3d = np.hstack(self.e2_e3_table[e2])
-            elem3d[j] = idx_3d[self._z_idx_in_column(idx_3d, z_vec[j])]
+            elem3d[j] = idx_3d[self._z_idx_in_column(idx_3d, z_vec[j])]  # type: ignore
 
             # z_col = self.element_coordinates[idx_3d, 2]
             # elem3d[j] = (np.abs(z_col - z_vec[j])).argmin()  # nearest
