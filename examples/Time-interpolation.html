@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.4.550">
+<meta name="generator" content="quarto-1.4.553">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
@@ -144,7 +144,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
           <div class="quarto-navbar-tools">
     <div class="dropdown">
       <a href="" title="" id="quarto-navigation-tool-dropdown-0" class="quarto-navigation-tool dropdown-toggle px-1" data-bs-toggle="dropdown" aria-expanded="false" aria-label=""><i class="bi bi-github"></i></a>
-      <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="quarto-navigation-tool-dropdown-0">
+      <ul class="dropdown-menu" aria-labelledby="quarto-navigation-tool-dropdown-0">
           <li>
             <a class="dropdown-item quarto-navbar-tools-item" href="https://github.com/DHI/mikeio">
             Source Code
@@ -376,11 +376,11 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </header>
 
 
-<div id="e92b05c1" class="cell" data-execution_count="1">
+<div id="3dcd8217" class="cell" data-execution_count="1">
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> mikeio</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<div id="a3156c1a" class="cell" data-execution_count="2">
+<div id="4927b06b" class="cell" data-execution_count="2">
 <div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>ds <span class="op">=</span> mikeio.read(<span class="st">"../data/waves.dfs2"</span>)</span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>ds</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="2">
@@ -397,7 +397,7 @@ items:
 <section id="interpolate-to-specific-timestep" class="level2">
 <h2 class="anchored" data-anchor-id="interpolate-to-specific-timestep">Interpolate to specific timestep</h2>
 <p>A common use case is to interpolate to a shorter timestep, in this case 1h.</p>
-<div id="ac98d6ab" class="cell" data-execution_count="3">
+<div id="e58802f6" class="cell" data-execution_count="3">
 <div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>ds_h <span class="op">=</span> ds.interp_time(<span class="dv">3600</span>)</span>
 <span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>ds_h</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="3">
@@ -412,14 +412,14 @@ items:
 </div>
 </div>
 <p>And to store the interpolated data in a new file.</p>
-<div id="eec8a500" class="cell" data-execution_count="4">
+<div id="84677388" class="cell" data-execution_count="4">
 <div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>ds_h.to_dfs(<span class="st">"waves_3h.dfs2"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </section>
 <section id="interpolate-to-time-axis-of-another-dataset" class="level2">
 <h2 class="anchored" data-anchor-id="interpolate-to-time-axis-of-another-dataset">Interpolate to time axis of another dataset</h2>
 <p>Read some non-equidistant data typically found in observed data.</p>
-<div id="ab7ca150" class="cell" data-execution_count="5">
+<div id="74eb27a3" class="cell" data-execution_count="5">
 <div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>ts <span class="op">=</span> mikeio.read(<span class="st">"../data/waves.dfs0"</span>)</span>
 <span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>ts</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="5">
@@ -434,10 +434,10 @@ items:
 </div>
 </div>
 <p>The observed timeseries is longer than the modelled data. Default is to fill values with NaN.</p>
-<div id="99befe84" class="cell" data-execution_count="6">
+<div id="714c246f" class="cell" data-execution_count="6">
 <div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>dsi <span class="op">=</span> ds.interp_time(ts)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<div id="5bbea037" class="cell" data-execution_count="7">
+<div id="1a90711b" class="cell" data-execution_count="7">
 <div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>dsi.time</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="7">
 <pre><code>DatetimeIndex(['2004-01-01 01:00:00', '2004-01-01 02:00:00',
@@ -455,13 +455,13 @@ items:
               dtype='datetime64[ns]', freq=None)</code></pre>
 </div>
 </div>
-<div id="14044d26" class="cell" data-execution_count="8">
+<div id="a63418a3" class="cell" data-execution_count="8">
 <div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>dsi[<span class="st">"Sign. Wave Height"</span>].shape</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="8">
 <pre><code>(24, 31, 31)</code></pre>
 </div>
 </div>
-<div id="f91266be" class="cell" data-execution_count="9">
+<div id="0f664123" class="cell" data-execution_count="9">
 <div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>ax <span class="op">=</span> dsi[<span class="st">"Sign. Wave Height"</span>].sel(x<span class="op">=</span><span class="dv">250</span>, y<span class="op">=</span><span class="dv">1200</span>).plot(marker<span class="op">=</span><span class="st">'+'</span>)</span>
 <span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>ts[<span class="st">"Sign. Wave Height"</span>].plot(ax<span class="op">=</span>ax,marker<span class="op">=</span><span class="st">'+'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display">
@@ -479,7 +479,7 @@ items:
 <p>In the example below we calculate this metric using the model data interpolated to the observed times.</p>
 <p>For a more elaborate model validation library which takes care of these things for you as well as calculating a number of relevant metrics, take a look at <a href="https://dhi.github.io/modelskill">`ModelSkill</a>.</p>
 <p>Use <code>np.nanmean</code> to skip NaN.</p>
-<div id="a334c54c" class="cell" data-execution_count="10">
+<div id="71e5a396" class="cell" data-execution_count="10">
 <div class="sourceCode cell-code" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>ts[<span class="st">"Sign. Wave Height"</span>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="10">
 <pre><code>&lt;mikeio.DataArray&gt;
@@ -490,7 +490,7 @@ geometry: GeometryUndefined()
 values: [0.06521, 0.06771, ..., 0.0576]</code></pre>
 </div>
 </div>
-<div id="487babc5" class="cell" data-execution_count="11">
+<div id="6ac72193" class="cell" data-execution_count="11">
 <div class="sourceCode cell-code" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>dsi[<span class="st">"Sign. Wave Height"</span>].sel(x<span class="op">=</span><span class="dv">250</span>, y<span class="op">=</span><span class="dv">1200</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="11">
 <pre><code>&lt;mikeio.DataArray&gt;
@@ -501,7 +501,7 @@ geometry: GeometryPoint2D(x=275.0, y=1225.0)
 values: [0.0387, 0.03939, ..., nan]</code></pre>
 </div>
 </div>
-<div id="ff84dd1c" class="cell" data-execution_count="12">
+<div id="dc0ab09c" class="cell" data-execution_count="12">
 <div class="sourceCode cell-code" id="cb19"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>diff <span class="op">=</span> (ts[<span class="st">"Sign. Wave Height"</span>]  <span class="op">-</span> dsi[<span class="st">"Sign. Wave Height"</span>].sel(x<span class="op">=</span><span class="dv">250</span>, y<span class="op">=</span><span class="dv">1200</span>))</span>
 <span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>diff.plot()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display">
@@ -512,7 +512,7 @@ values: [0.0387, 0.03939, ..., nan]</code></pre>
 </div>
 </div>
 </div>
-<div id="99a7128c" class="cell" data-execution_count="13">
+<div id="b7319fcb" class="cell" data-execution_count="13">
 <div class="sourceCode cell-code" id="cb20"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>mae <span class="op">=</span> np.<span class="bu">abs</span>(diff).nanmean().to_numpy()</span>
 <span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>mae</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="13">
@@ -522,7 +522,7 @@ values: [0.0387, 0.03939, ..., nan]</code></pre>
 </section>
 <section id="clean-up" class="level1">
 <h1>Clean up</h1>
-<div id="ab3c863d" class="cell" data-execution_count="14">
+<div id="77ab9a81" class="cell" data-execution_count="14">
 <div class="sourceCode cell-code" id="cb22"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> os</span>
 <span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a>os.remove(<span class="st">"waves_3h.dfs2"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
@@ -610,6 +610,24 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
     // clear code selection
     e.clearSelection();
   });
+    var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+    var mailtoRegex = new RegExp(/^mailto:/);
+      var filterRegex = new RegExp('/' + window.location.host + '/');
+    var isInternal = (href) => {
+        return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+    }
+    // Inspect non-navigation links and adorn them if external
+ 	var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool)');
+    for (var i=0; i<links.length; i++) {
+      const link = links[i];
+      if (!isInternal(link.href)) {
+        // undo the damage that might have been done by quarto-nav.js in the case of
+        // links that we want to consider external
+        if (link.dataset.originalHref !== undefined) {
+          link.href = link.dataset.originalHref;
+        }
+      }
+    }
   function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
     const config = {
       allowHTML: true,
@@ -644,7 +662,11 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
       try { href = new URL(href).hash; } catch {}
       const id = href.replace(/^#\/?/, "");
       const note = window.document.getElementById(id);
-      return note.innerHTML;
+      if (note) {
+        return note.innerHTML;
+      } else {
+        return "";
+      }
     });
   }
   const xrefs = window.document.querySelectorAll('a.quarto-xref');
