@@ -161,6 +161,16 @@ def test_read_area_spectrum_elements(dfsu_area):
     ds2 = dfs.read(elements=elems)
     assert ds2.shape[1] == len(elems)
     assert np.all(ds1[0].to_numpy()[:, elems, ...] == ds2[0].to_numpy())
+    assert ds2.geometry.element_coordinates[0, 0] == pytest.approx(2.651450863095597)
+    assert ds2["Energy density"].isel(time=-1).isel(frequency=0).isel(
+        direction=0
+    ).to_numpy()[0] == pytest.approx(1.770e-12)
+
+    ds3 = dfs.read(elements=[4, 3])
+    assert ds3.geometry.element_coordinates[1, 0] == pytest.approx(2.651450863095597)
+    assert ds3["Energy density"].isel(time=-1).isel(frequency=0).isel(
+        direction=0
+    ).to_numpy()[1] == pytest.approx(1.770e-12)
 
 
 def test_read_area_spectrum_xy(dfsu_area):

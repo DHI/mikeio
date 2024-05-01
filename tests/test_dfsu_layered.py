@@ -596,3 +596,13 @@ def test_read_wildcard_items():
     ds = dfs.read(items="Sal*")
     assert ds.items[0].name == "Salinity"
     assert ds.n_items == 1
+
+
+def test_read_elements_3d():
+    ds = mikeio.read("tests/testdata/oresund_sigma_z.dfsu", elements=[0, 10])
+    assert ds.geometry.element_coordinates[0][0] == pytest.approx(354020.46382194717)
+    assert ds.Salinity.to_numpy()[0, 0] == pytest.approx(23.18906021118164)
+
+    ds2 = mikeio.read("tests/testdata/oresund_sigma_z.dfsu", elements=[10, 0])
+    assert ds2.geometry.element_coordinates[1][0] == pytest.approx(354020.46382194717)
+    assert ds2.Salinity.to_numpy()[0, 1] == pytest.approx(23.18906021118164)
