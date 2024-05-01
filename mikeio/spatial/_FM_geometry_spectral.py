@@ -156,7 +156,6 @@ class GeometryFMAreaSpectrum(_GeometryFMSpectrum):
                 y=coords[1],
             )
 
-        elements = np.sort(elements)  # make sure elements are sorted!
         node_ids, elem_tbl = self._get_nodes_and_table_for_elements(elements)
         node_coords = self.node_coordinates[node_ids]
         codes = self.codes[node_ids]
@@ -209,7 +208,6 @@ class GeometryFMLineSpectrum(_GeometryFMSpectrum):
                 elements.append(j)
 
         assert len(elements) > 0, "no elements found"
-        elements = np.sort(elements)  # make sure elements are sorted!
 
         node_ids, elem_tbl = self._get_nodes_and_table_for_elements(elements)
         node_coords = self.node_coordinates[node_ids]
