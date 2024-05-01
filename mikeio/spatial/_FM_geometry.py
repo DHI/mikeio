@@ -1129,16 +1129,16 @@ class GeometryFM2D(_GeometryFM):
 
             return GeometryPoint2D(x=x, y=y, projection=self.projection)
 
-        sorted_elements = np.sort(
-            sel_elements
-        )  # make sure elements are sorted! # TODO is this necessary? If so, should be done in the initialiser
+        # sorted_elements = np.sort(
+        #    sel_elements
+        # )  # make sure elements are sorted! # TODO is this necessary? If so, should be done in the initialiser
 
         # extract information for selected elements
 
-        node_ids, elem_tbl = self._get_nodes_and_table_for_elements(sorted_elements)
+        node_ids, elem_tbl = self._get_nodes_and_table_for_elements(elements)
         node_coords = self.node_coordinates[node_ids]
         codes = self.codes[node_ids]
-        elem_ids = self.element_ids[sorted_elements]
+        elem_ids = self.element_ids[elements]
 
         return GeometryFM2D(
             node_coordinates=node_coords,
