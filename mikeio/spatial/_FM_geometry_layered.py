@@ -91,10 +91,6 @@ class _GeometryFMLayered(_GeometryFM):
 
             return GeometryPoint3D(x=x, y=y, z=z, projection=self.projection)
 
-        # sorted_elements = np.sort(
-        #    sel_elements
-        # )  # make sure elements are sorted! # TODO is this necessary?
-
         # create new geometry
         new_type = self._type
 
