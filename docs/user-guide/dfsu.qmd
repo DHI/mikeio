@@ -31,7 +31,7 @@ In MIKE Zero, node ids, element ids and layer ids are 1-based.  In MIKE IO, all 
 
 ## MIKE IO Flexible Mesh Geometry 
 
-MIKE IO has a Flexible Mesh Geometry class, [`GeometryFM`](`mikeio.spatial.GeometryFM2D`), containing the list of node coordinates and the element table which defines the mesh, as well as a number of derived properties (e.g. element coordinates) and methods making it convenient to work with the mesh. 
+MIKE IO has Flexible Mesh Geometry classes, e.g. [`GeometryFM2D`](`mikeio.spatial.GeometryFM2D`), containing the list of node coordinates and the element table which defines the mesh, as well as a number of derived properties (e.g. element coordinates) and methods making it convenient to work with the mesh. 
 
 | Property  |      Description     |
 |----------|--------------|
