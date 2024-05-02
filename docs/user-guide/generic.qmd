@@ -1,3 +1,8 @@
+---
+aliases:
+  - ../generic.html
+---
+
 # Generic
 
 The generic module contains functionality that works for all types of dfs (dfs0, dfs1, dfs2, dfs3, dfsu) files: 

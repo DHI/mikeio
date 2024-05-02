@@ -1,3 +1,8 @@
+---
+aliases:
+  - ../dataset.html
+---
+
 # Dataset
 
 The [Dataset](`mikeio.Dataset`) is the MIKE IO data structure 
