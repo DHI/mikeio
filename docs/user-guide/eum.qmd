@@ -1,3 +1,8 @@
+---
+aliases:
+  - ../eum.html
+---
+
 # EUM
 
 The dfs items in MIKE IO are represented by the `ItemInfo` class. 
