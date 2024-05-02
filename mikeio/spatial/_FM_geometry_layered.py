@@ -1,6 +1,6 @@
 from __future__ import annotations
 from functools import cached_property
-from typing import Any, Collection, Iterable, Literal, Sequence, List, Tuple
+from typing import Any, Iterable, Literal, Sequence, List, Tuple
 
 import numpy as np
 from mikecore.DfsuFile import DfsuFileType
@@ -69,14 +69,14 @@ class _GeometryFMLayered(_GeometryFM):
         return self.to_2d_geometry()
 
     def isel(
-        self, idx: Collection[int], keepdims: bool = False, **kwargs: Any
+        self, idx: Sequence[int], keepdims: bool = False, **kwargs: Any
     ) -> GeometryFM3D | GeometryPoint3D | GeometryFM2D | GeometryFMVerticalColumn:
 
         return self.elements_to_geometry(elements=idx, keepdims=keepdims)
 
     def elements_to_geometry(
         self,
-        elements: int | Collection[int],
+        elements: int | Sequence[int],
         node_layers: Layer = "all",
         keepdims: bool = False,
     ) -> GeometryFM3D | GeometryPoint3D | GeometryFM2D | GeometryFMVerticalColumn:
@@ -179,7 +179,7 @@ class _GeometryFMLayered(_GeometryFM):
 
     def _get_nodes_and_table_for_elements(
         self,
-        elements: Collection[int] | np.ndarray,
+        elements: Sequence[int] | np.ndarray,
         node_layers: Layer = "all",
     ) -> Tuple[Any, Any]:
         """list of nodes and element table for a list of elements

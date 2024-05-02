@@ -171,6 +171,25 @@ def test_read_dfsu3d_column():
     assert dscol2._zn.shape == (ds.n_timesteps, 5 * 3)
 
 
+def test_flip_column_upside_down():
+    filename = "tests/testdata/oresund_sigma_z.dfsu"
+    dfs = mikeio.open(filename)
+
+    (x, y) = (333934.1, 6158101.5)
+
+    ds = dfs.read()  # all data in file
+    dscol = ds.sel(x=x, y=y)
+    assert dscol.geometry.element_coordinates[0, 2] == pytest.approx(-7.0)
+    assert dscol.isel(time=-1).Temperature.values[0] == pytest.approx(17.460058)
+
+    idx = list(reversed(range(dscol.n_elements)))
+
+    dscol_ud = dscol.isel(element=idx)
+
+    assert dscol_ud.geometry.element_coordinates[-1, 2] == pytest.approx(-7.0)
+    assert dscol_ud.isel(time=-1).Temperature.values[-1] == pytest.approx(17.460058)
+
+
 def test_read_dfsu3d_column_save(tmp_path):
     filename = "tests/testdata/oresund_sigma_z.dfsu"
     dfs = mikeio.open(filename)

@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import Collection, Any, Tuple
+from typing import Any, Sequence, Tuple
 
 
 import numpy as np
@@ -127,12 +127,12 @@ class _GeometryFMSpectrum(GeometryFM2D):
 # TODO reconsider inheritance to avoid overriding method signature
 class GeometryFMAreaSpectrum(_GeometryFMSpectrum):
     def isel(  # type: ignore
-        self, idx: Collection[int], **kwargs: Any
+        self, idx: Sequence[int], **kwargs: Any
     ) -> "GeometryFMPointSpectrum" | "GeometryFMAreaSpectrum":
         return self.elements_to_geometry(elements=idx)
 
     def elements_to_geometry(  # type: ignore
-        self, elements: Collection[int], keepdims: bool = False
+        self, elements: Sequence[int], keepdims: bool = False
     ) -> "GeometryFMPointSpectrum" | "GeometryFMAreaSpectrum":
         """export a selection of elements to new flexible file geometry
         Parameters
