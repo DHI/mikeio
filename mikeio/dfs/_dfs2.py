@@ -256,7 +256,15 @@ class Dfs2(_Dfs123):
         The Dataset must have the same items as the dfs2 file.
         The original file is modified.
         """
-        # TODO check ds compliant with self
+        if self.geometry != ds.geometry:
+            raise ValueError("The geometry of the dataset to append does not match")
+
+        for item_s, item_o in zip(ds.items, self.items):
+            if item_s != item_o:
+                raise ValueError(
+                    f"Item in dataset {item_s.name} does not match {item_o.name}"
+                )
+
         dfs = DfsFileFactory.Dfs2FileOpenAppend(str(self._filename))
         write_dfs_data(dfs=dfs, ds=ds, n_spatial_dims=2)
 

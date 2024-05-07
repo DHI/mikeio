@@ -879,3 +879,28 @@ def test_append(tmp_path):
     assert ds3.n_timesteps == 4
     assert ds3.time[-1] == ds2.time[-1]
     assert ds3[0].values[-1, 0, 0] == ds2[0].values[-1, 0, 0]
+
+
+def test_append_mismatch_items_not_possible(tmp_path):
+    ds = mikeio.read("tests/testdata/consistency/oresundHD.dfs2", time=[0, 1])
+    ds2 = mikeio.read(
+        "tests/testdata/consistency/oresundHD.dfs2", time=[2, 3], items=[1, 2]
+    )
+
+    new_filename = tmp_path / "eq_appended.dfs2"
+    ds.to_dfs(new_filename)
+    dfs = mikeio.Dfs2(new_filename)
+    with pytest.raises(ValueError, match="Item"):
+        dfs.append(ds2)
+
+
+def test_append_mismatch_geometry(tmp_path):
+    ds = mikeio.read("tests/testdata/consistency/oresundHD.dfs2", time=[0, 1])
+    ds2 = mikeio.read("tests/testdata/consistency/oresundHD.dfs2").isel(
+        x=slice(1, None)
+    )
+    new_filename = tmp_path / "append_mismatch_geometry.dfs2"
+    ds.to_dfs(new_filename)
+    dfs = mikeio.Dfs2(new_filename)
+    with pytest.raises(ValueError, match="geometry"):
+        dfs.append(ds2)
