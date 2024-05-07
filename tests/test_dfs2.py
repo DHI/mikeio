@@ -864,3 +864,18 @@ def test_to_xarray():
     xr_da = da.to_xarray()
     assert xr_da.x[0] == pytest.approx(0.25)
     assert xr_da.y[0] == pytest.approx(0.25)
+
+
+def test_append(tmp_path):
+    ds = mikeio.read("tests/testdata/eq.dfs2", time=[0, 1])
+    ds2 = mikeio.read("tests/testdata/eq.dfs2", time=[2, 3])
+
+    new_filename = tmp_path / "eq_appended.dfs2"
+    ds.to_dfs(new_filename)
+    dfs = mikeio.Dfs2(new_filename)
+    dfs.append(ds2)
+
+    ds3 = mikeio.read(new_filename)
+    assert ds3.n_timesteps == 4
+    assert ds3.time[-1] == ds2.time[-1]
+    assert ds3[0].values[-1, 0, 0] == ds2[0].values[-1, 0, 0]

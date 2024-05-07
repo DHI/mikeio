@@ -242,6 +242,24 @@ class Dfs2(_Dfs123):
             validate=False,
         )
 
+    def append(self, ds: Dataset) -> None:
+        """
+        Append a Dataset to an existing dfs2 file
+
+        Parameters
+        ----------
+        ds: Dataset
+            Dataset to append
+
+        Notes
+        -----
+        The Dataset must have the same items as the dfs2 file.
+        The original file is modified.
+        """
+        # TODO check ds compliant with self
+        dfs = DfsFileFactory.Dfs2FileOpenAppend(str(self._filename))
+        write_dfs_data(dfs=dfs, ds=ds, n_spatial_dims=2)
+
     def _open(self) -> None:
         self._dfs = DfsFileFactory.Dfs2FileOpen(self._filename)
         self._source = self._dfs
