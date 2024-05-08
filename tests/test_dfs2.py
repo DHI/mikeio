@@ -872,7 +872,7 @@ def test_append(tmp_path):
 
     new_filename = tmp_path / "eq_appended.dfs2"
     ds.to_dfs(new_filename)
-    dfs = mikeio.Dfs2(new_filename)
+    dfs = mikeio.open(new_filename)
     dfs.append(ds2)
 
     ds3 = mikeio.read(new_filename)
@@ -889,7 +889,7 @@ def test_append_mismatch_items_not_possible(tmp_path):
 
     new_filename = tmp_path / "eq_appended.dfs2"
     ds.to_dfs(new_filename)
-    dfs = mikeio.Dfs2(new_filename)
+    dfs = mikeio.open(new_filename)
     with pytest.raises(ValueError, match="Item"):
         dfs.append(ds2)
 
@@ -901,6 +901,6 @@ def test_append_mismatch_geometry(tmp_path):
     )
     new_filename = tmp_path / "append_mismatch_geometry.dfs2"
     ds.to_dfs(new_filename)
-    dfs = mikeio.Dfs2(new_filename)
+    dfs = mikeio.open(new_filename)
     with pytest.raises(ValueError, match="geometry"):
         dfs.append(ds2)
