@@ -253,11 +253,11 @@ def test_to_xarray():
 def test_append_dfs3(tmp_path):
     fn = "tests/testdata/Karup_MIKE_SHE_head_output.dfs3"
     ds = mikeio.read(fn, time=[0, 1])
-    fp = tmp_path / "test_append.dfs3"
-    ds.to_dfs(fp)
+    new_fp = tmp_path / "test_append.dfs3"
+    ds.to_dfs(new_fp)
 
     ds2 = mikeio.read(fn, time=[2, 3])
 
-    dfs = mikeio.open(fn)
+    dfs = mikeio.open(new_fp)
 
     dfs.append(ds2)
