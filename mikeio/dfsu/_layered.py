@@ -359,7 +359,7 @@ class DfsuLayered:
                 dt=self.timestep,
             )
 
-    def append(self, ds: Dataset) -> None:
+    def append(self, ds: Dataset, validate: bool = True) -> None:
         """
         Append data to a dfsu file
 
@@ -367,20 +367,18 @@ class DfsuLayered:
         ---------
         ds: Dataset
             Dataset to append
+        validate: bool, optional
+            Validate that the dataset to append has the same geometry and items, by default True
         """
-        # TODO implement equality check for FMGgeometry
-        # if self.geometry != ds.geometry:
-        if (
-            self.geometry.n_nodes != ds.geometry.n_nodes
-            or self.geometry.n_elements != ds.geometry.n_elements
-        ):
-            raise ValueError("The geometry of the dataset to append does not match")
+        if validate:
+            if self.geometry != ds.geometry:
+                raise ValueError("The geometry of the dataset to append does not match")
 
-        for item_s, item_o in zip(ds.items, self.items):
-            if item_s != item_o:
-                raise ValueError(
-                    f"Item in dataset {item_s.name} does not match {item_o.name}"
-                )
+            for item_s, item_o in zip(ds.items, self.items):
+                if item_s != item_o:
+                    raise ValueError(
+                        f"Item in dataset {item_s.name} does not match {item_o.name}"
+                    )
 
         dfs = DfsFileFactory.DfsuFileOpenAppend(str(self._filename), parameters=None)
         write_dfsu_data(dfs=dfs, ds=ds, is_layered=ds.geometry.is_layered)
