@@ -4,6 +4,7 @@ from typing import Any, Collection, Sequence, Tuple, TYPE_CHECKING
 
 import numpy as np
 from mikecore.DfsuFile import DfsuFile, DfsuFileType
+from mikecore.DfsFileFactory import DfsFileFactory
 import pandas as pd
 from scipy.spatial import cKDTree
 from tqdm import trange
@@ -24,6 +25,7 @@ from ._dfsu import (
     get_nodes_from_source,
     get_elements_from_source,
     _validate_elements_and_geometry_sel,
+    write_dfsu_data,
 )
 
 if TYPE_CHECKING:
@@ -349,6 +351,32 @@ class DfsuLayered:
             return Dataset(
                 data_list, time, items, geometry=geometry, dims=dims, validate=False
             )
+
+    def append(self, ds: Dataset) -> None:
+        """
+        Append data to a dfsu file
+
+        Parameters
+        ---------
+        ds: Dataset
+            Dataset to append
+        """
+        # TODO implement equality check for FMGgeometry
+        # if self.geometry != ds.geometry:
+        if (
+            self.geometry.n_nodes != ds.geometry.n_nodes
+            or self.geometry.n_elements != ds.geometry.n_elements
+        ):
+            raise ValueError("The geometry of the dataset to append does not match")
+
+        for item_s, item_o in zip(ds.items, self.items):
+            if item_s != item_o:
+                raise ValueError(
+                    f"Item in dataset {item_s.name} does not match {item_o.name}"
+                )
+
+        dfs = DfsFileFactory.DfsuFileOpenAppend(str(self._filename), parameters=None)
+        write_dfsu_data(dfs=dfs, ds=ds, is_layered=ds.geometry.is_layered)
 
 
 class Dfsu2DV(DfsuLayered):

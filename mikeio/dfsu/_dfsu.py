@@ -8,6 +8,7 @@ import pandas as pd
 from mikecore.DfsFactory import DfsFactory
 from mikecore.DfsuBuilder import DfsuBuilder
 from mikecore.DfsuFile import DfsuFile, DfsuFileType
+from mikecore.DfsFileFactory import DfsFileFactory
 from mikecore.eum import eumQuantity, eumUnit
 from tqdm import trange
 
@@ -49,7 +50,7 @@ def write_dfsu(filename: str | Path, data: Dataset) -> None:
             raise ValueError("Non-equidistant time axis is not supported.")
 
         dt = (data.time[1] - data.time[0]).total_seconds()  # type: ignore
-    n_time_steps = len(data.time)
+    # n_time_steps = len(data.time)
 
     geometry = data.geometry
     dfsu_filetype = DfsuFileType.Dfsu2D
@@ -86,8 +87,32 @@ def write_dfsu(filename: str | Path, data: Dataset) -> None:
     builder.ApplicationVersion = __dfs_version__
     dfs = builder.CreateFile(filename)
 
+    # for i in range(n_time_steps):
+    #     if geometry.is_layered:
+    #         if "time" in data.dims:
+    #             assert data._zn is not None
+    #             zn = data._zn[i]
+    #         else:
+    #             zn = data._zn
+    #         dfs.WriteItemTimeStepNext(0, zn.astype(np.float32))
+    #     for da in data:
+    #         if "time" in data.dims:
+    #             d = da.to_numpy()[i, :]
+    #         else:
+    #             d = da.to_numpy()
+    #         d[np.isnan(d)] = data.deletevalue
+    #         dfs.WriteItemTimeStepNext(0, d.astype(np.float32))
+    # dfs.Close()
+    write_dfsu_data(dfs, data, geometry.is_layered)
+
+
+def write_dfsu_data(dfs: DfsuFile, ds: Dataset, is_layered: bool) -> None:
+
+    n_time_steps = len(ds.time)
+    data = ds
+
     for i in range(n_time_steps):
-        if geometry.is_layered:
+        if is_layered:
             if "time" in data.dims:
                 assert data._zn is not None
                 zn = data._zn[i]
@@ -487,6 +512,32 @@ class Dfsu2DH:
         return Dataset(
             data_list, time, items, geometry=geometry, dims=dims, validate=False
         )
+
+    def append(self, ds: Dataset) -> None:
+        """
+        Append data to an existing dfsu file
+
+        Parameters
+        ----------
+        data: Dataset
+            Dataset to be appended
+        """
+        # TODO implement equality check for FMGgeometry
+        # if self.geometry != ds.geometry:
+        if (
+            self.geometry.n_nodes != ds.geometry.n_nodes
+            or self.geometry.n_elements != ds.geometry.n_elements
+        ):
+            raise ValueError("The geometry of the dataset to append does not match")
+
+        for item_s, item_o in zip(ds.items, self.items):
+            if item_s != item_o:
+                raise ValueError(
+                    f"Item in dataset {item_s.name} does not match {item_o.name}"
+                )
+
+        dfs = DfsFileFactory.DfsuFileOpenAppend(str(self._filename), parameters=None)
+        write_dfsu_data(dfs=dfs, ds=ds, is_layered=False)
 
     def _parse_geometry_sel(self, area, x, y):
         """Parse geometry selection

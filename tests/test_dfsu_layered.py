@@ -596,3 +596,16 @@ def test_read_wildcard_items():
     ds = dfs.read(items="Sal*")
     assert ds.items[0].name == "Salinity"
     assert ds.n_items == 1
+
+
+def test_append_dfsu_3d(tmp_path):
+    ds = mikeio.read("tests/testdata/basin_3d.dfsu", time=[0, 1])
+    ds2 = mikeio.read("tests/testdata/basin_3d.dfsu", time=[2])
+    new_filename = tmp_path / "appended.dfsu"
+    ds.to_dfs(new_filename)
+    dfs = mikeio.open(new_filename)
+    dfs.append(ds2)
+
+    ds3 = mikeio.read(new_filename)
+    assert ds3.n_timesteps == 3
+    assert ds3.time[-1] == ds2.time[-1]
