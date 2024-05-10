@@ -1611,12 +1611,27 @@ def test_plot_scatter():
     ds.plot.scatter(x="Salinity", y="Temperature", title="S-vs-T")
 
 
+def test_select_single_timestep_preserves_dt():
+    ds = mikeio.read("tests/testdata/tide1.dfs1")
+    assert ds.timestep == pytest.approx(1800.0)
+    ds2 = ds.isel(time=-1)
+    assert ds2.timestep == pytest.approx(1800.0)
+
+
+def test_select_multiple_spaced_timesteps_uses_proper_dt(tmp_path):
+    ds = mikeio.read("tests/testdata/tide1.dfs1")
+    assert ds.timestep == pytest.approx(1800.0)
+    ds2 = ds.isel(time=[0, 2, 4])
+    assert ds2.timestep == pytest.approx(3600.0)
+
+
 def test_read_write_single_timestep_preserves_dt(tmp_path):
     fn = "tests/testdata/oresund_sigma_z.dfsu"
     dfs = mikeio.open(fn)
     assert dfs.timestep == pytest.approx(10800.0)
 
-    ds = dfs.read(time=0)
+    ds = dfs.read(time=[0])
+    assert ds.timestep == pytest.approx(dfs.timestep)
 
     outfn = tmp_path / "single.dfsu"
     ds.to_dfs(outfn)
