@@ -46,13 +46,7 @@ def write_dfsu(filename: str | Path, data: Dataset) -> None:
     if not data.is_equidistant:
         raise ValueError("Non-equidistant time axis is not supported.")
 
-<<<<<<< HEAD
-        dt = (data.time[1] - data.time[0]).total_seconds()  # type: ignore
-    # n_time_steps = len(data.time)
-=======
     dt = data.timestep
-    n_time_steps = len(data.time)
->>>>>>> 778c2657 (Remember original _dt)
 
     geometry = data.geometry
     dfsu_filetype = DfsuFileType.Dfsu2D
@@ -89,22 +83,6 @@ def write_dfsu(filename: str | Path, data: Dataset) -> None:
     builder.ApplicationVersion = __dfs_version__
     dfs = builder.CreateFile(filename)
 
-    # for i in range(n_time_steps):
-    #     if geometry.is_layered:
-    #         if "time" in data.dims:
-    #             assert data._zn is not None
-    #             zn = data._zn[i]
-    #         else:
-    #             zn = data._zn
-    #         dfs.WriteItemTimeStepNext(0, zn.astype(np.float32))
-    #     for da in data:
-    #         if "time" in data.dims:
-    #             d = da.to_numpy()[i, :]
-    #         else:
-    #             d = da.to_numpy()
-    #         d[np.isnan(d)] = data.deletevalue
-    #         dfs.WriteItemTimeStepNext(0, d.astype(np.float32))
-    # dfs.Close()
     write_dfsu_data(dfs, data, geometry.is_layered)
 
 
