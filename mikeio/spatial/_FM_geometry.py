@@ -387,6 +387,21 @@ class _GeometryFM(_Geometry):
         valid = list(set(self.codes))
         return [code for code in valid if code > 0]
 
+    def __eq__(self, value: Any) -> bool:
+
+        # this is not an exhaustive check, but should be sufficient for most cases
+
+        if self.__class__ != value.__class__:
+            return False
+
+        if self.projection != value.projection:
+            return False
+
+        if not np.array_equal(self.node_coordinates, value.node_coordinates):
+            return False
+
+        return True
+
 
 class GeometryFM2D(_GeometryFM):
     def __init__(
