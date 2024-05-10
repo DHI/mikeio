@@ -1609,3 +1609,17 @@ def test_interp_na():
 def test_plot_scatter():
     ds = mikeio.read("tests/testdata/oresund_sigma_z.dfsu", time=0)
     ds.plot.scatter(x="Salinity", y="Temperature", title="S-vs-T")
+
+
+def test_read_write_single_timestep_preserves_dt(tmp_path):
+    fn = "tests/testdata/oresund_sigma_z.dfsu"
+    dfs = mikeio.open(fn)
+    assert dfs.timestep == pytest.approx(10800.0)
+
+    ds = dfs.read(time=0)
+
+    outfn = tmp_path / "single.dfsu"
+    ds.to_dfs(outfn)
+
+    dfs2 = mikeio.open(outfn)
+    assert dfs2.timestep == pytest.approx(10800.0)
