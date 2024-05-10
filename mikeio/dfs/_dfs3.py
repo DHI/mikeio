@@ -294,6 +294,7 @@ class Dfs3(_Dfs123):
 
         dfs = DfsFileFactory.Dfs3FileOpenAppend(str(self._filename))
         write_dfs_data(dfs=dfs, ds=ds, n_spatial_dims=3)
+        self._n_timesteps = dfs.FileInfo.TimeAxis.NumberOfTimeSteps
 
     @staticmethod
     def _get_bottom_values(data):

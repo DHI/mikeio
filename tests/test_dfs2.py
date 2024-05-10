@@ -873,7 +873,9 @@ def test_append(tmp_path):
     new_filename = tmp_path / "eq_appended.dfs2"
     ds.to_dfs(new_filename)
     dfs = mikeio.open(new_filename)
+    assert dfs.n_timesteps == 2
     dfs.append(ds2)
+    assert dfs.n_timesteps == 4
 
     ds3 = mikeio.read(new_filename)
     assert ds3.n_timesteps == 4

@@ -968,7 +968,9 @@ def test_append_dfsu_2d(tmp_path):
     new_filename = tmp_path / "appended.dfsu"
     ds.to_dfs(new_filename)
     dfs = mikeio.open(new_filename)
+    assert dfs.time[-1] == ds.time[-1]
     dfs.append(ds2)
+    assert dfs.time[-1] == ds2.time[-1]
 
     ds3 = mikeio.read(new_filename)
     assert ds3.n_timesteps == 4

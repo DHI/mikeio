@@ -606,8 +606,12 @@ def test_append_dfsu_3d(tmp_path):
     ds.to_dfs(new_filename)
     dfs = mikeio.open(new_filename)
     assert dfs.timestep == pytest.approx(10800)
+    assert dfs.n_timesteps == 1
     dfs.append(ds2)
+    assert dfs.n_timesteps == 2
+    assert dfs.time[-1] == ds2.time[-1]
 
+    # verify that the new file can be read
     ds3 = mikeio.read(new_filename)
     assert ds3.n_timesteps == 2
     assert ds3.time[-1] == ds2.time[-1]

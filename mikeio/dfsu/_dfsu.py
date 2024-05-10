@@ -521,6 +521,8 @@ class Dfsu2DH:
 
         dfs = DfsFileFactory.DfsuFileOpenAppend(str(self._filename), parameters=None)
         write_dfsu_data(dfs=dfs, ds=ds, is_layered=False)
+        info = _get_dfsu_info(self._filename)
+        self._time = info.time
 
     def _parse_geometry_sel(self, area, x, y):
         """Parse geometry selection

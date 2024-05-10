@@ -382,6 +382,8 @@ class DfsuLayered:
 
         dfs = DfsFileFactory.DfsuFileOpenAppend(str(self._filename), parameters=None)
         write_dfsu_data(dfs=dfs, ds=ds, is_layered=ds.geometry.is_layered)
+        info = _get_dfsu_info(self._filename)
+        self._time = info.time
 
 
 class Dfsu2DV(DfsuLayered):

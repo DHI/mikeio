@@ -271,6 +271,8 @@ class Dfs2(_Dfs123):
         dfs = DfsFileFactory.Dfs2FileOpenAppend(str(self._filename))
         write_dfs_data(dfs=dfs, ds=ds, n_spatial_dims=2)
 
+        self._n_timesteps = dfs.FileInfo.TimeAxis.NumberOfTimeSteps
+
     def _open(self) -> None:
         self._dfs = DfsFileFactory.Dfs2FileOpen(self._filename)
         self._source = self._dfs
