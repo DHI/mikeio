@@ -1616,6 +1616,7 @@ def test_select_single_timestep_preserves_dt():
     assert ds.timestep == pytest.approx(1800.0)
     ds2 = ds.isel(time=-1)
     assert ds2.timestep == pytest.approx(1800.0)
+    assert ds2[0].timestep == pytest.approx(1800.0)
 
 
 def test_select_multiple_spaced_timesteps_uses_proper_dt(tmp_path):
