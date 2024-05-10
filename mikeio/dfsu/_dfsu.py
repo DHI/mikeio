@@ -47,7 +47,6 @@ def write_dfsu(filename: str | Path, data: Dataset) -> None:
         raise ValueError("Non-equidistant time axis is not supported.")
 
     dt = data.timestep
-
     geometry = data.geometry
     dfsu_filetype = DfsuFileType.Dfsu2D
 
