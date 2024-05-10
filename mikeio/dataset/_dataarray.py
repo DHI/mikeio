@@ -124,7 +124,12 @@ class _DataArraySpectrumToHm0:
             geometry = GeometryUndefined()
 
         return DataArray(
-            data=Hm0, time=self.da.time, item=item, dims=dims, geometry=geometry, dt=self.da._dt
+            data=Hm0,
+            time=self.da.time,
+            item=item,
+            dims=dims,
+            geometry=geometry,
+            dt=self.da._dt,
         )
 
 
@@ -423,11 +428,11 @@ class DataArray:
         return len(self.time.to_series().diff().dropna().unique()) == 1
 
     @property
-    def timestep(self) -> float | None:
+    def timestep(self) -> float:
         """Time step in seconds if equidistant (and at
-        least two time instances); otherwise None
+        least two time instances); otherwise original time step is returned.
         """
-        dt = None
+        dt = self._dt
         if len(self.time) > 1 and self.is_equidistant:
             first: pd.Timestamp = self.time[0]
             second: pd.Timestamp = self.time[1]
