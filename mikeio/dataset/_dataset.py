@@ -94,10 +94,11 @@ class Dataset:
         zn: NDArray[np.floating] | None = None,
         dims: Tuple[str, ...] | None = None,
         validate: bool = True,
+        dt: float = 1.0,
     ):
         if not self._is_DataArrays(data):
             data = self._create_dataarrays(
-                data=data, time=time, items=items, geometry=geometry, zn=zn, dims=dims  # type: ignore
+                data=data, time=time, items=items, geometry=geometry, zn=zn, dims=dims, dt=dt  # type: ignore
             )
         self._data_vars: MutableMapping[str, DataArray] = self._init_from_DataArrays(data, validate=validate)  # type: ignore
         self.plot = _DatasetPlotter(self)
@@ -123,11 +124,12 @@ class Dataset:
     @staticmethod
     def _create_dataarrays(
         data: Sequence[NDArray[np.floating]] | NDArray[np.floating],
-        time: pd.DatetimeIndex | None = None,
-        items: Sequence[ItemInfo] | None = None,
-        geometry: Any = None,
-        zn: NDArray[np.floating] | None = None,
-        dims: Tuple[str, ...] | None = None,
+        time: pd.DatetimeIndex,
+        items: Sequence[ItemInfo],
+        geometry: Any,
+        zn: NDArray[np.floating],
+        dims: Tuple[str, ...],
+        dt: float,
     ) -> Mapping[str, DataArray]:
         if not isinstance(data, Iterable):
             data = [data]
@@ -137,7 +139,7 @@ class Dataset:
         data_vars = {}
         for dd, it in zip(data, items):
             data_vars[it.name] = DataArray(
-                data=dd, time=time, item=it, geometry=geometry, zn=zn, dims=dims
+                data=dd, time=time, item=it, geometry=geometry, zn=zn, dims=dims, dt=dt
             )
         return data_vars
 
@@ -304,6 +306,11 @@ class Dataset:
     # ============= Basic properties/methods ===========
 
     @property
+    def _dt(self) -> float:
+        """Original time step in seconds"""
+        return self[0]._dt
+
+    @property
     def time(self) -> pd.DatetimeIndex:
         """Time axis"""
         return list(self)[0].time
@@ -326,11 +333,11 @@ class Dataset:
         return self.time[-1].to_pydatetime()  # type: ignore
 
     @property
-    def timestep(self) -> float | None:
+    def timestep(self) -> float:
         """Time step in seconds if equidistant (and at
-        least two time instances); otherwise None
+        least two time instances); otherwise original time step is returned.
         """
-        dt = None
+        dt = self._dt
         if len(self.time) > 1 and self.is_equidistant:
             dt = (self.time[1] - self.time[0]).total_seconds()
         return dt

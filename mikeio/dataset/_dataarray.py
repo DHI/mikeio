@@ -124,7 +124,12 @@ class _DataArraySpectrumToHm0:
             geometry = GeometryUndefined()
 
         return DataArray(
-            data=Hm0, time=self.da.time, item=item, dims=dims, geometry=geometry
+            data=Hm0,
+            time=self.da.time,
+            item=item,
+            dims=dims,
+            geometry=geometry,
+            dt=self.da._dt,
         )
 
 
@@ -162,10 +167,12 @@ class DataArray:
         geometry: GeometryType | None = None,
         zn: np.ndarray | None = None,
         dims: Sequence[str] | None = None,
+        dt: float = 1.0,
     ) -> None:
         # TODO: add optional validation validate=True
         self._values = self._parse_data(data)
         self.time: pd.DatetimeIndex = self._parse_time(time)
+        self._dt = dt
 
         geometry = GeometryUndefined() if geometry is None else geometry
         self.dims = self._parse_dims(dims, geometry)
@@ -421,11 +428,11 @@ class DataArray:
         return len(self.time.to_series().diff().dropna().unique()) == 1
 
     @property
-    def timestep(self) -> float | None:
+    def timestep(self) -> float:
         """Time step in seconds if equidistant (and at
-        least two time instances); otherwise None
+        least two time instances); otherwise original time step is returned.
         """
-        dt = None
+        dt = self._dt
         if len(self.time) > 1 and self.is_equidistant:
             first: pd.Timestamp = self.time[0]
             second: pd.Timestamp = self.time[1]
@@ -539,6 +546,7 @@ class DataArray:
             geometry=self.geometry,
             zn=self._zn,
             dims=tuple(dims),
+            dt=self._dt,
         )
 
     # ============= Select/interp ===========
@@ -718,6 +726,7 @@ class DataArray:
             geometry=geometry,
             zn=zn,
             dims=dims,
+            dt=self._dt,
         )
 
     def sel(
@@ -969,7 +978,11 @@ class DataArray:
                 #    )
 
             da = DataArray(
-                data=dai, time=self.time, geometry=geometry, item=deepcopy(self.item)
+                data=dai,
+                time=self.time,
+                geometry=geometry,
+                item=deepcopy(self.item),
+                dt=self._dt,
             )
         else:
             da = self.copy()
@@ -1097,6 +1110,7 @@ class DataArray:
             item=deepcopy(self.item),
             geometry=self.geometry,
             zn=zn,
+            dt=self._dt,
         )
 
     def interp_na(self, axis: str = "time", **kwargs: Any) -> "DataArray":
@@ -1197,7 +1211,11 @@ class DataArray:
             )
         assert isinstance(ari, np.ndarray)
         dai = DataArray(
-            data=ari, time=self.time, geometry=geom, item=deepcopy(self.item)
+            data=ari,
+            time=self.time,
+            geometry=geom,
+            item=deepcopy(self.item),
+            dt=self._dt,
         )
 
         if hasattr(other, "time"):
@@ -1506,6 +1524,7 @@ class DataArray:
             geometry=geometry,
             dims=dims,
             zn=zn,
+            dt=self._dt,
         )
 
     @overload
@@ -1599,7 +1618,13 @@ class DataArray:
             dims = tuple([d for i, d in enumerate(self.dims) if i != axis])
             item = deepcopy(self.item)
             return DataArray(
-                data=qdat, time=time, item=item, geometry=geometry, dims=dims, zn=zn
+                data=qdat,
+                time=time,
+                item=item,
+                geometry=geometry,
+                dims=dims,
+                zn=zn,
+                dt=self._dt,
             )
         else:
             res = []
@@ -1747,6 +1772,7 @@ class DataArray:
             item=ItemInfo("Boolean"),
             geometry=self.geometry,
             zn=self._zn,
+            dt=self._dt,
         )
 
     # ============= output methods: to_xxx() ===========
