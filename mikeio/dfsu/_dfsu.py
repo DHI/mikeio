@@ -43,14 +43,16 @@ def write_dfsu(filename: str | Path, data: Dataset) -> None:
     """
     filename = str(filename)
 
-    if len(data.time) == 1:
-        dt = 1  # TODO is there any sensible default?
-    else:
-        if not data.is_equidistant:
-            raise ValueError("Non-equidistant time axis is not supported.")
+    if not data.is_equidistant:
+        raise ValueError("Non-equidistant time axis is not supported.")
 
+<<<<<<< HEAD
         dt = (data.time[1] - data.time[0]).total_seconds()  # type: ignore
     # n_time_steps = len(data.time)
+=======
+    dt = data.timestep
+    n_time_steps = len(data.time)
+>>>>>>> 778c2657 (Remember original _dt)
 
     geometry = data.geometry
     dfsu_filetype = DfsuFileType.Dfsu2D
@@ -510,7 +512,13 @@ class Dfsu2DH:
             data_list = [np.squeeze(d, axis=-1) for d in data_list]
 
         return Dataset(
-            data_list, time, items, geometry=geometry, dims=dims, validate=False
+            data_list,
+            time,
+            items,
+            geometry=geometry,
+            dims=dims,
+            validate=False,
+            dt=self.timestep,
         )
 
     def append(self, ds: Dataset) -> None:
