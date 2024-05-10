@@ -333,9 +333,9 @@ class Dataset:
         return self.time[-1].to_pydatetime()  # type: ignore
 
     @property
-    def timestep(self) -> float | None:
+    def timestep(self) -> float:
         """Time step in seconds if equidistant (and at
-        least two time instances); otherwise None
+        least two time instances); otherwise original time step is returned.
         """
         dt = self._dt
         if len(self.time) > 1 and self.is_equidistant:
