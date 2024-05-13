@@ -1897,6 +1897,8 @@ class DataArray:
 
         grid = xu.Ugrid2d(xn, yn, fill_value=-1, face_node_connectivity=conn)
 
+        # TODO support data with time axis
+
         da = xr.DataArray(
             name=self.name,
             data=self.to_numpy(),
