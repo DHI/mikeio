@@ -1898,6 +1898,15 @@ class Dataset:
         data = {da.name: da.to_xarray() for da in self}
         return xarray.Dataset(data)
 
+    def to_xugrid(self):
+        import xugrid as xu
+
+        data = [da.to_uxarray() for da in self]
+        ds = xu.UgridDataset(grids=data[0].grid)
+        for da in data:
+            ds[da.name] = da
+        return ds
+
     # ===============================================
 
     def __repr__(self) -> str:

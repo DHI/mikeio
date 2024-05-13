@@ -960,3 +960,23 @@ def test_writing_non_equdistant_dfsu_is_not_possible(tmp_path):
     with pytest.raises(ValueError, match="equidistant"):
         fp = tmp_path / "not_gonna_work.dfsu"
         dss.to_dfs(fp)
+
+
+def test_convert_dfsu2d_to_xugrid(tmp_path):
+
+    import xugrid
+
+    ds = mikeio.read("tests/testdata/NorthSea_HD_and_windspeed.dfsu")
+    ds.sel(y=55, x=0).isel(time=-1).to_numpy() == pytest.approx(0.25443718)
+    xu_ds = ds.to_xugrid()
+
+    xu_ds.ugrid.sel(y=55, x=0)["Surface elevation"].isel(
+        time=-1
+    ).to_numpy() == pytest.approx(0.25443718)
+    assert xu_ds.time[-1] == ds.time[-1]
+
+    fp = tmp_path / "north_sea.nc"
+    xu_ds.ugrid.to_netcdf(fp)
+
+    xu_ds2 = xugrid.open_dataset(fp)
+    assert xu_ds2.time[-1] == ds.time[-1]

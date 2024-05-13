@@ -1873,6 +1873,40 @@ class DataArray:
         )
         return xr_da
 
+    def to_uxarray(self):
+        import xugrid as xu
+        import xarray as xr
+
+        assert isinstance(
+            self.geometry, GeometryFM2D
+        ), "Only flexible mesh 2D data is supported"
+        # face_code_connectivity is slightly different than the element_table
+        conn = np.zeros(shape=(self.geometry.n_elements, 4), dtype=np.int32)
+        conn[:] = -1
+
+        g = self.geometry
+
+        for i in range(g.n_elements):
+            if len(g.element_table[i]) == 3:
+                conn[i, 0:3] = g.element_table[i]
+            else:
+                conn[i] = g.element_table[i]
+
+        xn = g.element_coordinates[:, 0]
+        yn = g.element_coordinates[:, 1]
+
+        grid = xu.Ugrid2d(xn, yn, fill_value=-1, face_node_connectivity=conn)
+
+        da = xr.DataArray(
+            name=self.name,
+            data=self.to_numpy(),
+            coords={"time": self.time},
+            dims=["time", grid.face_dimension],
+        )
+
+        uda = xu.UgridDataArray(da, grid)
+        return uda
+
     # ===============================================
 
     def __repr__(self) -> str:
