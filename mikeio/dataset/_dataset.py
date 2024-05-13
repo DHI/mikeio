@@ -1901,7 +1901,7 @@ class Dataset:
     def to_xugrid(self):
         import xugrid as xu
 
-        data = [da.to_uxarray() for da in self]
+        data = [da.to_xugrid() for da in self]
         ds = xu.UgridDataset(grids=data[0].grid)
         for da in data:
             ds[da.name] = da

@@ -1873,7 +1873,7 @@ class DataArray:
         )
         return xr_da
 
-    def to_uxarray(self):
+    def to_xugrid(self):
         import xugrid as xu
         import xarray as xr
 
@@ -1881,30 +1881,42 @@ class DataArray:
             self.geometry, GeometryFM2D
         ), "Only flexible mesh 2D data is supported"
         # face_code_connectivity is slightly different than the element_table
-        conn = np.zeros(shape=(self.geometry.n_elements, 4), dtype=np.int32)
-        conn[:] = -1
 
         g = self.geometry
 
-        for i in range(g.n_elements):
-            if len(g.element_table[i]) == 3:
+        if g.is_tri_only:
+            conn = np.zeros(shape=(self.geometry.n_elements, 3), dtype=np.int32)
+            for i in range(g.n_elements):
                 conn[i, 0:3] = g.element_table[i]
-            else:
-                conn[i] = g.element_table[i]
+        else:
+            conn = np.zeros(shape=(self.geometry.n_elements, 4), dtype=np.int32)
+            conn[:] = -1
 
-        xn = g.element_coordinates[:, 0]
-        yn = g.element_coordinates[:, 1]
+            for i in range(g.n_elements):
+                if len(g.element_table[i]) == 3:
+                    conn[i, 0:3] = g.element_table[i]
+                else:
+                    conn[i] = g.element_table[i]
+
+        xn = g.node_coordinates[:, 0]
+        yn = g.node_coordinates[:, 1]
 
         grid = xu.Ugrid2d(xn, yn, fill_value=-1, face_node_connectivity=conn)
 
-        # TODO support data with time axis
-
-        da = xr.DataArray(
-            name=self.name,
-            data=self.to_numpy(),
-            coords={"time": self.time},
-            dims=["time", grid.face_dimension],
-        )
+        if "time" not in self.dims:
+            da = xr.DataArray(
+                name=self.name,
+                data=self.to_numpy(),
+                coords={},
+                dims=[grid.face_dimension],
+            )
+        else:
+            da = xr.DataArray(
+                name=self.name,
+                data=self.to_numpy(),
+                coords={"time": self.time},
+                dims=["time", grid.face_dimension],
+            )
 
         uda = xu.UgridDataArray(da, grid)
         return uda

@@ -980,3 +980,9 @@ def test_convert_dfsu2d_to_xugrid(tmp_path):
 
     xu_ds2 = xugrid.open_dataset(fp)
     assert xu_ds2.time[-1] == ds.time[-1]
+
+
+def test_mixed_mesh_time_invariant_to_xugrid():
+    ds = mikeio.read("tests/testdata/FakeLake.dfsu", time=0)
+    xu_ds = ds.to_xugrid()
+    assert len(xu_ds.mesh2d_nFaces) == 1011
