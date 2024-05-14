@@ -117,22 +117,12 @@ class _GeometryFMLayered(_GeometryFM):
         if n_layers == 1 and node_layers == "all":
             node_layers = "bottom"
 
-        # extract information for selected elements
-        if n_layers == 1:
-            elem2d = self.elem2d_ids[sorted_elements]
-            geom2d = self.geometry2d
-            node_ids, elem_tbl = geom2d._get_nodes_and_table_for_elements(elem2d)
-            assert len(elem_tbl[0]) <= 4, "Not a 2D element"
-            node_coords = geom2d.node_coordinates[node_ids]
-            codes = geom2d.codes[node_ids]
-            elem_ids = self._element_ids[elem2d]
-        else:
-            node_ids, elem_tbl = self._get_nodes_and_table_for_elements(
-                sorted_elements, node_layers=node_layers
-            )
-            node_coords = self.node_coordinates[node_ids]
-            codes = self.codes[node_ids]
-            elem_ids = self._element_ids[sorted_elements]
+        node_ids, elem_tbl = self._get_nodes_and_table_for_elements(
+            sorted_elements, node_layers=node_layers
+        )
+        node_coords = self.node_coordinates[node_ids]
+        codes = self.codes[node_ids]
+        elem_ids = self._element_ids[sorted_elements]
 
         if new_type == DfsuFileType.Dfsu2D:
             return GeometryFM2D(
@@ -223,7 +213,7 @@ class _GeometryFMLayered(_GeometryFM):
         nodes = np.unique(np.hstack(elem_tbl))  # type: ignore
         return nodes, elem_tbl
 
-    def to_2d_geometry(self) -> GeometryFM2D:
+    def to_2d_geometry(self, layer="bottom") -> GeometryFM2D:
         """extract 2d geometry from 3d geometry
 
         Returns
@@ -238,7 +228,7 @@ class _GeometryFMLayered(_GeometryFM):
             elem_ids = self.top_elements
 
         node_ids, elem_tbl = self._get_nodes_and_table_for_elements(
-            elem_ids, node_layers="bottom"
+            elem_ids, node_layers=layer
         )
         node_coords = self.node_coordinates[node_ids]
         codes = self._codes[node_ids]

@@ -17,7 +17,9 @@ def simple_3d_geom():
         for depth in z:
             nc.append((col[0], col[1], depth))
 
-    el = [(3, 4, 5, 6, 7, 8), (0, 1, 2, 3, 4, 5)]
+    # TODO constructing a 3d mesh following the convention needs a helper function
+    # Arbitrary 3d element tables doesn't work
+    el = [(0, 3, 6, 1, 4, 7), (1, 4, 7, 2, 5, 8)]
 
     g = GeometryFM3D(
         node_coordinates=nc,
@@ -210,10 +212,12 @@ def test_select_single_layer_preserved_vertical_coordinates(
 
     bot_el = g.bottom_elements
     gb = g.elements_to_geometry(bot_el, keepdims=True)
+    assert isinstance(gb, GeometryFM2D)
     assert gb.node_coordinates[0][2] == -2.0
 
     top_el = g.top_elements
 
     gt = g.elements_to_geometry(top_el, keepdims=True)
+    assert isinstance(gt, GeometryFM2D)
     assert gt.n_elements == 1
-    assert gt.node_coordinates[0][2] == 0.0
+    assert gt.node_coordinates[0][2] == -1.0
