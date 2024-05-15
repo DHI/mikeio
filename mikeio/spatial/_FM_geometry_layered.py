@@ -213,7 +213,7 @@ class _GeometryFMLayered(_GeometryFM):
         nodes = np.unique(np.hstack(elem_tbl))  # type: ignore
         return nodes, elem_tbl
 
-    def to_2d_geometry(self, layer="bottom") -> GeometryFM2D:
+    def to_2d_geometry(self) -> GeometryFM2D:
         """extract 2d geometry from 3d geometry
 
         Returns
@@ -228,7 +228,7 @@ class _GeometryFMLayered(_GeometryFM):
             elem_ids = self.top_elements
 
         node_ids, elem_tbl = self._get_nodes_and_table_for_elements(
-            elem_ids, node_layers=layer
+            elem_ids, node_layers="bottom"
         )
         node_coords = self.node_coordinates[node_ids]
         codes = self._codes[node_ids]
@@ -246,6 +246,7 @@ class _GeometryFMLayered(_GeometryFM):
             reindex=True,
         )
 
+        # TODO move this to before creating the geometry
         # Fix z-coordinate for sigma-z:
         if self._type == DfsuFileType.Dfsu3DSigmaZ:
             zn = geom.node_coordinates[:, 2].copy()
