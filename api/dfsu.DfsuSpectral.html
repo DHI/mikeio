@@ -504,10 +504,10 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <h4 class="anchored" data-anchor-id="parameters-1">Parameters</h4>
 <table class="table">
 <colgroup>
-<col style="width: 5%">
-<col style="width: 3%">
-<col style="width: 85%">
-<col style="width: 5%">
+<col style="width: 4%">
+<col style="width: 20%">
+<col style="width: 70%">
+<col style="width: 4%">
 </colgroup>
 <thead>
 <tr class="header">
@@ -520,49 +520,49 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <tbody>
 <tr class="odd">
 <td><code>items</code></td>
-<td></td>
+<td>str | int | typing.Sequence[str | int] | None</td>
 <td>Read only selected items, by number (0-based), or by name</td>
 <td><code>None</code></td>
 </tr>
 <tr class="even">
 <td><code>time</code></td>
-<td></td>
+<td>int | str | slice | None</td>
 <td>Read only selected time steps, by default None (=all)</td>
 <td><code>None</code></td>
 </tr>
 <tr class="odd">
 <td><code>keepdims</code></td>
-<td></td>
+<td>bool</td>
 <td>When reading a single time step only, should the time-dimension be kept in the returned Dataset? by default: False</td>
 <td><code>False</code></td>
 </tr>
 <tr class="even">
 <td><code>area</code></td>
-<td></td>
+<td>typing.Tuple[float, float, float, float] | None</td>
 <td>Read only data inside (horizontal) area (spectral area files only) given as a bounding box (tuple with left, lower, right, upper) or as list of coordinates for a polygon, by default None</td>
 <td><code>None</code></td>
 </tr>
 <tr class="odd">
 <td><code>x</code></td>
-<td></td>
+<td>float | None</td>
 <td>Read only data for elements containing the (x,y) points(s), by default None</td>
 <td><code>None</code></td>
 </tr>
 <tr class="even">
 <td><code>y</code></td>
-<td></td>
+<td>float | None</td>
 <td>Read only data for elements containing the (x,y) points(s), by default None</td>
 <td><code>None</code></td>
 </tr>
 <tr class="odd">
 <td><code>elements</code></td>
-<td></td>
+<td>typing.Sequence[int] | numpy.numpy.ndarray | None</td>
 <td>Read only selected element ids (spectral area files only)</td>
 <td><code>None</code></td>
 </tr>
 <tr class="even">
 <td><code>nodes</code></td>
-<td></td>
+<td>typing.Sequence[int] | numpy.numpy.ndarray | None</td>
 <td>Read only selected node ids (spectral line files only)</td>
 <td><code>None</code></td>
 </tr>
