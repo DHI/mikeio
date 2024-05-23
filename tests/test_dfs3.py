@@ -214,6 +214,13 @@ def test_local_coordinates_read_single_layer_dfs3():
     assert ds1.geometry.x[0] == pytest.approx(0.25)
 
 
+def test_local_coordinates_read_subset_layer_dfs3():
+    fn = "tests/testdata/local_coordinates.dfs3"
+
+    ds = mikeio.read(fn, layers=[0, 1])
+    assert ds.geometry.x[0] == pytest.approx(0.25)
+
+
 def test_write_read_local_coordinates(tmp_path: Path) -> None:
     da = mikeio.DataArray(
         np.array([[[1, 2, 3], [4, 5, 6]], [[7, 8, 9], [10, 11, 12]]]),
