@@ -1130,10 +1130,6 @@ class Grid3D(_Geometry):
         self._origin = origin
         self._orientation = orientation
 
-        if self.is_local_coordinates:
-            self._x0 = self._x0 + self._dx / 2
-            self._y0 = self._y0 + self._dy / 2
-
     @property
     def default_dims(self) -> Tuple[str, ...]:
         return ("z", "y", "x")
@@ -1149,8 +1145,10 @@ class Grid3D(_Geometry):
     @property
     def x(self) -> np.ndarray:
         """array of x-axis coordinates (element center)"""
-        x1 = self._x0 + self.dx * (self.nx - 1)
-        x_local = np.linspace(self._x0, x1, self.nx)
+        x0 = self._x0 + self._dx / 2 if self.is_local_coordinates else self._x0
+
+        x1 = x0 + self.dx * (self.nx - 1)
+        x_local = np.linspace(x0, x1, self.nx)
         return x_local if self._is_rotated else x_local + self.origin[0]
 
     @property
@@ -1166,8 +1164,9 @@ class Grid3D(_Geometry):
     @property
     def y(self) -> np.ndarray:
         """array of y-axis coordinates (element center)"""
-        y1 = self._y0 + self.dy * (self.ny - 1)
-        y_local = np.linspace(self._y0, y1, self.ny)
+        y0 = self._y0 + self._dy / 2 if self.is_local_coordinates else self._y0
+        y1 = y0 + self.dy * (self.ny - 1)
+        y_local = np.linspace(y0, y1, self.ny)
         return y_local if self._is_rotated else y_local + self.origin[1]
 
     @property
