@@ -1,3 +1,8 @@
+---
+aliases:
+  - ../dfs0.html
+---
+
 # Dfs0
 
 A dfs0 file is also called a time series file.

@@ -350,10 +350,17 @@ class DfsuLayered:
                 zn=data_list[0],
                 dims=dims,
                 validate=False,
+                dt=self.timestep,
             )
         else:
             return Dataset(
-                data_list, time, items, geometry=geometry, dims=dims, validate=False
+                data_list,
+                time,
+                items,
+                geometry=geometry,
+                dims=dims,
+                validate=False,
+                dt=self.timestep,
             )
 
 

@@ -1,3 +1,8 @@
+---
+aliases:
+  - ../dataarray.html
+---
+
 # DataArray
 
 The [DataArray](`mikeio.DataArray`) is the common MIKE IO data structure 

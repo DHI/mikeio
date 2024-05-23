@@ -1,4 +1,9 @@
 
+---
+aliases:
+  - ../dfs2.html
+---
+
 # Dfs2
 
 A dfs2 file is also called a grid series file. Values in a dfs2 file are ‘element based’, i.e. values are defined in the centre of each grid cell. 
