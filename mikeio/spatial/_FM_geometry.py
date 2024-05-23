@@ -382,7 +382,7 @@ class _GeometryFM(_Geometry):
         self._codes = np.array(v, dtype=np.int32)
 
     @property
-    def boundary_codes(self):
+    def boundary_codes(self) -> list[int]:
         """Unique list of boundary codes"""
         valid = list(set(self.codes))
         return [code for code in valid if code > 0]

@@ -52,7 +52,7 @@ def read(
     items: str | int | Sequence[str | int] | None = None,
     time: int | str | slice | None = None,
     keepdims: bool = False,
-    **kwargs,
+    **kwargs: Any,
 ) -> Dataset:
     """Read all or a subset of the data from a dfs file
 
