@@ -1,3 +1,4 @@
+from pathlib import Path
 import pytest
 import numpy as np
 
@@ -203,7 +204,17 @@ def test_MIKE_SHE_dfs3_output():
     assert g2.origin == pytest.approx((g2.x[0], g2.y[0]))
 
 
-def test_write_read_local_coordinates(tmp_path):
+def test_local_coordinates_read_single_layer_dfs3():
+    fn = "tests/testdata/local_coordinates.dfs3"
+
+    ds = mikeio.read(fn)
+    assert ds.geometry.x[0] == pytest.approx(0.25)
+
+    ds1 = mikeio.read(fn, layers=1)
+    assert ds1.geometry.x[0] == pytest.approx(0.25)
+
+
+def test_write_read_local_coordinates(tmp_path: Path) -> None:
     da = mikeio.DataArray(
         np.array([[[1, 2, 3], [4, 5, 6]], [[7, 8, 9], [10, 11, 12]]]),
         geometry=mikeio.Grid3D(
@@ -217,7 +228,7 @@ def test_write_read_local_coordinates(tmp_path):
     assert da.geometry == ds.geometry
 
 
-def test_to_xarray():
+def test_to_xarray() -> None:
     # data is not important here
     data = np.array([[[1, 2, 3], [4, 5, 6]], [[7, 8, 9], [10, 11, 12]]])
 
