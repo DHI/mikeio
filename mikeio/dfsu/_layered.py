@@ -1,6 +1,6 @@
 from __future__ import annotations
 from pathlib import Path
-from typing import Any, Collection, Sequence, Tuple, TYPE_CHECKING
+from typing import Any, Sequence, Tuple, TYPE_CHECKING
 
 from matplotlib.axes import Axes
 import numpy as np
@@ -184,7 +184,7 @@ class DfsuLayered:
         *,
         items: str | int | Sequence[str | int] | None = None,
         time: int | str | slice | None = None,
-        elements: Collection[int] | None = None,
+        elements: Sequence[int] | None = None,
         area: Tuple[float, float, float, float] | None = None,
         x: float | None = None,
         y: float | None = None,
@@ -252,7 +252,7 @@ class DfsuLayered:
                 elements = self.geometry.find_index(  # type: ignore
                     x=x, y=y, z=z, area=area, layers=layers
                 )
-                if len(elements) == 0:
+                if len(elements) == 0:  # type: ignore
                     raise ValueError("No elements in selection!")
 
         geometry = (

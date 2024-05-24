@@ -1,7 +1,8 @@
 from __future__ import annotations
 from functools import cached_property
 from pathlib import Path
-from typing import Any, Collection, Iterable, Literal, Sequence, List, Tuple
+
+from typing import Any, Iterable, Literal, Sequence, List, Tuple
 
 from matplotlib.axes import Axes
 import numpy as np
@@ -71,14 +72,14 @@ class _GeometryFMLayered(_GeometryFM):
         return self.to_2d_geometry()
 
     def isel(
-        self, idx: Collection[int], keepdims: bool = False, **kwargs: Any
+        self, idx: Sequence[int], keepdims: bool = False, **kwargs: Any
     ) -> GeometryFM3D | GeometryPoint3D | GeometryFM2D | GeometryFMVerticalColumn:
 
         return self.elements_to_geometry(elements=idx, keepdims=keepdims)
 
     def elements_to_geometry(
         self,
-        elements: int | Collection[int],
+        elements: int | Sequence[int] | np.ndarray,
         node_layers: Layer = "all",
         keepdims: bool = False,
     ) -> GeometryFM3D | GeometryPoint3D | GeometryFM2D | GeometryFMVerticalColumn:
@@ -93,21 +94,17 @@ class _GeometryFMLayered(_GeometryFM):
 
             return GeometryPoint3D(x=x, y=y, z=z, projection=self.projection)
 
-        sorted_elements = np.sort(
-            sel_elements
-        )  # make sure elements are sorted! # TODO is this necessary?
-
         # create new geometry
         new_type = self._type
 
-        layers_used = self.layer_ids[sorted_elements]
+        layers_used = self.layer_ids[sel_elements]
         unique_layer_ids = np.unique(layers_used)
         n_layers = len(unique_layer_ids)
 
         if n_layers > 1:
             bottom: Layer = "bottom"
             elem_bot = self.get_layer_elements(layers=bottom)
-            if np.all(np.in1d(sorted_elements, elem_bot)):
+            if np.all(np.in1d(sel_elements, elem_bot)):
                 n_layers = 1
 
         if (
@@ -121,7 +118,7 @@ class _GeometryFMLayered(_GeometryFM):
 
         # extract information for selected elements
         if n_layers == 1:
-            elem2d = self.elem2d_ids[sorted_elements]
+            elem2d = self.elem2d_ids[sel_elements]
             geom2d = self.geometry2d
             node_ids, elem_tbl = geom2d._get_nodes_and_table_for_elements(elem2d)
             assert len(elem_tbl[0]) <= 4, "Not a 2D element"
@@ -130,11 +127,11 @@ class _GeometryFMLayered(_GeometryFM):
             elem_ids = self._element_ids[elem2d]
         else:
             node_ids, elem_tbl = self._get_nodes_and_table_for_elements(
-                sorted_elements, node_layers=node_layers
+                sel_elements, node_layers=node_layers
             )
             node_coords = self.node_coordinates[node_ids]
             codes = self.codes[node_ids]
-            elem_ids = self._element_ids[sorted_elements]
+            elem_ids = self._element_ids[sel_elements]
 
         if new_type == DfsuFileType.Dfsu2D:
             return GeometryFM2D(
@@ -185,7 +182,7 @@ class _GeometryFMLayered(_GeometryFM):
 
     def _get_nodes_and_table_for_elements(
         self,
-        elements: Collection[int] | np.ndarray,
+        elements: Sequence[int] | np.ndarray,
         node_layers: Layer = "all",
     ) -> Tuple[Any, Any]:
         """list of nodes and element table for a list of elements

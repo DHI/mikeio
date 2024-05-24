@@ -1,7 +1,8 @@
 from __future__ import annotations
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Collection, Literal, Sequence, Tuple
+
+from typing import Any, Literal, Sequence, Tuple
 
 import numpy as np
 import pandas as pd
@@ -358,7 +359,7 @@ class Dfsu2DH:
         *,
         items: str | int | Sequence[str | int] | None = None,
         time: int | str | slice | None = None,
-        elements: Collection[int] | None = None,
+        elements: Sequence[int] | np.ndarray | None = None,
         area: Tuple[float, float, float, float] | None = None,
         x: float | None = None,
         y: float | None = None,

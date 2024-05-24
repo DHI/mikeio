@@ -696,6 +696,27 @@ def test_da_sel_area_dfsu2d():
     assert da1.geometry.n_elements == 14
 
 
+def test_da_isel_order_is_important_dfsu2d():
+    filename = "tests/testdata/FakeLake.dfsu"
+    da = mikeio.read(filename, items=0, time=0)[0]
+
+    # select elements sorted
+    da1 = da.isel(element=[0, 1])
+    assert da1.values[0] == pytest.approx(-3.2252840995788574)
+    assert da1.geometry.element_coordinates[0, 0] == pytest.approx(-0.61049269425)
+
+    # select elements in arbitrary order
+    da2 = da.isel(element=[1, 0])
+    assert da2.values[1] == pytest.approx(-3.2252840995788574)
+    assert da2.geometry.element_coordinates[1, 0] == pytest.approx(-0.61049269425)
+
+    # select same elements multiple times, not sure why, but consistent with NumPy, xarray
+    da3 = da.isel(element=[1, 0, 1])
+    assert da3.values[1] == pytest.approx(-3.2252840995788574)
+    assert da3.geometry.element_coordinates[1, 0] == pytest.approx(-0.61049269425)
+    assert len(da3.geometry.element_coordinates) == 3
+
+
 def test_da_sel_area_grid2d():
     filename = "tests/testdata/gebco_sound.dfs2"
     da = mikeio.read(filename, items=0)[0]

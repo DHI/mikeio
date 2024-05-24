@@ -5,7 +5,7 @@ from mikeio.spatial import GeometryPoint2D
 
 
 @pytest.fixture
-def simple_3d_geom():
+def simple_3d_geom() -> GeometryFM3D:
     #     x     y    z
     nc = [
         (0.0, 0.0, 0.0),
@@ -30,6 +30,19 @@ def simple_3d_geom():
     )
 
     return g
+
+
+def test_isel_list_of_indices(simple_3d_geom: GeometryFM3D) -> None:
+    g = simple_3d_geom
+
+    g1 = g.isel([0, 1])
+    assert isinstance(g1, GeometryFM3D)
+    assert g1.element_coordinates[0, 0] == pytest.approx(0.6666666666666666)
+
+    # you can get elements in arbitrary order
+    g2 = g.isel([1, 0])
+    assert isinstance(g2, GeometryFM3D)
+    assert g2.element_coordinates[1, 0] == pytest.approx(0.6666666666666666)
 
 
 def test_basic():
@@ -165,6 +178,26 @@ def test_isel_simple_domain():
     gp = g.isel(0)
     assert isinstance(gp, GeometryPoint2D)
     assert gp.projection == g.projection
+
+
+def test_isel_list_of_indices_simple_domain():
+    #     x     y    z
+    nc = [
+        (0.0, 0.0, 0.0),  # 0
+        (1.0, 0.0, 0.0),  # 1
+        (1.0, 1.0, 0.0),  # 2
+        (0.0, 1.0, 0.0),  # 3
+        (0.5, 1.5, 0.0),  # 4
+    ]
+
+    el = [(0, 1, 2), (0, 2, 3), (3, 2, 4)]
+
+    g = GeometryFM2D(node_coordinates=nc, element_table=el, projection="LONG/LAT")
+    g1 = g.isel([0, 1])
+    assert g1.element_coordinates[0, 0] == pytest.approx(0.6666666666666666)
+
+    g2 = g.isel([1, 0])
+    assert g2.element_coordinates[1, 0] == pytest.approx(0.6666666666666666)
 
 
 def test_plot_mesh():
