@@ -249,6 +249,16 @@ def test_read_area_polygon():
     assert subdomain.within(domain)
 
 
+def test_read_elements():
+    ds = mikeio.read(filename="tests/testdata/wind_north_sea.dfsu", elements=[0, 10])
+    assert ds.geometry.element_coordinates[0][0] == pytest.approx(1.4931853081272184)
+    assert ds.Wind_speed.to_numpy()[0, 0] == pytest.approx(9.530759811401367)
+
+    ds2 = mikeio.read(filename="tests/testdata/wind_north_sea.dfsu", elements=[10, 0])
+    assert ds2.geometry.element_coordinates[1][0] == pytest.approx(1.4931853081272184)
+    assert ds2.Wind_speed.to_numpy()[0, 1] == pytest.approx(9.530759811401367)
+
+
 def test_find_index_on_island():
     filename = "tests/testdata/FakeLake.dfsu"
     dfs = mikeio.open(filename)

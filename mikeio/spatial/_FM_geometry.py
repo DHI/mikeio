@@ -3,7 +3,6 @@ from collections import namedtuple
 from functools import cached_property
 from pathlib import Path
 from typing import (
-    Collection,
     List,
     Any,
     Literal,
@@ -944,7 +943,7 @@ class GeometryFM2D(_GeometryFM):
         return all_faces[uf_id[bnd_face_id]]
 
     def isel(
-        self, idx: Collection[int], keepdims: bool = False, **kwargs: Any
+        self, idx: Sequence[int], keepdims: bool = False, **kwargs: Any
     ) -> "GeometryFM2D" | GeometryPoint2D:
         """export a selection of elements to a new geometry
 
@@ -953,7 +952,7 @@ class GeometryFM2D(_GeometryFM):
 
         Parameters
         ----------
-        idx : collection(int)
+        idx : list(int)
             collection of element indicies
         keepdims : bool, optional
             Should the original Geometry type be kept (keepdims=True)
@@ -970,10 +969,7 @@ class GeometryFM2D(_GeometryFM):
         find_index : find element indicies for points or an area
         """
 
-        if self._type == DfsuFileType.DfsuSpectral1D:
-            return self._nodes_to_geometry(nodes=idx)
-        else:
-            return self.elements_to_geometry(elements=idx, keepdims=keepdims)
+        return self.elements_to_geometry(elements=idx, keepdims=keepdims)
 
     def find_index(
         self,
@@ -1072,53 +1068,8 @@ class GeometryFM2D(_GeometryFM):
         else:
             raise ValueError("'area' must be bbox [x0,y0,x1,y1] or polygon")
 
-    def _nodes_to_geometry(
-        self, nodes: Collection[int]
-    ) -> "GeometryFM2D" | GeometryPoint2D:
-        """export a selection of nodes to new flexible file geometry
-
-        Note: takes only the elements for which all nodes are selected
-
-        Parameters
-        ----------
-        nodes : list(int)
-            list of node ids
-
-        Returns
-        -------
-        UnstructuredGeometry
-            which can be used for further extraction or saved to file
-        """
-        nodes = np.atleast_1d(nodes)  # type: ignore
-        if len(nodes) == 1:
-            xy = self.node_coordinates[nodes[0], :2]
-            return GeometryPoint2D(xy[0], xy[1])
-
-        elements = []
-        for j, el_nodes in enumerate(self.element_table):
-            if np.all(np.isin(el_nodes, nodes)):
-                elements.append(j)
-
-        assert len(elements) > 0, "no elements found"
-        elements = np.sort(elements)  # make sure elements are sorted!
-
-        node_ids, elem_tbl = self._get_nodes_and_table_for_elements(elements)
-        node_coords = self.node_coordinates[node_ids]
-        codes = self.codes[node_ids]
-
-        return GeometryFM2D(
-            node_coordinates=node_coords,
-            codes=codes,
-            node_ids=node_ids,
-            dfsu_type=self._type,
-            projection=self.projection_string,
-            element_table=elem_tbl,
-            element_ids=self.element_ids[elements],
-            reindex=True,
-        )
-
     def elements_to_geometry(
-        self, elements: int | Collection[int], keepdims: bool = False
+        self, elements: int | Sequence[int], keepdims: bool = False
     ) -> "GeometryFM2D" | GeometryPoint2D:
         if isinstance(elements, (int, np.integer)):
             sel_elements: List[int] = [elements]
@@ -1129,16 +1080,12 @@ class GeometryFM2D(_GeometryFM):
 
             return GeometryPoint2D(x=x, y=y, projection=self.projection)
 
-        sorted_elements = np.sort(
-            sel_elements
-        )  # make sure elements are sorted! # TODO is this necessary? If so, should be done in the initialiser
-
         # extract information for selected elements
 
-        node_ids, elem_tbl = self._get_nodes_and_table_for_elements(sorted_elements)
+        node_ids, elem_tbl = self._get_nodes_and_table_for_elements(sel_elements)
         node_coords = self.node_coordinates[node_ids]
         codes = self.codes[node_ids]
-        elem_ids = self.element_ids[sorted_elements]
+        elem_ids = self.element_ids[sel_elements]
 
         return GeometryFM2D(
             node_coordinates=node_coords,
