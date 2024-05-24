@@ -1,6 +1,5 @@
 from __future__ import annotations
 from typing import Any, Sequence, Tuple
-from typing import Collection, Any, Sequence, Tuple
 
 
 import numpy as np

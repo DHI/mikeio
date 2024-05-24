@@ -78,7 +78,7 @@ class _GeometryFMLayered(_GeometryFM):
 
     def elements_to_geometry(
         self,
-        elements: int | Sequence[int],
+        elements: int | Sequence[int] | np.ndarray,
         node_layers: Layer = "all",
         keepdims: bool = False,
     ) -> GeometryFM3D | GeometryPoint3D | GeometryFM2D | GeometryFMVerticalColumn:
