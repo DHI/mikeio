@@ -1,6 +1,7 @@
 from __future__ import annotations
 from functools import cached_property
 from pathlib import Path
+
 from typing import Any, Iterable, Literal, Sequence, List, Tuple
 
 from matplotlib.axes import Axes
