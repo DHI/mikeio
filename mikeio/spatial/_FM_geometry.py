@@ -831,6 +831,10 @@ class GeometryFM2D(_GeometryFM):
         """Lists of closed polylines defining domain outline"""
         return self._get_boundary_polylines()
 
+    @cached_property
+    def _domain(self) -> Any:
+        return self.to_shapely().buffer(0)
+
     def contains(self, points: np.ndarray) -> np.ndarray:
         """test if a list of points are contained by mesh
 
@@ -844,25 +848,13 @@ class GeometryFM2D(_GeometryFM):
         bool array
             True for points inside, False otherwise
         """
-        import matplotlib.path as mp  # type: ignore
+        from shapely.geometry import Point  # type: ignore
 
         points = np.atleast_2d(points)
 
-        exterior = self.boundary_polylines.exteriors[0]
-        cnts = mp.Path(exterior.xy).contains_points(points)
+        domain = self._domain
 
-        if self.boundary_polylines.n_exteriors > 1:
-            # in case of several dis-joint outer domains
-            for exterior in self.boundary_polylines.exteriors[1:]:
-                in_domain = mp.Path(exterior.xy).contains_points(points)
-                cnts = np.logical_or(cnts, in_domain)
-
-        # subtract any holes
-        for interior in self.boundary_polylines.interiors:
-            in_hole = mp.Path(interior.xy).contains_points(points)
-            cnts = np.logical_and(cnts, ~in_hole)
-
-        return cnts
+        return np.array([domain.contains(Point(p)) for p in points])
 
     def __contains__(self, pt: np.ndarray) -> bool:
         return self.contains(pt)[0]
