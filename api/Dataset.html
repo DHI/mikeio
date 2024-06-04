@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.4.554">
+<meta name="generator" content="quarto-1.4.555">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
@@ -428,7 +428,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </section>
 <section id="examples" class="level2">
 <h2 class="anchored" data-anchor-id="examples">Examples</h2>
-<div id="209a2393" class="cell" data-execution_count="1">
+<div id="1bb555de" class="cell" data-execution_count="1">
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> mikeio</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>mikeio.read(<span class="st">"../data/europe_wind_long_lat.dfs2"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="1">
@@ -445,7 +445,7 @@ items:
 </section>
 <section id="attributes" class="level2">
 <h2 class="anchored" data-anchor-id="attributes">Attributes</h2>
-<table class="table">
+<table class="caption-top table">
 <thead>
 <tr class="header">
 <th>Name</th>
@@ -518,7 +518,7 @@ items:
 </section>
 <section id="methods" class="level2">
 <h2 class="anchored" data-anchor-id="methods">Methods</h2>
-<table class="table">
+<table class="caption-top table">
 <thead>
 <tr class="header">
 <th>Name</th>
@@ -674,12 +674,12 @@ items:
 <p>Aggregate along an axis</p>
 <section id="parameters" class="level4">
 <h4 class="anchored" data-anchor-id="parameters">Parameters</h4>
-<table class="table">
+<table class="caption-top table">
 <colgroup>
 <col style="width: 8%">
-<col style="width: 17%">
-<col style="width: 59%">
-<col style="width: 14%">
+<col style="width: 13%">
+<col style="width: 62%">
+<col style="width: 15%">
 </colgroup>
 <thead>
 <tr class="header">
@@ -698,7 +698,7 @@ items:
 </tr>
 <tr class="even">
 <td><code>func</code></td>
-<td>typing.Callable</td>
+<td>Callable</td>
 <td>default np.nanmean</td>
 <td><code>np.nanmean</code></td>
 </tr>
@@ -707,7 +707,7 @@ items:
 </section>
 <section id="returns" class="level4">
 <h4 class="anchored" data-anchor-id="returns">Returns</h4>
-<table class="table">
+<table class="caption-top table">
 <thead>
 <tr class="header">
 <th>Type</th>
@@ -716,7 +716,7 @@ items:
 </thead>
 <tbody>
 <tr class="odd">
-<td>mikeio.dataset._dataset.Dataset</td>
+<td>Dataset</td>
 <td>dataset with aggregated values</td>
 </tr>
 </tbody>
@@ -730,7 +730,7 @@ items:
 <p>Wraps :py:meth:<code>numpy.average</code></p>
 <section id="parameters-1" class="level4">
 <h4 class="anchored" data-anchor-id="parameters-1">Parameters</h4>
-<table class="table">
+<table class="caption-top table">
 <colgroup>
 <col style="width: 12%">
 <col style="width: 9%">
@@ -763,11 +763,7 @@ items:
 </section>
 <section id="returns-1" class="level4">
 <h4 class="anchored" data-anchor-id="returns-1">Returns</h4>
-<table class="table">
-<colgroup>
-<col style="width: 46%">
-<col style="width: 53%">
-</colgroup>
+<table class="caption-top table">
 <thead>
 <tr class="header">
 <th>Type</th>
@@ -776,7 +772,7 @@ items:
 </thead>
 <tbody>
 <tr class="odd">
-<td>mikeio.dataset._dataset.Dataset</td>
+<td>Dataset</td>
 <td>dataset with weighted average values</td>
 </tr>
 </tbody>
@@ -801,12 +797,12 @@ aggregate : Weighted average</code></pre>
 <p>Concatenate Datasets along the time axis</p>
 <section id="parameters-2" class="level4">
 <h4 class="anchored" data-anchor-id="parameters-2">Parameters</h4>
-<table class="table">
+<table class="caption-top table">
 <colgroup>
-<col style="width: 12%">
-<col style="width: 30%">
-<col style="width: 44%">
-<col style="width: 12%">
+<col style="width: 13%">
+<col style="width: 25%">
+<col style="width: 47%">
+<col style="width: 13%">
 </colgroup>
 <thead>
 <tr class="header">
@@ -819,13 +815,13 @@ aggregate : Weighted average</code></pre>
 <tbody>
 <tr class="odd">
 <td><code>datasets</code></td>
-<td>typing.Sequence[‘Dataset’]</td>
+<td>Sequence[‘Dataset’]</td>
 <td></td>
 <td><em>required</em></td>
 </tr>
 <tr class="even">
 <td><code>keep</code></td>
-<td>typing.Literal[‘last’]</td>
+<td>Literal[‘last’]</td>
 <td>TODO Yet to be implemented, default: last</td>
 <td><code>'last'</code></td>
 </tr>
@@ -834,7 +830,7 @@ aggregate : Weighted average</code></pre>
 </section>
 <section id="returns-2" class="level4">
 <h4 class="anchored" data-anchor-id="returns-2">Returns</h4>
-<table class="table">
+<table class="caption-top table">
 <thead>
 <tr class="header">
 <th>Type</th>
@@ -843,7 +839,7 @@ aggregate : Weighted average</code></pre>
 </thead>
 <tbody>
 <tr class="odd">
-<td>mikeio.dataset._dataset.Dataset</td>
+<td>Dataset</td>
 <td>concatenated dataset</td>
 </tr>
 </tbody>
@@ -895,11 +891,11 @@ aggregate : Weighted average</code></pre>
 <p>Extract data along a moving track</p>
 <section id="parameters-3" class="level4">
 <h4 class="anchored" data-anchor-id="parameters-3">Parameters</h4>
-<table class="table">
+<table class="caption-top table">
 <colgroup>
 <col style="width: 5%">
-<col style="width: 24%">
-<col style="width: 63%">
+<col style="width: 21%">
+<col style="width: 65%">
 <col style="width: 6%">
 </colgroup>
 <thead>
@@ -913,19 +909,19 @@ aggregate : Weighted average</code></pre>
 <tbody>
 <tr class="odd">
 <td><code>track</code></td>
-<td>pandas.pandas.DataFrame</td>
+<td>pd.DataFrame</td>
 <td>with DatetimeIndex and (x, y) of track points as first two columns x,y coordinates must be in same coordinate system as dfsu</td>
 <td><em>required</em></td>
 </tr>
 <tr class="even">
 <td><code>track</code></td>
-<td>pandas.pandas.DataFrame</td>
+<td>pd.DataFrame</td>
 <td>filename of csv or dfs0 file containing t,x,y</td>
 <td><em>required</em></td>
 </tr>
 <tr class="odd">
 <td><code>method</code></td>
-<td>typing.Literal[‘nearest’, ‘inverse_distance’]</td>
+<td>Literal[‘nearest’, ‘inverse_distance’]</td>
 <td>Spatial interpolation method (‘nearest’ or ‘inverse_distance’) default=‘nearest’</td>
 <td><code>'nearest'</code></td>
 </tr>
@@ -934,10 +930,10 @@ aggregate : Weighted average</code></pre>
 </section>
 <section id="returns-3" class="level4">
 <h4 class="anchored" data-anchor-id="returns-3">Returns</h4>
-<table class="table">
+<table class="caption-top table">
 <colgroup>
-<col style="width: 26%">
-<col style="width: 73%">
+<col style="width: 8%">
+<col style="width: 91%">
 </colgroup>
 <thead>
 <tr class="header">
@@ -947,7 +943,7 @@ aggregate : Weighted average</code></pre>
 </thead>
 <tbody>
 <tr class="odd">
-<td>mikeio.dataset._dataset.Dataset</td>
+<td>Dataset</td>
 <td>A dataset with data dimension t The first two items will be x- and y- coordinates of track</td>
 </tr>
 </tbody>
@@ -965,12 +961,12 @@ aggregate : Weighted average</code></pre>
 <p>Insert DataArray in a specific position</p>
 <section id="parameters-4" class="level4">
 <h4 class="anchored" data-anchor-id="parameters-4">Parameters</h4>
-<table class="table">
+<table class="caption-top table">
 <colgroup>
-<col style="width: 5%">
-<col style="width: 22%">
-<col style="width: 63%">
-<col style="width: 7%">
+<col style="width: 6%">
+<col style="width: 8%">
+<col style="width: 76%">
+<col style="width: 8%">
 </colgroup>
 <thead>
 <tr class="header">
@@ -989,7 +985,7 @@ aggregate : Weighted average</code></pre>
 </tr>
 <tr class="even">
 <td><code>value</code></td>
-<td>mikeio.dataset._dataarray.DataArray</td>
+<td>DataArray</td>
 <td>DataArray to be inserted, must comform with with existing DataArrays and must have a unique item name</td>
 <td><em>required</em></td>
 </tr>
@@ -1012,12 +1008,12 @@ aggregate : Weighted average</code></pre>
 </ul>
 <section id="parameters-5" class="level4">
 <h4 class="anchored" data-anchor-id="parameters-5">Parameters</h4>
-<table class="table">
+<table class="caption-top table">
 <colgroup>
 <col style="width: 5%">
-<col style="width: 28%">
-<col style="width: 61%">
-<col style="width: 4%">
+<col style="width: 17%">
+<col style="width: 71%">
+<col style="width: 5%">
 </colgroup>
 <thead>
 <tr class="header">
@@ -1030,7 +1026,7 @@ aggregate : Weighted average</code></pre>
 <tbody>
 <tr class="odd">
 <td><code>time</code></td>
-<td>(float, pandas.pandas.DatetimeIndex or mikeio.dataset._dataset.Dataset)</td>
+<td>(float, pd.DatetimeIndex or Dataset)</td>
 <td>timestep in seconds or discrete time instances given by pd.DatetimeIndex (typically from another Dataset da2.time), by default None (=don’t interp in time)</td>
 <td><code>None</code></td>
 </tr>
@@ -1057,7 +1053,7 @@ aggregate : Weighted average</code></pre>
 </section>
 <section id="returns-4" class="level4">
 <h4 class="anchored" data-anchor-id="returns-4">Returns</h4>
-<table class="table">
+<table class="caption-top table">
 <thead>
 <tr class="header">
 <th>Type</th>
@@ -1066,7 +1062,7 @@ aggregate : Weighted average</code></pre>
 </thead>
 <tbody>
 <tr class="odd">
-<td>mikeio.dataset._dataset.Dataset</td>
+<td>Dataset</td>
 <td>new Dataset with interped data</td>
 </tr>
 </tbody>
@@ -1092,12 +1088,12 @@ aggregate : Weighted average</code></pre>
 <p>Note: currently only supports interpolation from dfsu-2d to dfs2 or other dfsu-2d Datasets</p>
 <section id="parameters-6" class="level4">
 <h4 class="anchored" data-anchor-id="parameters-6">Parameters</h4>
-<table class="table">
+<table class="caption-top table">
 <colgroup>
-<col style="width: 5%">
-<col style="width: 78%">
-<col style="width: 8%">
-<col style="width: 6%">
+<col style="width: 9%">
+<col style="width: 65%">
+<col style="width: 14%">
+<col style="width: 11%">
 </colgroup>
 <thead>
 <tr class="header">
@@ -1110,13 +1106,13 @@ aggregate : Weighted average</code></pre>
 <tbody>
 <tr class="odd">
 <td><code>other</code></td>
-<td>‘Dataset’ | mikeio.dataset._dataarray.DataArray | mikeio.spatial.Grid2D | mikeio.spatial.GeometryFM2D | pandas.pandas.DatetimeIndex</td>
+<td>‘Dataset’ | DataArray | Grid2D | GeometryFM2D | pd.DatetimeIndex</td>
 <td></td>
 <td><em>required</em></td>
 </tr>
 <tr class="even">
 <td><code>kwargs</code></td>
-<td>typing.Any</td>
+<td>Any</td>
 <td></td>
 <td><code>{}</code></td>
 </tr>
@@ -1134,7 +1130,7 @@ aggregate : Weighted average</code></pre>
 </section>
 <section id="returns-5" class="level4">
 <h4 class="anchored" data-anchor-id="returns-5">Returns</h4>
-<table class="table">
+<table class="caption-top table">
 <thead>
 <tr class="header">
 <th>Type</th>
@@ -1143,7 +1139,7 @@ aggregate : Weighted average</code></pre>
 </thead>
 <tbody>
 <tr class="odd">
-<td>mikeio.dataset._dataset.Dataset</td>
+<td>Dataset</td>
 <td>Interpolated Dataset</td>
 </tr>
 </tbody>
@@ -1157,11 +1153,11 @@ aggregate : Weighted average</code></pre>
 <p>Wrapper of :py:class:<code>scipy.interpolate.interp1d</code></p>
 <section id="parameters-7" class="level4">
 <h4 class="anchored" data-anchor-id="parameters-7">Parameters</h4>
-<table class="table">
+<table class="caption-top table">
 <colgroup>
 <col style="width: 2%">
-<col style="width: 17%">
-<col style="width: 77%">
+<col style="width: 11%">
+<col style="width: 82%">
 <col style="width: 2%">
 </colgroup>
 <thead>
@@ -1175,7 +1171,7 @@ aggregate : Weighted average</code></pre>
 <tbody>
 <tr class="odd">
 <td><code>dt</code></td>
-<td>float | pandas.pandas.DatetimeIndex | ‘Dataset’ | mikeio.dataset._dataarray.DataArray | None</td>
+<td>float | pd.DatetimeIndex | ‘Dataset’ | DataArray | None</td>
 <td>output timestep in seconds or discrete time instances given as a pd.DatetimeIndex (typically from another Dataset ds2.time)</td>
 <td><code>None</code></td>
 </tr>
@@ -1208,7 +1204,7 @@ aggregate : Weighted average</code></pre>
 </section>
 <section id="returns-6" class="level4">
 <h4 class="anchored" data-anchor-id="returns-6">Returns</h4>
-<table class="table">
+<table class="caption-top table">
 <thead>
 <tr class="header">
 <th>Type</th>
@@ -1217,7 +1213,7 @@ aggregate : Weighted average</code></pre>
 </thead>
 <tbody>
 <tr class="odd">
-<td>mikeio.dataset._dataset.Dataset</td>
+<td>Dataset</td>
 <td></td>
 </tr>
 </tbody>
@@ -1261,11 +1257,11 @@ aggregate : Weighted average</code></pre>
 </ul>
 <section id="parameters-8" class="level4">
 <h4 class="anchored" data-anchor-id="parameters-8">Parameters</h4>
-<table class="table">
+<table class="caption-top table">
 <colgroup>
-<col style="width: 6%">
-<col style="width: 29%">
-<col style="width: 55%">
+<col style="width: 7%">
+<col style="width: 26%">
+<col style="width: 58%">
 <col style="width: 7%">
 </colgroup>
 <thead>
@@ -1279,7 +1275,7 @@ aggregate : Weighted average</code></pre>
 <tbody>
 <tr class="odd">
 <td><code>idx</code></td>
-<td>int | typing.Sequence[int] | slice | None</td>
+<td>int | Sequence[int] | slice | None</td>
 <td></td>
 <td><code>None</code></td>
 </tr>
@@ -1324,7 +1320,7 @@ aggregate : Weighted average</code></pre>
 </section>
 <section id="returns-7" class="level4">
 <h4 class="anchored" data-anchor-id="returns-7">Returns</h4>
-<table class="table">
+<table class="caption-top table">
 <thead>
 <tr class="header">
 <th>Type</th>
@@ -1333,7 +1329,7 @@ aggregate : Weighted average</code></pre>
 </thead>
 <tbody>
 <tr class="odd">
-<td>mikeio.dataset._dataset.Dataset</td>
+<td>Dataset</td>
 <td>dataset with subset</td>
 </tr>
 </tbody>
@@ -1356,7 +1352,7 @@ aggregate : Weighted average</code></pre>
 <p>Max value along an axis</p>
 <section id="parameters-9" class="level4">
 <h4 class="anchored" data-anchor-id="parameters-9">Parameters</h4>
-<table class="table">
+<table class="caption-top table">
 <colgroup>
 <col style="width: 9%">
 <col style="width: 13%">
@@ -1383,7 +1379,7 @@ aggregate : Weighted average</code></pre>
 </section>
 <section id="returns-8" class="level4">
 <h4 class="anchored" data-anchor-id="returns-8">Returns</h4>
-<table class="table">
+<table class="caption-top table">
 <thead>
 <tr class="header">
 <th>Type</th>
@@ -1392,7 +1388,7 @@ aggregate : Weighted average</code></pre>
 </thead>
 <tbody>
 <tr class="odd">
-<td>mikeio.dataset._dataset.Dataset</td>
+<td>Dataset</td>
 <td>dataset with max values</td>
 </tr>
 </tbody>
@@ -1409,7 +1405,7 @@ aggregate : Weighted average</code></pre>
 <p>Mean value along an axis</p>
 <section id="parameters-10" class="level4">
 <h4 class="anchored" data-anchor-id="parameters-10">Parameters</h4>
-<table class="table">
+<table class="caption-top table">
 <colgroup>
 <col style="width: 9%">
 <col style="width: 13%">
@@ -1436,7 +1432,7 @@ aggregate : Weighted average</code></pre>
 </section>
 <section id="returns-9" class="level4">
 <h4 class="anchored" data-anchor-id="returns-9">Returns</h4>
-<table class="table">
+<table class="caption-top table">
 <thead>
 <tr class="header">
 <th>Type</th>
@@ -1445,7 +1441,7 @@ aggregate : Weighted average</code></pre>
 </thead>
 <tbody>
 <tr class="odd">
-<td>mikeio.dataset._dataset.Dataset</td>
+<td>Dataset</td>
 <td>dataset with mean values</td>
 </tr>
 </tbody>
@@ -1463,13 +1459,7 @@ average : Weighted average</code></pre>
 <p>Merge Datasets along the item dimension</p>
 <section id="parameters-11" class="level4">
 <h4 class="anchored" data-anchor-id="parameters-11">Parameters</h4>
-<table class="table">
-<colgroup>
-<col style="width: 17%">
-<col style="width: 43%">
-<col style="width: 21%">
-<col style="width: 17%">
-</colgroup>
+<table class="caption-top table">
 <thead>
 <tr class="header">
 <th>Name</th>
@@ -1481,7 +1471,7 @@ average : Weighted average</code></pre>
 <tbody>
 <tr class="odd">
 <td><code>datasets</code></td>
-<td>typing.Sequence[‘Dataset’]</td>
+<td>Sequence[‘Dataset’]</td>
 <td></td>
 <td><em>required</em></td>
 </tr>
@@ -1490,7 +1480,7 @@ average : Weighted average</code></pre>
 </section>
 <section id="returns-10" class="level4">
 <h4 class="anchored" data-anchor-id="returns-10">Returns</h4>
-<table class="table">
+<table class="caption-top table">
 <thead>
 <tr class="header">
 <th>Type</th>
@@ -1499,7 +1489,7 @@ average : Weighted average</code></pre>
 </thead>
 <tbody>
 <tr class="odd">
-<td>mikeio.dataset._dataset.Dataset</td>
+<td>Dataset</td>
 <td>merged dataset</td>
 </tr>
 </tbody>
@@ -1512,7 +1502,7 @@ average : Weighted average</code></pre>
 <p>Min value along an axis</p>
 <section id="parameters-12" class="level4">
 <h4 class="anchored" data-anchor-id="parameters-12">Parameters</h4>
-<table class="table">
+<table class="caption-top table">
 <colgroup>
 <col style="width: 9%">
 <col style="width: 13%">
@@ -1539,7 +1529,7 @@ average : Weighted average</code></pre>
 </section>
 <section id="returns-11" class="level4">
 <h4 class="anchored" data-anchor-id="returns-11">Returns</h4>
-<table class="table">
+<table class="caption-top table">
 <thead>
 <tr class="header">
 <th>Type</th>
@@ -1548,7 +1538,7 @@ average : Weighted average</code></pre>
 </thead>
 <tbody>
 <tr class="odd">
-<td>mikeio.dataset._dataset.Dataset</td>
+<td>Dataset</td>
 <td>dataset with min values</td>
 </tr>
 </tbody>
@@ -1565,7 +1555,7 @@ average : Weighted average</code></pre>
 <p>Max value along an axis (NaN removed)</p>
 <section id="parameters-13" class="level4">
 <h4 class="anchored" data-anchor-id="parameters-13">Parameters</h4>
-<table class="table">
+<table class="caption-top table">
 <colgroup>
 <col style="width: 9%">
 <col style="width: 13%">
@@ -1596,7 +1586,7 @@ average : Weighted average</code></pre>
 </section>
 <section id="returns-12" class="level4">
 <h4 class="anchored" data-anchor-id="returns-12">Returns</h4>
-<table class="table">
+<table class="caption-top table">
 <thead>
 <tr class="header">
 <th>Type</th>
@@ -1605,7 +1595,7 @@ average : Weighted average</code></pre>
 </thead>
 <tbody>
 <tr class="odd">
-<td>mikeio.dataset._dataset.Dataset</td>
+<td>Dataset</td>
 <td>dataset with max values</td>
 </tr>
 </tbody>
@@ -1618,7 +1608,7 @@ average : Weighted average</code></pre>
 <p>Mean value along an axis (NaN removed)</p>
 <section id="parameters-14" class="level4">
 <h4 class="anchored" data-anchor-id="parameters-14">Parameters</h4>
-<table class="table">
+<table class="caption-top table">
 <colgroup>
 <col style="width: 9%">
 <col style="width: 13%">
@@ -1645,7 +1635,7 @@ average : Weighted average</code></pre>
 </section>
 <section id="returns-13" class="level4">
 <h4 class="anchored" data-anchor-id="returns-13">Returns</h4>
-<table class="table">
+<table class="caption-top table">
 <thead>
 <tr class="header">
 <th>Type</th>
@@ -1654,7 +1644,7 @@ average : Weighted average</code></pre>
 </thead>
 <tbody>
 <tr class="odd">
-<td>mikeio.dataset._dataset.Dataset</td>
+<td>Dataset</td>
 <td>dataset with mean values</td>
 </tr>
 </tbody>
@@ -1667,7 +1657,7 @@ average : Weighted average</code></pre>
 <p>Min value along an axis (NaN removed)</p>
 <section id="parameters-15" class="level4">
 <h4 class="anchored" data-anchor-id="parameters-15">Parameters</h4>
-<table class="table">
+<table class="caption-top table">
 <colgroup>
 <col style="width: 9%">
 <col style="width: 13%">
@@ -1694,7 +1684,7 @@ average : Weighted average</code></pre>
 </section>
 <section id="returns-14" class="level4">
 <h4 class="anchored" data-anchor-id="returns-14">Returns</h4>
-<table class="table">
+<table class="caption-top table">
 <thead>
 <tr class="header">
 <th>Type</th>
@@ -1703,7 +1693,7 @@ average : Weighted average</code></pre>
 </thead>
 <tbody>
 <tr class="odd">
-<td>mikeio.dataset._dataset.Dataset</td>
+<td>Dataset</td>
 <td>dataset with min values</td>
 </tr>
 </tbody>
@@ -1717,11 +1707,11 @@ average : Weighted average</code></pre>
 <p>Wrapping np.nanquantile</p>
 <section id="parameters-16" class="level4">
 <h4 class="anchored" data-anchor-id="parameters-16">Parameters</h4>
-<table class="table">
+<table class="caption-top table">
 <colgroup>
 <col style="width: 5%">
-<col style="width: 24%">
-<col style="width: 61%">
+<col style="width: 20%">
+<col style="width: 64%">
 <col style="width: 8%">
 </colgroup>
 <thead>
@@ -1735,7 +1725,7 @@ average : Weighted average</code></pre>
 <tbody>
 <tr class="odd">
 <td><code>q</code></td>
-<td>float | typing.Sequence[float]</td>
+<td>float | Sequence[float]</td>
 <td>Quantile or sequence of quantiles to compute, which must be between 0 and 1 inclusive.</td>
 <td><em>required</em></td>
 </tr>
@@ -1756,7 +1746,7 @@ average : Weighted average</code></pre>
 </section>
 <section id="returns-15" class="level4">
 <h4 class="anchored" data-anchor-id="returns-15">Returns</h4>
-<table class="table">
+<table class="caption-top table">
 <thead>
 <tr class="header">
 <th>Type</th>
@@ -1765,7 +1755,7 @@ average : Weighted average</code></pre>
 </thead>
 <tbody>
 <tr class="odd">
-<td>mikeio.dataset._dataset.Dataset</td>
+<td>Dataset</td>
 <td>dataset with quantile values</td>
 </tr>
 </tbody>
@@ -1778,7 +1768,7 @@ average : Weighted average</code></pre>
 <p>Standard deviation along an axis (NaN removed)</p>
 <section id="parameters-17" class="level4">
 <h4 class="anchored" data-anchor-id="parameters-17">Parameters</h4>
-<table class="table">
+<table class="caption-top table">
 <colgroup>
 <col style="width: 9%">
 <col style="width: 13%">
@@ -1805,11 +1795,7 @@ average : Weighted average</code></pre>
 </section>
 <section id="returns-16" class="level4">
 <h4 class="anchored" data-anchor-id="returns-16">Returns</h4>
-<table class="table">
-<colgroup>
-<col style="width: 45%">
-<col style="width: 54%">
-</colgroup>
+<table class="caption-top table">
 <thead>
 <tr class="header">
 <th>Type</th>
@@ -1818,7 +1804,7 @@ average : Weighted average</code></pre>
 </thead>
 <tbody>
 <tr class="odd">
-<td>mikeio.dataset._dataset.Dataset</td>
+<td>Dataset</td>
 <td>dataset with standard deviation values</td>
 </tr>
 </tbody>
@@ -1835,7 +1821,7 @@ average : Weighted average</code></pre>
 <p>Range (max - min) a.k.a Peak to Peak along an axis</p>
 <section id="parameters-18" class="level4">
 <h4 class="anchored" data-anchor-id="parameters-18">Parameters</h4>
-<table class="table">
+<table class="caption-top table">
 <colgroup>
 <col style="width: 9%">
 <col style="width: 13%">
@@ -1862,7 +1848,7 @@ average : Weighted average</code></pre>
 </section>
 <section id="returns-17" class="level4">
 <h4 class="anchored" data-anchor-id="returns-17">Returns</h4>
-<table class="table">
+<table class="caption-top table">
 <thead>
 <tr class="header">
 <th>Type</th>
@@ -1871,7 +1857,7 @@ average : Weighted average</code></pre>
 </thead>
 <tbody>
 <tr class="odd">
-<td>mikeio.dataset._dataset.Dataset</td>
+<td>Dataset</td>
 <td>dataset with peak to peak values</td>
 </tr>
 </tbody>
@@ -1885,11 +1871,11 @@ average : Weighted average</code></pre>
 <p>Wrapping np.quantile</p>
 <section id="parameters-19" class="level4">
 <h4 class="anchored" data-anchor-id="parameters-19">Parameters</h4>
-<table class="table">
+<table class="caption-top table">
 <colgroup>
 <col style="width: 5%">
-<col style="width: 24%">
-<col style="width: 61%">
+<col style="width: 20%">
+<col style="width: 64%">
 <col style="width: 8%">
 </colgroup>
 <thead>
@@ -1903,7 +1889,7 @@ average : Weighted average</code></pre>
 <tbody>
 <tr class="odd">
 <td><code>q</code></td>
-<td>float | typing.Sequence[float]</td>
+<td>float | Sequence[float]</td>
 <td>Quantile or sequence of quantiles to compute, which must be between 0 and 1 inclusive.</td>
 <td><em>required</em></td>
 </tr>
@@ -1918,7 +1904,7 @@ average : Weighted average</code></pre>
 </section>
 <section id="returns-18" class="level4">
 <h4 class="anchored" data-anchor-id="returns-18">Returns</h4>
-<table class="table">
+<table class="caption-top table">
 <thead>
 <tr class="header">
 <th>Type</th>
@@ -1927,7 +1913,7 @@ average : Weighted average</code></pre>
 </thead>
 <tbody>
 <tr class="odd">
-<td>mikeio.dataset._dataset.Dataset</td>
+<td>Dataset</td>
 <td>dataset with quantile values</td>
 </tr>
 </tbody>
@@ -1950,7 +1936,7 @@ average : Weighted average</code></pre>
 <p>Remove DataArray from Dataset</p>
 <section id="parameters-20" class="level4">
 <h4 class="anchored" data-anchor-id="parameters-20">Parameters</h4>
-<table class="table">
+<table class="caption-top table">
 <colgroup>
 <col style="width: 9%">
 <col style="width: 13%">
@@ -1986,12 +1972,12 @@ average : Weighted average</code></pre>
 <p>Rename items (DataArrays) in Dataset</p>
 <section id="parameters-21" class="level4">
 <h4 class="anchored" data-anchor-id="parameters-21">Parameters</h4>
-<table class="table">
+<table class="caption-top table">
 <colgroup>
 <col style="width: 7%">
-<col style="width: 18%">
-<col style="width: 66%">
-<col style="width: 7%">
+<col style="width: 14%">
+<col style="width: 70%">
+<col style="width: 8%">
 </colgroup>
 <thead>
 <tr class="header">
@@ -2004,7 +1990,7 @@ average : Weighted average</code></pre>
 <tbody>
 <tr class="odd">
 <td><code>mapper</code></td>
-<td>typing.Mapping[str, str]</td>
+<td>Mapping[str, str]</td>
 <td>dictionary (or similar) mapping from old to new names</td>
 <td><em>required</em></td>
 </tr>
@@ -2019,7 +2005,7 @@ average : Weighted average</code></pre>
 </section>
 <section id="returns-19" class="level4">
 <h4 class="anchored" data-anchor-id="returns-19">Returns</h4>
-<table class="table">
+<table class="caption-top table">
 <thead>
 <tr class="header">
 <th>Type</th>
@@ -2028,7 +2014,7 @@ average : Weighted average</code></pre>
 </thead>
 <tbody>
 <tr class="odd">
-<td>mikeio.dataset._dataset.Dataset</td>
+<td>Dataset</td>
 <td></td>
 </tr>
 </tbody>
@@ -2056,12 +2042,12 @@ average : Weighted average</code></pre>
 </ul>
 <section id="parameters-22" class="level4">
 <h4 class="anchored" data-anchor-id="parameters-22">Parameters</h4>
-<table class="table">
+<table class="caption-top table">
 <colgroup>
-<col style="width: 3%">
-<col style="width: 26%">
-<col style="width: 64%">
 <col style="width: 4%">
+<col style="width: 15%">
+<col style="width: 74%">
+<col style="width: 5%">
 </colgroup>
 <thead>
 <tr class="header">
@@ -2074,7 +2060,7 @@ average : Weighted average</code></pre>
 <tbody>
 <tr class="odd">
 <td><code>time</code></td>
-<td>(str, pandas.pandas.DatetimeIndex or mikeio.dataset._dataset.Dataset)</td>
+<td>(str, pd.DatetimeIndex or Dataset)</td>
 <td>time labels e.g.&nbsp;“2018-01” or slice(“2018-1-1”,“2019-1-1”), by default None</td>
 <td><em>required</em></td>
 </tr>
@@ -2098,7 +2084,7 @@ average : Weighted average</code></pre>
 </tr>
 <tr class="odd">
 <td><code>coords</code></td>
-<td>numpy.numpy.array(float, float)</td>
+<td>np.array(float, float)</td>
 <td>As an alternative to specifying x, y and z individually, the argument coords can be used instead. (x,y)- or (x,y,z)-coordinates of point to be selected, by default None</td>
 <td><em>required</em></td>
 </tr>
@@ -2119,7 +2105,7 @@ average : Weighted average</code></pre>
 </section>
 <section id="returns-20" class="level4">
 <h4 class="anchored" data-anchor-id="returns-20">Returns</h4>
-<table class="table">
+<table class="caption-top table">
 <thead>
 <tr class="header">
 <th>Type</th>
@@ -2128,7 +2114,7 @@ average : Weighted average</code></pre>
 </thead>
 <tbody>
 <tr class="odd">
-<td>mikeio.dataset._dataset.Dataset</td>
+<td>Dataset</td>
 <td>new Dataset with selected data</td>
 </tr>
 </tbody>
@@ -2156,7 +2142,7 @@ average : Weighted average</code></pre>
 <p>Remove axes of length 1</p>
 <section id="returns-21" class="level4">
 <h4 class="anchored" data-anchor-id="returns-21">Returns</h4>
-<table class="table">
+<table class="caption-top table">
 <thead>
 <tr class="header">
 <th>Type</th>
@@ -2165,7 +2151,7 @@ average : Weighted average</code></pre>
 </thead>
 <tbody>
 <tr class="odd">
-<td>mikeio.dataset._dataset.Dataset</td>
+<td>Dataset</td>
 <td></td>
 </tr>
 </tbody>
@@ -2178,7 +2164,7 @@ average : Weighted average</code></pre>
 <p>Standard deviation along an axis</p>
 <section id="parameters-23" class="level4">
 <h4 class="anchored" data-anchor-id="parameters-23">Parameters</h4>
-<table class="table">
+<table class="caption-top table">
 <colgroup>
 <col style="width: 9%">
 <col style="width: 13%">
@@ -2205,11 +2191,7 @@ average : Weighted average</code></pre>
 </section>
 <section id="returns-22" class="level4">
 <h4 class="anchored" data-anchor-id="returns-22">Returns</h4>
-<table class="table">
-<colgroup>
-<col style="width: 45%">
-<col style="width: 54%">
-</colgroup>
+<table class="caption-top table">
 <thead>
 <tr class="header">
 <th>Type</th>
@@ -2218,7 +2200,7 @@ average : Weighted average</code></pre>
 </thead>
 <tbody>
 <tr class="odd">
-<td>mikeio.dataset._dataset.Dataset</td>
+<td>Dataset</td>
 <td>dataset with standard deviation values</td>
 </tr>
 </tbody>
@@ -2235,7 +2217,7 @@ average : Weighted average</code></pre>
 <p>Convert Dataset to a Pandas DataFrame</p>
 <section id="parameters-24" class="level4">
 <h4 class="anchored" data-anchor-id="parameters-24">Parameters</h4>
-<table class="table">
+<table class="caption-top table">
 <colgroup>
 <col style="width: 15%">
 <col style="width: 12%">
@@ -2268,7 +2250,7 @@ average : Weighted average</code></pre>
 </section>
 <section id="returns-23" class="level4">
 <h4 class="anchored" data-anchor-id="returns-23">Returns</h4>
-<table class="table">
+<table class="caption-top table">
 <thead>
 <tr class="header">
 <th>Type</th>
@@ -2277,7 +2259,7 @@ average : Weighted average</code></pre>
 </thead>
 <tbody>
 <tr class="odd">
-<td>pandas.pandas.DataFrame</td>
+<td>pd.DataFrame</td>
 <td></td>
 </tr>
 </tbody>
@@ -2290,11 +2272,11 @@ average : Weighted average</code></pre>
 <p>Write dataset to a new dfs file</p>
 <section id="parameters-25" class="level4">
 <h4 class="anchored" data-anchor-id="parameters-25">Parameters</h4>
-<table class="table">
+<table class="caption-top table">
 <colgroup>
 <col style="width: 7%">
-<col style="width: 12%">
-<col style="width: 72%">
+<col style="width: 8%">
+<col style="width: 76%">
 <col style="width: 7%">
 </colgroup>
 <thead>
@@ -2308,7 +2290,7 @@ average : Weighted average</code></pre>
 <tbody>
 <tr class="odd">
 <td><code>filename</code></td>
-<td>str | pathlib.Path</td>
+<td>str | Path</td>
 <td>full path to the new dfs file</td>
 <td><em>required</em></td>
 </tr>
@@ -2328,7 +2310,7 @@ average : Weighted average</code></pre>
 <p>Stack data to a single ndarray with shape (n_items, n_timesteps, …)</p>
 <section id="returns-24" class="level4">
 <h4 class="anchored" data-anchor-id="returns-24">Returns</h4>
-<table class="table">
+<table class="caption-top table">
 <thead>
 <tr class="header">
 <th>Type</th>
@@ -2337,7 +2319,7 @@ average : Weighted average</code></pre>
 </thead>
 <tbody>
 <tr class="odd">
-<td>numpy.numpy.ndarray</td>
+<td>np.ndarray</td>
 <td></td>
 </tr>
 </tbody>

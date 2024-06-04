@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.4.554">
+<meta name="generator" content="quarto-1.4.555">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
@@ -411,7 +411,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </ul>
 <section id="examples" class="level2">
 <h2 class="anchored" data-anchor-id="examples">Examples</h2>
-<div id="74328fad" class="cell" data-execution_count="1">
+<div id="a3d95ab8" class="cell" data-execution_count="1">
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> mikeio</span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a></span>
@@ -431,7 +431,7 @@ values: [0, 1]</code></pre>
 </section>
 <section id="attributes" class="level2">
 <h2 class="anchored" data-anchor-id="attributes">Attributes</h2>
-<table class="table">
+<table class="caption-top table">
 <thead>
 <tr class="header">
 <th>Name</th>
@@ -492,7 +492,7 @@ values: [0, 1]</code></pre>
 </section>
 <section id="methods" class="level2">
 <h2 class="anchored" data-anchor-id="methods">Methods</h2>
-<table class="table">
+<table class="caption-top table">
 <thead>
 <tr class="header">
 <th>Name</th>
@@ -632,12 +632,12 @@ values: [0, 1]</code></pre>
 <p>Aggregate along an axis</p>
 <section id="parameters" class="level4">
 <h4 class="anchored" data-anchor-id="parameters">Parameters</h4>
-<table class="table">
+<table class="caption-top table">
 <colgroup>
-<col style="width: 7%">
-<col style="width: 33%">
-<col style="width: 45%">
-<col style="width: 13%">
+<col style="width: 8%">
+<col style="width: 23%">
+<col style="width: 52%">
+<col style="width: 15%">
 </colgroup>
 <thead>
 <tr class="header">
@@ -656,7 +656,7 @@ values: [0, 1]</code></pre>
 </tr>
 <tr class="even">
 <td><code>func</code></td>
-<td>typing.Callable[…, typing.Any]</td>
+<td>Callable[…, Any]</td>
 <td>default np.nanmean</td>
 <td><code>np.nanmean</code></td>
 </tr>
@@ -665,11 +665,7 @@ values: [0, 1]</code></pre>
 </section>
 <section id="returns" class="level4">
 <h4 class="anchored" data-anchor-id="returns">Returns</h4>
-<table class="table">
-<colgroup>
-<col style="width: 52%">
-<col style="width: 47%">
-</colgroup>
+<table class="caption-top table">
 <thead>
 <tr class="header">
 <th>Type</th>
@@ -678,7 +674,7 @@ values: [0, 1]</code></pre>
 </thead>
 <tbody>
 <tr class="odd">
-<td>mikeio.dataset._dataarray.DataArray</td>
+<td>DataArray</td>
 <td>dataarray with aggregated values</td>
 </tr>
 </tbody>
@@ -696,7 +692,7 @@ nanmax : Max values with NaN values removed</code></pre>
 <p>Compute the weighted average along the specified axis.</p>
 <section id="parameters-1" class="level4">
 <h4 class="anchored" data-anchor-id="parameters-1">Parameters</h4>
-<table class="table">
+<table class="caption-top table">
 <colgroup>
 <col style="width: 10%">
 <col style="width: 15%">
@@ -723,11 +719,7 @@ nanmax : Max values with NaN values removed</code></pre>
 </section>
 <section id="returns-1" class="level4">
 <h4 class="anchored" data-anchor-id="returns-1">Returns</h4>
-<table class="table">
-<colgroup>
-<col style="width: 48%">
-<col style="width: 51%">
-</colgroup>
+<table class="caption-top table">
 <thead>
 <tr class="header">
 <th>Type</th>
@@ -736,7 +728,7 @@ nanmax : Max values with NaN values removed</code></pre>
 </thead>
 <tbody>
 <tr class="odd">
-<td>mikeio.dataset._dataarray.DataArray</td>
+<td>DataArray</td>
 <td>DataArray with weighted average values</td>
 </tr>
 </tbody>
@@ -760,12 +752,12 @@ nanmax : Max values with NaN values removed</code></pre>
 <p>Concatenate DataArrays along the time axis</p>
 <section id="parameters-2" class="level4">
 <h4 class="anchored" data-anchor-id="parameters-2">Parameters</h4>
-<table class="table">
+<table class="caption-top table">
 <colgroup>
+<col style="width: 14%">
+<col style="width: 26%">
+<col style="width: 45%">
 <col style="width: 12%">
-<col style="width: 37%">
-<col style="width: 39%">
-<col style="width: 10%">
 </colgroup>
 <thead>
 <tr class="header">
@@ -778,13 +770,13 @@ nanmax : Max values with NaN values removed</code></pre>
 <tbody>
 <tr class="odd">
 <td><code>dataarrays</code></td>
-<td>collections.abc.Sequence[‘DataArray’]</td>
+<td>Sequence[‘DataArray’]</td>
 <td></td>
 <td><em>required</em></td>
 </tr>
 <tr class="even">
 <td><code>keep</code></td>
-<td>typing.Literal[‘last’]</td>
+<td>Literal[‘last’]</td>
 <td>TODO Yet to be implemented, default: last</td>
 <td><code>'last'</code></td>
 </tr>
@@ -793,7 +785,7 @@ nanmax : Max values with NaN values removed</code></pre>
 </section>
 <section id="returns-2" class="level4">
 <h4 class="anchored" data-anchor-id="returns-2">Returns</h4>
-<table class="table">
+<table class="caption-top table">
 <thead>
 <tr class="header">
 <th>Type</th>
@@ -802,7 +794,7 @@ nanmax : Max values with NaN values removed</code></pre>
 </thead>
 <tbody>
 <tr class="odd">
-<td>mikeio.dataset._dataarray.DataArray</td>
+<td>DataArray</td>
 <td>The concatenated DataArray</td>
 </tr>
 </tbody>
@@ -810,7 +802,7 @@ nanmax : Max values with NaN values removed</code></pre>
 </section>
 <section id="examples-2" class="level4">
 <h4 class="anchored" data-anchor-id="examples-2">Examples</h4>
-<div id="77a86578" class="cell" data-execution_count="2">
+<div id="a3423830" class="cell" data-execution_count="2">
 <div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>da1 <span class="op">=</span> mikeio.read(<span class="st">"../data/HD2D.dfsu"</span>, time<span class="op">=</span>[<span class="dv">0</span>,<span class="dv">1</span>])[<span class="dv">0</span>]</span>
 <span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>da2 <span class="op">=</span> mikeio.read(<span class="st">"../data/HD2D.dfsu"</span>, time<span class="op">=</span>[<span class="dv">2</span>,<span class="dv">3</span>])[<span class="dv">0</span>]</span>
 <span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>da1.time</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
@@ -818,7 +810,7 @@ nanmax : Max values with NaN values removed</code></pre>
 <pre><code>DatetimeIndex(['1985-08-06 07:00:00', '1985-08-06 09:30:00'], dtype='datetime64[ns]', freq=None)</code></pre>
 </div>
 </div>
-<div id="b2f1c57a" class="cell" data-execution_count="3">
+<div id="dcdda2a9" class="cell" data-execution_count="3">
 <div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>da3 <span class="op">=</span> mikeio.DataArray.concat([da1,da2])</span>
 <span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>da3</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="3">
@@ -842,7 +834,7 @@ geometry: Dfsu2D (884 elements, 529 nodes)</code></pre>
 <p>Generate descriptive statistics by wrapping <a href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.describe.html#pandas.DataFrame.describe"><code>pandas.DataFrame.describe</code></a></p>
 <section id="parameters-3" class="level4">
 <h4 class="anchored" data-anchor-id="parameters-3">Parameters</h4>
-<table class="table">
+<table class="caption-top table">
 <thead>
 <tr class="header">
 <th>Name</th>
@@ -879,11 +871,11 @@ geometry: Dfsu2D (884 elements, 529 nodes)</code></pre>
 <p>Extract data along a moving track</p>
 <section id="parameters-4" class="level4">
 <h4 class="anchored" data-anchor-id="parameters-4">Parameters</h4>
-<table class="table">
+<table class="caption-top table">
 <colgroup>
 <col style="width: 5%">
-<col style="width: 24%">
-<col style="width: 63%">
+<col style="width: 21%">
+<col style="width: 65%">
 <col style="width: 6%">
 </colgroup>
 <thead>
@@ -897,19 +889,19 @@ geometry: Dfsu2D (884 elements, 529 nodes)</code></pre>
 <tbody>
 <tr class="odd">
 <td><code>track</code></td>
-<td>pandas.pandas.DataFrame</td>
+<td>pd.DataFrame</td>
 <td>with DatetimeIndex and (x, y) of track points as first two columns x,y coordinates must be in same coordinate system as dfsu</td>
 <td><em>required</em></td>
 </tr>
 <tr class="even">
 <td><code>track</code></td>
-<td>pandas.pandas.DataFrame</td>
+<td>pd.DataFrame</td>
 <td>filename of csv or dfs0 file containing t,x,y</td>
 <td><em>required</em></td>
 </tr>
 <tr class="odd">
 <td><code>method</code></td>
-<td>typing.Literal[‘nearest’, ‘inverse_distance’]</td>
+<td>Literal[‘nearest’, ‘inverse_distance’]</td>
 <td>Spatial interpolation method (‘nearest’ or ‘inverse_distance’) default=‘nearest’</td>
 <td><code>'nearest'</code></td>
 </tr>
@@ -918,10 +910,10 @@ geometry: Dfsu2D (884 elements, 529 nodes)</code></pre>
 </section>
 <section id="returns-3" class="level4">
 <h4 class="anchored" data-anchor-id="returns-3">Returns</h4>
-<table class="table">
+<table class="caption-top table">
 <colgroup>
-<col style="width: 26%">
-<col style="width: 73%">
+<col style="width: 8%">
+<col style="width: 91%">
 </colgroup>
 <thead>
 <tr class="header">
@@ -931,7 +923,7 @@ geometry: Dfsu2D (884 elements, 529 nodes)</code></pre>
 </thead>
 <tbody>
 <tr class="odd">
-<td>mikeio.dataset._dataset.Dataset</td>
+<td>Dataset</td>
 <td>A dataset with data dimension t The first two items will be x- and y- coordinates of track</td>
 </tr>
 </tbody>
@@ -958,11 +950,11 @@ geometry: Dfsu2D (884 elements, 529 nodes)</code></pre>
 </ul>
 <section id="parameters-5" class="level4">
 <h4 class="anchored" data-anchor-id="parameters-5">Parameters</h4>
-<table class="table">
+<table class="caption-top table">
 <colgroup>
 <col style="width: 5%">
-<col style="width: 29%">
-<col style="width: 61%">
+<col style="width: 17%">
+<col style="width: 71%">
 <col style="width: 4%">
 </colgroup>
 <thead>
@@ -976,7 +968,7 @@ geometry: Dfsu2D (884 elements, 529 nodes)</code></pre>
 <tbody>
 <tr class="odd">
 <td><code>time</code></td>
-<td>(float, pandas.pandas.DatetimeIndex or mikeio.dataset._dataarray.DataArray)</td>
+<td>(float, pd.DatetimeIndex or DataArray)</td>
 <td>timestep in seconds or discrete time instances given by pd.DatetimeIndex (typically from another DataArray da2.time), by default None (=don’t interp in time)</td>
 <td><code>None</code></td>
 </tr>
@@ -1003,11 +995,7 @@ geometry: Dfsu2D (884 elements, 529 nodes)</code></pre>
 </section>
 <section id="returns-4" class="level4">
 <h4 class="anchored" data-anchor-id="returns-4">Returns</h4>
-<table class="table">
-<colgroup>
-<col style="width: 52%">
-<col style="width: 47%">
-</colgroup>
+<table class="caption-top table">
 <thead>
 <tr class="header">
 <th>Type</th>
@@ -1016,7 +1004,7 @@ geometry: Dfsu2D (884 elements, 529 nodes)</code></pre>
 </thead>
 <tbody>
 <tr class="odd">
-<td>mikeio.dataset._dataarray.DataArray</td>
+<td>DataArray</td>
 <td>new DataArray with interped data</td>
 </tr>
 </tbody>
@@ -1042,12 +1030,12 @@ geometry: Dfsu2D (884 elements, 529 nodes)</code></pre>
 <p>Note: currently only supports interpolation from dfsu-2d to dfs2 or other dfsu-2d DataArrays</p>
 <section id="parameters-6" class="level4">
 <h4 class="anchored" data-anchor-id="parameters-6">Parameters</h4>
-<table class="table">
+<table class="caption-top table">
 <colgroup>
-<col style="width: 8%">
-<col style="width: 59%">
-<col style="width: 23%">
-<col style="width: 7%">
+<col style="width: 11%">
+<col style="width: 46%">
+<col style="width: 31%">
+<col style="width: 9%">
 </colgroup>
 <thead>
 <tr class="header">
@@ -1060,25 +1048,25 @@ geometry: Dfsu2D (884 elements, 529 nodes)</code></pre>
 <tbody>
 <tr class="odd">
 <td><code>other</code></td>
-<td>‘DataArray’ | mikeio.spatial.Grid2D | mikeio.spatial.GeometryFM2D | pandas.pandas.DatetimeIndex</td>
+<td>‘DataArray’ | Grid2D | GeometryFM2D | pd.DatetimeIndex</td>
 <td></td>
 <td><em>required</em></td>
 </tr>
 <tr class="even">
 <td><code>interpolant</code></td>
-<td>typing.Tuple[typing.Any, typing.Any] | None</td>
+<td>Tuple[Any, Any] | None</td>
 <td>Reuse pre-calculated index and weights</td>
 <td><code>None</code></td>
 </tr>
 <tr class="odd">
 <td><code>optional</code></td>
-<td>typing.Tuple[typing.Any, typing.Any] | None</td>
+<td>Tuple[Any, Any] | None</td>
 <td>Reuse pre-calculated index and weights</td>
 <td><code>None</code></td>
 </tr>
 <tr class="even">
 <td><code>kwargs</code></td>
-<td>typing.Any</td>
+<td>Any</td>
 <td></td>
 <td><code>{}</code></td>
 </tr>
@@ -1093,7 +1081,7 @@ geometry: Dfsu2D (884 elements, 529 nodes)</code></pre>
 </section>
 <section id="returns-5" class="level4">
 <h4 class="anchored" data-anchor-id="returns-5">Returns</h4>
-<table class="table">
+<table class="caption-top table">
 <thead>
 <tr class="header">
 <th>Type</th>
@@ -1102,7 +1090,7 @@ geometry: Dfsu2D (884 elements, 529 nodes)</code></pre>
 </thead>
 <tbody>
 <tr class="odd">
-<td>mikeio.dataset._dataarray.DataArray</td>
+<td>DataArray</td>
 <td>Interpolated DataArray</td>
 </tr>
 </tbody>
@@ -1116,7 +1104,7 @@ geometry: Dfsu2D (884 elements, 529 nodes)</code></pre>
 <p>Wrapper of <a href="https://xarray.pydata.org/en/stable/generated/xarray.DataArray.interpolate_na.html#xarray.DataArray.interpolate_na"><code>xarray.DataArray.interpolate_na</code></a></p>
 <section id="examples-5" class="level4">
 <h4 class="anchored" data-anchor-id="examples-5">Examples</h4>
-<div id="de4a745f" class="cell" data-execution_count="4">
+<div id="f8f7253e" class="cell" data-execution_count="4">
 <div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
 <span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
 <span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>time <span class="op">=</span> pd.date_range(<span class="st">"2000"</span>, periods<span class="op">=</span><span class="dv">3</span>, freq<span class="op">=</span><span class="st">"D"</span>)</span>
@@ -1131,7 +1119,7 @@ geometry: GeometryUndefined()
 values: [0, nan, 2]</code></pre>
 </div>
 </div>
-<div id="2628fa74" class="cell" data-execution_count="5">
+<div id="bad63016" class="cell" data-execution_count="5">
 <div class="sourceCode cell-code" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>da.interp_na()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="5">
 <pre><code>&lt;mikeio.DataArray&gt;
@@ -1151,11 +1139,11 @@ values: [0, 1, 2]</code></pre>
 <p>Wrapper of <a href="https://docs.scipy.org/doc/scipy/reference/generated/scipy.interpolate.interp1d.html#scipy.interpolate.interp1d"><code>scipy.interpolate.interp1d</code></a></p>
 <section id="parameters-7" class="level4">
 <h4 class="anchored" data-anchor-id="parameters-7">Parameters</h4>
-<table class="table">
+<table class="caption-top table">
 <colgroup>
-<col style="width: 2%">
-<col style="width: 10%">
-<col style="width: 84%">
+<col style="width: 3%">
+<col style="width: 8%">
+<col style="width: 86%">
 <col style="width: 2%">
 </colgroup>
 <thead>
@@ -1169,7 +1157,7 @@ values: [0, 1, 2]</code></pre>
 <tbody>
 <tr class="odd">
 <td><code>dt</code></td>
-<td>float | pandas.pandas.DatetimeIndex | ‘DataArray’</td>
+<td>float | pd.DatetimeIndex | ‘DataArray’</td>
 <td>output timestep in seconds or new time axis</td>
 <td><em>required</em></td>
 </tr>
@@ -1196,7 +1184,7 @@ values: [0, 1, 2]</code></pre>
 </section>
 <section id="returns-6" class="level4">
 <h4 class="anchored" data-anchor-id="returns-6">Returns</h4>
-<table class="table">
+<table class="caption-top table">
 <thead>
 <tr class="header">
 <th>Type</th>
@@ -1205,7 +1193,7 @@ values: [0, 1, 2]</code></pre>
 </thead>
 <tbody>
 <tr class="odd">
-<td>mikeio.dataset._dataarray.DataArray</td>
+<td>DataArray</td>
 <td></td>
 </tr>
 </tbody>
@@ -1226,11 +1214,11 @@ values: [0, 1, 2]</code></pre>
 </ul>
 <section id="parameters-8" class="level4">
 <h4 class="anchored" data-anchor-id="parameters-8">Parameters</h4>
-<table class="table">
+<table class="caption-top table">
 <colgroup>
-<col style="width: 6%">
-<col style="width: 33%">
-<col style="width: 52%">
+<col style="width: 7%">
+<col style="width: 26%">
+<col style="width: 58%">
 <col style="width: 7%">
 </colgroup>
 <thead>
@@ -1244,7 +1232,7 @@ values: [0, 1, 2]</code></pre>
 <tbody>
 <tr class="odd">
 <td><code>idx</code></td>
-<td>int | collections.abc.Sequence[int] | slice | None</td>
+<td>int | Sequence[int] | slice | None</td>
 <td></td>
 <td><code>None</code></td>
 </tr>
@@ -1289,11 +1277,7 @@ values: [0, 1, 2]</code></pre>
 </section>
 <section id="returns-7" class="level4">
 <h4 class="anchored" data-anchor-id="returns-7">Returns</h4>
-<table class="table">
-<colgroup>
-<col style="width: 52%">
-<col style="width: 47%">
-</colgroup>
+<table class="caption-top table">
 <thead>
 <tr class="header">
 <th>Type</th>
@@ -1302,7 +1286,7 @@ values: [0, 1, 2]</code></pre>
 </thead>
 <tbody>
 <tr class="odd">
-<td>mikeio.dataset._dataarray.DataArray</td>
+<td>DataArray</td>
 <td>new DataArray with selected data</td>
 </tr>
 </tbody>
@@ -1314,7 +1298,7 @@ values: [0, 1, 2]</code></pre>
 </section>
 <section id="examples-6" class="level4">
 <h4 class="anchored" data-anchor-id="examples-6">Examples</h4>
-<div id="b2726da7" class="cell" data-execution_count="6">
+<div id="4d0a1f8b" class="cell" data-execution_count="6">
 <div class="sourceCode cell-code" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>da <span class="op">=</span> mikeio.read(<span class="st">"../data/europe_wind_long_lat.dfs2"</span>)[<span class="dv">0</span>]</span>
 <span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>da</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="6">
@@ -1325,7 +1309,7 @@ time: 2012-01-01 00:00:00 (time-invariant)
 geometry: Grid2D (ny=101, nx=221)</code></pre>
 </div>
 </div>
-<div id="d0c3f034" class="cell" data-execution_count="7">
+<div id="ce19dd8e" class="cell" data-execution_count="7">
 <div class="sourceCode cell-code" id="cb19"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>da.isel(time<span class="op">=-</span><span class="dv">1</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="7">
 <pre><code>&lt;mikeio.DataArray&gt;
@@ -1335,7 +1319,7 @@ time: 2012-01-01 00:00:00 (time-invariant)
 geometry: Grid2D (ny=101, nx=221)</code></pre>
 </div>
 </div>
-<div id="71f063d1" class="cell" data-execution_count="8">
+<div id="2db1c311" class="cell" data-execution_count="8">
 <div class="sourceCode cell-code" id="cb21"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>da.isel(x<span class="op">=</span><span class="bu">slice</span>(<span class="dv">10</span>,<span class="dv">20</span>), y<span class="op">=</span><span class="bu">slice</span>(<span class="dv">40</span>,<span class="dv">60</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="8">
 <pre><code>&lt;mikeio.DataArray&gt;
@@ -1345,7 +1329,7 @@ time: 2012-01-01 00:00:00 (time-invariant)
 geometry: Grid2D (ny=20, nx=10)</code></pre>
 </div>
 </div>
-<div id="772e900b" class="cell" data-execution_count="9">
+<div id="aa6fd4bc" class="cell" data-execution_count="9">
 <div class="sourceCode cell-code" id="cb23"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>da <span class="op">=</span> mikeio.read(<span class="st">"../data/oresund_sigma_z.dfsu"</span>).Temperature</span>
 <span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>da.isel(element<span class="op">=</span><span class="bu">range</span>(<span class="dv">200</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="9">
@@ -1369,7 +1353,7 @@ projection: UTM-33</code></pre>
 <p>Max value along an axis</p>
 <section id="parameters-9" class="level4">
 <h4 class="anchored" data-anchor-id="parameters-9">Parameters</h4>
-<table class="table">
+<table class="caption-top table">
 <colgroup>
 <col style="width: 10%">
 <col style="width: 15%">
@@ -1396,7 +1380,7 @@ projection: UTM-33</code></pre>
 </section>
 <section id="returns-8" class="level4">
 <h4 class="anchored" data-anchor-id="returns-8">Returns</h4>
-<table class="table">
+<table class="caption-top table">
 <thead>
 <tr class="header">
 <th>Type</th>
@@ -1405,7 +1389,7 @@ projection: UTM-33</code></pre>
 </thead>
 <tbody>
 <tr class="odd">
-<td>mikeio.dataset._dataarray.DataArray</td>
+<td>DataArray</td>
 <td>array with max values</td>
 </tr>
 </tbody>
@@ -1422,7 +1406,7 @@ projection: UTM-33</code></pre>
 <p>Mean value along an axis</p>
 <section id="parameters-10" class="level4">
 <h4 class="anchored" data-anchor-id="parameters-10">Parameters</h4>
-<table class="table">
+<table class="caption-top table">
 <colgroup>
 <col style="width: 10%">
 <col style="width: 15%">
@@ -1449,7 +1433,7 @@ projection: UTM-33</code></pre>
 </section>
 <section id="returns-9" class="level4">
 <h4 class="anchored" data-anchor-id="returns-9">Returns</h4>
-<table class="table">
+<table class="caption-top table">
 <thead>
 <tr class="header">
 <th>Type</th>
@@ -1458,7 +1442,7 @@ projection: UTM-33</code></pre>
 </thead>
 <tbody>
 <tr class="odd">
-<td>mikeio.dataset._dataarray.DataArray</td>
+<td>DataArray</td>
 <td>array with mean values</td>
 </tr>
 </tbody>
@@ -1475,7 +1459,7 @@ projection: UTM-33</code></pre>
 <p>Min value along an axis</p>
 <section id="parameters-11" class="level4">
 <h4 class="anchored" data-anchor-id="parameters-11">Parameters</h4>
-<table class="table">
+<table class="caption-top table">
 <colgroup>
 <col style="width: 10%">
 <col style="width: 15%">
@@ -1502,7 +1486,7 @@ projection: UTM-33</code></pre>
 </section>
 <section id="returns-10" class="level4">
 <h4 class="anchored" data-anchor-id="returns-10">Returns</h4>
-<table class="table">
+<table class="caption-top table">
 <thead>
 <tr class="header">
 <th>Type</th>
@@ -1511,7 +1495,7 @@ projection: UTM-33</code></pre>
 </thead>
 <tbody>
 <tr class="odd">
-<td>mikeio.dataset._dataarray.DataArray</td>
+<td>DataArray</td>
 <td>array with min values</td>
 </tr>
 </tbody>
@@ -1528,7 +1512,7 @@ projection: UTM-33</code></pre>
 <p>Max value along an axis (NaN removed)</p>
 <section id="parameters-12" class="level4">
 <h4 class="anchored" data-anchor-id="parameters-12">Parameters</h4>
-<table class="table">
+<table class="caption-top table">
 <colgroup>
 <col style="width: 10%">
 <col style="width: 15%">
@@ -1555,7 +1539,7 @@ projection: UTM-33</code></pre>
 </section>
 <section id="returns-11" class="level4">
 <h4 class="anchored" data-anchor-id="returns-11">Returns</h4>
-<table class="table">
+<table class="caption-top table">
 <thead>
 <tr class="header">
 <th>Type</th>
@@ -1564,7 +1548,7 @@ projection: UTM-33</code></pre>
 </thead>
 <tbody>
 <tr class="odd">
-<td>mikeio.dataset._dataarray.DataArray</td>
+<td>DataArray</td>
 <td>array with max values</td>
 </tr>
 </tbody>
@@ -1581,7 +1565,7 @@ projection: UTM-33</code></pre>
 <p>Mean value along an axis (NaN removed)</p>
 <section id="parameters-13" class="level4">
 <h4 class="anchored" data-anchor-id="parameters-13">Parameters</h4>
-<table class="table">
+<table class="caption-top table">
 <colgroup>
 <col style="width: 10%">
 <col style="width: 15%">
@@ -1608,7 +1592,7 @@ projection: UTM-33</code></pre>
 </section>
 <section id="returns-12" class="level4">
 <h4 class="anchored" data-anchor-id="returns-12">Returns</h4>
-<table class="table">
+<table class="caption-top table">
 <thead>
 <tr class="header">
 <th>Type</th>
@@ -1617,7 +1601,7 @@ projection: UTM-33</code></pre>
 </thead>
 <tbody>
 <tr class="odd">
-<td>mikeio.dataset._dataarray.DataArray</td>
+<td>DataArray</td>
 <td>array with mean values</td>
 </tr>
 </tbody>
@@ -1634,7 +1618,7 @@ projection: UTM-33</code></pre>
 <p>Min value along an axis (NaN removed)</p>
 <section id="parameters-14" class="level4">
 <h4 class="anchored" data-anchor-id="parameters-14">Parameters</h4>
-<table class="table">
+<table class="caption-top table">
 <colgroup>
 <col style="width: 10%">
 <col style="width: 15%">
@@ -1661,7 +1645,7 @@ projection: UTM-33</code></pre>
 </section>
 <section id="returns-13" class="level4">
 <h4 class="anchored" data-anchor-id="returns-13">Returns</h4>
-<table class="table">
+<table class="caption-top table">
 <thead>
 <tr class="header">
 <th>Type</th>
@@ -1670,7 +1654,7 @@ projection: UTM-33</code></pre>
 </thead>
 <tbody>
 <tr class="odd">
-<td>mikeio.dataset._dataarray.DataArray</td>
+<td>DataArray</td>
 <td>array with min values</td>
 </tr>
 </tbody>
@@ -1688,12 +1672,12 @@ projection: UTM-33</code></pre>
 <p>Wrapping np.nanquantile</p>
 <section id="parameters-15" class="level4">
 <h4 class="anchored" data-anchor-id="parameters-15">Parameters</h4>
-<table class="table">
+<table class="caption-top table">
 <colgroup>
 <col style="width: 5%">
-<col style="width: 28%">
-<col style="width: 57%">
-<col style="width: 7%">
+<col style="width: 20%">
+<col style="width: 64%">
+<col style="width: 8%">
 </colgroup>
 <thead>
 <tr class="header">
@@ -1706,7 +1690,7 @@ projection: UTM-33</code></pre>
 <tbody>
 <tr class="odd">
 <td><code>q</code></td>
-<td>float | collections.abc.Sequence[float]</td>
+<td>float | Sequence[float]</td>
 <td>Quantile or sequence of quantiles to compute, which must be between 0 and 1 inclusive.</td>
 <td><em>required</em></td>
 </tr>
@@ -1721,7 +1705,7 @@ projection: UTM-33</code></pre>
 </section>
 <section id="returns-14" class="level4">
 <h4 class="anchored" data-anchor-id="returns-14">Returns</h4>
-<table class="table">
+<table class="caption-top table">
 <thead>
 <tr class="header">
 <th>Type</th>
@@ -1730,7 +1714,7 @@ projection: UTM-33</code></pre>
 </thead>
 <tbody>
 <tr class="odd">
-<td>mikeio.dataset._dataarray.DataArray</td>
+<td>DataArray</td>
 <td>data with quantile values</td>
 </tr>
 </tbody>
@@ -1753,7 +1737,7 @@ projection: UTM-33</code></pre>
 <p>Standard deviation value along an axis (NaN removed)</p>
 <section id="parameters-16" class="level4">
 <h4 class="anchored" data-anchor-id="parameters-16">Parameters</h4>
-<table class="table">
+<table class="caption-top table">
 <colgroup>
 <col style="width: 10%">
 <col style="width: 15%">
@@ -1780,11 +1764,7 @@ projection: UTM-33</code></pre>
 </section>
 <section id="returns-15" class="level4">
 <h4 class="anchored" data-anchor-id="returns-15">Returns</h4>
-<table class="table">
-<colgroup>
-<col style="width: 49%">
-<col style="width: 50%">
-</colgroup>
+<table class="caption-top table">
 <thead>
 <tr class="header">
 <th>Type</th>
@@ -1793,7 +1773,7 @@ projection: UTM-33</code></pre>
 </thead>
 <tbody>
 <tr class="odd">
-<td>mikeio.dataset._dataarray.DataArray</td>
+<td>DataArray</td>
 <td>array with standard deviation values</td>
 </tr>
 </tbody>
@@ -1810,7 +1790,7 @@ projection: UTM-33</code></pre>
 <p>Range (max - min) a.k.a Peak to Peak along an axis</p>
 <section id="parameters-17" class="level4">
 <h4 class="anchored" data-anchor-id="parameters-17">Parameters</h4>
-<table class="table">
+<table class="caption-top table">
 <colgroup>
 <col style="width: 10%">
 <col style="width: 15%">
@@ -1837,7 +1817,7 @@ projection: UTM-33</code></pre>
 </section>
 <section id="returns-16" class="level4">
 <h4 class="anchored" data-anchor-id="returns-16">Returns</h4>
-<table class="table">
+<table class="caption-top table">
 <thead>
 <tr class="header">
 <th>Type</th>
@@ -1846,7 +1826,7 @@ projection: UTM-33</code></pre>
 </thead>
 <tbody>
 <tr class="odd">
-<td>mikeio.dataset._dataarray.DataArray</td>
+<td>DataArray</td>
 <td>array with peak to peak values</td>
 </tr>
 </tbody>
@@ -1860,12 +1840,12 @@ projection: UTM-33</code></pre>
 <p>Wrapping np.quantile</p>
 <section id="parameters-18" class="level4">
 <h4 class="anchored" data-anchor-id="parameters-18">Parameters</h4>
-<table class="table">
+<table class="caption-top table">
 <colgroup>
 <col style="width: 5%">
-<col style="width: 28%">
-<col style="width: 57%">
-<col style="width: 7%">
+<col style="width: 20%">
+<col style="width: 64%">
+<col style="width: 8%">
 </colgroup>
 <thead>
 <tr class="header">
@@ -1878,7 +1858,7 @@ projection: UTM-33</code></pre>
 <tbody>
 <tr class="odd">
 <td><code>q</code></td>
-<td>float | collections.abc.Sequence[float]</td>
+<td>float | Sequence[float]</td>
 <td>Quantile or sequence of quantiles to compute, which must be between 0 and 1 inclusive.</td>
 <td><em>required</em></td>
 </tr>
@@ -1893,7 +1873,7 @@ projection: UTM-33</code></pre>
 </section>
 <section id="returns-17" class="level4">
 <h4 class="anchored" data-anchor-id="returns-17">Returns</h4>
-<table class="table">
+<table class="caption-top table">
 <thead>
 <tr class="header">
 <th>Type</th>
@@ -1902,7 +1882,7 @@ projection: UTM-33</code></pre>
 </thead>
 <tbody>
 <tr class="odd">
-<td>mikeio.dataset._dataarray.DataArray</td>
+<td>DataArray</td>
 <td>data with quantile values</td>
 </tr>
 </tbody>
@@ -1934,12 +1914,12 @@ projection: UTM-33</code></pre>
 </ul>
 <section id="parameters-19" class="level4">
 <h4 class="anchored" data-anchor-id="parameters-19">Parameters</h4>
-<table class="table">
+<table class="caption-top table">
 <colgroup>
-<col style="width: 3%">
-<col style="width: 27%">
-<col style="width: 64%">
 <col style="width: 4%">
+<col style="width: 15%">
+<col style="width: 74%">
+<col style="width: 5%">
 </colgroup>
 <thead>
 <tr class="header">
@@ -1952,7 +1932,7 @@ projection: UTM-33</code></pre>
 <tbody>
 <tr class="odd">
 <td><code>time</code></td>
-<td>(str, pandas.pandas.DatetimeIndex, mikeio.dataset._dataarray.DataArray)</td>
+<td>(str, pd.DatetimeIndex, DataArray)</td>
 <td>time labels e.g.&nbsp;“2018-01” or slice(“2018-1-1”,“2019-1-1”), by default None</td>
 <td><code>None</code></td>
 </tr>
@@ -1976,7 +1956,7 @@ projection: UTM-33</code></pre>
 </tr>
 <tr class="odd">
 <td><code>coords</code></td>
-<td>numpy.numpy.array(float, float)</td>
+<td>np.array(float, float)</td>
 <td>As an alternative to specifying x, y and z individually, the argument coords can be used instead. (x,y)- or (x,y,z)-coordinates of point to be selected, by default None</td>
 <td><em>required</em></td>
 </tr>
@@ -1997,11 +1977,7 @@ projection: UTM-33</code></pre>
 </section>
 <section id="returns-18" class="level4">
 <h4 class="anchored" data-anchor-id="returns-18">Returns</h4>
-<table class="table">
-<colgroup>
-<col style="width: 52%">
-<col style="width: 47%">
-</colgroup>
+<table class="caption-top table">
 <thead>
 <tr class="header">
 <th>Type</th>
@@ -2010,7 +1986,7 @@ projection: UTM-33</code></pre>
 </thead>
 <tbody>
 <tr class="odd">
-<td>mikeio.dataset._dataarray.DataArray</td>
+<td>DataArray</td>
 <td>new DataArray with selected data</td>
 </tr>
 </tbody>
@@ -2022,7 +1998,7 @@ projection: UTM-33</code></pre>
 </section>
 <section id="examples-9" class="level4">
 <h4 class="anchored" data-anchor-id="examples-9">Examples</h4>
-<div id="7eef8a28" class="cell" data-execution_count="10">
+<div id="a76e49c3" class="cell" data-execution_count="10">
 <div class="sourceCode cell-code" id="cb34"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a>da <span class="op">=</span> mikeio.read(<span class="st">"../data/random.dfs1"</span>)[<span class="dv">0</span>]</span>
 <span id="cb34-2"><a href="#cb34-2" aria-hidden="true" tabindex="-1"></a>da</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="10">
@@ -2033,7 +2009,7 @@ time: 2012-01-01 00:00:00 - 2012-01-01 00:19:48 (100 records)
 geometry: Grid1D (n=3, dx=100)</code></pre>
 </div>
 </div>
-<div id="e5c8e03d" class="cell" data-execution_count="11">
+<div id="147b182b" class="cell" data-execution_count="11">
 <div class="sourceCode cell-code" id="cb36"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a>da.sel(time<span class="op">=</span><span class="bu">slice</span>(<span class="va">None</span>, <span class="st">"2012-1-1 00:02"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="11">
 <pre><code>&lt;mikeio.DataArray&gt;
@@ -2043,7 +2019,7 @@ time: 2012-01-01 00:00:00 - 2012-01-01 00:02:48 (15 records)
 geometry: Grid1D (n=3, dx=100)</code></pre>
 </div>
 </div>
-<div id="ddf35d77" class="cell" data-execution_count="12">
+<div id="08123e98" class="cell" data-execution_count="12">
 <div class="sourceCode cell-code" id="cb38"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a>da.sel(x<span class="op">=</span><span class="dv">100</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="12">
 <pre><code>&lt;mikeio.DataArray&gt;
@@ -2054,7 +2030,7 @@ geometry: GeometryUndefined()
 values: [0.3231, 0.6315, ..., 0.7506]</code></pre>
 </div>
 </div>
-<div id="1796493c" class="cell" data-execution_count="13">
+<div id="00ad3cfb" class="cell" data-execution_count="13">
 <div class="sourceCode cell-code" id="cb40"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a>da <span class="op">=</span> mikeio.read(<span class="st">"../data/oresund_sigma_z.dfsu"</span>).Temperature</span>
 <span id="cb40-2"><a href="#cb40-2" aria-hidden="true" tabindex="-1"></a>da</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="13">
@@ -2070,7 +2046,7 @@ number of sigma layers: 4
 projection: UTM-33</code></pre>
 </div>
 </div>
-<div id="b3b7dfb3" class="cell" data-execution_count="14">
+<div id="ee4d2444" class="cell" data-execution_count="14">
 <div class="sourceCode cell-code" id="cb42"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a>da.sel(time<span class="op">=</span><span class="st">"1997-09-15"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="14">
 <pre><code>&lt;mikeio.DataArray&gt;
@@ -2086,7 +2062,7 @@ projection: UTM-33
 values: [16.31, 16.43, ..., 16.69]</code></pre>
 </div>
 </div>
-<div id="bed9a014" class="cell" data-execution_count="15">
+<div id="9195d7bd" class="cell" data-execution_count="15">
 <div class="sourceCode cell-code" id="cb44"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb44-1"><a href="#cb44-1" aria-hidden="true" tabindex="-1"></a>da.sel(x<span class="op">=</span><span class="dv">340000</span>, y<span class="op">=</span><span class="dv">6160000</span>, z<span class="op">=-</span><span class="dv">3</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="15">
 <pre><code>&lt;mikeio.DataArray&gt;
@@ -2097,7 +2073,7 @@ geometry: GeometryPoint3D(x=340028.1116933554, y=6159980.070243686, z=-3.0)
 values: [17.54, 17.31, 17.08]</code></pre>
 </div>
 </div>
-<div id="301a973d" class="cell" data-execution_count="16">
+<div id="49532565" class="cell" data-execution_count="16">
 <div class="sourceCode cell-code" id="cb46"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb46-1"><a href="#cb46-1" aria-hidden="true" tabindex="-1"></a>da.sel(layers<span class="op">=</span><span class="st">"bottom"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="16">
 <pre><code>&lt;mikeio.DataArray&gt;
@@ -2115,7 +2091,7 @@ geometry: Dfsu2D (3700 elements, 2090 nodes)</code></pre>
 <p>Remove axes of length 1</p>
 <section id="returns-19" class="level4">
 <h4 class="anchored" data-anchor-id="returns-19">Returns</h4>
-<table class="table">
+<table class="caption-top table">
 <thead>
 <tr class="header">
 <th>Type</th>
@@ -2124,7 +2100,7 @@ geometry: Dfsu2D (3700 elements, 2090 nodes)</code></pre>
 </thead>
 <tbody>
 <tr class="odd">
-<td>mikeio.dataset._dataarray.DataArray</td>
+<td>DataArray</td>
 <td></td>
 </tr>
 </tbody>
@@ -2137,7 +2113,7 @@ geometry: Dfsu2D (3700 elements, 2090 nodes)</code></pre>
 <p>Standard deviation values along an axis</p>
 <section id="parameters-20" class="level4">
 <h4 class="anchored" data-anchor-id="parameters-20">Parameters</h4>
-<table class="table">
+<table class="caption-top table">
 <colgroup>
 <col style="width: 10%">
 <col style="width: 15%">
@@ -2164,11 +2140,7 @@ geometry: Dfsu2D (3700 elements, 2090 nodes)</code></pre>
 </section>
 <section id="returns-20" class="level4">
 <h4 class="anchored" data-anchor-id="returns-20">Returns</h4>
-<table class="table">
-<colgroup>
-<col style="width: 49%">
-<col style="width: 50%">
-</colgroup>
+<table class="caption-top table">
 <thead>
 <tr class="header">
 <th>Type</th>
@@ -2177,7 +2149,7 @@ geometry: Dfsu2D (3700 elements, 2090 nodes)</code></pre>
 </thead>
 <tbody>
 <tr class="odd">
-<td>mikeio.dataset._dataarray.DataArray</td>
+<td>DataArray</td>
 <td>array with standard deviation values</td>
 </tr>
 </tbody>
@@ -2194,7 +2166,7 @@ geometry: Dfsu2D (3700 elements, 2090 nodes)</code></pre>
 <p>Convert to DataFrame</p>
 <section id="parameters-21" class="level4">
 <h4 class="anchored" data-anchor-id="parameters-21">Parameters</h4>
-<table class="table">
+<table class="caption-top table">
 <colgroup>
 <col style="width: 15%">
 <col style="width: 12%">
@@ -2227,7 +2199,7 @@ geometry: Dfsu2D (3700 elements, 2090 nodes)</code></pre>
 </section>
 <section id="returns-21" class="level4">
 <h4 class="anchored" data-anchor-id="returns-21">Returns</h4>
-<table class="table">
+<table class="caption-top table">
 <thead>
 <tr class="header">
 <th>Type</th>
@@ -2236,7 +2208,7 @@ geometry: Dfsu2D (3700 elements, 2090 nodes)</code></pre>
 </thead>
 <tbody>
 <tr class="odd">
-<td>pandas.pandas.DataFrame</td>
+<td>pd.DataFrame</td>
 <td></td>
 </tr>
 </tbody>
@@ -2249,11 +2221,11 @@ geometry: Dfsu2D (3700 elements, 2090 nodes)</code></pre>
 <p>Write data to a new dfs file</p>
 <section id="parameters-22" class="level4">
 <h4 class="anchored" data-anchor-id="parameters-22">Parameters</h4>
-<table class="table">
+<table class="caption-top table">
 <colgroup>
 <col style="width: 7%">
-<col style="width: 12%">
-<col style="width: 72%">
+<col style="width: 8%">
+<col style="width: 76%">
 <col style="width: 7%">
 </colgroup>
 <thead>
@@ -2267,7 +2239,7 @@ geometry: Dfsu2D (3700 elements, 2090 nodes)</code></pre>
 <tbody>
 <tr class="odd">
 <td><code>filename</code></td>
-<td>str | pathlib.Path</td>
+<td>str | Path</td>
 <td>full path to the new dfs file</td>
 <td><em>required</em></td>
 </tr>
@@ -2292,7 +2264,7 @@ geometry: Dfsu2D (3700 elements, 2090 nodes)</code></pre>
 <p>Convert to Pandas Series</p>
 <section id="returns-22" class="level4">
 <h4 class="anchored" data-anchor-id="returns-22">Returns</h4>
-<table class="table">
+<table class="caption-top table">
 <thead>
 <tr class="header">
 <th>Type</th>
@@ -2301,7 +2273,7 @@ geometry: Dfsu2D (3700 elements, 2090 nodes)</code></pre>
 </thead>
 <tbody>
 <tr class="odd">
-<td>pandas.pandas.Series</td>
+<td>pd.Series</td>
 <td></td>
 </tr>
 </tbody>

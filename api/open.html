@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.4.554">
+<meta name="generator" content="quarto-1.4.555">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
@@ -361,12 +361,12 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <p>The typical workflow for small dfs files is to read all data with <em>mikeio.read</em> instead of using this function. For big files, however, it can be convenient to open the file first with <em>dfs=mikeio.open(…)</em> to inspect it’s content (items, time and shape) and then decide what to read using dfs.read(…)</p>
 <section id="parameters" class="level2">
 <h2 class="anchored" data-anchor-id="parameters">Parameters</h2>
-<table class="table">
+<table class="caption-top table">
 <colgroup>
-<col style="width: 7%">
-<col style="width: 13%">
-<col style="width: 70%">
-<col style="width: 7%">
+<col style="width: 8%">
+<col style="width: 8%">
+<col style="width: 74%">
+<col style="width: 8%">
 </colgroup>
 <thead>
 <tr class="header">
@@ -379,7 +379,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <tbody>
 <tr class="odd">
 <td><code>filename</code></td>
-<td>str | pathlib.Path</td>
+<td>str | Path</td>
 <td>full path and file name to the dfs file.</td>
 <td><em>required</em></td>
 </tr>

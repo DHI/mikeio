@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.4.554">
+<meta name="generator" content="quarto-1.4.555">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
@@ -374,12 +374,12 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <p>ItemInfo</p>
 <section id="parameters" class="level2">
 <h2 class="anchored" data-anchor-id="parameters">Parameters</h2>
-<table class="table">
+<table class="caption-top table">
 <colgroup>
-<col style="width: 6%">
-<col style="width: 32%">
-<col style="width: 53%">
-<col style="width: 6%">
+<col style="width: 7%">
+<col style="width: 30%">
+<col style="width: 54%">
+<col style="width: 7%">
 </colgroup>
 <thead>
 <tr class="header">
@@ -392,7 +392,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <tbody>
 <tr class="odd">
 <td><code>name</code></td>
-<td>str | mikeio.eum._eum.EUMType | None</td>
+<td>str | EUMType | None</td>
 <td></td>
 <td><code>None</code></td>
 </tr>
@@ -404,13 +404,13 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </tr>
 <tr class="odd">
 <td><code>unit</code></td>
-<td>mikeio.eum._eum.EUMUnit | None</td>
+<td>EUMUnit | None</td>
 <td>Default unit matching EUMType</td>
 <td><code>None</code></td>
 </tr>
 <tr class="even">
 <td><code>data_value_type</code></td>
-<td>typing.Literal[‘Instantaneous’, ‘Accumulated’, ‘StepAccumulated’, ‘MeanStepBackWard’]</td>
+<td>Literal[‘Instantaneous’, ‘Accumulated’, ‘StepAccumulated’, ‘MeanStepBackWard’]</td>
 <td>One of the following strings: ‘Instantaneous’, ‘Accumulated’, ‘StepAccumulated’, ‘MeanStepBackward’, ‘MeanStepForward’. Default: ‘Instantaneous’</td>
 <td><code>'Instantaneous'</code></td>
 </tr>
@@ -419,14 +419,14 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </section>
 <section id="examples" class="level2">
 <h2 class="anchored" data-anchor-id="examples">Examples</h2>
-<div id="39193cec" class="cell" data-execution_count="1">
+<div id="b47e0ee6" class="cell" data-execution_count="1">
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> mikeio</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>mikeio.ItemInfo(<span class="st">"Viken"</span>, mikeio.EUMType.Water_Level)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="1">
 <pre><code>Viken &lt;Water Level&gt; (meter)</code></pre>
 </div>
 </div>
-<div id="ed0b9e32" class="cell" data-execution_count="2">
+<div id="4f2059e8" class="cell" data-execution_count="2">
 <div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>mikeio.ItemInfo(mikeio.EUMType.Wind_speed)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="2">
 <pre><code>Wind speed &lt;Wind speed&gt; (meter per sec)</code></pre>
@@ -435,7 +435,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </section>
 <section id="methods" class="level2">
 <h2 class="anchored" data-anchor-id="methods">Methods</h2>
-<table class="table">
+<table class="caption-top table">
 <thead>
 <tr class="header">
 <th>Name</th>

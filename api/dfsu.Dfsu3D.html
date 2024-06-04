@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.4.554">
+<meta name="generator" content="quarto-1.4.555">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
@@ -328,7 +328,7 @@ ul.task-list li input[type="checkbox"] {
 <p><code>dfsu.Dfsu3D(self, filename)</code></p>
 <section id="attributes" class="level2">
 <h2 class="anchored" data-anchor-id="attributes">Attributes</h2>
-<table class="table">
+<table class="caption-top table">
 <thead>
 <tr class="header">
 <th>Name</th>
@@ -385,7 +385,7 @@ ul.task-list li input[type="checkbox"] {
 </section>
 <section id="methods" class="level2">
 <h2 class="anchored" data-anchor-id="methods">Methods</h2>
-<table class="table">
+<table class="caption-top table">
 <thead>
 <tr class="header">
 <th>Name</th>
@@ -409,7 +409,7 @@ ul.task-list li input[type="checkbox"] {
 <p>Extract surface elevation from a 3d dfsu file (based on zn) to a new 2d dfsu file with a surface elevation item.</p>
 <section id="parameters" class="level4">
 <h4 class="anchored" data-anchor-id="parameters">Parameters</h4>
-<table class="table">
+<table class="caption-top table">
 <colgroup>
 <col style="width: 12%">
 <col style="width: 7%">
@@ -441,12 +441,12 @@ ul.task-list li input[type="checkbox"] {
 <p>Read data from a dfsu file</p>
 <section id="parameters-1" class="level4">
 <h4 class="anchored" data-anchor-id="parameters-1">Parameters</h4>
-<table class="table">
+<table class="caption-top table">
 <colgroup>
-<col style="width: 8%">
-<col style="width: 30%">
-<col style="width: 57%">
-<col style="width: 3%">
+<col style="width: 9%">
+<col style="width: 19%">
+<col style="width: 66%">
+<col style="width: 4%">
 </colgroup>
 <thead>
 <tr class="header">
@@ -459,7 +459,7 @@ ul.task-list li input[type="checkbox"] {
 <tbody>
 <tr class="odd">
 <td><code>items</code></td>
-<td>str | int | typing.Sequence[str | int] | None</td>
+<td>str | int | Sequence[str | int] | None</td>
 <td>Read only selected items, by number (0-based), or by name</td>
 <td><code>None</code></td>
 </tr>
@@ -477,7 +477,7 @@ ul.task-list li input[type="checkbox"] {
 </tr>
 <tr class="even">
 <td><code>area</code></td>
-<td>typing.Tuple[float, float, float, float] | None</td>
+<td>Tuple[float, float, float, float] | None</td>
 <td>Read only data inside (horizontal) area given as a bounding box (tuple with left, lower, right, upper) or as list of coordinates for a polygon, by default None</td>
 <td><code>None</code></td>
 </tr>
@@ -501,13 +501,13 @@ ul.task-list li input[type="checkbox"] {
 </tr>
 <tr class="even">
 <td><code>layers</code></td>
-<td>int | mikeio.spatial._FM_geometry_layered.Layer | typing.Sequence[int] | None</td>
+<td>int | Layer | Sequence[int] | None</td>
 <td>Read only data for specific layers, by default None</td>
 <td><code>None</code></td>
 </tr>
 <tr class="odd">
 <td><code>elements</code></td>
-<td>typing.Sequence[int] | None</td>
+<td>Sequence[int] | None</td>
 <td>Read only selected element ids, by default None</td>
 <td><code>None</code></td>
 </tr>
@@ -528,7 +528,7 @@ ul.task-list li input[type="checkbox"] {
 </section>
 <section id="returns" class="level4">
 <h4 class="anchored" data-anchor-id="returns">Returns</h4>
-<table class="table">
+<table class="caption-top table">
 <thead>
 <tr class="header">
 <th>Type</th>
@@ -537,7 +537,7 @@ ul.task-list li input[type="checkbox"] {
 </thead>
 <tbody>
 <tr class="odd">
-<td>mikeio.dataset.Dataset</td>
+<td>Dataset</td>
 <td>A Dataset with data dimensions [t,elements]</td>
 </tr>
 </tbody>

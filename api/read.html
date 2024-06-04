@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.4.554">
+<meta name="generator" content="quarto-1.4.555">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
@@ -368,11 +368,11 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </ul>
 <section id="parameters" class="level2">
 <h2 class="anchored" data-anchor-id="parameters">Parameters</h2>
-<table class="table">
+<table class="caption-top table">
 <colgroup>
 <col style="width: 10%">
-<col style="width: 26%">
-<col style="width: 57%">
+<col style="width: 21%">
+<col style="width: 62%">
 <col style="width: 5%">
 </colgroup>
 <thead>
@@ -386,13 +386,13 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <tbody>
 <tr class="odd">
 <td><code>filename</code></td>
-<td>str | pathlib.Path</td>
+<td>str | Path</td>
 <td>full path and file name to the dfs file.</td>
 <td><em>required</em></td>
 </tr>
 <tr class="even">
 <td><code>items</code></td>
-<td>str | int | collections.abc.Sequence[str | int] | None</td>
+<td>str | int | Sequence[str | int] | None</td>
 <td>Read only selected items, by number (0-based), or by name, by default None (=all)</td>
 <td><code>None</code></td>
 </tr>
@@ -455,11 +455,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </section>
 <section id="returns" class="level2">
 <h2 class="anchored" data-anchor-id="returns">Returns</h2>
-<table class="table">
-<colgroup>
-<col style="width: 29%">
-<col style="width: 70%">
-</colgroup>
+<table class="caption-top table">
 <thead>
 <tr class="header">
 <th>Type</th>
@@ -468,7 +464,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </thead>
 <tbody>
 <tr class="odd">
-<td>mikeio.dataset.Dataset</td>
+<td>Dataset</td>
 <td>A Dataset with specification according to the file type</td>
 </tr>
 </tbody>
