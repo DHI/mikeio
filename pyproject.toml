@@ -48,7 +48,7 @@ classifiers = [
 dev = ["pytest",
        "black==22.3.0",
        "quarto-cli",
-       "quartodoc",
+       "quartodoc==0.7.3",
        "shapely",
        "pyproj",
        "xarray",

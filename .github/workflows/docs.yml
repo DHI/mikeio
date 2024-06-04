@@ -21,7 +21,6 @@ jobs:
         
     - name: Install mikeio
       run: |
-        pip install quartodoc@git+https://github.com/machow/quartodoc#d4140b4f804ebc6ec249699d52e3efa62cf53127
         pip install .[dev]
     
     - name: Build documentation
