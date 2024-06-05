@@ -20,6 +20,7 @@ dependencies = [
     "PyYAML",
     "tqdm",
     "xarray",
+    "shapely",
 ]
 
 authors = [
@@ -50,21 +51,20 @@ dev = ["pytest",
        "quarto-cli",
        "quartodoc==0.7.3",
        "shapely",
+       "quartodoc",
        "pyproj",
-       "xarray",
        "netcdf4",
        "rasterio",
        "ruff",
        "mypy==1.6.1",
        ]
 
-test = ["pytest", "pytest-cov", "xarray","mypy==1.6.1","shapely","pyproj"]
+test = ["pytest", "pytest-cov", "mypy==1.6.1","pyproj"]
 
 notebooks= [
             "nbformat",
             "nbconvert",
             "jupyter",
-            "xarray",
             "netcdf4",
             "rasterio",
             "geopandas",
