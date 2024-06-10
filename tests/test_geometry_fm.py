@@ -256,3 +256,16 @@ def test_contains_complex_geometry():
 
     res2 = msh.geometry.contains(points, strategy="shapely")
     assert all(res2)
+
+
+def test_find_index_in_highres_quad_area():
+
+    dfs = mikeio.open("tests/testdata/coastal_quad.dfsu")
+
+    pts = [(439166.047, 6921703.975), (439297.166, 6921728.645)]
+
+    idx = dfs.geometry.find_index(coords=pts)
+
+    assert len(idx) == 2
+    for i in idx:
+        assert i >= 0
