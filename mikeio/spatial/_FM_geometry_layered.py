@@ -104,7 +104,7 @@ class _GeometryFMLayered(_GeometryFM):
         if n_layers > 1:
             bottom: Layer = "bottom"
             elem_bot = self.get_layer_elements(layers=bottom)
-            if np.all(np.in1d(sel_elements, elem_bot)):
+            if np.all(np.isin(sel_elements, elem_bot)):
                 n_layers = 1
 
         if (
