@@ -50,7 +50,6 @@ dev = ["pytest",
        "black==22.3.0",
        "quarto-cli",
        "quartodoc==0.7.3",
-       "shapely",
        "quartodoc",
        "pyproj",
        "netcdf4",
@@ -59,7 +58,7 @@ dev = ["pytest",
        "mypy==1.6.1",
        ]
 
-test = ["pytest", "pytest-cov", "mypy==1.6.1","pyproj"]
+test = ["pytest", "pytest-cov", "mypy==1.6.1","pyproj", ""shapely"]
 
 notebooks= [
             "nbformat",
@@ -72,6 +71,7 @@ notebooks= [
             "matplotlib",
             "folium",
             "mapclassify",
+            "shapely",
         ]
 
 [project.urls]
