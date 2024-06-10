@@ -1,4 +1,5 @@
 import pytest
+import mikeio
 from mikeio.spatial import GeometryFM2D, GeometryFM3D
 from mikeio.exceptions import OutsideModelDomainError
 from mikeio.spatial import GeometryPoint2D
@@ -236,3 +237,19 @@ def test_layered(simple_3d_geom: GeometryFM3D):
 
     assert "elements: 2" in repr(g2)
     assert "layers: 2" in repr(g2)
+
+
+def test_contains_complex_geometry():
+
+    msh = mikeio.open("tests/testdata/gulf.mesh")
+
+    points = [
+        [300_000, 3_200_000],
+        [400_000, 3_000_000],
+        [800_000, 2_750_000],
+        [1_200_000, 2_700_000],
+    ]
+
+    res = msh.geometry.contains(points)
+
+    assert all(res)
