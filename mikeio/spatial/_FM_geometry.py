@@ -590,7 +590,7 @@ class GeometryFM2D(_GeometryFM):
         elif n_nearest > 1:
             weights = get_idw_interpolant(dists, p=p)
             if not extrapolate:
-                weights[~self.contains(xy), :] = np.nan  # type: ignore
+                weights[~self.contains(xy, strategy="shapely"), :] = np.nan  # type: ignore
         else:
             ValueError("n_nearest must be at least 1")
 
@@ -684,7 +684,7 @@ class GeometryFM2D(_GeometryFM):
             if not element_found and self.n_elements > 1:
                 many_nearest, _ = self._find_n_nearest_2d_elements(
                     coords[k, :],
-                    n=min(self.n_elements, 10),  # TODO is 10 enough?
+                    n=min(self.n_elements, 100),  # TODO is 10 enough?
                 )
                 for p in many_nearest[2:]:  # we have already tried the two first above
                     nodes = self.element_table[p]
@@ -696,6 +696,8 @@ class GeometryFM2D(_GeometryFM):
                         break
 
             if not element_found:
+                # make an extra check
+                # if not self.contains(coords[k]):
                 points_outside.append(k)
 
         if len(points_outside) > 0:
