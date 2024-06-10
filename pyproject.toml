@@ -58,7 +58,7 @@ dev = ["pytest",
        "mypy==1.6.1",
        ]
 
-test = ["pytest", "pytest-cov", "mypy==1.6.1","pyproj", ""shapely"]
+test = ["pytest", "pytest-cov", "mypy==1.6.1","pyproj", "shapely"]
 
 notebooks= [
             "nbformat",
