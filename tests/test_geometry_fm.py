@@ -253,3 +253,6 @@ def test_contains_complex_geometry():
     res = msh.geometry.contains(points)
 
     assert all(res)
+
+    res2 = msh.geometry.contains(points, strategy="shapely")
+    assert all(res2)

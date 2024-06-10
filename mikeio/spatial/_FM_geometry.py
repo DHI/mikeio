@@ -835,7 +835,9 @@ class GeometryFM2D(_GeometryFM):
     def _domain(self) -> Any:
         return self.to_shapely().buffer(0)
 
-    def contains(self, points: np.ndarray) -> np.ndarray:
+    def contains(
+        self, points: np.ndarray, strategy: Literal["loop", "shapely"] = "loop"
+    ) -> np.ndarray:
         """test if a list of points are contained by mesh
 
         Parameters
@@ -848,13 +850,25 @@ class GeometryFM2D(_GeometryFM):
         bool array
             True for points inside, False otherwise
         """
-        from shapely.geometry import Point  # type: ignore
-
         points = np.atleast_2d(points)
 
-        domain = self._domain
+        if strategy == "shapely":
+            from shapely.geometry import Point  # type: ignore
 
-        return np.array([domain.contains(Point(p)) for p in points])
+            domain = self._domain
+
+            return np.array([domain.contains(Point(p)) for p in points])
+        else:
+            result = np.zeros(points.shape[0], dtype=bool)
+
+            for i, p in enumerate(points):
+                for elem in self.element_table:
+                    coords = self.node_coordinates[elem]
+                    if self._point_in_polygon(coords[:, 0], coords[:, 1], p[0], p[1]):
+                        result[i] = True
+                        break
+
+            return result
 
     def __contains__(self, pt: np.ndarray) -> bool:
         return self.contains(pt)[0]
