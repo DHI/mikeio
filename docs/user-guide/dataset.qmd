@@ -114,7 +114,7 @@ ds["Wind_speed_clipped"] = ws2
 ds
 ```
 
-4. Reorder items if necessary (See #selecting-items above)
+4. Reorder items if necessary (See [selecting items](#selecting-items) above)
 
 ```{python}
 ds2 = ds[["Wind_speed_clipped", "Surface elevation", "Wind speed"]]
