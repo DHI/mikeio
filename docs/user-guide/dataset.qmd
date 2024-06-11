@@ -81,6 +81,53 @@ In most cases, you will *not* plot the Dataset, but rather it's DataArrays. But 
 See details in the [Dataset Plotter API](`mikeio.dataset._data_plot._DatasetPlotter`).
 
 
+## Add a new item
+
+A common workflow is to create a new item based on existing items in a dataset.
+
+This can be in done in several ways. Let's try one of the options.
+
+```{python}
+ds = mikeio.read("../data/NorthSea_HD_and_windspeed.dfsu")
+ds
+```
+
+1. Create a copy of the DataArray
+
+```{python}
+ws2 = ds.Wind_speed.copy()
+ws2.plot.hist();
+```
+
+2. Make the modifications, in this case we will clip the values to the interval 1-18 m/s.
+
+```{python}
+import numpy as np
+ws2.values = np.clip(ws2.to_numpy(), 1,18)
+ws2.plot.hist();
+```
+
+3. Assign it to a new name in the dataset
+
+```{python}
+ds["Wind_speed_clipped"] = ws2
+ds
+```
+
+4. Reorder items if necessary (See #selecting-items above)
+
+```{python}
+ds2 = ds[["Wind_speed_clipped", "Surface elevation", "Wind speed"]]
+ds2
+```
+
+5. Write the new dataset to a new file
+
+```{python}
+ds2.to_dfs("modified.dfsu")
+```
+
+
 ## Properties
 The Dataset (and DataArray) has several properties:
 
