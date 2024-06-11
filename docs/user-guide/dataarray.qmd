@@ -126,7 +126,7 @@ including different ways of *selecting* data:
 * [`aggregate()`](`mikeio.DataArray.aggregate`) - Aggregate along an axis
 * [`quantile()`](`mikeio.DataArray.quantile`) - Quantiles along an axis
 
-### {{< fa calculator >}} Mathematical operations
+## {{< fa calculator >}} Mathematical operations
 * ds + value
 * ds - value
 * ds * value
@@ -135,6 +135,41 @@ and + and - between two DataArrays (if number of items and shapes conform):
 
 * ds1 + ds2
 * ds1 - ds2
+
+## Multiply or add scalar
+
+```{python}
+da1 = mikeio.read("../data/oresundHD_run1.dfsu", items="Surface elevation")[0]
+da2 = mikeio.read("../data/oresundHD_run2.dfsu", items="Surface elevation")[0]
+
+da1.values.mean()
+```
+
+```{python}
+da1_A = da1 + 1
+da1_B = da1 - 1
+da1_A.values.mean(), da1_B.values.mean()
+```
+
+```{python}
+da1_C = da1 * 2
+da1_D = da1 / 2
+da1_C.values.mean(), da1_D.values.mean()
+```
+
+## Difference between two DataArrays
+
+Assume that we have two calibration runs and we wan't to find the difference...
+
+```{python}
+da_diff = da1-da2
+da_diff.plot(title="Difference");
+```
+
+```{python}
+da_ratio = da1 / da2
+da_ratio.plot(title="", label="Ratio", vmin=0.8, vmax=1.2, levels=9, cmap="coolwarm")
+```
 
 Other methods that also return a DataArray:
 
