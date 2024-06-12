@@ -1,11 +1,13 @@
 from __future__ import annotations
 from dataclasses import dataclass
+from datetime import datetime
 from pathlib import Path
 
 from typing import Any, Literal, Sequence, Tuple
 
 import numpy as np
 import pandas as pd
+from mikecore.DfsFile import TimeAxisType
 from mikecore.DfsFactory import DfsFactory
 from mikecore.DfsuBuilder import DfsuBuilder
 from mikecore.DfsuFile import DfsuFile, DfsuFileType
@@ -28,7 +30,7 @@ from ..spatial import (
 from ..spatial import Grid2D
 from .._track import _extract_track
 from ._common import get_elements_from_source, get_nodes_from_source
-from ..eum import ItemInfo
+from ..eum import ItemInfo, TimeStepUnit
 
 
 def write_dfsu(filename: str | Path, data: Dataset) -> None:
@@ -43,8 +45,9 @@ def write_dfsu(filename: str | Path, data: Dataset) -> None:
     """
     filename = str(filename)
 
-    if not data.is_equidistant:
-        raise ValueError("Non-equidistant time axis is not supported.")
+    # TODO warnings that this is not universally supported
+    # if not data.is_equidistant:
+    #    raise ValueError("Non-equidistant time axis is not supported.")
 
     dt = data.timestep
     n_time_steps = len(data.time)
@@ -71,7 +74,22 @@ def write_dfsu(filename: str | Path, data: Dataset) -> None:
     factory = DfsFactory()
     proj = factory.CreateProjection(geometry.projection_string)
     builder.SetProjection(proj)
-    builder.SetTimeInfo(data.time[0], dt)
+    # builder.SetTimeInfo(data.time[0], dt)
+
+    if data.is_equidistant:
+        if len(data.time) == 1:
+            dt = data.timestep
+        else:
+            dt = (data.time[1] - data.time[0]).total_seconds()
+
+        temporal_axis = factory.CreateTemporalEqCalendarAxis(
+            TimeStepUnit.SECOND, data.time[0], 0, dt
+        )
+    else:
+        temporal_axis = factory.CreateTemporalNonEqCalendarAxis(
+            TimeStepUnit.SECOND, data.time[0]
+        )
+    builder.SetTemporalAxis(timeAxis=temporal_axis)
     builder.SetZUnit(eumUnit.eumUmeter)
 
     if dfsu_filetype != DfsuFileType.Dfsu2D:
@@ -84,6 +102,11 @@ def write_dfsu(filename: str | Path, data: Dataset) -> None:
     builder.ApplicationVersion = __dfs_version__
     dfs = builder.CreateFile(filename)
 
+    if data.is_equidistant:
+        t_rel = np.zeros(data.n_timesteps)
+    else:
+        t_rel = (data.time - data.time[0]).total_seconds()
+
     for i in range(n_time_steps):
         if geometry.is_layered:
             if "time" in data.dims:
@@ -91,14 +114,14 @@ def write_dfsu(filename: str | Path, data: Dataset) -> None:
                 zn = data._zn[i]
             else:
                 zn = data._zn
-            dfs.WriteItemTimeStepNext(0, zn.astype(np.float32))
+            dfs.WriteItemTimeStepNext(t_rel[i], zn.astype(np.float32))
         for da in data:
             if "time" in data.dims:
                 d = da.to_numpy()[i, :]
             else:
                 d = da.to_numpy()
             d[np.isnan(d)] = data.deletevalue
-            dfs.WriteItemTimeStepNext(0, d.astype(np.float32))
+            dfs.WriteItemTimeStepNext(t_rel[i], d.astype(np.float32))
     dfs.Close()
 
 
@@ -117,7 +140,8 @@ def _validate_elements_and_geometry_sel(elements: Any, **kwargs: Any) -> None:
 class _DfsuInfo:
     filename: str
     type: DfsuFileType
-    time: pd.DatetimeIndex
+    start_time: datetime
+    time: pd.DatetimeIndex  # Not true if non-equidistant
     timestep: float
     items: list[ItemInfo]
     deletevalue: float
@@ -132,11 +156,15 @@ def _get_dfsu_info(filename: str | Path) -> _DfsuInfo:
     type = DfsuFileType(dfs.DfsuFileType)
     deletevalue = dfs.DeleteValueFloat
     freq = pd.Timedelta(seconds=dfs.TimeStepInSeconds)
-    time = pd.date_range(
-        start=dfs.StartDateTime,
-        periods=dfs.NumberOfTimeSteps,
-        freq=freq,
-    )
+
+    if dfs.FileInfo.TimeAxis.TimeAxisType == TimeAxisType.CalendarNonEquidistant:
+        time = None
+    else:
+        time = pd.date_range(
+            start=dfs.StartDateTime,
+            periods=dfs.NumberOfTimeSteps,
+            freq=freq,
+        )
     timestep = dfs.TimeStepInSeconds
     items = _get_item_info(dfs.ItemInfo)
     dfs.Close()
@@ -146,6 +174,7 @@ def _get_dfsu_info(filename: str | Path) -> _DfsuInfo:
         time=time,
         timestep=timestep,
         items=items,
+        start_time=dfs.FileInfo.TimeAxis.StartDateTime,
         deletevalue=deletevalue,
     )
 
@@ -266,6 +295,7 @@ class Dfsu2DH:
         self._type = info.type
         self._deletevalue = info.deletevalue
         self._time = info.time
+        self._start_time = info.start_time
         self._timestep = info.timestep
         self._items = info.items
         self._geometry = self._read_geometry(self._filename)
@@ -310,13 +340,14 @@ class Dfsu2DH:
         return self._items
 
     @property
-    def start_time(self) -> pd.Timestamp:
+    def start_time(self) -> datetime:
         """File start time"""
-        return self._time[0]
+        return self._start_time
 
     @property
     def n_timesteps(self) -> int:
         """Number of time steps"""
+        # TODO non-equidistant
         return len(self._time)
 
     @property
@@ -331,6 +362,10 @@ class Dfsu2DH:
 
     @property
     def time(self) -> pd.DatetimeIndex:
+        if self._time is None:
+            raise ValueError(
+                "Non-equidistant time axis is not supported without first reading the data."
+            )
         return self._time
 
     @staticmethod
@@ -429,6 +464,8 @@ class Dfsu2DH:
 
         shape: Tuple[int, ...]
 
+        t_seconds = np.zeros(len(time_steps))
+
         n_steps = len(time_steps)
         shape = (
             (n_elems,)
@@ -440,12 +477,10 @@ class Dfsu2DH:
             data: np.ndarray = np.ndarray(shape=shape, dtype=dtype)
             data_list.append(data)
 
-        time = self.time
-
         for i in trange(n_steps, disable=not self.show_progress):
             it = time_steps[i]
             for item in range(n_items):
-                dfs, d = _read_item_time_step(
+                dfs, d, t = _read_item_time_step(
                     dfs=dfs,
                     filename=self._filename,
                     time=time,
@@ -457,6 +492,7 @@ class Dfsu2DH:
                     error_bad_data=error_bad_data,
                     fill_bad_data_value=fill_bad_data_value,
                 )
+                t_seconds[i] = t
 
                 if elements is not None:
                     d = d[elements]
@@ -466,7 +502,7 @@ class Dfsu2DH:
                 else:
                     data_list[item][i] = d
 
-        time = self.time[time_steps]
+        time = pd.to_datetime(t_seconds, unit="s", origin=self.start_time)
 
         dfs.Close()
 

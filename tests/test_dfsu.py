@@ -587,13 +587,17 @@ def test_write_from_dfsu_2_time_steps(tmp_path):
     assert dfs.end_time != newdfs.end_time
 
 
-def test_write_non_equidistant_is_not_possible(tmp_path):
+def test_write_non_equidistant_is_possible(tmp_path):
     sourcefilename = "tests/testdata/HD2D.dfsu"
     fp = tmp_path / "simple.dfsu"
     ds = mikeio.read(sourcefilename, time=[0, 1, 3])
+    assert not ds.is_equidistant
 
-    with pytest.raises(ValueError):
-        ds.to_dfs(fp)
+    ds.to_dfs(fp)
+
+    ds2 = mikeio.read(fp)
+
+    assert all(ds.time == ds2.time)
 
 
 def test_temporal_resample_by_reading_selected_timesteps(tmp_path):
@@ -959,14 +963,3 @@ def test_interp_like_fm_dataset():
     dsi = ds.interp_like(geometry)
     assert isinstance(dsi, Dataset)
     assert isinstance(dsi.geometry, GeometryFM2D)
-
-
-def test_writing_non_equdistant_dfsu_is_not_possible(tmp_path):
-    ds = mikeio.read("tests/testdata/wind_north_sea.dfsu")
-    dss = ds.isel(time=[0, 2, 3])
-    assert not dss.is_equidistant
-
-    # TODO which exception should be raised, when trying to write non-equidistant dfsu? This operation is not supported
-    with pytest.raises(ValueError, match="equidistant"):
-        fp = tmp_path / "not_gonna_work.dfsu"
-        dss.to_dfs(fp)

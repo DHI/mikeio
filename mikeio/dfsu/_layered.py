@@ -302,7 +302,7 @@ class DfsuLayered:
         for i in trange(n_steps, disable=not self.show_progress):
             it = time_steps[i]
             for item in range(n_items):
-                dfs, d = _read_item_time_step(
+                dfs, d, t = _read_item_time_step(
                     dfs=dfs,
                     filename=self._filename,
                     time=time,
