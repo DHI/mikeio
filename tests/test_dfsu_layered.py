@@ -1,4 +1,5 @@
 import numpy as np
+import pandas as pd
 import pytest
 import mikeio
 from mikeio import Mesh
@@ -625,3 +626,34 @@ def test_read_elements_3d():
     ds2 = mikeio.read("tests/testdata/oresund_sigma_z.dfsu", elements=[10, 0])
     assert ds2.geometry.element_coordinates[1][0] == pytest.approx(354020.46382194717)
     assert ds2.Salinity.to_numpy()[0, 1] == pytest.approx(23.18906021118164)
+
+
+# def test_write_non_equidistant_is_possible(tmp_path):
+#     sourcefilename = "tests/testdata/HD2D.dfsu"
+#     fp = tmp_path / "simple.dfsu"
+#     ds = mikeio.read(sourcefilename, time=[0, 1, 3])
+#     assert not ds.is_equidistant
+
+#     ds.to_dfs(fp)
+
+#     ds2 = mikeio.read(fp)
+
+#     assert all(ds.time == ds2.time)
+
+
+def test_write_3d_non_equidistant(tmp_path):
+    sourcefilename = "tests/testdata/basin_3d.dfsu"
+    fp = tmp_path / "simple.dfsu"
+    ds = mikeio.read(sourcefilename)
+
+    # manipulate time
+    ds.time = pd.DatetimeIndex(["2000-01-01", "2000-01-02", "2000-01-10"])
+
+    assert not ds.is_equidistant
+
+    ds.to_dfs(fp)
+
+    ds2 = mikeio.read(fp)
+
+    assert all(ds.time == ds2.time)
+    assert not ds2.is_equidistant

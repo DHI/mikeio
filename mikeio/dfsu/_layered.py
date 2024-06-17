@@ -45,6 +45,7 @@ class DfsuLayered:
         self._type = info.type
         self._deletevalue = info.deletevalue
         self._time = info.time
+        self._start_time = info.start_time
         self._timestep = info.timestep
         self._geometry = self._read_geometry(self._filename)
         # 3d files have a zn item
@@ -96,7 +97,7 @@ class DfsuLayered:
     @property
     def start_time(self) -> pd.Timestamp:
         """File start time"""
-        return self._time[0]
+        return self._start_time
 
     @property
     def n_timesteps(self) -> int:
@@ -115,6 +116,10 @@ class DfsuLayered:
 
     @property
     def time(self) -> pd.DatetimeIndex:
+        if self._time is None:
+            raise ValueError(
+                "Non-equidistant time axis is not supported without first reading the data."
+            )
         return self._time
 
     @property
@@ -283,7 +288,7 @@ class DfsuLayered:
         deletevalue = self.deletevalue
 
         data_list = []
-
+        t_seconds = np.zeros(len(time_steps))
         n_steps = len(time_steps)
         item0_is_node_based = False
         for item in range(n_items):
@@ -296,8 +301,6 @@ class DfsuLayered:
 
         if single_time_selected and not keepdims:
             data = data[0]
-
-        time = self.time
 
         for i in trange(n_steps, disable=not self.show_progress):
             it = time_steps[i]
@@ -314,6 +317,7 @@ class DfsuLayered:
                     error_bad_data=error_bad_data,
                     fill_bad_data_value=fill_bad_data_value,
                 )
+                t_seconds[i] = t
 
                 if elements is not None:
                     if item == 0 and item0_is_node_based:
@@ -326,7 +330,7 @@ class DfsuLayered:
                 else:
                     data_list[item][i] = d
 
-        time = self.time[time_steps]
+        time = pd.to_datetime(t_seconds, unit="s", origin=self.start_time)
 
         dfs.Close()
 
