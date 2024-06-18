@@ -1,4 +1,5 @@
 from __future__ import annotations
+from functools import cached_property
 from pathlib import Path
 from typing import Any, Sequence, Tuple, TYPE_CHECKING
 
@@ -44,9 +45,10 @@ class DfsuLayered:
         self._filename = info.filename
         self._type = info.type
         self._deletevalue = info.deletevalue
-        self._time = info.time
+        self._equidistant = info.equidistant
         self._start_time = info.start_time
         self._timestep = info.timestep
+        self._n_timesteps = info.n_timesteps
         self._geometry = self._read_geometry(self._filename)
         # 3d files have a zn item
         self._items = self._read_items(self._filename)
@@ -102,7 +104,7 @@ class DfsuLayered:
     @property
     def n_timesteps(self) -> int:
         """Number of time steps"""
-        return len(self._time)
+        return self._n_timesteps
 
     @property
     def timestep(self) -> float:
@@ -112,15 +114,25 @@ class DfsuLayered:
     @property
     def end_time(self) -> pd.Timestamp:
         """File end time"""
-        return self._time[-1]
+        if self._equidistant:
+            return self.time[-1]
+        else:
+            # read the last timestep
+            ds = self.read(items=0, time=-1)
+            return ds.time[-1]
 
-    @property
+    @cached_property
     def time(self) -> pd.DatetimeIndex:
-        if self._time is None:
-            raise ValueError(
-                "Non-equidistant time axis is not supported without first reading the data."
+        if self._equidistant:
+            return pd.date_range(
+                start=self.start_time,
+                periods=self.n_timesteps,
+                freq=f"{self.timestep}S",
             )
-        return self._time
+        else:
+            raise NotImplementedError(
+                "Non-equidistant time axis. Read the data to get time."
+            )
 
     @property
     def geometry(self) -> GeometryFM3D | GeometryFMVerticalProfile:

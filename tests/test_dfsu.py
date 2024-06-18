@@ -599,6 +599,17 @@ def test_write_non_equidistant_is_possible(tmp_path):
 
     assert all(ds.time == ds2.time)
 
+    dfs = mikeio.open(fp)
+
+    dfs = mikeio.open(fp)
+
+    # it is not possible to get all time without reading the entire file
+    with pytest.raises(NotImplementedError):
+        dfs.time
+
+    # but getting the end time is not that expensive
+    assert dfs.end_time == ds.time[-1]
+
 
 def test_temporal_resample_by_reading_selected_timesteps(tmp_path):
     sourcefilename = "tests/testdata/HD2D.dfsu"

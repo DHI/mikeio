@@ -1,6 +1,7 @@
 from __future__ import annotations
 from dataclasses import dataclass
 from datetime import datetime
+from functools import cached_property
 from pathlib import Path
 
 from typing import Any, Literal, Sequence, Tuple
@@ -141,8 +142,9 @@ class _DfsuInfo:
     filename: str
     type: DfsuFileType
     start_time: datetime
-    time: pd.DatetimeIndex  # Not true if non-equidistant
+    equidistant: bool
     timestep: float
+    n_timesteps: int
     items: list[ItemInfo]
     deletevalue: float
 
@@ -155,24 +157,17 @@ def _get_dfsu_info(filename: str | Path) -> _DfsuInfo:
     dfs = DfsuFile.Open(filename)
     type = DfsuFileType(dfs.DfsuFileType)
     deletevalue = dfs.DeleteValueFloat
-    freq = pd.Timedelta(seconds=dfs.TimeStepInSeconds)
 
-    if dfs.FileInfo.TimeAxis.TimeAxisType == TimeAxisType.CalendarNonEquidistant:
-        time = None
-    else:
-        time = pd.date_range(
-            start=dfs.StartDateTime,
-            periods=dfs.NumberOfTimeSteps,
-            freq=freq,
-        )
     timestep = dfs.TimeStepInSeconds
     items = _get_item_info(dfs.ItemInfo)
+    equidistant = dfs.FileInfo.TimeAxis.TimeAxisType == TimeAxisType.CalendarEquidistant
     dfs.Close()
     return _DfsuInfo(
         filename=filename,
         type=type,
-        time=time,
         timestep=timestep,
+        equidistant=equidistant,
+        n_timesteps=dfs.NumberOfTimeSteps,
         items=items,
         start_time=dfs.FileInfo.TimeAxis.StartDateTime,
         deletevalue=deletevalue,
@@ -294,9 +289,10 @@ class Dfsu2DH:
         self._filename = info.filename
         self._type = info.type
         self._deletevalue = info.deletevalue
-        self._time = info.time
+        self._equidistant = info.equidistant
         self._start_time = info.start_time
         self._timestep = info.timestep
+        self._n_timesteps = info.n_timesteps
         self._items = info.items
         self._geometry = self._read_geometry(self._filename)
 
@@ -347,8 +343,7 @@ class Dfsu2DH:
     @property
     def n_timesteps(self) -> int:
         """Number of time steps"""
-        # TODO non-equidistant
-        return len(self._time)
+        return self._n_timesteps
 
     @property
     def timestep(self) -> float:
@@ -358,15 +353,25 @@ class Dfsu2DH:
     @property
     def end_time(self) -> pd.Timestamp:
         """File end time"""
-        return self._time[-1]
+        if self._equidistant:
+            return self.time[-1]
+        else:
+            # read the last timestep
+            ds = self.read(items=0, time=-1)
+            return ds.time[-1]
 
-    @property
+    @cached_property
     def time(self) -> pd.DatetimeIndex:
-        if self._time is None:
-            raise ValueError(
-                "Non-equidistant time axis is not supported without first reading the data."
+        if self._equidistant:
+            return pd.date_range(
+                start=self.start_time,
+                periods=self.n_timesteps,
+                freq=f"{self.timestep}S",
             )
-        return self._time
+        else:
+            raise NotImplementedError(
+                "Non-equidistant time axis. Read the data to get time."
+            )
 
     @staticmethod
     def _read_geometry(filename: str) -> GeometryFM2D:

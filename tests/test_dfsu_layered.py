@@ -628,19 +628,6 @@ def test_read_elements_3d():
     assert ds2.Salinity.to_numpy()[0, 1] == pytest.approx(23.18906021118164)
 
 
-# def test_write_non_equidistant_is_possible(tmp_path):
-#     sourcefilename = "tests/testdata/HD2D.dfsu"
-#     fp = tmp_path / "simple.dfsu"
-#     ds = mikeio.read(sourcefilename, time=[0, 1, 3])
-#     assert not ds.is_equidistant
-
-#     ds.to_dfs(fp)
-
-#     ds2 = mikeio.read(fp)
-
-#     assert all(ds.time == ds2.time)
-
-
 def test_write_3d_non_equidistant(tmp_path):
     sourcefilename = "tests/testdata/basin_3d.dfsu"
     fp = tmp_path / "simple.dfsu"
@@ -657,3 +644,12 @@ def test_write_3d_non_equidistant(tmp_path):
 
     assert all(ds.time == ds2.time)
     assert not ds2.is_equidistant
+
+    dfs = mikeio.open(fp)
+
+    # it is not possible to get all time without reading the entire file
+    with pytest.raises(NotImplementedError):
+        dfs.time
+
+    # but getting the end time is not that expensive
+    assert dfs.end_time == pd.Timestamp("2000-01-10")
