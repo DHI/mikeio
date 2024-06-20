@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import Collection, Any, Tuple
+from typing import Any, Sequence, Tuple
 
 
 import numpy as np
@@ -127,12 +127,12 @@ class _GeometryFMSpectrum(GeometryFM2D):
 # TODO reconsider inheritance to avoid overriding method signature
 class GeometryFMAreaSpectrum(_GeometryFMSpectrum):
     def isel(  # type: ignore
-        self, idx: Collection[int], **kwargs: Any
+        self, idx: Sequence[int], **kwargs: Any
     ) -> "GeometryFMPointSpectrum" | "GeometryFMAreaSpectrum":
         return self.elements_to_geometry(elements=idx)
 
     def elements_to_geometry(  # type: ignore
-        self, elements: Collection[int], keepdims: bool = False
+        self, elements: Sequence[int], keepdims: bool = False
     ) -> "GeometryFMPointSpectrum" | "GeometryFMAreaSpectrum":
         """export a selection of elements to new flexible file geometry
         Parameters
@@ -156,7 +156,6 @@ class GeometryFMAreaSpectrum(_GeometryFMSpectrum):
                 y=coords[1],
             )
 
-        elements = np.sort(elements)  # make sure elements are sorted!
         node_ids, elem_tbl = self._get_nodes_and_table_for_elements(elements)
         node_coords = self.node_coordinates[node_ids]
         codes = self.codes[node_ids]
@@ -178,10 +177,14 @@ class GeometryFMAreaSpectrum(_GeometryFMSpectrum):
 
 # TODO this inherits indirectly from GeometryFM2D, which is not ideal
 class GeometryFMLineSpectrum(_GeometryFMSpectrum):
-    def isel(self, idx=None, axis="node"):
+    def isel(  # type: ignore
+        self, idx: Sequence[int], axis: str = "node"
+    ) -> GeometryFMPointSpectrum | GeometryFMLineSpectrum:
         return self._nodes_to_geometry(nodes=idx)
 
-    def _nodes_to_geometry(self, nodes):
+    def _nodes_to_geometry(  # type: ignore
+        self, nodes: Sequence[int]
+    ) -> GeometryFMPointSpectrum | GeometryFMLineSpectrum:
         """export a selection of nodes to new flexible file geometry
         Note: takes only the elements for which all nodes are selected
         Parameters
@@ -190,7 +193,7 @@ class GeometryFMLineSpectrum(_GeometryFMSpectrum):
             list of node ids
         Returns
         -------
-        UnstructuredGeometry
+        GeometryFMPointSpectrum | GeometryFMLineSpectrum
             which can be used for further extraction or saved to file
         """
         nodes = np.atleast_1d(nodes)
@@ -209,7 +212,6 @@ class GeometryFMLineSpectrum(_GeometryFMSpectrum):
                 elements.append(j)
 
         assert len(elements) > 0, "no elements found"
-        elements = np.sort(elements)  # make sure elements are sorted!
 
         node_ids, elem_tbl = self._get_nodes_and_table_for_elements(elements)
         node_coords = self.node_coordinates[node_ids]
@@ -220,11 +222,11 @@ class GeometryFMLineSpectrum(_GeometryFMSpectrum):
             codes=codes,
             node_ids=node_ids,
             projection=self.projection_string,
+            dfsu_type=self._type,
             element_table=elem_tbl,
             element_ids=self.element_ids[elements],
             frequencies=self._frequencies,
             directions=self._directions,
             reindex=True,
         )
-        geom._type = self._type  # TODO
         return geom

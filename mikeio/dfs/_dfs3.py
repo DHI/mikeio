@@ -297,7 +297,7 @@ class Dfs3(_Dfs123):
         self._n_timesteps = dfs.FileInfo.TimeAxis.NumberOfTimeSteps
 
     @staticmethod
-    def _get_bottom_values(data):
+    def _get_bottom_values(data: np.ndarray) -> np.ndarray:
 
         assert len(data.shape) == 3
         b = np.empty_like(data[0])
@@ -314,20 +314,20 @@ class Dfs3(_Dfs123):
         return self._geometry
 
     @property
-    def dx(self):
+    def dx(self) -> float:
         """Step size in x direction"""
         return self._dx
 
     @property
-    def dy(self):
+    def dy(self) -> float:
         """Step size in y direction"""
         return self._dy
 
     @property
-    def dz(self):
+    def dz(self) -> float:
         """Step size in y direction"""
         return self._dz
 
     @property
-    def shape(self):
+    def shape(self) -> Tuple[int, int, int, int]:
         return (self._n_timesteps, self._nz, self._ny, self._nx)

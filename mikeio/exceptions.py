@@ -3,7 +3,7 @@ from typing import Any
 
 
 class DataDimensionMismatch(ValueError):
-    def __init__(self):
+    def __init__(self) -> None:
         self.message = (
             "Data matrices in the x dimension do not all match in the data list."
             "Data is a list of matrices [t, x]."
@@ -12,7 +12,7 @@ class DataDimensionMismatch(ValueError):
 
 
 class ItemsError(ValueError):
-    def __init__(self, n_items_file):
+    def __init__(self, n_items_file: int) -> None:
         self.n_items_file = n_items_file
         super().__init__(
             f"'items' must be (a list of) integers between 0 and {n_items_file-1} or str."
@@ -20,12 +20,14 @@ class ItemsError(ValueError):
 
 
 class InvalidGeometry(ValueError):
-    def __init__(self, message="Invalid operation for this type of geometry"):
+    def __init__(
+        self, message: str = "Invalid operation for this type of geometry"
+    ) -> None:
         super().__init__(message)
 
 
 class InvalidDataValueType(ValueError):
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__(
             "Invalid data type. Choose 'Instantaneous', 'Accumulated', 'StepAccumulated', "
             "'MeanStepBackward', or 'MeanStepForward'"
