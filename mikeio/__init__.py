@@ -21,7 +21,7 @@ from typing import Any
 # 'X.Y.dev0' is the canonical version of 'X.Y.dev'
 #
 
-__version__ = "2.0.b0"  # TODO use git hash instead for dev version?
+__version__ = "2.0.b1"  # TODO use git hash instead for dev version?
 # __version__ = "1.5.0"
 __dfs_version__: int = 200
 
@@ -52,7 +52,7 @@ def read(
     items: str | int | Sequence[str | int] | None = None,
     time: int | str | slice | None = None,
     keepdims: bool = False,
-    **kwargs,
+    **kwargs: Any,
 ) -> Dataset:
     """Read all or a subset of the data from a dfs file
 

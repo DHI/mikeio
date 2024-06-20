@@ -1,7 +1,10 @@
 import warnings
+from typing import TYPE_CHECKING
 
 from mikecore.Projections import Cartography, MapProjection
 
+if TYPE_CHECKING:
+    from pyproj import crs
 # import pyproj
 
 
@@ -72,7 +75,7 @@ class CRS:
     def is_projected(self) -> bool:
         return not self.is_geographical
 
-    def to_pyproj(self):
+    def to_pyproj(self) -> "crs.CRS":
         """
         Convert projection to pyptoj.CRS object.
 
@@ -93,7 +96,7 @@ class CRS:
             return pyproj.CRS.from_string(self.projection_string)
 
     @classmethod
-    def from_pyproj(cls, pyproj_crs):
+    def from_pyproj(cls, pyproj_crs: "crs.CRS") -> "CRS":
         """
         Create CRS object from pyproj.CRS object.
 
@@ -111,13 +114,13 @@ class CRS:
 
         return cls(projection_string=pyproj_crs.to_wkt(version="WKT1_ESRI"))
 
-    def to_epsg(self, min_confidence: float = 70.0) -> int:
+    def to_epsg(self, min_confidence: int = 70) -> int:
         """
         Convert projection to pyptoj.CRS object.
 
         Parameters
         ----------
-        min_confidence : float, optional
+        min_confidence : integer, optional
             A value between 0-100 where 100 is the most confident. Default is 70.
             See 'pyproj.CRS.to_epsg' for more details.
 
@@ -149,7 +152,7 @@ class CRS:
             )
 
     @classmethod
-    def from_epsg(cls, epsg: int):
+    def from_epsg(cls, epsg: int) -> "CRS":
         """
         Create CRS object from EPSG code.
 

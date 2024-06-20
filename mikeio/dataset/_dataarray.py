@@ -1777,7 +1777,7 @@ class DataArray:
 
     # ============= output methods: to_xxx() ===========
 
-    def _to_dataset(self):
+    def _to_dataset(self) -> "Dataset":
         """Create a single-item dataset"""
         from mikeio import Dataset
 

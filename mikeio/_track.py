@@ -1,7 +1,7 @@
 from __future__ import annotations
 from pathlib import Path
 from collections.abc import Sequence
-from typing import Callable, Tuple
+from typing import Any, Callable, Tuple
 
 import numpy as np
 import pandas as pd
@@ -25,7 +25,7 @@ def _extract_track(
     time_steps: Sequence[int],
     n_elements: int,
     method: str,
-    dtype,
+    dtype: Any,  # TODO DTypeLike?
     data_read_func: Callable[[int, int], Tuple[np.ndarray, float]],
 ) -> Dataset:
 
@@ -119,7 +119,7 @@ def _extract_track(
         d[d == deletevalue] = np.nan
         d2[i, :] = d
 
-    def is_EOF(step):
+    def is_EOF(step: int) -> bool:
         return step >= len(time_steps)
 
     # loop over track points
