@@ -46,11 +46,6 @@ def write_dfsu(filename: str | Path, data: Dataset) -> None:
     """
     filename = str(filename)
 
-    # TODO warnings that this is not universally supported
-    # if not data.is_equidistant:
-    #    raise ValueError("Non-equidistant time axis is not supported.")
-
-    dt = data.timestep
     n_time_steps = len(data.time)
 
     geometry = data.geometry
@@ -75,22 +70,16 @@ def write_dfsu(filename: str | Path, data: Dataset) -> None:
     factory = DfsFactory()
     proj = factory.CreateProjection(geometry.projection_string)
     builder.SetProjection(proj)
-    # builder.SetTimeInfo(data.time[0], dt)
 
     if data.is_equidistant:
-        if len(data.time) == 1:
-            dt = data.timestep
-        else:
-            dt = (data.time[1] - data.time[0]).total_seconds()
-
         temporal_axis = factory.CreateTemporalEqCalendarAxis(
-            TimeStepUnit.SECOND, data.time[0], 0, dt
+            TimeStepUnit.SECOND, data.time[0], 0, data.timestep
         )
     else:
         temporal_axis = factory.CreateTemporalNonEqCalendarAxis(
             TimeStepUnit.SECOND, data.time[0]
         )
-    builder.SetTemporalAxis(timeAxis=temporal_axis)
+    builder.SetTemporalAxis(temporal_axis)
     builder.SetZUnit(eumUnit.eumUmeter)
 
     if dfsu_filetype != DfsuFileType.Dfsu2D:
@@ -469,7 +458,7 @@ class Dfsu2DH:
 
         shape: Tuple[int, ...]
 
-        t_seconds = np.zeros(len(time_steps))
+        t_rel = np.zeros(len(time_steps))
 
         n_steps = len(time_steps)
         shape = (
@@ -497,7 +486,7 @@ class Dfsu2DH:
                     error_bad_data=error_bad_data,
                     fill_bad_data_value=fill_bad_data_value,
                 )
-                t_seconds[i] = t
+                t_rel[i] = t
 
                 if elements is not None:
                     d = d[elements]
@@ -507,7 +496,7 @@ class Dfsu2DH:
                 else:
                     data_list[item][i] = d
 
-        time = pd.to_datetime(t_seconds, unit="s", origin=self.start_time)
+        time = pd.to_datetime(t_rel, unit="s", origin=self.start_time)
 
         dfs.Close()
 
