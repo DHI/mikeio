@@ -46,8 +46,9 @@ def _read_item_time_step(
     it: int,
     error_bad_data: bool = True,
     fill_bad_data_value: float = np.nan,
-) -> Tuple[DfsFile, np.ndarray]:
+) -> Tuple[DfsFile, np.ndarray, float]:
     itemdata = dfs.ReadItemTimeStep(item_numbers[item] + 1, it)
+    t = itemdata.Time
     if itemdata is not None:
         d = itemdata.Data
         d[d == deletevalue] = np.nan
@@ -60,7 +61,7 @@ def _read_item_time_step(
             d[:] = fill_bad_data_value
             dfs.Close()
             dfs = DfsFileFactory.DfsGenericOpen(filename)
-    return dfs, d
+    return dfs, d, t
 
 
 def _fuzzy_item_search(

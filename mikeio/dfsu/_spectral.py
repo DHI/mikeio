@@ -1,4 +1,5 @@
 from __future__ import annotations
+from functools import cached_property
 from typing import Sequence, Sized, Tuple, Any
 from pathlib import Path
 
@@ -32,8 +33,10 @@ class DfsuSpectral:
         self._filename = info.filename
         self._type = info.type
         self._deletevalue = info.deletevalue
-        self._time = info.time
+        self._equidistant = info.equidistant
+        self._start_time = info.start_time
         self._timestep = info.timestep
+        self._n_timesteps = info.n_timesteps
         self._items = info.items
         self._geometry = self._read_geometry(self._filename)
 
@@ -90,12 +93,12 @@ class DfsuSpectral:
     @property
     def start_time(self) -> pd.Timestamp:
         """File start time"""
-        return self._time[0]
+        return self._start_time
 
     @property
     def n_timesteps(self) -> int:
         """Number of time steps"""
-        return len(self._time)
+        return self._n_timesteps
 
     @property
     def timestep(self) -> float:
@@ -105,11 +108,25 @@ class DfsuSpectral:
     @property
     def end_time(self) -> pd.Timestamp:
         """File end time"""
-        return self._time[-1]
+        if self._equidistant:
+            return self.time[-1]
+        else:
+            # read the last timestep
+            ds = self.read(items=0, time=-1)
+            return ds.time[-1]
 
-    @property
+    @cached_property
     def time(self) -> pd.DatetimeIndex:
-        return self._time
+        if self._equidistant:
+            return pd.date_range(
+                start=self.start_time,
+                periods=self.n_timesteps,
+                freq=f"{self.timestep}S",
+            )
+        else:
+            raise NotImplementedError(
+                "Non-equidistant time axis. Read the data to get time."
+            )
 
     @staticmethod
     def _read_geometry(
