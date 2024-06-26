@@ -3,7 +3,7 @@ from pathlib import Path
 import numpy as np
 import pytest
 from mikeio import Mesh
-from mikeio import Grid2D, Grid1D
+from mikeio import Grid2D, Grid1D, Grid3D
 from mikeio.spatial._FM_geometry import GeometryFM2D
 from mikeio.spatial import GeometryUndefined
 from mikeio.exceptions import OutsideModelDomainError
@@ -413,3 +413,8 @@ def test_bad_projection_raises_error():
 
     with pytest.raises(ValueError, match="proj"):
         Grid2D(nx=2, ny=2, dx=0.1, projection="Not a WKT projection string")
+
+
+def test_grid3d_repr():
+    g = Grid3D(nx=2, ny=2, nz=2, dx=1, dy=1, dz=1, projection="UTM-33")
+    assert "Grid3D" in repr(g)
