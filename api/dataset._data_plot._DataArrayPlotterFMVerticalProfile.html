@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.4.555">
+<meta name="generator" content="quarto-1.4.556">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
@@ -163,7 +163,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
         <i class="bi bi-layout-text-sidebar-reverse"></i>
       </button>
         <a class="flex-grow-1 no-decor" role="button" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
-          <h1 class="quarto-secondary-nav-title"></h1>
+          <h1 class="quarto-secondary-nav-title">dataset._data_plot._DataArrayPlotterFMVerticalProfile</h1>
         </a>     
       <button type="button" class="btn quarto-search-button" aria-label="" onclick="window.quartoOpenSearch();">
         <i class="bi bi-search"></i>
@@ -339,14 +339,11 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     <h2 id="toc-title">On this page</h2>
    
   <ul>
-  <li><a href="#mikeio.dataset._data_plot._DataArrayPlotterFMVerticalProfile" id="toc-mikeio.dataset._data_plot._DataArrayPlotterFMVerticalProfile" class="nav-link active" data-scroll-target="#mikeio.dataset._data_plot._DataArrayPlotterFMVerticalProfile">dataset._data_plot._DataArrayPlotterFMVerticalProfile</a>
-  <ul class="collapse">
-  <li><a href="#examples" id="toc-examples" class="nav-link" data-scroll-target="#examples">Examples</a></li>
+  <li><a href="#examples" id="toc-examples" class="nav-link active" data-scroll-target="#examples">Examples</a></li>
   <li><a href="#methods" id="toc-methods" class="nav-link" data-scroll-target="#methods">Methods</a>
   <ul class="collapse">
   <li><a href="#mikeio.dataset._data_plot._DataArrayPlotterFMVerticalProfile.hist" id="toc-mikeio.dataset._data_plot._DataArrayPlotterFMVerticalProfile.hist" class="nav-link" data-scroll-target="#mikeio.dataset._data_plot._DataArrayPlotterFMVerticalProfile.hist">hist</a></li>
   <li><a href="#mikeio.dataset._data_plot._DataArrayPlotterFMVerticalProfile.line" id="toc-mikeio.dataset._data_plot._DataArrayPlotterFMVerticalProfile.line" class="nav-link" data-scroll-target="#mikeio.dataset._data_plot._DataArrayPlotterFMVerticalProfile.line">line</a></li>
-  </ul></li>
   </ul></li>
   </ul>
 </nav>
@@ -354,20 +351,59 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <!-- main -->
 <main class="content" id="quarto-document-content">
 
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title d-none d-lg-block">dataset._data_plot._DataArrayPlotterFMVerticalProfile</h1>
+</div>
 
 
 
-<section id="mikeio.dataset._data_plot._DataArrayPlotterFMVerticalProfile" class="level1">
-<h1>dataset._data_plot._DataArrayPlotterFMVerticalProfile</h1>
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
 <p><code>dataset._data_plot._DataArrayPlotterFMVerticalProfile(self, da)</code></p>
 <p>Plot a DataArray with a 2DV GeometryFMVerticalProfile geometry</p>
 <p>If DataArray has multiple time steps, the first step will be plotted.</p>
 <section id="examples" class="level2">
 <h2 class="anchored" data-anchor-id="examples">Examples</h2>
-<div class="sourceCode" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> da <span class="op">=</span> mikeio.read(<span class="st">"oresund_vertical_slice.dfsu"</span>)[<span class="st">"Temperature"</span>]</span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> da.plot()</span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> da.plot.mesh()</span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> da.plot.hist()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div id="6bc521f1" class="cell" data-execution_count="1">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> mikeio</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>da <span class="op">=</span> mikeio.read(<span class="st">"../data/oresund_vertical_slice.dfsu"</span>)[<span class="st">"Temperature"</span>]</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>da.plot()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="dataset._data_plot._DataArrayPlotterFMVerticalProfile_files/figure-html/cell-2-output-1.png" width="593" height="449" class="figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+<div id="75f8a99d" class="cell" data-execution_count="2">
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>da.plot.hist()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="2">
+<pre><code>(array([  1.,   2.,  19.,  70., 202., 384., 336., 167., 127.,  15.]),
+ array([15.45340729, 15.63446045, 15.81551361, 15.99656582, 16.17761993,
+        16.3586731 , 16.53972435, 16.72077751, 16.90183067, 17.08288383,
+        17.263937  ]),
+ &lt;BarContainer object of 10 artists&gt;)</code></pre>
+</div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="dataset._data_plot._DataArrayPlotterFMVerticalProfile_files/figure-html/cell-3-output-2.png" width="575" height="432" class="figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
 </section>
 <section id="methods" class="level2">
 <h2 class="anchored" data-anchor-id="methods">Methods</h2>
@@ -466,7 +502,6 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <p>Plot data as lines (timeseries if time is present)</p>
 
 
-</section>
 </section>
 </section>
 
