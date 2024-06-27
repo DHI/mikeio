@@ -109,6 +109,7 @@ quartodoc:
         - dataset._data_plot._DataArrayPlotterGrid2D
         - dataset._data_plot._DataArrayPlotterFM
         - dataset._data_plot._DataArrayPlotterFMVerticalProfile
+        - dataset._data_plot._DataArrayPlotterFMVerticalColumn
     - title: Geometry
       desc: ""
       contents:
