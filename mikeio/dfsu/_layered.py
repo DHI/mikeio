@@ -5,6 +5,7 @@ from typing import Any, Sequence, Tuple, TYPE_CHECKING
 from matplotlib.axes import Axes
 import numpy as np
 from mikecore.DfsuFile import DfsuFile, DfsuFileType
+from mikecore.DfsFileFactory import DfsFileFactory
 import pandas as pd
 from scipy.spatial import cKDTree
 from tqdm import trange
@@ -30,6 +31,7 @@ from ._dfsu import (
     get_nodes_from_source,
     get_elements_from_source,
     _validate_elements_and_geometry_sel,
+    write_dfsu_data,
 )
 
 if TYPE_CHECKING:
@@ -362,6 +364,32 @@ class DfsuLayered:
                 validate=False,
                 dt=self.timestep,
             )
+
+    def append(self, ds: Dataset, validate: bool = True) -> None:
+        """
+        Append data to a dfsu file
+
+        Parameters
+        ---------
+        ds: Dataset
+            Dataset to append
+        validate: bool, optional
+            Validate that the dataset to append has the same geometry and items, by default True
+        """
+        if validate:
+            if self.geometry != ds.geometry:
+                raise ValueError("The geometry of the dataset to append does not match")
+
+            for item_s, item_o in zip(ds.items, self.items):
+                if item_s != item_o:
+                    raise ValueError(
+                        f"Item in dataset {item_s.name} does not match {item_o.name}"
+                    )
+
+        dfs = DfsFileFactory.DfsuFileOpenAppend(str(self._filename), parameters=None)
+        write_dfsu_data(dfs=dfs, ds=ds, is_layered=ds.geometry.is_layered)
+        info = _get_dfsu_info(self._filename)
+        self._time = info.time
 
 
 class Dfsu2DV(DfsuLayered):

@@ -1270,7 +1270,7 @@ def test_xzy_selection():
     das_xzy = ds.Temperature.sel(x=348946, y=6173673, z=0)
 
     # check for point geometry after selection
-    assert type(das_xzy.geometry) == mikeio.spatial.GeometryPoint3D
+    assert type(das_xzy.geometry) is mikeio.spatial.GeometryPoint3D
     assert das_xzy.values[0] == pytest.approx(17.381)
 
     # do the same but go one level deeper, but finding the index first
@@ -1301,7 +1301,7 @@ def test_layer_selection():
 
     das_layer = ds.Temperature.sel(layers=0)
     # should not be layered after selection
-    assert type(das_layer.geometry) == mikeio.spatial.GeometryFM2D
+    assert type(das_layer.geometry) is mikeio.spatial.GeometryFM2D
 
 
 def test_time_selection():

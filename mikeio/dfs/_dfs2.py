@@ -242,6 +242,37 @@ class Dfs2(_Dfs123):
             validate=False,
         )
 
+    def append(self, ds: Dataset, validate: bool = True) -> None:
+        """
+        Append a Dataset to an existing dfs2 file
+
+        Parameters
+        ----------
+        ds: Dataset
+            Dataset to append
+        validate: bool, optional
+            Check if the dataset to append has the same geometry and items as the original file,
+            by default True
+
+        Notes
+        -----
+        The original file is modified.
+        """
+        if validate:
+            if self.geometry != ds.geometry:
+                raise ValueError("The geometry of the dataset to append does not match")
+
+            for item_s, item_o in zip(ds.items, self.items):
+                if item_s != item_o:
+                    raise ValueError(
+                        f"Item in dataset {item_s.name} does not match {item_o.name}"
+                    )
+
+        dfs = DfsFileFactory.Dfs2FileOpenAppend(str(self._filename))
+        write_dfs_data(dfs=dfs, ds=ds, n_spatial_dims=2)
+
+        self._n_timesteps = dfs.FileInfo.TimeAxis.NumberOfTimeSteps
+
     def _open(self) -> None:
         self._dfs = DfsFileFactory.Dfs2FileOpen(self._filename)
         self._source = self._dfs

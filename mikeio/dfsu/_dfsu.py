@@ -9,6 +9,7 @@ import pandas as pd
 from mikecore.DfsFactory import DfsFactory
 from mikecore.DfsuBuilder import DfsuBuilder
 from mikecore.DfsuFile import DfsuFile, DfsuFileType
+from mikecore.DfsFileFactory import DfsFileFactory
 from mikecore.eum import eumQuantity, eumUnit
 from tqdm import trange
 
@@ -47,8 +48,6 @@ def write_dfsu(filename: str | Path, data: Dataset) -> None:
         raise ValueError("Non-equidistant time axis is not supported.")
 
     dt = data.timestep
-    n_time_steps = len(data.time)
-
     geometry = data.geometry
     dfsu_filetype = DfsuFileType.Dfsu2D
 
@@ -84,8 +83,16 @@ def write_dfsu(filename: str | Path, data: Dataset) -> None:
     builder.ApplicationVersion = __dfs_version__
     dfs = builder.CreateFile(filename)
 
+    write_dfsu_data(dfs, data, geometry.is_layered)
+
+
+def write_dfsu_data(dfs: DfsuFile, ds: Dataset, is_layered: bool) -> None:
+
+    n_time_steps = len(ds.time)
+    data = ds
+
     for i in range(n_time_steps):
-        if geometry.is_layered:
+        if is_layered:
             if "time" in data.dims:
                 assert data._zn is not None
                 zn = data._zn[i]
@@ -492,12 +499,40 @@ class Dfsu2DH:
             dt=self.timestep,
         )
 
+
+    def append(self, ds: Dataset, validate: bool = True) -> None:
+        """
+        Append data to an existing dfsu file
+
+        Parameters
+        ----------
+        data: Dataset
+            Dataset to be appended
+        validate: bool, optional
+            Validate that the items and geometry match, by default True
+        """
+        if validate:
+            if ds.geometry != self.geometry:
+                raise ValueError("The geometry of the dataset to append does not match")
+
+            for item_s, item_o in zip(ds.items, self.items):
+                if item_s != item_o:
+                    raise ValueError(
+                        f"Item in dataset {item_s.name} does not match {item_o.name}"
+                    )
+
+        dfs = DfsFileFactory.DfsuFileOpenAppend(str(self._filename), parameters=None)
+        write_dfsu_data(dfs=dfs, ds=ds, is_layered=False)
+        info = _get_dfsu_info(self._filename)
+        self._time = info.time
+
     def _parse_geometry_sel(
         self,
         area: Tuple[float, float, float, float] | None,
         x: float | None,
         y: float | None,
     ) -> np.ndarray | None:
+
         """Parse geometry selection
 
         Parameters

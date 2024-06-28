@@ -236,3 +236,44 @@ def test_layered(simple_3d_geom: GeometryFM3D):
 
     assert "elements: 2" in repr(g2)
     assert "layers: 2" in repr(g2)
+
+
+def test_equality():
+    nc = [
+        (0.0, 0.0, 0.0),  # 0
+        (1.0, 0.0, 0.0),  # 1
+        (1.0, 1.0, 0.0),  # 2
+        (0.0, 1.0, 0.0),  # 3
+    ]
+
+    el = [(0, 1, 2), (0, 2, 3)]
+
+    g = GeometryFM2D(node_coordinates=nc, element_table=el, projection="LONG/LAT")
+    g2 = GeometryFM2D(node_coordinates=nc, element_table=el, projection="LONG/LAT")
+
+    assert g == g2
+
+    g3 = GeometryFM2D(node_coordinates=nc, element_table=el, projection="UTM-33")
+    assert g != g3
+
+
+def test_equality_shifted_coords():
+    nc1 = [
+        (0.0, 0.0, 0.0),  # 0
+        (1.0, 0.0, 0.0),  # 1
+        (1.0, 1.0, 0.0),  # 2
+        (0.0, 1.0, 0.0),  # 3
+    ]
+
+    el = [(0, 1, 2), (0, 2, 3)]
+    g = GeometryFM2D(node_coordinates=nc1, element_table=el, projection="LONG/LAT")
+
+    nc2 = [
+        (0.1, 0.0, 0.0),  # 0
+        (1.0, 0.0, 0.0),  # 1
+        (1.0, 1.0, 0.0),  # 2
+        (0.1, 1.0, 0.0),  # 3
+    ]
+
+    g2 = GeometryFM2D(node_coordinates=nc2, element_table=el, projection="LONG/LAT")
+    assert g != g2
