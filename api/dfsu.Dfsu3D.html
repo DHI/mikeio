@@ -310,6 +310,7 @@ ul.task-list li input[type="checkbox"] {
   <li><a href="#attributes" id="toc-attributes" class="nav-link" data-scroll-target="#attributes">Attributes</a></li>
   <li><a href="#methods" id="toc-methods" class="nav-link" data-scroll-target="#methods">Methods</a>
   <ul class="collapse">
+  <li><a href="#mikeio.dfsu.Dfsu3D.append" id="toc-mikeio.dfsu.Dfsu3D.append" class="nav-link" data-scroll-target="#mikeio.dfsu.Dfsu3D.append">append</a></li>
   <li><a href="#mikeio.dfsu.Dfsu3D.extract_surface_elevation_from_3d" id="toc-mikeio.dfsu.Dfsu3D.extract_surface_elevation_from_3d" class="nav-link" data-scroll-target="#mikeio.dfsu.Dfsu3D.extract_surface_elevation_from_3d">extract_surface_elevation_from_3d</a></li>
   <li><a href="#mikeio.dfsu.Dfsu3D.read" id="toc-mikeio.dfsu.Dfsu3D.read" class="nav-link" data-scroll-target="#mikeio.dfsu.Dfsu3D.read">read</a></li>
   </ul></li>
@@ -394,21 +395,63 @@ ul.task-list li input[type="checkbox"] {
 </thead>
 <tbody>
 <tr class="odd">
+<td><a href="#mikeio.dfsu.Dfsu3D.append">append</a></td>
+<td>Append data to a dfsu file</td>
+</tr>
+<tr class="even">
 <td><a href="#mikeio.dfsu.Dfsu3D.extract_surface_elevation_from_3d">extract_surface_elevation_from_3d</a></td>
 <td>Extract surface elevation from a 3d dfsu file (based on zn)</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td><a href="#mikeio.dfsu.Dfsu3D.read">read</a></td>
 <td>Read data from a dfsu file</td>
 </tr>
 </tbody>
 </table>
+<section id="mikeio.dfsu.Dfsu3D.append" class="level3">
+<h3 class="anchored" data-anchor-id="mikeio.dfsu.Dfsu3D.append">append</h3>
+<p><code>dfsu.Dfsu3D.append(ds, validate=True)</code></p>
+<p>Append data to a dfsu file</p>
+<section id="parameters" class="level4">
+<h4 class="anchored" data-anchor-id="parameters">Parameters</h4>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 10%">
+<col style="width: 7%">
+<col style="width: 72%">
+<col style="width: 10%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Name</th>
+<th>Type</th>
+<th>Description</th>
+<th>Default</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>ds</code></td>
+<td>Dataset</td>
+<td>Dataset to append</td>
+<td><em>required</em></td>
+</tr>
+<tr class="even">
+<td><code>validate</code></td>
+<td>bool</td>
+<td>Validate that the dataset to append has the same geometry and items, by default True</td>
+<td><code>True</code></td>
+</tr>
+</tbody>
+</table>
+</section>
+</section>
 <section id="mikeio.dfsu.Dfsu3D.extract_surface_elevation_from_3d" class="level3">
 <h3 class="anchored" data-anchor-id="mikeio.dfsu.Dfsu3D.extract_surface_elevation_from_3d">extract_surface_elevation_from_3d</h3>
 <p><code>dfsu.Dfsu3D.extract_surface_elevation_from_3d(n_nearest=4)</code></p>
 <p>Extract surface elevation from a 3d dfsu file (based on zn) to a new 2d dfsu file with a surface elevation item.</p>
-<section id="parameters" class="level4">
-<h4 class="anchored" data-anchor-id="parameters">Parameters</h4>
+<section id="parameters-1" class="level4">
+<h4 class="anchored" data-anchor-id="parameters-1">Parameters</h4>
 <table class="caption-top table">
 <colgroup>
 <col style="width: 12%">
@@ -439,8 +482,8 @@ ul.task-list li input[type="checkbox"] {
 <h3 class="anchored" data-anchor-id="mikeio.dfsu.Dfsu3D.read">read</h3>
 <p><code>dfsu.Dfsu3D.read(items=None, time=None, elements=None, area=None, x=None, y=None, z=None, layers=None, keepdims=False, dtype=np.float32, error_bad_data=True, fill_bad_data_value=np.nan)</code></p>
 <p>Read data from a dfsu file</p>
-<section id="parameters-1" class="level4">
-<h4 class="anchored" data-anchor-id="parameters-1">Parameters</h4>
+<section id="parameters-2" class="level4">
+<h4 class="anchored" data-anchor-id="parameters-2">Parameters</h4>
 <table class="caption-top table">
 <colgroup>
 <col style="width: 9%">
