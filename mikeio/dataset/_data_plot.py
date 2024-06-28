@@ -563,13 +563,22 @@ class _DataArrayPlotterFMVerticalColumn(_DataArrayPlotter):
 
     Examples
     --------
-    >>> ds = mikeio.read("oresund_sigma_z.dfsu")
-    >>> dsp = ds.sel(x=333934.1, y=6158101.5)
-    >>> da = dsp["Temperature"]
-    >>> dsp.plot()
-    >>> dsp.plot(extrapolate=False, marker='o')
-    >>> dsp.plot.pcolormesh()
-    >>> dsp.plot.hist()
+    ```{python}
+    import mikeio
+    ds = mikeio.read("../data/oresund_sigma_z.dfsu")
+    dsp = ds.sel(x=333934.1, y=6158101.5)
+    da = dsp["Temperature"]
+    da.plot()
+    ```
+    ```{python}
+    da.plot(extrapolate=False, marker='o')
+    ```
+    ```{python}
+    da.plot.pcolormesh()
+    ```
+    ```{python}
+    da.plot.hist()
+    ```
     """
 
     def __call__(
@@ -659,10 +668,14 @@ class _DataArrayPlotterFMVerticalProfile(_DataArrayPlotter):
 
     Examples
     --------
-    >>> da = mikeio.read("oresund_vertical_slice.dfsu")["Temperature"]
-    >>> da.plot()
-    >>> da.plot.mesh()
-    >>> da.plot.hist()
+    ```{python}
+    import mikeio
+    da = mikeio.read("../data/oresund_vertical_slice.dfsu")["Temperature"]
+    da.plot()
+    ```
+    ```{python}
+    da.plot.hist()
+    ```
     """
 
     def __call__(
