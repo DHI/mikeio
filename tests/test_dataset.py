@@ -1504,7 +1504,7 @@ def test_layer_selection():
 
     dss_layer = ds.sel(layers=0)
     # should not be layered after selection
-    assert type(dss_layer.geometry) == mikeio.spatial.GeometryFM2D
+    assert type(dss_layer.geometry) is mikeio.spatial.GeometryFM2D
 
 
 def test_time_selection():
