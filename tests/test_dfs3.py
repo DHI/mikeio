@@ -266,3 +266,16 @@ def test_to_xarray() -> None:
     xr_da = da.to_xarray()
     assert xr_da.x[0] == pytest.approx(0.25)
     assert xr_da.y[0] == pytest.approx(0.25)
+
+
+def test_append_dfs3(tmp_path):
+    fn = "tests/testdata/Karup_MIKE_SHE_head_output.dfs3"
+    ds = mikeio.read(fn, time=[0, 1])
+    new_fp = tmp_path / "test_append.dfs3"
+    ds.to_dfs(new_fp)
+
+    ds2 = mikeio.read(fn, time=[2, 3])
+
+    dfs = mikeio.open(new_fp)
+
+    dfs.append(ds2)

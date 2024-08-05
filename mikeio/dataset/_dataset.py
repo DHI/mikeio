@@ -1166,24 +1166,6 @@ class Dataset:
 
     # ============= Combine/concat ===========
 
-    def _append_items(self, other: "Dataset") -> "Dataset":
-        item_names = {item.name for item in self.items}
-        other_names = {item.name for item in other.items}
-
-        overlap = other_names.intersection(item_names)
-        if len(overlap) != 0:
-            raise ValueError("Can not append items, names are not unique")
-
-        if not np.all(self.time == other.time):
-            # if not: create common time?
-            raise ValueError("All timesteps must match")
-
-        for key, value in other._data_vars.items():
-            if key != "Z coordinate":
-                self[key] = value
-
-        return self
-
     @staticmethod
     def concat(
         datasets: Sequence["Dataset"], keep: Literal["last"] = "last"

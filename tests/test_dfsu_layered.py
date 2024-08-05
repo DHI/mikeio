@@ -618,6 +618,24 @@ def test_read_wildcard_items():
     assert ds.n_items == 1
 
 
+def test_append_dfsu_3d(tmp_path):
+    ds = mikeio.read("tests/testdata/oresund_sigma_z.dfsu", time=[0])
+    assert ds.timestep == pytest.approx(10800)
+    ds2 = mikeio.read("tests/testdata/oresund_sigma_z.dfsu", time=[1])
+    new_filename = tmp_path / "appended.dfsu"
+    ds.to_dfs(new_filename)
+    dfs = mikeio.open(new_filename)
+    assert dfs.timestep == pytest.approx(10800)
+    assert dfs.n_timesteps == 1
+    dfs.append(ds2)
+    assert dfs.n_timesteps == 2
+    assert dfs.time[-1] == ds2.time[-1]
+
+    # verify that the new file can be read
+    ds3 = mikeio.read(new_filename)
+    assert ds3.n_timesteps == 2
+    assert ds3.time[-1] == ds2.time[-1]
+
 def test_read_elements_3d():
     ds = mikeio.read("tests/testdata/oresund_sigma_z.dfsu", elements=[0, 10])
     assert ds.geometry.element_coordinates[0][0] == pytest.approx(354020.46382194717)
@@ -653,3 +671,4 @@ def test_write_3d_non_equidistant(tmp_path):
 
     # but getting the end time is not that expensive
     assert dfs.end_time == pd.Timestamp("2000-01-10")
+

@@ -974,3 +974,20 @@ def test_interp_like_fm_dataset():
     dsi = ds.interp_like(geometry)
     assert isinstance(dsi, Dataset)
     assert isinstance(dsi.geometry, GeometryFM2D)
+
+def test_append_dfsu_2d(tmp_path):
+    ds = mikeio.read("tests/testdata/consistency/oresundHD.dfsu", time=[0, 1])
+    ds2 = mikeio.read("tests/testdata/consistency/oresundHD.dfsu", time=[2, 3])
+    new_filename = tmp_path / "appended.dfsu"
+    ds.to_dfs(new_filename)
+    dfs = mikeio.open(new_filename)
+    assert dfs.time[-1] == ds.time[-1]
+    dfs.append(ds2)
+    assert dfs.time[-1] == ds2.time[-1]
+
+    ds3 = mikeio.read(new_filename)
+    assert ds3.n_timesteps == 4
+    assert ds3.time[-1] == ds2.time[-1]
+    assert (
+        ds3.V_velocity.isel(time=3).values[0] == ds2.V_velocity.isel(time=1).values[0]
+    )
