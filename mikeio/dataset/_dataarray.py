@@ -221,10 +221,10 @@ class DataArray:
 
         if isinstance(geometry, GeometryUndefined):
             DIMS_MAPPING = {
-                0: [],
-                1: ["x"],
-                2: ["y", "x"],
-                3: ["z", "y", "x"],
+                0: tuple(),
+                1: ("x",),
+                2: ("y", "x"),
+                3: ("z", "y", "x"),
             }
             spdims = DIMS_MAPPING[ndim_no_time]
         else:
