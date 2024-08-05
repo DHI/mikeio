@@ -47,8 +47,6 @@ def write_dfsu(filename: str | Path, data: Dataset) -> None:
     """
     filename = str(filename)
 
-    n_time_steps = len(data.time)
-
     geometry = data.geometry
     dfsu_filetype = DfsuFileType.Dfsu2D
 
@@ -100,6 +98,11 @@ def write_dfsu_data(dfs: DfsuFile, ds: Dataset, is_layered: bool) -> None:
 
     n_time_steps = len(ds.time)
     data = ds
+
+    if data.is_equidistant:
+        t_rel = np.zeros(data.n_timesteps)
+    else:
+        t_rel = (data.time - data.time[0]).total_seconds()
 
     for i in range(n_time_steps):
         if is_layered:
@@ -353,7 +356,7 @@ class Dfsu2DH:
             ds = self.read(items=0, time=-1)
             return ds.time[-1]
 
-    @cached_property
+    @property
     def time(self) -> pd.DatetimeIndex:
         if self._equidistant:
             return pd.date_range(
@@ -526,7 +529,6 @@ class Dfsu2DH:
             dt=self.timestep,
         )
 
-
     def append(self, ds: Dataset, validate: bool = True) -> None:
         """
         Append data to an existing dfsu file
@@ -551,7 +553,7 @@ class Dfsu2DH:
         dfs = DfsFileFactory.DfsuFileOpenAppend(str(self._filename), parameters=None)
         write_dfsu_data(dfs=dfs, ds=ds, is_layered=False)
         info = _get_dfsu_info(self._filename)
-        self._time = info.time
+        self._n_timesteps = info.n_timesteps
 
     def _parse_geometry_sel(
         self,
@@ -559,7 +561,6 @@ class Dfsu2DH:
         x: float | None,
         y: float | None,
     ) -> np.ndarray | None:
-
         """Parse geometry selection
 
         Parameters
