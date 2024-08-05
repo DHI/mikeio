@@ -1,5 +1,4 @@
 from __future__ import annotations
-from functools import cached_property
 from typing import Sequence, Sized, Tuple, Any
 from pathlib import Path
 
@@ -115,7 +114,7 @@ class DfsuSpectral:
             ds = self.read(items=0, time=-1)
             return ds.time[-1]
 
-    @cached_property
+    @property
     def time(self) -> pd.DatetimeIndex:
         if self._equidistant:
             return pd.date_range(
