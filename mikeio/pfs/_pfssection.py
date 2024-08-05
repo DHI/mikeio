@@ -275,7 +275,7 @@ class PfsSection(SimpleNamespace, MutableMapping[str, Any]):
     def _param_match(parampat: Any, v: Any, case: bool) -> Any:
         if parampat is None:
             return False
-        if type(v) != type(parampat):
+        if type(v) is not type(parampat):
             return False
         if isinstance(v, str):
             vv = str(v) if case else str(v).lower()
