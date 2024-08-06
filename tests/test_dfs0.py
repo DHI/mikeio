@@ -293,6 +293,7 @@ def test_from_pandas_mapping_eum_types() -> None:
     assert len(ds) == 2
     assert ds.end_time == dfr.index[-1]
     assert ds.is_equidistant
+    assert ds[0].name == "flow"
 
 
 def test_from_pandas_same_eum_type() -> None:
@@ -322,15 +323,15 @@ def test_from_pandas_sequence_eum_types() -> None:
     ds = mikeio.from_pandas(
         dfr,
         items=[
-            mikeio.ItemInfo("Stream Flow", itemtype=mikeio.EUMType.Discharge),
-            mikeio.ItemInfo("River Level", itemtype=mikeio.EUMType.Water_Level),
+            mikeio.ItemInfo("Ignored", itemtype=mikeio.EUMType.Discharge),
+            mikeio.ItemInfo("Also Ignored", itemtype=mikeio.EUMType.Water_Level),
         ],
     )
 
     assert ds.n_timesteps == 15
     assert ds[0].type == mikeio.EUMType.Discharge
     assert ds[1].type == mikeio.EUMType.Water_Level
-    assert ds["River Level"].item.name == "River Level"
+    assert ds["level"].item.name == "level"
 
 
 def test_from_pandas_use_first_datetime_column() -> None:

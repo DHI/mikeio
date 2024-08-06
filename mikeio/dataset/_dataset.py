@@ -1933,6 +1933,8 @@ def from_pandas(
     ncol = df.values.shape[1]
     data = [df.values[:, i] for i in range(ncol)]
 
+    # column names are always used as item names
+
     if items is None:
         item_list: Sequence[ItemInfo] = [ItemInfo(name) for name in df.columns]
     elif isinstance(items, ItemInfo):
@@ -1941,9 +1943,13 @@ def from_pandas(
         item_list = [ItemInfo(name, eum_type, eum_unit) for name in df.columns]
 
     elif isinstance(items, Mapping):
-        item_list = [items[name] for name in df.columns]
+        item_list = [
+            ItemInfo(name, items[name].type, items[name].unit) for name in df.columns
+        ]
     elif isinstance(items, Sequence):
-        item_list = items
+        item_list = [
+            ItemInfo(col, item.type, item.unit) for col, item in zip(df.columns, items)
+        ]
 
     das = {
         item.name: DataArray(data=d, item=item, time=df.index)
