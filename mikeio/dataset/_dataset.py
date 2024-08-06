@@ -2019,14 +2019,13 @@ def from_polars(
                 break
 
     if datetime_col is None:
-        raise ValueError("Datetime column not found. Please specify time_col.")
+        raise ValueError("Datetime column not found. Please specify datetime_col.")
 
     time = pd.DatetimeIndex(df[datetime_col])
     df = df.drop(datetime_col)
 
     # convert the polars dataframe to list of numpy arrays
     array = df.to_numpy()
-
     data = [array[:, i] for i in range(array.shape[1])]
 
     item_list = _parse_items(df.columns, items)
