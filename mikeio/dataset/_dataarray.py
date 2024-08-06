@@ -220,6 +220,7 @@ class DataArray:
         ndim_no_time = ndim if (len(dims) == 0) else ndim - 1
 
         if isinstance(geometry, GeometryUndefined):
+
             DIMS_MAPPING: Mapping[int, Sequence[Any]] = {
                 0: [],
                 1: ["x"],
