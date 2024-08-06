@@ -1,3 +1,4 @@
+from datetime import datetime
 import numpy as np
 import pandas as pd
 import mikeio
@@ -349,7 +350,7 @@ def test_from_pandas_use_first_datetime_column() -> None:
     assert ds.time[-1].year == 2001
 
 
-def test_no_time_raises_error() -> None:
+def test_from_pandas_no_time_raises_error() -> None:
     df = pd.DataFrame(
         {
             "flow": np.array([1, np.nan, 2]),
@@ -359,6 +360,56 @@ def test_no_time_raises_error() -> None:
 
     with pytest.raises(ValueError, match="datetime"):
         mikeio.from_pandas(df)
+
+
+def test_from_polars_explicit_time_column() -> None:
+    import polars as pl
+
+    df = pl.DataFrame(
+        {
+            "flow": [1.0, None, 2.0],
+            "level": [2, 3.0, -1.3],
+            "time": [
+                datetime(2001, 1, 1, 0),
+                datetime(2001, 1, 1, 1),
+                datetime(2001, 1, 1, 2),
+            ],
+        }
+    )
+
+    ds = mikeio.from_polars(
+        df,
+        datetime_col="time",
+        items={
+            "flow": ItemInfo(EUMType.Discharge),
+            "level": ItemInfo(EUMType.Water_Level),
+        },
+    )
+    assert ds.time[0].year == 2001
+    assert ds["flow"].item.type == EUMType.Discharge
+    assert ds["level"].item.name == "level"
+
+
+def test_from_polars_use_first_datetime_column() -> None:
+    import polars as pl
+
+    df = pl.DataFrame(
+        {
+            "time": [
+                datetime(2001, 1, 1, 0),
+                datetime(2001, 1, 1, 1),
+                datetime(2001, 1, 1, 2),
+            ],
+            "flow": [1.0, None, 2.0],
+            "level": [2, 3.0, -1.3],
+        }
+    )
+
+    ds = mikeio.from_polars(df)
+
+    assert ds.n_timesteps == 3
+    assert ds.time[-1].year == 2001
+    assert ds["flow"].values[-1] == pytest.approx(2.0)
 
 
 def test_write_from_pandas_series_monkey_patched(tmp_path):

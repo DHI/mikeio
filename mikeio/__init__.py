@@ -29,7 +29,7 @@ __dfs_version__: int = 200
 if "64" not in architecture()[0]:
     raise Exception("This library has not been tested for a 32 bit system.")
 
-from .dataset import DataArray, Dataset, from_pandas
+from .dataset import DataArray, Dataset, from_pandas, from_polars
 from .dfs import Dfs0, Dfs1, Dfs2, Dfs3
 from .dfsu import Dfsu, Mesh
 from .eum import EUMType, EUMUnit, ItemInfo
@@ -210,4 +210,5 @@ __all__ = [
     "read",
     "open",
     "from_pandas",
+    "from_polars",
 ]
