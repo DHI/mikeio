@@ -368,7 +368,7 @@ def test_from_polars_explicit_time_column() -> None:
     df = pl.DataFrame(
         {
             "flow": [1.0, None, 2.0],
-            "level": [2, 3.0, -1.3],
+            "level": [2.0, 3.0, -1.3],
             "time": [
                 datetime(2001, 1, 1, 0),
                 datetime(2001, 1, 1, 1),
@@ -401,7 +401,7 @@ def test_from_polars_use_first_datetime_column() -> None:
                 datetime(2001, 1, 1, 2),
             ],
             "flow": [1.0, None, 2.0],
-            "level": [2, 3.0, -1.3],
+            "level": [2.0, 3.0, -1.3],
         }
     )
 
