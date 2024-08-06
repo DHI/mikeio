@@ -1897,3 +1897,35 @@ class Dataset:
                 out.append(f"  {i}:  {item}")
 
         return str.join("\n", out)
+
+
+def from_pandas(
+    df: pd.DataFrame,
+    items: Mapping[str, ItemInfo] | Sequence[ItemInfo] | ItemInfo | None = None,
+) -> "Dataset":
+    if not isinstance(df.index, pd.DatetimeIndex):
+        raise ValueError(
+            "Dataframe index must be a DatetimeIndex. Hint: pd.read_csv(..., parse_dates=True)"
+        )
+
+    ncol = df.values.shape[1]
+    data = [df.values[:, i] for i in range(ncol)]
+
+    if items is None:
+        item_list: Sequence[ItemInfo] = [ItemInfo(name) for name in df.columns]
+    elif isinstance(items, ItemInfo):
+        eum_type = items.type
+        eum_unit = items.unit
+        item_list = [ItemInfo(name, eum_type, eum_unit) for name in df.columns]
+
+    elif isinstance(items, Mapping):
+        item_list = [items[name] for name in df.columns]
+    elif isinstance(items, Sequence):
+        item_list = items
+
+    das = {
+        item.name: DataArray(data=d, item=item, time=df.index)
+        for d, item in zip(data, item_list)
+    }
+    ds = Dataset(das)
+    return ds
