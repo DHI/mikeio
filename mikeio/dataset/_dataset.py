@@ -1916,6 +1916,25 @@ def from_pandas(
     -------
     Dataset
         time series dataset
+
+    Examples
+    --------
+    ```{python}
+    import pandas as pd
+    import mikeio
+
+    df = pd.DataFrame(
+        {
+            "A": [1, 2, 3],
+            "B": [4, 5, 6],
+        },
+        index=pd.date_range("20210101", periods=3, freq="D"),
+    )
+    ds = mikeio.from_pandas(df, items={"A": mikeio.ItemInfo(mikeio.EUMType.Water_Level),
+                                       "B": mikeio.ItemInfo(mikeio.EUMType.Discharge)})
+    ds
+    ```
+
     """
 
     if not isinstance(df.index, pd.DatetimeIndex):
