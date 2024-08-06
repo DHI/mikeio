@@ -333,6 +333,33 @@ def test_from_pandas_sequence_eum_types() -> None:
     assert ds["River Level"].item.name == "River Level"
 
 
+def test_from_pandas_use_first_datetime_column() -> None:
+    df = pd.DataFrame(
+        {
+            "time": pd.date_range("2001-01-01", periods=3, freq="H"),
+            "flow": np.array([1, np.nan, 2]),
+            "level": np.array([2, 3.0, -1.3]),
+        }
+    )
+    # no index set, uses first datetime column
+    ds = mikeio.from_pandas(df)
+
+    assert ds.n_timesteps == 3
+    assert ds.time[-1].year == 2001
+
+
+def test_no_time_raises_error() -> None:
+    df = pd.DataFrame(
+        {
+            "flow": np.array([1, np.nan, 2]),
+            "level": np.array([2, 3.0, -1.3]),
+        }
+    )
+
+    with pytest.raises(ValueError, match="datetime"):
+        mikeio.from_pandas(df)
+
+
 def test_write_from_pandas_series_monkey_patched(tmp_path):
     df = pd.read_csv(
         "tests/testdata/co2-mm-mlo.csv",

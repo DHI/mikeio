@@ -1903,10 +1903,32 @@ def from_pandas(
     df: pd.DataFrame,
     items: Mapping[str, ItemInfo] | Sequence[ItemInfo] | ItemInfo | None = None,
 ) -> "Dataset":
+    """Create a Dataset from a pandas DataFrame
+
+    Parameters
+    ----------
+    df: pd.DataFrame
+        DataFrame with time index
+    items: Mapping[str, ItemInfo] | Sequence[ItemInfo] | ItemInfo | None, optional
+        Mapping of item names to ItemInfo objects, or a sequence of ItemInfo objects, or a single ItemInfo object.
+
+    Returns
+    -------
+    Dataset
+        time series dataset
+    """
+
     if not isinstance(df.index, pd.DatetimeIndex):
-        raise ValueError(
-            "Dataframe index must be a DatetimeIndex. Hint: pd.read_csv(..., parse_dates=True)"
-        )
+        # look for datetime column
+        for col in df.columns:
+            if isinstance(df[col].iloc[0], pd.Timestamp):
+                df.index = df[col]
+                df = df.drop(columns=col)
+                break
+        if not isinstance(df.index, pd.DatetimeIndex):
+            raise ValueError(
+                "Dataframe index must be a DatetimeIndex or contain a datetime column."
+            )
 
     ncol = df.values.shape[1]
     data = [df.values[:, i] for i in range(ncol)]
