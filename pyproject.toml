@@ -59,7 +59,7 @@ dev = ["pytest",
        "mypy==1.11.1",
        ]
 
-test = ["pytest", "pytest-cov", "xarray","mypy==1.6.1","shapely","pyproj", "polars"]
+test = ["pytest", "pytest-cov", "xarray","mypy==1.11.1","shapely","pyproj", "polars"]
 
 notebooks= [
             "nbformat",
