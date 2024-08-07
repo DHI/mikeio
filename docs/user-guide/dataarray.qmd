@@ -1,9 +1,8 @@
 ---
+title: DataArray
 aliases:
   - ../dataarray.html
 ---
-
-# DataArray
 
 The [DataArray](`mikeio.DataArray`) is the common MIKE IO data structure 
 for *item* data from dfs files. 
