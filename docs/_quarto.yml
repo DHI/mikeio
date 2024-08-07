@@ -98,6 +98,8 @@ quartodoc:
         - open
         - read
         - read_pfs
+        - from_pandas
+        - from_polars
     - title: Dataset
       desc: ""
       contents:

@@ -220,11 +220,12 @@ class DataArray:
         ndim_no_time = ndim if (len(dims) == 0) else ndim - 1
 
         if isinstance(geometry, GeometryUndefined):
-            DIMS_MAPPING = {
-                0: tuple(),
-                1: ("x",),
-                2: ("y", "x"),
-                3: ("z", "y", "x"),
+
+            DIMS_MAPPING: Mapping[int, Sequence[Any]] = {
+                0: [],
+                1: ["x"],
+                2: ["y", "x"],
+                3: ["z", "y", "x"],
             }
             spdims = DIMS_MAPPING[ndim_no_time]
         else:

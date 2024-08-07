@@ -34,3 +34,4 @@ docs/api/
 
 .testmondata
 objects.json
+.jupyter_cache/

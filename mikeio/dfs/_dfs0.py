@@ -388,7 +388,7 @@ def dataframe_to_dfs0(
     unit: EUMUnit, optional
         Same unit for all items
     items: list[ItemInfo]
-        Different types, units for each items, similar to `create`
+        Different types, units for each items
     title: str, optional
         Title of dfs0 file
     dtype : np.dtype, optional

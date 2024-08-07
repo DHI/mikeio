@@ -28,6 +28,7 @@ from mikecore.DfsFile import DfsSimpleType
 
 if TYPE_CHECKING:
     import xarray
+    import polars as pl
 
 from ._dataarray import DataArray
 from ._data_utils import _to_safe_name, _get_time_idx_list, _n_selected_timesteps
@@ -1897,3 +1898,167 @@ class Dataset:
                 out.append(f"  {i}:  {item}")
 
         return str.join("\n", out)
+
+
+def from_pandas(
+    df: pd.DataFrame,
+    items: Mapping[str, ItemInfo] | Sequence[ItemInfo] | ItemInfo | None = None,
+) -> "Dataset":
+    """Create a Dataset from a pandas DataFrame
+
+    Parameters
+    ----------
+    df: pd.DataFrame
+        DataFrame with time index
+    items: Mapping[str, ItemInfo] | Sequence[ItemInfo] | ItemInfo | None, optional
+        Mapping of item names to ItemInfo objects, or a sequence of ItemInfo objects, or a single ItemInfo object.
+
+    Returns
+    -------
+    Dataset
+        time series dataset
+
+    Examples
+    --------
+    ```{python}
+    import pandas as pd
+    import mikeio
+
+    df = pd.DataFrame(
+        {
+            "A": [1, 2, 3],
+            "B": [4, 5, 6],
+        },
+        index=pd.date_range("20210101", periods=3, freq="D"),
+    )
+    ds = mikeio.from_pandas(df, items={"A": mikeio.ItemInfo(mikeio.EUMType.Water_Level),
+                                       "B": mikeio.ItemInfo(mikeio.EUMType.Discharge)})
+    ds
+    ```
+
+    """
+
+    if not isinstance(df.index, pd.DatetimeIndex):
+        # look for datetime column
+        for col in df.columns:
+            if isinstance(df[col].iloc[0], pd.Timestamp):
+                df.index = df[col]
+                df = df.drop(columns=col)
+                break
+        if not isinstance(df.index, pd.DatetimeIndex):
+            raise ValueError(
+                "Dataframe index must be a DatetimeIndex or contain a datetime column."
+            )
+
+    ncol = df.values.shape[1]
+    data = [df.values[:, i] for i in range(ncol)]
+
+    item_list = _parse_items(df.columns, items)
+
+    das = {
+        item.name: DataArray(data=d, item=item, time=df.index)
+        for d, item in zip(data, item_list)
+    }
+    ds = Dataset(das)
+    return ds
+
+
+def from_polars(
+    df: "pl.DataFrame",
+    items: Mapping[str, ItemInfo] | Sequence[ItemInfo] | ItemInfo | None = None,
+    datetime_col: str | None = None,
+) -> "Dataset":
+    """Create a Dataset from a polars DataFrame
+
+    Parameters
+    ----------
+    df: pl.DataFrame
+        DataFrame
+    items: Mapping[str, ItemInfo] | Sequence[ItemInfo] | ItemInfo | None, optional
+        Mapping of item names to ItemInfo objects, or a sequence of ItemInfo objects, or a single ItemInfo object.
+    datetime_col: str, optional
+        Name of the column containing datetime information, default is to use the first datetime column found.
+
+    Returns
+    -------
+    Dataset
+        time series dataset
+
+    Examples
+    --------
+    ```{python}
+    import polars as pl
+    import mikeio
+    from datetime import datetime
+
+    df = pl.DataFrame(
+        {
+            "time": [datetime(2021, 1, 1), datetime(2021, 1, 2)],
+            "A": [1.0, 2.0],
+            "B": [4.0, 5.0],
+        }
+    )
+
+    ds = mikeio.from_polars(
+        df,
+        items={
+            "A": mikeio.ItemInfo(mikeio.EUMType.Water_Level),
+            "B": mikeio.ItemInfo(mikeio.EUMType.Discharge),
+        },
+    )
+    ds
+    ```
+    """
+
+    import polars as pl
+
+    if datetime_col is None:
+        for col, dtype in zip(df.columns, df.dtypes):
+            if isinstance(dtype, pl.Datetime):
+                datetime_col = col
+                break
+
+    if datetime_col is None:
+        raise ValueError("Datetime column not found. Please specify datetime_col.")
+
+    time = pd.DatetimeIndex(df[datetime_col])
+    df = df.drop(datetime_col)
+
+    # convert the polars dataframe to list of numpy arrays
+    array = df.to_numpy()
+    data = [array[:, i] for i in range(array.shape[1])]
+
+    item_list = _parse_items(df.columns, items)
+
+    das = {
+        item.name: DataArray(data=d, item=item, time=time)
+        for d, item in zip(data, item_list)
+    }
+    ds = Dataset(das)
+    return ds
+
+
+def _parse_items(
+    column_names: Sequence[str],
+    items: Mapping[str, ItemInfo] | Sequence[ItemInfo] | ItemInfo | None = None,
+) -> List[ItemInfo]:
+    if items is None:
+        item_list: List[ItemInfo] = [ItemInfo(name) for name in column_names]
+    elif isinstance(items, ItemInfo):
+        eum_type = items.type
+        eum_unit = items.unit
+        item_list = [ItemInfo(name, eum_type, eum_unit) for name in column_names]
+
+    elif isinstance(items, Mapping):
+        item_list = [
+            ItemInfo(name, items[name].type, items[name].unit) for name in column_names
+        ]
+    elif isinstance(items, Sequence):
+        item_list = [
+            ItemInfo(col, item.type, item.unit)
+            for col, item in zip(column_names, items)
+        ]
+    else:
+        raise TypeError("items must be a mapping, sequence or ItemInfo")
+
+    return item_list
