@@ -46,28 +46,6 @@ df = pd.read_csv(
 df.to_dfs0("mauna_loa_co2.dfs0")
 ```
 
-```{python}
-import polars as pl
-import mikeio
-from datetime import datetime
-
-df = pl.DataFrame(
-    {
-        "time": [datetime(2021, 1, 1), datetime(2021, 1, 2)],
-        "A": [1.0, 2.0],
-        "B": [4.0, 5.0],
-    }
-)
-
-ds = mikeio.from_polars(
-    df,
-    items={
-        "A": mikeio.ItemInfo(mikeio.EUMType.Water_Level),
-        "B": mikeio.ItemInfo(mikeio.EUMType.Discharge),
-    },
-)
-ds
-```
 
 ## Dfs0 example notebooks
 
