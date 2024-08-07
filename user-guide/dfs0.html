@@ -385,7 +385,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </ul>
 <section id="read-dfs0-to-dataset" class="level2">
 <h2 class="anchored" data-anchor-id="read-dfs0-to-dataset">Read Dfs0 to Dataset</h2>
-<div id="b1fc4b2c" class="cell" data-execution_count="1">
+<div id="5bb7cce8" class="cell" data-execution_count="1">
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> mikeio</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>ds <span class="op">=</span> mikeio.read(<span class="st">"../data/da_diagnostic.dfs0"</span>)</span>
@@ -402,7 +402,7 @@ items:
   3:  MeasurementSign. Wave Height &lt;Significant wave height&gt; (meter)</code></pre>
 </div>
 </div>
-<div id="a36f6ac8" class="cell" data-execution_count="2">
+<div id="f87aa43d" class="cell" data-execution_count="2">
 <div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> ds.to_dataframe()</span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>df.head()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="2">
@@ -477,44 +477,13 @@ Note
 <p>MIKE IO adds a new method to the DataFrame called <code>to_dfs0</code>. This method is used to save the DataFrame to a dfs0 file. (This method becomes available after importing the <code>mikeio</code> module.)</p>
 </div>
 </div>
-<div id="1d0f64c9" class="cell" data-execution_count="3">
+<div id="e7744b5c" class="cell" data-execution_count="3">
 <div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
 <span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> pd.read_csv(</span>
 <span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>    <span class="st">"../data/co2-mm-mlo.csv"</span>, parse_dates<span class="op">=</span><span class="va">True</span>, index_col<span class="op">=</span><span class="st">"Date"</span>, na_values<span class="op">=-</span><span class="fl">99.99</span></span>
 <span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>)</span>
 <span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>df.to_dfs0(<span class="st">"mauna_loa_co2.dfs0"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</div>
-<div id="2fbfaf28" class="cell" data-execution_count="4">
-<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> polars <span class="im">as</span> pl</span>
-<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> mikeio</span>
-<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> datetime <span class="im">import</span> datetime</span>
-<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> pl.DataFrame(</span>
-<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>    {</span>
-<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>        <span class="st">"time"</span>: [datetime(<span class="dv">2021</span>, <span class="dv">1</span>, <span class="dv">1</span>), datetime(<span class="dv">2021</span>, <span class="dv">1</span>, <span class="dv">2</span>)],</span>
-<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>        <span class="st">"A"</span>: [<span class="fl">1.0</span>, <span class="fl">2.0</span>],</span>
-<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>        <span class="st">"B"</span>: [<span class="fl">4.0</span>, <span class="fl">5.0</span>],</span>
-<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>    }</span>
-<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a>ds <span class="op">=</span> mikeio.from_polars(</span>
-<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a>    df,</span>
-<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a>    items<span class="op">=</span>{</span>
-<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a>        <span class="st">"A"</span>: mikeio.ItemInfo(mikeio.EUMType.Water_Level),</span>
-<span id="cb5-17"><a href="#cb5-17" aria-hidden="true" tabindex="-1"></a>        <span class="st">"B"</span>: mikeio.ItemInfo(mikeio.EUMType.Discharge),</span>
-<span id="cb5-18"><a href="#cb5-18" aria-hidden="true" tabindex="-1"></a>    },</span>
-<span id="cb5-19"><a href="#cb5-19" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb5-20"><a href="#cb5-20" aria-hidden="true" tabindex="-1"></a>ds</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display" data-execution_count="4">
-<pre><code>&lt;mikeio.Dataset&gt;
-dims: (time:2)
-time: 2021-01-01 00:00:00 - 2021-01-02 00:00:00 (2 records)
-geometry: GeometryUndefined()
-items:
-  0:  A &lt;Water Level&gt; (meter)
-  1:  B &lt;Discharge&gt; (meter pow 3 per sec)</code></pre>
-</div>
 </div>
 </section>
 <section id="dfs0-example-notebooks" class="level2">
