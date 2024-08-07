@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>dfs0 – MIKE IO</title>
+<title>Dfs0 – MIKE IO</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -168,7 +168,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
         <i class="bi bi-layout-text-sidebar-reverse"></i>
       </button>
         <a class="flex-grow-1 no-decor" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
-          <h1 class="quarto-secondary-nav-title">From Dfs0 to pandas DataFrame</h1>
+          <h1 class="quarto-secondary-nav-title">Dfs0</h1>
         </a>     
       <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
         <i class="bi bi-search"></i>
@@ -241,7 +241,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../user-guide/dfsu.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Dfsu and Mesh Overview</span></a>
+ <span class="menu-text">Dfsu</span></a>
   </div>
 </li>
           <li class="sidebar-item">
@@ -344,12 +344,10 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     <h2 id="toc-title">On this page</h2>
    
   <ul>
-  <li><a href="#dfs0" id="toc-dfs0" class="nav-link active" data-scroll-target="#dfs0">Dfs0</a>
-  <ul class="collapse">
-  <li><a href="#read-dfs0-to-dataset" id="toc-read-dfs0-to-dataset" class="nav-link" data-scroll-target="#read-dfs0-to-dataset">Read Dfs0 to Dataset</a></li>
+  <li><a href="#read-dfs0-to-dataset" id="toc-read-dfs0-to-dataset" class="nav-link active" data-scroll-target="#read-dfs0-to-dataset">Read Dfs0 to Dataset</a></li>
+  <li><a href="#from-dfs0-to-pandas-dataframe" id="toc-from-dfs0-to-pandas-dataframe" class="nav-link" data-scroll-target="#from-dfs0-to-pandas-dataframe">From Dfs0 to pandas DataFrame</a></li>
   <li><a href="#from-pandas-dataframe-to-dfs0" id="toc-from-pandas-dataframe-to-dfs0" class="nav-link" data-scroll-target="#from-pandas-dataframe-to-dfs0">From pandas DataFrame to Dfs0</a></li>
   <li><a href="#dfs0-example-notebooks" id="toc-dfs0-example-notebooks" class="nav-link" data-scroll-target="#dfs0-example-notebooks">Dfs0 example notebooks</a></li>
-  </ul></li>
   </ul>
 <div class="toc-actions"><ul><li><a href="https://github.com/DHI/mikeio/edit/main/docs/user-guide/dfs0.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li></ul></div></nav>
     </div>
@@ -358,7 +356,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<h1 class="title d-none d-lg-block">From Dfs0 to pandas DataFrame</h1>
+<h1 class="title d-none d-lg-block">Dfs0</h1>
 </div>
 
 
@@ -375,8 +373,6 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </header>
 
 
-<section id="dfs0" class="level1">
-<h1>Dfs0</h1>
 <p>A dfs0 file is also called a time series file.</p>
 <p>Working with data from dfs0 files are conveniently done in one of two ways:</p>
 <ul>
@@ -385,7 +381,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </ul>
 <section id="read-dfs0-to-dataset" class="level2">
 <h2 class="anchored" data-anchor-id="read-dfs0-to-dataset">Read Dfs0 to Dataset</h2>
-<div id="5bb7cce8" class="cell" data-execution_count="1">
+<div id="b1fb0f4b" class="cell" data-execution_count="1">
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> mikeio</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>ds <span class="op">=</span> mikeio.read(<span class="st">"../data/da_diagnostic.dfs0"</span>)</span>
@@ -402,7 +398,10 @@ items:
   3:  MeasurementSign. Wave Height &lt;Significant wave height&gt; (meter)</code></pre>
 </div>
 </div>
-<div id="f87aa43d" class="cell" data-execution_count="2">
+</section>
+<section id="from-dfs0-to-pandas-dataframe" class="level2">
+<h2 class="anchored" data-anchor-id="from-dfs0-to-pandas-dataframe">From Dfs0 to pandas DataFrame</h2>
+<div id="e3b10f84" class="cell" data-execution_count="2">
 <div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> ds.to_dataframe()</span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>df.head()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="2">
@@ -477,7 +476,7 @@ Note
 <p>MIKE IO adds a new method to the DataFrame called <code>to_dfs0</code>. This method is used to save the DataFrame to a dfs0 file. (This method becomes available after importing the <code>mikeio</code> module.)</p>
 </div>
 </div>
-<div id="e7744b5c" class="cell" data-execution_count="3">
+<div id="4f3ea6ca" class="cell" data-execution_count="3">
 <div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
 <span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> pd.read_csv(</span>
@@ -495,7 +494,6 @@ Note
 </ul>
 
 
-</section>
 </section>
 
 </main> <!-- /main -->

@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>dataset – MIKE IO</title>
+<title>Dataset – MIKE IO</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -167,7 +167,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
         <i class="bi bi-layout-text-sidebar-reverse"></i>
       </button>
         <a class="flex-grow-1 no-decor" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
-          <h1 class="quarto-secondary-nav-title"><i class="fa-solid fa-filter" aria-label="filter"></i> Selecting items</h1>
+          <h1 class="quarto-secondary-nav-title">Dataset</h1>
         </a>     
       <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
         <i class="bi bi-search"></i>
@@ -240,7 +240,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../user-guide/dfsu.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Dfsu and Mesh Overview</span></a>
+ <span class="menu-text">Dfsu</span></a>
   </div>
 </li>
           <li class="sidebar-item">
@@ -343,8 +343,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     <h2 id="toc-title">On this page</h2>
    
   <ul>
-  <li><a href="#dataset" id="toc-dataset" class="nav-link active" data-scroll-target="#dataset">Dataset</a>
-  <ul class="collapse">
+  <li><a href="#selecting-items" id="toc-selecting-items" class="nav-link active" data-scroll-target="#selecting-items"><i class="fa-solid fa-filter" aria-label="filter"></i> Selecting items</a></li>
   <li><a href="#temporal-selection" id="toc-temporal-selection" class="nav-link" data-scroll-target="#temporal-selection"><i class="fa-solid fa-calendar" aria-label="calendar"></i> Temporal selection</a></li>
   <li><a href="#spatial-selection" id="toc-spatial-selection" class="nav-link" data-scroll-target="#spatial-selection"><i class="fa-solid fa-map" aria-label="map"></i> Spatial selection</a></li>
   <li><a href="#plotting" id="toc-plotting" class="nav-link" data-scroll-target="#plotting"><i class="fa-solid fa-chart-line" aria-label="chart-line"></i> Plotting</a></li>
@@ -355,7 +354,6 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <li><a href="#mathematical-operations" id="toc-mathematical-operations" class="nav-link" data-scroll-target="#mathematical-operations"><i class="fa-solid fa-calculator" aria-label="calculator"></i> Mathematical operations</a></li>
   <li><a href="#conversion" id="toc-conversion" class="nav-link" data-scroll-target="#conversion">Conversion:</a></li>
   </ul></li>
-  </ul></li>
   </ul>
 <div class="toc-actions"><ul><li><a href="https://github.com/DHI/mikeio/edit/main/docs/user-guide/dataset.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li></ul></div></nav>
     </div>
@@ -364,7 +362,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<h1 class="title d-none d-lg-block"><i class="fa-solid fa-filter" aria-label="filter"></i> Selecting items</h1>
+<h1 class="title d-none d-lg-block">Dataset</h1>
 </div>
 
 
@@ -381,8 +379,6 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </header>
 
 
-<section id="dataset" class="level1">
-<h1>Dataset</h1>
 <p>The <a href="../api/Dataset.html#mikeio.Dataset">Dataset</a> is the MIKE IO data structure for data from dfs files. The <a href="../api/read.html#mikeio.read"><code>mikeio.read</code></a> methods returns a Dataset as a container of <a href="../api/DataArray.html#mikeio.DataArray">DataArray</a> (Dfs items). Each DataArray has the properties, <em>item</em>, <em>time</em>, <em>geometry</em> and <em>values</em>. The time and geometry are common to all DataArrays in the Dataset.</p>
 <p>The Dataset has the following primary properties:</p>
 <ul>
@@ -391,7 +387,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <li><strong>geometry</strong> - a Geometry object with the spatial description of the data</li>
 </ul>
 <p>Use Dataset’s string representation to get an overview of the Dataset</p>
-<div id="9b6f1fc8" class="cell" data-execution_count="1">
+<div id="1c33e750" class="cell" data-execution_count="1">
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> mikeio</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>ds <span class="op">=</span> mikeio.read(<span class="st">"../data/HD2D.dfsu"</span>)</span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>ds</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
@@ -407,6 +403,8 @@ items:
   3:  Current speed &lt;Current Speed&gt; (meter per sec)</code></pre>
 </div>
 </div>
+<section id="selecting-items" class="level2">
+<h2 class="anchored" data-anchor-id="selecting-items"><i class="fa-solid fa-filter" aria-label="filter"></i> Selecting items</h2>
 <p>Selecting a specific item “itemA” (at position 0) from a Dataset ds can be done with:</p>
 <ul>
 <li><code>ds[["itemA"]]</code> - returns a new Dataset with “itemA”</li>
@@ -416,7 +414,7 @@ items:
 <li><code>ds.itemA</code> - returns “itemA” DataArray</li>
 </ul>
 <p>We recommend the use <em>named</em> items for readability.</p>
-<div id="0624e9de" class="cell" data-execution_count="2">
+<div id="dbe218bb" class="cell" data-execution_count="2">
 <div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>ds.Surface_elevation</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="2">
 <pre><code>&lt;mikeio.DataArray&gt;
@@ -432,10 +430,11 @@ geometry: Dfsu2D (884 elements, 529 nodes)</code></pre>
 <li><code>ds[[0, 2]]</code></li>
 </ul>
 <p>Note that this behavior is similar to pandas and xarray.</p>
+</section>
 <section id="temporal-selection" class="level2">
 <h2 class="anchored" data-anchor-id="temporal-selection"><i class="fa-solid fa-calendar" aria-label="calendar"></i> Temporal selection</h2>
 <p>A time slice of a Dataset can be selected in several different ways.</p>
-<div id="76f3b611" class="cell" data-execution_count="3">
+<div id="2dd6de9f" class="cell" data-execution_count="3">
 <div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>ds.sel(time<span class="op">=</span><span class="st">"1985-08-06 12:00"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="3">
 <pre><code>&lt;mikeio.Dataset&gt;
@@ -449,7 +448,7 @@ items:
   3:  Current speed &lt;Current Speed&gt; (meter per sec)</code></pre>
 </div>
 </div>
-<div id="8f201a3a" class="cell" data-execution_count="4">
+<div id="5f0bc999" class="cell" data-execution_count="4">
 <div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>ds[<span class="st">"1985-8-7"</span>:]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="4">
 <pre><code>&lt;mikeio.Dataset&gt;
@@ -467,7 +466,7 @@ items:
 <section id="spatial-selection" class="level2">
 <h2 class="anchored" data-anchor-id="spatial-selection"><i class="fa-solid fa-map" aria-label="map"></i> Spatial selection</h2>
 <p>The <code>sel</code> method finds a single element.</p>
-<div id="b6cca785" class="cell" data-execution_count="5">
+<div id="c9a52294" class="cell" data-execution_count="5">
 <div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>ds.sel(x<span class="op">=</span><span class="dv">607002</span>, y<span class="op">=</span><span class="dv">6906734</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="5">
 <pre><code>&lt;mikeio.Dataset&gt;
@@ -495,7 +494,7 @@ items:
 <h2 class="anchored" data-anchor-id="add-a-new-item">Add a new item</h2>
 <p>A common workflow is to create a new item based on existing items in a dataset.</p>
 <p>This can be in done in several ways. Let’s try one of the options.</p>
-<div id="d3996caa" class="cell" data-execution_count="6">
+<div id="bef35b96" class="cell" data-execution_count="6">
 <div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>ds <span class="op">=</span> mikeio.read(<span class="st">"../data/NorthSea_HD_and_windspeed.dfsu"</span>)</span>
 <span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>ds</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="6">
@@ -511,7 +510,7 @@ items:
 <ol type="1">
 <li>Create a copy of the DataArray</li>
 </ol>
-<div id="0917350f" class="cell" data-execution_count="7">
+<div id="5328691a" class="cell" data-execution_count="7">
 <div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>ws2 <span class="op">=</span> ds.Wind_speed.copy()</span>
 <span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>ws2.plot.hist()<span class="op">;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display">
@@ -525,7 +524,7 @@ items:
 <ol start="2" type="1">
 <li>Make the modifications, in this case we will clip the values to the interval 1-18 m/s.</li>
 </ol>
-<div id="9cf6cc2a" class="cell" data-execution_count="8">
+<div id="dfb9bbbc" class="cell" data-execution_count="8">
 <div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
 <span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>ws2.values <span class="op">=</span> np.clip(ws2.to_numpy(), <span class="dv">1</span>,<span class="dv">18</span>)</span>
 <span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>ws2.plot.hist()<span class="op">;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
@@ -540,7 +539,7 @@ items:
 <ol start="3" type="1">
 <li>Assign it to a new name in the dataset</li>
 </ol>
-<div id="6ce7ae6a" class="cell" data-execution_count="9">
+<div id="b21ce342" class="cell" data-execution_count="9">
 <div class="sourceCode cell-code" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>ds[<span class="st">"Wind_speed_clipped"</span>] <span class="op">=</span> ws2</span>
 <span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>ds</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="9">
@@ -557,7 +556,7 @@ items:
 <ol start="4" type="1">
 <li>Reorder items if necessary (See <a href="#selecting-items">selecting items</a> above)</li>
 </ol>
-<div id="74aed05b" class="cell" data-execution_count="10">
+<div id="2edc6c5a" class="cell" data-execution_count="10">
 <div class="sourceCode cell-code" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>ds2 <span class="op">=</span> ds[[<span class="st">"Wind_speed_clipped"</span>, <span class="st">"Surface elevation"</span>, <span class="st">"Wind speed"</span>]]</span>
 <span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>ds2</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="10">
@@ -574,7 +573,7 @@ items:
 <ol start="5" type="1">
 <li>Write the new dataset to a new file</li>
 </ol>
-<div id="a336ca11" class="cell" data-execution_count="11">
+<div id="c17a6535" class="cell" data-execution_count="11">
 <div class="sourceCode cell-code" id="cb19"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>ds2.to_dfs(<span class="st">"modified.dfsu"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </section>
@@ -642,7 +641,6 @@ items:
 </ul>
 
 
-</section>
 </section>
 </section>
 

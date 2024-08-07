@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>dfs1 – MIKE IO</title>
+<title>Dfs1 – MIKE IO</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -165,7 +165,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
         <i class="bi bi-layout-text-sidebar-reverse"></i>
       </button>
         <a class="flex-grow-1 no-decor" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
-          <h1 class="quarto-secondary-nav-title">Grid 1D</h1>
+          <h1 class="quarto-secondary-nav-title">Dfs1</h1>
         </a>     
       <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
         <i class="bi bi-search"></i>
@@ -238,7 +238,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../user-guide/dfsu.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Dfsu and Mesh Overview</span></a>
+ <span class="menu-text">Dfsu</span></a>
   </div>
 </li>
           <li class="sidebar-item">
@@ -341,10 +341,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     <h2 id="toc-title">On this page</h2>
    
   <ul>
-  <li><a href="#dfs1" id="toc-dfs1" class="nav-link active" data-scroll-target="#dfs1">Dfs1</a>
-  <ul class="collapse">
+  <li><a href="#grid-1d" id="toc-grid-1d" class="nav-link active" data-scroll-target="#grid-1d">Grid 1D</a></li>
   <li><a href="#creating-a-dfs1-file" id="toc-creating-a-dfs1-file" class="nav-link" data-scroll-target="#creating-a-dfs1-file">Creating a dfs1 file</a></li>
-  </ul></li>
   </ul>
 <div class="toc-actions"><ul><li><a href="https://github.com/DHI/mikeio/edit/main/docs/user-guide/dfs1.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li></ul></div></nav>
     </div>
@@ -353,7 +351,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<h1 class="title d-none d-lg-block">Grid 1D</h1>
+<h1 class="title d-none d-lg-block">Dfs1</h1>
 </div>
 
 
@@ -370,10 +368,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </header>
 
 
-<section id="dfs1" class="level1">
-<h1>Dfs1</h1>
 <p>A dfs1 file contains node-based line series data. Dfs1 files do not contain enough metadata to determine their geographical position, but have a relative distance from the origo.</p>
-<div id="34cb8e46" class="cell" data-execution_count="1">
+<div id="99a55354" class="cell" data-execution_count="1">
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> mikeio</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>ds <span class="op">=</span> mikeio.read(<span class="st">"../data/tide1.dfs1"</span>)</span>
@@ -387,8 +383,10 @@ items:
   0:  Level &lt;Water Level&gt; (meter)</code></pre>
 </div>
 </div>
+<section id="grid-1d" class="level2">
+<h2 class="anchored" data-anchor-id="grid-1d">Grid 1D</h2>
 <p>The spatial information is available in the <code>geometry</code> attribute (accessible from Dfs1, Dataset, and DataArray), which in the case of a dfs1 file is a <a href="../api/Grid1D.html#mikeio.Grid1D"><code>Grid1D</code></a> geometry.</p>
-<div id="b472b951" class="cell" data-execution_count="2">
+<div id="5b20a861" class="cell" data-execution_count="2">
 <div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>ds.geometry</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="2">
 <pre><code>&lt;mikeio.Grid1D&gt;
@@ -404,6 +402,7 @@ x: [0, 0.06667, ..., 0.6] (nx=10, dx=0.06667)</code></pre>
 <li><code>isel()</code></li>
 </ul>
 <p>See <a href="../api/Grid1D.html#mikeio.Grid1D">API specification</a> for details.</p>
+</section>
 <section id="creating-a-dfs1-file" class="level2">
 <h2 class="anchored" data-anchor-id="creating-a-dfs1-file">Creating a dfs1 file</h2>
 <ol type="1">
@@ -411,7 +410,7 @@ x: [0, 0.06667, ..., 0.6] (nx=10, dx=0.06667)</code></pre>
 <li>Create a data array with dimensions (time, x)</li>
 </ol>
 <p>In this example the grid consist of two points (west and east), but the same approach can be used for any number of points.</p>
-<div id="02a2d3d9" class="cell" data-execution_count="3">
+<div id="b77f3c9f" class="cell" data-execution_count="3">
 <div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
 <span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
 <span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
@@ -432,7 +431,7 @@ x: [0, 0.06667, ..., 0.6] (nx=10, dx=0.06667)</code></pre>
 <ol start="3" type="1">
 <li>Create a <code>Grid1D</code> geometry with the number of points in the x-direction and the spacing.</li>
 </ol>
-<div id="f556aadb" class="cell" data-execution_count="4">
+<div id="8287ff05" class="cell" data-execution_count="4">
 <div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>geometry <span class="op">=</span> mikeio.Grid1D(nx<span class="op">=</span><span class="dv">2</span>, dx<span class="op">=</span><span class="dv">1</span>)</span>
 <span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>geometry</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="4">
@@ -443,7 +442,7 @@ x: [0, 1] (nx=2, dx=1)</code></pre>
 <ol start="4" type="1">
 <li>Create a <code>DataArray</code> object with the data, time, geometry, and item information.</li>
 </ol>
-<div id="e2677a24" class="cell" data-execution_count="5">
+<div id="65cd31da" class="cell" data-execution_count="5">
 <div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>da <span class="op">=</span> mikeio.DataArray(</span>
 <span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>    data,</span>
 <span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>    time<span class="op">=</span>t,</span>
@@ -459,7 +458,7 @@ time: 2021-01-01 00:00:00 - 2021-01-02 00:45:00 (100 records)
 geometry: Grid1D (n=2, dx=1)</code></pre>
 </div>
 </div>
-<div id="4d4019df" class="cell" data-execution_count="6">
+<div id="6bfbec86" class="cell" data-execution_count="6">
 <div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>da.plot.timeseries()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display">
 <div>
@@ -473,12 +472,11 @@ geometry: Grid1D (n=2, dx=1)</code></pre>
 <ol start="5" type="1">
 <li>Write to a dfs1 file.</li>
 </ol>
-<div id="3bd32a92" class="cell" data-execution_count="7">
+<div id="fce191f4" class="cell" data-execution_count="7">
 <div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>da.to_dfs(<span class="st">"boundary.dfs1"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 
 
-</section>
 </section>
 
 </main> <!-- /main -->
