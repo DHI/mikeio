@@ -31,10 +31,6 @@ df.head()
 
 ## From pandas DataFrame to Dfs0
 
-::: callout-note
-MIKE IO adds a new method to the DataFrame called `to_dfs0`. This method is used to save the DataFrame to a dfs0 file. (This method becomes available after importing the `mikeio` module.)
-:::
-
 
 ```{python}
 import pandas as pd
