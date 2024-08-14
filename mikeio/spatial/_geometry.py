@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 
 from collections import namedtuple
-from typing import Any, Tuple
+from typing import Any
 
 from mikecore.Projections import MapProjection
 
@@ -43,7 +43,7 @@ class _Geometry(ABC):
 
     @property
     @abstractmethod
-    def default_dims(self) -> Tuple[str, ...]:
+    def default_dims(self) -> tuple[str, ...]:
         pass
 
 
@@ -56,7 +56,7 @@ class GeometryUndefined(_Geometry):
         raise NotImplementedError()
 
     @property
-    def default_dims(self) -> Tuple[str, ...]:
+    def default_dims(self) -> tuple[str, ...]:
         raise NotImplementedError()
 
 
@@ -67,7 +67,7 @@ class GeometryPoint2D(_Geometry):
         self.y = y
 
     @property
-    def default_dims(self) -> Tuple[str, ...]:
+    def default_dims(self) -> tuple[str, ...]:
         return ()
 
     def __repr__(self) -> str:
@@ -104,7 +104,7 @@ class GeometryPoint3D(_Geometry):
         return f"GeometryPoint3D(x={self.x}, y={self.y}, z={self.z})"
 
     @property
-    def default_dims(self) -> Tuple[str, ...]:
+    def default_dims(self) -> tuple[str, ...]:
         return ()
 
     @property

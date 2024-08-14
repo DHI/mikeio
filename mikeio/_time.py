@@ -1,7 +1,6 @@
 from __future__ import annotations
 from datetime import datetime
 from dataclasses import dataclass
-from typing import List
 from collections.abc import Iterable
 
 import pandas as pd
@@ -18,7 +17,7 @@ class DateTimeSelector:
         x: (
             int | Iterable[int] | str | datetime | pd.DatetimeIndex | slice | None
         ) = None,
-    ) -> List[int]:
+    ) -> list[int]:
         """Select time steps from a pandas DatetimeIndex
 
         Parameters
@@ -28,7 +27,7 @@ class DateTimeSelector:
 
         Returns
         -------
-        List[int]
+        list[int]
             List of indices in the range (0, len(index)
         Examples
         --------

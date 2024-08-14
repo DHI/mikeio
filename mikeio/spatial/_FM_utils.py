@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import Any, Literal, Sequence, Tuple
+from typing import Any, Literal, Sequence
 from matplotlib.axes import Axes
 from matplotlib.cm import ScalarMappable
 from matplotlib.collections import PatchCollection
@@ -40,7 +40,7 @@ def _plot_map(
     n_refinements: int = 0,
     show_mesh: bool = False,
     show_outline: bool = True,
-    figsize: Tuple[float, float] | None = None,
+    figsize: tuple[float, float] | None = None,
     ax: Axes | None = None,
     add_colorbar: bool = True,
 ) -> Axes:
@@ -235,7 +235,7 @@ def __set_colormap_levels(
     vmax: float | None,
     levels: int | Sequence[float] | np.ndarray | None,
     z: np.ndarray,
-) -> Tuple[float, float, Colormap, Normalize, ScalarMappable, np.ndarray]:
+) -> tuple[float, float, Colormap, Normalize, ScalarMappable, np.ndarray]:
     """Set colormap, levels, vmin, vmax, and cmap_norm
 
     Parameters
@@ -430,7 +430,7 @@ def __get_tris(
     ec: np.ndarray,
     z: np.ndarray,
     n_refinements: int,
-) -> Tuple[Triangulation, np.ndarray]:
+) -> tuple[Triangulation, np.ndarray]:
     """get triangulation object and node-centered data
 
     Parameters
@@ -702,7 +702,7 @@ def __create_tri_only_element_table(
     element_table: np.ndarray,
     element_coordinates: np.ndarray,
     data: np.ndarray,
-) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
+) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
     """Convert quad/tri mesh to pure tri-mesh"""
 
     if __is_tri_only(element_table):

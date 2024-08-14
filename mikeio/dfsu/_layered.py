@@ -1,6 +1,6 @@
 from __future__ import annotations
 from pathlib import Path
-from typing import Any, Sequence, Tuple, TYPE_CHECKING
+from typing import Any, Sequence, TYPE_CHECKING
 
 from matplotlib.axes import Axes
 import numpy as np
@@ -203,7 +203,7 @@ class DfsuLayered:
         items: str | int | Sequence[str | int] | None = None,
         time: int | str | slice | None = None,
         elements: Sequence[int] | None = None,
-        area: Tuple[float, float, float, float] | None = None,
+        area: tuple[float, float, float, float] | None = None,
         x: float | None = None,
         y: float | None = None,
         z: float | None = None,

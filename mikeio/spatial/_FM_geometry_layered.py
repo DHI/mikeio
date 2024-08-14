@@ -2,7 +2,7 @@ from __future__ import annotations
 from functools import cached_property
 from pathlib import Path
 
-from typing import Any, Iterable, Literal, Sequence, List, Tuple
+from typing import Any, Iterable, Literal, Sequence
 
 from matplotlib.axes import Axes
 import numpy as np
@@ -24,7 +24,7 @@ class _GeometryFMLayered(_GeometryFM):
         self,
         *,
         node_coordinates: np.ndarray,
-        element_table: np.ndarray | List[Sequence[int]] | List[np.ndarray],
+        element_table: np.ndarray | list[Sequence[int]] | list[np.ndarray],
         codes: np.ndarray | None = None,
         projection: str = "LONG/LAT",
         dfsu_type: DfsuFileType = DfsuFileType.Dfsu3DSigma,
@@ -83,7 +83,7 @@ class _GeometryFMLayered(_GeometryFM):
         node_layers: Layer = "all",
         keepdims: bool = False,
     ) -> GeometryFM3D | GeometryPoint3D | GeometryFM2D | GeometryFMVerticalColumn:
-        sel_elements: List[int]
+        sel_elements: list[int]
 
         if isinstance(elements, (int, np.integer)):
             sel_elements = [elements]
@@ -184,7 +184,7 @@ class _GeometryFMLayered(_GeometryFM):
         self,
         elements: Sequence[int] | np.ndarray,
         node_layers: Layer = "all",
-    ) -> Tuple[Any, Any]:
+    ) -> tuple[Any, Any]:
         """list of nodes and element table for a list of elements
 
         Parameters
@@ -330,7 +330,7 @@ class _GeometryFMLayered(_GeometryFM):
             return self._find_top_layer_elements(self.element_table)
 
     def _elements_in_area(
-        self, area: Sequence[Tuple[float, float]] | Sequence[float]
+        self, area: Sequence[tuple[float, float]] | Sequence[float]
     ) -> np.ndarray:
         """Find element ids of elements inside area"""
         idx2d = self.geometry2d._elements_in_area(area)
@@ -482,7 +482,7 @@ class _GeometryFMLayered(_GeometryFM):
             self._layer_ids = res[2]
         return self._2d_ids
 
-    def _get_2d_to_3d_association(self) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
+    def _get_2d_to_3d_association(self) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
         e2_to_e3 = (
             []
         )  # for each 2d element: the corresponding 3d element ids from bot to top
@@ -623,7 +623,7 @@ class GeometryFM3D(_GeometryFMLayered):
         self,
         *,
         node_coordinates: np.ndarray,
-        element_table: np.ndarray | List[Sequence[int]] | List[np.ndarray],
+        element_table: np.ndarray | list[Sequence[int]] | list[np.ndarray],
         codes: np.ndarray | None = None,
         projection: str = "LONG/LAT",
         dfsu_type: DfsuFileType = DfsuFileType.Dfsu3DSigma,
@@ -665,7 +665,7 @@ class GeometryFM3D(_GeometryFMLayered):
         y: float | None = None,
         z: float | None = None,
         coords: np.ndarray | None = None,
-        area: Tuple[float, float, float, float] | None = None,
+        area: tuple[float, float, float, float] | None = None,
         layers: int | Layer | Sequence[int] | None = None,
     ) -> np.ndarray:
 
@@ -711,7 +711,7 @@ class GeometryFMVerticalProfile(_GeometryFMLayered):
     def __init__(
         self,
         node_coordinates: np.ndarray,
-        element_table: np.ndarray | List[Sequence[int]] | List[np.ndarray],
+        element_table: np.ndarray | list[Sequence[int]] | list[np.ndarray],
         codes: np.ndarray | None = None,
         projection: str = "LONG/LAT",
         dfsu_type: DfsuFileType = DfsuFileType.Dfsu3DSigma,
@@ -743,7 +743,7 @@ class GeometryFMVerticalProfile(_GeometryFMLayered):
         nc0 = self.node_coordinates[0, :2]
         return _relative_cumulative_distance(ec, nc0, is_geo=self.is_geo)
 
-    def get_nearest_relative_distance(self, coords: Tuple[float, float]) -> float:
+    def get_nearest_relative_distance(self, coords: tuple[float, float]) -> float:
         """For a point near a transect, find the nearest relative distance
         for showing position on transect plot.
 
@@ -896,7 +896,7 @@ class _GeometryFMVerticalProfilePlotter:
     def __call__(
         self,
         ax: Axes | None = None,
-        figsize: Tuple[float, float] | None = None,
+        figsize: tuple[float, float] | None = None,
         **kwargs: Any,
     ) -> Axes:
         import matplotlib.pyplot as plt
