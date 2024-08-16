@@ -87,9 +87,10 @@ def test_get_bad_node_coordinates(tri_mesh):
 def test_set_z(tri_mesh):
     msh = tri_mesh
     zn = msh.node_coordinates[:, 2]
+    assert msh.element_coordinates[:, 2].min() == pytest.approx(-10.938001)
     zn[zn < -3] = -3
+    assert msh.element_coordinates[:, 2].min() == pytest.approx(-3)
 
-    msh.node_coordinates[:, 2] = zn
     zn = msh.node_coordinates[:, 2]
     assert zn.min() == -3
 
