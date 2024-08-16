@@ -1432,7 +1432,7 @@ class ItemInfo:
         itemtype: EUMType | EUMUnit | None = None,
         unit: EUMUnit | None = None,
         data_value_type: Literal[
-            "Instantaneous", "Accumulated", "StepAccumulated", "MeanStepBackWard"
+            "Instantaneous", "Accumulated", "StepAccumulated", "MeanStepBackward"
         ] = "Instantaneous",
     ) -> None:
 

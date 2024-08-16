@@ -2047,15 +2047,16 @@ def _parse_items(
     elif isinstance(items, ItemInfo):
         eum_type = items.type
         eum_unit = items.unit
-        item_list = [ItemInfo(name, eum_type, eum_unit) for name in column_names]
+        eum_data_value_type = items.data_value_type
+        item_list = [ItemInfo(name, eum_type, eum_unit, eum_data_value_type) for name in column_names]
 
     elif isinstance(items, Mapping):
         item_list = [
-            ItemInfo(name, items[name].type, items[name].unit) for name in column_names
+            ItemInfo(name, items[name].type, items[name].unit, items[name].data_value_type) for name in column_names
         ]
     elif isinstance(items, Sequence):
         item_list = [
-            ItemInfo(col, item.type, item.unit)
+            ItemInfo(col, item.type, item.unit, item.data_value_type)
             for col, item in zip(column_names, items)
         ]
     else:

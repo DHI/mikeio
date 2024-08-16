@@ -3,6 +3,7 @@ import numpy as np
 import pandas as pd
 import mikeio
 from mikeio import Dfs0, EUMType, EUMUnit, ItemInfo
+from mikecore.DfsFile import DataValueType
 
 
 import pytest
@@ -274,23 +275,31 @@ def test_from_pandas_mapping_eum_types() -> None:
     time = pd.DatetimeIndex(["2001-01-01", "2001-01-01 01:00", "2001-01-01 01:10"])
 
     df = pd.DataFrame(
-        {"flow": np.array([1, np.nan, 2]), "level": np.array([2, 3.0, -1.3])}
+        {"flow": np.array([1, np.nan, 2]), "rain": np.array([2, 3.0, -1.3])}
     )
     df.index = time
 
     dfr = df.resample("5min").mean().fillna(0.0)  # .interpolate()
 
+    item_with_dvt = mikeio.ItemInfo(
+        itemtype=mikeio.EUMType.Rainfall,
+        unit=mikeio.EUMUnit.centimeter,
+        data_value_type="StepAccumulated",
+    )
     ds = mikeio.from_pandas(
         dfr,
         items={
             "flow": mikeio.ItemInfo(itemtype=mikeio.EUMType.Discharge),
-            "level": mikeio.ItemInfo(itemtype=mikeio.EUMType.Water_Level),
+            "rain": item_with_dvt,
         },
     )
+    item_with_dvt.name = "rain"
 
     assert ds.n_timesteps == 15
     assert ds[0].type == mikeio.EUMType.Discharge
-    assert ds[1].type == mikeio.EUMType.Water_Level
+    assert ds[1].type == mikeio.EUMType.Rainfall
+    assert ds[1].item is not item_with_dvt
+    assert ds[1].item == item_with_dvt
     assert len(ds) == 2
     assert ds.end_time == dfr.index[-1]
     assert ds.is_equidistant
@@ -304,10 +313,14 @@ def test_from_pandas_same_eum_type() -> None:
         index=pd.date_range("2001-01-01", periods=3, freq="H"),
     )
 
-    ds = mikeio.from_pandas(df, items=ItemInfo(EUMType.Water_Level))
+    ds = mikeio.from_pandas(
+        df,
+        items=ItemInfo(EUMType.Water_Level, data_value_type=DataValueType.Accumulated),
+    )
 
     assert ds.n_timesteps == 3
     assert ds[0].type == EUMType.Water_Level
+    assert ds[0].item.data_value_type == DataValueType.Accumulated
     assert ds["station_b"].item.name == "station_b"
 
 
@@ -325,13 +338,20 @@ def test_from_pandas_sequence_eum_types() -> None:
         dfr,
         items=[
             mikeio.ItemInfo("Ignored", itemtype=mikeio.EUMType.Discharge),
-            mikeio.ItemInfo("Also Ignored", itemtype=mikeio.EUMType.Water_Level),
+            mikeio.ItemInfo(
+                "Also Ignored",
+                itemtype=mikeio.EUMType.Water_Level,
+                unit=mikeio.EUMUnit.millimeter,
+                data_value_type=DataValueType.Accumulated,
+            ),
         ],
     )
 
     assert ds.n_timesteps == 15
     assert ds[0].type == mikeio.EUMType.Discharge
     assert ds[1].type == mikeio.EUMType.Water_Level
+    assert ds[1].item.unit == mikeio.EUMUnit.millimeter
+    assert ds[1].item.data_value_type == DataValueType.Accumulated
     assert ds["level"].item.name == "level"
 
 
