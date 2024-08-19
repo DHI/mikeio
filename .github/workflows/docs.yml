@@ -22,6 +22,11 @@ jobs:
     - name: Install mikeio
       run: |
         pip install .[dev]
+
+    - name: Install pinned version of Numpy
+      # Numpy 2.1 causes problems with shapely
+      run: |
+        pip install numpy==2.0.0
     
     - name: Build documentation
       run: |
