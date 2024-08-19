@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>grid1d – MIKE IO</title>
+<title>generic – MIKE IO</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -163,7 +163,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
         <i class="bi bi-layout-text-sidebar-reverse"></i>
       </button>
         <a class="flex-grow-1 no-decor" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
-          <h1 class="quarto-secondary-nav-title">Grid1D</h1>
+          <h1 class="quarto-secondary-nav-title"></h1>
         </a>     
       <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
         <i class="bi bi-search"></i>
@@ -339,13 +339,19 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     <h2 id="toc-title">On this page</h2>
    
   <ul>
-  <li><a href="#parameters" id="toc-parameters" class="nav-link active" data-scroll-target="#parameters">Parameters</a></li>
-  <li><a href="#examples" id="toc-examples" class="nav-link" data-scroll-target="#examples">Examples</a></li>
-  <li><a href="#attributes" id="toc-attributes" class="nav-link" data-scroll-target="#attributes">Attributes</a></li>
-  <li><a href="#methods" id="toc-methods" class="nav-link" data-scroll-target="#methods">Methods</a>
+  <li><a href="#mikeio.generic" id="toc-mikeio.generic" class="nav-link active" data-scroll-target="#mikeio.generic">generic</a>
   <ul class="collapse">
-  <li><a href="#mikeio.Grid1D.find_index" id="toc-mikeio.Grid1D.find_index" class="nav-link" data-scroll-target="#mikeio.Grid1D.find_index">find_index</a></li>
-  <li><a href="#mikeio.Grid1D.isel" id="toc-mikeio.Grid1D.isel" class="nav-link" data-scroll-target="#mikeio.Grid1D.isel">isel</a></li>
+  <li><a href="#functions" id="toc-functions" class="nav-link" data-scroll-target="#functions">Functions</a>
+  <ul class="collapse">
+  <li><a href="#mikeio.generic.avg_time" id="toc-mikeio.generic.avg_time" class="nav-link" data-scroll-target="#mikeio.generic.avg_time">avg_time</a></li>
+  <li><a href="#mikeio.generic.concat" id="toc-mikeio.generic.concat" class="nav-link" data-scroll-target="#mikeio.generic.concat">concat</a></li>
+  <li><a href="#mikeio.generic.diff" id="toc-mikeio.generic.diff" class="nav-link" data-scroll-target="#mikeio.generic.diff">diff</a></li>
+  <li><a href="#mikeio.generic.extract" id="toc-mikeio.generic.extract" class="nav-link" data-scroll-target="#mikeio.generic.extract">extract</a></li>
+  <li><a href="#mikeio.generic.fill_corrupt" id="toc-mikeio.generic.fill_corrupt" class="nav-link" data-scroll-target="#mikeio.generic.fill_corrupt">fill_corrupt</a></li>
+  <li><a href="#mikeio.generic.quantile" id="toc-mikeio.generic.quantile" class="nav-link" data-scroll-target="#mikeio.generic.quantile">quantile</a></li>
+  <li><a href="#mikeio.generic.scale" id="toc-mikeio.generic.scale" class="nav-link" data-scroll-target="#mikeio.generic.scale">scale</a></li>
+  <li><a href="#mikeio.generic.sum" id="toc-mikeio.generic.sum" class="nav-link" data-scroll-target="#mikeio.generic.sum">sum</a></li>
+  </ul></li>
   </ul></li>
   </ul>
 </nav>
@@ -353,35 +359,68 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <!-- main -->
 <main class="content" id="quarto-document-content">
 
-<header id="title-block-header" class="quarto-title-block default">
-<div class="quarto-title">
-<h1 class="title d-none d-lg-block">Grid1D</h1>
-</div>
 
 
 
-<div class="quarto-title-meta">
-
-    
-  
-    
-  </div>
-  
-
-
-</header>
-
-
-<p><code>Grid1D(self, x=None, *, x0=0.0, dx=None, nx=None, projection='NON-UTM', origin=(0.0, 0.0), orientation=0.0, node_coordinates=None, axis_name='x')</code></p>
-<p>1D grid (node-based) axis is increasing and equidistant</p>
-<section id="parameters" class="level2">
-<h2 class="anchored" data-anchor-id="parameters">Parameters</h2>
+<section id="mikeio.generic" class="level1">
+<h1>generic</h1>
+<p><code>generic</code></p>
+<section id="functions" class="level2">
+<h2 class="anchored" data-anchor-id="functions">Functions</h2>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Name</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><a href="#mikeio.generic.avg_time">avg_time</a></td>
+<td>Create a temporally averaged dfs file</td>
+</tr>
+<tr class="even">
+<td><a href="#mikeio.generic.concat">concat</a></td>
+<td>Concatenates files along the time axis</td>
+</tr>
+<tr class="odd">
+<td><a href="#mikeio.generic.diff">diff</a></td>
+<td>Calculate difference between two dfs files (a-b)</td>
+</tr>
+<tr class="even">
+<td><a href="#mikeio.generic.extract">extract</a></td>
+<td>Extract timesteps and/or items to a new dfs file</td>
+</tr>
+<tr class="odd">
+<td><a href="#mikeio.generic.fill_corrupt">fill_corrupt</a></td>
+<td>Replace corrupt (unreadable) data with fill_value, default delete value.</td>
+</tr>
+<tr class="even">
+<td><a href="#mikeio.generic.quantile">quantile</a></td>
+<td>Create temporal quantiles of all items in dfs file</td>
+</tr>
+<tr class="odd">
+<td><a href="#mikeio.generic.scale">scale</a></td>
+<td>Apply scaling to any dfs file</td>
+</tr>
+<tr class="even">
+<td><a href="#mikeio.generic.sum">sum</a></td>
+<td>Sum two dfs files (a+b)</td>
+</tr>
+</tbody>
+</table>
+<section id="mikeio.generic.avg_time" class="level3">
+<h3 class="anchored" data-anchor-id="mikeio.generic.avg_time">avg_time</h3>
+<p><code>generic.avg_time(infilename, outfilename, skipna=True)</code></p>
+<p>Create a temporally averaged dfs file</p>
+<section id="parameters" class="level4">
+<h4 class="anchored" data-anchor-id="parameters">Parameters</h4>
 <table class="caption-top table">
 <colgroup>
-<col style="width: 23%">
 <col style="width: 13%">
-<col style="width: 46%">
-<col style="width: 16%">
+<col style="width: 18%">
+<col style="width: 58%">
+<col style="width: 10%">
 </colgroup>
 <thead>
 <tr class="header">
@@ -393,148 +432,41 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </thead>
 <tbody>
 <tr class="odd">
-<td><code>x</code></td>
-<td>array_like</td>
-<td>node coordinates</td>
-<td><code>None</code></td>
+<td><code>infilename</code></td>
+<td>str | pathlib.Path</td>
+<td>input filename</td>
+<td><em>required</em></td>
 </tr>
 <tr class="even">
-<td><code>x0</code></td>
-<td>float</td>
-<td>first node coordinate</td>
-<td><code>0.0</code></td>
+<td><code>outfilename</code></td>
+<td>str | pathlib.Path</td>
+<td>output filename</td>
+<td><em>required</em></td>
 </tr>
 <tr class="odd">
-<td><code>dx</code></td>
-<td>float</td>
-<td>grid spacing</td>
-<td><code>None</code></td>
-</tr>
-<tr class="even">
-<td><code>nx</code></td>
-<td>int</td>
-<td>number of nodes</td>
-<td><code>None</code></td>
-</tr>
-<tr class="odd">
-<td><code>projection</code></td>
-<td>str</td>
-<td>projection string</td>
-<td><code>'NON-UTM'</code></td>
-</tr>
-<tr class="even">
-<td><code>origin</code></td>
-<td>tuple</td>
-<td>not commonly used</td>
-<td><code>(0.0, 0.0)</code></td>
-</tr>
-<tr class="odd">
-<td><code>orientation</code></td>
-<td>float</td>
-<td>not commonly used</td>
-<td><code>0.0</code></td>
-</tr>
-<tr class="even">
-<td><code>node_coordinates</code></td>
-<td>array_like</td>
-<td>coordinates of nodes in 2D or 3D space</td>
-<td><code>None</code></td>
-</tr>
-<tr class="odd">
-<td><code>axis_name</code></td>
-<td>str</td>
-<td>name of axis, by default “x”</td>
-<td><code>'x'</code></td>
+<td><code>skipna</code></td>
+<td>bool</td>
+<td>exclude NaN/delete values when computing the result, default True</td>
+<td><code>True</code></td>
 </tr>
 </tbody>
 </table>
 </section>
-<section id="examples" class="level2">
-<h2 class="anchored" data-anchor-id="examples">Examples</h2>
-<div id="9e08427e" class="cell" data-execution_count="1">
-<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> mikeio</span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>mikeio.Grid1D(nx<span class="op">=</span><span class="dv">3</span>,dx<span class="op">=</span><span class="fl">0.1</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display" data-execution_count="1">
-<pre><code>&lt;mikeio.Grid1D&gt;
-x: [0, 0.1, 0.2] (nx=3, dx=0.1)</code></pre>
-</div>
-</div>
-<div id="7acf3d7e" class="cell" data-execution_count="2">
-<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>mikeio.Grid1D(x<span class="op">=</span>[<span class="fl">0.1</span>, <span class="fl">0.5</span>, <span class="fl">0.9</span>])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display" data-execution_count="2">
-<pre><code>&lt;mikeio.Grid1D&gt;
-x: [0.1, 0.5, 0.9] (nx=3, dx=0.4)</code></pre>
-</div>
-</div>
 </section>
-<section id="attributes" class="level2">
-<h2 class="anchored" data-anchor-id="attributes">Attributes</h2>
-<table class="caption-top table">
-<thead>
-<tr class="header">
-<th>Name</th>
-<th>Description</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td><a href="#mikeio.Grid1D.dx">dx</a></td>
-<td>grid spacing</td>
-</tr>
-<tr class="even">
-<td><a href="#mikeio.Grid1D.is_geo">is_geo</a></td>
-<td>Are coordinates geographical (LONG/LAT)?</td>
-</tr>
-<tr class="odd">
-<td><a href="#mikeio.Grid1D.is_local_coordinates">is_local_coordinates</a></td>
-<td>Are coordinates relative (NON-UTM)?</td>
-</tr>
-<tr class="even">
-<td><a href="#mikeio.Grid1D.nx">nx</a></td>
-<td>number of grid points</td>
-</tr>
-<tr class="odd">
-<td><a href="#mikeio.Grid1D.projection">projection</a></td>
-<td>The projection</td>
-</tr>
-<tr class="even">
-<td><a href="#mikeio.Grid1D.projection_string">projection_string</a></td>
-<td>The projection string</td>
-</tr>
-<tr class="odd">
-<td><a href="#mikeio.Grid1D.x">x</a></td>
-<td>array of node coordinates</td>
-</tr>
-</tbody>
-</table>
-</section>
-<section id="methods" class="level2">
-<h2 class="anchored" data-anchor-id="methods">Methods</h2>
-<table class="caption-top table">
-<thead>
-<tr class="header">
-<th>Name</th>
-<th>Description</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td><a href="#mikeio.Grid1D.find_index">find_index</a></td>
-<td>Find nearest point</td>
-</tr>
-<tr class="even">
-<td><a href="#mikeio.Grid1D.isel">isel</a></td>
-<td>Get a subset geometry from this geometry</td>
-</tr>
-</tbody>
-</table>
-<section id="mikeio.Grid1D.find_index" class="level3">
-<h3 class="anchored" data-anchor-id="mikeio.Grid1D.find_index">find_index</h3>
-<p><code>Grid1D.find_index(x, **kwargs)</code></p>
-<p>Find nearest point</p>
+<section id="mikeio.generic.concat" class="level3">
+<h3 class="anchored" data-anchor-id="mikeio.generic.concat">concat</h3>
+<p><code>generic.concat(infilenames, outfilename, keep='last')</code></p>
+<p>Concatenates files along the time axis</p>
+<p>Overlap handling is defined by the <code>keep</code> argument, by default the last one will be used.</p>
 <section id="parameters-1" class="level4">
 <h4 class="anchored" data-anchor-id="parameters-1">Parameters</h4>
 <table class="caption-top table">
+<colgroup>
+<col style="width: 9%">
+<col style="width: 20%">
+<col style="width: 62%">
+<col style="width: 7%">
+</colgroup>
 <thead>
 <tr class="header">
 <th>Name</th>
@@ -545,52 +477,43 @@ x: [0.1, 0.5, 0.9] (nx=3, dx=0.4)</code></pre>
 </thead>
 <tbody>
 <tr class="odd">
-<td><code>x</code></td>
-<td>float</td>
-<td>x-coordinate of point</td>
+<td><code>infilenames</code></td>
+<td>Sequence[str | pathlib.Path]</td>
+<td>filenames to concatenate</td>
 <td><em>required</em></td>
 </tr>
-</tbody>
-</table>
-</section>
-<section id="returns" class="level4">
-<h4 class="anchored" data-anchor-id="returns">Returns</h4>
-<table class="caption-top table">
-<thead>
-<tr class="header">
-<th>Type</th>
-<th>Description</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td>int</td>
-<td>index of nearest point</td>
-</tr>
 <tr class="even">
-<td>Any</td>
-<td>Not used</td>
+<td><code>outfilename</code></td>
+<td>str | pathlib.Path</td>
+<td>filename of output</td>
+<td><em>required</em></td>
+</tr>
+<tr class="odd">
+<td><code>keep</code></td>
+<td>str</td>
+<td>either ‘first’ (keep older), ‘last’ (keep newer) or ‘average’ can be selected. By default ‘last’</td>
+<td><code>'last'</code></td>
 </tr>
 </tbody>
 </table>
 </section>
-<section id="see-also" class="level4">
-<h4 class="anchored" data-anchor-id="see-also">See Also</h4>
-<p><a href="../api/Dataset.html#mikeio.Dataset.sel"><code>mikeio.Dataset.sel</code></a></p>
+<section id="notes" class="level4">
+<h4 class="anchored" data-anchor-id="notes">Notes</h4>
+<p>The list of input files have to be sorted, i.e.&nbsp;in chronological order</p>
 </section>
 </section>
-<section id="mikeio.Grid1D.isel" class="level3">
-<h3 class="anchored" data-anchor-id="mikeio.Grid1D.isel">isel</h3>
-<p><code>Grid1D.isel(idx, axis=None)</code></p>
-<p>Get a subset geometry from this geometry</p>
+<section id="mikeio.generic.diff" class="level3">
+<h3 class="anchored" data-anchor-id="mikeio.generic.diff">diff</h3>
+<p><code>generic.diff(infilename_a, infilename_b, outfilename)</code></p>
+<p>Calculate difference between two dfs files (a-b)</p>
 <section id="parameters-2" class="level4">
 <h4 class="anchored" data-anchor-id="parameters-2">Parameters</h4>
 <table class="caption-top table">
 <colgroup>
-<col style="width: 11%">
-<col style="width: 19%">
-<col style="width: 52%">
-<col style="width: 16%">
+<col style="width: 18%">
+<col style="width: 24%">
+<col style="width: 42%">
+<col style="width: 14%">
 </colgroup>
 <thead>
 <tr class="header">
@@ -602,67 +525,318 @@ x: [0.1, 0.5, 0.9] (nx=3, dx=0.4)</code></pre>
 </thead>
 <tbody>
 <tr class="odd">
-<td><code>idx</code></td>
-<td>int or slice</td>
-<td>index or slice</td>
+<td><code>infilename_a</code></td>
+<td>str | pathlib.Path</td>
+<td>full path to the first input file</td>
 <td><em>required</em></td>
 </tr>
 <tr class="even">
-<td><code>axis</code></td>
+<td><code>infilename_b</code></td>
+<td>str | pathlib.Path</td>
+<td>full path to the second input file</td>
+<td><em>required</em></td>
+</tr>
+<tr class="odd">
+<td><code>outfilename</code></td>
+<td>str | pathlib.Path</td>
+<td>full path to the output file</td>
+<td><em>required</em></td>
+</tr>
+</tbody>
+</table>
+</section>
+</section>
+<section id="mikeio.generic.extract" class="level3">
+<h3 class="anchored" data-anchor-id="mikeio.generic.extract">extract</h3>
+<p><code>generic.extract(infilename, outfilename, start=0, end=-1, step=1, items=None)</code></p>
+<p>Extract timesteps and/or items to a new dfs file</p>
+<section id="parameters-3" class="level4">
+<h4 class="anchored" data-anchor-id="parameters-3">Parameters</h4>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 9%">
+<col style="width: 21%">
+<col style="width: 62%">
+<col style="width: 7%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Name</th>
+<th>Type</th>
+<th>Description</th>
+<th>Default</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>infilename</code></td>
+<td>str | pathlib.Path</td>
+<td>path to input dfs file</td>
+<td><em>required</em></td>
+</tr>
+<tr class="even">
+<td><code>outfilename</code></td>
+<td>str | pathlib.Path</td>
+<td>path to output dfs file</td>
+<td><em>required</em></td>
+</tr>
+<tr class="odd">
+<td><code>start</code></td>
+<td>(int, float, str or datetime)</td>
+<td>start of extraction as either step, relative seconds or datetime/str, by default 0 (start of file)</td>
+<td><code>0</code></td>
+</tr>
+<tr class="even">
+<td><code>end</code></td>
+<td>(int, float, str or datetime)</td>
+<td>end of extraction as either step, relative seconds or datetime/str, by default -1 (end of file)</td>
+<td><code>-1</code></td>
+</tr>
+<tr class="odd">
+<td><code>step</code></td>
 <td>int</td>
-<td>Not used for Grid1D, by default None</td>
+<td>jump this many step, by default 1 (every step between start and end)</td>
+<td><code>1</code></td>
+</tr>
+<tr class="even">
+<td><code>items</code></td>
+<td>(int, list(int), str, list(str))</td>
+<td>items to be extracted to new file</td>
 <td><code>None</code></td>
 </tr>
 </tbody>
 </table>
 </section>
-<section id="returns-1" class="level4">
-<h4 class="anchored" data-anchor-id="returns-1">Returns</h4>
+<section id="examples" class="level4">
+<h4 class="anchored" data-anchor-id="examples">Examples</h4>
+<div class="sourceCode" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> extract(<span class="st">'f_in.dfs0'</span>, <span class="st">'f_out.dfs0'</span>, start<span class="op">=</span><span class="st">'2018-1-1'</span>)</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> extract(<span class="st">'f_in.dfs2'</span>, <span class="st">'f_out.dfs2'</span>, end<span class="op">=-</span><span class="dv">3</span>)</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> extract(<span class="st">'f_in.dfsu'</span>, <span class="st">'f_out.dfsu'</span>, start<span class="op">=</span><span class="fl">1800.0</span>, end<span class="op">=</span><span class="fl">3600.0</span>)</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> extract(<span class="st">'f_hourly.dfsu'</span>, <span class="st">'f_daily.dfsu'</span>, step<span class="op">=</span><span class="dv">24</span>)</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> extract(<span class="st">'f_in.dfsu'</span>, <span class="st">'f_out.dfsu'</span>, items<span class="op">=</span>[<span class="dv">2</span>, <span class="dv">0</span>])</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> extract(<span class="st">'f_in.dfsu'</span>, <span class="st">'f_out.dfsu'</span>, items<span class="op">=</span><span class="st">"Salinity"</span>)</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> extract(<span class="st">'f_in.dfsu'</span>, <span class="st">'f_out.dfsu'</span>, end<span class="op">=</span><span class="st">'2018-2-1 00:00'</span>, items<span class="op">=</span><span class="st">"Salinity"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+</section>
+<section id="mikeio.generic.fill_corrupt" class="level3">
+<h3 class="anchored" data-anchor-id="mikeio.generic.fill_corrupt">fill_corrupt</h3>
+<p><code>generic.fill_corrupt(infilename, outfilename, fill_value=np.nan, items=None)</code></p>
+<p>Replace corrupt (unreadable) data with fill_value, default delete value.</p>
+<section id="parameters-4" class="level4">
+<h4 class="anchored" data-anchor-id="parameters-4">Parameters</h4>
 <table class="caption-top table">
 <colgroup>
-<col style="width: 61%">
-<col style="width: 38%">
+<col style="width: 11%">
+<col style="width: 23%">
+<col style="width: 55%">
+<col style="width: 8%">
 </colgroup>
 <thead>
 <tr class="header">
+<th>Name</th>
 <th>Type</th>
 <th>Description</th>
+<th>Default</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
-<td>GeometryPoint2D or GeometryPoint3D or GeometryUndefined</td>
-<td>The geometry of the selected point</td>
+<td><code>infilename</code></td>
+<td>str | pathlib.Path</td>
+<td>full path to the input file</td>
+<td><em>required</em></td>
+</tr>
+<tr class="even">
+<td><code>outfilename</code></td>
+<td>str | pathlib.Path</td>
+<td>full path to the output file</td>
+<td><em>required</em></td>
+</tr>
+<tr class="odd">
+<td><code>fill_value</code></td>
+<td>float</td>
+<td>value to use where data is corrupt, default delete value</td>
+<td><code>np.nan</code></td>
+</tr>
+<tr class="even">
+<td><code>items</code></td>
+<td>Sequence[str | int] | None</td>
+<td>Process only selected items, by number (0-based) or name, by default: all</td>
+<td><code>None</code></td>
+</tr>
+</tbody>
+</table>
+</section>
+</section>
+<section id="mikeio.generic.quantile" class="level3">
+<h3 class="anchored" data-anchor-id="mikeio.generic.quantile">quantile</h3>
+<p><code>generic.quantile(infilename, outfilename, q, *, items=None, skipna=True, buffer_size=1000000000.0)</code></p>
+<p>Create temporal quantiles of all items in dfs file</p>
+<section id="parameters-5" class="level4">
+<h4 class="anchored" data-anchor-id="parameters-5">Parameters</h4>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 6%">
+<col style="width: 12%">
+<col style="width: 74%">
+<col style="width: 6%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Name</th>
+<th>Type</th>
+<th>Description</th>
+<th>Default</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>infilename</code></td>
+<td>str | pathlib.Path</td>
+<td>input filename</td>
+<td><em>required</em></td>
+</tr>
+<tr class="even">
+<td><code>outfilename</code></td>
+<td>str | pathlib.Path</td>
+<td>output filename</td>
+<td><em>required</em></td>
+</tr>
+<tr class="odd">
+<td><code>q</code></td>
+<td>float | Sequence[float]</td>
+<td>Quantile or sequence of quantiles to compute, which must be between 0 and 1 inclusive.</td>
+<td><em>required</em></td>
+</tr>
+<tr class="even">
+<td><code>items</code></td>
+<td>Sequence[int | str] | None</td>
+<td>Process only selected items, by number (0-based) or name, by default: all</td>
+<td><code>None</code></td>
+</tr>
+<tr class="odd">
+<td><code>skipna</code></td>
+<td>bool</td>
+<td>exclude NaN/delete values when computing the result, default True</td>
+<td><code>True</code></td>
+</tr>
+<tr class="even">
+<td><code>buffer_size</code></td>
+<td>float</td>
+<td>for huge files the quantiles need to be calculated for chunks of elements. buffer_size gives the maximum amount of memory available for the computation in bytes, by default 1e9 (=1GB)</td>
+<td><code>1000000000.0</code></td>
 </tr>
 </tbody>
 </table>
 </section>
 <section id="examples-1" class="level4">
 <h4 class="anchored" data-anchor-id="examples-1">Examples</h4>
-<div id="4f95b3c2" class="cell" data-execution_count="3">
-<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> mikeio</span>
-<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>g <span class="op">=</span> mikeio.Grid1D(nx<span class="op">=</span><span class="dv">3</span>,dx<span class="op">=</span><span class="fl">0.1</span>)</span>
-<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>g</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display" data-execution_count="3">
-<pre><code>&lt;mikeio.Grid1D&gt;
-x: [0, 0.1, 0.2] (nx=3, dx=0.1)</code></pre>
-</div>
-</div>
-<div id="70a3ee30" class="cell" data-execution_count="4">
-<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>g.isel([<span class="dv">1</span>,<span class="dv">2</span>])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display" data-execution_count="4">
-<pre><code>&lt;mikeio.Grid1D&gt;
-x: [0.1, 0.2] (nx=2, dx=0.1)</code></pre>
-</div>
-</div>
-<div id="271a2a27" class="cell" data-execution_count="5">
-<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>g.isel(<span class="dv">1</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display" data-execution_count="5">
-<pre><code>GeometryUndefined()</code></pre>
-</div>
-</div>
+<div class="sourceCode" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> quantile(<span class="st">"in.dfsu"</span>, <span class="st">"IQR.dfsu"</span>, q<span class="op">=</span>[<span class="fl">0.25</span>,<span class="fl">0.75</span>])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> quantile(<span class="st">"huge.dfsu"</span>, <span class="st">"Q01.dfsu"</span>, q<span class="op">=</span><span class="fl">0.1</span>, buffer_size<span class="op">=</span><span class="fl">5.0e9</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> quantile(<span class="st">"with_nans.dfsu"</span>, <span class="st">"Q05.dfsu"</span>, q<span class="op">=</span><span class="fl">0.5</span>, skipna<span class="op">=</span><span class="va">False</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+</section>
+<section id="mikeio.generic.scale" class="level3">
+<h3 class="anchored" data-anchor-id="mikeio.generic.scale">scale</h3>
+<p><code>generic.scale(infilename, outfilename, offset=0.0, factor=1.0, items=None)</code></p>
+<p>Apply scaling to any dfs file</p>
+<section id="parameters-6" class="level4">
+<h4 class="anchored" data-anchor-id="parameters-6">Parameters</h4>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 11%">
+<col style="width: 23%">
+<col style="width: 55%">
+<col style="width: 8%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Name</th>
+<th>Type</th>
+<th>Description</th>
+<th>Default</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>infilename</code></td>
+<td>str | pathlib.Path</td>
+<td>full path to the input file</td>
+<td><em>required</em></td>
+</tr>
+<tr class="even">
+<td><code>outfilename</code></td>
+<td>str | pathlib.Path</td>
+<td>full path to the output file</td>
+<td><em>required</em></td>
+</tr>
+<tr class="odd">
+<td><code>offset</code></td>
+<td>float</td>
+<td>value to add to all items, default 0.0</td>
+<td><code>0.0</code></td>
+</tr>
+<tr class="even">
+<td><code>factor</code></td>
+<td>float</td>
+<td>value to multiply to all items, default 1.0</td>
+<td><code>1.0</code></td>
+</tr>
+<tr class="odd">
+<td><code>items</code></td>
+<td>Sequence[int | str] | None</td>
+<td>Process only selected items, by number (0-based) or name, by default: all</td>
+<td><code>None</code></td>
+</tr>
+</tbody>
+</table>
+</section>
+</section>
+<section id="mikeio.generic.sum" class="level3">
+<h3 class="anchored" data-anchor-id="mikeio.generic.sum">sum</h3>
+<p><code>generic.sum(infilename_a, infilename_b, outfilename)</code></p>
+<p>Sum two dfs files (a+b)</p>
+<section id="parameters-7" class="level4">
+<h4 class="anchored" data-anchor-id="parameters-7">Parameters</h4>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 18%">
+<col style="width: 24%">
+<col style="width: 42%">
+<col style="width: 14%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Name</th>
+<th>Type</th>
+<th>Description</th>
+<th>Default</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>infilename_a</code></td>
+<td>str | pathlib.Path</td>
+<td>full path to the first input file</td>
+<td><em>required</em></td>
+</tr>
+<tr class="even">
+<td><code>infilename_b</code></td>
+<td>str | pathlib.Path</td>
+<td>full path to the second input file</td>
+<td><em>required</em></td>
+</tr>
+<tr class="odd">
+<td><code>outfilename</code></td>
+<td>str | pathlib.Path</td>
+<td>full path to the output file</td>
+<td><em>required</em></td>
+</tr>
+</tbody>
+</table>
 
 
+</section>
 </section>
 </section>
 </section>

@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>grid1d – MIKE IO</title>
+<title>spatial.geometryfmareaspectrum – MIKE IO</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -163,7 +163,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
         <i class="bi bi-layout-text-sidebar-reverse"></i>
       </button>
         <a class="flex-grow-1 no-decor" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
-          <h1 class="quarto-secondary-nav-title">Grid1D</h1>
+          <h1 class="quarto-secondary-nav-title"></h1>
         </a>     
       <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
         <i class="bi bi-search"></i>
@@ -339,13 +339,23 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     <h2 id="toc-title">On this page</h2>
    
   <ul>
-  <li><a href="#parameters" id="toc-parameters" class="nav-link active" data-scroll-target="#parameters">Parameters</a></li>
-  <li><a href="#examples" id="toc-examples" class="nav-link" data-scroll-target="#examples">Examples</a></li>
+  <li><a href="#mikeio.spatial.GeometryFMAreaSpectrum" id="toc-mikeio.spatial.GeometryFMAreaSpectrum" class="nav-link active" data-scroll-target="#mikeio.spatial.GeometryFMAreaSpectrum">spatial.GeometryFMAreaSpectrum</a>
+  <ul class="collapse">
   <li><a href="#attributes" id="toc-attributes" class="nav-link" data-scroll-target="#attributes">Attributes</a></li>
   <li><a href="#methods" id="toc-methods" class="nav-link" data-scroll-target="#methods">Methods</a>
   <ul class="collapse">
-  <li><a href="#mikeio.Grid1D.find_index" id="toc-mikeio.Grid1D.find_index" class="nav-link" data-scroll-target="#mikeio.Grid1D.find_index">find_index</a></li>
-  <li><a href="#mikeio.Grid1D.isel" id="toc-mikeio.Grid1D.isel" class="nav-link" data-scroll-target="#mikeio.Grid1D.isel">isel</a></li>
+  <li><a href="#mikeio.spatial.GeometryFMAreaSpectrum.contains" id="toc-mikeio.spatial.GeometryFMAreaSpectrum.contains" class="nav-link" data-scroll-target="#mikeio.spatial.GeometryFMAreaSpectrum.contains">contains</a></li>
+  <li><a href="#mikeio.spatial.GeometryFMAreaSpectrum.elements_to_geometry" id="toc-mikeio.spatial.GeometryFMAreaSpectrum.elements_to_geometry" class="nav-link" data-scroll-target="#mikeio.spatial.GeometryFMAreaSpectrum.elements_to_geometry">elements_to_geometry</a></li>
+  <li><a href="#mikeio.spatial.GeometryFMAreaSpectrum.find_index" id="toc-mikeio.spatial.GeometryFMAreaSpectrum.find_index" class="nav-link" data-scroll-target="#mikeio.spatial.GeometryFMAreaSpectrum.find_index">find_index</a></li>
+  <li><a href="#mikeio.spatial.GeometryFMAreaSpectrum.find_nearest_elements" id="toc-mikeio.spatial.GeometryFMAreaSpectrum.find_nearest_elements" class="nav-link" data-scroll-target="#mikeio.spatial.GeometryFMAreaSpectrum.find_nearest_elements">find_nearest_elements</a></li>
+  <li><a href="#mikeio.spatial.GeometryFMAreaSpectrum.get_2d_interpolant" id="toc-mikeio.spatial.GeometryFMAreaSpectrum.get_2d_interpolant" class="nav-link" data-scroll-target="#mikeio.spatial.GeometryFMAreaSpectrum.get_2d_interpolant">get_2d_interpolant</a></li>
+  <li><a href="#mikeio.spatial.GeometryFMAreaSpectrum.get_element_area" id="toc-mikeio.spatial.GeometryFMAreaSpectrum.get_element_area" class="nav-link" data-scroll-target="#mikeio.spatial.GeometryFMAreaSpectrum.get_element_area">get_element_area</a></li>
+  <li><a href="#mikeio.spatial.GeometryFMAreaSpectrum.get_node_centered_data" id="toc-mikeio.spatial.GeometryFMAreaSpectrum.get_node_centered_data" class="nav-link" data-scroll-target="#mikeio.spatial.GeometryFMAreaSpectrum.get_node_centered_data">get_node_centered_data</a></li>
+  <li><a href="#mikeio.spatial.GeometryFMAreaSpectrum.get_overset_grid" id="toc-mikeio.spatial.GeometryFMAreaSpectrum.get_overset_grid" class="nav-link" data-scroll-target="#mikeio.spatial.GeometryFMAreaSpectrum.get_overset_grid">get_overset_grid</a></li>
+  <li><a href="#mikeio.spatial.GeometryFMAreaSpectrum.interp2d" id="toc-mikeio.spatial.GeometryFMAreaSpectrum.interp2d" class="nav-link" data-scroll-target="#mikeio.spatial.GeometryFMAreaSpectrum.interp2d">interp2d</a></li>
+  <li><a href="#mikeio.spatial.GeometryFMAreaSpectrum.to_mesh" id="toc-mikeio.spatial.GeometryFMAreaSpectrum.to_mesh" class="nav-link" data-scroll-target="#mikeio.spatial.GeometryFMAreaSpectrum.to_mesh">to_mesh</a></li>
+  <li><a href="#mikeio.spatial.GeometryFMAreaSpectrum.to_shapely" id="toc-mikeio.spatial.GeometryFMAreaSpectrum.to_shapely" class="nav-link" data-scroll-target="#mikeio.spatial.GeometryFMAreaSpectrum.to_shapely">to_shapely</a></li>
+  </ul></li>
   </ul></li>
   </ul>
 </nav>
@@ -353,120 +363,12 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <!-- main -->
 <main class="content" id="quarto-document-content">
 
-<header id="title-block-header" class="quarto-title-block default">
-<div class="quarto-title">
-<h1 class="title d-none d-lg-block">Grid1D</h1>
-</div>
 
 
 
-<div class="quarto-title-meta">
-
-    
-  
-    
-  </div>
-  
-
-
-</header>
-
-
-<p><code>Grid1D(self, x=None, *, x0=0.0, dx=None, nx=None, projection='NON-UTM', origin=(0.0, 0.0), orientation=0.0, node_coordinates=None, axis_name='x')</code></p>
-<p>1D grid (node-based) axis is increasing and equidistant</p>
-<section id="parameters" class="level2">
-<h2 class="anchored" data-anchor-id="parameters">Parameters</h2>
-<table class="caption-top table">
-<colgroup>
-<col style="width: 23%">
-<col style="width: 13%">
-<col style="width: 46%">
-<col style="width: 16%">
-</colgroup>
-<thead>
-<tr class="header">
-<th>Name</th>
-<th>Type</th>
-<th>Description</th>
-<th>Default</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td><code>x</code></td>
-<td>array_like</td>
-<td>node coordinates</td>
-<td><code>None</code></td>
-</tr>
-<tr class="even">
-<td><code>x0</code></td>
-<td>float</td>
-<td>first node coordinate</td>
-<td><code>0.0</code></td>
-</tr>
-<tr class="odd">
-<td><code>dx</code></td>
-<td>float</td>
-<td>grid spacing</td>
-<td><code>None</code></td>
-</tr>
-<tr class="even">
-<td><code>nx</code></td>
-<td>int</td>
-<td>number of nodes</td>
-<td><code>None</code></td>
-</tr>
-<tr class="odd">
-<td><code>projection</code></td>
-<td>str</td>
-<td>projection string</td>
-<td><code>'NON-UTM'</code></td>
-</tr>
-<tr class="even">
-<td><code>origin</code></td>
-<td>tuple</td>
-<td>not commonly used</td>
-<td><code>(0.0, 0.0)</code></td>
-</tr>
-<tr class="odd">
-<td><code>orientation</code></td>
-<td>float</td>
-<td>not commonly used</td>
-<td><code>0.0</code></td>
-</tr>
-<tr class="even">
-<td><code>node_coordinates</code></td>
-<td>array_like</td>
-<td>coordinates of nodes in 2D or 3D space</td>
-<td><code>None</code></td>
-</tr>
-<tr class="odd">
-<td><code>axis_name</code></td>
-<td>str</td>
-<td>name of axis, by default “x”</td>
-<td><code>'x'</code></td>
-</tr>
-</tbody>
-</table>
-</section>
-<section id="examples" class="level2">
-<h2 class="anchored" data-anchor-id="examples">Examples</h2>
-<div id="9e08427e" class="cell" data-execution_count="1">
-<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> mikeio</span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>mikeio.Grid1D(nx<span class="op">=</span><span class="dv">3</span>,dx<span class="op">=</span><span class="fl">0.1</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display" data-execution_count="1">
-<pre><code>&lt;mikeio.Grid1D&gt;
-x: [0, 0.1, 0.2] (nx=3, dx=0.1)</code></pre>
-</div>
-</div>
-<div id="7acf3d7e" class="cell" data-execution_count="2">
-<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>mikeio.Grid1D(x<span class="op">=</span>[<span class="fl">0.1</span>, <span class="fl">0.5</span>, <span class="fl">0.9</span>])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display" data-execution_count="2">
-<pre><code>&lt;mikeio.Grid1D&gt;
-x: [0.1, 0.5, 0.9] (nx=3, dx=0.4)</code></pre>
-</div>
-</div>
-</section>
+<section id="mikeio.spatial.GeometryFMAreaSpectrum" class="level1">
+<h1>spatial.GeometryFMAreaSpectrum</h1>
+<p><code>spatial.GeometryFMAreaSpectrum(self, node_coordinates, element_table, codes=None, projection='LONG/LAT', dfsu_type=None, element_ids=None, node_ids=None, validate=True, frequencies=None, directions=None, reindex=False)</code></p>
 <section id="attributes" class="level2">
 <h2 class="anchored" data-anchor-id="attributes">Attributes</h2>
 <table class="caption-top table">
@@ -478,32 +380,88 @@ x: [0.1, 0.5, 0.9] (nx=3, dx=0.4)</code></pre>
 </thead>
 <tbody>
 <tr class="odd">
-<td><a href="#mikeio.Grid1D.dx">dx</a></td>
-<td>grid spacing</td>
+<td><a href="#mikeio.spatial.GeometryFMAreaSpectrum.boundary_codes">boundary_codes</a></td>
+<td>Unique list of boundary codes</td>
 </tr>
 <tr class="even">
-<td><a href="#mikeio.Grid1D.is_geo">is_geo</a></td>
-<td>Are coordinates geographical (LONG/LAT)?</td>
+<td><a href="#mikeio.spatial.GeometryFMAreaSpectrum.boundary_polylines">boundary_polylines</a></td>
+<td>Lists of closed polylines defining domain outline</td>
 </tr>
 <tr class="odd">
-<td><a href="#mikeio.Grid1D.is_local_coordinates">is_local_coordinates</a></td>
+<td><a href="#mikeio.spatial.GeometryFMAreaSpectrum.codes">codes</a></td>
+<td>Node codes of all nodes (0=water, 1=land, 2…=open boundaries)</td>
+</tr>
+<tr class="even">
+<td><a href="#mikeio.spatial.GeometryFMAreaSpectrum.directions">directions</a></td>
+<td>Directional axis</td>
+</tr>
+<tr class="odd">
+<td><a href="#mikeio.spatial.GeometryFMAreaSpectrum.element_coordinates">element_coordinates</a></td>
+<td>Center coordinates of each element</td>
+</tr>
+<tr class="even">
+<td><a href="#mikeio.spatial.GeometryFMAreaSpectrum.frequencies">frequencies</a></td>
+<td>Frequency axis</td>
+</tr>
+<tr class="odd">
+<td><a href="#mikeio.spatial.GeometryFMAreaSpectrum.geometry2d">geometry2d</a></td>
+<td>Return self</td>
+</tr>
+<tr class="even">
+<td><a href="#mikeio.spatial.GeometryFMAreaSpectrum.is_2d">is_2d</a></td>
+<td>Type is either mesh or Dfsu2D (2 horizontal dimensions)</td>
+</tr>
+<tr class="odd">
+<td><a href="#mikeio.spatial.GeometryFMAreaSpectrum.is_geo">is_geo</a></td>
+<td>Are coordinates geographical (LONG/LAT)?</td>
+</tr>
+<tr class="even">
+<td><a href="#mikeio.spatial.GeometryFMAreaSpectrum.is_layered">is_layered</a></td>
+<td>Type is layered dfsu (3d, vertical profile or vertical column)</td>
+</tr>
+<tr class="odd">
+<td><a href="#mikeio.spatial.GeometryFMAreaSpectrum.is_local_coordinates">is_local_coordinates</a></td>
 <td>Are coordinates relative (NON-UTM)?</td>
 </tr>
 <tr class="even">
-<td><a href="#mikeio.Grid1D.nx">nx</a></td>
-<td>number of grid points</td>
+<td><a href="#mikeio.spatial.GeometryFMAreaSpectrum.is_spectral">is_spectral</a></td>
+<td>Type is spectral dfsu (point, line or area spectrum)</td>
 </tr>
 <tr class="odd">
-<td><a href="#mikeio.Grid1D.projection">projection</a></td>
+<td><a href="#mikeio.spatial.GeometryFMAreaSpectrum.is_tri_only">is_tri_only</a></td>
+<td>Does the mesh consist of triangles only?</td>
+</tr>
+<tr class="even">
+<td><a href="#mikeio.spatial.GeometryFMAreaSpectrum.max_nodes_per_element">max_nodes_per_element</a></td>
+<td>The maximum number of nodes for an element</td>
+</tr>
+<tr class="odd">
+<td><a href="#mikeio.spatial.GeometryFMAreaSpectrum.n_directions">n_directions</a></td>
+<td>Number of directions</td>
+</tr>
+<tr class="even">
+<td><a href="#mikeio.spatial.GeometryFMAreaSpectrum.n_elements">n_elements</a></td>
+<td>Number of elements</td>
+</tr>
+<tr class="odd">
+<td><a href="#mikeio.spatial.GeometryFMAreaSpectrum.n_frequencies">n_frequencies</a></td>
+<td>Number of frequencies</td>
+</tr>
+<tr class="even">
+<td><a href="#mikeio.spatial.GeometryFMAreaSpectrum.n_nodes">n_nodes</a></td>
+<td>Number of nodes</td>
+</tr>
+<tr class="odd">
+<td><a href="#mikeio.spatial.GeometryFMAreaSpectrum.projection">projection</a></td>
 <td>The projection</td>
 </tr>
 <tr class="even">
-<td><a href="#mikeio.Grid1D.projection_string">projection_string</a></td>
+<td><a href="#mikeio.spatial.GeometryFMAreaSpectrum.projection_string">projection_string</a></td>
 <td>The projection string</td>
 </tr>
 <tr class="odd">
-<td><a href="#mikeio.Grid1D.x">x</a></td>
-<td>array of node coordinates</td>
+<td><a href="#mikeio.spatial.GeometryFMAreaSpectrum.type_name">type_name</a></td>
+<td>Type name, e.g.&nbsp;Mesh, Dfsu2D</td>
 </tr>
 </tbody>
 </table>
@@ -519,22 +477,64 @@ x: [0.1, 0.5, 0.9] (nx=3, dx=0.4)</code></pre>
 </thead>
 <tbody>
 <tr class="odd">
-<td><a href="#mikeio.Grid1D.find_index">find_index</a></td>
-<td>Find nearest point</td>
+<td><a href="#mikeio.spatial.GeometryFMAreaSpectrum.contains">contains</a></td>
+<td>test if a list of points are contained by mesh</td>
 </tr>
 <tr class="even">
-<td><a href="#mikeio.Grid1D.isel">isel</a></td>
-<td>Get a subset geometry from this geometry</td>
+<td><a href="#mikeio.spatial.GeometryFMAreaSpectrum.elements_to_geometry">elements_to_geometry</a></td>
+<td>export a selection of elements to new flexible file geometry</td>
+</tr>
+<tr class="odd">
+<td><a href="#mikeio.spatial.GeometryFMAreaSpectrum.find_index">find_index</a></td>
+<td>Find a <em>set</em> of element indicies for a number of points or within an area.</td>
+</tr>
+<tr class="even">
+<td><a href="#mikeio.spatial.GeometryFMAreaSpectrum.find_nearest_elements">find_nearest_elements</a></td>
+<td>Find index of nearest elements (optionally for a list)</td>
+</tr>
+<tr class="odd">
+<td><a href="#mikeio.spatial.GeometryFMAreaSpectrum.get_2d_interpolant">get_2d_interpolant</a></td>
+<td>IDW interpolant for list of coordinates</td>
+</tr>
+<tr class="even">
+<td><a href="#mikeio.spatial.GeometryFMAreaSpectrum.get_element_area">get_element_area</a></td>
+<td>Calculate the horizontal area of each element.</td>
+</tr>
+<tr class="odd">
+<td><a href="#mikeio.spatial.GeometryFMAreaSpectrum.get_node_centered_data">get_node_centered_data</a></td>
+<td>convert cell-centered data to node-centered by pseudo-laplacian method</td>
+</tr>
+<tr class="even">
+<td><a href="#mikeio.spatial.GeometryFMAreaSpectrum.get_overset_grid">get_overset_grid</a></td>
+<td>get a 2d grid that covers the domain by specifying spacing or shape</td>
+</tr>
+<tr class="odd">
+<td><a href="#mikeio.spatial.GeometryFMAreaSpectrum.interp2d">interp2d</a></td>
+<td>interp spatially in data (2d only)</td>
+</tr>
+<tr class="even">
+<td><a href="#mikeio.spatial.GeometryFMAreaSpectrum.to_mesh">to_mesh</a></td>
+<td>Export geometry to new mesh file</td>
+</tr>
+<tr class="odd">
+<td><a href="#mikeio.spatial.GeometryFMAreaSpectrum.to_shapely">to_shapely</a></td>
+<td>Export mesh as shapely MultiPolygon</td>
 </tr>
 </tbody>
 </table>
-<section id="mikeio.Grid1D.find_index" class="level3">
-<h3 class="anchored" data-anchor-id="mikeio.Grid1D.find_index">find_index</h3>
-<p><code>Grid1D.find_index(x, **kwargs)</code></p>
-<p>Find nearest point</p>
-<section id="parameters-1" class="level4">
-<h4 class="anchored" data-anchor-id="parameters-1">Parameters</h4>
+<section id="mikeio.spatial.GeometryFMAreaSpectrum.contains" class="level3">
+<h3 class="anchored" data-anchor-id="mikeio.spatial.GeometryFMAreaSpectrum.contains">contains</h3>
+<p><code>spatial.GeometryFMAreaSpectrum.contains(points)</code></p>
+<p>test if a list of points are contained by mesh</p>
+<section id="parameters" class="level4">
+<h4 class="anchored" data-anchor-id="parameters">Parameters</h4>
 <table class="caption-top table">
+<colgroup>
+<col style="width: 12%">
+<col style="width: 22%">
+<col style="width: 50%">
+<col style="width: 14%">
+</colgroup>
 <thead>
 <tr class="header">
 <th>Name</th>
@@ -545,9 +545,9 @@ x: [0.1, 0.5, 0.9] (nx=3, dx=0.4)</code></pre>
 </thead>
 <tbody>
 <tr class="odd">
-<td><code>x</code></td>
-<td>float</td>
-<td>x-coordinate of point</td>
+<td><code>points</code></td>
+<td>array-like n-by-2</td>
+<td>x,y-coordinates of n points to be tested</td>
 <td><em>required</em></td>
 </tr>
 </tbody>
@@ -564,33 +564,81 @@ x: [0.1, 0.5, 0.9] (nx=3, dx=0.4)</code></pre>
 </thead>
 <tbody>
 <tr class="odd">
-<td>int</td>
-<td>index of nearest point</td>
-</tr>
-<tr class="even">
-<td>Any</td>
-<td>Not used</td>
+<td>bool array</td>
+<td>True for points inside, False otherwise</td>
 </tr>
 </tbody>
 </table>
 </section>
-<section id="see-also" class="level4">
-<h4 class="anchored" data-anchor-id="see-also">See Also</h4>
-<p><a href="../api/Dataset.html#mikeio.Dataset.sel"><code>mikeio.Dataset.sel</code></a></p>
+</section>
+<section id="mikeio.spatial.GeometryFMAreaSpectrum.elements_to_geometry" class="level3">
+<h3 class="anchored" data-anchor-id="mikeio.spatial.GeometryFMAreaSpectrum.elements_to_geometry">elements_to_geometry</h3>
+<p><code>spatial.GeometryFMAreaSpectrum.elements_to_geometry(elements, keepdims=False)</code></p>
+<p>export a selection of elements to new flexible file geometry</p>
+<section id="parameters-1" class="level4">
+<h4 class="anchored" data-anchor-id="parameters-1">Parameters</h4>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Name</th>
+<th>Type</th>
+<th>Description</th>
+<th>Default</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>elements</code></td>
+<td>list(int)</td>
+<td>list of element ids</td>
+<td><em>required</em></td>
+</tr>
+<tr class="even">
+<td><code>keepdims</code></td>
+<td>bool</td>
+<td>Not used</td>
+<td><code>False</code></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="returns-1" class="level4">
+<h4 class="anchored" data-anchor-id="returns-1">Returns</h4>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 46%">
+<col style="width: 53%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>GeometryFMAreaSpectrum or GeometryFMPointSpectrum</td>
+<td>which can be used for further extraction or saved to file</td>
+</tr>
+</tbody>
+</table>
 </section>
 </section>
-<section id="mikeio.Grid1D.isel" class="level3">
-<h3 class="anchored" data-anchor-id="mikeio.Grid1D.isel">isel</h3>
-<p><code>Grid1D.isel(idx, axis=None)</code></p>
-<p>Get a subset geometry from this geometry</p>
+<section id="mikeio.spatial.GeometryFMAreaSpectrum.find_index" class="level3">
+<h3 class="anchored" data-anchor-id="mikeio.spatial.GeometryFMAreaSpectrum.find_index">find_index</h3>
+<p><code>spatial.GeometryFMAreaSpectrum.find_index(x=None, y=None, coords=None, area=None)</code></p>
+<p>Find a <em>set</em> of element indicies for a number of points or within an area.</p>
+<p>The returned indices returned are the unique, unordered set of element indices that contain the points or area.</p>
+<p>This method will return elements <em>containing</em> the argument points/area, which is not necessarily the same as the nearest.</p>
+<p>Typically not called directly, but by Dataset/DataArray’s sel() method.</p>
 <section id="parameters-2" class="level4">
 <h4 class="anchored" data-anchor-id="parameters-2">Parameters</h4>
 <table class="caption-top table">
 <colgroup>
-<col style="width: 11%">
-<col style="width: 19%">
-<col style="width: 52%">
-<col style="width: 16%">
+<col style="width: 4%">
+<col style="width: 14%">
+<col style="width: 75%">
+<col style="width: 5%">
 </colgroup>
 <thead>
 <tr class="header">
@@ -602,27 +650,35 @@ x: [0.1, 0.5, 0.9] (nx=3, dx=0.4)</code></pre>
 </thead>
 <tbody>
 <tr class="odd">
-<td><code>idx</code></td>
-<td>int or slice</td>
-<td>index or slice</td>
-<td><em>required</em></td>
+<td><code>x</code></td>
+<td>float | np.ndarray | None</td>
+<td>X coordinate(s) (easting or longitude)</td>
+<td><code>None</code></td>
 </tr>
 <tr class="even">
-<td><code>axis</code></td>
-<td>int</td>
-<td>Not used for Grid1D, by default None</td>
+<td><code>y</code></td>
+<td>float | np.ndarray | None</td>
+<td>Y coordinate(s) (northing or latitude)</td>
+<td><code>None</code></td>
+</tr>
+<tr class="odd">
+<td><code>coords</code></td>
+<td>np.array(float, float)</td>
+<td>As an alternative to specifying x, and y individually, the argument coords can be used instead. (x,y)-coordinates of points to be found, by default None</td>
+<td><code>None</code></td>
+</tr>
+<tr class="even">
+<td><code>area</code></td>
+<td>(float, float, float, float)</td>
+<td>Bounding box of coordinates (left lower and right upper) to be selected, by default None</td>
 <td><code>None</code></td>
 </tr>
 </tbody>
 </table>
 </section>
-<section id="returns-1" class="level4">
-<h4 class="anchored" data-anchor-id="returns-1">Returns</h4>
+<section id="returns-2" class="level4">
+<h4 class="anchored" data-anchor-id="returns-2">Returns</h4>
 <table class="caption-top table">
-<colgroup>
-<col style="width: 61%">
-<col style="width: 38%">
-</colgroup>
 <thead>
 <tr class="header">
 <th>Type</th>
@@ -631,38 +687,469 @@ x: [0.1, 0.5, 0.9] (nx=3, dx=0.4)</code></pre>
 </thead>
 <tbody>
 <tr class="odd">
-<td>GeometryPoint2D or GeometryPoint3D or GeometryUndefined</td>
-<td>The geometry of the selected point</td>
+<td>np.array</td>
+<td>indicies of containing elements</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="raises" class="level4">
+<h4 class="anchored" data-anchor-id="raises">Raises</h4>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>ValueError</td>
+<td>if any point is outside the domain</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="examples" class="level4">
+<h4 class="anchored" data-anchor-id="examples">Examples</h4>
+<div class="sourceCode" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> g <span class="op">=</span> dfs.geometry</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> <span class="bu">id</span> <span class="op">=</span> dfs.find_index(x<span class="op">=</span><span class="fl">3.1</span>, y<span class="op">=</span><span class="fl">4.3</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+<section id="see-also" class="level4">
+<h4 class="anchored" data-anchor-id="see-also">See Also</h4>
+<p>isel : get subset geometry for specific indicies find_nearest_elements : find nearest instead of containing elements</p>
+</section>
+</section>
+<section id="mikeio.spatial.GeometryFMAreaSpectrum.find_nearest_elements" class="level3">
+<h3 class="anchored" data-anchor-id="mikeio.spatial.GeometryFMAreaSpectrum.find_nearest_elements">find_nearest_elements</h3>
+<p><code>spatial.GeometryFMAreaSpectrum.find_nearest_elements(x, y=None, n_nearest=1, return_distances=False)</code></p>
+<p>Find index of nearest elements (optionally for a list)</p>
+<section id="parameters-3" class="level4">
+<h4 class="anchored" data-anchor-id="parameters-3">Parameters</h4>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 13%">
+<col style="width: 20%">
+<col style="width: 57%">
+<col style="width: 8%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Name</th>
+<th>Type</th>
+<th>Description</th>
+<th>Default</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>x</code></td>
+<td>float | np.ndarray</td>
+<td>X coordinate(s) (easting or longitude)</td>
+<td><em>required</em></td>
+</tr>
+<tr class="even">
+<td><code>y</code></td>
+<td>float | np.ndarray | None</td>
+<td>Y coordinate(s) (northing or latitude)</td>
+<td><code>None</code></td>
+</tr>
+<tr class="odd">
+<td><code>n_nearest</code></td>
+<td>int</td>
+<td>return this many (horizontally) nearest points for each coordinate set, default=1</td>
+<td><code>1</code></td>
+</tr>
+<tr class="even">
+<td><code>return_distances</code></td>
+<td>bool</td>
+<td>should the horizontal distances to each point be returned? default=False</td>
+<td><code>False</code></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="returns-3" class="level4">
+<h4 class="anchored" data-anchor-id="returns-3">Returns</h4>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>np.array</td>
+<td>element ids of nearest element(s)</td>
+</tr>
+<tr class="even">
+<td>(np.array, optional)</td>
+<td>horizontal distances</td>
 </tr>
 </tbody>
 </table>
 </section>
 <section id="examples-1" class="level4">
 <h4 class="anchored" data-anchor-id="examples-1">Examples</h4>
-<div id="4f95b3c2" class="cell" data-execution_count="3">
-<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> mikeio</span>
-<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>g <span class="op">=</span> mikeio.Grid1D(nx<span class="op">=</span><span class="dv">3</span>,dx<span class="op">=</span><span class="fl">0.1</span>)</span>
-<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>g</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display" data-execution_count="3">
-<pre><code>&lt;mikeio.Grid1D&gt;
-x: [0, 0.1, 0.2] (nx=3, dx=0.1)</code></pre>
-</div>
-</div>
-<div id="70a3ee30" class="cell" data-execution_count="4">
-<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>g.isel([<span class="dv">1</span>,<span class="dv">2</span>])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display" data-execution_count="4">
-<pre><code>&lt;mikeio.Grid1D&gt;
-x: [0.1, 0.2] (nx=2, dx=0.1)</code></pre>
-</div>
-</div>
-<div id="271a2a27" class="cell" data-execution_count="5">
-<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>g.isel(<span class="dv">1</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display" data-execution_count="5">
-<pre><code>GeometryUndefined()</code></pre>
-</div>
-</div>
+<div class="sourceCode" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> g <span class="op">=</span> dfs.geometry</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> <span class="bu">id</span> <span class="op">=</span> g.find_nearest_elements(<span class="dv">3</span>, <span class="dv">4</span>)</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> ids <span class="op">=</span> g.find_nearest_elements([<span class="dv">3</span>, <span class="dv">8</span>], [<span class="dv">4</span>, <span class="dv">6</span>])</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> ids <span class="op">=</span> g.find_nearest_elements(xy)</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> ids <span class="op">=</span> g.find_nearest_elements(<span class="dv">3</span>, <span class="dv">4</span>, n_nearest<span class="op">=</span><span class="dv">4</span>)</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> ids, d <span class="op">=</span> g.find_nearest_elements(xy, return_distances<span class="op">=</span><span class="va">True</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+<section id="see-also-1" class="level4">
+<h4 class="anchored" data-anchor-id="see-also-1">See Also</h4>
+<p>find_index : find element indicies for points or an area</p>
+</section>
+</section>
+<section id="mikeio.spatial.GeometryFMAreaSpectrum.get_2d_interpolant" class="level3">
+<h3 class="anchored" data-anchor-id="mikeio.spatial.GeometryFMAreaSpectrum.get_2d_interpolant">get_2d_interpolant</h3>
+<p><code>spatial.GeometryFMAreaSpectrum.get_2d_interpolant(xy, n_nearest=5, extrapolate=False, p=2, radius=None)</code></p>
+<p>IDW interpolant for list of coordinates</p>
+<section id="parameters-4" class="level4">
+<h4 class="anchored" data-anchor-id="parameters-4">Parameters</h4>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 12%">
+<col style="width: 12%">
+<col style="width: 63%">
+<col style="width: 10%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Name</th>
+<th>Type</th>
+<th>Description</th>
+<th>Default</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>xy</code></td>
+<td>array - like</td>
+<td>x,y coordinates of new points</td>
+<td><em>required</em></td>
+</tr>
+<tr class="even">
+<td><code>n_nearest</code></td>
+<td>int</td>
+<td>number of nearest elements used for IDW, by default 5</td>
+<td><code>5</code></td>
+</tr>
+<tr class="odd">
+<td><code>extrapolate</code></td>
+<td>bool</td>
+<td>allow extrapolation, by default False</td>
+<td><code>False</code></td>
+</tr>
+<tr class="even">
+<td><code>p</code></td>
+<td>float</td>
+<td>power of inverse distance weighting, default=2</td>
+<td><code>2</code></td>
+</tr>
+<tr class="odd">
+<td><code>radius</code></td>
+<td>float | None</td>
+<td>an alternative to extrapolate=False, only include elements within radius</td>
+<td><code>None</code></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="returns-4" class="level4">
+<h4 class="anchored" data-anchor-id="returns-4">Returns</h4>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>(np.array, np.array)</td>
+<td>element ids and weights</td>
+</tr>
+</tbody>
+</table>
+</section>
+</section>
+<section id="mikeio.spatial.GeometryFMAreaSpectrum.get_element_area" class="level3">
+<h3 class="anchored" data-anchor-id="mikeio.spatial.GeometryFMAreaSpectrum.get_element_area">get_element_area</h3>
+<p><code>spatial.GeometryFMAreaSpectrum.get_element_area()</code></p>
+<p>Calculate the horizontal area of each element.</p>
+<section id="returns-5" class="level4">
+<h4 class="anchored" data-anchor-id="returns-5">Returns</h4>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>np.array(float)</td>
+<td>areas in m2</td>
+</tr>
+</tbody>
+</table>
+</section>
+</section>
+<section id="mikeio.spatial.GeometryFMAreaSpectrum.get_node_centered_data" class="level3">
+<h3 class="anchored" data-anchor-id="mikeio.spatial.GeometryFMAreaSpectrum.get_node_centered_data">get_node_centered_data</h3>
+<p><code>spatial.GeometryFMAreaSpectrum.get_node_centered_data(data, extrapolate=True)</code></p>
+<p>convert cell-centered data to node-centered by pseudo-laplacian method</p>
+<section id="parameters-5" class="level4">
+<h4 class="anchored" data-anchor-id="parameters-5">Parameters</h4>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 16%">
+<col style="width: 18%">
+<col style="width: 51%">
+<col style="width: 13%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Name</th>
+<th>Type</th>
+<th>Description</th>
+<th>Default</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>data</code></td>
+<td>np.array(float)</td>
+<td>cell-centered data</td>
+<td><em>required</em></td>
+</tr>
+<tr class="even">
+<td><code>extrapolate</code></td>
+<td>bool</td>
+<td>allow the method to extrapolate, default:True</td>
+<td><code>True</code></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="returns-6" class="level4">
+<h4 class="anchored" data-anchor-id="returns-6">Returns</h4>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>np.array(float)</td>
+<td>node-centered data</td>
+</tr>
+</tbody>
+</table>
+</section>
+</section>
+<section id="mikeio.spatial.GeometryFMAreaSpectrum.get_overset_grid" class="level3">
+<h3 class="anchored" data-anchor-id="mikeio.spatial.GeometryFMAreaSpectrum.get_overset_grid">get_overset_grid</h3>
+<p><code>spatial.GeometryFMAreaSpectrum.get_overset_grid(dx=None, dy=None, nx=None, ny=None, buffer=0.0)</code></p>
+<p>get a 2d grid that covers the domain by specifying spacing or shape</p>
+<section id="parameters-6" class="level4">
+<h4 class="anchored" data-anchor-id="parameters-6">Parameters</h4>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 5%">
+<col style="width: 14%">
+<col style="width: 73%">
+<col style="width: 6%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Name</th>
+<th>Type</th>
+<th>Description</th>
+<th>Default</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>dx</code></td>
+<td>float or (float, float)</td>
+<td>grid resolution in x-direction (or in x- and y-direction)</td>
+<td><code>None</code></td>
+</tr>
+<tr class="even">
+<td><code>dy</code></td>
+<td>float</td>
+<td>grid resolution in y-direction</td>
+<td><code>None</code></td>
+</tr>
+<tr class="odd">
+<td><code>nx</code></td>
+<td>int</td>
+<td>number of points in x-direction, by default None, (the value will be inferred)</td>
+<td><code>None</code></td>
+</tr>
+<tr class="even">
+<td><code>ny</code></td>
+<td>int</td>
+<td>number of points in y-direction, by default None, (the value will be inferred)</td>
+<td><code>None</code></td>
+</tr>
+<tr class="odd">
+<td><code>buffer</code></td>
+<td>float</td>
+<td>positive to make the area larger, default=0 can be set to a small negative value to avoid NaN values all around the domain.</td>
+<td><code>0.0</code></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="returns-7" class="level4">
+<h4 class="anchored" data-anchor-id="returns-7">Returns</h4>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>&lt;mikeio.Grid2D&gt;</td>
+<td>2d grid</td>
+</tr>
+</tbody>
+</table>
+</section>
+</section>
+<section id="mikeio.spatial.GeometryFMAreaSpectrum.interp2d" class="level3">
+<h3 class="anchored" data-anchor-id="mikeio.spatial.GeometryFMAreaSpectrum.interp2d">interp2d</h3>
+<p><code>spatial.GeometryFMAreaSpectrum.interp2d(data, elem_ids, weights=None, shape=None)</code></p>
+<p>interp spatially in data (2d only)</p>
+<section id="parameters-7" class="level4">
+<h4 class="anchored" data-anchor-id="parameters-7">Parameters</h4>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 10%">
+<col style="width: 23%">
+<col style="width: 55%">
+<col style="width: 10%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Name</th>
+<th>Type</th>
+<th>Description</th>
+<th>Default</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>data</code></td>
+<td>ndarray or list(ndarray)</td>
+<td>dfsu data</td>
+<td><em>required</em></td>
+</tr>
+<tr class="even">
+<td><code>elem_ids</code></td>
+<td>ndarray(int)</td>
+<td>n sized array of 1 or more element ids used for interpolation</td>
+<td><em>required</em></td>
+</tr>
+<tr class="odd">
+<td><code>weights</code></td>
+<td>ndarray(float)</td>
+<td>weights with same size as elem_ids used for interpolation</td>
+<td><code>None</code></td>
+</tr>
+<tr class="even">
+<td><code>shape</code></td>
+<td>Tuple[int, …] | None</td>
+<td>reshape output</td>
+<td><code>None</code></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="returns-8" class="level4">
+<h4 class="anchored" data-anchor-id="returns-8">Returns</h4>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>ndarray or list(ndarray)</td>
+<td>spatially interped data</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="examples-2" class="level4">
+<h4 class="anchored" data-anchor-id="examples-2">Examples</h4>
+<div class="sourceCode" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> ds <span class="op">=</span> dfsu.read()</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> g <span class="op">=</span> dfs.get_overset_grid(shape<span class="op">=</span>(<span class="dv">50</span>,<span class="dv">40</span>))</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> elem_ids, weights <span class="op">=</span> dfs.get_2d_interpolant(g.xy)</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> dsi <span class="op">=</span> dfs.interp2d(ds, elem_ids, weights)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
+</section>
+<section id="mikeio.spatial.GeometryFMAreaSpectrum.to_mesh" class="level3">
+<h3 class="anchored" data-anchor-id="mikeio.spatial.GeometryFMAreaSpectrum.to_mesh">to_mesh</h3>
+<p><code>spatial.GeometryFMAreaSpectrum.to_mesh(outfilename)</code></p>
+<p>Export geometry to new mesh file</p>
+<section id="parameters-8" class="level4">
+<h4 class="anchored" data-anchor-id="parameters-8">Parameters</h4>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Name</th>
+<th>Type</th>
+<th>Description</th>
+<th>Default</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>outfilename</code></td>
+<td>str</td>
+<td>path to file to be written</td>
+<td><em>required</em></td>
+</tr>
+</tbody>
+</table>
+</section>
+</section>
+<section id="mikeio.spatial.GeometryFMAreaSpectrum.to_shapely" class="level3">
+<h3 class="anchored" data-anchor-id="mikeio.spatial.GeometryFMAreaSpectrum.to_shapely">to_shapely</h3>
+<p><code>spatial.GeometryFMAreaSpectrum.to_shapely()</code></p>
+<p>Export mesh as shapely MultiPolygon</p>
+<section id="returns-9" class="level4">
+<h4 class="anchored" data-anchor-id="returns-9">Returns</h4>
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>shapely.geometry.MultiPolygon</td>
+<td>polygons with mesh elements</td>
+</tr>
+</tbody>
+</table>
 
 
+</section>
 </section>
 </section>
 </section>

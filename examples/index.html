@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>grid1d – MIKE IO</title>
+<title>Examples – MIKE IO</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -20,40 +20,6 @@ ul.task-list li input[type="checkbox"] {
   margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
 }
-/* CSS for syntax highlighting */
-pre > code.sourceCode { white-space: pre; position: relative; }
-pre > code.sourceCode > span { line-height: 1.25; }
-pre > code.sourceCode > span:empty { height: 1.2em; }
-.sourceCode { overflow: visible; }
-code.sourceCode > span { color: inherit; text-decoration: inherit; }
-div.sourceCode { margin: 1em 0; }
-pre.sourceCode { margin: 0; }
-@media screen {
-div.sourceCode { overflow: auto; }
-}
-@media print {
-pre > code.sourceCode { white-space: pre-wrap; }
-pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
-}
-pre.numberSource code
-  { counter-reset: source-line 0; }
-pre.numberSource code > span
-  { position: relative; left: -4em; counter-increment: source-line; }
-pre.numberSource code > span > a:first-child::before
-  { content: counter(source-line);
-    position: relative; left: -1em; text-align: right; vertical-align: baseline;
-    border: none; display: inline-block;
-    -webkit-touch-callout: none; -webkit-user-select: none;
-    -khtml-user-select: none; -moz-user-select: none;
-    -ms-user-select: none; user-select: none;
-    padding: 0 4px; width: 4em;
-  }
-pre.numberSource { margin-left: 3em;  padding-left: 4px; }
-div.sourceCode
-  {   }
-@media screen {
-pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
-}
 </style>
 
 
@@ -64,6 +30,10 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <script src="../site_libs/quarto-search/fuse.min.js"></script>
 <script src="../site_libs/quarto-search/quarto-search.js"></script>
 <meta name="quarto:offset" content="../">
+<link href="../examples/dfs2/index.html" rel="next">
+<link href="../user-guide/pfs.html" rel="prev">
+<script src="../site_libs/quarto-listing/list.min.js"></script>
+<script src="../site_libs/quarto-listing/quarto-listing.js"></script>
 <script src="../site_libs/quarto-html/quarto.js"></script>
 <script src="../site_libs/quarto-html/popper.min.js"></script>
 <script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
@@ -100,7 +70,65 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     "search-label": "Search"
   }
 }</script>
+<script>
 
+  window.document.addEventListener("DOMContentLoaded", function (_event) {
+    const listingTargetEl = window.document.querySelector('#listing-listing .list');
+    if (!listingTargetEl) {
+      // No listing discovered, do not attach.
+      return; 
+    }
+
+    const options = {
+      valueNames: ['listing-title','listing-description',{ data: ['index'] },{ data: ['categories'] },{ data: ['listing-date-sort'] },{ data: ['listing-title-sort'] }],
+      
+      searchColumns: ["listing-title","listing-author"],
+    };
+
+    window['quarto-listings'] = window['quarto-listings'] || {};
+    window['quarto-listings']['listing-listing'] = new List('listing-listing', options);
+
+    if (window['quarto-listing-loaded']) {
+      window['quarto-listing-loaded']();
+    }
+  });
+
+  window.addEventListener('hashchange',() => {
+    if (window['quarto-listing-loaded']) {
+      window['quarto-listing-loaded']();
+    }
+  })
+  </script>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
 
 </head>
 
@@ -163,7 +191,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
         <i class="bi bi-layout-text-sidebar-reverse"></i>
       </button>
         <a class="flex-grow-1 no-decor" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
-          <h1 class="quarto-secondary-nav-title">Grid1D</h1>
+          <h1 class="quarto-secondary-nav-title">Examples</h1>
         </a>     
       <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
         <i class="bi bi-search"></i>
@@ -267,7 +295,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   </li>
         <li class="sidebar-item sidebar-item-section">
       <div class="sidebar-item-container"> 
-            <a href="../examples/index.html" class="sidebar-item-text sidebar-link">
+            <a href="../examples/index.html" class="sidebar-item-text sidebar-link active">
  <span class="menu-text">Examples</span></a>
           <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true" aria-label="Toggle section">
             <i class="bi bi-chevron-right ms-2"></i>
@@ -335,27 +363,14 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
 <!-- margin-sidebar -->
     <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
-        <nav id="TOC" role="doc-toc" class="toc-active">
-    <h2 id="toc-title">On this page</h2>
-   
-  <ul>
-  <li><a href="#parameters" id="toc-parameters" class="nav-link active" data-scroll-target="#parameters">Parameters</a></li>
-  <li><a href="#examples" id="toc-examples" class="nav-link" data-scroll-target="#examples">Examples</a></li>
-  <li><a href="#attributes" id="toc-attributes" class="nav-link" data-scroll-target="#attributes">Attributes</a></li>
-  <li><a href="#methods" id="toc-methods" class="nav-link" data-scroll-target="#methods">Methods</a>
-  <ul class="collapse">
-  <li><a href="#mikeio.Grid1D.find_index" id="toc-mikeio.Grid1D.find_index" class="nav-link" data-scroll-target="#mikeio.Grid1D.find_index">find_index</a></li>
-  <li><a href="#mikeio.Grid1D.isel" id="toc-mikeio.Grid1D.isel" class="nav-link" data-scroll-target="#mikeio.Grid1D.isel">isel</a></li>
-  </ul></li>
-  </ul>
-</nav>
-    </div>
+        
+    <h5 class="quarto-listing-category-title">Categories</h5><div class="quarto-listing-category category-default"><div class="category" data-category="">All <span class="quarto-category-count">(6)</span></div></div></div>
 <!-- main -->
 <main class="content" id="quarto-document-content">
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<h1 class="title d-none d-lg-block">Grid1D</h1>
+<h1 class="title d-none d-lg-block">Examples</h1>
 </div>
 
 
@@ -372,302 +387,132 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </header>
 
 
-<p><code>Grid1D(self, x=None, *, x0=0.0, dx=None, nx=None, projection='NON-UTM', origin=(0.0, 0.0), orientation=0.0, node_coordinates=None, axis_name='x')</code></p>
-<p>1D grid (node-based) axis is increasing and equidistant</p>
-<section id="parameters" class="level2">
-<h2 class="anchored" data-anchor-id="parameters">Parameters</h2>
-<table class="caption-top table">
-<colgroup>
-<col style="width: 23%">
-<col style="width: 13%">
-<col style="width: 46%">
-<col style="width: 16%">
-</colgroup>
-<thead>
-<tr class="header">
-<th>Name</th>
-<th>Type</th>
-<th>Description</th>
-<th>Default</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td><code>x</code></td>
-<td>array_like</td>
-<td>node coordinates</td>
-<td><code>None</code></td>
-</tr>
-<tr class="even">
-<td><code>x0</code></td>
-<td>float</td>
-<td>first node coordinate</td>
-<td><code>0.0</code></td>
-</tr>
-<tr class="odd">
-<td><code>dx</code></td>
-<td>float</td>
-<td>grid spacing</td>
-<td><code>None</code></td>
-</tr>
-<tr class="even">
-<td><code>nx</code></td>
-<td>int</td>
-<td>number of nodes</td>
-<td><code>None</code></td>
-</tr>
-<tr class="odd">
-<td><code>projection</code></td>
-<td>str</td>
-<td>projection string</td>
-<td><code>'NON-UTM'</code></td>
-</tr>
-<tr class="even">
-<td><code>origin</code></td>
-<td>tuple</td>
-<td>not commonly used</td>
-<td><code>(0.0, 0.0)</code></td>
-</tr>
-<tr class="odd">
-<td><code>orientation</code></td>
-<td>float</td>
-<td>not commonly used</td>
-<td><code>0.0</code></td>
-</tr>
-<tr class="even">
-<td><code>node_coordinates</code></td>
-<td>array_like</td>
-<td>coordinates of nodes in 2D or 3D space</td>
-<td><code>None</code></td>
-</tr>
-<tr class="odd">
-<td><code>axis_name</code></td>
-<td>str</td>
-<td>name of axis, by default “x”</td>
-<td><code>'x'</code></td>
-</tr>
-</tbody>
-</table>
-</section>
-<section id="examples" class="level2">
-<h2 class="anchored" data-anchor-id="examples">Examples</h2>
-<div id="9e08427e" class="cell" data-execution_count="1">
-<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> mikeio</span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>mikeio.Grid1D(nx<span class="op">=</span><span class="dv">3</span>,dx<span class="op">=</span><span class="fl">0.1</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display" data-execution_count="1">
-<pre><code>&lt;mikeio.Grid1D&gt;
-x: [0, 0.1, 0.2] (nx=3, dx=0.1)</code></pre>
+<div class="callout callout-style-default callout-tip callout-titled" title="Example data">
+<div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-1-contents" aria-controls="callout-1" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
 </div>
+<div class="callout-title-container flex-fill">
+Example data
 </div>
-<div id="7acf3d7e" class="cell" data-execution_count="2">
-<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>mikeio.Grid1D(x<span class="op">=</span>[<span class="fl">0.1</span>, <span class="fl">0.5</span>, <span class="fl">0.9</span>])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display" data-execution_count="2">
-<pre><code>&lt;mikeio.Grid1D&gt;
-x: [0.1, 0.5, 0.9] (nx=3, dx=0.4)</code></pre>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
 </div>
+<div id="callout-1" class="callout-1-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<p>If you want to try one of the examples you need to first download some data files.</p>
+<p>The files are stored on GitHub in the <a href="https://github.com/DHI/mikeio">MIKE IO repo</a>.</p>
+<p>The easiest way is to the download the repo as a <a href="https://github.com/DHI/mikeio/archive/main.zip">zip file</a> and extract the files you need.</p>
+<p>In the zip file you find the files in <code>tests/testdata/</code> folder</p>
+<p>Some of the files:</p>
+<pre><code>tests/testdata
+├── FakeLake.dfsu
+├── HD2D.dfsu
+├── NorthSea_HD_and_windspeed.dfsu
+├── consistency
+│&nbsp;&nbsp; ├── oresundHD.dfs2
+│&nbsp;&nbsp; └── oresundHD.dfsu
+├── gebco_2020_n56.3_s55.2_w12.2_e13.1.nc
+├── gfs_wind.nc
+├── odense_rough.mesh
+├── oresund_sigma_z.dfsu
+├── pfs
+│&nbsp;&nbsp; ├── concat.mzt
+│&nbsp;&nbsp; └── t1_t0.mzt
+├── tide1.dfs1
+├── tide2.dfs1</code></pre>
 </div>
-</section>
-<section id="attributes" class="level2">
-<h2 class="anchored" data-anchor-id="attributes">Attributes</h2>
-<table class="caption-top table">
-<thead>
-<tr class="header">
-<th>Name</th>
-<th>Description</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td><a href="#mikeio.Grid1D.dx">dx</a></td>
-<td>grid spacing</td>
-</tr>
-<tr class="even">
-<td><a href="#mikeio.Grid1D.is_geo">is_geo</a></td>
-<td>Are coordinates geographical (LONG/LAT)?</td>
-</tr>
-<tr class="odd">
-<td><a href="#mikeio.Grid1D.is_local_coordinates">is_local_coordinates</a></td>
-<td>Are coordinates relative (NON-UTM)?</td>
-</tr>
-<tr class="even">
-<td><a href="#mikeio.Grid1D.nx">nx</a></td>
-<td>number of grid points</td>
-</tr>
-<tr class="odd">
-<td><a href="#mikeio.Grid1D.projection">projection</a></td>
-<td>The projection</td>
-</tr>
-<tr class="even">
-<td><a href="#mikeio.Grid1D.projection_string">projection_string</a></td>
-<td>The projection string</td>
-</tr>
-<tr class="odd">
-<td><a href="#mikeio.Grid1D.x">x</a></td>
-<td>array of node coordinates</td>
-</tr>
-</tbody>
-</table>
-</section>
-<section id="methods" class="level2">
-<h2 class="anchored" data-anchor-id="methods">Methods</h2>
-<table class="caption-top table">
-<thead>
-<tr class="header">
-<th>Name</th>
-<th>Description</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td><a href="#mikeio.Grid1D.find_index">find_index</a></td>
-<td>Find nearest point</td>
-</tr>
-<tr class="even">
-<td><a href="#mikeio.Grid1D.isel">isel</a></td>
-<td>Get a subset geometry from this geometry</td>
-</tr>
-</tbody>
-</table>
-<section id="mikeio.Grid1D.find_index" class="level3">
-<h3 class="anchored" data-anchor-id="mikeio.Grid1D.find_index">find_index</h3>
-<p><code>Grid1D.find_index(x, **kwargs)</code></p>
-<p>Find nearest point</p>
-<section id="parameters-1" class="level4">
-<h4 class="anchored" data-anchor-id="parameters-1">Parameters</h4>
-<table class="caption-top table">
-<thead>
-<tr class="header">
-<th>Name</th>
-<th>Type</th>
-<th>Description</th>
-<th>Default</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td><code>x</code></td>
-<td>float</td>
-<td>x-coordinate of point</td>
-<td><em>required</em></td>
-</tr>
-</tbody>
-</table>
-</section>
-<section id="returns" class="level4">
-<h4 class="anchored" data-anchor-id="returns">Returns</h4>
-<table class="caption-top table">
-<thead>
-<tr class="header">
-<th>Type</th>
-<th>Description</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td>int</td>
-<td>index of nearest point</td>
-</tr>
-<tr class="even">
-<td>Any</td>
-<td>Not used</td>
-</tr>
-</tbody>
-</table>
-</section>
-<section id="see-also" class="level4">
-<h4 class="anchored" data-anchor-id="see-also">See Also</h4>
-<p><a href="../api/Dataset.html#mikeio.Dataset.sel"><code>mikeio.Dataset.sel</code></a></p>
-</section>
-</section>
-<section id="mikeio.Grid1D.isel" class="level3">
-<h3 class="anchored" data-anchor-id="mikeio.Grid1D.isel">isel</h3>
-<p><code>Grid1D.isel(idx, axis=None)</code></p>
-<p>Get a subset geometry from this geometry</p>
-<section id="parameters-2" class="level4">
-<h4 class="anchored" data-anchor-id="parameters-2">Parameters</h4>
-<table class="caption-top table">
-<colgroup>
-<col style="width: 11%">
-<col style="width: 19%">
-<col style="width: 52%">
-<col style="width: 16%">
-</colgroup>
-<thead>
-<tr class="header">
-<th>Name</th>
-<th>Type</th>
-<th>Description</th>
-<th>Default</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td><code>idx</code></td>
-<td>int or slice</td>
-<td>index or slice</td>
-<td><em>required</em></td>
-</tr>
-<tr class="even">
-<td><code>axis</code></td>
-<td>int</td>
-<td>Not used for Grid1D, by default None</td>
-<td><code>None</code></td>
-</tr>
-</tbody>
-</table>
-</section>
-<section id="returns-1" class="level4">
-<h4 class="anchored" data-anchor-id="returns-1">Returns</h4>
-<table class="caption-top table">
-<colgroup>
-<col style="width: 61%">
-<col style="width: 38%">
-</colgroup>
-<thead>
-<tr class="header">
-<th>Type</th>
-<th>Description</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td>GeometryPoint2D or GeometryPoint3D or GeometryUndefined</td>
-<td>The geometry of the selected point</td>
-</tr>
-</tbody>
-</table>
-</section>
-<section id="examples-1" class="level4">
-<h4 class="anchored" data-anchor-id="examples-1">Examples</h4>
-<div id="4f95b3c2" class="cell" data-execution_count="3">
-<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> mikeio</span>
-<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>g <span class="op">=</span> mikeio.Grid1D(nx<span class="op">=</span><span class="dv">3</span>,dx<span class="op">=</span><span class="fl">0.1</span>)</span>
-<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>g</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display" data-execution_count="3">
-<pre><code>&lt;mikeio.Grid1D&gt;
-x: [0, 0.1, 0.2] (nx=3, dx=0.1)</code></pre>
-</div>
-</div>
-<div id="70a3ee30" class="cell" data-execution_count="4">
-<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>g.isel([<span class="dv">1</span>,<span class="dv">2</span>])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display" data-execution_count="4">
-<pre><code>&lt;mikeio.Grid1D&gt;
-x: [0.1, 0.2] (nx=2, dx=0.1)</code></pre>
-</div>
-</div>
-<div id="271a2a27" class="cell" data-execution_count="5">
-<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>g.isel(<span class="dv">1</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display" data-execution_count="5">
-<pre><code>GeometryUndefined()</code></pre>
 </div>
 </div>
 
 
-</section>
-</section>
-</section>
 
-</main> <!-- /main -->
+
+<div class="quarto-listing quarto-listing-container-table" id="listing-listing">
+<div class="listing-actions-group">
+   <div class="input-group input-group-sm quarto-listing-sort">
+     <span class="input-group-text"><i class="bi bi-sort-down"></i></span>
+     <select id="listing-listing-sort" class="form-select" aria-label="Order By" onchange="window['quarto-listings']['listing-listing'].sort(this.options[this.selectedIndex].value, { order: this.options[this.selectedIndex].getAttribute('data-direction')})">
+       <option value="" disabled="" selected="" hidden="">Order By</option>
+       <option value="index" data-direction="asc">Default</option>
+         <option value="listing-title-sort" data-direction="asc">
+          Title
+        </option>
+     </select>
+  </div>
+    <div class="input-group input-group-sm quarto-listing-filter">
+      <span class="input-group-text"><i class="bi bi-search"></i></span>
+      <input type="text" class="search form-control" placeholder="Filter">
+    </div>
+</div>
+<table class="quarto-listing-table table">
+<thead>
+<tr>
+<th>
+<a class="sort" data-sort="listing-title-sort" onclick="if (this.classList.contains('sort-asc')) { this.classList.add('sort-desc'); this.classList.remove('sort-asc') } else { this.classList.add('sort-asc'); this.classList.remove('sort-desc')} return false;">Title</a>
+</th>
+<th>
+Description
+</th>
+</tr>
+</thead>
+<tbody class="list">
+<tr data-index="0" data-listing-file-modified-sort="1724051681086" data-listing-reading-time-sort="1" data-listing-word-count-sort="121" data-listing-title-sort="Dfs2 - Bathymetric data" data-listing-filename-sort="bathy.qmd">
+<td>
+<a href="../examples/dfs2/bathy.html" class="title listing-title">Dfs2 - Bathymetric data</a>
+</td>
+<td>
+<span class="listing-description">Convert GEBCO 2020 NetCDF to dfs2</span>
+</td>
+</tr>
+<tr data-index="1" data-listing-file-modified-sort="1724051681086" data-listing-reading-time-sort="1" data-listing-word-count-sort="115" data-listing-title-sort="Dfs2 - Meteo data" data-listing-filename-sort="gfs.qmd">
+<td>
+<a href="../examples/dfs2/gfs.html" class="title listing-title">Dfs2 - Meteo data</a>
+</td>
+<td>
+<span class="listing-description">Conversion of NetCDF from Global Forecasting System to Dfs2</span>
+</td>
+</tr>
+<tr data-index="2" data-listing-file-modified-sort="1724051681086" data-listing-reading-time-sort="1" data-listing-word-count-sort="4" data-listing-title-sort="Dfs2 examples" data-listing-filename-sort="index.qmd">
+<td>
+<a href="../examples/dfs2/index.html" class="title listing-title">Dfs2 examples</a>
+</td>
+<td>
+<span class="listing-description">
+<li>Bathymetry</li>
+<li>Meteo data</li>
+</span>
+</td>
+</tr>
+<tr data-index="3" data-listing-file-modified-sort="1724051681086" data-listing-reading-time-sort="2" data-listing-word-count-sort="359" data-listing-title-sort="Dfsu - 2D interpolation" data-listing-filename-sort="Dfsu-2D-interpolation.qmd">
+<td>
+<a href="../examples/Dfsu-2D-interpolation.html" class="title listing-title">Dfsu - 2D interpolation</a>
+</td>
+<td>
+<span class="listing-description">Interpolate dfsu data to a grid, save as dfs2 and geotiff. Interpolate dfsu data to another mesh.</span>
+</td>
+</tr>
+<tr data-index="4" data-listing-file-modified-sort="1724051681086" data-listing-reading-time-sort="3" data-listing-word-count-sort="541" data-listing-title-sort="Generic dfs processing" data-listing-filename-sort="Generic.qmd">
+<td>
+<a href="../examples/Generic.html" class="title listing-title">Generic dfs processing</a>
+</td>
+<td>
+<span class="listing-description">Tools and methods that applies to any type of dfs files.</span>
+</td>
+</tr>
+<tr data-index="5" data-listing-file-modified-sort="1724051681086" data-listing-reading-time-sort="1" data-listing-word-count-sort="155" data-listing-title-sort="Time interpolation" data-listing-filename-sort="Time-interpolation.qmd">
+<td>
+<a href="../examples/Time-interpolation.html" class="title listing-title">Time interpolation</a>
+</td>
+<td>
+<span class="listing-description">Interpolate data to a specific time axis</span>
+</td>
+</tr>
+</tbody>
+</table>
+<div class="listing-no-matching d-none">
+No matching items
+</div>
+</div></main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
 window.document.addEventListener("DOMContentLoaded", function (event) {
   const toggleBodyColorMode = (bsSheetEl) => {
@@ -1088,6 +933,18 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
   }
 });
 </script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="../user-guide/pfs.html" class="pagination-link" aria-label="PFS">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text">PFS</span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="../examples/dfs2/index.html" class="pagination-link" aria-label="Dfs2">
+        <span class="nav-page-text">Dfs2</span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
 </div> <!-- /content -->
 <footer class="footer">
   <div class="nav-footer">
@@ -1096,7 +953,7 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
     </div>   
     <div class="nav-footer-center">
 <p>© 2024 DHI Group</p>
-</div>
+<div class="toc-actions"><ul><li><a href="https://github.com/DHI/mikeio/edit/main/docs/examples/index.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li></ul></div></div>
     <div class="nav-footer-right">
       &nbsp;
     </div>

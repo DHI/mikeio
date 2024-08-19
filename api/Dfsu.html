@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>grid1d – MIKE IO</title>
+<title>dfsu – MIKE IO</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -19,40 +19,6 @@ ul.task-list li input[type="checkbox"] {
   width: 0.8em;
   margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
-}
-/* CSS for syntax highlighting */
-pre > code.sourceCode { white-space: pre; position: relative; }
-pre > code.sourceCode > span { line-height: 1.25; }
-pre > code.sourceCode > span:empty { height: 1.2em; }
-.sourceCode { overflow: visible; }
-code.sourceCode > span { color: inherit; text-decoration: inherit; }
-div.sourceCode { margin: 1em 0; }
-pre.sourceCode { margin: 0; }
-@media screen {
-div.sourceCode { overflow: auto; }
-}
-@media print {
-pre > code.sourceCode { white-space: pre-wrap; }
-pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
-}
-pre.numberSource code
-  { counter-reset: source-line 0; }
-pre.numberSource code > span
-  { position: relative; left: -4em; counter-increment: source-line; }
-pre.numberSource code > span > a:first-child::before
-  { content: counter(source-line);
-    position: relative; left: -1em; text-align: right; vertical-align: baseline;
-    border: none; display: inline-block;
-    -webkit-touch-callout: none; -webkit-user-select: none;
-    -khtml-user-select: none; -moz-user-select: none;
-    -ms-user-select: none; user-select: none;
-    padding: 0 4px; width: 4em;
-  }
-pre.numberSource { margin-left: 3em;  padding-left: 4px; }
-div.sourceCode
-  {   }
-@media screen {
-pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
 }
 </style>
 
@@ -163,7 +129,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
         <i class="bi bi-layout-text-sidebar-reverse"></i>
       </button>
         <a class="flex-grow-1 no-decor" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
-          <h1 class="quarto-secondary-nav-title">Grid1D</h1>
+          <h1 class="quarto-secondary-nav-title"></h1>
         </a>     
       <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
         <i class="bi bi-search"></i>
@@ -339,332 +305,21 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     <h2 id="toc-title">On this page</h2>
    
   <ul>
-  <li><a href="#parameters" id="toc-parameters" class="nav-link active" data-scroll-target="#parameters">Parameters</a></li>
-  <li><a href="#examples" id="toc-examples" class="nav-link" data-scroll-target="#examples">Examples</a></li>
-  <li><a href="#attributes" id="toc-attributes" class="nav-link" data-scroll-target="#attributes">Attributes</a></li>
-  <li><a href="#methods" id="toc-methods" class="nav-link" data-scroll-target="#methods">Methods</a>
-  <ul class="collapse">
-  <li><a href="#mikeio.Grid1D.find_index" id="toc-mikeio.Grid1D.find_index" class="nav-link" data-scroll-target="#mikeio.Grid1D.find_index">find_index</a></li>
-  <li><a href="#mikeio.Grid1D.isel" id="toc-mikeio.Grid1D.isel" class="nav-link" data-scroll-target="#mikeio.Grid1D.isel">isel</a></li>
-  </ul></li>
+  <li><a href="#mikeio.Dfsu" id="toc-mikeio.Dfsu" class="nav-link active" data-scroll-target="#mikeio.Dfsu">Dfsu</a></li>
   </ul>
 </nav>
     </div>
 <!-- main -->
 <main class="content" id="quarto-document-content">
 
-<header id="title-block-header" class="quarto-title-block default">
-<div class="quarto-title">
-<h1 class="title d-none d-lg-block">Grid1D</h1>
-</div>
 
 
 
-<div class="quarto-title-meta">
-
-    
-  
-    
-  </div>
-  
+<section id="mikeio.Dfsu" class="level1">
+<h1>Dfsu</h1>
+<p><code>Dfsu()</code></p>
 
 
-</header>
-
-
-<p><code>Grid1D(self, x=None, *, x0=0.0, dx=None, nx=None, projection='NON-UTM', origin=(0.0, 0.0), orientation=0.0, node_coordinates=None, axis_name='x')</code></p>
-<p>1D grid (node-based) axis is increasing and equidistant</p>
-<section id="parameters" class="level2">
-<h2 class="anchored" data-anchor-id="parameters">Parameters</h2>
-<table class="caption-top table">
-<colgroup>
-<col style="width: 23%">
-<col style="width: 13%">
-<col style="width: 46%">
-<col style="width: 16%">
-</colgroup>
-<thead>
-<tr class="header">
-<th>Name</th>
-<th>Type</th>
-<th>Description</th>
-<th>Default</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td><code>x</code></td>
-<td>array_like</td>
-<td>node coordinates</td>
-<td><code>None</code></td>
-</tr>
-<tr class="even">
-<td><code>x0</code></td>
-<td>float</td>
-<td>first node coordinate</td>
-<td><code>0.0</code></td>
-</tr>
-<tr class="odd">
-<td><code>dx</code></td>
-<td>float</td>
-<td>grid spacing</td>
-<td><code>None</code></td>
-</tr>
-<tr class="even">
-<td><code>nx</code></td>
-<td>int</td>
-<td>number of nodes</td>
-<td><code>None</code></td>
-</tr>
-<tr class="odd">
-<td><code>projection</code></td>
-<td>str</td>
-<td>projection string</td>
-<td><code>'NON-UTM'</code></td>
-</tr>
-<tr class="even">
-<td><code>origin</code></td>
-<td>tuple</td>
-<td>not commonly used</td>
-<td><code>(0.0, 0.0)</code></td>
-</tr>
-<tr class="odd">
-<td><code>orientation</code></td>
-<td>float</td>
-<td>not commonly used</td>
-<td><code>0.0</code></td>
-</tr>
-<tr class="even">
-<td><code>node_coordinates</code></td>
-<td>array_like</td>
-<td>coordinates of nodes in 2D or 3D space</td>
-<td><code>None</code></td>
-</tr>
-<tr class="odd">
-<td><code>axis_name</code></td>
-<td>str</td>
-<td>name of axis, by default “x”</td>
-<td><code>'x'</code></td>
-</tr>
-</tbody>
-</table>
-</section>
-<section id="examples" class="level2">
-<h2 class="anchored" data-anchor-id="examples">Examples</h2>
-<div id="9e08427e" class="cell" data-execution_count="1">
-<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> mikeio</span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>mikeio.Grid1D(nx<span class="op">=</span><span class="dv">3</span>,dx<span class="op">=</span><span class="fl">0.1</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display" data-execution_count="1">
-<pre><code>&lt;mikeio.Grid1D&gt;
-x: [0, 0.1, 0.2] (nx=3, dx=0.1)</code></pre>
-</div>
-</div>
-<div id="7acf3d7e" class="cell" data-execution_count="2">
-<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>mikeio.Grid1D(x<span class="op">=</span>[<span class="fl">0.1</span>, <span class="fl">0.5</span>, <span class="fl">0.9</span>])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display" data-execution_count="2">
-<pre><code>&lt;mikeio.Grid1D&gt;
-x: [0.1, 0.5, 0.9] (nx=3, dx=0.4)</code></pre>
-</div>
-</div>
-</section>
-<section id="attributes" class="level2">
-<h2 class="anchored" data-anchor-id="attributes">Attributes</h2>
-<table class="caption-top table">
-<thead>
-<tr class="header">
-<th>Name</th>
-<th>Description</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td><a href="#mikeio.Grid1D.dx">dx</a></td>
-<td>grid spacing</td>
-</tr>
-<tr class="even">
-<td><a href="#mikeio.Grid1D.is_geo">is_geo</a></td>
-<td>Are coordinates geographical (LONG/LAT)?</td>
-</tr>
-<tr class="odd">
-<td><a href="#mikeio.Grid1D.is_local_coordinates">is_local_coordinates</a></td>
-<td>Are coordinates relative (NON-UTM)?</td>
-</tr>
-<tr class="even">
-<td><a href="#mikeio.Grid1D.nx">nx</a></td>
-<td>number of grid points</td>
-</tr>
-<tr class="odd">
-<td><a href="#mikeio.Grid1D.projection">projection</a></td>
-<td>The projection</td>
-</tr>
-<tr class="even">
-<td><a href="#mikeio.Grid1D.projection_string">projection_string</a></td>
-<td>The projection string</td>
-</tr>
-<tr class="odd">
-<td><a href="#mikeio.Grid1D.x">x</a></td>
-<td>array of node coordinates</td>
-</tr>
-</tbody>
-</table>
-</section>
-<section id="methods" class="level2">
-<h2 class="anchored" data-anchor-id="methods">Methods</h2>
-<table class="caption-top table">
-<thead>
-<tr class="header">
-<th>Name</th>
-<th>Description</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td><a href="#mikeio.Grid1D.find_index">find_index</a></td>
-<td>Find nearest point</td>
-</tr>
-<tr class="even">
-<td><a href="#mikeio.Grid1D.isel">isel</a></td>
-<td>Get a subset geometry from this geometry</td>
-</tr>
-</tbody>
-</table>
-<section id="mikeio.Grid1D.find_index" class="level3">
-<h3 class="anchored" data-anchor-id="mikeio.Grid1D.find_index">find_index</h3>
-<p><code>Grid1D.find_index(x, **kwargs)</code></p>
-<p>Find nearest point</p>
-<section id="parameters-1" class="level4">
-<h4 class="anchored" data-anchor-id="parameters-1">Parameters</h4>
-<table class="caption-top table">
-<thead>
-<tr class="header">
-<th>Name</th>
-<th>Type</th>
-<th>Description</th>
-<th>Default</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td><code>x</code></td>
-<td>float</td>
-<td>x-coordinate of point</td>
-<td><em>required</em></td>
-</tr>
-</tbody>
-</table>
-</section>
-<section id="returns" class="level4">
-<h4 class="anchored" data-anchor-id="returns">Returns</h4>
-<table class="caption-top table">
-<thead>
-<tr class="header">
-<th>Type</th>
-<th>Description</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td>int</td>
-<td>index of nearest point</td>
-</tr>
-<tr class="even">
-<td>Any</td>
-<td>Not used</td>
-</tr>
-</tbody>
-</table>
-</section>
-<section id="see-also" class="level4">
-<h4 class="anchored" data-anchor-id="see-also">See Also</h4>
-<p><a href="../api/Dataset.html#mikeio.Dataset.sel"><code>mikeio.Dataset.sel</code></a></p>
-</section>
-</section>
-<section id="mikeio.Grid1D.isel" class="level3">
-<h3 class="anchored" data-anchor-id="mikeio.Grid1D.isel">isel</h3>
-<p><code>Grid1D.isel(idx, axis=None)</code></p>
-<p>Get a subset geometry from this geometry</p>
-<section id="parameters-2" class="level4">
-<h4 class="anchored" data-anchor-id="parameters-2">Parameters</h4>
-<table class="caption-top table">
-<colgroup>
-<col style="width: 11%">
-<col style="width: 19%">
-<col style="width: 52%">
-<col style="width: 16%">
-</colgroup>
-<thead>
-<tr class="header">
-<th>Name</th>
-<th>Type</th>
-<th>Description</th>
-<th>Default</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td><code>idx</code></td>
-<td>int or slice</td>
-<td>index or slice</td>
-<td><em>required</em></td>
-</tr>
-<tr class="even">
-<td><code>axis</code></td>
-<td>int</td>
-<td>Not used for Grid1D, by default None</td>
-<td><code>None</code></td>
-</tr>
-</tbody>
-</table>
-</section>
-<section id="returns-1" class="level4">
-<h4 class="anchored" data-anchor-id="returns-1">Returns</h4>
-<table class="caption-top table">
-<colgroup>
-<col style="width: 61%">
-<col style="width: 38%">
-</colgroup>
-<thead>
-<tr class="header">
-<th>Type</th>
-<th>Description</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td>GeometryPoint2D or GeometryPoint3D or GeometryUndefined</td>
-<td>The geometry of the selected point</td>
-</tr>
-</tbody>
-</table>
-</section>
-<section id="examples-1" class="level4">
-<h4 class="anchored" data-anchor-id="examples-1">Examples</h4>
-<div id="4f95b3c2" class="cell" data-execution_count="3">
-<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> mikeio</span>
-<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>g <span class="op">=</span> mikeio.Grid1D(nx<span class="op">=</span><span class="dv">3</span>,dx<span class="op">=</span><span class="fl">0.1</span>)</span>
-<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>g</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display" data-execution_count="3">
-<pre><code>&lt;mikeio.Grid1D&gt;
-x: [0, 0.1, 0.2] (nx=3, dx=0.1)</code></pre>
-</div>
-</div>
-<div id="70a3ee30" class="cell" data-execution_count="4">
-<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>g.isel([<span class="dv">1</span>,<span class="dv">2</span>])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display" data-execution_count="4">
-<pre><code>&lt;mikeio.Grid1D&gt;
-x: [0.1, 0.2] (nx=2, dx=0.1)</code></pre>
-</div>
-</div>
-<div id="271a2a27" class="cell" data-execution_count="5">
-<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>g.isel(<span class="dv">1</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display" data-execution_count="5">
-<pre><code>GeometryUndefined()</code></pre>
-</div>
-</div>
-
-
-</section>
-</section>
 </section>
 
 </main> <!-- /main -->

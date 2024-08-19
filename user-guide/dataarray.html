@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>grid1d – MIKE IO</title>
+<title>DataArray – MIKE IO</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -64,6 +64,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <script src="../site_libs/quarto-search/fuse.min.js"></script>
 <script src="../site_libs/quarto-search/quarto-search.js"></script>
 <meta name="quarto:offset" content="../">
+<link href="../user-guide/dataset.html" rel="next">
+<link href="../user-guide/data-structures.html" rel="prev">
 <script src="../site_libs/quarto-html/quarto.js"></script>
 <script src="../site_libs/quarto-html/popper.min.js"></script>
 <script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
@@ -73,6 +75,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <script src="../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
 <link href="../site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<link href="../site_libs/quarto-contrib/fontawesome6-0.1.0/all.css" rel="stylesheet">
+<link href="../site_libs/quarto-contrib/fontawesome6-0.1.0/latex-fontsize.css" rel="stylesheet">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -163,7 +167,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
         <i class="bi bi-layout-text-sidebar-reverse"></i>
       </button>
         <a class="flex-grow-1 no-decor" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
-          <h1 class="quarto-secondary-nav-title">Grid1D</h1>
+          <h1 class="quarto-secondary-nav-title">DataArray</h1>
         </a>     
       <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
         <i class="bi bi-search"></i>
@@ -205,7 +209,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../user-guide/dataarray.html" class="sidebar-item-text sidebar-link">
+  <a href="../user-guide/dataarray.html" class="sidebar-item-text sidebar-link active">
  <span class="menu-text">DataArray</span></a>
   </div>
 </li>
@@ -339,23 +343,30 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     <h2 id="toc-title">On this page</h2>
    
   <ul>
-  <li><a href="#parameters" id="toc-parameters" class="nav-link active" data-scroll-target="#parameters">Parameters</a></li>
-  <li><a href="#examples" id="toc-examples" class="nav-link" data-scroll-target="#examples">Examples</a></li>
-  <li><a href="#attributes" id="toc-attributes" class="nav-link" data-scroll-target="#attributes">Attributes</a></li>
+  <li><a href="#temporal-selection" id="toc-temporal-selection" class="nav-link active" data-scroll-target="#temporal-selection"><i class="fa-solid fa-calendar" aria-label="calendar"></i> Temporal selection</a></li>
+  <li><a href="#spatial-selection" id="toc-spatial-selection" class="nav-link" data-scroll-target="#spatial-selection"><i class="fa-solid fa-map" aria-label="map"></i> Spatial selection</a></li>
+  <li><a href="#modifying-values" id="toc-modifying-values" class="nav-link" data-scroll-target="#modifying-values">Modifying values</a></li>
+  <li><a href="#plotting" id="toc-plotting" class="nav-link" data-scroll-target="#plotting"><i class="fa-solid fa-chart-line" aria-label="chart-line"></i> Plotting</a></li>
+  <li><a href="#properties" id="toc-properties" class="nav-link" data-scroll-target="#properties">Properties</a></li>
   <li><a href="#methods" id="toc-methods" class="nav-link" data-scroll-target="#methods">Methods</a>
   <ul class="collapse">
-  <li><a href="#mikeio.Grid1D.find_index" id="toc-mikeio.Grid1D.find_index" class="nav-link" data-scroll-target="#mikeio.Grid1D.find_index">find_index</a></li>
-  <li><a href="#mikeio.Grid1D.isel" id="toc-mikeio.Grid1D.isel" class="nav-link" data-scroll-target="#mikeio.Grid1D.isel">isel</a></li>
+  <li><a href="#aggregations-along-an-axis" id="toc-aggregations-along-an-axis" class="nav-link" data-scroll-target="#aggregations-along-an-axis">Aggregations along an axis</a></li>
+  </ul></li>
+  <li><a href="#mathematical-operations" id="toc-mathematical-operations" class="nav-link" data-scroll-target="#mathematical-operations"><i class="fa-solid fa-calculator" aria-label="calculator"></i> Mathematical operations</a></li>
+  <li><a href="#multiply-or-add-scalar" id="toc-multiply-or-add-scalar" class="nav-link" data-scroll-target="#multiply-or-add-scalar">Multiply or add scalar</a></li>
+  <li><a href="#difference-between-two-dataarrays" id="toc-difference-between-two-dataarrays" class="nav-link" data-scroll-target="#difference-between-two-dataarrays">Difference between two DataArrays</a>
+  <ul class="collapse">
+  <li><a href="#conversion" id="toc-conversion" class="nav-link" data-scroll-target="#conversion">Conversion:</a></li>
   </ul></li>
   </ul>
-</nav>
+<div class="toc-actions"><ul><li><a href="https://github.com/DHI/mikeio/edit/main/docs/user-guide/dataarray.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li></ul></div></nav>
     </div>
 <!-- main -->
 <main class="content" id="quarto-document-content">
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<h1 class="title d-none d-lg-block">Grid1D</h1>
+<h1 class="title d-none d-lg-block">DataArray</h1>
 </div>
 
 
@@ -372,298 +383,242 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </header>
 
 
-<p><code>Grid1D(self, x=None, *, x0=0.0, dx=None, nx=None, projection='NON-UTM', origin=(0.0, 0.0), orientation=0.0, node_coordinates=None, axis_name='x')</code></p>
-<p>1D grid (node-based) axis is increasing and equidistant</p>
-<section id="parameters" class="level2">
-<h2 class="anchored" data-anchor-id="parameters">Parameters</h2>
-<table class="caption-top table">
-<colgroup>
-<col style="width: 23%">
-<col style="width: 13%">
-<col style="width: 46%">
-<col style="width: 16%">
-</colgroup>
-<thead>
-<tr class="header">
-<th>Name</th>
-<th>Type</th>
-<th>Description</th>
-<th>Default</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td><code>x</code></td>
-<td>array_like</td>
-<td>node coordinates</td>
-<td><code>None</code></td>
-</tr>
-<tr class="even">
-<td><code>x0</code></td>
-<td>float</td>
-<td>first node coordinate</td>
-<td><code>0.0</code></td>
-</tr>
-<tr class="odd">
-<td><code>dx</code></td>
-<td>float</td>
-<td>grid spacing</td>
-<td><code>None</code></td>
-</tr>
-<tr class="even">
-<td><code>nx</code></td>
-<td>int</td>
-<td>number of nodes</td>
-<td><code>None</code></td>
-</tr>
-<tr class="odd">
-<td><code>projection</code></td>
-<td>str</td>
-<td>projection string</td>
-<td><code>'NON-UTM'</code></td>
-</tr>
-<tr class="even">
-<td><code>origin</code></td>
-<td>tuple</td>
-<td>not commonly used</td>
-<td><code>(0.0, 0.0)</code></td>
-</tr>
-<tr class="odd">
-<td><code>orientation</code></td>
-<td>float</td>
-<td>not commonly used</td>
-<td><code>0.0</code></td>
-</tr>
-<tr class="even">
-<td><code>node_coordinates</code></td>
-<td>array_like</td>
-<td>coordinates of nodes in 2D or 3D space</td>
-<td><code>None</code></td>
-</tr>
-<tr class="odd">
-<td><code>axis_name</code></td>
-<td>str</td>
-<td>name of axis, by default “x”</td>
-<td><code>'x'</code></td>
-</tr>
-</tbody>
-</table>
-</section>
-<section id="examples" class="level2">
-<h2 class="anchored" data-anchor-id="examples">Examples</h2>
-<div id="9e08427e" class="cell" data-execution_count="1">
+<p>The <a href="../api/DataArray.html#mikeio.DataArray">DataArray</a> is the common MIKE IO data structure for <em>item</em> data from dfs files. The <a href="../api/read.html#mikeio.read"><code>mikeio.read</code></a> methods returns a Dataset as a container of DataArrays (Dfs items)</p>
+<p>Each DataArray have the following properties:</p>
+<ul>
+<li><strong>item</strong> - an <a href="../api/ItemInfo.html#mikeio.ItemInfo"><code>mikeio.ItemInfo</code></a> with name, type and unit</li>
+<li><strong>time</strong> - a <a href="https://pandas.pydata.org/docs/reference/api/pandas.DatetimeIndex.html#pandas.DatetimeIndex"><code>pandas.DatetimeIndex</code></a> with the time instances of the data</li>
+<li><strong>geometry</strong> - a Geometry object with the spatial description of the data</li>
+<li><strong>values</strong> - a <a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray"><code>numpy.ndarray</code></a></li>
+</ul>
+<p>Use DataArray’s string representation to get an overview of the DataArray</p>
+<div id="38620af7" class="cell" data-execution_count="1">
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> mikeio</span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>mikeio.Grid1D(nx<span class="op">=</span><span class="dv">3</span>,dx<span class="op">=</span><span class="fl">0.1</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>ds <span class="op">=</span> mikeio.read(<span class="st">"../data/HD2D.dfsu"</span>)</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>da <span class="op">=</span> ds[<span class="st">"Surface elevation"</span>]</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>da</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="1">
-<pre><code>&lt;mikeio.Grid1D&gt;
-x: [0, 0.1, 0.2] (nx=3, dx=0.1)</code></pre>
+<pre><code>&lt;mikeio.DataArray&gt;
+name: Surface elevation
+dims: (time:9, element:884)
+time: 1985-08-06 07:00:00 - 1985-08-07 03:00:00 (9 records)
+geometry: Dfsu2D (884 elements, 529 nodes)</code></pre>
 </div>
 </div>
-<div id="7acf3d7e" class="cell" data-execution_count="2">
-<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>mikeio.Grid1D(x<span class="op">=</span>[<span class="fl">0.1</span>, <span class="fl">0.5</span>, <span class="fl">0.9</span>])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<section id="temporal-selection" class="level2">
+<h2 class="anchored" data-anchor-id="temporal-selection"><i class="fa-solid fa-calendar" aria-label="calendar"></i> Temporal selection</h2>
+<div id="dca9f5b5" class="cell" data-execution_count="2">
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>da.sel(time<span class="op">=</span><span class="st">"1985-08-06 12:00"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="2">
-<pre><code>&lt;mikeio.Grid1D&gt;
-x: [0.1, 0.5, 0.9] (nx=3, dx=0.4)</code></pre>
+<pre><code>&lt;mikeio.DataArray&gt;
+name: Surface elevation
+dims: (element:884)
+time: 1985-08-06 12:00:00 (time-invariant)
+geometry: Dfsu2D (884 elements, 529 nodes)
+values: [0.1012, 0.1012, ..., 0.105]</code></pre>
+</div>
+</div>
+<div id="32eb72cd" class="cell" data-execution_count="3">
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>da[<span class="st">"1985-8-7"</span>:]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="3">
+<pre><code>&lt;mikeio.DataArray&gt;
+name: Surface elevation
+dims: (time:2, element:884)
+time: 1985-08-07 00:30:00 - 1985-08-07 03:00:00 (2 records)
+geometry: Dfsu2D (884 elements, 529 nodes)</code></pre>
 </div>
 </div>
 </section>
-<section id="attributes" class="level2">
-<h2 class="anchored" data-anchor-id="attributes">Attributes</h2>
-<table class="caption-top table">
-<thead>
-<tr class="header">
-<th>Name</th>
-<th>Description</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td><a href="#mikeio.Grid1D.dx">dx</a></td>
-<td>grid spacing</td>
-</tr>
-<tr class="even">
-<td><a href="#mikeio.Grid1D.is_geo">is_geo</a></td>
-<td>Are coordinates geographical (LONG/LAT)?</td>
-</tr>
-<tr class="odd">
-<td><a href="#mikeio.Grid1D.is_local_coordinates">is_local_coordinates</a></td>
-<td>Are coordinates relative (NON-UTM)?</td>
-</tr>
-<tr class="even">
-<td><a href="#mikeio.Grid1D.nx">nx</a></td>
-<td>number of grid points</td>
-</tr>
-<tr class="odd">
-<td><a href="#mikeio.Grid1D.projection">projection</a></td>
-<td>The projection</td>
-</tr>
-<tr class="even">
-<td><a href="#mikeio.Grid1D.projection_string">projection_string</a></td>
-<td>The projection string</td>
-</tr>
-<tr class="odd">
-<td><a href="#mikeio.Grid1D.x">x</a></td>
-<td>array of node coordinates</td>
-</tr>
-</tbody>
-</table>
+<section id="spatial-selection" class="level2">
+<h2 class="anchored" data-anchor-id="spatial-selection"><i class="fa-solid fa-map" aria-label="map"></i> Spatial selection</h2>
+<p>The <a href="../api/DataArray.html#mikeio.DataArray.sel"><code>sel</code></a> method finds the nearest element.</p>
+<div id="694b6045" class="cell" data-execution_count="4">
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>da.sel(x<span class="op">=</span><span class="dv">607002</span>, y<span class="op">=</span><span class="dv">6906734</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="4">
+<pre><code>&lt;mikeio.DataArray&gt;
+name: Surface elevation
+dims: (time:9)
+time: 1985-08-06 07:00:00 - 1985-08-07 03:00:00 (9 records)
+geometry: GeometryPoint2D(x=607002.7094112666, y=6906734.833048992)
+values: [0.4591, 0.8078, ..., -0.6311]</code></pre>
+</div>
+</div>
+</section>
+<section id="modifying-values" class="level2">
+<h2 class="anchored" data-anchor-id="modifying-values">Modifying values</h2>
+<p>You can modify the values of a DataArray by changing its <a href="../api/DataArray.html#mikeio.DataArray.values"><code>values</code></a>:</p>
+<div id="e2b92351" class="cell" data-execution_count="5">
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>da.values[<span class="dv">0</span>, <span class="dv">3</span>] <span class="op">=</span> <span class="fl">5.0</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>If you wish to change values of a subset of the DataArray you should be aware of the difference between a <em>view</em> and a <em>copy</em> of the data. Similar to NumPy, MIKE IO selection method will return a <em>view</em> of the data when using single index and slices, but a <em>copy</em> of the data using fancy indexing (a list of indicies or boolean indexing). Note that prior to release 1.3, MIKE IO would always return a copy.</p>
+<p>It is recommended to change the values using <code>values</code> property directly on the original DataArray (like above), but it is also possible to change the values of the original DataArray by working on a subset DataArray if it is selected with single index or slice as explained above.</p>
+<div id="290595ba" class="cell" data-execution_count="6">
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>da_sub <span class="op">=</span> da.isel(time<span class="op">=</span><span class="dv">0</span>)</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>da_sub.values[:] <span class="op">=</span> <span class="fl">5.0</span>    <span class="co"># will change da</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Fancy indexing will return a <em>copy</em> and therefore not change the original:</p>
+<div id="2c778227" class="cell" data-execution_count="7">
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>da_sub <span class="op">=</span> da.isel(time<span class="op">=</span>[<span class="dv">0</span>,<span class="dv">1</span>,<span class="dv">2</span>])</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>da_sub.values[:] <span class="op">=</span> <span class="fl">5.0</span>    <span class="co"># will NOT change da</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="plotting" class="level2">
+<h2 class="anchored" data-anchor-id="plotting"><i class="fa-solid fa-chart-line" aria-label="chart-line"></i> Plotting</h2>
+<p>The plotting of a DataArray is context-aware meaning that plotting behaviour depends on the geometry of the DataArray being plotted.</p>
+<div id="4563e324" class="cell" data-execution_count="8">
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>da.plot()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="dataarray_files/figure-html/cell-9-output-1.png" width="299" height="463" class="figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+<div id="759e24db" class="cell" data-execution_count="9">
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>da.plot.contourf()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="dataarray_files/figure-html/cell-10-output-1.png" width="299" height="463" class="figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+<div id="ccbe7adc" class="cell" data-execution_count="10">
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>da.plot.mesh()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="dataarray_files/figure-html/cell-11-output-1.png" width="213" height="449" class="figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>See details in the <a href="../api/dataset._data_plot._DataArrayPlotter.html#mikeio.dataset._data_plot._DataArrayPlotter">API specification</a> below and in the bottom of the relevant pages e.g.&nbsp;<a href="../api/dataset._data_plot._DataArrayPlotterGrid2D.html#mikeio.dataset._data_plot._DataArrayPlotterGrid2D">DataArray Plotter Grid2D API</a>.</p>
+</section>
+<section id="properties" class="level2">
+<h2 class="anchored" data-anchor-id="properties">Properties</h2>
+<p>The DataArray has several properties:</p>
+<ul>
+<li>time - Time index</li>
+<li>geometry - geometry of the data (e.g.&nbsp;<code>spatial.GeometryFM2D</code>)</li>
+<li>shape - Shape of the data</li>
+<li>deletevalue - File delete value (NaN value)</li>
+</ul>
+<div id="e265503b" class="cell" data-execution_count="11">
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>da.geometry</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="11">
+<pre><code>Flexible Mesh Geometry: Dfsu2D
+number of nodes: 529
+number of elements: 884
+projection: UTM-29</code></pre>
+</div>
+</div>
 </section>
 <section id="methods" class="level2">
 <h2 class="anchored" data-anchor-id="methods">Methods</h2>
-<table class="caption-top table">
-<thead>
-<tr class="header">
-<th>Name</th>
-<th>Description</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td><a href="#mikeio.Grid1D.find_index">find_index</a></td>
-<td>Find nearest point</td>
-</tr>
-<tr class="even">
-<td><a href="#mikeio.Grid1D.isel">isel</a></td>
-<td>Get a subset geometry from this geometry</td>
-</tr>
-</tbody>
-</table>
-<section id="mikeio.Grid1D.find_index" class="level3">
-<h3 class="anchored" data-anchor-id="mikeio.Grid1D.find_index">find_index</h3>
-<p><code>Grid1D.find_index(x, **kwargs)</code></p>
-<p>Find nearest point</p>
-<section id="parameters-1" class="level4">
-<h4 class="anchored" data-anchor-id="parameters-1">Parameters</h4>
-<table class="caption-top table">
-<thead>
-<tr class="header">
-<th>Name</th>
-<th>Type</th>
-<th>Description</th>
-<th>Default</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td><code>x</code></td>
-<td>float</td>
-<td>x-coordinate of point</td>
-<td><em>required</em></td>
-</tr>
-</tbody>
-</table>
-</section>
-<section id="returns" class="level4">
-<h4 class="anchored" data-anchor-id="returns">Returns</h4>
-<table class="caption-top table">
-<thead>
-<tr class="header">
-<th>Type</th>
-<th>Description</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td>int</td>
-<td>index of nearest point</td>
-</tr>
-<tr class="even">
-<td>Any</td>
-<td>Not used</td>
-</tr>
-</tbody>
-</table>
-</section>
-<section id="see-also" class="level4">
-<h4 class="anchored" data-anchor-id="see-also">See Also</h4>
-<p><a href="../api/Dataset.html#mikeio.Dataset.sel"><code>mikeio.Dataset.sel</code></a></p>
+<p>DataArray has several useful methods for working with data, including different ways of <em>selecting</em> data:</p>
+<ul>
+<li><a href="../api/DataArray.html#mikeio.DataArray.sel"><code>sel()</code></a> - Select subset along an axis</li>
+<li><a href="../api/DataArray.html#mikeio.DataArray.isel"><code>isel()</code></a> - Select subset along an axis with an integer</li>
+</ul>
+<section id="aggregations-along-an-axis" class="level3">
+<h3 class="anchored" data-anchor-id="aggregations-along-an-axis">Aggregations along an axis</h3>
+<ul>
+<li><a href="../api/DataArray.html#mikeio.DataArray.mean"><code>mean()</code></a> - Mean value along an axis</li>
+<li><a href="../api/DataArray.html#mikeio.DataArray.nanmean"><code>nanmean()</code></a> - Mean value along an axis (NaN removed)</li>
+<li><a href="../api/DataArray.html#mikeio.DataArray.max"><code>max()</code></a> - Max value along an axis</li>
+<li><a href="../api/DataArray.html#mikeio.DataArray.nanmax"><code>nanmax()</code></a> - Max value along an axis (NaN removed)</li>
+<li><a href="../api/DataArray.html#mikeio.DataArray.min"><code>min()</code></a> - Min value along an axis</li>
+<li><a href="../api/DataArray.html#mikeio.DataArray.nanmin"><code>nanmin()</code></a> - Min value along an axis (NaN removed)</li>
+<li><a href="../api/DataArray.html#mikeio.DataArray.aggregate"><code>aggregate()</code></a> - Aggregate along an axis</li>
+<li><a href="../api/DataArray.html#mikeio.DataArray.quantile"><code>quantile()</code></a> - Quantiles along an axis</li>
+</ul>
 </section>
 </section>
-<section id="mikeio.Grid1D.isel" class="level3">
-<h3 class="anchored" data-anchor-id="mikeio.Grid1D.isel">isel</h3>
-<p><code>Grid1D.isel(idx, axis=None)</code></p>
-<p>Get a subset geometry from this geometry</p>
-<section id="parameters-2" class="level4">
-<h4 class="anchored" data-anchor-id="parameters-2">Parameters</h4>
-<table class="caption-top table">
-<colgroup>
-<col style="width: 11%">
-<col style="width: 19%">
-<col style="width: 52%">
-<col style="width: 16%">
-</colgroup>
-<thead>
-<tr class="header">
-<th>Name</th>
-<th>Type</th>
-<th>Description</th>
-<th>Default</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td><code>idx</code></td>
-<td>int or slice</td>
-<td>index or slice</td>
-<td><em>required</em></td>
-</tr>
-<tr class="even">
-<td><code>axis</code></td>
-<td>int</td>
-<td>Not used for Grid1D, by default None</td>
-<td><code>None</code></td>
-</tr>
-</tbody>
-</table>
+<section id="mathematical-operations" class="level2">
+<h2 class="anchored" data-anchor-id="mathematical-operations"><i class="fa-solid fa-calculator" aria-label="calculator"></i> Mathematical operations</h2>
+<ul>
+<li>ds + value</li>
+<li>ds - value</li>
+<li>ds * value</li>
+</ul>
+<p>and + and - between two DataArrays (if number of items and shapes conform):</p>
+<ul>
+<li>ds1 + ds2</li>
+<li>ds1 - ds2</li>
+</ul>
 </section>
-<section id="returns-1" class="level4">
-<h4 class="anchored" data-anchor-id="returns-1">Returns</h4>
-<table class="caption-top table">
-<colgroup>
-<col style="width: 61%">
-<col style="width: 38%">
-</colgroup>
-<thead>
-<tr class="header">
-<th>Type</th>
-<th>Description</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td>GeometryPoint2D or GeometryPoint3D or GeometryUndefined</td>
-<td>The geometry of the selected point</td>
-</tr>
-</tbody>
-</table>
+<section id="multiply-or-add-scalar" class="level2">
+<h2 class="anchored" data-anchor-id="multiply-or-add-scalar">Multiply or add scalar</h2>
+<div id="a483143f" class="cell" data-execution_count="12">
+<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>da1 <span class="op">=</span> mikeio.read(<span class="st">"../data/oresundHD_run1.dfsu"</span>, items<span class="op">=</span><span class="st">"Surface elevation"</span>)[<span class="dv">0</span>]</span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>da2 <span class="op">=</span> mikeio.read(<span class="st">"../data/oresundHD_run2.dfsu"</span>, items<span class="op">=</span><span class="st">"Surface elevation"</span>)[<span class="dv">0</span>]</span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a>da1.values.mean()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="12">
+<pre><code>np.float32(0.18681714)</code></pre>
+</div>
+</div>
+<div id="8dc9e3eb" class="cell" data-execution_count="13">
+<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>da1_A <span class="op">=</span> da1 <span class="op">+</span> <span class="dv">1</span></span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>da1_B <span class="op">=</span> da1 <span class="op">-</span> <span class="dv">1</span></span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>da1_A.values.mean(), da1_B.values.mean()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="13">
+<pre><code>(np.float32(1.1868172), np.float32(-0.81318283))</code></pre>
+</div>
+</div>
+<div id="fa63a607" class="cell" data-execution_count="14">
+<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>da1_C <span class="op">=</span> da1 <span class="op">*</span> <span class="dv">2</span></span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>da1_D <span class="op">=</span> da1 <span class="op">/</span> <span class="dv">2</span></span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>da1_C.values.mean(), da1_D.values.mean()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="14">
+<pre><code>(np.float32(0.37363428), np.float32(0.09340857))</code></pre>
+</div>
+</div>
 </section>
-<section id="examples-1" class="level4">
-<h4 class="anchored" data-anchor-id="examples-1">Examples</h4>
-<div id="4f95b3c2" class="cell" data-execution_count="3">
-<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> mikeio</span>
-<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>g <span class="op">=</span> mikeio.Grid1D(nx<span class="op">=</span><span class="dv">3</span>,dx<span class="op">=</span><span class="fl">0.1</span>)</span>
-<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>g</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display" data-execution_count="3">
-<pre><code>&lt;mikeio.Grid1D&gt;
-x: [0, 0.1, 0.2] (nx=3, dx=0.1)</code></pre>
+<section id="difference-between-two-dataarrays" class="level2">
+<h2 class="anchored" data-anchor-id="difference-between-two-dataarrays">Difference between two DataArrays</h2>
+<p>Assume that we have two calibration runs and we wan’t to find the difference…</p>
+<div id="63ba8fd5" class="cell" data-execution_count="15">
+<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>da_diff <span class="op">=</span> da1<span class="op">-</span>da2</span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>da_diff.plot(title<span class="op">=</span><span class="st">"Difference"</span>)<span class="op">;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="dataarray_files/figure-html/cell-16-output-1.png" width="395" height="449" class="figure-img"></p>
+</figure>
 </div>
 </div>
-<div id="70a3ee30" class="cell" data-execution_count="4">
-<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>g.isel([<span class="dv">1</span>,<span class="dv">2</span>])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display" data-execution_count="4">
-<pre><code>&lt;mikeio.Grid1D&gt;
-x: [0.1, 0.2] (nx=2, dx=0.1)</code></pre>
+</div>
+<div id="1ebd99f4" class="cell" data-execution_count="16">
+<div class="sourceCode cell-code" id="cb24"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>da_ratio <span class="op">=</span> da1 <span class="op">/</span> da2</span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>da_ratio.plot(title<span class="op">=</span><span class="st">""</span>, label<span class="op">=</span><span class="st">"Ratio"</span>, vmin<span class="op">=</span><span class="fl">0.8</span>, vmax<span class="op">=</span><span class="fl">1.2</span>, levels<span class="op">=</span><span class="dv">9</span>, cmap<span class="op">=</span><span class="st">"coolwarm"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="dataarray_files/figure-html/cell-17-output-1.png" width="367" height="443" class="figure-img"></p>
+</figure>
 </div>
 </div>
-<div id="271a2a27" class="cell" data-execution_count="5">
-<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>g.isel(<span class="dv">1</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display" data-execution_count="5">
-<pre><code>GeometryUndefined()</code></pre>
 </div>
-</div>
+<p>Other methods that also return a DataArray:</p>
+<ul>
+<li><a href="../api/DataArray.html#mikeio.DataArray.interp_like"><code>interp_like</code></a> - Spatio (temporal) interpolation (see example <a href="../examples/Dfsu-2D-interpolation.html">Dfsu interpolation</a>)</li>
+<li><a href="../api/DataArray.html#mikeio.DataArray.interp_time"><code>interp_time()</code></a> - Temporal interpolation (see example <a href="../examples/Time-interpolation.html">Time interpolation</a>)</li>
+<li><a href="../api/DataArray.html#mikeio.DataArray.dropna"><code>dropna()</code></a> - Remove time steps where all items are NaN</li>
+<li><a href="../api/DataArray.html#mikeio.DataArray.squeeze"><code>squeeze()</code></a> - Remove axes of length 1</li>
+</ul>
+<section id="conversion" class="level3">
+<h3 class="anchored" data-anchor-id="conversion">Conversion:</h3>
+<ul>
+<li><a href="../api/DataArray.html#mikeio.DataArray.to_xarray"><code>to_xarray()</code></a> - Convert DataArray to a xarray DataArray (great for Dfs2)</li>
+<li><a href="../api/DataArray.html#mikeio.DataArray.to_dfs"><code>to_dfs()</code></a> - Write DataArray to a Dfs file</li>
+</ul>
 
 
-</section>
 </section>
 </section>
 
@@ -1088,6 +1043,18 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
   }
 });
 </script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="../user-guide/data-structures.html" class="pagination-link" aria-label="Data Structures">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text">Data Structures</span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="../user-guide/dataset.html" class="pagination-link" aria-label="Dataset">
+        <span class="nav-page-text">Dataset</span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
 </div> <!-- /content -->
 <footer class="footer">
   <div class="nav-footer">
@@ -1096,7 +1063,7 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
     </div>   
     <div class="nav-footer-center">
 <p>© 2024 DHI Group</p>
-</div>
+<div class="toc-actions d-sm-block d-md-none"><ul><li><a href="https://github.com/DHI/mikeio/edit/main/docs/user-guide/dataarray.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li></ul></div></div>
     <div class="nav-footer-right">
       &nbsp;
     </div>

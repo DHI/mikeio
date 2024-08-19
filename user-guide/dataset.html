@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>grid1d – MIKE IO</title>
+<title>Dataset – MIKE IO</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -64,6 +64,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <script src="../site_libs/quarto-search/fuse.min.js"></script>
 <script src="../site_libs/quarto-search/quarto-search.js"></script>
 <meta name="quarto:offset" content="../">
+<link href="../user-guide/dfs0.html" rel="next">
+<link href="../user-guide/dataarray.html" rel="prev">
 <script src="../site_libs/quarto-html/quarto.js"></script>
 <script src="../site_libs/quarto-html/popper.min.js"></script>
 <script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
@@ -73,6 +75,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <script src="../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
 <link href="../site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<link href="../site_libs/quarto-contrib/fontawesome6-0.1.0/all.css" rel="stylesheet">
+<link href="../site_libs/quarto-contrib/fontawesome6-0.1.0/latex-fontsize.css" rel="stylesheet">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -163,7 +167,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
         <i class="bi bi-layout-text-sidebar-reverse"></i>
       </button>
         <a class="flex-grow-1 no-decor" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
-          <h1 class="quarto-secondary-nav-title">Grid1D</h1>
+          <h1 class="quarto-secondary-nav-title">Dataset</h1>
         </a>     
       <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
         <i class="bi bi-search"></i>
@@ -211,7 +215,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../user-guide/dataset.html" class="sidebar-item-text sidebar-link">
+  <a href="../user-guide/dataset.html" class="sidebar-item-text sidebar-link active">
  <span class="menu-text">Dataset</span></a>
   </div>
 </li>
@@ -339,23 +343,26 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     <h2 id="toc-title">On this page</h2>
    
   <ul>
-  <li><a href="#parameters" id="toc-parameters" class="nav-link active" data-scroll-target="#parameters">Parameters</a></li>
-  <li><a href="#examples" id="toc-examples" class="nav-link" data-scroll-target="#examples">Examples</a></li>
-  <li><a href="#attributes" id="toc-attributes" class="nav-link" data-scroll-target="#attributes">Attributes</a></li>
+  <li><a href="#selecting-items" id="toc-selecting-items" class="nav-link active" data-scroll-target="#selecting-items"><i class="fa-solid fa-filter" aria-label="filter"></i> Selecting items</a></li>
+  <li><a href="#temporal-selection" id="toc-temporal-selection" class="nav-link" data-scroll-target="#temporal-selection"><i class="fa-solid fa-calendar" aria-label="calendar"></i> Temporal selection</a></li>
+  <li><a href="#spatial-selection" id="toc-spatial-selection" class="nav-link" data-scroll-target="#spatial-selection"><i class="fa-solid fa-map" aria-label="map"></i> Spatial selection</a></li>
+  <li><a href="#plotting" id="toc-plotting" class="nav-link" data-scroll-target="#plotting"><i class="fa-solid fa-chart-line" aria-label="chart-line"></i> Plotting</a></li>
+  <li><a href="#add-a-new-item" id="toc-add-a-new-item" class="nav-link" data-scroll-target="#add-a-new-item">Add a new item</a></li>
+  <li><a href="#properties" id="toc-properties" class="nav-link" data-scroll-target="#properties">Properties</a></li>
   <li><a href="#methods" id="toc-methods" class="nav-link" data-scroll-target="#methods">Methods</a>
   <ul class="collapse">
-  <li><a href="#mikeio.Grid1D.find_index" id="toc-mikeio.Grid1D.find_index" class="nav-link" data-scroll-target="#mikeio.Grid1D.find_index">find_index</a></li>
-  <li><a href="#mikeio.Grid1D.isel" id="toc-mikeio.Grid1D.isel" class="nav-link" data-scroll-target="#mikeio.Grid1D.isel">isel</a></li>
+  <li><a href="#mathematical-operations" id="toc-mathematical-operations" class="nav-link" data-scroll-target="#mathematical-operations"><i class="fa-solid fa-calculator" aria-label="calculator"></i> Mathematical operations</a></li>
+  <li><a href="#conversion" id="toc-conversion" class="nav-link" data-scroll-target="#conversion">Conversion:</a></li>
   </ul></li>
   </ul>
-</nav>
+<div class="toc-actions"><ul><li><a href="https://github.com/DHI/mikeio/edit/main/docs/user-guide/dataset.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li></ul></div></nav>
     </div>
 <!-- main -->
 <main class="content" id="quarto-document-content">
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<h1 class="title d-none d-lg-block">Grid1D</h1>
+<h1 class="title d-none d-lg-block">Dataset</h1>
 </div>
 
 
@@ -372,298 +379,268 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </header>
 
 
-<p><code>Grid1D(self, x=None, *, x0=0.0, dx=None, nx=None, projection='NON-UTM', origin=(0.0, 0.0), orientation=0.0, node_coordinates=None, axis_name='x')</code></p>
-<p>1D grid (node-based) axis is increasing and equidistant</p>
-<section id="parameters" class="level2">
-<h2 class="anchored" data-anchor-id="parameters">Parameters</h2>
-<table class="caption-top table">
-<colgroup>
-<col style="width: 23%">
-<col style="width: 13%">
-<col style="width: 46%">
-<col style="width: 16%">
-</colgroup>
-<thead>
-<tr class="header">
-<th>Name</th>
-<th>Type</th>
-<th>Description</th>
-<th>Default</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td><code>x</code></td>
-<td>array_like</td>
-<td>node coordinates</td>
-<td><code>None</code></td>
-</tr>
-<tr class="even">
-<td><code>x0</code></td>
-<td>float</td>
-<td>first node coordinate</td>
-<td><code>0.0</code></td>
-</tr>
-<tr class="odd">
-<td><code>dx</code></td>
-<td>float</td>
-<td>grid spacing</td>
-<td><code>None</code></td>
-</tr>
-<tr class="even">
-<td><code>nx</code></td>
-<td>int</td>
-<td>number of nodes</td>
-<td><code>None</code></td>
-</tr>
-<tr class="odd">
-<td><code>projection</code></td>
-<td>str</td>
-<td>projection string</td>
-<td><code>'NON-UTM'</code></td>
-</tr>
-<tr class="even">
-<td><code>origin</code></td>
-<td>tuple</td>
-<td>not commonly used</td>
-<td><code>(0.0, 0.0)</code></td>
-</tr>
-<tr class="odd">
-<td><code>orientation</code></td>
-<td>float</td>
-<td>not commonly used</td>
-<td><code>0.0</code></td>
-</tr>
-<tr class="even">
-<td><code>node_coordinates</code></td>
-<td>array_like</td>
-<td>coordinates of nodes in 2D or 3D space</td>
-<td><code>None</code></td>
-</tr>
-<tr class="odd">
-<td><code>axis_name</code></td>
-<td>str</td>
-<td>name of axis, by default “x”</td>
-<td><code>'x'</code></td>
-</tr>
-</tbody>
-</table>
-</section>
-<section id="examples" class="level2">
-<h2 class="anchored" data-anchor-id="examples">Examples</h2>
-<div id="9e08427e" class="cell" data-execution_count="1">
+<p>The <a href="../api/Dataset.html#mikeio.Dataset">Dataset</a> is the MIKE IO data structure for data from dfs files. The <a href="../api/read.html#mikeio.read"><code>mikeio.read</code></a> methods returns a Dataset as a container of <a href="../api/DataArray.html#mikeio.DataArray">DataArray</a> (Dfs items). Each DataArray has the properties, <em>item</em>, <em>time</em>, <em>geometry</em> and <em>values</em>. The time and geometry are common to all DataArrays in the Dataset.</p>
+<p>The Dataset has the following primary properties:</p>
+<ul>
+<li><strong>items</strong> - a list of <a href="../api/ItemInfo.html#mikeio.ItemInfo"><code>mikeio.ItemInfo</code></a> items for each dataarray</li>
+<li><strong>time</strong> - a <a href="https://pandas.pydata.org/docs/reference/api/pandas.DatetimeIndex.html#pandas.DatetimeIndex"><code>pandas.DatetimeIndex</code></a> with the time instances of the data</li>
+<li><strong>geometry</strong> - a Geometry object with the spatial description of the data</li>
+</ul>
+<p>Use Dataset’s string representation to get an overview of the Dataset</p>
+<div id="30bac220" class="cell" data-execution_count="1">
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> mikeio</span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>mikeio.Grid1D(nx<span class="op">=</span><span class="dv">3</span>,dx<span class="op">=</span><span class="fl">0.1</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>ds <span class="op">=</span> mikeio.read(<span class="st">"../data/HD2D.dfsu"</span>)</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>ds</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="1">
-<pre><code>&lt;mikeio.Grid1D&gt;
-x: [0, 0.1, 0.2] (nx=3, dx=0.1)</code></pre>
+<pre><code>&lt;mikeio.Dataset&gt;
+dims: (time:9, element:884)
+time: 1985-08-06 07:00:00 - 1985-08-07 03:00:00 (9 records)
+geometry: Dfsu2D (884 elements, 529 nodes)
+items:
+  0:  Surface elevation &lt;Surface Elevation&gt; (meter)
+  1:  U velocity &lt;u velocity component&gt; (meter per sec)
+  2:  V velocity &lt;v velocity component&gt; (meter per sec)
+  3:  Current speed &lt;Current Speed&gt; (meter per sec)</code></pre>
 </div>
 </div>
-<div id="7acf3d7e" class="cell" data-execution_count="2">
-<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>mikeio.Grid1D(x<span class="op">=</span>[<span class="fl">0.1</span>, <span class="fl">0.5</span>, <span class="fl">0.9</span>])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<section id="selecting-items" class="level2">
+<h2 class="anchored" data-anchor-id="selecting-items"><i class="fa-solid fa-filter" aria-label="filter"></i> Selecting items</h2>
+<p>Selecting a specific item “itemA” (at position 0) from a Dataset ds can be done with:</p>
+<ul>
+<li><code>ds[["itemA"]]</code> - returns a new Dataset with “itemA”</li>
+<li><code>ds["itemA"]</code> - returns “itemA” DataArray</li>
+<li><code>ds[[0]]</code> - returns a new Dataset with “itemA”</li>
+<li><code>ds[0]</code> - returns “itemA” DataArray</li>
+<li><code>ds.itemA</code> - returns “itemA” DataArray</li>
+</ul>
+<p>We recommend the use <em>named</em> items for readability.</p>
+<div id="d38f8566" class="cell" data-execution_count="2">
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>ds.Surface_elevation</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="2">
-<pre><code>&lt;mikeio.Grid1D&gt;
-x: [0.1, 0.5, 0.9] (nx=3, dx=0.4)</code></pre>
+<pre><code>&lt;mikeio.DataArray&gt;
+name: Surface elevation
+dims: (time:9, element:884)
+time: 1985-08-06 07:00:00 - 1985-08-07 03:00:00 (9 records)
+geometry: Dfsu2D (884 elements, 529 nodes)</code></pre>
+</div>
+</div>
+<p>Negative index e.g.&nbsp;ds[-1] can also be used to select from the end. Several items (“itemA” at 0 and “itemC” at 2) can be selected with the notation:</p>
+<ul>
+<li><code>ds[["itemA", "itemC"]]</code></li>
+<li><code>ds[[0, 2]]</code></li>
+</ul>
+<p>Note that this behavior is similar to pandas and xarray.</p>
+</section>
+<section id="temporal-selection" class="level2">
+<h2 class="anchored" data-anchor-id="temporal-selection"><i class="fa-solid fa-calendar" aria-label="calendar"></i> Temporal selection</h2>
+<p>A time slice of a Dataset can be selected in several different ways.</p>
+<div id="ac1c5014" class="cell" data-execution_count="3">
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>ds.sel(time<span class="op">=</span><span class="st">"1985-08-06 12:00"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="3">
+<pre><code>&lt;mikeio.Dataset&gt;
+dims: (element:884)
+time: 1985-08-06 12:00:00 (time-invariant)
+geometry: Dfsu2D (884 elements, 529 nodes)
+items:
+  0:  Surface elevation &lt;Surface Elevation&gt; (meter)
+  1:  U velocity &lt;u velocity component&gt; (meter per sec)
+  2:  V velocity &lt;v velocity component&gt; (meter per sec)
+  3:  Current speed &lt;Current Speed&gt; (meter per sec)</code></pre>
+</div>
+</div>
+<div id="c1c21af9" class="cell" data-execution_count="4">
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>ds[<span class="st">"1985-8-7"</span>:]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="4">
+<pre><code>&lt;mikeio.Dataset&gt;
+dims: (time:2, element:884)
+time: 1985-08-07 00:30:00 - 1985-08-07 03:00:00 (2 records)
+geometry: Dfsu2D (884 elements, 529 nodes)
+items:
+  0:  Surface elevation &lt;Surface Elevation&gt; (meter)
+  1:  U velocity &lt;u velocity component&gt; (meter per sec)
+  2:  V velocity &lt;v velocity component&gt; (meter per sec)
+  3:  Current speed &lt;Current Speed&gt; (meter per sec)</code></pre>
 </div>
 </div>
 </section>
-<section id="attributes" class="level2">
-<h2 class="anchored" data-anchor-id="attributes">Attributes</h2>
-<table class="caption-top table">
-<thead>
-<tr class="header">
-<th>Name</th>
-<th>Description</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td><a href="#mikeio.Grid1D.dx">dx</a></td>
-<td>grid spacing</td>
-</tr>
-<tr class="even">
-<td><a href="#mikeio.Grid1D.is_geo">is_geo</a></td>
-<td>Are coordinates geographical (LONG/LAT)?</td>
-</tr>
-<tr class="odd">
-<td><a href="#mikeio.Grid1D.is_local_coordinates">is_local_coordinates</a></td>
-<td>Are coordinates relative (NON-UTM)?</td>
-</tr>
-<tr class="even">
-<td><a href="#mikeio.Grid1D.nx">nx</a></td>
-<td>number of grid points</td>
-</tr>
-<tr class="odd">
-<td><a href="#mikeio.Grid1D.projection">projection</a></td>
-<td>The projection</td>
-</tr>
-<tr class="even">
-<td><a href="#mikeio.Grid1D.projection_string">projection_string</a></td>
-<td>The projection string</td>
-</tr>
-<tr class="odd">
-<td><a href="#mikeio.Grid1D.x">x</a></td>
-<td>array of node coordinates</td>
-</tr>
-</tbody>
-</table>
+<section id="spatial-selection" class="level2">
+<h2 class="anchored" data-anchor-id="spatial-selection"><i class="fa-solid fa-map" aria-label="map"></i> Spatial selection</h2>
+<p>The <code>sel</code> method finds a single element.</p>
+<div id="30304891" class="cell" data-execution_count="5">
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>ds.sel(x<span class="op">=</span><span class="dv">607002</span>, y<span class="op">=</span><span class="dv">6906734</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="5">
+<pre><code>&lt;mikeio.Dataset&gt;
+dims: (time:9)
+time: 1985-08-06 07:00:00 - 1985-08-07 03:00:00 (9 records)
+geometry: GeometryPoint2D(x=607002.7094112666, y=6906734.833048992)
+items:
+  0:  Surface elevation &lt;Surface Elevation&gt; (meter)
+  1:  U velocity &lt;u velocity component&gt; (meter per sec)
+  2:  V velocity &lt;v velocity component&gt; (meter per sec)
+  3:  Current speed &lt;Current Speed&gt; (meter per sec)</code></pre>
+</div>
+</div>
+</section>
+<section id="plotting" class="level2">
+<h2 class="anchored" data-anchor-id="plotting"><i class="fa-solid fa-chart-line" aria-label="chart-line"></i> Plotting</h2>
+<p>In most cases, you will <em>not</em> plot the Dataset, but rather it’s DataArrays. But there are two exceptions:</p>
+<ul>
+<li>dfs0-Dataset : plot all items as timeseries with ds.plot()</li>
+<li>scatter : compare two items using ds.plot.scatter(x=“itemA”, y=“itemB”)</li>
+</ul>
+<p>See details in the <a href="../api/dataset._data_plot._DatasetPlotter.html#mikeio.dataset._data_plot._DatasetPlotter">Dataset Plotter API</a>.</p>
+</section>
+<section id="add-a-new-item" class="level2">
+<h2 class="anchored" data-anchor-id="add-a-new-item">Add a new item</h2>
+<p>A common workflow is to create a new item based on existing items in a dataset.</p>
+<p>This can be in done in several ways. Let’s try one of the options.</p>
+<div id="dbfed918" class="cell" data-execution_count="6">
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>ds <span class="op">=</span> mikeio.read(<span class="st">"../data/NorthSea_HD_and_windspeed.dfsu"</span>)</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>ds</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="6">
+<pre><code>&lt;mikeio.Dataset&gt;
+dims: (time:67, element:958)
+time: 2017-10-27 00:00:00 - 2017-10-29 18:00:00 (67 records)
+geometry: Dfsu2D (958 elements, 570 nodes)
+items:
+  0:  Surface elevation &lt;Surface Elevation&gt; (meter)
+  1:  Wind speed &lt;Wind speed&gt; (meter per sec)</code></pre>
+</div>
+</div>
+<ol type="1">
+<li>Create a copy of the DataArray</li>
+</ol>
+<div id="bd50f40c" class="cell" data-execution_count="7">
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>ws2 <span class="op">=</span> ds.Wind_speed.copy()</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>ws2.plot.hist()<span class="op">;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="dataset_files/figure-html/cell-8-output-1.png" width="592" height="429" class="figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+<ol start="2" type="1">
+<li>Make the modifications, in this case we will clip the values to the interval 1-18 m/s.</li>
+</ol>
+<div id="632e4f98" class="cell" data-execution_count="8">
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>ws2.values <span class="op">=</span> np.clip(ws2.to_numpy(), <span class="dv">1</span>,<span class="dv">18</span>)</span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>ws2.plot.hist()<span class="op">;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="dataset_files/figure-html/cell-9-output-1.png" width="592" height="429" class="figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+<ol start="3" type="1">
+<li>Assign it to a new name in the dataset</li>
+</ol>
+<div id="c9346116" class="cell" data-execution_count="9">
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>ds[<span class="st">"Wind_speed_clipped"</span>] <span class="op">=</span> ws2</span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>ds</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="9">
+<pre><code>&lt;mikeio.Dataset&gt;
+dims: (time:67, element:958)
+time: 2017-10-27 00:00:00 - 2017-10-29 18:00:00 (67 records)
+geometry: Dfsu2D (958 elements, 570 nodes)
+items:
+  0:  Surface elevation &lt;Surface Elevation&gt; (meter)
+  1:  Wind speed &lt;Wind speed&gt; (meter per sec)
+  2:  Wind_speed_clipped &lt;Wind speed&gt; (meter per sec)</code></pre>
+</div>
+</div>
+<ol start="4" type="1">
+<li>Reorder items if necessary (See <a href="#selecting-items">selecting items</a> above)</li>
+</ol>
+<div id="9f471a19" class="cell" data-execution_count="10">
+<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>ds2 <span class="op">=</span> ds[[<span class="st">"Wind_speed_clipped"</span>, <span class="st">"Surface elevation"</span>, <span class="st">"Wind speed"</span>]]</span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>ds2</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="10">
+<pre><code>&lt;mikeio.Dataset&gt;
+dims: (time:67, element:958)
+time: 2017-10-27 00:00:00 - 2017-10-29 18:00:00 (67 records)
+geometry: Dfsu2D (958 elements, 570 nodes)
+items:
+  0:  Wind_speed_clipped &lt;Wind speed&gt; (meter per sec)
+  1:  Surface elevation &lt;Surface Elevation&gt; (meter)
+  2:  Wind speed &lt;Wind speed&gt; (meter per sec)</code></pre>
+</div>
+</div>
+<ol start="5" type="1">
+<li>Write the new dataset to a new file</li>
+</ol>
+<div id="ca6eb02e" class="cell" data-execution_count="11">
+<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>ds2.to_dfs(<span class="st">"modified.dfsu"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="properties" class="level2">
+<h2 class="anchored" data-anchor-id="properties">Properties</h2>
+<p>The Dataset (and DataArray) has several properties:</p>
+<ul>
+<li>n_items - Number of items</li>
+<li>n_timesteps - Number of timesteps</li>
+<li>n_elements - Number of elements</li>
+<li>start_time - First time instance (as datetime)</li>
+<li>end_time - Last time instance (as datetime)</li>
+<li>is_equidistant - Is the time series equidistant in time</li>
+<li>timestep - Time step in seconds (if is_equidistant)</li>
+<li>shape - Shape of each item</li>
+<li>deletevalue - File delete value (NaN value)</li>
+</ul>
 </section>
 <section id="methods" class="level2">
 <h2 class="anchored" data-anchor-id="methods">Methods</h2>
-<table class="caption-top table">
-<thead>
-<tr class="header">
-<th>Name</th>
-<th>Description</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td><a href="#mikeio.Grid1D.find_index">find_index</a></td>
-<td>Find nearest point</td>
-</tr>
-<tr class="even">
-<td><a href="#mikeio.Grid1D.isel">isel</a></td>
-<td>Get a subset geometry from this geometry</td>
-</tr>
-</tbody>
-</table>
-<section id="mikeio.Grid1D.find_index" class="level3">
-<h3 class="anchored" data-anchor-id="mikeio.Grid1D.find_index">find_index</h3>
-<p><code>Grid1D.find_index(x, **kwargs)</code></p>
-<p>Find nearest point</p>
-<section id="parameters-1" class="level4">
-<h4 class="anchored" data-anchor-id="parameters-1">Parameters</h4>
-<table class="caption-top table">
-<thead>
-<tr class="header">
-<th>Name</th>
-<th>Type</th>
-<th>Description</th>
-<th>Default</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td><code>x</code></td>
-<td>float</td>
-<td>x-coordinate of point</td>
-<td><em>required</em></td>
-</tr>
-</tbody>
-</table>
+<p>Dataset (and DataArray) has several useful methods for working with data, including different ways of <em>selecting</em> data:</p>
+<ul>
+<li><a href="../api/Dataset.html#mikeio.Dataset.sel"><code>sel()</code></a> - Select subset along an axis</li>
+<li><a href="../api/Dataset.html#mikeio.Dataset.isel"><code>isel()</code></a> - Select subset along an axis with an integer</li>
+</ul>
+<p><em>Aggregations</em> along an axis:</p>
+<ul>
+<li><a href="../api/Dataset.html#mikeio.Dataset.mean"><code>mean()</code></a> - Mean value along an axis</li>
+<li><a href="../api/Dataset.html#mikeio.Dataset.nanmean"><code>nanmean()</code></a> - Mean value along an axis (NaN removed)</li>
+<li><a href="../api/Dataset.html#mikeio.Dataset.max"><code>max()</code></a> - Max value along an axis</li>
+<li><a href="../api/Dataset.html#mikeio.Dataset.nanmax"><code>nanmax()</code></a> - Max value along an axis (NaN removed)</li>
+<li><a href="../api/Dataset.html#mikeio.Dataset.min"><code>min()</code></a> - Min value along an axis</li>
+<li><a href="../api/Dataset.html#mikeio.Dataset.nanmin"><code>nanmin()</code></a> - Min value along an axis (NaN removed)</li>
+<li><a href="../api/Dataset.html#mikeio.Dataset.average"><code>average()</code></a> - Compute the weighted average along the specified axis.</li>
+<li><a href="../api/Dataset.html#mikeio.Dataset.aggregate"><code>aggregate()</code></a> - Aggregate along an axis</li>
+<li><a href="../api/Dataset.html#mikeio.Dataset.quantile"><code>quantile()</code></a> - Quantiles along an axis</li>
+<li><a href="../api/Dataset.html#mikeio.Dataset.nanquantile"><code>nanquantile()</code></a> - Quantiles along an axis (NaN ignored)</li>
+</ul>
+<section id="mathematical-operations" class="level3">
+<h3 class="anchored" data-anchor-id="mathematical-operations"><i class="fa-solid fa-calculator" aria-label="calculator"></i> Mathematical operations</h3>
+<ul>
+<li>ds + value</li>
+<li>ds - value</li>
+<li>ds * value</li>
+</ul>
+<p>and + and - between two Datasets (if number of items and shapes conform):</p>
+<ul>
+<li>ds1 + ds2</li>
+<li>ds1 - ds2</li>
+</ul>
+<p>Other methods that also return a Dataset:</p>
+<ul>
+<li><a href="../api/Dataset.html#mikeio.Dataset.interp_like"><code>interp_like</code></a> - Spatio (temporal) interpolation (see <a href="../examples/Dfsu-2D-interpolation.html">Dfsu interpolation notebook</a>)</li>
+<li><a href="../api/Dataset.html#mikeio.Dataset.interp_time"><code>interp_time()</code></a> - Temporal interpolation (see <a href="../examples/Time-interpolation.html">Time interpolation notebook</a>)</li>
+<li><a href="../api/Dataset.html#mikeio.Dataset.dropna"><code>dropna()</code></a> - Remove time steps where all items are NaN</li>
+<li><a href="../api/Dataset.html#mikeio.Dataset.squeeze"><code>squeeze()</code></a> - Remove axes of length 1</li>
+</ul>
 </section>
-<section id="returns" class="level4">
-<h4 class="anchored" data-anchor-id="returns">Returns</h4>
-<table class="caption-top table">
-<thead>
-<tr class="header">
-<th>Type</th>
-<th>Description</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td>int</td>
-<td>index of nearest point</td>
-</tr>
-<tr class="even">
-<td>Any</td>
-<td>Not used</td>
-</tr>
-</tbody>
-</table>
-</section>
-<section id="see-also" class="level4">
-<h4 class="anchored" data-anchor-id="see-also">See Also</h4>
-<p><a href="../api/Dataset.html#mikeio.Dataset.sel"><code>mikeio.Dataset.sel</code></a></p>
-</section>
-</section>
-<section id="mikeio.Grid1D.isel" class="level3">
-<h3 class="anchored" data-anchor-id="mikeio.Grid1D.isel">isel</h3>
-<p><code>Grid1D.isel(idx, axis=None)</code></p>
-<p>Get a subset geometry from this geometry</p>
-<section id="parameters-2" class="level4">
-<h4 class="anchored" data-anchor-id="parameters-2">Parameters</h4>
-<table class="caption-top table">
-<colgroup>
-<col style="width: 11%">
-<col style="width: 19%">
-<col style="width: 52%">
-<col style="width: 16%">
-</colgroup>
-<thead>
-<tr class="header">
-<th>Name</th>
-<th>Type</th>
-<th>Description</th>
-<th>Default</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td><code>idx</code></td>
-<td>int or slice</td>
-<td>index or slice</td>
-<td><em>required</em></td>
-</tr>
-<tr class="even">
-<td><code>axis</code></td>
-<td>int</td>
-<td>Not used for Grid1D, by default None</td>
-<td><code>None</code></td>
-</tr>
-</tbody>
-</table>
-</section>
-<section id="returns-1" class="level4">
-<h4 class="anchored" data-anchor-id="returns-1">Returns</h4>
-<table class="caption-top table">
-<colgroup>
-<col style="width: 61%">
-<col style="width: 38%">
-</colgroup>
-<thead>
-<tr class="header">
-<th>Type</th>
-<th>Description</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td>GeometryPoint2D or GeometryPoint3D or GeometryUndefined</td>
-<td>The geometry of the selected point</td>
-</tr>
-</tbody>
-</table>
-</section>
-<section id="examples-1" class="level4">
-<h4 class="anchored" data-anchor-id="examples-1">Examples</h4>
-<div id="4f95b3c2" class="cell" data-execution_count="3">
-<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> mikeio</span>
-<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>g <span class="op">=</span> mikeio.Grid1D(nx<span class="op">=</span><span class="dv">3</span>,dx<span class="op">=</span><span class="fl">0.1</span>)</span>
-<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>g</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display" data-execution_count="3">
-<pre><code>&lt;mikeio.Grid1D&gt;
-x: [0, 0.1, 0.2] (nx=3, dx=0.1)</code></pre>
-</div>
-</div>
-<div id="70a3ee30" class="cell" data-execution_count="4">
-<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>g.isel([<span class="dv">1</span>,<span class="dv">2</span>])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display" data-execution_count="4">
-<pre><code>&lt;mikeio.Grid1D&gt;
-x: [0.1, 0.2] (nx=2, dx=0.1)</code></pre>
-</div>
-</div>
-<div id="271a2a27" class="cell" data-execution_count="5">
-<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>g.isel(<span class="dv">1</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display" data-execution_count="5">
-<pre><code>GeometryUndefined()</code></pre>
-</div>
-</div>
+<section id="conversion" class="level3">
+<h3 class="anchored" data-anchor-id="conversion">Conversion:</h3>
+<ul>
+<li><a href="../api/Dataset.html#mikeio.Dataset.to_dataframe"><code>to_dataframe()</code></a> - Convert Dataset to a <a href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame"><code>pandas.DataFrame</code></a>.</li>
+<li><a href="../api/Dataset.html#mikeio.Dataset.to_xarray"><code>to_xarray()</code></a> - Convert Dataset to a <a href="https://xarray.pydata.org/en/stable/generated/xarray.Dataset.html#xarray.Dataset"><code>xarray.Dataset</code></a> (great for Dfs2, Dfs3).</li>
+<li><a href="../api/Dataset.html#mikeio.Dataset.to_dfs"><code>to_dfs()</code></a> - Write Dataset to a Dfs file</li>
+</ul>
 
 
-</section>
 </section>
 </section>
 
@@ -1088,6 +1065,18 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
   }
 });
 </script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="../user-guide/dataarray.html" class="pagination-link" aria-label="DataArray">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text">DataArray</span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="../user-guide/dfs0.html" class="pagination-link" aria-label="Dfs0">
+        <span class="nav-page-text">Dfs0</span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
 </div> <!-- /content -->
 <footer class="footer">
   <div class="nav-footer">
@@ -1096,7 +1085,7 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
     </div>   
     <div class="nav-footer-center">
 <p>© 2024 DHI Group</p>
-</div>
+<div class="toc-actions d-sm-block d-md-none"><ul><li><a href="https://github.com/DHI/mikeio/edit/main/docs/user-guide/dataset.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li></ul></div></div>
     <div class="nav-footer-right">
       &nbsp;
     </div>

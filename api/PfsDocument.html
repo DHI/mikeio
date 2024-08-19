@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>grid1d – MIKE IO</title>
+<title>pfsdocument – MIKE IO</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -57,7 +57,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </style>
 
 
-<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js" integrity="sha512-bLT0Qm9VnAYZDflyKcBaQ2gg0hSYNQrJ8RilYldYQ1FxQYoCLtUjuuRuZo+fjqhx/qtq/1itJ0C2ejDxltZVFg==" crossorigin="anonymous"></script><script src="../site_libs/quarto-nav/quarto-nav.js"></script>
 <script src="../site_libs/quarto-nav/headroom.min.js"></script>
 <script src="../site_libs/clipboard/clipboard.min.js"></script>
 <script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
@@ -100,6 +100,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     "search-label": "Search"
   }
 }</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" integrity="sha512-c3Nl8+7g4LMSTdrm621y7kf9v3SDPnhxLNhcjFJbKECVnmZHTdo+IRO05sNLTH/D3vA6u1X32ehoLC7WFVdheg==" crossorigin="anonymous"></script>
+
+<script type="application/javascript">define('jquery', [],function() {return window.jQuery;})</script>
 
 
 </head>
@@ -163,7 +166,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
         <i class="bi bi-layout-text-sidebar-reverse"></i>
       </button>
         <a class="flex-grow-1 no-decor" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
-          <h1 class="quarto-secondary-nav-title">Grid1D</h1>
+          <h1 class="quarto-secondary-nav-title">PfsDocument</h1>
         </a>     
       <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
         <i class="bi bi-search"></i>
@@ -340,12 +343,24 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
    
   <ul>
   <li><a href="#parameters" id="toc-parameters" class="nav-link active" data-scroll-target="#parameters">Parameters</a></li>
-  <li><a href="#examples" id="toc-examples" class="nav-link" data-scroll-target="#examples">Examples</a></li>
   <li><a href="#attributes" id="toc-attributes" class="nav-link" data-scroll-target="#attributes">Attributes</a></li>
   <li><a href="#methods" id="toc-methods" class="nav-link" data-scroll-target="#methods">Methods</a>
   <ul class="collapse">
-  <li><a href="#mikeio.Grid1D.find_index" id="toc-mikeio.Grid1D.find_index" class="nav-link" data-scroll-target="#mikeio.Grid1D.find_index">find_index</a></li>
-  <li><a href="#mikeio.Grid1D.isel" id="toc-mikeio.Grid1D.isel" class="nav-link" data-scroll-target="#mikeio.Grid1D.isel">isel</a></li>
+  <li><a href="#mikeio.PfsDocument.clear" id="toc-mikeio.PfsDocument.clear" class="nav-link" data-scroll-target="#mikeio.PfsDocument.clear">clear</a></li>
+  <li><a href="#mikeio.PfsDocument.copy" id="toc-mikeio.PfsDocument.copy" class="nav-link" data-scroll-target="#mikeio.PfsDocument.copy">copy</a></li>
+  <li><a href="#mikeio.PfsDocument.find_replace" id="toc-mikeio.PfsDocument.find_replace" class="nav-link" data-scroll-target="#mikeio.PfsDocument.find_replace">find_replace</a></li>
+  <li><a href="#mikeio.PfsDocument.from_dataframe" id="toc-mikeio.PfsDocument.from_dataframe" class="nav-link" data-scroll-target="#mikeio.PfsDocument.from_dataframe">from_dataframe</a></li>
+  <li><a href="#mikeio.PfsDocument.from_text" id="toc-mikeio.PfsDocument.from_text" class="nav-link" data-scroll-target="#mikeio.PfsDocument.from_text">from_text</a></li>
+  <li><a href="#mikeio.PfsDocument.get" id="toc-mikeio.PfsDocument.get" class="nav-link" data-scroll-target="#mikeio.PfsDocument.get">get</a></li>
+  <li><a href="#mikeio.PfsDocument.items" id="toc-mikeio.PfsDocument.items" class="nav-link" data-scroll-target="#mikeio.PfsDocument.items">items</a></li>
+  <li><a href="#mikeio.PfsDocument.keys" id="toc-mikeio.PfsDocument.keys" class="nav-link" data-scroll-target="#mikeio.PfsDocument.keys">keys</a></li>
+  <li><a href="#mikeio.PfsDocument.pop" id="toc-mikeio.PfsDocument.pop" class="nav-link" data-scroll-target="#mikeio.PfsDocument.pop">pop</a></li>
+  <li><a href="#mikeio.PfsDocument.search" id="toc-mikeio.PfsDocument.search" class="nav-link" data-scroll-target="#mikeio.PfsDocument.search">search</a></li>
+  <li><a href="#mikeio.PfsDocument.to_dataframe" id="toc-mikeio.PfsDocument.to_dataframe" class="nav-link" data-scroll-target="#mikeio.PfsDocument.to_dataframe">to_dataframe</a></li>
+  <li><a href="#mikeio.PfsDocument.to_dict" id="toc-mikeio.PfsDocument.to_dict" class="nav-link" data-scroll-target="#mikeio.PfsDocument.to_dict">to_dict</a></li>
+  <li><a href="#mikeio.PfsDocument.update_recursive" id="toc-mikeio.PfsDocument.update_recursive" class="nav-link" data-scroll-target="#mikeio.PfsDocument.update_recursive">update_recursive</a></li>
+  <li><a href="#mikeio.PfsDocument.values" id="toc-mikeio.PfsDocument.values" class="nav-link" data-scroll-target="#mikeio.PfsDocument.values">values</a></li>
+  <li><a href="#mikeio.PfsDocument.write" id="toc-mikeio.PfsDocument.write" class="nav-link" data-scroll-target="#mikeio.PfsDocument.write">write</a></li>
   </ul></li>
   </ul>
 </nav>
@@ -355,7 +370,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<h1 class="title d-none d-lg-block">Grid1D</h1>
+<h1 class="title d-none d-lg-block">PfsDocument</h1>
 </div>
 
 
@@ -372,16 +387,16 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </header>
 
 
-<p><code>Grid1D(self, x=None, *, x0=0.0, dx=None, nx=None, projection='NON-UTM', origin=(0.0, 0.0), orientation=0.0, node_coordinates=None, axis_name='x')</code></p>
-<p>1D grid (node-based) axis is increasing and equidistant</p>
+<p><code>PfsDocument(self, data, *, encoding='cp1252', names=None, unique_keywords=False)</code></p>
+<p>Create a PfsDocument object for reading, writing and manipulating pfs files</p>
 <section id="parameters" class="level2">
 <h2 class="anchored" data-anchor-id="parameters">Parameters</h2>
 <table class="caption-top table">
 <colgroup>
-<col style="width: 23%">
-<col style="width: 13%">
-<col style="width: 46%">
-<col style="width: 16%">
+<col style="width: 5%">
+<col style="width: 21%">
+<col style="width: 69%">
+<col style="width: 3%">
 </colgroup>
 <thead>
 <tr class="header">
@@ -393,79 +408,25 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </thead>
 <tbody>
 <tr class="odd">
-<td><code>x</code></td>
-<td>array_like</td>
-<td>node coordinates</td>
-<td><code>None</code></td>
+<td><code>data</code></td>
+<td>TextIO | PfsSection | Mapping[str | PfsSection, Any] | str | Path</td>
+<td>Either a file name (including full path) to the pfs file to be read or dictionary-like structure.</td>
+<td><em>required</em></td>
 </tr>
 <tr class="even">
-<td><code>x0</code></td>
-<td>float</td>
-<td>first node coordinate</td>
-<td><code>0.0</code></td>
-</tr>
-<tr class="odd">
-<td><code>dx</code></td>
-<td>float</td>
-<td>grid spacing</td>
-<td><code>None</code></td>
-</tr>
-<tr class="even">
-<td><code>nx</code></td>
-<td>int</td>
-<td>number of nodes</td>
-<td><code>None</code></td>
-</tr>
-<tr class="odd">
-<td><code>projection</code></td>
+<td><code>encoding</code></td>
 <td>str</td>
-<td>projection string</td>
-<td><code>'NON-UTM'</code></td>
-</tr>
-<tr class="even">
-<td><code>origin</code></td>
-<td>tuple</td>
-<td>not commonly used</td>
-<td><code>(0.0, 0.0)</code></td>
+<td>How is the pfs file encoded? By default cp1252</td>
+<td><code>'cp1252'</code></td>
 </tr>
 <tr class="odd">
-<td><code>orientation</code></td>
-<td>float</td>
-<td>not commonly used</td>
-<td><code>0.0</code></td>
-</tr>
-<tr class="even">
-<td><code>node_coordinates</code></td>
-<td>array_like</td>
-<td>coordinates of nodes in 2D or 3D space</td>
-<td><code>None</code></td>
-</tr>
-<tr class="odd">
-<td><code>axis_name</code></td>
-<td>str</td>
-<td>name of axis, by default “x”</td>
-<td><code>'x'</code></td>
+<td><code>unique_keywords</code></td>
+<td>bool</td>
+<td>Should the keywords in a section be unique? Some tools e.g.&nbsp;the MIKE Plot Composer allows non-unique keywords. If True: warnings will be issued if non-unique keywords are present and the first occurence will be used by default False</td>
+<td><code>False</code></td>
 </tr>
 </tbody>
 </table>
-</section>
-<section id="examples" class="level2">
-<h2 class="anchored" data-anchor-id="examples">Examples</h2>
-<div id="9e08427e" class="cell" data-execution_count="1">
-<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> mikeio</span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>mikeio.Grid1D(nx<span class="op">=</span><span class="dv">3</span>,dx<span class="op">=</span><span class="fl">0.1</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display" data-execution_count="1">
-<pre><code>&lt;mikeio.Grid1D&gt;
-x: [0, 0.1, 0.2] (nx=3, dx=0.1)</code></pre>
-</div>
-</div>
-<div id="7acf3d7e" class="cell" data-execution_count="2">
-<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>mikeio.Grid1D(x<span class="op">=</span>[<span class="fl">0.1</span>, <span class="fl">0.5</span>, <span class="fl">0.9</span>])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display" data-execution_count="2">
-<pre><code>&lt;mikeio.Grid1D&gt;
-x: [0.1, 0.5, 0.9] (nx=3, dx=0.4)</code></pre>
-</div>
-</div>
 </section>
 <section id="attributes" class="level2">
 <h2 class="anchored" data-anchor-id="attributes">Attributes</h2>
@@ -478,32 +439,20 @@ x: [0.1, 0.5, 0.9] (nx=3, dx=0.4)</code></pre>
 </thead>
 <tbody>
 <tr class="odd">
-<td><a href="#mikeio.Grid1D.dx">dx</a></td>
-<td>grid spacing</td>
+<td><a href="#mikeio.PfsDocument.is_unique">is_unique</a></td>
+<td>Are the target (root) names unique?</td>
 </tr>
 <tr class="even">
-<td><a href="#mikeio.Grid1D.is_geo">is_geo</a></td>
-<td>Are coordinates geographical (LONG/LAT)?</td>
+<td><a href="#mikeio.PfsDocument.n_targets">n_targets</a></td>
+<td>Number of targets (root sections)</td>
 </tr>
 <tr class="odd">
-<td><a href="#mikeio.Grid1D.is_local_coordinates">is_local_coordinates</a></td>
-<td>Are coordinates relative (NON-UTM)?</td>
+<td><a href="#mikeio.PfsDocument.names">names</a></td>
+<td>Names of the targets (root sections) as a list</td>
 </tr>
 <tr class="even">
-<td><a href="#mikeio.Grid1D.nx">nx</a></td>
-<td>number of grid points</td>
-</tr>
-<tr class="odd">
-<td><a href="#mikeio.Grid1D.projection">projection</a></td>
-<td>The projection</td>
-</tr>
-<tr class="even">
-<td><a href="#mikeio.Grid1D.projection_string">projection_string</a></td>
-<td>The projection string</td>
-</tr>
-<tr class="odd">
-<td><a href="#mikeio.Grid1D.x">x</a></td>
-<td>array of node coordinates</td>
+<td><a href="#mikeio.PfsDocument.targets">targets</a></td>
+<td>List of targets (root sections)</td>
 </tr>
 </tbody>
 </table>
@@ -519,19 +468,86 @@ x: [0.1, 0.5, 0.9] (nx=3, dx=0.4)</code></pre>
 </thead>
 <tbody>
 <tr class="odd">
-<td><a href="#mikeio.Grid1D.find_index">find_index</a></td>
-<td>Find nearest point</td>
+<td><a href="#mikeio.PfsDocument.clear">clear</a></td>
+<td>Remove all items from the PfsSection.</td>
 </tr>
 <tr class="even">
-<td><a href="#mikeio.Grid1D.isel">isel</a></td>
-<td>Get a subset geometry from this geometry</td>
+<td><a href="#mikeio.PfsDocument.copy">copy</a></td>
+<td>Return a deep copy of the PfsDocument</td>
+</tr>
+<tr class="odd">
+<td><a href="#mikeio.PfsDocument.find_replace">find_replace</a></td>
+<td>Update recursively all old_value with new_value</td>
+</tr>
+<tr class="even">
+<td><a href="#mikeio.PfsDocument.from_dataframe">from_dataframe</a></td>
+<td>Create a PfsSection from a DataFrame</td>
+</tr>
+<tr class="odd">
+<td><a href="#mikeio.PfsDocument.from_text">from_text</a></td>
+<td>Create a PfsDocument from a string</td>
+</tr>
+<tr class="even">
+<td><a href="#mikeio.PfsDocument.get">get</a></td>
+<td>Return the value for key if key is in the PfsSection,</td>
+</tr>
+<tr class="odd">
+<td><a href="#mikeio.PfsDocument.items">items</a></td>
+<td>Return a new view of the PfsDocument’s items ((key, value) pairs)</td>
+</tr>
+<tr class="even">
+<td><a href="#mikeio.PfsDocument.keys">keys</a></td>
+<td>Return a list of the PfsDocument’s keys (target names)</td>
+</tr>
+<tr class="odd">
+<td><a href="#mikeio.PfsDocument.pop">pop</a></td>
+<td>If key is in the dictionary, remove it and return its</td>
+</tr>
+<tr class="even">
+<td><a href="#mikeio.PfsDocument.search">search</a></td>
+<td>Find recursively all keys, sections or parameters</td>
+</tr>
+<tr class="odd">
+<td><a href="#mikeio.PfsDocument.to_dataframe">to_dataframe</a></td>
+<td>Output enumerated subsections to a DataFrame</td>
+</tr>
+<tr class="even">
+<td><a href="#mikeio.PfsDocument.to_dict">to_dict</a></td>
+<td>Convert to (nested) dict (as a copy)</td>
+</tr>
+<tr class="odd">
+<td><a href="#mikeio.PfsDocument.update_recursive">update_recursive</a></td>
+<td>Update recursively all matches of key with value</td>
+</tr>
+<tr class="even">
+<td><a href="#mikeio.PfsDocument.values">values</a></td>
+<td>Return a list of the PfsDocument’s values (targets).</td>
+</tr>
+<tr class="odd">
+<td><a href="#mikeio.PfsDocument.write">write</a></td>
+<td>Write object to a pfs file</td>
 </tr>
 </tbody>
 </table>
-<section id="mikeio.Grid1D.find_index" class="level3">
-<h3 class="anchored" data-anchor-id="mikeio.Grid1D.find_index">find_index</h3>
-<p><code>Grid1D.find_index(x, **kwargs)</code></p>
-<p>Find nearest point</p>
+<section id="mikeio.PfsDocument.clear" class="level3">
+<h3 class="anchored" data-anchor-id="mikeio.PfsDocument.clear">clear</h3>
+<p><code>PfsDocument.clear()</code></p>
+<p>Remove all items from the PfsSection.</p>
+</section>
+<section id="mikeio.PfsDocument.copy" class="level3">
+<h3 class="anchored" data-anchor-id="mikeio.PfsDocument.copy">copy</h3>
+<p><code>PfsDocument.copy()</code></p>
+<p>Return a deep copy of the PfsDocument</p>
+</section>
+<section id="mikeio.PfsDocument.find_replace" class="level3">
+<h3 class="anchored" data-anchor-id="mikeio.PfsDocument.find_replace">find_replace</h3>
+<p><code>PfsDocument.find_replace(old_value, new_value)</code></p>
+<p>Update recursively all old_value with new_value</p>
+</section>
+<section id="mikeio.PfsDocument.from_dataframe" class="level3">
+<h3 class="anchored" data-anchor-id="mikeio.PfsDocument.from_dataframe">from_dataframe</h3>
+<p><code>PfsDocument.from_dataframe(df, prefix)</code></p>
+<p>Create a PfsSection from a DataFrame</p>
 <section id="parameters-1" class="level4">
 <h4 class="anchored" data-anchor-id="parameters-1">Parameters</h4>
 <table class="caption-top table">
@@ -545,10 +561,148 @@ x: [0.1, 0.5, 0.9] (nx=3, dx=0.4)</code></pre>
 </thead>
 <tbody>
 <tr class="odd">
-<td><code>x</code></td>
-<td>float</td>
-<td>x-coordinate of point</td>
+<td><code>df</code></td>
+<td>pd.DataFrame</td>
+<td>data</td>
 <td><em>required</em></td>
+</tr>
+<tr class="even">
+<td><code>prefix</code></td>
+<td>str</td>
+<td>section header prefix</td>
+<td><em>required</em></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="examples" class="level4">
+<h4 class="anchored" data-anchor-id="examples">Examples</h4>
+<div id="a84dbc4d" class="cell" data-execution_count="1">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> mikeio</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> pd.DataFrame(<span class="bu">dict</span>(station<span class="op">=</span>[<span class="st">"Foo"</span>, <span class="st">"Bar"</span>],include<span class="op">=</span>[<span class="dv">0</span>,<span class="dv">1</span>]), index<span class="op">=</span>[<span class="dv">1</span>,<span class="dv">2</span>])</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>df</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="1">
+<div>
+
+
+<table class="dataframe caption-top table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">station</th>
+<th data-quarto-table-cell-role="th">include</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">1</td>
+<td>Foo</td>
+<td>0</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">2</td>
+<td>Bar</td>
+<td>1</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
+<div id="70a352c1" class="cell" data-execution_count="2">
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>mikeio.PfsSection.from_dataframe(df,<span class="st">"STATION_"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="2">
+<pre><code>[STATION_1]
+   station = 'Foo'
+   include = 0
+EndSect  // STATION_1
+[STATION_2]
+   station = 'Bar'
+   include = 1
+EndSect  // STATION_2</code></pre>
+</div>
+</div>
+</section>
+</section>
+<section id="mikeio.PfsDocument.from_text" class="level3">
+<h3 class="anchored" data-anchor-id="mikeio.PfsDocument.from_text">from_text</h3>
+<p><code>PfsDocument.from_text(text)</code></p>
+<p>Create a PfsDocument from a string</p>
+</section>
+<section id="mikeio.PfsDocument.get" class="level3">
+<h3 class="anchored" data-anchor-id="mikeio.PfsDocument.get">get</h3>
+<p><code>PfsDocument.get(key, default=None)</code></p>
+<p>Return the value for key if key is in the PfsSection, else default. If default is not given, it defaults to None, so that this method never raises a KeyError.</p>
+</section>
+<section id="mikeio.PfsDocument.items" class="level3">
+<h3 class="anchored" data-anchor-id="mikeio.PfsDocument.items">items</h3>
+<p><code>PfsDocument.items()</code></p>
+<p>Return a new view of the PfsDocument’s items ((key, value) pairs)</p>
+</section>
+<section id="mikeio.PfsDocument.keys" class="level3">
+<h3 class="anchored" data-anchor-id="mikeio.PfsDocument.keys">keys</h3>
+<p><code>PfsDocument.keys()</code></p>
+<p>Return a list of the PfsDocument’s keys (target names)</p>
+</section>
+<section id="mikeio.PfsDocument.pop" class="level3">
+<h3 class="anchored" data-anchor-id="mikeio.PfsDocument.pop">pop</h3>
+<p><code>PfsDocument.pop(key, default=None)</code></p>
+<p>If key is in the dictionary, remove it and return its value, else return default. If default is not given and key is not in the dictionary, a KeyError is raised.</p>
+</section>
+<section id="mikeio.PfsDocument.search" class="level3">
+<h3 class="anchored" data-anchor-id="mikeio.PfsDocument.search">search</h3>
+<p><code>PfsDocument.search(text=None, *, key=None, section=None, param=None, case=False)</code></p>
+<p>Find recursively all keys, sections or parameters matching a pattern</p>
+<p>NOTE: logical OR between multiple conditions</p>
+<section id="parameters-2" class="level4">
+<h4 class="anchored" data-anchor-id="parameters-2">Parameters</h4>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 9%">
+<col style="width: 21%">
+<col style="width: 59%">
+<col style="width: 9%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Name</th>
+<th>Type</th>
+<th>Description</th>
+<th>Default</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>text</code></td>
+<td>str</td>
+<td>Search for text in either key, section or parameter, by default None</td>
+<td><code>None</code></td>
+</tr>
+<tr class="even">
+<td><code>key</code></td>
+<td>str</td>
+<td>text pattern to seach for in keywords, by default None</td>
+<td><code>None</code></td>
+</tr>
+<tr class="odd">
+<td><code>section</code></td>
+<td>str</td>
+<td>text pattern to seach for in sections, by default None</td>
+<td><code>None</code></td>
+</tr>
+<tr class="even">
+<td><code>param</code></td>
+<td>(str, bool, float, int)</td>
+<td>text or value in a parameter, by default None</td>
+<td><code>None</code></td>
+</tr>
+<tr class="odd">
+<td><code>case</code></td>
+<td>bool</td>
+<td>should the text search be case-sensitive?, by default False</td>
+<td><code>False</code></td>
 </tr>
 </tbody>
 </table>
@@ -564,33 +718,25 @@ x: [0.1, 0.5, 0.9] (nx=3, dx=0.4)</code></pre>
 </thead>
 <tbody>
 <tr class="odd">
-<td>int</td>
-<td>index of nearest point</td>
-</tr>
-<tr class="even">
-<td>Any</td>
-<td>Not used</td>
+<td>PfsSection</td>
+<td>Search result as a nested PfsSection</td>
 </tr>
 </tbody>
 </table>
 </section>
-<section id="see-also" class="level4">
-<h4 class="anchored" data-anchor-id="see-also">See Also</h4>
-<p><a href="../api/Dataset.html#mikeio.Dataset.sel"><code>mikeio.Dataset.sel</code></a></p>
 </section>
-</section>
-<section id="mikeio.Grid1D.isel" class="level3">
-<h3 class="anchored" data-anchor-id="mikeio.Grid1D.isel">isel</h3>
-<p><code>Grid1D.isel(idx, axis=None)</code></p>
-<p>Get a subset geometry from this geometry</p>
-<section id="parameters-2" class="level4">
-<h4 class="anchored" data-anchor-id="parameters-2">Parameters</h4>
+<section id="mikeio.PfsDocument.to_dataframe" class="level3">
+<h3 class="anchored" data-anchor-id="mikeio.PfsDocument.to_dataframe">to_dataframe</h3>
+<p><code>PfsDocument.to_dataframe(prefix=None)</code></p>
+<p>Output enumerated subsections to a DataFrame</p>
+<section id="parameters-3" class="level4">
+<h4 class="anchored" data-anchor-id="parameters-3">Parameters</h4>
 <table class="caption-top table">
 <colgroup>
-<col style="width: 11%">
-<col style="width: 19%">
-<col style="width: 52%">
-<col style="width: 16%">
+<col style="width: 5%">
+<col style="width: 4%">
+<col style="width: 84%">
+<col style="width: 5%">
 </colgroup>
 <thead>
 <tr class="header">
@@ -602,15 +748,9 @@ x: [0.1, 0.5, 0.9] (nx=3, dx=0.4)</code></pre>
 </thead>
 <tbody>
 <tr class="odd">
-<td><code>idx</code></td>
-<td>int or slice</td>
-<td>index or slice</td>
-<td><em>required</em></td>
-</tr>
-<tr class="even">
-<td><code>axis</code></td>
-<td>int</td>
-<td>Not used for Grid1D, by default None</td>
+<td><code>prefix</code></td>
+<td>str</td>
+<td>The prefix of the enumerated sections, e.g.&nbsp;“File_”, which can be supplied if it fails without this argument, by default None (will try to “guess” the prefix)</td>
 <td><code>None</code></td>
 </tr>
 </tbody>
@@ -619,10 +759,6 @@ x: [0.1, 0.5, 0.9] (nx=3, dx=0.4)</code></pre>
 <section id="returns-1" class="level4">
 <h4 class="anchored" data-anchor-id="returns-1">Returns</h4>
 <table class="caption-top table">
-<colgroup>
-<col style="width: 61%">
-<col style="width: 38%">
-</colgroup>
 <thead>
 <tr class="header">
 <th>Type</th>
@@ -631,36 +767,203 @@ x: [0.1, 0.5, 0.9] (nx=3, dx=0.4)</code></pre>
 </thead>
 <tbody>
 <tr class="odd">
-<td>GeometryPoint2D or GeometryPoint3D or GeometryUndefined</td>
-<td>The geometry of the selected point</td>
+<td>pd.DataFrame</td>
+<td>The enumerated subsections as a DataFrame</td>
 </tr>
 </tbody>
 </table>
 </section>
 <section id="examples-1" class="level4">
 <h4 class="anchored" data-anchor-id="examples-1">Examples</h4>
-<div id="4f95b3c2" class="cell" data-execution_count="3">
-<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> mikeio</span>
-<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>g <span class="op">=</span> mikeio.Grid1D(nx<span class="op">=</span><span class="dv">3</span>,dx<span class="op">=</span><span class="fl">0.1</span>)</span>
-<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>g</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div id="0b65bf47" class="cell" data-execution_count="3">
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>pfs <span class="op">=</span> mikeio.read_pfs(<span class="st">"../data/pfs/lake.sw"</span>)</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>pfs.SW.OUTPUTS.to_dataframe(prefix<span class="op">=</span><span class="st">"OUTPUT_"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="3">
-<pre><code>&lt;mikeio.Grid1D&gt;
-x: [0, 0.1, 0.2] (nx=3, dx=0.1)</code></pre>
+<div>
+
+
+<table class="dataframe caption-top table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">Touched</th>
+<th data-quarto-table-cell-role="th">include</th>
+<th data-quarto-table-cell-role="th">title</th>
+<th data-quarto-table-cell-role="th">file_name</th>
+<th data-quarto-table-cell-role="th">type</th>
+<th data-quarto-table-cell-role="th">format</th>
+<th data-quarto-table-cell-role="th">flood_and_dry</th>
+<th data-quarto-table-cell-role="th">coordinate_type</th>
+<th data-quarto-table-cell-role="th">zone</th>
+<th data-quarto-table-cell-role="th">input_file_name</th>
+<th data-quarto-table-cell-role="th">...</th>
+<th data-quarto-table-cell-role="th">last_time_step</th>
+<th data-quarto-table-cell-role="th">time_step_frequency</th>
+<th data-quarto-table-cell-role="th">number_of_points</th>
+<th data-quarto-table-cell-role="th">POINT_1</th>
+<th data-quarto-table-cell-role="th">LINE</th>
+<th data-quarto-table-cell-role="th">AREA</th>
+<th data-quarto-table-cell-role="th">INTEGRAL_WAVE_PARAMETERS</th>
+<th data-quarto-table-cell-role="th">INPUT_PARAMETERS</th>
+<th data-quarto-table-cell-role="th">MODEL_PARAMETERS</th>
+<th data-quarto-table-cell-role="th">SPECTRAL_PARAMETERS</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">1</td>
+<td>1</td>
+<td>1</td>
+<td>Wave parameters in domain</td>
+<td>Wave_parameters.dfsu</td>
+<td>1</td>
+<td>2</td>
+<td>2</td>
+<td>UTM-32</td>
+<td>0</td>
+<td>||</td>
+<td>...</td>
+<td>450</td>
+<td>10</td>
+<td>1</td>
+<td>{'name': 'POINT_1', 'x': 20000.0, 'y': 20000.0}</td>
+<td>{'npoints': 3, 'x_first': 0.0, 'y_first': 0.0,...</td>
+<td>{'number_of_points': 4, 'POINT_1': {'x': -400....</td>
+<td>{'Touched': 1, 'type_of_spectrum': 1, 'minimum...</td>
+<td>{'Touched': 1, 'Surface_elevation': 0, 'Water_...</td>
+<td>{'Touched': 1, 'Wind_friction_speed': 0, 'Roug...</td>
+<td>{'Touched': 1, 'separation_of_wind_sea_and_swe...</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">2</td>
+<td>1</td>
+<td>0</td>
+<td>Wave parameters along line</td>
+<td>Wave_line.dfs1</td>
+<td>1</td>
+<td>1</td>
+<td>2</td>
+<td>UTM-32</td>
+<td>0</td>
+<td>||</td>
+<td>...</td>
+<td>450</td>
+<td>10</td>
+<td>1</td>
+<td>{'name': 'POINT_1', 'x': 20000.0, 'y': 20000.0}</td>
+<td>{'npoints': 41, 'x_first': 0.0, 'y_first': 200...</td>
+<td>{'number_of_points': 4, 'POINT_1': {'x': -400....</td>
+<td>{'Touched': 1, 'type_of_spectrum': 1, 'minimum...</td>
+<td>{'Touched': 1, 'Surface_elevation': 0, 'Water_...</td>
+<td>{'Touched': 1, 'Wind_friction_speed': 0, 'Roug...</td>
+<td>{'Touched': 1, 'separation_of_wind_sea_and_swe...</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">3</td>
+<td>1</td>
+<td>1</td>
+<td>Wave parameters in a point</td>
+<td>Waves_x20km_y20km.dfs0</td>
+<td>1</td>
+<td>0</td>
+<td>2</td>
+<td>UTM-32</td>
+<td>0</td>
+<td>||</td>
+<td>...</td>
+<td>450</td>
+<td>1</td>
+<td>1</td>
+<td>{'name': 'POINT_1', 'x': 38000.0, 'y': 20000.0}</td>
+<td>{'npoints': 3, 'x_first': 0.0, 'y_first': 0.0,...</td>
+<td>{'number_of_points': 4, 'POINT_1': {'x': -400....</td>
+<td>{'Touched': 1, 'type_of_spectrum': 1, 'minimum...</td>
+<td>{'Touched': 1, 'Surface_elevation': 0, 'Water_...</td>
+<td>{'Touched': 1, 'Wind_friction_speed': 0, 'Roug...</td>
+<td>{'Touched': 1, 'separation_of_wind_sea_and_swe...</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">4</td>
+<td>1</td>
+<td>1</td>
+<td>Spectrum in a point</td>
+<td>spectrum_x20km_y20km.dfsu</td>
+<td>4</td>
+<td>0</td>
+<td>2</td>
+<td>UTM-32</td>
+<td>0</td>
+<td>||</td>
+<td>...</td>
+<td>450</td>
+<td>10</td>
+<td>1</td>
+<td>{'name': 'POINT_1', 'x': 38000.0, 'y': 20000.0}</td>
+<td>{'npoints': 3, 'x_first': 0.0, 'y_first': 0.0,...</td>
+<td>{'number_of_points': 4, 'POINT_1': {'x': -400....</td>
+<td>{'Touched': 1, 'type_of_spectrum': 1, 'minimum...</td>
+<td>{'Touched': 1, 'Surface_elevation': 0, 'Water_...</td>
+<td>{'Touched': 1, 'Wind_friction_speed': 0, 'Roug...</td>
+<td>{'Touched': 1, 'separation_of_wind_sea_and_swe...</td>
+</tr>
+</tbody>
+</table>
+
+<p>4 rows × 24 columns</p>
 </div>
 </div>
-<div id="70a3ee30" class="cell" data-execution_count="4">
-<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>g.isel([<span class="dv">1</span>,<span class="dv">2</span>])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display" data-execution_count="4">
-<pre><code>&lt;mikeio.Grid1D&gt;
-x: [0.1, 0.2] (nx=2, dx=0.1)</code></pre>
 </div>
-</div>
-<div id="271a2a27" class="cell" data-execution_count="5">
-<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>g.isel(<span class="dv">1</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display" data-execution_count="5">
-<pre><code>GeometryUndefined()</code></pre>
-</div>
-</div>
+</section>
+</section>
+<section id="mikeio.PfsDocument.to_dict" class="level3">
+<h3 class="anchored" data-anchor-id="mikeio.PfsDocument.to_dict">to_dict</h3>
+<p><code>PfsDocument.to_dict()</code></p>
+<p>Convert to (nested) dict (as a copy)</p>
+</section>
+<section id="mikeio.PfsDocument.update_recursive" class="level3">
+<h3 class="anchored" data-anchor-id="mikeio.PfsDocument.update_recursive">update_recursive</h3>
+<p><code>PfsDocument.update_recursive(key, value)</code></p>
+<p>Update recursively all matches of key with value</p>
+</section>
+<section id="mikeio.PfsDocument.values" class="level3">
+<h3 class="anchored" data-anchor-id="mikeio.PfsDocument.values">values</h3>
+<p><code>PfsDocument.values()</code></p>
+<p>Return a list of the PfsDocument’s values (targets).</p>
+</section>
+<section id="mikeio.PfsDocument.write" class="level3">
+<h3 class="anchored" data-anchor-id="mikeio.PfsDocument.write">write</h3>
+<p><code>PfsDocument.write(filename)</code></p>
+<p>Write object to a pfs file</p>
+<section id="parameters-4" class="level4">
+<h4 class="anchored" data-anchor-id="parameters-4">Parameters</h4>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 15%">
+<col style="width: 10%">
+<col style="width: 58%">
+<col style="width: 15%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Name</th>
+<th>Type</th>
+<th>Description</th>
+<th>Default</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>filename</code></td>
+<td>str</td>
+<td>Full path and filename of pfs to be created.</td>
+<td><em>required</em></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="notes" class="level4">
+<h4 class="anchored" data-anchor-id="notes">Notes</h4>
+<p>To return the content as a string, use repr()</p>
 
 
 </section>
