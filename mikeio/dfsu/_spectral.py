@@ -120,7 +120,7 @@ class DfsuSpectral:
             return pd.date_range(
                 start=self.start_time,
                 periods=self.n_timesteps,
-                freq=f"{self.timestep}S",
+                freq=f"{int(self.timestep)}s",
             )
         else:
             raise NotImplementedError(
