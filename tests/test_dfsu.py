@@ -243,11 +243,10 @@ def test_read_area_polygon():
 
     assert ds.geometry.n_elements < dfs.geometry.n_elements
 
-    # TODO fails with Numpy 2.1.0
-    # domain = dfs.geometry.to_shapely().buffer(0)
-    # subdomain = ds.geometry.to_shapely().buffer(0)
+    domain = dfs.geometry.to_shapely().buffer(0)
+    subdomain = ds.geometry.to_shapely().buffer(0)
 
-    # assert subdomain.within(domain)
+    assert subdomain.within(domain)
 
 
 def test_read_elements():

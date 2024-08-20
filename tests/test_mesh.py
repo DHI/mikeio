@@ -150,9 +150,8 @@ def test_write_mesh_from_dfsu(tmp_path):
     assert np.all(np.hstack(msh2.element_table) == np.hstack(geometry.element_table))
 
 
-# TODO doesn't run with Numpy 2.1.0
-# def test_to_shapely(tri_mesh) -> None:
-#    msh = tri_mesh
-#    shp = msh.to_shapely()
-#    assert shp.geom_type == "MultiPolygon"
-#    assert shp.area == pytest.approx(68931409.58160606)
+def test_to_shapely(tri_mesh) -> None:
+    msh = tri_mesh
+    shp = msh.to_shapely()
+    assert shp.geom_type == "MultiPolygon"
+    assert shp.area == pytest.approx(68931409.58160606)
