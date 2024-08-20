@@ -310,7 +310,7 @@ def test_from_pandas_same_eum_type() -> None:
 
     df = pd.DataFrame(
         {"station_a": np.array([1, np.nan, 2]), "station_b": np.array([2, 3.0, -1.3])},
-        index=pd.date_range("2001-01-01", periods=3, freq="H"),
+        index=pd.date_range("2001-01-01", periods=3, freq="h"),
     )
 
     ds = mikeio.from_pandas(
@@ -358,7 +358,7 @@ def test_from_pandas_sequence_eum_types() -> None:
 def test_from_pandas_use_first_datetime_column() -> None:
     df = pd.DataFrame(
         {
-            "time": pd.date_range("2001-01-01", periods=3, freq="H"),
+            "time": pd.date_range("2001-01-01", periods=3, freq="h"),
             "flow": np.array([1, np.nan, 2]),
             "level": np.array([2, 3.0, -1.3]),
         }

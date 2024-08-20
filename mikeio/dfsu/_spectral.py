@@ -347,7 +347,7 @@ class DfsuSpectral:
                 d = itemdata.Data
                 d[d == deletevalue] = np.nan
 
-                d = np.reshape(d, newshape=shape)
+                d = np.reshape(d, shape=shape)
                 if self._type != DfsuFileType.DfsuSpectral0D:
                     d = np.moveaxis(d, -1, 0)
 
