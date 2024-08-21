@@ -40,14 +40,18 @@ jobs:
       
       
 
-    - name: Install the project
+    - name: Install dependencies
       run: |
-        #python -m pip install --upgrade pip
-        uv sync --all-extras test
+        uv venv
+        source .venv/bin/activate
+        uv pip install pytest pytest-cov
         
+    - name: Install mikeio
+      run: |
+        uv pip install .[test]
     - name: Test with pytest
       run: |
-        uv run pytest --cov=mikeio tests --ignore tests/performance/ --ignore tests/notebooks/ --disable-warnings
+        pytest --cov=mikeio tests --ignore tests/performance/ --ignore tests/notebooks/ --disable-warnings
     - name: Test docstrings with doctest
       run: make doctest
     - name: Static type check
