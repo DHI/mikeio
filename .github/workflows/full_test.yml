@@ -51,7 +51,7 @@ jobs:
         uv pip install .[test]
     - name: Test with pytest
       run: |
-        pytest --cov=mikeio tests --ignore tests/performance/ --ignore tests/notebooks/ --disable-warnings
+        python -m pytest --cov=mikeio tests --ignore tests/performance/ --ignore tests/notebooks/ --disable-warnings
     - name: Test docstrings with doctest
       run: make doctest
     - name: Static type check
