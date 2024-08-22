@@ -452,7 +452,7 @@ def concat(
     """
     # fast path for Dfs0
     suffix = pathlib.Path(infilenames[0]).suffix
-    if suffix == ".dfs0" and keep == "last":
+    if suffix == ".dfs0":
         dss = [mikeio.read(f) for f in infilenames]
         ds = mikeio.Dataset.concat(dss, keep=keep)  # type: ignore
         ds.to_dfs(outfilename)

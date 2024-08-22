@@ -1228,15 +1228,15 @@ class DataArray:
 
     @staticmethod
     def concat(
-        dataarrays: Sequence["DataArray"], keep: Literal["last"] = "last"
+        dataarrays: Sequence["DataArray"], keep: Literal["last", "first"] = "last"
     ) -> "DataArray":
         """Concatenate DataArrays along the time axis
 
         Parameters
         ---------
         dataarrays: sequence of DataArrays
-        keep: str, optional
-            TODO Yet to be implemented, default: last
+        keep: 'first' or 'last', optional
+            default: last
 
         Returns
         -------
@@ -1506,7 +1506,9 @@ class DataArray:
         if "name" in kwargs:
             item.name = kwargs.pop("name")
 
-        with warnings.catch_warnings():  # there might be all-Nan slices, it is ok, so we ignore them!
+        with (
+            warnings.catch_warnings()
+        ):  # there might be all-Nan slices, it is ok, so we ignore them!
             warnings.simplefilter("ignore", category=RuntimeWarning)
             data = func(self.to_numpy(), axis=axis, keepdims=False, **kwargs)
 
