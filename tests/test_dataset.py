@@ -1265,6 +1265,21 @@ def test_concat_dataarray_by_time():
     assert da3.is_equidistant
 
 
+def test_concat_dataarray_keep_first() -> None:
+    da1 = mikeio.DataArray(
+        data=np.array([1.0, 2.0, 3.0]), time=pd.date_range("2000-01-01", periods=3)
+    )
+    # another dataarray with partly overlapping time
+    da2 = mikeio.DataArray(
+        data=np.array([4.0, 5.0]), time=pd.date_range("2000-01-02", periods=2)
+    )
+
+    da3 = mikeio.DataArray.concat([da1, da2], keep="first")
+
+    assert da3.n_timesteps == 3
+    assert da3.to_numpy()[2] == 3.0
+
+
 def test_concat_by_time():
     ds1 = mikeio.read("tests/testdata/tide1.dfs1")
     ds2 = mikeio.read("tests/testdata/tide2.dfs1") + 0.5  # add offset
