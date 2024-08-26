@@ -405,7 +405,7 @@ class PfsSection(SimpleNamespace, MutableMapping[str, Any]):
         Parameters
         ----------
         prefix : str, optional
-            The prefix of the enumerated sections, e.g. "File\_",
+            The prefix of the enumerated sections, e.g. "OUTPUT_",
             which can be supplied if it fails without this argument,
             by default None (will try to "guess" the prefix)
 
