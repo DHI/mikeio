@@ -21,9 +21,9 @@ from typing import Any
 # 'X.Y.dev0' is the canonical version of 'X.Y.dev'
 #
 
-__version__ = "2.1.dev1"  # TODO use git hash instead for dev version?
+__version__ = "2.1.0"  # TODO use git hash instead for dev version?
 # __version__ = "1.5.0"
-__dfs_version__: int = 200
+__dfs_version__: int = 210
 
 
 if "64" not in architecture()[0]:
