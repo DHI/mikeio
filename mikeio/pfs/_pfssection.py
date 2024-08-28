@@ -275,7 +275,7 @@ class PfsSection(SimpleNamespace, MutableMapping[str, Any]):
     def _param_match(parampat: Any, v: Any, case: bool) -> Any:
         if parampat is None:
             return False
-        if type(v) != type(parampat):
+        if type(v) is not type(parampat):
             return False
         if isinstance(v, str):
             vv = str(v) if case else str(v).lower()
@@ -405,7 +405,7 @@ class PfsSection(SimpleNamespace, MutableMapping[str, Any]):
         Parameters
         ----------
         prefix : str, optional
-            The prefix of the enumerated sections, e.g. "File\_",
+            The prefix of the enumerated sections, e.g. "OUTPUT_",
             which can be supplied if it fails without this argument,
             by default None (will try to "guess" the prefix)
 

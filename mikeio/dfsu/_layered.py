@@ -5,6 +5,7 @@ from typing import Any, Sequence, Tuple, TYPE_CHECKING
 from matplotlib.axes import Axes
 import numpy as np
 from mikecore.DfsuFile import DfsuFile, DfsuFileType
+from mikecore.DfsFileFactory import DfsFileFactory
 import pandas as pd
 from scipy.spatial import cKDTree
 from tqdm import trange
@@ -30,6 +31,7 @@ from ._dfsu import (
     get_nodes_from_source,
     get_elements_from_source,
     _validate_elements_and_geometry_sel,
+    write_dfsu_data,
 )
 
 if TYPE_CHECKING:
@@ -44,8 +46,10 @@ class DfsuLayered:
         self._filename = info.filename
         self._type = info.type
         self._deletevalue = info.deletevalue
-        self._time = info.time
+        self._equidistant = info.equidistant
+        self._start_time = info.start_time
         self._timestep = info.timestep
+        self._n_timesteps = info.n_timesteps
         self._geometry = self._read_geometry(self._filename)
         # 3d files have a zn item
         self._items = self._read_items(self._filename)
@@ -96,12 +100,12 @@ class DfsuLayered:
     @property
     def start_time(self) -> pd.Timestamp:
         """File start time"""
-        return self._time[0]
+        return self._start_time
 
     @property
     def n_timesteps(self) -> int:
         """Number of time steps"""
-        return len(self._time)
+        return self._n_timesteps
 
     @property
     def timestep(self) -> float:
@@ -111,11 +115,25 @@ class DfsuLayered:
     @property
     def end_time(self) -> pd.Timestamp:
         """File end time"""
-        return self._time[-1]
+        if self._equidistant:
+            return self.time[-1]
+        else:
+            # read the last timestep
+            ds = self.read(items=0, time=-1)
+            return ds.time[-1]
 
     @property
     def time(self) -> pd.DatetimeIndex:
-        return self._time
+        if self._equidistant:
+            return pd.date_range(
+                start=self.start_time,
+                periods=self.n_timesteps,
+                freq=f"{int(self.timestep)}s",
+            )
+        else:
+            raise NotImplementedError(
+                "Non-equidistant time axis. Read the data to get time."
+            )
 
     @property
     def geometry(self) -> GeometryFM3D | GeometryFMVerticalProfile:
@@ -283,7 +301,7 @@ class DfsuLayered:
         deletevalue = self.deletevalue
 
         data_list = []
-
+        t_seconds = np.zeros(len(time_steps))
         n_steps = len(time_steps)
         item0_is_node_based = False
         for item in range(n_items):
@@ -297,12 +315,10 @@ class DfsuLayered:
         if single_time_selected and not keepdims:
             data = data[0]
 
-        time = self.time
-
         for i in trange(n_steps, disable=not self.show_progress):
             it = time_steps[i]
             for item in range(n_items):
-                dfs, d = _read_item_time_step(
+                dfs, d, t = _read_item_time_step(
                     dfs=dfs,
                     filename=self._filename,
                     time=time,
@@ -314,6 +330,7 @@ class DfsuLayered:
                     error_bad_data=error_bad_data,
                     fill_bad_data_value=fill_bad_data_value,
                 )
+                t_seconds[i] = t
 
                 if elements is not None:
                     if item == 0 and item0_is_node_based:
@@ -326,7 +343,7 @@ class DfsuLayered:
                 else:
                     data_list[item][i] = d
 
-        time = self.time[time_steps]
+        time = pd.to_datetime(t_seconds, unit="s", origin=self.start_time)
 
         dfs.Close()
 
@@ -362,6 +379,32 @@ class DfsuLayered:
                 validate=False,
                 dt=self.timestep,
             )
+
+    def append(self, ds: Dataset, validate: bool = True) -> None:
+        """
+        Append data to a dfsu file
+
+        Parameters
+        ---------
+        ds: Dataset
+            Dataset to append
+        validate: bool, optional
+            Validate that the dataset to append has the same geometry and items, by default True
+        """
+        if validate:
+            if self.geometry != ds.geometry:
+                raise ValueError("The geometry of the dataset to append does not match")
+
+            for item_s, item_o in zip(ds.items, self.items):
+                if item_s != item_o:
+                    raise ValueError(
+                        f"Item in dataset {item_s.name} does not match {item_o.name}"
+                    )
+
+        dfs = DfsFileFactory.DfsuFileOpenAppend(str(self._filename), parameters=None)
+        write_dfsu_data(dfs=dfs, ds=ds, is_layered=ds.geometry.is_layered)
+        info = _get_dfsu_info(self._filename)
+        self._n_timesteps = info.n_timesteps
 
 
 class Dfsu2DV(DfsuLayered):

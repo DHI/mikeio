@@ -21,15 +21,15 @@ from typing import Any
 # 'X.Y.dev0' is the canonical version of 'X.Y.dev'
 #
 
-__version__ = "2.0.b1"  # TODO use git hash instead for dev version?
+__version__ = "2.1.0"  # TODO use git hash instead for dev version?
 # __version__ = "1.5.0"
-__dfs_version__: int = 200
+__dfs_version__: int = 210
 
 
 if "64" not in architecture()[0]:
     raise Exception("This library has not been tested for a 32 bit system.")
 
-from .dataset import DataArray, Dataset
+from .dataset import DataArray, Dataset, from_pandas, from_polars
 from .dfs import Dfs0, Dfs1, Dfs2, Dfs3
 from .dfsu import Dfsu, Mesh
 from .eum import EUMType, EUMUnit, ItemInfo
@@ -209,4 +209,6 @@ __all__ = [
     "read_xyz",
     "read",
     "open",
+    "from_pandas",
+    "from_polars",
 ]

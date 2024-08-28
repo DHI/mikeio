@@ -98,6 +98,8 @@ quartodoc:
         - open
         - read
         - read_pfs
+        - from_pandas
+        - from_polars
     - title: Dataset
       desc: ""
       contents:
@@ -109,6 +111,7 @@ quartodoc:
         - dataset._data_plot._DataArrayPlotterGrid2D
         - dataset._data_plot._DataArrayPlotterFM
         - dataset._data_plot._DataArrayPlotterFMVerticalProfile
+        - dataset._data_plot._DataArrayPlotterFMVerticalColumn
     - title: Geometry
       desc: ""
       contents:

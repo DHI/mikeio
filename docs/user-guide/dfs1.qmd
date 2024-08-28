@@ -1,9 +1,8 @@
 ---
+title: Dfs1
 aliases:
   - ../dfs1.html
 ---
-
-# Dfs1
 
 A dfs1 file contains node-based line series data. Dfs1 files do not contain enough metadata to determine their geographical position, but have a relative distance from the origo. 
 

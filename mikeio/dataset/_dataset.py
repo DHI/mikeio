@@ -28,6 +28,7 @@ from mikecore.DfsFile import DfsSimpleType
 
 if TYPE_CHECKING:
     import xarray
+    import polars as pl
 
 from ._dataarray import DataArray
 from ._data_utils import _to_safe_name, _get_time_idx_list, _n_selected_timesteps
@@ -1165,35 +1166,18 @@ class Dataset:
 
     # ============= Combine/concat ===========
 
-    def _append_items(self, other: "Dataset") -> "Dataset":
-        item_names = {item.name for item in self.items}
-        other_names = {item.name for item in other.items}
-
-        overlap = other_names.intersection(item_names)
-        if len(overlap) != 0:
-            raise ValueError("Can not append items, names are not unique")
-
-        if not np.all(self.time == other.time):
-            # if not: create common time?
-            raise ValueError("All timesteps must match")
-
-        for key, value in other._data_vars.items():
-            if key != "Z coordinate":
-                self[key] = value
-
-        return self
-
     @staticmethod
     def concat(
-        datasets: Sequence["Dataset"], keep: Literal["last"] = "last"
+        datasets: Sequence["Dataset"], keep: Literal["last", "first"] = "last"
     ) -> "Dataset":
         """Concatenate Datasets along the time axis
 
         Parameters
         ---------
         datasets: sequence of Datasets
-        keep: str, optional
-            TODO Yet to be implemented, default: last
+        keep: 'first' or 'last', optional
+            which values to keep in case of overlap, by default 'last'
+
 
         Returns
         -------
@@ -1211,14 +1195,9 @@ class Dataset:
         >>> ds3.n_timesteps
         4
         """
-
-        if keep != "last":
-            raise NotImplementedError(
-                "Last values is the only available option at the moment."
-            )
         ds = datasets[0].copy()
         for dsj in datasets[1:]:
-            ds = ds._concat_time(dsj, copy=False)
+            ds = ds._concat_time(dsj, copy=False, keep=keep)
 
         return ds
 
@@ -1253,7 +1232,12 @@ class Dataset:
 
         return ds
 
-    def _concat_time(self, other: "Dataset", copy: bool = True) -> "Dataset":
+    def _concat_time(
+        self,
+        other: "Dataset",
+        copy: bool = True,
+        keep: Literal["last", "first"] = "last",
+    ) -> "Dataset":
         self._check_all_items_match(other)
         # assuming time is always first dimension we can skip / keep it by bool
         start_dim = int("time" in self.dims)
@@ -1280,16 +1264,23 @@ class Dataset:
         idx1 = np.where(~df12["idx1"].isna())
         idx2 = np.where(~df12["idx2"].isna())
         for j in range(ds.n_items):
-            #    # if there is an overlap "other" data will be used!
-            newdata[j][idx1] = ds[j].to_numpy()
-            newdata[j][idx2] = other[j].to_numpy()
+            if keep == "last":
+                newdata[j][idx1] = ds[j].to_numpy()
+                newdata[j][idx2] = other[j].to_numpy()
+            else:
+                newdata[j][idx2] = other[j].to_numpy()
+                newdata[j][idx1] = ds[j].to_numpy()
 
         zn = None
         if self._zn is not None:
             zshape = (len(newtime), self._zn.shape[start_dim])
             zn = np.zeros(shape=zshape, dtype=self._zn.dtype)
-            zn[idx1, :] = self._zn
-            zn[idx2, :] = other._zn
+            if keep == "last":
+                zn[idx1, :] = self._zn
+                zn[idx2, :] = other._zn
+            else:
+                zn[idx2, :] = other._zn
+                zn[idx1, :] = self._zn
 
         return Dataset(
             newdata, time=newtime, items=ds.items, geometry=ds.geometry, zn=zn
@@ -1914,3 +1905,174 @@ class Dataset:
                 out.append(f"  {i}:  {item}")
 
         return str.join("\n", out)
+
+
+def from_pandas(
+    df: pd.DataFrame,
+    items: Mapping[str, ItemInfo] | Sequence[ItemInfo] | ItemInfo | None = None,
+) -> "Dataset":
+    """Create a Dataset from a pandas DataFrame
+
+    Parameters
+    ----------
+    df: pd.DataFrame
+        DataFrame with time index
+    items: Mapping[str, ItemInfo] | Sequence[ItemInfo] | ItemInfo | None, optional
+        Mapping of item names to ItemInfo objects, or a sequence of ItemInfo objects, or a single ItemInfo object.
+
+    Returns
+    -------
+    Dataset
+        time series dataset
+
+    Examples
+    --------
+    ```{python}
+    import pandas as pd
+    import mikeio
+
+    df = pd.DataFrame(
+        {
+            "A": [1, 2, 3],
+            "B": [4, 5, 6],
+        },
+        index=pd.date_range("20210101", periods=3, freq="D"),
+    )
+    ds = mikeio.from_pandas(df, items={"A": mikeio.ItemInfo(mikeio.EUMType.Water_Level),
+                                       "B": mikeio.ItemInfo(mikeio.EUMType.Discharge)})
+    ds
+    ```
+
+    """
+
+    if not isinstance(df.index, pd.DatetimeIndex):
+        # look for datetime column
+        for col in df.columns:
+            if isinstance(df[col].iloc[0], pd.Timestamp):
+                df.index = df[col]
+                df = df.drop(columns=col)
+                break
+        if not isinstance(df.index, pd.DatetimeIndex):
+            raise ValueError(
+                "Dataframe index must be a DatetimeIndex or contain a datetime column."
+            )
+
+    ncol = df.values.shape[1]
+    data = [df.values[:, i] for i in range(ncol)]
+
+    item_list = _parse_items(df.columns, items)
+
+    das = {
+        item.name: DataArray(data=d, item=item, time=df.index)
+        for d, item in zip(data, item_list)
+    }
+    ds = Dataset(das)
+    return ds
+
+
+def from_polars(
+    df: "pl.DataFrame",
+    items: Mapping[str, ItemInfo] | Sequence[ItemInfo] | ItemInfo | None = None,
+    datetime_col: str | None = None,
+) -> "Dataset":
+    """Create a Dataset from a polars DataFrame
+
+    Parameters
+    ----------
+    df: pl.DataFrame
+        DataFrame
+    items: Mapping[str, ItemInfo] | Sequence[ItemInfo] | ItemInfo | None, optional
+        Mapping of item names to ItemInfo objects, or a sequence of ItemInfo objects, or a single ItemInfo object.
+    datetime_col: str, optional
+        Name of the column containing datetime information, default is to use the first datetime column found.
+
+    Returns
+    -------
+    Dataset
+        time series dataset
+
+    Examples
+    --------
+    ```{python}
+    import polars as pl
+    import mikeio
+    from datetime import datetime
+
+    df = pl.DataFrame(
+        {
+            "time": [datetime(2021, 1, 1), datetime(2021, 1, 2)],
+            "A": [1.0, 2.0],
+            "B": [4.0, 5.0],
+        }
+    )
+
+    ds = mikeio.from_polars(
+        df,
+        items={
+            "A": mikeio.ItemInfo(mikeio.EUMType.Water_Level),
+            "B": mikeio.ItemInfo(mikeio.EUMType.Discharge),
+        },
+    )
+    ds
+    ```
+    """
+
+    import polars as pl
+
+    if datetime_col is None:
+        for col, dtype in zip(df.columns, df.dtypes):
+            if isinstance(dtype, pl.Datetime):
+                datetime_col = col
+                break
+
+    if datetime_col is None:
+        raise ValueError("Datetime column not found. Please specify datetime_col.")
+
+    time = pd.DatetimeIndex(df[datetime_col])
+    df = df.drop(datetime_col)
+
+    # convert the polars dataframe to list of numpy arrays
+    array = df.to_numpy()
+    data = [array[:, i] for i in range(array.shape[1])]
+
+    item_list = _parse_items(df.columns, items)
+
+    das = {
+        item.name: DataArray(data=d, item=item, time=time)
+        for d, item in zip(data, item_list)
+    }
+    ds = Dataset(das)
+    return ds
+
+
+def _parse_items(
+    column_names: Sequence[str],
+    items: Mapping[str, ItemInfo] | Sequence[ItemInfo] | ItemInfo | None = None,
+) -> List[ItemInfo]:
+    if items is None:
+        item_list: List[ItemInfo] = [ItemInfo(name) for name in column_names]
+    elif isinstance(items, ItemInfo):
+        eum_type = items.type
+        eum_unit = items.unit
+        eum_data_value_type = items.data_value_type
+        item_list = [
+            ItemInfo(name, eum_type, eum_unit, eum_data_value_type)
+            for name in column_names
+        ]
+
+    elif isinstance(items, Mapping):
+        item_list = [
+            ItemInfo(
+                name, items[name].type, items[name].unit, items[name].data_value_type
+            )
+            for name in column_names
+        ]
+    elif isinstance(items, Sequence):
+        item_list = [
+            ItemInfo(col, item.type, item.unit, item.data_value_type)
+            for col, item in zip(column_names, items)
+        ]
+    else:
+        raise TypeError("items must be a mapping, sequence or ItemInfo")
+
+    return item_list

@@ -10,7 +10,7 @@ allow-direct-references = true
 
 [project]
 name="mikeio"
-version="2.0.b1"
+version="2.1.0"
 dependencies = [
     "mikecore>=0.2.1",
     "numpy>=1.22.0",
@@ -30,14 +30,13 @@ authors = [
 description="A package that uses the DHI dfs libraries to create, write and read dfs and mesh files."
 license="BSD-3-Clause"
 readme = "README.md"
-requires-python = ">=3.8"
+requires-python = ">=3.9"
 classifiers = [
     "License :: OSI Approved :: BSD License",
     "Development Status :: 5 - Production/Stable",
     "Intended Audience :: Science/Research",
     "Programming Language :: Python",
     "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.8",
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
@@ -49,16 +48,17 @@ classifiers = [
 dev = ["pytest",
        "black==22.3.0",
        "quarto-cli",
-       "quartodoc==0.7.3",
-       "quartodoc",
+       "quartodoc==0.7.6",
+       "shapely",
        "pyproj",
        "netcdf4",
        "rasterio",
-       "ruff",
-       "mypy==1.6.1",
+       "polars",
+       "ruff==0.5.6",
+       "mypy==1.11.1",
        ]
 
-test = ["pytest", "pytest-cov", "mypy==1.6.1","pyproj", "shapely"]
+test = ["pytest", "pytest-cov", "xarray","mypy==1.11.1","shapely","pyproj", "polars"]
 
 notebooks= [
             "nbformat",
