@@ -8,7 +8,7 @@ build: typecheck test
 	python -m build
 
 lint:
-	ruff check .
+	ruff check mikeio
 
 format:
 	ruff format $(LIB)/

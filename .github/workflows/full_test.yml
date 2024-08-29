@@ -24,6 +24,7 @@ jobs:
     - uses: chartboost/ruff-action@v1 # Fail fast if there are any linting errors
       with:
         version: 0.6.2 # consistent with pyproject.toml ?
+        src: mikeio # ignore notebooks
     - name: Set up Python ${{ matrix.python-version }}
       uses: actions/setup-python@v4
       with:
