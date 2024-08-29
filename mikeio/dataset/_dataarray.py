@@ -964,7 +964,7 @@ class DataArray:
 
                 if interpolant is None:
                     interpolant = self.geometry.get_2d_interpolant(
-                        coords,
+                        coords,  # type: ignore
                         n_nearest=n_nearest,
                         **kwargs,  # type: ignore
                     )

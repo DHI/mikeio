@@ -105,10 +105,11 @@ class Dataset:
                 geometry=geometry,
                 zn=zn,
                 dims=dims,
-                dt=dt,  # type: ignore
+                dt=dt,
             )
         self._data_vars: MutableMapping[str, DataArray] = self._init_from_DataArrays(
-            data, validate=validate
+            data,  # type: ignore
+            validate=validate,
         )  # type: ignore
         self.plot = _DatasetPlotter(self)
 
@@ -132,12 +133,12 @@ class Dataset:
 
     @staticmethod
     def _create_dataarrays(
-        data: Sequence[NDArray[np.floating]] | NDArray[np.floating],
+        data: Any,
         time: pd.DatetimeIndex,
-        items: Sequence[ItemInfo],
+        items: Any,
         geometry: Any,
-        zn: NDArray[np.floating],
-        dims: Tuple[str, ...],
+        zn: Any,
+        dims: Any,
         dt: float,
     ) -> Mapping[str, DataArray]:
         if not isinstance(data, Iterable):
@@ -502,7 +503,7 @@ class Dataset:
         n_timesteps: int = 1,
         n_elements: int | None = None,
         shape: Tuple[int, ...] | None = None,
-    ):  # type: ignore
+    ) -> list:
         data = []
         if shape is None:
             if n_elements is None:
@@ -961,7 +962,7 @@ class Dataset:
                 self.geometry, GeometryFM2D
             ):  # TODO remove this when all geometries implements the same method
                 interpolant = self.geometry.get_2d_interpolant(
-                    xy,
+                    xy,  # type: ignore
                     n_nearest=n_nearest,
                     **kwargs,  # type: ignore
                 )
