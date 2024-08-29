@@ -94,7 +94,6 @@ def write_dfsu(filename: str | Path, data: Dataset) -> None:
 
 
 def write_dfsu_data(dfs: DfsuFile, ds: Dataset, is_layered: bool) -> None:
-
     n_time_steps = len(ds.time)
     data = ds
 

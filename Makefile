@@ -10,6 +10,9 @@ build: typecheck test
 lint:
 	ruff check .
 
+format:
+	ruff format $(LIB)/
+
 pylint:
 	pylint --disable=all --enable=attribute-defined-outside-init mikeio/
 

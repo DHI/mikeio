@@ -28,7 +28,6 @@ def _extract_track(
     dtype: Any,  # TODO DTypeLike?
     data_read_func: Callable[[int, int], Tuple[np.ndarray, float]],
 ) -> Dataset:
-
     if not isinstance(geometry, GeometryFM2D):
         raise NotImplementedError("Only implemented for 2d flexible mesh geometries")
 
@@ -65,9 +64,7 @@ def _extract_track(
     assert isinstance(
         times, pd.DatetimeIndex
     ), "The index must be a pandas.DatetimeIndex"
-    assert (
-        times.is_monotonic_increasing
-    ), "The time index must be monotonic increasing. Consider df.sort_index() before passing to extract_track()."
+    assert times.is_monotonic_increasing, "The time index must be monotonic increasing. Consider df.sort_index() before passing to extract_track()."
 
     data_list = [coords[:, 0], coords[:, 1]]  # lon,lat
     for item in range(n_items):

@@ -519,8 +519,8 @@ def concat(
                         darray = d.astype(np.float32)
 
                         dfs_o.WriteItemTimeStepNext(0, darray)
-                end_time = start_time + timedelta(
-                    seconds=timestep * dt
+                end_time = (
+                    start_time + timedelta(seconds=timestep * dt)
                 )  # reuse last timestep since there is no EndDateTime attribute in t_axis.
                 dfs_i.Close()
 

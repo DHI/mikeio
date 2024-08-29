@@ -367,7 +367,7 @@ class PfsSection(SimpleNamespace, MutableMapping[str, Any]):
         if isinstance(v, str):
             if len(v) > 5 and not ("PROJ" in v or "<CLOB:" in v):
                 v = v.replace('"', "''")
-                v = v.replace("\U0001F600", "'")
+                v = v.replace("\U0001f600", "'")
 
             if v == "":
                 # add either '' or || as pre- and suffix to strings depending on path definition

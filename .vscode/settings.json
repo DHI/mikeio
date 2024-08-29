@@ -13,4 +13,8 @@
     "mypy-type-checker.args": [
         "--disallow-untyped-defs",
     ],
+    "[python]": {
+        "editor.formatOnSave": true,
+        "editor.defaultFormatter": "charliermarsh.ruff"
+    }
 }

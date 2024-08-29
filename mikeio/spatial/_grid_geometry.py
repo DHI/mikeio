@@ -564,7 +564,7 @@ class Grid2D(_Geometry):
 
     @staticmethod
     def _parse_bbox(
-        bbox: Tuple[float, float, float, float]
+        bbox: Tuple[float, float, float, float],
     ) -> Tuple[float, float, float, float]:
         left = bbox[0]
         bottom = bbox[1]

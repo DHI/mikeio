@@ -99,7 +99,6 @@ def _write_dfs3_header(filename: str | Path, ds: Dataset, title: str) -> DfsFile
 
 
 class Dfs3(_Dfs123):
-
     _ndim = 3
 
     def __init__(self, filename: str | Path):
@@ -298,7 +297,6 @@ class Dfs3(_Dfs123):
 
     @staticmethod
     def _get_bottom_values(data: np.ndarray) -> np.ndarray:
-
         assert len(data.shape) == 3
         b = np.empty_like(data[0])
         b[:] = np.nan
