@@ -342,7 +342,6 @@ class DfsuSpectral:
         for i in trange(n_steps, disable=not self.show_progress):
             it = time_steps[i]
             for item in range(n_items):
-
                 itemdata = dfs.ReadItemTimeStep(item_numbers[item] + 1, it)
                 d = itemdata.Data
                 d[d == deletevalue] = np.nan
@@ -486,7 +485,6 @@ class DfsuSpectral:
                 tail,
             )
         else:
-
             m0 = calc_m0_from_spectrum(
                 spectrum, self.frequencies, self.directions, tail
             )

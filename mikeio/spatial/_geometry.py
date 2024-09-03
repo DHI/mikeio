@@ -10,7 +10,6 @@ BoundingBox = namedtuple("BoundingBox", ["left", "bottom", "right", "top"])
 
 class _Geometry(ABC):
     def __init__(self, projection: str = "LONG/LAT") -> None:
-
         if not MapProjection.IsValid(projection):
             raise ValueError(f"{projection=} is not a valid projection string")
 

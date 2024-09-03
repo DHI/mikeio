@@ -99,9 +99,18 @@ class Dataset:
     ):
         if not self._is_DataArrays(data):
             data = self._create_dataarrays(
-                data=data, time=time, items=items, geometry=geometry, zn=zn, dims=dims, dt=dt  # type: ignore
+                data=data,
+                time=time,
+                items=items,
+                geometry=geometry,
+                zn=zn,
+                dims=dims,
+                dt=dt,
             )
-        self._data_vars: MutableMapping[str, DataArray] = self._init_from_DataArrays(data, validate=validate)  # type: ignore
+        self._data_vars: MutableMapping[str, DataArray] = self._init_from_DataArrays(
+            data,  # type: ignore
+            validate=validate,
+        )  # type: ignore
         self.plot = _DatasetPlotter(self)
 
     @staticmethod
@@ -124,12 +133,12 @@ class Dataset:
 
     @staticmethod
     def _create_dataarrays(
-        data: Sequence[NDArray[np.floating]] | NDArray[np.floating],
+        data: Any,
         time: pd.DatetimeIndex,
-        items: Sequence[ItemInfo],
+        items: Any,
         geometry: Any,
-        zn: NDArray[np.floating],
-        dims: Tuple[str, ...],
+        zn: Any,
+        dims: Any,
         dt: float,
     ) -> Mapping[str, DataArray]:
         if not isinstance(data, Iterable):
@@ -220,7 +229,7 @@ class Dataset:
 
     @staticmethod
     def _DataArrays_as_mapping(
-        data: DataArray | Sequence[DataArray] | Mapping[str, DataArray]
+        data: DataArray | Sequence[DataArray] | Mapping[str, DataArray],
     ) -> MutableMapping[str, DataArray]:
         """Create dict of DataArrays if necessary"""
         if isinstance(data, MutableMapping):
@@ -238,7 +247,7 @@ class Dataset:
 
     @staticmethod
     def _validate_item_names_and_keys(
-        data_map: MutableMapping[str, DataArray]
+        data_map: MutableMapping[str, DataArray],
     ) -> MutableMapping[str, DataArray]:
         for key, da in data_map.items():
             if da.name == "NoName":
@@ -489,7 +498,12 @@ class Dataset:
 
     # TODO: delete this?
     @staticmethod
-    def create_empty_data(n_items: int = 1, n_timesteps: int = 1, n_elements: int | None = None, shape: Tuple[int, ...] | None = None):  # type: ignore
+    def create_empty_data(
+        n_items: int = 1,
+        n_timesteps: int = 1,
+        n_elements: int | None = None,
+        shape: Tuple[int, ...] | None = None,
+    ) -> list:
         data = []
         if shape is None:
             if n_elements is None:
@@ -948,7 +962,9 @@ class Dataset:
                 self.geometry, GeometryFM2D
             ):  # TODO remove this when all geometries implements the same method
                 interpolant = self.geometry.get_2d_interpolant(
-                    xy, n_nearest=n_nearest, **kwargs  # type: ignore
+                    xy,  # type: ignore
+                    n_nearest=n_nearest,
+                    **kwargs,  # type: ignore
                 )
                 das = [da.interp(x=x, y=y, interpolant=interpolant) for da in self]
             else:

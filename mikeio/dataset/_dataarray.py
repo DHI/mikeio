@@ -220,7 +220,6 @@ class DataArray:
         ndim_no_time = ndim if (len(dims) == 0) else ndim - 1
 
         if isinstance(geometry, GeometryUndefined):
-
             DIMS_MAPPING: Mapping[int, Sequence[Any]] = {
                 0: [],
                 1: ["x"],
@@ -965,7 +964,9 @@ class DataArray:
 
                 if interpolant is None:
                     interpolant = self.geometry.get_2d_interpolant(
-                        coords, n_nearest=n_nearest, **kwargs  # type: ignore
+                        coords,  # type: ignore
+                        n_nearest=n_nearest,
+                        **kwargs,  # type: ignore
                     )
                 dai = self.geometry.interp2d(self, *interpolant).flatten()  # type: ignore
                 if z is None:

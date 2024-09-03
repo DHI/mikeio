@@ -59,7 +59,6 @@ class _DataArrayPlotter:
     def _get_ax(
         ax: Axes | None = None, figsize: Tuple[float, float] | None = None
     ) -> Axes:
-
         if ax is None:
             _, ax = plt.subplots(figsize=figsize)
         return ax
@@ -68,7 +67,6 @@ class _DataArrayPlotter:
     def _get_fig_ax(
         ax: Axes | None = None, figsize: Tuple[float, float] | None = None
     ) -> Tuple[Figure, Axes]:
-
         if ax is None:
             fig, ax = plt.subplots(figsize=figsize)
         else:
