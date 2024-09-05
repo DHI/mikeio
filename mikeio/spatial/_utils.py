@@ -1,7 +1,5 @@
 from __future__ import annotations
 
-from typing import Tuple
-
 import numpy as np
 
 from ._geometry import BoundingBox
@@ -17,7 +15,7 @@ def xy_to_bbox(xy: np.ndarray, buffer: float = 0.0) -> BoundingBox:
 
 
 def dist_in_meters(
-    coords: np.ndarray, pt: Tuple[float, float], is_geo: bool = False
+    coords: np.ndarray, pt: tuple[float, float], is_geo: bool = False
 ) -> np.ndarray:
     """get distance between array of coordinates and point
 

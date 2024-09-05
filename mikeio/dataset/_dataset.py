@@ -6,16 +6,13 @@ from copy import deepcopy
 from typing import (
     Iterable,
     Iterator,
-    List,
     Literal,
     Mapping,
     MutableMapping,
     Sequence,
-    Tuple,
     Any,
     overload,
     Hashable,
-    Set,
     TYPE_CHECKING,
     Callable,
 )
@@ -93,7 +90,7 @@ class Dataset:
         items: Sequence[ItemInfo] | None = None,
         geometry: Any = None,
         zn: NDArray[np.floating] | None = None,
-        dims: Tuple[str, ...] | None = None,
+        dims: tuple[str, ...] | None = None,
         validate: bool = True,
         dt: float = 1.0,
     ):
@@ -167,7 +164,7 @@ class Dataset:
         self._check_all_different_ids(list(data_vars.values()))
 
         # TODO is it necessary to keep track of item names?
-        self.__itemattr: Set[str] = set()
+        self.__itemattr: set[str] = set()
         for key, value in data_vars.items():
             self._set_name_attr(key, value)
 
@@ -180,7 +177,7 @@ class Dataset:
         )
 
     @staticmethod
-    def _modify_list(lst: Iterable[str]) -> List[str]:
+    def _modify_list(lst: Iterable[str]) -> list[str]:
         modified_list = []
         count_dict = {}
 
@@ -201,7 +198,7 @@ class Dataset:
     @staticmethod
     def _parse_items(
         items: None | Sequence[ItemInfo | EUMType | str], n_items_data: int
-    ) -> List[ItemInfo]:
+    ) -> list[ItemInfo]:
         if items is None:
             # default Undefined items
             item_infos = [ItemInfo(f"Item_{j+1}") for j in range(n_items_data)]
@@ -260,7 +257,7 @@ class Dataset:
         return data_map
 
     @staticmethod
-    def _unique_item_names(das: Sequence[DataArray]) -> List[str]:
+    def _unique_item_names(das: Sequence[DataArray]) -> list[str]:
         item_names = [da.name for da in das]
         if len(set(item_names)) != len(item_names):
             raise ValueError(
@@ -374,7 +371,7 @@ class Dataset:
         return len(self.time)
 
     @property
-    def items(self) -> List[ItemInfo]:
+    def items(self) -> list[ItemInfo]:
         """ItemInfo for each of the DataArrays as a list"""
         return [x.item for x in self]
 
@@ -384,7 +381,7 @@ class Dataset:
         return len(self._data_vars)
 
     @property
-    def names(self) -> List[str]:
+    def names(self) -> list[str]:
         """Name of each of the DataArrays as a list"""
         return [da.name for da in self]
 
@@ -397,7 +394,7 @@ class Dataset:
         return self[0].ndim
 
     @property
-    def dims(self) -> Tuple[str, ...]:
+    def dims(self) -> tuple[str, ...]:
         """Named array dimensions of each DataArray"""
         return self[0].dims
 
@@ -446,7 +443,7 @@ class Dataset:
         if not self[0]._has_time_axis:  # type: ignore
             raise ValueError("Not available if no time axis!")
 
-        all_index: List[int] = []
+        all_index: list[int] = []
         for i in range(self.n_items):
             x = self[i].to_numpy()
 
@@ -502,7 +499,7 @@ class Dataset:
         n_items: int = 1,
         n_timesteps: int = 1,
         n_elements: int | None = None,
-        shape: Tuple[int, ...] | None = None,
+        shape: tuple[int, ...] | None = None,
     ) -> list:
         data = []
         if shape is None:
@@ -751,7 +748,7 @@ class Dataset:
 
     # TODO change this to return a single type
     def _key_to_str(self, key: Any) -> Any:
-        """Translate item selection key to str (or List[str])"""
+        """Translate item selection key to str (or list[str])"""
         if isinstance(key, str):
             return key
         if isinstance(key, int):
@@ -981,7 +978,7 @@ class Dataset:
 
     def __dataset_read_item_time_func(
         self, item: int, step: int
-    ) -> Tuple[np.ndarray, float]:
+    ) -> tuple[np.ndarray, float]:
         "Used by _extract_track"
 
         data = self[item].isel(time=step).to_numpy()
@@ -1456,7 +1453,7 @@ class Dataset:
                 )
                 return Dataset([da], validate=False)
             else:
-                res: List[DataArray] = []
+                res: list[DataArray] = []
                 for quantile in q:
                     qd = self._quantile(q=quantile, axis=axis, func=func, **kwargs)[0]
                     assert isinstance(qd, DataArray)
@@ -2065,9 +2062,9 @@ def from_polars(
 def _parse_items(
     column_names: Sequence[str],
     items: Mapping[str, ItemInfo] | Sequence[ItemInfo] | ItemInfo | None = None,
-) -> List[ItemInfo]:
+) -> list[ItemInfo]:
     if items is None:
-        item_list: List[ItemInfo] = [ItemInfo(name) for name in column_names]
+        item_list: list[ItemInfo] = [ItemInfo(name) for name in column_names]
     elif isinstance(items, ItemInfo):
         eum_type = items.type
         eum_unit = items.unit

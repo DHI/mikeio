@@ -5,9 +5,7 @@ from types import SimpleNamespace
 from typing import (
     Any,
     Callable,
-    Dict,
     ItemsView,
-    List,
     Mapping,
     MutableMapping,
     Sequence,
@@ -16,7 +14,7 @@ from typing import (
 import pandas as pd
 
 
-def _merge_dict(a: Dict[str, Any], b: Mapping[str, Any]) -> Dict[str, Any]:
+def _merge_dict(a: dict[str, Any], b: Mapping[str, Any]) -> dict[str, Any]:
     """merges dict b into dict a; handling non-unique keys"""
     for key in b:
         if key in a:
@@ -241,7 +239,7 @@ class PfsSection(SimpleNamespace, MutableMapping[str, Any]):
         keypat: str | None = None,
         parampat: Any = None,
         secpat: str | None = None,
-        keylist: List[str] | None = None,
+        keylist: list[str] | None = None,
         case: bool = False,
     ) -> Any:
         """Look for patterns in either keys, params or sections"""
@@ -295,8 +293,8 @@ class PfsSection(SimpleNamespace, MutableMapping[str, Any]):
         """Return a copy of the PfsSection."""
         return PfsSection(self.to_dict())
 
-    def _to_txt_lines(self) -> List[str]:
-        lines: List[str] = []
+    def _to_txt_lines(self) -> list[str]:
+        lines: list[str] = []
         self._write_with_func(lines.append, newline="")
         return lines
 
@@ -321,7 +319,7 @@ class PfsSection(SimpleNamespace, MutableMapping[str, Any]):
                 func(f"{lvl_prefix * level}[{k}]{newline}")
                 func(f"{lvl_prefix * level}EndSect  // {k}{newline}{newline}")
 
-            elif isinstance(v, List) and any(
+            elif isinstance(v, list) and any(
                 isinstance(subv, PfsSection) for subv in v
             ):
                 # duplicate sections

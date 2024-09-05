@@ -3,12 +3,10 @@ from collections import namedtuple
 from functools import cached_property
 from pathlib import Path
 from typing import (
-    List,
     Any,
     Literal,
     Sequence,
     Sized,
-    Tuple,
     TYPE_CHECKING,
 )
 
@@ -61,7 +59,7 @@ class _GeometryFMPlotter:
     def __call__(
         self,
         ax: Axes | None = None,
-        figsize: Tuple[float, float] | None = None,
+        figsize: tuple[float, float] | None = None,
         **kwargs: Any,
     ) -> Axes:
         """Plot bathymetry as coloured patches"""
@@ -72,7 +70,7 @@ class _GeometryFMPlotter:
     def contour(
         self,
         ax: Axes | None = None,
-        figsize: Tuple[float, float] | None = None,
+        figsize: tuple[float, float] | None = None,
         **kwargs: Any,
     ) -> Axes:
         """Plot bathymetry as contour lines"""
@@ -83,7 +81,7 @@ class _GeometryFMPlotter:
     def contourf(
         self,
         ax: Axes | None = None,
-        figsize: Tuple[float, float] | None = None,
+        figsize: tuple[float, float] | None = None,
         **kwargs: Any,
     ) -> Axes:
         """Plot bathymetry as filled contours"""
@@ -94,7 +92,7 @@ class _GeometryFMPlotter:
     @staticmethod
     def _get_ax(
         ax: Axes | None = None,
-        figsize: Tuple[float, float] | None = None,
+        figsize: tuple[float, float] | None = None,
     ) -> Axes:
         import matplotlib.pyplot as plt
 
@@ -125,7 +123,7 @@ class _GeometryFMPlotter:
     def mesh(
         self,
         title: str = "Mesh",
-        figsize: Tuple[float, float] | None = None,
+        figsize: tuple[float, float] | None = None,
         ax: Axes | None = None,
     ) -> Axes:
         """Plot mesh only"""
@@ -151,7 +149,7 @@ class _GeometryFMPlotter:
     def outline(
         self,
         title: str = "Outline",
-        figsize: Tuple[float, float] | None = None,
+        figsize: tuple[float, float] | None = None,
         ax: Axes | None = None,
     ) -> Axes:
         """Plot domain outline (using the boundary_polylines property)"""
@@ -173,7 +171,7 @@ class _GeometryFMPlotter:
     def boundary_nodes(
         self,
         boundary_names: Sequence[str] | None = None,
-        figsize: Tuple[float, float] | None = None,
+        figsize: tuple[float, float] | None = None,
         ax: Axes | None = None,
     ) -> Axes:
         """Plot mesh boundary nodes and their code values"""
@@ -228,7 +226,7 @@ class _GeometryFM(_Geometry):
         self,
         *,
         node_coordinates: np.ndarray,
-        element_table: np.ndarray | List[Sequence[int]] | List[np.ndarray],
+        element_table: np.ndarray | list[Sequence[int]] | list[np.ndarray],
         projection: str,
         codes: np.ndarray | None = None,
         dfsu_type: DfsuFileType,
@@ -294,7 +292,7 @@ class _GeometryFM(_Geometry):
 
     def _check_elements(
         self,
-        element_table: np.ndarray | List[Sequence[int]] | List[np.ndarray],
+        element_table: np.ndarray | list[Sequence[int]] | list[np.ndarray],
         element_ids: np.ndarray | None = None,
         validate: bool = True,
     ) -> tuple[Any, Any]:
@@ -334,7 +332,7 @@ class _GeometryFM(_Geometry):
         self._element_ids = new_element_ids
 
     @property
-    def default_dims(self) -> Tuple[str, ...]:
+    def default_dims(self) -> tuple[str, ...]:
         return ("element",)
 
     @property
@@ -458,7 +456,7 @@ class GeometryFM2D(_GeometryFM):
         return isinstance(area, Sized) and len(area) == 4
 
     @staticmethod
-    def _area_is_polygon(area: Sequence[Tuple[float, float]] | Sequence[float]) -> bool:
+    def _area_is_polygon(area: Sequence[tuple[float, float]] | Sequence[float]) -> bool:
         polygon = np.array(area)
         return polygon.ndim == 2 and polygon.shape[1] == 2
 
@@ -618,8 +616,8 @@ class GeometryFM2D(_GeometryFM):
         data: np.ndarray,
         elem_ids: np.ndarray,
         weights: np.ndarray | None = None,
-        shape: Tuple[int, ...] | None = None,
-    ) -> np.ndarray | List[np.ndarray]:
+        shape: tuple[int, ...] | None = None,
+    ) -> np.ndarray | list[np.ndarray]:
         """interp spatially in data (2d only)
 
         Parameters
@@ -881,7 +879,7 @@ class GeometryFM2D(_GeometryFM):
     def __contains__(self, pt: np.ndarray) -> bool:
         return self.contains(pt)[0]
 
-    def _get_boundary_polylines_uncategorized(self) -> List[List[np.int64]]:
+    def _get_boundary_polylines_uncategorized(self) -> list[list[np.int64]]:
         """Construct closed polylines for all boundary faces"""
         boundary_faces = self._get_boundary_faces()
         face_remains = boundary_faces.copy()
@@ -991,7 +989,7 @@ class GeometryFM2D(_GeometryFM):
         y: float | np.ndarray | None = None,
         coords: np.ndarray | None = None,
         area: (
-            Tuple[float, float, float, float] | Sequence[Tuple[float, float]] | None
+            tuple[float, float, float, float] | Sequence[tuple[float, float]] | None
         ) = None,
     ) -> np.ndarray:
         """Find a *set* of element indicies for a number of points or within an area.
@@ -1065,7 +1063,7 @@ class GeometryFM2D(_GeometryFM):
         return mp.Path(polygon).contains_points(xy)
 
     def _elements_in_area(
-        self, area: Sequence[float] | Sequence[Tuple[float, float]]
+        self, area: Sequence[float] | Sequence[tuple[float, float]]
     ) -> np.ndarray:
         """Find 2d element ids of elements inside area"""
         if self._area_is_bbox(area):
@@ -1086,7 +1084,7 @@ class GeometryFM2D(_GeometryFM):
         self, elements: int | Sequence[int], keepdims: bool = False
     ) -> "GeometryFM2D" | GeometryPoint2D:
         if isinstance(elements, (int, np.integer)):
-            sel_elements: List[int] = [elements]
+            sel_elements: list[int] = [elements]
         else:
             sel_elements = list(elements)
         if len(sel_elements) == 1 and not keepdims:
@@ -1113,7 +1111,7 @@ class GeometryFM2D(_GeometryFM):
         )
 
     def _get_nodes_and_table_for_elements(
-        self, elements: np.ndarray | List[int]
+        self, elements: np.ndarray | list[int]
     ) -> tuple[Any, Any]:
         """list of nodes and element table for a list of elements
 

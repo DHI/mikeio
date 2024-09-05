@@ -1,6 +1,6 @@
 from __future__ import annotations
 from collections.abc import Sequence
-from typing import Literal, Tuple
+from typing import Literal
 import numpy as np
 from matplotlib.axes import Axes
 from matplotlib.projections.polar import PolarAxes
@@ -20,7 +20,7 @@ def plot_2dspectrum(
     rmin: float | None = None,
     rmax: float | None = None,
     levels: int | Sequence[float] | None = None,
-    figsize: Tuple[float, float] = (7, 7),
+    figsize: tuple[float, float] = (7, 7),
     add_colorbar: bool = True,
 ) -> Axes:
     """

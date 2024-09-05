@@ -1,7 +1,7 @@
 from __future__ import annotations
 from copy import deepcopy
 from pathlib import Path
-from typing import Any, List, Literal, Tuple
+from typing import Any, Literal
 from collections.abc import Sequence
 
 import numpy as np
@@ -148,7 +148,7 @@ class Dfs2(_Dfs123):
         *,
         items: str | int | Sequence[str | int] | None = None,
         time: int | str | slice | None = None,
-        area: Tuple[float, float, float, float] | None = None,
+        area: tuple[float, float, float, float] | None = None,
         keepdims: bool = False,
         dtype: Any = np.float32,
     ) -> Dataset:
@@ -183,7 +183,7 @@ class Dfs2(_Dfs123):
         single_time_selected, time_steps = _valid_timesteps(self._dfs.FileInfo, time)
         nt = len(time_steps) if not single_time_selected else 1
 
-        shape: Tuple[int, ...]
+        shape: tuple[int, ...]
 
         if area is not None:
             take_subset = True
@@ -198,7 +198,7 @@ class Dfs2(_Dfs123):
         if single_time_selected and not keepdims:
             shape = shape[1:]
 
-        data_list: List[np.ndarray] = [
+        data_list: list[np.ndarray] = [
             np.ndarray(shape=shape, dtype=dtype) for _ in range(n_items)
         ]
 
@@ -226,7 +226,7 @@ class Dfs2(_Dfs123):
 
         time = pd.to_datetime(t_seconds, unit="s", origin=self.start_time)
 
-        dims: Tuple[str, ...]
+        dims: tuple[str, ...]
 
         if single_time_selected and not keepdims:
             dims = ("y", "x")
@@ -304,7 +304,7 @@ class Dfs2(_Dfs123):
         return self.geometry.dy
 
     @property
-    def shape(self) -> Tuple[int, ...]:
+    def shape(self) -> tuple[int, ...]:
         """Tuple with number of values in the t-, y-, x-direction"""
         return (self._n_timesteps, self.geometry.ny, self.geometry.nx)
 

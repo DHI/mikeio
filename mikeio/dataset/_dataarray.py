@@ -18,7 +18,6 @@ from typing import (
     TYPE_CHECKING,
     overload,
     Callable,
-    Tuple,
 )
 
 
@@ -196,7 +195,7 @@ class DataArray:
 
     def _parse_dims(
         self, dims: Sequence[str] | None, geometry: GeometryType
-    ) -> Tuple[str, ...]:
+    ) -> tuple[str, ...]:
         if dims is None:
             return self._guess_dims(self.ndim, self.shape, self.n_timesteps, geometry)
         else:
@@ -212,8 +211,8 @@ class DataArray:
 
     @staticmethod
     def _guess_dims(
-        ndim: int, shape: Tuple[int, ...], n_timesteps: int, geometry: GeometryType
-    ) -> Tuple[str, ...]:
+        ndim: int, shape: tuple[int, ...], n_timesteps: int, geometry: GeometryType
+    ) -> tuple[str, ...]:
         # This is not very robust, but is probably a reasonable guess
         time_is_first = (n_timesteps > 1) or (shape[0] == 1 and n_timesteps == 1)
         dims = ["time"] if time_is_first else []
@@ -253,7 +252,7 @@ class DataArray:
 
     @staticmethod
     def _parse_geometry(
-        geometry: Any, dims: Tuple[str, ...], shape: Tuple[int, ...]
+        geometry: Any, dims: tuple[str, ...], shape: tuple[int, ...]
     ) -> Any:
         if len(dims) > 1 and (
             geometry is None or isinstance(geometry, GeometryUndefined)
@@ -881,7 +880,7 @@ class DataArray:
         y: float | None = None,
         z: float | None = None,
         n_nearest: int = 3,
-        interpolant: Tuple[Any, Any] | None = None,
+        interpolant: tuple[Any, Any] | None = None,
         **kwargs: Any,
     ) -> "DataArray":
         """Interpolate data in time and space
@@ -997,7 +996,7 @@ class DataArray:
 
     def __dataarray_read_item_time_func(
         self, item: int, step: int
-    ) -> Tuple[np.ndarray, float]:
+    ) -> tuple[np.ndarray, float]:
         "Used by _extract_track"
         # Ignore item argument
         data = self.isel(time=step).to_numpy()
@@ -1143,7 +1142,7 @@ class DataArray:
     def interp_like(
         self,
         other: "DataArray" | Grid2D | GeometryFM2D | pd.DatetimeIndex,
-        interpolant: Tuple[Any, Any] | None = None,
+        interpolant: tuple[Any, Any] | None = None,
         **kwargs: Any,
     ) -> "DataArray":
         """Interpolate in space (and in time) to other geometry (and time axis)
@@ -2005,10 +2004,10 @@ class DataArray:
 
     @staticmethod
     def _parse_axis(
-        data_shape: Tuple[int, ...],
-        dims: Tuple[str, ...],
-        axis: int | Tuple[int, ...] | str | None,
-    ) -> int | Tuple[int, ...]:
+        data_shape: tuple[int, ...],
+        dims: tuple[str, ...],
+        axis: int | tuple[int, ...] | str | None,
+    ) -> int | tuple[int, ...]:
         # TODO change to return tuple always
         # axis = 0 if axis == "time" else axis
         if (axis == "spatial") or (axis == "space"):

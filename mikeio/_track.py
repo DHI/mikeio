@@ -1,7 +1,7 @@
 from __future__ import annotations
 from pathlib import Path
 from collections.abc import Sequence
-from typing import Any, Callable, Tuple
+from typing import Any, Callable
 
 import numpy as np
 import pandas as pd
@@ -26,7 +26,7 @@ def _extract_track(
     n_elements: int,
     method: str,
     dtype: Any,  # TODO DTypeLike?
-    data_read_func: Callable[[int, int], Tuple[np.ndarray, float]],
+    data_read_func: Callable[[int, int], tuple[np.ndarray, float]],
 ) -> Dataset:
     if not isinstance(geometry, GeometryFM2D):
         raise NotImplementedError("Only implemented for 2d flexible mesh geometries")

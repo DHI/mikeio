@@ -3,7 +3,7 @@ from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
 
-from typing import Any, Literal, Sequence, Tuple
+from typing import Any, Literal, Sequence
 
 import numpy as np
 import pandas as pd
@@ -394,7 +394,7 @@ class Dfsu2DH:
         items: str | int | Sequence[str | int] | None = None,
         time: int | str | slice | None = None,
         elements: Sequence[int] | np.ndarray | None = None,
-        area: Tuple[float, float, float, float] | None = None,
+        area: tuple[float, float, float, float] | None = None,
         x: float | None = None,
         y: float | None = None,
         keepdims: bool = False,
@@ -461,7 +461,7 @@ class Dfsu2DH:
 
         data_list = []
 
-        shape: Tuple[int, ...]
+        shape: tuple[int, ...]
 
         t_rel = np.zeros(len(time_steps))
 
@@ -505,7 +505,7 @@ class Dfsu2DH:
 
         dfs.Close()
 
-        dims: Tuple[str, ...]
+        dims: tuple[str, ...]
 
         dims = ("time", "element")
 
@@ -555,7 +555,7 @@ class Dfsu2DH:
 
     def _parse_geometry_sel(
         self,
-        area: Tuple[float, float, float, float] | None,
+        area: tuple[float, float, float, float] | None,
         x: float | None,
         y: float | None,
     ) -> np.ndarray | None:
@@ -644,7 +644,7 @@ class Dfsu2DH:
 
     def _dfs_read_item_time_func(
         self, item: int, step: int
-    ) -> Tuple[np.ndarray, pd.Timestamp]:
+    ) -> tuple[np.ndarray, pd.Timestamp]:
         dfs = DfsuFile.Open(self._filename)
         itemdata = dfs.ReadItemTimeStep(item + 1, step)
 
