@@ -219,7 +219,6 @@ class DataArray:
         ndim_no_time = ndim if (len(dims) == 0) else ndim - 1
 
         if isinstance(geometry, GeometryUndefined):
-
             DIMS_MAPPING: Mapping[int, Sequence[Any]] = {
                 0: [],
                 1: ["x"],
@@ -964,7 +963,9 @@ class DataArray:
 
                 if interpolant is None:
                     interpolant = self.geometry.get_2d_interpolant(
-                        coords, n_nearest=n_nearest, **kwargs  # type: ignore
+                        coords,  # type: ignore
+                        n_nearest=n_nearest,
+                        **kwargs,  # type: ignore
                     )
                 dai = self.geometry.interp2d(self, *interpolant).flatten()  # type: ignore
                 if z is None:
@@ -1227,15 +1228,15 @@ class DataArray:
 
     @staticmethod
     def concat(
-        dataarrays: Sequence["DataArray"], keep: Literal["last"] = "last"
+        dataarrays: Sequence["DataArray"], keep: Literal["last", "first"] = "last"
     ) -> "DataArray":
         """Concatenate DataArrays along the time axis
 
         Parameters
         ---------
         dataarrays: sequence of DataArrays
-        keep: str, optional
-            TODO Yet to be implemented, default: last
+        keep: 'first' or 'last', optional
+            default: last
 
         Returns
         -------
@@ -1505,7 +1506,9 @@ class DataArray:
         if "name" in kwargs:
             item.name = kwargs.pop("name")
 
-        with warnings.catch_warnings():  # there might be all-Nan slices, it is ok, so we ignore them!
+        with (
+            warnings.catch_warnings()
+        ):  # there might be all-Nan slices, it is ok, so we ignore them!
             warnings.simplefilter("ignore", category=RuntimeWarning)
             data = func(self.to_numpy(), axis=axis, keepdims=False, **kwargs)
 

@@ -35,7 +35,6 @@ class _GeometryFMLayered(_GeometryFM):
         validate: bool = True,
         reindex: bool = False,
     ) -> None:
-
         super().__init__(
             node_coordinates=node_coordinates,
             element_table=element_table,
@@ -74,7 +73,6 @@ class _GeometryFMLayered(_GeometryFM):
     def isel(
         self, idx: Sequence[int], keepdims: bool = False, **kwargs: Any
     ) -> GeometryFM3D | GeometryPoint3D | GeometryFM2D | GeometryFMVerticalColumn:
-
         return self.elements_to_geometry(elements=idx, keepdims=keepdims)
 
     def elements_to_geometry(
@@ -668,7 +666,6 @@ class GeometryFM3D(_GeometryFMLayered):
         area: tuple[float, float, float, float] | None = None,
         layers: int | Layer | Sequence[int] | None = None,
     ) -> np.ndarray:
-
         if layers is not None:
             idx = self.get_layer_elements(layers)
         else:
@@ -771,7 +768,6 @@ class GeometryFMVerticalProfile(_GeometryFMLayered):
         coords: np.ndarray | None = None,
         layers: int | Sequence[int] | Layer | None = None,
     ) -> np.ndarray:
-
         if layers is not None:
             idx = self.get_layer_elements(layers)
         else:
@@ -909,7 +905,6 @@ class _GeometryFMVerticalProfilePlotter:
         return ax
 
     def mesh(self, title: str = "Mesh", edge_color: str = "0.5", **kwargs: Any) -> Axes:
-
         v = np.full_like(self.g.element_coordinates[:, 0], np.nan)
         return _plot_vertical_profile(
             node_coordinates=self.g.node_coordinates,

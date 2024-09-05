@@ -365,7 +365,7 @@ class PfsSection(SimpleNamespace, MutableMapping[str, Any]):
         if isinstance(v, str):
             if len(v) > 5 and not ("PROJ" in v or "<CLOB:" in v):
                 v = v.replace('"', "''")
-                v = v.replace("\U0001F600", "'")
+                v = v.replace("\U0001f600", "'")
 
             if v == "":
                 # add either '' or || as pre- and suffix to strings depending on path definition
@@ -403,7 +403,7 @@ class PfsSection(SimpleNamespace, MutableMapping[str, Any]):
         Parameters
         ----------
         prefix : str, optional
-            The prefix of the enumerated sections, e.g. "File\_",
+            The prefix of the enumerated sections, e.g. "OUTPUT_",
             which can be supplied if it fails without this argument,
             by default None (will try to "guess" the prefix)
 

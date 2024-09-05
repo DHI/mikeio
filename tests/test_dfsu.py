@@ -975,6 +975,7 @@ def test_interp_like_fm_dataset():
     assert isinstance(dsi, Dataset)
     assert isinstance(dsi.geometry, GeometryFM2D)
 
+
 def test_append_dfsu_2d(tmp_path):
     ds = mikeio.read("tests/testdata/consistency/oresundHD.dfsu", time=[0, 1])
     ds2 = mikeio.read("tests/testdata/consistency/oresundHD.dfsu", time=[2, 3])

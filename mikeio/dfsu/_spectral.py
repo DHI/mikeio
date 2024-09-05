@@ -120,7 +120,7 @@ class DfsuSpectral:
             return pd.date_range(
                 start=self.start_time,
                 periods=self.n_timesteps,
-                freq=f"{self.timestep}S",
+                freq=f"{int(self.timestep)}s",
             )
         else:
             raise NotImplementedError(
@@ -342,12 +342,11 @@ class DfsuSpectral:
         for i in trange(n_steps, disable=not self.show_progress):
             it = time_steps[i]
             for item in range(n_items):
-
                 itemdata = dfs.ReadItemTimeStep(item_numbers[item] + 1, it)
                 d = itemdata.Data
                 d[d == deletevalue] = np.nan
 
-                d = np.reshape(d, newshape=shape)
+                d = np.reshape(d, shape)
                 if self._type != DfsuFileType.DfsuSpectral0D:
                     d = np.moveaxis(d, -1, 0)
 
@@ -486,7 +485,6 @@ class DfsuSpectral:
                 tail,
             )
         else:
-
             m0 = calc_m0_from_spectrum(
                 spectrum, self.frequencies, self.directions, tail
             )

@@ -385,7 +385,6 @@ class _GeometryFM(_Geometry):
         return [code for code in valid if code > 0]
 
     def __eq__(self, value: Any) -> bool:
-
         # this is not an exhaustive check, but should be sufficient for most cases
 
         if self.__class__ != value.__class__:

@@ -96,9 +96,18 @@ class Dataset:
     ):
         if not self._is_DataArrays(data):
             data = self._create_dataarrays(
-                data=data, time=time, items=items, geometry=geometry, zn=zn, dims=dims, dt=dt  # type: ignore
+                data=data,
+                time=time,
+                items=items,
+                geometry=geometry,
+                zn=zn,
+                dims=dims,
+                dt=dt,
             )
-        self._data_vars: MutableMapping[str, DataArray] = self._init_from_DataArrays(data, validate=validate)  # type: ignore
+        self._data_vars: MutableMapping[str, DataArray] = self._init_from_DataArrays(
+            data,  # type: ignore
+            validate=validate,
+        )  # type: ignore
         self.plot = _DatasetPlotter(self)
 
     @staticmethod
@@ -121,12 +130,12 @@ class Dataset:
 
     @staticmethod
     def _create_dataarrays(
-        data: Sequence[NDArray[np.floating]] | NDArray[np.floating],
+        data: Any,
         time: pd.DatetimeIndex,
-        items: Sequence[ItemInfo],
+        items: Any,
         geometry: Any,
-        zn: NDArray[np.floating],
-        dims: tuple[str, ...],
+        zn: Any,
+        dims: Any,
         dt: float,
     ) -> Mapping[str, DataArray]:
         if not isinstance(data, Iterable):
@@ -217,7 +226,7 @@ class Dataset:
 
     @staticmethod
     def _DataArrays_as_mapping(
-        data: DataArray | Sequence[DataArray] | Mapping[str, DataArray]
+        data: DataArray | Sequence[DataArray] | Mapping[str, DataArray],
     ) -> MutableMapping[str, DataArray]:
         """Create dict of DataArrays if necessary"""
         if isinstance(data, MutableMapping):
@@ -235,7 +244,7 @@ class Dataset:
 
     @staticmethod
     def _validate_item_names_and_keys(
-        data_map: MutableMapping[str, DataArray]
+        data_map: MutableMapping[str, DataArray],
     ) -> MutableMapping[str, DataArray]:
         for key, da in data_map.items():
             if da.name == "NoName":
@@ -486,7 +495,12 @@ class Dataset:
 
     # TODO: delete this?
     @staticmethod
-    def create_empty_data(n_items: int = 1, n_timesteps: int = 1, n_elements: int | None = None, shape: tuple[int, ...] | None = None):  # type: ignore
+    def create_empty_data(
+        n_items: int = 1,
+        n_timesteps: int = 1,
+        n_elements: int | None = None,
+        shape: tuple[int, ...] | None = None,
+    ) -> list:
         data = []
         if shape is None:
             if n_elements is None:
@@ -945,7 +959,9 @@ class Dataset:
                 self.geometry, GeometryFM2D
             ):  # TODO remove this when all geometries implements the same method
                 interpolant = self.geometry.get_2d_interpolant(
-                    xy, n_nearest=n_nearest, **kwargs  # type: ignore
+                    xy,  # type: ignore
+                    n_nearest=n_nearest,
+                    **kwargs,  # type: ignore
                 )
                 das = [da.interp(x=x, y=y, interpolant=interpolant) for da in self]
             else:
@@ -1166,15 +1182,16 @@ class Dataset:
 
     @staticmethod
     def concat(
-        datasets: Sequence["Dataset"], keep: Literal["last"] = "last"
+        datasets: Sequence["Dataset"], keep: Literal["last", "first"] = "last"
     ) -> "Dataset":
         """Concatenate Datasets along the time axis
 
         Parameters
         ---------
         datasets: sequence of Datasets
-        keep: str, optional
-            TODO Yet to be implemented, default: last
+        keep: 'first' or 'last', optional
+            which values to keep in case of overlap, by default 'last'
+
 
         Returns
         -------
@@ -1192,14 +1209,9 @@ class Dataset:
         >>> ds3.n_timesteps
         4
         """
-
-        if keep != "last":
-            raise NotImplementedError(
-                "Last values is the only available option at the moment."
-            )
         ds = datasets[0].copy()
         for dsj in datasets[1:]:
-            ds = ds._concat_time(dsj, copy=False)
+            ds = ds._concat_time(dsj, copy=False, keep=keep)
 
         return ds
 
@@ -1234,7 +1246,12 @@ class Dataset:
 
         return ds
 
-    def _concat_time(self, other: "Dataset", copy: bool = True) -> "Dataset":
+    def _concat_time(
+        self,
+        other: "Dataset",
+        copy: bool = True,
+        keep: Literal["last", "first"] = "last",
+    ) -> "Dataset":
         self._check_all_items_match(other)
         # assuming time is always first dimension we can skip / keep it by bool
         start_dim = int("time" in self.dims)
@@ -1261,16 +1278,23 @@ class Dataset:
         idx1 = np.where(~df12["idx1"].isna())
         idx2 = np.where(~df12["idx2"].isna())
         for j in range(ds.n_items):
-            #    # if there is an overlap "other" data will be used!
-            newdata[j][idx1] = ds[j].to_numpy()
-            newdata[j][idx2] = other[j].to_numpy()
+            if keep == "last":
+                newdata[j][idx1] = ds[j].to_numpy()
+                newdata[j][idx2] = other[j].to_numpy()
+            else:
+                newdata[j][idx2] = other[j].to_numpy()
+                newdata[j][idx1] = ds[j].to_numpy()
 
         zn = None
         if self._zn is not None:
             zshape = (len(newtime), self._zn.shape[start_dim])
             zn = np.zeros(shape=zshape, dtype=self._zn.dtype)
-            zn[idx1, :] = self._zn
-            zn[idx2, :] = other._zn
+            if keep == "last":
+                zn[idx1, :] = self._zn
+                zn[idx2, :] = other._zn
+            else:
+                zn[idx2, :] = other._zn
+                zn[idx1, :] = self._zn
 
         return Dataset(
             newdata, time=newtime, items=ds.items, geometry=ds.geometry, zn=zn
@@ -2044,15 +2068,22 @@ def _parse_items(
     elif isinstance(items, ItemInfo):
         eum_type = items.type
         eum_unit = items.unit
-        item_list = [ItemInfo(name, eum_type, eum_unit) for name in column_names]
+        eum_data_value_type = items.data_value_type
+        item_list = [
+            ItemInfo(name, eum_type, eum_unit, eum_data_value_type)
+            for name in column_names
+        ]
 
     elif isinstance(items, Mapping):
         item_list = [
-            ItemInfo(name, items[name].type, items[name].unit) for name in column_names
+            ItemInfo(
+                name, items[name].type, items[name].unit, items[name].data_value_type
+            )
+            for name in column_names
         ]
     elif isinstance(items, Sequence):
         item_list = [
-            ItemInfo(col, item.type, item.unit)
+            ItemInfo(col, item.type, item.unit, item.data_value_type)
             for col, item in zip(column_names, items)
         ]
     else:

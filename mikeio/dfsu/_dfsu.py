@@ -94,7 +94,6 @@ def write_dfsu(filename: str | Path, data: Dataset) -> None:
 
 
 def write_dfsu_data(dfs: DfsuFile, ds: Dataset, is_layered: bool) -> None:
-
     n_time_steps = len(ds.time)
     data = ds
 
@@ -361,7 +360,7 @@ class Dfsu2DH:
             return pd.date_range(
                 start=self.start_time,
                 periods=self.n_timesteps,
-                freq=f"{self.timestep}S",
+                freq=f"{int(self.timestep)}s",
             )
         else:
             raise NotImplementedError(

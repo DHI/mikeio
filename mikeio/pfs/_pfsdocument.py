@@ -198,9 +198,7 @@ class PfsDocument(PfsSection):
         try:
             yml = self._pfs2yaml(filename, encoding)
             target_list = parse_yaml_preserving_duplicates(yml, unique_keywords)
-        except (
-            AttributeError
-        ):  # This is the error raised if parsing fails, try again with the normal loader
+        except AttributeError:  # This is the error raised if parsing fails, try again with the normal loader
             target_list = yaml.load(yml, Loader=yaml.CFullLoader)
         except FileNotFoundError as e:
             raise FileNotFoundError(str(e))
@@ -283,7 +281,6 @@ class PfsDocument(PfsSection):
     def _pfs2yaml(
         self, filename: str | Path | TextIO, encoding: str | None = None
     ) -> str:
-
         if hasattr(filename, "read"):  # To read in memory strings StringIO
             pfsstring = filename.read()
         else:
@@ -376,9 +373,9 @@ class PfsDocument(PfsSection):
             if len(parts[1]) > 1 and parts[1].count("'") > 0:
                 # string containing single quotes that needs escaping
                 warnings.warn(
-                    f"The string {s} contains a single quote character which will be temporarily converted to \U0001F600 . If you write back to a pfs file again it will be converted back."
+                    f"The string {s} contains a single quote character which will be temporarily converted to \U0001f600 . If you write back to a pfs file again it will be converted back."
                 )
-                parts[1] = parts[1].replace("'", "\U0001F600")
+                parts[1] = parts[1].replace("'", "\U0001f600")
             s = parts[0] + "'|" + parts[1] + "|'" + parts[2]
 
         if len(s) > 2:  # ignore foo = ''
