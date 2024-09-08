@@ -602,7 +602,7 @@ class GeometryFM2D(_GeometryFM):
         elif n_nearest > 1:
             weights = get_idw_interpolant(dists, p=p)
             if not extrapolate:
-                weights[~self.contains(xy), :] = np.nan  # type: ignore
+                weights[~self.contains(xy, strategy="shapely"), :] = np.nan  # type: ignore
         else:
             ValueError("n_nearest must be at least 1")
 
@@ -696,7 +696,7 @@ class GeometryFM2D(_GeometryFM):
             if not element_found and self.n_elements > 1:
                 many_nearest, _ = self._find_n_nearest_2d_elements(
                     coords[k, :],
-                    n=min(self.n_elements, 10),  # TODO is 10 enough?
+                    n=min(self.n_elements, 100),  # TODO is 10 enough?
                 )
                 for p in many_nearest[2:]:  # we have already tried the two first above
                     nodes = self.element_table[p]
@@ -708,6 +708,8 @@ class GeometryFM2D(_GeometryFM):
                         break
 
             if not element_found:
+                # make an extra check
+                # if not self.contains(coords[k]):
                 points_outside.append(k)
 
         if len(points_outside) > 0:
@@ -843,7 +845,13 @@ class GeometryFM2D(_GeometryFM):
         """Lists of closed polylines defining domain outline"""
         return self._get_boundary_polylines()
 
-    def contains(self, points: np.ndarray) -> np.ndarray:
+    @cached_property
+    def _domain(self) -> Any:
+        return self.to_shapely().buffer(0)
+
+    def contains(
+        self, points: np.ndarray, strategy: Literal["loop", "shapely"] = "loop"
+    ) -> np.ndarray:
         """test if a list of points are contained by mesh
 
         Parameters
@@ -856,25 +864,25 @@ class GeometryFM2D(_GeometryFM):
         bool array
             True for points inside, False otherwise
         """
-        import matplotlib.path as mp  # type: ignore
-
         points = np.atleast_2d(points)
 
-        exterior = self.boundary_polylines.exteriors[0]
-        cnts = mp.Path(exterior.xy).contains_points(points)
+        if strategy == "shapely":
+            from shapely.geometry import Point  # type: ignore
 
-        if self.boundary_polylines.n_exteriors > 1:
-            # in case of several dis-joint outer domains
-            for exterior in self.boundary_polylines.exteriors[1:]:
-                in_domain = mp.Path(exterior.xy).contains_points(points)
-                cnts = np.logical_or(cnts, in_domain)
+            domain = self._domain
 
-        # subtract any holes
-        for interior in self.boundary_polylines.interiors:
-            in_hole = mp.Path(interior.xy).contains_points(points)
-            cnts = np.logical_and(cnts, ~in_hole)
+            return np.array([domain.contains(Point(p)) for p in points])
+        else:
+            result = np.zeros(points.shape[0], dtype=bool)
 
-        return cnts
+            for i, p in enumerate(points):
+                for elem in self.element_table:
+                    coords = self.node_coordinates[elem]
+                    if self._point_in_polygon(coords[:, 0], coords[:, 1], p[0], p[1]):
+                        result[i] = True
+                        break
+
+            return result
 
     def __contains__(self, pt: np.ndarray) -> bool:
         return self.contains(pt)[0]

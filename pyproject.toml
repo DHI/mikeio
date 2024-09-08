@@ -20,6 +20,7 @@ dependencies = [
     "PyYAML",
     "tqdm",
     "xarray",
+    "shapely",
 ]
 
 authors = [
@@ -49,7 +50,6 @@ dev = ["pytest",
        "quartodoc==0.7.6",
        "shapely",
        "pyproj",
-       "xarray",
        "netcdf4",
        "rasterio",
        "polars",
@@ -63,7 +63,6 @@ notebooks= [
             "nbformat",
             "nbconvert",
             "jupyter",
-            "xarray",
             "netcdf4",
             "rasterio",
             "geopandas",
@@ -71,6 +70,7 @@ notebooks= [
             "matplotlib",
             "folium",
             "mapclassify",
+            "shapely",
         ]
 
 [project.urls]
