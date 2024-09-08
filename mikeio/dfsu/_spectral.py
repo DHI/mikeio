@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import Sequence, Sized, Tuple, Any
+from typing import Sequence, Sized, Any
 from pathlib import Path
 
 import numpy as np
@@ -199,11 +199,11 @@ class DfsuSpectral:
 
     def _get_spectral_data_shape(
         self, n_steps: int, elements: Sized | None, dfsu_type: DfsuFileType
-    ) -> Tuple[Tuple[int, ...], Tuple[int, ...], Tuple[str, ...]]:
+    ) -> tuple[tuple[int, ...], tuple[int, ...], tuple[str, ...]]:
         dims = [] if n_steps == 1 else ["time"]
         n_freq = self.geometry.n_frequencies
         n_dir = self.geometry.n_directions
-        shape: Tuple[int, ...] = (n_dir, n_freq)
+        shape: tuple[int, ...] = (n_dir, n_freq)
         if n_dir == 0:
             shape = (n_freq,)
         elif n_freq == 0:
@@ -242,7 +242,7 @@ class DfsuSpectral:
         time: int | str | slice | None = None,
         elements: Sequence[int] | np.ndarray | None = None,
         nodes: Sequence[int] | np.ndarray | None = None,
-        area: Tuple[float, float, float, float] | None = None,
+        area: tuple[float, float, float, float] | None = None,
         x: float | None = None,
         y: float | None = None,
         keepdims: bool = False,
@@ -342,7 +342,6 @@ class DfsuSpectral:
         for i in trange(n_steps, disable=not self.show_progress):
             it = time_steps[i]
             for item in range(n_items):
-
                 itemdata = dfs.ReadItemTimeStep(item_numbers[item] + 1, it)
                 d = itemdata.Data
                 d[d == deletevalue] = np.nan
@@ -370,7 +369,7 @@ class DfsuSpectral:
 
     def _parse_geometry_sel(
         self,
-        area: Tuple[float, float, float, float] | None,
+        area: tuple[float, float, float, float] | None,
         x: float | None,
         y: float | None,
     ) -> np.ndarray | None:
@@ -424,7 +423,7 @@ class DfsuSpectral:
         self,
         elements: Sequence[int] | np.ndarray | None,
         nodes: Sequence[int] | np.ndarray | None,
-    ) -> Tuple[Any, Any]:
+    ) -> tuple[Any, Any]:
         if self._type == DfsuFileType.DfsuSpectral0D:
             if elements is not None or nodes is not None:
                 raise ValueError(
@@ -486,7 +485,6 @@ class DfsuSpectral:
                 tail,
             )
         else:
-
             m0 = calc_m0_from_spectrum(
                 spectrum, self.frequencies, self.directions, tail
             )

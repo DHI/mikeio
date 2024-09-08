@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import Any, Sequence, Tuple
+from typing import Any, Sequence
 
 
 import numpy as np
@@ -31,7 +31,7 @@ class GeometryFMPointSpectrum(_Geometry):
         self.y = y
 
     @property
-    def default_dims(self) -> Tuple[str, ...]:
+    def default_dims(self) -> tuple[str, ...]:
         if self.directions is None:
             return ("frequency",)
         else:

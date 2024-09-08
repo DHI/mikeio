@@ -42,7 +42,6 @@ class Mesh:
     """
 
     def __init__(self, filename: str | Path) -> None:
-
         self.geometry: GeometryFM2D = self._read_header(filename)
         self.plot = self.geometry.plot
 

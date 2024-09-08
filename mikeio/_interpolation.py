@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import Tuple, TYPE_CHECKING, overload
+from typing import TYPE_CHECKING, overload
 import numpy as np
 
 if TYPE_CHECKING:
@@ -49,7 +49,7 @@ def interp2d(
     data: np.ndarray | DataArray,
     elem_ids: np.ndarray,
     weights: np.ndarray | None = None,
-    shape: Tuple[int, ...] | None = None,
+    shape: tuple[int, ...] | None = None,
 ) -> np.ndarray: ...
 
 
@@ -58,7 +58,7 @@ def interp2d(
     data: Dataset,
     elem_ids: np.ndarray,
     weights: np.ndarray | None = None,
-    shape: Tuple[int, ...] | None = None,
+    shape: tuple[int, ...] | None = None,
 ) -> Dataset: ...
 
 
@@ -66,7 +66,7 @@ def interp2d(
     data: Dataset | DataArray | np.ndarray,
     elem_ids: np.ndarray,
     weights: np.ndarray | None = None,
-    shape: Tuple[int, ...] | None = None,
+    shape: tuple[int, ...] | None = None,
 ) -> Dataset | np.ndarray:
     """interp spatially in data (2d only)
 

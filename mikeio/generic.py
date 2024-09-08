@@ -6,7 +6,7 @@ from copy import deepcopy
 from datetime import datetime, timedelta
 from shutil import copyfile
 from collections.abc import Iterable, Sequence
-from typing import Union, List, Tuple
+from typing import Union
 
 
 import numpy as np
@@ -89,7 +89,7 @@ class _ChunkInfo:
 
     @staticmethod
     def from_dfs(
-        dfs: DfsFile, item_numbers: List[int], buffer_size: float
+        dfs: DfsFile, item_numbers: list[int], buffer_size: float
     ) -> "_ChunkInfo":
         """Calculate chunk info based on # of elements in dfs file and selected buffer size"""
 
@@ -225,7 +225,7 @@ def scale(
         value to add to all items, default 0.0
     factor: float, optional
         value to multiply to all items, default 1.0
-    items: List[str] or List[int], optional
+    items: list[str] or list[int], optional
         Process only selected items, by number (0-based) or name, by default: all
     """
     infilename = str(infilename)
@@ -275,7 +275,7 @@ def fill_corrupt(
         full path to the output file
     fill_value: float, optional
         value to use where data is corrupt, default delete value
-    items: List[str] or List[int], optional
+    items: list[str] or list[int], optional
         Process only selected items, by number (0-based) or name, by default: all
     """
     dfs_i = DfsFileFactory.DfsGenericOpen(infilename)
@@ -519,8 +519,8 @@ def concat(
                         darray = d.astype(np.float32)
 
                         dfs_o.WriteItemTimeStepNext(0, darray)
-                end_time = start_time + timedelta(
-                    seconds=timestep * dt
+                end_time = (
+                    start_time + timedelta(seconds=timestep * dt)
                 )  # reuse last timestep since there is no EndDateTime attribute in t_axis.
                 dfs_i.Close()
 
@@ -643,7 +643,7 @@ def _parse_start_end(
     time_axis: TimeAxis,
     start: int | float | str | datetime,
     end: int | float | str | datetime,
-) -> Tuple[datetime | None, int, float, int, float]:  # TODO better return type
+) -> tuple[datetime | None, int, float, int, float]:  # TODO better return type
     """Helper function for parsing start and end arguments"""
     n_time_steps = time_axis.NumberOfTimeSteps
     file_start_datetime = time_axis.StartDateTime
@@ -820,7 +820,7 @@ def quantile(
     q: array_like of float
         Quantile or sequence of quantiles to compute,
         which must be between 0 and 1 inclusive.
-    items: List[str] or List[int], optional
+    items: list[str] or list[int], optional
         Process only selected items, by number (0-based) or name, by default: all
     skipna : bool, optional
         exclude NaN/delete values when computing the result, default True
@@ -943,20 +943,20 @@ def _read_item(dfs: DfsFile, item: int, timestep: int) -> np.ndarray:
 
 
 def _get_repeated_items(
-    items_in: List[DfsDynamicItemInfo], prefixes: List[str]
-) -> List[ItemInfo]:
+    items_in: list[DfsDynamicItemInfo], prefixes: list[str]
+) -> list[ItemInfo]:
     """Create new items by repeating the items in items_in with the prefixes
 
     Parameters
     ----------
-    items_in : List[DfsDynamicItemInfo]
+    items_in : list[DfsDynamicItemInfo]
         List of items to be repeated
-    prefixes : List[str]
+    prefixes : list[str]
         List of prefixes to be added to the items
 
     Returns
     -------
-    List[ItemInfo]
+    list[ItemInfo]
         List of new items
     """
     item_numbers = _valid_item_numbers(items_in)

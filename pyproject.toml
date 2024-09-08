@@ -46,7 +46,6 @@ classifiers = [
 
 [project.optional-dependencies]
 dev = ["pytest",
-       "black==22.3.0",
        "quarto-cli",
        "quartodoc==0.7.6",
        "shapely",
@@ -54,7 +53,7 @@ dev = ["pytest",
        "netcdf4",
        "rasterio",
        "polars",
-       "ruff==0.5.6",
+       "ruff==0.6.2",
        "mypy==1.11.1",
        ]
 
@@ -82,4 +81,4 @@ notebooks= [
 [tool.ruff]
 
 # ignore long lines
-ignore = ["E501", "E741"]
+lint.ignore = ["E501", "E741"]

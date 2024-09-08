@@ -313,7 +313,6 @@ class Dfs0:
 
     @cached_property
     def end_time(self) -> datetime:
-
         if self._source.FileInfo.TimeAxis.IsEquidistant():
             dt = self._source.FileInfo.TimeAxis.TimeStep
             n_steps = self._source.FileInfo.TimeAxis.NumberOfTimeSteps
@@ -362,7 +361,6 @@ def series_to_dfs0(
     title: str | None = None,
     dtype: Any | None = None,
 ) -> None:
-
     df = pd.DataFrame(self)
     df.to_dfs0(filename, itemtype, unit, items, title, dtype)
 

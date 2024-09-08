@@ -2,7 +2,7 @@ from __future__ import annotations
 from functools import cached_property
 from pathlib import Path
 import warnings
-from typing import Any, Sequence, Tuple, TYPE_CHECKING, List, overload
+from typing import Any, Sequence, TYPE_CHECKING, overload
 from dataclasses import dataclass
 import numpy as np
 
@@ -35,7 +35,7 @@ def _parse_grid_axis(
     x0: float = 0.0,
     dx: float | None = None,
     nx: int | None = None,
-) -> Tuple[float, float, int]:
+) -> tuple[float, float, int]:
     if x is not None:
         x = np.asarray(x)
         _check_equidistant(x)
@@ -109,7 +109,7 @@ class Grid1D(_Geometry):
     _nx: int
     _x0: float
     _orientation: float
-    _origin: Tuple[float, float]
+    _origin: tuple[float, float]
     _projstr: str
 
     def __init__(
@@ -120,7 +120,7 @@ class Grid1D(_Geometry):
         dx: float | None = None,
         nx: int | None = None,
         projection: str = "NON-UTM",
-        origin: Tuple[float, float] = (0.0, 0.0),
+        origin: tuple[float, float] = (0.0, 0.0),
         orientation: float = 0.0,
         node_coordinates: np.ndarray | None = None,
         axis_name: str = "x",
@@ -143,7 +143,7 @@ class Grid1D(_Geometry):
         return 1
 
     @property
-    def default_dims(self) -> Tuple[str, ...]:
+    def default_dims(self) -> tuple[str, ...]:
         return ("x",)
 
     def __repr__(self) -> str:
@@ -178,8 +178,8 @@ class Grid1D(_Geometry):
         return int(np.argmin(d))
 
     def get_spatial_interpolant(
-        self, coords: Tuple[np.ndarray, np.ndarray], **kwargs: Any
-    ) -> Tuple[np.ndarray, np.ndarray]:
+        self, coords: tuple[np.ndarray, np.ndarray], **kwargs: Any
+    ) -> tuple[np.ndarray, np.ndarray]:
         x = coords[0][0]  # TODO accept list of points
 
         assert self.nx > 1, "Interpolation not possible for Grid1D with one point"
@@ -215,7 +215,7 @@ class Grid1D(_Geometry):
         return self._nx
 
     @property
-    def origin(self) -> Tuple[float, float]:
+    def origin(self) -> tuple[float, float]:
         return self._origin
 
     @property
@@ -296,7 +296,7 @@ class _Grid2DPlotter:
     def __call__(
         self,
         ax: Axes | None = None,
-        figsize: Tuple[float, float] | None = None,
+        figsize: tuple[float, float] | None = None,
         **kwargs: Any,
     ) -> Any:
         """Plot bathymetry as coloured patches"""
@@ -305,7 +305,7 @@ class _Grid2DPlotter:
 
     @staticmethod
     def _get_ax(
-        ax: Axes | None = None, figsize: Tuple[float, float] | None = None
+        ax: Axes | None = None, figsize: tuple[float, float] | None = None
     ) -> Axes:
         import matplotlib.pyplot as plt
 
@@ -341,7 +341,7 @@ class _Grid2DPlotter:
         self,
         title: str = "Outline",
         ax: Axes | None = None,
-        figsize: Tuple[float, float] | None = None,
+        figsize: tuple[float, float] | None = None,
         color: str = "0.4",
         linewidth: float = 1.2,
         **kwargs: Any,
@@ -410,7 +410,7 @@ class Grid2D(_Geometry):
     _ny: int
     _y0: float
     _projstr: str
-    _origin: Tuple[float, float]
+    _origin: tuple[float, float]
     _orientation: float
     is_spectral: bool
 
@@ -425,11 +425,11 @@ class Grid2D(_Geometry):
         y0: float = 0.0,
         dy: float | None = None,
         ny: int | None = None,
-        bbox: Tuple[float, float, float, float] | None = None,
+        bbox: tuple[float, float, float, float] | None = None,
         projection: str = "LONG/LAT",
-        origin: Tuple[float, float] | None = None,
+        origin: tuple[float, float] | None = None,
         orientation: float = 0.0,
-        axis_names: Tuple[str, str] = ("x", "y"),
+        axis_names: tuple[str, str] = ("x", "y"),
         is_spectral: bool = False,
         is_vertical: bool = False,
     ):
@@ -500,7 +500,7 @@ class Grid2D(_Geometry):
         self.plot = _Grid2DPlotter(self)
 
     @property
-    def default_dims(self) -> Tuple[str, ...]:
+    def default_dims(self) -> tuple[str, ...]:
         return ("y", "x")
 
     @property
@@ -513,8 +513,8 @@ class Grid2D(_Geometry):
 
     def _create_in_bbox(
         self,
-        bbox: Tuple[float, float, float, float],
-        dx: float | Tuple[float, float] | None = None,
+        bbox: tuple[float, float, float, float],
+        dx: float | tuple[float, float] | None = None,
         dy: float | None = None,
         nx: int | None = None,
         ny: int | None = None,
@@ -564,8 +564,8 @@ class Grid2D(_Geometry):
 
     @staticmethod
     def _parse_bbox(
-        bbox: Tuple[float, float, float, float]
-    ) -> Tuple[float, float, float, float]:
+        bbox: tuple[float, float, float, float]
+    ) -> tuple[float, float, float, float]:
         left = bbox[0]
         bottom = bbox[1]
         right = bbox[2]
@@ -593,7 +593,7 @@ class Grid2D(_Geometry):
         right: float,
         dx: float | None = None,
         nx: int | None = None,
-    ) -> Tuple[float, float, int]:
+    ) -> tuple[float, float, int]:
         xr = right - left
         if dx is not None:
             nx = int(np.ceil(xr / dx))
@@ -704,7 +704,7 @@ class Grid2D(_Geometry):
         return self._ny
 
     @property
-    def origin(self) -> Tuple[float, float]:
+    def origin(self) -> tuple[float, float]:
         """Coordinates of grid origo (in projection)"""
         return self._origin
 
@@ -790,8 +790,8 @@ class Grid2D(_Geometry):
         x: float | None = None,
         y: float | None = None,
         coords: np.ndarray | None = None,
-        area: Tuple[float, float, float, float] | None = None,
-    ) -> Tuple[Any, Any]:
+        area: tuple[float, float, float, float] | None = None,
+    ) -> tuple[Any, Any]:
         """Find nearest index (i,j) of point(s)
 
         Parameters
@@ -840,7 +840,7 @@ class Grid2D(_Geometry):
         else:
             raise ValueError("Provide x,y or coords")
 
-    def _xy_to_index(self, xy: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
+    def _xy_to_index(self, xy: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
         """Find specific points in this geometry"""
         xy = np.atleast_2d(xy)
         y = xy[:, 1]
@@ -860,8 +860,8 @@ class Grid2D(_Geometry):
         return ii, jj
 
     def _bbox_to_index(
-        self, bbox: Tuple[float, float, float, float] | BoundingBox
-    ) -> Tuple[range, range]:
+        self, bbox: tuple[float, float, float, float] | BoundingBox
+    ) -> tuple[range, range]:
         """Find subarea within this geometry"""
         if not (len(bbox) == 4):
             raise ValueError(
@@ -963,7 +963,7 @@ class Grid2D(_Geometry):
                 origin=origin,
             )
 
-    def _to_element_table(self, index_base: int = 0) -> List[List[int]]:
+    def _to_element_table(self, index_base: int = 0) -> list[list[int]]:
         elem_table = []
         for elx in range(self.nx - 1):
             # each col
@@ -1102,7 +1102,7 @@ class Grid3D(_Geometry):
     _nz: int
     _z0: float
     _projstr: str
-    _origin: Tuple[float, float]
+    _origin: tuple[float, float]
     _orientation: float
 
     def __init__(
@@ -1121,7 +1121,7 @@ class Grid3D(_Geometry):
         dz: float | None = None,
         nz: int | None = None,
         projection: str = "NON-UTM",  # TODO LONG/LAT
-        origin: Tuple[float, float] = (0.0, 0.0),
+        origin: tuple[float, float] = (0.0, 0.0),
         orientation: float = 0.0,
     ) -> None:
         super().__init__(projection=projection)
@@ -1136,7 +1136,7 @@ class Grid3D(_Geometry):
         self._orientation = orientation
 
     @property
-    def default_dims(self) -> Tuple[str, ...]:
+    def default_dims(self) -> tuple[str, ...]:
         return ("z", "y", "x")
 
     @property
@@ -1201,7 +1201,7 @@ class Grid3D(_Geometry):
         return self._nz
 
     @property
-    def origin(self) -> Tuple[float, float]:
+    def origin(self) -> tuple[float, float]:
         """Coordinates of grid origo (in projection)"""
         return self._origin
 

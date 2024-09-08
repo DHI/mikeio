@@ -1,7 +1,7 @@
 from __future__ import annotations
 from pathlib import Path
 from collections.abc import Sequence
-from typing import Any, Tuple
+from typing import Any
 
 import numpy as np
 import pandas as pd
@@ -99,7 +99,6 @@ def _write_dfs3_header(filename: str | Path, ds: Dataset, title: str) -> DfsFile
 
 
 class Dfs3(_Dfs123):
-
     _ndim = 3
 
     def __init__(self, filename: str | Path):
@@ -151,7 +150,7 @@ class Dfs3(_Dfs123):
         *,
         items: str | int | Sequence[str | int] | None = None,
         time: int | str | slice | None = None,
-        area: Tuple[float, float, float, float] | None = None,
+        area: tuple[float, float, float, float] | None = None,
         layers: str | int | Sequence[int] | None = None,
         keepdims: bool = False,
         dtype: Any = np.float32,
@@ -206,8 +205,8 @@ class Dfs3(_Dfs123):
             layers = -1
         layers = None if layers is None else np.atleast_1d(layers)
 
-        dims: Tuple[str, ...]
-        shape: Tuple[int, ...]
+        dims: tuple[str, ...]
+        shape: tuple[int, ...]
 
         nzl = nz if layers is None else len(layers)
         if nzl == 1 and (not keepdims):
@@ -298,7 +297,6 @@ class Dfs3(_Dfs123):
 
     @staticmethod
     def _get_bottom_values(data: np.ndarray) -> np.ndarray:
-
         assert len(data.shape) == 3
         b = np.empty_like(data[0])
         b[:] = np.nan
@@ -329,5 +327,5 @@ class Dfs3(_Dfs123):
         return self._dz
 
     @property
-    def shape(self) -> Tuple[int, int, int, int]:
+    def shape(self) -> tuple[int, int, int, int]:
         return (self._n_timesteps, self._nz, self._ny, self._nx)

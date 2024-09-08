@@ -5,7 +5,7 @@ from collections import Counter
 from collections.abc import Mapping, Sequence
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Callable, Dict, List, TextIO, Tuple
+from typing import Any, Callable, TextIO
 
 import yaml
 
@@ -128,15 +128,15 @@ class PfsDocument(PfsSection):
                 data[key] = val
         return data
 
-    def keys(self) -> List[str]:  # type: ignore
+    def keys(self) -> list[str]:  # type: ignore
         """Return a list of the PfsDocument's keys (target names)"""
         return [k for k, _ in self.items()]
 
-    def values(self) -> List[PfsSection | PfsNonUniqueList]:  # type: ignore
+    def values(self) -> list[PfsSection | PfsNonUniqueList]:  # type: ignore
         """Return a list of the PfsDocument's values (targets)."""
         return [v for _, v in self.items()]
 
-    def items(self) -> List[Tuple[str, PfsSection | PfsNonUniqueList]]:  # type: ignore
+    def items(self) -> list[tuple[str, PfsSection | PfsNonUniqueList]]:  # type: ignore
         """Return a new view of the PfsDocument's items ((key, value) pairs)"""
         return [(k, v) for k, v in self.__dict__.items() if k not in self._ALIAS_LIST]
 
@@ -147,7 +147,7 @@ class PfsDocument(PfsSection):
         return d
 
     @staticmethod
-    def _unravel_items(items: Callable) -> Tuple[List, List]:
+    def _unravel_items(items: Callable) -> tuple[list, list]:
         rkeys = []
         rvals = []
         for k, v in items():
@@ -161,7 +161,7 @@ class PfsDocument(PfsSection):
         return rkeys, rvals
 
     @property
-    def targets(self) -> List[PfsSection]:
+    def targets(self) -> list[PfsSection]:
         """List of targets (root sections)"""
         _, rvals = self._unravel_items(self.items)
         return rvals
@@ -177,7 +177,7 @@ class PfsDocument(PfsSection):
         return len(self.keys()) == len(self.names)
 
     @property
-    def names(self) -> List[str]:
+    def names(self) -> list[str]:
         """Names of the targets (root sections) as a list"""
         rkeys, _ = self._unravel_items(self.items)
         return rkeys
@@ -194,13 +194,11 @@ class PfsDocument(PfsSection):
         filename: str | Path | TextIO,
         encoding: str | None,
         unique_keywords: bool = False,
-    ) -> Tuple[List[str], List[PfsSection]]:
+    ) -> tuple[list[str], list[PfsSection]]:
         try:
             yml = self._pfs2yaml(filename, encoding)
             target_list = parse_yaml_preserving_duplicates(yml, unique_keywords)
-        except (
-            AttributeError
-        ):  # This is the error raised if parsing fails, try again with the normal loader
+        except AttributeError:  # This is the error raised if parsing fails, try again with the normal loader
             target_list = yaml.load(yml, Loader=yaml.CFullLoader)
         except FileNotFoundError as e:
             raise FileNotFoundError(str(e))
@@ -216,10 +214,10 @@ class PfsDocument(PfsSection):
             Mapping[str | PfsSection, Any]
             | PfsSection
             | Sequence[PfsSection]
-            | Sequence[Dict]
+            | Sequence[dict]
         ),
         names: Sequence[str] | None = None,
-    ) -> Tuple[Sequence[str], List[PfsSection]]:
+    ) -> tuple[Sequence[str], list[PfsSection]]:
         """dict/PfsSection or lists of these can be parsed"""
         if names is None:
             assert isinstance(input, Mapping), "input must be a mapping"
@@ -283,7 +281,6 @@ class PfsDocument(PfsSection):
     def _pfs2yaml(
         self, filename: str | Path | TextIO, encoding: str | None = None
     ) -> str:
-
         if hasattr(filename, "read"):  # To read in memory strings StringIO
             pfsstring = filename.read()
         else:
@@ -303,7 +300,7 @@ class PfsDocument(PfsSection):
 
         return "\n".join(output)
 
-    def _parse_line(self, line: str, level: int = 0) -> Tuple[str, int]:
+    def _parse_line(self, line: str, level: int = 0) -> tuple[str, int]:
         section_header = False
         s = line.strip()
         s = re.sub(r"\s*//.*", "", s)  # remove comments
@@ -363,7 +360,7 @@ class PfsDocument(PfsSection):
 
     _COMMA_MATCHER = re.compile(r",(?=(?:[^\"']*[\"'][^\"']*[\"'])*[^\"']*$)")
 
-    def _split_line_by_comma(self, s: str) -> List[str]:
+    def _split_line_by_comma(self, s: str) -> list[str]:
         return self._COMMA_MATCHER.split(s)
 
     def _parse_token(self, token: str, context: str = "") -> str:
@@ -376,9 +373,9 @@ class PfsDocument(PfsSection):
             if len(parts[1]) > 1 and parts[1].count("'") > 0:
                 # string containing single quotes that needs escaping
                 warnings.warn(
-                    f"The string {s} contains a single quote character which will be temporarily converted to \U0001F600 . If you write back to a pfs file again it will be converted back."
+                    f"The string {s} contains a single quote character which will be temporarily converted to \U0001f600 . If you write back to a pfs file again it will be converted back."
                 )
-                parts[1] = parts[1].replace("'", "\U0001F600")
+                parts[1] = parts[1].replace("'", "\U0001f600")
             s = parts[0] + "'|" + parts[1] + "|'" + parts[2]
 
         if len(s) > 2:  # ignore foo = ''

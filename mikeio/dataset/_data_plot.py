@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import Any, Tuple, TYPE_CHECKING
+from typing import Any, TYPE_CHECKING
 
 from matplotlib.figure import Figure
 import numpy as np
@@ -23,7 +23,7 @@ class _DataArrayPlotter:
     def __call__(
         self,
         ax: Axes | None = None,
-        figsize: Tuple[float, float] | None = None,
+        figsize: tuple[float, float] | None = None,
         **kwargs: Any,
     ) -> Axes:
         """Plot DataArray according to geometry
@@ -57,18 +57,16 @@ class _DataArrayPlotter:
 
     @staticmethod
     def _get_ax(
-        ax: Axes | None = None, figsize: Tuple[float, float] | None = None
+        ax: Axes | None = None, figsize: tuple[float, float] | None = None
     ) -> Axes:
-
         if ax is None:
             _, ax = plt.subplots(figsize=figsize)
         return ax
 
     @staticmethod
     def _get_fig_ax(
-        ax: Axes | None = None, figsize: Tuple[float, float] | None = None
-    ) -> Tuple[Figure, Axes]:
-
+        ax: Axes | None = None, figsize: tuple[float, float] | None = None
+    ) -> tuple[Figure, Axes]:
         if ax is None:
             fig, ax = plt.subplots(figsize=figsize)
         else:
@@ -78,7 +76,7 @@ class _DataArrayPlotter:
     def hist(
         self,
         ax: Axes | None = None,
-        figsize: Tuple[float, float] | None = None,
+        figsize: tuple[float, float] | None = None,
         title: str | None = None,
         **kwargs: Any,
     ) -> Axes:
@@ -121,7 +119,7 @@ class _DataArrayPlotter:
     def line(
         self,
         ax: Axes | None = None,
-        figsize: Tuple[float, float] | None = None,
+        figsize: tuple[float, float] | None = None,
         **kwargs: Any,
     ) -> Axes:
         """Plot data as lines (timeseries if time is present)"""
@@ -178,7 +176,7 @@ class _DataArrayPlotterGrid1D(_DataArrayPlotter):
     def __call__(
         self,
         ax: Axes | None = None,
-        figsize: Tuple[float, float] | None = None,
+        figsize: tuple[float, float] | None = None,
         **kwargs: Any,
     ) -> Axes:
         _, ax = self._get_fig_ax(ax, figsize)
@@ -190,7 +188,7 @@ class _DataArrayPlotterGrid1D(_DataArrayPlotter):
     def line(
         self,
         ax: Axes | None = None,
-        figsize: Tuple[float, float] | None = None,
+        figsize: tuple[float, float] | None = None,
         **kwargs: Any,
     ) -> Axes:
         """Plot as spatial lines"""
@@ -200,7 +198,7 @@ class _DataArrayPlotterGrid1D(_DataArrayPlotter):
     def timeseries(
         self,
         ax: Axes | None = None,
-        figsize: Tuple[float, float] | None = None,
+        figsize: tuple[float, float] | None = None,
         **kwargs: Any,
     ) -> Axes:
         """Plot as timeseries"""
@@ -212,7 +210,7 @@ class _DataArrayPlotterGrid1D(_DataArrayPlotter):
     def imshow(
         self,
         ax: Axes | None = None,
-        figsize: Tuple[float, float] | None = None,
+        figsize: tuple[float, float] | None = None,
         **kwargs: Any,
     ) -> Axes:
         """Plot as 2d"""
@@ -228,7 +226,7 @@ class _DataArrayPlotterGrid1D(_DataArrayPlotter):
     def pcolormesh(
         self,
         ax: Axes | None = None,
-        figsize: Tuple[float, float] | None = None,
+        figsize: tuple[float, float] | None = None,
         title: str | None = None,
         **kwargs: Any,
     ) -> Axes:
@@ -281,7 +279,7 @@ class _DataArrayPlotterGrid2D(_DataArrayPlotter):
     def __call__(
         self,
         ax: Axes | None = None,
-        figsize: Tuple[float, float] | None = None,
+        figsize: tuple[float, float] | None = None,
         **kwargs: Any,
     ) -> Axes:
         return self.pcolormesh(ax, figsize, **kwargs)
@@ -289,7 +287,7 @@ class _DataArrayPlotterGrid2D(_DataArrayPlotter):
     def contour(
         self,
         ax: Axes | None = None,
-        figsize: Tuple[float, float] | None = None,
+        figsize: tuple[float, float] | None = None,
         title: str | None = None,
         **kwargs: Any,
     ) -> Axes:
@@ -318,7 +316,7 @@ class _DataArrayPlotterGrid2D(_DataArrayPlotter):
     def contourf(
         self,
         ax: Axes | None = None,
-        figsize: Tuple[float, float] | None = None,
+        figsize: tuple[float, float] | None = None,
         title: str | None = None,
         label: str | None = None,
         **kwargs: Any,
@@ -349,7 +347,7 @@ class _DataArrayPlotterGrid2D(_DataArrayPlotter):
     def pcolormesh(
         self,
         ax: Axes | None = None,
-        figsize: Tuple[float, float] | None = None,
+        figsize: tuple[float, float] | None = None,
         title: str | None = None,
         label: str | None = None,
         **kwargs: Any,
@@ -377,12 +375,12 @@ class _DataArrayPlotterGrid2D(_DataArrayPlotter):
             ax.set_title(title)
         return ax
 
-    def _get_x_y(self) -> Tuple[np.ndarray, np.ndarray]:
+    def _get_x_y(self) -> tuple[np.ndarray, np.ndarray]:
         x = self.da.geometry.x
         y = self.da.geometry.y
         return x, y
 
-    def _get_xn_yn(self) -> Tuple[np.ndarray, np.ndarray]:
+    def _get_xn_yn(self) -> tuple[np.ndarray, np.ndarray]:
         xn = self.da.geometry._centers_to_nodes(self.da.geometry.x)
         yn = self.da.geometry._centers_to_nodes(self.da.geometry.y)
         return xn, yn
@@ -429,7 +427,7 @@ class _DataArrayPlotterFM(_DataArrayPlotter):
     def __call__(
         self,
         ax: Axes | None = None,
-        figsize: Tuple[float, float] | None = None,
+        figsize: tuple[float, float] | None = None,
         **kwargs: Any,
     ) -> Axes:
         """Plot data as coloured patches"""
@@ -439,7 +437,7 @@ class _DataArrayPlotterFM(_DataArrayPlotter):
     def patch(
         self,
         ax: Axes | None = None,
-        figsize: Tuple[float, float] | None = None,
+        figsize: tuple[float, float] | None = None,
         **kwargs: Any,
     ) -> Axes:
         """Plot data as coloured patches
@@ -458,7 +456,7 @@ class _DataArrayPlotterFM(_DataArrayPlotter):
     def contour(
         self,
         ax: Axes | None = None,
-        figsize: Tuple[float, float] | None = None,
+        figsize: tuple[float, float] | None = None,
         **kwargs: Any,
     ) -> Axes:
         """Plot data as contour lines
@@ -477,7 +475,7 @@ class _DataArrayPlotterFM(_DataArrayPlotter):
     def contourf(
         self,
         ax: Axes | None = None,
-        figsize: Tuple[float, float] | None = None,
+        figsize: tuple[float, float] | None = None,
         **kwargs: Any,
     ) -> Axes:
         """Plot data as filled contours
@@ -496,7 +494,7 @@ class _DataArrayPlotterFM(_DataArrayPlotter):
     def mesh(
         self,
         ax: Axes | None = None,
-        figsize: Tuple[float, float] | None = None,
+        figsize: tuple[float, float] | None = None,
         **kwargs: Any,
     ) -> Axes:
         """Plot mesh only
@@ -513,7 +511,7 @@ class _DataArrayPlotterFM(_DataArrayPlotter):
     def outline(
         self,
         ax: Axes | None = None,
-        figsize: Tuple[float, float] | None = None,
+        figsize: tuple[float, float] | None = None,
         **kwargs: Any,
     ) -> Axes:
         """Plot domain outline (using the boundary_polylines property)
@@ -584,7 +582,7 @@ class _DataArrayPlotterFMVerticalColumn(_DataArrayPlotter):
     def __call__(
         self,
         ax: Axes | None = None,
-        figsize: Tuple[float, float] | None = None,
+        figsize: tuple[float, float] | None = None,
         **kwargs: Any,
     ) -> Axes:
         ax = self._get_ax(ax, figsize)
@@ -593,7 +591,7 @@ class _DataArrayPlotterFMVerticalColumn(_DataArrayPlotter):
     def line(
         self,
         ax: Axes | None = None,
-        figsize: Tuple[float, float] | None = None,
+        figsize: tuple[float, float] | None = None,
         extrapolate: bool = True,
         **kwargs: Any,
     ) -> Axes:
@@ -638,7 +636,7 @@ class _DataArrayPlotterFMVerticalColumn(_DataArrayPlotter):
     def pcolormesh(
         self,
         ax: Axes | None = None,
-        figsize: Tuple[float, float] | None = None,
+        figsize: tuple[float, float] | None = None,
         title: str | None = None,
         **kwargs: Any,
     ) -> Axes:
@@ -681,7 +679,7 @@ class _DataArrayPlotterFMVerticalProfile(_DataArrayPlotter):
     def __call__(
         self,
         ax: Axes | None = None,
-        figsize: Tuple[float, float] | None = None,
+        figsize: tuple[float, float] | None = None,
         **kwargs: Any,
     ) -> Axes:
         ax = self._get_ax(ax, figsize)
@@ -714,7 +712,7 @@ class _DataArrayPlotterPointSpectrum(_DataArrayPlotter):
     def __call__(
         self,
         ax: Axes | None = None,
-        figsize: Tuple[float, float] | None = None,
+        figsize: tuple[float, float] | None = None,
         **kwargs: Any,
     ) -> Axes:
         # ax = self._get_ax(ax, figsize)
@@ -742,7 +740,7 @@ class _DataArrayPlotterPointSpectrum(_DataArrayPlotter):
     def _plot_freqspectrum(
         self,
         ax: Axes | None = None,
-        figsize: Tuple[float, float] | None = None,
+        figsize: tuple[float, float] | None = None,
         **kwargs: Any,
     ) -> Axes:
         ax = self._plot_1dspectrum(self.da.frequencies, ax, figsize, **kwargs)  # type: ignore
@@ -753,7 +751,7 @@ class _DataArrayPlotterPointSpectrum(_DataArrayPlotter):
     def _plot_dirspectrum(
         self,
         ax: Axes | None = None,
-        figsize: Tuple[float, float] | None = None,
+        figsize: tuple[float, float] | None = None,
         **kwargs: Any,
     ) -> Axes:
         ax = self._plot_1dspectrum(self.da.directions, ax, figsize, **kwargs)  # type: ignore
@@ -766,7 +764,7 @@ class _DataArrayPlotterPointSpectrum(_DataArrayPlotter):
         self,
         x_values: np.ndarray,
         ax: Axes | None = None,
-        figsize: Tuple[float, float] | None = None,
+        figsize: tuple[float, float] | None = None,
         **kwargs: Any,
     ) -> Axes:
         ax = self._get_ax(ax, figsize)
@@ -834,7 +832,7 @@ class _DatasetPlotter:
         self.ds = ds
 
     def __call__(
-        self, figsize: Tuple[float, float] | None = None, **kwargs: Any
+        self, figsize: tuple[float, float] | None = None, **kwargs: Any
     ) -> Axes:
         """Plot multiple DataArrays as time series (only possible dfs0-type data)"""
         if self.ds.dims == ("time",):
@@ -847,8 +845,8 @@ class _DatasetPlotter:
 
     @staticmethod
     def _get_fig_ax(
-        ax: Axes | None = None, figsize: Tuple[float, float] | None = None
-    ) -> Tuple[Figure, Axes]:
+        ax: Axes | None = None, figsize: tuple[float, float] | None = None
+    ) -> tuple[Figure, Axes]:
         import matplotlib.pyplot as plt
 
         if ax is None:
@@ -862,7 +860,7 @@ class _DatasetPlotter:
         x: str | int,
         y: str | int,
         ax: Axes | None = None,
-        figsize: Tuple[float, float] | None = None,
+        figsize: tuple[float, float] | None = None,
         **kwargs: Any,
     ) -> Axes:
         """Plot data from two DataArrays against each other in a scatter plot

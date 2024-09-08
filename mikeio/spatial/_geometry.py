@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 
 from collections import namedtuple
-from typing import Any, Tuple
+from typing import Any
 
 from mikecore.Projections import MapProjection
 
@@ -10,7 +10,6 @@ BoundingBox = namedtuple("BoundingBox", ["left", "bottom", "right", "top"])
 
 class _Geometry(ABC):
     def __init__(self, projection: str = "LONG/LAT") -> None:
-
         if not MapProjection.IsValid(projection):
             raise ValueError(f"{projection=} is not a valid projection string")
 
@@ -43,7 +42,7 @@ class _Geometry(ABC):
 
     @property
     @abstractmethod
-    def default_dims(self) -> Tuple[str, ...]:
+    def default_dims(self) -> tuple[str, ...]:
         pass
 
 
@@ -56,7 +55,7 @@ class GeometryUndefined(_Geometry):
         raise NotImplementedError()
 
     @property
-    def default_dims(self) -> Tuple[str, ...]:
+    def default_dims(self) -> tuple[str, ...]:
         raise NotImplementedError()
 
 
@@ -67,7 +66,7 @@ class GeometryPoint2D(_Geometry):
         self.y = y
 
     @property
-    def default_dims(self) -> Tuple[str, ...]:
+    def default_dims(self) -> tuple[str, ...]:
         return ()
 
     def __repr__(self) -> str:
@@ -104,7 +103,7 @@ class GeometryPoint3D(_Geometry):
         return f"GeometryPoint3D(x={self.x}, y={self.y}, z={self.z})"
 
     @property
-    def default_dims(self) -> Tuple[str, ...]:
+    def default_dims(self) -> tuple[str, ...]:
         return ()
 
     @property

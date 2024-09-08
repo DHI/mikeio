@@ -92,19 +92,16 @@ def _unit_list(eum_type: int) -> dict[str, eumUnit]:
 
 
 class TimeAxisType(IntEnum):
-
     EquidistantRelative = 1
     NonEquidistantRelative = 2
     EquidistantCalendar = 3
     NonEquidistantCalendar = 4
 
     def __repr__(self) -> str:
-
         return self.name
 
 
 class TimeStepUnit(IntEnum):
-
     SECOND = 1400
     MINUTE = 1401
     HOUR = 1402
@@ -728,7 +725,6 @@ class EUMType(IntEnum):
         return name
 
     def __repr__(self) -> str:
-
         return self.display_name
 
     @property
@@ -1371,7 +1367,6 @@ class EUMUnit(IntEnum):
 
     @property
     def short_name(self) -> str:
-
         unit_short_names = {
             "kilometer": "km",
             "centimeter": "cm",
@@ -1396,7 +1391,6 @@ class EUMUnit(IntEnum):
         return name
 
     def __repr__(self) -> str:
-
         return self.display_name
 
 
@@ -1435,7 +1429,6 @@ class ItemInfo:
             "Instantaneous", "Accumulated", "StepAccumulated", "MeanStepBackward"
         ] = "Instantaneous",
     ) -> None:
-
         # Handle arguments in the wrong place
         if isinstance(name, EUMType):
             if isinstance(itemtype, EUMUnit):
@@ -1457,11 +1450,9 @@ class ItemInfo:
             if name is None:
                 name = itemtype.display_name
         else:
-
             self.type = EUMType.Undefined
 
         if unit is not None:
-
             if isinstance(unit, int):
                 unit = EUMUnit(unit)
 
@@ -1495,7 +1486,6 @@ class ItemInfo:
         )
 
     def __repr__(self) -> str:
-
         if self.data_value_type == DataValueType.Instantaneous:
             return f"{self.name} <{self.type.display_name}> ({self.unit.display_name})"
         else:
