@@ -6,17 +6,6 @@
 [![PyPI version](https://badge.fury.io/py/mikeio.svg)](https://badge.fury.io/py/mikeio)
 ![OS](https://img.shields.io/badge/OS-Windows%20%7C%20Linux-blue)
 
-
-> [!NOTE]
-> 
-> ![](https://training.dhigroup.com/ACA_Logo.png?v=1647618443406)
->
-> **Instructor-led course**
->
-> [Getting started with MIKE IO for Python processing of dfs files](https://training.dhigroup.com/event/sessions?id=Instructor-led_course_-_Online852475847)
-> 
-> From 4th September 2024 to 2nd October 2024
-
 Read, write and manipulate dfs0, dfs1, dfs2, dfs3, dfsu and mesh files.
 
 MIKE IO facilitates common data processing workflows for [MIKE files in Python](https://www.mikepoweredbydhi.com/products/mike-for-developers#io).
@@ -30,8 +19,6 @@ MIKE IO facilitates common data processing workflows for [MIKE files in Python](
 * Windows or Linux operating system
 * Python x64 3.9 - 3.12
 * (Windows) [VC++ redistributables](https://support.microsoft.com/en-us/help/2977003/the-latest-supported-visual-c-downloads) (already installed if you have MIKE)
-
-[More info about dependencies](http://docs.mikepoweredbydhi.com/nuget/)
 
 ## Installation
 
