@@ -90,7 +90,7 @@ def _clone(
     outfilename: str | pathlib.Path,
     start_time: datetime | None = None,
     timestep: float | None = None,
-    items: Sequence[int | str | DfsDynamicItemInfo] | None = None,
+    items: Sequence[int | DfsDynamicItemInfo] | None = None,
 ) -> DfsFile:
     """Clone a dfs file
 
@@ -104,7 +104,7 @@ def _clone(
         new start time for the new file, by default None
     timestep : float, optional
         new timestep (in seconds) for the new file, by default None
-    items : list(int,str,eum.ItemInfo), optional
+    items : list(int,eum.ItemInfo), optional
         list of items for new file, either as a list of
         ItemInfo or a list of str/int referring to original file,
         default: all items from original file
@@ -142,9 +142,6 @@ def _clone(
     for customBlock in fi.CustomBlocks:
         builder.AddCustomBlock(customBlock)
 
-    names = [x.Name for x in source.ItemInfo]
-    item_lookup = {name: i for i, name in enumerate(names)}
-
     if isinstance(items, Iterable) and not isinstance(items, str):
         for item in items:
             if isinstance(item, ItemInfo):
@@ -157,11 +154,8 @@ def _clone(
                 builder.AddDynamicItem(item)
             elif isinstance(item, int):
                 builder.AddDynamicItem(source.ItemInfo[item])
-            elif isinstance(item, str):
-                item_no = item_lookup[item]
-                builder.AddDynamicItem(source.ItemInfo[item_no])
 
-    elif isinstance(items, (int, str)) or items is None:
+    elif isinstance(items, (int)) or items is None:
         # must be str/int refering to original file (or None)
         item_numbers = _valid_item_numbers(source.ItemInfo, items)
         items = [source.ItemInfo[item] for item in item_numbers]
@@ -507,8 +501,8 @@ def concat(
 def extract(
     infilename: str | pathlib.Path,
     outfilename: str | pathlib.Path,
-    start: int = 0,
-    end: int = -1,
+    start: int | float | str | datetime = 0,
+    end: int | float | str | datetime = -1,
     step: int = 1,
     items: Sequence[int | str] | None = None,
 ) -> None:

@@ -201,7 +201,9 @@ def test_sum_dfsu(tmp_path: Path) -> None:
     infilename_a = "tests/testdata/HD2D.dfsu"
     infilename_b = "tests/testdata/HD2D.dfsu"
     fp = tmp_path / "sum.dfsu"
-    mikeio.generic.sum(infilename_a, infilename_b, fp)
+
+    with pytest.warns(FutureWarning):
+        mikeio.generic.sum(infilename_a, infilename_b, fp)
 
     org = mikeio.read(infilename_a)
 
@@ -372,6 +374,9 @@ def test_extract_equidistant(tmp_path: Path) -> None:
 
     with pytest.raises(ValueError):
         extract(infile, fp, start=1000)
+
+    with pytest.raises(ValueError):
+        extract(infile, fp, end=1000)
 
 
 def test_extract_non_equidistant(tmp_path: Path) -> None:
