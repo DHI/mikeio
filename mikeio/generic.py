@@ -1,4 +1,5 @@
 from __future__ import annotations
+from dataclasses import dataclass
 import math
 import os
 import pathlib
@@ -36,42 +37,22 @@ TimeAxis = Union[
 
 show_progress = True
 
+__all__ = [
+    "avg_time",
+    "concat",
+    "diff",
+    "extract",
+    "fill_corrupt",
+    "quantile",
+    "scale",
+    "sum",
+]
 
+
+@dataclass
 class _ChunkInfo:
-    """Class for keeping track of an chunked processing
-
-    Parameters
-    ----------
-    n_data : int
-        number of data points
-    n_chunks : int
-        number of chunks
-
-    Attributes
-    ----------
-    n_data : int
-        number of data points
-    n_chunks : int
-        number of chunks
-    chunk_size : int
-        number of data points per chunk
-
-    Methods
-    -------
-    stop(start)
-        Return the stop index for a chunk
-    chunk_end(start)
-        Return the end index for a chunk
-    from_dfs(dfs, item_numbers, buffer_size)
-        Calculate chunk info based on # of elements in dfs file and selected buffer size
-    """
-
-    def __init__(self, n_data: int, n_chunks: int):
-        self.n_data = n_data
-        self.n_chunks = n_chunks
-
-    def __repr__(self) -> str:
-        return f"_ChunkInfo(n_chunks={self.n_chunks}, n_data={self.n_data}, chunk_size={self.chunk_size})"
+    n_data: int
+    n_chunks: int
 
     @property
     def chunk_size(self) -> int:
@@ -187,17 +168,11 @@ def _clone(
     else:
         raise ValueError("Items of type: {type(items)} is not supported")
 
-    # Create file
     builder.CreateFile(str(outfilename))
 
-    # Copy static items
-    while True:
-        static_item = source.ReadStaticItemNext()
-        if static_item is None:
-            break
+    for static_item in iter(source.ReadStaticItemNext, None):
         builder.AddStaticItem(static_item)
 
-    # Get the file
     file = builder.GetFile()
 
     source.Close()
@@ -318,6 +293,7 @@ def fill_corrupt(
     dfs.Close()
 
 
+# TODO sum is conflicting with the built-in sum function, which we could haved used above in line 78. Consider renaming.
 def sum(
     infilename_a: str | pathlib.Path,
     infilename_b: str | pathlib.Path,
