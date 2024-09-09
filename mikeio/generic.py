@@ -1,13 +1,15 @@
 from __future__ import annotations
 from dataclasses import dataclass
 import math
+import operator
 import os
 import pathlib
 from copy import deepcopy
 from datetime import datetime, timedelta
 from shutil import copyfile
 from collections.abc import Iterable, Sequence
-from typing import Union
+from typing import Callable, Union
+import warnings
 
 
 import numpy as np
@@ -293,13 +295,13 @@ def fill_corrupt(
     dfs.Close()
 
 
-# TODO sum is conflicting with the built-in sum function, which we could haved used above in line 78. Consider renaming.
-def sum(
+def _process_dfs_files(
     infilename_a: str | pathlib.Path,
     infilename_b: str | pathlib.Path,
     outfilename: str | pathlib.Path,
+    op: Callable[[np.ndarray, np.ndarray], np.ndarray],
 ) -> None:
-    """Sum two dfs files (a+b)
+    """Process two dfs files with a specified operation
 
     Parameters
     ----------
@@ -309,64 +311,12 @@ def sum(
         full path to the second input file
     outfilename: str | pathlib.Path
         full path to the output file
+    op: Callable[[np.ndarray, np.ndarray], np.ndarray]
+        operation to perform on the data arrays
     """
     infilename_a = str(infilename_a)
     infilename_b = str(infilename_b)
     outfilename = str(outfilename)
-    copyfile(infilename_a, outfilename)
-
-    dfs_i_a = DfsFileFactory.DfsGenericOpen(infilename_a)
-    dfs_i_b = DfsFileFactory.DfsGenericOpen(infilename_b)
-    dfs_o = DfsFileFactory.DfsGenericOpenEdit(outfilename)
-
-    deletevalue = dfs_i_a.FileInfo.DeleteValueFloat
-
-    n_time_steps = dfs_i_a.FileInfo.TimeAxis.NumberOfTimeSteps
-    n_items = len(dfs_i_a.ItemInfo)
-    # TODO Add checks to verify identical structure of file a and b
-
-    for timestep in trange(n_time_steps):
-        for item in range(n_items):
-            itemdata_a = dfs_i_a.ReadItemTimeStep(item + 1, timestep)
-            d_a = itemdata_a.Data
-            d_a[d_a == deletevalue] = np.nan
-
-            itemdata_b = dfs_i_b.ReadItemTimeStep(item + 1, timestep)
-            d_b = itemdata_b.Data
-            d_a[d_a == deletevalue] = np.nan
-            time = itemdata_a.Time
-
-            outdata = d_a + d_b
-
-            darray = outdata.astype(np.float32)
-
-            dfs_o.WriteItemTimeStep(item + 1, timestep, time, darray)
-
-    dfs_i_a.Close()
-    dfs_i_b.Close()
-    dfs_o.Close()
-
-
-def diff(
-    infilename_a: str | pathlib.Path,
-    infilename_b: str | pathlib.Path,
-    outfilename: str | pathlib.Path,
-) -> None:
-    """Calculate difference between two dfs files (a-b)
-
-    Parameters
-    ----------
-    infilename_a: str | pathlib.Path
-        full path to the first input file
-    infilename_b: str | pathlib.Path
-        full path to the second input file
-    outfilename: str | pathlib.Path
-        full path to the output file
-    """
-    infilename_a = str(infilename_a)
-    infilename_b = str(infilename_b)
-    outfilename = str(outfilename)
-
     copyfile(infilename_a, outfilename)
 
     dfs_i_a = DfsFileFactory.DfsGenericOpen(infilename_a)
@@ -390,16 +340,46 @@ def diff(
             d_b[d_b == deletevalue] = np.nan
             time = itemdata_a.Time
 
-            outdata = d_a - d_b
+            outdata = op(d_a, d_b)
 
-            d = outdata.astype(np.float32)
-            d[np.isnan(d)] = deletevalue
+            darray = outdata.astype(np.float32)
 
-            dfs_o.WriteItemTimeStep(item + 1, timestep, time, d)
+            dfs_o.WriteItemTimeStep(item + 1, timestep, time, darray)
 
     dfs_i_a.Close()
     dfs_i_b.Close()
     dfs_o.Close()
+
+
+# TODO sum is conflicting with the built-in sum function, which we could haved used above.
+def sum(
+    infilename_a: str | pathlib.Path,
+    infilename_b: str | pathlib.Path,
+    outfilename: str | pathlib.Path,
+) -> None:
+    """Sum two dfs files (a+b)"""
+
+    # deprecated
+    warnings.warn(FutureWarning("This function is deprecated. Use add instead."))
+    _process_dfs_files(infilename_a, infilename_b, outfilename, operator.add)
+
+
+def add(
+    infilename_a: str | pathlib.Path,
+    infilename_b: str | pathlib.Path,
+    outfilename: str | pathlib.Path,
+) -> None:
+    """Sum two dfs files (a+b)"""
+    _process_dfs_files(infilename_a, infilename_b, outfilename, operator.add)
+
+
+def diff(
+    infilename_a: str | pathlib.Path,
+    infilename_b: str | pathlib.Path,
+    outfilename: str | pathlib.Path,
+) -> None:
+    """Calculate difference between two dfs files (a-b)"""
+    _process_dfs_files(infilename_a, infilename_b, outfilename, operator.sub)
 
 
 def concat(
