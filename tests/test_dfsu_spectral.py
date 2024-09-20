@@ -87,7 +87,7 @@ def test_properties_line_spectrum_degrees(dfsu_line_degrees):
     assert dfs._type == DfsuFileType.DfsuSpectral1D
     dir = dfs.geometry.directions
     assert dir[0] == pytest.approx(0.0)
-    assert dir[-1] == pytest.approx(360.0)
+    assert dir[-1] == pytest.approx(350.0)
 
 
 def test_properties_area_spectrum(dfsu_area):
