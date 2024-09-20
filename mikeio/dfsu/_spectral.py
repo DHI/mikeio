@@ -305,7 +305,7 @@ class DfsuSpectral:
         items:
           0:  Energy density <Wave energy density> (meter pow 2 sec per deg)
 
-        >>> mikeio.read("tests/testdata/area_spectra.dfsu", time=-1)
+        >>> mikeio.read("tests/testdata/spectra/area_spectra.dfsu", time=-1)
         <mikeio.Dataset>
         dims: (element:40, direction:16, frequency:25)
         time: 2017-10-27 05:00:00 (time-invariant)
