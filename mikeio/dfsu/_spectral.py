@@ -279,7 +279,7 @@ class DfsuSpectral:
 
         Examples
         --------
-        >>> mikeio.read("tests/testdata/line_spectra.dfsu")
+        >>> mikeio.read("tests/testdata/spectra/line_spectra.dfsu")
         <mikeio.Dataset>
         dims: (time:4, node:10, direction:16, frequency:25)
         time: 2017-10-27 00:00:00 - 2017-10-27 05:00:00 (4 records)

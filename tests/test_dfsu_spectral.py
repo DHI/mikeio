@@ -10,43 +10,43 @@ import mikeio._spectral as _spectral
 
 @pytest.fixture
 def dfsu_pt():
-    filename = "tests/testdata/pt_spectra.dfsu"
+    filename = "tests/testdata/spectra/pt_spectra.dfsu"
     return mikeio.open(filename)
 
 
 @pytest.fixture
 def dfsu_line():
-    filename = "tests/testdata/line_spectra.dfsu"
+    filename = "tests/testdata/spectra/line_spectra.dfsu"
     return mikeio.open(filename)
 
 
 @pytest.fixture
 def dfsu_area():
-    filename = "tests/testdata/area_spectra.dfsu"
+    filename = "tests/testdata/spectra/area_spectra.dfsu"
     return mikeio.open(filename)
 
 
 @pytest.fixture
 def dfsu_area_sector():
-    filename = "tests/testdata/MIKE21SW_dir_sector_area_spectra.dfsu"
+    filename = "tests/testdata/spectra/MIKE21SW_dir_sector_area_spectra.dfsu"
     return mikeio.open(filename)
 
 
 @pytest.fixture
 def dfsu_pt_freq():
-    filename = "tests/testdata/pt_freq_spectra.dfsu"
+    filename = "tests/testdata/spectra/pt_freq_spectra.dfsu"
     return mikeio.open(filename)
 
 
 @pytest.fixture
 def dfsu_line_dir():
-    filename = "tests/testdata/line_dir_spectra.dfsu"
+    filename = "tests/testdata/spectra/line_dir_spectra.dfsu"
     return mikeio.open(filename)
 
 
 @pytest.fixture
 def dfsu_area_freq():
-    filename = "tests/testdata/area_freq_spectra.dfsu"
+    filename = "tests/testdata/spectra/area_freq_spectra.dfsu"
     return mikeio.open(filename)
 
 
