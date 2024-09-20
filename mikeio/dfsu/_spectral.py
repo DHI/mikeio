@@ -5,10 +5,11 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 from mikecore.DfsuFile import DfsuFile, DfsuFileType
+from mikecore.DfsFileFactory import DfsFileFactory
 from tqdm import trange
 
 from ..dataset import DataArray, Dataset
-from ..eum import ItemInfo
+from ..eum import ItemInfo, EUMUnit
 from ..dfs._dfs import _get_item_info, _valid_item_numbers, _valid_timesteps
 from .._spectral import calc_m0_from_spectrum
 from ._dfsu import (
@@ -134,8 +135,12 @@ class DfsuSpectral:
         dfs = DfsuFile.Open(filename)
         dfsu_type = DfsuFileType(dfs.DfsuFileType)
 
-        dir = dfs.Directions
-        directions = None if dir is None else dir * (180 / np.pi)
+        directions = dfs.Directions
+        if directions is not None:
+            dir_unit = DfsuSpectral._get_direction_unit(filename)
+            dir_conversion = 180.0 / np.pi if dir_unit == int(EUMUnit.radian) else 1.0
+            directions = directions * dir_conversion
+
         frequencies = dfs.Frequencies
 
         # geometry
@@ -176,6 +181,19 @@ class DfsuSpectral:
                 )
         dfs.Close()
         return geometry
+
+    @staticmethod
+    def _get_direction_unit(filename: str) -> int:
+        """Determine if the directional axis is in degrees or radians"""
+        source = DfsFileFactory.DfsGenericOpen(filename)
+        try:
+            for static_item in iter(source.ReadStaticItemNext, None):
+                if static_item.Name == "Direction":
+                    return static_item.Quantity.Unit.value
+        finally:
+            source.Close()
+
+        raise ValueError("Direction static item not found in the file.")
 
     @property
     def n_frequencies(self) -> int | None:
