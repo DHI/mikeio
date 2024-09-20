@@ -21,6 +21,12 @@ def dfsu_line():
 
 
 @pytest.fixture
+def dfsu_line_degrees():
+    filename = "tests/testdata/spectra/line_spectra_degrees.dfsu"
+    return mikeio.open(filename)
+
+
+@pytest.fixture
 def dfsu_area():
     filename = "tests/testdata/spectra/area_spectra.dfsu"
     return mikeio.open(filename)
@@ -70,6 +76,18 @@ def test_properties_line_spectrum(dfsu_line):
     assert len(dfs.directions) == 16
     assert dfs.geometry.n_nodes == 10
     assert dfs.geometry.n_elements == 9
+    dir = dfs.geometry.directions
+    assert dir[0] == pytest.approx(0.0)
+    assert dir[-1] == pytest.approx(337.5)
+
+
+def test_properties_line_spectrum_degrees(dfsu_line_degrees):
+    dfs = dfsu_line_degrees
+    assert dfs.geometry.is_spectral
+    assert dfs._type == DfsuFileType.DfsuSpectral1D
+    dir = dfs.geometry.directions
+    assert dir[0] == pytest.approx(0.0)
+    assert dir[-1] == pytest.approx(360.0)
 
 
 def test_properties_area_spectrum(dfsu_area):
