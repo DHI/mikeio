@@ -44,3 +44,10 @@ jobs:
       run: make doctest
     - name: Static type check
       run: make typecheck
+    - name: Build package
+      run: python -m build
+    - name: Upload build artifact
+      uses: actions/upload-artifact@v2
+      with:
+        name: dist {{matrix.os}} {{matrix.python-version}}
+        path: dist/*
