@@ -1,14 +1,12 @@
 LIB = mikeio
 
-LIB = mikeio
-
 check: lint typecheck test
 
 build: typecheck test
 	python -m build
 
 lint:
-	ruff check mikeio
+	ruff check $(LIB)/
 
 format:
 	ruff format $(LIB)/
