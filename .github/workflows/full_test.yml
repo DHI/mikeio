@@ -45,7 +45,10 @@ jobs:
     - name: Static type check
       run: make typecheck
     - name: Build package
-      run: python -m build
+      run: 
+        pip install build wheel twine
+        python -m build
+        
     - name: Upload build artifact
       uses: actions/upload-artifact@v4
       with:
