@@ -45,7 +45,7 @@ jobs:
     - name: Static type check
       run: make typecheck
     - name: Build package
-      run: 
+      run: |
         pip install build wheel twine
         python -m build
         
