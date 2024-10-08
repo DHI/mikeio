@@ -52,5 +52,5 @@ jobs:
     - name: Upload build artifact
       uses: actions/upload-artifact@v4
       with:
-        name: dist {{matrix.os}} {{matrix.python-version}}
+        name: dist-${{matrix.os}}-${{matrix.python-version}}
         path: dist/*
