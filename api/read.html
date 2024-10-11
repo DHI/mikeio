@@ -343,7 +343,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <ul class="collapse">
   <li><a href="#parameters" id="toc-parameters" class="nav-link" data-scroll-target="#parameters">Parameters</a></li>
   <li><a href="#returns" id="toc-returns" class="nav-link" data-scroll-target="#returns">Returns</a></li>
-  <li><a href="#see-also" id="toc-see-also" class="nav-link" data-scroll-target="#see-also">See Also</a></li>
+  <li><a href="#see-also" id="toc-see-also" class="nav-link" data-scroll-target="#see-also">See also</a></li>
   <li><a href="#examples" id="toc-examples" class="nav-link" data-scroll-target="#examples">Examples</a></li>
   </ul></li>
   </ul>
@@ -357,7 +357,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 <section id="mikeio.read" class="level1">
 <h1>read</h1>
-<p><code>read(filename, *, items=None, time=None, keepdims=False, **kwargs)</code></p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>read(filename, <span class="op">*</span>, items<span class="op">=</span><span class="va">None</span>, time<span class="op">=</span><span class="va">None</span>, keepdims<span class="op">=</span><span class="va">False</span>, <span class="op">**</span>kwargs)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <p>Read all or a subset of the data from a dfs file</p>
 <p>All dfs files can be subsetted with the <em>items</em> and <em>time</em> arguments. But the following file types also have the shown additional arguments:</p>
 <ul>
@@ -366,11 +366,11 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <li>Dfsu-2d: (x,y), elements, area</li>
 <li>Dfsu-layered: (xy,z), elements, area, layers</li>
 </ul>
-<section id="parameters" class="level2">
-<h2 class="anchored" data-anchor-id="parameters">Parameters</h2>
+<section id="parameters" class="level2 doc-section doc-section-parameters">
+<h2 class="doc-section doc-section-parameters anchored" data-anchor-id="parameters">Parameters</h2>
 <table class="caption-top table">
 <colgroup>
-<col style="width: 10%">
+<col style="width: 9%">
 <col style="width: 21%">
 <col style="width: 62%">
 <col style="width: 5%">
@@ -385,67 +385,67 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </thead>
 <tbody>
 <tr class="odd">
-<td><code>filename</code></td>
+<td>filename</td>
 <td>str | Path</td>
 <td>full path and file name to the dfs file.</td>
 <td><em>required</em></td>
 </tr>
 <tr class="even">
-<td><code>items</code></td>
+<td>items</td>
 <td>str | int | Sequence[str | int] | None</td>
 <td>Read only selected items, by number (0-based), or by name, by default None (=all)</td>
 <td><code>None</code></td>
 </tr>
 <tr class="odd">
-<td><code>time</code></td>
+<td>time</td>
 <td>int | str | slice | None</td>
 <td>Read only selected time steps, by default None (=all)</td>
 <td><code>None</code></td>
 </tr>
 <tr class="even">
-<td><code>keepdims</code></td>
+<td>keepdims</td>
 <td>bool</td>
 <td>When reading a single time step only, should the time-dimension be kept in the returned Dataset? by default: False</td>
 <td><code>False</code></td>
 </tr>
 <tr class="odd">
-<td><code>x</code></td>
+<td>x</td>
 <td></td>
 <td>Dfsu: Read only data for elements containing the (x,y) or (x,y,z) points(s), by default None</td>
 <td><em>required</em></td>
 </tr>
 <tr class="even">
-<td><code>y</code></td>
+<td>y</td>
 <td></td>
 <td>Dfsu: Read only data for elements containing the (x,y) or (x,y,z) points(s), by default None</td>
 <td><em>required</em></td>
 </tr>
 <tr class="odd">
-<td><code>z</code></td>
+<td>z</td>
 <td></td>
 <td>Dfsu: Read only data for elements containing the (x,y) or (x,y,z) points(s), by default None</td>
 <td><em>required</em></td>
 </tr>
 <tr class="even">
-<td><code>area</code></td>
+<td>area</td>
 <td></td>
 <td>Dfs2/Dfsu: read only data within an area given by a bounding box of coordinates (left, lower, right, upper), by default None (=all)</td>
 <td><em>required</em></td>
 </tr>
 <tr class="odd">
-<td><code>layers</code></td>
+<td>layers</td>
 <td></td>
 <td>Dfs3/Dfsu-layered: read only data from specific layers, by default None (=all layers)</td>
 <td><em>required</em></td>
 </tr>
 <tr class="even">
-<td><code>error_bad_data</code></td>
+<td>error_bad_data</td>
 <td></td>
 <td>raise error if data is corrupt, by default True,</td>
 <td><em>required</em></td>
 </tr>
 <tr class="odd">
-<td><code>fill_bad_data_value</code></td>
+<td>fill_bad_data_value</td>
 <td></td>
 <td>fill value for to impute corrupt data, used in conjunction with error_bad_data=False default np.nan</td>
 <td><em>required</em></td>
@@ -453,51 +453,58 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </tbody>
 </table>
 </section>
-<section id="returns" class="level2">
-<h2 class="anchored" data-anchor-id="returns">Returns</h2>
+<section id="returns" class="level2 doc-section doc-section-returns">
+<h2 class="doc-section doc-section-returns anchored" data-anchor-id="returns">Returns</h2>
 <table class="caption-top table">
+<colgroup>
+<col style="width: 10%">
+<col style="width: 12%">
+<col style="width: 77%">
+</colgroup>
 <thead>
 <tr class="header">
+<th>Name</th>
 <th>Type</th>
 <th>Description</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
+<td></td>
 <td>Dataset</td>
 <td>A Dataset with specification according to the file type</td>
 </tr>
 </tbody>
 </table>
 </section>
-<section id="see-also" class="level2">
-<h2 class="anchored" data-anchor-id="see-also">See Also</h2>
+<section id="see-also" class="level2 doc-section doc-section-see-also">
+<h2 class="doc-section doc-section-see-also anchored" data-anchor-id="see-also">See also</h2>
 <p>mikeio.open - open a Dfs file and only read the header</p>
 </section>
-<section id="examples" class="level2">
-<h2 class="anchored" data-anchor-id="examples">Examples</h2>
-<div class="sourceCode" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> ds <span class="op">=</span> mikeio.read(<span class="st">"ts.dfs0"</span>)</span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> ds <span class="op">=</span> mikeio.read(<span class="st">"ts.dfs0"</span>, items<span class="op">=</span><span class="dv">0</span>)</span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> ds <span class="op">=</span> mikeio.read(<span class="st">"ts.dfs0"</span>, items<span class="op">=</span><span class="st">"Temperature"</span>)</span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> ds <span class="op">=</span> mikeio.read(<span class="st">"sw_points.dfs0, items="</span><span class="op">*</span>Buoy <span class="dv">4</span><span class="op">*</span><span class="st">")</span></span>
-<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="er">&gt;&gt;&gt; ds = mikeio.read</span>(<span class="st">"ts.dfs0"</span>, items<span class="op">=</span>[<span class="st">"u"</span>,<span class="st">"v"</span>], time<span class="op">=</span><span class="st">"2016"</span>)</span>
-<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> ds <span class="op">=</span> mikeio.read(<span class="st">"tide.dfs1"</span>, time<span class="op">=</span><span class="st">"2018-5"</span>)</span>
-<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> ds <span class="op">=</span> mikeio.read(<span class="st">"tide.dfs1"</span>, time<span class="op">=</span><span class="bu">slice</span>(<span class="st">"2018-5-1"</span>,<span class="st">"2018-6-1"</span>))</span>
-<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> ds <span class="op">=</span> mikeio.read(<span class="st">"tide.dfs1"</span>, items<span class="op">=</span>[<span class="dv">0</span>,<span class="dv">3</span>,<span class="dv">6</span>], time<span class="op">=-</span><span class="dv">1</span>)</span>
-<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> ds <span class="op">=</span> mikeio.read(<span class="st">"tide.dfs1"</span>, time<span class="op">=-</span><span class="dv">1</span>, keepdims<span class="op">=</span><span class="va">True</span>)</span>
-<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> ds <span class="op">=</span> mikeio.read(<span class="st">"era5.dfs2"</span>, area<span class="op">=</span>(<span class="dv">10</span>,<span class="dv">50</span>,<span class="dv">16</span>,<span class="dv">58</span>))</span>
-<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> ds <span class="op">=</span> mikeio.read(<span class="st">"HD2D.dfsu"</span>)</span>
-<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> ds <span class="op">=</span> mikeio.read(<span class="st">"HD2D.dfsu"</span>, x<span class="op">=</span><span class="fl">2.2</span>, y<span class="op">=</span><span class="fl">54.2</span>)</span>
-<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> ds <span class="op">=</span> mikeio.read(<span class="st">"HD2D.dfsu"</span>, elements<span class="op">=</span><span class="dv">183</span>)</span>
-<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> ds <span class="op">=</span> mikeio.read(<span class="st">"HD2D.dfsu"</span>, elements<span class="op">=</span><span class="bu">range</span>(<span class="dv">0</span>,<span class="dv">2000</span>))</span>
-<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> ds <span class="op">=</span> mikeio.read(<span class="st">"HD2D.dfsu"</span>, area<span class="op">=</span>(<span class="dv">10</span>,<span class="dv">50</span>,<span class="dv">16</span>,<span class="dv">58</span>))</span>
-<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> ds <span class="op">=</span> mikeio.read(<span class="st">"MT3D_sigma_z.dfsu"</span>, x<span class="op">=</span><span class="fl">11.4</span>, y<span class="op">=</span><span class="fl">56.2</span>)</span>
-<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> ds <span class="op">=</span> mikeio.read(<span class="st">"MT3D_sigma_z.dfsu"</span>, x<span class="op">=</span><span class="fl">11.4</span>, y<span class="op">=</span><span class="fl">56.2</span>, z<span class="op">=-</span><span class="fl">1.1</span>)</span>
-<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> ds <span class="op">=</span> mikeio.read(<span class="st">"MT3D_sigma_z.dfsu"</span>, elements<span class="op">=</span>lst_of_elems)</span>
-<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> ds <span class="op">=</span> mikeio.read(<span class="st">"MT3D_sigma_z.dfsu"</span>, layers<span class="op">=</span><span class="st">"bottom"</span>)</span>
-<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> ds <span class="op">=</span> mikeio.read(<span class="st">"MT3D_sigma_z.dfsu"</span>, layers<span class="op">=</span>[<span class="op">-</span><span class="dv">2</span>,<span class="op">-</span><span class="dv">1</span>])</span>
-<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> ds <span class="op">=</span> mikeio.read(<span class="st">"HD2D.dfsu"</span>, error_bad_data<span class="op">=</span><span class="va">False</span>) <span class="co"># replace corrupt data with np.nan</span></span>
-<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> ds <span class="op">=</span> mikeio.read(<span class="st">"HD2D.dfsu"</span>, error_bad_data<span class="op">=</span><span class="va">False</span>, fill_bad_data_value<span class="op">=</span><span class="fl">0.0</span>) <span class="co"># replace corrupt data with 0.0</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<section id="examples" class="level2 doc-section doc-section-examples">
+<h2 class="doc-section doc-section-examples anchored" data-anchor-id="examples">Examples</h2>
+<div class="sourceCode" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> ds <span class="op">=</span> mikeio.read(<span class="st">"ts.dfs0"</span>)</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> ds <span class="op">=</span> mikeio.read(<span class="st">"ts.dfs0"</span>, items<span class="op">=</span><span class="dv">0</span>)</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> ds <span class="op">=</span> mikeio.read(<span class="st">"ts.dfs0"</span>, items<span class="op">=</span><span class="st">"Temperature"</span>)</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> ds <span class="op">=</span> mikeio.read(<span class="st">"sw_points.dfs0, items="</span><span class="op">*</span>Buoy <span class="dv">4</span><span class="op">*</span><span class="st">")</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="er">&gt;&gt;&gt; ds = mikeio.read</span>(<span class="st">"ts.dfs0"</span>, items<span class="op">=</span>[<span class="st">"u"</span>,<span class="st">"v"</span>], time<span class="op">=</span><span class="st">"2016"</span>)</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> ds <span class="op">=</span> mikeio.read(<span class="st">"tide.dfs1"</span>, time<span class="op">=</span><span class="st">"2018-5"</span>)</span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> ds <span class="op">=</span> mikeio.read(<span class="st">"tide.dfs1"</span>, time<span class="op">=</span><span class="bu">slice</span>(<span class="st">"2018-5-1"</span>,<span class="st">"2018-6-1"</span>))</span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> ds <span class="op">=</span> mikeio.read(<span class="st">"tide.dfs1"</span>, items<span class="op">=</span>[<span class="dv">0</span>,<span class="dv">3</span>,<span class="dv">6</span>], time<span class="op">=-</span><span class="dv">1</span>)</span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> ds <span class="op">=</span> mikeio.read(<span class="st">"tide.dfs1"</span>, time<span class="op">=-</span><span class="dv">1</span>, keepdims<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> ds <span class="op">=</span> mikeio.read(<span class="st">"era5.dfs2"</span>, area<span class="op">=</span>(<span class="dv">10</span>,<span class="dv">50</span>,<span class="dv">16</span>,<span class="dv">58</span>))</span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> ds <span class="op">=</span> mikeio.read(<span class="st">"HD2D.dfsu"</span>)</span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> ds <span class="op">=</span> mikeio.read(<span class="st">"HD2D.dfsu"</span>, x<span class="op">=</span><span class="fl">2.2</span>, y<span class="op">=</span><span class="fl">54.2</span>)</span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> ds <span class="op">=</span> mikeio.read(<span class="st">"HD2D.dfsu"</span>, elements<span class="op">=</span><span class="dv">183</span>)</span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> ds <span class="op">=</span> mikeio.read(<span class="st">"HD2D.dfsu"</span>, elements<span class="op">=</span><span class="bu">range</span>(<span class="dv">0</span>,<span class="dv">2000</span>))</span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> ds <span class="op">=</span> mikeio.read(<span class="st">"HD2D.dfsu"</span>, area<span class="op">=</span>(<span class="dv">10</span>,<span class="dv">50</span>,<span class="dv">16</span>,<span class="dv">58</span>))</span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> ds <span class="op">=</span> mikeio.read(<span class="st">"MT3D_sigma_z.dfsu"</span>, x<span class="op">=</span><span class="fl">11.4</span>, y<span class="op">=</span><span class="fl">56.2</span>)</span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> ds <span class="op">=</span> mikeio.read(<span class="st">"MT3D_sigma_z.dfsu"</span>, x<span class="op">=</span><span class="fl">11.4</span>, y<span class="op">=</span><span class="fl">56.2</span>, z<span class="op">=-</span><span class="fl">1.1</span>)</span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> ds <span class="op">=</span> mikeio.read(<span class="st">"MT3D_sigma_z.dfsu"</span>, elements<span class="op">=</span>lst_of_elems)</span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> ds <span class="op">=</span> mikeio.read(<span class="st">"MT3D_sigma_z.dfsu"</span>, layers<span class="op">=</span><span class="st">"bottom"</span>)</span>
+<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> ds <span class="op">=</span> mikeio.read(<span class="st">"MT3D_sigma_z.dfsu"</span>, layers<span class="op">=</span>[<span class="op">-</span><span class="dv">2</span>,<span class="op">-</span><span class="dv">1</span>])</span>
+<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> ds <span class="op">=</span> mikeio.read(<span class="st">"HD2D.dfsu"</span>, error_bad_data<span class="op">=</span><span class="va">False</span>) <span class="co"># replace corrupt data with np.nan</span></span>
+<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> ds <span class="op">=</span> mikeio.read(<span class="st">"HD2D.dfsu"</span>, error_bad_data<span class="op">=</span><span class="va">False</span>, fill_bad_data_value<span class="op">=</span><span class="fl">0.0</span>) <span class="co"># replace corrupt data with 0.0</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 
 
 </section>

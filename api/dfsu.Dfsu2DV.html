@@ -20,6 +20,40 @@ ul.task-list li input[type="checkbox"] {
   margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
 }
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
 </style>
 
 
@@ -326,7 +360,7 @@ ul.task-list li input[type="checkbox"] {
 
 <section id="mikeio.dfsu.Dfsu2DV" class="level1">
 <h1>dfsu.Dfsu2DV</h1>
-<p><code>dfsu.Dfsu2DV(self, filename)</code></p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>dfsu.Dfsu2DV(<span class="va">self</span>, filename)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <section id="attributes" class="level2">
 <h2 class="anchored" data-anchor-id="attributes">Attributes</h2>
 <table class="caption-top table">
@@ -406,15 +440,15 @@ ul.task-list li input[type="checkbox"] {
 </table>
 <section id="mikeio.dfsu.Dfsu2DV.append" class="level3">
 <h3 class="anchored" data-anchor-id="mikeio.dfsu.Dfsu2DV.append">append</h3>
-<p><code>dfsu.Dfsu2DV.append(ds, validate=True)</code></p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>dfsu.Dfsu2DV.append(ds, validate<span class="op">=</span><span class="va">True</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <p>Append data to a dfsu file</p>
-<section id="parameters" class="level4">
-<h4 class="anchored" data-anchor-id="parameters">Parameters</h4>
+<section id="parameters" class="level4 doc-section doc-section-parameters">
+<h4 class="doc-section doc-section-parameters anchored" data-anchor-id="parameters">Parameters</h4>
 <table class="caption-top table">
 <colgroup>
-<col style="width: 10%">
+<col style="width: 8%">
 <col style="width: 7%">
-<col style="width: 72%">
+<col style="width: 73%">
 <col style="width: 10%">
 </colgroup>
 <thead>
@@ -427,13 +461,13 @@ ul.task-list li input[type="checkbox"] {
 </thead>
 <tbody>
 <tr class="odd">
-<td><code>ds</code></td>
+<td>ds</td>
 <td>Dataset</td>
 <td>Dataset to append</td>
 <td><em>required</em></td>
 </tr>
 <tr class="even">
-<td><code>validate</code></td>
+<td>validate</td>
 <td>bool</td>
 <td>Validate that the dataset to append has the same geometry and items, by default True</td>
 <td><code>True</code></td>
@@ -444,15 +478,22 @@ ul.task-list li input[type="checkbox"] {
 </section>
 <section id="mikeio.dfsu.Dfsu2DV.plot_vertical_profile" class="level3">
 <h3 class="anchored" data-anchor-id="mikeio.dfsu.Dfsu2DV.plot_vertical_profile">plot_vertical_profile</h3>
-<p><code>dfsu.Dfsu2DV.plot_vertical_profile(values, time_step=None, cmin=None, cmax=None, label='', **kwargs)</code></p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>dfsu.Dfsu2DV.plot_vertical_profile(</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>    values</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>    time_step<span class="op">=</span><span class="va">None</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>    cmin<span class="op">=</span><span class="va">None</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>    cmax<span class="op">=</span><span class="va">None</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>    label<span class="op">=</span><span class="st">''</span></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>    <span class="op">**</span>kwargs</span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <p>Plot unstructured vertical profile</p>
-<section id="parameters-1" class="level4">
-<h4 class="anchored" data-anchor-id="parameters-1">Parameters</h4>
+<section id="parameters-1" class="level4 doc-section doc-section-parameters">
+<h4 class="doc-section doc-section-parameters anchored" data-anchor-id="parameters-1">Parameters</h4>
 <table class="caption-top table">
 <colgroup>
-<col style="width: 10%">
-<col style="width: 23%">
-<col style="width: 54%">
+<col style="width: 8%">
+<col style="width: 24%">
+<col style="width: 55%">
 <col style="width: 11%">
 </colgroup>
 <thead>
@@ -465,49 +506,49 @@ ul.task-list li input[type="checkbox"] {
 </thead>
 <tbody>
 <tr class="odd">
-<td><code>values</code></td>
+<td>values</td>
 <td>np.ndarray | DataArray</td>
 <td>value for each element to plot</td>
 <td><em>required</em></td>
 </tr>
 <tr class="even">
-<td><code>cmin</code></td>
+<td>cmin</td>
 <td>float | None</td>
 <td>lower bound of values to be shown on plot, default:None</td>
 <td><code>None</code></td>
 </tr>
 <tr class="odd">
-<td><code>cmax</code></td>
+<td>cmax</td>
 <td>float | None</td>
 <td>upper bound of values to be shown on plot, default:None</td>
 <td><code>None</code></td>
 </tr>
 <tr class="even">
-<td><code>title</code></td>
+<td>title</td>
 <td></td>
 <td>axes title</td>
 <td><em>required</em></td>
 </tr>
 <tr class="odd">
-<td><code>label</code></td>
+<td>label</td>
 <td>str</td>
 <td>colorbar label</td>
 <td><code>''</code></td>
 </tr>
 <tr class="even">
-<td><code>cmap</code></td>
+<td>cmap</td>
 <td></td>
 <td>colormap, default viridis</td>
 <td><em>required</em></td>
 </tr>
 <tr class="odd">
-<td><code>figsize</code></td>
+<td>figsize</td>
 <td></td>
 <td>specify size of figure</td>
 <td><em>required</em></td>
 </tr>
 <tr class="even">
-<td><code>ax</code></td>
+<td>ax</td>
 <td></td>
 <td>Adding to existing axis, instead of creating new fig</td>
 <td><em>required</em></td>
@@ -515,17 +556,19 @@ ul.task-list li input[type="checkbox"] {
 </tbody>
 </table>
 </section>
-<section id="returns" class="level4">
-<h4 class="anchored" data-anchor-id="returns">Returns</h4>
+<section id="returns" class="level4 doc-section doc-section-returns">
+<h4 class="doc-section doc-section-returns anchored" data-anchor-id="returns">Returns</h4>
 <table class="caption-top table">
 <thead>
 <tr class="header">
+<th>Name</th>
 <th>Type</th>
 <th>Description</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
+<td></td>
 <td>&lt;matplotlib.axes&gt;</td>
 <td></td>
 </tr>
@@ -535,15 +578,28 @@ ul.task-list li input[type="checkbox"] {
 </section>
 <section id="mikeio.dfsu.Dfsu2DV.read" class="level3">
 <h3 class="anchored" data-anchor-id="mikeio.dfsu.Dfsu2DV.read">read</h3>
-<p><code>dfsu.Dfsu2DV.read(items=None, time=None, elements=None, area=None, x=None, y=None, z=None, layers=None, keepdims=False, dtype=np.float32, error_bad_data=True, fill_bad_data_value=np.nan)</code></p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>dfsu.Dfsu2DV.read(</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>    items<span class="op">=</span><span class="va">None</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>    time<span class="op">=</span><span class="va">None</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>    elements<span class="op">=</span><span class="va">None</span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>    area<span class="op">=</span><span class="va">None</span></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>    x<span class="op">=</span><span class="va">None</span></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>    y<span class="op">=</span><span class="va">None</span></span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>    z<span class="op">=</span><span class="va">None</span></span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>    layers<span class="op">=</span><span class="va">None</span></span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>    keepdims<span class="op">=</span><span class="va">False</span></span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>    dtype<span class="op">=</span>np.float32</span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a>    error_bad_data<span class="op">=</span><span class="va">True</span></span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a>    fill_bad_data_value<span class="op">=</span>np.nan</span>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <p>Read data from a dfsu file</p>
-<section id="parameters-2" class="level4">
-<h4 class="anchored" data-anchor-id="parameters-2">Parameters</h4>
+<section id="parameters-2" class="level4 doc-section doc-section-parameters">
+<h4 class="doc-section doc-section-parameters anchored" data-anchor-id="parameters-2">Parameters</h4>
 <table class="caption-top table">
 <colgroup>
-<col style="width: 9%">
+<col style="width: 8%">
 <col style="width: 19%">
-<col style="width: 66%">
+<col style="width: 67%">
 <col style="width: 4%">
 </colgroup>
 <thead>
@@ -556,67 +612,67 @@ ul.task-list li input[type="checkbox"] {
 </thead>
 <tbody>
 <tr class="odd">
-<td><code>items</code></td>
+<td>items</td>
 <td>str | int | Sequence[str | int] | None</td>
 <td>Read only selected items, by number (0-based), or by name</td>
 <td><code>None</code></td>
 </tr>
 <tr class="even">
-<td><code>time</code></td>
+<td>time</td>
 <td>int | str | slice | None</td>
 <td>Read only selected time steps, by default None (=all)</td>
 <td><code>None</code></td>
 </tr>
 <tr class="odd">
-<td><code>keepdims</code></td>
+<td>keepdims</td>
 <td>bool</td>
 <td>When reading a single time step only, should the time-dimension be kept in the returned Dataset? by default: False</td>
 <td><code>False</code></td>
 </tr>
 <tr class="even">
-<td><code>area</code></td>
+<td>area</td>
 <td>tuple[float, float, float, float] | None</td>
 <td>Read only data inside (horizontal) area given as a bounding box (tuple with left, lower, right, upper) or as list of coordinates for a polygon, by default None</td>
 <td><code>None</code></td>
 </tr>
 <tr class="odd">
-<td><code>x</code></td>
+<td>x</td>
 <td>float | None</td>
 <td>Read only data for elements containing the (x,y,z) points(s)</td>
 <td><code>None</code></td>
 </tr>
 <tr class="even">
-<td><code>y</code></td>
+<td>y</td>
 <td>float | None</td>
 <td>Read only data for elements containing the (x,y,z) points(s)</td>
 <td><code>None</code></td>
 </tr>
 <tr class="odd">
-<td><code>z</code></td>
+<td>z</td>
 <td>float | None</td>
 <td>Read only data for elements containing the (x,y,z) points(s)</td>
 <td><code>None</code></td>
 </tr>
 <tr class="even">
-<td><code>layers</code></td>
+<td>layers</td>
 <td>int | Layer | Sequence[int] | None</td>
 <td>Read only data for specific layers, by default None</td>
 <td><code>None</code></td>
 </tr>
 <tr class="odd">
-<td><code>elements</code></td>
+<td>elements</td>
 <td>Sequence[int] | None</td>
 <td>Read only selected element ids, by default None</td>
 <td><code>None</code></td>
 </tr>
 <tr class="even">
-<td><code>error_bad_data</code></td>
+<td>error_bad_data</td>
 <td>bool</td>
 <td>raise error if data is corrupt, by default True,</td>
 <td><code>True</code></td>
 </tr>
 <tr class="odd">
-<td><code>fill_bad_data_value</code></td>
+<td>fill_bad_data_value</td>
 <td>float</td>
 <td>fill value for to impute corrupt data, used in conjunction with error_bad_data=False default np.nan</td>
 <td><code>np.nan</code></td>
@@ -624,17 +680,19 @@ ul.task-list li input[type="checkbox"] {
 </tbody>
 </table>
 </section>
-<section id="returns-1" class="level4">
-<h4 class="anchored" data-anchor-id="returns-1">Returns</h4>
+<section id="returns-1" class="level4 doc-section doc-section-returns">
+<h4 class="doc-section doc-section-returns anchored" data-anchor-id="returns-1">Returns</h4>
 <table class="caption-top table">
 <thead>
 <tr class="header">
+<th>Name</th>
 <th>Type</th>
 <th>Description</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
+<td></td>
 <td>Dataset</td>
 <td>A Dataset with data dimensions [t,elements]</td>
 </tr>

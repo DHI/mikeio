@@ -342,7 +342,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <li><a href="#mikeio.open" id="toc-mikeio.open" class="nav-link active" data-scroll-target="#mikeio.open">open</a>
   <ul class="collapse">
   <li><a href="#parameters" id="toc-parameters" class="nav-link" data-scroll-target="#parameters">Parameters</a></li>
-  <li><a href="#see-also" id="toc-see-also" class="nav-link" data-scroll-target="#see-also">See Also</a></li>
+  <li><a href="#see-also" id="toc-see-also" class="nav-link" data-scroll-target="#see-also">See also</a></li>
   <li><a href="#examples" id="toc-examples" class="nav-link" data-scroll-target="#examples">Examples</a></li>
   </ul></li>
   </ul>
@@ -356,16 +356,16 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 <section id="mikeio.open" class="level1">
 <h1>open</h1>
-<p><code>open(filename, **kwargs)</code></p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="bu">open</span>(filename, <span class="op">**</span>kwargs)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <p>Open a dfs/mesh file (and read the header)</p>
 <p>The typical workflow for small dfs files is to read all data with <em>mikeio.read</em> instead of using this function. For big files, however, it can be convenient to open the file first with <em>dfs=mikeio.open(…)</em> to inspect it’s content (items, time and shape) and then decide what to read using dfs.read(…)</p>
-<section id="parameters" class="level2">
-<h2 class="anchored" data-anchor-id="parameters">Parameters</h2>
+<section id="parameters" class="level2 doc-section doc-section-parameters">
+<h2 class="doc-section doc-section-parameters anchored" data-anchor-id="parameters">Parameters</h2>
 <table class="caption-top table">
 <colgroup>
+<col style="width: 6%">
 <col style="width: 8%">
-<col style="width: 8%">
-<col style="width: 74%">
+<col style="width: 76%">
 <col style="width: 8%">
 </colgroup>
 <thead>
@@ -378,30 +378,30 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </thead>
 <tbody>
 <tr class="odd">
-<td><code>filename</code></td>
+<td>filename</td>
 <td>str | Path</td>
 <td>full path and file name to the dfs file.</td>
 <td><em>required</em></td>
 </tr>
 <tr class="even">
-<td><code>type</code></td>
+<td>type</td>
 <td>str</td>
-<td>Dfs2 only. Additional information about the file, e.g.&nbsp;“spectral” for spectral dfs2 files. By default: None.</td>
+<td>Dfs2 only. Additional information about the file, e.g.&nbsp;"spectral" for spectral dfs2 files. By default: None.</td>
 <td><em>required</em></td>
 </tr>
 </tbody>
 </table>
 </section>
-<section id="see-also" class="level2">
-<h2 class="anchored" data-anchor-id="see-also">See Also</h2>
+<section id="see-also" class="level2 doc-section doc-section-see-also">
+<h2 class="doc-section doc-section-see-also anchored" data-anchor-id="see-also">See also</h2>
 <p>mikeio.read - read data from a dfs file</p>
 </section>
-<section id="examples" class="level2">
-<h2 class="anchored" data-anchor-id="examples">Examples</h2>
-<div class="sourceCode" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> dfs <span class="op">=</span> mikeio.<span class="bu">open</span>(<span class="st">"wl.dfs1"</span>)</span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> dfs <span class="op">=</span> mikeio.<span class="bu">open</span>(<span class="st">"HD2D.dfsu"</span>)</span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> ds <span class="op">=</span> dfs.read(items<span class="op">=</span><span class="st">"Salinity"</span>, time<span class="op">=</span><span class="st">"2016-01"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="sourceCode" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> dfs <span class="op">=</span> mikeio.<span class="bu">open</span>(<span class="st">"pt_spectra.dfs2"</span>, <span class="bu">type</span><span class="op">=</span><span class="st">"spectral"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<section id="examples" class="level2 doc-section doc-section-examples">
+<h2 class="doc-section doc-section-examples anchored" data-anchor-id="examples">Examples</h2>
+<div class="sourceCode" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> dfs <span class="op">=</span> mikeio.<span class="bu">open</span>(<span class="st">"wl.dfs1"</span>)</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> dfs <span class="op">=</span> mikeio.<span class="bu">open</span>(<span class="st">"HD2D.dfsu"</span>)</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> ds <span class="op">=</span> dfs.read(items<span class="op">=</span><span class="st">"Salinity"</span>, time<span class="op">=</span><span class="st">"2016-01"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> dfs <span class="op">=</span> mikeio.<span class="bu">open</span>(<span class="st">"pt_spectra.dfs2"</span>, <span class="bu">type</span><span class="op">=</span><span class="st">"spectral"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 
 
 </section>

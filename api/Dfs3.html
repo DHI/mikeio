@@ -20,6 +20,40 @@ ul.task-list li input[type="checkbox"] {
   margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
 }
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
 </style>
 
 
@@ -325,7 +359,7 @@ ul.task-list li input[type="checkbox"] {
 
 <section id="mikeio.Dfs3" class="level1">
 <h1>Dfs3</h1>
-<p><code>Dfs3(self, filename)</code></p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>Dfs3(<span class="va">self</span>, filename)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <section id="attributes" class="level2">
 <h2 class="anchored" data-anchor-id="attributes">Attributes</h2>
 <table class="caption-top table">
@@ -421,15 +455,15 @@ ul.task-list li input[type="checkbox"] {
 </table>
 <section id="mikeio.Dfs3.append" class="level3">
 <h3 class="anchored" data-anchor-id="mikeio.Dfs3.append">append</h3>
-<p><code>Dfs3.append(ds, validate=True)</code></p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>Dfs3.append(ds, validate<span class="op">=</span><span class="va">True</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <p>Append a Dataset to an existing dfs3 file</p>
-<section id="parameters" class="level4">
-<h4 class="anchored" data-anchor-id="parameters">Parameters</h4>
+<section id="parameters" class="level4 doc-section doc-section-parameters">
+<h4 class="doc-section doc-section-parameters anchored" data-anchor-id="parameters">Parameters</h4>
 <table class="caption-top table">
 <colgroup>
-<col style="width: 9%">
+<col style="width: 8%">
 <col style="width: 7%">
-<col style="width: 73%">
+<col style="width: 74%">
 <col style="width: 9%">
 </colgroup>
 <thead>
@@ -442,13 +476,13 @@ ul.task-list li input[type="checkbox"] {
 </thead>
 <tbody>
 <tr class="odd">
-<td><code>ds</code></td>
+<td>ds</td>
 <td>Dataset</td>
 <td>Dataset to append</td>
 <td><em>required</em></td>
 </tr>
 <tr class="even">
-<td><code>validate</code></td>
+<td>validate</td>
 <td>bool</td>
 <td>Validate that the dataset to append has the same geometry and items as the original file</td>
 <td><code>True</code></td>
@@ -456,22 +490,29 @@ ul.task-list li input[type="checkbox"] {
 </tbody>
 </table>
 </section>
-<section id="notes" class="level4">
-<h4 class="anchored" data-anchor-id="notes">Notes</h4>
+<section id="notes" class="level4 doc-section doc-section-notes">
+<h4 class="doc-section doc-section-notes anchored" data-anchor-id="notes">Notes</h4>
 <p>The original file is modified.</p>
 </section>
 </section>
 <section id="mikeio.Dfs3.read" class="level3">
 <h3 class="anchored" data-anchor-id="mikeio.Dfs3.read">read</h3>
-<p><code>Dfs3.read(items=None, time=None, area=None, layers=None, keepdims=False, dtype=np.float32)</code></p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>Dfs3.read(</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>    items<span class="op">=</span><span class="va">None</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>    time<span class="op">=</span><span class="va">None</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>    area<span class="op">=</span><span class="va">None</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>    layers<span class="op">=</span><span class="va">None</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>    keepdims<span class="op">=</span><span class="va">False</span></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>    dtype<span class="op">=</span>np.float32</span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <p>Read data from a dfs3 file</p>
-<section id="parameters-1" class="level4">
-<h4 class="anchored" data-anchor-id="parameters-1">Parameters</h4>
+<section id="parameters-1" class="level4 doc-section doc-section-parameters">
+<h4 class="doc-section doc-section-parameters anchored" data-anchor-id="parameters-1">Parameters</h4>
 <table class="caption-top table">
 <colgroup>
-<col style="width: 5%">
-<col style="width: 21%">
-<col style="width: 65%">
+<col style="width: 4%">
+<col style="width: 22%">
+<col style="width: 66%">
 <col style="width: 6%">
 </colgroup>
 <thead>
@@ -484,31 +525,31 @@ ul.task-list li input[type="checkbox"] {
 </thead>
 <tbody>
 <tr class="odd">
-<td><code>items</code></td>
+<td>items</td>
 <td>str | int | Sequence[str | int] | None</td>
 <td>Read only selected items, by number (0-based), or by name</td>
 <td><code>None</code></td>
 </tr>
 <tr class="even">
-<td><code>time</code></td>
+<td>time</td>
 <td>int | str | slice | None</td>
 <td>Read only selected time steps, by default None (=all)</td>
 <td><code>None</code></td>
 </tr>
 <tr class="odd">
-<td><code>keepdims</code></td>
+<td>keepdims</td>
 <td>bool</td>
 <td>When reading a single time step or a single layer only, should the singleton dimension be kept in the returned Dataset? by default: False</td>
 <td><code>False</code></td>
 </tr>
 <tr class="even">
-<td><code>layers</code></td>
+<td>layers</td>
 <td>str | int | Sequence[int] | None</td>
 <td>Read only data for specific layers, by default None</td>
 <td><code>None</code></td>
 </tr>
 <tr class="odd">
-<td><code>dtype</code></td>
+<td>dtype</td>
 <td>Any</td>
 <td>Define the dtype of the returned dataset (default = np.float32)</td>
 <td><code>np.float32</code></td>
@@ -516,17 +557,19 @@ ul.task-list li input[type="checkbox"] {
 </tbody>
 </table>
 </section>
-<section id="returns" class="level4">
-<h4 class="anchored" data-anchor-id="returns">Returns</h4>
+<section id="returns" class="level4 doc-section doc-section-returns">
+<h4 class="doc-section doc-section-returns anchored" data-anchor-id="returns">Returns</h4>
 <table class="caption-top table">
 <thead>
 <tr class="header">
+<th>Name</th>
 <th>Type</th>
 <th>Description</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
+<td></td>
 <td>Dataset</td>
 <td></td>
 </tr>

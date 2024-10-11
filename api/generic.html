@@ -411,15 +411,15 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </table>
 <section id="mikeio.generic.avg_time" class="level3">
 <h3 class="anchored" data-anchor-id="mikeio.generic.avg_time">avg_time</h3>
-<p><code>generic.avg_time(infilename, outfilename, skipna=True)</code></p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>generic.avg_time(infilename, outfilename, skipna<span class="op">=</span><span class="va">True</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <p>Create a temporally averaged dfs file</p>
-<section id="parameters" class="level4">
-<h4 class="anchored" data-anchor-id="parameters">Parameters</h4>
+<section id="parameters" class="level4 doc-section doc-section-parameters">
+<h4 class="doc-section doc-section-parameters anchored" data-anchor-id="parameters">Parameters</h4>
 <table class="caption-top table">
 <colgroup>
-<col style="width: 13%">
+<col style="width: 11%">
 <col style="width: 18%">
-<col style="width: 58%">
+<col style="width: 59%">
 <col style="width: 10%">
 </colgroup>
 <thead>
@@ -432,19 +432,19 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </thead>
 <tbody>
 <tr class="odd">
-<td><code>infilename</code></td>
+<td>infilename</td>
 <td>str | pathlib.Path</td>
 <td>input filename</td>
 <td><em>required</em></td>
 </tr>
 <tr class="even">
-<td><code>outfilename</code></td>
+<td>outfilename</td>
 <td>str | pathlib.Path</td>
 <td>output filename</td>
 <td><em>required</em></td>
 </tr>
 <tr class="odd">
-<td><code>skipna</code></td>
+<td>skipna</td>
 <td>bool</td>
 <td>exclude NaN/delete values when computing the result, default True</td>
 <td><code>True</code></td>
@@ -455,16 +455,16 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </section>
 <section id="mikeio.generic.concat" class="level3">
 <h3 class="anchored" data-anchor-id="mikeio.generic.concat">concat</h3>
-<p><code>generic.concat(infilenames, outfilename, keep='last')</code></p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>generic.concat(infilenames, outfilename, keep<span class="op">=</span><span class="st">'last'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <p>Concatenates files along the time axis</p>
 <p>Overlap handling is defined by the <code>keep</code> argument, by default the last one will be used.</p>
-<section id="parameters-1" class="level4">
-<h4 class="anchored" data-anchor-id="parameters-1">Parameters</h4>
+<section id="parameters-1" class="level4 doc-section doc-section-parameters">
+<h4 class="doc-section doc-section-parameters anchored" data-anchor-id="parameters-1">Parameters</h4>
 <table class="caption-top table">
 <colgroup>
-<col style="width: 9%">
+<col style="width: 7%">
 <col style="width: 20%">
-<col style="width: 62%">
+<col style="width: 64%">
 <col style="width: 7%">
 </colgroup>
 <thead>
@@ -477,42 +477,42 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </thead>
 <tbody>
 <tr class="odd">
-<td><code>infilenames</code></td>
+<td>infilenames</td>
 <td>Sequence[str | pathlib.Path]</td>
 <td>filenames to concatenate</td>
 <td><em>required</em></td>
 </tr>
 <tr class="even">
-<td><code>outfilename</code></td>
+<td>outfilename</td>
 <td>str | pathlib.Path</td>
 <td>filename of output</td>
 <td><em>required</em></td>
 </tr>
 <tr class="odd">
-<td><code>keep</code></td>
+<td>keep</td>
 <td>str</td>
-<td>either ‘first’ (keep older), ‘last’ (keep newer) or ‘average’ can be selected. By default ‘last’</td>
+<td>either 'first' (keep older), 'last' (keep newer) or 'average' can be selected. By default 'last'</td>
 <td><code>'last'</code></td>
 </tr>
 </tbody>
 </table>
 </section>
-<section id="notes" class="level4">
-<h4 class="anchored" data-anchor-id="notes">Notes</h4>
+<section id="notes" class="level4 doc-section doc-section-notes">
+<h4 class="doc-section doc-section-notes anchored" data-anchor-id="notes">Notes</h4>
 <p>The list of input files have to be sorted, i.e.&nbsp;in chronological order</p>
 </section>
 </section>
 <section id="mikeio.generic.diff" class="level3">
 <h3 class="anchored" data-anchor-id="mikeio.generic.diff">diff</h3>
-<p><code>generic.diff(infilename_a, infilename_b, outfilename)</code></p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>generic.diff(infilename_a, infilename_b, outfilename)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <p>Calculate difference between two dfs files (a-b)</p>
-<section id="parameters-2" class="level4">
-<h4 class="anchored" data-anchor-id="parameters-2">Parameters</h4>
+<section id="parameters-2" class="level4 doc-section doc-section-parameters">
+<h4 class="doc-section doc-section-parameters anchored" data-anchor-id="parameters-2">Parameters</h4>
 <table class="caption-top table">
 <colgroup>
-<col style="width: 18%">
-<col style="width: 24%">
-<col style="width: 42%">
+<col style="width: 16%">
+<col style="width: 25%">
+<col style="width: 43%">
 <col style="width: 14%">
 </colgroup>
 <thead>
@@ -525,19 +525,19 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </thead>
 <tbody>
 <tr class="odd">
-<td><code>infilename_a</code></td>
+<td>infilename_a</td>
 <td>str | pathlib.Path</td>
 <td>full path to the first input file</td>
 <td><em>required</em></td>
 </tr>
 <tr class="even">
-<td><code>infilename_b</code></td>
+<td>infilename_b</td>
 <td>str | pathlib.Path</td>
 <td>full path to the second input file</td>
 <td><em>required</em></td>
 </tr>
 <tr class="odd">
-<td><code>outfilename</code></td>
+<td>outfilename</td>
 <td>str | pathlib.Path</td>
 <td>full path to the output file</td>
 <td><em>required</em></td>
@@ -548,13 +548,13 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </section>
 <section id="mikeio.generic.extract" class="level3">
 <h3 class="anchored" data-anchor-id="mikeio.generic.extract">extract</h3>
-<p><code>generic.extract(infilename, outfilename, start=0, end=-1, step=1, items=None)</code></p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>generic.extract(infilename, outfilename, start<span class="op">=</span><span class="dv">0</span>, end<span class="op">=-</span><span class="dv">1</span>, step<span class="op">=</span><span class="dv">1</span>, items<span class="op">=</span><span class="va">None</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <p>Extract timesteps and/or items to a new dfs file</p>
-<section id="parameters-3" class="level4">
-<h4 class="anchored" data-anchor-id="parameters-3">Parameters</h4>
+<section id="parameters-3" class="level4 doc-section doc-section-parameters">
+<h4 class="doc-section doc-section-parameters anchored" data-anchor-id="parameters-3">Parameters</h4>
 <table class="caption-top table">
 <colgroup>
-<col style="width: 9%">
+<col style="width: 8%">
 <col style="width: 21%">
 <col style="width: 62%">
 <col style="width: 7%">
@@ -569,37 +569,37 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </thead>
 <tbody>
 <tr class="odd">
-<td><code>infilename</code></td>
+<td>infilename</td>
 <td>str | pathlib.Path</td>
 <td>path to input dfs file</td>
 <td><em>required</em></td>
 </tr>
 <tr class="even">
-<td><code>outfilename</code></td>
+<td>outfilename</td>
 <td>str | pathlib.Path</td>
 <td>path to output dfs file</td>
 <td><em>required</em></td>
 </tr>
 <tr class="odd">
-<td><code>start</code></td>
+<td>start</td>
 <td>(int, float, str or datetime)</td>
 <td>start of extraction as either step, relative seconds or datetime/str, by default 0 (start of file)</td>
 <td><code>0</code></td>
 </tr>
 <tr class="even">
-<td><code>end</code></td>
+<td>end</td>
 <td>(int, float, str or datetime)</td>
 <td>end of extraction as either step, relative seconds or datetime/str, by default -1 (end of file)</td>
 <td><code>-1</code></td>
 </tr>
 <tr class="odd">
-<td><code>step</code></td>
+<td>step</td>
 <td>int</td>
 <td>jump this many step, by default 1 (every step between start and end)</td>
 <td><code>1</code></td>
 </tr>
 <tr class="even">
-<td><code>items</code></td>
+<td>items</td>
 <td>(int, list(int), str, list(str))</td>
 <td>items to be extracted to new file</td>
 <td><code>None</code></td>
@@ -607,29 +607,29 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </tbody>
 </table>
 </section>
-<section id="examples" class="level4">
-<h4 class="anchored" data-anchor-id="examples">Examples</h4>
-<div class="sourceCode" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> extract(<span class="st">'f_in.dfs0'</span>, <span class="st">'f_out.dfs0'</span>, start<span class="op">=</span><span class="st">'2018-1-1'</span>)</span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> extract(<span class="st">'f_in.dfs2'</span>, <span class="st">'f_out.dfs2'</span>, end<span class="op">=-</span><span class="dv">3</span>)</span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> extract(<span class="st">'f_in.dfsu'</span>, <span class="st">'f_out.dfsu'</span>, start<span class="op">=</span><span class="fl">1800.0</span>, end<span class="op">=</span><span class="fl">3600.0</span>)</span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> extract(<span class="st">'f_hourly.dfsu'</span>, <span class="st">'f_daily.dfsu'</span>, step<span class="op">=</span><span class="dv">24</span>)</span>
-<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> extract(<span class="st">'f_in.dfsu'</span>, <span class="st">'f_out.dfsu'</span>, items<span class="op">=</span>[<span class="dv">2</span>, <span class="dv">0</span>])</span>
-<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> extract(<span class="st">'f_in.dfsu'</span>, <span class="st">'f_out.dfsu'</span>, items<span class="op">=</span><span class="st">"Salinity"</span>)</span>
-<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> extract(<span class="st">'f_in.dfsu'</span>, <span class="st">'f_out.dfsu'</span>, end<span class="op">=</span><span class="st">'2018-2-1 00:00'</span>, items<span class="op">=</span><span class="st">"Salinity"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<section id="examples" class="level4 doc-section doc-section-examples">
+<h4 class="doc-section doc-section-examples anchored" data-anchor-id="examples">Examples</h4>
+<div class="sourceCode" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> extract(<span class="st">'f_in.dfs0'</span>, <span class="st">'f_out.dfs0'</span>, start<span class="op">=</span><span class="st">'2018-1-1'</span>)</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> extract(<span class="st">'f_in.dfs2'</span>, <span class="st">'f_out.dfs2'</span>, end<span class="op">=-</span><span class="dv">3</span>)</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> extract(<span class="st">'f_in.dfsu'</span>, <span class="st">'f_out.dfsu'</span>, start<span class="op">=</span><span class="fl">1800.0</span>, end<span class="op">=</span><span class="fl">3600.0</span>)</span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> extract(<span class="st">'f_hourly.dfsu'</span>, <span class="st">'f_daily.dfsu'</span>, step<span class="op">=</span><span class="dv">24</span>)</span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> extract(<span class="st">'f_in.dfsu'</span>, <span class="st">'f_out.dfsu'</span>, items<span class="op">=</span>[<span class="dv">2</span>, <span class="dv">0</span>])</span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> extract(<span class="st">'f_in.dfsu'</span>, <span class="st">'f_out.dfsu'</span>, items<span class="op">=</span><span class="st">"Salinity"</span>)</span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> extract(<span class="st">'f_in.dfsu'</span>, <span class="st">'f_out.dfsu'</span>, end<span class="op">=</span><span class="st">'2018-2-1 00:00'</span>, items<span class="op">=</span><span class="st">"Salinity"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </section>
 </section>
 <section id="mikeio.generic.fill_corrupt" class="level3">
 <h3 class="anchored" data-anchor-id="mikeio.generic.fill_corrupt">fill_corrupt</h3>
-<p><code>generic.fill_corrupt(infilename, outfilename, fill_value=np.nan, items=None)</code></p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>generic.fill_corrupt(infilename, outfilename, fill_value<span class="op">=</span>np.nan, items<span class="op">=</span><span class="va">None</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <p>Replace corrupt (unreadable) data with fill_value, default delete value.</p>
-<section id="parameters-4" class="level4">
-<h4 class="anchored" data-anchor-id="parameters-4">Parameters</h4>
+<section id="parameters-4" class="level4 doc-section doc-section-parameters">
+<h4 class="doc-section doc-section-parameters anchored" data-anchor-id="parameters-4">Parameters</h4>
 <table class="caption-top table">
 <colgroup>
-<col style="width: 11%">
-<col style="width: 23%">
-<col style="width: 55%">
-<col style="width: 8%">
+<col style="width: 9%">
+<col style="width: 24%">
+<col style="width: 56%">
+<col style="width: 9%">
 </colgroup>
 <thead>
 <tr class="header">
@@ -641,25 +641,25 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </thead>
 <tbody>
 <tr class="odd">
-<td><code>infilename</code></td>
+<td>infilename</td>
 <td>str | pathlib.Path</td>
 <td>full path to the input file</td>
 <td><em>required</em></td>
 </tr>
 <tr class="even">
-<td><code>outfilename</code></td>
+<td>outfilename</td>
 <td>str | pathlib.Path</td>
 <td>full path to the output file</td>
 <td><em>required</em></td>
 </tr>
 <tr class="odd">
-<td><code>fill_value</code></td>
+<td>fill_value</td>
 <td>float</td>
 <td>value to use where data is corrupt, default delete value</td>
 <td><code>np.nan</code></td>
 </tr>
 <tr class="even">
-<td><code>items</code></td>
+<td>items</td>
 <td>Sequence[str | int] | None</td>
 <td>Process only selected items, by number (0-based) or name, by default: all</td>
 <td><code>None</code></td>
@@ -670,15 +670,23 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </section>
 <section id="mikeio.generic.quantile" class="level3">
 <h3 class="anchored" data-anchor-id="mikeio.generic.quantile">quantile</h3>
-<p><code>generic.quantile(infilename, outfilename, q, *, items=None, skipna=True, buffer_size=1000000000.0)</code></p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>generic.quantile(</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>    infilename</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>    outfilename</span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>    q</span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>    <span class="op">*</span></span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>    items<span class="op">=</span><span class="va">None</span></span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>    skipna<span class="op">=</span><span class="va">True</span></span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>    buffer_size<span class="op">=</span><span class="fl">1000000000.0</span></span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <p>Create temporal quantiles of all items in dfs file</p>
-<section id="parameters-5" class="level4">
-<h4 class="anchored" data-anchor-id="parameters-5">Parameters</h4>
+<section id="parameters-5" class="level4 doc-section doc-section-parameters">
+<h4 class="doc-section doc-section-parameters anchored" data-anchor-id="parameters-5">Parameters</h4>
 <table class="caption-top table">
 <colgroup>
-<col style="width: 6%">
-<col style="width: 12%">
-<col style="width: 74%">
+<col style="width: 5%">
+<col style="width: 13%">
+<col style="width: 75%">
 <col style="width: 6%">
 </colgroup>
 <thead>
@@ -691,37 +699,37 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </thead>
 <tbody>
 <tr class="odd">
-<td><code>infilename</code></td>
+<td>infilename</td>
 <td>str | pathlib.Path</td>
 <td>input filename</td>
 <td><em>required</em></td>
 </tr>
 <tr class="even">
-<td><code>outfilename</code></td>
+<td>outfilename</td>
 <td>str | pathlib.Path</td>
 <td>output filename</td>
 <td><em>required</em></td>
 </tr>
 <tr class="odd">
-<td><code>q</code></td>
+<td>q</td>
 <td>float | Sequence[float]</td>
 <td>Quantile or sequence of quantiles to compute, which must be between 0 and 1 inclusive.</td>
 <td><em>required</em></td>
 </tr>
 <tr class="even">
-<td><code>items</code></td>
+<td>items</td>
 <td>Sequence[int | str] | None</td>
 <td>Process only selected items, by number (0-based) or name, by default: all</td>
 <td><code>None</code></td>
 </tr>
 <tr class="odd">
-<td><code>skipna</code></td>
+<td>skipna</td>
 <td>bool</td>
 <td>exclude NaN/delete values when computing the result, default True</td>
 <td><code>True</code></td>
 </tr>
 <tr class="even">
-<td><code>buffer_size</code></td>
+<td>buffer_size</td>
 <td>float</td>
 <td>for huge files the quantiles need to be calculated for chunks of elements. buffer_size gives the maximum amount of memory available for the computation in bytes, by default 1e9 (=1GB)</td>
 <td><code>1000000000.0</code></td>
@@ -729,25 +737,25 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </tbody>
 </table>
 </section>
-<section id="examples-1" class="level4">
-<h4 class="anchored" data-anchor-id="examples-1">Examples</h4>
-<div class="sourceCode" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> quantile(<span class="st">"in.dfsu"</span>, <span class="st">"IQR.dfsu"</span>, q<span class="op">=</span>[<span class="fl">0.25</span>,<span class="fl">0.75</span>])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="sourceCode" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> quantile(<span class="st">"huge.dfsu"</span>, <span class="st">"Q01.dfsu"</span>, q<span class="op">=</span><span class="fl">0.1</span>, buffer_size<span class="op">=</span><span class="fl">5.0e9</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="sourceCode" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> quantile(<span class="st">"with_nans.dfsu"</span>, <span class="st">"Q05.dfsu"</span>, q<span class="op">=</span><span class="fl">0.5</span>, skipna<span class="op">=</span><span class="va">False</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<section id="examples-1" class="level4 doc-section doc-section-examples">
+<h4 class="doc-section doc-section-examples anchored" data-anchor-id="examples-1">Examples</h4>
+<div class="sourceCode" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> quantile(<span class="st">"in.dfsu"</span>, <span class="st">"IQR.dfsu"</span>, q<span class="op">=</span>[<span class="fl">0.25</span>,<span class="fl">0.75</span>])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> quantile(<span class="st">"huge.dfsu"</span>, <span class="st">"Q01.dfsu"</span>, q<span class="op">=</span><span class="fl">0.1</span>, buffer_size<span class="op">=</span><span class="fl">5.0e9</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> quantile(<span class="st">"with_nans.dfsu"</span>, <span class="st">"Q05.dfsu"</span>, q<span class="op">=</span><span class="fl">0.5</span>, skipna<span class="op">=</span><span class="va">False</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </section>
 </section>
 <section id="mikeio.generic.scale" class="level3">
 <h3 class="anchored" data-anchor-id="mikeio.generic.scale">scale</h3>
-<p><code>generic.scale(infilename, outfilename, offset=0.0, factor=1.0, items=None)</code></p>
+<div class="sourceCode" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>generic.scale(infilename, outfilename, offset<span class="op">=</span><span class="fl">0.0</span>, factor<span class="op">=</span><span class="fl">1.0</span>, items<span class="op">=</span><span class="va">None</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <p>Apply scaling to any dfs file</p>
-<section id="parameters-6" class="level4">
-<h4 class="anchored" data-anchor-id="parameters-6">Parameters</h4>
+<section id="parameters-6" class="level4 doc-section doc-section-parameters">
+<h4 class="doc-section doc-section-parameters anchored" data-anchor-id="parameters-6">Parameters</h4>
 <table class="caption-top table">
 <colgroup>
-<col style="width: 11%">
-<col style="width: 23%">
-<col style="width: 55%">
-<col style="width: 8%">
+<col style="width: 9%">
+<col style="width: 24%">
+<col style="width: 56%">
+<col style="width: 9%">
 </colgroup>
 <thead>
 <tr class="header">
@@ -759,31 +767,31 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </thead>
 <tbody>
 <tr class="odd">
-<td><code>infilename</code></td>
+<td>infilename</td>
 <td>str | pathlib.Path</td>
 <td>full path to the input file</td>
 <td><em>required</em></td>
 </tr>
 <tr class="even">
-<td><code>outfilename</code></td>
+<td>outfilename</td>
 <td>str | pathlib.Path</td>
 <td>full path to the output file</td>
 <td><em>required</em></td>
 </tr>
 <tr class="odd">
-<td><code>offset</code></td>
+<td>offset</td>
 <td>float</td>
 <td>value to add to all items, default 0.0</td>
 <td><code>0.0</code></td>
 </tr>
 <tr class="even">
-<td><code>factor</code></td>
+<td>factor</td>
 <td>float</td>
 <td>value to multiply to all items, default 1.0</td>
 <td><code>1.0</code></td>
 </tr>
 <tr class="odd">
-<td><code>items</code></td>
+<td>items</td>
 <td>Sequence[int | str] | None</td>
 <td>Process only selected items, by number (0-based) or name, by default: all</td>
 <td><code>None</code></td>
@@ -794,15 +802,15 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </section>
 <section id="mikeio.generic.sum" class="level3">
 <h3 class="anchored" data-anchor-id="mikeio.generic.sum">sum</h3>
-<p><code>generic.sum(infilename_a, infilename_b, outfilename)</code></p>
+<div class="sourceCode" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>generic.<span class="bu">sum</span>(infilename_a, infilename_b, outfilename)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <p>Sum two dfs files (a+b)</p>
-<section id="parameters-7" class="level4">
-<h4 class="anchored" data-anchor-id="parameters-7">Parameters</h4>
+<section id="parameters-7" class="level4 doc-section doc-section-parameters">
+<h4 class="doc-section doc-section-parameters anchored" data-anchor-id="parameters-7">Parameters</h4>
 <table class="caption-top table">
 <colgroup>
-<col style="width: 18%">
-<col style="width: 24%">
-<col style="width: 42%">
+<col style="width: 16%">
+<col style="width: 25%">
+<col style="width: 43%">
 <col style="width: 14%">
 </colgroup>
 <thead>
@@ -815,19 +823,19 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </thead>
 <tbody>
 <tr class="odd">
-<td><code>infilename_a</code></td>
+<td>infilename_a</td>
 <td>str | pathlib.Path</td>
 <td>full path to the first input file</td>
 <td><em>required</em></td>
 </tr>
 <tr class="even">
-<td><code>infilename_b</code></td>
+<td>infilename_b</td>
 <td>str | pathlib.Path</td>
 <td>full path to the second input file</td>
 <td><em>required</em></td>
 </tr>
 <tr class="odd">
-<td><code>outfilename</code></td>
+<td>outfilename</td>
 <td>str | pathlib.Path</td>
 <td>full path to the output file</td>
 <td><em>required</em></td>

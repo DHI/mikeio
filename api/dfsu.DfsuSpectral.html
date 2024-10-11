@@ -359,7 +359,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 <section id="mikeio.dfsu.DfsuSpectral" class="level1">
 <h1>dfsu.DfsuSpectral</h1>
-<p><code>dfsu.DfsuSpectral(self, filename)</code></p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>dfsu.DfsuSpectral(<span class="va">self</span>, filename)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <section id="attributes" class="level2">
 <h2 class="anchored" data-anchor-id="attributes">Attributes</h2>
 <table class="caption-top table">
@@ -443,15 +443,15 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </table>
 <section id="mikeio.dfsu.DfsuSpectral.calc_Hm0_from_spectrum" class="level3">
 <h3 class="anchored" data-anchor-id="mikeio.dfsu.DfsuSpectral.calc_Hm0_from_spectrum">calc_Hm0_from_spectrum</h3>
-<p><code>dfsu.DfsuSpectral.calc_Hm0_from_spectrum(spectrum, tail=True)</code></p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>dfsu.DfsuSpectral.calc_Hm0_from_spectrum(spectrum, tail<span class="op">=</span><span class="va">True</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <p>Calculate significant wave height (Hm0) from spectrum</p>
-<section id="parameters" class="level4">
-<h4 class="anchored" data-anchor-id="parameters">Parameters</h4>
+<section id="parameters" class="level4 doc-section doc-section-parameters">
+<h4 class="doc-section doc-section-parameters anchored" data-anchor-id="parameters">Parameters</h4>
 <table class="caption-top table">
 <colgroup>
-<col style="width: 9%">
+<col style="width: 7%">
 <col style="width: 19%">
-<col style="width: 62%">
+<col style="width: 63%">
 <col style="width: 9%">
 </colgroup>
 <thead>
@@ -464,13 +464,13 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </thead>
 <tbody>
 <tr class="odd">
-<td><code>spectrum</code></td>
+<td>spectrum</td>
 <td>(np.ndarray, DataArray)</td>
 <td>frequency or direction-frequency spectrum</td>
 <td><em>required</em></td>
 </tr>
 <tr class="even">
-<td><code>tail</code></td>
+<td>tail</td>
 <td>bool</td>
 <td>Should a parametric spectral tail be added in the computations? by default True</td>
 <td><code>True</code></td>
@@ -478,17 +478,19 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </tbody>
 </table>
 </section>
-<section id="returns" class="level4">
-<h4 class="anchored" data-anchor-id="returns">Returns</h4>
+<section id="returns" class="level4 doc-section doc-section-returns">
+<h4 class="doc-section doc-section-returns anchored" data-anchor-id="returns">Returns</h4>
 <table class="caption-top table">
 <thead>
 <tr class="header">
+<th>Name</th>
 <th>Type</th>
 <th>Description</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
+<td></td>
 <td>np.ndarray</td>
 <td>significant wave height values</td>
 </tr>
@@ -498,14 +500,24 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </section>
 <section id="mikeio.dfsu.DfsuSpectral.read" class="level3">
 <h3 class="anchored" data-anchor-id="mikeio.dfsu.DfsuSpectral.read">read</h3>
-<p><code>dfsu.DfsuSpectral.read(items=None, time=None, elements=None, nodes=None, area=None, x=None, y=None, keepdims=False, dtype=np.float32)</code></p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>dfsu.DfsuSpectral.read(</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>    items<span class="op">=</span><span class="va">None</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>    time<span class="op">=</span><span class="va">None</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>    elements<span class="op">=</span><span class="va">None</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>    nodes<span class="op">=</span><span class="va">None</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>    area<span class="op">=</span><span class="va">None</span></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>    x<span class="op">=</span><span class="va">None</span></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>    y<span class="op">=</span><span class="va">None</span></span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>    keepdims<span class="op">=</span><span class="va">False</span></span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>    dtype<span class="op">=</span>np.float32</span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <p>Read data from a spectral dfsu file</p>
-<section id="parameters-1" class="level4">
-<h4 class="anchored" data-anchor-id="parameters-1">Parameters</h4>
+<section id="parameters-1" class="level4 doc-section doc-section-parameters">
+<h4 class="doc-section doc-section-parameters anchored" data-anchor-id="parameters-1">Parameters</h4>
 <table class="caption-top table">
 <colgroup>
-<col style="width: 4%">
-<col style="width: 17%">
+<col style="width: 3%">
+<col style="width: 18%">
 <col style="width: 73%">
 <col style="width: 4%">
 </colgroup>
@@ -519,49 +531,49 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </thead>
 <tbody>
 <tr class="odd">
-<td><code>items</code></td>
+<td>items</td>
 <td>str | int | Sequence[str | int] | None</td>
 <td>Read only selected items, by number (0-based), or by name</td>
 <td><code>None</code></td>
 </tr>
 <tr class="even">
-<td><code>time</code></td>
+<td>time</td>
 <td>int | str | slice | None</td>
 <td>Read only selected time steps, by default None (=all)</td>
 <td><code>None</code></td>
 </tr>
 <tr class="odd">
-<td><code>keepdims</code></td>
+<td>keepdims</td>
 <td>bool</td>
 <td>When reading a single time step only, should the time-dimension be kept in the returned Dataset? by default: False</td>
 <td><code>False</code></td>
 </tr>
 <tr class="even">
-<td><code>area</code></td>
+<td>area</td>
 <td>tuple[float, float, float, float] | None</td>
 <td>Read only data inside (horizontal) area (spectral area files only) given as a bounding box (tuple with left, lower, right, upper) or as list of coordinates for a polygon, by default None</td>
 <td><code>None</code></td>
 </tr>
 <tr class="odd">
-<td><code>x</code></td>
+<td>x</td>
 <td>float | None</td>
 <td>Read only data for elements containing the (x,y) points(s), by default None</td>
 <td><code>None</code></td>
 </tr>
 <tr class="even">
-<td><code>y</code></td>
+<td>y</td>
 <td>float | None</td>
 <td>Read only data for elements containing the (x,y) points(s), by default None</td>
 <td><code>None</code></td>
 </tr>
 <tr class="odd">
-<td><code>elements</code></td>
+<td>elements</td>
 <td>Sequence[int] | np.ndarray | None</td>
 <td>Read only selected element ids (spectral area files only)</td>
 <td><code>None</code></td>
 </tr>
 <tr class="even">
-<td><code>nodes</code></td>
+<td>nodes</td>
 <td>Sequence[int] | np.ndarray | None</td>
 <td>Read only selected node ids (spectral line files only)</td>
 <td><code>None</code></td>
@@ -569,43 +581,46 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </tbody>
 </table>
 </section>
-<section id="returns-1" class="level4">
-<h4 class="anchored" data-anchor-id="returns-1">Returns</h4>
+<section id="returns-1" class="level4 doc-section doc-section-returns">
+<h4 class="doc-section doc-section-returns anchored" data-anchor-id="returns-1">Returns</h4>
 <table class="caption-top table">
 <colgroup>
-<col style="width: 11%">
-<col style="width: 88%">
+<col style="width: 9%">
+<col style="width: 10%">
+<col style="width: 80%">
 </colgroup>
 <thead>
 <tr class="header">
+<th>Name</th>
 <th>Type</th>
 <th>Description</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
+<td></td>
 <td>Dataset</td>
 <td>A Dataset with dimensions [t,elements/nodes,frequencies,directions]</td>
 </tr>
 </tbody>
 </table>
 </section>
-<section id="examples" class="level4">
-<h4 class="anchored" data-anchor-id="examples">Examples</h4>
-<div class="sourceCode" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> mikeio.read(<span class="st">"tests/testdata/spectra/line_spectra.dfsu"</span>)</span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="op">&lt;</span>mikeio.Dataset<span class="op">&gt;</span></span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>dims: (time:<span class="dv">4</span>, node:<span class="dv">10</span>, direction:<span class="dv">16</span>, frequency:<span class="dv">25</span>)</span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>time: <span class="dv">2017</span><span class="op">-</span><span class="dv">10</span><span class="op">-</span><span class="dv">27</span> <span class="dv">00</span>:<span class="dv">00</span>:<span class="dv">00</span> <span class="op">-</span> <span class="dv">2017</span><span class="op">-</span><span class="dv">10</span><span class="op">-</span><span class="dv">27</span> <span class="dv">0</span><span class="er">5</span>:<span class="dv">00</span>:<span class="dv">00</span> (<span class="dv">4</span> records)</span>
-<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>geometry: DfsuSpectral1D (<span class="dv">9</span> elements, <span class="dv">10</span> nodes)</span>
-<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>items:</span>
-<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>  <span class="dv">0</span>:  Energy density <span class="op">&lt;</span>Wave energy density<span class="op">&gt;</span> (meter <span class="bu">pow</span> <span class="dv">2</span> sec per deg)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="sourceCode" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> mikeio.read(<span class="st">"tests/testdata/spectra/area_spectra.dfsu"</span>, time<span class="op">=-</span><span class="dv">1</span>)</span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="op">&lt;</span>mikeio.Dataset<span class="op">&gt;</span></span>
-<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>dims: (element:<span class="dv">40</span>, direction:<span class="dv">16</span>, frequency:<span class="dv">25</span>)</span>
-<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>time: <span class="dv">2017</span><span class="op">-</span><span class="dv">10</span><span class="op">-</span><span class="dv">27</span> <span class="dv">0</span><span class="er">5</span>:<span class="dv">00</span>:<span class="dv">00</span> (time<span class="op">-</span>invariant)</span>
-<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>geometry: DfsuSpectral2D (<span class="dv">40</span> elements, <span class="dv">33</span> nodes)</span>
-<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>items:</span>
-<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>  <span class="dv">0</span>:  Energy density <span class="op">&lt;</span>Wave energy density<span class="op">&gt;</span> (meter <span class="bu">pow</span> <span class="dv">2</span> sec per deg)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<section id="examples" class="level4 doc-section doc-section-examples">
+<h4 class="doc-section doc-section-examples anchored" data-anchor-id="examples">Examples</h4>
+<div class="sourceCode" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> mikeio.read(<span class="st">"tests/testdata/spectra/line_spectra.dfsu"</span>)</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="op">&lt;</span>mikeio.Dataset<span class="op">&gt;</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>dims: (time:<span class="dv">4</span>, node:<span class="dv">10</span>, direction:<span class="dv">16</span>, frequency:<span class="dv">25</span>)</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>time: <span class="dv">2017</span><span class="op">-</span><span class="dv">10</span><span class="op">-</span><span class="dv">27</span> <span class="dv">00</span>:<span class="dv">00</span>:<span class="dv">00</span> <span class="op">-</span> <span class="dv">2017</span><span class="op">-</span><span class="dv">10</span><span class="op">-</span><span class="dv">27</span> <span class="dv">0</span><span class="er">5</span>:<span class="dv">00</span>:<span class="dv">00</span> (<span class="dv">4</span> records)</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>geometry: DfsuSpectral1D (<span class="dv">9</span> elements, <span class="dv">10</span> nodes)</span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>items:</span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>  <span class="dv">0</span>:  Energy density <span class="op">&lt;</span>Wave energy density<span class="op">&gt;</span> (meter <span class="bu">pow</span> <span class="dv">2</span> sec per deg)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> mikeio.read(<span class="st">"tests/testdata/spectra/area_spectra.dfsu"</span>, time<span class="op">=-</span><span class="dv">1</span>)</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="op">&lt;</span>mikeio.Dataset<span class="op">&gt;</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>dims: (element:<span class="dv">40</span>, direction:<span class="dv">16</span>, frequency:<span class="dv">25</span>)</span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>time: <span class="dv">2017</span><span class="op">-</span><span class="dv">10</span><span class="op">-</span><span class="dv">27</span> <span class="dv">0</span><span class="er">5</span>:<span class="dv">00</span>:<span class="dv">00</span> (time<span class="op">-</span>invariant)</span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>geometry: DfsuSpectral2D (<span class="dv">40</span> elements, <span class="dv">33</span> nodes)</span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>items:</span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>  <span class="dv">0</span>:  Energy density <span class="op">&lt;</span>Wave energy density<span class="op">&gt;</span> (meter <span class="bu">pow</span> <span class="dv">2</span> sec per deg)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 
 
 </section>

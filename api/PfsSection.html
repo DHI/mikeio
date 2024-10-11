@@ -383,7 +383,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </header>
 
 
-<p><code>PfsSection(self, dictionary, **kwargs)</code></p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>PfsSection(<span class="va">self</span>, dictionary, <span class="op">**</span>kwargs)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <section id="methods" class="level2">
 <h2 class="anchored" data-anchor-id="methods">Methods</h2>
 <table class="caption-top table">
@@ -416,11 +416,11 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </tr>
 <tr class="even">
 <td><a href="#mikeio.PfsSection.items">items</a></td>
-<td>Return a new view of the PfsSection’s items ((key, value) pairs)</td>
+<td>Return a new view of the PfsSection's items ((key, value) pairs)</td>
 </tr>
 <tr class="odd">
 <td><a href="#mikeio.PfsSection.keys">keys</a></td>
-<td>Return a new view of the PfsSection’s keys</td>
+<td>Return a new view of the PfsSection's keys</td>
 </tr>
 <tr class="even">
 <td><a href="#mikeio.PfsSection.pop">pop</a></td>
@@ -444,31 +444,31 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </tr>
 <tr class="odd">
 <td><a href="#mikeio.PfsSection.values">values</a></td>
-<td>Return a new view of the PfsSection’s values.</td>
+<td>Return a new view of the PfsSection's values.</td>
 </tr>
 </tbody>
 </table>
 <section id="mikeio.PfsSection.clear" class="level3">
 <h3 class="anchored" data-anchor-id="mikeio.PfsSection.clear">clear</h3>
-<p><code>PfsSection.clear()</code></p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>PfsSection.clear()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <p>Remove all items from the PfsSection.</p>
 </section>
 <section id="mikeio.PfsSection.copy" class="level3">
 <h3 class="anchored" data-anchor-id="mikeio.PfsSection.copy">copy</h3>
-<p><code>PfsSection.copy()</code></p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>PfsSection.copy()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <p>Return a copy of the PfsSection.</p>
 </section>
 <section id="mikeio.PfsSection.find_replace" class="level3">
 <h3 class="anchored" data-anchor-id="mikeio.PfsSection.find_replace">find_replace</h3>
-<p><code>PfsSection.find_replace(old_value, new_value)</code></p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>PfsSection.find_replace(old_value, new_value)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <p>Update recursively all old_value with new_value</p>
 </section>
 <section id="mikeio.PfsSection.from_dataframe" class="level3">
 <h3 class="anchored" data-anchor-id="mikeio.PfsSection.from_dataframe">from_dataframe</h3>
-<p><code>PfsSection.from_dataframe(df, prefix)</code></p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>PfsSection.from_dataframe(df, prefix)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <p>Create a PfsSection from a DataFrame</p>
-<section id="parameters" class="level4">
-<h4 class="anchored" data-anchor-id="parameters">Parameters</h4>
+<section id="parameters" class="level4 doc-section doc-section-parameters">
+<h4 class="doc-section doc-section-parameters anchored" data-anchor-id="parameters">Parameters</h4>
 <table class="caption-top table">
 <thead>
 <tr class="header">
@@ -480,13 +480,13 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </thead>
 <tbody>
 <tr class="odd">
-<td><code>df</code></td>
+<td>df</td>
 <td>pd.DataFrame</td>
 <td>data</td>
 <td><em>required</em></td>
 </tr>
 <tr class="even">
-<td><code>prefix</code></td>
+<td>prefix</td>
 <td>str</td>
 <td>section header prefix</td>
 <td><em>required</em></td>
@@ -494,13 +494,13 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </tbody>
 </table>
 </section>
-<section id="examples" class="level4">
-<h4 class="anchored" data-anchor-id="examples">Examples</h4>
-<div id="0fb97b7d" class="cell" data-execution_count="1">
-<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> mikeio</span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> pd.DataFrame(<span class="bu">dict</span>(station<span class="op">=</span>[<span class="st">"Foo"</span>, <span class="st">"Bar"</span>],include<span class="op">=</span>[<span class="dv">0</span>,<span class="dv">1</span>]), index<span class="op">=</span>[<span class="dv">1</span>,<span class="dv">2</span>])</span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>df</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<section id="examples" class="level4 doc-section doc-section-examples">
+<h4 class="doc-section doc-section-examples anchored" data-anchor-id="examples">Examples</h4>
+<div id="e92b1aad" class="cell" data-execution_count="1">
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> mikeio</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> pd.DataFrame(<span class="bu">dict</span>(station<span class="op">=</span>[<span class="st">"Foo"</span>, <span class="st">"Bar"</span>],include<span class="op">=</span>[<span class="dv">0</span>,<span class="dv">1</span>]), index<span class="op">=</span>[<span class="dv">1</span>,<span class="dv">2</span>])</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>df</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="1">
 <div>
 
@@ -530,8 +530,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 </div>
 </div>
-<div id="936bdbc7" class="cell" data-execution_count="2">
-<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>mikeio.PfsSection.from_dataframe(df,<span class="st">"STATION_"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div id="8e18c4cd" class="cell" data-execution_count="2">
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>mikeio.PfsSection.from_dataframe(df,<span class="st">"STATION_"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="2">
 <pre><code>[STATION_1]
    station = 'Foo'
@@ -547,36 +547,36 @@ EndSect  // STATION_2</code></pre>
 </section>
 <section id="mikeio.PfsSection.get" class="level3">
 <h3 class="anchored" data-anchor-id="mikeio.PfsSection.get">get</h3>
-<p><code>PfsSection.get(key, default=None)</code></p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>PfsSection.get(key, default<span class="op">=</span><span class="va">None</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <p>Return the value for key if key is in the PfsSection, else default. If default is not given, it defaults to None, so that this method never raises a KeyError.</p>
 </section>
 <section id="mikeio.PfsSection.items" class="level3">
 <h3 class="anchored" data-anchor-id="mikeio.PfsSection.items">items</h3>
-<p><code>PfsSection.items()</code></p>
+<div class="sourceCode" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>PfsSection.items()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <p>Return a new view of the PfsSection’s items ((key, value) pairs)</p>
 </section>
 <section id="mikeio.PfsSection.keys" class="level3">
 <h3 class="anchored" data-anchor-id="mikeio.PfsSection.keys">keys</h3>
-<p><code>PfsSection.keys()</code></p>
+<div class="sourceCode" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>PfsSection.keys()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <p>Return a new view of the PfsSection’s keys</p>
 </section>
 <section id="mikeio.PfsSection.pop" class="level3">
 <h3 class="anchored" data-anchor-id="mikeio.PfsSection.pop">pop</h3>
-<p><code>PfsSection.pop(key, default=None)</code></p>
+<div class="sourceCode" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>PfsSection.pop(key, default<span class="op">=</span><span class="va">None</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <p>If key is in the dictionary, remove it and return its value, else return default. If default is not given and key is not in the dictionary, a KeyError is raised.</p>
 </section>
 <section id="mikeio.PfsSection.search" class="level3">
 <h3 class="anchored" data-anchor-id="mikeio.PfsSection.search">search</h3>
-<p><code>PfsSection.search(text=None, *, key=None, section=None, param=None, case=False)</code></p>
+<div class="sourceCode" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>PfsSection.search(text<span class="op">=</span><span class="va">None</span>, <span class="op">*</span>, key<span class="op">=</span><span class="va">None</span>, section<span class="op">=</span><span class="va">None</span>, param<span class="op">=</span><span class="va">None</span>, case<span class="op">=</span><span class="va">False</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <p>Find recursively all keys, sections or parameters matching a pattern</p>
 <p>NOTE: logical OR between multiple conditions</p>
-<section id="parameters-1" class="level4">
-<h4 class="anchored" data-anchor-id="parameters-1">Parameters</h4>
+<section id="parameters-1" class="level4 doc-section doc-section-parameters">
+<h4 class="doc-section doc-section-parameters anchored" data-anchor-id="parameters-1">Parameters</h4>
 <table class="caption-top table">
 <colgroup>
-<col style="width: 9%">
+<col style="width: 7%">
 <col style="width: 21%">
-<col style="width: 59%">
+<col style="width: 60%">
 <col style="width: 9%">
 </colgroup>
 <thead>
@@ -589,31 +589,31 @@ EndSect  // STATION_2</code></pre>
 </thead>
 <tbody>
 <tr class="odd">
-<td><code>text</code></td>
+<td>text</td>
 <td>str</td>
 <td>Search for text in either key, section or parameter, by default None</td>
 <td><code>None</code></td>
 </tr>
 <tr class="even">
-<td><code>key</code></td>
+<td>key</td>
 <td>str</td>
 <td>text pattern to seach for in keywords, by default None</td>
 <td><code>None</code></td>
 </tr>
 <tr class="odd">
-<td><code>section</code></td>
+<td>section</td>
 <td>str</td>
 <td>text pattern to seach for in sections, by default None</td>
 <td><code>None</code></td>
 </tr>
 <tr class="even">
-<td><code>param</code></td>
+<td>param</td>
 <td>(str, bool, float, int)</td>
 <td>text or value in a parameter, by default None</td>
 <td><code>None</code></td>
 </tr>
 <tr class="odd">
-<td><code>case</code></td>
+<td>case</td>
 <td>bool</td>
 <td>should the text search be case-sensitive?, by default False</td>
 <td><code>False</code></td>
@@ -621,17 +621,19 @@ EndSect  // STATION_2</code></pre>
 </tbody>
 </table>
 </section>
-<section id="returns" class="level4">
-<h4 class="anchored" data-anchor-id="returns">Returns</h4>
+<section id="returns" class="level4 doc-section doc-section-returns">
+<h4 class="doc-section doc-section-returns anchored" data-anchor-id="returns">Returns</h4>
 <table class="caption-top table">
 <thead>
 <tr class="header">
+<th>Name</th>
 <th>Type</th>
 <th>Description</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
+<td></td>
 <td>PfsSection</td>
 <td>Search result as a nested PfsSection</td>
 </tr>
@@ -641,15 +643,15 @@ EndSect  // STATION_2</code></pre>
 </section>
 <section id="mikeio.PfsSection.to_dataframe" class="level3">
 <h3 class="anchored" data-anchor-id="mikeio.PfsSection.to_dataframe">to_dataframe</h3>
-<p><code>PfsSection.to_dataframe(prefix=None)</code></p>
+<div class="sourceCode" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>PfsSection.to_dataframe(prefix<span class="op">=</span><span class="va">None</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <p>Output enumerated subsections to a DataFrame</p>
-<section id="parameters-2" class="level4">
-<h4 class="anchored" data-anchor-id="parameters-2">Parameters</h4>
+<section id="parameters-2" class="level4 doc-section doc-section-parameters">
+<h4 class="doc-section doc-section-parameters anchored" data-anchor-id="parameters-2">Parameters</h4>
 <table class="caption-top table">
 <colgroup>
-<col style="width: 5%">
 <col style="width: 4%">
-<col style="width: 84%">
+<col style="width: 4%">
+<col style="width: 86%">
 <col style="width: 5%">
 </colgroup>
 <thead>
@@ -662,36 +664,38 @@ EndSect  // STATION_2</code></pre>
 </thead>
 <tbody>
 <tr class="odd">
-<td><code>prefix</code></td>
+<td>prefix</td>
 <td>str</td>
-<td>The prefix of the enumerated sections, e.g.&nbsp;“OUTPUT_”, which can be supplied if it fails without this argument, by default None (will try to “guess” the prefix)</td>
+<td>The prefix of the enumerated sections, e.g.&nbsp;"OUTPUT_", which can be supplied if it fails without this argument, by default None (will try to "guess" the prefix)</td>
 <td><code>None</code></td>
 </tr>
 </tbody>
 </table>
 </section>
-<section id="returns-1" class="level4">
-<h4 class="anchored" data-anchor-id="returns-1">Returns</h4>
+<section id="returns-1" class="level4 doc-section doc-section-returns">
+<h4 class="doc-section doc-section-returns anchored" data-anchor-id="returns-1">Returns</h4>
 <table class="caption-top table">
 <thead>
 <tr class="header">
+<th>Name</th>
 <th>Type</th>
 <th>Description</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
+<td></td>
 <td>pd.DataFrame</td>
 <td>The enumerated subsections as a DataFrame</td>
 </tr>
 </tbody>
 </table>
 </section>
-<section id="examples-1" class="level4">
-<h4 class="anchored" data-anchor-id="examples-1">Examples</h4>
-<div id="f63c82e5" class="cell" data-execution_count="3">
-<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>pfs <span class="op">=</span> mikeio.read_pfs(<span class="st">"../data/pfs/lake.sw"</span>)</span>
-<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>pfs.SW.OUTPUTS.to_dataframe(prefix<span class="op">=</span><span class="st">"OUTPUT_"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<section id="examples-1" class="level4 doc-section doc-section-examples">
+<h4 class="doc-section doc-section-examples anchored" data-anchor-id="examples-1">Examples</h4>
+<div id="7448d791" class="cell" data-execution_count="3">
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>pfs <span class="op">=</span> mikeio.read_pfs(<span class="st">"../data/pfs/lake.sw"</span>)</span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>pfs.SW.OUTPUTS.to_dataframe(prefix<span class="op">=</span><span class="st">"OUTPUT_"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="3">
 <div>
 
@@ -831,17 +835,17 @@ EndSect  // STATION_2</code></pre>
 </section>
 <section id="mikeio.PfsSection.to_dict" class="level3">
 <h3 class="anchored" data-anchor-id="mikeio.PfsSection.to_dict">to_dict</h3>
-<p><code>PfsSection.to_dict()</code></p>
+<div class="sourceCode" id="cb16"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>PfsSection.to_dict()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <p>Convert to (nested) dict (as a copy)</p>
 </section>
 <section id="mikeio.PfsSection.update_recursive" class="level3">
 <h3 class="anchored" data-anchor-id="mikeio.PfsSection.update_recursive">update_recursive</h3>
-<p><code>PfsSection.update_recursive(key, value)</code></p>
+<div class="sourceCode" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>PfsSection.update_recursive(key, value)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <p>Update recursively all matches of key with value</p>
 </section>
 <section id="mikeio.PfsSection.values" class="level3">
 <h3 class="anchored" data-anchor-id="mikeio.PfsSection.values">values</h3>
-<p><code>PfsSection.values()</code></p>
+<div class="sourceCode" id="cb18"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>PfsSection.values()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <p>Return a new view of the PfsSection’s values.</p>
 
 

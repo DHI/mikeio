@@ -20,6 +20,40 @@ ul.task-list li input[type="checkbox"] {
   margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
 }
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
 </style>
 
 
@@ -329,7 +363,25 @@ ul.task-list li input[type="checkbox"] {
 
 <section id="mikeio.Grid2D" class="level1">
 <h1>Grid2D</h1>
-<p><code>Grid2D(self, *, x=None, x0=0.0, dx=None, nx=None, y=None, y0=0.0, dy=None, ny=None, bbox=None, projection='LONG/LAT', origin=None, orientation=0.0, axis_names=('x', 'y'), is_spectral=False, is_vertical=False)</code></p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>Grid2D(</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>    <span class="va">self</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>    <span class="op">*</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>    x<span class="op">=</span><span class="va">None</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>    x0<span class="op">=</span><span class="fl">0.0</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>    dx<span class="op">=</span><span class="va">None</span></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>    nx<span class="op">=</span><span class="va">None</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>    y<span class="op">=</span><span class="va">None</span></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>    y0<span class="op">=</span><span class="fl">0.0</span></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>    dy<span class="op">=</span><span class="va">None</span></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>    ny<span class="op">=</span><span class="va">None</span></span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>    bbox<span class="op">=</span><span class="va">None</span></span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>    projection<span class="op">=</span><span class="st">'LONG/LAT'</span></span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>    origin<span class="op">=</span><span class="va">None</span></span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>    orientation<span class="op">=</span><span class="fl">0.0</span></span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>    axis_names<span class="op">=</span>(<span class="st">'x'</span>, <span class="st">'y'</span>)</span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>    is_spectral<span class="op">=</span><span class="va">False</span></span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>    is_vertical<span class="op">=</span><span class="va">False</span></span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <p>2D grid Origin in the center of cell in lower-left corner x and y axes are increasing and equidistant</p>
 <section id="attributes" class="level2">
 <h2 class="anchored" data-anchor-id="attributes">Attributes</h2>
@@ -438,15 +490,15 @@ ul.task-list li input[type="checkbox"] {
 </table>
 <section id="mikeio.Grid2D.contains" class="level3">
 <h3 class="anchored" data-anchor-id="mikeio.Grid2D.contains">contains</h3>
-<p><code>Grid2D.contains(coords)</code></p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>Grid2D.contains(coords)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <p>test if a list of points are inside grid</p>
-<section id="parameters" class="level4">
-<h4 class="anchored" data-anchor-id="parameters">Parameters</h4>
+<section id="parameters" class="level4 doc-section doc-section-parameters">
+<h4 class="doc-section doc-section-parameters anchored" data-anchor-id="parameters">Parameters</h4>
 <table class="caption-top table">
 <colgroup>
-<col style="width: 12%">
-<col style="width: 16%">
-<col style="width: 56%">
+<col style="width: 9%">
+<col style="width: 17%">
+<col style="width: 58%">
 <col style="width: 14%">
 </colgroup>
 <thead>
@@ -459,7 +511,7 @@ ul.task-list li input[type="checkbox"] {
 </thead>
 <tbody>
 <tr class="odd">
-<td><code>coords</code></td>
+<td>coords</td>
 <td>array(float)</td>
 <td>xy-coordinate of points given as n-by-2 array</td>
 <td><em>required</em></td>
@@ -467,17 +519,19 @@ ul.task-list li input[type="checkbox"] {
 </tbody>
 </table>
 </section>
-<section id="returns" class="level4">
-<h4 class="anchored" data-anchor-id="returns">Returns</h4>
+<section id="returns" class="level4 doc-section doc-section-returns">
+<h4 class="doc-section doc-section-returns anchored" data-anchor-id="returns">Returns</h4>
 <table class="caption-top table">
 <thead>
 <tr class="header">
+<th>Name</th>
 <th>Type</th>
 <th>Description</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
+<td></td>
 <td>bool array</td>
 <td>True for points inside, False otherwise</td>
 </tr>
@@ -487,15 +541,15 @@ ul.task-list li input[type="checkbox"] {
 </section>
 <section id="mikeio.Grid2D.find_index" class="level3">
 <h3 class="anchored" data-anchor-id="mikeio.Grid2D.find_index">find_index</h3>
-<p><code>Grid2D.find_index(x=None, y=None, coords=None, area=None)</code></p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>Grid2D.find_index(x<span class="op">=</span><span class="va">None</span>, y<span class="op">=</span><span class="va">None</span>, coords<span class="op">=</span><span class="va">None</span>, area<span class="op">=</span><span class="va">None</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <p>Find nearest index (i,j) of point(s)</p>
-<section id="parameters-1" class="level4">
-<h4 class="anchored" data-anchor-id="parameters-1">Parameters</h4>
+<section id="parameters-1" class="level4 doc-section doc-section-parameters">
+<h4 class="doc-section doc-section-parameters anchored" data-anchor-id="parameters-1">Parameters</h4>
 <table class="caption-top table">
 <colgroup>
-<col style="width: 12%">
+<col style="width: 10%">
 <col style="width: 17%">
-<col style="width: 57%">
+<col style="width: 58%">
 <col style="width: 13%">
 </colgroup>
 <thead>
@@ -508,25 +562,25 @@ ul.task-list li input[type="checkbox"] {
 </thead>
 <tbody>
 <tr class="odd">
-<td><code>x</code></td>
+<td>x</td>
 <td>float</td>
 <td>x-coordinate of point</td>
 <td><code>None</code></td>
 </tr>
 <tr class="even">
-<td><code>y</code></td>
+<td>y</td>
 <td>float</td>
 <td>y-coordinate of point</td>
 <td><code>None</code></td>
 </tr>
 <tr class="odd">
-<td><code>coords</code></td>
+<td>coords</td>
 <td>array(float)</td>
 <td>xy-coordinate of points given as n-by-2 array</td>
 <td><code>None</code></td>
 </tr>
 <tr class="even">
-<td><code>area</code></td>
+<td>area</td>
 <td>array(float)</td>
 <td>xy-coordinates of bounding box</td>
 <td><code>None</code></td>
@@ -534,17 +588,19 @@ ul.task-list li input[type="checkbox"] {
 </tbody>
 </table>
 </section>
-<section id="returns-1" class="level4">
-<h4 class="anchored" data-anchor-id="returns-1">Returns</h4>
+<section id="returns-1" class="level4 doc-section doc-section-returns">
+<h4 class="doc-section doc-section-returns anchored" data-anchor-id="returns-1">Returns</h4>
 <table class="caption-top table">
 <thead>
 <tr class="header">
+<th>Name</th>
 <th>Type</th>
 <th>Description</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
+<td></td>
 <td>(array(int), array(int))</td>
 <td>i- and j-index of nearest cell</td>
 </tr>
@@ -554,19 +610,26 @@ ul.task-list li input[type="checkbox"] {
 </section>
 <section id="mikeio.Grid2D.get_node_coordinates" class="level3">
 <h3 class="anchored" data-anchor-id="mikeio.Grid2D.get_node_coordinates">get_node_coordinates</h3>
-<p><code>Grid2D.get_node_coordinates()</code></p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>Grid2D.get_node_coordinates()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <p>node coordinates for this grid</p>
-<section id="returns-2" class="level4">
-<h4 class="anchored" data-anchor-id="returns-2">Returns</h4>
+<section id="returns-2" class="level4 doc-section doc-section-returns">
+<h4 class="doc-section doc-section-returns anchored" data-anchor-id="returns-2">Returns</h4>
 <table class="caption-top table">
+<colgroup>
+<col style="width: 10%">
+<col style="width: 18%">
+<col style="width: 70%">
+</colgroup>
 <thead>
 <tr class="header">
+<th>Name</th>
 <th>Type</th>
 <th>Description</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
+<td></td>
 <td>array(float)</td>
 <td>2d array with x,y-coordinates, length=(nx+1)*(ny+1)</td>
 </tr>
@@ -576,20 +639,20 @@ ul.task-list li input[type="checkbox"] {
 </section>
 <section id="mikeio.Grid2D.isel" class="level3">
 <h3 class="anchored" data-anchor-id="mikeio.Grid2D.isel">isel</h3>
-<p><code>Grid2D.isel(idx, axis)</code></p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>Grid2D.isel(idx, axis)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <p>Return a new geometry as a subset of Grid2D along the given axis.</p>
 </section>
 <section id="mikeio.Grid2D.to_geometryFM" class="level3">
 <h3 class="anchored" data-anchor-id="mikeio.Grid2D.to_geometryFM">to_geometryFM</h3>
-<p><code>Grid2D.to_geometryFM(z=None, west=2, east=4, north=5, south=3)</code></p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>Grid2D.to_geometryFM(z<span class="op">=</span><span class="va">None</span>, west<span class="op">=</span><span class="dv">2</span>, east<span class="op">=</span><span class="dv">4</span>, north<span class="op">=</span><span class="dv">5</span>, south<span class="op">=</span><span class="dv">3</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <p>convert Grid2D to GeometryFM2D</p>
-<section id="parameters-2" class="level4">
-<h4 class="anchored" data-anchor-id="parameters-2">Parameters</h4>
+<section id="parameters-2" class="level4 doc-section doc-section-parameters">
+<h4 class="doc-section doc-section-parameters anchored" data-anchor-id="parameters-2">Parameters</h4>
 <table class="caption-top table">
 <colgroup>
-<col style="width: 12%">
 <col style="width: 10%">
-<col style="width: 62%">
+<col style="width: 10%">
+<col style="width: 63%">
 <col style="width: 14%">
 </colgroup>
 <thead>
@@ -602,31 +665,31 @@ ul.task-list li input[type="checkbox"] {
 </thead>
 <tbody>
 <tr class="odd">
-<td><code>z</code></td>
+<td>z</td>
 <td>float</td>
 <td>bathymetry values for each node, by default 0</td>
 <td><code>None</code></td>
 </tr>
 <tr class="even">
-<td><code>west</code></td>
+<td>west</td>
 <td>int</td>
 <td>code value for west boundary</td>
 <td><code>2</code></td>
 </tr>
 <tr class="odd">
-<td><code>east</code></td>
+<td>east</td>
 <td>int</td>
 <td>code value for east boundary</td>
 <td><code>4</code></td>
 </tr>
 <tr class="even">
-<td><code>north</code></td>
+<td>north</td>
 <td>int</td>
 <td>code value for north boundary</td>
 <td><code>5</code></td>
 </tr>
 <tr class="odd">
-<td><code>south</code></td>
+<td>south</td>
 <td>int</td>
 <td>code value for south boundary</td>
 <td><code>3</code></td>
@@ -637,15 +700,15 @@ ul.task-list li input[type="checkbox"] {
 </section>
 <section id="mikeio.Grid2D.to_mesh" class="level3">
 <h3 class="anchored" data-anchor-id="mikeio.Grid2D.to_mesh">to_mesh</h3>
-<p><code>Grid2D.to_mesh(outfilename, z=None)</code></p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>Grid2D.to_mesh(outfilename, z<span class="op">=</span><span class="va">None</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <p>export grid to mesh file</p>
-<section id="parameters-3" class="level4">
-<h4 class="anchored" data-anchor-id="parameters-3">Parameters</h4>
+<section id="parameters-3" class="level4 doc-section doc-section-parameters">
+<h4 class="doc-section doc-section-parameters anchored" data-anchor-id="parameters-3">Parameters</h4>
 <table class="caption-top table">
 <colgroup>
-<col style="width: 10%">
+<col style="width: 9%">
 <col style="width: 16%">
-<col style="width: 63%">
+<col style="width: 64%">
 <col style="width: 8%">
 </colgroup>
 <thead>
@@ -658,13 +721,13 @@ ul.task-list li input[type="checkbox"] {
 </thead>
 <tbody>
 <tr class="odd">
-<td><code>outfilename</code></td>
+<td>outfilename</td>
 <td>str</td>
 <td>path of new mesh file</td>
 <td><em>required</em></td>
 </tr>
 <tr class="even">
-<td><code>z</code></td>
+<td>z</td>
 <td>float or array(float)</td>
 <td>bathymetry values for each node, by default 0 if array: must have length=(nx+1)*(ny+1)</td>
 <td><code>None</code></td>
