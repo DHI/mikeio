@@ -24,7 +24,7 @@ jobs:
         pip install .[dev]
     
     - name: Generate API docs
-      run: cd docs;quartodoc build;quartodoc interlinks
+      run: cd docs;quartodoc build;quarto add --no-prompt machow/quartodoc;quartodoc interlinks;
 
     - name: Render and Publish
       uses: quarto-dev/quarto-actions/publish@v2
