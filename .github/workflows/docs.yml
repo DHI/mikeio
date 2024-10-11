@@ -13,7 +13,7 @@ jobs:
     - name: Set up Python
       uses: actions/setup-python@v4
       with:
-        python-version: 3.11
+        python-version: 3.12
         
     - name: Install dependencies
       run: |
@@ -23,12 +23,14 @@ jobs:
       run: |
         pip install .[dev]
     
-    - name: Build documentation
-      run: |
-        make docs
+    - name: Generate API docs
+      run: cd docs;quartodoc build
 
-    - name: Publish to GitHub Pages
-      uses: peaceiris/actions-gh-pages@v3.6.1
+    - name: Render and Publish
+      uses: quarto-dev/quarto-actions/publish@v2
       with:
-        github_token: ${{ secrets.GITHUB_TOKEN }}
-        publish_dir: docs/_site/
+        target: gh-pages
+        path: docs/
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      
