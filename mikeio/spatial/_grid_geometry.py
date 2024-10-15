@@ -69,42 +69,6 @@ def _print_axis_txt(name: str, x: np.ndarray, dx: float) -> str:
 
 @dataclass
 class Grid1D(_Geometry):
-    """1D grid (node-based)
-    axis is increasing and equidistant
-
-    Parameters
-    ----------
-    x : array_like
-        node coordinates
-    x0 : float
-        first node coordinate
-    dx : float
-        grid spacing
-    nx : int
-        number of nodes
-    projection : str
-        projection string
-    origin : tuple
-        not commonly used
-    orientation : float
-        not commonly used
-    node_coordinates : array_like
-        coordinates of nodes in 2D or 3D space
-    axis_name : str
-        name of axis, by default "x"
-
-    Examples
-    --------
-    ```{python}
-    import mikeio
-    mikeio.Grid1D(nx=3,dx=0.1)
-    ```
-
-    ```{python}
-    mikeio.Grid1D(x=[0.1, 0.5, 0.9])
-    ```
-    """
-
     _dx: float
     _nx: int
     _x0: float
@@ -125,7 +89,41 @@ class Grid1D(_Geometry):
         node_coordinates: np.ndarray | None = None,
         axis_name: str = "x",
     ):
-        """Create equidistant 1D spatial geometry"""
+        """1D grid (node-based)
+        axis is increasing and equidistant
+
+        Parameters
+        ----------
+        x : array_like
+            node coordinates
+        x0 : float
+            first node coordinate
+        dx : float
+            grid spacing
+        nx : int
+            number of nodes
+        projection : str
+            projection string
+        origin : float, float
+            not commonly used
+        orientation : float
+            not commonly used
+        node_coordinates : array_like
+            coordinates of nodes in 2D or 3D space
+        axis_name : str
+            name of axis, by default "x"
+
+        Examples
+        --------
+        ```{python}
+        import mikeio
+        mikeio.Grid1D(nx=3,dx=0.1)
+        ```
+
+        ```{python}
+        mikeio.Grid1D(x=[0.1, 0.5, 0.9])
+        ```
+        """
         super().__init__(projection=projection)
         self._origin = (0.0, 0.0) if origin is None else (origin[0], origin[1])
         assert len(self._origin) == 2, "origin must be a tuple of length 2"
@@ -564,7 +562,7 @@ class Grid2D(_Geometry):
 
     @staticmethod
     def _parse_bbox(
-        bbox: tuple[float, float, float, float]
+        bbox: tuple[float, float, float, float],
     ) -> tuple[float, float, float, float]:
         left = bbox[0]
         bottom = bbox[1]
@@ -1124,6 +1122,41 @@ class Grid3D(_Geometry):
         origin: tuple[float, float] = (0.0, 0.0),
         orientation: float = 0.0,
     ) -> None:
+        """Create equidistant 3D spatial geometry
+
+        Parameters
+        ----------
+        x : array_like, optional
+            x coordinates of cell centers
+        x0 : float, optional
+            x coordinate of lower-left corner of first cell
+        dx : float, optional
+            x cell size
+        nx : int, optional
+            number of cells in x direction
+        y : array_like, optional
+            y coordinates of cell centers
+        y0 : float, optional
+            y coordinate of lower-left corner of first cell
+        dy : float, optional
+            y cell size
+        ny : int, optional
+            number of cells in y direction
+        z : array_like, optional
+            z coordinates of cell centers
+        z0 : float, optional
+            z coordinate of lower-left corner of first cell
+        dz : float, optional
+            z cell size
+        nz : int, optional
+            number of cells in z direction
+        projection : str, optional
+            projection string, by default "NON-UTM"
+        origin : tuple, optional
+            user-defined origin, by default (0.0, 0.0)
+        orientation : float, optional
+            rotation angle in degrees, by default 0.0
+        """
         super().__init__(projection=projection)
         self._origin = (0.0, 0.0) if origin is None else (origin[0], origin[1])
         assert len(self._origin) == 2, "origin must be a tuple of length 2"
