@@ -168,3 +168,6 @@ format:
   html:
     theme: cosmo
     toc: true
+  ipynb: 
+    theme: cosmo
+    toc: true
