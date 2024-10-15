@@ -54,7 +54,11 @@ website:
             contents:
               - examples/dfs2/bathy.qmd
               - examples/dfs2/gfs.qmd
-          - examples/Dfsu-2D-interpolation.qmd
+          - section: Dfsu
+            href: examples/dfsu/index.qmd
+            contents:
+              - examples/dfsu/spatial_interpolation.qmd
+              - examples/dfsu/merge_subdomains.qmd
           - examples/Time-interpolation.qmd
           - examples/Generic.qmd
       - text: Design philosophy
