@@ -49,6 +49,10 @@ website:
       - section: Examples
         href: examples/index.qmd
         contents:
+          - section: Dfs0
+            href: examples/dfs0/index.qmd
+            contents:
+              - examples/dfs0/cmems_insitu.qmd
           - section: Dfs2
             href: examples/dfs2/index.qmd
             contents:
