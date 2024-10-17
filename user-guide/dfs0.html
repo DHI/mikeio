@@ -281,13 +281,30 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
       <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 show">  
           <li class="sidebar-item sidebar-item-section">
       <div class="sidebar-item-container"> 
-            <a href="../examples/dfs2/index.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Dfs2</span></a>
+            <a href="../examples/dfs0/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Dfs0</span></a>
           <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="false" aria-label="Toggle section">
             <i class="bi bi-chevron-right ms-2"></i>
           </a> 
       </div>
       <ul id="quarto-sidebar-section-3" class="collapse list-unstyled sidebar-section depth2 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../examples/dfs0/cmems_insitu.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Dfs0 - CMEMS <em>in-situ</em> data</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+          <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../examples/dfs2/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Dfs2</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-4" class="collapse list-unstyled sidebar-section depth2 ">  
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../examples/dfs2/bathy.html" class="sidebar-item-text sidebar-link">
@@ -302,12 +319,29 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </li>
       </ul>
   </li>
+          <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../examples/dfsu/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Dfsu</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-5" class="collapse list-unstyled sidebar-section depth2 ">  
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../examples/Dfsu-2D-interpolation.html" class="sidebar-item-text sidebar-link">
+  <a href="../examples/dfsu/spatial_interpolation.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">Dfsu - 2D interpolation</span></a>
   </div>
 </li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../examples/dfsu/merge_subdomains.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Merging subdomain dfsu files</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../examples/Time-interpolation.html" class="sidebar-item-text sidebar-link">
@@ -349,7 +383,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <li><a href="#from-pandas-dataframe-to-dfs0" id="toc-from-pandas-dataframe-to-dfs0" class="nav-link" data-scroll-target="#from-pandas-dataframe-to-dfs0">From pandas DataFrame to Dfs0</a></li>
   <li><a href="#dfs0-example-notebooks" id="toc-dfs0-example-notebooks" class="nav-link" data-scroll-target="#dfs0-example-notebooks">Dfs0 example notebooks</a></li>
   </ul>
-<div class="toc-actions"><ul><li><a href="https://github.com/DHI/mikeio/edit/main/docs/user-guide/dfs0.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li></ul></div></nav>
+<div class="toc-actions"><ul><li><a href="https://github.com/DHI/mikeio/edit/main/docs/user-guide/dfs0.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li></ul></div><div class="quarto-alternate-formats"><h2>Other Formats</h2><ul><li><a href="dfs0.ipynb" download="dfs0.ipynb"><i class="bi bi-journal-code"></i>Jupyter</a></li></ul></div></nav>
     </div>
 <!-- main -->
 <main class="content" id="quarto-document-content">
@@ -381,7 +415,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </ul>
 <section id="read-dfs0-to-dataset" class="level2">
 <h2 class="anchored" data-anchor-id="read-dfs0-to-dataset">Read Dfs0 to Dataset</h2>
-<div id="84ba232c" class="cell" data-execution_count="1">
+<div id="62b9b398" class="cell" data-execution_count="1">
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> mikeio</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>ds <span class="op">=</span> mikeio.read(<span class="st">"../data/da_diagnostic.dfs0"</span>)</span>
@@ -401,7 +435,7 @@ items:
 </section>
 <section id="from-dfs0-to-pandas-dataframe" class="level2">
 <h2 class="anchored" data-anchor-id="from-dfs0-to-pandas-dataframe">From Dfs0 to pandas DataFrame</h2>
-<div id="a1ac4b73" class="cell" data-execution_count="2">
+<div id="c850c98b" class="cell" data-execution_count="2">
 <div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> ds.to_dataframe()</span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>df.head()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="2">
@@ -463,7 +497,7 @@ items:
 </section>
 <section id="from-pandas-dataframe-to-dfs0" class="level2">
 <h2 class="anchored" data-anchor-id="from-pandas-dataframe-to-dfs0">From pandas DataFrame to Dfs0</h2>
-<div id="196e7db1" class="cell" data-execution_count="3">
+<div id="adabf6ad" class="cell" data-execution_count="3">
 <div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
 <span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> pd.read_csv(</span>

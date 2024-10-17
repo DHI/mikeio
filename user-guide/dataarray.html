@@ -280,13 +280,30 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
       <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 show">  
           <li class="sidebar-item sidebar-item-section">
       <div class="sidebar-item-container"> 
-            <a href="../examples/dfs2/index.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Dfs2</span></a>
+            <a href="../examples/dfs0/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Dfs0</span></a>
           <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="false" aria-label="Toggle section">
             <i class="bi bi-chevron-right ms-2"></i>
           </a> 
       </div>
       <ul id="quarto-sidebar-section-3" class="collapse list-unstyled sidebar-section depth2 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../examples/dfs0/cmems_insitu.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Dfs0 - CMEMS <em>in-situ</em> data</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+          <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../examples/dfs2/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Dfs2</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-4" class="collapse list-unstyled sidebar-section depth2 ">  
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../examples/dfs2/bathy.html" class="sidebar-item-text sidebar-link">
@@ -301,12 +318,29 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </li>
       </ul>
   </li>
+          <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../examples/dfsu/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Dfsu</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-5" class="collapse list-unstyled sidebar-section depth2 ">  
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../examples/Dfsu-2D-interpolation.html" class="sidebar-item-text sidebar-link">
+  <a href="../examples/dfsu/spatial_interpolation.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">Dfsu - 2D interpolation</span></a>
   </div>
 </li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../examples/dfsu/merge_subdomains.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Merging subdomain dfsu files</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../examples/Time-interpolation.html" class="sidebar-item-text sidebar-link">
@@ -359,7 +393,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <li><a href="#conversion" id="toc-conversion" class="nav-link" data-scroll-target="#conversion">Conversion:</a></li>
   </ul></li>
   </ul>
-<div class="toc-actions"><ul><li><a href="https://github.com/DHI/mikeio/edit/main/docs/user-guide/dataarray.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li></ul></div></nav>
+<div class="toc-actions"><ul><li><a href="https://github.com/DHI/mikeio/edit/main/docs/user-guide/dataarray.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li></ul></div><div class="quarto-alternate-formats"><h2>Other Formats</h2><ul><li><a href="dataarray.ipynb" download="dataarray.ipynb"><i class="bi bi-journal-code"></i>Jupyter</a></li></ul></div></nav>
     </div>
 <!-- main -->
 <main class="content" id="quarto-document-content">
@@ -392,7 +426,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <li><strong>values</strong> - a <a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray"><code>numpy.ndarray</code></a></li>
 </ul>
 <p>Use DataArray’s string representation to get an overview of the DataArray</p>
-<div id="058510be" class="cell" data-execution_count="1">
+<div id="7c0a17fb" class="cell" data-execution_count="1">
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> mikeio</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>ds <span class="op">=</span> mikeio.read(<span class="st">"../data/HD2D.dfsu"</span>)</span>
@@ -408,7 +442,7 @@ geometry: Dfsu2D (884 elements, 529 nodes)</code></pre>
 </div>
 <section id="temporal-selection" class="level2">
 <h2 class="anchored" data-anchor-id="temporal-selection"><i class="fa-solid fa-calendar" aria-label="calendar"></i> Temporal selection</h2>
-<div id="a683e235" class="cell" data-execution_count="2">
+<div id="bd8228f3" class="cell" data-execution_count="2">
 <div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>da.sel(time<span class="op">=</span><span class="st">"1985-08-06 12:00"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="2">
 <pre><code>&lt;mikeio.DataArray&gt;
@@ -419,7 +453,7 @@ geometry: Dfsu2D (884 elements, 529 nodes)
 values: [0.1012, 0.1012, ..., 0.105]</code></pre>
 </div>
 </div>
-<div id="8abf434b" class="cell" data-execution_count="3">
+<div id="51742de2" class="cell" data-execution_count="3">
 <div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>da[<span class="st">"1985-8-7"</span>:]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="3">
 <pre><code>&lt;mikeio.DataArray&gt;
@@ -433,7 +467,7 @@ geometry: Dfsu2D (884 elements, 529 nodes)</code></pre>
 <section id="spatial-selection" class="level2">
 <h2 class="anchored" data-anchor-id="spatial-selection"><i class="fa-solid fa-map" aria-label="map"></i> Spatial selection</h2>
 <p>The <a href="../api/DataArray.html#mikeio.DataArray.sel"><code>sel</code></a> method finds the nearest element.</p>
-<div id="5d206933" class="cell" data-execution_count="4">
+<div id="e8a5ba37" class="cell" data-execution_count="4">
 <div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>da.sel(x<span class="op">=</span><span class="dv">607002</span>, y<span class="op">=</span><span class="dv">6906734</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="4">
 <pre><code>&lt;mikeio.DataArray&gt;
@@ -448,17 +482,17 @@ values: [0.4591, 0.8078, ..., -0.6311]</code></pre>
 <section id="modifying-values" class="level2">
 <h2 class="anchored" data-anchor-id="modifying-values">Modifying values</h2>
 <p>You can modify the values of a DataArray by changing its <a href="../api/DataArray.html#mikeio.DataArray.values"><code>values</code></a>:</p>
-<div id="d5562c67" class="cell" data-execution_count="5">
+<div id="22c44ce7" class="cell" data-execution_count="5">
 <div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>da.values[<span class="dv">0</span>, <span class="dv">3</span>] <span class="op">=</span> <span class="fl">5.0</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>If you wish to change values of a subset of the DataArray you should be aware of the difference between a <em>view</em> and a <em>copy</em> of the data. Similar to NumPy, MIKE IO selection method will return a <em>view</em> of the data when using single index and slices, but a <em>copy</em> of the data using fancy indexing (a list of indicies or boolean indexing). Note that prior to release 1.3, MIKE IO would always return a copy.</p>
 <p>It is recommended to change the values using <code>values</code> property directly on the original DataArray (like above), but it is also possible to change the values of the original DataArray by working on a subset DataArray if it is selected with single index or slice as explained above.</p>
-<div id="9289ea09" class="cell" data-execution_count="6">
+<div id="aed27f2d" class="cell" data-execution_count="6">
 <div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>da_sub <span class="op">=</span> da.isel(time<span class="op">=</span><span class="dv">0</span>)</span>
 <span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>da_sub.values[:] <span class="op">=</span> <span class="fl">5.0</span>    <span class="co"># will change da</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>Fancy indexing will return a <em>copy</em> and therefore not change the original:</p>
-<div id="28048c07" class="cell" data-execution_count="7">
+<div id="0efb267f" class="cell" data-execution_count="7">
 <div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>da_sub <span class="op">=</span> da.isel(time<span class="op">=</span>[<span class="dv">0</span>,<span class="dv">1</span>,<span class="dv">2</span>])</span>
 <span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>da_sub.values[:] <span class="op">=</span> <span class="fl">5.0</span>    <span class="co"># will NOT change da</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
@@ -466,7 +500,7 @@ values: [0.4591, 0.8078, ..., -0.6311]</code></pre>
 <section id="plotting" class="level2">
 <h2 class="anchored" data-anchor-id="plotting"><i class="fa-solid fa-chart-line" aria-label="chart-line"></i> Plotting</h2>
 <p>The plotting of a DataArray is context-aware meaning that plotting behaviour depends on the geometry of the DataArray being plotted.</p>
-<div id="39947f7b" class="cell" data-execution_count="8">
+<div id="8b52d6d0" class="cell" data-execution_count="8">
 <div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>da.plot()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display">
 <div>
@@ -476,7 +510,7 @@ values: [0.4591, 0.8078, ..., -0.6311]</code></pre>
 </div>
 </div>
 </div>
-<div id="e3498be9" class="cell" data-execution_count="9">
+<div id="4c4bc62b" class="cell" data-execution_count="9">
 <div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>da.plot.contourf()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display">
 <div>
@@ -486,7 +520,7 @@ values: [0.4591, 0.8078, ..., -0.6311]</code></pre>
 </div>
 </div>
 </div>
-<div id="265fa13c" class="cell" data-execution_count="10">
+<div id="c2b52b38" class="cell" data-execution_count="10">
 <div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>da.plot.mesh()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display">
 <div>
@@ -507,7 +541,7 @@ values: [0.4591, 0.8078, ..., -0.6311]</code></pre>
 <li>shape - Shape of the data</li>
 <li>deletevalue - File delete value (NaN value)</li>
 </ul>
-<div id="447118dc" class="cell" data-execution_count="11">
+<div id="492d0066" class="cell" data-execution_count="11">
 <div class="sourceCode cell-code" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>da.geometry</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="11">
 <pre><code>Flexible Mesh Geometry: Dfsu2D
@@ -553,7 +587,7 @@ projection: UTM-29</code></pre>
 </section>
 <section id="multiply-or-add-scalar" class="level2">
 <h2 class="anchored" data-anchor-id="multiply-or-add-scalar">Multiply or add scalar</h2>
-<div id="744cc57e" class="cell" data-execution_count="12">
+<div id="f74f607f" class="cell" data-execution_count="12">
 <div class="sourceCode cell-code" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>da1 <span class="op">=</span> mikeio.read(<span class="st">"../data/oresundHD_run1.dfsu"</span>, items<span class="op">=</span><span class="st">"Surface elevation"</span>)[<span class="dv">0</span>]</span>
 <span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>da2 <span class="op">=</span> mikeio.read(<span class="st">"../data/oresundHD_run2.dfsu"</span>, items<span class="op">=</span><span class="st">"Surface elevation"</span>)[<span class="dv">0</span>]</span>
 <span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a></span>
@@ -562,7 +596,7 @@ projection: UTM-29</code></pre>
 <pre><code>np.float32(0.18681714)</code></pre>
 </div>
 </div>
-<div id="654462ad" class="cell" data-execution_count="13">
+<div id="aa303b52" class="cell" data-execution_count="13">
 <div class="sourceCode cell-code" id="cb19"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>da1_A <span class="op">=</span> da1 <span class="op">+</span> <span class="dv">1</span></span>
 <span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>da1_B <span class="op">=</span> da1 <span class="op">-</span> <span class="dv">1</span></span>
 <span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>da1_A.values.mean(), da1_B.values.mean()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
@@ -570,7 +604,7 @@ projection: UTM-29</code></pre>
 <pre><code>(np.float32(1.1868172), np.float32(-0.81318283))</code></pre>
 </div>
 </div>
-<div id="05402f01" class="cell" data-execution_count="14">
+<div id="267b1380" class="cell" data-execution_count="14">
 <div class="sourceCode cell-code" id="cb21"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>da1_C <span class="op">=</span> da1 <span class="op">*</span> <span class="dv">2</span></span>
 <span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>da1_D <span class="op">=</span> da1 <span class="op">/</span> <span class="dv">2</span></span>
 <span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>da1_C.values.mean(), da1_D.values.mean()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
@@ -582,7 +616,7 @@ projection: UTM-29</code></pre>
 <section id="difference-between-two-dataarrays" class="level2">
 <h2 class="anchored" data-anchor-id="difference-between-two-dataarrays">Difference between two DataArrays</h2>
 <p>Assume that we have two calibration runs and we wan’t to find the difference…</p>
-<div id="8797d3aa" class="cell" data-execution_count="15">
+<div id="7210fb6e" class="cell" data-execution_count="15">
 <div class="sourceCode cell-code" id="cb23"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>da_diff <span class="op">=</span> da1<span class="op">-</span>da2</span>
 <span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>da_diff.plot(title<span class="op">=</span><span class="st">"Difference"</span>)<span class="op">;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display">
@@ -593,7 +627,7 @@ projection: UTM-29</code></pre>
 </div>
 </div>
 </div>
-<div id="2ff20295" class="cell" data-execution_count="16">
+<div id="0b799e55" class="cell" data-execution_count="16">
 <div class="sourceCode cell-code" id="cb24"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>da_ratio <span class="op">=</span> da1 <span class="op">/</span> da2</span>
 <span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>da_ratio.plot(title<span class="op">=</span><span class="st">""</span>, label<span class="op">=</span><span class="st">"Ratio"</span>, vmin<span class="op">=</span><span class="fl">0.8</span>, vmax<span class="op">=</span><span class="fl">1.2</span>, levels<span class="op">=</span><span class="dv">9</span>, cmap<span class="op">=</span><span class="st">"coolwarm"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display">
@@ -606,7 +640,7 @@ projection: UTM-29</code></pre>
 </div>
 <p>Other methods that also return a DataArray:</p>
 <ul>
-<li><a href="../api/DataArray.html#mikeio.DataArray.interp_like"><code>interp_like</code></a> - Spatio (temporal) interpolation (see example <a href="../examples/Dfsu-2D-interpolation.html">Dfsu interpolation</a>)</li>
+<li><a href="../api/DataArray.html#mikeio.DataArray.interp_like"><code>interp_like</code></a> - Spatio (temporal) interpolation (see example <a href="../examples/Dfsu-2D-interpolation.qmd">Dfsu interpolation</a>)</li>
 <li><a href="../api/DataArray.html#mikeio.DataArray.interp_time"><code>interp_time()</code></a> - Temporal interpolation (see example <a href="../examples/Time-interpolation.html">Time interpolation</a>)</li>
 <li><a href="../api/DataArray.html#mikeio.DataArray.dropna"><code>dropna()</code></a> - Remove time steps where all items are NaN</li>
 <li><a href="../api/DataArray.html#mikeio.DataArray.squeeze"><code>squeeze()</code></a> - Remove axes of length 1</li>

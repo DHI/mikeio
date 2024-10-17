@@ -278,13 +278,30 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
       <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 show">  
           <li class="sidebar-item sidebar-item-section">
       <div class="sidebar-item-container"> 
-            <a href="../examples/dfs2/index.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Dfs2</span></a>
+            <a href="../examples/dfs0/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Dfs0</span></a>
           <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="false" aria-label="Toggle section">
             <i class="bi bi-chevron-right ms-2"></i>
           </a> 
       </div>
       <ul id="quarto-sidebar-section-3" class="collapse list-unstyled sidebar-section depth2 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../examples/dfs0/cmems_insitu.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Dfs0 - CMEMS <em>in-situ</em> data</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+          <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../examples/dfs2/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Dfs2</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-4" class="collapse list-unstyled sidebar-section depth2 ">  
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../examples/dfs2/bathy.html" class="sidebar-item-text sidebar-link">
@@ -299,12 +316,29 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </li>
       </ul>
   </li>
+          <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a href="../examples/dfsu/index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Dfsu</span></a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" role="navigation" aria-expanded="false" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-5" class="collapse list-unstyled sidebar-section depth2 ">  
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="../examples/Dfsu-2D-interpolation.html" class="sidebar-item-text sidebar-link">
+  <a href="../examples/dfsu/spatial_interpolation.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">Dfsu - 2D interpolation</span></a>
   </div>
 </li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../examples/dfsu/merge_subdomains.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Merging subdomain dfsu files</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../examples/Time-interpolation.html" class="sidebar-item-text sidebar-link">
@@ -346,7 +380,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <li><a href="#common-dfsu-and-mesh-properties" id="toc-common-dfsu-and-mesh-properties" class="nav-link" data-scroll-target="#common-dfsu-and-mesh-properties">Common Dfsu and Mesh properties</a></li>
   <li><a href="#dfsu-types" id="toc-dfsu-types" class="nav-link" data-scroll-target="#dfsu-types">Dfsu types</a></li>
   </ul>
-<div class="toc-actions"><ul><li><a href="https://github.com/DHI/mikeio/edit/main/docs/user-guide/dfsu.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li></ul></div></nav>
+<div class="toc-actions"><ul><li><a href="https://github.com/DHI/mikeio/edit/main/docs/user-guide/dfsu.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li></ul></div><div class="quarto-alternate-formats"><h2>Other Formats</h2><ul><li><a href="dfsu.ipynb" download="dfsu.ipynb"><i class="bi bi-journal-code"></i>Jupyter</a></li></ul></div></nav>
     </div>
 <!-- main -->
 <main class="content" id="quarto-document-content">
@@ -517,7 +551,7 @@ Note
 </table>
 <p>These properties and methods are accessible from the geometry, but also from the Mesh/Dfsu object.</p>
 <p>If a .dfsu file is <em>read</em> with <a href="../api/read.html#mikeio.read"><code>mikeio.read</code></a>, the returned Dataset ds will contain a Flexible Mesh Geometry <code>geometry</code>. If a .dfsu or a .mesh file is <em>opened</em> with <a href="../api/open.html#mikeio.open"><code>mikeio.open</code></a>, the returned object will also contain a Flexible Mesh Geometry <code>geometry</code>.</p>
-<div id="ea1471ac" class="cell" data-execution_count="1">
+<div id="563bcaa6" class="cell" data-execution_count="1">
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> mikeio</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>ds <span class="op">=</span> mikeio.read(<span class="st">"../data/oresundHD_run1.dfsu"</span>)</span>
@@ -529,7 +563,7 @@ number of elements: 3612
 projection: UTM-33</code></pre>
 </div>
 </div>
-<div id="17b514de" class="cell" data-execution_count="2">
+<div id="7dbf399b" class="cell" data-execution_count="2">
 <div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>dfs <span class="op">=</span> mikeio.<span class="bu">open</span>(<span class="st">"../data/oresundHD_run1.dfsu"</span>)</span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>dfs.geometry</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="2">
