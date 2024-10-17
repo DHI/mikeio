@@ -44,7 +44,7 @@ da_grid.plot();
 da_grid.to_dfs("wind_north_sea_interpolated.dfs2")
 ```
 
-![](../images/dfsu_grid_interp.png)
+![](../../images/dfsu_grid_interp.png)
 
 ## Save to NetCDF
 
@@ -53,7 +53,7 @@ xr_da = da_grid.to_xarray()
 xr_da.to_netcdf("wind_north_sea_interpolated.nc")
 ```
 
-![](../images/dfsu_grid_netcdf.png)
+![](../../images/dfsu_grid_netcdf.png)
 
 ## Save to GeoTiff
 
