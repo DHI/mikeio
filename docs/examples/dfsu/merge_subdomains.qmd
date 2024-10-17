@@ -1,0 +1,153 @@
+---
+title: Merging subdomain dfsu files
+jupyter: python3
+---
+
+During simulation MIKE will commonly split simulation files into subdomains and output results with a p_# suffix. This script will merge dfsu files of this type into a single file.
+
+Note: Below implementation considers a 2D dfsu file. For 3D dfsu file, the script needs to be modified accordingly.
+
+
+## Import libraries
+
+```{python}
+import mikeio 
+import numpy as np
+from mikeio.spatial import GeometryFM2D
+```
+
+```{python}
+# (optional) check first file, items etc. 
+mikeio.open("../../data/SimA_HD_p0.dfsu")
+```
+
+## Choose items to process
+
+```{python}
+# choose items to process (when in doubt look at one of the files you want to process with mikeio.open)
+items = ["Surface elevation", "Current speed", "Current direction"]
+```
+
+## Read files
+
+Option A: automatically find all with _p# suffix
+
+```{python}
+import glob
+import os
+
+basename = "../../data/SimA_HD"  # basename of the dfsu files
+
+
+def find_dfsu_files(basename):
+    pattern = f"{basename}_p*.dfsu"
+    files = sorted(glob.glob(pattern))
+    if not files:
+        raise ValueError(f"No files found matching the pattern: {pattern}")
+    return files
+
+
+dfs_files = find_dfsu_files(basename)
+print(f"Found {len(dfs_files)} files:")
+for file in dfs_files:
+    print(f"  - {os.path.basename(file)}")
+
+dfs_list = [mikeio.read(file, items=items) for file in dfs_files]
+```
+
+Option B: manually select files
+
+```{python}
+# List of input dfsu files
+dfs_files = [
+    "../../data/SimA_HD_p0.dfsu",
+    "../../data/SimA_HD_p1.dfsu",
+    "../../data/SimA_HD_p2.dfsu",
+    "../../data/SimA_HD_p3.dfsu",
+]
+
+# read all dfsu files
+dfs_list = [mikeio.read(file, items=items) for file in dfs_files]
+```
+
+## Extract data of all subdomains
+
+```{python}
+# Create a dictionary to store data for each item
+data_dict = {item: [] for item in items}
+
+# Get time steps (assuming all files have the same time steps)
+time_steps = dfs_list[0][items[0]].time
+
+# loop over items and time steps and concatenate data from all subdomains
+for item in items:
+    for i in range(len(time_steps)):
+        # Extract and combine data for the current time step from all subdomains
+        combined_data = np.concatenate([dfs[item].values[i, :] for dfs in dfs_list])
+        data_dict[item].append(combined_data)
+    
+    # Convert the list to a numpy array
+    data_dict[item] = np.array(data_dict[item])
+
+# Prepare Merged Data
+merged_data = np.array([data_dict[item] for item in items])
+```
+
+## Merge geometry of all subdomains
+
+```{python}
+geometries = [dfs.geometry for dfs in dfs_list]
+
+combined_node_coordinates = []
+combined_element_table = []
+node_offset = 0
+
+# loop through geometries to combine nodes and elements of all subdomains
+for geom in geometries:
+    current_node_coordinates = geom.node_coordinates
+    current_element_table = geom.element_table
+    
+    combined_node_coordinates.extend(current_node_coordinates)
+    adjusted_element_table = [element + node_offset for element in current_element_table]
+    combined_element_table.extend(adjusted_element_table)
+    
+    node_offset += len(current_node_coordinates)
+
+combined_node_coordinates = np.array(combined_node_coordinates)
+combined_element_table = np.array(combined_element_table, dtype=object)
+projection = geometries[0]._projstr
+
+# create combined geometry
+combined_geometry = GeometryFM2D(
+    node_coordinates=combined_node_coordinates,
+    element_table=combined_element_table,
+    projection=projection
+)
+```
+
+```{python}
+combined_geometry.plot()
+```
+
+## Merge everything into dataset
+
+```{python}
+ds_out = mikeio.Dataset(
+    data=merged_data,  # n_items, timesteps, n_elements
+    items=items, 
+    time=time_steps,
+    geometry=combined_geometry
+)
+```
+
+```{python}
+ds_out[items[0]].sel(time=1).plot() # plot the first time step of the first item
+```
+
+## Write output to single file
+
+```{python}
+output_file = "area_merged.dfsu"
+ds_out.to_dfs(output_file)
+```
+
