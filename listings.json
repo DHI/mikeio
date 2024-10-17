@@ -1,0 +1,17 @@
+[
+  {
+    "listing": "/examples/index.html",
+    "items": [
+      "/examples/dfs0/cmems_insitu.html",
+      "/examples/dfs0/index.html",
+      "/examples/dfs2/bathy.html",
+      "/examples/dfs2/gfs.html",
+      "/examples/dfs2/index.html",
+      "/examples/dfsu/spatial_interpolation.html",
+      "/examples/dfsu/index.html",
+      "/examples/Generic.html",
+      "/examples/dfsu/merge_subdomains.html",
+      "/examples/Time-interpolation.html"
+    ]
+  }
+]
