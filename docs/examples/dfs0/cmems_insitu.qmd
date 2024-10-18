@@ -3,7 +3,7 @@ title: Dfs0 - CMEMS *in-situ* data
 jupyter: python3
 ---
 
-
+Copernicus Marine provides access to a wide range of model and [*in-situ* data](https://marine.copernicus.eu/about/producers/insitu-tac). In this example we will look at how to access the *in-situ* data and convert it to a MIKE IO dataset.
 
 ```{python}
 import pandas as pd
@@ -16,16 +16,7 @@ fino = xr.open_dataset("../../data/NO_TS_MO_FINO1_202209.nc")
 fino
 ```
 
-CMEMS *in-situ* data is provided in a standardised format, the [OceanSITES time-series data format](http://www.oceansites.org/docs/oceansites_data_format_reference_manual.pdf).
-
-> "*The OceanSITES programme is the global network of open-ocean sustained time series 
-sites, called ocean reference stations, being implemented by an international partnership of 
-researchers and agencies. OceanSITES provides fixed-point time series of various physical, 
-biogeochemical, ecosystem and atmospheric variables at locations around the globe, from 
-the atmosphere and sea surface to the seafloor. The program’s objective is to build and 
-maintain a multidisciplinary global network for a broad range of research and operational 
-applications including climate, carbon, and ecosystem variability and forecasting and ocean 
-state validation*"
+CMEMS *in-situ* data is provided in a [standardised format](https://archimer.ifremer.fr/doc/00488/59938/).
 
 Find out which variables we are interested in to extract:
 
