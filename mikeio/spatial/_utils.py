@@ -6,7 +6,7 @@ from ._geometry import BoundingBox
 
 
 def xy_to_bbox(xy: np.ndarray, buffer: float = 0.0) -> BoundingBox:
-    """return bounding box for list of coordinates"""
+    """Return bounding box for list of coordinates."""
     left = xy[:, 0].min() - buffer
     bottom = xy[:, 1].min() - buffer
     right = xy[:, 0].max() + buffer
@@ -17,7 +17,7 @@ def xy_to_bbox(xy: np.ndarray, buffer: float = 0.0) -> BoundingBox:
 def dist_in_meters(
     coords: np.ndarray, pt: tuple[float, float], is_geo: bool = False
 ) -> np.ndarray:
-    """get distance between array of coordinates and point
+    """Get distance between array of coordinates and point.
 
     Parameters
     ----------
@@ -32,6 +32,7 @@ def dist_in_meters(
     -------
     array
         distances in meter
+
     """
     coords = np.atleast_2d(coords)
     xe = coords[:, 0]
@@ -61,7 +62,7 @@ def _get_dist_geo(lon: float, lat: float, lon1: float, lat1: float) -> float:
 def _relative_cumulative_distance(
     coords: np.ndarray, reference: np.ndarray | None = None, is_geo: bool = False
 ) -> np.ndarray:
-    """Calculate the cumulative relative distance along a path"""
+    """Calculate the cumulative relative distance along a path."""
     coords = np.atleast_2d(coords)
     d = np.zeros_like(coords[:, 0])
     if reference is not None:

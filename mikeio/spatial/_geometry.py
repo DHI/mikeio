@@ -17,12 +17,12 @@ class _Geometry(ABC):
 
     @property
     def projection_string(self) -> str:
-        """The projection string"""
+        """The projection string."""
         return self._projstr
 
     @property
     def projection(self) -> str:
-        """The projection"""
+        """The projection."""
         return self._projstr
 
     @property
@@ -82,7 +82,7 @@ class GeometryPoint2D(_Geometry):
 
     @property
     def ndim(self) -> int:
-        """Geometry dimension"""
+        """Geometry dimension."""
         return 0
 
     def to_shapely(self) -> Any:

@@ -96,15 +96,15 @@ class Dfs1(_Dfs123):
 
     @property
     def x0(self) -> float:
-        """Start point of x values (often 0)"""
+        """Start point of x values (often 0)."""
         return self._x0
 
     @property
     def dx(self) -> float:
-        """Step size in x direction"""
+        """Step size in x direction."""
         return self._dx
 
     @property
     def nx(self) -> int:
-        """Number of node values"""
+        """Number of node values."""
         return self._nx

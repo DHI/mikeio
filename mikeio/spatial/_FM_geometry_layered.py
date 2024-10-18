@@ -175,7 +175,7 @@ class _GeometryFMLayered(_GeometryFM):
 
     @cached_property
     def element_coordinates(self) -> np.ndarray:
-        """Center coordinates of each element"""
+        """Center coordinates of each element."""
         return self._calc_element_coordinates(maxnodes=8)
 
     def _get_nodes_and_table_for_elements(
@@ -183,7 +183,7 @@ class _GeometryFMLayered(_GeometryFM):
         elements: Sequence[int] | np.ndarray,
         node_layers: Layer = "all",
     ) -> tuple[Any, Any]:
-        """list of nodes and element table for a list of elements
+        """list of nodes and element table for a list of elements.
 
         Parameters
         ----------
@@ -199,6 +199,7 @@ class _GeometryFMLayered(_GeometryFM):
             array of node ids (unique)
         list(list(int))
             element table with a list of nodes for each element
+
         """
         elem_tbl = np.empty(len(elements), dtype=np.dtype("O"))
         if (node_layers == "all") or self.is_2d:
@@ -221,12 +222,13 @@ class _GeometryFMLayered(_GeometryFM):
         return nodes, elem_tbl
 
     def to_2d_geometry(self) -> GeometryFM2D:
-        """extract 2d geometry from 3d geometry
+        """extract 2d geometry from 3d geometry.
 
         Returns
         -------
         UnstructuredGeometry
             2d geometry (bottom nodes)
+
         """
         # extract information for selected elements
         elem_ids = self.bottom_elements
@@ -267,7 +269,7 @@ class _GeometryFMLayered(_GeometryFM):
 
     @cached_property
     def n_elements(self) -> int:
-        """Number of 3d elements"""
+        """Number of 3d elements."""
         return len(self.element_table)
 
     @property
@@ -288,7 +290,7 @@ class _GeometryFMLayered(_GeometryFM):
 
     @cached_property
     def layer_ids(self) -> np.ndarray:
-        """The layer number (0=bottom, 1, 2, ...) for each 3d element"""
+        """The layer number (0=bottom, 1, 2, ...) for each 3d element."""
         if self._layer_ids is None:
             res = self._get_2d_to_3d_association()
             self._e2_e3_table = res[0]
@@ -298,22 +300,22 @@ class _GeometryFMLayered(_GeometryFM):
 
     @property
     def n_layers(self) -> int:
-        """Maximum number of layers"""
+        """Maximum number of layers."""
         return self._n_layers
 
     @property
     def n_sigma_layers(self) -> int:
-        """Number of sigma layers"""
+        """Number of sigma layers."""
         return self._n_sigma
 
     @property
     def n_z_layers(self) -> int:
-        """Maximum number of z-layers"""
+        """Maximum number of z-layers."""
         return self.n_layers - self.n_sigma_layers
 
     @cached_property
     def top_elements(self) -> np.ndarray:
-        """List of 3d element ids of surface layer"""
+        """List of 3d element ids of surface layer."""
         # note: if subset of elements is selected then this cannot be done!
 
         # fast path if no z-layers
@@ -330,7 +332,7 @@ class _GeometryFMLayered(_GeometryFM):
     def _elements_in_area(
         self, area: Sequence[tuple[float, float]] | Sequence[float]
     ) -> np.ndarray:
-        """Find element ids of elements inside area"""
+        """Find element ids of elements inside area."""
         idx2d = self.geometry2d._elements_in_area(area)
         if len(idx2d) > 0:
             return np.hstack(self.e2_e3_table[idx2d])
@@ -339,8 +341,7 @@ class _GeometryFMLayered(_GeometryFM):
 
     @staticmethod
     def _find_top_layer_elements(elementTable: np.ndarray) -> np.ndarray:
-        """
-        Find element indices (zero based) of the elements being the upper-most element
+        """Find element indices (zero based) of the elements being the upper-most element
         in its column.
         Each column is identified by matching node id numbers. For 3D elements the
         last half of the node numbers of the bottom element must match the first half
@@ -351,9 +352,8 @@ class _GeometryFMLayered(_GeometryFM):
         is stored in res:
         For the first column it is res[0]+1.
         For the i'th column, it is res[i]-res[i-1].
-        :returns: A list of element indices of top layer elements
+        :returns: A list of element indices of top layer elements.
         """
-
         topLayerElments = []
 
         # Find top layer elements by matching the number numers of the last half of elmt i
@@ -396,8 +396,7 @@ class _GeometryFMLayered(_GeometryFM):
 
     @cached_property
     def n_layers_per_column(self) -> np.ndarray:
-        """List of number of layers for each column"""
-
+        """List of number of layers for each column."""
         top_elems = self.top_elements
         n = len(top_elems)
         tmp = top_elems.copy()
@@ -408,11 +407,11 @@ class _GeometryFMLayered(_GeometryFM):
 
     @cached_property
     def bottom_elements(self) -> np.ndarray:
-        """List of 3d element ids of bottom layer"""
+        """List of 3d element ids of bottom layer."""
         return self.top_elements - self.n_layers_per_column + 1
 
     def get_layer_elements(self, layers: int | Layer | Sequence[int]) -> np.ndarray:
-        """3d element ids for one (or more) specific layer(s)
+        """3d element ids for one (or more) specific layer(s).
 
         Parameters
         ----------
@@ -424,6 +423,7 @@ class _GeometryFMLayered(_GeometryFM):
         -------
         np.array(int)
             element ids
+
         """
         if isinstance(layers, str):
             if layers == "top":
@@ -459,8 +459,7 @@ class _GeometryFMLayered(_GeometryFM):
 
     @property
     def e2_e3_table(self) -> np.ndarray:
-        """The 2d-to-3d element connectivity table for a 3d object"""
-
+        """The 2d-to-3d element connectivity table for a 3d object."""
         # e2_e3, 2d_ids and layer_ids are all set at the same time
 
         if self._e2_e3_table is None:
@@ -472,7 +471,7 @@ class _GeometryFMLayered(_GeometryFM):
 
     @property
     def elem2d_ids(self) -> np.ndarray:
-        """The associated 2d element id for each 3d element"""
+        """The associated 2d element id for each 3d element."""
         if self._2d_ids is None:
             res = self._get_2d_to_3d_association()
             self._e2_e3_table = res[0]
@@ -523,8 +522,7 @@ class _GeometryFMLayered(_GeometryFM):
     def _find_elem3d_from_elem2d(
         self, elem2d: int | np.ndarray, z: np.ndarray | float
     ) -> np.ndarray:
-        """Find 3d element ids from 2d element ids and z-values"""
-
+        """Find 3d element ids from 2d element ids and z-values."""
         # TODO: coordinate with _find_3d_from_2d_points()
 
         elem2d = [elem2d] if np.isscalar(elem2d) else elem2d
@@ -592,11 +590,11 @@ class _GeometryFMLayered(_GeometryFM):
 
     @cached_property
     def _dz(self) -> np.ndarray:
-        """Height of each 3d element (using static zn information)"""
+        """Height of each 3d element (using static zn information)."""
         return self._calc_dz()
 
     def _calc_dz(self) -> np.ndarray:
-        """Height of 3d elements using static or dynamic zn information"""
+        """Height of 3d elements using static or dynamic zn information."""
         element_table = self.element_table
         n_elements = len(element_table)
 
@@ -753,6 +751,7 @@ class GeometryFMVerticalProfile(_GeometryFMLayered):
         -------
         float
             relative distance in meters from start of transect
+
         """
         xe = self.element_coordinates[:, 0]
         ye = self.element_coordinates[:, 1]
@@ -809,7 +808,7 @@ class GeometryFMVerticalProfile(_GeometryFMLayered):
 
 
 class GeometryFMVerticalColumn(GeometryFM3D):
-    "A 3d geometry with consisting of a single vertical column"
+    "A 3d geometry with consisting of a single vertical column."
 
     # TODO: add plotter
 
@@ -837,7 +836,7 @@ class GeometryFMVerticalColumn(GeometryFM3D):
     def _interp_values(
         self, zn: np.ndarray, data: np.ndarray, z: np.ndarray
     ) -> np.ndarray:
-        """Interpolate to other z values, allow linear extrapolation"""
+        """Interpolate to other z values, allow linear extrapolation."""
         from scipy.interpolate import interp1d  # type: ignore
 
         opt = {"kind": "linear", "bounds_error": False, "fill_value": "extrapolate"}

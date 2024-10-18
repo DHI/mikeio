@@ -39,7 +39,7 @@ if TYPE_CHECKING:
 
 
 class _GeometryFMPlotter:
-    """Plot GeometryFM
+    """Plot GeometryFM.
 
     Examples
     --------
@@ -51,6 +51,7 @@ class _GeometryFMPlotter:
     >>> g.plot.mesh()     # mesh only
     >>> g.plot.outline()  # domain outline only
     >>> g.plot.boundary_nodes()
+
     """
 
     def __init__(self, geometry: GeometryFM2D | GeometryFM3D) -> None:
@@ -62,7 +63,7 @@ class _GeometryFMPlotter:
         figsize: tuple[float, float] | None = None,
         **kwargs: Any,
     ) -> Axes:
-        """Plot bathymetry as coloured patches"""
+        """Plot bathymetry as coloured patches."""
         ax = self._get_ax(ax, figsize)
         kwargs["plot_type"] = kwargs.get("plot_type") or "patch"
         return self._plot_FM_map(ax, **kwargs)
@@ -73,7 +74,7 @@ class _GeometryFMPlotter:
         figsize: tuple[float, float] | None = None,
         **kwargs: Any,
     ) -> Axes:
-        """Plot bathymetry as contour lines"""
+        """Plot bathymetry as contour lines."""
         ax = self._get_ax(ax, figsize)
         kwargs["plot_type"] = "contour"
         return self._plot_FM_map(ax, **kwargs)
@@ -84,7 +85,7 @@ class _GeometryFMPlotter:
         figsize: tuple[float, float] | None = None,
         **kwargs: Any,
     ) -> Axes:
-        """Plot bathymetry as filled contours"""
+        """Plot bathymetry as filled contours."""
         ax = self._get_ax(ax, figsize)
         kwargs["plot_type"] = "contourf"
         return self._plot_FM_map(ax, **kwargs)
@@ -126,8 +127,7 @@ class _GeometryFMPlotter:
         figsize: tuple[float, float] | None = None,
         ax: Axes | None = None,
     ) -> Axes:
-        """Plot mesh only"""
-
+        """Plot mesh only."""
         # TODO this must be a duplicate, delegate
 
         from matplotlib.collections import PatchCollection  # type: ignore
@@ -152,8 +152,7 @@ class _GeometryFMPlotter:
         figsize: tuple[float, float] | None = None,
         ax: Axes | None = None,
     ) -> Axes:
-        """Plot domain outline (using the boundary_polylines property)"""
-
+        """Plot domain outline (using the boundary_polylines property)."""
         ax = self._get_ax(ax=ax, figsize=figsize)
         ax.set_aspect(self._plot_aspect())
 
@@ -174,7 +173,7 @@ class _GeometryFMPlotter:
         figsize: tuple[float, float] | None = None,
         ax: Axes | None = None,
     ) -> Axes:
-        """Plot mesh boundary nodes and their code values"""
+        """Plot mesh boundary nodes and their code values."""
         import matplotlib.pyplot as plt
 
         ax = self._get_ax(ax=ax, figsize=figsize)
@@ -341,7 +340,7 @@ class _GeometryFM(_Geometry):
 
     @property
     def n_nodes(self) -> int:
-        """Number of nodes"""
+        """Number of nodes."""
         return len(self._node_ids)
 
     @property
@@ -350,7 +349,7 @@ class _GeometryFM(_Geometry):
 
     @property
     def n_elements(self) -> int:
-        """Number of elements"""
+        """Number of elements."""
         return len(self._element_ids)
 
     @property
@@ -359,7 +358,7 @@ class _GeometryFM(_Geometry):
 
     @cached_property
     def max_nodes_per_element(self) -> int:
-        """The maximum number of nodes for an element"""
+        """The maximum number of nodes for an element."""
         maxnodes = 0
         for local_nodes in self.element_table:
             n = len(local_nodes)
@@ -369,7 +368,7 @@ class _GeometryFM(_Geometry):
 
     @property
     def codes(self) -> np.ndarray:
-        """Node codes of all nodes (0=water, 1=land, 2...=open boundaries)"""
+        """Node codes of all nodes (0=water, 1=land, 2...=open boundaries)."""
         return self._codes
 
     @codes.setter
@@ -380,7 +379,7 @@ class _GeometryFM(_Geometry):
 
     @property
     def boundary_codes(self) -> list[int]:
-        """Unique list of boundary codes"""
+        """Unique list of boundary codes."""
         valid = list(set(self.codes))
         return [code for code in valid if code > 0]
 
@@ -440,8 +439,7 @@ class GeometryFM2D(_GeometryFM):
 
     @staticmethod
     def _point_in_polygon(xn: np.ndarray, yn: np.ndarray, xp: float, yp: float) -> bool:
-        """Check for each side in the polygon that the point is on the correct side"""
-
+        """Check for each side in the polygon that the point is on the correct side."""
         for j in range(len(xn) - 1):
             if (yn[j + 1] - yn[j]) * (xp - xn[j]) + (-xn[j + 1] + xn[j]) * (
                 yp - yn[j]
@@ -462,7 +460,7 @@ class GeometryFM2D(_GeometryFM):
 
     @property
     def type_name(self) -> str:
-        """Type name, e.g. Mesh, Dfsu2D"""
+        """Type name, e.g. Mesh, Dfsu2D."""
         return self._type.name if self._type else "Mesh"
 
     @property
@@ -471,12 +469,11 @@ class GeometryFM2D(_GeometryFM):
 
     @property
     def geometry2d(self) -> GeometryFM2D:
-        """Return self"""
         return self
 
     @property
     def is_2d(self) -> bool:
-        """Type is either mesh or Dfsu2D (2 horizontal dimensions)"""
+        """Type is either mesh or Dfsu2D (2 horizontal dimensions)."""
         return self._type in (
             DfsuFileType.Dfsu2D,
             DfsuFileType.DfsuSpectral2D,
@@ -485,12 +482,12 @@ class GeometryFM2D(_GeometryFM):
 
     @property
     def is_layered(self) -> bool:
-        """Type is layered dfsu (3d, vertical profile or vertical column)"""
+        """Type is layered dfsu (3d, vertical profile or vertical column)."""
         return False
 
     @property
     def is_spectral(self) -> bool:
-        """Type is spectral dfsu (point, line or area spectrum)"""
+        """Type is spectral dfsu (point, line or area spectrum)."""
         return self._type in (
             DfsuFileType.DfsuSpectral0D,
             DfsuFileType.DfsuSpectral1D,
@@ -499,12 +496,12 @@ class GeometryFM2D(_GeometryFM):
 
     @property
     def is_tri_only(self) -> bool:
-        """Does the mesh consist of triangles only?"""
+        """Does the mesh consist of triangles only."""
         return self.max_nodes_per_element == 3 or self.max_nodes_per_element == 6
 
     @cached_property
     def element_coordinates(self) -> np.ndarray:
-        """Center coordinates of each element"""
+        """Center coordinates of each element."""
         return self._calc_element_coordinates()
 
     @cached_property
@@ -519,7 +516,7 @@ class GeometryFM2D(_GeometryFM):
         n_nearest: int = 1,
         return_distances: bool = False,
     ) -> Any:
-        """Find index of nearest elements (optionally for a list)
+        """Find index of nearest elements (optionally for a list).
 
         Parameters
         ----------
@@ -554,6 +551,7 @@ class GeometryFM2D(_GeometryFM):
         See Also
         --------
         find_index : find element indicies for points or an area
+
         """
         idx, d2d = self._find_n_nearest_2d_elements(x, y, n=n_nearest)
 
@@ -570,7 +568,7 @@ class GeometryFM2D(_GeometryFM):
         p: int = 2,
         radius: float | None = None,
     ) -> tuple[Any, Any]:
-        """IDW interpolant for list of coordinates
+        """IDW interpolant for list of coordinates.
 
         Parameters
         ----------
@@ -590,6 +588,7 @@ class GeometryFM2D(_GeometryFM):
         -------
         (np.array, np.array)
             element ids and weights
+
         """
         xy = np.atleast_2d(xy)
         ids, dists = self._find_n_nearest_2d_elements(xy, n=n_nearest)
@@ -618,7 +617,7 @@ class GeometryFM2D(_GeometryFM):
         weights: np.ndarray | None = None,
         shape: tuple[int, ...] | None = None,
     ) -> np.ndarray | list[np.ndarray]:
-        """interp spatially in data (2d only)
+        """Interpolate spatially in data (2d only).
 
         Parameters
         ----------
@@ -642,6 +641,7 @@ class GeometryFM2D(_GeometryFM):
         >>> g = dfs.get_overset_grid(shape=(50,40))
         >>> elem_ids, weights = dfs.get_2d_interpolant(g.xy)
         >>> dsi = dfs.interp2d(ds, elem_ids, weights)
+
         """
         return interp2d(data, elem_ids, weights, shape)  # type: ignore
 
@@ -743,7 +743,7 @@ class GeometryFM2D(_GeometryFM):
         ny: int | None = None,
         buffer: float = 0.0,
     ) -> Grid2D:
-        """get a 2d grid that covers the domain by specifying spacing or shape
+        """Get a 2d grid that covers the domain by specifying spacing or shape.
 
         Parameters
         ----------
@@ -766,6 +766,7 @@ class GeometryFM2D(_GeometryFM):
         -------
         <mikeio.Grid2D>
             2d grid
+
         """
         nc = self.node_coordinates
         bbox = xy_to_bbox(nc, buffer=buffer)
@@ -778,6 +779,7 @@ class GeometryFM2D(_GeometryFM):
         -------
         np.array(float)
             areas in m2
+
         """
         n_elements = self.n_elements
 
@@ -840,11 +842,11 @@ class GeometryFM2D(_GeometryFM):
 
     @cached_property
     def boundary_polylines(self) -> BoundaryPolylines:
-        """Lists of closed polylines defining domain outline"""
+        """Lists of closed polylines defining domain outline."""
         return self._get_boundary_polylines()
 
     def contains(self, points: np.ndarray) -> np.ndarray:
-        """test if a list of points are contained by mesh
+        """Test if a list of points are contained by mesh.
 
         Parameters
         ----------
@@ -855,6 +857,7 @@ class GeometryFM2D(_GeometryFM):
         -------
         bool array
             True for points inside, False otherwise
+
         """
         import matplotlib.path as mp  # type: ignore
 
@@ -880,7 +883,7 @@ class GeometryFM2D(_GeometryFM):
         return self.contains(pt)[0]
 
     def _get_boundary_polylines_uncategorized(self) -> list[list[np.int64]]:
-        """Construct closed polylines for all boundary faces"""
+        """Construct closed polylines for all boundary faces."""
         boundary_faces = self._get_boundary_faces()
         face_remains = boundary_faces.copy()
         polylines = []
@@ -906,9 +909,7 @@ class GeometryFM2D(_GeometryFM):
         return polylines
 
     def _get_boundary_polylines(self) -> BoundaryPolylines:
-        """Get boundary polylines and categorize as inner or outer by
-        assessing the signed area
-        """
+        """Get boundary polylines and categorize as inner or outer by assessing the signed area."""
         polylines = self._get_boundary_polylines_uncategorized()
 
         poly_lines_int = []
@@ -934,7 +935,7 @@ class GeometryFM2D(_GeometryFM):
         return BoundaryPolylines(n_ext, poly_lines_ext, n_int, poly_lines_int)
 
     def _get_boundary_faces(self) -> np.ndarray:
-        """Construct list of faces"""
+        """Construct list of faces."""
         element_table = self.element_table
 
         all_faces = []
@@ -957,7 +958,7 @@ class GeometryFM2D(_GeometryFM):
     def isel(
         self, idx: Sequence[int], keepdims: bool = False, **kwargs: Any
     ) -> "GeometryFM2D" | GeometryPoint2D:
-        """export a selection of elements to a new geometry
+        """Export a selection of elements to a new geometry.
 
         Typically not called directly, but by Dataset/DataArray's
         isel() or sel() methods.
@@ -970,6 +971,8 @@ class GeometryFM2D(_GeometryFM):
             Should the original Geometry type be kept (keepdims=True)
             or should it be reduced e.g. to a GeometryPoint2D if possible
             (keepdims=False), by default False
+        **kwargs: Any
+            Not used
 
         Returns
         -------
@@ -979,8 +982,8 @@ class GeometryFM2D(_GeometryFM):
         See Also
         --------
         find_index : find element indicies for points or an area
-        """
 
+        """
         return self.elements_to_geometry(elements=idx, keepdims=keepdims)
 
     def find_index(
@@ -1036,6 +1039,7 @@ class GeometryFM2D(_GeometryFM):
         --------
         isel : get subset geometry for specific indicies
         find_nearest_elements : find nearest instead of containing elements
+
         """
         if (coords is not None) or (x is not None) or (y is not None):
             if area is not None:
@@ -1065,7 +1069,7 @@ class GeometryFM2D(_GeometryFM):
     def _elements_in_area(
         self, area: Sequence[float] | Sequence[tuple[float, float]]
     ) -> np.ndarray:
-        """Find 2d element ids of elements inside area"""
+        """Find 2d element ids of elements inside area."""
         if self._area_is_bbox(area):
             x0, y0, x1, y1 = area
             xc = self.element_coordinates[:, 0]
@@ -1113,7 +1117,7 @@ class GeometryFM2D(_GeometryFM):
     def _get_nodes_and_table_for_elements(
         self, elements: np.ndarray | list[int]
     ) -> tuple[Any, Any]:
-        """list of nodes and element table for a list of elements
+        """List of nodes and element table for a list of elements.
 
         Parameters
         ----------
@@ -1126,6 +1130,7 @@ class GeometryFM2D(_GeometryFM):
             array of node ids (unique)
         list(list(int))
             element table with a list of nodes for each element
+
         """
         elem_tbl = np.empty(len(elements), dtype=np.dtype("O"))
 
@@ -1138,7 +1143,7 @@ class GeometryFM2D(_GeometryFM):
     def get_node_centered_data(
         self, data: np.ndarray, extrapolate: bool = True
     ) -> np.ndarray:
-        """convert cell-centered data to node-centered by pseudo-laplacian method
+        """Convert cell-centered data to node-centered by pseudo-laplacian method.
 
         Parameters
         ----------
@@ -1151,6 +1156,7 @@ class GeometryFM2D(_GeometryFM):
         -------
         np.array(float)
             node-centered data
+
         """
         geometry = self
         nc = geometry.node_coordinates
@@ -1159,12 +1165,13 @@ class GeometryFM2D(_GeometryFM):
         return _get_node_centered_data(nc, elem_table, ec, data, extrapolate)
 
     def to_shapely(self) -> Any:
-        """Export mesh as shapely MultiPolygon
+        """Export mesh as shapely MultiPolygon.
 
         Returns
         -------
         shapely.geometry.MultiPolygon
             polygons with mesh elements
+
         """
         from shapely.geometry import MultiPolygon, Polygon  # type: ignore
 
@@ -1182,12 +1189,13 @@ class GeometryFM2D(_GeometryFM):
         return mp
 
     def to_mesh(self, outfilename: str | Path) -> None:
-        """Export geometry to new mesh file
+        """Export geometry to new mesh file.
 
         Parameters
         ----------
         outfilename : str
             path to file to be written
+
         """
         builder = MeshBuilder()
         outfilename = str(outfilename)

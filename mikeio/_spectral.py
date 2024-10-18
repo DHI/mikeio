@@ -23,14 +23,16 @@ def plot_2dspectrum(
     figsize: tuple[float, float] = (7, 7),
     add_colorbar: bool = True,
 ) -> Axes:
-    """
-    Plot spectrum in polar coordinates
+    """Plot spectrum in polar coordinates.
 
     Parameters
     ----------
     spectrum: np.array
-
         spectral values as 2d array with dimensions: directions, frequencies
+    frequencies: np.array
+        frequency axis
+    directions: np.array
+        direction axis
     plot_type: str, optional
         type of plot: 'contour', 'contourf', 'patch', 'shaded',
         by default: 'contourf'
@@ -61,8 +63,8 @@ def plot_2dspectrum(
     Returns
     -------
     <matplotlib.axes>
-    """
 
+    """
     import matplotlib.pyplot as plt
 
     if (frequencies is None or len(frequencies) <= 1) and (
@@ -214,7 +216,7 @@ def calc_m0_from_spectrum(
 
 
 def _f_to_df(f: np.ndarray) -> np.ndarray:
-    """Frequency bins for equidistant or logrithmic frequency axis"""
+    """Frequency bins for equidistant or logrithmic frequency axis."""
     if np.isclose(np.diff(f).min(), np.diff(f).max()):
         # equidistant frequency bins
         return (f[1] - f[0]) * np.ones_like(f)
