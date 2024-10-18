@@ -23,8 +23,7 @@ def _get_time_idx_list(
     time: pd.DatetimeIndex,
     steps: int | Iterable[int] | str | datetime | pd.DatetimeIndex | slice,
 ) -> list[int] | slice:
-    """Find list of idx in DatetimeIndex"""
-
+    """Find list of idx in DatetimeIndex."""
     # indexing with a slice needs to be handled differently, since slicing returns a view
 
     if isinstance(steps, slice):

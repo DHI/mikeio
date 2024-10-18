@@ -10,7 +10,7 @@ def read_pfs(
     encoding: str = "cp1252",
     unique_keywords: bool = False,
 ) -> PfsDocument:
-    """Read a pfs file to a Pfs object for further analysis/manipulation
+    """Read a pfs file to a Pfs object for further analysis/manipulation.
 
     Parameters
     ----------
@@ -29,6 +29,7 @@ def read_pfs(
     -------
     PfsDocument
         A PfsDocument object
+
     """
     return PfsDocument(filename, encoding=encoding, unique_keywords=unique_keywords)
 
