@@ -48,7 +48,7 @@ unit
 type(unit)
 ```
 
-`a [](`mikeio.EUMUnit)` is encoded as integers, which you can utilize in some MIKE applications.
+an [`EUMUnit`](`mikeio.EUMUnit`) is encoded as integers, which you can utilize in some MIKE applications.
 
 ```{python}
 int(unit)
