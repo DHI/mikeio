@@ -391,7 +391,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <section id="mikeio.open" class="level1">
 <h1>open</h1>
 <div class="sourceCode" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="bu">open</span>(filename, <span class="op">**</span>kwargs)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p>Open a dfs/mesh file (and read the header)</p>
+<p>Open a dfs/mesh file (and read the header).</p>
 <p>The typical workflow for small dfs files is to read all data with <em>mikeio.read</em> instead of using this function. For big files, however, it can be convenient to open the file first with <em>dfs=mikeio.open(…)</em> to inspect it’s content (items, time and shape) and then decide what to read using dfs.read(…)</p>
 <section id="parameters" class="level2 doc-section doc-section-parameters">
 <h2 class="doc-section doc-section-parameters anchored" data-anchor-id="parameters">Parameters</h2>
@@ -422,6 +422,12 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <td>str</td>
 <td>Dfs2 only. Additional information about the file, e.g.&nbsp;"spectral" for spectral dfs2 files. By default: None.</td>
 <td><em>required</em></td>
+</tr>
+<tr class="odd">
+<td>**kwargs</td>
+<td>Any</td>
+<td>Additional keyword arguments, e.g.&nbsp;<em>type="spectral"</em></td>
+<td><code>{}</code></td>
 </tr>
 </tbody>
 </table>

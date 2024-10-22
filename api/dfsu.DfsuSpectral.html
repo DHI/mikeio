@@ -406,51 +406,51 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <tbody>
 <tr class="odd">
 <td><a href="#mikeio.dfsu.DfsuSpectral.deletevalue">deletevalue</a></td>
-<td>File delete value</td>
+<td>File delete value.</td>
 </tr>
 <tr class="even">
 <td><a href="#mikeio.dfsu.DfsuSpectral.directions">directions</a></td>
-<td>Directional axis</td>
+<td>Directional axis.</td>
 </tr>
 <tr class="odd">
 <td><a href="#mikeio.dfsu.DfsuSpectral.end_time">end_time</a></td>
-<td>File end time</td>
+<td>File end time.</td>
 </tr>
 <tr class="even">
 <td><a href="#mikeio.dfsu.DfsuSpectral.frequencies">frequencies</a></td>
-<td>Frequency axis</td>
+<td>Frequency axis.</td>
 </tr>
 <tr class="odd">
 <td><a href="#mikeio.dfsu.DfsuSpectral.geometry">geometry</a></td>
-<td>Geometry</td>
+<td>Geometry.</td>
 </tr>
 <tr class="even">
 <td><a href="#mikeio.dfsu.DfsuSpectral.items">items</a></td>
-<td>List of items</td>
+<td>List of items.</td>
 </tr>
 <tr class="odd">
 <td><a href="#mikeio.dfsu.DfsuSpectral.n_directions">n_directions</a></td>
-<td>Number of directions</td>
+<td>Number of directions.</td>
 </tr>
 <tr class="even">
 <td><a href="#mikeio.dfsu.DfsuSpectral.n_frequencies">n_frequencies</a></td>
-<td>Number of frequencies</td>
+<td>Number of frequencies.</td>
 </tr>
 <tr class="odd">
 <td><a href="#mikeio.dfsu.DfsuSpectral.n_items">n_items</a></td>
-<td>Number of items</td>
+<td>Number of items.</td>
 </tr>
 <tr class="even">
 <td><a href="#mikeio.dfsu.DfsuSpectral.n_timesteps">n_timesteps</a></td>
-<td>Number of time steps</td>
+<td>Number of time steps.</td>
 </tr>
 <tr class="odd">
 <td><a href="#mikeio.dfsu.DfsuSpectral.start_time">start_time</a></td>
-<td>File start time</td>
+<td>File start time.</td>
 </tr>
 <tr class="even">
 <td><a href="#mikeio.dfsu.DfsuSpectral.timestep">timestep</a></td>
-<td>Time step size in seconds</td>
+<td>Time step size in seconds.</td>
 </tr>
 </tbody>
 </table>
@@ -467,18 +467,18 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <tbody>
 <tr class="odd">
 <td><a href="#mikeio.dfsu.DfsuSpectral.calc_Hm0_from_spectrum">calc_Hm0_from_spectrum</a></td>
-<td>Calculate significant wave height (Hm0) from spectrum</td>
+<td>Calculate significant wave height (Hm0) from spectrum.</td>
 </tr>
 <tr class="even">
 <td><a href="#mikeio.dfsu.DfsuSpectral.read">read</a></td>
-<td>Read data from a spectral dfsu file</td>
+<td>Read data from a spectral dfsu file.</td>
 </tr>
 </tbody>
 </table>
 <section id="mikeio.dfsu.DfsuSpectral.calc_Hm0_from_spectrum" class="level3">
 <h3 class="anchored" data-anchor-id="mikeio.dfsu.DfsuSpectral.calc_Hm0_from_spectrum">calc_Hm0_from_spectrum</h3>
 <div class="sourceCode" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>dfsu.DfsuSpectral.calc_Hm0_from_spectrum(spectrum, tail<span class="op">=</span><span class="va">True</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p>Calculate significant wave height (Hm0) from spectrum</p>
+<p>Calculate significant wave height (Hm0) from spectrum.</p>
 <section id="parameters" class="level4 doc-section doc-section-parameters">
 <h4 class="doc-section doc-section-parameters anchored" data-anchor-id="parameters">Parameters</h4>
 <table class="caption-top table">
@@ -545,15 +545,15 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>    keepdims<span class="op">=</span><span class="va">False</span></span>
 <span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>    dtype<span class="op">=</span>np.float32</span>
 <span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p>Read data from a spectral dfsu file</p>
+<p>Read data from a spectral dfsu file.</p>
 <section id="parameters-1" class="level4 doc-section doc-section-parameters">
 <h4 class="doc-section doc-section-parameters anchored" data-anchor-id="parameters-1">Parameters</h4>
 <table class="caption-top table">
 <colgroup>
 <col style="width: 3%">
-<col style="width: 18%">
-<col style="width: 73%">
-<col style="width: 4%">
+<col style="width: 17%">
+<col style="width: 72%">
+<col style="width: 5%">
 </colgroup>
 <thead>
 <tr class="header">
@@ -611,6 +611,12 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <td>Sequence[int] | np.ndarray | None</td>
 <td>Read only selected node ids (spectral line files only)</td>
 <td><code>None</code></td>
+</tr>
+<tr class="odd">
+<td>dtype</td>
+<td>Any</td>
+<td>Data type to read. Default is np.float32</td>
+<td><code>np.float32</code></td>
 </tr>
 </tbody>
 </table>

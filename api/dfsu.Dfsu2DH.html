@@ -408,31 +408,31 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <tbody>
 <tr class="odd">
 <td><a href="#mikeio.dfsu.Dfsu2DH.deletevalue">deletevalue</a></td>
-<td>File delete value</td>
+<td>File delete value.</td>
 </tr>
 <tr class="even">
 <td><a href="#mikeio.dfsu.Dfsu2DH.end_time">end_time</a></td>
-<td>File end time</td>
+<td>File end time.</td>
 </tr>
 <tr class="odd">
 <td><a href="#mikeio.dfsu.Dfsu2DH.items">items</a></td>
-<td>List of items</td>
+<td>List of items.</td>
 </tr>
 <tr class="even">
 <td><a href="#mikeio.dfsu.Dfsu2DH.n_items">n_items</a></td>
-<td>Number of items</td>
+<td>Number of items.</td>
 </tr>
 <tr class="odd">
 <td><a href="#mikeio.dfsu.Dfsu2DH.n_timesteps">n_timesteps</a></td>
-<td>Number of time steps</td>
+<td>Number of time steps.</td>
 </tr>
 <tr class="even">
 <td><a href="#mikeio.dfsu.Dfsu2DH.start_time">start_time</a></td>
-<td>File start time</td>
+<td>File start time.</td>
 </tr>
 <tr class="odd">
 <td><a href="#mikeio.dfsu.Dfsu2DH.timestep">timestep</a></td>
-<td>Time step size in seconds</td>
+<td>Time step size in seconds.</td>
 </tr>
 </tbody>
 </table>
@@ -449,33 +449,33 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <tbody>
 <tr class="odd">
 <td><a href="#mikeio.dfsu.Dfsu2DH.append">append</a></td>
-<td>Append data to an existing dfsu file</td>
+<td>Append data to an existing dfsu file.</td>
 </tr>
 <tr class="even">
 <td><a href="#mikeio.dfsu.Dfsu2DH.extract_track">extract_track</a></td>
-<td>Extract track data from a dfsu file</td>
+<td>Extract track data from a dfsu file.</td>
 </tr>
 <tr class="odd">
 <td><a href="#mikeio.dfsu.Dfsu2DH.get_overset_grid">get_overset_grid</a></td>
-<td>get a 2d grid that covers the domain by specifying spacing or shape</td>
+<td>get a 2d grid that covers the domain by specifying spacing or shape.</td>
 </tr>
 <tr class="even">
 <td><a href="#mikeio.dfsu.Dfsu2DH.read">read</a></td>
-<td>Read data from a dfsu file</td>
+<td>Read data from a dfsu file.</td>
 </tr>
 </tbody>
 </table>
 <section id="mikeio.dfsu.Dfsu2DH.append" class="level3">
 <h3 class="anchored" data-anchor-id="mikeio.dfsu.Dfsu2DH.append">append</h3>
 <div class="sourceCode" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>dfsu.Dfsu2DH.append(ds, validate<span class="op">=</span><span class="va">True</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p>Append data to an existing dfsu file</p>
+<p>Append data to an existing dfsu file.</p>
 <section id="parameters" class="level4 doc-section doc-section-parameters">
 <h4 class="doc-section doc-section-parameters anchored" data-anchor-id="parameters">Parameters</h4>
 <table class="caption-top table">
 <colgroup>
 <col style="width: 10%">
-<col style="width: 8%">
-<col style="width: 67%">
+<col style="width: 9%">
+<col style="width: 66%">
 <col style="width: 13%">
 </colgroup>
 <thead>
@@ -488,8 +488,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </thead>
 <tbody>
 <tr class="odd">
-<td>data</td>
-<td></td>
+<td>ds</td>
+<td>Dataset</td>
 <td>Dataset to be appended</td>
 <td><em>required</em></td>
 </tr>
@@ -511,15 +511,15 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>    method<span class="op">=</span><span class="st">'nearest'</span></span>
 <span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>    dtype<span class="op">=</span>np.float32</span>
 <span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p>Extract track data from a dfsu file</p>
+<p>Extract track data from a dfsu file.</p>
 <section id="parameters-1" class="level4 doc-section doc-section-parameters">
 <h4 class="doc-section doc-section-parameters anchored" data-anchor-id="parameters-1">Parameters</h4>
 <table class="caption-top table">
 <colgroup>
 <col style="width: 4%">
 <col style="width: 23%">
-<col style="width: 65%">
-<col style="width: 6%">
+<col style="width: 64%">
+<col style="width: 7%">
 </colgroup>
 <thead>
 <tr class="header">
@@ -553,6 +553,12 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <td>Literal['nearest', 'inverse_distance']</td>
 <td>Spatial interpolation method ('nearest' or 'inverse_distance') default='nearest'</td>
 <td><code>'nearest'</code></td>
+</tr>
+<tr class="odd">
+<td>dtype</td>
+<td>Any</td>
+<td>Data type to read, by default np.float32</td>
+<td><code>np.float32</code></td>
 </tr>
 </tbody>
 </table>
@@ -600,7 +606,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <section id="mikeio.dfsu.Dfsu2DH.get_overset_grid" class="level3">
 <h3 class="anchored" data-anchor-id="mikeio.dfsu.Dfsu2DH.get_overset_grid">get_overset_grid</h3>
 <div class="sourceCode" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>dfsu.Dfsu2DH.get_overset_grid(dx<span class="op">=</span><span class="va">None</span>, dy<span class="op">=</span><span class="va">None</span>, nx<span class="op">=</span><span class="va">None</span>, ny<span class="op">=</span><span class="va">None</span>, <span class="bu">buffer</span><span class="op">=</span><span class="fl">0.0</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p>get a 2d grid that covers the domain by specifying spacing or shape</p>
+<p>get a 2d grid that covers the domain by specifying spacing or shape.</p>
 <section id="parameters-2" class="level4 doc-section doc-section-parameters">
 <h4 class="doc-section doc-section-parameters anchored" data-anchor-id="parameters-2">Parameters</h4>
 <table class="caption-top table">
@@ -686,15 +692,15 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a>    error_bad_data<span class="op">=</span><span class="va">True</span></span>
 <span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a>    fill_bad_data_value<span class="op">=</span>np.nan</span>
 <span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p>Read data from a dfsu file</p>
+<p>Read data from a dfsu file.</p>
 <section id="parameters-3" class="level4 doc-section doc-section-parameters">
 <h4 class="doc-section doc-section-parameters anchored" data-anchor-id="parameters-3">Parameters</h4>
 <table class="caption-top table">
 <colgroup>
 <col style="width: 8%">
 <col style="width: 19%">
-<col style="width: 67%">
-<col style="width: 4%">
+<col style="width: 66%">
+<col style="width: 5%">
 </colgroup>
 <thead>
 <tr class="header">
@@ -758,6 +764,12 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <td>float</td>
 <td>fill value for to impute corrupt data, used in conjunction with error_bad_data=False default np.nan</td>
 <td><code>np.nan</code></td>
+</tr>
+<tr class="even">
+<td>dtype</td>
+<td>Any</td>
+<td>Data type to read, by default np.float32</td>
+<td><code>np.float32</code></td>
 </tr>
 </tbody>
 </table>

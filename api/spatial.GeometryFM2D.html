@@ -426,71 +426,67 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <tbody>
 <tr class="odd">
 <td><a href="#mikeio.spatial.GeometryFM2D.boundary_codes">boundary_codes</a></td>
-<td>Unique list of boundary codes</td>
+<td>Unique list of boundary codes.</td>
 </tr>
 <tr class="even">
 <td><a href="#mikeio.spatial.GeometryFM2D.boundary_polylines">boundary_polylines</a></td>
-<td>Lists of closed polylines defining domain outline</td>
+<td>Lists of closed polylines defining domain outline.</td>
 </tr>
 <tr class="odd">
 <td><a href="#mikeio.spatial.GeometryFM2D.codes">codes</a></td>
-<td>Node codes of all nodes (0=water, 1=land, 2…=open boundaries)</td>
+<td>Node codes of all nodes (0=water, 1=land, 2…=open boundaries).</td>
 </tr>
 <tr class="even">
 <td><a href="#mikeio.spatial.GeometryFM2D.element_coordinates">element_coordinates</a></td>
-<td>Center coordinates of each element</td>
+<td>Center coordinates of each element.</td>
 </tr>
 <tr class="odd">
-<td><a href="#mikeio.spatial.GeometryFM2D.geometry2d">geometry2d</a></td>
-<td>Return self</td>
+<td><a href="#mikeio.spatial.GeometryFM2D.is_2d">is_2d</a></td>
+<td>Type is either mesh or Dfsu2D (2 horizontal dimensions).</td>
 </tr>
 <tr class="even">
-<td><a href="#mikeio.spatial.GeometryFM2D.is_2d">is_2d</a></td>
-<td>Type is either mesh or Dfsu2D (2 horizontal dimensions)</td>
-</tr>
-<tr class="odd">
 <td><a href="#mikeio.spatial.GeometryFM2D.is_geo">is_geo</a></td>
 <td>Are coordinates geographical (LONG/LAT)?</td>
 </tr>
-<tr class="even">
-<td><a href="#mikeio.spatial.GeometryFM2D.is_layered">is_layered</a></td>
-<td>Type is layered dfsu (3d, vertical profile or vertical column)</td>
-</tr>
 <tr class="odd">
+<td><a href="#mikeio.spatial.GeometryFM2D.is_layered">is_layered</a></td>
+<td>Type is layered dfsu (3d, vertical profile or vertical column).</td>
+</tr>
+<tr class="even">
 <td><a href="#mikeio.spatial.GeometryFM2D.is_local_coordinates">is_local_coordinates</a></td>
 <td>Are coordinates relative (NON-UTM)?</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td><a href="#mikeio.spatial.GeometryFM2D.is_spectral">is_spectral</a></td>
-<td>Type is spectral dfsu (point, line or area spectrum)</td>
+<td>Type is spectral dfsu (point, line or area spectrum).</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td><a href="#mikeio.spatial.GeometryFM2D.is_tri_only">is_tri_only</a></td>
-<td>Does the mesh consist of triangles only?</td>
+<td>Does the mesh consist of triangles only.</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td><a href="#mikeio.spatial.GeometryFM2D.max_nodes_per_element">max_nodes_per_element</a></td>
-<td>The maximum number of nodes for an element</td>
+<td>The maximum number of nodes for an element.</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td><a href="#mikeio.spatial.GeometryFM2D.n_elements">n_elements</a></td>
-<td>Number of elements</td>
+<td>Number of elements.</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td><a href="#mikeio.spatial.GeometryFM2D.n_nodes">n_nodes</a></td>
-<td>Number of nodes</td>
-</tr>
-<tr class="odd">
-<td><a href="#mikeio.spatial.GeometryFM2D.projection">projection</a></td>
-<td>The projection</td>
+<td>Number of nodes.</td>
 </tr>
 <tr class="even">
-<td><a href="#mikeio.spatial.GeometryFM2D.projection_string">projection_string</a></td>
-<td>The projection string</td>
+<td><a href="#mikeio.spatial.GeometryFM2D.projection">projection</a></td>
+<td>The projection.</td>
 </tr>
 <tr class="odd">
+<td><a href="#mikeio.spatial.GeometryFM2D.projection_string">projection_string</a></td>
+<td>The projection string.</td>
+</tr>
+<tr class="even">
 <td><a href="#mikeio.spatial.GeometryFM2D.type_name">type_name</a></td>
-<td>Type name, e.g.&nbsp;Mesh, Dfsu2D</td>
+<td>Type name, e.g.&nbsp;Mesh, Dfsu2D.</td>
 </tr>
 </tbody>
 </table>
@@ -507,7 +503,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <tbody>
 <tr class="odd">
 <td><a href="#mikeio.spatial.GeometryFM2D.contains">contains</a></td>
-<td>test if a list of points are contained by mesh</td>
+<td>Test if a list of points are contained by mesh.</td>
 </tr>
 <tr class="even">
 <td><a href="#mikeio.spatial.GeometryFM2D.find_index">find_index</a></td>
@@ -515,11 +511,11 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </tr>
 <tr class="odd">
 <td><a href="#mikeio.spatial.GeometryFM2D.find_nearest_elements">find_nearest_elements</a></td>
-<td>Find index of nearest elements (optionally for a list)</td>
+<td>Find index of nearest elements (optionally for a list).</td>
 </tr>
 <tr class="even">
 <td><a href="#mikeio.spatial.GeometryFM2D.get_2d_interpolant">get_2d_interpolant</a></td>
-<td>IDW interpolant for list of coordinates</td>
+<td>IDW interpolant for list of coordinates.</td>
 </tr>
 <tr class="odd">
 <td><a href="#mikeio.spatial.GeometryFM2D.get_element_area">get_element_area</a></td>
@@ -527,34 +523,34 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </tr>
 <tr class="even">
 <td><a href="#mikeio.spatial.GeometryFM2D.get_node_centered_data">get_node_centered_data</a></td>
-<td>convert cell-centered data to node-centered by pseudo-laplacian method</td>
+<td>Convert cell-centered data to node-centered by pseudo-laplacian method.</td>
 </tr>
 <tr class="odd">
 <td><a href="#mikeio.spatial.GeometryFM2D.get_overset_grid">get_overset_grid</a></td>
-<td>get a 2d grid that covers the domain by specifying spacing or shape</td>
+<td>Get a 2d grid that covers the domain by specifying spacing or shape.</td>
 </tr>
 <tr class="even">
 <td><a href="#mikeio.spatial.GeometryFM2D.interp2d">interp2d</a></td>
-<td>interp spatially in data (2d only)</td>
+<td>Interpolate spatially in data (2d only).</td>
 </tr>
 <tr class="odd">
 <td><a href="#mikeio.spatial.GeometryFM2D.isel">isel</a></td>
-<td>export a selection of elements to a new geometry</td>
+<td>Export a selection of elements to a new geometry.</td>
 </tr>
 <tr class="even">
 <td><a href="#mikeio.spatial.GeometryFM2D.to_mesh">to_mesh</a></td>
-<td>Export geometry to new mesh file</td>
+<td>Export geometry to new mesh file.</td>
 </tr>
 <tr class="odd">
 <td><a href="#mikeio.spatial.GeometryFM2D.to_shapely">to_shapely</a></td>
-<td>Export mesh as shapely MultiPolygon</td>
+<td>Export mesh as shapely MultiPolygon.</td>
 </tr>
 </tbody>
 </table>
 <section id="mikeio.spatial.GeometryFM2D.contains" class="level3">
 <h3 class="anchored" data-anchor-id="mikeio.spatial.GeometryFM2D.contains">contains</h3>
 <div class="sourceCode" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>spatial.GeometryFM2D.contains(points)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p>test if a list of points are contained by mesh</p>
+<p>Test if a list of points are contained by mesh.</p>
 <section id="parameters" class="level4 doc-section doc-section-parameters">
 <h4 class="doc-section doc-section-parameters anchored" data-anchor-id="parameters">Parameters</h4>
 <table class="caption-top table">
@@ -710,7 +706,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>    n_nearest<span class="op">=</span><span class="dv">1</span></span>
 <span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>    return_distances<span class="op">=</span><span class="va">False</span></span>
 <span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p>Find index of nearest elements (optionally for a list)</p>
+<p>Find index of nearest elements (optionally for a list).</p>
 <section id="parameters-2" class="level4 doc-section doc-section-parameters">
 <h4 class="doc-section doc-section-parameters anchored" data-anchor-id="parameters-2">Parameters</h4>
 <table class="caption-top table">
@@ -803,7 +799,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>    p<span class="op">=</span><span class="dv">2</span></span>
 <span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>    radius<span class="op">=</span><span class="va">None</span></span>
 <span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p>IDW interpolant for list of coordinates</p>
+<p>IDW interpolant for list of coordinates.</p>
 <section id="parameters-3" class="level4 doc-section doc-section-parameters">
 <h4 class="doc-section doc-section-parameters anchored" data-anchor-id="parameters-3">Parameters</h4>
 <table class="caption-top table">
@@ -902,7 +898,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <section id="mikeio.spatial.GeometryFM2D.get_node_centered_data" class="level3">
 <h3 class="anchored" data-anchor-id="mikeio.spatial.GeometryFM2D.get_node_centered_data">get_node_centered_data</h3>
 <div class="sourceCode" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>spatial.GeometryFM2D.get_node_centered_data(data, extrapolate<span class="op">=</span><span class="va">True</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p>convert cell-centered data to node-centered by pseudo-laplacian method</p>
+<p>Convert cell-centered data to node-centered by pseudo-laplacian method.</p>
 <section id="parameters-4" class="level4 doc-section doc-section-parameters">
 <h4 class="doc-section doc-section-parameters anchored" data-anchor-id="parameters-4">Parameters</h4>
 <table class="caption-top table">
@@ -965,7 +961,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>    ny<span class="op">=</span><span class="va">None</span></span>
 <span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>    <span class="bu">buffer</span><span class="op">=</span><span class="fl">0.0</span></span>
 <span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p>get a 2d grid that covers the domain by specifying spacing or shape</p>
+<p>Get a 2d grid that covers the domain by specifying spacing or shape.</p>
 <section id="parameters-5" class="level4 doc-section doc-section-parameters">
 <h4 class="doc-section doc-section-parameters anchored" data-anchor-id="parameters-5">Parameters</h4>
 <table class="caption-top table">
@@ -1040,7 +1036,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <section id="mikeio.spatial.GeometryFM2D.interp2d" class="level3">
 <h3 class="anchored" data-anchor-id="mikeio.spatial.GeometryFM2D.interp2d">interp2d</h3>
 <div class="sourceCode" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>spatial.GeometryFM2D.interp2d(data, elem_ids, weights<span class="op">=</span><span class="va">None</span>, shape<span class="op">=</span><span class="va">None</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p>interp spatially in data (2d only)</p>
+<p>Interpolate spatially in data (2d only).</p>
 <section id="parameters-6" class="level4 doc-section doc-section-parameters">
 <h4 class="doc-section doc-section-parameters anchored" data-anchor-id="parameters-6">Parameters</h4>
 <table class="caption-top table">
@@ -1116,7 +1112,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <section id="mikeio.spatial.GeometryFM2D.isel" class="level3">
 <h3 class="anchored" data-anchor-id="mikeio.spatial.GeometryFM2D.isel">isel</h3>
 <div class="sourceCode" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>spatial.GeometryFM2D.isel(idx, keepdims<span class="op">=</span><span class="va">False</span>, <span class="op">**</span>kwargs)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p>export a selection of elements to a new geometry</p>
+<p>Export a selection of elements to a new geometry.</p>
 <p>Typically not called directly, but by Dataset/DataArray’s isel() or sel() methods.</p>
 <section id="parameters-7" class="level4 doc-section doc-section-parameters">
 <h4 class="doc-section doc-section-parameters anchored" data-anchor-id="parameters-7">Parameters</h4>
@@ -1148,6 +1144,12 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <td>Should the original Geometry type be kept (keepdims=True) or should it be reduced e.g.&nbsp;to a GeometryPoint2D if possible (keepdims=False), by default False</td>
 <td><code>False</code></td>
 </tr>
+<tr class="odd">
+<td>**kwargs</td>
+<td>Any</td>
+<td>Not used</td>
+<td><code>{}</code></td>
+</tr>
 </tbody>
 </table>
 </section>
@@ -1178,7 +1180,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <section id="mikeio.spatial.GeometryFM2D.to_mesh" class="level3">
 <h3 class="anchored" data-anchor-id="mikeio.spatial.GeometryFM2D.to_mesh">to_mesh</h3>
 <div class="sourceCode" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>spatial.GeometryFM2D.to_mesh(outfilename)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p>Export geometry to new mesh file</p>
+<p>Export geometry to new mesh file.</p>
 <section id="parameters-8" class="level4 doc-section doc-section-parameters">
 <h4 class="doc-section doc-section-parameters anchored" data-anchor-id="parameters-8">Parameters</h4>
 <table class="caption-top table">
@@ -1204,7 +1206,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <section id="mikeio.spatial.GeometryFM2D.to_shapely" class="level3">
 <h3 class="anchored" data-anchor-id="mikeio.spatial.GeometryFM2D.to_shapely">to_shapely</h3>
 <div class="sourceCode" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>spatial.GeometryFM2D.to_shapely()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p>Export mesh as shapely MultiPolygon</p>
+<p>Export mesh as shapely MultiPolygon.</p>
 <section id="returns-9" class="level4 doc-section doc-section-returns">
 <h4 class="doc-section doc-section-returns anchored" data-anchor-id="returns-9">Returns</h4>
 <table class="caption-top table">

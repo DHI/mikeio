@@ -405,15 +405,15 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <tbody>
 <tr class="odd">
 <td><a href="#mikeio.Dfs1.deletevalue">deletevalue</a></td>
-<td>File delete value</td>
+<td>File delete value.</td>
 </tr>
 <tr class="even">
 <td><a href="#mikeio.Dfs1.dx">dx</a></td>
-<td>Step size in x direction</td>
+<td>Step size in x direction.</td>
 </tr>
 <tr class="odd">
 <td><a href="#mikeio.Dfs1.end_time">end_time</a></td>
-<td>File end time</td>
+<td>File end time.</td>
 </tr>
 <tr class="even">
 <td><a href="#mikeio.Dfs1.is_geo">is_geo</a></td>
@@ -421,51 +421,51 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </tr>
 <tr class="odd">
 <td><a href="#mikeio.Dfs1.items">items</a></td>
-<td>List of items</td>
+<td>List of items.</td>
 </tr>
 <tr class="even">
 <td><a href="#mikeio.Dfs1.latitude">latitude</a></td>
-<td>Origin latitude</td>
+<td>Origin latitude.</td>
 </tr>
 <tr class="odd">
 <td><a href="#mikeio.Dfs1.longitude">longitude</a></td>
-<td>Origin longitude</td>
+<td>Origin longitude.</td>
 </tr>
 <tr class="even">
 <td><a href="#mikeio.Dfs1.n_items">n_items</a></td>
-<td>Number of items</td>
+<td>Number of items.</td>
 </tr>
 <tr class="odd">
 <td><a href="#mikeio.Dfs1.n_timesteps">n_timesteps</a></td>
-<td>Number of time steps</td>
+<td>Number of time steps.</td>
 </tr>
 <tr class="even">
 <td><a href="#mikeio.Dfs1.nx">nx</a></td>
-<td>Number of node values</td>
+<td>Number of node values.</td>
 </tr>
 <tr class="odd">
 <td><a href="#mikeio.Dfs1.orientation">orientation</a></td>
-<td>Orientation (in own CRS)</td>
+<td>Orientation (in own CRS).</td>
 </tr>
 <tr class="even">
 <td><a href="#mikeio.Dfs1.origin">origin</a></td>
-<td>Origin (in own CRS)</td>
+<td>Origin (in own CRS).</td>
 </tr>
 <tr class="odd">
 <td><a href="#mikeio.Dfs1.shape">shape</a></td>
-<td>Shape of the data array</td>
+<td>Shape of the data array.</td>
 </tr>
 <tr class="even">
 <td><a href="#mikeio.Dfs1.start_time">start_time</a></td>
-<td>File start time</td>
+<td>File start time.</td>
 </tr>
 <tr class="odd">
 <td><a href="#mikeio.Dfs1.timestep">timestep</a></td>
-<td>Time step size in seconds</td>
+<td>Time step size in seconds.</td>
 </tr>
 <tr class="even">
 <td><a href="#mikeio.Dfs1.x0">x0</a></td>
-<td>Start point of x values (often 0)</td>
+<td>Start point of x values (often 0).</td>
 </tr>
 </tbody>
 </table>
@@ -482,22 +482,22 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <tbody>
 <tr class="odd">
 <td><a href="#mikeio.Dfs1.read">read</a></td>
-<td>Read data from a dfs file</td>
+<td>Read data from a dfs file.</td>
 </tr>
 </tbody>
 </table>
 <section id="mikeio.Dfs1.read" class="level3">
 <h3 class="anchored" data-anchor-id="mikeio.Dfs1.read">read</h3>
 <div class="sourceCode" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>Dfs1.read(items<span class="op">=</span><span class="va">None</span>, time<span class="op">=</span><span class="va">None</span>, keepdims<span class="op">=</span><span class="va">False</span>, dtype<span class="op">=</span>np.float32)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p>Read data from a dfs file</p>
+<p>Read data from a dfs file.</p>
 <section id="parameters" class="level4 doc-section doc-section-parameters">
 <h4 class="doc-section doc-section-parameters anchored" data-anchor-id="parameters">Parameters</h4>
 <table class="caption-top table">
 <colgroup>
 <col style="width: 5%">
-<col style="width: 25%">
-<col style="width: 63%">
-<col style="width: 6%">
+<col style="width: 24%">
+<col style="width: 62%">
+<col style="width: 7%">
 </colgroup>
 <thead>
 <tr class="header">
@@ -525,6 +525,12 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <td>bool</td>
 <td>When reading a single time step only, should the time-dimension be kept in the returned Dataset? by default: False</td>
 <td><code>False</code></td>
+</tr>
+<tr class="even">
+<td>dtype</td>
+<td>Any</td>
+<td>Define the dtype of the returned dataset (default = np.float32)</td>
+<td><code>np.float32</code></td>
 </tr>
 </tbody>
 </table>

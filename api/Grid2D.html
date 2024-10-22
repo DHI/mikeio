@@ -416,7 +416,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>    is_spectral<span class="op">=</span><span class="va">False</span></span>
 <span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>    is_vertical<span class="op">=</span><span class="va">False</span></span>
 <span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p>2D grid Origin in the center of cell in lower-left corner x and y axes are increasing and equidistant</p>
+<p>2D grid.</p>
+<p>Origin in the center of cell in lower-left corner x and y axes are increasing and equidistant</p>
 <section id="attributes" class="level2">
 <h2 class="anchored" data-anchor-id="attributes">Attributes</h2>
 <table class="caption-top table">
@@ -429,15 +430,15 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <tbody>
 <tr class="odd">
 <td><a href="#mikeio.Grid2D.bbox">bbox</a></td>
-<td>bounding box (left, bottom, right, top)</td>
+<td>Bounding box (left, bottom, right, top).</td>
 </tr>
 <tr class="even">
 <td><a href="#mikeio.Grid2D.dx">dx</a></td>
-<td>x grid spacing</td>
+<td>X grid spacing.</td>
 </tr>
 <tr class="odd">
 <td><a href="#mikeio.Grid2D.dy">dy</a></td>
-<td>y grid spacing</td>
+<td>Y grid spacing.</td>
 </tr>
 <tr class="even">
 <td><a href="#mikeio.Grid2D.is_geo">is_geo</a></td>
@@ -449,39 +450,39 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </tr>
 <tr class="even">
 <td><a href="#mikeio.Grid2D.nx">nx</a></td>
-<td>number of x grid points</td>
+<td>Number of x grid points.</td>
 </tr>
 <tr class="odd">
 <td><a href="#mikeio.Grid2D.ny">ny</a></td>
-<td>number of y grid points</td>
+<td>Number of y grid points.</td>
 </tr>
 <tr class="even">
 <td><a href="#mikeio.Grid2D.orientation">orientation</a></td>
-<td>Grid orientation</td>
+<td>Grid orientation.</td>
 </tr>
 <tr class="odd">
 <td><a href="#mikeio.Grid2D.origin">origin</a></td>
-<td>Coordinates of grid origo (in projection)</td>
+<td>Coordinates of grid origo (in projection).</td>
 </tr>
 <tr class="even">
 <td><a href="#mikeio.Grid2D.projection">projection</a></td>
-<td>The projection</td>
+<td>The projection.</td>
 </tr>
 <tr class="odd">
 <td><a href="#mikeio.Grid2D.projection_string">projection_string</a></td>
-<td>The projection string</td>
+<td>The projection string.</td>
 </tr>
 <tr class="even">
 <td><a href="#mikeio.Grid2D.x">x</a></td>
-<td>array of x coordinates (element center)</td>
+<td>Array of x coordinates (element center).</td>
 </tr>
 <tr class="odd">
 <td><a href="#mikeio.Grid2D.xy">xy</a></td>
-<td>n-by-2 array of x- and y-coordinates</td>
+<td>N-by-2 array of x- and y-coordinates.</td>
 </tr>
 <tr class="even">
 <td><a href="#mikeio.Grid2D.y">y</a></td>
-<td>array of y coordinates (element center)</td>
+<td>Array of y coordinates (element center).</td>
 </tr>
 </tbody>
 </table>
@@ -498,15 +499,15 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <tbody>
 <tr class="odd">
 <td><a href="#mikeio.Grid2D.contains">contains</a></td>
-<td>test if a list of points are inside grid</td>
+<td>Test if a list of points are inside grid.</td>
 </tr>
 <tr class="even">
 <td><a href="#mikeio.Grid2D.find_index">find_index</a></td>
-<td>Find nearest index (i,j) of point(s)</td>
+<td>Find nearest index (i,j) of point(s).</td>
 </tr>
 <tr class="odd">
 <td><a href="#mikeio.Grid2D.get_node_coordinates">get_node_coordinates</a></td>
-<td>node coordinates for this grid</td>
+<td>Node coordinates for this grid.</td>
 </tr>
 <tr class="even">
 <td><a href="#mikeio.Grid2D.isel">isel</a></td>
@@ -514,18 +515,18 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </tr>
 <tr class="odd">
 <td><a href="#mikeio.Grid2D.to_geometryFM">to_geometryFM</a></td>
-<td>convert Grid2D to GeometryFM2D</td>
+<td>Convert Grid2D to GeometryFM2D.</td>
 </tr>
 <tr class="even">
 <td><a href="#mikeio.Grid2D.to_mesh">to_mesh</a></td>
-<td>export grid to mesh file</td>
+<td>Export grid to mesh file.</td>
 </tr>
 </tbody>
 </table>
 <section id="mikeio.Grid2D.contains" class="level3">
 <h3 class="anchored" data-anchor-id="mikeio.Grid2D.contains">contains</h3>
 <div class="sourceCode" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>Grid2D.contains(coords)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p>test if a list of points are inside grid</p>
+<p>Test if a list of points are inside grid.</p>
 <section id="parameters" class="level4 doc-section doc-section-parameters">
 <h4 class="doc-section doc-section-parameters anchored" data-anchor-id="parameters">Parameters</h4>
 <table class="caption-top table">
@@ -576,7 +577,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <section id="mikeio.Grid2D.find_index" class="level3">
 <h3 class="anchored" data-anchor-id="mikeio.Grid2D.find_index">find_index</h3>
 <div class="sourceCode" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>Grid2D.find_index(x<span class="op">=</span><span class="va">None</span>, y<span class="op">=</span><span class="va">None</span>, coords<span class="op">=</span><span class="va">None</span>, area<span class="op">=</span><span class="va">None</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p>Find nearest index (i,j) of point(s)</p>
+<p>Find nearest index (i,j) of point(s).</p>
 <section id="parameters-1" class="level4 doc-section doc-section-parameters">
 <h4 class="doc-section doc-section-parameters anchored" data-anchor-id="parameters-1">Parameters</h4>
 <table class="caption-top table">
@@ -645,7 +646,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <section id="mikeio.Grid2D.get_node_coordinates" class="level3">
 <h3 class="anchored" data-anchor-id="mikeio.Grid2D.get_node_coordinates">get_node_coordinates</h3>
 <div class="sourceCode" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>Grid2D.get_node_coordinates()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p>node coordinates for this grid</p>
+<p>Node coordinates for this grid.</p>
 <section id="returns-2" class="level4 doc-section doc-section-returns">
 <h4 class="doc-section doc-section-returns anchored" data-anchor-id="returns-2">Returns</h4>
 <table class="caption-top table">
@@ -679,7 +680,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <section id="mikeio.Grid2D.to_geometryFM" class="level3">
 <h3 class="anchored" data-anchor-id="mikeio.Grid2D.to_geometryFM">to_geometryFM</h3>
 <div class="sourceCode" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>Grid2D.to_geometryFM(z<span class="op">=</span><span class="va">None</span>, west<span class="op">=</span><span class="dv">2</span>, east<span class="op">=</span><span class="dv">4</span>, north<span class="op">=</span><span class="dv">5</span>, south<span class="op">=</span><span class="dv">3</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p>convert Grid2D to GeometryFM2D</p>
+<p>Convert Grid2D to GeometryFM2D.</p>
 <section id="parameters-2" class="level4 doc-section doc-section-parameters">
 <h4 class="doc-section doc-section-parameters anchored" data-anchor-id="parameters-2">Parameters</h4>
 <table class="caption-top table">
@@ -735,7 +736,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <section id="mikeio.Grid2D.to_mesh" class="level3">
 <h3 class="anchored" data-anchor-id="mikeio.Grid2D.to_mesh">to_mesh</h3>
 <div class="sourceCode" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>Grid2D.to_mesh(outfilename, z<span class="op">=</span><span class="va">None</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p>export grid to mesh file</p>
+<p>Export grid to mesh file.</p>
 <section id="parameters-3" class="level4 doc-section doc-section-parameters">
 <h4 class="doc-section doc-section-parameters anchored" data-anchor-id="parameters-3">Parameters</h4>
 <table class="caption-top table">

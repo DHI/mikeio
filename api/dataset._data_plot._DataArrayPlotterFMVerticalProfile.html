@@ -405,11 +405,11 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 
 <div class="sourceCode" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>dataset._data_plot._DataArrayPlotterFMVerticalProfile(<span class="va">self</span>, da)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p>Plot a DataArray with a 2DV GeometryFMVerticalProfile geometry</p>
+<p>Plot a DataArray with a 2DV GeometryFMVerticalProfile geometry.</p>
 <p>If DataArray has multiple time steps, the first step will be plotted.</p>
 <section id="examples" class="level2 doc-section doc-section-examples">
 <h2 class="doc-section doc-section-examples anchored" data-anchor-id="examples">Examples</h2>
-<div id="9a8b1a1c" class="cell" data-execution_count="1">
+<div id="82aa2909" class="cell" data-execution_count="1">
 <div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> mikeio</span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>da <span class="op">=</span> mikeio.read(<span class="st">"../data/oresund_vertical_slice.dfsu"</span>)[<span class="st">"Temperature"</span>]</span>
 <span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>da.plot()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
@@ -421,7 +421,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 </div>
 </div>
-<div id="56df368f" class="cell" data-execution_count="2">
+<div id="cda12333" class="cell" data-execution_count="2">
 <div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>da.plot.hist()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="2">
 <pre><code>(array([  1.,   2.,  19.,  70., 202., 384., 336., 167., 127.,  15.]),
@@ -451,11 +451,11 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <tbody>
 <tr class="odd">
 <td><a href="#mikeio.dataset._data_plot._DataArrayPlotterFMVerticalProfile.hist">hist</a></td>
-<td>Plot DataArray as histogram (using ax.hist)</td>
+<td>Plot DataArray as histogram (using ax.hist).</td>
 </tr>
 <tr class="even">
 <td><a href="#mikeio.dataset._data_plot._DataArrayPlotterFMVerticalProfile.line">line</a></td>
-<td>Plot data as lines (timeseries if time is present)</td>
+<td>Plot data as lines (timeseries if time is present).</td>
 </tr>
 </tbody>
 </table>
@@ -467,14 +467,14 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>    title<span class="op">=</span><span class="va">None</span></span>
 <span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>    <span class="op">**</span>kwargs</span>
 <span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p>Plot DataArray as histogram (using ax.hist)</p>
+<p>Plot DataArray as histogram (using ax.hist).</p>
 <section id="parameters" class="level4 doc-section doc-section-parameters">
 <h4 class="doc-section doc-section-parameters anchored" data-anchor-id="parameters">Parameters</h4>
 <table class="caption-top table">
 <colgroup>
-<col style="width: 2%">
+<col style="width: 3%">
 <col style="width: 10%">
-<col style="width: 83%">
+<col style="width: 82%">
 <col style="width: 3%">
 </colgroup>
 <thead>
@@ -510,6 +510,12 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <td>axes title</td>
 <td><code>None</code></td>
 </tr>
+<tr class="odd">
+<td>**kwargs</td>
+<td>Any</td>
+<td>additional arguments passed to the plotting function</td>
+<td><code>{}</code></td>
+</tr>
 </tbody>
 </table>
 </section>
@@ -544,7 +550,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>    figsize<span class="op">=</span><span class="va">None</span></span>
 <span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>    <span class="op">**</span>kwargs</span>
 <span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p>Plot data as lines (timeseries if time is present)</p>
+<p>Plot data as lines (timeseries if time is present).</p>
 
 
 </section>

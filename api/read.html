@@ -392,7 +392,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <section id="mikeio.read" class="level1">
 <h1>read</h1>
 <div class="sourceCode" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>read(filename, <span class="op">*</span>, items<span class="op">=</span><span class="va">None</span>, time<span class="op">=</span><span class="va">None</span>, keepdims<span class="op">=</span><span class="va">False</span>, <span class="op">**</span>kwargs)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p>Read all or a subset of the data from a dfs file</p>
+<p>Read all or a subset of the data from a dfs file.</p>
 <p>All dfs files can be subsetted with the <em>items</em> and <em>time</em> arguments. But the following file types also have the shown additional arguments:</p>
 <ul>
 <li>Dfs2: area</li>
@@ -483,6 +483,12 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <td></td>
 <td>fill value for to impute corrupt data, used in conjunction with error_bad_data=False default np.nan</td>
 <td><em>required</em></td>
+</tr>
+<tr class="even">
+<td>**kwargs</td>
+<td>Any</td>
+<td>Additional keyword arguments</td>
+<td><code>{}</code></td>
 </tr>
 </tbody>
 </table>

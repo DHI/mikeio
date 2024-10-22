@@ -393,7 +393,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <section id="mikeio.dataset._data_plot._DataArrayPlotter" class="level1">
 <h1>dataset._data_plot._DataArrayPlotter</h1>
 <div class="sourceCode" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>dataset._data_plot._DataArrayPlotter(<span class="va">self</span>, da)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p>Context aware plotter (sensible plotting according to geometry)</p>
+<p>Context aware plotter (sensible plotting according to geometry).</p>
 <section id="methods" class="level2">
 <h2 class="anchored" data-anchor-id="methods">Methods</h2>
 <table class="caption-top table">
@@ -406,11 +406,11 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <tbody>
 <tr class="odd">
 <td><a href="#mikeio.dataset._data_plot._DataArrayPlotter.hist">hist</a></td>
-<td>Plot DataArray as histogram (using ax.hist)</td>
+<td>Plot DataArray as histogram (using ax.hist).</td>
 </tr>
 <tr class="even">
 <td><a href="#mikeio.dataset._data_plot._DataArrayPlotter.line">line</a></td>
-<td>Plot data as lines (timeseries if time is present)</td>
+<td>Plot data as lines (timeseries if time is present).</td>
 </tr>
 </tbody>
 </table>
@@ -422,14 +422,14 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>    title<span class="op">=</span><span class="va">None</span></span>
 <span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>    <span class="op">**</span>kwargs</span>
 <span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p>Plot DataArray as histogram (using ax.hist)</p>
+<p>Plot DataArray as histogram (using ax.hist).</p>
 <section id="parameters" class="level4 doc-section doc-section-parameters">
 <h4 class="doc-section doc-section-parameters anchored" data-anchor-id="parameters">Parameters</h4>
 <table class="caption-top table">
 <colgroup>
-<col style="width: 2%">
+<col style="width: 3%">
 <col style="width: 10%">
-<col style="width: 83%">
+<col style="width: 82%">
 <col style="width: 3%">
 </colgroup>
 <thead>
@@ -465,6 +465,12 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <td>axes title</td>
 <td><code>None</code></td>
 </tr>
+<tr class="odd">
+<td>**kwargs</td>
+<td>Any</td>
+<td>additional arguments passed to the plotting function</td>
+<td><code>{}</code></td>
+</tr>
 </tbody>
 </table>
 </section>
@@ -495,7 +501,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <section id="mikeio.dataset._data_plot._DataArrayPlotter.line" class="level3">
 <h3 class="anchored" data-anchor-id="mikeio.dataset._data_plot._DataArrayPlotter.line">line</h3>
 <div class="sourceCode" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>dataset._data_plot._DataArrayPlotter.line(ax<span class="op">=</span><span class="va">None</span>, figsize<span class="op">=</span><span class="va">None</span>, <span class="op">**</span>kwargs)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p>Plot data as lines (timeseries if time is present)</p>
+<p>Plot data as lines (timeseries if time is present).</p>
 
 
 </section>

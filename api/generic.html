@@ -399,6 +399,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <section id="mikeio.generic" class="level1">
 <h1>generic</h1>
 <p><code>generic</code></p>
+<p>Generic functions for working with all types of dfs files.</p>
 <section id="functions" class="level2">
 <h2 class="anchored" data-anchor-id="functions">Functions</h2>
 <table class="caption-top table">
@@ -411,19 +412,19 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <tbody>
 <tr class="odd">
 <td><a href="#mikeio.generic.avg_time">avg_time</a></td>
-<td>Create a temporally averaged dfs file</td>
+<td>Create a temporally averaged dfs file.</td>
 </tr>
 <tr class="even">
 <td><a href="#mikeio.generic.concat">concat</a></td>
-<td>Concatenates files along the time axis</td>
+<td>Concatenates files along the time axis.</td>
 </tr>
 <tr class="odd">
 <td><a href="#mikeio.generic.diff">diff</a></td>
-<td>Calculate difference between two dfs files (a-b)</td>
+<td>Calculate difference between two dfs files (a-b).</td>
 </tr>
 <tr class="even">
 <td><a href="#mikeio.generic.extract">extract</a></td>
-<td>Extract timesteps and/or items to a new dfs file</td>
+<td>Extract timesteps and/or items to a new dfs file.</td>
 </tr>
 <tr class="odd">
 <td><a href="#mikeio.generic.fill_corrupt">fill_corrupt</a></td>
@@ -431,22 +432,22 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </tr>
 <tr class="even">
 <td><a href="#mikeio.generic.quantile">quantile</a></td>
-<td>Create temporal quantiles of all items in dfs file</td>
+<td>Create temporal quantiles of all items in dfs file.</td>
 </tr>
 <tr class="odd">
 <td><a href="#mikeio.generic.scale">scale</a></td>
-<td>Apply scaling to any dfs file</td>
+<td>Apply scaling to any dfs file.</td>
 </tr>
 <tr class="even">
 <td><a href="#mikeio.generic.sum">sum</a></td>
-<td>Sum two dfs files (a+b)</td>
+<td>Sum two dfs files (a+b).</td>
 </tr>
 </tbody>
 </table>
 <section id="mikeio.generic.avg_time" class="level3">
 <h3 class="anchored" data-anchor-id="mikeio.generic.avg_time">avg_time</h3>
 <div class="sourceCode" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>generic.avg_time(infilename, outfilename, skipna<span class="op">=</span><span class="va">True</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p>Create a temporally averaged dfs file</p>
+<p>Create a temporally averaged dfs file.</p>
 <section id="parameters" class="level4 doc-section doc-section-parameters">
 <h4 class="doc-section doc-section-parameters anchored" data-anchor-id="parameters">Parameters</h4>
 <table class="caption-top table">
@@ -490,7 +491,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <section id="mikeio.generic.concat" class="level3">
 <h3 class="anchored" data-anchor-id="mikeio.generic.concat">concat</h3>
 <div class="sourceCode" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>generic.concat(infilenames, outfilename, keep<span class="op">=</span><span class="st">'last'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p>Concatenates files along the time axis</p>
+<p>Concatenates files along the time axis.</p>
 <p>Overlap handling is defined by the <code>keep</code> argument, by default the last one will be used.</p>
 <section id="parameters-1" class="level4 doc-section doc-section-parameters">
 <h4 class="doc-section doc-section-parameters anchored" data-anchor-id="parameters-1">Parameters</h4>
@@ -539,7 +540,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <section id="mikeio.generic.diff" class="level3">
 <h3 class="anchored" data-anchor-id="mikeio.generic.diff">diff</h3>
 <div class="sourceCode" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>generic.diff(infilename_a, infilename_b, outfilename)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p>Calculate difference between two dfs files (a-b)</p>
+<p>Calculate difference between two dfs files (a-b).</p>
 <section id="parameters-2" class="level4 doc-section doc-section-parameters">
 <h4 class="doc-section doc-section-parameters anchored" data-anchor-id="parameters-2">Parameters</h4>
 <table class="caption-top table">
@@ -583,7 +584,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <section id="mikeio.generic.extract" class="level3">
 <h3 class="anchored" data-anchor-id="mikeio.generic.extract">extract</h3>
 <div class="sourceCode" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>generic.extract(infilename, outfilename, start<span class="op">=</span><span class="dv">0</span>, end<span class="op">=-</span><span class="dv">1</span>, step<span class="op">=</span><span class="dv">1</span>, items<span class="op">=</span><span class="va">None</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p>Extract timesteps and/or items to a new dfs file</p>
+<p>Extract timesteps and/or items to a new dfs file.</p>
 <section id="parameters-3" class="level4 doc-section doc-section-parameters">
 <h4 class="doc-section doc-section-parameters anchored" data-anchor-id="parameters-3">Parameters</h4>
 <table class="caption-top table">
@@ -713,7 +714,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>    skipna<span class="op">=</span><span class="va">True</span></span>
 <span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>    buffer_size<span class="op">=</span><span class="fl">1000000000.0</span></span>
 <span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p>Create temporal quantiles of all items in dfs file</p>
+<p>Create temporal quantiles of all items in dfs file.</p>
 <section id="parameters-5" class="level4 doc-section doc-section-parameters">
 <h4 class="doc-section doc-section-parameters anchored" data-anchor-id="parameters-5">Parameters</h4>
 <table class="caption-top table">
@@ -781,7 +782,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <section id="mikeio.generic.scale" class="level3">
 <h3 class="anchored" data-anchor-id="mikeio.generic.scale">scale</h3>
 <div class="sourceCode" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>generic.scale(infilename, outfilename, offset<span class="op">=</span><span class="fl">0.0</span>, factor<span class="op">=</span><span class="fl">1.0</span>, items<span class="op">=</span><span class="va">None</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p>Apply scaling to any dfs file</p>
+<p>Apply scaling to any dfs file.</p>
 <section id="parameters-6" class="level4 doc-section doc-section-parameters">
 <h4 class="doc-section doc-section-parameters anchored" data-anchor-id="parameters-6">Parameters</h4>
 <table class="caption-top table">
@@ -837,7 +838,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <section id="mikeio.generic.sum" class="level3">
 <h3 class="anchored" data-anchor-id="mikeio.generic.sum">sum</h3>
 <div class="sourceCode" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>generic.<span class="bu">sum</span>(infilename_a, infilename_b, outfilename)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p>Sum two dfs files (a+b)</p>
+<p>Sum two dfs files (a+b).</p>
 <section id="parameters-7" class="level4 doc-section doc-section-parameters">
 <h4 class="doc-section doc-section-parameters anchored" data-anchor-id="parameters-7">Parameters</h4>
 <table class="caption-top table">

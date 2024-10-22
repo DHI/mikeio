@@ -397,7 +397,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <section id="mikeio.dataset._data_plot._DataArrayPlotterGrid1D" class="level1">
 <h1>dataset._data_plot._DataArrayPlotterGrid1D</h1>
 <div class="sourceCode" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>dataset._data_plot._DataArrayPlotterGrid1D(<span class="va">self</span>, da)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p>Plot a DataArray with a Grid1D geometry</p>
+<p>Plot a DataArray with a Grid1D geometry.</p>
 <section id="examples" class="level2 doc-section doc-section-examples">
 <h2 class="doc-section doc-section-examples anchored" data-anchor-id="examples">Examples</h2>
 <div class="sourceCode" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> da <span class="op">=</span> mikeio.read(<span class="st">"tide1.dfs1"</span>)[<span class="st">"Level"</span>]</span>
@@ -420,23 +420,23 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <tbody>
 <tr class="odd">
 <td><a href="#mikeio.dataset._data_plot._DataArrayPlotterGrid1D.hist">hist</a></td>
-<td>Plot DataArray as histogram (using ax.hist)</td>
+<td>Plot DataArray as histogram (using ax.hist).</td>
 </tr>
 <tr class="even">
 <td><a href="#mikeio.dataset._data_plot._DataArrayPlotterGrid1D.imshow">imshow</a></td>
-<td>Plot as 2d</td>
+<td>Plot as 2d.</td>
 </tr>
 <tr class="odd">
 <td><a href="#mikeio.dataset._data_plot._DataArrayPlotterGrid1D.line">line</a></td>
-<td>Plot as spatial lines</td>
+<td>Plot as spatial lines.</td>
 </tr>
 <tr class="even">
 <td><a href="#mikeio.dataset._data_plot._DataArrayPlotterGrid1D.pcolormesh">pcolormesh</a></td>
-<td>Plot multiple lines as 2d color plot</td>
+<td>Plot multiple lines as 2d color plot.</td>
 </tr>
 <tr class="odd">
 <td><a href="#mikeio.dataset._data_plot._DataArrayPlotterGrid1D.timeseries">timeseries</a></td>
-<td>Plot as timeseries</td>
+<td>Plot as timeseries.</td>
 </tr>
 </tbody>
 </table>
@@ -448,14 +448,14 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>    title<span class="op">=</span><span class="va">None</span></span>
 <span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>    <span class="op">**</span>kwargs</span>
 <span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p>Plot DataArray as histogram (using ax.hist)</p>
+<p>Plot DataArray as histogram (using ax.hist).</p>
 <section id="parameters" class="level4 doc-section doc-section-parameters">
 <h4 class="doc-section doc-section-parameters anchored" data-anchor-id="parameters">Parameters</h4>
 <table class="caption-top table">
 <colgroup>
-<col style="width: 2%">
+<col style="width: 3%">
 <col style="width: 10%">
-<col style="width: 83%">
+<col style="width: 82%">
 <col style="width: 3%">
 </colgroup>
 <thead>
@@ -491,6 +491,12 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <td>axes title</td>
 <td><code>None</code></td>
 </tr>
+<tr class="odd">
+<td>**kwargs</td>
+<td>Any</td>
+<td>additional arguments passed to the plotting function</td>
+<td><code>{}</code></td>
+</tr>
 </tbody>
 </table>
 </section>
@@ -525,12 +531,12 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>    figsize<span class="op">=</span><span class="va">None</span></span>
 <span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>    <span class="op">**</span>kwargs</span>
 <span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p>Plot as 2d</p>
+<p>Plot as 2d.</p>
 </section>
 <section id="mikeio.dataset._data_plot._DataArrayPlotterGrid1D.line" class="level3">
 <h3 class="anchored" data-anchor-id="mikeio.dataset._data_plot._DataArrayPlotterGrid1D.line">line</h3>
 <div class="sourceCode" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>dataset._data_plot._DataArrayPlotterGrid1D.line(ax<span class="op">=</span><span class="va">None</span>, figsize<span class="op">=</span><span class="va">None</span>, <span class="op">**</span>kwargs)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p>Plot as spatial lines</p>
+<p>Plot as spatial lines.</p>
 </section>
 <section id="mikeio.dataset._data_plot._DataArrayPlotterGrid1D.pcolormesh" class="level3">
 <h3 class="anchored" data-anchor-id="mikeio.dataset._data_plot._DataArrayPlotterGrid1D.pcolormesh">pcolormesh</h3>
@@ -540,7 +546,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>    title<span class="op">=</span><span class="va">None</span></span>
 <span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>    <span class="op">**</span>kwargs</span>
 <span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p>Plot multiple lines as 2d color plot</p>
+<p>Plot multiple lines as 2d color plot.</p>
 </section>
 <section id="mikeio.dataset._data_plot._DataArrayPlotterGrid1D.timeseries" class="level3">
 <h3 class="anchored" data-anchor-id="mikeio.dataset._data_plot._DataArrayPlotterGrid1D.timeseries">timeseries</h3>
@@ -549,7 +555,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>    figsize<span class="op">=</span><span class="va">None</span></span>
 <span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>    <span class="op">**</span>kwargs</span>
 <span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p>Plot as timeseries</p>
+<p>Plot as timeseries.</p>
 
 
 </section>

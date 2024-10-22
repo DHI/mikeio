@@ -408,11 +408,11 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 
 <div class="sourceCode" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>dataset._data_plot._DataArrayPlotterGrid2D(<span class="va">self</span>, da)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p>Plot a DataArray with a Grid2D geometry</p>
+<p>Plot a DataArray with a Grid2D geometry.</p>
 <p>If DataArray has multiple time steps, the first step will be plotted.</p>
 <section id="examples" class="level2 doc-section doc-section-examples">
 <h2 class="doc-section doc-section-examples anchored" data-anchor-id="examples">Examples</h2>
-<div id="d16f84df" class="cell" data-execution_count="1">
+<div id="65e36162" class="cell" data-execution_count="1">
 <div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> mikeio</span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>da <span class="op">=</span> mikeio.read(<span class="st">"../data/gebco_sound.dfs2"</span>)[<span class="st">"Elevation"</span>]</span>
 <span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>da.plot()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
@@ -437,23 +437,23 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <tbody>
 <tr class="odd">
 <td><a href="#mikeio.dataset._data_plot._DataArrayPlotterGrid2D.contour">contour</a></td>
-<td>Plot data as contour lines</td>
+<td>Plot data as contour lines.</td>
 </tr>
 <tr class="even">
 <td><a href="#mikeio.dataset._data_plot._DataArrayPlotterGrid2D.contourf">contourf</a></td>
-<td>Plot data as filled contours</td>
+<td>Plot data as filled contours.</td>
 </tr>
 <tr class="odd">
 <td><a href="#mikeio.dataset._data_plot._DataArrayPlotterGrid2D.hist">hist</a></td>
-<td>Plot DataArray as histogram (using ax.hist)</td>
+<td>Plot DataArray as histogram (using ax.hist).</td>
 </tr>
 <tr class="even">
 <td><a href="#mikeio.dataset._data_plot._DataArrayPlotterGrid2D.line">line</a></td>
-<td>Plot data as lines (timeseries if time is present)</td>
+<td>Plot data as lines (timeseries if time is present).</td>
 </tr>
 <tr class="odd">
 <td><a href="#mikeio.dataset._data_plot._DataArrayPlotterGrid2D.pcolormesh">pcolormesh</a></td>
-<td>Plot data as coloured patches</td>
+<td>Plot data as coloured patches.</td>
 </tr>
 </tbody>
 </table>
@@ -465,10 +465,10 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>    title<span class="op">=</span><span class="va">None</span></span>
 <span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>    <span class="op">**</span>kwargs</span>
 <span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p>Plot data as contour lines</p>
+<p>Plot data as contour lines.</p>
 <section id="examples-1" class="level4 doc-section doc-section-examples">
 <h4 class="doc-section doc-section-examples anchored" data-anchor-id="examples-1">Examples</h4>
-<div id="18269b1c" class="cell" data-execution_count="2">
+<div id="dde13d7a" class="cell" data-execution_count="2">
 <div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>da <span class="op">=</span> mikeio.read(<span class="st">"../data/gebco_sound.dfs2"</span>)[<span class="st">"Elevation"</span>]</span>
 <span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>da.plot.contour()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display">
@@ -490,10 +490,10 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>    label<span class="op">=</span><span class="va">None</span></span>
 <span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>    <span class="op">**</span>kwargs</span>
 <span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p>Plot data as filled contours</p>
+<p>Plot data as filled contours.</p>
 <section id="examples-2" class="level4 doc-section doc-section-examples">
 <h4 class="doc-section doc-section-examples anchored" data-anchor-id="examples-2">Examples</h4>
-<div id="5ec70d67" class="cell" data-execution_count="3">
+<div id="907901b4" class="cell" data-execution_count="3">
 <div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>da <span class="op">=</span> mikeio.read(<span class="st">"../data/gebco_sound.dfs2"</span>)[<span class="st">"Elevation"</span>]</span>
 <span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>da.plot.contourf()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display">
@@ -514,14 +514,14 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>    title<span class="op">=</span><span class="va">None</span></span>
 <span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>    <span class="op">**</span>kwargs</span>
 <span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p>Plot DataArray as histogram (using ax.hist)</p>
+<p>Plot DataArray as histogram (using ax.hist).</p>
 <section id="parameters" class="level4 doc-section doc-section-parameters">
 <h4 class="doc-section doc-section-parameters anchored" data-anchor-id="parameters">Parameters</h4>
 <table class="caption-top table">
 <colgroup>
-<col style="width: 2%">
+<col style="width: 3%">
 <col style="width: 10%">
-<col style="width: 83%">
+<col style="width: 82%">
 <col style="width: 3%">
 </colgroup>
 <thead>
@@ -557,6 +557,12 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <td>axes title</td>
 <td><code>None</code></td>
 </tr>
+<tr class="odd">
+<td>**kwargs</td>
+<td>Any</td>
+<td>additional arguments passed to the plotting function</td>
+<td><code>{}</code></td>
+</tr>
 </tbody>
 </table>
 </section>
@@ -587,7 +593,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <section id="mikeio.dataset._data_plot._DataArrayPlotterGrid2D.line" class="level3">
 <h3 class="anchored" data-anchor-id="mikeio.dataset._data_plot._DataArrayPlotterGrid2D.line">line</h3>
 <div class="sourceCode" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>dataset._data_plot._DataArrayPlotterGrid2D.line(ax<span class="op">=</span><span class="va">None</span>, figsize<span class="op">=</span><span class="va">None</span>, <span class="op">**</span>kwargs)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p>Plot data as lines (timeseries if time is present)</p>
+<p>Plot data as lines (timeseries if time is present).</p>
 </section>
 <section id="mikeio.dataset._data_plot._DataArrayPlotterGrid2D.pcolormesh" class="level3">
 <h3 class="anchored" data-anchor-id="mikeio.dataset._data_plot._DataArrayPlotterGrid2D.pcolormesh">pcolormesh</h3>
@@ -598,10 +604,10 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>    label<span class="op">=</span><span class="va">None</span></span>
 <span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>    <span class="op">**</span>kwargs</span>
 <span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p>Plot data as coloured patches</p>
+<p>Plot data as coloured patches.</p>
 <section id="examples-3" class="level4 doc-section doc-section-examples">
 <h4 class="doc-section doc-section-examples anchored" data-anchor-id="examples-3">Examples</h4>
-<div id="56e34815" class="cell" data-execution_count="4">
+<div id="70909e10" class="cell" data-execution_count="4">
 <div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>da <span class="op">=</span> mikeio.read(<span class="st">"../data/gebco_sound.dfs2"</span>)[<span class="st">"Elevation"</span>]</span>
 <span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>da.plot.pcolormesh()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display">
