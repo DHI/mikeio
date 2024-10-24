@@ -2,6 +2,8 @@
 title: Dfs2 examples
 ---
 
+A collection of specific examples of working with dfs2 files. For a general introduction to dfsu see the [user guide](../../user-guide/dfs2.qmd) and the [API reference](../../api/#dfs).
+
 * [Bathymetry](bathy.qmd)
 * [Meteo data](gfs.qmd)
 

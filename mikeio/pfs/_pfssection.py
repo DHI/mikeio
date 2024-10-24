@@ -15,7 +15,7 @@ import pandas as pd
 
 
 def _merge_dict(a: dict[str, Any], b: Mapping[str, Any]) -> dict[str, Any]:
-    """merges dict b into dict a; handling non-unique keys"""
+    """merges dict b into dict a; handling non-unique keys."""
     for key in b:
         if key in a:
             if isinstance(a[key], dict) and isinstance(b[key], dict):
@@ -35,7 +35,7 @@ class PfsNonUniqueList(list):
 class PfsSection(SimpleNamespace, MutableMapping[str, Any]):
     @staticmethod
     def from_dataframe(df: pd.DataFrame, prefix: str) -> "PfsSection":
-        """Create a PfsSection from a DataFrame
+        """Create a PfsSection from a DataFrame.
 
         Parameters
         ----------
@@ -56,6 +56,7 @@ class PfsSection(SimpleNamespace, MutableMapping[str, Any]):
         ```{python}
         mikeio.PfsSection.from_dataframe(df,"STATION_")
         ```
+
         """
         d = {f"{prefix}{idx}": row.to_dict() for idx, row in df.iterrows()}
 
@@ -117,7 +118,7 @@ class PfsSection(SimpleNamespace, MutableMapping[str, Any]):
 
     @staticmethod
     def _str_is_scientific_float(s: str) -> bool:
-        """True: -1.0e2, 1E-4, -0.1E+0.5; False: E12, E-4"""
+        """True: -1.0e2, 1E-4, -0.1E+0.5; False: E12, E-4."""
         if len(s) < 3:
             return False
         if (
@@ -157,7 +158,7 @@ class PfsSection(SimpleNamespace, MutableMapping[str, Any]):
         return self.__dict__.clear()
 
     def keys(self) -> KeysView[str]:
-        """Return a new view of the PfsSection's keys"""
+        """Return a new view of the PfsSection's keys."""
         return self.__dict__.keys()
 
     def values(self) -> ValuesView[Any]:
@@ -165,12 +166,12 @@ class PfsSection(SimpleNamespace, MutableMapping[str, Any]):
         return self.__dict__.values()
 
     def items(self) -> ItemsView[str, Any]:
-        """Return a new view of the PfsSection's items ((key, value) pairs)"""
+        """Return a new view of the PfsSection's items ((key, value) pairs)."""
         return self.__dict__.items()
 
     # TODO: better name
     def update_recursive(self, key: Any, value: Any) -> None:
-        """Update recursively all matches of key with value"""
+        """Update recursively all matches of key with value."""
         for k, v in self.items():
             if isinstance(v, PfsSection):
                 self[k].update_recursive(key, value)
@@ -187,7 +188,7 @@ class PfsSection(SimpleNamespace, MutableMapping[str, Any]):
         case: bool = False,
     ) -> PfsSection:
         """Find recursively all keys, sections or parameters
-           matching a pattern
+           matching a pattern.
 
         NOTE: logical OR between multiple conditions
 
@@ -208,6 +209,7 @@ class PfsSection(SimpleNamespace, MutableMapping[str, Any]):
         -------
         PfsSection
             Search result as a nested PfsSection
+
         """
         results = []
         if text is not None:
@@ -242,8 +244,7 @@ class PfsSection(SimpleNamespace, MutableMapping[str, Any]):
         keylist: list[str] | None = None,
         case: bool = False,
     ) -> Any:
-        """Look for patterns in either keys, params or sections"""
-
+        """Look for patterns in either keys, params or sections."""
         keylist = [] if keylist is None else keylist
         for k, v in self.items():
             kk = str(k) if case else str(k).lower()
@@ -263,7 +264,7 @@ class PfsSection(SimpleNamespace, MutableMapping[str, Any]):
 
     @staticmethod
     def _yield_deep_dict(keys: Sequence[str], val: Any) -> Any:
-        """yield a deep nested dict with keys with a single deep value val"""
+        """yield a deep nested dict with keys with a single deep value val."""
         for j in range(len(keys) - 1, -1, -1):
             d = {keys[j]: val}
             val = d
@@ -282,7 +283,7 @@ class PfsSection(SimpleNamespace, MutableMapping[str, Any]):
             return parampat == v
 
     def find_replace(self, old_value: Any, new_value: Any) -> None:
-        """Update recursively all old_value with new_value"""
+        """Update recursively all old_value with new_value."""
         for k, v in self.items():
             if isinstance(v, PfsSection):
                 self[k].find_replace(old_value, new_value)
@@ -301,7 +302,7 @@ class PfsSection(SimpleNamespace, MutableMapping[str, Any]):
     def _write_with_func(
         self, func: Callable[[str], Any], level: int = 0, newline: str = "\n"
     ) -> None:
-        """Write pfs nested objects
+        """Write pfs nested objects.
 
         Parameters
         ----------
@@ -311,6 +312,7 @@ class PfsSection(SimpleNamespace, MutableMapping[str, Any]):
             Level of indentation (add 3 spaces for each), by default 0
         newline : str, optional
             newline string, by default "\n"
+
         """
         lvl_prefix = "   "
         for k, v in self.items():
@@ -350,7 +352,7 @@ class PfsSection(SimpleNamespace, MutableMapping[str, Any]):
     def _prepare_value_for_write(
         self, v: str | bool | datetime | list[str | bool | datetime]
     ) -> str:
-        """catch peculiarities of string formatted pfs data
+        """catch peculiarities of string formatted pfs data.
 
         Parameters
         ----------
@@ -360,6 +362,7 @@ class PfsSection(SimpleNamespace, MutableMapping[str, Any]):
         Returns
         -------
             modified value
+
         """
         # some crude checks and corrections
         if isinstance(v, str):
@@ -390,7 +393,7 @@ class PfsSection(SimpleNamespace, MutableMapping[str, Any]):
         return v
 
     def to_dict(self) -> dict[str, Any]:
-        """Convert to (nested) dict (as a copy)"""
+        """Convert to (nested) dict (as a copy)."""
         d = self.__dict__.copy()
         for key, value in d.items():
             if isinstance(value, PfsSection):
@@ -398,7 +401,7 @@ class PfsSection(SimpleNamespace, MutableMapping[str, Any]):
         return d
 
     def to_dataframe(self, prefix: str | None = None) -> pd.DataFrame:
-        """Output enumerated subsections to a DataFrame
+        """Output enumerated subsections to a DataFrame.
 
         Parameters
         ----------
@@ -418,6 +421,7 @@ class PfsSection(SimpleNamespace, MutableMapping[str, Any]):
         pfs = mikeio.read_pfs("../data/pfs/lake.sw")
         pfs.SW.OUTPUTS.to_dataframe(prefix="OUTPUT_")
         ```
+
         """
         if prefix is not None:
             sections = [
@@ -448,7 +452,7 @@ class PfsSection(SimpleNamespace, MutableMapping[str, Any]):
 
     @classmethod
     def _merge_PfsSections(cls, sections: Sequence[dict[str, Any]]) -> "PfsSection":
-        """Merge a list of PfsSections/dict"""
+        """Merge a list of PfsSections/dict."""
         assert len(sections) > 0
         a = sections[0]
         for b in sections[1:]:

@@ -76,7 +76,9 @@ notebooks= [
 "Bug Tracker" = "https://github.com/DHI/mikeio/issues"
 
 
-[tool.ruff]
+[tool.ruff.lint]
 
 # ignore long lines
-lint.ignore = ["E501", "E741"]
+ignore = ["E501", "E741"]
+
+select = ["D100", "D101", "D102", "D103", "D202", "D212", "D413", "D415", "D417"]

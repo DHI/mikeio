@@ -49,12 +49,20 @@ website:
       - section: Examples
         href: examples/index.qmd
         contents:
+          - section: Dfs0
+            href: examples/dfs0/index.qmd
+            contents:
+              - examples/dfs0/cmems_insitu.qmd
           - section: Dfs2
             href: examples/dfs2/index.qmd
             contents:
               - examples/dfs2/bathy.qmd
               - examples/dfs2/gfs.qmd
-          - examples/Dfsu-2D-interpolation.qmd
+          - section: Dfsu
+            href: examples/dfsu/index.qmd
+            contents:
+              - examples/dfsu/spatial_interpolation.qmd
+              - examples/dfsu/merge_subdomains.qmd
           - examples/Time-interpolation.qmd
           - examples/Generic.qmd
       - text: Design philosophy
@@ -162,5 +170,8 @@ quartodoc:
     
 format:
   html:
+    theme: cosmo
+    toc: true
+  ipynb: 
     theme: cosmo
     toc: true
