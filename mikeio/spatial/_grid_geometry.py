@@ -148,7 +148,10 @@ class Grid1D(_Geometry):
 
     def __repr__(self) -> str:
         out = ["<mikeio.Grid1D>", _print_axis_txt("x", self.x, self.dx)]
-        return "\n".join(out)
+        txt = "\n".join(out)
+        if self._axis_name != "x":
+            txt = txt.replace(")", f", axis_name='{self._axis_name}')")
+        return txt
 
     def __str__(self) -> str:
         return f"Grid1D (n={self.nx}, dx={self.dx:.4g})"
@@ -1139,10 +1142,11 @@ class Grid3D(_Geometry):
         origin: tuple[float, float] = (0.0, 0.0),
         orientation: float = 0.0,
     ) -> None:
-        """Create equidistant 3D spatial geometry
+        """Create equidistant 3D spatial geometry.
 
         Parameters
         ----------
+
         x : array_like, optional
             x coordinates of cell centers
         x0 : float, optional
@@ -1173,6 +1177,7 @@ class Grid3D(_Geometry):
             user-defined origin, by default (0.0, 0.0)
         orientation : float, optional
             rotation angle in degrees, by default 0.0
+
         """
         super().__init__(projection=projection)
         self._origin = (0.0, 0.0) if origin is None else (origin[0], origin[1])
