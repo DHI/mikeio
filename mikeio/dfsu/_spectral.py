@@ -72,42 +72,42 @@ class DfsuSpectral:
     def geometry(
         self,
     ) -> GeometryFMPointSpectrum | GeometryFMLineSpectrum | GeometryFMAreaSpectrum:
-        """Geometry"""
+        """Geometry."""
         return self._geometry
 
     @property
     def deletevalue(self) -> float:
-        """File delete value"""
+        """File delete value."""
         return self._deletevalue
 
     @property
     def n_items(self) -> int:
-        """Number of items"""
+        """Number of items."""
         return len(self.items)
 
     @property
     def items(self) -> list[ItemInfo]:
-        """List of items"""
+        """List of items."""
         return self._items
 
     @property
     def start_time(self) -> pd.Timestamp:
-        """File start time"""
+        """File start time."""
         return self._start_time
 
     @property
     def n_timesteps(self) -> int:
-        """Number of time steps"""
+        """Number of time steps."""
         return self._n_timesteps
 
     @property
     def timestep(self) -> float:
-        """Time step size in seconds"""
+        """Time step size in seconds."""
         return self._timestep
 
     @property
     def end_time(self) -> pd.Timestamp:
-        """File end time"""
+        """File end time."""
         if self._equidistant:
             return self.time[-1]
         else:
@@ -184,7 +184,7 @@ class DfsuSpectral:
 
     @staticmethod
     def _get_direction_unit(filename: str) -> int:
-        """Determine if the directional axis is in degrees or radians"""
+        """Determine if the directional axis is in degrees or radians."""
         source = DfsFileFactory.DfsGenericOpen(filename)
         try:
             for static_item in iter(source.ReadStaticItemNext, None):
@@ -197,22 +197,22 @@ class DfsuSpectral:
 
     @property
     def n_frequencies(self) -> int | None:
-        """Number of frequencies"""
+        """Number of frequencies."""
         return 0 if self.frequencies is None else len(self.frequencies)
 
     @property
     def frequencies(self) -> np.ndarray | None:
-        """Frequency axis"""
+        """Frequency axis."""
         return self.geometry._frequencies
 
     @property
     def n_directions(self) -> int | None:
-        """Number of directions"""
+        """Number of directions."""
         return 0 if self.directions is None else len(self.directions)
 
     @property
     def directions(self) -> np.ndarray | None:
-        """Directional axis"""
+        """Directional axis."""
         return self.geometry._directions
 
     def _get_spectral_data_shape(
@@ -266,8 +266,7 @@ class DfsuSpectral:
         keepdims: bool = False,
         dtype: Any = np.float32,
     ) -> Dataset:
-        """
-        Read data from a spectral dfsu file
+        """Read data from a spectral dfsu file.
 
         Parameters
         ---------
@@ -289,6 +288,8 @@ class DfsuSpectral:
             Read only selected element ids (spectral area files only)
         nodes: list[int], optional
             Read only selected node ids (spectral line files only)
+        dtype: numpy.dtype, optional
+            Data type to read. Default is np.float32
 
         Returns
         -------
@@ -312,6 +313,7 @@ class DfsuSpectral:
         geometry: DfsuSpectral2D (40 elements, 33 nodes)
         items:
           0:  Energy density <Wave energy density> (meter pow 2 sec per deg)
+
         """
         if dtype not in [np.float32, np.float64]:
             raise ValueError("Invalid data type. Choose np.float32 or np.float64")
@@ -391,7 +393,7 @@ class DfsuSpectral:
         x: float | None,
         y: float | None,
     ) -> np.ndarray | None:
-        """Parse geometry selection
+        """Parse geometry selection.
 
         Parameters
         ----------
@@ -415,6 +417,7 @@ class DfsuSpectral:
         ------
         ValueError
             If no elements are found in selection
+
         """
         elements = None
 
@@ -481,7 +484,7 @@ class DfsuSpectral:
     def calc_Hm0_from_spectrum(
         self, spectrum: np.ndarray | DataArray, tail: bool = True
     ) -> np.ndarray:
-        """Calculate significant wave height (Hm0) from spectrum
+        """Calculate significant wave height (Hm0) from spectrum.
 
         Parameters
         ----------
@@ -494,6 +497,7 @@ class DfsuSpectral:
         -------
         np.ndarray
             significant wave height values
+
         """
         if isinstance(spectrum, DataArray):
             m0 = calc_m0_from_spectrum(

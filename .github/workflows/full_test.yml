@@ -5,19 +5,18 @@ name: Full test
 
 on:
   push:
-    branches: [ main]
+    branches: [main]
   pull_request:
-    branches: [ main ]
-
+    branches: [main]
 
 jobs:
   build:
 
-    runs-on: ${{ matrix.os }}
+    runs-on: ubuntu-latest
     strategy:
       matrix:
         os: [ubuntu-latest, windows-latest]
-        python-version: [3.9, "3.12"]
+        python-version: ["3.9", "3.13"]
 
     steps:
     - uses: actions/checkout@v4
