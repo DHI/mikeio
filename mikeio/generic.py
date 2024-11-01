@@ -569,6 +569,7 @@ def concat(
                 # For subsequent files, we need to handle overlapping periods
                 # Calculate overlap in timesteps
                 if start_time <= end_time:
+
                     overlap_end = int((end_time - start_time).total_seconds() / dt) + 1
 
                     # Read current file data
@@ -603,8 +604,10 @@ def concat(
 
                                     # Calculate average
                                     averaged_data = (existing_data + current_data) / 2
-
                                     # Write averaged data
+                                    # dfs_o.WriteItemTimeStep(
+                                    #     item + 1, existing_pos, 0, averaged_data
+                                    # ) # This is what we need, but it does not wo
                                     dfs_o.WriteItemTimeStepNext(0, averaged_data)
 
                             else:
@@ -624,7 +627,7 @@ def concat(
 
                 end_time = start_time + timedelta(seconds=(n_time_steps - 1) * dt)
                 dfs_i.Close()
-        n_time_steps_prev_file = n_time_steps
+
     dfs_o.Close()
 
 
