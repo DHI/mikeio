@@ -644,7 +644,9 @@ def _to_polygons(node_coordinates: np.ndarray, element_table: np.ndarray) -> lis
     return polygons
 
 
-def _create_node_element_matrix(element_table: np.ndarray, num_nodes: int) -> csr_matrix:
+def _create_node_element_matrix(
+    element_table: np.ndarray, num_nodes: int
+) -> csr_matrix:
     """Creates a sparse node-element connectivity matrix from a given element table.
 
     Parameters
@@ -654,12 +656,13 @@ def _create_node_element_matrix(element_table: np.ndarray, num_nodes: int) -> cs
         column corresponds to a node index involved in the element.)
     num_nodes : int
         The total number of nodes in the mesh.
-    
+
     Returns
     -------
     scipy.sparse.csr_matrix
         A sparse matrix of shape (num_nodes, number of elements), where the entry
         (i, j) is 1 if node i is part of element j, and 0 otherwise.
+
     """
     row_ind = element_table.ravel()
     col_ind = np.repeat(np.arange(element_table.shape[0]), element_table.shape[1])
