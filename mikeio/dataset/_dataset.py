@@ -429,7 +429,10 @@ class Dataset:
         return n_elem
 
     def describe(self, **kwargs: Any) -> pd.DataFrame:
-        """Generate descriptive statistics by wrapping :py:meth:`pandas.DataFrame.describe`."""
+        """Generate descriptive statistics.
+
+        Wraps [](`pandas.DataFrame.describe`).
+        """
         data = {x.name: x.to_numpy().ravel() for x in self}
         df = pd.DataFrame(data).describe(**kwargs)
 
@@ -1067,7 +1070,7 @@ class Dataset:
     ) -> "Dataset":
         """Temporal interpolation.
 
-        Wrapper of :py:class:`scipy.interpolate.interp1d`
+        Wrapper of [](`scipy.interpolate.interp1d`).
 
         Parameters
         ----------
@@ -1090,27 +1093,18 @@ class Dataset:
 
         Examples
         --------
-        >>> ds = mikeio.read("tests/testdata/HD2D.dfsu")
-        >>> ds
-        <mikeio.Dataset>
-        Dimensions: (9, 884)
-        Time: 1985-08-06 07:00:00 - 1985-08-07 03:00:00
-        Items:
-        0:  Surface elevation <Surface Elevation> (meter)
-        1:  U velocity <u velocity component> (meter per sec)
-        2:  V velocity <v velocity component> (meter per sec)
-        3:  Current speed <Current Speed> (meter per sec)
-        >>> dsi = ds.interp_time(dt=1800)
-        >>> dsi
-        <mikeio.Dataset>
-        Dimensions: (41, 884)
-        Time: 1985-08-06 07:00:00 - 1985-08-07 03:00:00
-        Items:
-        0:  Surface elevation <Surface Elevation> (meter)
-        1:  U velocity <u velocity component> (meter per sec)
-        2:  V velocity <v velocity component> (meter per sec)
-        3:  Current speed <Current Speed> (meter per sec)
-        >>> dsi = ds.interp_time(freq='2H')
+        ```{python}
+        ds = mikeio.read("../data/HD2D.dfsu")
+        ds
+        ```
+
+        ```{python}
+        ds.interp_time(dt=1800)
+        ```
+
+        ```{python}
+        ds.interp_time(freq='2h')
+        ```
 
         """
         if freq:
@@ -1618,7 +1612,7 @@ class Dataset:
     def average(self, *, weights, axis=0, **kwargs) -> "Dataset":  # type: ignore
         """Compute the weighted average along the specified axis.
 
-        Wraps :py:meth:`numpy.average`
+        Wraps [](`numpy.average`)
 
         Parameters
         ----------
