@@ -440,15 +440,15 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 
 <div class="sourceCode" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>Dataset(</span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>    <span class="va">self</span></span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>    data</span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>    time<span class="op">=</span><span class="va">None</span></span>
-<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>    items<span class="op">=</span><span class="va">None</span></span>
-<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>    geometry<span class="op">=</span><span class="va">None</span></span>
-<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>    zn<span class="op">=</span><span class="va">None</span></span>
-<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>    dims<span class="op">=</span><span class="va">None</span></span>
-<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>    validate<span class="op">=</span><span class="va">True</span></span>
-<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>    dt<span class="op">=</span><span class="fl">1.0</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>    <span class="va">self</span>,</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>    data,</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>    time<span class="op">=</span><span class="va">None</span>,</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>    items<span class="op">=</span><span class="va">None</span>,</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>    geometry<span class="op">=</span><span class="va">None</span>,</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>    zn<span class="op">=</span><span class="va">None</span>,</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>    dims<span class="op">=</span><span class="va">None</span>,</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>    validate<span class="op">=</span><span class="va">True</span>,</span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>    dt<span class="op">=</span><span class="fl">1.0</span>,</span>
 <span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <p>Dataset containing one or more DataArrays with common geometry and time.</p>
 <p>Most often obtained by reading a dfs file. But can also be created a sequence or dictonary of DataArrays. The mikeio.Dataset is inspired by and similar to the xarray.Dataset.</p>
@@ -472,7 +472,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </section>
 <section id="examples" class="level2 doc-section doc-section-examples">
 <h2 class="doc-section doc-section-examples anchored" data-anchor-id="examples">Examples</h2>
-<div id="a0f7abb8" class="cell" data-execution_count="1">
+<div id="aa736889" class="cell" data-execution_count="1">
 <div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> mikeio</span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>mikeio.read(<span class="st">"../data/europe_wind_long_lat.dfs2"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="1">
@@ -592,7 +592,7 @@ items:
 </tr>
 <tr class="even">
 <td><a href="#mikeio.Dataset.describe">describe</a></td>
-<td>Generate descriptive statistics by wrapping :py:meth:<code>pandas.DataFrame.describe</code>.</td>
+<td>Generate descriptive statistics.</td>
 </tr>
 <tr class="odd">
 <td><a href="#mikeio.Dataset.dropna">dropna</a></td>
@@ -722,8 +722,8 @@ items:
 <colgroup>
 <col style="width: 10%">
 <col style="width: 12%">
-<col style="width: 63%">
-<col style="width: 14%">
+<col style="width: 61%">
+<col style="width: 15%">
 </colgroup>
 <thead>
 <tr class="header">
@@ -737,7 +737,7 @@ items:
 <tr class="odd">
 <td>axis</td>
 <td>int | str</td>
-<td>axis number or "time", "space" or "items", by default 0</td>
+<td>axis number or “time”, “space” or “items”, by default 0</td>
 <td><code>0</code></td>
 </tr>
 <tr class="even">
@@ -779,15 +779,15 @@ items:
 <h3 class="anchored" data-anchor-id="mikeio.Dataset.average">average</h3>
 <div class="sourceCode" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>Dataset.average(weights, axis<span class="op">=</span><span class="dv">0</span>, <span class="op">**</span>kwargs)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <p>Compute the weighted average along the specified axis.</p>
-<p>Wraps :py:meth:<code>numpy.average</code></p>
+<p>Wraps <a href="https://numpy.org/doc/stable/reference/generated/numpy.average.html#numpy.average"><code>numpy.average</code></a></p>
 <section id="parameters-1" class="level4 doc-section doc-section-parameters">
 <h4 class="doc-section doc-section-parameters anchored" data-anchor-id="parameters-1">Parameters</h4>
 <table class="caption-top table">
 <colgroup>
-<col style="width: 10%">
-<col style="width: 8%">
-<col style="width: 67%">
-<col style="width: 12%">
+<col style="width: 11%">
+<col style="width: 9%">
+<col style="width: 65%">
+<col style="width: 13%">
 </colgroup>
 <thead>
 <tr class="header">
@@ -807,7 +807,7 @@ items:
 <tr class="even">
 <td>axis</td>
 <td></td>
-<td>axis number or "time", "space" or "items", by default 0</td>
+<td>axis number or “time”, “space” or “items”, by default 0</td>
 <td><code>0</code></td>
 </tr>
 <tr class="odd">
@@ -860,8 +860,8 @@ aggregate : Weighted average</code></pre>
 <table class="caption-top table">
 <colgroup>
 <col style="width: 8%">
-<col style="width: 27%">
-<col style="width: 53%">
+<col style="width: 28%">
+<col style="width: 52%">
 <col style="width: 10%">
 </colgroup>
 <thead>
@@ -882,7 +882,7 @@ aggregate : Weighted average</code></pre>
 <tr class="even">
 <td>keep</td>
 <td>Literal['last', 'first']</td>
-<td>which values to keep in case of overlap, by default 'last'</td>
+<td>which values to keep in case of overlap, by default ‘last’</td>
 <td><code>'last'</code></td>
 </tr>
 </tbody>
@@ -940,7 +940,8 @@ aggregate : Weighted average</code></pre>
 <section id="mikeio.Dataset.describe" class="level3">
 <h3 class="anchored" data-anchor-id="mikeio.Dataset.describe">describe</h3>
 <div class="sourceCode" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>Dataset.describe(<span class="op">**</span>kwargs)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p>Generate descriptive statistics by wrapping :py:meth:<code>pandas.DataFrame.describe</code>.</p>
+<p>Generate descriptive statistics.</p>
+<p>Wraps <a href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.describe.html#pandas.DataFrame.describe"><code>pandas.DataFrame.describe</code></a>.</p>
 </section>
 <section id="mikeio.Dataset.dropna" class="level3">
 <h3 class="anchored" data-anchor-id="mikeio.Dataset.dropna">dropna</h3>
@@ -984,7 +985,7 @@ aggregate : Weighted average</code></pre>
 <tr class="odd">
 <td>method</td>
 <td>Literal['nearest', 'inverse_distance']</td>
-<td>Spatial interpolation method ('nearest' or 'inverse_distance') default='nearest'</td>
+<td>Spatial interpolation method (‘nearest’ or ‘inverse_distance’) default=‘nearest’</td>
 <td><code>'nearest'</code></td>
 </tr>
 <tr class="even">
@@ -1098,7 +1099,7 @@ aggregate : Weighted average</code></pre>
 <tr class="odd">
 <td>time</td>
 <td>(float, pd.DatetimeIndex or Dataset)</td>
-<td>timestep in seconds or discrete time instances given by pd.DatetimeIndex (typically from another Dataset da2.time), by default None (=don't interp in time)</td>
+<td>timestep in seconds or discrete time instances given by pd.DatetimeIndex (typically from another Dataset da2.time), by default None (=don’t interp in time)</td>
 <td><code>None</code></td>
 </tr>
 <tr class="even">
@@ -1236,22 +1237,22 @@ aggregate : Weighted average</code></pre>
 <section id="mikeio.Dataset.interp_time" class="level3">
 <h3 class="anchored" data-anchor-id="mikeio.Dataset.interp_time">interp_time</h3>
 <div class="sourceCode" id="cb23"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>Dataset.interp_time(</span>
-<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>    dt<span class="op">=</span><span class="va">None</span></span>
-<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a>    <span class="op">*</span></span>
-<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a>    freq<span class="op">=</span><span class="va">None</span></span>
-<span id="cb23-5"><a href="#cb23-5" aria-hidden="true" tabindex="-1"></a>    method<span class="op">=</span><span class="st">'linear'</span></span>
-<span id="cb23-6"><a href="#cb23-6" aria-hidden="true" tabindex="-1"></a>    extrapolate<span class="op">=</span><span class="va">True</span></span>
-<span id="cb23-7"><a href="#cb23-7" aria-hidden="true" tabindex="-1"></a>    fill_value<span class="op">=</span>np.nan</span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>    dt<span class="op">=</span><span class="va">None</span>,</span>
+<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a>    <span class="op">*</span>,</span>
+<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a>    freq<span class="op">=</span><span class="va">None</span>,</span>
+<span id="cb23-5"><a href="#cb23-5" aria-hidden="true" tabindex="-1"></a>    method<span class="op">=</span><span class="st">'linear'</span>,</span>
+<span id="cb23-6"><a href="#cb23-6" aria-hidden="true" tabindex="-1"></a>    extrapolate<span class="op">=</span><span class="va">True</span>,</span>
+<span id="cb23-7"><a href="#cb23-7" aria-hidden="true" tabindex="-1"></a>    fill_value<span class="op">=</span>np.nan,</span>
 <span id="cb23-8"><a href="#cb23-8" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <p>Temporal interpolation.</p>
-<p>Wrapper of :py:class:<code>scipy.interpolate.interp1d</code></p>
+<p>Wrapper of <a href="https://docs.scipy.org/doc/scipy/reference/generated/scipy.interpolate.interp1d.html#scipy.interpolate.interp1d"><code>scipy.interpolate.interp1d</code></a>.</p>
 <section id="parameters-7" class="level4 doc-section doc-section-parameters">
 <h4 class="doc-section doc-section-parameters anchored" data-anchor-id="parameters-7">Parameters</h4>
 <table class="caption-top table">
 <colgroup>
 <col style="width: 2%">
-<col style="width: 11%">
-<col style="width: 83%">
+<col style="width: 12%">
+<col style="width: 82%">
 <col style="width: 2%">
 </colgroup>
 <thead>
@@ -1278,7 +1279,7 @@ aggregate : Weighted average</code></pre>
 <tr class="odd">
 <td>method</td>
 <td>str</td>
-<td>Specifies the kind of interpolation as a string ('linear', 'nearest', 'zero', 'slinear', 'quadratic', 'cubic', 'previous', 'next', where 'zero', 'slinear', 'quadratic' and 'cubic' refer to a spline interpolation of zeroth, first, second or third order; 'previous' and 'next' simply return the previous or next value of the point) or as an integer specifying the order of the spline interpolator to use. Default is 'linear'.</td>
+<td>Specifies the kind of interpolation as a string (‘linear’, ‘nearest’, ‘zero’, ‘slinear’, ‘quadratic’, ‘cubic’, ‘previous’, ‘next’, where ‘zero’, ‘slinear’, ‘quadratic’ and ‘cubic’ refer to a spline interpolation of zeroth, first, second or third order; ‘previous’ and ‘next’ simply return the previous or next value of the point) or as an integer specifying the order of the spline interpolator to use. Default is ‘linear’.</td>
 <td><code>'linear'</code></td>
 </tr>
 <tr class="even">
@@ -1317,32 +1318,54 @@ aggregate : Weighted average</code></pre>
 </section>
 <section id="examples-6" class="level4 doc-section doc-section-examples">
 <h4 class="doc-section doc-section-examples anchored" data-anchor-id="examples-6">Examples</h4>
-<div class="sourceCode" id="cb24"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> ds <span class="op">=</span> mikeio.read(<span class="st">"tests/testdata/HD2D.dfsu"</span>)</span>
-<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> ds</span>
-<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a><span class="op">&lt;</span>mikeio.Dataset<span class="op">&gt;</span></span>
-<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a>Dimensions: (<span class="dv">9</span>, <span class="dv">884</span>)</span>
-<span id="cb24-5"><a href="#cb24-5" aria-hidden="true" tabindex="-1"></a>Time: <span class="dv">1985</span><span class="op">-</span><span class="dv">0</span><span class="er">8</span><span class="op">-</span><span class="dv">0</span><span class="er">6</span> <span class="dv">0</span><span class="er">7</span>:<span class="dv">00</span>:<span class="dv">00</span> <span class="op">-</span> <span class="dv">1985</span><span class="op">-</span><span class="dv">0</span><span class="er">8</span><span class="op">-</span><span class="dv">0</span><span class="er">7</span> <span class="dv">0</span><span class="er">3</span>:<span class="dv">00</span>:<span class="dv">00</span></span>
-<span id="cb24-6"><a href="#cb24-6" aria-hidden="true" tabindex="-1"></a>Items:</span>
-<span id="cb24-7"><a href="#cb24-7" aria-hidden="true" tabindex="-1"></a><span class="dv">0</span>:  Surface elevation <span class="op">&lt;</span>Surface Elevation<span class="op">&gt;</span> (meter)</span>
-<span id="cb24-8"><a href="#cb24-8" aria-hidden="true" tabindex="-1"></a><span class="dv">1</span>:  U velocity <span class="op">&lt;</span>u velocity component<span class="op">&gt;</span> (meter per sec)</span>
-<span id="cb24-9"><a href="#cb24-9" aria-hidden="true" tabindex="-1"></a><span class="dv">2</span>:  V velocity <span class="op">&lt;</span>v velocity component<span class="op">&gt;</span> (meter per sec)</span>
-<span id="cb24-10"><a href="#cb24-10" aria-hidden="true" tabindex="-1"></a><span class="dv">3</span>:  Current speed <span class="op">&lt;</span>Current Speed<span class="op">&gt;</span> (meter per sec)</span>
-<span id="cb24-11"><a href="#cb24-11" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> dsi <span class="op">=</span> ds.interp_time(dt<span class="op">=</span><span class="dv">1800</span>)</span>
-<span id="cb24-12"><a href="#cb24-12" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> dsi</span>
-<span id="cb24-13"><a href="#cb24-13" aria-hidden="true" tabindex="-1"></a><span class="op">&lt;</span>mikeio.Dataset<span class="op">&gt;</span></span>
-<span id="cb24-14"><a href="#cb24-14" aria-hidden="true" tabindex="-1"></a>Dimensions: (<span class="dv">41</span>, <span class="dv">884</span>)</span>
-<span id="cb24-15"><a href="#cb24-15" aria-hidden="true" tabindex="-1"></a>Time: <span class="dv">1985</span><span class="op">-</span><span class="dv">0</span><span class="er">8</span><span class="op">-</span><span class="dv">0</span><span class="er">6</span> <span class="dv">0</span><span class="er">7</span>:<span class="dv">00</span>:<span class="dv">00</span> <span class="op">-</span> <span class="dv">1985</span><span class="op">-</span><span class="dv">0</span><span class="er">8</span><span class="op">-</span><span class="dv">0</span><span class="er">7</span> <span class="dv">0</span><span class="er">3</span>:<span class="dv">00</span>:<span class="dv">00</span></span>
-<span id="cb24-16"><a href="#cb24-16" aria-hidden="true" tabindex="-1"></a>Items:</span>
-<span id="cb24-17"><a href="#cb24-17" aria-hidden="true" tabindex="-1"></a><span class="dv">0</span>:  Surface elevation <span class="op">&lt;</span>Surface Elevation<span class="op">&gt;</span> (meter)</span>
-<span id="cb24-18"><a href="#cb24-18" aria-hidden="true" tabindex="-1"></a><span class="dv">1</span>:  U velocity <span class="op">&lt;</span>u velocity component<span class="op">&gt;</span> (meter per sec)</span>
-<span id="cb24-19"><a href="#cb24-19" aria-hidden="true" tabindex="-1"></a><span class="dv">2</span>:  V velocity <span class="op">&lt;</span>v velocity component<span class="op">&gt;</span> (meter per sec)</span>
-<span id="cb24-20"><a href="#cb24-20" aria-hidden="true" tabindex="-1"></a><span class="dv">3</span>:  Current speed <span class="op">&lt;</span>Current Speed<span class="op">&gt;</span> (meter per sec)</span>
-<span id="cb24-21"><a href="#cb24-21" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> dsi <span class="op">=</span> ds.interp_time(freq<span class="op">=</span><span class="st">'2H'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div id="72e6f055" class="cell" data-execution_count="2">
+<div class="sourceCode cell-code" id="cb24"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>ds <span class="op">=</span> mikeio.read(<span class="st">"../data/HD2D.dfsu"</span>)</span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>ds</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="2">
+<pre><code>&lt;mikeio.Dataset&gt;
+dims: (time:9, element:884)
+time: 1985-08-06 07:00:00 - 1985-08-07 03:00:00 (9 records)
+geometry: Dfsu2D (884 elements, 529 nodes)
+items:
+  0:  Surface elevation &lt;Surface Elevation&gt; (meter)
+  1:  U velocity &lt;u velocity component&gt; (meter per sec)
+  2:  V velocity &lt;v velocity component&gt; (meter per sec)
+  3:  Current speed &lt;Current Speed&gt; (meter per sec)</code></pre>
+</div>
+</div>
+<div id="55b88c9a" class="cell" data-execution_count="3">
+<div class="sourceCode cell-code" id="cb26"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a>ds.interp_time(dt<span class="op">=</span><span class="dv">1800</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="3">
+<pre><code>&lt;mikeio.Dataset&gt;
+dims: (time:41, element:884)
+time: 1985-08-06 07:00:00 - 1985-08-07 03:00:00 (41 records)
+geometry: Dfsu2D (884 elements, 529 nodes)
+items:
+  0:  Surface elevation &lt;Surface Elevation&gt; (meter)
+  1:  U velocity &lt;u velocity component&gt; (meter per sec)
+  2:  V velocity &lt;v velocity component&gt; (meter per sec)
+  3:  Current speed &lt;Current Speed&gt; (meter per sec)</code></pre>
+</div>
+</div>
+<div id="ca133301" class="cell" data-execution_count="4">
+<div class="sourceCode cell-code" id="cb28"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a>ds.interp_time(freq<span class="op">=</span><span class="st">'2h'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="4">
+<pre><code>&lt;mikeio.Dataset&gt;
+dims: (time:11, element:884)
+time: 1985-08-06 07:00:00 - 1985-08-07 03:00:00 (11 records)
+geometry: Dfsu2D (884 elements, 529 nodes)
+items:
+  0:  Surface elevation &lt;Surface Elevation&gt; (meter)
+  1:  U velocity &lt;u velocity component&gt; (meter per sec)
+  2:  V velocity &lt;v velocity component&gt; (meter per sec)
+  3:  Current speed &lt;Current Speed&gt; (meter per sec)</code></pre>
+</div>
+</div>
 </section>
 </section>
 <section id="mikeio.Dataset.isel" class="level3">
 <h3 class="anchored" data-anchor-id="mikeio.Dataset.isel">isel</h3>
-<div class="sourceCode" id="cb25"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a>Dataset.isel(idx<span class="op">=</span><span class="va">None</span>, axis<span class="op">=</span><span class="dv">0</span>, <span class="op">**</span>kwargs)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb30"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a>Dataset.isel(idx<span class="op">=</span><span class="va">None</span>, axis<span class="op">=</span><span class="dv">0</span>, <span class="op">**</span>kwargs)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <p>Return a new Dataset whose data is given by integer indexing along the specified dimension(s).</p>
 <p>The spatial parameters available depend on the dims (i.e.&nbsp;geometry) of the Dataset:</p>
 <ul>
@@ -1378,7 +1401,7 @@ aggregate : Weighted average</code></pre>
 <tr class="even">
 <td>axis</td>
 <td>int | str</td>
-<td>axis number or "time", by default 0</td>
+<td>axis number or “time”, by default 0</td>
 <td><code>0</code></td>
 </tr>
 <tr class="odd">
@@ -1441,27 +1464,27 @@ aggregate : Weighted average</code></pre>
 </section>
 <section id="examples-7" class="level4 doc-section doc-section-examples">
 <h4 class="doc-section doc-section-examples anchored" data-anchor-id="examples-7">Examples</h4>
-<div class="sourceCode" id="cb26"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> ds <span class="op">=</span> mikeio.read(<span class="st">"europe_wind_long_lat.dfs2"</span>)</span>
-<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> ds.isel(time<span class="op">=-</span><span class="dv">1</span>)</span>
-<span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> ds.isel(x<span class="op">=</span><span class="bu">slice</span>(<span class="dv">10</span>,<span class="dv">20</span>), y<span class="op">=</span><span class="bu">slice</span>(<span class="dv">40</span>,<span class="dv">60</span>))</span>
-<span id="cb26-4"><a href="#cb26-4" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> ds.isel(y<span class="op">=</span><span class="dv">34</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="sourceCode" id="cb27"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> ds <span class="op">=</span> mikeio.read(<span class="st">"tests/testdata/HD2D.dfsu"</span>)</span>
-<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> ds2 <span class="op">=</span> ds.isel(time<span class="op">=</span>[<span class="dv">0</span>,<span class="dv">1</span>,<span class="dv">2</span>])</span>
-<span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> ds3 <span class="op">=</span> ds2.isel(elements<span class="op">=</span>[<span class="dv">100</span>,<span class="dv">200</span>])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb31"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> ds <span class="op">=</span> mikeio.read(<span class="st">"europe_wind_long_lat.dfs2"</span>)</span>
+<span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> ds.isel(time<span class="op">=-</span><span class="dv">1</span>)</span>
+<span id="cb31-3"><a href="#cb31-3" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> ds.isel(x<span class="op">=</span><span class="bu">slice</span>(<span class="dv">10</span>,<span class="dv">20</span>), y<span class="op">=</span><span class="bu">slice</span>(<span class="dv">40</span>,<span class="dv">60</span>))</span>
+<span id="cb31-4"><a href="#cb31-4" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> ds.isel(y<span class="op">=</span><span class="dv">34</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb32"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> ds <span class="op">=</span> mikeio.read(<span class="st">"tests/testdata/HD2D.dfsu"</span>)</span>
+<span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> ds2 <span class="op">=</span> ds.isel(time<span class="op">=</span>[<span class="dv">0</span>,<span class="dv">1</span>,<span class="dv">2</span>])</span>
+<span id="cb32-3"><a href="#cb32-3" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> ds3 <span class="op">=</span> ds2.isel(elements<span class="op">=</span>[<span class="dv">100</span>,<span class="dv">200</span>])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </section>
 </section>
 <section id="mikeio.Dataset.max" class="level3">
 <h3 class="anchored" data-anchor-id="mikeio.Dataset.max">max</h3>
-<div class="sourceCode" id="cb28"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a>Dataset.<span class="bu">max</span>(axis<span class="op">=</span><span class="dv">0</span>, <span class="op">**</span>kwargs)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb33"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a>Dataset.<span class="bu">max</span>(axis<span class="op">=</span><span class="dv">0</span>, <span class="op">**</span>kwargs)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <p>Max value along an axis.</p>
 <section id="parameters-9" class="level4 doc-section doc-section-parameters">
 <h4 class="doc-section doc-section-parameters anchored" data-anchor-id="parameters-9">Parameters</h4>
 <table class="caption-top table">
 <colgroup>
-<col style="width: 10%">
-<col style="width: 12%">
-<col style="width: 65%">
 <col style="width: 11%">
+<col style="width: 13%">
+<col style="width: 63%">
+<col style="width: 12%">
 </colgroup>
 <thead>
 <tr class="header">
@@ -1475,7 +1498,7 @@ aggregate : Weighted average</code></pre>
 <tr class="odd">
 <td>axis</td>
 <td>int | str</td>
-<td>axis number or "time", "space" or "items", by default 0</td>
+<td>axis number or “time”, “space” or “items”, by default 0</td>
 <td><code>0</code></td>
 </tr>
 <tr class="even">
@@ -1513,16 +1536,16 @@ aggregate : Weighted average</code></pre>
 </section>
 <section id="mikeio.Dataset.mean" class="level3">
 <h3 class="anchored" data-anchor-id="mikeio.Dataset.mean">mean</h3>
-<div class="sourceCode" id="cb30"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a>Dataset.mean(axis<span class="op">=</span><span class="dv">0</span>, <span class="op">**</span>kwargs)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb35"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a>Dataset.mean(axis<span class="op">=</span><span class="dv">0</span>, <span class="op">**</span>kwargs)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <p>Mean value along an axis.</p>
 <section id="parameters-10" class="level4 doc-section doc-section-parameters">
 <h4 class="doc-section doc-section-parameters anchored" data-anchor-id="parameters-10">Parameters</h4>
 <table class="caption-top table">
 <colgroup>
-<col style="width: 10%">
-<col style="width: 12%">
-<col style="width: 65%">
 <col style="width: 11%">
+<col style="width: 13%">
+<col style="width: 63%">
+<col style="width: 12%">
 </colgroup>
 <thead>
 <tr class="header">
@@ -1536,7 +1559,7 @@ aggregate : Weighted average</code></pre>
 <tr class="odd">
 <td>axis</td>
 <td>int | str</td>
-<td>axis number or "time", "space" or "items", by default 0</td>
+<td>axis number or “time”, “space” or “items”, by default 0</td>
 <td><code>0</code></td>
 </tr>
 <tr class="even">
@@ -1575,7 +1598,7 @@ average : Weighted average</code></pre>
 </section>
 <section id="mikeio.Dataset.merge" class="level3">
 <h3 class="anchored" data-anchor-id="mikeio.Dataset.merge">merge</h3>
-<div class="sourceCode" id="cb32"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a>Dataset.merge(datasets)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb37"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a>Dataset.merge(datasets)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <p>Merge Datasets along the item dimension.</p>
 <section id="parameters-11" class="level4 doc-section doc-section-parameters">
 <h4 class="doc-section doc-section-parameters anchored" data-anchor-id="parameters-11">Parameters</h4>
@@ -1626,16 +1649,16 @@ average : Weighted average</code></pre>
 </section>
 <section id="mikeio.Dataset.min" class="level3">
 <h3 class="anchored" data-anchor-id="mikeio.Dataset.min">min</h3>
-<div class="sourceCode" id="cb33"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a>Dataset.<span class="bu">min</span>(axis<span class="op">=</span><span class="dv">0</span>, <span class="op">**</span>kwargs)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb38"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a>Dataset.<span class="bu">min</span>(axis<span class="op">=</span><span class="dv">0</span>, <span class="op">**</span>kwargs)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <p>Min value along an axis.</p>
 <section id="parameters-12" class="level4 doc-section doc-section-parameters">
 <h4 class="doc-section doc-section-parameters anchored" data-anchor-id="parameters-12">Parameters</h4>
 <table class="caption-top table">
 <colgroup>
-<col style="width: 10%">
-<col style="width: 12%">
-<col style="width: 65%">
 <col style="width: 11%">
+<col style="width: 13%">
+<col style="width: 63%">
+<col style="width: 12%">
 </colgroup>
 <thead>
 <tr class="header">
@@ -1649,7 +1672,7 @@ average : Weighted average</code></pre>
 <tr class="odd">
 <td>axis</td>
 <td>int | str</td>
-<td>axis number or "time", "space" or "items", by default 0</td>
+<td>axis number or “time”, “space” or “items”, by default 0</td>
 <td><code>0</code></td>
 </tr>
 <tr class="even">
@@ -1687,16 +1710,16 @@ average : Weighted average</code></pre>
 </section>
 <section id="mikeio.Dataset.nanmax" class="level3">
 <h3 class="anchored" data-anchor-id="mikeio.Dataset.nanmax">nanmax</h3>
-<div class="sourceCode" id="cb35"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a>Dataset.nanmax(axis<span class="op">=</span><span class="dv">0</span>, <span class="op">**</span>kwargs)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb40"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a>Dataset.nanmax(axis<span class="op">=</span><span class="dv">0</span>, <span class="op">**</span>kwargs)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <p>Max value along an axis (NaN removed).</p>
 <section id="parameters-13" class="level4 doc-section doc-section-parameters">
 <h4 class="doc-section doc-section-parameters anchored" data-anchor-id="parameters-13">Parameters</h4>
 <table class="caption-top table">
 <colgroup>
-<col style="width: 10%">
-<col style="width: 12%">
-<col style="width: 65%">
 <col style="width: 11%">
+<col style="width: 13%">
+<col style="width: 63%">
+<col style="width: 12%">
 </colgroup>
 <thead>
 <tr class="header">
@@ -1710,7 +1733,7 @@ average : Weighted average</code></pre>
 <tr class="odd">
 <td>axis</td>
 <td>int | str</td>
-<td>axis number or "time", "space" or "items", by default 0</td>
+<td>axis number or “time”, “space” or “items”, by default 0</td>
 <td><code>0</code></td>
 </tr>
 <tr class="even">
@@ -1748,16 +1771,16 @@ average : Weighted average</code></pre>
 </section>
 <section id="mikeio.Dataset.nanmean" class="level3">
 <h3 class="anchored" data-anchor-id="mikeio.Dataset.nanmean">nanmean</h3>
-<div class="sourceCode" id="cb37"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a>Dataset.nanmean(axis<span class="op">=</span><span class="dv">0</span>, <span class="op">**</span>kwargs)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb42"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a>Dataset.nanmean(axis<span class="op">=</span><span class="dv">0</span>, <span class="op">**</span>kwargs)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <p>Mean value along an axis (NaN removed).</p>
 <section id="parameters-14" class="level4 doc-section doc-section-parameters">
 <h4 class="doc-section doc-section-parameters anchored" data-anchor-id="parameters-14">Parameters</h4>
 <table class="caption-top table">
 <colgroup>
-<col style="width: 10%">
-<col style="width: 12%">
-<col style="width: 65%">
 <col style="width: 11%">
+<col style="width: 13%">
+<col style="width: 63%">
+<col style="width: 12%">
 </colgroup>
 <thead>
 <tr class="header">
@@ -1771,7 +1794,7 @@ average : Weighted average</code></pre>
 <tr class="odd">
 <td>axis</td>
 <td>int | str</td>
-<td>axis number or "time", "space" or "items", by default 0</td>
+<td>axis number or “time”, “space” or “items”, by default 0</td>
 <td><code>0</code></td>
 </tr>
 <tr class="even">
@@ -1805,16 +1828,16 @@ average : Weighted average</code></pre>
 </section>
 <section id="mikeio.Dataset.nanmin" class="level3">
 <h3 class="anchored" data-anchor-id="mikeio.Dataset.nanmin">nanmin</h3>
-<div class="sourceCode" id="cb38"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a>Dataset.nanmin(axis<span class="op">=</span><span class="dv">0</span>, <span class="op">**</span>kwargs)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb43"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb43-1"><a href="#cb43-1" aria-hidden="true" tabindex="-1"></a>Dataset.nanmin(axis<span class="op">=</span><span class="dv">0</span>, <span class="op">**</span>kwargs)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <p>Min value along an axis (NaN removed).</p>
 <section id="parameters-15" class="level4 doc-section doc-section-parameters">
 <h4 class="doc-section doc-section-parameters anchored" data-anchor-id="parameters-15">Parameters</h4>
 <table class="caption-top table">
 <colgroup>
-<col style="width: 10%">
-<col style="width: 12%">
-<col style="width: 65%">
 <col style="width: 11%">
+<col style="width: 13%">
+<col style="width: 63%">
+<col style="width: 12%">
 </colgroup>
 <thead>
 <tr class="header">
@@ -1828,7 +1851,7 @@ average : Weighted average</code></pre>
 <tr class="odd">
 <td>axis</td>
 <td>int | str</td>
-<td>axis number or "time", "space" or "items", by default 0</td>
+<td>axis number or “time”, “space” or “items”, by default 0</td>
 <td><code>0</code></td>
 </tr>
 <tr class="even">
@@ -1862,7 +1885,7 @@ average : Weighted average</code></pre>
 </section>
 <section id="mikeio.Dataset.nanquantile" class="level3">
 <h3 class="anchored" data-anchor-id="mikeio.Dataset.nanquantile">nanquantile</h3>
-<div class="sourceCode" id="cb39"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a>Dataset.nanquantile(q, <span class="op">*</span>, axis<span class="op">=</span><span class="dv">0</span>, <span class="op">**</span>kwargs)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb44"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb44-1"><a href="#cb44-1" aria-hidden="true" tabindex="-1"></a>Dataset.nanquantile(q, <span class="op">*</span>, axis<span class="op">=</span><span class="dv">0</span>, <span class="op">**</span>kwargs)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <p>Compute the q-th quantile of the data along the specified axis, while ignoring nan values.</p>
 <p>Wrapping np.nanquantile</p>
 <section id="parameters-16" class="level4 doc-section doc-section-parameters">
@@ -1892,7 +1915,7 @@ average : Weighted average</code></pre>
 <tr class="even">
 <td>axis</td>
 <td>int | str</td>
-<td>axis number or "time", "space" or "items", by default 0</td>
+<td>axis number or “time”, “space” or “items”, by default 0</td>
 <td><code>0</code></td>
 </tr>
 <tr class="odd">
@@ -1906,9 +1929,9 @@ average : Weighted average</code></pre>
 </section>
 <section id="examples-8" class="level4 doc-section doc-section-examples">
 <h4 class="doc-section doc-section-examples anchored" data-anchor-id="examples-8">Examples</h4>
-<div class="sourceCode" id="cb40"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> ds.nanquantile(q<span class="op">=</span>[<span class="fl">0.25</span>,<span class="fl">0.75</span>])</span>
-<span id="cb40-2"><a href="#cb40-2" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> ds.nanquantile(q<span class="op">=</span><span class="fl">0.5</span>)</span>
-<span id="cb40-3"><a href="#cb40-3" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> ds.nanquantile(q<span class="op">=</span>[<span class="fl">0.01</span>,<span class="fl">0.5</span>,<span class="fl">0.99</span>], axis<span class="op">=</span><span class="st">"space"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb45"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb45-1"><a href="#cb45-1" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> ds.nanquantile(q<span class="op">=</span>[<span class="fl">0.25</span>,<span class="fl">0.75</span>])</span>
+<span id="cb45-2"><a href="#cb45-2" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> ds.nanquantile(q<span class="op">=</span><span class="fl">0.5</span>)</span>
+<span id="cb45-3"><a href="#cb45-3" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> ds.nanquantile(q<span class="op">=</span>[<span class="fl">0.01</span>,<span class="fl">0.5</span>,<span class="fl">0.99</span>], axis<span class="op">=</span><span class="st">"space"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </section>
 <section id="returns-15" class="level4 doc-section doc-section-returns">
 <h4 class="doc-section doc-section-returns anchored" data-anchor-id="returns-15">Returns</h4>
@@ -1932,16 +1955,16 @@ average : Weighted average</code></pre>
 </section>
 <section id="mikeio.Dataset.nanstd" class="level3">
 <h3 class="anchored" data-anchor-id="mikeio.Dataset.nanstd">nanstd</h3>
-<div class="sourceCode" id="cb41"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a>Dataset.nanstd(axis<span class="op">=</span><span class="dv">0</span>, <span class="op">**</span>kwargs)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb46"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb46-1"><a href="#cb46-1" aria-hidden="true" tabindex="-1"></a>Dataset.nanstd(axis<span class="op">=</span><span class="dv">0</span>, <span class="op">**</span>kwargs)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <p>Standard deviation along an axis (NaN removed).</p>
 <section id="parameters-17" class="level4 doc-section doc-section-parameters">
 <h4 class="doc-section doc-section-parameters anchored" data-anchor-id="parameters-17">Parameters</h4>
 <table class="caption-top table">
 <colgroup>
-<col style="width: 10%">
-<col style="width: 12%">
-<col style="width: 65%">
 <col style="width: 11%">
+<col style="width: 13%">
+<col style="width: 63%">
+<col style="width: 12%">
 </colgroup>
 <thead>
 <tr class="header">
@@ -1955,7 +1978,7 @@ average : Weighted average</code></pre>
 <tr class="odd">
 <td>axis</td>
 <td>int | str</td>
-<td>axis number or "time", "space" or "items", by default 0</td>
+<td>axis number or “time”, “space” or “items”, by default 0</td>
 <td><code>0</code></td>
 </tr>
 <tr class="even">
@@ -1993,7 +2016,7 @@ average : Weighted average</code></pre>
 </section>
 <section id="mikeio.Dataset.ptp" class="level3">
 <h3 class="anchored" data-anchor-id="mikeio.Dataset.ptp">ptp</h3>
-<div class="sourceCode" id="cb43"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb43-1"><a href="#cb43-1" aria-hidden="true" tabindex="-1"></a>Dataset.ptp(axis<span class="op">=</span><span class="dv">0</span>, <span class="op">**</span>kwargs)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb48"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb48-1"><a href="#cb48-1" aria-hidden="true" tabindex="-1"></a>Dataset.ptp(axis<span class="op">=</span><span class="dv">0</span>, <span class="op">**</span>kwargs)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <p>Range (max - min) a.k.a Peak to Peak along an axis</p>
 <section id="parameters." class="level4 doc-section doc-section-parameters">
 <h4 class="doc-section doc-section-parameters anchored" data-anchor-id="parameters.">Parameters.</h4>
@@ -2021,7 +2044,7 @@ average : Weighted average</code></pre>
 </section>
 <section id="mikeio.Dataset.quantile" class="level3">
 <h3 class="anchored" data-anchor-id="mikeio.Dataset.quantile">quantile</h3>
-<div class="sourceCode" id="cb44"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb44-1"><a href="#cb44-1" aria-hidden="true" tabindex="-1"></a>Dataset.quantile(q, <span class="op">*</span>, axis<span class="op">=</span><span class="dv">0</span>, <span class="op">**</span>kwargs)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb49"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb49-1"><a href="#cb49-1" aria-hidden="true" tabindex="-1"></a>Dataset.quantile(q, <span class="op">*</span>, axis<span class="op">=</span><span class="dv">0</span>, <span class="op">**</span>kwargs)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <p>Compute the q-th quantile of the data along the specified axis.</p>
 <p>Wrapping np.quantile</p>
 <section id="parameters-18" class="level4 doc-section doc-section-parameters">
@@ -2051,7 +2074,7 @@ average : Weighted average</code></pre>
 <tr class="even">
 <td>axis</td>
 <td>int | str</td>
-<td>axis number or "time", "space" or "items", by default 0</td>
+<td>axis number or “time”, “space” or “items”, by default 0</td>
 <td><code>0</code></td>
 </tr>
 <tr class="odd">
@@ -2084,9 +2107,9 @@ average : Weighted average</code></pre>
 </section>
 <section id="examples-9" class="level4 doc-section doc-section-examples">
 <h4 class="doc-section doc-section-examples anchored" data-anchor-id="examples-9">Examples</h4>
-<div class="sourceCode" id="cb45"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb45-1"><a href="#cb45-1" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> ds.quantile(q<span class="op">=</span>[<span class="fl">0.25</span>,<span class="fl">0.75</span>])</span>
-<span id="cb45-2"><a href="#cb45-2" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> ds.quantile(q<span class="op">=</span><span class="fl">0.5</span>)</span>
-<span id="cb45-3"><a href="#cb45-3" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> ds.quantile(q<span class="op">=</span>[<span class="fl">0.01</span>,<span class="fl">0.5</span>,<span class="fl">0.99</span>], axis<span class="op">=</span><span class="st">"space"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb50"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb50-1"><a href="#cb50-1" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> ds.quantile(q<span class="op">=</span>[<span class="fl">0.25</span>,<span class="fl">0.75</span>])</span>
+<span id="cb50-2"><a href="#cb50-2" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> ds.quantile(q<span class="op">=</span><span class="fl">0.5</span>)</span>
+<span id="cb50-3"><a href="#cb50-3" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> ds.quantile(q<span class="op">=</span>[<span class="fl">0.01</span>,<span class="fl">0.5</span>,<span class="fl">0.99</span>], axis<span class="op">=</span><span class="st">"space"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </section>
 <section id="see-also-7" class="level4 doc-section doc-section-see-also">
 <h4 class="doc-section doc-section-see-also anchored" data-anchor-id="see-also-7">See Also</h4>
@@ -2095,7 +2118,7 @@ average : Weighted average</code></pre>
 </section>
 <section id="mikeio.Dataset.remove" class="level3">
 <h3 class="anchored" data-anchor-id="mikeio.Dataset.remove">remove</h3>
-<div class="sourceCode" id="cb46"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb46-1"><a href="#cb46-1" aria-hidden="true" tabindex="-1"></a>Dataset.remove(key)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb51"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb51-1"><a href="#cb51-1" aria-hidden="true" tabindex="-1"></a>Dataset.remove(key)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <p>Remove DataArray from Dataset.</p>
 <section id="parameters-19" class="level4 doc-section doc-section-parameters">
 <h4 class="doc-section doc-section-parameters anchored" data-anchor-id="parameters-19">Parameters</h4>
@@ -2131,7 +2154,7 @@ average : Weighted average</code></pre>
 </section>
 <section id="mikeio.Dataset.rename" class="level3">
 <h3 class="anchored" data-anchor-id="mikeio.Dataset.rename">rename</h3>
-<div class="sourceCode" id="cb47"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb47-1"><a href="#cb47-1" aria-hidden="true" tabindex="-1"></a>Dataset.rename(mapper, inplace<span class="op">=</span><span class="va">False</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb52"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb52-1"><a href="#cb52-1" aria-hidden="true" tabindex="-1"></a>Dataset.rename(mapper, inplace<span class="op">=</span><span class="va">False</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <p>Rename items (DataArrays) in Dataset.</p>
 <section id="parameters-20" class="level4 doc-section doc-section-parameters">
 <h4 class="doc-section doc-section-parameters anchored" data-anchor-id="parameters-20">Parameters</h4>
@@ -2187,14 +2210,14 @@ average : Weighted average</code></pre>
 </section>
 <section id="examples-10" class="level4 doc-section doc-section-examples">
 <h4 class="doc-section doc-section-examples anchored" data-anchor-id="examples-10">Examples</h4>
-<div class="sourceCode" id="cb48"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb48-1"><a href="#cb48-1" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> ds <span class="op">=</span> mikeio.read(<span class="st">"tide1.dfs1"</span>)</span>
-<span id="cb48-2"><a href="#cb48-2" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> newds <span class="op">=</span> ds.rename({<span class="st">"Level"</span>:<span class="st">"Surface Elevation"</span>})</span>
-<span id="cb48-3"><a href="#cb48-3" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> ds.rename({<span class="st">"Level"</span>:<span class="st">"Surface Elevation"</span>}, inplace<span class="op">=</span><span class="va">True</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb53"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb53-1"><a href="#cb53-1" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> ds <span class="op">=</span> mikeio.read(<span class="st">"tide1.dfs1"</span>)</span>
+<span id="cb53-2"><a href="#cb53-2" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> newds <span class="op">=</span> ds.rename({<span class="st">"Level"</span>:<span class="st">"Surface Elevation"</span>})</span>
+<span id="cb53-3"><a href="#cb53-3" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> ds.rename({<span class="st">"Level"</span>:<span class="st">"Surface Elevation"</span>}, inplace<span class="op">=</span><span class="va">True</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </section>
 </section>
 <section id="mikeio.Dataset.sel" class="level3">
 <h3 class="anchored" data-anchor-id="mikeio.Dataset.sel">sel</h3>
-<div class="sourceCode" id="cb49"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb49-1"><a href="#cb49-1" aria-hidden="true" tabindex="-1"></a>Dataset.sel(<span class="op">**</span>kwargs)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb54"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb54-1"><a href="#cb54-1" aria-hidden="true" tabindex="-1"></a>Dataset.sel(<span class="op">**</span>kwargs)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <p>Return a new Dataset whose data is given by selecting index labels along the specified dimension(s).</p>
 <p>In contrast to Dataset.isel, indexers for this method should use labels instead of integers.</p>
 <p>The spatial parameters available depend on the geometry of the Dataset:</p>
@@ -2226,7 +2249,7 @@ average : Weighted average</code></pre>
 <tr class="odd">
 <td>time</td>
 <td>(str, pd.DatetimeIndex or Dataset)</td>
-<td>time labels e.g.&nbsp;"2018-01" or slice("2018-1-1","2019-1-1"), by default None</td>
+<td>time labels e.g.&nbsp;“2018-01” or slice(“2018-1-1”,“2019-1-1”), by default None</td>
 <td><em>required</em></td>
 </tr>
 <tr class="even">
@@ -2262,7 +2285,7 @@ average : Weighted average</code></pre>
 <tr class="odd">
 <td>layers</td>
 <td>int or str or list</td>
-<td>layer(s) to be selected: "top", "bottom" or layer number from bottom 0,1,2,… or from the top -1,-2,… or as list of these; only for layered dfsu, by default None</td>
+<td>layer(s) to be selected: “top”, “bottom” or layer number from bottom 0,1,2,… or from the top -1,-2,… or as list of these; only for layered dfsu, by default None</td>
 <td><em>required</em></td>
 </tr>
 <tr class="even">
@@ -2299,19 +2322,19 @@ average : Weighted average</code></pre>
 </section>
 <section id="examples-11" class="level4 doc-section doc-section-examples">
 <h4 class="doc-section doc-section-examples anchored" data-anchor-id="examples-11">Examples</h4>
-<div class="sourceCode" id="cb50"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb50-1"><a href="#cb50-1" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> ds <span class="op">=</span> mikeio.read(<span class="st">"random.dfs1"</span>)</span>
-<span id="cb50-2"><a href="#cb50-2" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> ds.sel(time<span class="op">=</span><span class="bu">slice</span>(<span class="va">None</span>, <span class="st">"2012-1-1 00:02"</span>))</span>
-<span id="cb50-3"><a href="#cb50-3" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> ds.sel(x<span class="op">=</span><span class="dv">100</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="sourceCode" id="cb51"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb51-1"><a href="#cb51-1" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> ds <span class="op">=</span> mikeio.read(<span class="st">"oresund_sigma_z.dfsu"</span>)</span>
-<span id="cb51-2"><a href="#cb51-2" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> ds.sel(time<span class="op">=</span><span class="st">"1997-09-15"</span>)</span>
-<span id="cb51-3"><a href="#cb51-3" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> ds.sel(x<span class="op">=</span><span class="dv">340000</span>, y<span class="op">=</span><span class="dv">6160000</span>, z<span class="op">=-</span><span class="dv">3</span>)</span>
-<span id="cb51-4"><a href="#cb51-4" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> ds.sel(area<span class="op">=</span>(<span class="dv">340000</span>, <span class="dv">6160000</span>, <span class="dv">350000</span>, <span class="dv">6170000</span>))</span>
-<span id="cb51-5"><a href="#cb51-5" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> ds.sel(layers<span class="op">=</span><span class="st">"bottom"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb55"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb55-1"><a href="#cb55-1" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> ds <span class="op">=</span> mikeio.read(<span class="st">"random.dfs1"</span>)</span>
+<span id="cb55-2"><a href="#cb55-2" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> ds.sel(time<span class="op">=</span><span class="bu">slice</span>(<span class="va">None</span>, <span class="st">"2012-1-1 00:02"</span>))</span>
+<span id="cb55-3"><a href="#cb55-3" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> ds.sel(x<span class="op">=</span><span class="dv">100</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb56"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb56-1"><a href="#cb56-1" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> ds <span class="op">=</span> mikeio.read(<span class="st">"oresund_sigma_z.dfsu"</span>)</span>
+<span id="cb56-2"><a href="#cb56-2" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> ds.sel(time<span class="op">=</span><span class="st">"1997-09-15"</span>)</span>
+<span id="cb56-3"><a href="#cb56-3" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> ds.sel(x<span class="op">=</span><span class="dv">340000</span>, y<span class="op">=</span><span class="dv">6160000</span>, z<span class="op">=-</span><span class="dv">3</span>)</span>
+<span id="cb56-4"><a href="#cb56-4" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> ds.sel(area<span class="op">=</span>(<span class="dv">340000</span>, <span class="dv">6160000</span>, <span class="dv">350000</span>, <span class="dv">6170000</span>))</span>
+<span id="cb56-5"><a href="#cb56-5" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> ds.sel(layers<span class="op">=</span><span class="st">"bottom"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </section>
 </section>
 <section id="mikeio.Dataset.squeeze" class="level3">
 <h3 class="anchored" data-anchor-id="mikeio.Dataset.squeeze">squeeze</h3>
-<div class="sourceCode" id="cb52"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb52-1"><a href="#cb52-1" aria-hidden="true" tabindex="-1"></a>Dataset.squeeze()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb57"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb57-1"><a href="#cb57-1" aria-hidden="true" tabindex="-1"></a>Dataset.squeeze()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <p>Remove axes of length 1.</p>
 <section id="returns-21" class="level4 doc-section doc-section-returns">
 <h4 class="doc-section doc-section-returns anchored" data-anchor-id="returns-21">Returns</h4>
@@ -2335,16 +2358,16 @@ average : Weighted average</code></pre>
 </section>
 <section id="mikeio.Dataset.std" class="level3">
 <h3 class="anchored" data-anchor-id="mikeio.Dataset.std">std</h3>
-<div class="sourceCode" id="cb53"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb53-1"><a href="#cb53-1" aria-hidden="true" tabindex="-1"></a>Dataset.std(axis<span class="op">=</span><span class="dv">0</span>, <span class="op">**</span>kwargs)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb58"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb58-1"><a href="#cb58-1" aria-hidden="true" tabindex="-1"></a>Dataset.std(axis<span class="op">=</span><span class="dv">0</span>, <span class="op">**</span>kwargs)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <p>Standard deviation along an axis.</p>
 <section id="parameters-22" class="level4 doc-section doc-section-parameters">
 <h4 class="doc-section doc-section-parameters anchored" data-anchor-id="parameters-22">Parameters</h4>
 <table class="caption-top table">
 <colgroup>
-<col style="width: 10%">
-<col style="width: 12%">
-<col style="width: 65%">
 <col style="width: 11%">
+<col style="width: 13%">
+<col style="width: 63%">
+<col style="width: 12%">
 </colgroup>
 <thead>
 <tr class="header">
@@ -2358,7 +2381,7 @@ average : Weighted average</code></pre>
 <tr class="odd">
 <td>axis</td>
 <td>int | str</td>
-<td>axis number or "time", "space" or "items", by default 0</td>
+<td>axis number or “time”, “space” or “items”, by default 0</td>
 <td><code>0</code></td>
 </tr>
 <tr class="even">
@@ -2396,16 +2419,16 @@ average : Weighted average</code></pre>
 </section>
 <section id="mikeio.Dataset.to_dataframe" class="level3">
 <h3 class="anchored" data-anchor-id="mikeio.Dataset.to_dataframe">to_dataframe</h3>
-<div class="sourceCode" id="cb55"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb55-1"><a href="#cb55-1" aria-hidden="true" tabindex="-1"></a>Dataset.to_dataframe(unit_in_name<span class="op">=</span><span class="va">False</span>, round_time<span class="op">=</span><span class="st">'ms'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb60"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb60-1"><a href="#cb60-1" aria-hidden="true" tabindex="-1"></a>Dataset.to_dataframe(unit_in_name<span class="op">=</span><span class="va">False</span>, round_time<span class="op">=</span><span class="st">'ms'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <p>Convert Dataset to a Pandas DataFrame.</p>
 <section id="parameters-23" class="level4 doc-section doc-section-parameters">
 <h4 class="doc-section doc-section-parameters anchored" data-anchor-id="parameters-23">Parameters</h4>
 <table class="caption-top table">
 <colgroup>
+<col style="width: 14%">
 <col style="width: 13%">
-<col style="width: 12%">
-<col style="width: 62%">
-<col style="width: 10%">
+<col style="width: 61%">
+<col style="width: 11%">
 </colgroup>
 <thead>
 <tr class="header">
@@ -2425,7 +2448,7 @@ average : Weighted average</code></pre>
 <tr class="even">
 <td>round_time</td>
 <td>str | bool</td>
-<td>round time to, by default "ms", use False to avoid rounding</td>
+<td>round time to, by default “ms”, use False to avoid rounding</td>
 <td><code>'ms'</code></td>
 </tr>
 </tbody>
@@ -2453,7 +2476,7 @@ average : Weighted average</code></pre>
 </section>
 <section id="mikeio.Dataset.to_dfs" class="level3">
 <h3 class="anchored" data-anchor-id="mikeio.Dataset.to_dfs">to_dfs</h3>
-<div class="sourceCode" id="cb56"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb56-1"><a href="#cb56-1" aria-hidden="true" tabindex="-1"></a>Dataset.to_dfs(filename, <span class="op">**</span>kwargs)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb61"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb61-1"><a href="#cb61-1" aria-hidden="true" tabindex="-1"></a>Dataset.to_dfs(filename, <span class="op">**</span>kwargs)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <p>Write dataset to a new dfs file.</p>
 <section id="parameters-24" class="level4 doc-section doc-section-parameters">
 <h4 class="doc-section doc-section-parameters anchored" data-anchor-id="parameters-24">Parameters</h4>
@@ -2491,7 +2514,7 @@ average : Weighted average</code></pre>
 </section>
 <section id="mikeio.Dataset.to_numpy" class="level3">
 <h3 class="anchored" data-anchor-id="mikeio.Dataset.to_numpy">to_numpy</h3>
-<div class="sourceCode" id="cb57"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb57-1"><a href="#cb57-1" aria-hidden="true" tabindex="-1"></a>Dataset.to_numpy()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb62"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb62-1"><a href="#cb62-1" aria-hidden="true" tabindex="-1"></a>Dataset.to_numpy()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <p>Stack data to a single ndarray with shape (n_items, n_timesteps, …).</p>
 <section id="returns-24" class="level4 doc-section doc-section-returns">
 <h4 class="doc-section doc-section-returns anchored" data-anchor-id="returns-24">Returns</h4>
@@ -2515,12 +2538,12 @@ average : Weighted average</code></pre>
 </section>
 <section id="mikeio.Dataset.to_pandas" class="level3">
 <h3 class="anchored" data-anchor-id="mikeio.Dataset.to_pandas">to_pandas</h3>
-<div class="sourceCode" id="cb58"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb58-1"><a href="#cb58-1" aria-hidden="true" tabindex="-1"></a>Dataset.to_pandas(<span class="op">**</span>kwargs)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb63"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb63-1"><a href="#cb63-1" aria-hidden="true" tabindex="-1"></a>Dataset.to_pandas(<span class="op">**</span>kwargs)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <p>Convert Dataset to a Pandas DataFrame.</p>
 </section>
 <section id="mikeio.Dataset.to_xarray" class="level3">
 <h3 class="anchored" data-anchor-id="mikeio.Dataset.to_xarray">to_xarray</h3>
-<div class="sourceCode" id="cb59"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb59-1"><a href="#cb59-1" aria-hidden="true" tabindex="-1"></a>Dataset.to_xarray()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb64"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb64-1"><a href="#cb64-1" aria-hidden="true" tabindex="-1"></a>Dataset.to_xarray()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <p>Export to xarray.Dataset.</p>
 
 
