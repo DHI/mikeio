@@ -44,7 +44,7 @@ classifiers = [
 [project.optional-dependencies]
 dev = ["pytest",
        "quarto-cli",
-       "quartodoc==0.8.0",
+       "quartodoc==0.9.1",
        "shapely",
        "pyproj",
        "xarray",
