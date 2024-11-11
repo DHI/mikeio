@@ -992,3 +992,14 @@ def test_append_dfsu_2d(tmp_path):
     assert (
         ds3.V_velocity.isel(time=3).values[0] == ds2.V_velocity.isel(time=1).values[0]
     )
+
+
+def test_repr_dfsu_many_items_only_shows_number_of_items() -> None:
+    ds = mikeio.read("tests/testdata/random_data_20_items_2d.dfsu")
+    txt = repr(ds)
+    assert "number of items: 20" in txt
+
+    # repeat for mikeio.open
+    dfs = mikeio.open("tests/testdata/random_data_20_items_2d.dfsu")
+    txt_dfs = repr(dfs)
+    assert "number of items: 20" in txt_dfs
