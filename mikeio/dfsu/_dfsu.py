@@ -302,7 +302,7 @@ class Dfsu2DH:
             for i, item in enumerate(self.items):
                 out.append(f"  {i}:  {item}")
         else:
-            out.append(f"number of items: {self.geometry.n_items}")
+            out.append(f"number of items: {self.n_items}")
         if self.n_timesteps == 1:
             out.append(f"time: time-invariant file (1 step) at {self.time[0]}")
         else:
