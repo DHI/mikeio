@@ -1,4 +1,5 @@
 from __future__ import annotations
+from importlib.metadata import PackageNotFoundError, version
 from pathlib import Path
 from platform import architecture
 from collections.abc import Sequence
@@ -21,7 +22,14 @@ from typing import Any
 # 'X.Y.dev0' is the canonical version of 'X.Y.dev'
 #
 
-__version__ = "2.2.dev2"  # TODO use git hash instead for dev version?
+try:
+    # read version from installed package
+    __version__ = version("mikeio")
+except PackageNotFoundError:
+    # package is not installed
+    __version__ = "dev"
+
+# __version__ = "2.2.dev2"  # TODO use git hash instead for dev version?
 # __version__ = "1.5.0"
 __dfs_version__: int = 220
 
