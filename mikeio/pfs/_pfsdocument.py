@@ -348,7 +348,8 @@ class PfsDocument(PfsSection):
     def _parse_param(self, value: str) -> str:
         if len(value) == 0:
             return "[]"
-
+        if "MULTIPOLYGON" in value:
+            return value
         if "," in value:
             tokens = self._split_line_by_comma(value)
             for j in range(len(tokens)):
