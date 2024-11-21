@@ -58,6 +58,7 @@ website:
             contents:
               - examples/dfs2/bathy.qmd
               - examples/dfs2/gfs.qmd
+              - examples/dfs2/snowcompare.qmd
           - section: Dfsu
             href: examples/dfsu/index.qmd
             contents:
