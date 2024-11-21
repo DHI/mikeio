@@ -1,6 +1,7 @@
 """Generic functions for working with all types of dfs files."""
 
 from __future__ import annotations
+from dataclasses import dataclass
 import math
 import os
 import pathlib
@@ -597,10 +598,7 @@ def extract(
 
     is_layered_dfsu = dfs_i.ItemInfo[0].Name == "Z coordinate"
 
-    file_start_new, start_step, start_sec, end_step, end_sec = _parse_start_end(
-        dfs_i.FileInfo.TimeAxis, start, end
-    )
-    timestep = _parse_step(dfs_i.FileInfo.TimeAxis, step)
+    time = _parse_time(dfs_i.FileInfo.TimeAxis, start, end, step)
     item_numbers = _valid_item_numbers(
         dfs_i.ItemInfo, items, ignore_first=is_layered_dfsu
     )
@@ -612,28 +610,28 @@ def extract(
     dfs_o = _clone(
         str(infilename),
         str(outfilename),
-        start_time=file_start_new,
-        timestep=timestep,
+        start_time=time.file_start_new,
+        timestep=time.timestep,
         items=item_numbers,
     )
 
     file_start_shift = 0
-    if file_start_new is not None:
+    if time.file_start_new is not None:
         file_start_orig = dfs_i.FileInfo.TimeAxis.StartDateTime
-        file_start_shift = (file_start_new - file_start_orig).total_seconds()
+        file_start_shift = (time.file_start_new - file_start_orig).total_seconds()
 
     timestep_out = -1
-    for timestep in range(start_step, end_step, step):
+    for timestep in range(time.start_step, time.end_step, step):
         for item_out, item in enumerate(item_numbers):
             itemdata = dfs_i.ReadItemTimeStep((item + 1), timestep)
             time_sec = itemdata.Time
 
-            if time_sec > end_sec:
+            if time_sec > time.end_sec:
                 dfs_i.Close()
                 dfs_o.Close()
                 return
 
-            if time_sec >= start_sec:
+            if time_sec >= time.start_sec:
                 if item == item_numbers[0]:
                     timestep_out = timestep_out + 1
                 time_sec_out = time_sec - file_start_shift
@@ -647,11 +645,24 @@ def extract(
     dfs_o.Close()
 
 
-def _parse_start_end(
+@dataclass
+class TimeInfo:
+    "Parsed time information."
+
+    file_start_new: datetime | None
+    start_step: int
+    start_sec: float
+    end_step: int
+    end_sec: float
+    timestep: float | None
+
+
+def _parse_time(
     time_axis: TimeAxis,
     start: int | float | str | datetime,
     end: int | float | str | datetime,
-) -> tuple[datetime | None, int, float, int, float]:  # TODO better return type
+    step: int,
+) -> TimeInfo:
     """Helper function for parsing start and end arguments."""
     n_time_steps = time_axis.NumberOfTimeSteps
     file_start_datetime = time_axis.StartDateTime
@@ -727,7 +738,9 @@ def _parse_start_end(
         if start_sec > file_start_sec:
             file_start_new = file_start_datetime + timedelta(seconds=start_sec)
 
-    return file_start_new, start_step, start_sec, end_step, end_sec
+    timestep = _parse_step(time_axis, step)
+
+    return TimeInfo(file_start_new, start_step, start_sec, end_step, end_sec, timestep)
 
 
 def _parse_step(time_axis: TimeAxis, step: int) -> float | None:
