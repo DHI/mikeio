@@ -1,0 +1,9 @@
+---
+title: Dfsu examples
+---
+
+A collection of specific examples of working with dfsu files. For a general introduction to dfsu see the [user guide](../../user-guide/dfsu.qmd) and the [API reference](../../api/#dfs).
+
+
+* [2D spatial interpolation](spatial_interpolation.qmd)
+* [Merging subdomain dfsu files](merge_subdomains.qmd)

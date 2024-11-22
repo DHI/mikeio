@@ -3,14 +3,11 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [tool.hatch.build.targets.sdist]
-exclude = ["notebooks", "tests", "images"]
-
-[tool.hatch.metadata]
-allow-direct-references = true
+exclude = ["notebooks", "tests", "images", ".github", "docs", ".devcontainer", "*.md", "*.txt", ".gitattributes"]
 
 [project]
 name="mikeio"
-version="2.1.0"
+version="2.1.3"
 dependencies = [
     "mikecore>=0.2.1",
     "numpy>=1.22.0",
@@ -40,13 +37,14 @@ classifiers = [
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
     "Topic :: Scientific/Engineering",
 ]
 
 [project.optional-dependencies]
 dev = ["pytest",
        "quarto-cli",
-       "quartodoc==0.7.6",
+       "quartodoc==0.9.1",
        "shapely",
        "pyproj",
        "xarray",
@@ -78,7 +76,9 @@ notebooks= [
 "Bug Tracker" = "https://github.com/DHI/mikeio/issues"
 
 
-[tool.ruff]
+[tool.ruff.lint]
 
 # ignore long lines
-lint.ignore = ["E501", "E741"]
+ignore = ["E501", "E741"]
+
+select = ["D100", "D101", "D102", "D103", "D202", "D212", "D413", "D415", "D417"]

@@ -1,0 +1,95 @@
+---
+title: Dfs0 - CMEMS *in-situ* data
+jupyter: python3
+---
+
+Copernicus Marine provides access to a wide range of model and [*in-situ* data](https://marine.copernicus.eu/about/producers/insitu-tac). In this example we will look at how to access the *in-situ* data and convert it to a MIKE IO dataset.
+
+```{python}
+import pandas as pd
+import xarray as xr
+import mikeio
+```
+
+```{python}
+fino = xr.open_dataset("../../data/NO_TS_MO_FINO1_202209.nc")
+fino
+```
+
+CMEMS *in-situ* data is provided in a [standardised format](https://archimer.ifremer.fr/doc/00488/59938/).
+
+Find out which variables we are interested in to extract:
+
+```{python}
+data = [
+    {
+        "name": fino[var].name,
+        "standard_name": fino[var].standard_name,
+        "units": fino[var].units,
+    }
+    for var in fino.data_vars
+    if hasattr(fino[var], "units")
+]
+
+pd.DataFrame(data)
+```
+
+The data have a DEPTH dimension, even though variables are only measured at a single level and doesn't vary in time although the format allows for it.
+
+I.e. temperature (TEMP) is available at level 1 (0.5 m)
+
+```{python}
+fino.DEPH.plot.line(x="TIME")
+```
+
+```{python}
+fino['TEMP'].plot.line("-^",x='TIME')
+```
+
+```{python}
+fino['VHM0'].plot.line("-^",x='TIME')
+```
+
+Wave data are only available at the surface.
+
+```{python}
+fino[['VHM0','VTZA','VPED']].isel(DEPTH=0)
+```
+
+```{python}
+df = fino[['VHM0','VTZA','VPED']].isel(DEPTH=0).to_dataframe()
+```
+
+The data are stored on the concurrent timesteps.
+
+```{python}
+df[['VHM0','VTZA','VPED']].head()
+```
+
+```{python}
+df[['VHM0','VTZA']].plot(style='+')
+```
+
+Convert the wave height data to a mikeio dataset.
+
+```{python}
+ds = mikeio.from_pandas(
+    df[["VHM0"]].dropna(), items=mikeio.ItemInfo(mikeio.EUMType.Significant_wave_height)
+)
+ds
+```
+
+Store the results in Dfs0 format.
+
+```{python}
+ds.to_dfs("FINO1_VHM0.dfs0")
+```
+
+Read the file again to check...
+
+```{python}
+ds = mikeio.read("FINO1_VHM0.dfs0")
+ds
+```
+
+

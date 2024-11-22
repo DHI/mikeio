@@ -35,7 +35,7 @@ from ..eum import ItemInfo, TimeStepUnit
 
 
 def write_dfsu(filename: str | Path, data: Dataset) -> None:
-    """Write a dfsu file
+    """Write a dfsu file.
 
     Parameters
     ----------
@@ -43,6 +43,7 @@ def write_dfsu(filename: str | Path, data: Dataset) -> None:
         dfsu filename
     data: Dataset
         Dataset to be written
+
     """
     filename = str(filename)
 
@@ -121,7 +122,7 @@ def write_dfsu_data(dfs: DfsuFile, ds: Dataset, is_layered: bool) -> None:
 
 
 def _validate_elements_and_geometry_sel(elements: Any, **kwargs: Any) -> None:
-    """Check that only one of elements, area, x, y is selected"""
+    """Check that only one of elements, area, x, y is selected."""
     used_kwargs = [key for key, val in kwargs.items() if val is not None]
 
     if elements is not None and len(used_kwargs) > 0:
@@ -301,7 +302,7 @@ class Dfsu2DH:
             for i, item in enumerate(self.items):
                 out.append(f"  {i}:  {item}")
         else:
-            out.append(f"number of items: {self.geometry.n_items}")
+            out.append(f"number of items: {self.n_items}")
         if self.n_timesteps == 1:
             out.append(f"time: time-invariant file (1 step) at {self.time[0]}")
         else:
@@ -316,37 +317,37 @@ class Dfsu2DH:
 
     @property
     def deletevalue(self) -> float:
-        """File delete value"""
+        """File delete value."""
         return self._deletevalue
 
     @property
     def n_items(self) -> int:
-        """Number of items"""
+        """Number of items."""
         return len(self.items)
 
     @property
     def items(self) -> list[ItemInfo]:
-        """List of items"""
+        """List of items."""
         return self._items
 
     @property
     def start_time(self) -> datetime:
-        """File start time"""
+        """File start time."""
         return self._start_time
 
     @property
     def n_timesteps(self) -> int:
-        """Number of time steps"""
+        """Number of time steps."""
         return self._n_timesteps
 
     @property
     def timestep(self) -> float:
-        """Time step size in seconds"""
+        """Time step size in seconds."""
         return self._timestep
 
     @property
     def end_time(self) -> pd.Timestamp:
-        """File end time"""
+        """File end time."""
         if self._equidistant:
             return self.time[-1]
         else:
@@ -402,8 +403,7 @@ class Dfsu2DH:
         error_bad_data: bool = True,
         fill_bad_data_value: float = np.nan,
     ) -> Dataset:
-        """
-        Read data from a dfsu file
+        """Read data from a dfsu file.
 
         Parameters
         ---------
@@ -428,13 +428,15 @@ class Dfsu2DH:
         fill_bad_data_value:
             fill value for to impute corrupt data, used in conjunction with error_bad_data=False
             default np.nan
+        dtype: Any, optional
+            Data type to read, by default np.float32
 
         Returns
         -------
         Dataset
             A Dataset with data dimensions [t,elements]
-        """
 
+        """
         if dtype not in [np.float32, np.float64]:
             raise ValueError("Invalid data type. Choose np.float32 or np.float64")
         dfs = DfsuFile.Open(self._filename)
@@ -528,15 +530,15 @@ class Dfsu2DH:
         )
 
     def append(self, ds: Dataset, validate: bool = True) -> None:
-        """
-        Append data to an existing dfsu file
+        """Append data to an existing dfsu file.
 
         Parameters
         ----------
-        data: Dataset
+        ds: Dataset
             Dataset to be appended
         validate: bool, optional
             Validate that the items and geometry match, by default True
+
         """
         if validate:
             if ds.geometry != self.geometry:
@@ -559,7 +561,7 @@ class Dfsu2DH:
         x: float | None,
         y: float | None,
     ) -> np.ndarray | None:
-        """Parse geometry selection
+        """Parse geometry selection.
 
         Parameters
         ----------
@@ -583,6 +585,7 @@ class Dfsu2DH:
         ------
         ValueError
             If no elements are found in selection
+
         """
         elements = None
 
@@ -607,7 +610,7 @@ class Dfsu2DH:
         ny: int | None = None,
         buffer: float = 0.0,
     ) -> Grid2D:
-        """get a 2d grid that covers the domain by specifying spacing or shape
+        """get a 2d grid that covers the domain by specifying spacing or shape.
 
         Parameters
         ----------
@@ -630,6 +633,7 @@ class Dfsu2DH:
         -------
         <mikeio.Grid2D>
             2d grid
+
         """
         nc = self.geometry.geometry2d.node_coordinates
         bbox = xy_to_bbox(nc, buffer=buffer)
@@ -657,8 +661,7 @@ class Dfsu2DH:
         method: Literal["nearest", "inverse_distance"] = "nearest",
         dtype: Any = np.float32,
     ) -> Dataset:
-        """
-        Extract track data from a dfsu file
+        """Extract track data from a dfsu file.
 
         Parameters
         ---------
@@ -672,6 +675,8 @@ class Dfsu2DH:
         method: str, optional
             Spatial interpolation method ('nearest' or 'inverse_distance')
             default='nearest'
+        dtype: Any, optional
+            Data type to read, by default np.float32
 
         Returns
         -------
@@ -693,6 +698,7 @@ class Dfsu2DH:
           1:  Latitude <Undefined> (undefined)
           2:  Surface elevation <Surface Elevation> (meter)
           3:  Wind speed <Wind speed> (meter per sec)
+
         """
         dfs = DfsuFile.Open(self._filename)
 

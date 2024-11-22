@@ -68,7 +68,7 @@ def parse_yaml_preserving_duplicates(
 
 
 class PfsDocument(PfsSection):
-    """Create a PfsDocument object for reading, writing and manipulating pfs files
+    """Create a PfsDocument object for reading, writing and manipulating pfs files.
 
     Parameters
     ----------
@@ -83,6 +83,7 @@ class PfsDocument(PfsSection):
         If True: warnings will be issued if non-unique keywords
         are present and the first occurence will be used
         by default False
+
     """
 
     def __init__(
@@ -109,7 +110,7 @@ class PfsDocument(PfsSection):
 
     @staticmethod
     def from_text(text: str) -> PfsDocument:
-        """Create a PfsDocument from a string"""
+        """Create a PfsDocument from a string."""
         from io import StringIO
 
         f = StringIO(text)
@@ -129,7 +130,7 @@ class PfsDocument(PfsSection):
         return data
 
     def keys(self) -> list[str]:  # type: ignore
-        """Return a list of the PfsDocument's keys (target names)"""
+        """Return a list of the PfsDocument's keys (target names)."""
         return [k for k, _ in self.items()]
 
     def values(self) -> list[PfsSection | PfsNonUniqueList]:  # type: ignore
@@ -137,11 +138,11 @@ class PfsDocument(PfsSection):
         return [v for _, v in self.items()]
 
     def items(self) -> list[tuple[str, PfsSection | PfsNonUniqueList]]:  # type: ignore
-        """Return a new view of the PfsDocument's items ((key, value) pairs)"""
+        """Return a new view of the PfsDocument's items ((key, value) pairs)."""
         return [(k, v) for k, v in self.__dict__.items() if k not in self._ALIAS_LIST]
 
     def to_dict(self) -> dict:
-        """Convert to (nested) dict (as a copy)"""
+        """Convert to (nested) dict (as a copy)."""
         d = super().to_dict()
         _ = d.pop("_ALIAS_LIST")
         return d
@@ -162,13 +163,13 @@ class PfsDocument(PfsSection):
 
     @property
     def targets(self) -> list[PfsSection]:
-        """List of targets (root sections)"""
+        """List of targets (root sections)."""
         _, rvals = self._unravel_items(self.items)
         return rvals
 
     @property
     def n_targets(self) -> int:
-        """Number of targets (root sections)"""
+        """Number of targets (root sections)."""
         return len(self.targets)
 
     @property
@@ -178,13 +179,12 @@ class PfsDocument(PfsSection):
 
     @property
     def names(self) -> list[str]:
-        """Names of the targets (root sections) as a list"""
+        """Names of the targets (root sections) as a list."""
         rkeys, _ = self._unravel_items(self.items)
         return rkeys
 
     def copy(self) -> PfsDocument:
-        """Return a deep copy of the PfsDocument"""
-
+        """Return a deep copy of the PfsDocument."""
         text = repr(self)
 
         return PfsDocument.from_text(text)
@@ -218,7 +218,7 @@ class PfsDocument(PfsSection):
         ),
         names: Sequence[str] | None = None,
     ) -> tuple[Sequence[str], list[PfsSection]]:
-        """dict/PfsSection or lists of these can be parsed"""
+        """dict/PfsSection or lists of these can be parsed."""
         if names is None:
             assert isinstance(input, Mapping), "input must be a mapping"
             names, sections = PfsDocument._unravel_items(input.items)
@@ -257,7 +257,7 @@ class PfsDocument(PfsSection):
         return "FemEngine" in self.names[0]
 
     def _add_all_FM_aliases(self) -> None:
-        """create MIKE FM module aliases"""
+        """create MIKE FM module aliases."""
         self._add_FM_alias("HD", "HYDRODYNAMIC_MODULE")
         self._add_FM_alias("SW", "SPECTRAL_WAVE_MODULE")
         self._add_FM_alias("TR", "TRANSPORT_MODULE")
@@ -348,7 +348,8 @@ class PfsDocument(PfsSection):
     def _parse_param(self, value: str) -> str:
         if len(value) == 0:
             return "[]"
-
+        if "MULTIPOLYGON" in value:
+            return value
         if "," in value:
             tokens = self._split_line_by_comma(value)
             for j in range(len(tokens)):
@@ -384,7 +385,7 @@ class PfsDocument(PfsSection):
         return s
 
     def write(self, filename: str) -> None:
-        """Write object to a pfs file
+        """Write object to a pfs file.
 
         Parameters
         ----------
@@ -394,6 +395,7 @@ class PfsDocument(PfsSection):
         Notes
         -----
         To return the content as a string, use repr()
+
         """
         from mikeio import __version__ as mikeio_version
 

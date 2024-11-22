@@ -1,3 +1,5 @@
+"""Generic functions for working with all types of dfs files."""
+
 from __future__ import annotations
 from dataclasses import dataclass
 import math
@@ -53,20 +55,53 @@ __all__ = [
 
 @dataclass
 class _ChunkInfo:
-    n_data: int
-    n_chunks: int
+    """Class for keeping track of an chunked processing.
+
+    Parameters
+    ----------
+    n_data : int
+        number of data points
+    n_chunks : int
+        number of chunks
+
+    Attributes
+    ----------
+    n_data : int
+        number of data points
+    n_chunks : int
+        number of chunks
+    chunk_size : int
+        number of data points per chunk
+
+    Methods
+    -------
+    stop(start)
+        Return the stop index for a chunk
+    chunk_end(start)
+        Return the end index for a chunk
+    from_dfs(dfs, item_numbers, buffer_size)
+        Calculate chunk info based on # of elements in dfs file and selected buffer size
+
+    """
+
+    def __init__(self, n_data: int, n_chunks: int):
+        self.n_data = n_data
+        self.n_chunks = n_chunks
+
+    def __repr__(self) -> str:
+        return f"_ChunkInfo(n_chunks={self.n_chunks}, n_data={self.n_data}, chunk_size={self.chunk_size})"
 
     @property
     def chunk_size(self) -> int:
-        """number of data points per chunk"""
+        """number of data points per chunk."""
         return math.ceil(self.n_data / self.n_chunks)
 
     def stop(self, start: int) -> int:
-        """Return the stop index for a chunk"""
+        """Return the stop index for a chunk."""
         return min(start + self.chunk_size, self.n_data)
 
     def chunk_end(self, start: int) -> int:
-        """Return the end index for a chunk"""
+        """Return the end index for a chunk."""
         e2 = self.stop(start)
         return self.chunk_size - ((start + self.chunk_size) - e2)
 
@@ -74,8 +109,7 @@ class _ChunkInfo:
     def from_dfs(
         dfs: DfsFile, item_numbers: list[int], buffer_size: float
     ) -> "_ChunkInfo":
-        """Calculate chunk info based on # of elements in dfs file and selected buffer size"""
-
+        """Calculate chunk info based on # of elements in dfs file and selected buffer size."""
         n_time_steps = dfs.FileInfo.TimeAxis.NumberOfTimeSteps
         n_data_all: int = np.sum([dfs.ItemInfo[i].ElementCount for i in item_numbers])
         mem_need = 8 * n_time_steps * n_data_all  # n_items *
@@ -92,7 +126,7 @@ def _clone(
     timestep: float | None = None,
     items: Sequence[int | DfsDynamicItemInfo] | None = None,
 ) -> DfsFile:
-    """Clone a dfs file
+    """Clone a dfs file.
 
     Parameters
     ----------
@@ -113,6 +147,7 @@ def _clone(
     -------
     DfsFile
         MIKE generic dfs file object
+
     """
     source = DfsFileFactory.DfsGenericOpen(str(infilename))
     fi = source.FileInfo
@@ -183,7 +218,7 @@ def scale(
     factor: float = 1.0,
     items: Sequence[int | str] | None = None,
 ) -> None:
-    """Apply scaling to any dfs file
+    """Apply scaling to any dfs file.
 
     Parameters
     ----------
@@ -198,6 +233,7 @@ def scale(
         value to multiply to all items, default 1.0
     items: list[str] or list[int], optional
         Process only selected items, by number (0-based) or name, by default: all
+
     """
     infilename = str(infilename)
     outfilename = str(outfilename)
@@ -234,8 +270,7 @@ def fill_corrupt(
     fill_value: float = np.nan,
     items: Sequence[str | int] | None = None,
 ) -> None:
-    """
-    Replace corrupt (unreadable) data with fill_value, default delete value.
+    """Replace corrupt (unreadable) data with fill_value, default delete value.
 
     Parameters
     ----------
@@ -248,6 +283,7 @@ def fill_corrupt(
         value to use where data is corrupt, default delete value
     items: list[str] or list[int], optional
         Process only selected items, by number (0-based) or name, by default: all
+
     """
     dfs_i = DfsFileFactory.DfsGenericOpen(infilename)
 
@@ -295,7 +331,7 @@ def _process_dfs_files(
     outfilename: str | pathlib.Path,
     op: Callable[[np.ndarray, np.ndarray], np.ndarray],
 ) -> None:
-    """Process two dfs files with a specified operation
+    """Process two dfs files with a specified operation.
 
     Parameters
     ----------
@@ -307,6 +343,7 @@ def _process_dfs_files(
         full path to the output file
     op: Callable[[np.ndarray, np.ndarray], np.ndarray]
         operation to perform on the data arrays
+
     """
     infilename_a = str(infilename_a)
     infilename_b = str(infilename_b)
@@ -381,7 +418,7 @@ def concat(
     outfilename: str | pathlib.Path,
     keep: str = "last",
 ) -> None:
-    """Concatenates files along the time axis
+    """Concatenates files along the time axis.
 
     Overlap handling is defined by the `keep` argument,  by default the last one will be used.
 
@@ -399,6 +436,7 @@ def concat(
     ------
 
     The list of input files have to be sorted, i.e. in chronological order
+
     """
     # fast path for Dfs0
     suffix = pathlib.Path(infilenames[0]).suffix
@@ -506,7 +544,7 @@ def extract(
     step: int = 1,
     items: Sequence[int | str] | None = None,
 ) -> None:
-    """Extract timesteps and/or items to a new dfs file
+    """Extract timesteps and/or items to a new dfs file.
 
     Parameters
     ----------
@@ -534,6 +572,7 @@ def extract(
     >>> extract('f_in.dfsu', 'f_out.dfsu', items=[2, 0])
     >>> extract('f_in.dfsu', 'f_out.dfsu', items="Salinity")
     >>> extract('f_in.dfsu', 'f_out.dfsu', end='2018-2-1 00:00', items="Salinity")
+
     """
     dfs_i = DfsFileFactory.DfsGenericOpenEdit(str(infilename))
 
@@ -594,7 +633,7 @@ def _parse_start_end(
     start: int | float | str | datetime,
     end: int | float | str | datetime,
 ) -> tuple[datetime | None, int, float, int, float]:  # TODO better return type
-    """Helper function for parsing start and end arguments"""
+    """Helper function for parsing start and end arguments."""
     n_time_steps = time_axis.NumberOfTimeSteps
     file_start_datetime = time_axis.StartDateTime
     file_start_sec = time_axis.StartTimeOffset
@@ -673,7 +712,7 @@ def _parse_start_end(
 
 
 def _parse_step(time_axis: TimeAxis, step: int) -> float | None:
-    """Helper function for parsing step argument"""
+    """Helper function for parsing step argument."""
     if step == 1:
         timestep = None
     elif time_axis.TimeAxisType == 3:
@@ -690,7 +729,7 @@ def avg_time(
     outfilename: str | pathlib.Path,
     skipna: bool = True,
 ) -> None:
-    """Create a temporally averaged dfs file
+    """Create a temporally averaged dfs file.
 
     Parameters
     ----------
@@ -700,8 +739,8 @@ def avg_time(
         output filename
     skipna : bool, optional
         exclude NaN/delete values when computing the result, default True
-    """
 
+    """
     dfs_i = DfsFileFactory.DfsGenericOpen(str(infilename))
 
     dfs_o = _clone(infilename, outfilename)
@@ -759,7 +798,7 @@ def quantile(
     skipna: bool = True,
     buffer_size: float = 1.0e9,
 ) -> None:
-    """Create temporal quantiles of all items in dfs file
+    """Create temporal quantiles of all items in dfs file.
 
     Parameters
     ----------
@@ -786,6 +825,7 @@ def quantile(
     >>> quantile("huge.dfsu", "Q01.dfsu", q=0.1, buffer_size=5.0e9)
 
     >>> quantile("with_nans.dfsu", "Q05.dfsu", q=0.5, skipna=False)
+
     """
     func = np.nanquantile if skipna else np.quantile
 
@@ -868,7 +908,7 @@ def quantile(
 
 
 def _read_item(dfs: DfsFile, item: int, timestep: int) -> np.ndarray:
-    """Read item data from dfs file
+    """Read item data from dfs file.
 
     Parameters
     ----------
@@ -883,6 +923,7 @@ def _read_item(dfs: DfsFile, item: int, timestep: int) -> np.ndarray:
     -------
     np.ndarray
         item data
+
     """
     indatatime = dfs.ReadItemTimeStep(item + 1, timestepIndex=timestep)
     indata = indatatime.Data
@@ -895,7 +936,7 @@ def _read_item(dfs: DfsFile, item: int, timestep: int) -> np.ndarray:
 def _get_repeated_items(
     items_in: list[DfsDynamicItemInfo], prefixes: list[str]
 ) -> list[ItemInfo]:
-    """Create new items by repeating the items in items_in with the prefixes
+    """Create new items by repeating the items in items_in with the prefixes.
 
     Parameters
     ----------
@@ -908,6 +949,7 @@ def _get_repeated_items(
     -------
     list[ItemInfo]
         List of new items
+
     """
     item_numbers = _valid_item_numbers(items_in)
     items_in = _get_item_info(items_in)
