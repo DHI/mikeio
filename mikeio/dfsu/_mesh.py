@@ -66,8 +66,8 @@ class Mesh:
     def __repr__(self) -> str:
         out = [
             "<Mesh>",
-            f"number of elements: {self.n_elements}",
             f"number of nodes: {self.n_nodes}",
+            f"number of elements: {self.n_elements}",
             f"projection: {self.geometry.projection_string}",
         ]
         return str.join("\n", out)
