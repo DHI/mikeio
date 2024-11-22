@@ -388,8 +388,7 @@ def sum(
     infilename_b: str | pathlib.Path,
     outfilename: str | pathlib.Path,
 ) -> None:
-    """Sum two dfs files (a+b)"""
-
+    """Sum two dfs files (a+b)."""
     # deprecated
     warnings.warn(FutureWarning("This function is deprecated. Use add instead."))
     _process_dfs_files(infilename_a, infilename_b, outfilename, operator.add)
@@ -400,7 +399,7 @@ def add(
     infilename_b: str | pathlib.Path,
     outfilename: str | pathlib.Path,
 ) -> None:
-    """Sum two dfs files (a+b)"""
+    """Add two dfs files (a+b)."""
     _process_dfs_files(infilename_a, infilename_b, outfilename, operator.add)
 
 
@@ -409,7 +408,7 @@ def diff(
     infilename_b: str | pathlib.Path,
     outfilename: str | pathlib.Path,
 ) -> None:
-    """Calculate difference between two dfs files (a-b)"""
+    """Calculate difference between two dfs files (a-b)."""
     _process_dfs_files(infilename_a, infilename_b, outfilename, operator.sub)
 
 
