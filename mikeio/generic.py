@@ -599,7 +599,7 @@ def extract(
 
     is_layered_dfsu = dfs_i.ItemInfo[0].Name == "Z coordinate"
 
-    time = TimeInfo.parse(dfs_i.FileInfo.TimeAxis, start, end, step)
+    time = _TimeInfo.parse(dfs_i.FileInfo.TimeAxis, start, end, step)
     item_numbers = _valid_item_numbers(
         dfs_i.ItemInfo, items, ignore_first=is_layered_dfsu
     )
@@ -647,7 +647,7 @@ def extract(
 
 
 @dataclass
-class TimeInfo:
+class _TimeInfo:
     """Parsed time information.
 
     Attributes
@@ -680,7 +680,7 @@ class TimeInfo:
         start: int | float | str | datetime,
         end: int | float | str | datetime,
         step: int,
-    ) -> TimeInfo:
+    ) -> _TimeInfo:
         """Helper function for parsing start and end arguments."""
         n_time_steps = time_axis.NumberOfTimeSteps
         file_start_datetime = time_axis.StartDateTime
@@ -760,24 +760,24 @@ class TimeInfo:
             if start_sec > file_start_sec:
                 file_start_new = file_start_datetime + timedelta(seconds=start_sec)
 
-        timestep = _parse_step(time_axis, step)
+        timestep = _TimeInfo._parse_step(time_axis, step)
 
-        return TimeInfo(
+        return _TimeInfo(
             file_start_new, start_step, start_sec, end_step, end_sec, timestep
         )
 
-
-def _parse_step(time_axis: TimeAxis, step: int) -> float | None:
-    """Helper function for parsing step argument."""
-    if step == 1:
-        timestep = None
-    elif time_axis.TimeAxisType == 3:
-        timestep = time_axis.TimeStep * step
-    elif time_axis.TimeAxisType == 4:
-        timestep = None
-    else:
-        raise ValueError("TimeAxisType not supported")
-    return timestep
+    @staticmethod
+    def _parse_step(time_axis: TimeAxis, step: int) -> float | None:
+        """Helper function for parsing step argument."""
+        if step == 1:
+            timestep = None
+        elif time_axis.TimeAxisType == TimeAxisType.CalendarEquidistant:
+            timestep = time_axis.TimeStep * step
+        elif time_axis.TimeAxisType == TimeAxisType.CalendarNonEquidistant:
+            timestep = None
+        else:
+            raise ValueError("TimeAxisType not supported")
+        return timestep
 
 
 def avg_time(
