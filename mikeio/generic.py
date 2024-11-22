@@ -22,6 +22,7 @@ from mikecore.DfsFile import (
     DfsNonEqTimeAxis,
     DfsEqCalendarAxis,
     DfsNonEqCalendarAxis,
+    TimeAxisType,
 )
 from mikecore.DfsFileFactory import DfsFileFactory
 from mikecore.eum import eumQuantity
@@ -598,7 +599,7 @@ def extract(
 
     is_layered_dfsu = dfs_i.ItemInfo[0].Name == "Z coordinate"
 
-    time = _parse_time(dfs_i.FileInfo.TimeAxis, start, end, step)
+    time = TimeInfo.parse(dfs_i.FileInfo.TimeAxis, start, end, step)
     item_numbers = _valid_item_numbers(
         dfs_i.ItemInfo, items, ignore_first=is_layered_dfsu
     )
@@ -647,7 +648,24 @@ def extract(
 
 @dataclass
 class TimeInfo:
-    "Parsed time information."
+    """Parsed time information.
+
+    Attributes
+    ----------
+    file_start_new : datetime | None
+        new start time for the new file
+    start_step : int
+        start step
+    start_sec : float
+        start time in seconds
+    end_step : int
+        end step
+    end_sec : float
+        end time in seconds
+    timestep : float | None
+        timestep in seconds
+
+    """
 
     file_start_new: datetime | None
     start_step: int
@@ -656,91 +674,97 @@ class TimeInfo:
     end_sec: float
     timestep: float | None
 
+    @staticmethod
+    def parse(
+        time_axis: TimeAxis,
+        start: int | float | str | datetime,
+        end: int | float | str | datetime,
+        step: int,
+    ) -> TimeInfo:
+        """Helper function for parsing start and end arguments."""
+        n_time_steps = time_axis.NumberOfTimeSteps
+        file_start_datetime = time_axis.StartDateTime
+        file_start_sec = time_axis.StartTimeOffset
+        start_sec = file_start_sec
 
-def _parse_time(
-    time_axis: TimeAxis,
-    start: int | float | str | datetime,
-    end: int | float | str | datetime,
-    step: int,
-) -> TimeInfo:
-    """Helper function for parsing start and end arguments."""
-    n_time_steps = time_axis.NumberOfTimeSteps
-    file_start_datetime = time_axis.StartDateTime
-    file_start_sec = time_axis.StartTimeOffset
-    start_sec = file_start_sec
+        timespan = 0
+        if time_axis.TimeAxisType == 3:
+            timespan = time_axis.TimeStep * (n_time_steps - 1)
+        elif time_axis.TimeAxisType == 4:
+            timespan = time_axis.TimeSpan
+        else:
+            raise ValueError("TimeAxisType not supported")
 
-    timespan = 0
-    if time_axis.TimeAxisType == 3:
-        timespan = time_axis.TimeStep * (n_time_steps - 1)
-    elif time_axis.TimeAxisType == 4:
-        timespan = time_axis.TimeSpan
-    else:
-        raise ValueError("TimeAxisType not supported")
+        file_end_sec = start_sec + timespan
+        end_sec = file_end_sec
 
-    file_end_sec = start_sec + timespan
-    end_sec = file_end_sec
+        start_step = 0
+        if isinstance(start, int):
+            start_step = start
+        elif isinstance(start, float):
+            start_sec = start
+        elif isinstance(start, str):
+            parts = start.split(",")
+            start = parts[0]
+            if len(parts) == 2:
+                end = parts[1]
+            start = pd.to_datetime(start)
 
-    start_step = 0
-    if isinstance(start, int):
-        start_step = start
-    elif isinstance(start, float):
-        start_sec = start
-    elif isinstance(start, str):
-        parts = start.split(",")
-        start = parts[0]
-        if len(parts) == 2:
-            end = parts[1]
-        start = pd.to_datetime(start)
+        if isinstance(start, datetime):
+            start_sec = (start - file_start_datetime).total_seconds()
 
-    if isinstance(start, datetime):
-        start_sec = (start - file_start_datetime).total_seconds()
+        end_step = n_time_steps
+        if isinstance(end, int):
+            if end < 0:
+                end = end_step + end + 1
+            end_step = end
+        elif isinstance(end, float):
+            end_sec = end
+        elif isinstance(end, str):
+            end = pd.to_datetime(end)
 
-    end_step = n_time_steps
-    if isinstance(end, int):
-        if end < 0:
-            end = end_step + end + 1
-        end_step = end
-    elif isinstance(end, float):
-        end_sec = end
-    elif isinstance(end, str):
-        end = pd.to_datetime(end)
+        if isinstance(end, datetime):
+            end_sec = (end - file_start_datetime).total_seconds()
 
-    if isinstance(end, datetime):
-        end_sec = (end - file_start_datetime).total_seconds()
+        if start_step < 0:
+            raise ValueError(
+                f"start cannot be before start of file. start={start_step} is invalid"
+            )
 
-    if start_step < 0:
-        raise ValueError(
-            f"start cannot be before start of file. start={start_step} is invalid"
+        if start_sec < file_start_sec:
+            raise ValueError(
+                f"start cannot be before start of file start={start_step} is invalid"
+            )
+
+        if (end_sec < start_sec) or (end_step < start_step):
+            raise ValueError("end must be after start")
+
+        if end_step > n_time_steps:
+            raise ValueError(
+                f"end cannot be after end of file. end={end_step} is invalid."
+            )
+
+        if end_sec > file_end_sec:
+            raise ValueError(
+                f"end cannot be after end of file. end={end_sec} is invalid."
+            )
+
+        file_start_new = None
+        if time_axis.TimeAxisType == TimeAxisType.CalendarEquidistant:
+            dt = time_axis.TimeStep
+            if (start_sec > file_start_sec) and (start_step == 0):
+                # we can find the coresponding step
+                start_step = int((start_sec - file_start_sec) / dt)
+            file_start_new = file_start_datetime + timedelta(seconds=start_step * dt)
+        elif time_axis.TimeAxisType == TimeAxisType.CalendarNonEquidistant:
+            if start_sec > file_start_sec:
+                file_start_new = file_start_datetime + timedelta(seconds=start_sec)
+
+        timestep = _parse_step(time_axis, step)
+
+        return TimeInfo(
+            file_start_new, start_step, start_sec, end_step, end_sec, timestep
         )
-
-    if start_sec < file_start_sec:
-        raise ValueError(
-            f"start cannot be before start of file start={start_step} is invalid"
-        )
-
-    if (end_sec < start_sec) or (end_step < start_step):
-        raise ValueError("end must be after start")
-
-    if end_step > n_time_steps:
-        raise ValueError(f"end cannot be after end of file. end={end_step} is invalid.")
-
-    if end_sec > file_end_sec:
-        raise ValueError(f"end cannot be after end of file. end={end_sec} is invalid.")
-
-    file_start_new = None
-    if time_axis.TimeAxisType == 3:
-        dt = time_axis.TimeStep
-        if (start_sec > file_start_sec) and (start_step == 0):
-            # we can find the coresponding step
-            start_step = int((start_sec - file_start_sec) / dt)
-        file_start_new = file_start_datetime + timedelta(seconds=start_step * dt)
-    elif time_axis.TimeAxisType == 4:
-        if start_sec > file_start_sec:
-            file_start_new = file_start_datetime + timedelta(seconds=start_sec)
-
-    timestep = _parse_step(time_axis, step)
-
-    return TimeInfo(file_start_new, start_step, start_sec, end_step, end_sec, timestep)
 
 
 def _parse_step(time_axis: TimeAxis, step: int) -> float | None:
