@@ -2,6 +2,9 @@
 requires = ["hatchling"]
 build-backend = "hatchling.build"
 
+[tool.hatch.build]
+include = ["mikeio"]
+
 [tool.hatch.build.targets.sdist]
 exclude = ["notebooks", "tests", "images", ".github", "docs", ".devcontainer", "*.md", "*.txt", ".gitattributes"]
 
@@ -16,7 +19,11 @@ dependencies = [
     "scipy>=1.0",
     "PyYAML",
     "tqdm",
-    "xarray",
+    "xarray==2024.11.0",
+    "h5netcdf>=1.4.1",
+    "hatchling>=1.26.3",
+    "build>=1.2.2.post1",
+    "twine>=5.1.1",
 ]
 
 authors = [
