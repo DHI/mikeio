@@ -55,12 +55,13 @@ class DfsuLayered:
         self._items = self._read_items(self._filename)
 
     def __repr__(self) -> str:
-        out = [f"<mikeio.{self.__class__.__name__}>"]
-
-        out.append(f"number of elements: {self.geometry.n_elements}")
-        out.append(f"number of nodes: {self.geometry.n_nodes}")
-        out.append(f"projection: {self.geometry.projection_string}")
-        out.append(f"number of sigma layers: {self.geometry.n_sigma_layers}")
+        out = [
+            f"<mikeio.{self.__class__.__name__}>"
+            f"number of nodes: {self.geometry.n_nodes}",
+            f"number of elements: {self.geometry.n_elements}",
+            f"projection: {self.geometry.projection_string}",
+            f"number of sigma layers: {self.geometry.n_sigma_layers}",
+        ]
         if (
             self._type == DfsuFileType.DfsuVerticalProfileSigmaZ
             or self._type == DfsuFileType.Dfsu3DSigmaZ
