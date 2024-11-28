@@ -700,7 +700,10 @@ class Grid2D(_Geometry):
 
         y1 = y0 + self.dy * (self.ny - 1)
         y_local = np.linspace(y0, y1, self.ny)
-        return y_local if self._is_rotated else y_local + self._origin[1]
+        if self._is_rotated or self.is_spectral:
+            return y_local
+        else:
+            return y_local + self._origin[1]
 
     @property
     def nx(self) -> int:
