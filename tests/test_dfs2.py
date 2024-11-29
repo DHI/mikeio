@@ -26,6 +26,12 @@ def dfs2_random_2items():
 
 
 @pytest.fixture
+def dfs2_pt_spectrum_geographical():
+    filepath = Path("tests/testdata/spectra/pt_spectra_geographical.dfs2")
+    return mikeio.open(filepath, type="spectral")
+
+
+@pytest.fixture
 def dfs2_pt_spectrum():
     filepath = Path("tests/testdata/spectra/pt_spectra.dfs2")
     return mikeio.open(filepath, type="spectral")
@@ -296,6 +302,31 @@ def test_properties_pt_spectrum(dfs2_pt_spectrum):
     assert dfs.nx == 25
     assert dfs.ny == 16
     assert dfs.longitude == 0
+    assert dfs.latitude == 0
+    assert dfs.orientation == 0
+    assert dfs.n_items == 1
+    assert dfs.n_timesteps == 31
+
+    g = dfs.geometry
+    assert g.is_spectral
+    assert g.x[0] == pytest.approx(0.055)
+    # assert g.x[-1] > 25  # if considered linear
+    assert g.x[-1] < 0.6  # logarithmic
+    assert g.y[0] == 0
+    assert g.dx == pytest.approx(1.1)
+    assert g.dy == 22.5
+    assert g.orientation == 0
+
+
+def test_properties_pt_spectrum_geographical(dfs2_pt_spectrum_geographical):
+    dfs = dfs2_pt_spectrum_geographical
+    assert dfs.x0 == pytest.approx(0.055)
+    assert dfs.y0 == 0
+    assert dfs.dx == pytest.approx(1.1)
+    assert dfs.dy == 22.5
+    assert dfs.nx == 25
+    assert dfs.ny == 16
+    assert dfs.longitude == pytest.approx(0, abs=1e-6)
     assert dfs.latitude == 0
     assert dfs.orientation == 0
     assert dfs.n_items == 1
