@@ -788,7 +788,14 @@ def test_extract_track_from_dataset():
         parse_dates=True,
     )
     df.index = pd.DatetimeIndex(df.index)
+    assert ds[0].name == "Sign. Wave Height"
     track = ds.extract_track(df)
+
+    # This should not change the original dataset
+    track.rename({"Sign. Wave Height": "NewName"}, inplace=True)
+    assert track["NewName"].name == "NewName"
+
+    assert ds[0].name == "Sign. Wave Height"
 
     assert track[2].values[23] == approx(3.6284972794399653)
     assert sum(np.isnan(track[2].to_numpy())) == 26
