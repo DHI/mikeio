@@ -792,12 +792,12 @@ def test_extract_track_from_dataset():
     track = ds.extract_track(df)
 
     # This should not change the original dataset
-    track.rename({"Sign. Wave Height": "NewName"}, inplace=True)
-    assert track["NewName"].name == "NewName"
+    track.rename({"Sign. Wave Height": "Hm0"}, inplace=True)
+    assert track["Hm0"].name == "Hm0"
 
     assert ds[0].name == "Sign. Wave Height"
 
-    assert track[2].values[23] == approx(3.6284972794399653)
+    assert track["Hm0"].values[23] == approx(3.6284972794399653)
     assert sum(np.isnan(track[2].to_numpy())) == 26
     assert np.all(track[1].to_numpy() == df.latitude.values)
 
