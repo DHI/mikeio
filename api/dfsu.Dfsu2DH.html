@@ -163,7 +163,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
         <i class="bi bi-layout-text-sidebar-reverse"></i>
       </button>
         <a class="flex-grow-1 no-decor" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
-          <h1 class="quarto-secondary-nav-title"></h1>
+          <h1 class="quarto-secondary-nav-title">dfsu.Dfsu2DH</h1>
         </a>     
       <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
         <i class="bi bi-search"></i>
@@ -373,9 +373,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     <h2 id="toc-title">On this page</h2>
    
   <ul>
-  <li><a href="#mikeio.dfsu.Dfsu2DH" id="toc-mikeio.dfsu.Dfsu2DH" class="nav-link active" data-scroll-target="#mikeio.dfsu.Dfsu2DH">dfsu.Dfsu2DH</a>
-  <ul class="collapse">
-  <li><a href="#attributes" id="toc-attributes" class="nav-link" data-scroll-target="#attributes">Attributes</a></li>
+  <li><a href="#attributes" id="toc-attributes" class="nav-link active" data-scroll-target="#attributes">Attributes</a></li>
   <li><a href="#methods" id="toc-methods" class="nav-link" data-scroll-target="#methods">Methods</a>
   <ul class="collapse">
   <li><a href="#mikeio.dfsu.Dfsu2DH.append" id="toc-mikeio.dfsu.Dfsu2DH.append" class="nav-link" data-scroll-target="#mikeio.dfsu.Dfsu2DH.append">append</a></li>
@@ -383,18 +381,31 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <li><a href="#mikeio.dfsu.Dfsu2DH.get_overset_grid" id="toc-mikeio.dfsu.Dfsu2DH.get_overset_grid" class="nav-link" data-scroll-target="#mikeio.dfsu.Dfsu2DH.get_overset_grid">get_overset_grid</a></li>
   <li><a href="#mikeio.dfsu.Dfsu2DH.read" id="toc-mikeio.dfsu.Dfsu2DH.read" class="nav-link" data-scroll-target="#mikeio.dfsu.Dfsu2DH.read">read</a></li>
   </ul></li>
-  </ul></li>
   </ul>
 <div class="quarto-alternate-formats"><h2>Other Formats</h2><ul><li><a href="dfsu.Dfsu2DH.ipynb" download="dfsu.Dfsu2DH.ipynb"><i class="bi bi-journal-code"></i>Jupyter</a></li></ul></div></nav>
     </div>
 <!-- main -->
-<main class="content" id="quarto-document-content"><header id="title-block-header" class="quarto-title-block"></header>
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title d-none d-lg-block">dfsu.Dfsu2DH</h1>
+</div>
 
 
 
+<div class="quarto-title-meta">
 
-<section id="mikeio.dfsu.Dfsu2DH" class="level1">
-<h1>dfsu.Dfsu2DH</h1>
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
 <div class="sourceCode" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>dfsu.Dfsu2DH(<span class="va">self</span>, filename)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <section id="attributes" class="level2">
 <h2 class="anchored" data-anchor-id="attributes">Attributes</h2>
@@ -589,23 +600,31 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </section>
 <section id="examples" class="level4 doc-section doc-section-examples">
 <h4 class="doc-section doc-section-examples anchored" data-anchor-id="examples">Examples</h4>
-<div class="sourceCode" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> dfsu <span class="op">=</span> mikeio.<span class="bu">open</span>(<span class="st">"tests/testdata/NorthSea_HD_and_windspeed.dfsu"</span>)</span>
-<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> ds <span class="op">=</span> dfsu.extract_track(<span class="st">"tests/testdata/altimetry_NorthSea_20171027.csv"</span>)</span>
-<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> ds</span>
-<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a><span class="op">&lt;</span>mikeio.Dataset<span class="op">&gt;</span></span>
-<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>dims: (time:<span class="dv">1115</span>)</span>
-<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>time: <span class="dv">2017</span><span class="op">-</span><span class="dv">10</span><span class="op">-</span><span class="dv">26</span> <span class="dv">0</span><span class="er">4</span>:<span class="dv">37</span>:<span class="dv">37</span> <span class="op">-</span> <span class="dv">2017</span><span class="op">-</span><span class="dv">10</span><span class="op">-</span><span class="dv">30</span> <span class="dv">20</span>:<span class="dv">54</span>:<span class="dv">47</span> (<span class="dv">1115</span> non<span class="op">-</span>equidistant records)</span>
-<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>geometry: GeometryUndefined()</span>
-<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>items:</span>
-<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>  <span class="dv">0</span>:  Longitude <span class="op">&lt;</span>Undefined<span class="op">&gt;</span> (undefined)</span>
-<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>  <span class="dv">1</span>:  Latitude <span class="op">&lt;</span>Undefined<span class="op">&gt;</span> (undefined)</span>
-<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>  <span class="dv">2</span>:  Surface elevation <span class="op">&lt;</span>Surface Elevation<span class="op">&gt;</span> (meter)</span>
-<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a>  <span class="dv">3</span>:  Wind speed <span class="op">&lt;</span>Wind speed<span class="op">&gt;</span> (meter per sec)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div id="f7b65a05" class="cell" data-execution_count="1">
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> mikeio</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>ds <span class="op">=</span> (</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>    mikeio.<span class="bu">open</span>(<span class="st">"../data/NorthSea_HD_and_windspeed.dfsu"</span>)</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>          .extract_track(<span class="st">"../data/altimetry_NorthSea_20171027.csv"</span>)</span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>ds</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="1">
+<pre><code>&lt;mikeio.Dataset&gt;
+dims: (time:1115)
+time: 2017-10-26 04:37:37 - 2017-10-30 20:54:47 (1115 non-equidistant records)
+geometry: GeometryUndefined()
+items:
+  0:  Longitude &lt;Latitude longitude&gt; (degree)
+  1:  Latitude &lt;Latitude longitude&gt; (degree)
+  2:  Surface elevation &lt;Surface Elevation&gt; (meter)
+  3:  Wind speed &lt;Wind speed&gt; (meter per sec)</code></pre>
+</div>
+</div>
 </section>
 </section>
 <section id="mikeio.dfsu.Dfsu2DH.get_overset_grid" class="level3">
 <h3 class="anchored" data-anchor-id="mikeio.dfsu.Dfsu2DH.get_overset_grid">get_overset_grid</h3>
-<div class="sourceCode" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>dfsu.Dfsu2DH.get_overset_grid(dx<span class="op">=</span><span class="va">None</span>, dy<span class="op">=</span><span class="va">None</span>, nx<span class="op">=</span><span class="va">None</span>, ny<span class="op">=</span><span class="va">None</span>, <span class="bu">buffer</span><span class="op">=</span><span class="fl">0.0</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>dfsu.Dfsu2DH.get_overset_grid(dx<span class="op">=</span><span class="va">None</span>, dy<span class="op">=</span><span class="va">None</span>, nx<span class="op">=</span><span class="va">None</span>, ny<span class="op">=</span><span class="va">None</span>, <span class="bu">buffer</span><span class="op">=</span><span class="fl">0.0</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <p>get a 2d grid that covers the domain by specifying spacing or shape.</p>
 <section id="parameters-2" class="level4 doc-section doc-section-parameters">
 <h4 class="doc-section doc-section-parameters anchored" data-anchor-id="parameters-2">Parameters</h4>
@@ -680,18 +699,18 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </section>
 <section id="mikeio.dfsu.Dfsu2DH.read" class="level3">
 <h3 class="anchored" data-anchor-id="mikeio.dfsu.Dfsu2DH.read">read</h3>
-<div class="sourceCode" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>dfsu.Dfsu2DH.read(</span>
-<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>    items<span class="op">=</span><span class="va">None</span>,</span>
-<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>    time<span class="op">=</span><span class="va">None</span>,</span>
-<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>    elements<span class="op">=</span><span class="va">None</span>,</span>
-<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>    area<span class="op">=</span><span class="va">None</span>,</span>
-<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>    x<span class="op">=</span><span class="va">None</span>,</span>
-<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>    y<span class="op">=</span><span class="va">None</span>,</span>
-<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>    keepdims<span class="op">=</span><span class="va">False</span>,</span>
-<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>    dtype<span class="op">=</span>np.float32,</span>
-<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a>    error_bad_data<span class="op">=</span><span class="va">True</span>,</span>
-<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a>    fill_bad_data_value<span class="op">=</span>np.nan,</span>
-<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>dfsu.Dfsu2DH.read(</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>    items<span class="op">=</span><span class="va">None</span>,</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>    time<span class="op">=</span><span class="va">None</span>,</span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>    elements<span class="op">=</span><span class="va">None</span>,</span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>    area<span class="op">=</span><span class="va">None</span>,</span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>    x<span class="op">=</span><span class="va">None</span>,</span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>    y<span class="op">=</span><span class="va">None</span>,</span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>    keepdims<span class="op">=</span><span class="va">False</span>,</span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>    dtype<span class="op">=</span>np.float32,</span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a>    error_bad_data<span class="op">=</span><span class="va">True</span>,</span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a>    fill_bad_data_value<span class="op">=</span>np.nan,</span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <p>Read data from a dfsu file.</p>
 <section id="parameters-3" class="level4 doc-section doc-section-parameters">
 <h4 class="doc-section doc-section-parameters anchored" data-anchor-id="parameters-3">Parameters</h4>
@@ -794,7 +813,6 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </table>
 
 
-</section>
 </section>
 </section>
 </section>
