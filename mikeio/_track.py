@@ -8,7 +8,7 @@ import pandas as pd
 
 from .dataset import Dataset
 from .dfs import Dfs0
-from .eum import ItemInfo
+from .eum import ItemInfo, EUMUnit, EUMType
 from .spatial import GeometryFM2D
 
 
@@ -141,9 +141,15 @@ def _extract_track(
             data_list[item + 2][t] = dati[item]
 
     if geometry.is_geo:
-        items_out = [ItemInfo("Longitude"), ItemInfo("Latitude")]
+        items_out = [
+            ItemInfo("Longitude", EUMType.Latitude_longitude, EUMUnit.degree),
+            ItemInfo("Latitude", EUMType.Latitude_longitude, EUMUnit.degree),
+        ]
     else:
-        items_out = [ItemInfo("x"), ItemInfo("y")]
+        items_out = [
+            ItemInfo("x", EUMType.Geographical_coordinate, EUMUnit.meter),
+            ItemInfo("y", EUMType.Geographical_coordinate, EUMUnit.meter),
+        ]
 
     for item_info in items:
         items_out.append(item_info)
