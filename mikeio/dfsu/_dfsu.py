@@ -1,4 +1,5 @@
 from __future__ import annotations
+from copy import deepcopy
 from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
@@ -686,18 +687,15 @@ class Dfsu2DH:
 
         Examples
         --------
-        >>> dfsu = mikeio.open("tests/testdata/NorthSea_HD_and_windspeed.dfsu")
-        >>> ds = dfsu.extract_track("tests/testdata/altimetry_NorthSea_20171027.csv")
-        >>> ds
-        <mikeio.Dataset>
-        dims: (time:1115)
-        time: 2017-10-26 04:37:37 - 2017-10-30 20:54:47 (1115 non-equidistant records)
-        geometry: GeometryUndefined()
-        items:
-          0:  Longitude <Undefined> (undefined)
-          1:  Latitude <Undefined> (undefined)
-          2:  Surface elevation <Surface Elevation> (meter)
-          3:  Wind speed <Wind speed> (meter per sec)
+        ```{python}
+        import mikeio
+
+        ds = (
+            mikeio.open("../data/NorthSea_HD_and_windspeed.dfsu")
+                  .extract_track("../data/altimetry_NorthSea_20171027.csv")
+            )
+        ds
+        ```
 
         """
         dfs = DfsuFile.Open(self._filename)
@@ -714,7 +712,7 @@ class Dfsu2DH:
             geometry=self.geometry,
             n_elements=self.geometry.n_elements,
             track=track,
-            items=items,
+            items=deepcopy(items),
             time_steps=time_steps,
             item_numbers=item_numbers,
             method=method,
