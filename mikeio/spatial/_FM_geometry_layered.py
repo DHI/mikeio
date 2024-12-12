@@ -71,7 +71,7 @@ class _GeometryFMLayered(_GeometryFM):
         return self.to_2d_geometry()
 
     def isel(
-        self, idx: Sequence[int], keepdims: bool = False, **kwargs: Any
+        self, idx: Sequence[int] | np.ndarray, keepdims: bool = False, **kwargs: Any
     ) -> GeometryFM3D | GeometryPoint3D | GeometryFM2D | GeometryFMVerticalColumn:
         return self.elements_to_geometry(elements=idx, keepdims=keepdims)
 
@@ -480,9 +480,7 @@ class _GeometryFMLayered(_GeometryFM):
         return self._2d_ids
 
     def _get_2d_to_3d_association(self) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
-        e2_to_e3 = (
-            []
-        )  # for each 2d element: the corresponding 3d element ids from bot to top
+        e2_to_e3 = []  # for each 2d element: the corresponding 3d element ids from bot to top
         index2d = []  # for each 3d element: the associated 2d element id
         layerid = []  # for each 3d element: the associated layer number
         n2d = len(self.top_elements)
