@@ -19,7 +19,7 @@ jobs:
 
     steps:
     - uses: actions/checkout@v4
-    - uses: chartboost/ruff-action@v1 # Fail fast if there are any linting errors
+    - uses: astral-sh/ruff-action@v2 # Fail fast if there are any linting errors
       with:
         version: 0.6.2 # consistent with pyproject.toml ?
         src: mikeio # ignore notebooks
@@ -50,5 +50,5 @@ jobs:
     - name: Upload build artifact
       uses: actions/upload-artifact@v4
       with:
-        name: dist-${{matrix.os}}-${{matrix.python-version}}
+        name: dist-${{matrix.python-version}}
         path: dist/*
