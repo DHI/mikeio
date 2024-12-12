@@ -1064,7 +1064,7 @@ class DataArray:
             geometry=self.geometry,
             n_elements=self.shape[1],  # TODO is there a better way to find out this?
             track=track,
-            items=[self.item],
+            items=deepcopy([self.item]),
             time_steps=list(range(self.n_timesteps)),
             item_numbers=[0],
             method=method,

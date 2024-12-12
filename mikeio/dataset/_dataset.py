@@ -1051,7 +1051,7 @@ class Dataset:
             geometry=self.geometry,
             n_elements=self.shape[1],  # TODO is there a better way to find out this?
             track=track,
-            items=self.items,
+            items=deepcopy(self.items),
             time_steps=time_steps,
             item_numbers=item_numbers,
             method=method,
