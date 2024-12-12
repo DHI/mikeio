@@ -1307,7 +1307,7 @@ class Dataset:
                 newdata[j][idx1] = ds[j].to_numpy()
 
         zn = None
-        if self._zn is not None:
+        if self._zn is not None and other._zn is not None:
             zshape = (len(newtime), self._zn.shape[start_dim])
             zn = np.zeros(shape=zshape, dtype=self._zn.dtype)
             if keep == "last":
