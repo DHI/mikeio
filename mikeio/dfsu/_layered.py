@@ -203,7 +203,7 @@ class DfsuLayered:
         *,
         items: str | int | Sequence[str | int] | None = None,
         time: int | str | slice | None = None,
-        elements: Sequence[int] | None = None,
+        elements: Sequence[int] | np.ndarray | None = None,
         area: tuple[float, float, float, float] | None = None,
         x: float | None = None,
         y: float | None = None,
