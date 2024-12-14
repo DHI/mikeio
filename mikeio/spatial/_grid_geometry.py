@@ -550,7 +550,7 @@ class Grid2D(_Geometry):
             in which case the value will be inferred
 
         """
-        box = self._parse_bbox(bbox)
+        box = BoundingBox.parse(bbox)
 
         xr = box.right - box.left  # dx too large
         yr = box.top - box.bottom  # dy too large
@@ -576,21 +576,6 @@ class Grid2D(_Geometry):
         self._y0, self._dy, self._ny = self._create_in_bbox_1d(
             "y", box.bottom, box.top, dy, ny
         )
-
-    @staticmethod
-    def _parse_bbox(
-        values: BoundingBox | Sequence[float],
-    ) -> BoundingBox:
-        match values:
-            case BoundingBox():
-                bbox = values
-            case left, bottom, right, top:
-                bbox = BoundingBox(left, bottom, right, top)
-            case _:
-                raise ValueError(
-                    "area most be a bounding box of coordinates e.g. area=(-10.0, 10.0 20.0, 30.0)"
-                )
-        return bbox
 
     @staticmethod
     def _create_in_bbox_1d(
@@ -850,7 +835,7 @@ class Grid2D(_Geometry):
         if coords is not None:
             return self._xy_to_index(coords)
         elif area is not None:
-            bbox = self._parse_bbox(area)
+            bbox = BoundingBox.parse(area)
             return self._bbox_to_index(bbox)
         else:
             raise ValueError("Provide x,y or coords")

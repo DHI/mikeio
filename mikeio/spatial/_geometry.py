@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 
 from dataclasses import dataclass
-from typing import Any
+from typing import Any, Sequence
 
 from mikecore.Projections import MapProjection
 
@@ -15,15 +15,6 @@ class BoundingBox:
     right: float
     top: float
 
-    def overlaps(self, other: "BoundingBox") -> bool:
-        """Check if two bounding boxes overlap."""
-        return not (
-            self.left > other.right
-            or self.bottom > other.top
-            or self.right < other.left
-            or self.top < other.bottom
-        )
-
     def __post_init__(self) -> None:
         if self.left > self.right:
             raise ValueError(
@@ -34,6 +25,30 @@ class BoundingBox:
             raise ValueError(
                 f"Invalid y axis, bottom: {self.bottom} must be smaller than top: {self.top}"
             )
+
+    def overlaps(self, other: "BoundingBox") -> bool:
+        """Check if two bounding boxes overlap."""
+        return not (
+            self.left > other.right
+            or self.bottom > other.top
+            or self.right < other.left
+            or self.top < other.bottom
+        )
+
+    @staticmethod
+    def parse(
+        values: "BoundingBox" | Sequence[float],
+    ) -> "BoundingBox":
+        match values:
+            case BoundingBox():
+                bbox = values
+            case left, bottom, right, top:
+                bbox = BoundingBox(left, bottom, right, top)
+            case _:
+                raise ValueError(
+                    "values must be a bounding box of coordinates e.g. (-10.0, 10.0 20.0, 30.0)"
+                )
+        return bbox
 
 
 class _Geometry(ABC):
