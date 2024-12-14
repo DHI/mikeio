@@ -1,5 +1,5 @@
 from __future__ import annotations
-from collections import namedtuple
+from dataclasses import dataclass
 from functools import cached_property
 from pathlib import Path
 from typing import (
@@ -12,6 +12,7 @@ from typing import (
 
 
 import numpy as np
+from numpy.typing import NDArray
 from mikecore.DfsuFile import DfsuFileType
 from mikecore.eum import eumQuantity
 from mikecore.MeshBuilder import MeshBuilder
@@ -36,6 +37,14 @@ from ._utils import xy_to_bbox
 if TYPE_CHECKING:
     from ._FM_geometry_layered import GeometryFM3D
     from matplotlib.axes import Axes
+
+
+@dataclass
+class Polyline:
+    n_nodes: int
+    nodes: NDArray
+    xy: NDArray
+    area: float
 
 
 class _GeometryFMPlotter:
@@ -914,7 +923,6 @@ class GeometryFM2D(_GeometryFM):
 
         poly_lines_int = []
         poly_lines_ext = []
-        Polyline = namedtuple("Polyline", ["n_nodes", "nodes", "xy", "area"])
 
         for polyline in polylines:
             xy = self.node_coordinates[polyline, :2]

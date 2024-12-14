@@ -1,11 +1,39 @@
 from abc import ABC, abstractmethod
 
-from collections import namedtuple
+from dataclasses import dataclass
 from typing import Any
 
 from mikecore.Projections import MapProjection
 
-BoundingBox = namedtuple("BoundingBox", ["left", "bottom", "right", "top"])
+
+@dataclass
+class BoundingBox:
+    """Bounding box for spatial data."""
+
+    left: float
+    bottom: float
+    right: float
+    top: float
+
+    def overlaps(self, other: "BoundingBox") -> bool:
+        """Check if two bounding boxes overlap."""
+        return not (
+            self.left > other.right
+            or self.bottom > other.top
+            or self.right < other.left
+            or self.top < other.bottom
+        )
+
+    def __post_init__(self) -> None:
+        if self.left > self.right:
+            raise ValueError(
+                f"Invalid x axis, left: {self.left} must be smaller than right: {self.right}"
+            )
+
+        if self.bottom > self.top:
+            raise ValueError(
+                f"Invalid y axis, bottom: {self.bottom} must be smaller than top: {self.top}"
+            )
 
 
 class _Geometry(ABC):

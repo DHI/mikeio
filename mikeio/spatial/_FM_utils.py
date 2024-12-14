@@ -1,4 +1,4 @@
-from __future__ import annotations
+from dataclasses import dataclass
 from typing import Any, Literal, Sequence
 from matplotlib.axes import Axes
 from matplotlib.cm import ScalarMappable
@@ -8,7 +8,6 @@ from matplotlib.figure import Figure
 from matplotlib.tri import Triangulation
 import numpy as np
 from scipy.sparse import csr_matrix
-from collections import namedtuple
 
 from ._utils import _relative_cumulative_distance
 
@@ -16,10 +15,13 @@ from ._utils import _relative_cumulative_distance
 MESH_COL = "0.95"
 MESH_COL_DARK = "0.6"
 
-BoundaryPolylines = namedtuple(
-    "BoundaryPolylines",
-    ["n_exteriors", "exteriors", "n_interiors", "interiors"],
-)
+
+@dataclass
+class BoundaryPolylines:
+    n_exteriors: int
+    exteriors: list
+    n_interiors: int
+    interiors: list
 
 
 def _plot_map(
