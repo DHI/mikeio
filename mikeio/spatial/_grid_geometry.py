@@ -579,14 +579,18 @@ class Grid2D(_Geometry):
 
     @staticmethod
     def _parse_bbox(
-        bbox: BoundingBox | Sequence[float],
+        values: BoundingBox | Sequence[float],
     ) -> BoundingBox:
-        if isinstance(bbox, BoundingBox):
-            return bbox
-        elif isinstance(bbox, Sequence) and len(bbox) == 4:
-            return BoundingBox(*bbox)
-        else:
-            raise ValueError("bbox must be a BoundingBox or a tuple of length 4")
+        match values:
+            case BoundingBox():
+                bbox = values
+            case left, bottom, right, top:
+                bbox = BoundingBox(left, bottom, right, top)
+            case _:
+                raise ValueError(
+                    "area most be a bounding box of coordinates e.g. area=(-10.0, 10.0 20.0, 30.0)"
+                )
+        return bbox
 
     @staticmethod
     def _create_in_bbox_1d(
@@ -846,7 +850,8 @@ class Grid2D(_Geometry):
         if coords is not None:
             return self._xy_to_index(coords)
         elif area is not None:
-            return self._bbox_to_index(area)
+            bbox = self._parse_bbox(area)
+            return self._bbox_to_index(bbox)
         else:
             raise ValueError("Provide x,y or coords")
 
@@ -869,19 +874,8 @@ class Grid2D(_Geometry):
 
         return ii, jj
 
-    def _bbox_to_index(
-        self, values: BoundingBox | tuple[float, float, float, float]
-    ) -> tuple[range, range]:
+    def _bbox_to_index(self, bbox: BoundingBox) -> tuple[range, range]:
         """Find subarea within this geometry."""
-        match values:
-            case BoundingBox():
-                bbox = values
-            case left, bottom, right, top:
-                bbox = BoundingBox(left, bottom, right, top)
-            case _:
-                raise ValueError(
-                    "area most be a bounding box of coordinates e.g. area=(-10.0, 10.0 20.0, 30.0)"
-                )
         if not bbox.overlaps(self.bbox):
             raise ValueError("area is outside grid")
 
