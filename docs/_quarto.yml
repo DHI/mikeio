@@ -32,14 +32,8 @@ website:
   # use hybrid navigation
 
   sidebar:
-    
-    - title: Home
-      style: docked
-      contents: 
-        - index.qmd
-        
-
     - title: "User Guide"
+      style: docked
       contents:
         - user-guide/getting-started.qmd 
         - user-guide/data-structures.md
@@ -72,54 +66,7 @@ website:
         - api/Dfs2.qmd
         - api/Dfs3.qmd
         - api/Dfsu.qmd
-
         
-
-  # sidebar:
-  #   style: docked
-  #   search: true
-  #   contents: 
-  #     - section: "User Guide"
-  #       href: user-guide/getting-started.qmd
-  #       contents:
-  #       - user-guide/getting-started.qmd 
-  #       - user-guide/data-structures.md
-  #       - user-guide/dataarray.qmd
-  #       - user-guide/dataset.qmd
-  #       - user-guide/dfs0.qmd
-  #       - user-guide/dfs1.qmd
-  #       - user-guide/dfs2.qmd
-  #       - user-guide/dfsu.qmd
-  #       - user-guide/mesh.qmd
-  #       - user-guide/eum.qmd
-  #       - user-guide/generic.qmd
-  #       - user-guide/pfs.qmd
-  #     - section: Examples
-  #       href: examples/index.qmd
-  #       contents:
-  #         - section: Dfs0
-  #           href: examples/dfs0/index.qmd
-  #           contents:
-  #             - examples/dfs0/cmems_insitu.qmd
-  #         - section: Dfs2
-  #           href: examples/dfs2/index.qmd
-  #           contents:
-  #             - examples/dfs2/bathy.qmd
-  #             - examples/dfs2/gfs.qmd
-  #         - section: Dfsu
-  #           href: examples/dfsu/index.qmd
-  #           contents:
-  #             - examples/dfsu/spatial_interpolation.qmd
-  #             - examples/dfsu/merge_subdomains.qmd
-  #         - examples/Time-interpolation.qmd
-  #         - examples/Generic.qmd
-  #     - text: Design philosophy
-  #       href: design.qmd
-  #     - text: API Reference
-  #       href: api/index.qmd
-          
-        
-
       
 filters:
   - interlinks
@@ -161,13 +108,6 @@ quartodoc:
       contents:
         - DataArray
         - Dataset
-        - dataset._data_plot._DatasetPlotter  # TODO alias?
-        - dataset._data_plot._DataArrayPlotter
-        - dataset._data_plot._DataArrayPlotterGrid1D
-        - dataset._data_plot._DataArrayPlotterGrid2D
-        - dataset._data_plot._DataArrayPlotterFM
-        - dataset._data_plot._DataArrayPlotterFMVerticalProfile
-        - dataset._data_plot._DataArrayPlotterFMVerticalColumn
     - title: Geometry
       desc: ""
       contents:
@@ -214,6 +154,17 @@ quartodoc:
       contents:
         - PfsDocument
         - PfsSection
+    
+    - title: Dataset plotting
+      desc: "Plotting functions for Dataset and DataArray objects."
+      contents:
+        - dataset._DatasetPlotter
+        - dataset._DataArrayPlotter
+        - dataset._DataArrayPlotterGrid1D
+        - dataset._DataArrayPlotterGrid2D
+        - dataset._DataArrayPlotterFM
+        - dataset._DataArrayPlotterFMVerticalProfile
+        - dataset._DataArrayPlotterFMVerticalColumn
 
     
 format:
