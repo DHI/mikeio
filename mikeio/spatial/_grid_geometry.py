@@ -2,7 +2,7 @@ from __future__ import annotations
 from functools import cached_property
 from pathlib import Path
 import warnings
-from typing import Any, Sequence, TYPE_CHECKING, overload
+from typing import Any, Sequence, TYPE_CHECKING, Sized, overload
 from dataclasses import dataclass
 import numpy as np
 
@@ -431,7 +431,10 @@ class Grid2D(_Geometry):
         y0: float = 0.0,
         dy: float | None = None,
         ny: int | None = None,
-        bbox: tuple[float, float, float, float] | None = None,
+        bbox: BoundingBox
+        | Sequence[float]
+        | tuple[float, float, float, float]
+        | None = None,
         projection: str = "LONG/LAT",
         origin: tuple[float, float] | None = None,
         orientation: float = 0.0,
@@ -520,7 +523,7 @@ class Grid2D(_Geometry):
 
     def _create_in_bbox(
         self,
-        bbox: tuple[float, float, float, float],
+        bbox: BoundingBox | tuple[float, float, float, float] | Sequence[float],
         dx: float | tuple[float, float] | None = None,
         dy: float | None = None,
         nx: int | None = None,
@@ -547,10 +550,10 @@ class Grid2D(_Geometry):
             in which case the value will be inferred
 
         """
-        left, bottom, right, top = self._parse_bbox(bbox)
+        box = BoundingBox.parse(bbox)
 
-        xr = right - left  # dx too large
-        yr = top - bottom  # dy too large
+        xr = box.right - box.left  # dx too large
+        yr = box.top - box.bottom  # dy too large
 
         if (dx is None and dy is None) and (nx is None and ny is None):
             if xr <= yr:
@@ -567,32 +570,12 @@ class Grid2D(_Geometry):
             dx, dy = dx
         dy = dx if dy is None else dy
 
-        self._x0, self._dx, self._nx = self._create_in_bbox_1d("x", left, right, dx, nx)
-        self._y0, self._dy, self._ny = self._create_in_bbox_1d("y", bottom, top, dy, ny)
-
-    @staticmethod
-    def _parse_bbox(
-        bbox: tuple[float, float, float, float],
-    ) -> tuple[float, float, float, float]:
-        left = bbox[0]
-        bottom = bbox[1]
-        right = bbox[2]
-        top = bbox[3]
-
-        if left > right:
-            raise (
-                ValueError(
-                    f"Invalid x axis, left: {left} must be smaller than right: {right}"
-                )
-            )
-
-        if bottom > top:
-            raise (
-                ValueError(
-                    f"Invalid y axis, bottom: {bottom} must be smaller than top: {top}"
-                )
-            )
-        return left, bottom, right, top
+        self._x0, self._dx, self._nx = self._create_in_bbox_1d(
+            "x", box.left, box.right, dx, nx
+        )
+        self._y0, self._dy, self._ny = self._create_in_bbox_1d(
+            "y", box.bottom, box.top, dy, ny
+        )
 
     @staticmethod
     def _create_in_bbox_1d(
@@ -852,7 +835,8 @@ class Grid2D(_Geometry):
         if coords is not None:
             return self._xy_to_index(coords)
         elif area is not None:
-            return self._bbox_to_index(area)
+            bbox = BoundingBox.parse(area)
+            return self._bbox_to_index(bbox)
         else:
             raise ValueError("Provide x,y or coords")
 
@@ -875,22 +859,14 @@ class Grid2D(_Geometry):
 
         return ii, jj
 
-    def _bbox_to_index(
-        self, bbox: tuple[float, float, float, float] | BoundingBox
-    ) -> tuple[range, range]:
+    def _bbox_to_index(self, bbox: BoundingBox) -> tuple[range, range]:
         """Find subarea within this geometry."""
-        if not (len(bbox) == 4):
-            raise ValueError(
-                "area most be a bounding box of coordinates e.g. area=(-10.0, 10.0 20.0, 30.0)"
-            )
-
-        x0, y0, x1, y1 = bbox
-        if x0 > self.x[-1] or y0 > self.y[-1] or x1 < self.x[0] or y1 < self.y[0]:
+        if not bbox.overlaps(self.bbox):
             raise ValueError("area is outside grid")
 
-        mask = (self.x >= x0) & (self.x <= x1)
+        mask = (self.x >= bbox.left) & (self.x <= bbox.right)
         ii = np.where(mask)[0]
-        mask = (self.y >= y0) & (self.y <= y1)
+        mask = (self.y >= bbox.bottom) & (self.y <= bbox.top)
         jj = np.where(mask)[0]
 
         i = range(ii[0], ii[-1] + 1)
