@@ -261,8 +261,6 @@ class DataArray:
             if dims == ("time", "x"):
                 return Grid1D(nx=shape[1], dx=1.0 / (shape[1] - 1))
 
-            warnings.warn("Geometry is required for ndim >=1")
-
         axis = 1 if "time" in dims else 0
         # dims_no_time = tuple([d for d in dims if d != "time"])
         # shape_no_time = shape[1:] if ("time" in dims) else shape
@@ -298,6 +296,9 @@ class DataArray:
             assert shape[axis] == geometry.ny, "data shape does not match ny"
             assert shape[axis + 1] == geometry.nx, "data shape does not match nx"
         # elif isinstance(geometry, Grid3D): # TODO
+
+        if geometry is None:
+            geometry = GeometryUndefined()
 
         return geometry
 
@@ -1773,8 +1774,16 @@ class DataArray:
 
         # TODO: check if geometry etc match if other is DataArray?
 
-        new_da = self.copy()  # TODO: alternatively: create new dataset (will validate)
-        new_da.values = data
+        # new_da = self.copy()  # TODO: alternatively: create new dataset (will validate)
+        # new_da.values = data
+
+        time = self.time
+        if isinstance(other, DataArray):
+            time = other.time if len(self.time) == 1 else self.time
+
+        new_da = DataArray(
+            data=data, time=time, geometry=self.geometry, item=self.item, zn=self._zn
+        )
 
         if not self._keep_EUM_after_math_operation(other, func):
             other_name = other.name if hasattr(other, "name") else "array"
