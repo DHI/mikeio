@@ -66,6 +66,8 @@ def _write_dfs1_header(filename: str | Path, ds: Dataset, title: str) -> DfsFile
 
 
 class Dfs1(_Dfs123):
+    """Class for reading/writing dfs1 files."""
+
     _ndim = 1
 
     def __init__(self, filename: str | Path) -> None:

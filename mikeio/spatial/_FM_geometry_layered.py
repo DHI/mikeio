@@ -620,6 +620,8 @@ class _GeometryFMLayered(_GeometryFM):
 
 
 class GeometryFM3D(_GeometryFMLayered):
+    """Flexible 3d mesh geometry."""
+
     def __init__(
         self,
         *,
@@ -708,6 +710,8 @@ class GeometryFM3D(_GeometryFMLayered):
 
 
 class GeometryFMVerticalProfile(_GeometryFMLayered):
+    """Flexible mesh 2d vertical profile geometry."""
+
     def __init__(
         self,
         node_coordinates: np.ndarray,
