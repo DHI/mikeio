@@ -12,6 +12,8 @@ from ._FM_geometry import GeometryFM2D
 
 
 class GeometryFMPointSpectrum(_Geometry):
+    """Flexible mesh point spectrum."""
+
     def __init__(
         self,
         frequencies: np.ndarray | None = None,
@@ -126,6 +128,8 @@ class _GeometryFMSpectrum(GeometryFM2D):
 
 # TODO reconsider inheritance to avoid overriding method signature
 class GeometryFMAreaSpectrum(_GeometryFMSpectrum):
+    """Flexible mesh area spectrum geometry."""
+
     def isel(  # type: ignore
         self, idx: Sequence[int], **kwargs: Any
     ) -> "GeometryFMPointSpectrum" | "GeometryFMAreaSpectrum":
@@ -178,6 +182,8 @@ class GeometryFMAreaSpectrum(_GeometryFMSpectrum):
 
 # TODO this inherits indirectly from GeometryFM2D, which is not ideal
 class GeometryFMLineSpectrum(_GeometryFMSpectrum):
+    """Flexible mesh line spectrum geometry."""
+
     def isel(  # type: ignore
         self, idx: Sequence[int], axis: str = "node"
     ) -> GeometryFMPointSpectrum | GeometryFMLineSpectrum:

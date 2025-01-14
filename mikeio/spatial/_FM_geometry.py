@@ -399,6 +399,8 @@ class _GeometryFM(_Geometry):
 
 
 class GeometryFM2D(_GeometryFM):
+    """Flexible 2d mesh geometry."""
+
     def __init__(
         self,
         node_coordinates: np.ndarray,

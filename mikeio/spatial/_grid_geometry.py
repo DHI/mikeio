@@ -69,6 +69,8 @@ def _print_axis_txt(name: str, x: np.ndarray, dx: float) -> str:
 
 @dataclass
 class Grid1D(_Geometry):
+    """1D grid (node-based)."""
+
     _dx: float
     _nx: int
     _x0: float
@@ -89,9 +91,9 @@ class Grid1D(_Geometry):
         node_coordinates: np.ndarray | None = None,
         axis_name: str = "x",
     ):
-        """1D grid (node-based).
+        """Create a Grid1D.
 
-        axis is increasing and equidistant
+        The axis is increasing and equidistant
 
         Parameters
         ----------
