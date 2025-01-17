@@ -20,40 +20,6 @@ ul.task-list li input[type="checkbox"] {
   margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
 }
-/* CSS for syntax highlighting */
-pre > code.sourceCode { white-space: pre; position: relative; }
-pre > code.sourceCode > span { line-height: 1.25; }
-pre > code.sourceCode > span:empty { height: 1.2em; }
-.sourceCode { overflow: visible; }
-code.sourceCode > span { color: inherit; text-decoration: inherit; }
-div.sourceCode { margin: 1em 0; }
-pre.sourceCode { margin: 0; }
-@media screen {
-div.sourceCode { overflow: auto; }
-}
-@media print {
-pre > code.sourceCode { white-space: pre-wrap; }
-pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
-}
-pre.numberSource code
-  { counter-reset: source-line 0; }
-pre.numberSource code > span
-  { position: relative; left: -4em; counter-increment: source-line; }
-pre.numberSource code > span > a:first-child::before
-  { content: counter(source-line);
-    position: relative; left: -1em; text-align: right; vertical-align: baseline;
-    border: none; display: inline-block;
-    -webkit-touch-callout: none; -webkit-user-select: none;
-    -khtml-user-select: none; -moz-user-select: none;
-    -ms-user-select: none; user-select: none;
-    padding: 0 4px; width: 4em;
-  }
-pre.numberSource { margin-left: 3em;  padding-left: 4px; }
-div.sourceCode
-  {   }
-@media screen {
-pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
-}
 </style>
 
 
@@ -72,7 +38,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <link href="site_libs/quarto-html/quarto-syntax-highlighting-549806ee2085284f45b00abea8c6df48.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="site_libs/bootstrap/bootstrap-72a733559614cdcac886c686ae4f468f.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<link href="site_libs/bootstrap/bootstrap-0b70d8ee14c43831778c0a8f58b563a4.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<link href="site_libs/quarto-contrib/fontawesome6-0.1.0/all.css" rel="stylesheet">
+<link href="site_libs/quarto-contrib/fontawesome6-0.1.0/latex-fontsize.css" rel="stylesheet">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -104,7 +72,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 </head>
 
-<body class="nav-sidebar docked nav-fixed">
+<body class="nav-fixed">
 
 <div id="quarto-search-results"></div>
   <header id="quarto-header" class="headroom fixed-top">
@@ -127,6 +95,10 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <li class="nav-item">
     <a class="nav-link active" href="./index.html" aria-current="page"> 
 <span class="menu-text">Home</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="./user-guide/getting-started.html"> 
+<span class="menu-text">User Guide</span></a>
   </li>  
   <li class="nav-item">
     <a class="nav-link" href="./examples/index.html"> 
@@ -157,232 +129,13 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
       </div> <!-- /container-fluid -->
     </nav>
-  <nav class="quarto-secondary-nav">
-    <div class="container-fluid d-flex">
-      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
-        <i class="bi bi-layout-text-sidebar-reverse"></i>
-      </button>
-        <a class="flex-grow-1 no-decor" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
-          <h1 class="quarto-secondary-nav-title"></h1>
-        </a>     
-      <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
-        <i class="bi bi-search"></i>
-      </button>
-    </div>
-  </nav>
 </header>
 <!-- content -->
 <div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
 <!-- sidebar -->
-  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation docked overflow-auto">
-        <div class="mt-2 flex-shrink-0 align-items-center">
-        <div class="sidebar-search">
-        <div id="quarto-search" class="" title="Search"></div>
-        </div>
-        </div>
-    <div class="sidebar-menu-container"> 
-    <ul class="list-unstyled mt-1">
-        <li class="sidebar-item sidebar-item-section">
-      <div class="sidebar-item-container"> 
-            <a href="./user-guide/getting-started.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">User Guide</span></a>
-          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true" aria-label="Toggle section">
-            <i class="bi bi-chevron-right ms-2"></i>
-          </a> 
-      </div>
-      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="./user-guide/getting-started.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Getting started</span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="./user-guide/data-structures.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Data Structures</span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="./user-guide/dataarray.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">DataArray</span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="./user-guide/dataset.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Dataset</span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="./user-guide/dfs0.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Dfs0</span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="./user-guide/dfs1.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Dfs1</span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="./user-guide/dfs2.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Dfs2</span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="./user-guide/dfsu.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Dfsu</span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="./user-guide/mesh.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Mesh</span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="./user-guide/eum.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">EUM</span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="./user-guide/generic.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Generic</span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="./user-guide/pfs.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">PFS</span></a>
-  </div>
-</li>
-      </ul>
-  </li>
-        <li class="sidebar-item sidebar-item-section">
-      <div class="sidebar-item-container"> 
-            <a href="./examples/index.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Examples</span></a>
-          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true" aria-label="Toggle section">
-            <i class="bi bi-chevron-right ms-2"></i>
-          </a> 
-      </div>
-      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 show">  
-          <li class="sidebar-item sidebar-item-section">
-      <div class="sidebar-item-container"> 
-            <a href="./examples/dfs0/index.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Dfs0</span></a>
-          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="false" aria-label="Toggle section">
-            <i class="bi bi-chevron-right ms-2"></i>
-          </a> 
-      </div>
-      <ul id="quarto-sidebar-section-3" class="collapse list-unstyled sidebar-section depth2 ">  
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="./examples/dfs0/cmems_insitu.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Dfs0 - CMEMS <em>in-situ</em> data</span></a>
-  </div>
-</li>
-      </ul>
-  </li>
-          <li class="sidebar-item sidebar-item-section">
-      <div class="sidebar-item-container"> 
-            <a href="./examples/dfs2/index.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Dfs2</span></a>
-          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="false" aria-label="Toggle section">
-            <i class="bi bi-chevron-right ms-2"></i>
-          </a> 
-      </div>
-      <ul id="quarto-sidebar-section-4" class="collapse list-unstyled sidebar-section depth2 ">  
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="./examples/dfs2/bathy.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Dfs2 - Bathymetric data</span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="./examples/dfs2/gfs.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Dfs2 - Meteo data</span></a>
-  </div>
-</li>
-      </ul>
-  </li>
-          <li class="sidebar-item sidebar-item-section">
-      <div class="sidebar-item-container"> 
-            <a href="./examples/dfsu/index.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Dfsu</span></a>
-          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" role="navigation" aria-expanded="false" aria-label="Toggle section">
-            <i class="bi bi-chevron-right ms-2"></i>
-          </a> 
-      </div>
-      <ul id="quarto-sidebar-section-5" class="collapse list-unstyled sidebar-section depth2 ">  
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="./examples/dfsu/spatial_interpolation.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Dfsu - 2D interpolation</span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="./examples/dfsu/merge_subdomains.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Merging subdomain dfsu files</span></a>
-  </div>
-</li>
-      </ul>
-  </li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="./examples/Time-interpolation.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Time interpolation</span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="./examples/Generic.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Generic dfs processing</span></a>
-  </div>
-</li>
-      </ul>
-  </li>
-        <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="./design.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Design philosophy</span></a>
-  </div>
-</li>
-        <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="./api/index.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">API Reference</span></a>
-  </div>
-</li>
-    </ul>
-    </div>
-</nav>
-<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
 <!-- margin-sidebar -->
     <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
-        <nav id="TOC" role="doc-toc" class="toc-active">
-    <h2 id="toc-title">On this page</h2>
-   
-  <ul>
-  <li><a href="#mike-io-inputoutput-of-mike-files-in-python" id="toc-mike-io-inputoutput-of-mike-files-in-python" class="nav-link active" data-scroll-target="#mike-io-inputoutput-of-mike-files-in-python">MIKE IO: input/output of MIKE files in Python</a>
-  <ul class="collapse">
-  <li><a href="#requirements" id="toc-requirements" class="nav-link" data-scroll-target="#requirements">Requirements</a></li>
-  <li><a href="#installation" id="toc-installation" class="nav-link" data-scroll-target="#installation">Installation</a></li>
-  <li><a href="#getting-started" id="toc-getting-started" class="nav-link" data-scroll-target="#getting-started">Getting started</a></li>
-  <li><a href="#where-can-i-get-help" id="toc-where-can-i-get-help" class="nav-link" data-scroll-target="#where-can-i-get-help">Where can I get help?</a></li>
-  </ul></li>
-  </ul>
-<div class="toc-actions"><ul><li><a href="https://github.com/DHI/mikeio/edit/main/docs/index.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li></ul></div><div class="quarto-alternate-formats"><h2>Other Formats</h2><ul><li><a href="index.ipynb" download="index.ipynb"><i class="bi bi-journal-code"></i>Jupyter</a></li></ul></div></nav>
-    </div>
+    <div class="quarto-alternate-formats"><h2>Other Formats</h2><ul><li><a href="index.ipynb" download="index.ipynb"><i class="bi bi-journal-code"></i>Jupyter</a></li></ul></div></div>
 <!-- main -->
 <main class="content" id="quarto-document-content"><header id="title-block-header" class="quarto-title-block"></header>
 
@@ -393,59 +146,34 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <section id="mike-io-inputoutput-of-mike-files-in-python" class="level1">
 <h1>MIKE IO: input/output of MIKE files in Python</h1>
 <p><img src="https://img.shields.io/pypi/pyversions/mikeio.svg" class="img-fluid" alt="Python version"> <a href="https://badge.fury.io/py/mikeio"><img src="https://badge.fury.io/py/mikeio.svg" class="img-fluid" alt="PyPI version"></a></p>
+<div class="grid">
+<div class="g-col-6">
+<section id="set-up-in-5-minutes" class="level2">
+<h2 class="anchored" data-anchor-id="set-up-in-5-minutes"><i class="fa-solid fa-clock" aria-label="clock"></i> <strong>Set up in 5 minutes</strong></h2>
+<p>Install <strong>MIKE IO</strong> with <a href="https://pypi.org/project/mikeio/"><code>pip</code></a> and get up and running in minutes</p>
+<p><a href="./user-guide/getting-started.html"><strong>Getting started</strong></a></p>
+</section>
+<section id="its-just-python" class="level2">
+<h2 class="anchored" data-anchor-id="its-just-python"><i class="fa-brands fa-python" aria-label="python"></i> <strong>It’s just Python</strong></h2>
 <p>Read, write and manipulate dfs0, dfs1, dfs2, dfs3, dfsu and mesh files.</p>
-<p>See our sister library <a href="https://github.com/DHI/mikeio1d">MIKE IO 1D</a> for .res1d and .xns11 files.</p>
-<section id="requirements" class="level2">
-<h2 class="anchored" data-anchor-id="requirements">Requirements</h2>
-<ul>
-<li>Windows or Linux operating system</li>
-<li>Python x64 3.9 - 3.13</li>
-<li>(Windows) <a href="https://support.microsoft.com/en-us/help/2977003/the-latest-supported-visual-c-downloads%3E">VC++ redistributables</a> (already installed if you have MIKE)</li>
-</ul>
+<p><a href="./api/index.html"><strong>API Reference</strong></a></p>
 </section>
-<section id="installation" class="level2">
-<h2 class="anchored" data-anchor-id="installation">Installation</h2>
-<pre><code>$ pip install mikeio</code></pre>
-<div class="callout callout-style-default callout-warning callout-titled">
-<div class="callout-header d-flex align-content-center">
-<div class="callout-icon-container">
-<i class="callout-icon"></i>
 </div>
-<div class="callout-title-container flex-fill">
-Warning
-</div>
-</div>
-<div class="callout-body-container callout-body">
-<p><strong>Don’t use conda to install MIKE IO!</strong>, the version on conda is outdated.</p>
-</div>
-</div>
+<div class="g-col-6">
+<section id="associated-package" class="level2">
+<h2 class="anchored" data-anchor-id="associated-package"><i class="fa-solid fa-diagram-project" aria-label="diagram-project"></i> <strong>Associated package</strong></h2>
+<p>See our sister library <strong>MIKE IO 1D</strong> for .res1d and .xns11 files.</p>
+<p><a href="https://dhi.github.io/mikeio1d/"><strong>MIKE IO 1D</strong></a></p>
 </section>
-<section id="getting-started" class="level2">
-<h2 class="anchored" data-anchor-id="getting-started">Getting started</h2>
-<div id="4fa693ec" class="cell" data-execution_count="1">
-<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> mikeio</span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>ds <span class="op">=</span> mikeio.read(<span class="st">"data/FakeLake.dfsu"</span>)</span>
-<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>ds.Bathymetry.plot()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display">
-<div>
-<figure class="figure">
-<p><img src="index_files/figure-html/cell-2-output-1.png" width="677" height="324" class="figure-img"></p>
-</figure>
-</div>
-</div>
-</div>
-<p>Read more in the <a href="./user-guide/getting-started.html">getting started guide</a>.</p>
+<section id="open-source" class="level2">
+<h2 class="anchored" data-anchor-id="open-source"><i class="fa-solid fa-scale-balanced" aria-label="scale-balanced"></i> <strong>Open Source</strong></h2>
+<p>MIKE IO is licensed under BSD-3-Clause license and available on <a href="https://github.com/DHI/mikeio">GitHub</a></p>
+<p><a href="./license.html"><strong>License</strong></a></p>
 </section>
-<section id="where-can-i-get-help" class="level2">
-<h2 class="anchored" data-anchor-id="where-can-i-get-help">Where can I get help?</h2>
-<ul>
-<li>New ideas and feature requests - <a href="https://github.com/DHI/mikeio/discussions">GitHub Discussions</a></li>
-<li>Bugs - <a href="https://github.com/DHI/mikeio/issues">GitHub Issues</a></li>
-</ul>
+</div>
+</div>
 
 
-</section>
 </section>
 
 </main> <!-- /main -->
@@ -874,7 +602,7 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
     </div>   
     <div class="nav-footer-center">
 <p>© 2024 DHI Group</p>
-<div class="toc-actions d-sm-block d-md-none"><ul><li><a href="https://github.com/DHI/mikeio/edit/main/docs/index.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li></ul></div></div>
+<div class="toc-actions"><ul><li><a href="https://github.com/DHI/mikeio/edit/main/docs/index.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li></ul></div></div>
     <div class="nav-footer-right">
       &nbsp;
     </div>

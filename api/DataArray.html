@@ -64,6 +64,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <script src="../site_libs/quarto-search/fuse.min.js"></script>
 <script src="../site_libs/quarto-search/quarto-search.js"></script>
 <meta name="quarto:offset" content="../">
+<link href="../api/Dataset.html" rel="next">
+<link href="../api/index.html" rel="prev">
 <script src="../site_libs/quarto-html/quarto.js"></script>
 <script src="../site_libs/quarto-html/popper.min.js"></script>
 <script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
@@ -72,7 +74,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <link href="../site_libs/quarto-html/quarto-syntax-highlighting-549806ee2085284f45b00abea8c6df48.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="../site_libs/bootstrap/bootstrap-72a733559614cdcac886c686ae4f468f.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<link href="../site_libs/bootstrap/bootstrap-0b70d8ee14c43831778c0a8f58b563a4.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -129,11 +131,15 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span class="menu-text">Home</span></a>
   </li>  
   <li class="nav-item">
-    <a class="nav-link active" href="../examples/index.html" aria-current="page"> 
+    <a class="nav-link" href="../user-guide/getting-started.html"> 
+<span class="menu-text">User Guide</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../examples/index.html"> 
 <span class="menu-text">Examples</span></a>
   </li>  
   <li class="nav-item">
-    <a class="nav-link" href="../api/index.html"> 
+    <a class="nav-link active" href="../api/index.html" aria-current="page"> 
 <span class="menu-text">API Reference</span></a>
   </li>  
 </ul>
@@ -165,9 +171,6 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
         <a class="flex-grow-1 no-decor" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
           <h1 class="quarto-secondary-nav-title">DataArray</h1>
         </a>     
-      <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
-        <i class="bi bi-search"></i>
-      </button>
     </div>
   </nav>
 </header>
@@ -175,192 +178,54 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
 <!-- sidebar -->
   <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation docked overflow-auto">
-        <div class="mt-2 flex-shrink-0 align-items-center">
-        <div class="sidebar-search">
-        <div id="quarto-search" class="" title="Search"></div>
-        </div>
-        </div>
     <div class="sidebar-menu-container"> 
     <ul class="list-unstyled mt-1">
-        <li class="sidebar-item sidebar-item-section">
-      <div class="sidebar-item-container"> 
-            <a href="../user-guide/getting-started.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">User Guide</span></a>
-          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true" aria-label="Toggle section">
-            <i class="bi bi-chevron-right ms-2"></i>
-          </a> 
-      </div>
-      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../user-guide/getting-started.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Getting started</span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../user-guide/data-structures.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Data Structures</span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../user-guide/dataarray.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">DataArray</span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../user-guide/dataset.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Dataset</span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../user-guide/dfs0.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Dfs0</span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../user-guide/dfs1.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Dfs1</span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../user-guide/dfs2.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Dfs2</span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../user-guide/dfsu.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Dfsu</span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../user-guide/mesh.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Mesh</span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../user-guide/eum.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">EUM</span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../user-guide/generic.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Generic</span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../user-guide/pfs.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">PFS</span></a>
-  </div>
-</li>
-      </ul>
-  </li>
-        <li class="sidebar-item sidebar-item-section">
-      <div class="sidebar-item-container"> 
-            <a href="../examples/index.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Examples</span></a>
-          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true" aria-label="Toggle section">
-            <i class="bi bi-chevron-right ms-2"></i>
-          </a> 
-      </div>
-      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 show">  
-          <li class="sidebar-item sidebar-item-section">
-      <div class="sidebar-item-container"> 
-            <a href="../examples/dfs0/index.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Dfs0</span></a>
-          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="false" aria-label="Toggle section">
-            <i class="bi bi-chevron-right ms-2"></i>
-          </a> 
-      </div>
-      <ul id="quarto-sidebar-section-3" class="collapse list-unstyled sidebar-section depth2 ">  
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../examples/dfs0/cmems_insitu.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Dfs0 - CMEMS <em>in-situ</em> data</span></a>
-  </div>
-</li>
-      </ul>
-  </li>
-          <li class="sidebar-item sidebar-item-section">
-      <div class="sidebar-item-container"> 
-            <a href="../examples/dfs2/index.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Dfs2</span></a>
-          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="false" aria-label="Toggle section">
-            <i class="bi bi-chevron-right ms-2"></i>
-          </a> 
-      </div>
-      <ul id="quarto-sidebar-section-4" class="collapse list-unstyled sidebar-section depth2 ">  
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../examples/dfs2/bathy.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Dfs2 - Bathymetric data</span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../examples/dfs2/gfs.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Dfs2 - Meteo data</span></a>
-  </div>
-</li>
-      </ul>
-  </li>
-          <li class="sidebar-item sidebar-item-section">
-      <div class="sidebar-item-container"> 
-            <a href="../examples/dfsu/index.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Dfsu</span></a>
-          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" role="navigation" aria-expanded="false" aria-label="Toggle section">
-            <i class="bi bi-chevron-right ms-2"></i>
-          </a> 
-      </div>
-      <ul id="quarto-sidebar-section-5" class="collapse list-unstyled sidebar-section depth2 ">  
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../examples/dfsu/spatial_interpolation.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Dfsu - 2D interpolation</span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../examples/dfsu/merge_subdomains.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Merging subdomain dfsu files</span></a>
-  </div>
-</li>
-      </ul>
-  </li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../examples/Time-interpolation.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Time interpolation</span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../examples/Generic.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Generic dfs processing</span></a>
-  </div>
-</li>
-      </ul>
-  </li>
-        <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../design.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Design philosophy</span></a>
-  </div>
-</li>
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="../api/index.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text">API Reference</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../api/DataArray.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text">DataArray</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../api/Dataset.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Dataset</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../api/Dfs0.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Dfs0</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../api/Dfs1.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Dfs1</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../api/Dfs2.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Dfs2</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../api/Dfs3.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Dfs3</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="../api/Dfsu.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Dfsu</span></a>
   </div>
 </li>
     </ul>
@@ -455,7 +320,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </ul>
 <section id="examples" class="level2 doc-section doc-section-examples">
 <h2 class="doc-section doc-section-examples anchored" data-anchor-id="examples">Examples</h2>
-<div id="1c048da0" class="cell" data-execution_count="1">
+<div id="7fffe9fd" class="cell" data-execution_count="1">
 <div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> mikeio</span>
 <span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a></span>
@@ -870,7 +735,7 @@ nanmax : Max values with NaN values removed</code></pre>
 </section>
 <section id="examples-2" class="level4 doc-section doc-section-examples">
 <h4 class="doc-section doc-section-examples anchored" data-anchor-id="examples-2">Examples</h4>
-<div id="b724bbaa" class="cell" data-execution_count="2">
+<div id="c4887f98" class="cell" data-execution_count="2">
 <div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>da1 <span class="op">=</span> mikeio.read(<span class="st">"../data/HD2D.dfsu"</span>, time<span class="op">=</span>[<span class="dv">0</span>,<span class="dv">1</span>])[<span class="dv">0</span>]</span>
 <span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>da2 <span class="op">=</span> mikeio.read(<span class="st">"../data/HD2D.dfsu"</span>, time<span class="op">=</span>[<span class="dv">2</span>,<span class="dv">3</span>])[<span class="dv">0</span>]</span>
 <span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>da1.time</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
@@ -878,7 +743,7 @@ nanmax : Max values with NaN values removed</code></pre>
 <pre><code>DatetimeIndex(['1985-08-06 07:00:00', '1985-08-06 09:30:00'], dtype='datetime64[ns]', freq=None)</code></pre>
 </div>
 </div>
-<div id="28ece930" class="cell" data-execution_count="3">
+<div id="ac77cfe5" class="cell" data-execution_count="3">
 <div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>da3 <span class="op">=</span> mikeio.DataArray.concat([da1,da2])</span>
 <span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>da3</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="3">
@@ -1236,7 +1101,7 @@ geometry: Dfsu2D (884 elements, 529 nodes)</code></pre>
 <p>Wrapper of <a href="https://xarray.pydata.org/en/stable/generated/xarray.DataArray.interpolate_na.html#xarray.DataArray.interpolate_na"><code>xarray.DataArray.interpolate_na</code></a></p>
 <section id="examples-5" class="level4 doc-section doc-section-examples">
 <h4 class="doc-section doc-section-examples anchored" data-anchor-id="examples-5">Examples</h4>
-<div id="c5dfae69" class="cell" data-execution_count="4">
+<div id="283c6612" class="cell" data-execution_count="4">
 <div class="sourceCode cell-code" id="cb25"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
 <span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
 <span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a>time <span class="op">=</span> pd.date_range(<span class="st">"2000"</span>, periods<span class="op">=</span><span class="dv">3</span>, freq<span class="op">=</span><span class="st">"D"</span>)</span>
@@ -1251,7 +1116,7 @@ geometry: GeometryUndefined()
 values: [0, nan, 2]</code></pre>
 </div>
 </div>
-<div id="1bfc8c1e" class="cell" data-execution_count="5">
+<div id="bc11e7d5" class="cell" data-execution_count="5">
 <div class="sourceCode cell-code" id="cb27"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a>da.interp_na()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="5">
 <pre><code>&lt;mikeio.DataArray&gt;
@@ -1446,7 +1311,7 @@ values: [0, 1, 2]</code></pre>
 </section>
 <section id="examples-6" class="level4 doc-section doc-section-examples">
 <h4 class="doc-section doc-section-examples anchored" data-anchor-id="examples-6">Examples</h4>
-<div id="f934ac64" class="cell" data-execution_count="6">
+<div id="72032e31" class="cell" data-execution_count="6">
 <div class="sourceCode cell-code" id="cb31"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a>da <span class="op">=</span> mikeio.read(<span class="st">"../data/europe_wind_long_lat.dfs2"</span>)[<span class="dv">0</span>]</span>
 <span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a>da</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="6">
@@ -1457,7 +1322,7 @@ time: 2012-01-01 00:00:00 (time-invariant)
 geometry: Grid2D (ny=101, nx=221)</code></pre>
 </div>
 </div>
-<div id="a22fe7b0" class="cell" data-execution_count="7">
+<div id="23289841" class="cell" data-execution_count="7">
 <div class="sourceCode cell-code" id="cb33"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a>da.isel(time<span class="op">=-</span><span class="dv">1</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="7">
 <pre><code>&lt;mikeio.DataArray&gt;
@@ -1467,7 +1332,7 @@ time: 2012-01-01 00:00:00 (time-invariant)
 geometry: Grid2D (ny=101, nx=221)</code></pre>
 </div>
 </div>
-<div id="2f9cee8f" class="cell" data-execution_count="8">
+<div id="089fb980" class="cell" data-execution_count="8">
 <div class="sourceCode cell-code" id="cb35"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a>da.isel(x<span class="op">=</span><span class="bu">slice</span>(<span class="dv">10</span>,<span class="dv">20</span>), y<span class="op">=</span><span class="bu">slice</span>(<span class="dv">40</span>,<span class="dv">60</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="8">
 <pre><code>&lt;mikeio.DataArray&gt;
@@ -1477,7 +1342,7 @@ time: 2012-01-01 00:00:00 (time-invariant)
 geometry: Grid2D (ny=20, nx=10)</code></pre>
 </div>
 </div>
-<div id="f42efbd1" class="cell" data-execution_count="9">
+<div id="bda7f180" class="cell" data-execution_count="9">
 <div class="sourceCode cell-code" id="cb37"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a>da <span class="op">=</span> mikeio.read(<span class="st">"../data/oresund_sigma_z.dfsu"</span>).Temperature</span>
 <span id="cb37-2"><a href="#cb37-2" aria-hidden="true" tabindex="-1"></a>da.isel(element<span class="op">=</span><span class="bu">range</span>(<span class="dv">200</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="9">
@@ -2234,7 +2099,7 @@ projection: UTM-33</code></pre>
 </section>
 <section id="examples-9" class="level4 doc-section doc-section-examples">
 <h4 class="doc-section doc-section-examples anchored" data-anchor-id="examples-9">Examples</h4>
-<div id="753d1ea2" class="cell" data-execution_count="10">
+<div id="ced9f10b" class="cell" data-execution_count="10">
 <div class="sourceCode cell-code" id="cb59"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb59-1"><a href="#cb59-1" aria-hidden="true" tabindex="-1"></a>da <span class="op">=</span> mikeio.read(<span class="st">"../data/random.dfs1"</span>)[<span class="dv">0</span>]</span>
 <span id="cb59-2"><a href="#cb59-2" aria-hidden="true" tabindex="-1"></a>da</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="10">
@@ -2245,7 +2110,7 @@ time: 2012-01-01 00:00:00 - 2012-01-01 00:19:48 (100 records)
 geometry: Grid1D (n=3, dx=100)</code></pre>
 </div>
 </div>
-<div id="44ace60a" class="cell" data-execution_count="11">
+<div id="1f610f2d" class="cell" data-execution_count="11">
 <div class="sourceCode cell-code" id="cb61"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb61-1"><a href="#cb61-1" aria-hidden="true" tabindex="-1"></a>da.sel(time<span class="op">=</span><span class="bu">slice</span>(<span class="va">None</span>, <span class="st">"2012-1-1 00:02"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="11">
 <pre><code>&lt;mikeio.DataArray&gt;
@@ -2255,7 +2120,7 @@ time: 2012-01-01 00:00:00 - 2012-01-01 00:02:48 (15 records)
 geometry: Grid1D (n=3, dx=100)</code></pre>
 </div>
 </div>
-<div id="53619bf8" class="cell" data-execution_count="12">
+<div id="763c531f" class="cell" data-execution_count="12">
 <div class="sourceCode cell-code" id="cb63"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb63-1"><a href="#cb63-1" aria-hidden="true" tabindex="-1"></a>da.sel(x<span class="op">=</span><span class="dv">100</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="12">
 <pre><code>&lt;mikeio.DataArray&gt;
@@ -2266,7 +2131,7 @@ geometry: GeometryUndefined()
 values: [0.3231, 0.6315, ..., 0.7506]</code></pre>
 </div>
 </div>
-<div id="bbff546a" class="cell" data-execution_count="13">
+<div id="77cdd2d0" class="cell" data-execution_count="13">
 <div class="sourceCode cell-code" id="cb65"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb65-1"><a href="#cb65-1" aria-hidden="true" tabindex="-1"></a>da <span class="op">=</span> mikeio.read(<span class="st">"../data/oresund_sigma_z.dfsu"</span>).Temperature</span>
 <span id="cb65-2"><a href="#cb65-2" aria-hidden="true" tabindex="-1"></a>da</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="13">
@@ -2282,7 +2147,7 @@ number of sigma layers: 4
 projection: UTM-33</code></pre>
 </div>
 </div>
-<div id="ccc4c0a2" class="cell" data-execution_count="14">
+<div id="835e5824" class="cell" data-execution_count="14">
 <div class="sourceCode cell-code" id="cb67"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb67-1"><a href="#cb67-1" aria-hidden="true" tabindex="-1"></a>da.sel(time<span class="op">=</span><span class="st">"1997-09-15"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="14">
 <pre><code>&lt;mikeio.DataArray&gt;
@@ -2298,7 +2163,7 @@ projection: UTM-33
 values: [16.31, 16.43, ..., 16.69]</code></pre>
 </div>
 </div>
-<div id="e7dd7e20" class="cell" data-execution_count="15">
+<div id="570f0bb2" class="cell" data-execution_count="15">
 <div class="sourceCode cell-code" id="cb69"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb69-1"><a href="#cb69-1" aria-hidden="true" tabindex="-1"></a>da.sel(x<span class="op">=</span><span class="dv">340000</span>, y<span class="op">=</span><span class="dv">6160000</span>, z<span class="op">=-</span><span class="dv">3</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="15">
 <pre><code>&lt;mikeio.DataArray&gt;
@@ -2309,7 +2174,7 @@ geometry: GeometryPoint3D(x=340028.1116933554, y=6159980.070243686, z=-3.0)
 values: [17.54, 17.31, 17.08]</code></pre>
 </div>
 </div>
-<div id="b45434d6" class="cell" data-execution_count="16">
+<div id="83b0a77f" class="cell" data-execution_count="16">
 <div class="sourceCode cell-code" id="cb71"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb71-1"><a href="#cb71-1" aria-hidden="true" tabindex="-1"></a>da.sel(layers<span class="op">=</span><span class="st">"bottom"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="16">
 <pre><code>&lt;mikeio.DataArray&gt;
@@ -2963,6 +2828,18 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
   }
 });
 </script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="../api/index.html" class="pagination-link" aria-label="API Reference">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text">API Reference</span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="../api/Dataset.html" class="pagination-link" aria-label="Dataset">
+        <span class="nav-page-text">Dataset</span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
 </div> <!-- /content -->
 <footer class="footer">
   <div class="nav-footer">

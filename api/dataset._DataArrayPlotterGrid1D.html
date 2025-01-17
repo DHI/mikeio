@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>dataset._data_plot._dataarrayplotter – MIKE IO</title>
+<title>dataset._dataarrayplottergrid1d – MIKE IO</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -72,7 +72,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <link href="../site_libs/quarto-html/quarto-syntax-highlighting-549806ee2085284f45b00abea8c6df48.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="../site_libs/bootstrap/bootstrap-72a733559614cdcac886c686ae4f468f.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<link href="../site_libs/bootstrap/bootstrap-0b70d8ee14c43831778c0a8f58b563a4.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -104,7 +104,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 </head>
 
-<body class="nav-sidebar docked nav-fixed">
+<body class="nav-fixed">
 
 <div id="quarto-search-results"></div>
   <header id="quarto-header" class="headroom fixed-top">
@@ -129,7 +129,11 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span class="menu-text">Home</span></a>
   </li>  
   <li class="nav-item">
-    <a class="nav-link active" href="../examples/index.html" aria-current="page"> 
+    <a class="nav-link" href="../user-guide/getting-started.html"> 
+<span class="menu-text">User Guide</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../examples/index.html"> 
 <span class="menu-text">Examples</span></a>
   </li>  
   <li class="nav-item">
@@ -157,232 +161,30 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
       </div> <!-- /container-fluid -->
     </nav>
-  <nav class="quarto-secondary-nav">
-    <div class="container-fluid d-flex">
-      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
-        <i class="bi bi-layout-text-sidebar-reverse"></i>
-      </button>
-        <a class="flex-grow-1 no-decor" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
-          <h1 class="quarto-secondary-nav-title"></h1>
-        </a>     
-      <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
-        <i class="bi bi-search"></i>
-      </button>
-    </div>
-  </nav>
 </header>
 <!-- content -->
 <div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
 <!-- sidebar -->
-  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation docked overflow-auto">
-        <div class="mt-2 flex-shrink-0 align-items-center">
-        <div class="sidebar-search">
-        <div id="quarto-search" class="" title="Search"></div>
-        </div>
-        </div>
-    <div class="sidebar-menu-container"> 
-    <ul class="list-unstyled mt-1">
-        <li class="sidebar-item sidebar-item-section">
-      <div class="sidebar-item-container"> 
-            <a href="../user-guide/getting-started.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">User Guide</span></a>
-          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true" aria-label="Toggle section">
-            <i class="bi bi-chevron-right ms-2"></i>
-          </a> 
-      </div>
-      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../user-guide/getting-started.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Getting started</span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../user-guide/data-structures.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Data Structures</span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../user-guide/dataarray.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">DataArray</span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../user-guide/dataset.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Dataset</span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../user-guide/dfs0.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Dfs0</span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../user-guide/dfs1.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Dfs1</span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../user-guide/dfs2.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Dfs2</span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../user-guide/dfsu.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Dfsu</span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../user-guide/mesh.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Mesh</span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../user-guide/eum.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">EUM</span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../user-guide/generic.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Generic</span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../user-guide/pfs.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">PFS</span></a>
-  </div>
-</li>
-      </ul>
-  </li>
-        <li class="sidebar-item sidebar-item-section">
-      <div class="sidebar-item-container"> 
-            <a href="../examples/index.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Examples</span></a>
-          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true" aria-label="Toggle section">
-            <i class="bi bi-chevron-right ms-2"></i>
-          </a> 
-      </div>
-      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 show">  
-          <li class="sidebar-item sidebar-item-section">
-      <div class="sidebar-item-container"> 
-            <a href="../examples/dfs0/index.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Dfs0</span></a>
-          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="false" aria-label="Toggle section">
-            <i class="bi bi-chevron-right ms-2"></i>
-          </a> 
-      </div>
-      <ul id="quarto-sidebar-section-3" class="collapse list-unstyled sidebar-section depth2 ">  
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../examples/dfs0/cmems_insitu.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Dfs0 - CMEMS <em>in-situ</em> data</span></a>
-  </div>
-</li>
-      </ul>
-  </li>
-          <li class="sidebar-item sidebar-item-section">
-      <div class="sidebar-item-container"> 
-            <a href="../examples/dfs2/index.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Dfs2</span></a>
-          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="false" aria-label="Toggle section">
-            <i class="bi bi-chevron-right ms-2"></i>
-          </a> 
-      </div>
-      <ul id="quarto-sidebar-section-4" class="collapse list-unstyled sidebar-section depth2 ">  
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../examples/dfs2/bathy.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Dfs2 - Bathymetric data</span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../examples/dfs2/gfs.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Dfs2 - Meteo data</span></a>
-  </div>
-</li>
-      </ul>
-  </li>
-          <li class="sidebar-item sidebar-item-section">
-      <div class="sidebar-item-container"> 
-            <a href="../examples/dfsu/index.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Dfsu</span></a>
-          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" role="navigation" aria-expanded="false" aria-label="Toggle section">
-            <i class="bi bi-chevron-right ms-2"></i>
-          </a> 
-      </div>
-      <ul id="quarto-sidebar-section-5" class="collapse list-unstyled sidebar-section depth2 ">  
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../examples/dfsu/spatial_interpolation.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Dfsu - 2D interpolation</span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../examples/dfsu/merge_subdomains.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Merging subdomain dfsu files</span></a>
-  </div>
-</li>
-      </ul>
-  </li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../examples/Time-interpolation.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Time interpolation</span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../examples/Generic.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Generic dfs processing</span></a>
-  </div>
-</li>
-      </ul>
-  </li>
-        <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../design.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Design philosophy</span></a>
-  </div>
-</li>
-        <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../api/index.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">API Reference</span></a>
-  </div>
-</li>
-    </ul>
-    </div>
-</nav>
-<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
 <!-- margin-sidebar -->
     <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
         <nav id="TOC" role="doc-toc" class="toc-active">
     <h2 id="toc-title">On this page</h2>
    
   <ul>
-  <li><a href="#mikeio.dataset._data_plot._DataArrayPlotter" id="toc-mikeio.dataset._data_plot._DataArrayPlotter" class="nav-link active" data-scroll-target="#mikeio.dataset._data_plot._DataArrayPlotter">dataset._data_plot._DataArrayPlotter</a>
+  <li><a href="#mikeio.dataset._DataArrayPlotterGrid1D" id="toc-mikeio.dataset._DataArrayPlotterGrid1D" class="nav-link active" data-scroll-target="#mikeio.dataset._DataArrayPlotterGrid1D">dataset._DataArrayPlotterGrid1D</a>
   <ul class="collapse">
+  <li><a href="#examples" id="toc-examples" class="nav-link" data-scroll-target="#examples">Examples</a></li>
   <li><a href="#methods" id="toc-methods" class="nav-link" data-scroll-target="#methods">Methods</a>
   <ul class="collapse">
-  <li><a href="#mikeio.dataset._data_plot._DataArrayPlotter.hist" id="toc-mikeio.dataset._data_plot._DataArrayPlotter.hist" class="nav-link" data-scroll-target="#mikeio.dataset._data_plot._DataArrayPlotter.hist">hist</a></li>
-  <li><a href="#mikeio.dataset._data_plot._DataArrayPlotter.line" id="toc-mikeio.dataset._data_plot._DataArrayPlotter.line" class="nav-link" data-scroll-target="#mikeio.dataset._data_plot._DataArrayPlotter.line">line</a></li>
+  <li><a href="#mikeio.dataset._DataArrayPlotterGrid1D.hist" id="toc-mikeio.dataset._DataArrayPlotterGrid1D.hist" class="nav-link" data-scroll-target="#mikeio.dataset._DataArrayPlotterGrid1D.hist">hist</a></li>
+  <li><a href="#mikeio.dataset._DataArrayPlotterGrid1D.imshow" id="toc-mikeio.dataset._DataArrayPlotterGrid1D.imshow" class="nav-link" data-scroll-target="#mikeio.dataset._DataArrayPlotterGrid1D.imshow">imshow</a></li>
+  <li><a href="#mikeio.dataset._DataArrayPlotterGrid1D.line" id="toc-mikeio.dataset._DataArrayPlotterGrid1D.line" class="nav-link" data-scroll-target="#mikeio.dataset._DataArrayPlotterGrid1D.line">line</a></li>
+  <li><a href="#mikeio.dataset._DataArrayPlotterGrid1D.pcolormesh" id="toc-mikeio.dataset._DataArrayPlotterGrid1D.pcolormesh" class="nav-link" data-scroll-target="#mikeio.dataset._DataArrayPlotterGrid1D.pcolormesh">pcolormesh</a></li>
+  <li><a href="#mikeio.dataset._DataArrayPlotterGrid1D.timeseries" id="toc-mikeio.dataset._DataArrayPlotterGrid1D.timeseries" class="nav-link" data-scroll-target="#mikeio.dataset._DataArrayPlotterGrid1D.timeseries">timeseries</a></li>
   </ul></li>
   </ul></li>
   </ul>
-<div class="quarto-alternate-formats"><h2>Other Formats</h2><ul><li><a href="dataset._data_plot._DataArrayPlotter.ipynb" download="dataset._data_plot._DataArrayPlotter.ipynb"><i class="bi bi-journal-code"></i>Jupyter</a></li></ul></div></nav>
+<div class="quarto-alternate-formats"><h2>Other Formats</h2><ul><li><a href="dataset._DataArrayPlotterGrid1D.ipynb" download="dataset._DataArrayPlotterGrid1D.ipynb"><i class="bi bi-journal-code"></i>Jupyter</a></li></ul></div></nav>
     </div>
 <!-- main -->
 <main class="content" id="quarto-document-content"><header id="title-block-header" class="quarto-title-block"></header>
@@ -390,10 +192,20 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 
 
-<section id="mikeio.dataset._data_plot._DataArrayPlotter" class="level1">
-<h1>dataset._data_plot._DataArrayPlotter</h1>
-<div class="sourceCode" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>dataset._data_plot._DataArrayPlotter(<span class="va">self</span>, da)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p>Context aware plotter (sensible plotting according to geometry).</p>
+<section id="mikeio.dataset._DataArrayPlotterGrid1D" class="level1">
+<h1>dataset._DataArrayPlotterGrid1D</h1>
+<div class="sourceCode" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>dataset._DataArrayPlotterGrid1D(<span class="va">self</span>, da)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>Plot a DataArray with a Grid1D geometry.</p>
+<section id="examples" class="level2 doc-section doc-section-examples">
+<h2 class="doc-section doc-section-examples anchored" data-anchor-id="examples">Examples</h2>
+<div class="sourceCode" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> da <span class="op">=</span> mikeio.read(<span class="st">"tide1.dfs1"</span>)[<span class="st">"Level"</span>]</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> da.plot()</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> da.plot.line()</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> da.plot.timeseries()</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> da.plot.imshow()</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> da.plot.pcolormesh()</span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> da.plot.hist()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</section>
 <section id="methods" class="level2">
 <h2 class="anchored" data-anchor-id="methods">Methods</h2>
 <table class="caption-top table">
@@ -405,23 +217,35 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </thead>
 <tbody>
 <tr class="odd">
-<td><a href="#mikeio.dataset._data_plot._DataArrayPlotter.hist">hist</a></td>
+<td><a href="#mikeio.dataset._DataArrayPlotterGrid1D.hist">hist</a></td>
 <td>Plot DataArray as histogram (using ax.hist).</td>
 </tr>
 <tr class="even">
-<td><a href="#mikeio.dataset._data_plot._DataArrayPlotter.line">line</a></td>
-<td>Plot data as lines (timeseries if time is present).</td>
+<td><a href="#mikeio.dataset._DataArrayPlotterGrid1D.imshow">imshow</a></td>
+<td>Plot as 2d.</td>
+</tr>
+<tr class="odd">
+<td><a href="#mikeio.dataset._DataArrayPlotterGrid1D.line">line</a></td>
+<td>Plot as spatial lines.</td>
+</tr>
+<tr class="even">
+<td><a href="#mikeio.dataset._DataArrayPlotterGrid1D.pcolormesh">pcolormesh</a></td>
+<td>Plot multiple lines as 2d color plot.</td>
+</tr>
+<tr class="odd">
+<td><a href="#mikeio.dataset._DataArrayPlotterGrid1D.timeseries">timeseries</a></td>
+<td>Plot as timeseries.</td>
 </tr>
 </tbody>
 </table>
-<section id="mikeio.dataset._data_plot._DataArrayPlotter.hist" class="level3">
-<h3 class="anchored" data-anchor-id="mikeio.dataset._data_plot._DataArrayPlotter.hist">hist</h3>
-<div class="sourceCode" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>dataset._data_plot._DataArrayPlotter.hist(</span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>    ax<span class="op">=</span><span class="va">None</span>,</span>
-<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>    figsize<span class="op">=</span><span class="va">None</span>,</span>
-<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>    title<span class="op">=</span><span class="va">None</span>,</span>
-<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>    <span class="op">**</span>kwargs,</span>
-<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<section id="mikeio.dataset._DataArrayPlotterGrid1D.hist" class="level3">
+<h3 class="anchored" data-anchor-id="mikeio.dataset._DataArrayPlotterGrid1D.hist">hist</h3>
+<div class="sourceCode" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>dataset._DataArrayPlotterGrid1D.hist(</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>    ax<span class="op">=</span><span class="va">None</span>,</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>    figsize<span class="op">=</span><span class="va">None</span>,</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>    title<span class="op">=</span><span class="va">None</span>,</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>    <span class="op">**</span>kwargs,</span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <p>Plot DataArray as histogram (using ax.hist).</p>
 <section id="parameters" class="level4 doc-section doc-section-parameters">
 <h4 class="doc-section doc-section-parameters anchored" data-anchor-id="parameters">Parameters</h4>
@@ -498,10 +322,30 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </table>
 </section>
 </section>
-<section id="mikeio.dataset._data_plot._DataArrayPlotter.line" class="level3">
-<h3 class="anchored" data-anchor-id="mikeio.dataset._data_plot._DataArrayPlotter.line">line</h3>
-<div class="sourceCode" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>dataset._data_plot._DataArrayPlotter.line(ax<span class="op">=</span><span class="va">None</span>, figsize<span class="op">=</span><span class="va">None</span>, <span class="op">**</span>kwargs)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p>Plot data as lines (timeseries if time is present).</p>
+<section id="mikeio.dataset._DataArrayPlotterGrid1D.imshow" class="level3">
+<h3 class="anchored" data-anchor-id="mikeio.dataset._DataArrayPlotterGrid1D.imshow">imshow</h3>
+<div class="sourceCode" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>dataset._DataArrayPlotterGrid1D.imshow(ax<span class="op">=</span><span class="va">None</span>, figsize<span class="op">=</span><span class="va">None</span>, <span class="op">**</span>kwargs)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>Plot as 2d.</p>
+</section>
+<section id="mikeio.dataset._DataArrayPlotterGrid1D.line" class="level3">
+<h3 class="anchored" data-anchor-id="mikeio.dataset._DataArrayPlotterGrid1D.line">line</h3>
+<div class="sourceCode" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>dataset._DataArrayPlotterGrid1D.line(ax<span class="op">=</span><span class="va">None</span>, figsize<span class="op">=</span><span class="va">None</span>, <span class="op">**</span>kwargs)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>Plot as spatial lines.</p>
+</section>
+<section id="mikeio.dataset._DataArrayPlotterGrid1D.pcolormesh" class="level3">
+<h3 class="anchored" data-anchor-id="mikeio.dataset._DataArrayPlotterGrid1D.pcolormesh">pcolormesh</h3>
+<div class="sourceCode" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>dataset._DataArrayPlotterGrid1D.pcolormesh(</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>    ax<span class="op">=</span><span class="va">None</span>,</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>    figsize<span class="op">=</span><span class="va">None</span>,</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>    title<span class="op">=</span><span class="va">None</span>,</span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>    <span class="op">**</span>kwargs,</span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>Plot multiple lines as 2d color plot.</p>
+</section>
+<section id="mikeio.dataset._DataArrayPlotterGrid1D.timeseries" class="level3">
+<h3 class="anchored" data-anchor-id="mikeio.dataset._DataArrayPlotterGrid1D.timeseries">timeseries</h3>
+<div class="sourceCode" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>dataset._DataArrayPlotterGrid1D.timeseries(ax<span class="op">=</span><span class="va">None</span>, figsize<span class="op">=</span><span class="va">None</span>, <span class="op">**</span>kwargs)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>Plot as timeseries.</p>
 
 
 </section>

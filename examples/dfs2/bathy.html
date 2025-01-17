@@ -65,8 +65,6 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <script src="../../site_libs/quarto-search/fuse.min.js"></script>
 <script src="../../site_libs/quarto-search/quarto-search.js"></script>
 <meta name="quarto:offset" content="../../">
-<link href="../../examples/dfs2/gfs.html" rel="next">
-<link href="../../examples/dfs2/index.html" rel="prev">
 <script src="../../site_libs/quarto-html/quarto.js"></script>
 <script src="../../site_libs/quarto-html/popper.min.js"></script>
 <script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
@@ -75,7 +73,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <link href="../../site_libs/quarto-html/quarto-syntax-highlighting-549806ee2085284f45b00abea8c6df48.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="../../site_libs/bootstrap/bootstrap-72a733559614cdcac886c686ae4f468f.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<link href="../../site_libs/bootstrap/bootstrap-0b70d8ee14c43831778c0a8f58b563a4.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -110,7 +108,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 </head>
 
-<body class="nav-sidebar docked nav-fixed">
+<body class="nav-fixed">
 
 <div id="quarto-search-results"></div>
   <header id="quarto-header" class="headroom fixed-top">
@@ -135,7 +133,11 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span class="menu-text">Home</span></a>
   </li>  
   <li class="nav-item">
-    <a class="nav-link active" href="../../examples/index.html" aria-current="page"> 
+    <a class="nav-link" href="../../user-guide/getting-started.html"> 
+<span class="menu-text">User Guide</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../examples/index.html"> 
 <span class="menu-text">Examples</span></a>
   </li>  
   <li class="nav-item">
@@ -163,216 +165,10 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
       </div> <!-- /container-fluid -->
     </nav>
-  <nav class="quarto-secondary-nav">
-    <div class="container-fluid d-flex">
-      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
-        <i class="bi bi-layout-text-sidebar-reverse"></i>
-      </button>
-        <a class="flex-grow-1 no-decor" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
-          <h1 class="quarto-secondary-nav-title">Dfs2 - Bathymetric data</h1>
-        </a>     
-      <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
-        <i class="bi bi-search"></i>
-      </button>
-    </div>
-  </nav>
 </header>
 <!-- content -->
 <div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
 <!-- sidebar -->
-  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation docked overflow-auto">
-        <div class="mt-2 flex-shrink-0 align-items-center">
-        <div class="sidebar-search">
-        <div id="quarto-search" class="" title="Search"></div>
-        </div>
-        </div>
-    <div class="sidebar-menu-container"> 
-    <ul class="list-unstyled mt-1">
-        <li class="sidebar-item sidebar-item-section">
-      <div class="sidebar-item-container"> 
-            <a href="../../user-guide/getting-started.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">User Guide</span></a>
-          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true" aria-label="Toggle section">
-            <i class="bi bi-chevron-right ms-2"></i>
-          </a> 
-      </div>
-      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../../user-guide/getting-started.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Getting started</span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../../user-guide/data-structures.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Data Structures</span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../../user-guide/dataarray.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">DataArray</span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../../user-guide/dataset.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Dataset</span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../../user-guide/dfs0.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Dfs0</span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../../user-guide/dfs1.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Dfs1</span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../../user-guide/dfs2.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Dfs2</span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../../user-guide/dfsu.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Dfsu</span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../../user-guide/mesh.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Mesh</span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../../user-guide/eum.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">EUM</span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../../user-guide/generic.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Generic</span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../../user-guide/pfs.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">PFS</span></a>
-  </div>
-</li>
-      </ul>
-  </li>
-        <li class="sidebar-item sidebar-item-section">
-      <div class="sidebar-item-container"> 
-            <a href="../../examples/index.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Examples</span></a>
-          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true" aria-label="Toggle section">
-            <i class="bi bi-chevron-right ms-2"></i>
-          </a> 
-      </div>
-      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 show">  
-          <li class="sidebar-item sidebar-item-section">
-      <div class="sidebar-item-container"> 
-            <a href="../../examples/dfs0/index.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Dfs0</span></a>
-          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="false" aria-label="Toggle section">
-            <i class="bi bi-chevron-right ms-2"></i>
-          </a> 
-      </div>
-      <ul id="quarto-sidebar-section-3" class="collapse list-unstyled sidebar-section depth2 ">  
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../../examples/dfs0/cmems_insitu.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Dfs0 - CMEMS <em>in-situ</em> data</span></a>
-  </div>
-</li>
-      </ul>
-  </li>
-          <li class="sidebar-item sidebar-item-section">
-      <div class="sidebar-item-container"> 
-            <a href="../../examples/dfs2/index.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Dfs2</span></a>
-          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="true" aria-label="Toggle section">
-            <i class="bi bi-chevron-right ms-2"></i>
-          </a> 
-      </div>
-      <ul id="quarto-sidebar-section-4" class="collapse list-unstyled sidebar-section depth2 show">  
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../../examples/dfs2/bathy.html" class="sidebar-item-text sidebar-link active">
- <span class="menu-text">Dfs2 - Bathymetric data</span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../../examples/dfs2/gfs.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Dfs2 - Meteo data</span></a>
-  </div>
-</li>
-      </ul>
-  </li>
-          <li class="sidebar-item sidebar-item-section">
-      <div class="sidebar-item-container"> 
-            <a href="../../examples/dfsu/index.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Dfsu</span></a>
-          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" role="navigation" aria-expanded="false" aria-label="Toggle section">
-            <i class="bi bi-chevron-right ms-2"></i>
-          </a> 
-      </div>
-      <ul id="quarto-sidebar-section-5" class="collapse list-unstyled sidebar-section depth2 ">  
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../../examples/dfsu/spatial_interpolation.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Dfsu - 2D interpolation</span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../../examples/dfsu/merge_subdomains.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Merging subdomain dfsu files</span></a>
-  </div>
-</li>
-      </ul>
-  </li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../../examples/Time-interpolation.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Time interpolation</span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../../examples/Generic.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Generic dfs processing</span></a>
-  </div>
-</li>
-      </ul>
-  </li>
-        <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../../design.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Design philosophy</span></a>
-  </div>
-</li>
-        <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="../../api/index.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">API Reference</span></a>
-  </div>
-</li>
-    </ul>
-    </div>
-</nav>
-<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
 <!-- margin-sidebar -->
     <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
         <nav id="TOC" role="doc-toc" class="toc-active">
@@ -388,7 +184,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<h1 class="title d-none d-lg-block">Dfs2 - Bathymetric data</h1>
+<h1 class="title">Dfs2 - Bathymetric data</h1>
 </div>
 
 <div>
@@ -411,11 +207,11 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 
 <p><a href="https://www.gebco.net/data_and_products/gridded_bathymetry_data/"><em>GEBCO Compilation Group (2020) GEBCO 2020 Grid (doi:10.5285/a29c5465-b138-234d-e053-6c86abc040b9</em>)</a></p>
-<div id="3496a96e" class="cell" data-execution_count="1">
+<div id="fc69acd2" class="cell" data-execution_count="1">
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> xarray</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> mikeio</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<div id="002008f0" class="cell" data-execution_count="3">
+<div id="6ea39836" class="cell" data-execution_count="3">
 <div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>ds <span class="op">=</span> xarray.open_dataset(<span class="st">"../../data/gebco_2020_n56.3_s55.2_w12.2_e13.1.nc"</span>)</span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>ds</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="3">
@@ -794,9 +590,9 @@ Dimensions:    (lat: 264, lon: 216)
 Coordinates: (2)
 Data variables:
     elevation  (lat, lon) int16 114kB ...
-Attributes: (8)</pre><div class="xr-wrap" style="display:none"><div class="xr-header"><div class="xr-obj-type">xarray.Dataset</div></div><ul class="xr-sections"><li class="xr-section-item"><input id="section-95136d4e-ed6e-49ac-953c-dfffbe7b0d11" class="xr-section-summary-in" type="checkbox" disabled=""><label for="section-95136d4e-ed6e-49ac-953c-dfffbe7b0d11" class="xr-section-summary" title="Expand/collapse section">Dimensions:</label><div class="xr-section-inline-details"><ul class="xr-dim-list"><li><span class="xr-has-index">lat</span>: 264</li><li><span class="xr-has-index">lon</span>: 216</li></ul></div><div class="xr-section-details"></div></li><li class="xr-section-item"><input id="section-7bed456d-fe53-48ed-ac0f-b2e126453b44" class="xr-section-summary-in" type="checkbox"><label for="section-7bed456d-fe53-48ed-ac0f-b2e126453b44" class="xr-section-summary">Coordinates: <span>(2)</span></label><div class="xr-section-inline-details"></div><div class="xr-section-details"><ul class="xr-var-list"><li class="xr-var-item"><div class="xr-var-name"><span class="xr-has-index">lat</span></div><div class="xr-var-dims">(lat)</div><div class="xr-var-dtype">float64</div><div class="xr-var-preview xr-preview">55.2 55.21 55.21 ... 56.29 56.3</div><input id="attrs-720938d5-2b8e-4e66-af5f-98c112b5e4c3" class="xr-var-attrs-in" type="checkbox"><label for="attrs-720938d5-2b8e-4e66-af5f-98c112b5e4c3" title="Show/Hide attributes"><svg class="icon xr-icon-file-text2"><use href="#icon-file-text2"></use></svg></label><input id="data-114a5805-470e-4852-b2df-7bff1cd77856" class="xr-var-data-in" type="checkbox"><label for="data-114a5805-470e-4852-b2df-7bff1cd77856" title="Show/Hide data repr"><svg class="icon xr-icon-database"><use href="#icon-database"></use></svg></label><div class="xr-var-attrs"><dl class="xr-attrs"><dt><span>standard_name :</span></dt><dd>latitude</dd><dt><span>long_name :</span></dt><dd>latitude</dd><dt><span>units :</span></dt><dd>degrees_north</dd><dt><span>axis :</span></dt><dd>Y</dd><dt><span>sdn_parameter_urn :</span></dt><dd>SDN:P01::ALATZZ01</dd><dt><span>sdn_parameter_name :</span></dt><dd>Latitude north</dd><dt><span>sdn_uom_urn :</span></dt><dd>SDN:P06::DEGN</dd><dt><span>sdn_uom_name :</span></dt><dd>Degrees north</dd></dl></div><div class="xr-var-data"><pre>array([55.202083, 55.20625 , 55.210417, ..., 56.289583, 56.29375 , 56.297917],
-      shape=(264,))</pre></div></li><li class="xr-var-item"><div class="xr-var-name"><span class="xr-has-index">lon</span></div><div class="xr-var-dims">(lon)</div><div class="xr-var-dtype">float64</div><div class="xr-var-preview xr-preview">12.2 12.21 12.21 ... 13.09 13.1</div><input id="attrs-493bbb0d-1385-4da3-8ab7-3acba4f98092" class="xr-var-attrs-in" type="checkbox"><label for="attrs-493bbb0d-1385-4da3-8ab7-3acba4f98092" title="Show/Hide attributes"><svg class="icon xr-icon-file-text2"><use href="#icon-file-text2"></use></svg></label><input id="data-d5bfd48d-2631-4aae-888f-b7263148d5e0" class="xr-var-data-in" type="checkbox"><label for="data-d5bfd48d-2631-4aae-888f-b7263148d5e0" title="Show/Hide data repr"><svg class="icon xr-icon-database"><use href="#icon-database"></use></svg></label><div class="xr-var-attrs"><dl class="xr-attrs"><dt><span>standard_name :</span></dt><dd>longitude</dd><dt><span>long_name :</span></dt><dd>longitude</dd><dt><span>units :</span></dt><dd>degrees_east</dd><dt><span>axis :</span></dt><dd>X</dd><dt><span>sdn_parameter_urn :</span></dt><dd>SDN:P01::ALONZZ01</dd><dt><span>sdn_parameter_name :</span></dt><dd>Longitude east</dd><dt><span>sdn_uom_urn :</span></dt><dd>SDN:P06::DEGE</dd><dt><span>sdn_uom_name :</span></dt><dd>Degrees east</dd></dl></div><div class="xr-var-data"><pre>array([12.202083, 12.20625 , 12.210417, ..., 13.089583, 13.09375 , 13.097917],
-      shape=(216,))</pre></div></li></ul></div></li><li class="xr-section-item"><input id="section-c52a6d39-b79a-449b-b6b6-5211a22849c9" class="xr-section-summary-in" type="checkbox" checked=""><label for="section-c52a6d39-b79a-449b-b6b6-5211a22849c9" class="xr-section-summary">Data variables: <span>(1)</span></label><div class="xr-section-inline-details"></div><div class="xr-section-details"><ul class="xr-var-list"><li class="xr-var-item"><div class="xr-var-name"><span>elevation</span></div><div class="xr-var-dims">(lat, lon)</div><div class="xr-var-dtype">int16</div><div class="xr-var-preview xr-preview">...</div><input id="attrs-3d9ec439-e40e-4b25-8f6b-8c706fced26b" class="xr-var-attrs-in" type="checkbox"><label for="attrs-3d9ec439-e40e-4b25-8f6b-8c706fced26b" title="Show/Hide attributes"><svg class="icon xr-icon-file-text2"><use href="#icon-file-text2"></use></svg></label><input id="data-48054767-062e-45aa-b292-d39287422190" class="xr-var-data-in" type="checkbox"><label for="data-48054767-062e-45aa-b292-d39287422190" title="Show/Hide data repr"><svg class="icon xr-icon-database"><use href="#icon-database"></use></svg></label><div class="xr-var-attrs"><dl class="xr-attrs"><dt><span>standard_name :</span></dt><dd>height_above_reference_ellipsoid</dd><dt><span>long_name :</span></dt><dd>Elevation relative to sea level</dd><dt><span>units :</span></dt><dd>m</dd><dt><span>sdn_parameter_urn :</span></dt><dd>SDN:P01::BATHHGHT</dd><dt><span>sdn_parameter_name :</span></dt><dd>Sea floor height (above mean sea level) {bathymetric height}</dd><dt><span>sdn_uom_urn :</span></dt><dd>SDN:P06::ULAA</dd><dt><span>sdn_uom_name :</span></dt><dd>Metres</dd></dl></div><div class="xr-var-data"><pre>[57024 values with dtype=int16]</pre></div></li></ul></div></li><li class="xr-section-item"><input id="section-bebc1c8c-6a60-4116-a201-54889298f31b" class="xr-section-summary-in" type="checkbox"><label for="section-bebc1c8c-6a60-4116-a201-54889298f31b" class="xr-section-summary">Indexes: <span>(2)</span></label><div class="xr-section-inline-details"></div><div class="xr-section-details"><ul class="xr-var-list"><li class="xr-var-item"><div class="xr-index-name"><div>lat</div></div><div class="xr-index-preview">PandasIndex</div><input type="checkbox" disabled=""><label></label><input id="index-79b2bf26-f48d-4d21-b6e1-804333e882aa" class="xr-index-data-in" type="checkbox"><label for="index-79b2bf26-f48d-4d21-b6e1-804333e882aa" title="Show/Hide index repr"><svg class="icon xr-icon-database"><use href="#icon-database"></use></svg></label><div class="xr-index-data"><pre>PandasIndex(Index([ 55.20208333333332,  55.20625000000001, 55.210416666666674,
+Attributes: (8)</pre><div class="xr-wrap" style="display:none"><div class="xr-header"><div class="xr-obj-type">xarray.Dataset</div></div><ul class="xr-sections"><li class="xr-section-item"><input id="section-c2e0b0fd-147d-43db-95f4-a046fc96eebb" class="xr-section-summary-in" type="checkbox" disabled=""><label for="section-c2e0b0fd-147d-43db-95f4-a046fc96eebb" class="xr-section-summary" title="Expand/collapse section">Dimensions:</label><div class="xr-section-inline-details"><ul class="xr-dim-list"><li><span class="xr-has-index">lat</span>: 264</li><li><span class="xr-has-index">lon</span>: 216</li></ul></div><div class="xr-section-details"></div></li><li class="xr-section-item"><input id="section-5fa36b31-ebbd-4cec-ab77-55168c07ca3c" class="xr-section-summary-in" type="checkbox"><label for="section-5fa36b31-ebbd-4cec-ab77-55168c07ca3c" class="xr-section-summary">Coordinates: <span>(2)</span></label><div class="xr-section-inline-details"></div><div class="xr-section-details"><ul class="xr-var-list"><li class="xr-var-item"><div class="xr-var-name"><span class="xr-has-index">lat</span></div><div class="xr-var-dims">(lat)</div><div class="xr-var-dtype">float64</div><div class="xr-var-preview xr-preview">55.2 55.21 55.21 ... 56.29 56.3</div><input id="attrs-d0bf7825-9231-4b6a-99df-05c49985654f" class="xr-var-attrs-in" type="checkbox"><label for="attrs-d0bf7825-9231-4b6a-99df-05c49985654f" title="Show/Hide attributes"><svg class="icon xr-icon-file-text2"><use href="#icon-file-text2"></use></svg></label><input id="data-8221147c-9830-4b4a-a711-7dac62c47e0c" class="xr-var-data-in" type="checkbox"><label for="data-8221147c-9830-4b4a-a711-7dac62c47e0c" title="Show/Hide data repr"><svg class="icon xr-icon-database"><use href="#icon-database"></use></svg></label><div class="xr-var-attrs"><dl class="xr-attrs"><dt><span>standard_name :</span></dt><dd>latitude</dd><dt><span>long_name :</span></dt><dd>latitude</dd><dt><span>units :</span></dt><dd>degrees_north</dd><dt><span>axis :</span></dt><dd>Y</dd><dt><span>sdn_parameter_urn :</span></dt><dd>SDN:P01::ALATZZ01</dd><dt><span>sdn_parameter_name :</span></dt><dd>Latitude north</dd><dt><span>sdn_uom_urn :</span></dt><dd>SDN:P06::DEGN</dd><dt><span>sdn_uom_name :</span></dt><dd>Degrees north</dd></dl></div><div class="xr-var-data"><pre>array([55.202083, 55.20625 , 55.210417, ..., 56.289583, 56.29375 , 56.297917],
+      shape=(264,))</pre></div></li><li class="xr-var-item"><div class="xr-var-name"><span class="xr-has-index">lon</span></div><div class="xr-var-dims">(lon)</div><div class="xr-var-dtype">float64</div><div class="xr-var-preview xr-preview">12.2 12.21 12.21 ... 13.09 13.1</div><input id="attrs-9ae104e2-160a-4bc3-850f-8f429dc640c6" class="xr-var-attrs-in" type="checkbox"><label for="attrs-9ae104e2-160a-4bc3-850f-8f429dc640c6" title="Show/Hide attributes"><svg class="icon xr-icon-file-text2"><use href="#icon-file-text2"></use></svg></label><input id="data-b36dc10e-2cb3-453b-a801-1ea8ade5298a" class="xr-var-data-in" type="checkbox"><label for="data-b36dc10e-2cb3-453b-a801-1ea8ade5298a" title="Show/Hide data repr"><svg class="icon xr-icon-database"><use href="#icon-database"></use></svg></label><div class="xr-var-attrs"><dl class="xr-attrs"><dt><span>standard_name :</span></dt><dd>longitude</dd><dt><span>long_name :</span></dt><dd>longitude</dd><dt><span>units :</span></dt><dd>degrees_east</dd><dt><span>axis :</span></dt><dd>X</dd><dt><span>sdn_parameter_urn :</span></dt><dd>SDN:P01::ALONZZ01</dd><dt><span>sdn_parameter_name :</span></dt><dd>Longitude east</dd><dt><span>sdn_uom_urn :</span></dt><dd>SDN:P06::DEGE</dd><dt><span>sdn_uom_name :</span></dt><dd>Degrees east</dd></dl></div><div class="xr-var-data"><pre>array([12.202083, 12.20625 , 12.210417, ..., 13.089583, 13.09375 , 13.097917],
+      shape=(216,))</pre></div></li></ul></div></li><li class="xr-section-item"><input id="section-6f83db5d-5884-4f8d-8b86-3aa31ef7645f" class="xr-section-summary-in" type="checkbox" checked=""><label for="section-6f83db5d-5884-4f8d-8b86-3aa31ef7645f" class="xr-section-summary">Data variables: <span>(1)</span></label><div class="xr-section-inline-details"></div><div class="xr-section-details"><ul class="xr-var-list"><li class="xr-var-item"><div class="xr-var-name"><span>elevation</span></div><div class="xr-var-dims">(lat, lon)</div><div class="xr-var-dtype">int16</div><div class="xr-var-preview xr-preview">...</div><input id="attrs-def63483-526c-48e3-a00f-55562c7d8801" class="xr-var-attrs-in" type="checkbox"><label for="attrs-def63483-526c-48e3-a00f-55562c7d8801" title="Show/Hide attributes"><svg class="icon xr-icon-file-text2"><use href="#icon-file-text2"></use></svg></label><input id="data-92569ca1-c183-41f9-807c-840916289af9" class="xr-var-data-in" type="checkbox"><label for="data-92569ca1-c183-41f9-807c-840916289af9" title="Show/Hide data repr"><svg class="icon xr-icon-database"><use href="#icon-database"></use></svg></label><div class="xr-var-attrs"><dl class="xr-attrs"><dt><span>standard_name :</span></dt><dd>height_above_reference_ellipsoid</dd><dt><span>long_name :</span></dt><dd>Elevation relative to sea level</dd><dt><span>units :</span></dt><dd>m</dd><dt><span>sdn_parameter_urn :</span></dt><dd>SDN:P01::BATHHGHT</dd><dt><span>sdn_parameter_name :</span></dt><dd>Sea floor height (above mean sea level) {bathymetric height}</dd><dt><span>sdn_uom_urn :</span></dt><dd>SDN:P06::ULAA</dd><dt><span>sdn_uom_name :</span></dt><dd>Metres</dd></dl></div><div class="xr-var-data"><pre>[57024 values with dtype=int16]</pre></div></li></ul></div></li><li class="xr-section-item"><input id="section-21b10cfa-27dc-4587-8231-f26108de75a4" class="xr-section-summary-in" type="checkbox"><label for="section-21b10cfa-27dc-4587-8231-f26108de75a4" class="xr-section-summary">Indexes: <span>(2)</span></label><div class="xr-section-inline-details"></div><div class="xr-section-details"><ul class="xr-var-list"><li class="xr-var-item"><div class="xr-index-name"><div>lat</div></div><div class="xr-index-preview">PandasIndex</div><input type="checkbox" disabled=""><label></label><input id="index-f5bed231-d6f2-42c1-a7a8-db9f416ae62e" class="xr-index-data-in" type="checkbox"><label for="index-f5bed231-d6f2-42c1-a7a8-db9f416ae62e" title="Show/Hide index repr"><svg class="icon xr-icon-database"><use href="#icon-database"></use></svg></label><div class="xr-index-data"><pre>PandasIndex(Index([ 55.20208333333332,  55.20625000000001, 55.210416666666674,
         55.21458333333334,           55.21875,  55.22291666666666,
        55.227083333333326,  55.23124999999999,  55.23541666666665,
         55.23958333333334,
@@ -805,7 +601,7 @@ Attributes: (8)</pre><div class="xr-wrap" style="display:none"><div class="xr-he
        56.272916666666674,  56.27708333333334,           56.28125,
         56.28541666666666, 56.289583333333326,  56.29374999999999,
         56.29791666666665],
-      dtype='float64', name='lat', length=264))</pre></div></li><li class="xr-var-item"><div class="xr-index-name"><div>lon</div></div><div class="xr-index-preview">PandasIndex</div><input type="checkbox" disabled=""><label></label><input id="index-de84e3f9-25d9-4736-af54-134ce8f08f17" class="xr-index-data-in" type="checkbox"><label for="index-de84e3f9-25d9-4736-af54-134ce8f08f17" title="Show/Hide index repr"><svg class="icon xr-icon-database"><use href="#icon-database"></use></svg></label><div class="xr-index-data"><pre>PandasIndex(Index([ 12.20208333333332, 12.206250000000011, 12.210416666666674,
+      dtype='float64', name='lat', length=264))</pre></div></li><li class="xr-var-item"><div class="xr-index-name"><div>lon</div></div><div class="xr-index-preview">PandasIndex</div><input type="checkbox" disabled=""><label></label><input id="index-b8796f26-2c7a-4fe2-b71f-3f607ccc46e7" class="xr-index-data-in" type="checkbox"><label for="index-b8796f26-2c7a-4fe2-b71f-3f607ccc46e7" title="Show/Hide index repr"><svg class="icon xr-icon-database"><use href="#icon-database"></use></svg></label><div class="xr-index-data"><pre>PandasIndex(Index([ 12.20208333333332, 12.206250000000011, 12.210416666666674,
        12.214583333333337,           12.21875, 12.222916666666663,
        12.227083333333326, 12.231249999999989, 12.235416666666652,
        12.239583333333343,
@@ -814,10 +610,10 @@ Attributes: (8)</pre><div class="xr-wrap" style="display:none"><div class="xr-he
        13.072916666666657,  13.07708333333332, 13.081250000000011,
        13.085416666666674, 13.089583333333337,           13.09375,
        13.097916666666663],
-      dtype='float64', name='lon', length=216))</pre></div></li></ul></div></li><li class="xr-section-item"><input id="section-b9518c7a-2dc9-4919-b171-6bda2200ccfa" class="xr-section-summary-in" type="checkbox"><label for="section-b9518c7a-2dc9-4919-b171-6bda2200ccfa" class="xr-section-summary">Attributes: <span>(8)</span></label><div class="xr-section-inline-details"></div><div class="xr-section-details"><dl class="xr-attrs"><dt><span>Conventions :</span></dt><dd>CF-1.6</dd><dt><span>title :</span></dt><dd>The GEBCO_2020 Grid - a continuous terrain model for oceans and land at 15 arc-second intervals</dd><dt><span>institution :</span></dt><dd>On behalf of the General Bathymetric Chart of the Oceans (GEBCO), the data are held at the British Oceanographic Data Centre (BODC).</dd><dt><span>source :</span></dt><dd>The GEBCO_2020 Grid is the latest global bathymetric product released by the General Bathymetric Chart of the Oceans (GEBCO) and has been developed through the Nippon Foundation-GEBCO Seabed 2030 Project. This is a collaborative project between the Nippon Foundation of Japan and GEBCO. The Seabed 2030 Project aims to bring together all available bathymetric data to produce the definitive map of the world ocean floor and make it available to all.</dd><dt><span>history :</span></dt><dd>Information on the development of the data set and the source data sets included in the grid can be found in the data set documentation available from https://www.gebco.net</dd><dt><span>references :</span></dt><dd>DOI: 10.5285/a29c5465-b138-234d-e053-6c86abc040b9</dd><dt><span>comment :</span></dt><dd>The data in the GEBCO_2020 Grid should not be used for navigation or any purpose relating to safety at sea.</dd><dt><span>node_offset :</span></dt><dd>1.0</dd></dl></div></li></ul></div></div>
+      dtype='float64', name='lon', length=216))</pre></div></li></ul></div></li><li class="xr-section-item"><input id="section-c47deca8-9ce9-48b9-b218-6bdf31c5b99d" class="xr-section-summary-in" type="checkbox"><label for="section-c47deca8-9ce9-48b9-b218-6bdf31c5b99d" class="xr-section-summary">Attributes: <span>(8)</span></label><div class="xr-section-inline-details"></div><div class="xr-section-details"><dl class="xr-attrs"><dt><span>Conventions :</span></dt><dd>CF-1.6</dd><dt><span>title :</span></dt><dd>The GEBCO_2020 Grid - a continuous terrain model for oceans and land at 15 arc-second intervals</dd><dt><span>institution :</span></dt><dd>On behalf of the General Bathymetric Chart of the Oceans (GEBCO), the data are held at the British Oceanographic Data Centre (BODC).</dd><dt><span>source :</span></dt><dd>The GEBCO_2020 Grid is the latest global bathymetric product released by the General Bathymetric Chart of the Oceans (GEBCO) and has been developed through the Nippon Foundation-GEBCO Seabed 2030 Project. This is a collaborative project between the Nippon Foundation of Japan and GEBCO. The Seabed 2030 Project aims to bring together all available bathymetric data to produce the definitive map of the world ocean floor and make it available to all.</dd><dt><span>history :</span></dt><dd>Information on the development of the data set and the source data sets included in the grid can be found in the data set documentation available from https://www.gebco.net</dd><dt><span>references :</span></dt><dd>DOI: 10.5285/a29c5465-b138-234d-e053-6c86abc040b9</dd><dt><span>comment :</span></dt><dd>The data in the GEBCO_2020 Grid should not be used for navigation or any purpose relating to safety at sea.</dd><dt><span>node_offset :</span></dt><dd>1.0</dd></dl></div></li></ul></div></div>
 </div>
 </div>
-<div id="7e76e078" class="cell" data-execution_count="4">
+<div id="e5d67bec" class="cell" data-execution_count="4">
 <div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>ds.elevation.plot()<span class="op">;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display">
 <div>
@@ -827,7 +623,7 @@ Attributes: (8)</pre><div class="xr-wrap" style="display:none"><div class="xr-he
 </div>
 </div>
 </div>
-<div id="d1078d28" class="cell" data-execution_count="5">
+<div id="ef79fd4a" class="cell" data-execution_count="5">
 <div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>ds.elevation.sel(lon<span class="op">=</span><span class="fl">12.74792</span>, lat<span class="op">=</span><span class="fl">55.865</span>, method<span class="op">=</span><span class="st">"nearest"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="5">
 <div><svg style="position: absolute; width: 0; height: 0; overflow: hidden">
@@ -1203,17 +999,17 @@ dl.xr-attrs {
 </style><pre class="xr-text-repr-fallback">&lt;xarray.DataArray 'elevation' ()&gt; Size: 2B
 [1 values with dtype=int16]
 Coordinates: (2)
-Attributes: (7)</pre><div class="xr-wrap" style="display:none"><div class="xr-header"><div class="xr-obj-type">xarray.DataArray</div><div class="xr-array-name">'elevation'</div></div><ul class="xr-sections"><li class="xr-section-item"><div class="xr-array-wrap"><input id="section-2e8e2553-7483-4cea-98e5-362d12fe7941" class="xr-array-in" type="checkbox" checked=""><label for="section-2e8e2553-7483-4cea-98e5-362d12fe7941" title="Show/hide data repr"><svg class="icon xr-icon-database"><use href="#icon-database"></use></svg></label><div class="xr-array-preview xr-preview"><span>...</span></div><div class="xr-array-data"><pre>[1 values with dtype=int16]</pre></div></div></li><li class="xr-section-item"><input id="section-957205d0-0b79-43cf-a617-b544f1935ef6" class="xr-section-summary-in" type="checkbox"><label for="section-957205d0-0b79-43cf-a617-b544f1935ef6" class="xr-section-summary">Coordinates: <span>(2)</span></label><div class="xr-section-inline-details"></div><div class="xr-section-details"><ul class="xr-var-list"><li class="xr-var-item"><div class="xr-var-name"><span>lat</span></div><div class="xr-var-dims">()</div><div class="xr-var-dtype">float64</div><div class="xr-var-preview xr-preview">55.86</div><input id="attrs-fd7f12f7-283e-49fd-93b0-56b74b3f4323" class="xr-var-attrs-in" type="checkbox"><label for="attrs-fd7f12f7-283e-49fd-93b0-56b74b3f4323" title="Show/Hide attributes"><svg class="icon xr-icon-file-text2"><use href="#icon-file-text2"></use></svg></label><input id="data-24c6d073-941f-4a0e-94db-aa7f127ca490" class="xr-var-data-in" type="checkbox"><label for="data-24c6d073-941f-4a0e-94db-aa7f127ca490" title="Show/Hide data repr"><svg class="icon xr-icon-database"><use href="#icon-database"></use></svg></label><div class="xr-var-attrs"><dl class="xr-attrs"><dt><span>standard_name :</span></dt><dd>latitude</dd><dt><span>long_name :</span></dt><dd>latitude</dd><dt><span>units :</span></dt><dd>degrees_north</dd><dt><span>axis :</span></dt><dd>Y</dd><dt><span>sdn_parameter_urn :</span></dt><dd>SDN:P01::ALATZZ01</dd><dt><span>sdn_parameter_name :</span></dt><dd>Latitude north</dd><dt><span>sdn_uom_urn :</span></dt><dd>SDN:P06::DEGN</dd><dt><span>sdn_uom_name :</span></dt><dd>Degrees north</dd></dl></div><div class="xr-var-data"><pre>array(55.86458333)</pre></div></li><li class="xr-var-item"><div class="xr-var-name"><span>lon</span></div><div class="xr-var-dims">()</div><div class="xr-var-dtype">float64</div><div class="xr-var-preview xr-preview">12.75</div><input id="attrs-0310d3e5-33ed-4a25-b396-64115bdc42c6" class="xr-var-attrs-in" type="checkbox"><label for="attrs-0310d3e5-33ed-4a25-b396-64115bdc42c6" title="Show/Hide attributes"><svg class="icon xr-icon-file-text2"><use href="#icon-file-text2"></use></svg></label><input id="data-8a86b229-9079-4c11-b04f-7e65f8d4975c" class="xr-var-data-in" type="checkbox"><label for="data-8a86b229-9079-4c11-b04f-7e65f8d4975c" title="Show/Hide data repr"><svg class="icon xr-icon-database"><use href="#icon-database"></use></svg></label><div class="xr-var-attrs"><dl class="xr-attrs"><dt><span>standard_name :</span></dt><dd>longitude</dd><dt><span>long_name :</span></dt><dd>longitude</dd><dt><span>units :</span></dt><dd>degrees_east</dd><dt><span>axis :</span></dt><dd>X</dd><dt><span>sdn_parameter_urn :</span></dt><dd>SDN:P01::ALONZZ01</dd><dt><span>sdn_parameter_name :</span></dt><dd>Longitude east</dd><dt><span>sdn_uom_urn :</span></dt><dd>SDN:P06::DEGE</dd><dt><span>sdn_uom_name :</span></dt><dd>Degrees east</dd></dl></div><div class="xr-var-data"><pre>array(12.74791667)</pre></div></li></ul></div></li><li class="xr-section-item"><input id="section-18ad291e-bd2a-400f-b182-ec6ae0836fe4" class="xr-section-summary-in" type="checkbox" disabled=""><label for="section-18ad291e-bd2a-400f-b182-ec6ae0836fe4" class="xr-section-summary" title="Expand/collapse section">Indexes: <span>(0)</span></label><div class="xr-section-inline-details"></div><div class="xr-section-details"><ul class="xr-var-list"></ul></div></li><li class="xr-section-item"><input id="section-6d882c8e-cde3-4200-90ac-c1e55caf55cb" class="xr-section-summary-in" type="checkbox"><label for="section-6d882c8e-cde3-4200-90ac-c1e55caf55cb" class="xr-section-summary">Attributes: <span>(7)</span></label><div class="xr-section-inline-details"></div><div class="xr-section-details"><dl class="xr-attrs"><dt><span>standard_name :</span></dt><dd>height_above_reference_ellipsoid</dd><dt><span>long_name :</span></dt><dd>Elevation relative to sea level</dd><dt><span>units :</span></dt><dd>m</dd><dt><span>sdn_parameter_urn :</span></dt><dd>SDN:P01::BATHHGHT</dd><dt><span>sdn_parameter_name :</span></dt><dd>Sea floor height (above mean sea level) {bathymetric height}</dd><dt><span>sdn_uom_urn :</span></dt><dd>SDN:P06::ULAA</dd><dt><span>sdn_uom_name :</span></dt><dd>Metres</dd></dl></div></li></ul></div></div>
+Attributes: (7)</pre><div class="xr-wrap" style="display:none"><div class="xr-header"><div class="xr-obj-type">xarray.DataArray</div><div class="xr-array-name">'elevation'</div></div><ul class="xr-sections"><li class="xr-section-item"><div class="xr-array-wrap"><input id="section-cd77b16a-e863-49c8-953d-ecd9e07f943a" class="xr-array-in" type="checkbox" checked=""><label for="section-cd77b16a-e863-49c8-953d-ecd9e07f943a" title="Show/hide data repr"><svg class="icon xr-icon-database"><use href="#icon-database"></use></svg></label><div class="xr-array-preview xr-preview"><span>...</span></div><div class="xr-array-data"><pre>[1 values with dtype=int16]</pre></div></div></li><li class="xr-section-item"><input id="section-b39564cc-a3ff-4579-8d11-095220cb5914" class="xr-section-summary-in" type="checkbox"><label for="section-b39564cc-a3ff-4579-8d11-095220cb5914" class="xr-section-summary">Coordinates: <span>(2)</span></label><div class="xr-section-inline-details"></div><div class="xr-section-details"><ul class="xr-var-list"><li class="xr-var-item"><div class="xr-var-name"><span>lat</span></div><div class="xr-var-dims">()</div><div class="xr-var-dtype">float64</div><div class="xr-var-preview xr-preview">55.86</div><input id="attrs-c5955337-57da-4c98-91a6-a119430858c3" class="xr-var-attrs-in" type="checkbox"><label for="attrs-c5955337-57da-4c98-91a6-a119430858c3" title="Show/Hide attributes"><svg class="icon xr-icon-file-text2"><use href="#icon-file-text2"></use></svg></label><input id="data-7ab3c7c5-c38f-4931-ac50-bf69ddd5e7d4" class="xr-var-data-in" type="checkbox"><label for="data-7ab3c7c5-c38f-4931-ac50-bf69ddd5e7d4" title="Show/Hide data repr"><svg class="icon xr-icon-database"><use href="#icon-database"></use></svg></label><div class="xr-var-attrs"><dl class="xr-attrs"><dt><span>standard_name :</span></dt><dd>latitude</dd><dt><span>long_name :</span></dt><dd>latitude</dd><dt><span>units :</span></dt><dd>degrees_north</dd><dt><span>axis :</span></dt><dd>Y</dd><dt><span>sdn_parameter_urn :</span></dt><dd>SDN:P01::ALATZZ01</dd><dt><span>sdn_parameter_name :</span></dt><dd>Latitude north</dd><dt><span>sdn_uom_urn :</span></dt><dd>SDN:P06::DEGN</dd><dt><span>sdn_uom_name :</span></dt><dd>Degrees north</dd></dl></div><div class="xr-var-data"><pre>array(55.86458333)</pre></div></li><li class="xr-var-item"><div class="xr-var-name"><span>lon</span></div><div class="xr-var-dims">()</div><div class="xr-var-dtype">float64</div><div class="xr-var-preview xr-preview">12.75</div><input id="attrs-677cbf73-c4ca-4d1b-a132-b4ca36561839" class="xr-var-attrs-in" type="checkbox"><label for="attrs-677cbf73-c4ca-4d1b-a132-b4ca36561839" title="Show/Hide attributes"><svg class="icon xr-icon-file-text2"><use href="#icon-file-text2"></use></svg></label><input id="data-ac2d2e12-61fc-4e73-a070-b3950538bf44" class="xr-var-data-in" type="checkbox"><label for="data-ac2d2e12-61fc-4e73-a070-b3950538bf44" title="Show/Hide data repr"><svg class="icon xr-icon-database"><use href="#icon-database"></use></svg></label><div class="xr-var-attrs"><dl class="xr-attrs"><dt><span>standard_name :</span></dt><dd>longitude</dd><dt><span>long_name :</span></dt><dd>longitude</dd><dt><span>units :</span></dt><dd>degrees_east</dd><dt><span>axis :</span></dt><dd>X</dd><dt><span>sdn_parameter_urn :</span></dt><dd>SDN:P01::ALONZZ01</dd><dt><span>sdn_parameter_name :</span></dt><dd>Longitude east</dd><dt><span>sdn_uom_urn :</span></dt><dd>SDN:P06::DEGE</dd><dt><span>sdn_uom_name :</span></dt><dd>Degrees east</dd></dl></div><div class="xr-var-data"><pre>array(12.74791667)</pre></div></li></ul></div></li><li class="xr-section-item"><input id="section-a4eeccbe-6b44-4412-9041-f059ebe0dba1" class="xr-section-summary-in" type="checkbox" disabled=""><label for="section-a4eeccbe-6b44-4412-9041-f059ebe0dba1" class="xr-section-summary" title="Expand/collapse section">Indexes: <span>(0)</span></label><div class="xr-section-inline-details"></div><div class="xr-section-details"><ul class="xr-var-list"></ul></div></li><li class="xr-section-item"><input id="section-afb482bc-6098-42bf-9181-68392e93484e" class="xr-section-summary-in" type="checkbox"><label for="section-afb482bc-6098-42bf-9181-68392e93484e" class="xr-section-summary">Attributes: <span>(7)</span></label><div class="xr-section-inline-details"></div><div class="xr-section-details"><dl class="xr-attrs"><dt><span>standard_name :</span></dt><dd>height_above_reference_ellipsoid</dd><dt><span>long_name :</span></dt><dd>Elevation relative to sea level</dd><dt><span>units :</span></dt><dd>m</dd><dt><span>sdn_parameter_urn :</span></dt><dd>SDN:P01::BATHHGHT</dd><dt><span>sdn_parameter_name :</span></dt><dd>Sea floor height (above mean sea level) {bathymetric height}</dd><dt><span>sdn_uom_urn :</span></dt><dd>SDN:P06::ULAA</dd><dt><span>sdn_uom_name :</span></dt><dd>Metres</dd></dl></div></li></ul></div></div>
 </div>
 </div>
 <p>Check ordering of dimensions, should be (y,x)</p>
-<div id="b0445e2b" class="cell" data-execution_count="6">
+<div id="4a4c3e09" class="cell" data-execution_count="6">
 <div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>ds.elevation.dims</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="6">
 <pre><code>('lat', 'lon')</code></pre>
 </div>
 </div>
-<div id="4b5ecff1" class="cell" data-execution_count="7">
+<div id="a061acdd" class="cell" data-execution_count="7">
 <div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>el <span class="op">=</span> ds.elevation.values</span>
 <span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>el.shape</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="7">
@@ -1221,37 +1017,37 @@ Attributes: (7)</pre><div class="xr-wrap" style="display:none"><div class="xr-he
 </div>
 </div>
 <p>Check that axes are increasing, S-&gt;N W-&gt;E</p>
-<div id="b6da7193" class="cell" data-execution_count="8">
+<div id="ca878c2a" class="cell" data-execution_count="8">
 <div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>ds.lat.values[<span class="dv">0</span>],ds.lat.values[<span class="op">-</span><span class="dv">1</span>] </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="8">
 <pre><code>(np.float64(55.20208333333332), np.float64(56.29791666666665))</code></pre>
 </div>
 </div>
-<div id="81c114a9" class="cell" data-execution_count="9">
+<div id="04a1bb47" class="cell" data-execution_count="9">
 <div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>ds.lat.values[<span class="dv">0</span>] <span class="op">&lt;</span> ds.lat.values[<span class="op">-</span><span class="dv">1</span>] </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="9">
 <pre><code>np.True_</code></pre>
 </div>
 </div>
-<div id="3f1e7db5" class="cell" data-execution_count="10">
+<div id="013056e7" class="cell" data-execution_count="10">
 <div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>ds.lon.values[<span class="dv">0</span>],ds.lon.values[<span class="op">-</span><span class="dv">1</span>] </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="10">
 <pre><code>(np.float64(12.20208333333332), np.float64(13.097916666666663))</code></pre>
 </div>
 </div>
-<div id="a095879d" class="cell" data-execution_count="11">
+<div id="610243b2" class="cell" data-execution_count="11">
 <div class="sourceCode cell-code" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>el[<span class="dv">0</span>,<span class="dv">0</span>] <span class="co"># Bottom left</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="11">
 <pre><code>np.int16(-8)</code></pre>
 </div>
 </div>
-<div id="f3a1cabc" class="cell" data-execution_count="12">
+<div id="f9a70221" class="cell" data-execution_count="12">
 <div class="sourceCode cell-code" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>el[<span class="op">-</span><span class="dv">1</span>,<span class="dv">0</span>] <span class="co"># Top Left</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="12">
 <pre><code>np.int16(-31)</code></pre>
 </div>
 </div>
-<div id="176ffde7" class="cell" data-execution_count="13">
+<div id="fa3c8c9d" class="cell" data-execution_count="13">
 <div class="sourceCode cell-code" id="cb19"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>geometry <span class="op">=</span> mikeio.Grid2D(x<span class="op">=</span>ds.lon.values, y<span class="op">=</span>ds.lat.values, projection<span class="op">=</span><span class="st">"LONG/LAT"</span>)</span>
 <span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>geometry</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="13">
@@ -1261,7 +1057,7 @@ y: [55.2, 55.21, ..., 56.3] (ny=264, dy=0.004167)
 projection: LONG/LAT</code></pre>
 </div>
 </div>
-<div id="714a12e2" class="cell" data-execution_count="14">
+<div id="c45c6733" class="cell" data-execution_count="14">
 <div class="sourceCode cell-code" id="cb21"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>da <span class="op">=</span> mikeio.DataArray(data<span class="op">=</span>el,</span>
 <span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>               item<span class="op">=</span>mikeio.ItemInfo(<span class="st">"Elevation"</span>, mikeio.EUMType.Total_Water_Depth),</span>
 <span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>               geometry<span class="op">=</span>geometry,</span>
@@ -1276,7 +1072,7 @@ time: 2018-01-01 00:00:00 (time-invariant)
 geometry: Grid2D (ny=264, nx=216)</code></pre>
 </div>
 </div>
-<div id="e4806665" class="cell" data-execution_count="15">
+<div id="b3872d2b" class="cell" data-execution_count="15">
 <div class="sourceCode cell-code" id="cb23"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>da.plot()<span class="op">;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display">
 <div>
@@ -1286,7 +1082,7 @@ geometry: Grid2D (ny=264, nx=216)</code></pre>
 </div>
 </div>
 </div>
-<div id="9857d759" class="cell" data-execution_count="16">
+<div id="2753ba62" class="cell" data-execution_count="16">
 <div class="sourceCode cell-code" id="cb24"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>da.plot(cmap<span class="op">=</span><span class="st">'coolwarm'</span>, vmin<span class="op">=-</span><span class="dv">100</span>, vmax<span class="op">=</span><span class="dv">100</span>)<span class="op">;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display">
 <div>
@@ -1296,10 +1092,10 @@ geometry: Grid2D (ny=264, nx=216)</code></pre>
 </div>
 </div>
 </div>
-<div id="7dba2527" class="cell" data-execution_count="17">
+<div id="5cb00036" class="cell" data-execution_count="17">
 <div class="sourceCode cell-code" id="cb25"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a>da.to_dfs(<span class="st">"gebco.dfs2"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<div id="45061d10" class="cell" data-execution_count="18">
+<div id="dab29189" class="cell" data-execution_count="18">
 <div class="sourceCode cell-code" id="cb26"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a>ds <span class="op">=</span> mikeio.read(<span class="st">"gebco.dfs2"</span>)</span>
 <span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a>ds.Elevation.plot()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display">
@@ -1312,7 +1108,7 @@ geometry: Grid2D (ny=264, nx=216)</code></pre>
 </div>
 <section id="clean-up" class="level1">
 <h1>Clean up</h1>
-<div id="88d6a549" class="cell" data-execution_count="19">
+<div id="72264777" class="cell" data-execution_count="19">
 <div class="sourceCode cell-code" id="cb27"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> os</span>
 <span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a>os.remove(<span class="st">"gebco.dfs2"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
@@ -1739,18 +1535,6 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
   }
 });
 </script>
-<nav class="page-navigation">
-  <div class="nav-page nav-page-previous">
-      <a href="../../examples/dfs2/index.html" class="pagination-link" aria-label="Dfs2">
-        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text">Dfs2</span>
-      </a>          
-  </div>
-  <div class="nav-page nav-page-next">
-      <a href="../../examples/dfs2/gfs.html" class="pagination-link" aria-label="Dfs2 - Meteo data">
-        <span class="nav-page-text">Dfs2 - Meteo data</span> <i class="bi bi-arrow-right-short"></i>
-      </a>
-  </div>
-</nav>
 </div> <!-- /content -->
 <footer class="footer">
   <div class="nav-footer">
