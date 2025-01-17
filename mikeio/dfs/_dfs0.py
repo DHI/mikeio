@@ -82,6 +82,8 @@ def _write_dfs0(
 
 
 class Dfs0:
+    """Class for reading/writing dfs0 files."""
+
     def __init__(self, filename: str | Path):
         """Create a Dfs0 object for reading, writing.
 

@@ -1399,7 +1399,7 @@ class EUMUnit(IntEnum):
 
 
 class ItemInfo:
-    """ItemInfo.
+    """Info for dynamicc items (variables).
 
     Parameters
     ----------

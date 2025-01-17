@@ -847,6 +847,8 @@ class _DataArrayPlotterAreaSpectrum(_DataArrayPlotterFM):
 
 
 class _DatasetPlotter:
+    """Class for plotting scatter plots from datasets."""
+
     def __init__(self, ds: Dataset) -> None:
         self.ds = ds
 
