@@ -393,8 +393,13 @@ class _Dfs123:
         else:
             shape = (nt, self.nz, self.ny, self.nx)  # type: ignore
 
+        spdims = self.geometry.default_dims
+        dims = ["time"]
+        dims.extend(spdims)
+
         if single_time_selected and not keepdims:
             shape = shape[1:]
+            dims = dims[1:]
 
         data_list: list[np.ndarray] = [
             np.ndarray(shape=shape, dtype=dtype) for _ in range(n_items)
@@ -415,7 +420,10 @@ class _Dfs123:
                     d = d.reshape(self.ny, self.nx)  # type: ignore
 
                 if single_time_selected:
-                    data_list[item] = d
+                    if keepdims:
+                        data_list[item] = np.atleast_2d(d)
+                    else:
+                        data_list[item] = d
                 else:
                     data_list[item][i] = d
 
@@ -426,10 +434,12 @@ class _Dfs123:
         items = _get_item_info(self._dfs.ItemInfo, item_numbers)
 
         self._dfs.Close()
+
         return Dataset(
-            data_list,
-            time,
-            items,
+            data=data_list,
+            time=time,
+            items=items,
+            dims=tuple(dims),
             geometry=self.geometry,
             validate=False,
             dt=self._timestep,
