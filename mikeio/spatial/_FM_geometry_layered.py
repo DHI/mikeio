@@ -71,7 +71,7 @@ class _GeometryFMLayered(_GeometryFM):
         return self.to_2d_geometry()
 
     def isel(
-        self, idx: Sequence[int], keepdims: bool = False, **kwargs: Any
+        self, idx: Sequence[int] | np.ndarray, keepdims: bool = False, **kwargs: Any
     ) -> GeometryFM3D | GeometryPoint3D | GeometryFM2D | GeometryFMVerticalColumn:
         return self.elements_to_geometry(elements=idx, keepdims=keepdims)
 
@@ -226,15 +226,20 @@ class _GeometryFMLayered(_GeometryFM):
 
         Returns
         -------
-        UnstructuredGeometry
-            2d geometry (bottom nodes)
+        GeometryFM2D
+            2d geometry
 
         """
         # extract information for selected elements
-        elem_ids = self.bottom_elements
-        if self._type == DfsuFileType.Dfsu3DSigmaZ:
-            # for z-layers nodes will not match on neighboring elements!
-            elem_ids = self.top_elements
+        match self._type:
+            case DfsuFileType.Dfsu3DSigmaZ:
+                elem_ids = self.top_elements
+            case DfsuFileType.Dfsu3DSigma:
+                elem_ids = self.bottom_elements
+            case _:
+                raise NotImplementedError(
+                    f"Conversion to 2D not implemented for {self._type}"
+                )
 
         node_ids, elem_tbl = self._get_nodes_and_table_for_elements(
             elem_ids, node_layers="bottom"
@@ -242,7 +247,6 @@ class _GeometryFMLayered(_GeometryFM):
         node_coords = self.node_coordinates[node_ids]
         codes = self._codes[node_ids]
 
-        # create new geometry
         geom = GeometryFM2D(
             node_coordinates=node_coords,
             codes=codes,
@@ -255,6 +259,9 @@ class _GeometryFMLayered(_GeometryFM):
             reindex=True,
         )
 
+        # TODO do this before creating the geometry
+
+        # TODO extract method
         # Fix z-coordinate for sigma-z:
         if self._type == DfsuFileType.Dfsu3DSigmaZ:
             zn = geom.node_coordinates[:, 2].copy()
@@ -480,9 +487,7 @@ class _GeometryFMLayered(_GeometryFM):
         return self._2d_ids
 
     def _get_2d_to_3d_association(self) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
-        e2_to_e3 = (
-            []
-        )  # for each 2d element: the corresponding 3d element ids from bot to top
+        e2_to_e3 = []  # for each 2d element: the corresponding 3d element ids from bot to top
         index2d = []  # for each 3d element: the associated 2d element id
         layerid = []  # for each 3d element: the associated layer number
         n2d = len(self.top_elements)
@@ -615,6 +620,8 @@ class _GeometryFMLayered(_GeometryFM):
 
 
 class GeometryFM3D(_GeometryFMLayered):
+    """Flexible 3d mesh geometry."""
+
     def __init__(
         self,
         *,
@@ -703,6 +710,8 @@ class GeometryFM3D(_GeometryFMLayered):
 
 
 class GeometryFMVerticalProfile(_GeometryFMLayered):
+    """Flexible mesh 2d vertical profile geometry."""
+
     def __init__(
         self,
         node_coordinates: np.ndarray,

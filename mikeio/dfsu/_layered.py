@@ -203,7 +203,7 @@ class DfsuLayered:
         *,
         items: str | int | Sequence[str | int] | None = None,
         time: int | str | slice | None = None,
-        elements: Sequence[int] | None = None,
+        elements: Sequence[int] | np.ndarray | None = None,
         area: tuple[float, float, float, float] | None = None,
         x: float | None = None,
         y: float | None = None,
@@ -411,6 +411,8 @@ class DfsuLayered:
 
 
 class Dfsu2DV(DfsuLayered):
+    """Class for reading/writing dfsu 2d vertical files."""
+
     def plot_vertical_profile(
         self,
         values: np.ndarray | DataArray,
@@ -465,6 +467,8 @@ class Dfsu2DV(DfsuLayered):
 
 
 class Dfsu3D(DfsuLayered):
+    """Class for reading/writing dfsu 3d files."""
+
     @property
     def geometry2d(self) -> GeometryFM2D:
         """The 2d geometry for a 3d object."""

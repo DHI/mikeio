@@ -847,6 +847,8 @@ class _DataArrayPlotterAreaSpectrum(_DataArrayPlotterFM):
 
 
 class _DatasetPlotter:
+    """Class for plotting scatter plots from datasets."""
+
     def __init__(self, ds: Dataset) -> None:
         self.ds = ds
 
@@ -925,3 +927,17 @@ class _DatasetPlotter:
     @staticmethod
     def _label_txt(da: DataArray) -> str:
         return f"{da.name} [{da.unit.name}]"
+
+
+__all__ = [
+    "_DataArrayPlotter",
+    "_DataArrayPlotterGrid1D",
+    "_DataArrayPlotterGrid2D",
+    "_DataArrayPlotterFM",
+    "_DataArrayPlotterFMVerticalColumn",
+    "_DataArrayPlotterFMVerticalProfile",
+    "_DataArrayPlotterPointSpectrum",
+    "_DataArrayPlotterLineSpectrum",
+    "_DataArrayPlotterAreaSpectrum",
+    "_DatasetPlotter",
+]
