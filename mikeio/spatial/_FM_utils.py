@@ -31,7 +31,7 @@ class Polygon:
 
 
 @dataclass
-class BoundaryPolylines:
+class BoundaryPolygons:
     exteriors: list[Polygon]
     interiors: list[Polygon]
 

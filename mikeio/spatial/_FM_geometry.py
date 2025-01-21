@@ -22,7 +22,7 @@ from .._interpolation import get_idw_interpolant, interp2d
 from ._FM_utils import (
     _get_node_centered_data,
     _plot_map,
-    BoundaryPolylines,
+    BoundaryPolygons,
     Polygon,
     _set_xy_label_by_projection,  # TODO remove
     _to_polygons,  # TODO remove
@@ -843,9 +843,9 @@ class GeometryFM2D(_GeometryFM):
         return np.abs(area)
 
     @cached_property
-    def boundary_polylines(self) -> BoundaryPolylines:
+    def boundary_polylines(self) -> BoundaryPolygons:
         """Lists of closed polylines defining domain outline."""
-        return self._get_boundary_polylines()
+        return self._get_boundary_polygons()
 
     def contains(self, points: np.ndarray) -> np.ndarray:
         """Test if a list of points are contained by mesh.
@@ -861,7 +861,6 @@ class GeometryFM2D(_GeometryFM):
             True for points inside, False otherwise
 
         """
-
         points = np.atleast_2d(points)
 
         return self.boundary_polylines.contains(points)
@@ -869,11 +868,11 @@ class GeometryFM2D(_GeometryFM):
     def __contains__(self, pt: np.ndarray) -> bool:
         return self.contains(pt)[0]
 
-    def _get_boundary_polylines_uncategorized(self) -> list[list[np.int64]]:
-        """Construct closed polylines for all boundary faces."""
+    def _get_boundary_polygons_uncategorized(self) -> list[list[np.int64]]:
+        """Construct closed polygons for all boundary faces."""
         boundary_faces = self._get_boundary_faces()
         face_remains = boundary_faces.copy()
-        polylines = []
+        polygons = []
         while face_remains.shape[0] > 1:
             n0 = face_remains[:, 0]
             n1 = face_remains[:, 1]
@@ -892,28 +891,26 @@ class GeometryFM2D(_GeometryFM):
                     break
 
             face_remains = np.delete(face_remains, index_to_delete, axis=0)
-            polylines.append(polyline)
-        return polylines
+            polygons.append(polyline)
+        return polygons
 
-    def _get_boundary_polylines(self) -> BoundaryPolylines:
+    def _get_boundary_polygons(self) -> BoundaryPolygons:
         """Get boundary polylines and categorize as inner or outer by assessing the signed area."""
-        polylines = self._get_boundary_polylines_uncategorized()
+        polygons = self._get_boundary_polygons_uncategorized()
 
         interiors = []
         exteriors = []
 
-        for polyline in polylines:
-            # xy = self.node_coordinates[polyline, :2]
-
-            poly_line = np.asarray(polyline)
-            xy = self.node_coordinates[poly_line, 0:2]
+        for polygon in polygons:
+            polygon_np = np.asarray(polygon)
+            xy = self.node_coordinates[polygon_np, 0:2]
             poly = Polygon(xy)
             if poly.area > 0:
                 exteriors.append(poly)
             else:
                 interiors.append(poly)
 
-        return BoundaryPolylines(exteriors=exteriors, interiors=interiors)
+        return BoundaryPolygons(exteriors=exteriors, interiors=interiors)
 
     def _get_boundary_faces(self) -> np.ndarray:
         """Construct list of faces."""
