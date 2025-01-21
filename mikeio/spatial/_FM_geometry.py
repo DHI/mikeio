@@ -8,6 +8,7 @@ from typing import (
     Sized,
     TYPE_CHECKING,
 )
+import warnings
 
 
 import numpy as np
@@ -113,7 +114,7 @@ class _GeometryFMPlotter:
             node_coordinates=g.node_coordinates,
             element_table=g.element_table,
             element_coordinates=g.element_coordinates,
-            boundary_polylines=g.boundary_polylines.lines,
+            boundary_polylines=g.boundary_polygons.lines,
             plot_type=plot_type,
             projection=g.projection,
             z=None,
@@ -158,9 +159,9 @@ class _GeometryFMPlotter:
 
         linwid = 1.2
         out_col = "0.4"
-        for exterior in self.g.boundary_polylines.exteriors:
+        for exterior in self.g.boundary_polygons.exteriors:
             ax.plot(*exterior.xy.T, color=out_col, linewidth=linwid)
-        for interior in self.g.boundary_polylines.interiors:
+        for interior in self.g.boundary_polygons.interiors:
             ax.plot(*interior.xy.T, color=out_col, linewidth=linwid)
         if title is not None:
             ax.set_title(title)
@@ -844,7 +845,14 @@ class GeometryFM2D(_GeometryFM):
 
     @cached_property
     def boundary_polylines(self) -> BoundaryPolygons:
-        """Lists of closed polylines defining domain outline."""
+        warnings.warn(
+            "boundary_polylines is renamed to boundary_polygons", FutureWarning
+        )
+        return self._get_boundary_polygons()
+
+    @cached_property
+    def boundary_polygons(self) -> BoundaryPolygons:
+        """Lists of polygons defining domain outline."""
         return self._get_boundary_polygons()
 
     def contains(self, points: np.ndarray) -> np.ndarray:

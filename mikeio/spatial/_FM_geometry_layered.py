@@ -3,6 +3,7 @@ from functools import cached_property
 from pathlib import Path
 
 from typing import Any, Iterable, Literal, Sequence
+import warnings
 
 from matplotlib.axes import Axes
 import numpy as np
@@ -654,6 +655,13 @@ class GeometryFM3D(_GeometryFMLayered):
 
     @property
     def boundary_polylines(self) -> BoundaryPolygons:
+        warnings.warn(
+            "boundary_polylines is renamed to boundary_polygons", FutureWarning
+        )
+        return self.geometry2d.boundary_polylines
+
+    @property
+    def boundary_polygons(self) -> BoundaryPolygons:
         return self.geometry2d.boundary_polylines
 
     def contains(self, points: np.ndarray) -> np.ndarray:
