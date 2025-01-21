@@ -1,5 +1,4 @@
 from __future__ import annotations
-from dataclasses import dataclass
 from functools import cached_property
 from pathlib import Path
 from typing import (
@@ -12,7 +11,6 @@ from typing import (
 
 
 import numpy as np
-from numpy.typing import NDArray
 from mikecore.DfsuFile import DfsuFileType
 from mikecore.eum import eumQuantity
 from mikecore.MeshBuilder import MeshBuilder
@@ -25,6 +23,7 @@ from ._FM_utils import (
     _get_node_centered_data,
     _plot_map,
     BoundaryPolylines,
+    Polygon,
     _set_xy_label_by_projection,  # TODO remove
     _to_polygons,  # TODO remove
 )
@@ -37,14 +36,6 @@ from ._utils import xy_to_bbox
 if TYPE_CHECKING:
     from ._FM_geometry_layered import GeometryFM3D
     from matplotlib.axes import Axes
-
-
-@dataclass
-class Polyline:
-    n_nodes: int
-    nodes: NDArray
-    xy: NDArray
-    area: float
 
 
 class _GeometryFMPlotter:
@@ -122,7 +113,7 @@ class _GeometryFMPlotter:
             node_coordinates=g.node_coordinates,
             element_table=g.element_table,
             element_coordinates=g.element_coordinates,
-            boundary_polylines=g.boundary_polylines,
+            boundary_polylines=g.boundary_polylines.lines,
             plot_type=plot_type,
             projection=g.projection,
             z=None,
@@ -870,25 +861,10 @@ class GeometryFM2D(_GeometryFM):
             True for points inside, False otherwise
 
         """
-        import matplotlib.path as mp  # type: ignore
 
         points = np.atleast_2d(points)
 
-        exterior = self.boundary_polylines.exteriors[0]
-        cnts = mp.Path(exterior.xy).contains_points(points)
-
-        if self.boundary_polylines.n_exteriors > 1:
-            # in case of several dis-joint outer domains
-            for exterior in self.boundary_polylines.exteriors[1:]:
-                in_domain = mp.Path(exterior.xy).contains_points(points)
-                cnts = np.logical_or(cnts, in_domain)
-
-        # subtract any holes
-        for interior in self.boundary_polylines.interiors:
-            in_hole = mp.Path(interior.xy).contains_points(points)
-            cnts = np.logical_and(cnts, ~in_hole)
-
-        return cnts
+        return self.boundary_polylines.contains(points)
 
     def __contains__(self, pt: np.ndarray) -> bool:
         return self.contains(pt)[0]
@@ -923,26 +899,21 @@ class GeometryFM2D(_GeometryFM):
         """Get boundary polylines and categorize as inner or outer by assessing the signed area."""
         polylines = self._get_boundary_polylines_uncategorized()
 
-        poly_lines_int = []
-        poly_lines_ext = []
+        interiors = []
+        exteriors = []
 
         for polyline in polylines:
-            xy = self.node_coordinates[polyline, :2]
-            area = (
-                np.dot(xy[:, 1], np.roll(xy[:, 0], 1))
-                - np.dot(xy[:, 0], np.roll(xy[:, 1], 1))
-            ) * 0.5
+            # xy = self.node_coordinates[polyline, :2]
+
             poly_line = np.asarray(polyline)
             xy = self.node_coordinates[poly_line, 0:2]
-            poly = Polyline(len(polyline), poly_line, xy, area)
-            if area > 0:
-                poly_lines_ext.append(poly)
+            poly = Polygon(xy)
+            if poly.area > 0:
+                exteriors.append(poly)
             else:
-                poly_lines_int.append(poly)
+                interiors.append(poly)
 
-        n_ext = len(poly_lines_ext)
-        n_int = len(poly_lines_int)
-        return BoundaryPolylines(n_ext, poly_lines_ext, n_int, poly_lines_int)
+        return BoundaryPolylines(exteriors=exteriors, interiors=interiors)
 
     def _get_boundary_faces(self) -> np.ndarray:
         """Construct list of faces."""

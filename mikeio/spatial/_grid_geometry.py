@@ -2,7 +2,7 @@ from __future__ import annotations
 from functools import cached_property
 from pathlib import Path
 import warnings
-from typing import Any, Sequence, TYPE_CHECKING, Sized, overload
+from typing import Any, Sequence, TYPE_CHECKING, overload
 from dataclasses import dataclass
 import numpy as np
 
