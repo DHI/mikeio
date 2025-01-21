@@ -399,8 +399,8 @@ class Dfsu2DH:
         time: int | str | slice | None = None,
         elements: Sequence[int] | np.ndarray | None = None,
         area: tuple[float, float, float, float] | None = None,
-        x: float | None = None,
-        y: float | None = None,
+        x: float | Sequence[float] | None = None,
+        y: float | Sequence[float] | None = None,
         keepdims: bool = False,
         dtype: Any = np.float32,
         error_bad_data: bool = True,
@@ -447,8 +447,13 @@ class Dfsu2DH:
         single_time_selected, time_steps = _valid_timesteps(dfs, time)
 
         _validate_elements_and_geometry_sel(elements, area=area, x=x, y=y)
-        if elements is None:
-            elements = self._parse_geometry_sel(area=area, x=x, y=y)
+        # if elements is None:
+        #    elements = self._parse_geometry_sel(area=area, x=x, y=y)
+        if area is not None:
+            elements = self.geometry._elements_in_area(area)
+
+        if (x is not None) or (y is not None):
+            elements = self.geometry.find_index(x=x, y=y)
 
         if elements is None:
             geometry = self.geometry
@@ -557,53 +562,6 @@ class Dfsu2DH:
         write_dfsu_data(dfs=dfs, ds=ds, is_layered=False)
         info = _get_dfsu_info(self._filename)
         self._n_timesteps = info.n_timesteps
-
-    def _parse_geometry_sel(
-        self,
-        area: tuple[float, float, float, float] | None,
-        x: float | None,
-        y: float | None,
-    ) -> np.ndarray | None:
-        """Parse geometry selection.
-
-        Parameters
-        ----------
-        area : list[float], optional
-            Read only data inside (horizontal) area given as a
-            bounding box (tuple with left, lower, right, upper)
-            or as list of coordinates for a polygon, by default None
-        x : float, optional
-            Read only data for elements containing the (x,y) points(s),
-            by default None
-        y : float, optional
-            Read only data for elements containing the (x,y) points(s),
-            by default None
-
-        Returns
-        -------
-        list[int]
-            List of element ids
-
-        Raises
-        ------
-        ValueError
-            If no elements are found in selection
-
-        """
-        elements = None
-
-        if area is not None:
-            elements = self.geometry._elements_in_area(area)
-
-        if (x is not None) or (y is not None):
-            elements = self.geometry.find_index(x=x, y=y)
-
-        if (x is not None) or (y is not None) or (area is not None):
-            # selection was attempted
-            if (elements is None) or len(elements) == 0:
-                raise ValueError("No elements in selection!")
-
-        return elements
 
     def get_overset_grid(
         self,
