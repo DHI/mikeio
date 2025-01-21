@@ -33,6 +33,8 @@ class PfsNonUniqueList(list):
 
 
 class PfsSection(SimpleNamespace, MutableMapping[str, Any]):
+    """Class for reading/writing sections in a pfs file."""
+
     @staticmethod
     def from_dataframe(df: pd.DataFrame, prefix: str) -> "PfsSection":
         """Create a PfsSection from a DataFrame.

@@ -278,6 +278,8 @@ def _get_dfsu_info(filename: str | Path) -> _DfsuInfo:
 
 
 class Dfsu2DH:
+    """Class for reading/writing dfsu 2d horizontal files."""
+
     show_progress = False
 
     def __init__(self, filename: str | Path) -> None:

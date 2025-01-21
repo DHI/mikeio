@@ -103,6 +103,12 @@ notebooks = [
 ignore = ["E501", "E741"]
 
 select = [
+    # ruff defaults
+    "E4",
+    "E7",
+    "E9",
+    "F",
+    # ruff defaults
     "D100",
     "D101",
     "D102",
@@ -113,3 +119,8 @@ select = [
     "D415",
     "D417",
 ]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/*" = ["D"]
+"notebooks/*" = ["D", "E402"]
+"conftest.py" = ["D"]

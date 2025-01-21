@@ -444,7 +444,7 @@ def test_top_elements_subset() -> None:
 
     assert len(subg.top_elements) == 6
 
-    ds = mikeio.Dfsu3D(filename).read(elements=idx3d)
+    _ = mikeio.Dfsu3D(filename).read(elements=idx3d)
 
 
 def test_bottom_elements():

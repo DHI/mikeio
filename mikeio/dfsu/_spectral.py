@@ -26,6 +26,8 @@ from ..spatial import (
 
 
 class DfsuSpectral:
+    """Dfsu for Spectral data."""
+
     show_progress = False
 
     def __init__(self, filename: str | Path) -> None:
