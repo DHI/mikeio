@@ -391,6 +391,7 @@ class _Dfs123:
         elif self._ndim == 2:
             shape = (nt, self.ny, self.nx)  # type: ignore
         else:
+            # TODO this is not used, since Dfs3 has a separate .read method
             shape = (nt, self.nz, self.ny, self.nx)  # type: ignore
 
         spdims = self.geometry.default_dims
@@ -411,8 +412,8 @@ class _Dfs123:
             for item in range(n_items):
                 itemdata = self._dfs.ReadItemTimeStep(item_numbers[item] + 1, int(it))
 
-                src = itemdata.Data
-                d = src
+                d = itemdata.Data
+                assert d.ndim == 1
 
                 d[d == self.deletevalue] = np.nan
 
@@ -461,17 +462,9 @@ class _Dfs123:
         list[Iteminfo]
 
         """
-        items = []
-        for item in item_numbers:
-            name = self._dfs.ItemInfo[item].Name
-            eumItem = self._dfs.ItemInfo[item].Quantity.Item
-            eumUnit = self._dfs.ItemInfo[item].Quantity.Unit
-            itemtype = EUMType(eumItem)
-            unit = EUMUnit(eumUnit)
-            data_value_type = self._dfs.ItemInfo[item].ValueType
-            item_info = ItemInfo(name, itemtype, unit, data_value_type)
-            items.append(item_info)
-        return items
+        infos = self._dfs.ItemInfo
+        nos = item_numbers
+        return [ItemInfo.from_mikecore_dynamic_item_info(infos[i]) for i in nos]
 
     @property
     def geometry(self) -> Any:
