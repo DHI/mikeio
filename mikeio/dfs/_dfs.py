@@ -19,7 +19,7 @@ from mikecore.DfsFileFactory import DfsFileFactory
 from mikecore.Projections import Cartography
 
 from ..dataset import Dataset
-from ..eum import EUMType, EUMUnit, ItemInfo, ItemInfoList
+from ..eum import ItemInfo, ItemInfoList
 from ..exceptions import ItemsError
 from .._time import DateTimeSelector
 
