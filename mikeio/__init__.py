@@ -124,7 +124,8 @@ def read(
         raise ValueError("mikeio.read() is only supported for dfs files")
 
     dfs = open(filename)
-    assert not isinstance(dfs, Mesh)
+    if isinstance(dfs, Mesh):
+        raise ValueError("mikeio.read() is not supported for Mesh files")
 
     return dfs.read(items=items, time=time, keepdims=keepdims, **kwargs)
 
