@@ -213,10 +213,10 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </header>
 
 
-<div id="ace83378" class="cell" data-execution_count="1">
+<div id="834c4afb" class="cell" data-execution_count="1">
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> mikeio</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<div id="c42e8761" class="cell" data-execution_count="2">
+<div id="84045cd5" class="cell" data-execution_count="2">
 <div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>ds <span class="op">=</span> mikeio.read(<span class="st">"../../data/wind_north_sea.dfsu"</span>, items<span class="op">=</span><span class="st">"Wind speed"</span>)</span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>ds</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="2">
@@ -228,7 +228,7 @@ items:
   0:  Wind speed &lt;Wind speed&gt; (meter per sec)</code></pre>
 </div>
 </div>
-<div id="50228faa" class="cell" data-execution_count="3">
+<div id="18114540" class="cell" data-execution_count="3">
 <div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>da <span class="op">=</span> ds.Wind_speed</span>
 <span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>da.plot()<span class="op">;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stderr">
@@ -250,7 +250,7 @@ items:
 <li>Then interpolate all data to the new grid and plot.</li>
 <li>The interpolated data is then saved to a dfs2 file.</li>
 </ol>
-<div id="a277cd76" class="cell" data-execution_count="4">
+<div id="790dcd62" class="cell" data-execution_count="4">
 <div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>g <span class="op">=</span> da.geometry.get_overset_grid(dx<span class="op">=</span><span class="fl">0.1</span>)</span>
 <span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>g</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="4">
@@ -260,7 +260,7 @@ y: [49.9, 50, ..., 55.3] (ny=55, dy=0.1)
 projection: LONG/LAT</code></pre>
 </div>
 </div>
-<div id="1f89b0c7" class="cell" data-execution_count="5">
+<div id="9510e51f" class="cell" data-execution_count="5">
 <div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>da_grid <span class="op">=</span> da.interp_like(g)</span>
 <span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>da_grid</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="5">
@@ -271,7 +271,7 @@ time: 2017-10-27 00:00:00 - 2017-10-27 05:00:00 (6 records)
 geometry: Grid2D (ny=55, nx=105)</code></pre>
 </div>
 </div>
-<div id="9b196789" class="cell" data-execution_count="6">
+<div id="aeece3b3" class="cell" data-execution_count="6">
 <div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>da_grid.plot()<span class="op">;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display">
 <div>
@@ -284,14 +284,14 @@ geometry: Grid2D (ny=55, nx=105)</code></pre>
 </section>
 <section id="save-to-dfs2-file" class="level2">
 <h2 class="anchored" data-anchor-id="save-to-dfs2-file">Save to dfs2 file</h2>
-<div id="8da63425" class="cell" data-execution_count="7">
+<div id="576af65b" class="cell" data-execution_count="7">
 <div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>da_grid.to_dfs(<span class="st">"wind_north_sea_interpolated.dfs2"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p><img src="../../images/dfsu_grid_interp.png" class="img-fluid"></p>
 </section>
 <section id="save-to-netcdf" class="level2">
 <h2 class="anchored" data-anchor-id="save-to-netcdf">Save to NetCDF</h2>
-<div id="e7325d0a" class="cell" data-execution_count="8">
+<div id="c9844ae3" class="cell" data-execution_count="8">
 <div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>xr_da <span class="op">=</span> da_grid.to_xarray()</span>
 <span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>xr_da.to_netcdf(<span class="st">"wind_north_sea_interpolated.nc"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
@@ -312,7 +312,7 @@ Note
 <p>This section requires the <a href="https://rasterio.readthedocs.io/en/latest/installation.html"><code>rasterio</code></a> package.</p>
 </div>
 </div>
-<div id="c5655104" class="cell" data-execution_count="9">
+<div id="c2a2c7c1" class="cell" data-execution_count="9">
 <div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
 <span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> rasterio</span>
 <span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> rasterio.transform <span class="im">import</span> from_origin</span>
@@ -336,7 +336,7 @@ Note
 <section id="interpolate-to-other-mesh" class="level1">
 <h1>Interpolate to other mesh</h1>
 <p>Interpolate the data from this coarse mesh onto a finer resolution mesh</p>
-<div id="b7093f60" class="cell" data-execution_count="10">
+<div id="781f2401" class="cell" data-execution_count="10">
 <div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>msh <span class="op">=</span> mikeio.Mesh(<span class="st">"../../data/north_sea_2.mesh"</span>)</span>
 <span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>msh</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="10">
@@ -346,7 +346,7 @@ number of elements: 2259
 projection: LONG/LAT</code></pre>
 </div>
 </div>
-<div id="4ea67013" class="cell" data-execution_count="11">
+<div id="3ec8592d" class="cell" data-execution_count="11">
 <div class="sourceCode cell-code" id="cb16"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>dsi <span class="op">=</span> da.interp_like(msh)</span>
 <span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>dsi</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="11">
@@ -357,7 +357,7 @@ time: 2017-10-27 00:00:00 - 2017-10-27 05:00:00 (6 records)
 geometry: Dfsu2D (2259 elements, 1296 nodes)</code></pre>
 </div>
 </div>
-<div id="e4dafcc0" class="cell" data-execution_count="12">
+<div id="229064dd" class="cell" data-execution_count="12">
 <div class="sourceCode cell-code" id="cb18"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>da[<span class="dv">0</span>].plot(figsize<span class="op">=</span>(<span class="dv">9</span>,<span class="dv">7</span>), show_mesh<span class="op">=</span><span class="va">True</span>)<span class="op">;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display">
 <div>
@@ -367,7 +367,7 @@ geometry: Dfsu2D (2259 elements, 1296 nodes)</code></pre>
 </div>
 </div>
 </div>
-<div id="84e9ddb1" class="cell" data-execution_count="13">
+<div id="5b922a3b" class="cell" data-execution_count="13">
 <div class="sourceCode cell-code" id="cb19"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>dsi[<span class="dv">0</span>].plot(figsize<span class="op">=</span>(<span class="dv">9</span>,<span class="dv">7</span>), show_mesh<span class="op">=</span><span class="va">True</span>)<span class="op">;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stderr">
 <pre><code>/opt/hostedtoolcache/Python/3.12.8/x64/lib/python3.12/site-packages/mikeio/spatial/_FM_geometry.py:848: FutureWarning: boundary_polylines is renamed to boundary_polygons
@@ -383,14 +383,14 @@ geometry: Dfsu2D (2259 elements, 1296 nodes)</code></pre>
 </div>
 <section id="note-3-of-the-new-elements-are-outside-the-original-mesh-and-data-are-therefore-nan-by-default" class="level3">
 <h3 class="anchored" data-anchor-id="note-3-of-the-new-elements-are-outside-the-original-mesh-and-data-are-therefore-nan-by-default">Note: 3 of the new elements are outside the original mesh and data are therefore NaN by default</h3>
-<div id="d9d85efc" class="cell" data-execution_count="14">
+<div id="296d3e3e" class="cell" data-execution_count="14">
 <div class="sourceCode cell-code" id="cb21"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>nan_elements <span class="op">=</span> np.where(np.isnan(dsi[<span class="dv">0</span>].to_numpy()))[<span class="dv">0</span>]</span>
 <span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>nan_elements</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="14">
 <pre><code>array([ 249,  451, 1546])</code></pre>
 </div>
 </div>
-<div id="51088878" class="cell" data-execution_count="15">
+<div id="62163296" class="cell" data-execution_count="15">
 <div class="sourceCode cell-code" id="cb23"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>da.geometry.contains(msh.element_coordinates[nan_elements,:<span class="dv">2</span>])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="15">
 <pre><code>array([False, False, False])</code></pre>
@@ -399,10 +399,10 @@ geometry: Dfsu2D (2259 elements, 1296 nodes)</code></pre>
 </section>
 <section id="we-can-force-extrapolation-to-avoid-the-nan-values" class="level3">
 <h3 class="anchored" data-anchor-id="we-can-force-extrapolation-to-avoid-the-nan-values">We can force extrapolation to avoid the NaN values</h3>
-<div id="48445c3c" class="cell" data-execution_count="16">
+<div id="0311f11c" class="cell" data-execution_count="16">
 <div class="sourceCode cell-code" id="cb25"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a>dat_interp <span class="op">=</span> da.interp_like(msh, extrapolate<span class="op">=</span><span class="va">True</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<div id="90b54a91" class="cell" data-execution_count="17">
+<div id="0aeafa6b" class="cell" data-execution_count="17">
 <div class="sourceCode cell-code" id="cb26"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a>n_nan_elements <span class="op">=</span> np.<span class="bu">sum</span>(np.isnan(dat_interp.values))</span>
 <span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a>n_nan_elements</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="17">
@@ -415,14 +415,14 @@ geometry: Dfsu2D (2259 elements, 1296 nodes)</code></pre>
 <p>We want to interpolate scatter data onto an existing mesh and create a new dfsu with the interpolated data.</p>
 <p><strong>This uses lower level private utility methods not part of the public API</strong>.</p>
 <p>Interpolating from scatter data will soon be possible in a simpler way.</p>
-<div id="3dbc6c60" class="cell" data-execution_count="18">
+<div id="e7780efe" class="cell" data-execution_count="18">
 <div class="sourceCode cell-code" id="cb28"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> mikeio.spatial._utils <span class="im">import</span> dist_in_meters</span>
 <span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> mikeio._interpolation <span class="im">import</span> get_idw_interpolant</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<div id="83865153" class="cell" data-execution_count="19">
+<div id="453db2bd" class="cell" data-execution_count="19">
 <div class="sourceCode cell-code" id="cb29"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a>dfs <span class="op">=</span> mikeio.<span class="bu">open</span>(<span class="st">"../../data/wind_north_sea.dfsu"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<div id="d1d47aeb" class="cell" data-execution_count="20">
+<div id="d4e93878" class="cell" data-execution_count="20">
 <div class="sourceCode cell-code" id="cb30"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a>dfs.geometry.plot.mesh()<span class="op">;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display">
 <div>
@@ -432,7 +432,7 @@ geometry: Dfsu2D (2259 elements, 1296 nodes)</code></pre>
 </div>
 </div>
 </div>
-<div id="2d5c201e" class="cell" data-execution_count="21">
+<div id="17bb98cd" class="cell" data-execution_count="21">
 <div class="sourceCode cell-code" id="cb31"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a><span class="co"># scatter data: x,y,value for 4 points</span></span>
 <span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a>scatter<span class="op">=</span> np.array([[<span class="dv">1</span>,<span class="dv">50</span>,<span class="dv">1</span>], [<span class="dv">4</span>, <span class="dv">52</span>, <span class="dv">3</span>], [<span class="dv">8</span>, <span class="dv">55</span>, <span class="dv">2</span>], [<span class="op">-</span><span class="dv">1</span>, <span class="dv">55</span>, <span class="fl">1.5</span>]])</span>
 <span id="cb31-3"><a href="#cb31-3" aria-hidden="true" tabindex="-1"></a>scatter</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
@@ -449,35 +449,35 @@ geometry: Dfsu2D (2259 elements, 1296 nodes)</code></pre>
 <li>calc IDW interpolatant weights</li>
 <li>Interpolate</li>
 </ul>
-<div id="f7eb1974" class="cell" data-execution_count="22">
+<div id="fa4fc6f0" class="cell" data-execution_count="22">
 <div class="sourceCode cell-code" id="cb33"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a>dist <span class="op">=</span> dist_in_meters(scatter[:,:<span class="dv">2</span>], dfs.geometry.element_coordinates[<span class="dv">0</span>,:<span class="dv">2</span>])</span>
 <span id="cb33-2"><a href="#cb33-2" aria-hidden="true" tabindex="-1"></a>dist</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="22">
 <pre><code>array([4.00139539, 3.18881018, 6.58769411, 2.69722991])</code></pre>
 </div>
 </div>
-<div id="3b51149f" class="cell" data-execution_count="23">
+<div id="3b6c45ea" class="cell" data-execution_count="23">
 <div class="sourceCode cell-code" id="cb35"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a>w <span class="op">=</span> get_idw_interpolant(dist, p<span class="op">=</span><span class="dv">2</span>)</span>
 <span id="cb35-2"><a href="#cb35-2" aria-hidden="true" tabindex="-1"></a>w</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="23">
 <pre><code>array([0.19438779, 0.30607974, 0.07171749, 0.42781498])</code></pre>
 </div>
 </div>
-<div id="0da9345e" class="cell" data-execution_count="24">
+<div id="10549215" class="cell" data-execution_count="24">
 <div class="sourceCode cell-code" id="cb37"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a>np.dot(scatter[:,<span class="dv">2</span>], w) <span class="co"># interpolated value in element 0</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="24">
 <pre><code>np.float64(1.8977844597276883)</code></pre>
 </div>
 </div>
 <p>Let’s do the same for all points in the mesh and plot in the end</p>
-<div id="3e3fcf04" class="cell" data-execution_count="25">
+<div id="d8650b1d" class="cell" data-execution_count="25">
 <div class="sourceCode cell-code" id="cb39"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a>dati <span class="op">=</span> np.zeros((<span class="dv">1</span>, dfs.geometry.n_elements))</span>
 <span id="cb39-2"><a href="#cb39-2" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> j <span class="kw">in</span> <span class="bu">range</span>(dfs.geometry.n_elements):</span>
 <span id="cb39-3"><a href="#cb39-3" aria-hidden="true" tabindex="-1"></a>    dist <span class="op">=</span> dist_in_meters(scatter[:, :<span class="dv">2</span>], dfs.geometry.element_coordinates[j, :<span class="dv">2</span>])</span>
 <span id="cb39-4"><a href="#cb39-4" aria-hidden="true" tabindex="-1"></a>    w <span class="op">=</span> get_idw_interpolant(dist, p<span class="op">=</span><span class="dv">2</span>)</span>
 <span id="cb39-5"><a href="#cb39-5" aria-hidden="true" tabindex="-1"></a>    dati[<span class="dv">0</span>, j] <span class="op">=</span> np.dot(scatter[:, <span class="dv">2</span>], w)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<div id="0b8490c3" class="cell" data-execution_count="26">
+<div id="3c2a2dc5" class="cell" data-execution_count="26">
 <div class="sourceCode cell-code" id="cb40"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a>da <span class="op">=</span> mikeio.DataArray(data<span class="op">=</span>dati, geometry<span class="op">=</span>dfs.geometry, time<span class="op">=</span>dfs.start_time)</span>
 <span id="cb40-2"><a href="#cb40-2" aria-hidden="true" tabindex="-1"></a>da</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="26">
@@ -488,7 +488,7 @@ time: 2017-10-27 00:00:00 (time-invariant)
 geometry: Dfsu2D (958 elements, 570 nodes)</code></pre>
 </div>
 </div>
-<div id="dfeef9f3" class="cell" data-execution_count="27">
+<div id="fbd14b6a" class="cell" data-execution_count="27">
 <div class="sourceCode cell-code" id="cb42"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a>da.plot(title<span class="op">=</span><span class="st">"Interpolated scatter data"</span>)<span class="op">;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display">
 <div>
@@ -498,13 +498,13 @@ geometry: Dfsu2D (958 elements, 570 nodes)</code></pre>
 </div>
 </div>
 </div>
-<div id="db894c39" class="cell" data-execution_count="28">
+<div id="0f8ab4d8" class="cell" data-execution_count="28">
 <div class="sourceCode cell-code" id="cb43"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb43-1"><a href="#cb43-1" aria-hidden="true" tabindex="-1"></a>da.to_dfs(<span class="st">"interpolated_scatter.dfsu"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </section>
 <section id="clean-up" class="level2">
 <h2 class="anchored" data-anchor-id="clean-up">Clean up</h2>
-<div id="5534e541" class="cell" data-execution_count="29">
+<div id="1b730056" class="cell" data-execution_count="29">
 <div class="sourceCode cell-code" id="cb44"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb44-1"><a href="#cb44-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> os</span>
 <span id="cb44-2"><a href="#cb44-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb44-3"><a href="#cb44-3" aria-hidden="true" tabindex="-1"></a>os.remove(<span class="st">"wind_north_sea_interpolated.dfs2"</span>)</span>
