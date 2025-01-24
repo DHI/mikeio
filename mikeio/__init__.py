@@ -121,7 +121,7 @@ def read(
     ext = Path(filename).suffix.lower()
 
     if "dfs" not in ext:
-        raise ValueError("mikeio.read() is only supported for Dfs files")
+        raise ValueError("mikeio.read() is only supported for dfs files")
 
     dfs = open(filename)
     if isinstance(dfs, Mesh):
