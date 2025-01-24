@@ -871,7 +871,7 @@ class GeometryFM2D(_GeometryFM):
         """
         points = np.atleast_2d(points)
 
-        return self.boundary_polylines.contains(points)
+        return self.boundary_polygons.contains(points)
 
     def __contains__(self, pt: np.ndarray) -> bool:
         return self.contains(pt)[0]
