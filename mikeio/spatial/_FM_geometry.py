@@ -1061,14 +1061,16 @@ class GeometryFM2D(_GeometryFM):
             xc = self.element_coordinates[:, 0]
             yc = self.element_coordinates[:, 1]
             mask = (xc >= x0) & (xc <= x1) & (yc >= y0) & (yc <= y1)
-            return np.where(mask)[0]
         elif self._area_is_polygon(area):
             polygon = np.array(area)
             xy = self.element_coordinates[:, :2]
             mask = self._inside_polygon(polygon, xy)
-            return np.where(mask)[0]
         else:
             raise ValueError("'area' must be bbox [x0,y0,x1,y1] or polygon")
+        elements = np.where(mask)[0]
+        if len(elements) == 0:
+            raise ValueError("No elements in selection!")
+        return elements
 
     def elements_to_geometry(
         self, elements: int | Sequence[int], keepdims: bool = False
