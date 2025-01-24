@@ -1,5 +1,7 @@
-from __future__ import annotations
+from dataclasses import dataclass
 from typing import Any, Literal, Sequence
+
+from numpy.typing import NDArray
 from matplotlib.axes import Axes
 from matplotlib.cm import ScalarMappable
 from matplotlib.collections import PatchCollection
@@ -8,7 +10,6 @@ from matplotlib.figure import Figure
 from matplotlib.tri import Triangulation
 import numpy as np
 from scipy.sparse import csr_matrix
-from collections import namedtuple
 
 from ._utils import _relative_cumulative_distance
 
@@ -16,17 +17,66 @@ from ._utils import _relative_cumulative_distance
 MESH_COL = "0.95"
 MESH_COL_DARK = "0.6"
 
-BoundaryPolylines = namedtuple(
-    "BoundaryPolylines",
-    ["n_exteriors", "exteriors", "n_interiors", "interiors"],
-)
+
+@dataclass
+class Polygon:
+    xy: NDArray
+
+    @property
+    def area(self) -> float:
+        return (
+            np.dot(self.xy[:, 1], np.roll(self.xy[:, 0], 1))
+            - np.dot(self.xy[:, 0], np.roll(self.xy[:, 1], 1))
+        ) * 0.5
+
+
+@dataclass
+class BoundaryPolygons:
+    exteriors: list[Polygon]
+    interiors: list[Polygon]
+
+    @property
+    def lines(self) -> list[Polygon]:
+        return self.exteriors + self.interiors
+
+    def contains(self, points: np.ndarray) -> np.ndarray:
+        """Test if a list of points are contained by mesh.
+
+        Parameters
+        ----------
+        points : array-like n-by-2
+            x,y-coordinates of n points to be tested
+
+        Returns
+        -------
+        bool array
+            True for points inside, False otherwise
+
+        """
+        import matplotlib.path as mp  # type: ignore
+
+        exterior = self.exteriors[0]
+        cnts = mp.Path(exterior.xy).contains_points(points)
+
+        if len(self.exteriors) > 1:
+            # in case of several dis-joint outer domains
+            for exterior in self.exteriors[1:]:
+                in_domain = mp.Path(exterior.xy).contains_points(points)
+                cnts = np.logical_or(cnts, in_domain)
+
+        # subtract any holes
+        for interior in self.interiors:
+            in_hole = mp.Path(interior.xy).contains_points(points)
+            cnts = np.logical_and(cnts, ~in_hole)
+
+        return cnts
 
 
 def _plot_map(
     node_coordinates: np.ndarray,
     element_table: np.ndarray,
     element_coordinates: np.ndarray,
-    boundary_polylines: BoundaryPolylines,
+    boundary_polylines: list[Polygon],
     projection: str = "",
     z: np.ndarray | None = None,
     plot_type: Literal[
@@ -347,14 +397,14 @@ def __plot_mesh_only(ax: Axes, nc: np.ndarray, element_table: np.ndarray) -> Non
     ax.add_collection(fig_obj)
 
 
-def __plot_outline_only(ax: Axes, boundary_polylines: BoundaryPolylines) -> Axes:
+def __plot_outline_only(ax: Axes, boundary_polylines: list[Polygon]) -> Axes:
     """plot outline only (no data).
 
     Parameters
     ----------
     ax : matplotlib.axes.Axes
         axes object
-    boundary_polylines : BoundaryPolylines
+    boundary_polylines : list[PolyLine]
         boundary polylines
 
     Returns
@@ -583,14 +633,14 @@ def __add_non_tri_mesh(
     ax.add_collection(p)
 
 
-def __add_outline(ax: Axes, boundary_polylines: BoundaryPolylines) -> None:
+def __add_outline(ax: Axes, boundary_polylines: list[Polygon]) -> None:
     """add outline to axes.
 
     Parameters
     ----------
     ax : matplotlib.axes.Axes
         axes object
-    boundary_polylines: BoundaryPolylines
+    boundary_polylines: list[PolyLine]
         boundary polylines
 
     Returns
@@ -598,8 +648,7 @@ def __add_outline(ax: Axes, boundary_polylines: BoundaryPolylines) -> None:
     None
 
     """
-    lines = boundary_polylines.exteriors + boundary_polylines.interiors
-    for line in lines:
+    for line in boundary_polylines:
         ax.plot(*line.xy.T, color="0.4", linewidth=1.2)
 
 
