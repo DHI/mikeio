@@ -394,13 +394,12 @@ class _Dfs123:
             # TODO this is not used, since Dfs3 has a separate .read method
             shape = (nt, self.nz, self.ny, self.nx)  # type: ignore
 
-        spdims = self.geometry.default_dims
-        dims = ["time"]
-        dims.extend(spdims)
+        dims = self.geometry.default_dims
 
         if single_time_selected and not keepdims:
             shape = shape[1:]
-            dims = dims[1:]
+        else:
+            dims = ["time"] + list(dims)
 
         data_list: list[np.ndarray] = [
             np.ndarray(shape=shape, dtype=dtype) for _ in range(n_items)
@@ -421,10 +420,7 @@ class _Dfs123:
                     d = d.reshape(self.ny, self.nx)  # type: ignore
 
                 if single_time_selected:
-                    if keepdims:
-                        data_list[item] = np.atleast_2d(d)
-                    else:
-                        data_list[item] = d
+                    data_list[item] = np.atleast_2d(d) if keepdims else d
                 else:
                     data_list[item][i] = d
 
