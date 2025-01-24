@@ -421,7 +421,7 @@ class Dfsu2DH:
             Read only data inside (horizontal) area given as a
             bounding box (tuple with left, lower, right, upper)
             or as list of coordinates for a polygon, by default None
-        x, y: float, optional
+        x, y: float or list[float], optional
             Read only data for elements containing the (x,y) points(s),
             by default None
         elements: list[int], optional
@@ -447,8 +447,6 @@ class Dfsu2DH:
         single_time_selected, time_steps = _valid_timesteps(dfs, time)
 
         _validate_elements_and_geometry_sel(elements, area=area, x=x, y=y)
-        # if elements is None:
-        #    elements = self._parse_geometry_sel(area=area, x=x, y=y)
         if area is not None:
             elements = self.geometry._elements_in_area(area)
 
@@ -464,44 +462,34 @@ class Dfsu2DH:
             geometry = self.geometry.elements_to_geometry(elements)
 
         item_numbers = _valid_item_numbers(dfs.ItemInfo, items)
-        items = _get_item_info(dfs.ItemInfo, item_numbers)
         n_items = len(item_numbers)
-
-        deletevalue = self.deletevalue
-
-        data_list = []
-
-        shape: tuple[int, ...]
 
         t_rel = np.zeros(len(time_steps))
 
         n_steps = len(time_steps)
-        shape = (
+        shape: tuple[int, ...] = (
             (n_elems,)
             if (single_time_selected and not keepdims)
             else (n_steps, n_elems)
         )
-        for item in range(n_items):
-            # Initialize an empty data block
-            data: np.ndarray = np.ndarray(shape=shape, dtype=dtype)
-            data_list.append(data)
+        data_list: list[np.ndarray] = [
+            np.ndarray(shape=shape, dtype=dtype) for _ in range(n_items)
+        ]
 
         for i in trange(n_steps, disable=not self.show_progress):
-            it = time_steps[i]
             for item in range(n_items):
-                dfs, d, t = _read_item_time_step(
+                dfs, d, t_rel[i] = _read_item_time_step(
                     dfs=dfs,
                     filename=self._filename,
                     time=time,
                     item_numbers=item_numbers,
-                    deletevalue=deletevalue,
+                    deletevalue=self.deletevalue,
                     shape=shape,
                     item=item,
-                    it=it,
+                    it=time_steps[i],
                     error_bad_data=error_bad_data,
                     fill_bad_data_value=fill_bad_data_value,
                 )
-                t_rel[i] = t
 
                 if elements is not None:
                     d = d[elements]
@@ -511,13 +499,9 @@ class Dfsu2DH:
                 else:
                     data_list[item][i] = d
 
-        time = pd.to_datetime(t_rel, unit="s", origin=self.start_time)
-
         dfs.Close()
 
-        dims: tuple[str, ...]
-
-        dims = ("time", "element")
+        dims: tuple[str, ...] = ("time", "element")
 
         if single_time_selected and not keepdims:
             dims = ("element",)
@@ -527,10 +511,13 @@ class Dfsu2DH:
             dims = tuple([d for d in dims if d != "element"])
             data_list = [np.squeeze(d, axis=-1) for d in data_list]
 
+        time = pd.to_datetime(t_rel, unit="s", origin=self.start_time)
+        item_infos = _get_item_info(dfs.ItemInfo, item_numbers)
+
         return Dataset(
             data_list,
             time,
-            items,
+            item_infos,
             geometry=geometry,
             dims=dims,
             validate=False,
