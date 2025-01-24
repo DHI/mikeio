@@ -259,6 +259,35 @@ def test_read_elements():
     assert ds2.Wind_speed.to_numpy()[0, 1] == pytest.approx(9.530759811401367)
 
 
+def test_read_x_y() -> None:
+    x = [1.49318531, 3.69276145]
+    y = [53.97088571, 54.08928194]
+    dfs = mikeio.open("tests/testdata/wind_north_sea.dfsu")
+    assert isinstance(dfs, mikeio.Dfsu2DH)
+    ds = dfs.read(x=x, y=y, time=0, keepdims=True)
+    assert isinstance(ds.geometry, mikeio.GeometryFM2D)
+    assert ds.geometry.element_coordinates[0][0] == pytest.approx(1.4931853081272184)
+    assert ds.Wind_speed.to_numpy()[0, 0] == pytest.approx(9.530759811401367)
+
+    x = x[::-1]
+    y = y[::-1]
+    ds2 = mikeio.read(
+        filename="tests/testdata/wind_north_sea.dfsu", x=x, y=y, time=0, keepdims=True
+    )
+    assert isinstance(ds2.geometry, mikeio.GeometryFM2D)
+    assert ds2.geometry.element_coordinates[1][0] == pytest.approx(1.4931853081272184)
+    assert ds2.Wind_speed.to_numpy()[0, 1] == pytest.approx(9.530759811401367)
+
+    x = 1.49318531
+    y = 53.97088571
+    ds3 = mikeio.read(
+        filename="tests/testdata/wind_north_sea.dfsu", x=x, y=y, time=0, keepdims=True
+    )
+    assert isinstance(ds3.geometry, mikeio.spatial.GeometryPoint2D)
+    assert ds3.geometry.x == pytest.approx(1.4931853081272184)
+    assert ds3.geometry.y == pytest.approx(53.97088571)
+
+
 def test_find_index_on_island():
     filename = "tests/testdata/FakeLake.dfsu"
     dfs = mikeio.open(filename)
