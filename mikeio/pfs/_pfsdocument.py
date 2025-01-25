@@ -2,7 +2,7 @@ from __future__ import annotations
 import re
 import warnings
 from collections import Counter
-from collections.abc import Mapping, Sequence
+from collections.abc import Mapping
 from datetime import datetime
 from pathlib import Path
 from typing import Any, Callable, TextIO
@@ -88,23 +88,20 @@ class PfsDocument(PfsSection):
 
     def __init__(
         self,
-        data: TextIO | PfsSection | Mapping[str | PfsSection, Any] | str | Path,
+        data: TextIO | Mapping[str | PfsSection, Any] | str | Path,
         *,
         encoding: str = "cp1252",
-        names: Sequence[str] | None = None,
         unique_keywords: bool = False,
     ) -> None:
         if isinstance(data, (str, Path)) or hasattr(data, "read"):
-            if names is not None:
-                raise ValueError("names cannot be given as argument if input is a file")
             names, sections = self._read_pfs_file(data, encoding, unique_keywords)  # type: ignore
         else:
-            names, sections = self._parse_non_file_input(data, names)
+            names, sections = self._parse_non_file_input(data)
 
         d = self._to_nonunique_key_dict(names, sections)
         super().__init__(d)
 
-        self._ALIAS_LIST = ["_ALIAS_LIST"]  # ignore these in key list
+        self._ALIAS_LIST = set(["_ALIAS_LIST"])  # ignore these in key list
         if self._is_FM_engine:
             self._add_all_FM_aliases()
 
@@ -210,46 +207,15 @@ class PfsDocument(PfsSection):
 
     @staticmethod
     def _parse_non_file_input(
-        input: (
-            Mapping[str | PfsSection, Any]
-            | PfsSection
-            | Sequence[PfsSection]
-            | Sequence[dict]
-        ),
-        names: Sequence[str] | None = None,
-    ) -> tuple[Sequence[str], list[PfsSection]]:
-        """dict/PfsSection or lists of these can be parsed."""
-        if names is None:
-            assert isinstance(input, Mapping), "input must be a mapping"
-            names, sections = PfsDocument._unravel_items(input.items)
-            for sec in sections:
-                assert isinstance(
-                    sec, Mapping
-                ), "all targets must be PfsSections/dict (no key-value pairs allowed in the root)"
-            return names, sections
-
-        if isinstance(names, str):
-            names = [names]
-
-        if isinstance(input, PfsSection):
-            sections = [input]
-        elif isinstance(input, dict):
-            sections = [PfsSection(input)]
-        elif isinstance(input, Sequence):
-            if isinstance(input[0], PfsSection):
-                sections = input  # type: ignore
-            elif isinstance(input[0], dict):
-                sections = [PfsSection(d) for d in input]
-            else:
-                raise ValueError("List input must contain either dict or PfsSection")
-        else:
-            raise ValueError(
-                f"Input of type ({type(input)}) could not be parsed (pfs file, dict, PfsSection, lists of dict or PfsSection)"
-            )
-        if len(names) != len(sections):
-            raise ValueError(
-                f"Length of names ({len(names)}) does not match length of target sections ({len(sections)})"
-            )
+        input: (Mapping[str | PfsSection, Any]),
+    ) -> tuple[list[str], list[PfsSection]]:
+        assert isinstance(input, Mapping), "input must be a mapping"
+        names, sections = PfsDocument._unravel_items(input.items)
+        for sec in sections:
+            if not isinstance(sec, Mapping):
+                raise ValueError(
+                    "all targets must be PfsSections/dict (no key-value pairs allowed in the root)"
+                )
         return names, sections
 
     @property
@@ -276,10 +242,10 @@ class PfsDocument(PfsSection):
         target = self.targets[0]
         if hasattr(target, module) and hasattr(target, "MODULE_SELECTION"):
             mode_name = f"mode_of_{module.lower()}"
-            mode_of = int(self.targets[0].MODULE_SELECTION.get(mode_name, 0))
+            mode_of = int(target.MODULE_SELECTION.get(mode_name, 0))
             if mode_of > 0:
-                setattr(self, alias, self.targets[0][module])
-                self._ALIAS_LIST.append(alias)
+                setattr(self, alias, target[module])
+                self._ALIAS_LIST.add(alias)
 
     def _pfs2yaml(
         self, filename: str | Path | TextIO, encoding: str | None = None
