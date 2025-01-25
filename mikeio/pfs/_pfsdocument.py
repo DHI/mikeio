@@ -255,7 +255,7 @@ class PfsDocument(PfsSection):
         else:
             pfsstring = Path(filename).read_text(encoding=encoding)
 
-        lines = pfsstring.split("\n")
+        lines = pfsstring.splitlines()
 
         output = []
         output.append("---")

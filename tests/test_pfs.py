@@ -313,8 +313,8 @@ def assert_files_match(f1, f2) -> None:
 
 def assert_txt_files_match(f1, f2, comment="//") -> None:
     """Checks non"""
-    file1lines = Path(f1).read_text().split("\n")
-    file2lines = Path(f1).read_text().split("\n")
+    file1lines = Path(f1).read_text().splitlines()
+    file2lines = Path(f1).read_text().splitlines()
 
     for a, b in zip(file1lines, file2lines):
         s1 = a.strip()
@@ -635,7 +635,7 @@ EndSect // ENGINE
     outfile = tmp_path / "empty.pfs"
     pfs.write(outfile)
 
-    outlines = Path(outfile).read_text().split("\n")
+    outlines = Path(outfile).read_text().splitlines()
 
     assert outlines[5].strip() == "A ="
     assert outlines[6].strip() == "[B]"
@@ -669,7 +669,7 @@ EndSect // ENGINE
     outfile = tmp_path / "difficult_chars_in_str.pfs"
     pfs.write(outfile)
 
-    outlines = Path(outfile).read_text().split("\n")
+    outlines = Path(outfile).read_text().splitlines()
 
     assert outlines[5].strip() == "A = 'str,s/d\sd.dfs0'"
     assert outlines[6].strip() == "B = 'str,sd'sd.dfs0'"
@@ -693,7 +693,7 @@ EndSect // ENGINE"""
     outfile = tmp_path / "difficult_chars_in_str2.pfs"
     pfs.write(outfile)
 
-    outlines = Path(outfile).read_text().split("\n")
+    outlines = Path(outfile).read_text().splitlines()
 
     assert outlines[5].strip() == "A = 'str,s/d\sd.dfs0'"
     assert outlines[6].strip() == "B = 'str,sd'sd.dfs0'"
@@ -743,7 +743,7 @@ EndSect // ENGINE
 
     pfs.write(outfile)
 
-    outlines = Path(outfile).read_text().split("\n")
+    outlines = Path(outfile).read_text().splitlines()
 
     n_rgb_out = len([line for line in outlines if "RGB_Color_Value" in line])
     assert n_rgb_out == 2
@@ -990,7 +990,7 @@ def test_nonunique_mixed_keywords_sections1(tmp_path) -> None:
     filename = tmp_path / "nonunique_mixed_keywords_sections.pfs"
     pfs.write(filename)
 
-    outlines = Path(filename).read_text().split("\n")
+    outlines = Path(filename).read_text().splitlines()
 
     assert outlines[5].strip() == "A = '1'"
     assert outlines[6].strip() == "A = 0"
