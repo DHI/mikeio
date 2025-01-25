@@ -4,7 +4,6 @@ from datetime import datetime
 from types import SimpleNamespace
 from typing import (
     Any,
-    Callable,
     ItemsView,
     Mapping,
     MutableMapping,
