@@ -297,17 +297,16 @@ class PfsSection(SimpleNamespace, MutableMapping[str, Any]):
 
     def _to_txt_lines(self) -> list[str]:
         lines: list[str] = []
-        self.append_to_lines_at_level(lines)
+        self._append_to_lines_at_level(lines)
         return lines
 
-    def append_to_lines_at_level(self, lines: list[str], level: int = 0) -> None:
-        newline = ""
+    def _append_to_lines_at_level(self, lines: list[str], level: int = 0) -> None:
         lvl_prefix = "   "
         for k, v in self.items():
             # check for empty sections
             if v is None:
-                lines.append(f"{lvl_prefix * level}[{k}]{newline}")
-                lines.append(f"{lvl_prefix * level}EndSect  // {k}{newline}{newline}")
+                lines.append(f"{lvl_prefix * level}[{k}]")
+                lines.append(f"{lvl_prefix * level}EndSect  // {k}")
 
             elif isinstance(v, list) and any(
                 isinstance(subv, PfsSection) for subv in v
@@ -316,26 +315,26 @@ class PfsSection(SimpleNamespace, MutableMapping[str, Any]):
                 for subv in v:
                     if isinstance(subv, PfsSection):
                         subsec = PfsSection({k: subv})
-                        subsec.append_to_lines_at_level(lines, level=level)
+                        subsec._append_to_lines_at_level(lines, level=level)
                     else:
                         subv = self._prepare_value_for_write(subv)
-                        lines.append(f"{lvl_prefix * level}{k} = {subv}{newline}")
+                        lines.append(f"{lvl_prefix * level}{k} = {subv}")
             elif isinstance(v, PfsSection):
-                lines.append(f"{lvl_prefix * level}[{k}]{newline}")
-                v.append_to_lines_at_level(lines, level=(level + 1))
-                lines.append(f"{lvl_prefix * level}EndSect  // {k}{newline}{newline}")
+                lines.append(f"{lvl_prefix * level}[{k}]")
+                v._append_to_lines_at_level(lines, level=(level + 1))
+                lines.append(f"{lvl_prefix * level}EndSect  // {k}")
             elif isinstance(v, PfsNonUniqueList) or (
                 isinstance(v, list) and all([isinstance(vv, list) for vv in v])
             ):
                 if len(v) == 0:
                     # empty list -> keyword with no parameter
-                    lines.append(f"{lvl_prefix * level}{k} = {newline}")
+                    lines.append(f"{lvl_prefix * level}{k} = ")
                 for subv in v:
                     subv = self._prepare_value_for_write(subv)
-                    lines.append(f"{lvl_prefix * level}{k} = {subv}{newline}")
+                    lines.append(f"{lvl_prefix * level}{k} = {subv}")
             else:
                 v = self._prepare_value_for_write(v)
-                lines.append(f"{lvl_prefix * level}{k} = {v}{newline}")
+                lines.append(f"{lvl_prefix * level}{k} = {v}")
 
     def _prepare_value_for_write(
         self, v: str | bool | datetime | list[str | bool | datetime]
