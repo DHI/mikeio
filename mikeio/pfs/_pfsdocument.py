@@ -258,20 +258,23 @@ class PfsDocument(PfsSection):
 
     def _add_all_FM_aliases(self) -> None:
         """create MIKE FM module aliases."""
-        self._add_FM_alias("HD", "HYDRODYNAMIC_MODULE")
-        self._add_FM_alias("SW", "SPECTRAL_WAVE_MODULE")
-        self._add_FM_alias("TR", "TRANSPORT_MODULE")
-        self._add_FM_alias("MT", "MUD_TRANSPORT_MODULE")
-        self._add_FM_alias("EL", "ECOLAB_MODULE")
-        self._add_FM_alias("ST", "SAND_TRANSPORT_MODULE")
-        self._add_FM_alias("PT", "PARTICLE_TRACKING_MODULE")
-        self._add_FM_alias("DA", "DATA_ASSIMILATION_MODULE")
+        ALIASES = {
+            "HD": "HYDRODYNAMIC_MODULE",
+            "SW": "SPECTRAL_WAVE_MODULE",
+            "TR": "TRANSPORT_MODULE",
+            "MT": "MUD_TRANSPORT_MODULE",
+            "EL": "ECOLAB_MODULE",
+            "ST": "SAND_TRANSPORT_MODULE",
+            "PT": "PARTICLE_TRACKING_MODULE",
+            "DA": "DATA_ASSIMILATION_MODULE",
+        }
+        for alias, module in ALIASES.items():
+            self._add_FM_alias(alias, module)
 
     def _add_FM_alias(self, alias: str, module: str) -> None:
         """Add short-hand alias for MIKE FM module, e.g. SW, but only if active!"""
-        if hasattr(self.targets[0], module) and hasattr(
-            self.targets[0], "MODULE_SELECTION"
-        ):
+        target = self.targets[0]
+        if hasattr(target, module) and hasattr(target, "MODULE_SELECTION"):
             mode_name = f"mode_of_{module.lower()}"
             mode_of = int(self.targets[0].MODULE_SELECTION.get(mode_name, 0))
             if mode_of > 0:
@@ -284,8 +287,7 @@ class PfsDocument(PfsSection):
         if hasattr(filename, "read"):  # To read in memory strings StringIO
             pfsstring = filename.read()
         else:
-            with open(filename, encoding=encoding) as f:
-                pfsstring = f.read()
+            pfsstring = Path(filename).read_text(encoding=encoding)
 
         lines = pfsstring.split("\n")
 
@@ -399,19 +401,12 @@ class PfsDocument(PfsSection):
         """
         from mikeio import __version__ as mikeio_version
 
-        # if filename is None:
-        #    return self._to_txt_lines()
+        now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        header = f"""// Created     : {now}
+// By          : MIKE IO
+// Version     : {mikeio_version}
 
-        with open(filename, "w") as f:
-            now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-            f.write(f"// Created     : {now}\n")
-            f.write(r"// By          : MIKE IO")
-            f.write("\n")
-            f.write(rf"// Version     : {mikeio_version}")
-            f.write("\n\n")
+"""
+        txt = header + "\n".join(self._to_txt_lines())
 
-            self._write_with_func(f.write, level=0)
-
-
-# TODO remove this alias
-Pfs = PfsDocument
+        Path(filename).write_text(txt)

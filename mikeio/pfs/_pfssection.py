@@ -298,30 +298,17 @@ class PfsSection(SimpleNamespace, MutableMapping[str, Any]):
 
     def _to_txt_lines(self) -> list[str]:
         lines: list[str] = []
-        self._write_with_func(lines.append, newline="")
+        self.append_to_lines_at_level(lines)
         return lines
 
-    def _write_with_func(
-        self, func: Callable[[str], Any], level: int = 0, newline: str = "\n"
-    ) -> None:
-        """Write pfs nested objects.
-
-        Parameters
-        ----------
-        func : Callable
-            A function that performs the writing e.g. to a file
-        level : int, optional
-            Level of indentation (add 3 spaces for each), by default 0
-        newline : str, optional
-            newline string, by default "\n"
-
-        """
+    def append_to_lines_at_level(self, lines: list[str], level: int = 0) -> None:
+        newline = ""
         lvl_prefix = "   "
         for k, v in self.items():
             # check for empty sections
             if v is None:
-                func(f"{lvl_prefix * level}[{k}]{newline}")
-                func(f"{lvl_prefix * level}EndSect  // {k}{newline}{newline}")
+                lines.append(f"{lvl_prefix * level}[{k}]{newline}")
+                lines.append(f"{lvl_prefix * level}EndSect  // {k}{newline}{newline}")
 
             elif isinstance(v, list) and any(
                 isinstance(subv, PfsSection) for subv in v
@@ -330,26 +317,26 @@ class PfsSection(SimpleNamespace, MutableMapping[str, Any]):
                 for subv in v:
                     if isinstance(subv, PfsSection):
                         subsec = PfsSection({k: subv})
-                        subsec._write_with_func(func, level=level, newline=newline)
+                        subsec.append_to_lines_at_level(lines, level=level)
                     else:
                         subv = self._prepare_value_for_write(subv)
-                        func(f"{lvl_prefix * level}{k} = {subv}{newline}")
+                        lines.append(f"{lvl_prefix * level}{k} = {subv}{newline}")
             elif isinstance(v, PfsSection):
-                func(f"{lvl_prefix * level}[{k}]{newline}")
-                v._write_with_func(func, level=(level + 1), newline=newline)
-                func(f"{lvl_prefix * level}EndSect  // {k}{newline}{newline}")
+                lines.append(f"{lvl_prefix * level}[{k}]{newline}")
+                v.append_to_lines_at_level(lines, level=(level + 1))
+                lines.append(f"{lvl_prefix * level}EndSect  // {k}{newline}{newline}")
             elif isinstance(v, PfsNonUniqueList) or (
                 isinstance(v, list) and all([isinstance(vv, list) for vv in v])
             ):
                 if len(v) == 0:
                     # empty list -> keyword with no parameter
-                    func(f"{lvl_prefix * level}{k} = {newline}")
+                    lines.append(f"{lvl_prefix * level}{k} = {newline}")
                 for subv in v:
                     subv = self._prepare_value_for_write(subv)
-                    func(f"{lvl_prefix * level}{k} = {subv}{newline}")
+                    lines.append(f"{lvl_prefix * level}{k} = {subv}{newline}")
             else:
                 v = self._prepare_value_for_write(v)
-                func(f"{lvl_prefix * level}{k} = {v}{newline}")
+                lines.append(f"{lvl_prefix * level}{k} = {v}{newline}")
 
     def _prepare_value_for_write(
         self, v: str | bool | datetime | list[str | bool | datetime]

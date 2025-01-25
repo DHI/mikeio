@@ -1,4 +1,5 @@
 from io import StringIO
+from pathlib import Path
 import sys
 import pytest
 import mikeio
@@ -283,7 +284,6 @@ def test_basic():
 
 
 def test_pfsdocument_copy():
-
     pfs = mikeio.PfsDocument("tests/testdata/pfs/simple.pfs")
     pfs2 = pfs.copy()
     data = pfs.targets[0]
@@ -308,22 +308,16 @@ def test_mztoolbox():
 
 
 def assert_files_match(f1, f2):
-    with open(f1) as file:
-        file1txt = file.read()
-
-    with open(f2) as file:
-        file2txt = file.read()
+    file1txt = Path(f1).read_text()
+    file2txt = Path(f2).read_text()
 
     assert file1txt == file2txt
 
 
 def assert_txt_files_match(f1, f2, comment="//") -> None:
     """Checks non"""
-    with open(f1) as file:
-        file1lines = file.read().split("\n")
-
-    with open(f2) as file:
-        file2lines = file.read().split("\n")
+    file1lines = Path(f1).read_text().split("\n")
+    file2lines = Path(f1).read_text().split("\n")
 
     for a, b in zip(file1lines, file2lines):
         s1 = a.strip()
@@ -644,8 +638,7 @@ EndSect // ENGINE
     outfile = tmp_path / "empty.pfs"
     pfs.write(outfile)
 
-    with open(outfile) as f:
-        outlines = f.readlines()
+    outlines = Path(outfile).read_text().split("\n")
 
     assert outlines[5].strip() == "A ="
     assert outlines[6].strip() == "[B]"
@@ -672,15 +665,14 @@ EndSect // ENGINE
     assert isinstance(pfs.ENGINE.B[0], str)
     assert pfs.ENGINE.B[0] == "str,sd'sd.dfs0"
     assert isinstance(pfs.ENGINE.C, str)
-    assert pfs.ENGINE.C == "|sd\U0001F600s\d.dfs0|"
+    assert pfs.ENGINE.C == "|sd\U0001f600s\d.dfs0|"
     assert isinstance(pfs.ENGINE.D, str)
-    assert pfs.ENGINE.E == "|str,s\U0001F600+-s_d.dfs0|"
+    assert pfs.ENGINE.E == "|str,s\U0001f600+-s_d.dfs0|"
 
     outfile = tmp_path / "difficult_chars_in_str.pfs"
     pfs.write(outfile)
 
-    with open(outfile) as f:
-        outlines = f.readlines()
+    outlines = Path(outfile).read_text().split("\n")
 
     assert outlines[5].strip() == "A = 'str,s/d\sd.dfs0'"
     assert outlines[6].strip() == "B = 'str,sd'sd.dfs0'"
@@ -704,8 +696,7 @@ EndSect // ENGINE"""
     outfile = tmp_path / "difficult_chars_in_str2.pfs"
     pfs.write(outfile)
 
-    with open(outfile) as f:
-        outlines = f.readlines()
+    outlines = Path(outfile).read_text().split("\n")
 
     assert outlines[5].strip() == "A = 'str,s/d\sd.dfs0'"
     assert outlines[6].strip() == "B = 'str,sd'sd.dfs0'"
@@ -755,8 +746,7 @@ EndSect // ENGINE
 
     pfs.write(outfile)
 
-    with open(outfile) as f:
-        outlines = f.readlines()
+    outlines = Path(outfile).read_text().split("\n")
 
     n_rgb_out = len([line for line in outlines if "RGB_Color_Value" in line])
     assert n_rgb_out == 2
@@ -1003,8 +993,7 @@ def test_nonunique_mixed_keywords_sections1(tmp_path):
     filename = tmp_path / "nonunique_mixed_keywords_sections.pfs"
     pfs.write(filename)
 
-    with open(filename) as f:
-        outlines = f.readlines()
+    outlines = Path(filename).read_text().split("\n")
 
     assert outlines[5].strip() == "A = '1'"
     assert outlines[6].strip() == "A = 0"
