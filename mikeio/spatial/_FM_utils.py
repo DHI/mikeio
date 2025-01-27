@@ -29,6 +29,13 @@ class Polygon:
             - np.dot(self.xy[:, 0], np.roll(self.xy[:, 1], 1))
         ) * 0.5
 
+    def to_wkt(self) -> str:
+        coordinates = ", ".join(f"{x} {y}" for x, y in self.xy)
+        return f"POLYGON(({coordinates}))"
+
+    def __repr__(self) -> str:
+        return self.to_wkt()
+
 
 @dataclass
 class BoundaryPolygons:
