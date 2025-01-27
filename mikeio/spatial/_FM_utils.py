@@ -76,7 +76,7 @@ def _plot_map(
     node_coordinates: np.ndarray,
     element_table: np.ndarray,
     element_coordinates: np.ndarray,
-    boundary_polylines: list[Polygon],
+    boundary_polygons: list[Polygon],
     projection: str = "",
     z: np.ndarray | None = None,
     plot_type: Literal[
@@ -105,8 +105,8 @@ def _plot_map(
         element table
     element_coordinates: np.array
         element coordinates
-    boundary_polylines: BoundaryPolylines,
-        boundary polylines
+    boundary_polygons: list[Polygon],
+        boundary polygons
     projection: str, optional
         projection type, default: ""
     z: np.array or a Dataset with a single item, optional
@@ -193,7 +193,7 @@ def _plot_map(
     _set_xy_label_by_projection(ax, projection)
 
     if plot_type == "outline_only":
-        __plot_outline_only(ax, boundary_polylines)
+        __plot_outline_only(ax, boundary_polygons)
         return ax
 
     if plot_type == "mesh_only":
@@ -271,7 +271,7 @@ def _plot_map(
             __add_non_tri_mesh(ax, nc, element_table, plot_type)
 
     if show_outline:
-        __add_outline(ax, boundary_polylines)
+        __add_outline(ax, boundary_polygons)
 
     if add_colorbar:
         __add_colorbar(ax, cmap_ScMappable, fig_obj, label, levels, cbar_extend)
@@ -397,23 +397,8 @@ def __plot_mesh_only(ax: Axes, nc: np.ndarray, element_table: np.ndarray) -> Non
     ax.add_collection(fig_obj)
 
 
-def __plot_outline_only(ax: Axes, boundary_polylines: list[Polygon]) -> Axes:
-    """plot outline only (no data).
-
-    Parameters
-    ----------
-    ax : matplotlib.axes.Axes
-        axes object
-    boundary_polylines : list[PolyLine]
-        boundary polylines
-
-    Returns
-    -------
-    matplotlib.axes.Axes
-        axes object
-
-    """
-    __add_outline(ax, boundary_polylines)
+def __plot_outline_only(ax: Axes, boundary_polygons: list[Polygon]) -> Axes:
+    __add_outline(ax, boundary_polygons)
     return ax
 
 
@@ -633,22 +618,8 @@ def __add_non_tri_mesh(
     ax.add_collection(p)
 
 
-def __add_outline(ax: Axes, boundary_polylines: list[Polygon]) -> None:
-    """add outline to axes.
-
-    Parameters
-    ----------
-    ax : matplotlib.axes.Axes
-        axes object
-    boundary_polylines: list[PolyLine]
-        boundary polylines
-
-    Returns
-    -------
-    None
-
-    """
-    for line in boundary_polylines:
+def __add_outline(ax: Axes, boundary_polygons: list[Polygon]) -> None:
+    for line in boundary_polygons:
         ax.plot(*line.xy.T, color="0.4", linewidth=1.2)
 
 
