@@ -530,7 +530,7 @@ class _DataArrayPlotterFM(_DataArrayPlotter):
         figsize: tuple[float, float] | None = None,
         **kwargs: Any,
     ) -> Axes:
-        """Plot domain outline (using the boundary_polylines property).
+        """Plot domain outline (using the boundary_polygons property).
 
         Examples
         --------
@@ -563,7 +563,7 @@ class _DataArrayPlotterFM(_DataArrayPlotter):
             node_coordinates=geometry.node_coordinates,
             element_table=geometry.element_table,
             element_coordinates=geometry.element_coordinates,
-            boundary_polylines=geometry.boundary_polylines.lines,
+            boundary_polygons=geometry.boundary_polygons.lines,
             projection=geometry.projection,
             z=values,
             ax=ax,

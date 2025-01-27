@@ -114,7 +114,7 @@ class _GeometryFMPlotter:
             node_coordinates=g.node_coordinates,
             element_table=g.element_table,
             element_coordinates=g.element_coordinates,
-            boundary_polylines=g.boundary_polygons.lines,
+            boundary_polygons=g.boundary_polygons.lines,
             plot_type=plot_type,
             projection=g.projection,
             z=None,
@@ -153,7 +153,7 @@ class _GeometryFMPlotter:
         figsize: tuple[float, float] | None = None,
         ax: Axes | None = None,
     ) -> Axes:
-        """Plot domain outline (using the boundary_polylines property)."""
+        """Plot domain outline (using the boundary_polygons property)."""
         ax = self._get_ax(ax=ax, figsize=figsize)
         ax.set_aspect(self._plot_aspect())
 
@@ -903,7 +903,7 @@ class GeometryFM2D(_GeometryFM):
         return polygons
 
     def _get_boundary_polygons(self) -> BoundaryPolygons:
-        """Get boundary polylines and categorize as inner or outer by assessing the signed area."""
+        """Get boundary polygons and categorize as inner or outer by assessing the signed area."""
         polygons = self._get_boundary_polygons_uncategorized()
 
         interiors = []
