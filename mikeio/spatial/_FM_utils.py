@@ -40,68 +40,6 @@ def _plot_map(
     ax: Axes | None = None,
     add_colorbar: bool = True,
 ) -> Axes:
-    """Plot unstructured data and/or mesh, mesh outline.
-
-    Parameters
-    ----------
-    node_coordinates: np.array
-        node coordinates
-    element_table: np.array
-        element table
-    element_coordinates: np.array
-        element coordinates
-    boundary_polygons: list[Polygon]
-        boundary polygons
-    projection: str, optional
-        projection type, default: ""
-    z: np.array or a Dataset with a single item, optional
-        value for each element to plot, default bathymetry
-    plot_type: str, optional
-        type of plot: 'patch' (default), 'mesh_only', 'shaded',
-        'contour', 'contourf' or 'outline_only'
-    title: str, optional
-        axes title
-    label: str, optional
-        colorbar label (or title if contour plot)
-    cmap: matplotlib.cm.cmap, optional
-        colormap, default viridis
-    vmin: real, optional
-        lower bound of values to be shown on plot, default:None
-    vmax: real, optional
-        upper bound of values to be shown on plot, default:None
-    levels: int, list(float), optional
-        for contour plots: how many levels, default:10
-        or a list of discrete levels e.g. [3.0, 4.5, 6.0]
-    show_mesh: bool, optional
-        should the mesh be shown on the plot? default=True
-    show_outline: bool, optional
-        should domain outline be shown on the plot? default=True
-    n_refinements: int, optional
-        for 'shaded' and 'contour' plots (and if show_mesh=False)
-        do this number of mesh refinements for smoother plotting
-    figsize: (float, float), optional
-        specify size of figure
-    ax: matplotlib.axes, optional
-        Adding to existing axis, instead of creating new fig
-    add_colorbar: bool
-        Add colorbar to plot, default True
-
-    Returns
-    -------
-    <matplotlib.axes>
-
-    Examples
-    --------
-    >>> dfs = Dfsu("HD2D.dfsu")
-    >>> dfs.plot() # bathymetry
-    >>> ds = dfs.read(items="Surface elevation", time=0)
-    >>> ds.shape
-    (1, 884)
-    >>> ds.n_items
-    1
-    >>> dfs.plot(z=ds) # plot surface elevation
-
-    """
     import matplotlib.pyplot as plt
     import matplotlib
 
