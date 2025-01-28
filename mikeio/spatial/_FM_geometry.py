@@ -352,6 +352,11 @@ class _GeometryFM(_Geometry):
         """Number of elements."""
         return len(self._element_ids)
 
+    def __len__(self) -> int:
+        "Number of elements."
+        # TODO it can be discussed whether n_elements is the correct length, but most values are defined on elements
+        return self.n_elements
+
     @property
     def element_ids(self) -> np.ndarray:
         return self._element_ids
@@ -1003,8 +1008,8 @@ class GeometryFM2D(_GeometryFM):
 
     def find_index(
         self,
-        x: float | np.ndarray | None = None,
-        y: float | np.ndarray | None = None,
+        x: float | Sequence[float] | np.ndarray | None = None,
+        y: float | Sequence[float] | np.ndarray | None = None,
         coords: np.ndarray | None = None,
         area: (
             tuple[float, float, float, float] | Sequence[tuple[float, float]] | None

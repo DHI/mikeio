@@ -654,7 +654,7 @@ class GeometryFM3D(_GeometryFMLayered):
         self.plot = _GeometryFMPlotter(self)
 
     @property
-    def boundary_polygons(self) -> Polygon:
+    def boundary_polygon(self) -> Polygon:
         return self.geometry2d.boundary_polygon
 
     def contains(self, points: np.ndarray) -> np.ndarray:
