@@ -313,9 +313,3 @@ def test_da_boundary_polygon() -> None:
     dfs = mikeio.Dfsu2DH("tests/testdata/FakeLake.dfsu")
     bnd = dfs.geometry.boundary_polygon
     assert len(bnd.interiors) == 1
-
-def test_square_with_two_holes() -> None:
-
-    nodes = 
-
-    elements = 
