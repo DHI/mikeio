@@ -30,7 +30,7 @@ dependencies = [
     "PyYAML",
     "tqdm",
     "xarray",
-    "shapely",
+    "shapely>=2.0",
 ]
 
 authors = [
@@ -69,27 +69,7 @@ dev = [
     "mypy==1.11.1",
 ]
 
-
-
-<<<<<<< HEAD
-notebooks= [
-            "nbformat",
-            "nbconvert",
-            "jupyter",
-            "netcdf4",
-            "rasterio",
-            "geopandas",
-            "scikit-learn",
-            "matplotlib",
-            "folium",
-            "mapclassify",
-            "shapely",
-        ]
-=======
-
->>>>>>> main
-
-[project.urls]test = [
+test = [
     "pytest",
     "pytest-cov",
     "xarray",
@@ -98,6 +78,7 @@ notebooks= [
     "pyproj",
     "polars",
 ]
+
 notebooks = [
     "nbformat",
     "nbconvert",
@@ -111,6 +92,8 @@ notebooks = [
     "folium",
     "mapclassify",
 ]
+
+[project.urls]
 "Homepage" = "https://github.com/DHI/mikeio"
 "Bug Tracker" = "https://github.com/DHI/mikeio/issues"
 
