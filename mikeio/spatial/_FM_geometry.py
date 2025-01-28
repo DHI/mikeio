@@ -159,9 +159,9 @@ class _GeometryFMPlotter:
         linwid = 1.2
         out_col = "0.4"
         exterior = self.g.boundary_polygon.exterior
-        ax.plot(exterior.coords, color=out_col, linewidth=linwid)
+        ax.plot(*np.array(exterior.coords).T, color=out_col, linewidth=linwid)
         for interior in self.g.boundary_polygon.interiors:
-            ax.plot(interior.coords, color=out_col, linewidth=linwid)
+            ax.plot(*np.array(interior.coords).T, color=out_col, linewidth=linwid)
         if title is not None:
             ax.set_title(title)
         ax = self._set_plot_limits(ax)

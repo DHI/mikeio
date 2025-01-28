@@ -517,7 +517,7 @@ def __add_non_tri_mesh(
 
 
 def __add_outline(ax: Axes, boundary_polygons: Polygon) -> None:
-    ax.plot(boundary_polygons.exterior.coords, color="0.4", linewidth=1.2)
+    ax.plot(*np.array(boundary_polygons.exterior.coords).T, color="0.4", linewidth=1.2)
 
 
 def _set_xy_label_by_projection(ax: Axes, projection: str) -> None:
