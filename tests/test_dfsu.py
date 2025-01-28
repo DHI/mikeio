@@ -259,6 +259,35 @@ def test_read_elements():
     assert ds2.Wind_speed.to_numpy()[0, 1] == pytest.approx(9.530759811401367)
 
 
+def test_read_x_y() -> None:
+    x = [1.49318531, 3.69276145]
+    y = [53.97088571, 54.08928194]
+    dfs = mikeio.open("tests/testdata/wind_north_sea.dfsu")
+    assert isinstance(dfs, mikeio.Dfsu2DH)
+    ds = dfs.read(x=x, y=y, time=0, keepdims=True)
+    assert isinstance(ds.geometry, mikeio.GeometryFM2D)
+    assert ds.geometry.element_coordinates[0][0] == pytest.approx(1.4931853081272184)
+    assert ds.Wind_speed.to_numpy()[0, 0] == pytest.approx(9.530759811401367)
+
+    x = x[::-1]
+    y = y[::-1]
+    ds2 = mikeio.read(
+        filename="tests/testdata/wind_north_sea.dfsu", x=x, y=y, time=0, keepdims=True
+    )
+    assert isinstance(ds2.geometry, mikeio.GeometryFM2D)
+    assert ds2.geometry.element_coordinates[1][0] == pytest.approx(1.4931853081272184)
+    assert ds2.Wind_speed.to_numpy()[0, 1] == pytest.approx(9.530759811401367)
+
+    x = 1.49318531
+    y = 53.97088571
+    ds3 = mikeio.read(
+        filename="tests/testdata/wind_north_sea.dfsu", x=x, y=y, time=0, keepdims=True
+    )
+    assert isinstance(ds3.geometry, mikeio.spatial.GeometryPoint2D)
+    assert ds3.geometry.x == pytest.approx(1.4931853081272184)
+    assert ds3.geometry.y == pytest.approx(53.97088571)
+
+
 def test_find_index_on_island():
     filename = "tests/testdata/FakeLake.dfsu"
     dfs = mikeio.open(filename)
@@ -788,9 +817,16 @@ def test_extract_track_from_dataset():
         parse_dates=True,
     )
     df.index = pd.DatetimeIndex(df.index)
+    assert ds[0].name == "Sign. Wave Height"
     track = ds.extract_track(df)
 
-    assert track[2].values[23] == approx(3.6284972794399653)
+    # This should not change the original dataset
+    track.rename({"Sign. Wave Height": "Hm0"}, inplace=True)
+    assert track["Hm0"].name == "Hm0"
+
+    assert ds[0].name == "Sign. Wave Height"
+
+    assert track["Hm0"].values[23] == approx(3.6284972794399653)
     assert sum(np.isnan(track[2].to_numpy())) == 26
     assert np.all(track[1].to_numpy() == df.latitude.values)
 
@@ -992,3 +1028,14 @@ def test_append_dfsu_2d(tmp_path):
     assert (
         ds3.V_velocity.isel(time=3).values[0] == ds2.V_velocity.isel(time=1).values[0]
     )
+
+
+def test_repr_dfsu_many_items_only_shows_number_of_items() -> None:
+    ds = mikeio.read("tests/testdata/random_data_20_items_2d.dfsu")
+    txt = repr(ds)
+    assert "number of items: 20" in txt
+
+    # repeat for mikeio.open
+    dfs = mikeio.open("tests/testdata/random_data_20_items_2d.dfsu")
+    txt_dfs = repr(dfs)
+    assert "number of items: 20" in txt_dfs

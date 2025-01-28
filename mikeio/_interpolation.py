@@ -9,7 +9,7 @@ from .spatial import GeometryUndefined
 
 
 def get_idw_interpolant(distances: np.ndarray, p: float = 2) -> np.ndarray:
-    """IDW interpolant for 2d array of distances
+    """IDW interpolant for 2d array of distances.
 
     https://pro.arcgis.com/en/pro-app/help/analysis/geostatistical-analyst/how-inverse-distance-weighted-interpolation-works.htm
 
@@ -24,6 +24,7 @@ def get_idw_interpolant(distances: np.ndarray, p: float = 2) -> np.ndarray:
     -------
     np.array
         weights
+
     """
     is_1d = distances.ndim == 1
     if is_1d:
@@ -68,7 +69,7 @@ def interp2d(
     weights: np.ndarray | None = None,
     shape: tuple[int, ...] | None = None,
 ) -> Dataset | np.ndarray:
-    """interp spatially in data (2d only)
+    """interp spatially in data (2d only).
 
     Parameters
     ----------
@@ -90,6 +91,7 @@ def interp2d(
     --------
     >>> elem_ids, weights = dfs.get_spatial_interpolant(coords)
     >>> dsi = interp2d(ds, elem_ids, weights)
+
     """
     from .dataset import DataArray, Dataset
 
@@ -157,7 +159,7 @@ def _interp_itemstep(
     elem_ids: np.ndarray,
     weights: np.ndarray | None = None,
 ) -> np.ndarray:
-    """Interpolate a single item and time step
+    """Interpolate a single item and time step.
 
     Parameters
     ----------
@@ -176,6 +178,7 @@ def _interp_itemstep(
     Notes
     -----
     This function is used internally by interp2d
+
     """
     if weights is None:
         return data[elem_ids]

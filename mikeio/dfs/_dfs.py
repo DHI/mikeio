@@ -19,7 +19,7 @@ from mikecore.DfsFileFactory import DfsFileFactory
 from mikecore.Projections import Cartography
 
 from ..dataset import Dataset
-from ..eum import EUMType, EUMUnit, ItemInfo, ItemInfoList
+from ..eum import ItemInfo, ItemInfoList
 from ..exceptions import ItemsError
 from .._time import DateTimeSelector
 
@@ -179,16 +179,21 @@ def _valid_timesteps(
 
 
 def _item_numbers_by_name(
-    dfsItemInfo: DfsDynamicItemInfo, item_names: list[str], ignore_first: bool = False
+    dfsItemInfo: list[DfsDynamicItemInfo],
+    item_names: list[str],
+    ignore_first: bool = False,
 ) -> list[int]:
-    """Utility function to find item numbers
+    """Utility function to find item numbers.
 
     Parameters
     ----------
-    dfsItemInfo : MIKE dfs ItemInfo object
-
+    dfsItemInfo : list[DfsDynamicItemInfo]
+        item info from dfs file
     item_names : list[str]
         Names of items to be found
+    ignore_first : bool, optional
+        Ignore first item, by default False
+
 
     Returns
     -------
@@ -199,6 +204,7 @@ def _item_numbers_by_name(
     ------
     KeyError
         In case item is not found in the dfs file
+
     """
     first_idx = 1 if ignore_first else 0
     names = [x.Name for x in dfsItemInfo[first_idx:]]
@@ -217,11 +223,12 @@ def _get_item_info(
     item_numbers: list[int] | None = None,
     ignore_first: bool = False,
 ) -> ItemInfoList:
-    """Read DFS ItemInfo for specific item numbers
+    """Read DFS ItemInfo for specific item numbers.
 
     Parameters
     ----------
     dfsItemInfo : list[DfsDynamicItemInfo]
+        Item info from dfs file
     item_numbers : list[int], optional
         Item numbers to read, by default all items are read
     ignore_first : bool, optional
@@ -230,6 +237,7 @@ def _get_item_info(
     Returns
     -------
     ItemInfoList
+
     """
     first_idx = 1 if ignore_first else 0
     if item_numbers is None:
@@ -349,8 +357,7 @@ class _Dfs123:
         keepdims: bool = False,
         dtype: Any = np.float32,
     ) -> Dataset:
-        """
-        Read data from a dfs file
+        """Read data from a dfs file.
 
         Parameters
         ---------
@@ -361,12 +368,14 @@ class _Dfs123:
         keepdims: bool, optional
             When reading a single time step only, should the time-dimension be kept
             in the returned Dataset? by default: False
+        dtype: data-type, optional
+            Define the dtype of the returned dataset (default = np.float32)
 
         Returns
         -------
         Dataset
-        """
 
+        """
         self._open()
 
         item_numbers = _valid_item_numbers(self._dfs.ItemInfo, items)
@@ -382,10 +391,15 @@ class _Dfs123:
         elif self._ndim == 2:
             shape = (nt, self.ny, self.nx)  # type: ignore
         else:
+            # TODO this is not used, since Dfs3 has a separate .read method
             shape = (nt, self.nz, self.ny, self.nx)  # type: ignore
+
+        dims = self.geometry.default_dims
 
         if single_time_selected and not keepdims:
             shape = shape[1:]
+        else:
+            dims = ["time"] + list(dims)
 
         data_list: list[np.ndarray] = [
             np.ndarray(shape=shape, dtype=dtype) for _ in range(n_items)
@@ -397,8 +411,8 @@ class _Dfs123:
             for item in range(n_items):
                 itemdata = self._dfs.ReadItemTimeStep(item_numbers[item] + 1, int(it))
 
-                src = itemdata.Data
-                d = src
+                d = itemdata.Data
+                assert d.ndim == 1
 
                 d[d == self.deletevalue] = np.nan
 
@@ -406,7 +420,7 @@ class _Dfs123:
                     d = d.reshape(self.ny, self.nx)  # type: ignore
 
                 if single_time_selected:
-                    data_list[item] = d
+                    data_list[item] = np.atleast_2d(d) if keepdims else d
                 else:
                     data_list[item][i] = d
 
@@ -417,10 +431,12 @@ class _Dfs123:
         items = _get_item_info(self._dfs.ItemInfo, item_numbers)
 
         self._dfs.Close()
+
         return Dataset(
-            data_list,
-            time,
-            items,
+            data=data_list,
+            time=time,
+            items=items,
+            dims=tuple(dims),
             geometry=self.geometry,
             validate=False,
             dt=self._timestep,
@@ -430,28 +446,21 @@ class _Dfs123:
         raise NotImplementedError("Should be implemented by subclass")
 
     def _get_item_info(self, item_numbers: Sequence[int]) -> list[ItemInfo]:
-        """Read DFS ItemInfo
+        """Read DFS ItemInfo.
 
         Parameters
         ----------
-        dfs : MIKE dfs object
         item_numbers : list[int]
+            Item numbers to read
 
         Returns
         -------
         list[Iteminfo]
+
         """
-        items = []
-        for item in item_numbers:
-            name = self._dfs.ItemInfo[item].Name
-            eumItem = self._dfs.ItemInfo[item].Quantity.Item
-            eumUnit = self._dfs.ItemInfo[item].Quantity.Unit
-            itemtype = EUMType(eumItem)
-            unit = EUMUnit(eumUnit)
-            data_value_type = self._dfs.ItemInfo[item].ValueType
-            item_info = ItemInfo(name, itemtype, unit, data_value_type)
-            items.append(item_info)
-        return items
+        infos = self._dfs.ItemInfo
+        nos = item_numbers
+        return [ItemInfo.from_mikecore_dynamic_item_info(infos[i]) for i in nos]
 
     @property
     def geometry(self) -> Any:
@@ -459,17 +468,17 @@ class _Dfs123:
 
     @property
     def deletevalue(self) -> float:
-        "File delete value"
+        "File delete value."
         return self._deletevalue
 
     @property
     def n_items(self) -> int:
-        "Number of items"
+        "Number of items."
         return len(self.items)
 
     @property
     def items(self) -> list[ItemInfo]:
-        "List of items"
+        "List of items."
         return self._items
 
     @property
@@ -478,12 +487,12 @@ class _Dfs123:
 
     @property
     def start_time(self) -> pd.Timestamp:
-        """File start time"""
+        """File start time."""
         return self._start_time
 
     @property
     def end_time(self) -> pd.Timestamp:
-        """File end time"""
+        """File end time."""
         if self._end_time is None:
             self._end_time = self.read(items=[0]).time[-1].to_pydatetime()
 
@@ -491,12 +500,12 @@ class _Dfs123:
 
     @property
     def n_timesteps(self) -> int:
-        """Number of time steps"""
+        """Number of time steps."""
         return self._n_timesteps
 
     @property
     def timestep(self) -> Any:
-        """Time step size in seconds"""
+        """Time step size in seconds."""
         # this will fail if the TimeAxisType is not calendar and equidistant, but that is ok
         return self._dfs.FileInfo.TimeAxis.TimeStepInSeconds()
 
@@ -506,22 +515,22 @@ class _Dfs123:
 
     @property
     def longitude(self) -> float:
-        """Origin longitude"""
+        """Origin longitude."""
         return self._longitude
 
     @property
     def latitude(self) -> float:
-        """Origin latitude"""
+        """Origin latitude."""
         return self._latitude
 
     @property
     def origin(self) -> Any:
-        """Origin (in own CRS)"""
+        """Origin (in own CRS)."""
         return self.geometry.origin
 
     @property
     def orientation(self) -> Any:
-        """Orientation (in own CRS)"""
+        """Orientation (in own CRS)."""
         return self.geometry.orientation
 
     @property
@@ -532,7 +541,7 @@ class _Dfs123:
     @property
     @abstractmethod
     def shape(self) -> tuple[int, ...]:
-        """Shape of the data array"""
+        """Shape of the data array."""
         pass
 
     def _validate_no_orientation_in_geo(self) -> None:
@@ -540,7 +549,7 @@ class _Dfs123:
             raise ValueError("Orientation is not supported for LONG/LAT coordinates")
 
     def _origin_and_orientation_in_CRS(self) -> tuple[Any, float]:
-        """Project origin and orientation to projected CRS (if not LONG/LAT)"""
+        """Project origin and orientation to projected CRS (if not LONG/LAT)."""
         if self.is_geo:
             origin = self._longitude, self._latitude
             orientation = 0.0

@@ -20,8 +20,7 @@ if TYPE_CHECKING:
 
 
 class Mesh:
-    """
-    The Mesh class is initialized with a mesh file.
+    """The Mesh class is initialized with a mesh file.
 
     Parameters
     ---------
@@ -39,6 +38,7 @@ class Mesh:
     import mikeio
     mikeio.Mesh("../data/odense_rough.mesh")
     ```
+
     """
 
     def __init__(self, filename: str | Path) -> None:
@@ -66,8 +66,8 @@ class Mesh:
     def __repr__(self) -> str:
         out = [
             "<Mesh>",
-            f"number of elements: {self.n_elements}",
             f"number of nodes: {self.n_nodes}",
+            f"number of elements: {self.n_elements}",
             f"projection: {self.geometry.projection_string}",
         ]
         return str.join("\n", out)
@@ -75,37 +75,37 @@ class Mesh:
     # TODO re-consider if all of these properties are needed, since they all are available in the geometry
     @property
     def n_elements(self) -> int:
-        """Number of elements"""
+        """Number of elements."""
         return self.geometry.n_elements
 
     @property
     def element_coordinates(self) -> np.ndarray:
-        """Coordinates of element centroids"""
+        """Coordinates of element centroids."""
         return self.geometry.element_coordinates
 
     @property
     def node_coordinates(self) -> np.ndarray:
-        """Coordinates of nodes"""
+        """Coordinates of nodes."""
         return self.geometry.node_coordinates
 
     @property
     def n_nodes(self) -> int:
-        """Number of nodes"""
+        """Number of nodes."""
         return self.geometry.n_nodes
 
     @property
     def codes(self) -> np.ndarray:
-        """Codes of nodes"""
+        """Codes of nodes."""
         return self.geometry.codes
 
     @property
     def element_table(self) -> np.ndarray:
-        """Element table"""
+        """Element table."""
         return self.geometry.element_table
 
     @property
     def zn(self) -> np.ndarray:
-        """Static bathymetry values (depth) at nodes"""
+        """Static bathymetry values (depth) at nodes."""
         return self.geometry.node_coordinates[:, 2]
 
     @zn.setter
@@ -118,14 +118,14 @@ class Mesh:
         self,
         outfilename: str | Path,
     ) -> None:
-        """write mesh to file
+        """write mesh to file.
 
         Parameters
         ----------
         outfilename : str
             path to file
-        """
 
+        """
         geometry = self.geometry
 
         assert isinstance(geometry, GeometryFM2D)  # i.e. not a GeometryPoint2d
@@ -133,7 +133,7 @@ class Mesh:
         self.geometry.to_mesh(outfilename=outfilename)
 
     def to_shapely(self) -> MultiPolygon:
-        """Convert Mesh geometry to shapely MultiPolygon
+        """Convert Mesh geometry to shapely MultiPolygon.
 
         Returns
         -------
@@ -147,5 +147,6 @@ class Mesh:
         msh = mikeio.open("../data/odense_rough.mesh")
         msh.to_shapely()
         ```
+
         """
         return self.geometry.to_shapely()

@@ -172,7 +172,7 @@ da_ratio.plot(title="", label="Ratio", vmin=0.8, vmax=1.2, levels=9, cmap="coolw
 
 Other methods that also return a DataArray:
 
-* [`interp_like`](`mikeio.DataArray.interp_like`) - Spatio (temporal) interpolation (see example [Dfsu interpolation](../examples/Dfsu-2D-interpolation.qmd))
+* [`interp_like`](`mikeio.DataArray.interp_like`) - Spatio (temporal) interpolation (see example [Dfsu interpolation](../examples/dfsu/spatial_interpolation.qmd)
 * [`interp_time()`](`mikeio.DataArray.interp_time`) - Temporal interpolation (see example [Time interpolation](../examples/Time-interpolation.qmd))
 * [`dropna()`](`mikeio.DataArray.dropna`) - Remove time steps where all items are NaN
 * [`squeeze()`](`mikeio.DataArray.squeeze`) - Remove axes of length 1

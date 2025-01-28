@@ -37,5 +37,7 @@ def dfsu(filename: str | Path) -> Any:
 
 
 class Dfsu:
+    """Factory class for dfsu files."""
+
     def __new__(self, filename: str | Path) -> Any:
         return dfsu(filename)

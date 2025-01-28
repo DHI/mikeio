@@ -66,6 +66,8 @@ def _write_dfs1_header(filename: str | Path, ds: Dataset, title: str) -> DfsFile
 
 
 class Dfs1(_Dfs123):
+    """Class for reading/writing dfs1 files."""
+
     _ndim = 1
 
     def __init__(self, filename: str | Path) -> None:
@@ -96,15 +98,15 @@ class Dfs1(_Dfs123):
 
     @property
     def x0(self) -> float:
-        """Start point of x values (often 0)"""
+        """Start point of x values (often 0)."""
         return self._x0
 
     @property
     def dx(self) -> float:
-        """Step size in x direction"""
+        """Step size in x direction."""
         return self._dx
 
     @property
     def nx(self) -> int:
-        """Number of node values"""
+        """Number of node values."""
         return self._nx

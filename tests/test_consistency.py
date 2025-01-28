@@ -574,3 +574,38 @@ def test_concat_dfsu3d_single_timesteps_generic_vs_dataset(tmp_path):
     assert ds3.end_time == ds4.end_time
     assert ds3.n_items == ds4.n_items
     assert ds3.n_timesteps == ds4.n_timesteps
+
+
+def test_keepdims_removes_singleton_dimension() -> None:
+    ds1 = mikeio.read(
+        filename="tests/testdata/consistency/oresundHD.dfs1", time=0, keepdims=False
+    )
+    assert ds1.dims == ("x",)
+
+    ds2 = mikeio.read(
+        filename="tests/testdata/consistency/oresundHD.dfs1", time=0, keepdims=True
+    )
+    assert ds2.dims == ("time", "x")
+
+    ds3 = mikeio.read(
+        filename="tests/testdata/consistency/oresundHD.dfs2", time=0, keepdims=False
+    )
+    assert ds3.dims == (
+        "y",
+        "x",
+    )
+
+    ds4 = mikeio.read(
+        filename="tests/testdata/consistency/oresundHD.dfs2", time=0, keepdims=True
+    )
+    assert ds4.dims == ("time", "y", "x")
+
+    ds5 = mikeio.read(
+        filename="tests/testdata/consistency/oresundHD.dfsu", time=0, keepdims=False
+    )
+    assert ds5.dims == ("element",)
+
+    ds6 = mikeio.read(
+        filename="tests/testdata/consistency/oresundHD.dfsu", time=0, keepdims=True
+    )
+    assert ds6.dims == ("time", "element")
