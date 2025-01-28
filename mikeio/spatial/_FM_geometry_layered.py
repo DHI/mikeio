@@ -655,7 +655,7 @@ class GeometryFM3D(_GeometryFMLayered):
 
     @property
     def boundary_polygons(self) -> Polygon:
-        return self.geometry2d.boundary_polygons
+        return self.geometry2d.boundary_polygon
 
     def contains(self, points: np.ndarray) -> np.ndarray:
         return self.geometry2d.contains(points)

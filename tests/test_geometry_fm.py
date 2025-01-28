@@ -218,7 +218,6 @@ def test_plot_mesh():
 
 
 def test_layered(simple_3d_geom: GeometryFM3D):
-
     g = simple_3d_geom
 
     assert g.n_elements == 2
@@ -240,7 +239,6 @@ def test_layered(simple_3d_geom: GeometryFM3D):
 
 
 def test_contains_complex_geometry():
-
     msh = mikeio.open("tests/testdata/gulf.mesh")
 
     points = [
@@ -259,7 +257,6 @@ def test_contains_complex_geometry():
 
 
 def test_find_index_in_highres_quad_area():
-
     dfs = mikeio.open("tests/testdata/coastal_quad.dfsu")
 
     pts = [(439166.047, 6921703.975), (439297.166, 6921728.645)]
@@ -269,6 +266,7 @@ def test_find_index_in_highres_quad_area():
     assert len(idx) == 2
     for i in idx:
         assert i >= 0
+
 
 def test_equality():
     nc = [
@@ -309,4 +307,9 @@ def test_equality_shifted_coords():
 
     g2 = GeometryFM2D(node_coordinates=nc2, element_table=el, projection="LONG/LAT")
     assert g != g2
-    
+
+
+def test_da_boundary_polygon() -> None:
+    dfs = mikeio.Dfsu2DH("tests/testdata/FakeLake.dfsu")
+    bnd = dfs.geometry.boundary_polygon
+    assert len(bnd.interiors) == 1

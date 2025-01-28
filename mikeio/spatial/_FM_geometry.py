@@ -113,7 +113,7 @@ class _GeometryFMPlotter:
             node_coordinates=g.node_coordinates,
             element_table=g.element_table,
             element_coordinates=g.element_coordinates,
-            boundary_polygon=g.boundary_polygons,
+            boundary_polygon=g.boundary_polygon,
             plot_type=plot_type,
             projection=g.projection,
             z=None,
@@ -158,9 +158,9 @@ class _GeometryFMPlotter:
 
         linwid = 1.2
         out_col = "0.4"
-        exterior = self.g.boundary_polygons.exterior
+        exterior = self.g.boundary_polygon.exterior
         ax.plot(exterior.coords, color=out_col, linewidth=linwid)
-        for interior in self.g.boundary_polygons.interiors:
+        for interior in self.g.boundary_polygon.interiors:
             ax.plot(interior.coords, color=out_col, linewidth=linwid)
         if title is not None:
             ax.set_title(title)
@@ -845,9 +845,9 @@ class GeometryFM2D(_GeometryFM):
         return np.abs(area)
 
     @cached_property
-    def boundary_polygons(self) -> Polygon:
-        """Lists of polygons defining domain outline."""
-        return self._get_boundary_polygons()
+    def boundary_polygon(self) -> Polygon:
+        """Domain polygon including potential holes."""
+        return self._get_boundary_polygon()
 
     @cached_property
     def _domain(self) -> Any:
@@ -927,7 +927,7 @@ class GeometryFM2D(_GeometryFM):
             - np.dot(xy[:, 0], np.roll(xy[:, 1], 1))
         ) * 0.5
 
-    def _get_boundary_polygons(self) -> Polygon:
+    def _get_boundary_polygon(self) -> Polygon:
         polygons = self._get_boundary_polygons_uncategorized()
 
         shells = []
@@ -942,6 +942,10 @@ class GeometryFM2D(_GeometryFM):
             else:
                 holes.append(xy)
 
+        if len(shells) > 1:
+            raise NotImplementedError(
+                "Domains with multiple exteriors are not supported"
+            )
         poly = Polygon(shell=shells[0], holes=holes)
         return poly
 
