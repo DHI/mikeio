@@ -8,7 +8,6 @@ from typing import (
     Sized,
     TYPE_CHECKING,
 )
-import warnings
 
 
 import numpy as np

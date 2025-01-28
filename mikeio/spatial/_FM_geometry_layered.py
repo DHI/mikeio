@@ -3,7 +3,6 @@ from functools import cached_property
 from pathlib import Path
 
 from typing import Any, Iterable, Literal, Sequence
-import warnings
 
 from matplotlib.axes import Axes
 import numpy as np

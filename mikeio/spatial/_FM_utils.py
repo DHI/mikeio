@@ -1,4 +1,3 @@
-from dataclasses import dataclass
 from typing import Any, Literal, Sequence
 
 from matplotlib.axes import Axes
