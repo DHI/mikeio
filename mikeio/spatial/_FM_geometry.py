@@ -870,6 +870,8 @@ class GeometryFM2D(_GeometryFM):
         ----------
         points : array-like n-by-2
             x,y-coordinates of n points to be tested
+        strategy: str
+            Use either 'shapely' or native python 'loop', default is 'loop'.
 
         Returns
         -------
