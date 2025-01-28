@@ -15,6 +15,7 @@ from mikecore.DfsuFile import DfsuFileType
 from mikecore.eum import eumQuantity
 from mikecore.MeshBuilder import MeshBuilder
 from scipy.spatial import cKDTree
+from shapely import MultiPolygon
 
 from ..eum import EUMType, EUMUnit
 from ..exceptions import OutsideModelDomainError
@@ -112,7 +113,7 @@ class _GeometryFMPlotter:
             node_coordinates=g.node_coordinates,
             element_table=g.element_table,
             element_coordinates=g.element_coordinates,
-            boundary_polygons=g.boundary_polygons,
+            boundary_polygon=g.boundary_polygons,
             plot_type=plot_type,
             projection=g.projection,
             z=None,
@@ -944,8 +945,6 @@ class GeometryFM2D(_GeometryFM):
         poly = Polygon(shell=shells[0], holes=holes)
         return poly
 
-        # return MultiPolygon(polys)
-
     def _get_boundary_faces(self) -> np.ndarray:
         """Construct list of faces."""
         element_table = self.element_table
@@ -1187,17 +1186,10 @@ class GeometryFM2D(_GeometryFM):
             polygons with mesh elements
 
         """
-        from shapely.geometry import MultiPolygon, Polygon  # type: ignore
+        polygons = [
+            Polygon(self.node_coordinates[nodes, :2]) for nodes in self.element_table
+        ]
 
-        polygons = []
-        for j in range(self.n_elements):
-            nodes = self.element_table[j]
-            pcoords = np.empty([len(nodes), 2])
-            for i in range(len(nodes)):
-                nidx = nodes[i]
-                pcoords[i, :] = self.node_coordinates[nidx, 0:2]
-            polygon = Polygon(pcoords)
-            polygons.append(polygon)
         mp = MultiPolygon(polygons)
 
         return mp
