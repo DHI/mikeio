@@ -8,7 +8,7 @@ from matplotlib.figure import Figure
 from matplotlib.tri import Triangulation
 import numpy as np
 from scipy.sparse import csr_matrix
-from shapely import MultiPolygon, Polygon
+from shapely import Polygon
 
 from ._utils import _relative_cumulative_distance
 
@@ -21,7 +21,7 @@ def _plot_map(
     node_coordinates: np.ndarray,
     element_table: np.ndarray,
     element_coordinates: np.ndarray,
-    boundary_polygons: MultiPolygon,
+    boundary_polygon: Polygon,
     projection: str = "",
     z: np.ndarray | None = None,
     plot_type: Literal[
@@ -138,7 +138,7 @@ def _plot_map(
     _set_xy_label_by_projection(ax, projection)
 
     if plot_type == "outline_only":
-        __plot_outline_only(ax, boundary_polygons)
+        __plot_outline_only(ax, boundary_polygon)
         return ax
 
     if plot_type == "mesh_only":
@@ -216,7 +216,7 @@ def _plot_map(
             __add_non_tri_mesh(ax, nc, element_table, plot_type)
 
     if show_outline:
-        __add_outline(ax, boundary_polygons)
+        __add_outline(ax, boundary_polygon)
 
     if add_colorbar:
         __add_colorbar(ax, cmap_ScMappable, fig_obj, label, levels, cbar_extend)
