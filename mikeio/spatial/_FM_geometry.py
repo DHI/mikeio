@@ -23,7 +23,6 @@ from .._interpolation import get_idw_interpolant, interp2d
 from ._FM_utils import (
     _get_node_centered_data,
     _plot_map,
-    BoundaryPolygons,
     Polygon,
     _set_xy_label_by_projection,  # TODO remove
     _to_polygons,  # TODO remove
@@ -114,7 +113,7 @@ class _GeometryFMPlotter:
             node_coordinates=g.node_coordinates,
             element_table=g.element_table,
             element_coordinates=g.element_coordinates,
-            boundary_polylines=g.boundary_polygons.lines,
+            boundary_polygons=g.boundary_polygons,
             plot_type=plot_type,
             projection=g.projection,
             z=None,
@@ -159,10 +158,10 @@ class _GeometryFMPlotter:
 
         linwid = 1.2
         out_col = "0.4"
-        for exterior in self.g.boundary_polygons.exteriors:
-            ax.plot(*exterior.xy.T, color=out_col, linewidth=linwid)
+        exterior = self.g.boundary_polygons.exterior
+        ax.plot(exterior.coords, color=out_col, linewidth=linwid)
         for interior in self.g.boundary_polygons.interiors:
-            ax.plot(*interior.xy.T, color=out_col, linewidth=linwid)
+            ax.plot(interior.coords, color=out_col, linewidth=linwid)
         if title is not None:
             ax.set_title(title)
         ax = self._set_plot_limits(ax)
@@ -846,14 +845,7 @@ class GeometryFM2D(_GeometryFM):
         return np.abs(area)
 
     @cached_property
-    def boundary_polylines(self) -> BoundaryPolygons:
-        warnings.warn(
-            "boundary_polylines is renamed to boundary_polygons", FutureWarning
-        )
-        return self._get_boundary_polygons()
-
-    @cached_property
-    def boundary_polygons(self) -> BoundaryPolygons:
+    def boundary_polygons(self) -> Polygon:
         """Lists of polygons defining domain outline."""
         return self._get_boundary_polygons()
 
@@ -882,7 +874,7 @@ class GeometryFM2D(_GeometryFM):
         points = np.atleast_2d(points)
 
         if strategy == "shapely":
-            from shapely.geometry import Point  # type: ignore
+            from shapely.geometry import Point
 
             domain = self._domain
 
@@ -903,7 +895,7 @@ class GeometryFM2D(_GeometryFM):
         return self.contains(pt)[0]
 
     def _get_boundary_polygons_uncategorized(self) -> list[list[np.int64]]:
-        """Construct closed polygons for all boundary faces."""
+        """Construct polygons for all boundary faces."""
         boundary_faces = self._get_boundary_faces()
         face_remains = boundary_faces.copy()
         polygons = []
@@ -928,23 +920,32 @@ class GeometryFM2D(_GeometryFM):
             polygons.append(polyline)
         return polygons
 
-    def _get_boundary_polygons(self) -> BoundaryPolygons:
-        """Get boundary polylines and categorize as inner or outer by assessing the signed area."""
+    @staticmethod
+    def _signed_area(xy: np.ndarray) -> float:
+        return (
+            np.dot(xy[:, 1], np.roll(xy[:, 0], 1))
+            - np.dot(xy[:, 0], np.roll(xy[:, 1], 1))
+        ) * 0.5
+
+    def _get_boundary_polygons(self) -> Polygon:
         polygons = self._get_boundary_polygons_uncategorized()
 
-        interiors = []
-        exteriors = []
+        shells = []
+        holes = []
 
         for polygon in polygons:
             polygon_np = np.asarray(polygon)
             xy = self.node_coordinates[polygon_np, 0:2]
-            poly = Polygon(xy)
-            if poly.area > 0:
-                exteriors.append(poly)
-            else:
-                interiors.append(poly)
 
-        return BoundaryPolygons(exteriors=exteriors, interiors=interiors)
+            if self._signed_area(xy) > 0:
+                shells.append(xy)
+            else:
+                holes.append(xy)
+
+        poly = Polygon(shell=shells[0], holes=holes)
+        return poly
+
+        # return MultiPolygon(polys)
 
     def _get_boundary_faces(self) -> np.ndarray:
         """Construct list of faces."""
