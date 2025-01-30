@@ -586,8 +586,17 @@ class DataArray:
     def isel(
         self,
         idx: int | Sequence[int] | slice | None = None,
+        *,
+        time: int | None = None,
+        x: int | None = None,
+        y: int | None = None,
+        z: int | None = None,
+        element: int | None = None,
+        node: int | None = None,
+        layer: int | None = None,
+        frequency: int | None = None,
+        direction: int | None = None,
         axis: int | str = 0,
-        **kwargs: Any,
     ) -> "DataArray":
         """Return a new DataArray whose data is given by
         integer indexing along the specified dimension(s).
@@ -621,8 +630,6 @@ class DataArray:
         element : int, optional
             Bounding box of coordinates (left lower and right upper)
             to be selected, by default None
-        **kwargs: Any
-            Not used
 
         Returns
         -------
@@ -655,10 +662,23 @@ class DataArray:
         ```
 
         """
-        if isinstance(self.geometry, Grid2D) and ("x" in kwargs and "y" in kwargs):
-            idx_x = kwargs["x"]
-            idx_y = kwargs["y"]
-            return self.isel(x=idx_x).isel(y=idx_y)
+        if isinstance(self.geometry, Grid2D) and (x is not None and y is not None):
+            return self.isel(x=x).isel(y=y)
+        kwargs = {
+            k: v
+            for k, v in dict(
+                time=time,
+                x=x,
+                y=y,
+                z=z,
+                element=element,
+                node=node,
+                layer=layer,
+                frequency=frequency,
+                direction=direction,
+            ).items()
+            if v is not None
+        }
         for dim in kwargs:
             if dim in self.dims:
                 axis = dim
@@ -835,13 +855,11 @@ class DataArray:
             if isinstance(idx, tuple):
                 # TODO: support for dfs3
                 assert len(idx) == 2
-                t_ax_offset = 1 if self._has_time_axis else 0
                 ii, jj = idx
                 if jj is not None:
-                    da = da.isel(idx=jj, axis=(0 + t_ax_offset))
+                    da = da.isel(y=jj)
                 if ii is not None:
-                    sp_axis = 0 if (jj is not None and len(jj) == 1) else 1
-                    da = da.isel(idx=ii, axis=(sp_axis + t_ax_offset))
+                    da = da.isel(x=ii)
             else:
                 da = da.isel(idx, axis="space")
 

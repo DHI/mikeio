@@ -784,6 +784,16 @@ class Dataset:
     def isel(
         self,
         idx: int | Sequence[int] | slice | None = None,
+        *,
+        time: int | None = None,
+        x: int | None = None,
+        y: int | None = None,
+        z: int | None = None,
+        element: int | None = None,
+        node: int | None = None,
+        layer: int | None = None,
+        frequency: int | None = None,
+        direction: int | None = None,
         axis: int | str = 0,
         **kwargs: Any,
     ) -> "Dataset":
@@ -835,7 +845,24 @@ class Dataset:
         >>> ds3 = ds2.isel(elements=[100,200])
 
         """
-        res = [da.isel(idx=idx, axis=axis, **kwargs) for da in self]
+        # TODO deprecate idx, axis to prefer x= instead
+
+        res = [
+            da.isel(
+                idx=idx,
+                axis=axis,
+                time=time,
+                x=x,
+                y=y,
+                z=z,
+                element=element,
+                node=node,
+                frequency=frequency,
+                direction=direction,
+                layer=layer,
+            )
+            for da in self
+        ]
         return Dataset(data=res, validate=False)
 
     def sel(
