@@ -627,6 +627,14 @@ class DataArray:
             y index, by default None
         z : int, optional
             z index, by default None
+        layer: int, optional
+            layer index, only used in dfsu 3d
+        direction: int, optional
+            direction index, only used in sprectra
+        frequency: int, optional
+            frequencey index, only used in spectra
+        node: int, optional
+            node index, only used in spectra
         element : int, optional
             Bounding box of coordinates (left lower and right upper)
             to be selected, by default None

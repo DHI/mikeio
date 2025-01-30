@@ -795,7 +795,6 @@ class Dataset:
         frequency: int | None = None,
         direction: int | None = None,
         axis: int | str = 0,
-        **kwargs: Any,
     ) -> "Dataset":
         """Return a new Dataset whose data is given by
         integer indexing along the specified dimension(s).
@@ -825,8 +824,14 @@ class Dataset:
         element : int, optional
             Bounding box of coordinates (left lower and right upper)
             to be selected, by default None
-        **kwargs: Any
-            Not used
+        layer: int, optional
+            layer index, only used in dfsu 3d
+        direction: int, optional
+            direction index, only used in sprectra
+        frequency: int, optional
+            frequencey index, only used in spectra
+        node: int, optional
+            node index, only used in spectra
 
         Returns
         -------
