@@ -44,14 +44,13 @@ class _GeometryFMPlotter:
 
     Examples
     --------
-    >>> ds = mikeio.read("HD2D.dfsu")
-    >>> g = ds.geometry
-    >>> g.plot()          # bathymetry (as patches)
-    >>> g.plot.contour()  # bathymetry contours
-    >>> g.plot.contourf() # filled bathymetry contours
-    >>> g.plot.mesh()     # mesh only
-    >>> g.plot.outline()  # domain outline only
-    >>> g.plot.boundary_nodes()
+    ```{python}
+    import mikeio
+
+    ds = mikeio.read("../data/FakeLake.dfsu")
+    g = ds.geometry
+    g.plot()
+    ```
 
     """
 
@@ -75,7 +74,15 @@ class _GeometryFMPlotter:
         figsize: tuple[float, float] | None = None,
         **kwargs: Any,
     ) -> Axes:
-        """Plot bathymetry as contour lines."""
+        """Plot bathymetry as contour lines.
+
+        Examples
+        --------
+        ```{python}
+        g.plot.contour()
+        ```
+
+        """
         ax = self._get_ax(ax, figsize)
         kwargs["plot_type"] = "contour"
         return self._plot_FM_map(ax, **kwargs)
@@ -86,7 +93,15 @@ class _GeometryFMPlotter:
         figsize: tuple[float, float] | None = None,
         **kwargs: Any,
     ) -> Axes:
-        """Plot bathymetry as filled contours."""
+        """Plot bathymetry as filled contours.
+
+        Examples
+        --------
+        ```{python}
+        g.plot.contourf()
+        ```
+
+        """
         ax = self._get_ax(ax, figsize)
         kwargs["plot_type"] = "contourf"
         return self._plot_FM_map(ax, **kwargs)
@@ -128,7 +143,15 @@ class _GeometryFMPlotter:
         figsize: tuple[float, float] | None = None,
         ax: Axes | None = None,
     ) -> Axes:
-        """Plot mesh only."""
+        """Plot mesh only.
+
+        Examples
+        --------
+        ```{python}
+        g.plot.mesh()
+        ```
+
+        """
         # TODO this must be a duplicate, delegate
 
         from matplotlib.collections import PatchCollection  # type: ignore
@@ -153,7 +176,15 @@ class _GeometryFMPlotter:
         figsize: tuple[float, float] | None = None,
         ax: Axes | None = None,
     ) -> Axes:
-        """Plot domain outline (using the boundary_polylines property)."""
+        """Plot domain outline.
+
+        Examples
+        --------
+        ```{python}
+        g.plot.outline()
+        ```
+
+        """
         ax = self._get_ax(ax=ax, figsize=figsize)
         ax.set_aspect(self._plot_aspect())
 
@@ -174,7 +205,15 @@ class _GeometryFMPlotter:
         figsize: tuple[float, float] | None = None,
         ax: Axes | None = None,
     ) -> Axes:
-        """Plot mesh boundary nodes and their code values."""
+        """Plot mesh boundary nodes and their code values.
+
+        Examples
+        --------
+        ```{python}
+        g.plot.boundary_nodes()
+        ```
+
+        """
         import matplotlib.pyplot as plt
 
         ax = self._get_ax(ax=ax, figsize=figsize)
