@@ -80,3 +80,45 @@ but the following values types exists:
 * Face value type, storing values on element faces. This is used e.g. for HD decoupling files, to store the discharge between elements.
 * Spectral value type, for each node or element, storing vales for a number of frequencies and/or directions. This is the file type for spectral output from the MIKE 21 SW. 
 
+
+## Visualization
+
+### Geometry
+
+The geometry (bathymetry) can be visualized in various ways.
+
+```{python}
+geom  = dfs.geometry
+geom.plot();
+```
+
+```{python}
+geom.plot.mesh();
+```
+
+```{python}
+geom.plot(vmin=-20);
+```
+
+
+```{python}
+geom.plot.contour(levels=[-20,-10], cmap='tab10');
+```
+
+```{python}
+geom.plot.contourf(levels=6, vmin=-30);
+```
+
+### Data
+
+The data can be visualized in a similar way.
+
+```{python}
+da = ds["Surface elevation"]
+da.plot(cmap='plasma');
+```
+
+```{python}
+ax = da.plot.contour(show_mesh=True, cmap="tab20")
+ax.set_ylim(6135000, 6160000);
+```
