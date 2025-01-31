@@ -4,7 +4,6 @@ import pandas as pd
 import mikeio
 from mikeio import Dfs0, EUMType, EUMUnit, ItemInfo
 from mikecore.DfsFile import DataValueType
-from mikecore.DfsFileFactory import DfsFileFactory
 
 
 import pytest

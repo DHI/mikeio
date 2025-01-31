@@ -24,7 +24,6 @@ from typing import (
 import numpy as np
 import pandas as pd
 from mikecore.DfsuFile import DfsuFileType
-from mikecore.DfsFile import DfsSimpleType
 
 from ..eum import EUMType, EUMUnit, ItemInfo
 from ._data_utils import _get_time_idx_list, _n_selected_timesteps
