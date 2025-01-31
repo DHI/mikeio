@@ -43,24 +43,6 @@ def test_write_float(tmp_path):
     assert fp.exists()
 
 
-def test_write_title(tmp_path) -> None:
-    fp = tmp_path / "zeros.dfs0"
-
-    nt = 100
-
-    da = mikeio.DataArray(
-        data=np.zeros([nt]),
-        time=pd.date_range("2000", periods=nt, freq="h"),
-    )
-
-    da.to_dfs(fp, title="Zeros")
-
-    dfs = DfsFileFactory.DfsGenericOpen(str(fp))
-
-    # TODO should we expose the title in MIKE IO?
-    assert dfs.FileInfo.FileTitle == "Zeros"
-
-
 def test_write_double(tmp_path):
     fp = tmp_path / "simple_float.dfs0"
 

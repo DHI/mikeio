@@ -1898,12 +1898,7 @@ class DataArray:
             {self.name: self}
         )  # Single-item Dataset (All info is contained in the DataArray, no need for additional info)
 
-    def to_dfs(
-        self,
-        filename: str | Path,
-        dtype: str | np.dtype | DfsSimpleType | None = None,
-        title: str = "",
-    ) -> None:
+    def to_dfs(self, filename: str | Path, **kwargs: Any) -> None:
         """Write data to a new dfs file.
 
         Parameters
@@ -1913,11 +1908,11 @@ class DataArray:
         dtype: str, np.dtype, DfsSimpleType, optional
             Dfs0 only: set the dfs data type of the written data
             to e.g. np.float64, by default: DfsSimpleType.Float (=np.float32)
-        title: str
-            Only used by dfs0
+        **kwargs: Any
+            additional arguments passed to the writing function, e.g. dtype for dfs0
 
         """
-        self._to_dataset().to_dfs(filename, dtype, title)
+        self._to_dataset().to_dfs(filename, **kwargs)
 
     def to_dataframe(
         self, *, unit_in_name: bool = False, round_time: str | bool = "ms"
