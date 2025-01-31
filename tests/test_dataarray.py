@@ -612,7 +612,7 @@ def test_da_isel_empty(da_grid2d):
 def test_da_isel_space_multiple_elements(da_grid2d):
     assert da_grid2d.geometry.nx == 7
     assert da_grid2d.geometry.ny == 14
-    da_sel = da_grid2d.isel(x=(0, 1, 2, 10))
+    da_sel = da_grid2d.isel(y=(0, 1, 2, 10))
     assert da_sel.dims == ("time", "y", "x")
     assert da_sel.shape == (10, 4, 7)
     assert isinstance(da_sel.geometry, mikeio.spatial.GeometryUndefined)
