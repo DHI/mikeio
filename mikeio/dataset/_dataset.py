@@ -461,7 +461,7 @@ class Dataset:
             else:
                 all_index = list(np.intersect1d(all_index, idx))
 
-        return self.isel(all_index, axis=0)
+        return self.isel(time=all_index)
 
     def flipud(self) -> "Dataset":
         """Flip data upside down (on first non-time axis)."""
@@ -669,7 +669,7 @@ class Dataset:
             time_steps = _get_time_idx_list(self.time, key)
             if _n_selected_timesteps(self.time, time_steps) == 0:
                 raise IndexError("No timesteps found!")
-            return self.isel(time_steps, axis=0)
+            return self.isel(time=time_steps)
         if isinstance(key, slice):
             if self._is_slice_time_slice(key):
                 try:
@@ -677,7 +677,7 @@ class Dataset:
                     time_steps = list(range(s.start, s.stop))
                 except ValueError:
                     time_steps = list(range(*key.indices(len(self.time))))
-                return self.isel(time_steps, axis=0)
+                return self.isel(time=time_steps)
 
         if self._multi_indexing_attempted(key):
             raise TypeError(

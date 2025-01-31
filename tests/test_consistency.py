@@ -45,7 +45,7 @@ def test_dfs1_isel_x():
     ds1 = ds.isel(x=8)
     assert ds1.dims == ("time",)
     assert isinstance(ds1.geometry, GeometryUndefined)
-    assert ds1[0].isel(0, axis="time").values == pytest.approx(0.203246)
+    assert ds1[0].isel(time=0).values == pytest.approx(0.203246)
 
 
 def test_dfs1_sel_t():
@@ -63,13 +63,13 @@ def test_dfs1_sel_x():
     ds1 = ds.sel(x=7.8)
     assert ds1.dims == ("time",)
     assert isinstance(ds1.geometry, GeometryUndefined)
-    assert ds1[0].isel(0, axis="time").values == pytest.approx(0.203246)
+    assert ds1[0].isel(time=0).values == pytest.approx(0.203246)
 
     da: DataArray = ds[0]
     da1 = da.sel(x=7.8)
     assert da1.dims == ("time",)
     assert isinstance(ds1.geometry, GeometryUndefined)
-    assert da1.isel(0, axis="time").values == pytest.approx(0.203246)
+    assert da1.isel(time=0).values == pytest.approx(0.203246)
 
 
 def test_dfs1_interp_x():
@@ -78,7 +78,7 @@ def test_dfs1_interp_x():
     ds1 = ds.interp(x=7.75)
     assert ds1.dims == ("time",)
     assert isinstance(ds1.geometry, GeometryUndefined)
-    assert ds1[0].isel(0, axis="time").values == pytest.approx(0.20202248)
+    assert ds1[0].isel(time=0).values == pytest.approx(0.20202248)
 
 
 # Nice to have...
