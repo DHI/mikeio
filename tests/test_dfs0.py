@@ -4,6 +4,7 @@ import pandas as pd
 import mikeio
 from mikeio import Dfs0, EUMType, EUMUnit, ItemInfo
 from mikecore.DfsFile import DataValueType
+from mikecore.DfsFileFactory import DfsFileFactory
 
 
 import pytest
@@ -40,6 +41,24 @@ def test_write_float(tmp_path):
     da.to_dfs(fp)
 
     assert fp.exists()
+
+
+def test_write_title(tmp_path) -> None:
+    fp = tmp_path / "zeros.dfs0"
+
+    nt = 100
+
+    da = mikeio.DataArray(
+        data=np.zeros([nt]),
+        time=pd.date_range("2000", periods=nt, freq="h"),
+    )
+
+    da.to_dfs(fp, title="Zeros")
+
+    dfs = DfsFileFactory.DfsGenericOpen(str(fp))
+
+    # TODO should we expose the title in MIKE IO?
+    assert dfs.FileInfo.FileTitle == "Zeros"
 
 
 def test_write_double(tmp_path):
@@ -307,7 +326,6 @@ def test_from_pandas_mapping_eum_types() -> None:
 
 
 def test_from_pandas_same_eum_type() -> None:
-
     df = pd.DataFrame(
         {"station_a": np.array([1, np.nan, 2]), "station_b": np.array([2, 3.0, -1.3])},
         index=pd.date_range("2001-01-01", periods=3, freq="h"),
@@ -741,7 +759,6 @@ def test_read_dfs0_with_non_unique_item_names():
 
 
 def test_non_equidistant_time_can_read_correctly_with_open(tmp_path):
-
     dfs = mikeio.open("tests/testdata/neq_daily_time_unit.dfs0")
     dfs.time
     ds = dfs.read()
