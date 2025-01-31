@@ -33,7 +33,7 @@ def test_read_dfs1():
 def test_dfs1_isel_t():
     ds = mikeio.read("tests/testdata/consistency/oresundHD.dfs1")
 
-    ds1 = ds.isel([0, 1], axis="t")
+    ds1 = ds.isel(time=[0, 1])
     assert ds1.dims == ("time", "x")
     assert isinstance(ds1.geometry, type(ds.geometry))
     assert ds1[0].values[0, 8] == pytest.approx(0.203246)
@@ -42,7 +42,7 @@ def test_dfs1_isel_t():
 def test_dfs1_isel_x():
     ds = mikeio.read("tests/testdata/consistency/oresundHD.dfs1")
 
-    ds1 = ds.isel(8, axis="x")
+    ds1 = ds.isel(x=8)
     assert ds1.dims == ("time",)
     assert isinstance(ds1.geometry, GeometryUndefined)
     assert ds1[0].isel(0, axis="time").values == pytest.approx(0.203246)

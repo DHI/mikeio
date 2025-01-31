@@ -24,6 +24,7 @@ from typing import (
 import numpy as np
 import pandas as pd
 from mikecore.DfsuFile import DfsuFileType
+from mikecore.DfsFile import DfsSimpleType
 
 from ..eum import EUMType, EUMUnit, ItemInfo
 from ._data_utils import _get_time_idx_list, _n_selected_timesteps
@@ -80,6 +81,8 @@ GeometryType = Union[
     Grid2D,
     Grid3D,
 ]
+
+IndexType = Union[int, slice, Sequence[int], np.ndarray, None]
 
 
 class _DataArraySpectrumToHm0:
@@ -585,17 +588,17 @@ class DataArray:
 
     def isel(
         self,
-        idx: int | Sequence[int] | slice | None = None,
+        idx: IndexType = None,
         *,
-        time: int | None = None,
-        x: int | None = None,
-        y: int | None = None,
-        z: int | None = None,
-        element: int | None = None,
-        node: int | None = None,
-        layer: int | None = None,
-        frequency: int | None = None,
-        direction: int | None = None,
+        time: IndexType = None,
+        x: IndexType = None,
+        y: IndexType = None,
+        z: IndexType = None,
+        element: IndexType = None,
+        node: IndexType = None,
+        layer: IndexType = None,
+        frequency: IndexType = None,
+        direction: IndexType = None,
         axis: int | str = 0,
     ) -> "DataArray":
         """Return a new DataArray whose data is given by
@@ -727,7 +730,7 @@ class DataArray:
                 spatial_axis = axis - 1 if self.dims[0] == "time" else axis
                 geometry = self.geometry.isel(idx, axis=spatial_axis)
 
-            # TOOD this is ugly
+            # TODO this is ugly
             if isinstance(geometry, _GeometryFMLayered):
                 node_ids, _ = self.geometry._get_nodes_and_table_for_elements(
                     idx, node_layers="all"
@@ -770,7 +773,12 @@ class DataArray:
         self,
         *,
         time: str | pd.DatetimeIndex | "DataArray" | None = None,
-        **kwargs: Any,
+        x: float | slice | None = None,
+        y: float | slice | None = None,
+        z: float | slice | None = None,
+        coords: np.ndarray | None = None,
+        area: tuple[float, float, float, float] | None = None,
+        layers: int | str | Sequence[int | str] | None = None,
     ) -> "DataArray":
         """Return a new DataArray whose data is given by
         selecting index labels along the specified dimension(s).
@@ -809,8 +817,6 @@ class DataArray:
             layer(s) to be selected: "top", "bottom" or layer number
             from bottom 0,1,2,... or from the top -1,-2,... or as
             list of these; only for layered dfsu, by default None
-        **kwargs: Any
-            Additional keyword arguments
 
         Returns
         -------
@@ -852,14 +858,24 @@ class DataArray:
         ```
 
         """
+        # time is not part of kwargs
+        kwargs = {
+            k: v
+            for k, v in dict(
+                x=x, y=y, z=z, area=area, coords=coords, layers=layers
+            ).items()
+            if v is not None
+        }
         if any([isinstance(v, slice) for v in kwargs.values()]):
-            return self._sel_with_slice(kwargs)
+            return self._sel_with_slice(kwargs)  # type: ignore
 
         da = self
 
         # select in space
         if len(kwargs) > 0:
             idx = self.geometry.find_index(**kwargs)
+
+            # TODO this seems fragile
             if isinstance(idx, tuple):
                 # TODO: support for dfs3
                 assert len(idx) == 2
@@ -1882,7 +1898,9 @@ class DataArray:
             {self.name: self}
         )  # Single-item Dataset (All info is contained in the DataArray, no need for additional info)
 
-    def to_dfs(self, filename: str | Path, **kwargs: Any) -> None:
+    def to_dfs(
+        self, filename: str | Path, dtype: str | np.dtype | DfsSimpleType | None = None
+    ) -> None:
         """Write data to a new dfs file.
 
         Parameters
@@ -1892,11 +1910,9 @@ class DataArray:
         dtype: str, np.dtype, DfsSimpleType, optional
             Dfs0 only: set the dfs data type of the written data
             to e.g. np.float64, by default: DfsSimpleType.Float (=np.float32)
-        **kwargs: Any
-            Additional keyword arguments, e.g. dtype for dfs0
 
         """
-        self._to_dataset().to_dfs(filename, **kwargs)
+        self._to_dataset().to_dfs(filename, dtype)
 
     def to_dataframe(
         self, *, unit_in_name: bool = False, round_time: str | bool = "ms"

@@ -44,6 +44,8 @@ from ..spatial._FM_geometry import _GeometryFM
 
 from ._data_plot import _DatasetPlotter
 
+from ._dataarray import IndexType
+
 
 class Dataset:
     """Dataset containing one or more DataArrays with common geometry and time.
@@ -504,7 +506,7 @@ class Dataset:
     def create_empty_data(
         n_items: int = 1,
         n_timesteps: int = 1,
-        n_elements: int | None = None,
+        n_elements: IndexType = None,
         shape: tuple[int, ...] | None = None,
     ) -> list:
         data = []
@@ -783,17 +785,17 @@ class Dataset:
 
     def isel(
         self,
-        idx: int | Sequence[int] | slice | None = None,
+        idx: IndexType = None,
         *,
-        time: int | None = None,
-        x: int | None = None,
-        y: int | None = None,
-        z: int | None = None,
-        element: int | None = None,
-        node: int | None = None,
-        layer: int | None = None,
-        frequency: int | None = None,
-        direction: int | None = None,
+        time: IndexType = None,
+        x: IndexType = None,
+        y: IndexType = None,
+        z: IndexType = None,
+        element: IndexType = None,
+        node: IndexType = None,
+        layer: IndexType = None,
+        frequency: IndexType = None,
+        direction: IndexType = None,
         axis: int | str = 0,
     ) -> "Dataset":
         """Return a new Dataset whose data is given by
@@ -872,7 +874,14 @@ class Dataset:
 
     def sel(
         self,
-        **kwargs: Any,
+        *,
+        time: Any = None,
+        x: float | None = None,
+        y: float | None = None,
+        z: float | None = None,
+        coords: np.ndarray | None = None,
+        area: tuple[float, float, float, float] | None = None,
+        layers: int | str | Sequence[int | str] | None = None,
     ) -> "Dataset":
         """Return a new Dataset whose data is given by
         selecting index labels along the specified dimension(s).
@@ -911,8 +920,6 @@ class Dataset:
             layer(s) to be selected: "top", "bottom" or layer number
             from bottom 0,1,2,... or from the top -1,-2,... or as
             list of these; only for layered dfsu, by default None
-        **kwargs: Any
-            Not used
 
         Returns
         -------
@@ -936,7 +943,10 @@ class Dataset:
         >>> ds.sel(layers="bottom")
 
         """
-        res = [da.sel(**kwargs) for da in self]
+        res = [
+            da.sel(time=time, x=x, y=y, z=z, coords=coords, area=area, layers=layers)
+            for da in self
+        ]
         return Dataset(data=res, validate=False)
 
     def interp(
@@ -1906,28 +1916,32 @@ class Dataset:
 
         return df
 
-    def to_dfs(self, filename: str | Path, **kwargs: Any) -> None:
+    def to_dfs(
+        self, filename: str | Path, dtype: str | np.dtype | DfsSimpleType | None = None
+    ) -> None:
         """Write dataset to a new dfs file.
 
         Parameters
         ----------
         filename: str
             full path to the new dfs file
-        **kwargs: Any
-            additional arguments passed to the writing function, e.g. dtype for dfs0
+        dtype: str, np.dtype, DfsSimpleType, optional
+            Dfs0 only: set the dfs data type of the written data
+            to e.g. np.float64, by default: DfsSimpleType.Float (=np.float32)
 
         """
         filename = str(filename)
 
+        # TODO is this a candidate for match/case?
         if isinstance(
             self.geometry, (GeometryPoint2D, GeometryPoint3D, GeometryUndefined)
         ):
             if self.ndim == 0:  # Not very common, but still...
                 self._validate_extension(filename, ".dfs0")
-                self._to_dfs0(filename, **kwargs)
+                self._to_dfs0(filename, dtype)
             elif self.ndim == 1 and self[0]._has_time_axis:
                 self._validate_extension(filename, ".dfs0")
-                self._to_dfs0(filename, **kwargs)
+                self._to_dfs0(filename, dtype)
             else:
                 raise ValueError("Cannot write Dataset with no geometry to file!")
         elif isinstance(self.geometry, Grid2D):
@@ -1955,10 +1969,10 @@ class Dataset:
         if ext != valid_extension:
             raise ValueError(f"File extension must be {valid_extension}")
 
-    def _to_dfs0(self, filename: str | Path, **kwargs: Any) -> None:
+    def _to_dfs0(
+        self, filename: str | Path, dtype: DfsSimpleType = DfsSimpleType.Float
+    ) -> None:
         from ..dfs._dfs0 import _write_dfs0
-
-        dtype = kwargs.get("dtype", DfsSimpleType.Float)
 
         _write_dfs0(filename, self, dtype=dtype)
 
