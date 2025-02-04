@@ -1376,3 +1376,24 @@ def test_set_by_mask():
     mask = da < threshold
     wl_capped = da.copy()
     wl_capped[mask] = np.nan
+
+
+def test_set_unit() -> None:
+    da = mikeio.DataArray(
+        data=np.array([0.0, 1.0]),
+        item=mikeio.ItemInfo("Water", mikeio.EUMType.Water_Level, mikeio.EUMUnit.meter),
+    )
+
+    da.unit = mikeio.EUMUnit.feet
+
+    assert da.unit == mikeio.EUMUnit.feet
+
+
+def test_set_bad_unit_fails() -> None:
+    da = mikeio.DataArray(
+        data=np.array([0.0, 1.0]),
+        item=mikeio.ItemInfo("Water", mikeio.EUMType.Water_Level, mikeio.EUMUnit.meter),
+    )
+
+    with pytest.raises(ValueError, match="unit"):
+        da.unit = mikeio.EUMUnit.decibar
