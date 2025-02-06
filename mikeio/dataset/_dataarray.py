@@ -491,6 +491,20 @@ class DataArray:
         value: float
             Value used to fill missing values.
 
+        Examples
+        --------
+        ```{python}
+        import numpy as np
+        import mikeio
+
+        da = mikeio.DataArray([np.nan, 1.0])
+        da
+        ```
+
+        ```{python}
+        da.fillna(0.0)
+        ```
+
         """
         da = self.copy()
         x = da.values
