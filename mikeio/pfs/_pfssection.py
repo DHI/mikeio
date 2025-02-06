@@ -97,21 +97,23 @@ class PfsSection(SimpleNamespace, MutableMapping[str, Any]):
         if value is None:
             value = {}
 
-        if isinstance(value, dict):
-            d = value.copy() if copy else value
-            self.__setattr__(key, PfsSection(d))
-        elif isinstance(value, PfsNonUniqueList):
-            # multiple keywords/Sections with same name
-            sections = PfsNonUniqueList()
-            for v in value:
-                if isinstance(v, dict):
-                    d = v.copy() if copy else v
-                    sections.append(PfsSection(d))
-                else:
-                    sections.append(self._parse_value(v))
-            self.__setattr__(key, sections)
-        else:
-            self.__setattr__(key, self._parse_value(value))
+        match value:
+            case dict():
+                d = value.copy() if copy else value
+                self.__setattr__(key, PfsSection(d))
+            case PfsNonUniqueList():
+                # multiple keywords/Sections with same name
+                sections = PfsNonUniqueList()
+                for v in value:
+                    match v:
+                        case dict():
+                            d = v.copy() if copy else v
+                            sections.append(PfsSection(d))
+                        case _:
+                            sections.append(self._parse_value(v))
+                self.__setattr__(key, sections)
+            case _:
+                self.__setattr__(key, self._parse_value(value))
 
     def _parse_value(self, v: Any) -> Any:
         if isinstance(v, str) and self._str_is_scientific_float(v):
@@ -121,26 +123,12 @@ class PfsSection(SimpleNamespace, MutableMapping[str, Any]):
     @staticmethod
     def _str_is_scientific_float(s: str) -> bool:
         """True: -1.0e2, 1E-4, -0.1E+0.5; False: E12, E-4."""
-        if len(s) < 3:
+        if len(s) < 3 or s.lower().startswith('e'):
             return False
-        if (
-            s.count(".") <= 2
-            and s.lower().count("e") == 1
-            and s.lower()[0] != "e"
-            and s.strip()
-            .lower()
-            .replace(".", "")
-            .replace("e", "")
-            .replace("-", "")
-            .replace("+", "")
-            .isnumeric()
-        ):
-            try:
-                float(s)
-                return True
-            except ValueError:
-                return False
-        else:
+        try:
+            float(s)
+            return 'e' in s.lower()
+        except ValueError:
             return False
 
     def pop(self, key: Any, default: Any = None) -> Any:
@@ -215,14 +203,13 @@ class PfsSection(SimpleNamespace, MutableMapping[str, Any]):
         """
         results = []
         if text is not None:
-            assert key is None, "text and key cannot both be provided!"
-            assert section is None, "text and section cannot both be provided!"
-            assert param is None, "text and param cannot both be provided!"
-            key = text
-            section = text
-            param = text
-        key = key if (key is None or case) else key.lower()
-        section = section if (section is None or case) else section.lower()
+            # text searches across all fields
+            if key is not None or section is not None or param is not None:
+                raise ValueError("When 'text' is provided, 'key', 'section' and 'param' must be None")
+            key = section = param = text
+            
+        key = key.lower() if (key is not None and not case) else key
+        section = section.lower() if (section is not None and not case) else section
         param = (
             param
             if (param is None or not isinstance(param, str) or case)
