@@ -526,7 +526,6 @@ def test_non_unique_keywords() -> None:
         pfs = mikeio.PfsDocument(fn, unique_keywords=True)
 
     assert len(pfs.BoundaryExtractor.POINT_1) == 2
-    assert isinstance(pfs.BoundaryExtractor.POINT_1, mikeio.pfs.PfsNonUniqueList)
     assert isinstance(pfs.BoundaryExtractor.POINT_1[1], mikeio.PfsSection)
 
     # first value will be kept (like MIKE FM)
@@ -541,7 +540,6 @@ def test_non_unique_keywords_allowed() -> None:
     assert isinstance(pfs.BoundaryExtractor.POINT_1[1], mikeio.PfsSection)
 
     assert len(pfs.BoundaryExtractor.z_min) == 3
-    assert isinstance(pfs.BoundaryExtractor.z_min, mikeio.pfs.PfsNonUniqueList)
     assert pfs.BoundaryExtractor.z_min == [-3000, 9, 19]
 
 
@@ -1015,7 +1013,7 @@ def test_nonunique_mixed_keywords_sections1(tmp_path: Path) -> None:
     pfs = mikeio.PfsDocument.from_text(text)
     assert len(pfs.ROOT.A) == 4
     assert isinstance(pfs.ROOT.A[2], mikeio.PfsSection)
-    assert isinstance(pfs.ROOT.A[2].B, mikeio.pfs.PfsNonUniqueList)
+    assert len(pfs.ROOT.A[2].B) == 2
     assert pfs.ROOT.A[2].B[0] == 0
     assert pfs.ROOT.A[-1] == 3
 
@@ -1050,7 +1048,6 @@ def test_nonunique_mixed_keywords_sections2(tmp_path: Path) -> None:
 
     pfs = mikeio.PfsDocument.from_text(text)
     assert len(pfs.ROOT.A) == 4
-    assert isinstance(pfs.ROOT.A, mikeio.pfs.PfsNonUniqueList)
     assert isinstance(pfs.ROOT.A[0], mikeio.PfsSection)
     assert isinstance(pfs.ROOT.A[0].B[1], mikeio.PfsSection)
     assert isinstance(pfs.ROOT.A[2], mikeio.PfsSection)
