@@ -205,8 +205,14 @@ class PfsDocument(PfsSection):
             raise FileNotFoundError(str(e))
         except Exception as e:
             raise ValueError(f"{filename} could not be parsed. " + str(e))
-        sections = [PfsSection(list(d.values())[0]) for d in target_list]  # type: ignore
-        names = [list(d.keys())[0] for d in target_list]  # type: ignore
+        return PfsDocument._extract_names_from_list(target_list)
+
+    @staticmethod
+    def _extract_names_from_list(
+        input: Sequence[PfsSection],
+    ) -> tuple[list[str], list[PfsSection]]:
+        sections = [PfsSection(list(d.values())[0]) for d in input]  # type: ignore
+        names = [list(d.keys())[0] for d in input]  # type: ignore
         return names, sections
 
     @staticmethod
@@ -214,10 +220,7 @@ class PfsDocument(PfsSection):
         input: Mapping[str | PfsSection, Any] | Sequence[PfsSection],
     ) -> tuple[list[str], list[PfsSection]]:
         if isinstance(input, Sequence):
-            # TODO extract method
-            sections = [PfsSection(list(d.values())[0]) for d in input]  # type: ignore
-            names = [list(d.keys())[0] for d in input]  # type: ignore
-            return names, sections
+            return PfsDocument._extract_names_from_list(input)
 
         assert isinstance(input, Mapping), "input must be a mapping"
         names, sections = PfsDocument._unravel_items(input.items)
