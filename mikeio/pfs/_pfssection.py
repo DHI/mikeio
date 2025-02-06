@@ -235,9 +235,7 @@ class PfsSection(SimpleNamespace, MutableMapping[str, Any]):
                         keypat, parampat, secpat, keylist=keylist + [k], case=case
                     )
             else:
-                if keypat and keypat in kk:
-                    yield from self._yield_deep_dict(keylist + [k], v)
-                if self._param_match(parampat, v, case):
+                if (keypat and keypat in kk) or self._param_match(parampat, v, case):
                     yield from self._yield_deep_dict(keylist + [k], v)
 
     @staticmethod
@@ -278,12 +276,12 @@ class PfsSection(SimpleNamespace, MutableMapping[str, Any]):
         return lines
 
     def _append_to_lines_at_level(self, lines: list[str], level: int = 0) -> None:
-        lvl_prefix = "   "
+        lvl_prefix = "   " * level
         for k, v in self.items():
             # check for empty sections
             if v is None:
-                lines.append(f"{lvl_prefix * level}[{k}]")
-                lines.append(f"{lvl_prefix * level}EndSect  // {k}")
+                lines.append(f"{lvl_prefix}[{k}]")
+                lines.append(f"{lvl_prefix}EndSect  // {k}")
 
             elif isinstance(v, list) and any(
                 isinstance(subv, PfsSection) for subv in v
@@ -295,64 +293,52 @@ class PfsSection(SimpleNamespace, MutableMapping[str, Any]):
                         subsec._append_to_lines_at_level(lines, level=level)
                     else:
                         subv = self._prepare_value_for_write(subv)
-                        lines.append(f"{lvl_prefix * level}{k} = {subv}")
+                        lines.append(f"{lvl_prefix}{k} = {subv}")
             elif isinstance(v, PfsSection):
-                lines.append(f"{lvl_prefix * level}[{k}]")
+                lines.append(f"{lvl_prefix}[{k}]")
                 v._append_to_lines_at_level(lines, level=(level + 1))
-                lines.append(f"{lvl_prefix * level}EndSect  // {k}")
+                lines.append(f"{lvl_prefix}EndSect  // {k}")
             elif isinstance(v, PfsNonUniqueList) or (
                 isinstance(v, list) and all([isinstance(vv, list) for vv in v])
             ):
                 if len(v) == 0:
                     # empty list -> keyword with no parameter
-                    lines.append(f"{lvl_prefix * level}{k} = ")
+                    lines.append(f"{lvl_prefix}{k} = ")
                 for subv in v:
-                    subv = self._prepare_value_for_write(subv)
-                    lines.append(f"{lvl_prefix * level}{k} = {subv}")
+                    psubv = self._prepare_value_for_write(subv)
+                    lines.append(f"{lvl_prefix}{k} = {psubv}")
             else:
-                v = self._prepare_value_for_write(v)
-                lines.append(f"{lvl_prefix * level}{k} = {v}")
+                pv = self._prepare_value_for_write(v)
+                lines.append(f"{lvl_prefix}{k} = {pv}")
 
     def _prepare_value_for_write(
         self, v: str | bool | datetime | list[str | bool | datetime]
     ) -> str:
-        """catch peculiarities of string formatted pfs data.
+        """Catch peculiarities of string formatted pfs data."""
+        match v:
+            case str():
+                if len(v) > 5 and not ("PROJ" in v or "<CLOB:" in v):
+                    v = v.replace('"', "''")
+                    v = v.replace("\U0001f600", "'")
 
-        Parameters
-        ----------
-        v : str
-            value from one pfs line
+                if v == "":
+                    v = "''"
+                elif v.count("|") == 2 and "CLOB" not in v:
+                    v = f"{v}"
+                else:
+                    v = f"'{v}'"
 
-        Returns
-        -------
-            modified value
+            case bool():
+                v = str(v).lower()  # stick to MIKE lowercase bool notation
 
-        """
-        # some crude checks and corrections
-        if isinstance(v, str):
-            if len(v) > 5 and not ("PROJ" in v or "<CLOB:" in v):
-                v = v.replace('"', "''")
-                v = v.replace("\U0001f600", "'")
+            case datetime():
+                v = v.strftime("%Y, %m, %d, %H, %M, %S").replace(" 0", " ")
 
-            if v == "":
-                # add either '' or || as pre- and suffix to strings depending on path definition
-                v = "''"
-            elif v.count("|") == 2 and "CLOB" not in v:
-                v = f"{v}"
-            else:
-                v = f"'{v}'"
-
-        elif isinstance(v, bool):
-            v = str(v).lower()  # stick to MIKE lowercase bool notation
-
-        elif isinstance(v, datetime):
-            v = v.strftime("%Y, %m, %d, %H, %M, %S").replace(" 0", " ")
-
-        elif isinstance(v, list):
-            out = []
-            for subv in v:
-                out.append(str(self._prepare_value_for_write(subv)))
-            v = ", ".join(out)
+            case list():
+                out = []
+                for subv in v:
+                    out.append(str(self._prepare_value_for_write(subv)))
+                v = ", ".join(out)
 
         return v
 
