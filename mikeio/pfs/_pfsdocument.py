@@ -352,14 +352,14 @@ class PfsDocument(PfsSection):
         # Example of complicated string:
         # '<CLOB:22,1,1,false,1,0,"",0,"",0,"",0,"",0,"",0,"",0,"",0,"",||,false>'
         if s.count("|") == 2 and "CLOB" not in context:
-            parts = s.split("|")
-            if len(parts[1]) > 1 and parts[1].count("'") > 0:
+            prefix, content, suffix = s.split("|")
+            if len(content) > 1 and content.count("'") > 0:
                 # string containing single quotes that needs escaping
                 warnings.warn(
                     f"The string {s} contains a single quote character which will be temporarily converted to \U0001f600 . If you write back to a pfs file again it will be converted back."
                 )
-                parts[1] = parts[1].replace("'", "\U0001f600")
-            s = parts[0] + "'|" + parts[1] + "|'" + parts[2]
+                content = content.replace("'", "\U0001f600")
+            s = f"{prefix}'|{content}|'{suffix}"
 
         if len(s) > 2:  # ignore foo = ''
             s = s.replace("''", '"')
