@@ -532,7 +532,9 @@ class Dataset:
     def __setitem__(self, key, value) -> None:  # type: ignore
         self.__set_or_insert_item(key, value, insert=False)
 
-    def __set_or_insert_item(self, key, value: DataArray, insert=False) -> None:  # type: ignore
+    def __set_or_insert_item(
+        self, key: int | str, value: DataArray, insert=False
+    ) -> None:  # type: ignore
         if len(self) > 0:
             self[0]._is_compatible(value)
 
@@ -1008,7 +1010,7 @@ class Dataset:
 
     def extract_track(
         self,
-        track: pd.DataFrame,
+        track: str | Path | Dataset | pd.DataFrame,
         method: Literal["nearest", "inverse_distance"] = "nearest",
         dtype: Any = np.float32,
     ) -> "Dataset":
@@ -1016,11 +1018,9 @@ class Dataset:
 
         Parameters
         ---------
-        track: pandas.DataFrame
+        track: pandas.DataFrame, str or Dataset
             with DatetimeIndex and (x, y) of track points as first two columns
-            x,y coordinates must be in same coordinate system as dfsu
-        track: str
-            filename of csv or dfs0 file containing t,x,y
+            x,y coordinates must be in same coordinate system as dataset
         method: str, optional
             Spatial interpolation method ('nearest' or 'inverse_distance')
             default='nearest'

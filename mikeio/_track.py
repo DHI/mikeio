@@ -19,7 +19,7 @@ def _extract_track(
     end_time: pd.Timestamp,
     timestep: float,
     geometry: GeometryFM2D,
-    track: str | Dataset | pd.DataFrame,
+    track: str | Path | Dataset | pd.DataFrame,
     items: Sequence[ItemInfo],
     item_numbers: Sequence[int],
     time_steps: Sequence[int],
@@ -36,6 +36,8 @@ def _extract_track(
     match track:
         case str():
             times, coords = _get_track_data_from_file(track)
+        case Path():
+            times, coords = _get_track_data_from_file(str(track))
         case Dataset():
             times, coords = _get_track_data_from_dataset(track)
         case pd.DataFrame():
