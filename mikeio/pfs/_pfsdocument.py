@@ -205,15 +205,16 @@ class PfsDocument(PfsSection):
             raise FileNotFoundError(str(e))
         except Exception as e:
             raise ValueError(f"{filename} could not be parsed. " + str(e))
-        return PfsDocument._extract_names_from_list(target_list)
+        return PfsDocument._extract_names_from_list(target_list)  # type: ignore
 
     @staticmethod
     def _extract_names_from_list(
-        input: Sequence[PfsSection],
+        targets: Sequence[PfsSection],
     ) -> tuple[list[str], list[PfsSection]]:
-        sections = [PfsSection(list(d.values())[0]) for d in input]  # type: ignore
-        names = [list(d.keys())[0] for d in input]  # type: ignore
-        return names, sections
+        names, sections = zip(
+            *((k, PfsSection(v)) for target in targets for k, v in target.items())
+        )
+        return list(names), list(sections)
 
     @staticmethod
     def _parse_non_file_input(
