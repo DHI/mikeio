@@ -304,27 +304,25 @@ def test_mztoolbox() -> None:
     assert "|" in pfs.txconc.Setup.File_1.InputFile
 
 
-def assert_files_match(f1, f2) -> None:
-    file1txt = Path(f1).read_text()
-    file2txt = Path(f2).read_text()
-
-    assert file1txt == file2txt
-
 
 def assert_txt_files_match(f1, f2, comment="//") -> None:
-    """Checks non"""
+    """Checks that non-comment lines in two files match exactly.
+    Empty lines and lines starting with the comment string are ignored."""
     file1lines = Path(f1).read_text().splitlines()
-    file2lines = Path(f1).read_text().splitlines()
-
-    for a, b in zip(file1lines, file2lines):
-        s1 = a.strip()
-        s2 = b.strip()
-        if s1 == "" or s1.startswith(comment):
-            continue
-        if s2 == "" or s2.startswith(comment):
-            continue
-
-        assert s1 == s2
+    file2lines = Path(f2).read_text().splitlines()
+    
+    # Filter out comments and empty lines
+    content1 = [line.strip() for line in file1lines if line.strip() and not line.strip().startswith(comment)]
+    content2 = [line.strip() for line in file2lines if line.strip() and not line.strip().startswith(comment)]
+    
+    # Check lengths match after filtering
+    if len(content1) != len(content2):
+        raise AssertionError(f"Files have different number of non-comment lines: {len(content1)} vs {len(content2)}")
+    
+    # Compare remaining lines
+    for i, (line1, line2) in enumerate(zip(content1, content2)):
+        if line1 != line2:
+            raise AssertionError(f"Line {i} differs:\n{line1}\nvs\n{line2}")
 
 
 def test_read_write(tmp_path: Path) -> None:
