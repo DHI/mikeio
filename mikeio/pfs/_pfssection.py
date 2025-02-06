@@ -28,6 +28,7 @@ def _merge_dict(a: dict[str, Any], b: Mapping[str, Any]) -> dict[str, Any]:
 
 
 class PfsNonUniqueList(list):
+    # TODO do we really need this, regular lists are not unique
     pass
 
 
