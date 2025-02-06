@@ -407,7 +407,11 @@ class DataArray:
     @property
     def unit(self) -> EUMUnit:
         """EUMUnit."""
-        return self.item.unit
+        return self.item._unit
+
+    @unit.setter
+    def unit(self, value: EUMUnit) -> None:
+        self.item.unit = value
 
     @property
     def start_time(self) -> datetime:
