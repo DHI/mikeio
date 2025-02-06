@@ -247,7 +247,7 @@ def test_pfssection_find_replace(d1) -> None:
     assert sct.FILE_6.lst == [0.11, 0.22, 0.33]
 
 
-def test_pfssection_write(d1, tmp_path) -> None:
+def test_pfssection_write(d1, tmp_path: Path) -> None:
     sct = mikeio.PfsSection(d1)
     pfs = mikeio.PfsDocument({"root": sct})
     fn = tmp_path / "pfssection.pfs"
@@ -327,7 +327,7 @@ def assert_txt_files_match(f1, f2, comment="//") -> None:
         assert s1 == s2
 
 
-def test_read_write(tmp_path) -> None:
+def test_read_write(tmp_path: Path) -> None:
     infilename = "tests/testdata/pfs/concat.mzt"
     pfs1 = mikeio.PfsDocument(infilename)
     outfilename = tmp_path / "concat_out.mzt"
@@ -336,7 +336,7 @@ def test_read_write(tmp_path) -> None:
     _ = mikeio.PfsDocument(outfilename)  # try to parse it also
 
 
-def test_read_write_she(tmp_path) -> None:
+def test_read_write_she(tmp_path: Path) -> None:
     infilename = "tests/testdata/pfs/Karup_basic.she"
     pfs1 = mikeio.PfsDocument(infilename, unique_keywords=False)
     outfilename = tmp_path / "Karup_basic_out.she"
@@ -345,7 +345,7 @@ def test_read_write_she(tmp_path) -> None:
     assert pfs1.MIKESHE_FLOWMODEL == pfs2.MIKESHE_FLOWMODEL
 
 
-def test_read_write_she2(tmp_path) -> None:
+def test_read_write_she2(tmp_path: Path) -> None:
     infilename = "tests/testdata/pfs/Karup_mini.she"
     with pytest.warns(match="contains a single quote character"):
         pfs1 = mikeio.PfsDocument(infilename)
@@ -358,7 +358,7 @@ def test_read_write_she2(tmp_path) -> None:
     assert pfs1.MIKESHE_FLOWMODEL == pfs2.MIKESHE_FLOWMODEL
 
 
-def test_read_write_filenames(tmp_path) -> None:
+def test_read_write_filenames(tmp_path: Path) -> None:
     infilename = "tests/testdata/pfs/filenames.pfs"
     pfs1 = mikeio.PfsDocument(infilename)
     outfilename = tmp_path / "filenames_out.pfs"
@@ -367,7 +367,7 @@ def test_read_write_filenames(tmp_path) -> None:
     _ = mikeio.PfsDocument(outfilename)  # try to parse it also
 
 
-def test_read_write_filenames_modified(tmp_path) -> None:
+def test_read_write_filenames_modified(tmp_path: Path) -> None:
     infilename = "tests/testdata/pfs/filenames.pfs"
     pfs1 = mikeio.PfsDocument(infilename)
     pfs1.FILE_NAMES.file5 = r"..\..\newfile5.dfs0"
@@ -463,6 +463,38 @@ def test_multiple_identical_roots() -> None:
     assert not pfs.is_unique
 
 
+def test_multiple_roots_from_text() -> None:
+    text = """
+[t1_t0]
+   [Setup]
+      Name = 'Extract this'
+   EndSect  // Setup
+EndSect  // t1_t0
+
+[t1_t0]
+   [Setup]
+      Name = 'Extract that'
+   EndSect  // Setup
+EndSect  // t1_t0
+    """
+    pfs = mikeio.PfsDocument.from_text(text)
+    assert pfs.targets[0].Setup.Name == "Extract this"
+    assert pfs.targets[1].Setup.Name == "Extract that"
+
+
+def test_multiple_roots_from_data() -> None:
+    data = [
+        mikeio.PfsSection({"ATOOL": {"file_name": r"|path\file1.dfs0|"}}),
+        mikeio.PfsSection({"ATOOL": {"file_name": r"|path\file2.dfs0|"}}),
+    ]
+
+    pfs = mikeio.PfsDocument(data)
+    assert pfs.names[0] == "ATOOL"
+    assert pfs.names[1] == "ATOOL"
+    assert pfs.targets[0].file_name == r"|path\file1.dfs0|"
+    assert pfs.targets[1].file_name == r"|path\file2.dfs0|"
+
+
 def test_multiple_unique_roots() -> None:
     """Test a file created with Mike Zero toolbox containing two similar extraction tasks"""
     pfs = mikeio.read_pfs("tests/testdata/pfs/multiple_unique_root_elements.pfs")
@@ -513,11 +545,11 @@ def test_non_unique_keywords_allowed() -> None:
     assert pfs.BoundaryExtractor.z_min == [-3000, 9, 19]
 
 
-def test_non_unique_keywords_read_write(tmp_path) -> None:
+def test_non_unique_keywords_read_write(tmp_path: Path) -> None:
     fn1 = "tests/testdata/pfs/nonunique.pfs"
     pfs1 = mikeio.PfsDocument(fn1, unique_keywords=False)
 
-    fn2 = tmp_path / "nonunique_out.pfs"
+    fn2 = str(tmp_path / "nonunique_out.pfs")
     pfs1.write(fn2)
 
     pfs2 = mikeio.PfsDocument(fn2, unique_keywords=False)
@@ -617,7 +649,7 @@ EndSect // ENGINE
     assert pfs.ENGINE.fill_list[1] == 2
 
 
-def test_empty(tmp_path) -> None:
+def test_empty(tmp_path: Path) -> None:
     text = """
 [ENGINE]
   A = 
@@ -642,7 +674,7 @@ EndSect // ENGINE
     assert outlines[7].strip() == "EndSect  // B"
 
 
-def test_difficult_chars_in_str(tmp_path) -> None:
+def test_difficult_chars_in_str(tmp_path: Path) -> None:
     text = """
 [ENGINE]
   A = 'str,s/d\sd.dfs0'
@@ -678,7 +710,7 @@ EndSect // ENGINE
     assert outlines[9].strip() == "E = |str,s'+-s_d.dfs0|"
 
 
-def test_difficult_chars_in_str2(tmp_path) -> None:
+def test_difficult_chars_in_str2(tmp_path: Path) -> None:
     text = """
 [ENGINE]
    A = 'str,s/d\sd.dfs0'
@@ -728,7 +760,7 @@ EndSect // ENGINE
     assert pfs.ENGINE.fill_list[2] == "baz"
 
 
-def test_read_write_list_list(tmp_path) -> None:
+def test_read_write_list_list(tmp_path: Path) -> None:
     text = """
 [ENGINE]
   RGB_Color_Value = 128, 0, 128
@@ -763,7 +795,7 @@ EndSect // ENGINE
     assert "ENGINE" in text
 
 
-def test_double_single_quotes_in_string(tmp_path) -> None:
+def test_double_single_quotes_in_string(tmp_path: Path) -> None:
     text = """
 [DERIVED_VARIABLE_106]
             name = 'alfa_PC_T'
@@ -796,7 +828,7 @@ EndSect  // DERIVED_VARIABLE_106
                 )
 
 
-def test_str_in_str_projection(tmp_path) -> None:
+def test_str_in_str_projection(tmp_path: Path) -> None:
     text = """
    [ROOT]
       Proj = 'PROJCS["ETRS_1989",GEOGCS["GCS_1989",DATUM["D_ETRS_1"]]]'
@@ -819,7 +851,7 @@ def test_str_in_str_projection(tmp_path) -> None:
                 )
 
 
-def test_number_in_str(tmp_path) -> None:
+def test_number_in_str(tmp_path: Path) -> None:
     text = """
    [ROOT]
       ID1 = '1'
@@ -844,7 +876,7 @@ def test_number_in_str(tmp_path) -> None:
                 assert line.strip() == "ID2 = '1'"
 
 
-def test_floatlike_strings(tmp_path) -> None:
+def test_floatlike_strings(tmp_path: Path) -> None:
     text = """
     [WELLNO_424]
       ID_A = '1E-3'
@@ -865,7 +897,7 @@ def test_floatlike_strings(tmp_path) -> None:
     assert pfs.WELLNO_424.ID_C == "1-E3"
 
 
-def test_nested_quotes(tmp_path) -> None:
+def test_nested_quotes(tmp_path: Path) -> None:
     text = """
   [Weir_0]
     Properties = '<CLOB:"1495_weir",0,0,false,0.0,0.0,0.0,0.0,1,0,0.5,1.0,1.0,0.5,1.0,1.0,0,0.0,0.0,"00000000-0000-0000-0000-000000000000",15.24018,5.181663,0.0,"","">'
@@ -889,7 +921,7 @@ def test_nested_quotes(tmp_path) -> None:
                 )
 
 
-def test_filename_in_list(tmp_path) -> None:
+def test_filename_in_list(tmp_path: Path) -> None:
     text = """
    [EcolabTemplateSpecification]
       TemplateFile_A = |.\Test1_OLSZ_OL_WQsetups.ecolab|
@@ -916,7 +948,7 @@ def test_filename_in_list(tmp_path) -> None:
                 )
 
 
-def test_multiple_empty_strings_in_list(tmp_path) -> None:
+def test_multiple_empty_strings_in_list(tmp_path: Path) -> None:
     text = """
    [Engine]
       A = '', '', '', ''
@@ -944,7 +976,7 @@ def test_multiple_empty_strings_in_list(tmp_path) -> None:
                 assert line.strip() == "B = '', '', ||, ||, '', ''"
 
 
-def test_vertical_lines_in_list(tmp_path) -> None:
+def test_vertical_lines_in_list(tmp_path: Path) -> None:
     text = """
    [EcolabTemplateSpecification]
       TemplateFile_OL = ||, -1, -1, ||, -1, -1, ||
@@ -967,7 +999,7 @@ def test_vertical_lines_in_list(tmp_path) -> None:
                 assert line.strip() == "TemplateFile_OL = ||, -1, -1, ||, -1, -1, ||"
 
 
-def test_nonunique_mixed_keywords_sections1(tmp_path) -> None:
+def test_nonunique_mixed_keywords_sections1(tmp_path: Path) -> None:
     text = """
    [ROOT]
       A = '1'
@@ -999,7 +1031,7 @@ def test_nonunique_mixed_keywords_sections1(tmp_path) -> None:
     assert outlines[9].strip() == "B = 2"
 
 
-def test_nonunique_mixed_keywords_sections2(tmp_path) -> None:
+def test_nonunique_mixed_keywords_sections2(tmp_path: Path) -> None:
     text = """
    [ROOT]
       [A]
@@ -1038,7 +1070,7 @@ def test_parse_mike_she_pfs() -> None:
     )  # TODO Is this sensible to check?
 
 
-def test_read_write_grid_editor_color_palette(tmp_path) -> None:
+def test_read_write_grid_editor_color_palette(tmp_path: Path) -> None:
     infile = "tests/testdata/pfs/grid1.gsf"
     outfile = tmp_path / "grid.gsf"
     pfs = mikeio.PfsDocument(infile)
@@ -1193,7 +1225,7 @@ def test_clob_can_contain_pipe_characters() -> None:
     )
 
 
-def test_write_read_clob(tmp_path) -> None:
+def test_write_read_clob(tmp_path: Path) -> None:
     clob_text = """
     [WQRiverPfs_0]
         Clob = '<CLOB:22,1,1,false,1,0,"",0,"",0,"",0,"",0,"",0,"",0,"",0,"",||,false>'

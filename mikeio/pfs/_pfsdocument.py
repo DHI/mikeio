@@ -5,7 +5,7 @@ from collections import Counter
 from collections.abc import Mapping
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Callable, TextIO
+from typing import Any, Callable, Sequence, TextIO
 
 import yaml
 
@@ -88,7 +88,11 @@ class PfsDocument(PfsSection):
 
     def __init__(
         self,
-        data: TextIO | Mapping[str | PfsSection, Any] | str | Path,
+        data: TextIO
+        | Mapping[str | PfsSection, Any]
+        | Sequence[PfsSection]
+        | str
+        | Path,
         *,
         encoding: str = "cp1252",
         unique_keywords: bool = False,
@@ -207,8 +211,14 @@ class PfsDocument(PfsSection):
 
     @staticmethod
     def _parse_non_file_input(
-        input: (Mapping[str | PfsSection, Any]),
+        input: Mapping[str | PfsSection, Any] | Sequence[PfsSection],
     ) -> tuple[list[str], list[PfsSection]]:
+        if isinstance(input, Sequence):
+            # TODO extract method
+            sections = [PfsSection(list(d.values())[0]) for d in input]  # type: ignore
+            names = [list(d.keys())[0] for d in input]  # type: ignore
+            return names, sections
+
         assert isinstance(input, Mapping), "input must be a mapping"
         names, sections = PfsDocument._unravel_items(input.items)
         for sec in sections:
@@ -352,7 +362,7 @@ class PfsDocument(PfsSection):
 
         return s
 
-    def write(self, filename: str) -> None:
+    def write(self, filename: str | Path) -> None:
         """Write object to a pfs file.
 
         Parameters
