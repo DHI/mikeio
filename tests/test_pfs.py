@@ -221,18 +221,6 @@ def test_pfssection_insert_pfssection(d1) -> None:
     assert sct.FILE_6.val == 5
 
 
-def test_pfssection_find_replace_recursive(d1) -> None:
-    sct = mikeio.PfsSection(d1)
-
-    for j in range(10):
-        dj = dict(val=j, lst=[0.3, 0.7])
-        key = f"FILE_{j+1}"
-        sct[key] = mikeio.PfsSection(dj)
-
-    assert sct.FILE_6.val == 5
-    sct.update_recursive("val", 44)
-    assert sct.FILE_6.val == 44
-
 
 def test_pfssection_find_replace(d1) -> None:
     sct = mikeio.PfsSection(d1)

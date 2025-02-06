@@ -159,15 +159,6 @@ class PfsSection(SimpleNamespace, MutableMapping[str, Any]):
         """Return a new view of the PfsSection's items ((key, value) pairs)."""
         return self.__dict__.items()
 
-    # TODO: better name
-    def update_recursive(self, key: Any, value: Any) -> None:
-        """Update recursively all matches of key with value."""
-        for k, v in self.items():
-            if isinstance(v, PfsSection):
-                self[k].update_recursive(key, value)
-            elif k == key:
-                self[k] = value
-
     def search(
         self,
         text: str | None = None,
@@ -201,7 +192,6 @@ class PfsSection(SimpleNamespace, MutableMapping[str, Any]):
             Search result as a nested PfsSection
 
         """
-        results = []
         if text is not None:
             # text searches across all fields
             if key is not None or section is not None or param is not None:
@@ -215,10 +205,9 @@ class PfsSection(SimpleNamespace, MutableMapping[str, Any]):
             if (param is None or not isinstance(param, str) or case)
             else param.lower()
         )
-        for item in self._find_patterns_generator(
+        results = [item for item in self._find_patterns_generator(
             keypat=key, parampat=param, secpat=section, case=case
-        ):
-            results.append(item)
+        )]
         return (
             self.__class__._merge_PfsSections(results)
             if len(results) > 0
