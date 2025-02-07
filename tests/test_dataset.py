@@ -122,7 +122,7 @@ def test_insert_fail(ds1):
     with pytest.raises(ValueError, match="refer to the same data"):
         ds1.insert(2, da)
 
-    assert "Foo" in ds1
+    assert "Foo" in ds1.names
     da2 = ds1[0].copy()
     da2.name = "Foo"
     with pytest.raises(ValueError, match="already in"):
