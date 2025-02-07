@@ -1326,18 +1326,19 @@ class Dataset:
             raise ValueError(
                 f"Number of items must match ({self.n_items} and {other.n_items})"
             )
-        for j in range(self.n_items):
-            if self.items[j].name != other.items[j].name:
+
+        for this, that in zip(self.items, other.items):
+            if this.name != that.name:
                 raise ValueError(
-                    f"Item names must match. Item {j}: {self.items[j].name} != {other.items[j].name}"
+                    f"Item names must match. Item: {this.name} != {that.name}"
                 )
-            if self.items[j].type != other.items[j].type:
+            if this.type != that.type:
                 raise ValueError(
-                    f"Item types must match. Item {j}: {self.items[j].type} != {other.items[j].type}"
+                    f"Item types must match. Item: {this.type} != {that.type}"
                 )
-            if self.items[j].unit != other.items[j].unit:
+            if this.unit != that.unit:
                 raise ValueError(
-                    f"Item units must match. Item {j}: {self.items[j].unit} != {other.items[j].unit}"
+                    f"Item units must match. Item: {this.unit} != {that.unit}"
                 )
 
     # ============ aggregate =============
@@ -1771,24 +1772,13 @@ class Dataset:
         except TypeError:
             raise TypeError("Could not add data in Dataset")
         newds = self.copy()
-        for j in range(len(self)):
-            newds[j].values = data[j]  # type: ignore
+        for new, old in zip(newds, data):
+            new.values = old
         return newds
 
     def _check_datasets_match(self, other: "Dataset") -> None:
-        if self.n_items != other.n_items:
-            raise ValueError(
-                f"Number of items must match ({self.n_items} and {other.n_items})"
-            )
-        for j in range(self.n_items):
-            if self.items[j].type != other.items[j].type:
-                raise ValueError(
-                    f"Item types must match. Item {j}: {self.items[j].type} != {other.items[j].type}"
-                )
-            if self.items[j].unit != other.items[j].unit:
-                raise ValueError(
-                    f"Item units must match. Item {j}: {self.items[j].unit} != {other.items[j].unit}"
-                )
+        self._check_all_items_match(other)
+
         if not np.all(self.time == other.time):
             raise ValueError("All timesteps must match")
         if self.shape != other.shape:
