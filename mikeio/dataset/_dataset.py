@@ -529,11 +529,11 @@ class Dataset:
     def __iter__(self) -> Iterator[DataArray]:
         yield from self._data_vars.values()
 
-    def __setitem__(self, key, value) -> None:  # type: ignore
+    def __setitem__(self, key: int | str, value: DataArray) -> None:  # type: ignore
         self.__set_or_insert_item(key, value, insert=False)
 
     def __set_or_insert_item(
-        self, key: int | str, value: DataArray, insert=False
+        self, key: int | str, value: DataArray, insert: bool = False
     ) -> None:  # type: ignore
         if len(self) > 0:
             self[0]._is_compatible(value)
