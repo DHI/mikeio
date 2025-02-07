@@ -195,20 +195,3 @@ def _get_track_data_from_file(track: str) -> tuple[pd.DatetimeIndex, np.ndarray]
     coords = df.iloc[:, 0:2].to_numpy(copy=True)
 
     return times, coords
-
-
-def _find_end_index(t_rel: pd.Index, end_time: pd.Timestamp) -> int:
-    # largest idx for which (times - self.end_time)<=0
-    tmp = np.where(t_rel <= 0)[0]
-    if len(tmp) == 0:
-        raise ValueError("No time overlap!")
-    i_end = tmp[-1]
-    return i_end
-
-
-def _find_start_index(t_rel: pd.Index, start_time: pd.Timestamp) -> int:
-    tmp = np.where(t_rel >= 0)[0]
-    if len(tmp) == 0:
-        raise ValueError("No time overlap!")
-    i_start = tmp[0]  # smallest idx for which t_rel>=0
-    return i_start
