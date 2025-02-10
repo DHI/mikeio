@@ -761,22 +761,6 @@ class GeometryFM2D(_GeometryFM):
 
         return ids
 
-    def _find_single_element_2d(self, x: float, y: float) -> Any:
-        nc = self.node_coordinates
-
-        few_nearest, _ = self._find_n_nearest_2d_elements(
-            x=x, y=y, n=min(self.n_elements, 10)
-        )
-
-        for idx in few_nearest:
-            nodes = self.element_table[idx]
-            element_found = self._point_in_polygon(nc[nodes, 0], nc[nodes, 1], x, y)
-
-            if element_found:
-                return idx
-
-        raise OutsideModelDomainError(x=x, y=y)  # type: ignore
-
     def get_overset_grid(
         self,
         dx: float | None = None,
