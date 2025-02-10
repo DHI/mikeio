@@ -100,12 +100,9 @@ class _DataArraySpectrumToHm0:
         dims = tuple([d for d in self.da.dims if d not in ("frequency", "direction")])
         item = ItemInfo(EUMType.Significant_wave_height)
         g = self.da.geometry
-        if isinstance(g, GeometryFMPointSpectrum):
-            if g.x is not None and g.y is not None:
-                geometry: Any = GeometryPoint2D(x=g.x, y=g.y)
-            else:
-                geometry = GeometryUndefined()
-        elif isinstance(g, GeometryFMLineSpectrum):
+        geometry: Any = GeometryUndefined()
+
+        if isinstance(g, GeometryFMLineSpectrum):
             geometry = Grid1D(
                 nx=g.n_nodes,
                 dx=1.0,
@@ -121,8 +118,6 @@ class _DataArraySpectrumToHm0:
                 element_table=g.element_table,
                 element_ids=g.element_ids,
             )
-        else:
-            geometry = GeometryUndefined()
 
         return DataArray(
             data=Hm0,
@@ -409,7 +404,11 @@ class DataArray:
     @property
     def unit(self) -> EUMUnit:
         """EUMUnit."""
-        return self.item.unit
+        return self.item._unit
+
+    @unit.setter
+    def unit(self, value: EUMUnit) -> None:
+        self.item.unit = value
 
     @property
     def start_time(self) -> datetime:
