@@ -81,6 +81,8 @@ GeometryType = Union[
     Grid3D,
 ]
 
+IndexType = Union[int, slice, Sequence[int], np.ndarray, None]
+
 
 class _DataArraySpectrumToHm0:
     def __init__(self, da: "DataArray") -> None:
@@ -584,9 +586,18 @@ class DataArray:
 
     def isel(
         self,
-        idx: int | Sequence[int] | slice | None = None,
+        idx: IndexType = None,
+        *,
+        time: IndexType = None,
+        x: IndexType = None,
+        y: IndexType = None,
+        z: IndexType = None,
+        element: IndexType = None,
+        node: IndexType = None,
+        layer: IndexType = None,
+        frequency: IndexType = None,
+        direction: IndexType = None,
         axis: int | str = 0,
-        **kwargs: Any,
     ) -> "DataArray":
         """Return a new DataArray whose data is given by
         integer indexing along the specified dimension(s).
@@ -617,11 +628,17 @@ class DataArray:
             y index, by default None
         z : int, optional
             z index, by default None
+        layer: int, optional
+            layer index, only used in dfsu 3d
+        direction: int, optional
+            direction index, only used in sprectra
+        frequency: int, optional
+            frequencey index, only used in spectra
+        node: int, optional
+            node index, only used in spectra
         element : int, optional
             Bounding box of coordinates (left lower and right upper)
             to be selected, by default None
-        **kwargs: Any
-            Not used
 
         Returns
         -------
@@ -654,10 +671,23 @@ class DataArray:
         ```
 
         """
-        if isinstance(self.geometry, Grid2D) and ("x" in kwargs and "y" in kwargs):
-            idx_x = kwargs["x"]
-            idx_y = kwargs["y"]
-            return self.isel(x=idx_x).isel(y=idx_y)
+        if isinstance(self.geometry, Grid2D) and (x is not None and y is not None):
+            return self.isel(x=x).isel(y=y)
+        kwargs = {
+            k: v
+            for k, v in dict(
+                time=time,
+                x=x,
+                y=y,
+                z=z,
+                element=element,
+                node=node,
+                layer=layer,
+                frequency=frequency,
+                direction=direction,
+            ).items()
+            if v is not None
+        }
         for dim in kwargs:
             if dim in self.dims:
                 axis = dim
@@ -698,7 +728,7 @@ class DataArray:
                 spatial_axis = axis - 1 if self.dims[0] == "time" else axis
                 geometry = self.geometry.isel(idx, axis=spatial_axis)
 
-            # TOOD this is ugly
+            # TODO this is ugly
             if isinstance(geometry, _GeometryFMLayered):
                 node_ids, _ = self.geometry._get_nodes_and_table_for_elements(
                     idx, node_layers="all"
@@ -741,7 +771,12 @@ class DataArray:
         self,
         *,
         time: str | pd.DatetimeIndex | "DataArray" | None = None,
-        **kwargs: Any,
+        x: float | slice | None = None,
+        y: float | slice | None = None,
+        z: float | slice | None = None,
+        coords: np.ndarray | None = None,
+        area: tuple[float, float, float, float] | None = None,
+        layers: int | str | Sequence[int | str] | None = None,
     ) -> "DataArray":
         """Return a new DataArray whose data is given by
         selecting index labels along the specified dimension(s).
@@ -780,8 +815,6 @@ class DataArray:
             layer(s) to be selected: "top", "bottom" or layer number
             from bottom 0,1,2,... or from the top -1,-2,... or as
             list of these; only for layered dfsu, by default None
-        **kwargs: Any
-            Additional keyword arguments
 
         Returns
         -------
@@ -823,24 +856,32 @@ class DataArray:
         ```
 
         """
+        # time is not part of kwargs
+        kwargs = {
+            k: v
+            for k, v in dict(
+                x=x, y=y, z=z, area=area, coords=coords, layers=layers
+            ).items()
+            if v is not None
+        }
         if any([isinstance(v, slice) for v in kwargs.values()]):
-            return self._sel_with_slice(kwargs)
+            return self._sel_with_slice(kwargs)  # type: ignore
 
         da = self
 
         # select in space
         if len(kwargs) > 0:
             idx = self.geometry.find_index(**kwargs)
+
+            # TODO this seems fragile
             if isinstance(idx, tuple):
                 # TODO: support for dfs3
                 assert len(idx) == 2
-                t_ax_offset = 1 if self._has_time_axis else 0
                 ii, jj = idx
                 if jj is not None:
-                    da = da.isel(idx=jj, axis=(0 + t_ax_offset))
+                    da = da.isel(y=jj)
                 if ii is not None:
-                    sp_axis = 0 if (jj is not None and len(jj) == 1) else 1
-                    da = da.isel(idx=ii, axis=(sp_axis + t_ax_offset))
+                    da = da.isel(x=ii)
             else:
                 da = da.isel(idx, axis="space")
 
@@ -1866,7 +1907,7 @@ class DataArray:
             Dfs0 only: set the dfs data type of the written data
             to e.g. np.float64, by default: DfsSimpleType.Float (=np.float32)
         **kwargs: Any
-            Additional keyword arguments, e.g. dtype for dfs0
+            additional arguments passed to the writing function, e.g. dtype for dfs0
 
         """
         self._to_dataset().to_dfs(filename, **kwargs)
