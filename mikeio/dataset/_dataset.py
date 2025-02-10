@@ -162,8 +162,6 @@ class Dataset:
             for da in data_vars.values():
                 first._is_compatible(da, raise_error=True)
 
-        self._check_all_different_ids(list(data_vars.values()))
-
         # TODO is it necessary to keep track of item names?
         self.__itemattr: set[str] = set()
         for key, value in data_vars.items():
@@ -265,32 +263,6 @@ class Dataset:
                 f"Item names must be unique! ({item_names}). Please rename before constructing Dataset."
             )
         return item_names
-
-    @staticmethod
-    def _check_all_different_ids(das: Sequence[DataArray]) -> None:
-        """Are all the DataArrays different objects or are some referring to the same."""
-        ids = np.zeros(len(das), dtype=np.int64)
-        ids_val = np.zeros(len(das), dtype=np.int64)
-        for j, da in enumerate(das):
-            ids[j] = id(da)
-            ids_val[j] = id(da.values)
-
-        if len(ids) != len(np.unique(ids)):
-            # DataArrays not unique! - find first duplicate and report error
-            das = list(das)
-            u, c = np.unique(ids, return_counts=True)
-            dups = u[c > 1]
-            for dup in dups:
-                jj = np.where(ids == dup)[0]
-                Dataset._id_of_DataArrays_equal(das[jj[0]], das[jj[1]])
-        if len(ids_val) != len(np.unique(ids_val)):
-            # DataArray *values* not unique! - find first duplicate and report error
-            das = list(das)
-            u, c = np.unique(ids_val, return_counts=True)
-            dups = u[c > 1]
-            for dup in dups:
-                jj = np.where(ids_val == dup)[0]
-                Dataset._id_of_DataArrays_equal(das[jj[0]], das[jj[1]])
 
     @staticmethod
     def _id_of_DataArrays_equal(da1: DataArray, da2: DataArray) -> None:

@@ -151,13 +151,6 @@ def test_index_with_attribute():
     with pytest.raises(ValueError):
         mikeio.Dataset(data)
 
-    # We cannot create a mikeio.Dataset with multiple references to the same data
-    da1 = mikeio.DataArray(item="Foo", data=d, time=time)
-    da2 = mikeio.DataArray(item="Bar", data=d, time=time)
-    data = [da1, da2]
-    with pytest.raises(ValueError):
-        mikeio.Dataset(data)
-
     da1 = mikeio.DataArray(item="Foo", data=d, time=time)
     da2 = mikeio.DataArray(item="Bar", data=d.copy(), time=time)
     data = [da1, da2]
