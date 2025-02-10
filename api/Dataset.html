@@ -337,7 +337,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </section>
 <section id="examples" class="level2 doc-section doc-section-examples">
 <h2 class="doc-section doc-section-examples anchored" data-anchor-id="examples">Examples</h2>
-<div id="816a19e6" class="cell" data-execution_count="1">
+<div id="8973179b" class="cell" data-execution_count="1">
 <div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> mikeio</span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>mikeio.read(<span class="st">"../data/europe_wind_long_lat.dfs2"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="1">
@@ -823,7 +823,7 @@ aggregate : Weighted average</code></pre>
 <colgroup>
 <col style="width: 4%">
 <col style="width: 23%">
-<col style="width: 64%">
+<col style="width: 65%">
 <col style="width: 7%">
 </colgroup>
 <thead>
@@ -837,23 +837,17 @@ aggregate : Weighted average</code></pre>
 <tbody>
 <tr class="odd">
 <td>track</td>
-<td>pd.DataFrame</td>
-<td>with DatetimeIndex and (x, y) of track points as first two columns x,y coordinates must be in same coordinate system as dfsu</td>
+<td>str | Path | Dataset | pd.DataFrame</td>
+<td>with DatetimeIndex and (x, y) of track points as first two columns x,y coordinates must be in same coordinate system as dataset</td>
 <td><em>required</em></td>
 </tr>
 <tr class="even">
-<td>track</td>
-<td>pd.DataFrame</td>
-<td>filename of csv or dfs0 file containing t,x,y</td>
-<td><em>required</em></td>
-</tr>
-<tr class="odd">
 <td>method</td>
 <td>Literal['nearest', 'inverse_distance']</td>
 <td>Spatial interpolation method (‘nearest’ or ‘inverse_distance’) default=‘nearest’</td>
 <td><code>'nearest'</code></td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td>dtype</td>
 <td>Any</td>
 <td>Data type of the returned data, default=np.float32</td>
@@ -1183,7 +1177,7 @@ aggregate : Weighted average</code></pre>
 </section>
 <section id="examples-6" class="level4 doc-section doc-section-examples">
 <h4 class="doc-section doc-section-examples anchored" data-anchor-id="examples-6">Examples</h4>
-<div id="7064f4ba" class="cell" data-execution_count="2">
+<div id="5fd70c50" class="cell" data-execution_count="2">
 <div class="sourceCode cell-code" id="cb24"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>ds <span class="op">=</span> mikeio.read(<span class="st">"../data/HD2D.dfsu"</span>)</span>
 <span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>ds</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="2">
@@ -1198,7 +1192,7 @@ items:
   3:  Current speed &lt;Current Speed&gt; (meter per sec)</code></pre>
 </div>
 </div>
-<div id="8a0e4c32" class="cell" data-execution_count="3">
+<div id="24667fdc" class="cell" data-execution_count="3">
 <div class="sourceCode cell-code" id="cb26"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a>ds.interp_time(dt<span class="op">=</span><span class="dv">1800</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="3">
 <pre><code>&lt;mikeio.Dataset&gt;
@@ -1212,7 +1206,7 @@ items:
   3:  Current speed &lt;Current Speed&gt; (meter per sec)</code></pre>
 </div>
 </div>
-<div id="72c0f9bc" class="cell" data-execution_count="4">
+<div id="3cc97a4c" class="cell" data-execution_count="4">
 <div class="sourceCode cell-code" id="cb28"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a>ds.interp_time(freq<span class="op">=</span><span class="st">'2h'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="4">
 <pre><code>&lt;mikeio.Dataset&gt;
