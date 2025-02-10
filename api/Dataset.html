@@ -337,7 +337,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </section>
 <section id="examples" class="level2 doc-section doc-section-examples">
 <h2 class="doc-section doc-section-examples anchored" data-anchor-id="examples">Examples</h2>
-<div id="8973179b" class="cell" data-execution_count="1">
+<div id="f1f9d69c" class="cell" data-execution_count="1">
 <div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> mikeio</span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>mikeio.read(<span class="st">"../data/europe_wind_long_lat.dfs2"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="1">
@@ -1177,7 +1177,7 @@ aggregate : Weighted average</code></pre>
 </section>
 <section id="examples-6" class="level4 doc-section doc-section-examples">
 <h4 class="doc-section doc-section-examples anchored" data-anchor-id="examples-6">Examples</h4>
-<div id="5fd70c50" class="cell" data-execution_count="2">
+<div id="6db9d94b" class="cell" data-execution_count="2">
 <div class="sourceCode cell-code" id="cb24"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>ds <span class="op">=</span> mikeio.read(<span class="st">"../data/HD2D.dfsu"</span>)</span>
 <span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>ds</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="2">
@@ -1192,7 +1192,7 @@ items:
   3:  Current speed &lt;Current Speed&gt; (meter per sec)</code></pre>
 </div>
 </div>
-<div id="24667fdc" class="cell" data-execution_count="3">
+<div id="75a8eb6d" class="cell" data-execution_count="3">
 <div class="sourceCode cell-code" id="cb26"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a>ds.interp_time(dt<span class="op">=</span><span class="dv">1800</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="3">
 <pre><code>&lt;mikeio.Dataset&gt;
@@ -1206,7 +1206,7 @@ items:
   3:  Current speed &lt;Current Speed&gt; (meter per sec)</code></pre>
 </div>
 </div>
-<div id="3cc97a4c" class="cell" data-execution_count="4">
+<div id="483ce33f" class="cell" data-execution_count="4">
 <div class="sourceCode cell-code" id="cb28"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a>ds.interp_time(freq<span class="op">=</span><span class="st">'2h'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="4">
 <pre><code>&lt;mikeio.Dataset&gt;
@@ -1224,7 +1224,20 @@ items:
 </section>
 <section id="mikeio.Dataset.isel" class="level3">
 <h3 class="anchored" data-anchor-id="mikeio.Dataset.isel">isel</h3>
-<div class="sourceCode" id="cb30"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a>Dataset.isel(idx<span class="op">=</span><span class="va">None</span>, axis<span class="op">=</span><span class="dv">0</span>, <span class="op">**</span>kwargs)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb30"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a>Dataset.isel(</span>
+<span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a>    idx<span class="op">=</span><span class="va">None</span>,</span>
+<span id="cb30-3"><a href="#cb30-3" aria-hidden="true" tabindex="-1"></a>    <span class="op">*</span>,</span>
+<span id="cb30-4"><a href="#cb30-4" aria-hidden="true" tabindex="-1"></a>    time<span class="op">=</span><span class="va">None</span>,</span>
+<span id="cb30-5"><a href="#cb30-5" aria-hidden="true" tabindex="-1"></a>    x<span class="op">=</span><span class="va">None</span>,</span>
+<span id="cb30-6"><a href="#cb30-6" aria-hidden="true" tabindex="-1"></a>    y<span class="op">=</span><span class="va">None</span>,</span>
+<span id="cb30-7"><a href="#cb30-7" aria-hidden="true" tabindex="-1"></a>    z<span class="op">=</span><span class="va">None</span>,</span>
+<span id="cb30-8"><a href="#cb30-8" aria-hidden="true" tabindex="-1"></a>    element<span class="op">=</span><span class="va">None</span>,</span>
+<span id="cb30-9"><a href="#cb30-9" aria-hidden="true" tabindex="-1"></a>    node<span class="op">=</span><span class="va">None</span>,</span>
+<span id="cb30-10"><a href="#cb30-10" aria-hidden="true" tabindex="-1"></a>    layer<span class="op">=</span><span class="va">None</span>,</span>
+<span id="cb30-11"><a href="#cb30-11" aria-hidden="true" tabindex="-1"></a>    frequency<span class="op">=</span><span class="va">None</span>,</span>
+<span id="cb30-12"><a href="#cb30-12" aria-hidden="true" tabindex="-1"></a>    direction<span class="op">=</span><span class="va">None</span>,</span>
+<span id="cb30-13"><a href="#cb30-13" aria-hidden="true" tabindex="-1"></a>    axis<span class="op">=</span><span class="dv">0</span>,</span>
+<span id="cb30-14"><a href="#cb30-14" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <p>Return a new Dataset whose data is given by integer indexing along the specified dimension(s).</p>
 <p>The spatial parameters available depend on the dims (i.e.&nbsp;geometry) of the Dataset:</p>
 <ul>
@@ -1237,10 +1250,10 @@ items:
 <h4 class="doc-section doc-section-parameters anchored" data-anchor-id="parameters-8">Parameters</h4>
 <table class="caption-top table">
 <colgroup>
-<col style="width: 6%">
-<col style="width: 26%">
-<col style="width: 58%">
-<col style="width: 7%">
+<col style="width: 8%">
+<col style="width: 9%">
+<col style="width: 72%">
+<col style="width: 8%">
 </colgroup>
 <thead>
 <tr class="header">
@@ -1253,7 +1266,7 @@ items:
 <tbody>
 <tr class="odd">
 <td>idx</td>
-<td>int | Sequence[int] | slice | None</td>
+<td>IndexType</td>
 <td>Index, or indices, along the specified dimension(s)</td>
 <td><code>None</code></td>
 </tr>
@@ -1267,37 +1280,55 @@ items:
 <td>time</td>
 <td>int</td>
 <td>time index,by default None</td>
-<td><em>required</em></td>
+<td><code>None</code></td>
 </tr>
 <tr class="even">
 <td>x</td>
 <td>int</td>
 <td>x index, by default None</td>
-<td><em>required</em></td>
+<td><code>None</code></td>
 </tr>
 <tr class="odd">
 <td>y</td>
 <td>int</td>
 <td>y index, by default None</td>
-<td><em>required</em></td>
+<td><code>None</code></td>
 </tr>
 <tr class="even">
 <td>z</td>
 <td>int</td>
 <td>z index, by default None</td>
-<td><em>required</em></td>
+<td><code>None</code></td>
 </tr>
 <tr class="odd">
 <td>element</td>
 <td>int</td>
 <td>Bounding box of coordinates (left lower and right upper) to be selected, by default None</td>
-<td><em>required</em></td>
+<td><code>None</code></td>
 </tr>
 <tr class="even">
-<td>**kwargs</td>
-<td>Any</td>
-<td>Not used</td>
-<td><code>{}</code></td>
+<td>layer</td>
+<td>IndexType</td>
+<td>layer index, only used in dfsu 3d</td>
+<td><code>None</code></td>
+</tr>
+<tr class="odd">
+<td>direction</td>
+<td>IndexType</td>
+<td>direction index, only used in sprectra</td>
+<td><code>None</code></td>
+</tr>
+<tr class="even">
+<td>frequency</td>
+<td>IndexType</td>
+<td>frequencey index, only used in spectra</td>
+<td><code>None</code></td>
+</tr>
+<tr class="odd">
+<td>node</td>
+<td>IndexType</td>
+<td>node index, only used in spectra</td>
+<td><code>None</code></td>
 </tr>
 </tbody>
 </table>
@@ -2076,7 +2107,15 @@ average : Weighted average</code></pre>
 </section>
 <section id="mikeio.Dataset.sel" class="level3">
 <h3 class="anchored" data-anchor-id="mikeio.Dataset.sel">sel</h3>
-<div class="sourceCode" id="cb54"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb54-1"><a href="#cb54-1" aria-hidden="true" tabindex="-1"></a>Dataset.sel(<span class="op">**</span>kwargs)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb54"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb54-1"><a href="#cb54-1" aria-hidden="true" tabindex="-1"></a>Dataset.sel(</span>
+<span id="cb54-2"><a href="#cb54-2" aria-hidden="true" tabindex="-1"></a>    time<span class="op">=</span><span class="va">None</span>,</span>
+<span id="cb54-3"><a href="#cb54-3" aria-hidden="true" tabindex="-1"></a>    x<span class="op">=</span><span class="va">None</span>,</span>
+<span id="cb54-4"><a href="#cb54-4" aria-hidden="true" tabindex="-1"></a>    y<span class="op">=</span><span class="va">None</span>,</span>
+<span id="cb54-5"><a href="#cb54-5" aria-hidden="true" tabindex="-1"></a>    z<span class="op">=</span><span class="va">None</span>,</span>
+<span id="cb54-6"><a href="#cb54-6" aria-hidden="true" tabindex="-1"></a>    coords<span class="op">=</span><span class="va">None</span>,</span>
+<span id="cb54-7"><a href="#cb54-7" aria-hidden="true" tabindex="-1"></a>    area<span class="op">=</span><span class="va">None</span>,</span>
+<span id="cb54-8"><a href="#cb54-8" aria-hidden="true" tabindex="-1"></a>    layers<span class="op">=</span><span class="va">None</span>,</span>
+<span id="cb54-9"><a href="#cb54-9" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <p>Return a new Dataset whose data is given by selecting index labels along the specified dimension(s).</p>
 <p>In contrast to Dataset.isel, indexers for this method should use labels instead of integers.</p>
 <p>The spatial parameters available depend on the geometry of the Dataset:</p>
@@ -2091,10 +2130,10 @@ average : Weighted average</code></pre>
 <h4 class="doc-section doc-section-parameters anchored" data-anchor-id="parameters-21">Parameters</h4>
 <table class="caption-top table">
 <colgroup>
+<col style="width: 3%">
+<col style="width: 16%">
+<col style="width: 75%">
 <col style="width: 4%">
-<col style="width: 15%">
-<col style="width: 74%">
-<col style="width: 5%">
 </colgroup>
 <thead>
 <tr class="header">
@@ -2109,49 +2148,43 @@ average : Weighted average</code></pre>
 <td>time</td>
 <td>(str, pd.DatetimeIndex or Dataset)</td>
 <td>time labels e.g.&nbsp;“2018-01” or slice(“2018-1-1”,“2019-1-1”), by default None</td>
-<td><em>required</em></td>
+<td><code>None</code></td>
 </tr>
 <tr class="even">
 <td>x</td>
 <td>float</td>
 <td>x-coordinate of point to be selected, by default None</td>
-<td><em>required</em></td>
+<td><code>None</code></td>
 </tr>
 <tr class="odd">
 <td>y</td>
 <td>float</td>
 <td>y-coordinate of point to be selected, by default None</td>
-<td><em>required</em></td>
+<td><code>None</code></td>
 </tr>
 <tr class="even">
 <td>z</td>
 <td>float</td>
 <td>z-coordinate of point to be selected, by default None</td>
-<td><em>required</em></td>
+<td><code>None</code></td>
 </tr>
 <tr class="odd">
 <td>coords</td>
 <td>np.array(float, float)</td>
 <td>As an alternative to specifying x, y and z individually, the argument coords can be used instead. (x,y)- or (x,y,z)-coordinates of point to be selected, by default None</td>
-<td><em>required</em></td>
+<td><code>None</code></td>
 </tr>
 <tr class="even">
 <td>area</td>
 <td>(float, float, float, float)</td>
 <td>Bounding box of coordinates (left lower and right upper) to be selected, by default None</td>
-<td><em>required</em></td>
+<td><code>None</code></td>
 </tr>
 <tr class="odd">
 <td>layers</td>
 <td>int or str or list</td>
 <td>layer(s) to be selected: “top”, “bottom” or layer number from bottom 0,1,2,… or from the top -1,-2,… or as list of these; only for layered dfsu, by default None</td>
-<td><em>required</em></td>
-</tr>
-<tr class="even">
-<td>**kwargs</td>
-<td>Any</td>
-<td>Not used</td>
-<td><code>{}</code></td>
+<td><code>None</code></td>
 </tr>
 </tbody>
 </table>
