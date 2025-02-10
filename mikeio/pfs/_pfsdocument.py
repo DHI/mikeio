@@ -285,7 +285,16 @@ class PfsDocument(PfsSection):
     def _parse_line(self, line: str, level: int = 0) -> tuple[str, int]:
         section_header = False
         s = line.strip()
-        s = re.sub(r"\s*//.*", "", s)  # remove comments
+        parts = re.split(r'(".*?"|\'.*?\')', s)  # Preserve quoted strings
+        for i, part in enumerate(parts):
+            if not (
+                part.startswith('"') or part.startswith("'")
+            ):  # Ignore quoted parts
+                part = re.sub(
+                    r"\s*//.*", "", part
+                )  # Remove comments only outside quotes
+            parts[i] = part
+        s = "".join(parts)  # Reassemble the line
 
         if len(s) > 0:
             if s[0] == "[":
@@ -299,7 +308,7 @@ class PfsDocument(PfsSection):
             if s[-1] == "]":
                 s = s.replace("]", ":")
 
-        s = s.replace("//", "")
+        # s = s.replace("//", "")
         s = s.replace("\t", " ")
 
         if len(s) > 0 and s[0] != "!":

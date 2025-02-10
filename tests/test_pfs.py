@@ -221,7 +221,6 @@ def test_pfssection_insert_pfssection(d1) -> None:
     assert sct.FILE_6.val == 5
 
 
-
 def test_pfssection_find_replace(d1) -> None:
     sct = mikeio.PfsSection(d1)
 
@@ -292,21 +291,30 @@ def test_mztoolbox() -> None:
     assert "|" in pfs.txconc.Setup.File_1.InputFile
 
 
-
 def assert_txt_files_match(f1, f2, comment="//") -> None:
     """Checks that non-comment lines in two files match exactly.
     Empty lines and lines starting with the comment string are ignored."""
     file1lines = Path(f1).read_text().splitlines()
     file2lines = Path(f2).read_text().splitlines()
-    
+
     # Filter out comments and empty lines
-    content1 = [line.strip() for line in file1lines if line.strip() and not line.strip().startswith(comment)]
-    content2 = [line.strip() for line in file2lines if line.strip() and not line.strip().startswith(comment)]
-    
+    content1 = [
+        line.strip()
+        for line in file1lines
+        if line.strip() and not line.strip().startswith(comment)
+    ]
+    content2 = [
+        line.strip()
+        for line in file2lines
+        if line.strip() and not line.strip().startswith(comment)
+    ]
+
     # Check lengths match after filtering
     if len(content1) != len(content2):
-        raise AssertionError(f"Files have different number of non-comment lines: {len(content1)} vs {len(content2)}")
-    
+        raise AssertionError(
+            f"Files have different number of non-comment lines: {len(content1)} vs {len(content2)}"
+        )
+
     # Compare remaining lines
     for i, (line1, line2) in enumerate(zip(content1, content2)):
         if line1 != line2:
@@ -1230,3 +1238,15 @@ def test_write_read_clob(tmp_path: Path) -> None:
         sct.Clob
         == '<CLOB:22,1,1,false,1,0,"",0,"",0,"",0,"",0,"",0,"",0,"",0,"",||,false>'
     )
+
+
+def test_ignores_comments_in_quotes() -> None:
+    # Inspired by section from .mupp files
+
+    text = """
+      [SymbologyModule]
+         SymbologyTreeView = '//'
+      EndSect  // SymbologyModule
+"""
+    pfs = mikeio.PfsDocument.from_text(text)
+    assert pfs.SymbologyModule.SymbologyTreeView == "//"
