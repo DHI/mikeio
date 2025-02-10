@@ -134,6 +134,16 @@ def test_da_plot():
     plt.close("all")
 
 
+def test_geometry_fm_plot():
+    dfs = mikeio.open("tests/testdata/FakeLake.dfsu")
+    g = dfs.geometry
+    g.plot()
+    g.plot.outline()
+    g.plot.mesh()
+    g.plot.contour()
+    g.plot.contourf()
+
+
 def test_plot_non_utm_file():
     ds = mikeio.read("tests/testdata/FakeLake_NONUTM.dfsu")
     da = ds[0]
