@@ -400,7 +400,7 @@ class _Dfs123:
     def end_time(self) -> pd.Timestamp:
         """File end time."""
         if self._end_time is None:
-            self._end_time = self.read(items=[0]).time[-1].to_pydatetime()
+            self._end_time = self.read(items=[0]).time[-1].to_pydatetime()  # type: ignore
 
         return self._end_time
 
