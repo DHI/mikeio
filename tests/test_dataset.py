@@ -1201,6 +1201,34 @@ def test_sub_dataset(ds1, ds2):
     assert np.all(ds3[1].to_numpy() == 1.8)
 
 
+def test_multiply_dataset(ds1, ds2):
+    dsa = mikeio.Dataset({"Foo": mikeio.DataArray([1, 2, 3])})
+    dsb = mikeio.Dataset({"Foo": mikeio.DataArray([4, 5, 6])})
+    dsr = dsa * dsb
+    assert np.all(dsr[0].to_numpy() == np.array([4, 10, 18]))
+
+
+def test_multiply_datasets_must_match():
+    dsa = mikeio.Dataset({"Foo": mikeio.DataArray([1, 2, 3])})
+    dsb = mikeio.Dataset({"Bar": mikeio.DataArray([4, 5, 6])})
+    with pytest.raises(ValueError):
+        dsa * dsb
+
+
+def test_divide_dataset(ds1, ds2):
+    ds_nom = mikeio.Dataset({"Foo": mikeio.DataArray([1, 2, 3])})
+    ds_denom = mikeio.Dataset({"Foo": mikeio.DataArray([4, 5, 6])})
+    ds3 = ds_nom / ds_denom
+    assert np.all(ds3[0].to_numpy() == np.array([0.25, 0.4, 0.5]))
+
+
+def test_divide_dataset_must_match():
+    dsa = mikeio.Dataset({"Foo": mikeio.DataArray([1, 2, 3])})
+    dsb = mikeio.Dataset({"Bar": mikeio.DataArray([4, 5, 6])})
+    with pytest.raises(ValueError):
+        dsa / dsb
+
+
 def test_non_equidistant():
     nt = 4
     d = np.random.uniform(size=nt)
@@ -1533,7 +1561,7 @@ def test_create_dataset_with_many_items():
 
     for i in range(n_items):
         x = np.random.random(nt)
-        da = mikeio.DataArray(data=x, time=time, item=mikeio.ItemInfo(f"Item {i+1}"))
+        da = mikeio.DataArray(data=x, time=time, item=mikeio.ItemInfo(f"Item {i + 1}"))
         das.append(da)
 
     ds = mikeio.Dataset(das)

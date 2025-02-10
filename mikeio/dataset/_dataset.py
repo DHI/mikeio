@@ -202,7 +202,7 @@ class Dataset:
     ) -> list[ItemInfo]:
         if items is None:
             # default Undefined items
-            item_infos = [ItemInfo(f"Item_{j+1}") for j in range(n_items_data)]
+            item_infos = [ItemInfo(f"Item_{j + 1}") for j in range(n_items_data)]
         else:
             if len(items) != n_items_data:
                 raise ValueError(
@@ -1771,10 +1771,10 @@ class Dataset:
         return self.__mul__(other)
 
     def __mul__(self, other: "Dataset" | float) -> "Dataset":
-        if isinstance(other, self.__class__):
-            raise ValueError("Multiplication is not possible for two Datasets")
-        else:
-            return self._multiply_value(other)  # type: ignore
+        return self._multiply_value(other)
+
+    def __truediv__(self, other: "Dataset" | float) -> "Dataset":
+        return self._divide_value(other)
 
     def _add_dataset(self, other: "Dataset", sign: float = 1.0) -> "Dataset":
         self._check_datasets_match(other)
@@ -1814,11 +1814,41 @@ class Dataset:
             validate=False,
         )
 
-    def _multiply_value(self, value: float) -> "Dataset":
+    def _multiply_value(self, value: float | "Dataset") -> "Dataset":
         try:
-            data = [value * self[x].to_numpy() for x in self.items]
+            if isinstance(value, self.__class__):
+                self._check_datasets_match(value)
+                data = [
+                    self[x].to_numpy() * value[y].to_numpy()
+                    for x, y in zip(self.items, value.items)
+                ]
+            else:
+                data = [value * self[x].to_numpy() for x in self.items]
         except TypeError:
             raise TypeError(f"{value} could not be multiplied to Dataset")
+        items = deepcopy(self.items)
+        time = self.time.copy()
+        return Dataset(
+            data,
+            time=time,
+            items=items,
+            geometry=self.geometry,
+            zn=self._zn,
+            validate=False,
+        )
+
+    def _divide_value(self, value: float | "Dataset") -> "Dataset":
+        try:
+            if isinstance(value, self.__class__):
+                self._check_datasets_match(value)
+                data = [
+                    self[x].to_numpy() / value[y].to_numpy()
+                    for x, y in zip(self.items, value.items)
+                ]
+            else:
+                data = [self[x].to_numpy() / value for x in self.items]
+        except TypeError:
+            raise TypeError(f"{value} could not be divided to Dataset")
         items = deepcopy(self.items)
         time = self.time.copy()
         return Dataset(
