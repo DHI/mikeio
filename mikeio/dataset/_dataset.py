@@ -44,6 +44,8 @@ from ..spatial._FM_geometry import _GeometryFM
 
 from ._data_plot import _DatasetPlotter
 
+from ._dataarray import IndexType
+
 
 class Dataset:
     """Dataset containing one or more DataArrays with common geometry and time.
@@ -162,8 +164,6 @@ class Dataset:
             for da in data_vars.values():
                 first._is_compatible(da, raise_error=True)
 
-        self._check_all_different_ids(list(data_vars.values()))
-
         # TODO is it necessary to keep track of item names?
         self.__itemattr: set[str] = set()
         for key, value in data_vars.items():
@@ -265,32 +265,6 @@ class Dataset:
                 f"Item names must be unique! ({item_names}). Please rename before constructing Dataset."
             )
         return item_names
-
-    @staticmethod
-    def _check_all_different_ids(das: Sequence[DataArray]) -> None:
-        """Are all the DataArrays different objects or are some referring to the same."""
-        ids = np.zeros(len(das), dtype=np.int64)
-        ids_val = np.zeros(len(das), dtype=np.int64)
-        for j, da in enumerate(das):
-            ids[j] = id(da)
-            ids_val[j] = id(da.values)
-
-        if len(ids) != len(np.unique(ids)):
-            # DataArrays not unique! - find first duplicate and report error
-            das = list(das)
-            u, c = np.unique(ids, return_counts=True)
-            dups = u[c > 1]
-            for dup in dups:
-                jj = np.where(ids == dup)[0]
-                Dataset._id_of_DataArrays_equal(das[jj[0]], das[jj[1]])
-        if len(ids_val) != len(np.unique(ids_val)):
-            # DataArray *values* not unique! - find first duplicate and report error
-            das = list(das)
-            u, c = np.unique(ids_val, return_counts=True)
-            dups = u[c > 1]
-            for dup in dups:
-                jj = np.where(ids_val == dup)[0]
-                Dataset._id_of_DataArrays_equal(das[jj[0]], das[jj[1]])
 
     @staticmethod
     def _id_of_DataArrays_equal(da1: DataArray, da2: DataArray) -> None:
@@ -472,7 +446,7 @@ class Dataset:
             else:
                 all_index = list(np.intersect1d(all_index, idx))
 
-        return self.isel(all_index, axis=0)
+        return self.isel(time=all_index)
 
     def flipud(self) -> "Dataset":
         """Flip data upside down (on first non-time axis)."""
@@ -517,7 +491,7 @@ class Dataset:
     def create_empty_data(
         n_items: int = 1,
         n_timesteps: int = 1,
-        n_elements: int | None = None,
+        n_elements: IndexType = None,
         shape: tuple[int, ...] | None = None,
     ) -> list:
         data = []
@@ -542,10 +516,12 @@ class Dataset:
     def __iter__(self) -> Iterator[DataArray]:
         yield from self._data_vars.values()
 
-    def __setitem__(self, key, value) -> None:  # type: ignore
+    def __setitem__(self, key: int | str, value: DataArray) -> None:  # type: ignore
         self.__set_or_insert_item(key, value, insert=False)
 
-    def __set_or_insert_item(self, key, value: DataArray, insert=False) -> None:  # type: ignore
+    def __set_or_insert_item(
+        self, key: int | str, value: DataArray, insert: bool = False
+    ) -> None:  # type: ignore
         if len(self) > 0:
             self[0]._is_compatible(value)
 
@@ -680,7 +656,7 @@ class Dataset:
             time_steps = _get_time_idx_list(self.time, key)
             if _n_selected_timesteps(self.time, time_steps) == 0:
                 raise IndexError("No timesteps found!")
-            return self.isel(time_steps, axis=0)
+            return self.isel(time=time_steps)
         if isinstance(key, slice):
             if self._is_slice_time_slice(key):
                 try:
@@ -688,7 +664,7 @@ class Dataset:
                     time_steps = list(range(s.start, s.stop))
                 except ValueError:
                     time_steps = list(range(*key.indices(len(self.time))))
-                return self.isel(time_steps, axis=0)
+                return self.isel(time=time_steps)
 
         if self._multi_indexing_attempted(key):
             raise TypeError(
@@ -796,9 +772,18 @@ class Dataset:
 
     def isel(
         self,
-        idx: int | Sequence[int] | slice | None = None,
+        idx: IndexType = None,
+        *,
+        time: IndexType = None,
+        x: IndexType = None,
+        y: IndexType = None,
+        z: IndexType = None,
+        element: IndexType = None,
+        node: IndexType = None,
+        layer: IndexType = None,
+        frequency: IndexType = None,
+        direction: IndexType = None,
         axis: int | str = 0,
-        **kwargs: Any,
     ) -> "Dataset":
         """Return a new Dataset whose data is given by
         integer indexing along the specified dimension(s).
@@ -828,8 +813,14 @@ class Dataset:
         element : int, optional
             Bounding box of coordinates (left lower and right upper)
             to be selected, by default None
-        **kwargs: Any
-            Not used
+        layer: int, optional
+            layer index, only used in dfsu 3d
+        direction: int, optional
+            direction index, only used in sprectra
+        frequency: int, optional
+            frequencey index, only used in spectra
+        node: int, optional
+            node index, only used in spectra
 
         Returns
         -------
@@ -848,12 +839,36 @@ class Dataset:
         >>> ds3 = ds2.isel(elements=[100,200])
 
         """
-        res = [da.isel(idx=idx, axis=axis, **kwargs) for da in self]
+        # TODO deprecate idx, axis to prefer x= instead
+
+        res = [
+            da.isel(
+                idx=idx,
+                axis=axis,
+                time=time,
+                x=x,
+                y=y,
+                z=z,
+                element=element,
+                node=node,
+                frequency=frequency,
+                direction=direction,
+                layer=layer,
+            )
+            for da in self
+        ]
         return Dataset(data=res, validate=False)
 
     def sel(
         self,
-        **kwargs: Any,
+        *,
+        time: Any = None,
+        x: float | None = None,
+        y: float | None = None,
+        z: float | None = None,
+        coords: np.ndarray | None = None,
+        area: tuple[float, float, float, float] | None = None,
+        layers: int | str | Sequence[int | str] | None = None,
     ) -> "Dataset":
         """Return a new Dataset whose data is given by
         selecting index labels along the specified dimension(s).
@@ -892,8 +907,6 @@ class Dataset:
             layer(s) to be selected: "top", "bottom" or layer number
             from bottom 0,1,2,... or from the top -1,-2,... or as
             list of these; only for layered dfsu, by default None
-        **kwargs: Any
-            Not used
 
         Returns
         -------
@@ -917,7 +930,10 @@ class Dataset:
         >>> ds.sel(layers="bottom")
 
         """
-        res = [da.sel(**kwargs) for da in self]
+        res = [
+            da.sel(time=time, x=x, y=y, z=z, coords=coords, area=area, layers=layers)
+            for da in self
+        ]
         return Dataset(data=res, validate=False)
 
     def interp(
@@ -1021,7 +1037,7 @@ class Dataset:
 
     def extract_track(
         self,
-        track: pd.DataFrame,
+        track: str | Path | Dataset | pd.DataFrame,
         method: Literal["nearest", "inverse_distance"] = "nearest",
         dtype: Any = np.float32,
     ) -> "Dataset":
@@ -1029,11 +1045,9 @@ class Dataset:
 
         Parameters
         ---------
-        track: pandas.DataFrame
+        track: pandas.DataFrame, str or Dataset
             with DatetimeIndex and (x, y) of track points as first two columns
-            x,y coordinates must be in same coordinate system as dfsu
-        track: str
-            filename of csv or dfs0 file containing t,x,y
+            x,y coordinates must be in same coordinate system as dataset
         method: str, optional
             Spatial interpolation method ('nearest' or 'inverse_distance')
             default='nearest'
@@ -1339,18 +1353,19 @@ class Dataset:
             raise ValueError(
                 f"Number of items must match ({self.n_items} and {other.n_items})"
             )
-        for j in range(self.n_items):
-            if self.items[j].name != other.items[j].name:
+
+        for this, that in zip(self.items, other.items):
+            if this.name != that.name:
                 raise ValueError(
-                    f"Item names must match. Item {j}: {self.items[j].name} != {other.items[j].name}"
+                    f"Item names must match. Item: {this.name} != {that.name}"
                 )
-            if self.items[j].type != other.items[j].type:
+            if this.type != that.type:
                 raise ValueError(
-                    f"Item types must match. Item {j}: {self.items[j].type} != {other.items[j].type}"
+                    f"Item types must match. Item: {this.type} != {that.type}"
                 )
-            if self.items[j].unit != other.items[j].unit:
+            if this.unit != that.unit:
                 raise ValueError(
-                    f"Item units must match. Item {j}: {self.items[j].unit} != {other.items[j].unit}"
+                    f"Item units must match. Item: {this.unit} != {that.unit}"
                 )
 
     # ============ aggregate =============
@@ -1784,24 +1799,13 @@ class Dataset:
         except TypeError:
             raise TypeError("Could not add data in Dataset")
         newds = self.copy()
-        for j in range(len(self)):
-            newds[j].values = data[j]  # type: ignore
+        for new, old in zip(newds, data):
+            new.values = old
         return newds
 
     def _check_datasets_match(self, other: "Dataset") -> None:
-        if self.n_items != other.n_items:
-            raise ValueError(
-                f"Number of items must match ({self.n_items} and {other.n_items})"
-            )
-        for j in range(self.n_items):
-            if self.items[j].type != other.items[j].type:
-                raise ValueError(
-                    f"Item types must match. Item {j}: {self.items[j].type} != {other.items[j].type}"
-                )
-            if self.items[j].unit != other.items[j].unit:
-                raise ValueError(
-                    f"Item units must match. Item {j}: {self.items[j].unit} != {other.items[j].unit}"
-                )
+        self._check_all_items_match(other)
+
         if not np.all(self.time == other.time):
             raise ValueError("All timesteps must match")
         if self.shape != other.shape:
@@ -1900,15 +1904,16 @@ class Dataset:
         """
         filename = str(filename)
 
+        # TODO is this a candidate for match/case?
         if isinstance(
             self.geometry, (GeometryPoint2D, GeometryPoint3D, GeometryUndefined)
         ):
             if self.ndim == 0:  # Not very common, but still...
                 self._validate_extension(filename, ".dfs0")
-                self._to_dfs0(filename, **kwargs)
+                self._to_dfs0(filename=filename, **kwargs)
             elif self.ndim == 1 and self[0]._has_time_axis:
                 self._validate_extension(filename, ".dfs0")
-                self._to_dfs0(filename, **kwargs)
+                self._to_dfs0(filename=filename, **kwargs)
             else:
                 raise ValueError("Cannot write Dataset with no geometry to file!")
         elif isinstance(self.geometry, Grid2D):
@@ -1936,12 +1941,15 @@ class Dataset:
         if ext != valid_extension:
             raise ValueError(f"File extension must be {valid_extension}")
 
-    def _to_dfs0(self, filename: str | Path, **kwargs: Any) -> None:
+    def _to_dfs0(
+        self,
+        filename: str | Path,
+        dtype: DfsSimpleType = DfsSimpleType.Float,
+        title: str = "",
+    ) -> None:
         from ..dfs._dfs0 import _write_dfs0
 
-        dtype = kwargs.get("dtype", DfsSimpleType.Float)
-
-        _write_dfs0(filename, self, dtype=dtype)
+        _write_dfs0(filename, self, dtype=dtype, title=title)
 
     def _to_dfs2(self, filename: str | Path) -> None:
         # assumes Grid2D geometry

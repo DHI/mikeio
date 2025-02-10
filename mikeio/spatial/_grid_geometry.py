@@ -921,41 +921,35 @@ class Grid2D(_Geometry):
         assert ii[-1] < self.nx and jj[-1] < self.ny, "Index out of bounds"
         di = np.diff(ii)
         dj = np.diff(jj)
-        if (np.any(di < 1) or not np.allclose(di, di[0])) or (
-            np.any(dj < 1) or not np.allclose(dj, dj[0])
-        ):
-            # warnings.warn("Axis not equidistant! Will return GeometryUndefined()")
-            raise ValueError()
-            # return GeometryUndefined()
-        else:
-            dx = self.dx * di[0]
-            dy = self.dy * dj[0]
-            x0 = self._x0 + (self.x[ii[0]] - self.x[0])
-            y0 = self._y0 + (self.y[jj[0]] - self.y[0])
-            origin = None if self._shift_origin_on_write else self.origin
-            # if not self._is_rotated and not self._shift_origin_on_write:
-            if self._is_rotated:
-                origin = self._cart.Xy2Proj(ii[0], jj[0])
-                # what about the orientation if is_geo??
-                # orientationGeo = proj.Proj2GeoRotation(east, north, orientationProj)
-                x0, y0 = (0.0, 0.0)
-            elif not self.is_spectral:
-                origin = (self.origin[0] + x0, self.origin[1] + y0)
-                x0, y0 = (0.0, 0.0)
 
-            return Grid2D(
-                x0=x0,
-                y0=y0,
-                dx=dx,
-                dy=dy,
-                nx=len(ii),
-                ny=len(jj),
-                projection=self.projection,
-                orientation=self._orientation,
-                is_spectral=self.is_spectral,
-                is_vertical=self.is_vertical,
-                origin=origin,
-            )
+        dx = self.dx * di[0]
+        dy = self.dy * dj[0]
+        x0 = self._x0 + (self.x[ii[0]] - self.x[0])
+        y0 = self._y0 + (self.y[jj[0]] - self.y[0])
+        origin = None if self._shift_origin_on_write else self.origin
+        # if not self._is_rotated and not self._shift_origin_on_write:
+        if self._is_rotated:
+            origin = self._cart.Xy2Proj(ii[0], jj[0])
+            # what about the orientation if is_geo??
+            # orientationGeo = proj.Proj2GeoRotation(east, north, orientationProj)
+            x0, y0 = (0.0, 0.0)
+        elif not self.is_spectral:
+            origin = (self.origin[0] + x0, self.origin[1] + y0)
+            x0, y0 = (0.0, 0.0)
+
+        return Grid2D(
+            x0=x0,
+            y0=y0,
+            dx=dx,
+            dy=dy,
+            nx=len(ii),
+            ny=len(jj),
+            projection=self.projection,
+            orientation=self._orientation,
+            is_spectral=self.is_spectral,
+            is_vertical=self.is_vertical,
+            origin=origin,
+        )
 
     def _to_element_table(self, index_base: int = 0) -> list[list[int]]:
         elem_table = []

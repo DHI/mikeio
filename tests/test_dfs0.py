@@ -307,7 +307,6 @@ def test_from_pandas_mapping_eum_types() -> None:
 
 
 def test_from_pandas_same_eum_type() -> None:
-
     df = pd.DataFrame(
         {"station_a": np.array([1, np.nan, 2]), "station_b": np.array([2, 3.0, -1.3])},
         index=pd.date_range("2001-01-01", periods=3, freq="h"),
@@ -741,7 +740,6 @@ def test_read_dfs0_with_non_unique_item_names():
 
 
 def test_non_equidistant_time_can_read_correctly_with_open(tmp_path):
-
     dfs = mikeio.open("tests/testdata/neq_daily_time_unit.dfs0")
     dfs.time
     ds = dfs.read()

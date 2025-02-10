@@ -1,7 +1,6 @@
 from __future__ import annotations
 from importlib.metadata import PackageNotFoundError, version
 from pathlib import Path
-from platform import architecture
 from collections.abc import Sequence
 from typing import Any
 
@@ -14,9 +13,6 @@ except PackageNotFoundError:
 
 __dfs_version__: int = 220
 
-
-if "64" not in architecture()[0]:
-    raise Exception("This library has not been tested for a 32 bit system.")
 
 from .dataset import DataArray, Dataset, from_pandas, from_polars
 from .dfs import Dfs0, Dfs1, Dfs2, Dfs3
@@ -121,7 +117,9 @@ def read(
     ext = Path(filename).suffix.lower()
 
     if "dfs" not in ext:
-        raise ValueError("mikeio.read() is only supported for dfs files")
+        raise ValueError(
+            "mikeio.read() is only supported for dfs files. Use mikeio.open for mesh files."
+        )
 
     dfs = open(filename)
     if isinstance(dfs, Mesh):

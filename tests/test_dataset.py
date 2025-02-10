@@ -122,6 +122,12 @@ def test_insert_fail(ds1):
     with pytest.raises(ValueError, match="refer to the same data"):
         ds1.insert(2, da)
 
+    assert "Foo" in ds1.names
+    da2 = ds1[0].copy()
+    da2.name = "Foo"
+    with pytest.raises(ValueError, match="already in"):
+        ds1.insert(2, da2)
+
 
 def test_remove(ds1):
     ds1.remove(-1)
@@ -135,20 +141,13 @@ def test_remove(ds1):
 
 
 def test_index_with_attribute():
-    nt = 10000
+    nt = 10
     d = np.zeros([nt, 100, 30]) + 1.0
     time = pd.date_range(start=datetime(2000, 1, 1), freq="s", periods=nt)
 
     # We cannot create a mikeio.Dataset with multiple references to the same DataArray
     da = mikeio.DataArray(data=d, time=time)
     data = [da, da]
-    with pytest.raises(ValueError):
-        mikeio.Dataset(data)
-
-    # We cannot create a mikeio.Dataset with multiple references to the same data
-    da1 = mikeio.DataArray(item="Foo", data=d, time=time)
-    da2 = mikeio.DataArray(item="Bar", data=d, time=time)
-    data = [da1, da2]
     with pytest.raises(ValueError):
         mikeio.Dataset(data)
 
@@ -576,6 +575,12 @@ def test_interp_time():
     dsi2 = ds.interp_time(freq="2h")
     assert dsi2.timestep == 2 * 3600
 
+    with pytest.raises(ValueError, match="dt or freq"):
+        ds.interp_time()
+
+    dsi3 = ds.interp(time=pd.date_range("2000-1-1", freq="h", periods=10))
+    assert dsi3.time[0] == pd.Timestamp("2000-01-01 00:00:00")
+    assert dsi3.time[-1] == pd.Timestamp("2000-01-01 09:00:00")
 
 def test_interp_time_to_other_dataset():
     # Arrange
@@ -1342,6 +1347,25 @@ def test_merge_by_item():
     assert isinstance(ds3, mikeio.Dataset)
     assert ds3.n_items == 2
     assert ds3[1].name == ds1[0].name + " v2"
+
+
+def test_merge_must_have_same_time():
+    ds1 = mikeio.Dataset(
+        {
+            "Foo": mikeio.DataArray(
+                data=np.random.rand(10), time=pd.date_range("2000-01-01", periods=10)
+            )
+        }
+    )
+    ds2 = mikeio.Dataset(
+        {
+            "Bar": mikeio.DataArray(
+                data=np.random.rand(10), time=pd.date_range("2100-01-01", periods=10)
+            )
+        }
+    )
+    with pytest.raises(ValueError, match="timesteps"):
+        mikeio.Dataset.merge([ds1, ds2])
 
 
 def test_merge_by_item_dfsu_3d():

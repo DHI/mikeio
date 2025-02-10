@@ -592,35 +592,32 @@ def test_dropna(da2):
 def test_da_isel_space(da_grid2d):
     assert da_grid2d.geometry.nx == 7
     assert da_grid2d.geometry.ny == 14
-    da_sel = da_grid2d.isel(0, axis="y")
-    assert da_sel.dims[0][0] == "t"
-    assert da_sel.dims[1] == "x"
+    da_sel = da_grid2d.isel(y=0)
+    assert da_sel.dims == ("time", "x")
     assert isinstance(da_sel.geometry, mikeio.Grid1D)
 
-    da_sel = da_grid2d.isel(0, axis="x")
-    assert da_sel.dims[0][0] == "t"
-    assert da_sel.dims[1] == "y"
+    da_sel = da_grid2d.isel(x=0)
+    assert da_sel.dims == ("time", "y")
     assert isinstance(da_sel.geometry, mikeio.Grid1D)
 
-    da_sel = da_grid2d.isel(0, axis="t")
-    assert da_sel.dims[0] == "y"
-    assert da_sel.dims[1] == "x"
+    da_sel = da_grid2d.isel(time=0)
+    assert da_sel.dims == ("y", "x")
 
 
 def test_da_isel_empty(da_grid2d):
     with pytest.raises(ValueError):
-        da_grid2d.isel(slice(100, 200), axis="y")
+        da_grid2d.isel(y=slice(100, 200))
 
 
 def test_da_isel_space_multiple_elements(da_grid2d):
     assert da_grid2d.geometry.nx == 7
     assert da_grid2d.geometry.ny == 14
-    da_sel = da_grid2d.isel((0, 1, 2, 10), axis="y")
+    da_sel = da_grid2d.isel(y=(0, 1, 2, 10))
     assert da_sel.dims == ("time", "y", "x")
     assert da_sel.shape == (10, 4, 7)
     assert isinstance(da_sel.geometry, mikeio.spatial.GeometryUndefined)
 
-    da_sel = da_grid2d.isel(slice(None, 3), axis="x")
+    da_sel = da_grid2d.isel(x=slice(None, 3))
     assert da_sel.dims == ("time", "y", "x")
     assert da_sel.shape == (10, 14, 3)
     assert isinstance(da_sel.geometry, mikeio.Grid2D)
@@ -631,12 +628,10 @@ def test_da_isel_space_named_axis(da_grid2d: mikeio.DataArray):
     assert da_sel.dims[0] == "time"
 
     da_sel = da_grid2d.isel(x=0)
-    assert da_sel.dims[0] == "time"
-    assert da_sel.dims[1] == "y"
+    assert da_sel.dims == ("time", "y")
 
     da_sel = da_grid2d.isel(time=0)
-    assert da_sel.dims[0] == "y"
-    assert da_sel.dims[1] == "x"
+    assert da_sel.dims == ("y", "x")
 
 
 def test_da_isel_space_named_missing_axis(da_grid2d: mikeio.DataArray):
@@ -1376,3 +1371,24 @@ def test_set_by_mask():
     mask = da < threshold
     wl_capped = da.copy()
     wl_capped[mask] = np.nan
+
+
+def test_set_unit() -> None:
+    da = mikeio.DataArray(
+        data=np.array([0.0, 1.0]),
+        item=mikeio.ItemInfo("Water", mikeio.EUMType.Water_Level, mikeio.EUMUnit.meter),
+    )
+
+    da.unit = mikeio.EUMUnit.feet
+
+    assert da.unit == mikeio.EUMUnit.feet
+
+
+def test_set_bad_unit_fails() -> None:
+    da = mikeio.DataArray(
+        data=np.array([0.0, 1.0]),
+        item=mikeio.ItemInfo("Water", mikeio.EUMType.Water_Level, mikeio.EUMUnit.meter),
+    )
+
+    with pytest.raises(ValueError, match="unit"):
+        da.unit = mikeio.EUMUnit.decibar
