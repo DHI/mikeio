@@ -3,7 +3,6 @@ import mikeio
 
 
 def test_read_dfs0_generic_read():
-
     filename = r"tests/testdata/random.dfs0"
 
     res = mikeio.read(filename)
@@ -13,7 +12,6 @@ def test_read_dfs0_generic_read():
 
 
 def test_read_dfs1_generic_read():
-
     filename = r"tests/testdata/random.dfs1"
 
     res = mikeio.read(filename)
@@ -22,7 +20,6 @@ def test_read_dfs1_generic_read():
 
 
 def test_read_dfs2_generic_read():
-
     filename = "tests/testdata/gebco_sound.dfs2"
 
     ds = mikeio.read(filename)
@@ -30,7 +27,6 @@ def test_read_dfs2_generic_read():
 
 
 def test_read_dfsu_generic_read():
-
     filename = "tests/testdata/HD2D.dfsu"
 
     ds = mikeio.read(filename)
@@ -48,8 +44,14 @@ def test_read_dfsu_generic_read():
 
 
 def test_read_generic_read_unsupported_format():
-
     filename = "foo.txt"
 
     with pytest.raises(Exception):
+        mikeio.read(filename)
+
+
+def test_read_not_supported_for_mesh():
+    filename = "tests/testdata/odense_rough.mesh"
+
+    with pytest.raises(ValueError, match="open"):
         mikeio.read(filename)

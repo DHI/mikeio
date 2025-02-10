@@ -808,7 +808,7 @@ def test_extract_track():
 
 
 # TODO consider move to test_dataset.py
-def test_extract_track_from_dataset():
+def test_extract_track_from_dataset(tmp_path: Path) -> None:
     ds = mikeio.read("tests/testdata/track_extraction_case02_indata.dfsu")
     csv_file = "tests/testdata/track_extraction_case02_track.csv"
     df = pd.read_csv(
@@ -836,6 +836,26 @@ def test_extract_track_from_dataset():
 
     track3 = ds2.extract_track(csv_file, method="inverse_distance")
     assert track3[2].values[23] == approx(3.6469911492412463)
+
+    # test with dataset
+    track_ds = mikeio.from_pandas(df)
+    track4 = ds2.extract_track(track_ds)
+    assert track4[2].values[23] == approx(3.6284972794399653)
+
+    # test with dfs0 file
+    track_ds.to_dfs(tmp_path / "track.dfs0")
+    track5 = ds2.extract_track(tmp_path / "track.dfs0")
+    assert track5[2].values[23] == approx(3.6284972794399653)
+
+    # test with non-existent file
+    with pytest.raises(FileNotFoundError):
+        ds2.extract_track("non_existent_file.csv")
+
+    # test with bad file extension
+    fp = tmp_path / "track.txt"
+    fp.touch()
+    with pytest.raises(ValueError):
+        ds2.extract_track(fp)
 
 
 # TODO consider move to test_datarray.py

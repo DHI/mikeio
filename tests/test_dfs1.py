@@ -1,4 +1,3 @@
-
 import numpy as np
 import pytest
 import pandas as pd
@@ -14,7 +13,6 @@ def test_filenotexist():
 
 
 def test_repr():
-
     filename = r"tests/testdata/random.dfs1"
     dfs = mikeio.open(filename)
 
@@ -60,7 +58,6 @@ def test_read_write_properties(tmp_path):
 
 
 def test_read():
-
     filename = r"tests/testdata/random.dfs1"
     dfs = mikeio.open(filename)
 
@@ -70,7 +67,6 @@ def test_read():
 
 
 def test_read_item_names():
-
     filename = r"tests/testdata/random.dfs1"
     dfs = mikeio.open(filename)
 
@@ -80,7 +76,6 @@ def test_read_item_names():
 
 
 def test_read_time_steps():
-
     filename = r"tests/testdata/random.dfs1"
     dfs = mikeio.open(filename)
 
@@ -90,9 +85,8 @@ def test_read_time_steps():
 
 
 def test_write_some_time_steps_new_file(tmp_path):
-
     fp = tmp_path / "random.dfs1"
-    ds= mikeio.read("tests/testdata/random.dfs1", time=[0, 1, 2, 3, 4, 5])
+    ds = mikeio.read("tests/testdata/random.dfs1", time=[0, 1, 2, 3, 4, 5])
 
     data = ds[0].to_numpy()
     assert data.shape == (6, 3)  # time, x
@@ -107,7 +101,6 @@ def test_write_some_time_steps_new_file(tmp_path):
 
 
 def test_read_item_names_not_in_dataset_fails():
-
     filename = r"tests/testdata/random.dfs1"
     dfs = mikeio.open(filename)
 
@@ -116,7 +109,6 @@ def test_read_item_names_not_in_dataset_fails():
 
 
 def test_read_names_access():
-
     filename = r"tests/testdata/random.dfs1"
     dfs = mikeio.open(filename)
 
@@ -131,7 +123,6 @@ def test_read_names_access():
 
 
 def test_read_start_end_time():
-
     dfs = mikeio.open("tests/testdata/random.dfs1")
     ds = dfs.read()
 
@@ -140,7 +131,6 @@ def test_read_start_end_time():
 
 
 def test_read_start_end_time_relative_time():
-
     dfs = mikeio.open("tests/testdata/physical_basin_wave_maker_signal.dfs1")
     ds = dfs.read()
 
@@ -149,7 +139,6 @@ def test_read_start_end_time_relative_time():
 
 
 def test_get_time_axis_without_reading_data():
-
     dfs0file = r"tests/testdata/random.dfs1"
     dfs = mikeio.open(dfs0file)
     assert isinstance(dfs.time, pd.DatetimeIndex)
@@ -164,13 +153,12 @@ def test_get_time_axis_without_reading_data_relative():
 
 
 def test_select_point_dfs1_to_dfs0(tmp_path):
-
     outfilename = tmp_path / "vu_tide_hourly_p0.dfs0"
 
     ds = mikeio.read("tests/testdata/vu_tide_hourly.dfs1")
 
     assert ds.n_elements > 1
-    ds_0 = ds.isel(0, axis="space")
+    ds_0 = ds.isel(x=0)
     assert ds_0.n_elements == 1
     ds_0.to_dfs(outfilename)
 
@@ -180,7 +168,6 @@ def test_select_point_dfs1_to_dfs0(tmp_path):
 
 
 def test_select_point_and_single_step_dfs1_to_dfs0(tmp_path):
-
     outfilename = tmp_path / "vu_tide_hourly_p0.dfs0"
 
     ds = mikeio.read("tests/testdata/vu_tide_hourly.dfs1")
@@ -198,13 +185,12 @@ def test_select_point_and_single_step_dfs1_to_dfs0(tmp_path):
 
 
 def test_select_point_dfs1_to_dfs0_double(tmp_path):
-
     outfilename = tmp_path / "vu_tide_hourly_p0_dbl.dfs0"
 
     ds = mikeio.read("tests/testdata/vu_tide_hourly.dfs1")
 
     assert ds.n_elements > 1
-    ds_0 = ds.isel(0, axis="space")
+    ds_0 = ds.isel(x=0)
     assert ds_0.n_elements == 1
     ds_0.to_dfs(outfilename, dtype=np.float64)
 
@@ -214,7 +200,6 @@ def test_select_point_dfs1_to_dfs0_double(tmp_path):
 
 
 def test_interp_dfs1():
-
     ds = mikeio.read("tests/testdata/waterlevel_north.dfs1")
 
     da: mikeio.DataArray = ds.North_WL
@@ -238,7 +223,6 @@ def test_interp_dfs1():
 
 
 def test_interp_onepoint_dfs1():
-
     ds = mikeio.read("tests/testdata/nx1.dfs1")
     assert ds.geometry.nx == 1
 
