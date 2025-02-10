@@ -457,7 +457,7 @@ class _GeometryFMLayered(_GeometryFM):
         assert isinstance(layers, int)
         if layers < (-n_lay) or layers >= n_lay:
             raise Exception(
-                f"Layer {layers!r} not allowed; must be between -{n_lay} and {n_lay-1}"
+                f"Layer {layers!r} not allowed; must be between -{n_lay} and {n_lay - 1}"
             )
 
         if layers < 0:
@@ -890,15 +890,7 @@ class GeometryFMVerticalColumn(GeometryFM3D):
         return idx_e
 
     def _calc_z_using_idx(self, zn: np.ndarray, idx: np.ndarray) -> np.ndarray:
-        if zn.ndim == 1:
-            zf = zn[idx].mean(axis=1)
-        elif zn.ndim == 2:
-            n_steps = zn.shape[0]
-            zf = np.zeros((n_steps, idx.shape[0]))
-            for step in range(n_steps):
-                zf[step, :] = zn[step, idx].mean(axis=1)
-
-        return zf
+        return zn[..., idx].mean(axis=-1)
 
 
 class _GeometryFMVerticalProfilePlotter:
