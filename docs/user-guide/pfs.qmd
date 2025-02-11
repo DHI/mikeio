@@ -180,13 +180,16 @@ pfs = mikeio.PfsDocument({"MYTOOL": d})
 pfs
 ```
 
-Multiple targets can be achieved by providing list of dictionaries, in this way you can create a PFS file with multiple targets for the same tool. 
+Multiple targets can be achieved by providing a list of `mikeio.PfsSection`, in this way you can create a PFS file with multiple targets for the same tool. 
 
 ```{python}
-t1 = {"file_name": r"|path\file1.dfs0|"}
-t2 = {"file_name": r"|path\file2.dfs0|"}
 
-pfs = mikeio.PfsDocument([t1, t2], names=["ATOOL", "ATOOL"])
+data = [
+    mikeio.PfsSection({"ATOOL": {"file_name": r"|path\file1.dfs0|"}}),
+    mikeio.PfsSection({"ATOOL": {"file_name": r"|path\file2.dfs0|"}}),
+]
+
+pfs = mikeio.PfsDocument(data)
 pfs
 ```
 
