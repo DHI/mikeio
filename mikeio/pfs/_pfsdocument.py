@@ -198,6 +198,8 @@ class PfsDocument(PfsSection):
     ) -> tuple[list[str], list[PfsSection]]:
         try:
             yml = self._pfs2yaml(filename, encoding)
+            with open("pfs.yml", "w") as f:
+                f.write(yml)
             target_list = parse_yaml_preserving_duplicates(yml, unique_keywords)
         except AttributeError:  # This is the error raised if parsing fails, try again with the normal loader
             target_list = yaml.load(yml, Loader=yaml.CFullLoader)
@@ -339,6 +341,8 @@ class PfsDocument(PfsSection):
     def _parse_param(self, value: str) -> str:
         if len(value) == 0:
             return "[]"
+        if value[0] == "|":
+            return self._parse_token(value)
         if "MULTIPOLYGON" in value:
             return value
         if "," in value:
