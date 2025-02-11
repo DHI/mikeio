@@ -1341,20 +1341,6 @@ class Dataset:
                 f"Number of items must match ({self.n_items} and {other.n_items})"
             )
 
-        for this, that in zip(self.items, other.items):
-            if this.name != that.name:
-                raise ValueError(
-                    f"Item names must match. Item: {this.name} != {that.name}"
-                )
-            if this.type != that.type:
-                raise ValueError(
-                    f"Item types must match. Item: {this.type} != {that.type}"
-                )
-            if this.unit != that.unit:
-                raise ValueError(
-                    f"Item units must match. Item: {this.unit} != {that.unit}"
-                )
-
     # ============ aggregate =============
 
     def aggregate(
@@ -1779,16 +1765,10 @@ class Dataset:
     def _add_dataset(self, other: "Dataset", sign: float = 1.0) -> "Dataset":
         self._check_datasets_match(other)
         try:
-            data = [
-                self[x].to_numpy() + sign * other[y].to_numpy()
-                for x, y in zip(self.items, other.items)
-            ]
+            data = [x + sign * y for x, y in zip(self, other)]
         except TypeError:
             raise TypeError("Could not add data in Dataset")
-        newds = self.copy()
-        for new, old in zip(newds, data):
-            new.values = old
-        return newds
+        return Dataset(data)
 
     def _check_datasets_match(self, other: "Dataset") -> None:
         self._check_all_items_match(other)
@@ -1800,65 +1780,32 @@ class Dataset:
 
     def _add_value(self, value: float) -> "Dataset":
         try:
-            data = [value + self[x].to_numpy() for x in self.items]
+            data = [x + value for x in self]
         except TypeError:
             raise TypeError(f"{value} could not be added to Dataset")
-        items = deepcopy(self.items)
-        time = self.time.copy()
-        return Dataset(
-            data,
-            time=time,
-            items=items,
-            geometry=self.geometry,
-            zn=self._zn,
-            validate=False,
-        )
+        return Dataset(data)
 
     def _multiply_value(self, value: float | "Dataset") -> "Dataset":
         try:
             if isinstance(value, self.__class__):
                 self._check_datasets_match(value)
-                data = [
-                    self[x].to_numpy() * value[y].to_numpy()
-                    for x, y in zip(self.items, value.items)
-                ]
+                data = [x * y for x, y in zip(self, value)]
             else:
-                data = [value * self[x].to_numpy() for x in self.items]
+                data = [x * value for x in self]
         except TypeError:
             raise TypeError(f"{value} could not be multiplied to Dataset")
-        items = deepcopy(self.items)
-        time = self.time.copy()
-        return Dataset(
-            data,
-            time=time,
-            items=items,
-            geometry=self.geometry,
-            zn=self._zn,
-            validate=False,
-        )
+        return Dataset(data)
 
     def _divide_value(self, value: float | "Dataset") -> "Dataset":
         try:
             if isinstance(value, self.__class__):
                 self._check_datasets_match(value)
-                data = [
-                    self[x].to_numpy() / value[y].to_numpy()
-                    for x, y in zip(self.items, value.items)
-                ]
+                data = [x / y for x, y in zip(self, value)]
             else:
-                data = [self[x].to_numpy() / value for x in self.items]
+                data = [x / value for x in self]
         except TypeError:
             raise TypeError(f"{value} could not be divided to Dataset")
-        items = deepcopy(self.items)
-        time = self.time.copy()
-        return Dataset(
-            data,
-            time=time,
-            items=items,
-            geometry=self.geometry,
-            zn=self._zn,
-            validate=False,
-        )
+        return Dataset(data)
 
     # ===============================================
 

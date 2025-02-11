@@ -1816,33 +1816,7 @@ class DataArray:
         new_da = self.copy()  # TODO: alternatively: create new dataset (will validate)
         new_da.values = data
 
-        if not self._keep_EUM_after_math_operation(other, func):
-            other_name = other.name if hasattr(other, "name") else "array"
-            new_da.item = ItemInfo(
-                f"{self.name} {txt} {other_name}", itemtype=EUMType.Undefined
-            )
-
         return new_da
-
-    def _keep_EUM_after_math_operation(
-        self, other: "DataArray" | float, func: Callable
-    ) -> bool:
-        """Does the math operation falsify the EUM?"""
-        if hasattr(other, "shape") and hasattr(other, "ndim"):
-            # other is array-like, so maybe we cannot keep EUM
-            if func == np.subtract or func == np.sum:
-                # +/-: we may want to keep EUM
-                if isinstance(other, DataArray):
-                    if self.type == other.type and self.unit == other.unit:
-                        return True
-                    else:
-                        return False
-                else:
-                    return True  # assume okay, since no EUM
-            return False
-
-        # other is likely scalar, okay to keep EUM
-        return True
 
     # ============= Logical indexing ===========
 

@@ -1182,10 +1182,14 @@ def test_add_dataset(ds1, ds2):
 
     ds2b = ds2.copy()
     ds2b[0].item = ItemInfo(EUMType.Wind_Velocity)
-    with pytest.raises(ValueError):
-        # item type does not match
-        ds1 + ds2b
+    # item type does not match, but we don't care about the item type, item is defined by the first dataset
+    ds3 = ds2b + ds1
+    assert ds3.items[0].type == EUMType.Wind_Velocity
+    assert ds3.items[0].name == ds2b.items[0].name
 
+    ds4 = ds1 + ds2b
+    assert ds4.items[0].type == EUMType.Undefined
+    assert ds4.items[0].name == ds1.items[0].name
     ds2c = ds2.copy()
     tt = ds2c.time.to_numpy()
     tt[-1] = tt[-1] + np.timedelta64(1, "s")
@@ -1202,16 +1206,25 @@ def test_sub_dataset(ds1, ds2):
 
 
 def test_multiply_dataset(ds1, ds2):
-    dsa = mikeio.Dataset({"Foo": mikeio.DataArray([1, 2, 3])})
+    dsa = mikeio.Dataset(
+        {
+            "Foo": mikeio.DataArray(
+                [1, 2, 3], item=mikeio.ItemInfo("Foo", EUMType.Water_Level)
+            )
+        }
+    )
     dsb = mikeio.Dataset({"Foo": mikeio.DataArray([4, 5, 6])})
     dsr = dsa * dsb
-    assert np.all(dsr[0].to_numpy() == np.array([4, 10, 18]))
+    assert np.all(dsr.Foo.to_numpy() == np.array([4, 10, 18]))
+    assert dsr.Foo.type == EUMType.Water_Level
 
 
-def test_multiply_datasets_must_match():
-    dsa = mikeio.Dataset({"Foo": mikeio.DataArray([1, 2, 3])})
+def test_multiply_number_of_items_datasets_must_match():
+    dsa = mikeio.Dataset(
+        {"Foo": mikeio.DataArray([1, 2, 3]), "Bar": mikeio.DataArray([1, 2, 3])}
+    )
     dsb = mikeio.Dataset({"Bar": mikeio.DataArray([4, 5, 6])})
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match="Number of items"):
         dsa * dsb
 
 
@@ -1222,10 +1235,12 @@ def test_divide_dataset(ds1, ds2):
     assert np.all(ds3[0].to_numpy() == np.array([0.25, 0.4, 0.5]))
 
 
-def test_divide_dataset_must_match():
-    dsa = mikeio.Dataset({"Foo": mikeio.DataArray([1, 2, 3])})
+def test_divide_number_of_items_datasets_must_match():
+    dsa = mikeio.Dataset(
+        {"Foo": mikeio.DataArray([1, 2, 3]), "Bar": mikeio.DataArray([1, 2, 3])}
+    )
     dsb = mikeio.Dataset({"Bar": mikeio.DataArray([4, 5, 6])})
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match="Number of items"):
         dsa / dsb
 
 
