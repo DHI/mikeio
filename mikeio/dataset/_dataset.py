@@ -1791,7 +1791,7 @@ class Dataset:
                 self._check_datasets_match(value)
                 data = [x * y for x, y in zip(self, value)]
             else:
-                data = [x * value for x in self]
+                data = [x * value for x in self]  # type: ignore
         except TypeError:
             raise TypeError(f"{value} could not be multiplied to Dataset")
         return Dataset(data)
@@ -1802,7 +1802,7 @@ class Dataset:
                 self._check_datasets_match(value)
                 data = [x / y for x, y in zip(self, value)]
             else:
-                data = [x / value for x in self]
+                data = [x / value for x in self]  # type: ignore
         except TypeError:
             raise TypeError(f"{value} could not be divided to Dataset")
         return Dataset(data)

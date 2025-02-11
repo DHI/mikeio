@@ -1753,33 +1753,31 @@ class DataArray:
         return self.__add__(other)
 
     def __add__(self, other: "DataArray" | float) -> "DataArray":
-        return self._apply_math_operation(other, np.add, txt="+")
+        return self._apply_math_operation(other, np.add)
 
     def __rsub__(self, other: "DataArray" | float) -> "DataArray":
         return other + self.__neg__()
 
     def __sub__(self, other: "DataArray" | float) -> "DataArray":
-        return self._apply_math_operation(other, np.subtract, txt="-")
+        return self._apply_math_operation(other, np.subtract)
 
     def __rmul__(self, other: "DataArray" | float) -> "DataArray":
         return self.__mul__(other)
 
     def __mul__(self, other: "DataArray" | float) -> "DataArray":
-        return self._apply_math_operation(
-            other, np.multiply, txt="x"
-        )  # x in place of *
+        return self._apply_math_operation(other, np.multiply)
 
     def __pow__(self, other: float) -> "DataArray":
-        return self._apply_math_operation(other, np.power, txt="**")
+        return self._apply_math_operation(other, np.power)
 
     def __truediv__(self, other: "DataArray" | float) -> "DataArray":
-        return self._apply_math_operation(other, np.divide, txt="/")
+        return self._apply_math_operation(other, np.divide)
 
     def __floordiv__(self, other: "DataArray" | float) -> "DataArray":
-        return self._apply_math_operation(other, np.floor_divide, txt="//")
+        return self._apply_math_operation(other, np.floor_divide)
 
     def __mod__(self, other: float) -> "DataArray":
-        return self._apply_math_operation(other, np.mod, txt="%")
+        return self._apply_math_operation(other, np.mod)
 
     def __neg__(self) -> "DataArray":
         return self._apply_unary_math_operation(np.negative)
@@ -1802,7 +1800,9 @@ class DataArray:
         return new_da
 
     def _apply_math_operation(
-        self, other: "DataArray" | float, func: Callable, *, txt: str
+        self,
+        other: "DataArray" | float,
+        func: Callable,
     ) -> "DataArray":
         """Apply a binary math operation with a scalar, an array or another DataArray."""
         try:
@@ -1810,8 +1810,6 @@ class DataArray:
             data = func(self.values, other_values)
         except TypeError:
             raise TypeError("Math operation could not be applied to DataArray")
-
-        # TODO: check if geometry etc match if other is DataArray?
 
         new_da = self.copy()  # TODO: alternatively: create new dataset (will validate)
         new_da.values = data
