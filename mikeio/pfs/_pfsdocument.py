@@ -339,6 +339,9 @@ class PfsDocument(PfsSection):
     def _parse_param(self, value: str) -> str:
         if len(value) == 0:
             return "[]"
+        if value[0] == "|" and value[-1] == "|":
+            if value.count("|") == 2:
+                return self._parse_token(value)
         if "MULTIPOLYGON" in value:
             return value
         if "," in value:

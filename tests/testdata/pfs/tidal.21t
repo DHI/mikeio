@@ -1,0 +1,26 @@
+[m21_tideph]
+   CLSID = 'TidePredictionHeights.dll'
+   TypeName = 'm21_tideph'
+   CREATEDTIME = '2018-01-25T08:27:01'
+   MODIFIEDTIME = '2018-01-25T08:28:25'
+   NOTES = ''
+   [Setup]
+      Name = 'Esbjerg1989Global_Area'
+      Prediction_type = 1
+      constituent_file_name = |..\..\..\..\..\..\..\..\Program Files (x86)\DHI\MIKE Zero\2024\Application Data\Tide_Constituents\global_tide_constituents_height_0.25deg.dfs2|
+      start_date = 1989, 1, 1
+      end_date = 1990, 1, 4
+      timestep = 1.0
+      number_of_files = 1
+      [File_1]
+         format = 3
+         mesh_file = |.\b,athy.mesh|
+         file_name = |.\Esbjerg1989PredictedGlobal.dfsu|
+         description = 'Predicted tide level'
+      EndSect  // File_1
+
+      logfilelocation = |.\|
+   EndSect  // Setup
+
+EndSect  // m21_tideph
+
