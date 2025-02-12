@@ -412,11 +412,11 @@ class Dataset:
 
         return df
 
-    def copy(self) -> "Dataset":
+    def copy(self) -> Dataset:
         """Returns a copy of this dataset."""
         return deepcopy(self)
 
-    def dropna(self) -> "Dataset":
+    def dropna(self) -> Dataset:
         """Remove time steps where all items are NaN."""
         if not self[0]._has_time_axis:  # type: ignore
             raise ValueError("Not available if no time axis!")
@@ -435,14 +435,14 @@ class Dataset:
 
         return self.isel(time=all_index)
 
-    def flipud(self) -> "Dataset":
+    def flipud(self) -> Dataset:
         """Flip data upside down (on first non-time axis)."""
         self._data_vars = {
             key: value.flipud() for (key, value) in self._data_vars.items()
         }
         return self
 
-    def squeeze(self) -> "Dataset":
+    def squeeze(self) -> Dataset:
         """Remove axes of length 1.
 
         Returns
@@ -578,7 +578,7 @@ class Dataset:
         """
         self.__delitem__(key)
 
-    def rename(self, mapper: Mapping[str, str], inplace: bool = False) -> "Dataset":
+    def rename(self, mapper: Mapping[str, str], inplace: bool = False) -> Dataset:
         """Rename items (DataArrays) in Dataset.
 
         Parameters
@@ -631,9 +631,9 @@ class Dataset:
 
     # Mapping is Iterable
     @overload
-    def __getitem__(self, key: Iterable[Hashable]) -> "Dataset": ...
+    def __getitem__(self, key: Iterable[Hashable]) -> Dataset: ...
 
-    def __getitem__(self, key: Any) -> DataArray | "Dataset":
+    def __getitem__(self, key: Any) -> DataArray | Dataset:
         # select time steps
         if (
             isinstance(key, Sequence) and not isinstance(key, str)
@@ -771,7 +771,7 @@ class Dataset:
         frequency: IndexType = None,
         direction: IndexType = None,
         axis: int | str = 0,
-    ) -> "Dataset":
+    ) -> Dataset:
         """Return a new Dataset whose data is given by
         integer indexing along the specified dimension(s).
 
@@ -856,7 +856,7 @@ class Dataset:
         coords: np.ndarray | None = None,
         area: tuple[float, float, float, float] | None = None,
         layers: int | str | Sequence[int | str] | None = None,
-    ) -> "Dataset":
+    ) -> Dataset:
         """Return a new Dataset whose data is given by
         selecting index labels along the specified dimension(s).
 
@@ -926,13 +926,13 @@ class Dataset:
     def interp(
         self,
         *,
-        time: pd.DatetimeIndex | "DataArray" | None = None,
+        time: pd.DatetimeIndex | DataArray | None = None,
         x: float | None = None,
         y: float | None = None,
         z: float | None = None,
         n_nearest: int = 3,
         **kwargs: Any,
-    ) -> "Dataset":
+    ) -> Dataset:
         """Interpolate data in time and space.
 
         This method currently has limited functionality for
@@ -1027,7 +1027,7 @@ class Dataset:
         track: str | Path | Dataset | pd.DataFrame,
         method: Literal["nearest", "inverse_distance"] = "nearest",
         dtype: Any = np.float32,
-    ) -> "Dataset":
+    ) -> Dataset:
         """Extract data along a moving track.
 
         Parameters
@@ -1075,13 +1075,13 @@ class Dataset:
 
     def interp_time(
         self,
-        dt: float | pd.DatetimeIndex | "Dataset" | DataArray | None = None,
+        dt: float | pd.DatetimeIndex | Dataset | DataArray | None = None,
         *,
         freq: str | None = None,
         method: str = "linear",
         extrapolate: bool = True,
         fill_value: float = np.nan,
-    ) -> "Dataset":
+    ) -> Dataset:
         """Temporal interpolation.
 
         Wrapper of [](`scipy.interpolate.interp1d`).
@@ -1136,7 +1136,7 @@ class Dataset:
 
         return Dataset(das)
 
-    def interp_na(self, axis: str = "time", **kwargs: Any) -> "Dataset":
+    def interp_na(self, axis: str = "time", **kwargs: Any) -> Dataset:
         ds = self.copy()
         for da in ds:
             da.values = da.interp_na(axis=axis, **kwargs).values
@@ -1145,9 +1145,9 @@ class Dataset:
 
     def interp_like(
         self,
-        other: "Dataset" | DataArray | Grid2D | GeometryFM2D | pd.DatetimeIndex,
+        other: Dataset | DataArray | Grid2D | GeometryFM2D | pd.DatetimeIndex,
         **kwargs: Any,
-    ) -> "Dataset":
+    ) -> Dataset:
         """Interpolate in space (and in time) to other geometry (and time axis).
 
         Note: currently only supports interpolation from dfsu-2d to
@@ -1213,8 +1213,8 @@ class Dataset:
 
     @staticmethod
     def concat(
-        datasets: Sequence["Dataset"], keep: Literal["last", "first"] = "last"
-    ) -> "Dataset":
+        datasets: Sequence[Dataset], keep: Literal["last", "first"] = "last"
+    ) -> Dataset:
         """Concatenate Datasets along the time axis.
 
         Parameters
@@ -1249,7 +1249,7 @@ class Dataset:
         return ds
 
     @staticmethod
-    def merge(datasets: Sequence["Dataset"]) -> "Dataset":
+    def merge(datasets: Sequence[Dataset]) -> Dataset:
         """Merge Datasets along the item dimension.
 
         Parameters
@@ -1283,10 +1283,10 @@ class Dataset:
 
     def _concat_time(
         self,
-        other: "Dataset",
+        other: Dataset,
         copy: bool = True,
         keep: Literal["last", "first"] = "last",
-    ) -> "Dataset":
+    ) -> Dataset:
         self._check_all_items_match(other)
         # assuming time is always first dimension we can skip / keep it by bool
         start_dim = int("time" in self.dims)
@@ -1335,7 +1335,7 @@ class Dataset:
             newdata, time=newtime, items=ds.items, geometry=ds.geometry, zn=zn
         )
 
-    def _check_all_items_match(self, other: "Dataset") -> None:
+    def _check_all_items_match(self, other: Dataset) -> None:
         if self.n_items != other.n_items:
             raise ValueError(
                 f"Number of items must match ({self.n_items} and {other.n_items})"
@@ -1359,7 +1359,7 @@ class Dataset:
 
     def aggregate(
         self, axis: int | str = 0, func: Callable = np.nanmean, **kwargs: Any
-    ) -> "Dataset":
+    ) -> Dataset:
         """Aggregate along an axis.
 
         Parameters
@@ -1417,7 +1417,7 @@ class Dataset:
 
     def quantile(
         self, q: float | Sequence[float], *, axis: int | str = 0, **kwargs: Any
-    ) -> "Dataset":
+    ) -> Dataset:
         """Compute the q-th quantile of the data along the specified axis.
 
         Wrapping np.quantile
@@ -1452,7 +1452,7 @@ class Dataset:
 
     def nanquantile(
         self, q: float | Sequence[float], *, axis: int | str = 0, **kwargs: Any
-    ) -> "Dataset":
+    ) -> Dataset:
         """Compute the q-th quantile of the data along the specified axis, while ignoring nan values.
 
         Wrapping np.nanquantile
@@ -1481,7 +1481,7 @@ class Dataset:
         """
         return self._quantile(q, axis=axis, func=np.nanquantile, **kwargs)
 
-    def _quantile(self, q, *, axis=0, func=np.quantile, **kwargs) -> "Dataset":  # type: ignore
+    def _quantile(self, q, *, axis=0, func=np.quantile, **kwargs) -> Dataset:  # type: ignore
         if axis == "items":
             if self.n_items <= 1:
                 return self  # or raise ValueError?
@@ -1520,7 +1520,7 @@ class Dataset:
 
             return Dataset(data=res, validate=False)
 
-    def max(self, axis: int | str = 0, **kwargs: Any) -> "Dataset":
+    def max(self, axis: int | str = 0, **kwargs: Any) -> Dataset:
         """Max value along an axis.
 
         Parameters
@@ -1542,7 +1542,7 @@ class Dataset:
         """
         return self.aggregate(axis=axis, func=np.max, **kwargs)
 
-    def min(self, axis: int | str = 0, **kwargs: Any) -> "Dataset":
+    def min(self, axis: int | str = 0, **kwargs: Any) -> Dataset:
         """Min value along an axis.
 
         Parameters
@@ -1564,7 +1564,7 @@ class Dataset:
         """
         return self.aggregate(axis=axis, func=np.min, **kwargs)
 
-    def mean(self, axis: int | str = 0, **kwargs: Any) -> "Dataset":
+    def mean(self, axis: int | str = 0, **kwargs: Any) -> Dataset:
         """Mean value along an axis.
 
         Parameters
@@ -1587,7 +1587,7 @@ class Dataset:
         """
         return self.aggregate(axis=axis, func=np.mean, **kwargs)
 
-    def std(self, axis: int | str = 0, **kwargs: Any) -> "Dataset":
+    def std(self, axis: int | str = 0, **kwargs: Any) -> Dataset:
         """Standard deviation along an axis.
 
         Parameters
@@ -1609,7 +1609,7 @@ class Dataset:
         """
         return self.aggregate(axis=axis, func=np.std, **kwargs)
 
-    def ptp(self, axis: int | str = 0, **kwargs: Any) -> "Dataset":
+    def ptp(self, axis: int | str = 0, **kwargs: Any) -> Dataset:
         """Range (max - min) a.k.a Peak to Peak along an axis
         Parameters.
         ----------
@@ -1624,7 +1624,7 @@ class Dataset:
         """
         return self.aggregate(axis=axis, func=np.ptp, **kwargs)
 
-    def average(self, *, weights, axis=0, **kwargs) -> "Dataset":  # type: ignore
+    def average(self, *, weights, axis=0, **kwargs) -> Dataset:  # type: ignore
         """Compute the weighted average along the specified axis.
 
         Wraps [](`numpy.average`)
@@ -1665,7 +1665,7 @@ class Dataset:
 
         return self.aggregate(axis=axis, func=func, **kwargs)
 
-    def nanmax(self, axis: int | str = 0, **kwargs: Any) -> "Dataset":
+    def nanmax(self, axis: int | str = 0, **kwargs: Any) -> Dataset:
         """Max value along an axis (NaN removed).
 
         Parameters
@@ -1687,7 +1687,7 @@ class Dataset:
         """
         return self.aggregate(axis=axis, func=np.nanmax, **kwargs)
 
-    def nanmin(self, axis: int | str = 0, **kwargs: Any) -> "Dataset":
+    def nanmin(self, axis: int | str = 0, **kwargs: Any) -> Dataset:
         """Min value along an axis (NaN removed).
 
         Parameters
@@ -1705,7 +1705,7 @@ class Dataset:
         """
         return self.aggregate(axis=axis, func=np.nanmin, **kwargs)
 
-    def nanmean(self, axis: int | str = 0, **kwargs: Any) -> "Dataset":
+    def nanmean(self, axis: int | str = 0, **kwargs: Any) -> Dataset:
         """Mean value along an axis (NaN removed).
 
         Parameters
@@ -1723,7 +1723,7 @@ class Dataset:
         """
         return self.aggregate(axis=axis, func=np.nanmean, **kwargs)
 
-    def nanstd(self, axis: int | str = 0, **kwargs: Any) -> "Dataset":
+    def nanstd(self, axis: int | str = 0, **kwargs: Any) -> Dataset:
         """Standard deviation along an axis (NaN removed).
 
         Parameters
@@ -1747,36 +1747,36 @@ class Dataset:
 
     # ============ arithmetic/Math =============
 
-    def __radd__(self, other: "Dataset" | float) -> "Dataset":
+    def __radd__(self, other: Dataset | float) -> Dataset:
         return self.__add__(other)
 
-    def __add__(self, other: "Dataset" | float) -> "Dataset":
+    def __add__(self, other: Dataset | float) -> Dataset:
         if isinstance(other, self.__class__):
             return self._add_dataset(other)
         else:
             # float-like
             return self._add_value(other)  # type: ignore
 
-    def __rsub__(self, other: "Dataset" | float) -> "Dataset":
+    def __rsub__(self, other: Dataset | float) -> Dataset:
         ds = self.__mul__(-1.0)
         return other + ds
 
-    def __sub__(self, other: "Dataset" | float) -> "Dataset":
+    def __sub__(self, other: Dataset | float) -> Dataset:
         if isinstance(other, self.__class__):
             return self._add_dataset(other, sign=-1.0)
         else:
             return self._add_value(-other)  # type: ignore
 
-    def __rmul__(self, other: "Dataset" | float) -> "Dataset":
+    def __rmul__(self, other: Dataset | float) -> Dataset:
         return self.__mul__(other)
 
-    def __mul__(self, other: "Dataset" | float) -> "Dataset":
+    def __mul__(self, other: Dataset | float) -> Dataset:
         if isinstance(other, self.__class__):
             raise ValueError("Multiplication is not possible for two Datasets")
         else:
             return self._multiply_value(other)  # type: ignore
 
-    def _add_dataset(self, other: "Dataset", sign: float = 1.0) -> "Dataset":
+    def _add_dataset(self, other: Dataset, sign: float = 1.0) -> Dataset:
         self._check_datasets_match(other)
         try:
             data = [
@@ -1790,7 +1790,7 @@ class Dataset:
             new.values = old
         return newds
 
-    def _check_datasets_match(self, other: "Dataset") -> None:
+    def _check_datasets_match(self, other: Dataset) -> None:
         self._check_all_items_match(other)
 
         if not np.all(self.time == other.time):
@@ -1798,7 +1798,7 @@ class Dataset:
         if self.shape != other.shape:
             raise ValueError("shape must match")
 
-    def _add_value(self, value: float) -> "Dataset":
+    def _add_value(self, value: float) -> Dataset:
         try:
             data = [value + self[x].to_numpy() for x in self.items]
         except TypeError:
@@ -1814,7 +1814,7 @@ class Dataset:
             validate=False,
         )
 
-    def _multiply_value(self, value: float) -> "Dataset":
+    def _multiply_value(self, value: float) -> Dataset:
         try:
             data = [value * self[x].to_numpy() for x in self.items]
         except TypeError:
@@ -1960,7 +1960,7 @@ class Dataset:
 
         write_dfsu(filename, self)
 
-    def to_xarray(self) -> "xarray.Dataset":
+    def to_xarray(self) -> xarray.Dataset:
         """Export to xarray.Dataset."""
         import xarray
 
@@ -1989,7 +1989,7 @@ class Dataset:
 def from_pandas(
     df: pd.DataFrame,
     items: Mapping[str, ItemInfo] | Sequence[ItemInfo] | ItemInfo | None = None,
-) -> "Dataset":
+) -> Dataset:
     """Create a Dataset from a pandas DataFrame.
 
     Parameters
@@ -2049,10 +2049,10 @@ def from_pandas(
 
 
 def from_polars(
-    df: "pl.DataFrame",
+    df: pl.DataFrame,
     items: Mapping[str, ItemInfo] | Sequence[ItemInfo] | ItemInfo | None = None,
     datetime_col: str | None = None,
-) -> "Dataset":
+) -> Dataset:
     """Create a Dataset from a polars DataFrame.
 
     Parameters
