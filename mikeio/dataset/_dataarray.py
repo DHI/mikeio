@@ -484,13 +484,13 @@ class DataArray:
     def _has_time_axis(self) -> bool:
         return self.dims[0][0] == "t"
 
-    def fillna(self, value: float) -> "DataArray":
+    def fillna(self, value: float = 0.0) -> "DataArray":
         """Fill NA/NaN value.
 
         Parameters
         ----------
-        value: float
-            Value used to fill missing values.
+        value: float, optional
+            Value used to fill missing values. Default is 0.0.
 
         Examples
         --------

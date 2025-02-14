@@ -582,6 +582,7 @@ def test_interp_time():
     assert dsi3.time[0] == pd.Timestamp("2000-01-01 00:00:00")
     assert dsi3.time[-1] == pd.Timestamp("2000-01-01 09:00:00")
 
+
 def test_interp_time_to_other_dataset():
     # Arrange
     ## mikeio.Dataset 1
@@ -1532,7 +1533,7 @@ def test_create_dataset_with_many_items():
 
     for i in range(n_items):
         x = np.random.random(nt)
-        da = mikeio.DataArray(data=x, time=time, item=mikeio.ItemInfo(f"Item {i+1}"))
+        da = mikeio.DataArray(data=x, time=time, item=mikeio.ItemInfo(f"Item {i + 1}"))
         das.append(da)
 
     ds = mikeio.Dataset(das)
@@ -1648,7 +1649,7 @@ def test_fillna() -> None:
     assert np.isnan(ds["foo"].to_numpy()[0])
     assert np.isnan(ds["bar"].to_numpy()[-1])
 
-    ds_filled = ds.fillna(0.0)
+    ds_filled = ds.fillna()
 
     assert ds_filled["foo"].to_numpy()[0] == pytest.approx(0.0)
     assert ds_filled["bar"].to_numpy()[-1] == pytest.approx(0.0)
