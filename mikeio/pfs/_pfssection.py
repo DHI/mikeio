@@ -36,7 +36,7 @@ class PfsSection(SimpleNamespace, MutableMapping[str, Any]):
     """Class for reading/writing sections in a pfs file."""
 
     @staticmethod
-    def from_dataframe(df: pd.DataFrame, prefix: str) -> "PfsSection":
+    def from_dataframe(df: pd.DataFrame, prefix: str) -> PfsSection:
         """Create a PfsSection from a DataFrame.
 
         Parameters
@@ -123,11 +123,11 @@ class PfsSection(SimpleNamespace, MutableMapping[str, Any]):
     @staticmethod
     def _str_is_scientific_float(s: str) -> bool:
         """True: -1.0e2, 1E-4, -0.1E+0.5; False: E12, E-4."""
-        if len(s) < 3 or s.lower().startswith('e'):
+        if len(s) < 3 or s.lower().startswith("e"):
             return False
         try:
             float(s)
-            return 'e' in s.lower()
+            return "e" in s.lower()
         except ValueError:
             return False
 
@@ -195,9 +195,11 @@ class PfsSection(SimpleNamespace, MutableMapping[str, Any]):
         if text is not None:
             # text searches across all fields
             if key is not None or section is not None or param is not None:
-                raise ValueError("When 'text' is provided, 'key', 'section' and 'param' must be None")
+                raise ValueError(
+                    "When 'text' is provided, 'key', 'section' and 'param' must be None"
+                )
             key = section = param = text
-            
+
         key = key.lower() if (key is not None and not case) else key
         section = section.lower() if (section is not None and not case) else section
         param = (
@@ -205,9 +207,12 @@ class PfsSection(SimpleNamespace, MutableMapping[str, Any]):
             if (param is None or not isinstance(param, str) or case)
             else param.lower()
         )
-        results = [item for item in self._find_patterns_generator(
-            keypat=key, parampat=param, secpat=section, case=case
-        )]
+        results = [
+            item
+            for item in self._find_patterns_generator(
+                keypat=key, parampat=param, secpat=section, case=case
+            )
+        ]
         return (
             self.__class__._merge_PfsSections(results)
             if len(results) > 0
@@ -266,7 +271,7 @@ class PfsSection(SimpleNamespace, MutableMapping[str, Any]):
             elif self[k] == old_value:
                 self[k] = new_value
 
-    def copy(self) -> "PfsSection":
+    def copy(self) -> PfsSection:
         """Return a copy of the PfsSection."""
         return PfsSection(self.to_dict())
 
@@ -401,7 +406,7 @@ class PfsSection(SimpleNamespace, MutableMapping[str, Any]):
         return pd.DataFrame(res, index=range(1, n_sections + 1))
 
     @classmethod
-    def _merge_PfsSections(cls, sections: Sequence[dict[str, Any]]) -> "PfsSection":
+    def _merge_PfsSections(cls, sections: Sequence[dict[str, Any]]) -> PfsSection:
         """Merge a list of PfsSections/dict."""
         assert len(sections) > 0
         a = sections[0]

@@ -1511,7 +1511,7 @@ class ItemInfo:
         self._unit = value
 
     @staticmethod
-    def from_mikecore_dynamic_item_info(dfsItemInfo: DfsDynamicItemInfo) -> "ItemInfo":
+    def from_mikecore_dynamic_item_info(dfsItemInfo: DfsDynamicItemInfo) -> ItemInfo:
         """Create ItemInfo from a mikecore.DfsDynamicItemInfo object."""
         name = dfsItemInfo.Name
         item = dfsItemInfo.Quantity.Item

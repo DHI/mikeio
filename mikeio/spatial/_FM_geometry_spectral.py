@@ -132,12 +132,12 @@ class GeometryFMAreaSpectrum(_GeometryFMSpectrum):
 
     def isel(  # type: ignore
         self, idx: Sequence[int], **kwargs: Any
-    ) -> "GeometryFMPointSpectrum" | "GeometryFMAreaSpectrum":
+    ) -> GeometryFMPointSpectrum | GeometryFMAreaSpectrum:
         return self.elements_to_geometry(elements=idx)
 
     def elements_to_geometry(  # type: ignore
         self, elements: Sequence[int], keepdims: bool = False
-    ) -> "GeometryFMPointSpectrum" | "GeometryFMAreaSpectrum":
+    ) -> GeometryFMPointSpectrum | GeometryFMAreaSpectrum:
         """export a selection of elements to new flexible file geometry
         Parameters.
         ----------

@@ -85,10 +85,10 @@ IndexType = Union[int, slice, Sequence[int], np.ndarray, None]
 
 
 class _DataArraySpectrumToHm0:
-    def __init__(self, da: "DataArray") -> None:
+    def __init__(self, da: DataArray) -> None:
         self.da = da
 
-    def __call__(self, tail: bool = True) -> "DataArray":
+    def __call__(self, tail: bool = True) -> DataArray:
         # TODO: if action_density
         m0 = calc_m0_from_spectrum(
             self.da.to_numpy(),
@@ -317,7 +317,7 @@ class DataArray:
                 raise ValueError("zn can only be provided for layered dfsu data")
         return zn
 
-    def _is_compatible(self, other: "DataArray", raise_error: bool = False) -> bool:
+    def _is_compatible(self, other: DataArray, raise_error: bool = False) -> bool:
         """check if other DataArray has equivalent dimensions, time and geometry."""
         problems = []
         assert isinstance(other, DataArray)
@@ -484,7 +484,7 @@ class DataArray:
     def _has_time_axis(self) -> bool:
         return self.dims[0][0] == "t"
 
-    def dropna(self) -> "DataArray":
+    def dropna(self) -> DataArray:
         """Remove time steps where values are NaN."""
         if not self._has_time_axis:
             raise ValueError("Not available if no time axis!")
@@ -496,7 +496,7 @@ class DataArray:
         idx = list(np.where(~np.isnan(x).all(axis=axes))[0])
         return self.isel(idx, axis=0)
 
-    def flipud(self) -> "DataArray":
+    def flipud(self) -> DataArray:
         """Flip upside down (on first non-time axis)."""
         first_non_t_axis = 1 if self._has_time_axis else 0
         self.values = np.flip(self.values, axis=first_non_t_axis)
@@ -528,11 +528,11 @@ class DataArray:
 
         return df
 
-    def copy(self) -> "DataArray":
+    def copy(self) -> DataArray:
         """Make copy of DataArray."""
         return deepcopy(self)
 
-    def squeeze(self) -> "DataArray":
+    def squeeze(self) -> DataArray:
         """Remove axes of length 1.
 
         Returns
@@ -556,7 +556,7 @@ class DataArray:
         )
 
     # ============= Select/interp ===========
-    def __getitem__(self, key: Any) -> "DataArray":
+    def __getitem__(self, key: Any) -> DataArray:
         da = self
         dims = self.dims
         key = self._getitem_parse_key(key)
@@ -598,7 +598,7 @@ class DataArray:
         frequency: IndexType = None,
         direction: IndexType = None,
         axis: int | str = 0,
-    ) -> "DataArray":
+    ) -> DataArray:
         """Return a new DataArray whose data is given by
         integer indexing along the specified dimension(s).
 
@@ -770,14 +770,14 @@ class DataArray:
     def sel(
         self,
         *,
-        time: str | pd.DatetimeIndex | "DataArray" | None = None,
+        time: str | pd.DatetimeIndex | DataArray | None = None,
         x: float | slice | None = None,
         y: float | slice | None = None,
         z: float | slice | None = None,
         coords: np.ndarray | None = None,
         area: tuple[float, float, float, float] | None = None,
         layers: int | str | Sequence[int | str] | None = None,
-    ) -> "DataArray":
+    ) -> DataArray:
         """Return a new DataArray whose data is given by
         selecting index labels along the specified dimension(s).
 
@@ -895,7 +895,7 @@ class DataArray:
 
         return da
 
-    def _sel_with_slice(self, kwargs: Mapping[str, slice]) -> "DataArray":
+    def _sel_with_slice(self, kwargs: Mapping[str, slice]) -> DataArray:
         for k, v in kwargs.items():
             if isinstance(v, slice):
                 idx_start = (
@@ -928,14 +928,14 @@ class DataArray:
         # TODO find out optimal syntax to allow interpolation to single point, new time, grid, mesh...
         self,
         # *, # TODO: make this a keyword-only argument in the future
-        time: pd.DatetimeIndex | "DataArray" | None = None,
+        time: pd.DatetimeIndex | DataArray | None = None,
         x: float | None = None,
         y: float | None = None,
         z: float | None = None,
         n_nearest: int = 3,
         interpolant: tuple[Any, Any] | None = None,
         **kwargs: Any,
-    ) -> "DataArray":
+    ) -> DataArray:
         """Interpolate data in time and space.
 
         This method currently has limited functionality for
@@ -1069,7 +1069,7 @@ class DataArray:
         track: pd.DataFrame,
         method: Literal["nearest", "inverse_distance"] = "nearest",
         dtype: Any = np.float32,
-    ) -> "Dataset":
+    ) -> Dataset:
         """Extract data along a moving track.
 
         Parameters
@@ -1114,12 +1114,12 @@ class DataArray:
 
     def interp_time(
         self,
-        dt: float | pd.DatetimeIndex | "DataArray",
+        dt: float | pd.DatetimeIndex | DataArray,
         *,
         method: str = "linear",
         extrapolate: bool = True,
         fill_value: float = np.nan,
-    ) -> "DataArray":
+    ) -> DataArray:
         """Temporal interpolation.
 
         Wrapper of [](`scipy.interpolate.interp1d`)
@@ -1177,7 +1177,7 @@ class DataArray:
             dt=self._dt,
         )
 
-    def interp_na(self, axis: str = "time", **kwargs: Any) -> "DataArray":
+    def interp_na(self, axis: str = "time", **kwargs: Any) -> DataArray:
         """Fill in NaNs by interpolating according to different methods.
 
         Wrapper of [](`xarray.DataArray.interpolate_na`)
@@ -1204,10 +1204,10 @@ class DataArray:
 
     def interp_like(
         self,
-        other: "DataArray" | Grid2D | GeometryFM2D | pd.DatetimeIndex,
+        other: DataArray | Grid2D | GeometryFM2D | pd.DatetimeIndex,
         interpolant: tuple[Any, Any] | None = None,
         **kwargs: Any,
-    ) -> "DataArray":
+    ) -> DataArray:
         """Interpolate in space (and in time) to other geometry (and time axis).
 
         Note: currently only supports interpolation from dfsu-2d to
@@ -1294,8 +1294,8 @@ class DataArray:
 
     @staticmethod
     def concat(
-        dataarrays: Sequence["DataArray"], keep: Literal["last", "first"] = "last"
-    ) -> "DataArray":
+        dataarrays: Sequence[DataArray], keep: Literal["last", "first"] = "last"
+    ) -> DataArray:
         """Concatenate DataArrays along the time axis.
 
         Parameters
@@ -1335,7 +1335,7 @@ class DataArray:
 
     # ============= Aggregation methods ===========
 
-    def max(self, axis: int | str = 0, **kwargs: Any) -> "DataArray":
+    def max(self, axis: int | str = 0, **kwargs: Any) -> DataArray:
         """Max value along an axis.
 
         Parameters
@@ -1357,7 +1357,7 @@ class DataArray:
         """
         return self.aggregate(axis=axis, func=np.max, **kwargs)
 
-    def min(self, axis: int | str = 0, **kwargs: Any) -> "DataArray":
+    def min(self, axis: int | str = 0, **kwargs: Any) -> DataArray:
         """Min value along an axis.
 
         Parameters
@@ -1379,7 +1379,7 @@ class DataArray:
         """
         return self.aggregate(axis=axis, func=np.min, **kwargs)
 
-    def mean(self, axis: int | str = 0, **kwargs: Any) -> "DataArray":
+    def mean(self, axis: int | str = 0, **kwargs: Any) -> DataArray:
         """Mean value along an axis.
 
         Parameters
@@ -1401,7 +1401,7 @@ class DataArray:
         """
         return self.aggregate(axis=axis, func=np.mean, **kwargs)
 
-    def std(self, axis: int | str = 0, **kwargs: Any) -> "DataArray":
+    def std(self, axis: int | str = 0, **kwargs: Any) -> DataArray:
         """Standard deviation values along an axis.
 
         Parameters
@@ -1423,7 +1423,7 @@ class DataArray:
         """
         return self.aggregate(axis=axis, func=np.std, **kwargs)
 
-    def ptp(self, axis: int | str = 0, **kwargs: Any) -> "DataArray":
+    def ptp(self, axis: int | str = 0, **kwargs: Any) -> DataArray:
         """Range (max - min) a.k.a Peak to Peak along an axis.
 
         Parameters
@@ -1443,7 +1443,7 @@ class DataArray:
 
     def average(
         self, weights: np.ndarray, axis: int | str = 0, **kwargs: Any
-    ) -> "DataArray":
+    ) -> DataArray:
         """Compute the weighted average along the specified axis.
 
         Parameters
@@ -1481,7 +1481,7 @@ class DataArray:
 
         return self.aggregate(axis=axis, func=func, **kwargs)
 
-    def nanmax(self, axis: int | str = 0, **kwargs: Any) -> "DataArray":
+    def nanmax(self, axis: int | str = 0, **kwargs: Any) -> DataArray:
         """Max value along an axis (NaN removed).
 
         Parameters
@@ -1503,7 +1503,7 @@ class DataArray:
         """
         return self.aggregate(axis=axis, func=np.nanmax, **kwargs)
 
-    def nanmin(self, axis: int | str = 0, **kwargs: Any) -> "DataArray":
+    def nanmin(self, axis: int | str = 0, **kwargs: Any) -> DataArray:
         """Min value along an axis (NaN removed).
 
         Parameters
@@ -1525,7 +1525,7 @@ class DataArray:
         """
         return self.aggregate(axis=axis, func=np.nanmin, **kwargs)
 
-    def nanmean(self, axis: int | str = 0, **kwargs: Any) -> "DataArray":
+    def nanmean(self, axis: int | str = 0, **kwargs: Any) -> DataArray:
         """Mean value along an axis (NaN removed).
 
         Parameters
@@ -1547,7 +1547,7 @@ class DataArray:
         """
         return self.aggregate(axis=axis, func=np.nanmean, **kwargs)
 
-    def nanstd(self, axis: int | str = 0, **kwargs: Any) -> "DataArray":
+    def nanstd(self, axis: int | str = 0, **kwargs: Any) -> DataArray:
         """Standard deviation value along an axis (NaN removed).
 
         Parameters
@@ -1571,7 +1571,7 @@ class DataArray:
 
     def aggregate(
         self, axis: int | str = 0, func: Callable[..., Any] = np.nanmean, **kwargs: Any
-    ) -> "DataArray":
+    ) -> DataArray:
         """Aggregate along an axis.
 
         Parameters
@@ -1633,14 +1633,14 @@ class DataArray:
         )
 
     @overload
-    def quantile(self, q: float, **kwargs: Any) -> "DataArray": ...
+    def quantile(self, q: float, **kwargs: Any) -> DataArray: ...
 
     @overload
-    def quantile(self, q: Sequence[float], **kwargs: Any) -> "Dataset": ...
+    def quantile(self, q: Sequence[float], **kwargs: Any) -> Dataset: ...
 
     def quantile(
         self, q: float | Sequence[float], *, axis: int | str = 0, **kwargs: Any
-    ) -> "DataArray" | "Dataset":
+    ) -> DataArray | Dataset:
         """Compute the q-th quantile of the data along the specified axis.
 
         Wrapping np.quantile
@@ -1674,14 +1674,14 @@ class DataArray:
         return self._quantile(q, axis=axis, func=np.quantile, **kwargs)
 
     @overload
-    def nanquantile(self, q: float, **kwargs: Any) -> "DataArray": ...
+    def nanquantile(self, q: float, **kwargs: Any) -> DataArray: ...
 
     @overload
-    def nanquantile(self, q: Sequence[float], **kwargs: Any) -> "Dataset": ...
+    def nanquantile(self, q: Sequence[float], **kwargs: Any) -> Dataset: ...
 
     def nanquantile(
         self, q: float | Sequence[float], *, axis: int | str = 0, **kwargs: Any
-    ) -> "DataArray" | "Dataset":
+    ) -> DataArray | Dataset:
         """Compute the q-th quantile of the data along the specified axis, while ignoring nan values.
 
         Wrapping np.nanquantile
@@ -1749,48 +1749,48 @@ class DataArray:
 
     # ============= MATH operations ===========
 
-    def __radd__(self, other: "DataArray" | float) -> "DataArray":
+    def __radd__(self, other: DataArray | float) -> DataArray:
         return self.__add__(other)
 
-    def __add__(self, other: "DataArray" | float) -> "DataArray":
+    def __add__(self, other: DataArray | float) -> DataArray:
         return self._apply_math_operation(other, np.add, txt="+")
 
-    def __rsub__(self, other: "DataArray" | float) -> "DataArray":
+    def __rsub__(self, other: DataArray | float) -> DataArray:
         return other + self.__neg__()
 
-    def __sub__(self, other: "DataArray" | float) -> "DataArray":
+    def __sub__(self, other: DataArray | float) -> DataArray:
         return self._apply_math_operation(other, np.subtract, txt="-")
 
-    def __rmul__(self, other: "DataArray" | float) -> "DataArray":
+    def __rmul__(self, other: DataArray | float) -> DataArray:
         return self.__mul__(other)
 
-    def __mul__(self, other: "DataArray" | float) -> "DataArray":
+    def __mul__(self, other: DataArray | float) -> DataArray:
         return self._apply_math_operation(
             other, np.multiply, txt="x"
         )  # x in place of *
 
-    def __pow__(self, other: float) -> "DataArray":
+    def __pow__(self, other: float) -> DataArray:
         return self._apply_math_operation(other, np.power, txt="**")
 
-    def __truediv__(self, other: "DataArray" | float) -> "DataArray":
+    def __truediv__(self, other: DataArray | float) -> DataArray:
         return self._apply_math_operation(other, np.divide, txt="/")
 
-    def __floordiv__(self, other: "DataArray" | float) -> "DataArray":
+    def __floordiv__(self, other: DataArray | float) -> DataArray:
         return self._apply_math_operation(other, np.floor_divide, txt="//")
 
-    def __mod__(self, other: float) -> "DataArray":
+    def __mod__(self, other: float) -> DataArray:
         return self._apply_math_operation(other, np.mod, txt="%")
 
-    def __neg__(self) -> "DataArray":
+    def __neg__(self) -> DataArray:
         return self._apply_unary_math_operation(np.negative)
 
-    def __pos__(self) -> "DataArray":
+    def __pos__(self) -> DataArray:
         return self._apply_unary_math_operation(np.positive)
 
-    def __abs__(self) -> "DataArray":
+    def __abs__(self) -> DataArray:
         return self._apply_unary_math_operation(np.abs)
 
-    def _apply_unary_math_operation(self, func: Callable) -> "DataArray":
+    def _apply_unary_math_operation(self, func: Callable) -> DataArray:
         try:
             data = func(self.values)
 
@@ -1802,8 +1802,8 @@ class DataArray:
         return new_da
 
     def _apply_math_operation(
-        self, other: "DataArray" | float, func: Callable, *, txt: str
-    ) -> "DataArray":
+        self, other: DataArray | float, func: Callable, *, txt: str
+    ) -> DataArray:
         """Apply a binary math operation with a scalar, an array or another DataArray."""
         try:
             other_values = other.values if hasattr(other, "values") else other
@@ -1825,7 +1825,7 @@ class DataArray:
         return new_da
 
     def _keep_EUM_after_math_operation(
-        self, other: "DataArray" | float, func: Callable
+        self, other: DataArray | float, func: Callable
     ) -> bool:
         """Does the math operation falsify the EUM?"""
         if hasattr(other, "shape") and hasattr(other, "ndim"):
@@ -1846,37 +1846,37 @@ class DataArray:
 
     # ============= Logical indexing ===========
 
-    def __lt__(self, other) -> "DataArray":  # type: ignore
+    def __lt__(self, other) -> DataArray:  # type: ignore
         bmask = self.values < self._other_to_values(other)
         return self._boolmask_to_new_DataArray(bmask)
 
-    def __gt__(self, other) -> "DataArray":  # type: ignore
+    def __gt__(self, other) -> DataArray:  # type: ignore
         bmask = self.values > self._other_to_values(other)
         return self._boolmask_to_new_DataArray(bmask)
 
-    def __le__(self, other) -> "DataArray":  # type: ignore
+    def __le__(self, other) -> DataArray:  # type: ignore
         bmask = self.values <= self._other_to_values(other)
         return self._boolmask_to_new_DataArray(bmask)
 
-    def __ge__(self, other) -> "DataArray":  # type: ignore
+    def __ge__(self, other) -> DataArray:  # type: ignore
         bmask = self.values >= self._other_to_values(other)
         return self._boolmask_to_new_DataArray(bmask)
 
-    def __eq__(self, other) -> "DataArray":  # type: ignore
+    def __eq__(self, other) -> DataArray:  # type: ignore
         bmask = self.values == self._other_to_values(other)
         return self._boolmask_to_new_DataArray(bmask)
 
-    def __ne__(self, other) -> "DataArray":  # type: ignore
+    def __ne__(self, other) -> DataArray:  # type: ignore
         bmask = self.values != self._other_to_values(other)
         return self._boolmask_to_new_DataArray(bmask)
 
     @staticmethod
     def _other_to_values(
-        other: "DataArray" | np.ndarray,
+        other: DataArray | np.ndarray,
     ) -> np.ndarray:
         return other.values if isinstance(other, DataArray) else other
 
-    def _boolmask_to_new_DataArray(self, bmask) -> "DataArray":  # type: ignore
+    def _boolmask_to_new_DataArray(self, bmask) -> DataArray:  # type: ignore
         return DataArray(
             data=bmask,
             time=self.time,
@@ -1888,7 +1888,7 @@ class DataArray:
 
     # ============= output methods: to_xxx() ===========
 
-    def _to_dataset(self) -> "Dataset":
+    def _to_dataset(self) -> Dataset:
         """Create a single-item dataset."""
         from mikeio import Dataset
 
@@ -1943,7 +1943,7 @@ class DataArray:
         """
         return pd.Series(data=self.to_numpy(), index=self.time, name=self.name)
 
-    def to_xarray(self) -> "xarray.DataArray":
+    def to_xarray(self) -> xarray.DataArray:
         """Export to xarray.DataArray."""
         import xarray as xr
 
