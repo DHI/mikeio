@@ -1679,3 +1679,23 @@ def test_read_write_single_timestep_preserves_dt(tmp_path):
 
     dfs2 = mikeio.open(outfn)
     assert dfs2.timestep == pytest.approx(10800.0)
+
+
+def test_fillna() -> None:
+    ds = mikeio.Dataset(
+        {
+            "foo": mikeio.DataArray(np.array([np.nan, 1.0])),
+            "bar": mikeio.DataArray(np.array([2.0, np.nan])),
+            "baz": mikeio.DataArray(np.array([2.0, 3.0])),
+        }
+    )
+    assert np.isnan(ds["foo"].to_numpy()[0])
+    assert np.isnan(ds["bar"].to_numpy()[-1])
+
+    ds_filled = ds.fillna()
+
+    assert ds_filled["foo"].to_numpy()[0] == pytest.approx(0.0)
+    assert ds_filled["bar"].to_numpy()[-1] == pytest.approx(0.0)
+
+    # original dataset is not modified
+    assert np.isnan(ds["foo"].to_numpy()[0])

@@ -215,7 +215,7 @@ def test_pfssection_insert_pfssection(d1) -> None:
 
     for j in range(10):
         dj = dict(val=j, lst=[0.3, 0.7])
-        key = f"FILE_{j+1}"
+        key = f"FILE_{j + 1}"
         sct[key] = mikeio.PfsSection(dj)
 
     assert sct.FILE_6.val == 5
@@ -226,7 +226,7 @@ def test_pfssection_find_replace(d1) -> None:
 
     for j in range(10):
         dj = dict(val=j, lst=[0.3, 0.7])
-        key = f"FILE_{j+1}"
+        key = f"FILE_{j + 1}"
         sct[key] = mikeio.PfsSection(dj)
 
     assert sct.FILE_6.lst == [0.3, 0.7]
@@ -1250,3 +1250,8 @@ def test_ignores_comments_in_quotes() -> None:
 """
     pfs = mikeio.PfsDocument.from_text(text)
     assert pfs.SymbologyModule.SymbologyTreeView == "//"
+
+
+def test_filenames_may_contain_comma() -> None:
+    pfs = mikeio.read_pfs("tests/testdata/pfs/tidal.21t")
+    assert pfs.m21_tideph.Setup.File_1.mesh_file == "|.\\b,athy.mesh|"

@@ -416,6 +416,19 @@ class Dataset:
         """Returns a copy of this dataset."""
         return deepcopy(self)
 
+    def fillna(self, value: float = 0.0) -> "Dataset":
+        """Fill NA/NaN value.
+
+        Parameters
+        ----------
+        value: float, optional
+            Value used to fill missing values. Default is 0.0.
+
+        """
+        res = {name: da.fillna(value=value) for name, da in self._data_vars.items()}
+
+        return Dataset(data=res, validate=False)
+
     def dropna(self) -> "Dataset":
         """Remove time steps where all items are NaN."""
         if not self[0]._has_time_axis:  # type: ignore

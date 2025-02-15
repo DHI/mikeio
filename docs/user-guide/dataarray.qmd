@@ -175,6 +175,7 @@ Other methods that also return a DataArray:
 * [`interp_like`](`mikeio.DataArray.interp_like`) - Spatio (temporal) interpolation (see example [Dfsu interpolation](../examples/dfsu/spatial_interpolation.qmd)
 * [`interp_time()`](`mikeio.DataArray.interp_time`) - Temporal interpolation (see example [Time interpolation](../examples/Time-interpolation.qmd))
 * [`dropna()`](`mikeio.DataArray.dropna`) - Remove time steps where all items are NaN
+* [`fillna()`](`mikeio.DataArray.fillna`) - Fill missing values with a constant value
 * [`squeeze()`](`mikeio.DataArray.squeeze`) - Remove axes of length 1
 
 ### Conversion:
