@@ -484,6 +484,34 @@ class DataArray:
     def _has_time_axis(self) -> bool:
         return self.dims[0][0] == "t"
 
+    def fillna(self, value: float = 0.0) -> "DataArray":
+        """Fill NA/NaN value.
+
+        Parameters
+        ----------
+        value: float, optional
+            Value used to fill missing values. Default is 0.0.
+
+        Examples
+        --------
+        ```{python}
+        import numpy as np
+        import mikeio
+
+        da = mikeio.DataArray([np.nan, 1.0])
+        da
+        ```
+
+        ```{python}
+        da.fillna(0.0)
+        ```
+
+        """
+        da = self.copy()
+        x = da.values
+        x[np.isnan(x)] = value
+        return da
+
     def dropna(self) -> "DataArray":
         """Remove time steps where values are NaN."""
         if not self._has_time_axis:

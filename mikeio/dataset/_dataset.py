@@ -202,7 +202,7 @@ class Dataset:
     ) -> list[ItemInfo]:
         if items is None:
             # default Undefined items
-            item_infos = [ItemInfo(f"Item_{j+1}") for j in range(n_items_data)]
+            item_infos = [ItemInfo(f"Item_{j + 1}") for j in range(n_items_data)]
         else:
             if len(items) != n_items_data:
                 raise ValueError(
@@ -415,6 +415,19 @@ class Dataset:
     def copy(self) -> "Dataset":
         """Returns a copy of this dataset."""
         return deepcopy(self)
+
+    def fillna(self, value: float = 0.0) -> "Dataset":
+        """Fill NA/NaN value.
+
+        Parameters
+        ----------
+        value: float, optional
+            Value used to fill missing values. Default is 0.0.
+
+        """
+        res = {name: da.fillna(value=value) for name, da in self._data_vars.items()}
+
+        return Dataset(data=res, validate=False)
 
     def dropna(self) -> "Dataset":
         """Remove time steps where all items are NaN."""
