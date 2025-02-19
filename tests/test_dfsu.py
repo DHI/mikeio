@@ -939,8 +939,10 @@ def test_dataset_interp_to_xarray():
 def test_interp_like_grid():
     ds = mikeio.read("tests/testdata/wind_north_sea.dfsu")
     ws = ds[0]
+    assert ws.values.dtype == np.float32
     grid = ds.geometry.get_overset_grid(dx=0.1)
     ws_grid = ws.interp_like(grid)
+    assert ws_grid.values.dtype == np.float32
     assert ws_grid.n_timesteps == ds.n_timesteps
     assert isinstance(ws_grid, DataArray)
     assert isinstance(ws_grid.geometry, Grid2D)
