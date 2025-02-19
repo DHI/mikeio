@@ -1159,19 +1159,33 @@ class Dataset:
     def interp_like(
         self,
         other: "Dataset" | DataArray | Grid2D | GeometryFM2D | pd.DatetimeIndex,
+        *,
+        extrapolate: bool = True,
+        n_nearest: int = 3,
+        p: int = 2,
+        radius: float | None = None,
         **kwargs: Any,
     ) -> "Dataset":
-        """Interpolate in space (and in time) to other geometry (and time axis).
+        """Interpolate in space to other geometry.
 
         Note: currently only supports interpolation from dfsu-2d to
               dfs2 or other dfsu-2d Datasets
 
         Parameters
         ----------
-        other: Dataset, DataArray, Grid2D, GeometryFM, pd.DatetimeIndex
+        other: Dataset, DataArray, Grid2D, GeometryFM
             Dataset, DataArray, Grid2D or GeometryFM2D to interpolate to
+        n_nearest: int, optional
+            Number of nearest elements to use for interpolation
+        extrapolate: bool, optional
+            allow extrapolation, by default False
+        p: int, optional
+            power of inverse distance weighting, default=2
+        radius: float, optional
+            an alternative to extrapolate=False,
+            only include elements within radius
         **kwargs: Any
-            additional kwargs are passed to interpolation method
+            deprecated, use interp_time instead
 
         Examples
         --------
@@ -1180,7 +1194,6 @@ class Dataset:
         >>> dsi = ds.interp_like(ds2)
         >>> dsi.to_dfs("HD_gridded.dfs2")
         >>> dse = ds.interp_like(ds2, extrapolate=True)
-        >>> dst = ds.interp_like(ds2.time)
 
         Returns
         -------
@@ -1194,6 +1207,10 @@ class Dataset:
             )
 
         if isinstance(other, pd.DatetimeIndex):
+            warnings.warn(
+                "Interpolation to a new time axis will not longer be supported by interp_like, use interp_time instead.",
+                FutureWarning,
+            )
             return self.interp_time(other, **kwargs)
 
         if hasattr(other, "geometry"):
@@ -1213,7 +1230,9 @@ class Dataset:
         else:
             raise NotImplementedError()
 
-        interpolant = self.geometry.get_2d_interpolant(xy, **kwargs)
+        interpolant = self.geometry.get_2d_interpolant(
+            xy, n_nearest=n_nearest, extrapolate=extrapolate, p=p, radius=radius
+        )
         das = [da.interp_like(geom, interpolant=interpolant) for da in self]
         ds = Dataset(das, validate=False)
 

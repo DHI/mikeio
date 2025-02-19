@@ -1232,29 +1232,42 @@ class DataArray:
 
     def interp_like(
         self,
-        other: "DataArray" | Grid2D | GeometryFM2D | pd.DatetimeIndex,
+        other: "DataArray" | Grid2D | GeometryFM2D,
+        *,
+        extrapolate: bool = True,
+        n_nearest: int = 3,
+        p: int = 2,
+        radius: float | None = None,
         interpolant: tuple[Any, Any] | None = None,
         **kwargs: Any,
     ) -> "DataArray":
-        """Interpolate in space (and in time) to other geometry (and time axis).
+        """Interpolate in space to other geometry.
 
         Note: currently only supports interpolation from dfsu-2d to
               dfs2 or other dfsu-2d DataArrays
 
         Parameters
         ----------
-        other: Dataset, DataArray, Grid2D, GeometryFM, pd.DatetimeIndex
+        other: Dataset, DataArray, Grid2D, GeometryFM
             The target geometry (and time axis) to interpolate to
+        n_nearest: int, optional
+            Number of nearest elements to use for interpolation
+        extrapolate: bool, optional
+            allow extrapolation, by default False
+        p: int, optional
+            power of inverse distance weighting, default=2
+        radius: float, optional
+            an alternative to extrapolate=False,
+            only include elements within radius
         interpolant: tuple, optional
             Reuse pre-calculated index and weights
         **kwargs: Any
-            additional kwargs are passed to interpolation method
+            deprecated, use interp_time instead
 
         Examples
         --------
         >>> dai = da.interp_like(da2)
         >>> dae = da.interp_like(da2, extrapolate=True)
-        >>> dat = da.interp_like(da2.time)
 
         Returns
         -------
@@ -1268,6 +1281,10 @@ class DataArray:
             )
 
         if isinstance(other, pd.DatetimeIndex):
+            warnings.warn(
+                "Interpolation to a new time axis will not longer be supported by interp_like, use interp_time instead.",
+                FutureWarning,
+            )
             return self.interp_time(other, **kwargs)
 
         if not (isinstance(self.geometry, GeometryFM2D) and self.geometry.is_2d):
@@ -1290,7 +1307,9 @@ class DataArray:
             raise NotImplementedError()
 
         if interpolant is None:
-            elem_ids, weights = self.geometry.get_2d_interpolant(xy, **kwargs)
+            elem_ids, weights = self.geometry.get_2d_interpolant(
+                xy, n_nearest=n_nearest, extrapolate=extrapolate, p=p, radius=radius
+            )
         else:
             elem_ids, weights = interpolant
 
