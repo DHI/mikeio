@@ -1232,10 +1232,10 @@ class DataArray:
 
     def interp_like(
         self,
-        other: "DataArray" | Grid2D | GeometryFM2D,
+        other: DataArray | Grid2D | GeometryFM2D,
         *,
-        extrapolate: bool = True,
-        n_nearest: int = 3,
+        extrapolate: bool = False,
+        n_nearest: int = 5,
         p: int = 2,
         radius: float | None = None,
         interpolant: tuple[Any, Any] | None = None,
@@ -1262,7 +1262,11 @@ class DataArray:
         interpolant: tuple, optional
             Reuse pre-calculated index and weights
         **kwargs: Any
-            deprecated, use interp_time instead
+            arguments passed to interp_time
+
+        Notes
+        -----
+        Interpolating to another Dataset or DataArray will do both spatial and temporal interpolation.
 
         Examples
         --------
@@ -1275,7 +1279,7 @@ class DataArray:
             Interpolated DataArray
 
         """
-        if not (isinstance(self.geometry, GeometryFM2D) and self.geometry.is_2d):
+        if not isinstance(self.geometry, GeometryFM2D):
             raise NotImplementedError(
                 "Currently only supports interpolating from 2d flexible mesh data!"
             )
@@ -1286,9 +1290,6 @@ class DataArray:
                 FutureWarning,
             )
             return self.interp_time(other, **kwargs)
-
-        if not (isinstance(self.geometry, GeometryFM2D) and self.geometry.is_2d):
-            raise NotImplementedError("Currently only supports 2d flexible mesh data!")
 
         if hasattr(other, "geometry"):
             geom = other.geometry
@@ -1332,8 +1333,9 @@ class DataArray:
             dt=self._dt,
         )
 
+        # TODO consider if this should be removed
         if hasattr(other, "time"):
-            dai = dai.interp_time(other.time)
+            dai = dai.interp_time(other.time, **kwargs)
 
         assert isinstance(dai, DataArray)
 

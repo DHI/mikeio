@@ -1158,10 +1158,10 @@ class Dataset:
 
     def interp_like(
         self,
-        other: "Dataset" | DataArray | Grid2D | GeometryFM2D | pd.DatetimeIndex,
+        other: Dataset | DataArray | Grid2D | GeometryFM2D,
         *,
-        extrapolate: bool = True,
-        n_nearest: int = 3,
+        extrapolate: bool = False,
+        n_nearest: int = 5,
         p: int = 2,
         radius: float | None = None,
         **kwargs: Any,
@@ -1185,7 +1185,11 @@ class Dataset:
             an alternative to extrapolate=False,
             only include elements within radius
         **kwargs: Any
-            deprecated, use interp_time instead
+            arguments passed to interp_time
+
+        Notes
+        -----
+        Interpolating to another Dataset or DataArray will do both spatial and temporal interpolation.
 
         Examples
         --------
@@ -1201,7 +1205,7 @@ class Dataset:
             Interpolated Dataset
 
         """
-        if not (isinstance(self.geometry, GeometryFM2D) and self.geometry.is_2d):
+        if not isinstance(self.geometry, GeometryFM2D):
             raise NotImplementedError(
                 "Currently only supports interpolating from 2d flexible mesh data!"
             )
@@ -1236,8 +1240,9 @@ class Dataset:
         das = [da.interp_like(geom, interpolant=interpolant) for da in self]
         ds = Dataset(das, validate=False)
 
+        # TODO consider if this should be removed, it is a bit to magic
         if hasattr(other, "time"):
-            ds = ds.interp_time(other.time)
+            ds = ds.interp_time(other.time, **kwargs)
 
         return ds
 
