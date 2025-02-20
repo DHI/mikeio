@@ -1789,32 +1789,32 @@ class Dataset:
             return self._scalar_op(other, operator="/")  # type: ignore
 
     def _binary_op(self, other: "Dataset", operator: str) -> "Dataset":
-        """Perform binary operation between two Datasets."""
         self._check_datasets_match(other)
-        if operator == "+":
-            data = [x + y for x, y in zip(self, other)]
-        elif operator == "-":
-            data = [x - y for x, y in zip(self, other)]
-        elif operator == "*":
-            data = [x * y for x, y in zip(self, other)]
-        elif operator == "/":
-            data = [x / y for x, y in zip(self, other)]
-        else:
-            raise ValueError(f"Unsupported operator: {operator}")
+        match operator:
+            case "+":
+                data = [x + y for x, y in zip(self, other)]
+            case "-":
+                data = [x - y for x, y in zip(self, other)]
+            case "*":
+                data = [x * y for x, y in zip(self, other)]
+            case "/":
+                data = [x / y for x, y in zip(self, other)]
+            case _:
+                raise ValueError(f"Unsupported operator: {operator}")
         return Dataset(data)
 
     def _scalar_op(self, value: float, operator: str) -> "Dataset":
-        """Perform operation between Dataset and scalar value."""
-        if operator == "+":
-            data = [x + value for x in self]
-        elif operator == "-":
-            data = [x - value for x in self]
-        elif operator == "*":
-            data = [x * value for x in self]
-        elif operator == "/":
-            data = [x / value for x in self]
-        else:
-            raise ValueError(f"Unsupported operator: {operator}")
+        match operator:
+            case "+":
+                data = [x + value for x in self]
+            case "-":
+                data = [x - value for x in self]
+            case "*":
+                data = [x * value for x in self]
+            case "/":
+                data = [x / value for x in self]
+            case _:
+                raise ValueError(f"Unsupported operator: {operator}")
         return Dataset(data)
 
     # ===============================================
