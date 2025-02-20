@@ -7,7 +7,6 @@ from datetime import datetime
 from typing import Any, Sequence
 import numpy as np
 import pandas as pd
-from tqdm import tqdm
 
 from mikecore.DfsFile import (
     DfsDynamicItemInfo,
@@ -19,7 +18,7 @@ from mikecore.DfsFileFactory import DfsFileFactory
 from mikecore.Projections import Cartography
 
 from ..dataset import Dataset
-from ..eum import EUMType, EUMUnit, ItemInfo, ItemInfoList
+from ..eum import ItemInfo, ItemInfoList
 from ..exceptions import ItemsError
 from .._time import DateTimeSelector
 
@@ -349,92 +348,6 @@ class _Dfs123:
 
         return str.join("\n", out)
 
-    def read(
-        self,
-        *,
-        items: str | int | Sequence[str | int] | None = None,
-        time: int | str | slice | None = None,
-        keepdims: bool = False,
-        dtype: Any = np.float32,
-    ) -> Dataset:
-        """Read data from a dfs file.
-
-        Parameters
-        ---------
-        items: list[int] or list[str], optional
-            Read only selected items, by number (0-based), or by name
-        time: int, str, datetime, pd.TimeStamp, sequence, slice or pd.DatetimeIndex, optional
-            Read only selected time steps, by default None (=all)
-        keepdims: bool, optional
-            When reading a single time step only, should the time-dimension be kept
-            in the returned Dataset? by default: False
-        dtype: data-type, optional
-            Define the dtype of the returned dataset (default = np.float32)
-
-        Returns
-        -------
-        Dataset
-
-        """
-        self._open()
-
-        item_numbers = _valid_item_numbers(self._dfs.ItemInfo, items)
-        n_items = len(item_numbers)
-
-        single_time_selected, time_steps = _valid_timesteps(self._dfs.FileInfo, time)
-        nt = len(time_steps) if not single_time_selected else 1
-
-        shape: tuple[int, ...]
-
-        if self._ndim == 1:
-            shape = (nt, self.nx)  # type: ignore
-        elif self._ndim == 2:
-            shape = (nt, self.ny, self.nx)  # type: ignore
-        else:
-            shape = (nt, self.nz, self.ny, self.nx)  # type: ignore
-
-        if single_time_selected and not keepdims:
-            shape = shape[1:]
-
-        data_list: list[np.ndarray] = [
-            np.ndarray(shape=shape, dtype=dtype) for _ in range(n_items)
-        ]
-
-        t_seconds = np.zeros(len(time_steps))
-
-        for i, it in enumerate(tqdm(time_steps, disable=not self.show_progress)):
-            for item in range(n_items):
-                itemdata = self._dfs.ReadItemTimeStep(item_numbers[item] + 1, int(it))
-
-                src = itemdata.Data
-                d = src
-
-                d[d == self.deletevalue] = np.nan
-
-                if self._ndim == 2:
-                    d = d.reshape(self.ny, self.nx)  # type: ignore
-
-                if single_time_selected:
-                    data_list[item] = d
-                else:
-                    data_list[item][i] = d
-
-            t_seconds[i] = itemdata.Time
-
-        time = pd.to_datetime(t_seconds, unit="s", origin=self.start_time)
-
-        items = _get_item_info(self._dfs.ItemInfo, item_numbers)
-
-        self._dfs.Close()
-        return Dataset(
-            data_list,
-            time,
-            items,
-            geometry=self.geometry,
-            validate=False,
-            dt=self._timestep,
-        )
-
     def _open(self) -> None:
         raise NotImplementedError("Should be implemented by subclass")
 
@@ -451,17 +364,9 @@ class _Dfs123:
         list[Iteminfo]
 
         """
-        items = []
-        for item in item_numbers:
-            name = self._dfs.ItemInfo[item].Name
-            eumItem = self._dfs.ItemInfo[item].Quantity.Item
-            eumUnit = self._dfs.ItemInfo[item].Quantity.Unit
-            itemtype = EUMType(eumItem)
-            unit = EUMUnit(eumUnit)
-            data_value_type = self._dfs.ItemInfo[item].ValueType
-            item_info = ItemInfo(name, itemtype, unit, data_value_type)
-            items.append(item_info)
-        return items
+        infos = self._dfs.ItemInfo
+        nos = item_numbers
+        return [ItemInfo.from_mikecore_dynamic_item_info(infos[i]) for i in nos]
 
     @property
     def geometry(self) -> Any:
@@ -495,7 +400,7 @@ class _Dfs123:
     def end_time(self) -> pd.Timestamp:
         """File end time."""
         if self._end_time is None:
-            self._end_time = self.read(items=[0]).time[-1].to_pydatetime()
+            self._end_time = self.read(items=[0]).time[-1].to_pydatetime()  # type: ignore
 
         return self._end_time
 

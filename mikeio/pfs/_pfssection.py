@@ -4,7 +4,6 @@ from datetime import datetime
 from types import SimpleNamespace
 from typing import (
     Any,
-    Callable,
     ItemsView,
     Mapping,
     MutableMapping,
@@ -29,10 +28,13 @@ def _merge_dict(a: dict[str, Any], b: Mapping[str, Any]) -> dict[str, Any]:
 
 
 class PfsNonUniqueList(list):
+    # TODO do we really need this, regular lists are not unique
     pass
 
 
 class PfsSection(SimpleNamespace, MutableMapping[str, Any]):
+    """Class for reading/writing sections in a pfs file."""
+
     @staticmethod
     def from_dataframe(df: pd.DataFrame, prefix: str) -> "PfsSection":
         """Create a PfsSection from a DataFrame.
@@ -95,21 +97,23 @@ class PfsSection(SimpleNamespace, MutableMapping[str, Any]):
         if value is None:
             value = {}
 
-        if isinstance(value, dict):
-            d = value.copy() if copy else value
-            self.__setattr__(key, PfsSection(d))
-        elif isinstance(value, PfsNonUniqueList):
-            # multiple keywords/Sections with same name
-            sections = PfsNonUniqueList()
-            for v in value:
-                if isinstance(v, dict):
-                    d = v.copy() if copy else v
-                    sections.append(PfsSection(d))
-                else:
-                    sections.append(self._parse_value(v))
-            self.__setattr__(key, sections)
-        else:
-            self.__setattr__(key, self._parse_value(value))
+        match value:
+            case dict():
+                d = value.copy() if copy else value
+                self.__setattr__(key, PfsSection(d))
+            case PfsNonUniqueList():
+                # multiple keywords/Sections with same name
+                sections = PfsNonUniqueList()
+                for v in value:
+                    match v:
+                        case dict():
+                            d = v.copy() if copy else v
+                            sections.append(PfsSection(d))
+                        case _:
+                            sections.append(self._parse_value(v))
+                self.__setattr__(key, sections)
+            case _:
+                self.__setattr__(key, self._parse_value(value))
 
     def _parse_value(self, v: Any) -> Any:
         if isinstance(v, str) and self._str_is_scientific_float(v):
@@ -119,26 +123,12 @@ class PfsSection(SimpleNamespace, MutableMapping[str, Any]):
     @staticmethod
     def _str_is_scientific_float(s: str) -> bool:
         """True: -1.0e2, 1E-4, -0.1E+0.5; False: E12, E-4."""
-        if len(s) < 3:
+        if len(s) < 3 or s.lower().startswith('e'):
             return False
-        if (
-            s.count(".") <= 2
-            and s.lower().count("e") == 1
-            and s.lower()[0] != "e"
-            and s.strip()
-            .lower()
-            .replace(".", "")
-            .replace("e", "")
-            .replace("-", "")
-            .replace("+", "")
-            .isnumeric()
-        ):
-            try:
-                float(s)
-                return True
-            except ValueError:
-                return False
-        else:
+        try:
+            float(s)
+            return 'e' in s.lower()
+        except ValueError:
             return False
 
     def pop(self, key: Any, default: Any = None) -> Any:
@@ -168,15 +158,6 @@ class PfsSection(SimpleNamespace, MutableMapping[str, Any]):
     def items(self) -> ItemsView[str, Any]:
         """Return a new view of the PfsSection's items ((key, value) pairs)."""
         return self.__dict__.items()
-
-    # TODO: better name
-    def update_recursive(self, key: Any, value: Any) -> None:
-        """Update recursively all matches of key with value."""
-        for k, v in self.items():
-            if isinstance(v, PfsSection):
-                self[k].update_recursive(key, value)
-            elif k == key:
-                self[k] = value
 
     def search(
         self,
@@ -211,25 +192,22 @@ class PfsSection(SimpleNamespace, MutableMapping[str, Any]):
             Search result as a nested PfsSection
 
         """
-        results = []
         if text is not None:
-            assert key is None, "text and key cannot both be provided!"
-            assert section is None, "text and section cannot both be provided!"
-            assert param is None, "text and param cannot both be provided!"
-            key = text
-            section = text
-            param = text
-        key = key if (key is None or case) else key.lower()
-        section = section if (section is None or case) else section.lower()
+            # text searches across all fields
+            if key is not None or section is not None or param is not None:
+                raise ValueError("When 'text' is provided, 'key', 'section' and 'param' must be None")
+            key = section = param = text
+            
+        key = key.lower() if (key is not None and not case) else key
+        section = section.lower() if (section is not None and not case) else section
         param = (
             param
             if (param is None or not isinstance(param, str) or case)
             else param.lower()
         )
-        for item in self._find_patterns_generator(
+        results = [item for item in self._find_patterns_generator(
             keypat=key, parampat=param, secpat=section, case=case
-        ):
-            results.append(item)
+        )]
         return (
             self.__class__._merge_PfsSections(results)
             if len(results) > 0
@@ -257,9 +235,7 @@ class PfsSection(SimpleNamespace, MutableMapping[str, Any]):
                         keypat, parampat, secpat, keylist=keylist + [k], case=case
                     )
             else:
-                if keypat and keypat in kk:
-                    yield from self._yield_deep_dict(keylist + [k], v)
-                if self._param_match(parampat, v, case):
+                if (keypat and keypat in kk) or self._param_match(parampat, v, case):
                     yield from self._yield_deep_dict(keylist + [k], v)
 
     @staticmethod
@@ -296,30 +272,16 @@ class PfsSection(SimpleNamespace, MutableMapping[str, Any]):
 
     def _to_txt_lines(self) -> list[str]:
         lines: list[str] = []
-        self._write_with_func(lines.append, newline="")
+        self._append_to_lines_at_level(lines)
         return lines
 
-    def _write_with_func(
-        self, func: Callable[[str], Any], level: int = 0, newline: str = "\n"
-    ) -> None:
-        """Write pfs nested objects.
-
-        Parameters
-        ----------
-        func : Callable
-            A function that performs the writing e.g. to a file
-        level : int, optional
-            Level of indentation (add 3 spaces for each), by default 0
-        newline : str, optional
-            newline string, by default "\n"
-
-        """
-        lvl_prefix = "   "
+    def _append_to_lines_at_level(self, lines: list[str], level: int = 0) -> None:
+        lvl_prefix = "   " * level
         for k, v in self.items():
             # check for empty sections
             if v is None:
-                func(f"{lvl_prefix * level}[{k}]{newline}")
-                func(f"{lvl_prefix * level}EndSect  // {k}{newline}{newline}")
+                lines.append(f"{lvl_prefix}[{k}]")
+                lines.append(f"{lvl_prefix}EndSect  // {k}")
 
             elif isinstance(v, list) and any(
                 isinstance(subv, PfsSection) for subv in v
@@ -328,67 +290,55 @@ class PfsSection(SimpleNamespace, MutableMapping[str, Any]):
                 for subv in v:
                     if isinstance(subv, PfsSection):
                         subsec = PfsSection({k: subv})
-                        subsec._write_with_func(func, level=level, newline=newline)
+                        subsec._append_to_lines_at_level(lines, level=level)
                     else:
                         subv = self._prepare_value_for_write(subv)
-                        func(f"{lvl_prefix * level}{k} = {subv}{newline}")
+                        lines.append(f"{lvl_prefix}{k} = {subv}")
             elif isinstance(v, PfsSection):
-                func(f"{lvl_prefix * level}[{k}]{newline}")
-                v._write_with_func(func, level=(level + 1), newline=newline)
-                func(f"{lvl_prefix * level}EndSect  // {k}{newline}{newline}")
+                lines.append(f"{lvl_prefix}[{k}]")
+                v._append_to_lines_at_level(lines, level=(level + 1))
+                lines.append(f"{lvl_prefix}EndSect  // {k}")
             elif isinstance(v, PfsNonUniqueList) or (
                 isinstance(v, list) and all([isinstance(vv, list) for vv in v])
             ):
                 if len(v) == 0:
                     # empty list -> keyword with no parameter
-                    func(f"{lvl_prefix * level}{k} = {newline}")
+                    lines.append(f"{lvl_prefix}{k} = ")
                 for subv in v:
-                    subv = self._prepare_value_for_write(subv)
-                    func(f"{lvl_prefix * level}{k} = {subv}{newline}")
+                    psubv = self._prepare_value_for_write(subv)
+                    lines.append(f"{lvl_prefix}{k} = {psubv}")
             else:
-                v = self._prepare_value_for_write(v)
-                func(f"{lvl_prefix * level}{k} = {v}{newline}")
+                pv = self._prepare_value_for_write(v)
+                lines.append(f"{lvl_prefix}{k} = {pv}")
 
     def _prepare_value_for_write(
         self, v: str | bool | datetime | list[str | bool | datetime]
     ) -> str:
-        """catch peculiarities of string formatted pfs data.
+        """Catch peculiarities of string formatted pfs data."""
+        match v:
+            case str():
+                if len(v) > 5 and not ("PROJ" in v or "<CLOB:" in v):
+                    v = v.replace('"', "''")
+                    v = v.replace("\U0001f600", "'")
 
-        Parameters
-        ----------
-        v : str
-            value from one pfs line
+                if v == "":
+                    v = "''"
+                elif v.count("|") == 2 and "CLOB" not in v:
+                    v = f"{v}"
+                else:
+                    v = f"'{v}'"
 
-        Returns
-        -------
-            modified value
+            case bool():
+                v = str(v).lower()  # stick to MIKE lowercase bool notation
 
-        """
-        # some crude checks and corrections
-        if isinstance(v, str):
-            if len(v) > 5 and not ("PROJ" in v or "<CLOB:" in v):
-                v = v.replace('"', "''")
-                v = v.replace("\U0001f600", "'")
+            case datetime():
+                v = v.strftime("%Y, %m, %d, %H, %M, %S").replace(" 0", " ")
 
-            if v == "":
-                # add either '' or || as pre- and suffix to strings depending on path definition
-                v = "''"
-            elif v.count("|") == 2 and "CLOB" not in v:
-                v = f"{v}"
-            else:
-                v = f"'{v}'"
-
-        elif isinstance(v, bool):
-            v = str(v).lower()  # stick to MIKE lowercase bool notation
-
-        elif isinstance(v, datetime):
-            v = v.strftime("%Y, %m, %d, %H, %M, %S").replace(" 0", " ")
-
-        elif isinstance(v, list):
-            out = []
-            for subv in v:
-                out.append(str(self._prepare_value_for_write(subv)))
-            v = ", ".join(out)
+            case list():
+                out = []
+                for subv in v:
+                    out.append(str(self._prepare_value_for_write(subv)))
+                v = ", ".join(out)
 
         return v
 

@@ -166,17 +166,20 @@ including different ways of *selecting* data:
 * ds + value
 * ds - value
 * ds * value
-
-and + and - between two Datasets (if number of items and shapes conform):
+* ds / value
+and between two Datasets (if number of items and shapes conform):
 
 * ds1 + ds2
 * ds1 - ds2
+* ds1 * ds2
+* ds1 / ds2
 
 Other methods that also return a Dataset:
 
 * [`interp_like`](`mikeio.Dataset.interp_like`) - Spatio (temporal) interpolation (see [Dfsu interpolation notebook](../examples/dfsu/spatial_interpolation.qmd)
 * [`interp_time()`](`mikeio.Dataset.interp_time`) - Temporal interpolation (see [Time interpolation notebook](../examples/Time-interpolation.qmd))
 * [`dropna()`](`mikeio.Dataset.dropna`) - Remove time steps where all items are NaN
+* [`fillna()`](`mikeio.Dataset.fillna`) - Fill missing values with a constant value
 * [`squeeze()`](`mikeio.Dataset.squeeze`) - Remove axes of length 1
 
 ### Conversion:

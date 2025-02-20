@@ -33,7 +33,7 @@ def test_read_dfs1():
 def test_dfs1_isel_t():
     ds = mikeio.read("tests/testdata/consistency/oresundHD.dfs1")
 
-    ds1 = ds.isel([0, 1], axis="t")
+    ds1 = ds.isel(time=[0, 1])
     assert ds1.dims == ("time", "x")
     assert isinstance(ds1.geometry, type(ds.geometry))
     assert ds1[0].values[0, 8] == pytest.approx(0.203246)
@@ -42,10 +42,10 @@ def test_dfs1_isel_t():
 def test_dfs1_isel_x():
     ds = mikeio.read("tests/testdata/consistency/oresundHD.dfs1")
 
-    ds1 = ds.isel(8, axis="x")
+    ds1 = ds.isel(x=8)
     assert ds1.dims == ("time",)
     assert isinstance(ds1.geometry, GeometryUndefined)
-    assert ds1[0].isel(0, axis="time").values == pytest.approx(0.203246)
+    assert ds1[0].isel(time=0).values == pytest.approx(0.203246)
 
 
 def test_dfs1_sel_t():
@@ -63,13 +63,13 @@ def test_dfs1_sel_x():
     ds1 = ds.sel(x=7.8)
     assert ds1.dims == ("time",)
     assert isinstance(ds1.geometry, GeometryUndefined)
-    assert ds1[0].isel(0, axis="time").values == pytest.approx(0.203246)
+    assert ds1[0].isel(time=0).values == pytest.approx(0.203246)
 
     da: DataArray = ds[0]
     da1 = da.sel(x=7.8)
     assert da1.dims == ("time",)
     assert isinstance(ds1.geometry, GeometryUndefined)
-    assert da1.isel(0, axis="time").values == pytest.approx(0.203246)
+    assert da1.isel(time=0).values == pytest.approx(0.203246)
 
 
 def test_dfs1_interp_x():
@@ -78,7 +78,7 @@ def test_dfs1_interp_x():
     ds1 = ds.interp(x=7.75)
     assert ds1.dims == ("time",)
     assert isinstance(ds1.geometry, GeometryUndefined)
-    assert ds1[0].isel(0, axis="time").values == pytest.approx(0.20202248)
+    assert ds1[0].isel(time=0).values == pytest.approx(0.20202248)
 
 
 # Nice to have...
@@ -574,3 +574,38 @@ def test_concat_dfsu3d_single_timesteps_generic_vs_dataset(tmp_path):
     assert ds3.end_time == ds4.end_time
     assert ds3.n_items == ds4.n_items
     assert ds3.n_timesteps == ds4.n_timesteps
+
+
+def test_keepdims_removes_singleton_dimension() -> None:
+    ds1 = mikeio.read(
+        filename="tests/testdata/consistency/oresundHD.dfs1", time=0, keepdims=False
+    )
+    assert ds1.dims == ("x",)
+
+    ds2 = mikeio.read(
+        filename="tests/testdata/consistency/oresundHD.dfs1", time=0, keepdims=True
+    )
+    assert ds2.dims == ("time", "x")
+
+    ds3 = mikeio.read(
+        filename="tests/testdata/consistency/oresundHD.dfs2", time=0, keepdims=False
+    )
+    assert ds3.dims == (
+        "y",
+        "x",
+    )
+
+    ds4 = mikeio.read(
+        filename="tests/testdata/consistency/oresundHD.dfs2", time=0, keepdims=True
+    )
+    assert ds4.dims == ("time", "y", "x")
+
+    ds5 = mikeio.read(
+        filename="tests/testdata/consistency/oresundHD.dfsu", time=0, keepdims=False
+    )
+    assert ds5.dims == ("element",)
+
+    ds6 = mikeio.read(
+        filename="tests/testdata/consistency/oresundHD.dfsu", time=0, keepdims=True
+    )
+    assert ds6.dims == ("time", "element")

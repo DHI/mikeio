@@ -1399,7 +1399,7 @@ class EUMUnit(IntEnum):
 
 
 class ItemInfo:
-    """ItemInfo.
+    """Info for dynamicc items (variables).
 
     Parameters
     ----------
@@ -1465,12 +1465,12 @@ class ItemInfo:
                 raise ValueError(
                     "Invalid unit. Unit should be supplied as EUMUnit, e.g. ItemInfo('WL',EUMType.Water_Level, EUMUnit.meter)"
                 )
-            self.unit = unit
+            self._unit = unit
         else:
             if self.type == EUMType.Undefined:
-                self.unit = EUMUnit.undefined
+                self._unit = EUMUnit.undefined
             else:
-                self.unit = self.type.units[0]
+                self._unit = self.type.units[0]
 
         self.data_value_type = to_datatype(data_value_type)
 
@@ -1495,6 +1495,20 @@ class ItemInfo:
             return f"{self.name} <{self.type.display_name}> ({self.unit.display_name})"
         else:
             return f"{self.name} <{self.type.display_name}> ({self.unit.display_name}) - {self.data_value_type}"
+
+    @property
+    def unit(self) -> EUMUnit:
+        "Item unit."
+        return self._unit
+
+    @unit.setter
+    def unit(self, value: EUMUnit) -> None:
+        "Set unit."
+        if value not in self.type.units:
+            raise ValueError(
+                f"{value} is not a correct unit for {self.type}. Use {self.type.units}"
+            )
+        self._unit = value
 
     @staticmethod
     def from_mikecore_dynamic_item_info(dfsItemInfo: DfsDynamicItemInfo) -> "ItemInfo":

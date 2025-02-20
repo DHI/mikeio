@@ -530,7 +530,7 @@ class _DataArrayPlotterFM(_DataArrayPlotter):
         figsize: tuple[float, float] | None = None,
         **kwargs: Any,
     ) -> Axes:
-        """Plot domain outline (using the boundary_polylines property).
+        """Plot domain outline.
 
         Examples
         --------
@@ -563,7 +563,7 @@ class _DataArrayPlotterFM(_DataArrayPlotter):
             node_coordinates=geometry.node_coordinates,
             element_table=geometry.element_table,
             element_coordinates=geometry.element_coordinates,
-            boundary_polylines=geometry.boundary_polylines,
+            boundary_polylines=geometry.boundary_polygons.lines,
             projection=geometry.projection,
             z=values,
             ax=ax,
@@ -847,6 +847,8 @@ class _DataArrayPlotterAreaSpectrum(_DataArrayPlotterFM):
 
 
 class _DatasetPlotter:
+    """Class for plotting scatter plots from datasets."""
+
     def __init__(self, ds: Dataset) -> None:
         self.ds = ds
 
@@ -925,3 +927,17 @@ class _DatasetPlotter:
     @staticmethod
     def _label_txt(da: DataArray) -> str:
         return f"{da.name} [{da.unit.name}]"
+
+
+__all__ = [
+    "_DataArrayPlotter",
+    "_DataArrayPlotterGrid1D",
+    "_DataArrayPlotterGrid2D",
+    "_DataArrayPlotterFM",
+    "_DataArrayPlotterFMVerticalColumn",
+    "_DataArrayPlotterFMVerticalProfile",
+    "_DataArrayPlotterPointSpectrum",
+    "_DataArrayPlotterLineSpectrum",
+    "_DataArrayPlotterAreaSpectrum",
+    "_DatasetPlotter",
+]

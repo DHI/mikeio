@@ -82,6 +82,8 @@ def _write_dfs0(
 
 
 class Dfs0:
+    """Class for reading/writing dfs0 files."""
+
     def __init__(self, filename: str | Path):
         """Create a Dfs0 object for reading, writing.
 
@@ -187,7 +189,7 @@ class Dfs0:
                 _, time_steps = _valid_timesteps(dfs.FileInfo, time)
 
         if time_steps:
-            ds = ds.isel(time_steps, axis=0)
+            ds = ds.isel(time=time_steps)
 
         if sel_time_step_str:
             parts = sel_time_step_str.split(",")

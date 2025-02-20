@@ -111,7 +111,8 @@ def interp2d(
 
             else:
                 nt, _ = da.shape
-                idatitem = np.empty(shape=(nt, ni))
+                # use dtype of da
+                idatitem = np.empty(shape=(nt, ni), dtype=da.values.dtype)
                 for step in range(nt):
                     idatitem[step, :] = _interp_itemstep(
                         da[step].to_numpy(), elem_ids, weights
@@ -146,7 +147,7 @@ def interp2d(
     ni = len(elem_ids)
     datitem = data
     nt, _ = datitem.shape
-    idatitem = np.empty(shape=(nt, ni))
+    idatitem = np.empty(shape=(nt, ni), dtype=datitem.dtype)
     for step in range(nt):
         idatitem[step, :] = _interp_itemstep(datitem[step], elem_ids, weights)
     if shape:

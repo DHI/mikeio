@@ -22,18 +22,19 @@ website:
     left:
       - href: index.qmd
         text: Home
+      - href: user-guide/getting-started.qmd
+        text: "User Guide"
       - href: examples/index.qmd
         text: Examples
       - href: api/index.qmd
         text: API Reference 
     
+  # use hybrid navigation
+
   sidebar:
-    style: docked
-    search: true
-    contents: 
-      - section: "User Guide"
-        href: user-guide/getting-started.qmd
-        contents:
+    - title: "User Guide"
+      style: docked
+      contents:
         - user-guide/getting-started.qmd 
         - user-guide/data-structures.md
         - user-guide/dataarray.qmd
@@ -46,32 +47,26 @@ website:
         - user-guide/eum.qmd
         - user-guide/generic.qmd
         - user-guide/pfs.qmd
-      - section: Examples
-        href: examples/index.qmd
-        contents:
-          - section: Dfs0
-            href: examples/dfs0/index.qmd
-            contents:
-              - examples/dfs0/cmems_insitu.qmd
-          - section: Dfs2
-            href: examples/dfs2/index.qmd
-            contents:
-              - examples/dfs2/bathy.qmd
-              - examples/dfs2/gfs.qmd
-          - section: Dfsu
-            href: examples/dfsu/index.qmd
-            contents:
-              - examples/dfsu/spatial_interpolation.qmd
-              - examples/dfsu/merge_subdomains.qmd
-          - examples/Time-interpolation.qmd
-          - examples/Generic.qmd
-      - text: Design philosophy
-        href: design.qmd
-      - text: API Reference
-        href: api/index.qmd
-          
-        
 
+    - title: Examples
+      contents:
+        - examples/index.qmd
+        - examples/dfs0/index.qmd
+        - examples/dfs2/index.qmd
+        - examples/dfsu/index.qmd
+        - examples/Time-interpolation.qmd
+        - examples/Generic.qmd
+    - title: "API Reference"
+      contents:
+        - api/index.qmd
+        - api/DataArray.qmd
+        - api/Dataset.qmd
+        - api/Dfs0.qmd
+        - api/Dfs1.qmd
+        - api/Dfs2.qmd
+        - api/Dfs3.qmd
+        - api/Dfsu.qmd
+        
       
 filters:
   - interlinks
@@ -113,13 +108,6 @@ quartodoc:
       contents:
         - DataArray
         - Dataset
-        - dataset._data_plot._DatasetPlotter  # TODO alias?
-        - dataset._data_plot._DataArrayPlotter
-        - dataset._data_plot._DataArrayPlotterGrid1D
-        - dataset._data_plot._DataArrayPlotterGrid2D
-        - dataset._data_plot._DataArrayPlotterFM
-        - dataset._data_plot._DataArrayPlotterFMVerticalProfile
-        - dataset._data_plot._DataArrayPlotterFMVerticalColumn
     - title: Geometry
       desc: ""
       contents:
@@ -166,6 +154,17 @@ quartodoc:
       contents:
         - PfsDocument
         - PfsSection
+    
+    - title: Dataset plotting
+      desc: "Plotting functions for Dataset and DataArray objects."
+      contents:
+        - dataset._DatasetPlotter
+        - dataset._DataArrayPlotter
+        - dataset._DataArrayPlotterGrid1D
+        - dataset._DataArrayPlotterGrid2D
+        - dataset._DataArrayPlotterFM
+        - dataset._DataArrayPlotterFMVerticalProfile
+        - dataset._DataArrayPlotterFMVerticalColumn
 
     
 format:

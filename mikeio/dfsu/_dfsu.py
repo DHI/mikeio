@@ -1,4 +1,5 @@
 from __future__ import annotations
+from copy import deepcopy
 from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
@@ -277,6 +278,8 @@ def _get_dfsu_info(filename: str | Path) -> _DfsuInfo:
 
 
 class Dfsu2DH:
+    """Class for reading/writing dfsu 2d horizontal files."""
+
     show_progress = False
 
     def __init__(self, filename: str | Path) -> None:
@@ -396,8 +399,8 @@ class Dfsu2DH:
         time: int | str | slice | None = None,
         elements: Sequence[int] | np.ndarray | None = None,
         area: tuple[float, float, float, float] | None = None,
-        x: float | None = None,
-        y: float | None = None,
+        x: float | Sequence[float] | None = None,
+        y: float | Sequence[float] | None = None,
         keepdims: bool = False,
         dtype: Any = np.float32,
         error_bad_data: bool = True,
@@ -418,7 +421,7 @@ class Dfsu2DH:
             Read only data inside (horizontal) area given as a
             bounding box (tuple with left, lower, right, upper)
             or as list of coordinates for a polygon, by default None
-        x, y: float, optional
+        x, y: float or list[float], optional
             Read only data for elements containing the (x,y) points(s),
             by default None
         elements: list[int], optional
@@ -444,8 +447,11 @@ class Dfsu2DH:
         single_time_selected, time_steps = _valid_timesteps(dfs, time)
 
         _validate_elements_and_geometry_sel(elements, area=area, x=x, y=y)
-        if elements is None:
-            elements = self._parse_geometry_sel(area=area, x=x, y=y)
+        if area is not None:
+            elements = self.geometry._elements_in_area(area)
+
+        if (x is not None) or (y is not None):
+            elements = self.geometry.find_index(x=x, y=y)
 
         if elements is None:
             geometry = self.geometry
@@ -456,44 +462,34 @@ class Dfsu2DH:
             geometry = self.geometry.elements_to_geometry(elements)
 
         item_numbers = _valid_item_numbers(dfs.ItemInfo, items)
-        items = _get_item_info(dfs.ItemInfo, item_numbers)
         n_items = len(item_numbers)
-
-        deletevalue = self.deletevalue
-
-        data_list = []
-
-        shape: tuple[int, ...]
 
         t_rel = np.zeros(len(time_steps))
 
         n_steps = len(time_steps)
-        shape = (
+        shape: tuple[int, ...] = (
             (n_elems,)
             if (single_time_selected and not keepdims)
             else (n_steps, n_elems)
         )
-        for item in range(n_items):
-            # Initialize an empty data block
-            data: np.ndarray = np.ndarray(shape=shape, dtype=dtype)
-            data_list.append(data)
+        data_list: list[np.ndarray] = [
+            np.ndarray(shape=shape, dtype=dtype) for _ in range(n_items)
+        ]
 
         for i in trange(n_steps, disable=not self.show_progress):
-            it = time_steps[i]
             for item in range(n_items):
-                dfs, d, t = _read_item_time_step(
+                dfs, d, t_rel[i] = _read_item_time_step(
                     dfs=dfs,
                     filename=self._filename,
                     time=time,
                     item_numbers=item_numbers,
-                    deletevalue=deletevalue,
+                    deletevalue=self.deletevalue,
                     shape=shape,
                     item=item,
-                    it=it,
+                    it=time_steps[i],
                     error_bad_data=error_bad_data,
                     fill_bad_data_value=fill_bad_data_value,
                 )
-                t_rel[i] = t
 
                 if elements is not None:
                     d = d[elements]
@@ -503,13 +499,9 @@ class Dfsu2DH:
                 else:
                     data_list[item][i] = d
 
-        time = pd.to_datetime(t_rel, unit="s", origin=self.start_time)
-
         dfs.Close()
 
-        dims: tuple[str, ...]
-
-        dims = ("time", "element")
+        dims: tuple[str, ...] = ("time", "element")
 
         if single_time_selected and not keepdims:
             dims = ("element",)
@@ -519,10 +511,13 @@ class Dfsu2DH:
             dims = tuple([d for d in dims if d != "element"])
             data_list = [np.squeeze(d, axis=-1) for d in data_list]
 
+        time = pd.to_datetime(t_rel, unit="s", origin=self.start_time)
+        item_infos = _get_item_info(dfs.ItemInfo, item_numbers)
+
         return Dataset(
             data_list,
             time,
-            items,
+            item_infos,
             geometry=geometry,
             dims=dims,
             validate=False,
@@ -554,53 +549,6 @@ class Dfsu2DH:
         write_dfsu_data(dfs=dfs, ds=ds, is_layered=False)
         info = _get_dfsu_info(self._filename)
         self._n_timesteps = info.n_timesteps
-
-    def _parse_geometry_sel(
-        self,
-        area: tuple[float, float, float, float] | None,
-        x: float | None,
-        y: float | None,
-    ) -> np.ndarray | None:
-        """Parse geometry selection.
-
-        Parameters
-        ----------
-        area : list[float], optional
-            Read only data inside (horizontal) area given as a
-            bounding box (tuple with left, lower, right, upper)
-            or as list of coordinates for a polygon, by default None
-        x : float, optional
-            Read only data for elements containing the (x,y) points(s),
-            by default None
-        y : float, optional
-            Read only data for elements containing the (x,y) points(s),
-            by default None
-
-        Returns
-        -------
-        list[int]
-            List of element ids
-
-        Raises
-        ------
-        ValueError
-            If no elements are found in selection
-
-        """
-        elements = None
-
-        if area is not None:
-            elements = self.geometry._elements_in_area(area)
-
-        if (x is not None) or (y is not None):
-            elements = self.geometry.find_index(x=x, y=y)
-
-        if (x is not None) or (y is not None) or (area is not None):
-            # selection was attempted
-            if (elements is None) or len(elements) == 0:
-                raise ValueError("No elements in selection!")
-
-        return elements
 
     def get_overset_grid(
         self,
@@ -686,18 +634,15 @@ class Dfsu2DH:
 
         Examples
         --------
-        >>> dfsu = mikeio.open("tests/testdata/NorthSea_HD_and_windspeed.dfsu")
-        >>> ds = dfsu.extract_track("tests/testdata/altimetry_NorthSea_20171027.csv")
-        >>> ds
-        <mikeio.Dataset>
-        dims: (time:1115)
-        time: 2017-10-26 04:37:37 - 2017-10-30 20:54:47 (1115 non-equidistant records)
-        geometry: GeometryUndefined()
-        items:
-          0:  Longitude <Undefined> (undefined)
-          1:  Latitude <Undefined> (undefined)
-          2:  Surface elevation <Surface Elevation> (meter)
-          3:  Wind speed <Wind speed> (meter per sec)
+        ```{python}
+        import mikeio
+
+        ds = (
+            mikeio.open("../data/NorthSea_HD_and_windspeed.dfsu")
+                  .extract_track("../data/altimetry_NorthSea_20171027.csv")
+            )
+        ds
+        ```
 
         """
         dfs = DfsuFile.Open(self._filename)
@@ -714,7 +659,7 @@ class Dfsu2DH:
             geometry=self.geometry,
             n_elements=self.geometry.n_elements,
             track=track,
-            items=items,
+            items=deepcopy(items),
             time_steps=time_steps,
             item_numbers=item_numbers,
             method=method,

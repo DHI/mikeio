@@ -39,3 +39,6 @@ objects.json
 
 # direnv
 .envrc
+
+# useful, but not sure if it should be in source control
+uv.lock

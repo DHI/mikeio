@@ -26,6 +26,8 @@ from ..spatial import (
 
 
 class DfsuSpectral:
+    """Dfsu for Spectral data."""
+
     show_progress = False
 
     def __init__(self, filename: str | Path) -> None:
@@ -44,9 +46,9 @@ class DfsuSpectral:
         out = [f"<mikeio.{self.__class__.__name__}>"]
 
         if self._type is not DfsuFileType.DfsuSpectral0D:
+            out.append(f"number of nodes: {self.geometry.n_nodes}")
             if self._type is not DfsuFileType.DfsuSpectral1D:
                 out.append(f"number of elements: {self.geometry.n_elements}")
-            out.append(f"number of nodes: {self.geometry.n_nodes}")
         if self.geometry.is_spectral:
             if self.geometry.n_directions > 0:
                 out.append(f"number of directions: {self.geometry.n_directions}")

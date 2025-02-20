@@ -108,6 +108,8 @@ def _write_dfs2_spatial_axis(
 
 
 class Dfs2(_Dfs123):
+    """Class for reading/writing dfs2 files."""
+
     _ndim = 2
 
     def __init__(

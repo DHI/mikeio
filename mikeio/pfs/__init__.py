@@ -1,12 +1,11 @@
 from __future__ import annotations
 from pathlib import Path
-from typing import TextIO
 from ._pfsdocument import PfsDocument
 from ._pfssection import PfsNonUniqueList, PfsSection
 
 
 def read_pfs(
-    filename: str | Path | TextIO | dict | PfsSection,
+    filename: str | Path,
     encoding: str = "cp1252",
     unique_keywords: bool = False,
 ) -> PfsDocument:

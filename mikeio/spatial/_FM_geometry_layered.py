@@ -3,6 +3,7 @@ from functools import cached_property
 from pathlib import Path
 
 from typing import Any, Iterable, Literal, Sequence
+import warnings
 
 from matplotlib.axes import Axes
 import numpy as np
@@ -12,7 +13,7 @@ from mikecore.DfsuFile import DfsuFileType
 from ._FM_geometry import GeometryFM2D, _GeometryFM, _GeometryFMPlotter
 from ._geometry import GeometryPoint3D
 
-from ._FM_utils import _plot_vertical_profile, BoundaryPolylines
+from ._FM_utils import _plot_vertical_profile, BoundaryPolygons
 
 from ._utils import _relative_cumulative_distance
 
@@ -71,7 +72,7 @@ class _GeometryFMLayered(_GeometryFM):
         return self.to_2d_geometry()
 
     def isel(
-        self, idx: Sequence[int], keepdims: bool = False, **kwargs: Any
+        self, idx: Sequence[int] | np.ndarray, keepdims: bool = False, **kwargs: Any
     ) -> GeometryFM3D | GeometryPoint3D | GeometryFM2D | GeometryFMVerticalColumn:
         return self.elements_to_geometry(elements=idx, keepdims=keepdims)
 
@@ -226,15 +227,20 @@ class _GeometryFMLayered(_GeometryFM):
 
         Returns
         -------
-        UnstructuredGeometry
-            2d geometry (bottom nodes)
+        GeometryFM2D
+            2d geometry
 
         """
         # extract information for selected elements
-        elem_ids = self.bottom_elements
-        if self._type == DfsuFileType.Dfsu3DSigmaZ:
-            # for z-layers nodes will not match on neighboring elements!
-            elem_ids = self.top_elements
+        match self._type:
+            case DfsuFileType.Dfsu3DSigmaZ:
+                elem_ids = self.top_elements
+            case DfsuFileType.Dfsu3DSigma:
+                elem_ids = self.bottom_elements
+            case _:
+                raise NotImplementedError(
+                    f"Conversion to 2D not implemented for {self._type}"
+                )
 
         node_ids, elem_tbl = self._get_nodes_and_table_for_elements(
             elem_ids, node_layers="bottom"
@@ -242,7 +248,6 @@ class _GeometryFMLayered(_GeometryFM):
         node_coords = self.node_coordinates[node_ids]
         codes = self._codes[node_ids]
 
-        # create new geometry
         geom = GeometryFM2D(
             node_coordinates=node_coords,
             codes=codes,
@@ -255,6 +260,9 @@ class _GeometryFMLayered(_GeometryFM):
             reindex=True,
         )
 
+        # TODO do this before creating the geometry
+
+        # TODO extract method
         # Fix z-coordinate for sigma-z:
         if self._type == DfsuFileType.Dfsu3DSigmaZ:
             zn = geom.node_coordinates[:, 2].copy()
@@ -449,7 +457,7 @@ class _GeometryFMLayered(_GeometryFM):
         assert isinstance(layers, int)
         if layers < (-n_lay) or layers >= n_lay:
             raise Exception(
-                f"Layer {layers!r} not allowed; must be between -{n_lay} and {n_lay-1}"
+                f"Layer {layers!r} not allowed; must be between -{n_lay} and {n_lay - 1}"
             )
 
         if layers < 0:
@@ -480,9 +488,7 @@ class _GeometryFMLayered(_GeometryFM):
         return self._2d_ids
 
     def _get_2d_to_3d_association(self) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
-        e2_to_e3 = (
-            []
-        )  # for each 2d element: the corresponding 3d element ids from bot to top
+        e2_to_e3 = []  # for each 2d element: the corresponding 3d element ids from bot to top
         index2d = []  # for each 3d element: the associated 2d element id
         layerid = []  # for each 3d element: the associated layer number
         n2d = len(self.top_elements)
@@ -615,6 +621,8 @@ class _GeometryFMLayered(_GeometryFM):
 
 
 class GeometryFM3D(_GeometryFMLayered):
+    """Flexible 3d mesh geometry."""
+
     def __init__(
         self,
         *,
@@ -646,7 +654,14 @@ class GeometryFM3D(_GeometryFMLayered):
         self.plot = _GeometryFMPlotter(self)
 
     @property
-    def boundary_polylines(self) -> BoundaryPolylines:
+    def boundary_polylines(self) -> BoundaryPolygons:
+        warnings.warn(
+            "boundary_polylines is renamed to boundary_polygons", FutureWarning
+        )
+        return self.geometry2d.boundary_polylines
+
+    @property
+    def boundary_polygons(self) -> BoundaryPolygons:
         return self.geometry2d.boundary_polylines
 
     def contains(self, points: np.ndarray) -> np.ndarray:
@@ -703,6 +718,8 @@ class GeometryFM3D(_GeometryFMLayered):
 
 
 class GeometryFMVerticalProfile(_GeometryFMLayered):
+    """Flexible mesh 2d vertical profile geometry."""
+
     def __init__(
         self,
         node_coordinates: np.ndarray,
@@ -873,15 +890,7 @@ class GeometryFMVerticalColumn(GeometryFM3D):
         return idx_e
 
     def _calc_z_using_idx(self, zn: np.ndarray, idx: np.ndarray) -> np.ndarray:
-        if zn.ndim == 1:
-            zf = zn[idx].mean(axis=1)
-        elif zn.ndim == 2:
-            n_steps = zn.shape[0]
-            zf = np.zeros((n_steps, idx.shape[0]))
-            for step in range(n_steps):
-                zf[step, :] = zn[step, idx].mean(axis=1)
-
-        return zf
+        return zn[..., idx].mean(axis=-1)
 
 
 class _GeometryFMVerticalProfilePlotter:

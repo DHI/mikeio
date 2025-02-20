@@ -2,10 +2,10 @@ from __future__ import annotations
 import re
 import warnings
 from collections import Counter
-from collections.abc import Mapping, Sequence
+from collections.abc import Mapping
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Callable, TextIO
+from typing import Any, Callable, Sequence, TextIO
 
 import yaml
 
@@ -88,23 +88,24 @@ class PfsDocument(PfsSection):
 
     def __init__(
         self,
-        data: TextIO | PfsSection | Mapping[str | PfsSection, Any] | str | Path,
+        data: TextIO
+        | Mapping[str | PfsSection, Any]
+        | Sequence[PfsSection]
+        | str
+        | Path,
         *,
         encoding: str = "cp1252",
-        names: Sequence[str] | None = None,
         unique_keywords: bool = False,
     ) -> None:
         if isinstance(data, (str, Path)) or hasattr(data, "read"):
-            if names is not None:
-                raise ValueError("names cannot be given as argument if input is a file")
             names, sections = self._read_pfs_file(data, encoding, unique_keywords)  # type: ignore
         else:
-            names, sections = self._parse_non_file_input(data, names)
+            names, sections = self._parse_non_file_input(data)
 
         d = self._to_nonunique_key_dict(names, sections)
         super().__init__(d)
 
-        self._ALIAS_LIST = ["_ALIAS_LIST"]  # ignore these in key list
+        self._ALIAS_LIST = set(["_ALIAS_LIST"])  # ignore these in key list
         if self._is_FM_engine:
             self._add_all_FM_aliases()
 
@@ -204,52 +205,31 @@ class PfsDocument(PfsSection):
             raise FileNotFoundError(str(e))
         except Exception as e:
             raise ValueError(f"{filename} could not be parsed. " + str(e))
-        sections = [PfsSection(list(d.values())[0]) for d in target_list]  # type: ignore
-        names = [list(d.keys())[0] for d in target_list]  # type: ignore
-        return names, sections
+        return PfsDocument._extract_names_from_list(target_list)  # type: ignore
+
+    @staticmethod
+    def _extract_names_from_list(
+        targets: Sequence[PfsSection],
+    ) -> tuple[list[str], list[PfsSection]]:
+        names, sections = zip(
+            *((k, PfsSection(v)) for target in targets for k, v in target.items())
+        )
+        return list(names), list(sections)
 
     @staticmethod
     def _parse_non_file_input(
-        input: (
-            Mapping[str | PfsSection, Any]
-            | PfsSection
-            | Sequence[PfsSection]
-            | Sequence[dict]
-        ),
-        names: Sequence[str] | None = None,
-    ) -> tuple[Sequence[str], list[PfsSection]]:
-        """dict/PfsSection or lists of these can be parsed."""
-        if names is None:
-            assert isinstance(input, Mapping), "input must be a mapping"
-            names, sections = PfsDocument._unravel_items(input.items)
-            for sec in sections:
-                assert isinstance(
-                    sec, Mapping
-                ), "all targets must be PfsSections/dict (no key-value pairs allowed in the root)"
-            return names, sections
+        input: Mapping[str | PfsSection, Any] | Sequence[PfsSection],
+    ) -> tuple[list[str], list[PfsSection]]:
+        if isinstance(input, Sequence):
+            return PfsDocument._extract_names_from_list(input)
 
-        if isinstance(names, str):
-            names = [names]
-
-        if isinstance(input, PfsSection):
-            sections = [input]
-        elif isinstance(input, dict):
-            sections = [PfsSection(input)]
-        elif isinstance(input, Sequence):
-            if isinstance(input[0], PfsSection):
-                sections = input  # type: ignore
-            elif isinstance(input[0], dict):
-                sections = [PfsSection(d) for d in input]
-            else:
-                raise ValueError("List input must contain either dict or PfsSection")
-        else:
-            raise ValueError(
-                f"Input of type ({type(input)}) could not be parsed (pfs file, dict, PfsSection, lists of dict or PfsSection)"
-            )
-        if len(names) != len(sections):
-            raise ValueError(
-                f"Length of names ({len(names)}) does not match length of target sections ({len(sections)})"
-            )
+        assert isinstance(input, Mapping), "input must be a mapping"
+        names, sections = PfsDocument._unravel_items(input.items)
+        for sec in sections:
+            if not isinstance(sec, Mapping):
+                raise ValueError(
+                    "all targets must be PfsSections/dict (no key-value pairs allowed in the root)"
+                )
         return names, sections
 
     @property
@@ -258,25 +238,28 @@ class PfsDocument(PfsSection):
 
     def _add_all_FM_aliases(self) -> None:
         """create MIKE FM module aliases."""
-        self._add_FM_alias("HD", "HYDRODYNAMIC_MODULE")
-        self._add_FM_alias("SW", "SPECTRAL_WAVE_MODULE")
-        self._add_FM_alias("TR", "TRANSPORT_MODULE")
-        self._add_FM_alias("MT", "MUD_TRANSPORT_MODULE")
-        self._add_FM_alias("EL", "ECOLAB_MODULE")
-        self._add_FM_alias("ST", "SAND_TRANSPORT_MODULE")
-        self._add_FM_alias("PT", "PARTICLE_TRACKING_MODULE")
-        self._add_FM_alias("DA", "DATA_ASSIMILATION_MODULE")
+        ALIASES = {
+            "HD": "HYDRODYNAMIC_MODULE",
+            "SW": "SPECTRAL_WAVE_MODULE",
+            "TR": "TRANSPORT_MODULE",
+            "MT": "MUD_TRANSPORT_MODULE",
+            "EL": "ECOLAB_MODULE",
+            "ST": "SAND_TRANSPORT_MODULE",
+            "PT": "PARTICLE_TRACKING_MODULE",
+            "DA": "DATA_ASSIMILATION_MODULE",
+        }
+        for alias, module in ALIASES.items():
+            self._add_FM_alias(alias, module)
 
     def _add_FM_alias(self, alias: str, module: str) -> None:
         """Add short-hand alias for MIKE FM module, e.g. SW, but only if active!"""
-        if hasattr(self.targets[0], module) and hasattr(
-            self.targets[0], "MODULE_SELECTION"
-        ):
+        target = self.targets[0]
+        if hasattr(target, module) and hasattr(target, "MODULE_SELECTION"):
             mode_name = f"mode_of_{module.lower()}"
-            mode_of = int(self.targets[0].MODULE_SELECTION.get(mode_name, 0))
+            mode_of = int(target.MODULE_SELECTION.get(mode_name, 0))
             if mode_of > 0:
-                setattr(self, alias, self.targets[0][module])
-                self._ALIAS_LIST.append(alias)
+                setattr(self, alias, target[module])
+                self._ALIAS_LIST.add(alias)
 
     def _pfs2yaml(
         self, filename: str | Path | TextIO, encoding: str | None = None
@@ -284,10 +267,9 @@ class PfsDocument(PfsSection):
         if hasattr(filename, "read"):  # To read in memory strings StringIO
             pfsstring = filename.read()
         else:
-            with open(filename, encoding=encoding) as f:
-                pfsstring = f.read()
+            pfsstring = Path(filename).read_text(encoding=encoding)
 
-        lines = pfsstring.split("\n")
+        lines = pfsstring.splitlines()
 
         output = []
         output.append("---")
@@ -303,7 +285,16 @@ class PfsDocument(PfsSection):
     def _parse_line(self, line: str, level: int = 0) -> tuple[str, int]:
         section_header = False
         s = line.strip()
-        s = re.sub(r"\s*//.*", "", s)  # remove comments
+        parts = re.split(r'(".*?"|\'.*?\')', s)  # Preserve quoted strings
+        for i, part in enumerate(parts):
+            if not (
+                part.startswith('"') or part.startswith("'")
+            ):  # Ignore quoted parts
+                part = re.sub(
+                    r"\s*//.*", "", part
+                )  # Remove comments only outside quotes
+            parts[i] = part
+        s = "".join(parts)  # Reassemble the line
 
         if len(s) > 0:
             if s[0] == "[":
@@ -317,7 +308,7 @@ class PfsDocument(PfsSection):
             if s[-1] == "]":
                 s = s.replace("]", ":")
 
-        s = s.replace("//", "")
+        # s = s.replace("//", "")
         s = s.replace("\t", " ")
 
         if len(s) > 0 and s[0] != "!":
@@ -348,6 +339,9 @@ class PfsDocument(PfsSection):
     def _parse_param(self, value: str) -> str:
         if len(value) == 0:
             return "[]"
+        if value[0] == "|" and value[-1] == "|":
+            if value.count("|") == 2:
+                return self._parse_token(value)
         if "MULTIPOLYGON" in value:
             return value
         if "," in value:
@@ -370,21 +364,21 @@ class PfsDocument(PfsSection):
         # Example of complicated string:
         # '<CLOB:22,1,1,false,1,0,"",0,"",0,"",0,"",0,"",0,"",0,"",0,"",||,false>'
         if s.count("|") == 2 and "CLOB" not in context:
-            parts = s.split("|")
-            if len(parts[1]) > 1 and parts[1].count("'") > 0:
+            prefix, content, suffix = s.split("|")
+            if len(content) > 1 and content.count("'") > 0:
                 # string containing single quotes that needs escaping
                 warnings.warn(
                     f"The string {s} contains a single quote character which will be temporarily converted to \U0001f600 . If you write back to a pfs file again it will be converted back."
                 )
-                parts[1] = parts[1].replace("'", "\U0001f600")
-            s = parts[0] + "'|" + parts[1] + "|'" + parts[2]
+                content = content.replace("'", "\U0001f600")
+            s = f"{prefix}'|{content}|'{suffix}"
 
         if len(s) > 2:  # ignore foo = ''
             s = s.replace("''", '"')
 
         return s
 
-    def write(self, filename: str) -> None:
+    def write(self, filename: str | Path) -> None:
         """Write object to a pfs file.
 
         Parameters
@@ -399,19 +393,12 @@ class PfsDocument(PfsSection):
         """
         from mikeio import __version__ as mikeio_version
 
-        # if filename is None:
-        #    return self._to_txt_lines()
+        now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        header = f"""// Created     : {now}
+// By          : MIKE IO
+// Version     : {mikeio_version}
 
-        with open(filename, "w") as f:
-            now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-            f.write(f"// Created     : {now}\n")
-            f.write(r"// By          : MIKE IO")
-            f.write("\n")
-            f.write(rf"// Version     : {mikeio_version}")
-            f.write("\n\n")
+"""
+        txt = header + "\n".join(self._to_txt_lines())
 
-            self._write_with_func(f.write, level=0)
-
-
-# TODO remove this alias
-Pfs = PfsDocument
+        Path(filename).write_text(txt)

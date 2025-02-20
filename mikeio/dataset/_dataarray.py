@@ -81,6 +81,8 @@ GeometryType = Union[
     Grid3D,
 ]
 
+IndexType = Union[int, slice, Sequence[int], np.ndarray, None]
+
 
 class _DataArraySpectrumToHm0:
     def __init__(self, da: "DataArray") -> None:
@@ -98,12 +100,9 @@ class _DataArraySpectrumToHm0:
         dims = tuple([d for d in self.da.dims if d not in ("frequency", "direction")])
         item = ItemInfo(EUMType.Significant_wave_height)
         g = self.da.geometry
-        if isinstance(g, GeometryFMPointSpectrum):
-            if g.x is not None and g.y is not None:
-                geometry: Any = GeometryPoint2D(x=g.x, y=g.y)
-            else:
-                geometry = GeometryUndefined()
-        elif isinstance(g, GeometryFMLineSpectrum):
+        geometry: Any = GeometryUndefined()
+
+        if isinstance(g, GeometryFMLineSpectrum):
             geometry = Grid1D(
                 nx=g.n_nodes,
                 dx=1.0,
@@ -119,8 +118,6 @@ class _DataArraySpectrumToHm0:
                 element_table=g.element_table,
                 element_ids=g.element_ids,
             )
-        else:
-            geometry = GeometryUndefined()
 
         return DataArray(
             data=Hm0,
@@ -407,7 +404,11 @@ class DataArray:
     @property
     def unit(self) -> EUMUnit:
         """EUMUnit."""
-        return self.item.unit
+        return self.item._unit
+
+    @unit.setter
+    def unit(self, value: EUMUnit) -> None:
+        self.item.unit = value
 
     @property
     def start_time(self) -> datetime:
@@ -482,6 +483,34 @@ class DataArray:
     @property
     def _has_time_axis(self) -> bool:
         return self.dims[0][0] == "t"
+
+    def fillna(self, value: float = 0.0) -> "DataArray":
+        """Fill NA/NaN value.
+
+        Parameters
+        ----------
+        value: float, optional
+            Value used to fill missing values. Default is 0.0.
+
+        Examples
+        --------
+        ```{python}
+        import numpy as np
+        import mikeio
+
+        da = mikeio.DataArray([np.nan, 1.0])
+        da
+        ```
+
+        ```{python}
+        da.fillna(0.0)
+        ```
+
+        """
+        da = self.copy()
+        x = da.values
+        x[np.isnan(x)] = value
+        return da
 
     def dropna(self) -> "DataArray":
         """Remove time steps where values are NaN."""
@@ -585,9 +614,18 @@ class DataArray:
 
     def isel(
         self,
-        idx: int | Sequence[int] | slice | None = None,
+        idx: IndexType = None,
+        *,
+        time: IndexType = None,
+        x: IndexType = None,
+        y: IndexType = None,
+        z: IndexType = None,
+        element: IndexType = None,
+        node: IndexType = None,
+        layer: IndexType = None,
+        frequency: IndexType = None,
+        direction: IndexType = None,
         axis: int | str = 0,
-        **kwargs: Any,
     ) -> "DataArray":
         """Return a new DataArray whose data is given by
         integer indexing along the specified dimension(s).
@@ -618,11 +656,17 @@ class DataArray:
             y index, by default None
         z : int, optional
             z index, by default None
+        layer: int, optional
+            layer index, only used in dfsu 3d
+        direction: int, optional
+            direction index, only used in sprectra
+        frequency: int, optional
+            frequencey index, only used in spectra
+        node: int, optional
+            node index, only used in spectra
         element : int, optional
             Bounding box of coordinates (left lower and right upper)
             to be selected, by default None
-        **kwargs: Any
-            Not used
 
         Returns
         -------
@@ -655,10 +699,23 @@ class DataArray:
         ```
 
         """
-        if isinstance(self.geometry, Grid2D) and ("x" in kwargs and "y" in kwargs):
-            idx_x = kwargs["x"]
-            idx_y = kwargs["y"]
-            return self.isel(x=idx_x).isel(y=idx_y)
+        if isinstance(self.geometry, Grid2D) and (x is not None and y is not None):
+            return self.isel(x=x).isel(y=y)
+        kwargs = {
+            k: v
+            for k, v in dict(
+                time=time,
+                x=x,
+                y=y,
+                z=z,
+                element=element,
+                node=node,
+                layer=layer,
+                frequency=frequency,
+                direction=direction,
+            ).items()
+            if v is not None
+        }
         for dim in kwargs:
             if dim in self.dims:
                 axis = dim
@@ -699,7 +756,7 @@ class DataArray:
                 spatial_axis = axis - 1 if self.dims[0] == "time" else axis
                 geometry = self.geometry.isel(idx, axis=spatial_axis)
 
-            # TOOD this is ugly
+            # TODO this is ugly
             if isinstance(geometry, _GeometryFMLayered):
                 node_ids, _ = self.geometry._get_nodes_and_table_for_elements(
                     idx, node_layers="all"
@@ -742,7 +799,12 @@ class DataArray:
         self,
         *,
         time: str | pd.DatetimeIndex | "DataArray" | None = None,
-        **kwargs: Any,
+        x: float | slice | None = None,
+        y: float | slice | None = None,
+        z: float | slice | None = None,
+        coords: np.ndarray | None = None,
+        area: tuple[float, float, float, float] | None = None,
+        layers: int | str | Sequence[int | str] | None = None,
     ) -> "DataArray":
         """Return a new DataArray whose data is given by
         selecting index labels along the specified dimension(s).
@@ -781,8 +843,6 @@ class DataArray:
             layer(s) to be selected: "top", "bottom" or layer number
             from bottom 0,1,2,... or from the top -1,-2,... or as
             list of these; only for layered dfsu, by default None
-        **kwargs: Any
-            Additional keyword arguments
 
         Returns
         -------
@@ -824,24 +884,32 @@ class DataArray:
         ```
 
         """
+        # time is not part of kwargs
+        kwargs = {
+            k: v
+            for k, v in dict(
+                x=x, y=y, z=z, area=area, coords=coords, layers=layers
+            ).items()
+            if v is not None
+        }
         if any([isinstance(v, slice) for v in kwargs.values()]):
-            return self._sel_with_slice(kwargs)
+            return self._sel_with_slice(kwargs)  # type: ignore
 
         da = self
 
         # select in space
         if len(kwargs) > 0:
             idx = self.geometry.find_index(**kwargs)
+
+            # TODO this seems fragile
             if isinstance(idx, tuple):
                 # TODO: support for dfs3
                 assert len(idx) == 2
-                t_ax_offset = 1 if self._has_time_axis else 0
                 ii, jj = idx
                 if jj is not None:
-                    da = da.isel(idx=jj, axis=(0 + t_ax_offset))
+                    da = da.isel(y=jj)
                 if ii is not None:
-                    sp_axis = 0 if (jj is not None and len(jj) == 1) else 1
-                    da = da.isel(idx=ii, axis=(sp_axis + t_ax_offset))
+                    da = da.isel(x=ii)
             else:
                 da = da.isel(idx, axis="space")
 
@@ -1064,7 +1132,7 @@ class DataArray:
             geometry=self.geometry,
             n_elements=self.shape[1],  # TODO is there a better way to find out this?
             track=track,
-            items=[self.item],
+            items=deepcopy([self.item]),
             time_steps=list(range(self.n_timesteps)),
             item_numbers=[0],
             method=method,
@@ -1713,33 +1781,31 @@ class DataArray:
         return self.__add__(other)
 
     def __add__(self, other: "DataArray" | float) -> "DataArray":
-        return self._apply_math_operation(other, np.add, txt="+")
+        return self._apply_math_operation(other, np.add)
 
     def __rsub__(self, other: "DataArray" | float) -> "DataArray":
         return other + self.__neg__()
 
     def __sub__(self, other: "DataArray" | float) -> "DataArray":
-        return self._apply_math_operation(other, np.subtract, txt="-")
+        return self._apply_math_operation(other, np.subtract)
 
     def __rmul__(self, other: "DataArray" | float) -> "DataArray":
         return self.__mul__(other)
 
     def __mul__(self, other: "DataArray" | float) -> "DataArray":
-        return self._apply_math_operation(
-            other, np.multiply, txt="x"
-        )  # x in place of *
+        return self._apply_math_operation(other, np.multiply)
 
     def __pow__(self, other: float) -> "DataArray":
-        return self._apply_math_operation(other, np.power, txt="**")
+        return self._apply_math_operation(other, np.power)
 
     def __truediv__(self, other: "DataArray" | float) -> "DataArray":
-        return self._apply_math_operation(other, np.divide, txt="/")
+        return self._apply_math_operation(other, np.divide)
 
     def __floordiv__(self, other: "DataArray" | float) -> "DataArray":
-        return self._apply_math_operation(other, np.floor_divide, txt="//")
+        return self._apply_math_operation(other, np.floor_divide)
 
     def __mod__(self, other: float) -> "DataArray":
-        return self._apply_math_operation(other, np.mod, txt="%")
+        return self._apply_math_operation(other, np.mod)
 
     def __neg__(self) -> "DataArray":
         return self._apply_unary_math_operation(np.negative)
@@ -1762,7 +1828,9 @@ class DataArray:
         return new_da
 
     def _apply_math_operation(
-        self, other: "DataArray" | float, func: Callable, *, txt: str
+        self,
+        other: "DataArray" | float,
+        func: Callable,
     ) -> "DataArray":
         """Apply a binary math operation with a scalar, an array or another DataArray."""
         try:
@@ -1771,38 +1839,10 @@ class DataArray:
         except TypeError:
             raise TypeError("Math operation could not be applied to DataArray")
 
-        # TODO: check if geometry etc match if other is DataArray?
-
         new_da = self.copy()  # TODO: alternatively: create new dataset (will validate)
         new_da.values = data
 
-        if not self._keep_EUM_after_math_operation(other, func):
-            other_name = other.name if hasattr(other, "name") else "array"
-            new_da.item = ItemInfo(
-                f"{self.name} {txt} {other_name}", itemtype=EUMType.Undefined
-            )
-
         return new_da
-
-    def _keep_EUM_after_math_operation(
-        self, other: "DataArray" | float, func: Callable
-    ) -> bool:
-        """Does the math operation falsify the EUM?"""
-        if hasattr(other, "shape") and hasattr(other, "ndim"):
-            # other is array-like, so maybe we cannot keep EUM
-            if func == np.subtract or func == np.sum:
-                # +/-: we may want to keep EUM
-                if isinstance(other, DataArray):
-                    if self.type == other.type and self.unit == other.unit:
-                        return True
-                    else:
-                        return False
-                else:
-                    return True  # assume okay, since no EUM
-            return False
-
-        # other is likely scalar, okay to keep EUM
-        return True
 
     # ============= Logical indexing ===========
 
@@ -1867,7 +1907,7 @@ class DataArray:
             Dfs0 only: set the dfs data type of the written data
             to e.g. np.float64, by default: DfsSimpleType.Float (=np.float32)
         **kwargs: Any
-            Additional keyword arguments, e.g. dtype for dfs0
+            additional arguments passed to the writing function, e.g. dtype for dfs0
 
         """
         self._to_dataset().to_dfs(filename, **kwargs)

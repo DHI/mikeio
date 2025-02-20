@@ -1,5 +1,4 @@
 from __future__ import annotations
-from collections import namedtuple
 from functools import cached_property
 from pathlib import Path
 from typing import (
@@ -9,6 +8,7 @@ from typing import (
     Sized,
     TYPE_CHECKING,
 )
+import warnings
 
 
 import numpy as np
@@ -23,7 +23,8 @@ from .._interpolation import get_idw_interpolant, interp2d
 from ._FM_utils import (
     _get_node_centered_data,
     _plot_map,
-    BoundaryPolylines,
+    BoundaryPolygons,
+    Polygon,
     _set_xy_label_by_projection,  # TODO remove
     _to_polygons,  # TODO remove
 )
@@ -43,14 +44,13 @@ class _GeometryFMPlotter:
 
     Examples
     --------
-    >>> ds = mikeio.read("HD2D.dfsu")
-    >>> g = ds.geometry
-    >>> g.plot()          # bathymetry (as patches)
-    >>> g.plot.contour()  # bathymetry contours
-    >>> g.plot.contourf() # filled bathymetry contours
-    >>> g.plot.mesh()     # mesh only
-    >>> g.plot.outline()  # domain outline only
-    >>> g.plot.boundary_nodes()
+    ```{python}
+    import mikeio
+
+    ds = mikeio.read("../data/FakeLake.dfsu")
+    g = ds.geometry
+    g.plot()
+    ```
 
     """
 
@@ -74,7 +74,15 @@ class _GeometryFMPlotter:
         figsize: tuple[float, float] | None = None,
         **kwargs: Any,
     ) -> Axes:
-        """Plot bathymetry as contour lines."""
+        """Plot bathymetry as contour lines.
+
+        Examples
+        --------
+        ```{python}
+        g.plot.contour()
+        ```
+
+        """
         ax = self._get_ax(ax, figsize)
         kwargs["plot_type"] = "contour"
         return self._plot_FM_map(ax, **kwargs)
@@ -85,7 +93,15 @@ class _GeometryFMPlotter:
         figsize: tuple[float, float] | None = None,
         **kwargs: Any,
     ) -> Axes:
-        """Plot bathymetry as filled contours."""
+        """Plot bathymetry as filled contours.
+
+        Examples
+        --------
+        ```{python}
+        g.plot.contourf()
+        ```
+
+        """
         ax = self._get_ax(ax, figsize)
         kwargs["plot_type"] = "contourf"
         return self._plot_FM_map(ax, **kwargs)
@@ -113,7 +129,7 @@ class _GeometryFMPlotter:
             node_coordinates=g.node_coordinates,
             element_table=g.element_table,
             element_coordinates=g.element_coordinates,
-            boundary_polylines=g.boundary_polylines,
+            boundary_polylines=g.boundary_polygons.lines,
             plot_type=plot_type,
             projection=g.projection,
             z=None,
@@ -127,7 +143,15 @@ class _GeometryFMPlotter:
         figsize: tuple[float, float] | None = None,
         ax: Axes | None = None,
     ) -> Axes:
-        """Plot mesh only."""
+        """Plot mesh only.
+
+        Examples
+        --------
+        ```{python}
+        g.plot.mesh()
+        ```
+
+        """
         # TODO this must be a duplicate, delegate
 
         from matplotlib.collections import PatchCollection  # type: ignore
@@ -152,15 +176,23 @@ class _GeometryFMPlotter:
         figsize: tuple[float, float] | None = None,
         ax: Axes | None = None,
     ) -> Axes:
-        """Plot domain outline (using the boundary_polylines property)."""
+        """Plot domain outline.
+
+        Examples
+        --------
+        ```{python}
+        g.plot.outline()
+        ```
+
+        """
         ax = self._get_ax(ax=ax, figsize=figsize)
         ax.set_aspect(self._plot_aspect())
 
         linwid = 1.2
         out_col = "0.4"
-        for exterior in self.g.boundary_polylines.exteriors:
+        for exterior in self.g.boundary_polygons.exteriors:
             ax.plot(*exterior.xy.T, color=out_col, linewidth=linwid)
-        for interior in self.g.boundary_polylines.interiors:
+        for interior in self.g.boundary_polygons.interiors:
             ax.plot(*interior.xy.T, color=out_col, linewidth=linwid)
         if title is not None:
             ax.set_title(title)
@@ -173,7 +205,15 @@ class _GeometryFMPlotter:
         figsize: tuple[float, float] | None = None,
         ax: Axes | None = None,
     ) -> Axes:
-        """Plot mesh boundary nodes and their code values."""
+        """Plot mesh boundary nodes and their code values.
+
+        Examples
+        --------
+        ```{python}
+        g.plot.boundary_nodes()
+        ```
+
+        """
         import matplotlib.pyplot as plt
 
         ax = self._get_ax(ax=ax, figsize=figsize)
@@ -399,6 +439,8 @@ class _GeometryFM(_Geometry):
 
 
 class GeometryFM2D(_GeometryFM):
+    """Flexible 2d mesh geometry."""
+
     def __init__(
         self,
         node_coordinates: np.ndarray,
@@ -719,22 +761,6 @@ class GeometryFM2D(_GeometryFM):
 
         return ids
 
-    def _find_single_element_2d(self, x: float, y: float) -> Any:
-        nc = self.node_coordinates
-
-        few_nearest, _ = self._find_n_nearest_2d_elements(
-            x=x, y=y, n=min(self.n_elements, 10)
-        )
-
-        for idx in few_nearest:
-            nodes = self.element_table[idx]
-            element_found = self._point_in_polygon(nc[nodes, 0], nc[nodes, 1], x, y)
-
-            if element_found:
-                return idx
-
-        raise OutsideModelDomainError(x=x, y=y)  # type: ignore
-
     def get_overset_grid(
         self,
         dx: float | None = None,
@@ -841,9 +867,16 @@ class GeometryFM2D(_GeometryFM):
         return np.abs(area)
 
     @cached_property
-    def boundary_polylines(self) -> BoundaryPolylines:
-        """Lists of closed polylines defining domain outline."""
-        return self._get_boundary_polylines()
+    def boundary_polylines(self) -> BoundaryPolygons:
+        warnings.warn(
+            "boundary_polylines is renamed to boundary_polygons", FutureWarning
+        )
+        return self._get_boundary_polygons()
+
+    @cached_property
+    def boundary_polygons(self) -> BoundaryPolygons:
+        """Lists of polygons defining domain outline."""
+        return self._get_boundary_polygons()
 
     def contains(self, points: np.ndarray) -> np.ndarray:
         """Test if a list of points are contained by mesh.
@@ -859,34 +892,18 @@ class GeometryFM2D(_GeometryFM):
             True for points inside, False otherwise
 
         """
-        import matplotlib.path as mp  # type: ignore
-
         points = np.atleast_2d(points)
 
-        exterior = self.boundary_polylines.exteriors[0]
-        cnts = mp.Path(exterior.xy).contains_points(points)
-
-        if self.boundary_polylines.n_exteriors > 1:
-            # in case of several dis-joint outer domains
-            for exterior in self.boundary_polylines.exteriors[1:]:
-                in_domain = mp.Path(exterior.xy).contains_points(points)
-                cnts = np.logical_or(cnts, in_domain)
-
-        # subtract any holes
-        for interior in self.boundary_polylines.interiors:
-            in_hole = mp.Path(interior.xy).contains_points(points)
-            cnts = np.logical_and(cnts, ~in_hole)
-
-        return cnts
+        return self.boundary_polygons.contains(points)
 
     def __contains__(self, pt: np.ndarray) -> bool:
         return self.contains(pt)[0]
 
-    def _get_boundary_polylines_uncategorized(self) -> list[list[np.int64]]:
-        """Construct closed polylines for all boundary faces."""
+    def _get_boundary_polygons_uncategorized(self) -> list[list[np.int64]]:
+        """Construct closed polygons for all boundary faces."""
         boundary_faces = self._get_boundary_faces()
         face_remains = boundary_faces.copy()
-        polylines = []
+        polygons = []
         while face_remains.shape[0] > 1:
             n0 = face_remains[:, 0]
             n1 = face_remains[:, 1]
@@ -905,34 +922,26 @@ class GeometryFM2D(_GeometryFM):
                     break
 
             face_remains = np.delete(face_remains, index_to_delete, axis=0)
-            polylines.append(polyline)
-        return polylines
+            polygons.append(polyline)
+        return polygons
 
-    def _get_boundary_polylines(self) -> BoundaryPolylines:
+    def _get_boundary_polygons(self) -> BoundaryPolygons:
         """Get boundary polylines and categorize as inner or outer by assessing the signed area."""
-        polylines = self._get_boundary_polylines_uncategorized()
+        polygons = self._get_boundary_polygons_uncategorized()
 
-        poly_lines_int = []
-        poly_lines_ext = []
-        Polyline = namedtuple("Polyline", ["n_nodes", "nodes", "xy", "area"])
+        interiors = []
+        exteriors = []
 
-        for polyline in polylines:
-            xy = self.node_coordinates[polyline, :2]
-            area = (
-                np.dot(xy[:, 1], np.roll(xy[:, 0], 1))
-                - np.dot(xy[:, 0], np.roll(xy[:, 1], 1))
-            ) * 0.5
-            poly_line = np.asarray(polyline)
-            xy = self.node_coordinates[poly_line, 0:2]
-            poly = Polyline(len(polyline), poly_line, xy, area)
-            if area > 0:
-                poly_lines_ext.append(poly)
+        for polygon in polygons:
+            polygon_np = np.asarray(polygon)
+            xy = self.node_coordinates[polygon_np, 0:2]
+            poly = Polygon(xy)
+            if poly.area > 0:
+                exteriors.append(poly)
             else:
-                poly_lines_int.append(poly)
+                interiors.append(poly)
 
-        n_ext = len(poly_lines_ext)
-        n_int = len(poly_lines_int)
-        return BoundaryPolylines(n_ext, poly_lines_ext, n_int, poly_lines_int)
+        return BoundaryPolygons(exteriors=exteriors, interiors=interiors)
 
     def _get_boundary_faces(self) -> np.ndarray:
         """Construct list of faces."""
@@ -1075,14 +1084,16 @@ class GeometryFM2D(_GeometryFM):
             xc = self.element_coordinates[:, 0]
             yc = self.element_coordinates[:, 1]
             mask = (xc >= x0) & (xc <= x1) & (yc >= y0) & (yc <= y1)
-            return np.where(mask)[0]
         elif self._area_is_polygon(area):
             polygon = np.array(area)
             xy = self.element_coordinates[:, :2]
             mask = self._inside_polygon(polygon, xy)
-            return np.where(mask)[0]
         else:
             raise ValueError("'area' must be bbox [x0,y0,x1,y1] or polygon")
+        elements = np.where(mask)[0]
+        if len(elements) == 0:
+            raise ValueError("No elements in selection!")
+        return elements
 
     def elements_to_geometry(
         self, elements: int | Sequence[int], keepdims: bool = False
