@@ -339,52 +339,13 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <h3 class="anchored" data-anchor-id="mikeio.generic.diff">diff</h3>
 <div class="sourceCode" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>generic.diff(infilename_a, infilename_b, outfilename)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <p>Calculate difference between two dfs files (a-b).</p>
-<section id="parameters-2" class="level4 doc-section doc-section-parameters">
-<h4 class="doc-section doc-section-parameters anchored" data-anchor-id="parameters-2">Parameters</h4>
-<table class="caption-top table">
-<colgroup>
-<col style="width: 16%">
-<col style="width: 25%">
-<col style="width: 43%">
-<col style="width: 14%">
-</colgroup>
-<thead>
-<tr class="header">
-<th>Name</th>
-<th>Type</th>
-<th>Description</th>
-<th>Default</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td>infilename_a</td>
-<td>str | pathlib.Path</td>
-<td>full path to the first input file</td>
-<td><em>required</em></td>
-</tr>
-<tr class="even">
-<td>infilename_b</td>
-<td>str | pathlib.Path</td>
-<td>full path to the second input file</td>
-<td><em>required</em></td>
-</tr>
-<tr class="odd">
-<td>outfilename</td>
-<td>str | pathlib.Path</td>
-<td>full path to the output file</td>
-<td><em>required</em></td>
-</tr>
-</tbody>
-</table>
-</section>
 </section>
 <section id="mikeio.generic.extract" class="level3">
 <h3 class="anchored" data-anchor-id="mikeio.generic.extract">extract</h3>
 <div class="sourceCode" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>generic.extract(infilename, outfilename, start<span class="op">=</span><span class="dv">0</span>, end<span class="op">=-</span><span class="dv">1</span>, step<span class="op">=</span><span class="dv">1</span>, items<span class="op">=</span><span class="va">None</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <p>Extract timesteps and/or items to a new dfs file.</p>
-<section id="parameters-3" class="level4 doc-section doc-section-parameters">
-<h4 class="doc-section doc-section-parameters anchored" data-anchor-id="parameters-3">Parameters</h4>
+<section id="parameters-2" class="level4 doc-section doc-section-parameters">
+<h4 class="doc-section doc-section-parameters anchored" data-anchor-id="parameters-2">Parameters</h4>
 <table class="caption-top table">
 <colgroup>
 <col style="width: 8%">
@@ -455,8 +416,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <h3 class="anchored" data-anchor-id="mikeio.generic.fill_corrupt">fill_corrupt</h3>
 <div class="sourceCode" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>generic.fill_corrupt(infilename, outfilename, fill_value<span class="op">=</span>np.nan, items<span class="op">=</span><span class="va">None</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <p>Replace corrupt (unreadable) data with fill_value, default delete value.</p>
-<section id="parameters-4" class="level4 doc-section doc-section-parameters">
-<h4 class="doc-section doc-section-parameters anchored" data-anchor-id="parameters-4">Parameters</h4>
+<section id="parameters-3" class="level4 doc-section doc-section-parameters">
+<h4 class="doc-section doc-section-parameters anchored" data-anchor-id="parameters-3">Parameters</h4>
 <table class="caption-top table">
 <colgroup>
 <col style="width: 9%">
@@ -513,8 +474,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>    buffer_size<span class="op">=</span><span class="fl">1000000000.0</span>,</span>
 <span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <p>Create temporal quantiles of all items in dfs file.</p>
-<section id="parameters-5" class="level4 doc-section doc-section-parameters">
-<h4 class="doc-section doc-section-parameters anchored" data-anchor-id="parameters-5">Parameters</h4>
+<section id="parameters-4" class="level4 doc-section doc-section-parameters">
+<h4 class="doc-section doc-section-parameters anchored" data-anchor-id="parameters-4">Parameters</h4>
 <table class="caption-top table">
 <colgroup>
 <col style="width: 5%">
@@ -581,8 +542,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <h3 class="anchored" data-anchor-id="mikeio.generic.scale">scale</h3>
 <div class="sourceCode" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>generic.scale(infilename, outfilename, offset<span class="op">=</span><span class="fl">0.0</span>, factor<span class="op">=</span><span class="fl">1.0</span>, items<span class="op">=</span><span class="va">None</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <p>Apply scaling to any dfs file.</p>
-<section id="parameters-6" class="level4 doc-section doc-section-parameters">
-<h4 class="doc-section doc-section-parameters anchored" data-anchor-id="parameters-6">Parameters</h4>
+<section id="parameters-5" class="level4 doc-section doc-section-parameters">
+<h4 class="doc-section doc-section-parameters anchored" data-anchor-id="parameters-5">Parameters</h4>
 <table class="caption-top table">
 <colgroup>
 <col style="width: 9%">
@@ -637,47 +598,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <h3 class="anchored" data-anchor-id="mikeio.generic.sum">sum</h3>
 <div class="sourceCode" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>generic.<span class="bu">sum</span>(infilename_a, infilename_b, outfilename)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <p>Sum two dfs files (a+b).</p>
-<section id="parameters-7" class="level4 doc-section doc-section-parameters">
-<h4 class="doc-section doc-section-parameters anchored" data-anchor-id="parameters-7">Parameters</h4>
-<table class="caption-top table">
-<colgroup>
-<col style="width: 16%">
-<col style="width: 25%">
-<col style="width: 43%">
-<col style="width: 14%">
-</colgroup>
-<thead>
-<tr class="header">
-<th>Name</th>
-<th>Type</th>
-<th>Description</th>
-<th>Default</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td>infilename_a</td>
-<td>str | pathlib.Path</td>
-<td>full path to the first input file</td>
-<td><em>required</em></td>
-</tr>
-<tr class="even">
-<td>infilename_b</td>
-<td>str | pathlib.Path</td>
-<td>full path to the second input file</td>
-<td><em>required</em></td>
-</tr>
-<tr class="odd">
-<td>outfilename</td>
-<td>str | pathlib.Path</td>
-<td>full path to the output file</td>
-<td><em>required</em></td>
-</tr>
-</tbody>
-</table>
 
 
-</section>
 </section>
 </section>
 </section>
