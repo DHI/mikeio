@@ -29,8 +29,6 @@ from .spatial import (
     GeometryFMVerticalProfile,
 )
 
-from .xyz import read_xyz
-
 
 def read(
     filename: str | Path,
@@ -210,7 +208,6 @@ __all__ = [
     "GeometryFM2D",
     "GeometryFM3D",
     "GeometryFMVerticalProfile",
-    "read_xyz",
     "read",
     "open",
     "from_pandas",
