@@ -3,7 +3,8 @@ project:
 
 website:
   title: "MIKE IO"
-  page-footer: "© 2024 DHI Group"
+  page-footer: "© 2025 DHI Group"
+  favicon: dhi.ico
   repo-url: https://github.com/DHI/mikeio
   repo-actions: [edit]
   repo-subdir: docs
