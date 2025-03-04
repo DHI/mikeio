@@ -124,3 +124,14 @@ select = [
 "tests/*" = ["D"]
 "notebooks/*" = ["D", "E402"]
 "conftest.py" = ["D"]
+
+[tool.mypy]
+python_version = "3.10"
+warn_return_any = false
+allow_redefinition = true
+warn_unreachable = true
+disallow_untyped_defs = true
+
+[[tool.mypy.overrides]]
+ignore_missing_imports = true
+module = ["pandas", "mikecore.*", "tqdm", "scipy.*", "shapely.*", "yaml.*"]
