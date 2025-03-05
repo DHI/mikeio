@@ -1,10 +1,12 @@
+import sys
+from datetime import datetime
 from io import StringIO
 from pathlib import Path
-import sys
-import pytest
-import mikeio
+
 import pandas as pd
-from datetime import datetime
+import pytest
+
+import mikeio
 
 
 @pytest.fixture
@@ -667,7 +669,7 @@ EndSect // ENGINE
 
 
 def test_difficult_chars_in_str(tmp_path: Path) -> None:
-    text = """
+    text = r"""
 [ENGINE]
   A = 'str,s/d\sd.dfs0'
   B = "str,sd'sd.dfs0"
@@ -680,13 +682,13 @@ EndSect // ENGINE
         pfs = mikeio.PfsDocument.from_text(text)
 
     assert isinstance(pfs.ENGINE.A, str)
-    assert pfs.ENGINE.A == "str,s/d\sd.dfs0"
+    assert pfs.ENGINE.A == r"str,s/d\sd.dfs0"
 
     # NOTE: B will appear wrong as a list with one item
     assert isinstance(pfs.ENGINE.B[0], str)
     assert pfs.ENGINE.B[0] == "str,sd'sd.dfs0"
     assert isinstance(pfs.ENGINE.C, str)
-    assert pfs.ENGINE.C == "|sd\U0001f600s\d.dfs0|"
+    assert pfs.ENGINE.C == "|sd\U0001f600s\\d.dfs0|"
     assert isinstance(pfs.ENGINE.D, str)
     assert pfs.ENGINE.E == "|str,s\U0001f600+-s_d.dfs0|"
 
@@ -695,15 +697,15 @@ EndSect // ENGINE
 
     outlines = Path(outfile).read_text().splitlines()
 
-    assert outlines[5].strip() == "A = 'str,s/d\sd.dfs0'"
+    assert outlines[5].strip() == "A = 'str,s/d\\sd.dfs0'"
     assert outlines[6].strip() == "B = 'str,sd'sd.dfs0'"
-    assert outlines[7].strip() == "C = |sd's\d.dfs0|"
+    assert outlines[7].strip() == "C = |sd's\\d.dfs0|"
     assert outlines[8].strip() == "D = |str'd.dfs0|"
     assert outlines[9].strip() == "E = |str,s'+-s_d.dfs0|"
 
 
 def test_difficult_chars_in_str2(tmp_path: Path) -> None:
-    text = """
+    text = r"""
 [ENGINE]
    A = 'str,s/d\sd.dfs0'
    B = "str,sd'sd.dfs0"
@@ -719,7 +721,7 @@ EndSect // ENGINE"""
 
     outlines = Path(outfile).read_text().splitlines()
 
-    assert outlines[5].strip() == "A = 'str,s/d\sd.dfs0'"
+    assert outlines[5].strip() == "A = 'str,s/d\\sd.dfs0'"
     assert outlines[6].strip() == "B = 'str,sd'sd.dfs0'"
     assert outlines[7].strip() == "C = |str'd.dfs0|"
     assert outlines[8].strip() == "D = |str,s'+-s_d.dfs0|"
@@ -914,7 +916,7 @@ def test_nested_quotes(tmp_path: Path) -> None:
 
 
 def test_filename_in_list(tmp_path: Path) -> None:
-    text = """
+    text = r"""
    [EcolabTemplateSpecification]
       TemplateFile_A = |.\Test1_OLSZ_OL_WQsetups.ecolab|
       TemplateFile_OL = |.\Test1_OLSZ_OL_WQsetups.ecolab|, 2019, 4, 25, 14, 51, 35
