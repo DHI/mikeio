@@ -1,12 +1,11 @@
 from pathlib import Path
-from datetime import datetime
 import shutil
 
 import numpy as np
 import pandas as pd
 import pytest
 import mikeio
-from mikeio import Dataset, DataArray, Dfsu, Mesh, ItemInfo
+from mikeio import Dataset, DataArray, Dfsu, Mesh
 from pytest import approx
 from mikeio.exceptions import OutsideModelDomainError
 
@@ -536,26 +535,16 @@ def test_get_element_area_tri_quad():
     assert areas[0] == 0.0006875642143608321
 
 
-def test_write(tmp_path):
+def test_write(tmp_path: Path) -> None:
     fp = tmp_path / "simple.dfsu"
     meshfilename = "tests/testdata/odense_rough.mesh"
 
     msh = Mesh(meshfilename)
 
-    n_elements = msh.n_elements
-    d = np.zeros((1, n_elements))
-    data = []
-    data.append(d)
+    da = mikeio.DataArray(np.zeros((1, msh.n_elements)), geometry=msh.geometry)
 
-    ds = Dataset(
-        data,
-        time=[datetime(2000, 1, 1)],
-        items=[ItemInfo("Zeros")],
-        geometry=msh.geometry,
-    )
-
-    ds.to_dfs(fp)
-    ds.isel(time=0).to_dfs(fp)
+    da.to_dfs(fp)
+    da.isel(time=0).to_dfs(fp)
 
 
 def test_write_from_dfsu(tmp_path):
