@@ -12,7 +12,7 @@ format:
 	ruff format $(LIB)/
 
 test:
-	pytest --cov=mikeio tests
+	pytest --disable-warnings
 
 typecheck:
 	mypy $(LIB)/
