@@ -57,16 +57,6 @@ website:
         - examples/dfsu/index.qmd
         - examples/Time-interpolation.qmd
         - examples/Generic.qmd
-    - title: "API Reference"
-      contents:
-        - api/index.qmd
-        - api/DataArray.qmd
-        - api/Dataset.qmd
-        - api/Dfs0.qmd
-        - api/Dfs1.qmd
-        - api/Dfs2.qmd
-        - api/Dfs3.qmd
-        - api/Dfsu.qmd
         
       
 filters:
