@@ -170,115 +170,15 @@ def _get_dfsu_info(filename: str | Path) -> _DfsuInfo:
     )
 
 
-# class _Dfsu:
-#     show_progress = False
-
-#     def __init__(self, filename: str | Path) -> None:
-#         """
-#         Create a Dfsu object
-
-#         Parameters
-#         ---------
-#         filename: str
-#             dfsu filename
-#         """
-#         info = _get_dfsu_info(filename)
-#         self._filename = info.filename
-#         self._type = info.type
-#         self._deletevalue = info.deletevalue
-#         self._time = info.time
-#         self._timestep = info.timestep
-#         self._items = info.items
-
-#     def __repr__(self):
-#         out = [f"<mikeio.{self.__class__.__name__}>"]
-
-#         if self._type is not DfsuFileType.DfsuSpectral0D:
-#             if self._type is not DfsuFileType.DfsuSpectral1D:
-#                 out.append(f"number of elements: {self.geometry.n_elements}")
-#             out.append(f"number of nodes: {self.geometry.n_nodes}")
-#         if self.geometry.is_spectral:
-#             if self.geometry.n_directions > 0:
-#                 out.append(f"number of directions: {self.geometry.n_directions}")
-#             if self.geometry.n_frequencies > 0:
-#                 out.append(f"number of frequencies: {self.geometry.n_frequencies}")
-#         if self.geometry.projection_string:
-#             out.append(f"projection: {self.geometry.projection_string}")
-#         if self.geometry.is_layered:
-#             out.append(f"number of sigma layers: {self.geometry.n_sigma_layers}")
-#         if (
-#             self._type == DfsuFileType.DfsuVerticalProfileSigmaZ
-#             or self._type == DfsuFileType.Dfsu3DSigmaZ
-#         ):
-#             out.append(
-#                 f"max number of z layers: {self.geometry.n_layers - self.geometry.n_sigma_layers}"
-#             )
-#         if self.n_items < 10:
-#             out.append("items:")
-#             for i, item in enumerate(self.items):
-#                 out.append(f"  {i}:  {item}")
-#         else:
-#             out.append(f"number of items: {self.geometry.n_items}")
-#         if self.n_timesteps == 1:
-#             out.append(f"time: time-invariant file (1 step) at {self.time[0]}")
-#         else:
-#             out.append(
-#                 f"time: {str(self.time[0])} - {str(self.time[-1])} ({self.n_timesteps} records)"
-#             )
-#         return str.join("\n", out)
-
-#     def _read_items(self, filename: str) -> list[ItemInfo]:
-#         dfs = DfsuFile.Open(filename)
-#         items = _get_item_info(dfs.ItemInfo)
-#         dfs.Close()
-#         return items
-
-#     @property
-#     def geometry(self):
-#         return self._geometry
-
-#     @property
-#     def deletevalue(self) -> float:
-#         """File delete value"""
-#         return self._deletevalue
-
-#     @property
-#     def n_items(self) -> int:
-#         """Number of items"""
-#         return len(self.items)
-
-#     @property
-#     def items(self) -> list[ItemInfo]:
-#         """List of items"""
-#         return self._items
-
-#     @property
-#     def start_time(self) -> pd.Timestamp:
-#         """File start time"""
-#         return self._time[0]
-
-#     @property
-#     def n_timesteps(self) -> int:
-#         """Number of time steps"""
-#         return len(self._time)
-
-#     @property
-#     def timestep(self) -> float:
-#         """Time step size in seconds"""
-#         return self._timestep
-
-#     @property
-#     def end_time(self) -> pd.Timestamp:
-#         """File end time"""
-#         return self._time[-1]
-
-#     @property
-#     def time(self) -> pd.DatetimeIndex:
-#        return self._time
-
-
 class Dfsu2DH:
-    """Class for reading/writing dfsu 2d horizontal files."""
+    """Class for reading/writing dfsu 2d horizontal files.
+
+    Parameters
+    ----------
+    filename:
+        Path to dfsu file
+
+    """
 
     show_progress = False
 

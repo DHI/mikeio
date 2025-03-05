@@ -411,7 +411,14 @@ class DfsuLayered:
 
 
 class Dfsu2DV(DfsuLayered):
-    """Class for reading/writing dfsu 2d vertical files."""
+    """Class for reading/writing dfsu 2d vertical files.
+
+    Parameters
+    ----------
+    filename:
+        Path to dfsu file
+
+    """
 
     def plot_vertical_profile(
         self,
@@ -467,7 +474,14 @@ class Dfsu2DV(DfsuLayered):
 
 
 class Dfsu3D(DfsuLayered):
-    """Class for reading/writing dfsu 3d files."""
+    """Class for reading/writing dfsu 3d files.
+
+    Parameters
+    ----------
+    filename:
+        Path to dfsu file
+
+    """
 
     @property
     def geometry2d(self) -> GeometryFM2D:

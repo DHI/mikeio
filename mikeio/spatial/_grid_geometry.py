@@ -69,7 +69,43 @@ def _print_axis_txt(name: str, x: np.ndarray, dx: float) -> str:
 
 @dataclass
 class Grid1D(_Geometry):
-    """1D grid (node-based)."""
+    """1d spatial grid.
+
+    The axis is increasing and equidistant
+
+    Parameters
+    ----------
+    x : array_like
+        node coordinates
+    x0 : float
+        first node coordinate
+    dx : float
+        grid spacing
+    nx : int
+        number of nodes
+    projection : str
+        projection string
+    origin : float, float
+        not commonly used
+    orientation : float
+        not commonly used
+    node_coordinates : array_like
+        coordinates of nodes in 2D or 3D space
+    axis_name : str
+        name of axis, by default "x"
+
+    Examples
+    --------
+    ```{python}
+    import mikeio
+    mikeio.Grid1D(nx=3,dx=0.1)
+    ```
+
+    ```{python}
+    mikeio.Grid1D(x=[0.1, 0.5, 0.9])
+    ```
+
+    """
 
     _dx: float
     _nx: int
@@ -91,43 +127,6 @@ class Grid1D(_Geometry):
         node_coordinates: np.ndarray | None = None,
         axis_name: str = "x",
     ):
-        """Create a Grid1D.
-
-        The axis is increasing and equidistant
-
-        Parameters
-        ----------
-        x : array_like
-            node coordinates
-        x0 : float
-            first node coordinate
-        dx : float
-            grid spacing
-        nx : int
-            number of nodes
-        projection : str
-            projection string
-        origin : float, float
-            not commonly used
-        orientation : float
-            not commonly used
-        node_coordinates : array_like
-            coordinates of nodes in 2D or 3D space
-        axis_name : str
-            name of axis, by default "x"
-
-        Examples
-        --------
-        ```{python}
-        import mikeio
-        mikeio.Grid1D(nx=3,dx=0.1)
-        ```
-
-        ```{python}
-        mikeio.Grid1D(x=[0.1, 0.5, 0.9])
-        ```
-
-        """
         super().__init__(projection=projection)
         self._origin = (0.0, 0.0) if origin is None else (origin[0], origin[1])
         assert len(self._origin) == 2, "origin must be a tuple of length 2"
@@ -409,6 +408,47 @@ class Grid2D(_Geometry):
 
     Origin in the center of cell in lower-left corner
     x and y axes are increasing and equidistant
+
+    Parameters
+    ----------
+    x : array_like, optional
+        x coordinates of cell centers
+    x0 : float, optional
+        x coordinate of lower-left corner of first cell
+    dx : float, optional
+        x cell size
+    nx : int, optional
+        number of cells in x direction
+    y : array_like, optional
+        y coordinates of cell centers
+    y0 : float, optional
+        y coordinate of lower-left corner of first cell
+    dy : float, optional
+        y cell size
+    ny : int, optional
+        number of cells in y direction
+    bbox : tuple, optional
+        (x0, y0, x1, y1) of bounding box
+    projection : str, optional
+        projection string, by default "NON-UTM"
+    origin : tuple, optional
+        user-defined origin, by default None
+    orientation : float, optional
+        rotation angle in degrees, by default 0.0
+    axis_names : tuple, optional
+        names of x and y axes, by default ("x", "y")
+    is_spectral : bool, optional
+        if True, the grid is spectral, by default False
+    is_vertical : bool, optional
+        if True, the grid is vertical, by default False
+
+    Examples
+    --------
+    ```{python}
+    import mikeio
+    mikeio.Grid2D(x0=12.0, nx=2, dx=0.25, y0=55.0, ny=3, dy=0.25, projection="LONG/LAT")
+    ```
+
     """
 
     _dx: float
@@ -444,49 +484,6 @@ class Grid2D(_Geometry):
         is_spectral: bool = False,
         is_vertical: bool = False,
     ):
-        """Create equidistant 2D spatial geometry.
-
-        Parameters
-        ----------
-        x : array_like, optional
-            x coordinates of cell centers
-        x0 : float, optional
-            x coordinate of lower-left corner of first cell
-        dx : float, optional
-            x cell size
-        nx : int, optional
-            number of cells in x direction
-        y : array_like, optional
-            y coordinates of cell centers
-        y0 : float, optional
-            y coordinate of lower-left corner of first cell
-        dy : float, optional
-            y cell size
-        ny : int, optional
-            number of cells in y direction
-        bbox : tuple, optional
-            (x0, y0, x1, y1) of bounding box
-        projection : str, optional
-            projection string, by default "NON-UTM"
-        origin : tuple, optional
-            user-defined origin, by default None
-        orientation : float, optional
-            rotation angle in degrees, by default 0.0
-        axis_names : tuple, optional
-            names of x and y axes, by default ("x", "y")
-        is_spectral : bool, optional
-            if True, the grid is spectral, by default False
-        is_vertical : bool, optional
-            if True, the grid is vertical, by default False
-
-        Examples
-        --------
-        ```{python}
-        import mikeio
-        mikeio.Grid2D(x0=12.0, nx=2, dx=0.25, y0=55.0, ny=3, dy=0.25, projection="LONG/LAT")
-        ```
-
-        """
         super().__init__(projection=projection)
         self._shift_origin_on_write = origin is None  # user-constructed
         self._origin = (0.0, 0.0) if origin is None else (origin[0], origin[1])

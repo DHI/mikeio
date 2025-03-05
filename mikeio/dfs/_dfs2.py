@@ -108,7 +108,16 @@ def _write_dfs2_spatial_axis(
 
 
 class Dfs2(_Dfs123):
-    """Class for reading/writing dfs2 files."""
+    """Class for reading/writing dfs2 files.
+
+    Parameters
+    ----------
+    filename:
+        Path to dfs2 file
+    type:
+        horizontal, spectral or vertical, default horizontal
+
+    """
 
     _ndim = 2
 

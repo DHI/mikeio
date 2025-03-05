@@ -56,14 +56,29 @@ class Dataset:
 
     The Dataset is primarily a container for one or more DataArrays
     all having the same time and geometry (and shape, dims, etc).
-    For convenience, the Dataset provides access to these common properties:
 
-    * time - a pandas.DatetimeIndex with the time instances of the data
-    * geometry - a geometry object e.g. Grid2D or GeometryFM
-    * shape - a tuple of array dimensions (for each DataArray)
-    * dims - a tuple of dimension labels
+    Parameters
+    ----------
+    data:
+        a sequence or mapping of numpy arrays
+        By providing a mapping of data arrays, the remaining parameters are not needed
+    time:
+        a pandas.DatetimeIndex with the time instances of the data
+    item:
+        an ItemInfo with name, type and unit
+    geometry:
+        a geometry object e.g. Grid2D or GeometryFM2D
+    zn:
+        only relevant for Dfsu3d
+    dims:
+        named dimensions
+    validate:
+        Optional validation of consistency of data arrays.
+    dt:
+        placeholder timestep
 
-    Selecting items
+
+    Notes
     ---------------
     Selecting a specific item "itemA" (at position 0) from a Dataset ds can be done with:
 

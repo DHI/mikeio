@@ -1404,7 +1404,8 @@ class ItemInfo:
     Parameters
     ----------
     name: str or EUMType, optional
-    type: EUMType or int, optional
+        User defined name
+    itemtype: EUMType or int, optional
         Default EUMType.Undefined
     unit: EUMUnit or int, optional
         Default unit matching EUMType

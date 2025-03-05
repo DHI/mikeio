@@ -26,7 +26,14 @@ from ..spatial import (
 
 
 class DfsuSpectral:
-    """Dfsu for Spectral data."""
+    """Dfsu for Spectral data.
+
+    Parameters
+    ----------
+    filename:
+        Path to dfsu file
+
+    """
 
     show_progress = False
 

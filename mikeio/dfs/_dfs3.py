@@ -99,7 +99,14 @@ def _write_dfs3_header(filename: str | Path, ds: Dataset, title: str) -> DfsFile
 
 
 class Dfs3(_Dfs123):
-    """Class for reading/writing dfs3 files."""
+    """Class for reading/writing dfs3 files.
+
+    Parameters
+    ----------
+    filename:
+        Path to dfs3 file
+
+    """
 
     _ndim = 3
 

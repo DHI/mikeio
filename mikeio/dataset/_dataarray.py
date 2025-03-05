@@ -132,12 +132,23 @@ class _DataArraySpectrumToHm0:
 class DataArray:
     """DataArray with data and metadata for a single item in a dfs file.
 
-    The DataArray has these main properties:
+    Parameters
+    ----------
+    data:
+        a numpy array containing the data
+    time:
+        a pandas.DatetimeIndex with the time instances of the data
+    item:
+        an ItemInfo with name, type and unit
+    geometry:
+        a geometry object e.g. Grid2D or GeometryFM2D
+    zn:
+        only relevant for Dfsu3d
+    dims:
+        named dimensions
+    dt:
+        placeholder timestep
 
-    * time - a pandas.DatetimeIndex with the time instances of the data
-    * geometry - a geometry object e.g. Grid2D or GeometryFM
-    * values - a numpy array containing the data
-    * item - an ItemInfo with name, type and unit
 
     Examples
     --------

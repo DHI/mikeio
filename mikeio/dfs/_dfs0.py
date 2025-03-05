@@ -11,6 +11,8 @@ from mikecore.DfsFile import DfsSimpleType, StatType, TimeAxisType
 from mikecore.DfsFileFactory import DfsFileFactory
 from mikecore.eum import eumQuantity
 
+from mikeio.eum._eum import ItemInfoList
+
 from .. import __dfs_version__
 from ..dataset import Dataset, DataArray
 from ._dfs import _get_item_info, _valid_item_numbers, _valid_timesteps
@@ -305,7 +307,7 @@ class Dfs0:
         return self._n_items
 
     @property
-    def items(self) -> list[ItemInfo]:
+    def items(self) -> ItemInfoList:
         """List of items."""
         return self._items
 
