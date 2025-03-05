@@ -12,7 +12,7 @@ format:
 	ruff format $(LIB)/
 
 test:
-	pytest --disable-warnings
+	pytest -W error
 
 typecheck:
 	mypy $(LIB)/
