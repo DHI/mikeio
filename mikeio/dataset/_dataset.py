@@ -64,8 +64,8 @@ class Dataset:
         By providing a mapping of data arrays, the remaining parameters are not needed
     time:
         a pandas.DatetimeIndex with the time instances of the data
-    item:
-        an ItemInfo with name, type and unit
+    items:
+        a list of ItemInfo with name, type and unit
     geometry:
         a geometry object e.g. Grid2D or GeometryFM2D
     zn:
@@ -113,6 +113,10 @@ class Dataset:
         dt: float = 1.0,
     ):
         if not self._is_DataArrays(data):
+            warnings.warn(
+                "Supplying data as a list of numpy arrays is deprecated. Use Dataset.from_numpy",
+                FutureWarning,
+            )
             data = self._create_dataarrays(
                 data=data,
                 time=time,
@@ -122,11 +126,35 @@ class Dataset:
                 dims=dims,
                 dt=dt,
             )
-        self._data_vars: MutableMapping[str, DataArray] = self._init_from_DataArrays(
+        self._data_vars = self._init_from_DataArrays(
             data,  # type: ignore
             validate=validate,
-        )  # type: ignore
+        )
         self.plot = _DatasetPlotter(self)
+
+    @staticmethod
+    def from_numpy(
+        data: Sequence[NDArray[np.floating]],
+        time: pd.DatetimeIndex | None = None,
+        items: Sequence[ItemInfo] | None = None,
+        *,
+        geometry: Any | None = None,
+        zn: NDArray[np.floating] | None = None,
+        dims: tuple[str, ...] | None = None,
+        validate: bool = True,
+        dt: float = 1.0,
+    ) -> Dataset:
+        das = Dataset._create_dataarrays(
+            data=data,
+            time=time,
+            items=items,
+            geometry=geometry,
+            zn=zn,
+            dims=dims,
+            dt=dt,
+        )
+
+        return Dataset(das)
 
     @staticmethod
     def _is_DataArrays(data: Any) -> bool:
@@ -179,8 +207,6 @@ class Dataset:
             for da in data_vars.values():
                 first._is_compatible(da, raise_error=True)
 
-        # TODO is it necessary to keep track of item names?
-        self.__itemattr: set[str] = set()
         for key, value in data_vars.items():
             self._set_name_attr(key, value)
 
@@ -644,15 +670,11 @@ class Dataset:
 
     def _set_name_attr(self, name: str, value: DataArray) -> None:
         name = _to_safe_name(name)
-        if name not in self.__itemattr:
-            self.__itemattr.add(name)  # keep track of what we insert
         setattr(self, name, value)
 
     def _del_name_attr(self, name: str) -> None:
         name = _to_safe_name(name)
-        if name in self.__itemattr:
-            self.__itemattr.remove(name)
-            delattr(self, name)
+        delattr(self, name)
 
     @overload
     def __getitem__(self, key: Hashable | int) -> DataArray: ...
@@ -1359,7 +1381,7 @@ class Dataset:
                 zn[idx2, :] = other._zn
                 zn[idx1, :] = self._zn
 
-        return Dataset(
+        return Dataset.from_numpy(
             newdata, time=newtime, items=ds.items, geometry=ds.geometry, zn=zn
         )
 

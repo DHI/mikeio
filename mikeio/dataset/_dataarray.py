@@ -269,8 +269,6 @@ class DataArray:
             if dims == ("time", "x"):
                 return Grid1D(nx=shape[1], dx=1.0 / (shape[1] - 1))
 
-            warnings.warn("Geometry is required for ndim >=1")
-
         axis = 1 if "time" in dims else 0
         # dims_no_time = tuple([d for d in dims if d != "time"])
         # shape_no_time = shape[1:] if ("time" in dims) else shape

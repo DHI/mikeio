@@ -414,10 +414,10 @@ class Dfsu2DH:
         time = pd.to_datetime(t_rel, unit="s", origin=self.start_time)
         item_infos = _get_item_info(dfs.ItemInfo, item_numbers)
 
-        return Dataset(
+        return Dataset.from_numpy(
             data_list,
-            time,
-            item_infos,
+            time=time,
+            items=item_infos,
             geometry=geometry,
             dims=dims,
             validate=False,

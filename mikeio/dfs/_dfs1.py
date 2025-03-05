@@ -175,7 +175,7 @@ class Dfs1(_Dfs123):
 
         self._dfs.Close()
 
-        return Dataset(
+        return Dataset.from_numpy(
             data=data_list,
             time=time,
             items=items,

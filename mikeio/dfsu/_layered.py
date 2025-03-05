@@ -362,10 +362,10 @@ class DfsuLayered:
             data_list = [np.squeeze(d, axis=-1) for d in data_list]
 
         if layered_data:
-            return Dataset(
+            return Dataset.from_numpy(
                 data_list[1:],  # skip zn item
-                time,
-                items,
+                time=time,
+                items=items,
                 geometry=geometry,
                 zn=data_list[0],
                 dims=dims,
@@ -373,10 +373,10 @@ class DfsuLayered:
                 dt=self.timestep,
             )
         else:
-            return Dataset(
+            return Dataset.from_numpy(
                 data_list,
-                time,
-                items,
+                time=time,
+                items=items,
                 geometry=geometry,
                 dims=dims,
                 validate=False,

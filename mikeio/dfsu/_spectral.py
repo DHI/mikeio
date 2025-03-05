@@ -392,8 +392,13 @@ class DfsuSpectral:
         dfs.Close()
 
         time = pd.to_datetime(t_seconds, unit="s", origin=self.start_time)
-        return Dataset(
-            data_list, time, items, geometry=geometry, dims=dims, validate=False
+        return Dataset.from_numpy(
+            data_list,
+            time=time,
+            items=items,
+            geometry=geometry,
+            dims=dims,
+            validate=False,
         )
 
     def _parse_geometry_sel(
