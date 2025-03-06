@@ -160,27 +160,6 @@ def _interp_itemstep(
     elem_ids: np.ndarray,
     weights: np.ndarray | None = None,
 ) -> np.ndarray:
-    """Interpolate a single item and time step.
-
-    Parameters
-    ----------
-    data : ndarray
-        data to interpolate
-    elem_ids : ndarray(int)
-        n sized array of 1 or more element ids used for interpolation
-    weights : ndarray(float), optional
-        weights with same size as elem_ids used for interpolation
-
-    Returns
-    -------
-    ndarray
-        spatially interpolated data
-
-    Notes
-    -----
-    This function is used internally by interp2d
-
-    """
     if weights is None:
         return data[elem_ids]
     else:

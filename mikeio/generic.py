@@ -56,35 +56,6 @@ __all__ = [
 
 @dataclass
 class _ChunkInfo:
-    """Class for keeping track of an chunked processing.
-
-    Parameters
-    ----------
-    n_data : int
-        number of data points
-    n_chunks : int
-        number of chunks
-
-    Attributes
-    ----------
-    n_data : int
-        number of data points
-    n_chunks : int
-        number of chunks
-    chunk_size : int
-        number of data points per chunk
-
-    Methods
-    -------
-    stop(start)
-        Return the stop index for a chunk
-    chunk_end(start)
-        Return the end index for a chunk
-    from_dfs(dfs, item_numbers, buffer_size)
-        Calculate chunk info based on # of elements in dfs file and selected buffer size
-
-    """
-
     def __init__(self, n_data: int, n_chunks: int):
         self.n_data = n_data
         self.n_chunks = n_chunks
@@ -94,15 +65,12 @@ class _ChunkInfo:
 
     @property
     def chunk_size(self) -> int:
-        """number of data points per chunk."""
         return math.ceil(self.n_data / self.n_chunks)
 
     def stop(self, start: int) -> int:
-        """Return the stop index for a chunk."""
         return min(start + self.chunk_size, self.n_data)
 
     def chunk_end(self, start: int) -> int:
-        """Return the end index for a chunk."""
         e2 = self.stop(start)
         return self.chunk_size - ((start + self.chunk_size) - e2)
 
@@ -127,29 +95,6 @@ def _clone(
     timestep: float | None = None,
     items: Sequence[int | DfsDynamicItemInfo] | None = None,
 ) -> DfsFile:
-    """Clone a dfs file.
-
-    Parameters
-    ----------
-    infilename : str | pathlib.Path
-        input filename
-    outfilename : str | pathlib.Path
-        output filename
-    start_time : datetime, optional
-        new start time for the new file, by default None
-    timestep : float, optional
-        new timestep (in seconds) for the new file, by default None
-    items : list(int,eum.ItemInfo), optional
-        list of items for new file, either as a list of
-        ItemInfo or a list of str/int referring to original file,
-        default: all items from original file
-
-    Returns
-    -------
-    DfsFile
-        MIKE generic dfs file object
-
-    """
     source = DfsFileFactory.DfsGenericOpen(str(infilename))
     fi = source.FileInfo
 
@@ -943,23 +888,6 @@ def quantile(
 
 
 def _read_item(dfs: DfsFile, item: int, timestep: int) -> np.ndarray:
-    """Read item data from dfs file.
-
-    Parameters
-    ----------
-    dfs : DfsFile
-        dfs file
-    item : int
-        item number
-    timestep : int
-        timestep number
-
-    Returns
-    -------
-    np.ndarray
-        item data
-
-    """
     indatatime = dfs.ReadItemTimeStep(item + 1, timestepIndex=timestep)
     indata = indatatime.Data
     has_value = indata != dfs.FileInfo.DeleteValueFloat
@@ -971,21 +899,6 @@ def _read_item(dfs: DfsFile, item: int, timestep: int) -> np.ndarray:
 def _get_repeated_items(
     items_in: list[DfsDynamicItemInfo], prefixes: list[str]
 ) -> list[ItemInfo]:
-    """Create new items by repeating the items in items_in with the prefixes.
-
-    Parameters
-    ----------
-    items_in : list[DfsDynamicItemInfo]
-        List of items to be repeated
-    prefixes : list[str]
-        List of prefixes to be added to the items
-
-    Returns
-    -------
-    list[ItemInfo]
-        List of new items
-
-    """
     item_numbers = _valid_item_numbers(items_in)
     items_in = _get_item_info(items_in)
 
