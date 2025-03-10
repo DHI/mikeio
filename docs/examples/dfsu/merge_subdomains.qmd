@@ -132,11 +132,11 @@ combined_geometry.plot()
 ## Merge everything into dataset
 
 ```{python}
-ds_out = mikeio.Dataset(
+ds_out = mikeio.Dataset.from_numpy(
     data=merged_data,  # n_items, timesteps, n_elements
-    items=items, 
+    items=items,
     time=time_steps,
-    geometry=combined_geometry
+    geometry=combined_geometry,
 )
 ```
 
