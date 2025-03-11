@@ -1,5 +1,7 @@
-from __future__ import annotations
+from dataclasses import dataclass
 from typing import Any, Literal, Sequence
+
+from numpy.typing import NDArray
 from matplotlib.axes import Axes
 from matplotlib.cm import ScalarMappable
 from matplotlib.collections import PatchCollection
@@ -7,7 +9,7 @@ from matplotlib.colors import Colormap, Normalize
 from matplotlib.figure import Figure
 from matplotlib.tri import Triangulation
 import numpy as np
-from collections import namedtuple
+from scipy.sparse import csr_matrix
 
 from ._utils import _relative_cumulative_distance
 
@@ -15,17 +17,66 @@ from ._utils import _relative_cumulative_distance
 MESH_COL = "0.95"
 MESH_COL_DARK = "0.6"
 
-BoundaryPolylines = namedtuple(
-    "BoundaryPolylines",
-    ["n_exteriors", "exteriors", "n_interiors", "interiors"],
-)
+
+@dataclass
+class Polygon:
+    xy: NDArray
+
+    @property
+    def area(self) -> float:
+        return (
+            np.dot(self.xy[:, 1], np.roll(self.xy[:, 0], 1))
+            - np.dot(self.xy[:, 0], np.roll(self.xy[:, 1], 1))
+        ) * 0.5
+
+
+@dataclass
+class BoundaryPolygons:
+    exteriors: list[Polygon]
+    interiors: list[Polygon]
+
+    @property
+    def lines(self) -> list[Polygon]:
+        return self.exteriors + self.interiors
+
+    def contains(self, points: np.ndarray) -> np.ndarray:
+        """Test if a list of points are contained by mesh.
+
+        Parameters
+        ----------
+        points : array-like n-by-2
+            x,y-coordinates of n points to be tested
+
+        Returns
+        -------
+        bool array
+            True for points inside, False otherwise
+
+        """
+        import matplotlib.path as mp  # type: ignore
+
+        exterior = self.exteriors[0]
+        cnts = mp.Path(exterior.xy).contains_points(points)
+
+        if len(self.exteriors) > 1:
+            # in case of several dis-joint outer domains
+            for exterior in self.exteriors[1:]:
+                in_domain = mp.Path(exterior.xy).contains_points(points)
+                cnts = np.logical_or(cnts, in_domain)
+
+        # subtract any holes
+        for interior in self.interiors:
+            in_hole = mp.Path(interior.xy).contains_points(points)
+            cnts = np.logical_and(cnts, ~in_hole)
+
+        return cnts
 
 
 def _plot_map(
     node_coordinates: np.ndarray,
     element_table: np.ndarray,
     element_coordinates: np.ndarray,
-    boundary_polylines: BoundaryPolylines,
+    boundary_polylines: list[Polygon],
     projection: str = "",
     z: np.ndarray | None = None,
     plot_type: Literal[
@@ -44,16 +95,20 @@ def _plot_map(
     ax: Axes | None = None,
     add_colorbar: bool = True,
 ) -> Axes:
-    """
-    Plot unstructured data and/or mesh, mesh outline
+    """Plot unstructured data and/or mesh, mesh outline.
 
     Parameters
     ----------
-    node_coordinates,
-    element_table,
-    element_coordinates,
+    node_coordinates: np.array
+        node coordinates
+    element_table: np.array
+        element table
+    element_coordinates: np.array
+        element coordinates
     boundary_polylines: BoundaryPolylines,
-    projection,
+        boundary polylines
+    projection: str, optional
+        projection type, default: ""
     z: np.array or a Dataset with a single item, optional
         value for each element to plot, default bathymetry
     plot_type: str, optional
@@ -100,8 +155,8 @@ def _plot_map(
     >>> ds.n_items
     1
     >>> dfs.plot(z=ds) # plot surface elevation
-    """
 
+    """
     import matplotlib.pyplot as plt
     import matplotlib
 
@@ -236,37 +291,6 @@ def __set_colormap_levels(
     levels: int | Sequence[float] | np.ndarray | None,
     z: np.ndarray,
 ) -> tuple[float, float, Colormap, Normalize, ScalarMappable, np.ndarray]:
-    """Set colormap, levels, vmin, vmax, and cmap_norm
-
-    Parameters
-    ----------
-    cmap : str or matplotlib.colors.Colormap
-        colormap name or colormap object
-    vmin : float
-        minimum value for colorbar
-    vmax : float
-        maximum value for colorbar
-    levels : int or list of float
-        number of levels or list of levels
-    z : array of float
-        data to be plotted
-
-    Returns
-    -------
-    vmin : float
-        minimum value for colorbar
-    vmax : float
-        maximum value for colorbar
-    cmap : matplotlib.colors.Colormap
-        colormap object
-    cmap_norm : matplotlib.colors.Normalize
-        colormap normalization object
-    cmap_ScMappable : matplotlib.cm.ScalarMappable
-        colormap object
-    levels : list of float
-        list of levels
-    """
-
     import matplotlib
     import matplotlib.cm as cm
     import matplotlib.colors as mplc
@@ -303,10 +327,6 @@ def __set_colormap_levels(
 
 
 def __set_plot_limits(ax: Axes, nc: np.ndarray) -> None:
-    """Set default plot limits
-
-    Override with matplotlib ax.set_xlim, ax.set_ylim
-    """
     xmin, xmax = nc[:, 0].min(), nc[:, 0].max()
     ymin, ymax = nc[:, 1].min(), nc[:, 1].max()
 
@@ -316,22 +336,6 @@ def __set_plot_limits(ax: Axes, nc: np.ndarray) -> None:
 
 
 def __plot_mesh_only(ax: Axes, nc: np.ndarray, element_table: np.ndarray) -> None:
-    """plot mesh only (no data)
-
-    Parameters
-    ----------
-    ax : matplotlib.axes.Axes
-        axes object
-    nc : array of float
-        node coordinates
-    element_table : array of int
-        element table
-
-    Returns
-    -------
-    matplotlib.axes.Axes
-        axes object
-    """
     from matplotlib.collections import PatchCollection
 
     patches = _to_polygons(nc, element_table)
@@ -341,21 +345,7 @@ def __plot_mesh_only(ax: Axes, nc: np.ndarray, element_table: np.ndarray) -> Non
     ax.add_collection(fig_obj)
 
 
-def __plot_outline_only(ax: Axes, boundary_polylines: BoundaryPolylines) -> Axes:
-    """plot outline only (no data)
-
-    Parameters
-    ----------
-    ax : matplotlib.axes.Axes
-        axes object
-    boundary_polylines : BoundaryPolylines
-        boundary polylines
-
-    Returns
-    -------
-    matplotlib.axes.Axes
-        axes object
-    """
+def __plot_outline_only(ax: Axes, boundary_polylines: list[Polygon]) -> Axes:
     __add_outline(ax, boundary_polylines)
     return ax
 
@@ -371,35 +361,6 @@ def __plot_patch(
     vmin: float,
     vmax: float,
 ) -> PatchCollection:
-    """plot patch with data from z
-
-    Parameters
-    ----------
-    ax : matplotlib.axes.Axes
-        axes object
-    nc : array of float
-        node coordinates
-    element_table : array of int
-        element table
-    show_mesh : bool
-        include mesh polygons
-    cmap : str or matplotlib.colors.Colormap
-        colormap name or colormap object
-    cmap_norm : matplotlib.colors.Normalize
-        colormap normalization object
-    z : array of float
-        data to be plotted
-    vmin : float
-        minimum value for colorbar
-    vmax : float
-        maximum value for colorbar
-
-    Returns
-    -------
-    matplotlib.axes.Axes
-        axes object
-    """
-
     patches = _to_polygons(nc, element_table)
 
     if show_mesh:
@@ -431,26 +392,6 @@ def __get_tris(
     z: np.ndarray,
     n_refinements: int,
 ) -> tuple[Triangulation, np.ndarray]:
-    """get triangulation object and node-centered data
-
-    Parameters
-    ----------
-    nc : array of float
-        node coordinates
-    element_table : array of int
-        element table
-    ec : array of int
-        element coordinates
-    z : array of float
-        data to be plotted
-    n_refinements : int
-        number of refinements
-
-    Returns
-    -------
-    matplotlib.tri.Triangulation and node-centered data
-    """
-
     import matplotlib.tri as tri
 
     elem_table, ec, z = __create_tri_only_element_table(nc, element_table, ec, data=z)
@@ -474,28 +415,6 @@ def __add_colorbar(
     levels: np.ndarray,
     cbar_extend: str,
 ) -> None:
-    """add colorbar to axes
-
-    Parameters
-    ----------
-    ax : matplotlib.axes.Axes
-        axes object
-    cmap_ScMappable : matplotlib.cm.ScalarMappable
-        colormap object
-    fig_obj : matplotlib.figure.Figure
-        figure object
-    label : str
-        colorbar label
-    levels : array of float
-        colorbar levels
-    cbar_extend : str
-        extend colorbar beyond min/max values
-
-    Returns
-    -------
-    None
-    """
-
     from mpl_toolkits.axes_grid1 import make_axes_locatable  # type: ignore
     import matplotlib.pyplot as plt
 
@@ -513,21 +432,6 @@ def __add_colorbar(
 
 
 def __set_aspect_ratio(ax: Axes, nc: np.ndarray, projection: str) -> None:
-    """set aspect ratio
-
-    Parameters
-    ----------
-    ax : matplotlib.axes.Axes
-        axes object
-    nc : array of float
-        node coordinates
-    projection : str
-        projection type
-
-    Returns
-    -------
-    None
-    """
     is_geo = projection == "LONG/LAT"
     if is_geo:
         mean_lat = np.mean(nc[:, 1])
@@ -539,22 +443,6 @@ def __set_aspect_ratio(ax: Axes, nc: np.ndarray, projection: str) -> None:
 def __add_non_tri_mesh(
     ax: Axes, nc: np.ndarray, element_table: np.ndarray, plot_type: str
 ) -> None:
-    """add non-triangular mesh to axes
-
-    Parameters
-    ----------
-    ax : matplotlib.axes.Axes
-        axes object
-    nc : array of float
-        node coordinates
-    element_table : array of int
-        element table
-    plot_type : str
-
-    Returns
-    -------
-    None
-    """
     # if mesh is not tri only, we need to add it manually on top
     from matplotlib.collections import PatchCollection
 
@@ -573,23 +461,8 @@ def __add_non_tri_mesh(
     ax.add_collection(p)
 
 
-def __add_outline(ax: Axes, boundary_polylines: BoundaryPolylines) -> None:
-    """add outline to axes
-
-    Parameters
-    ----------
-    ax : matplotlib.axes.Axes
-        axes object
-    boundary_polylines: BoundaryPolylines
-        boundary polylines
-
-    Returns
-    -------
-    None
-    """
-
-    lines = boundary_polylines.exteriors + boundary_polylines.interiors
-    for line in lines:
+def __add_outline(ax: Axes, boundary_polylines: list[Polygon]) -> None:
+    for line in boundary_polylines:
         ax.plot(*line.xy.T, color="0.4", linewidth=1.2)
 
 
@@ -610,13 +483,6 @@ def __is_tri_only(element_table: np.ndarray) -> bool:
 
 
 def _to_polygons(node_coordinates: np.ndarray, element_table: np.ndarray) -> list[Any]:
-    """generate matplotlib polygons from element table for plotting
-
-    Returns
-    -------
-    list(matplotlib.patches.Polygon)
-        list of polygons for plotting
-    """
     from matplotlib.patches import Polygon
 
     polygons = []
@@ -633,6 +499,18 @@ def _to_polygons(node_coordinates: np.ndarray, element_table: np.ndarray) -> lis
     return polygons
 
 
+def _create_node_element_matrix(
+    element_table: np.ndarray, num_nodes: int
+) -> csr_matrix:
+    row_ind = element_table.ravel()
+    col_ind = np.repeat(np.arange(element_table.shape[0]), element_table.shape[1])
+    data = np.ones(len(row_ind), dtype=int)
+    connectivity_matrix = csr_matrix(
+        (data, (row_ind, col_ind)), shape=(num_nodes, element_table.shape[0])
+    )
+    return connectivity_matrix
+
+
 def _get_node_centered_data(
     node_coordinates: np.ndarray,
     element_table: np.ndarray,
@@ -640,38 +518,16 @@ def _get_node_centered_data(
     data: np.ndarray,
     extrapolate: bool = True,
 ) -> np.ndarray:
-    """convert cell-centered data to node-centered by pseudo-laplacian method
-
-    Parameters
-    ----------
-    node_coordinates,
-    element_table,
-    element_coordinates
-    data : np.array(float)
-        cell-centered data
-    extrapolate : bool, optional
-        allow the method to extrapolate, default:True
-
-    Returns
-    -------
-    np.array(float)
-        node-centered data
-    """
+    """convert cell-centered data to node-centered by pseudo-laplacian method."""
     nc = node_coordinates
     elem_table, ec, data = __create_tri_only_element_table(
         nc, element_table, element_coordinates, data
     )
+    connectivity_matrix = _create_node_element_matrix(elem_table, nc.shape[0])
 
-    node_cellID = [
-        list(np.argwhere(elem_table == i)[:, 0])
-        for i in np.unique(
-            elem_table.reshape(
-                -1,
-            )
-        )
-    ]
     node_centered_data = np.zeros(shape=nc.shape[0])
-    for n, item in enumerate(node_cellID):
+    for n in range(connectivity_matrix.shape[0]):
+        item = connectivity_matrix.getrow(n).indices
         I = ec[item][:, :2] - nc[n][:2]
         I2 = (I**2).sum(axis=0)
         Ixy = (I[:, 0] * I[:, 1]).sum(axis=0)
@@ -703,8 +559,7 @@ def __create_tri_only_element_table(
     element_coordinates: np.ndarray,
     data: np.ndarray,
 ) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
-    """Convert quad/tri mesh to pure tri-mesh"""
-
+    """Convert quad/tri mesh to pure tri-mesh."""
     if __is_tri_only(element_table):
         # already tri-only? just convert to 2d array
         return np.stack(element_table), element_coordinates, data  # type: ignore
@@ -763,44 +618,6 @@ def _plot_vertical_profile(
     add_colorbar: bool = True,
     **kwargs: Any,
 ) -> Axes:
-    """
-    Plot unstructured vertical profile
-
-    Parameters
-    ----------
-    node_coordinates: np.array
-    element_table: np.array[np.array]
-    values: np.array
-        value for each element to plot
-    zn: np.array, optional
-        dynamic vertical node positions,
-        default: use static vertical positions
-    is_geo: bool, optional
-        are coordinates geographical (for calculating
-        relative distance in meters), default: False
-    cmin: real, optional
-        lower bound of values to be shown on plot, default:None
-    cmax: real, optional
-        upper bound of values to be shown on plot, default:None
-    title: str, optional
-        axes title
-    label: str, optional
-        colorbar label
-    cmap: matplotlib.cm.cmap, optional
-        colormap, default viridis
-    edge_color: str, optional
-        color of mesh lines, default: None
-    add_colorbar: bool, optional
-        Add colorbar to plot, default True
-    figsize: (float, float), optional
-        specify size of figure
-    ax: matplotlib.axes, optional
-        Adding to existing axis, instead of creating new fig
-
-    Returns
-    -------
-    <matplotlib.axes>
-    """
     import matplotlib.pyplot as plt
     from matplotlib.collections import PolyCollection
 

@@ -5,10 +5,13 @@
  [![Full test](https://github.com/DHI/mikeio/actions/workflows/full_test.yml/badge.svg)](https://github.com/DHI/mikeio/actions/workflows/full_test.yml)
 [![PyPI version](https://badge.fury.io/py/mikeio.svg)](https://badge.fury.io/py/mikeio)
 ![OS](https://img.shields.io/badge/OS-Windows%20%7C%20Linux-blue)
+![Downloads](https://img.shields.io/pypi/dm/mikeio)
+
+
 
 Read, write and manipulate dfs0, dfs1, dfs2, dfs3, dfsu and mesh files.
 
-MIKE IO facilitates common data processing workflows for [MIKE files in Python](https://www.mikepoweredbydhi.com/products/mike-for-developers#io).
+MIKE IO facilitates common data processing workflows for [MIKE files](https://www.dhigroup.com/technologies/mikepoweredbydhi) using Python.
 
 [![MIKEIO. Read, write and analyze MIKE dfs files with Python on Vimeo](https://raw.githubusercontent.com/DHI/mikeio/main/images/youtube1.png)](https://player.vimeo.com/video/708275619)
 
@@ -17,7 +20,7 @@ MIKE IO facilitates common data processing workflows for [MIKE files in Python](
 
 ## Requirements
 * Windows or Linux operating system
-* Python x64 3.9 - 3.12
+* Python x64 3.10 - 3.13
 * (Windows) [VC++ redistributables](https://support.microsoft.com/en-us/help/2977003/the-latest-supported-visual-c-downloads) (already installed if you have MIKE)
 
 ## Installation

@@ -55,12 +55,13 @@ class DfsuLayered:
         self._items = self._read_items(self._filename)
 
     def __repr__(self) -> str:
-        out = [f"<mikeio.{self.__class__.__name__}>"]
-
-        out.append(f"number of elements: {self.geometry.n_elements}")
-        out.append(f"number of nodes: {self.geometry.n_nodes}")
-        out.append(f"projection: {self.geometry.projection_string}")
-        out.append(f"number of sigma layers: {self.geometry.n_sigma_layers}")
+        out = [
+            f"<mikeio.{self.__class__.__name__}>"
+            f"number of nodes: {self.geometry.n_nodes}",
+            f"number of elements: {self.geometry.n_elements}",
+            f"projection: {self.geometry.projection_string}",
+            f"number of sigma layers: {self.geometry.n_sigma_layers}",
+        ]
         if (
             self._type == DfsuFileType.DfsuVerticalProfileSigmaZ
             or self._type == DfsuFileType.Dfsu3DSigmaZ
@@ -84,37 +85,37 @@ class DfsuLayered:
 
     @property
     def deletevalue(self) -> float:
-        """File delete value"""
+        """File delete value."""
         return self._deletevalue
 
     @property
     def n_items(self) -> int:
-        """Number of items"""
+        """Number of items."""
         return len(self.items)
 
     @property
     def items(self) -> list[ItemInfo]:
-        """List of items"""
+        """List of items."""
         return self._items
 
     @property
     def start_time(self) -> pd.Timestamp:
-        """File start time"""
+        """File start time."""
         return self._start_time
 
     @property
     def n_timesteps(self) -> int:
-        """Number of time steps"""
+        """Number of time steps."""
         return self._n_timesteps
 
     @property
     def timestep(self) -> float:
-        """Time step size in seconds"""
+        """Time step size in seconds."""
         return self._timestep
 
     @property
     def end_time(self) -> pd.Timestamp:
-        """File end time"""
+        """File end time."""
         if self._equidistant:
             return self.time[-1]
         else:
@@ -184,17 +185,17 @@ class DfsuLayered:
 
     @property
     def n_layers(self) -> int:
-        """Maximum number of layers"""
+        """Maximum number of layers."""
         return self.geometry._n_layers
 
     @property
     def n_sigma_layers(self) -> int:
-        """Number of sigma layers"""
+        """Number of sigma layers."""
         return self.geometry.n_sigma_layers
 
     @property
     def n_z_layers(self) -> int:
-        """Maximum number of z-layers"""
+        """Maximum number of z-layers."""
         return self.n_layers - self.n_sigma_layers
 
     def read(
@@ -202,7 +203,7 @@ class DfsuLayered:
         *,
         items: str | int | Sequence[str | int] | None = None,
         time: int | str | slice | None = None,
-        elements: Sequence[int] | None = None,
+        elements: Sequence[int] | np.ndarray | None = None,
         area: tuple[float, float, float, float] | None = None,
         x: float | None = None,
         y: float | None = None,
@@ -213,8 +214,7 @@ class DfsuLayered:
         error_bad_data: bool = True,
         fill_bad_data_value: float = np.nan,
     ) -> Dataset:
-        """
-        Read data from a dfsu file
+        """Read data from a dfsu file.
 
         Parameters
         ---------
@@ -244,11 +244,14 @@ class DfsuLayered:
         fill_bad_data_value:
             fill value for to impute corrupt data, used in conjunction with error_bad_data=False
             default np.nan
+        dtype: numpy.dtype, optional
+            Data type to read, by default np.float32
 
         Returns
         -------
         Dataset
             A Dataset with data dimensions [t,elements]
+
         """
         if dtype not in [np.float32, np.float64]:
             raise ValueError("Invalid data type. Choose np.float32 or np.float64")
@@ -381,8 +384,7 @@ class DfsuLayered:
             )
 
     def append(self, ds: Dataset, validate: bool = True) -> None:
-        """
-        Append data to a dfsu file
+        """Append data to a dfsu file.
 
         Parameters
         ---------
@@ -390,6 +392,7 @@ class DfsuLayered:
             Dataset to append
         validate: bool, optional
             Validate that the dataset to append has the same geometry and items, by default True
+
         """
         if validate:
             if self.geometry != ds.geometry:
@@ -408,17 +411,24 @@ class DfsuLayered:
 
 
 class Dfsu2DV(DfsuLayered):
+    """Class for reading/writing dfsu 2d vertical files.
+
+    Parameters
+    ----------
+    filename:
+        Path to dfsu file
+
+    """
+
     def plot_vertical_profile(
         self,
         values: np.ndarray | DataArray,
-        time_step: int | None = None,
         cmin: float | None = None,
         cmax: float | None = None,
         label: str = "",
         **kwargs: Any,
     ) -> Axes:
-        """
-        Plot unstructured vertical profile
+        """Plot unstructured vertical profile.
 
         Parameters
         ----------
@@ -438,17 +448,16 @@ class Dfsu2DV(DfsuLayered):
             specify size of figure
         ax: matplotlib.axes, optional
             Adding to existing axis, instead of creating new fig
+        **kwargs: Any
+            Additional keyword arguments
 
         Returns
         -------
         <matplotlib.axes>
+
         """
         if isinstance(values, DataArray):
             values = values.to_numpy()
-        if time_step is not None:
-            raise NotImplementedError(
-                "Deprecated functionality. Instead, read as DataArray da, then use da.plot()"
-            )
 
         g = self.geometry
         return _plot_vertical_profile(
@@ -465,20 +474,29 @@ class Dfsu2DV(DfsuLayered):
 
 
 class Dfsu3D(DfsuLayered):
+    """Class for reading/writing dfsu 3d files.
+
+    Parameters
+    ----------
+    filename:
+        Path to dfsu file
+
+    """
+
     @property
     def geometry2d(self) -> GeometryFM2D:
-        """The 2d geometry for a 3d object"""
+        """The 2d geometry for a 3d object."""
         return self.geometry.geometry2d
 
     def extract_surface_elevation_from_3d(self, n_nearest: int = 4) -> DataArray:
-        """
-        Extract surface elevation from a 3d dfsu file (based on zn)
+        """Extract surface elevation from a 3d dfsu file (based on zn)
         to a new 2d dfsu file with a surface elevation item.
 
         Parameters
         ---------
         n_nearest: int, optional
             number of points for spatial interpolation (inverse_distance), default=4
+
         """
         # validate input
         assert (

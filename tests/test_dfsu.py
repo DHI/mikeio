@@ -259,6 +259,35 @@ def test_read_elements():
     assert ds2.Wind_speed.to_numpy()[0, 1] == pytest.approx(9.530759811401367)
 
 
+def test_read_x_y() -> None:
+    x = [1.49318531, 3.69276145]
+    y = [53.97088571, 54.08928194]
+    dfs = mikeio.open("tests/testdata/wind_north_sea.dfsu")
+    assert isinstance(dfs, mikeio.Dfsu2DH)
+    ds = dfs.read(x=x, y=y, time=0, keepdims=True)
+    assert isinstance(ds.geometry, mikeio.GeometryFM2D)
+    assert ds.geometry.element_coordinates[0][0] == pytest.approx(1.4931853081272184)
+    assert ds.Wind_speed.to_numpy()[0, 0] == pytest.approx(9.530759811401367)
+
+    x = x[::-1]
+    y = y[::-1]
+    ds2 = mikeio.read(
+        filename="tests/testdata/wind_north_sea.dfsu", x=x, y=y, time=0, keepdims=True
+    )
+    assert isinstance(ds2.geometry, mikeio.GeometryFM2D)
+    assert ds2.geometry.element_coordinates[1][0] == pytest.approx(1.4931853081272184)
+    assert ds2.Wind_speed.to_numpy()[0, 1] == pytest.approx(9.530759811401367)
+
+    x = 1.49318531
+    y = 53.97088571
+    ds3 = mikeio.read(
+        filename="tests/testdata/wind_north_sea.dfsu", x=x, y=y, time=0, keepdims=True
+    )
+    assert isinstance(ds3.geometry, mikeio.spatial.GeometryPoint2D)
+    assert ds3.geometry.x == pytest.approx(1.4931853081272184)
+    assert ds3.geometry.y == pytest.approx(53.97088571)
+
+
 def test_find_index_on_island():
     filename = "tests/testdata/FakeLake.dfsu"
     dfs = mikeio.open(filename)
@@ -779,7 +808,7 @@ def test_extract_track():
 
 
 # TODO consider move to test_dataset.py
-def test_extract_track_from_dataset():
+def test_extract_track_from_dataset(tmp_path: Path) -> None:
     ds = mikeio.read("tests/testdata/track_extraction_case02_indata.dfsu")
     csv_file = "tests/testdata/track_extraction_case02_track.csv"
     df = pd.read_csv(
@@ -788,9 +817,16 @@ def test_extract_track_from_dataset():
         parse_dates=True,
     )
     df.index = pd.DatetimeIndex(df.index)
+    assert ds[0].name == "Sign. Wave Height"
     track = ds.extract_track(df)
 
-    assert track[2].values[23] == approx(3.6284972794399653)
+    # This should not change the original dataset
+    track.rename({"Sign. Wave Height": "Hm0"}, inplace=True)
+    assert track["Hm0"].name == "Hm0"
+
+    assert ds[0].name == "Sign. Wave Height"
+
+    assert track["Hm0"].values[23] == approx(3.6284972794399653)
     assert sum(np.isnan(track[2].to_numpy())) == 26
     assert np.all(track[1].to_numpy() == df.latitude.values)
 
@@ -800,6 +836,26 @@ def test_extract_track_from_dataset():
 
     track3 = ds2.extract_track(csv_file, method="inverse_distance")
     assert track3[2].values[23] == approx(3.6469911492412463)
+
+    # test with dataset
+    track_ds = mikeio.from_pandas(df)
+    track4 = ds2.extract_track(track_ds)
+    assert track4[2].values[23] == approx(3.6284972794399653)
+
+    # test with dfs0 file
+    track_ds.to_dfs(tmp_path / "track.dfs0")
+    track5 = ds2.extract_track(tmp_path / "track.dfs0")
+    assert track5[2].values[23] == approx(3.6284972794399653)
+
+    # test with non-existent file
+    with pytest.raises(FileNotFoundError):
+        ds2.extract_track("non_existent_file.csv")
+
+    # test with bad file extension
+    fp = tmp_path / "track.txt"
+    fp.touch()
+    with pytest.raises(ValueError):
+        ds2.extract_track(fp)
 
 
 # TODO consider move to test_datarray.py
@@ -883,8 +939,10 @@ def test_dataset_interp_to_xarray():
 def test_interp_like_grid():
     ds = mikeio.read("tests/testdata/wind_north_sea.dfsu")
     ws = ds[0]
+    assert ws.values.dtype == np.float32
     grid = ds.geometry.get_overset_grid(dx=0.1)
     ws_grid = ws.interp_like(grid)
+    assert ws_grid.values.dtype == np.float32
     assert ws_grid.n_timesteps == ds.n_timesteps
     assert isinstance(ws_grid, DataArray)
     assert isinstance(ws_grid.geometry, Grid2D)
@@ -992,3 +1050,14 @@ def test_append_dfsu_2d(tmp_path):
     assert (
         ds3.V_velocity.isel(time=3).values[0] == ds2.V_velocity.isel(time=1).values[0]
     )
+
+
+def test_repr_dfsu_many_items_only_shows_number_of_items() -> None:
+    ds = mikeio.read("tests/testdata/random_data_20_items_2d.dfsu")
+    txt = repr(ds)
+    assert "number of items: 20" in txt
+
+    # repeat for mikeio.open
+    dfs = mikeio.open("tests/testdata/random_data_20_items_2d.dfsu")
+    txt_dfs = repr(dfs)
+    assert "number of items: 20" in txt_dfs

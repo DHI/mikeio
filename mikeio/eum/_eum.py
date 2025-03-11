@@ -29,7 +29,7 @@ from ..exceptions import InvalidDataValueType
 
 
 def _type_list(search: str | None = None) -> dict[eumItem, str]:
-    """Get a dictionary of the EUM items
+    """Get a dictionary of the EUM items.
 
     Notes
     -----
@@ -44,6 +44,7 @@ def _type_list(search: str | None = None) -> dict[eumItem, str]:
     -------
     dict
         names and codes for EUM items
+
     """
     items = {}
     check = True
@@ -70,17 +71,18 @@ def _type_list(search: str | None = None) -> dict[eumItem, str]:
 
 
 def _unit_list(eum_type: int) -> dict[str, eumUnit]:
-    """Get a dictionary of valid units
+    """Get a dictionary of valid units.
 
     Parameters
     ----------
-    type_enum: int
+    eum_type: int
         EUM variable type, e.g. 100006 or EUMType.Temperature
 
     Returns
     -------
     dict
         names and codes for valid units
+
     """
     items = {}
     n_units_for_eum_type = eumWrapper.eumGetItemUnitCount(eum_type)
@@ -111,7 +113,7 @@ class TimeStepUnit(IntEnum):
 
 
 class EUMType(IntEnum):
-    """EUM type
+    """EUM type.
 
     Examples
     --------
@@ -123,6 +125,7 @@ class EUMType(IntEnum):
     ```{python}
     mikeio.EUMType.Temperature.units
     ```
+
     """
 
     Water_Level = 100000
@@ -727,7 +730,7 @@ class EUMType(IntEnum):
 
     @property
     def display_name(self) -> str:
-        """Display friendly name"""
+        """Display friendly name."""
         name = self.name
         name = name.replace("_", " ")
         return name
@@ -737,7 +740,7 @@ class EUMType(IntEnum):
 
     @property
     def units(self) -> list[EUMUnit]:
-        """List valid units for this EUM type"""
+        """List valid units for this EUM type."""
         temp = _unit_list(self.code).values()
         return [EUMUnit(value) for value in temp]
 
@@ -748,7 +751,7 @@ class EUMType(IntEnum):
 
 
 class EUMUnit(IntEnum):
-    """EUM unit
+    """EUM unit.
 
     Examples
     --------
@@ -756,6 +759,7 @@ class EUMUnit(IntEnum):
     import mikeio
     mikeio.EUMUnit.degree_Kelvin
     ```
+
     """
 
     meter = 1000
@@ -1371,7 +1375,7 @@ class EUMUnit(IntEnum):
 
     @property
     def display_name(self) -> str:
-        """Display friendly name"""
+        """Display friendly name."""
         name = self.name
         name = name.replace("_", " ")
         return name
@@ -1406,12 +1410,13 @@ class EUMUnit(IntEnum):
 
 
 class ItemInfo:
-    """ItemInfo
+    """Info for dynamicc items (variables).
 
     Parameters
     ----------
     name: str or EUMType, optional
-    type: EUMType or int, optional
+        User defined name
+    itemtype: EUMType or int, optional
         Default EUMType.Undefined
     unit: EUMUnit or int, optional
         Default unit matching EUMType
@@ -1429,6 +1434,7 @@ class ItemInfo:
     ```{python}
     mikeio.ItemInfo(mikeio.EUMType.Wind_speed)
     ```
+
     """
 
     def __init__(
@@ -1471,12 +1477,12 @@ class ItemInfo:
                 raise ValueError(
                     "Invalid unit. Unit should be supplied as EUMUnit, e.g. ItemInfo('WL',EUMType.Water_Level, EUMUnit.meter)"
                 )
-            self.unit = unit
+            self._unit = unit
         else:
             if self.type == EUMType.Undefined:
-                self.unit = EUMUnit.undefined
+                self._unit = EUMUnit.undefined
             else:
-                self.unit = self.type.units[0]
+                self._unit = self.type.units[0]
 
         self.data_value_type = to_datatype(data_value_type)
 
@@ -1502,9 +1508,23 @@ class ItemInfo:
         else:
             return f"{self.name} <{self.type.display_name}> ({self.unit.display_name}) - {self.data_value_type}"
 
+    @property
+    def unit(self) -> EUMUnit:
+        "Item unit."
+        return self._unit
+
+    @unit.setter
+    def unit(self, value: EUMUnit) -> None:
+        "Set unit."
+        if value not in self.type.units:
+            raise ValueError(
+                f"{value} is not a correct unit for {self.type}. Use {self.type.units}"
+            )
+        self._unit = value
+
     @staticmethod
     def from_mikecore_dynamic_item_info(dfsItemInfo: DfsDynamicItemInfo) -> "ItemInfo":
-        """Create ItemInfo from a mikecore.DfsDynamicItemInfo object"""
+        """Create ItemInfo from a mikecore.DfsDynamicItemInfo object."""
         name = dfsItemInfo.Name
         item = dfsItemInfo.Quantity.Item
         unit = dfsItemInfo.Quantity.Unit

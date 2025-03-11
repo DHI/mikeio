@@ -1,15 +1,22 @@
 from __future__ import annotations
 from pathlib import Path
+from typing import Any, Sequence
 
 from mikecore.DfsFactory import DfsBuilder, DfsFactory
 from mikecore.DfsFile import DfsFile, DfsSimpleType
 from mikecore.DfsFileFactory import DfsFileFactory
 from mikecore.eum import eumQuantity, eumUnit
+import numpy as np
+import pandas as pd
+from tqdm import tqdm
 
 from .. import __dfs_version__
 from ..dataset import Dataset
 from ._dfs import (
     _Dfs123,
+    _get_item_info,
+    _valid_item_numbers,
+    _valid_timesteps,
     write_dfs_data,
 )
 from ..eum import TimeStepUnit
@@ -66,6 +73,15 @@ def _write_dfs1_header(filename: str | Path, ds: Dataset, title: str) -> DfsFile
 
 
 class Dfs1(_Dfs123):
+    """Class for reading/writing dfs1 files.
+
+    Parameters
+    ----------
+    filename:
+        Path to dfs1 file
+
+    """
+
     _ndim = 1
 
     def __init__(self, filename: str | Path) -> None:
@@ -89,6 +105,86 @@ class Dfs1(_Dfs123):
     def _open(self) -> None:
         self._dfs = DfsFileFactory.Dfs1FileOpen(self._filename)
 
+    def read(
+        self,
+        *,
+        items: str | int | Sequence[str | int] | None = None,
+        time: int | str | slice | None = None,
+        keepdims: bool = False,
+        dtype: Any = np.float32,
+    ) -> Dataset:
+        """Read data from a dfs1 file.
+
+        Parameters
+        ---------
+        items: list[int] or list[str], optional
+            Read only selected items, by number (0-based), or by name
+        time: int, str, datetime, pd.TimeStamp, sequence, slice or pd.DatetimeIndex, optional
+            Read only selected time steps, by default None (=all)
+        keepdims: bool, optional
+            When reading a single time step only, should the time-dimension be kept
+            in the returned Dataset? by default: False
+        dtype: data-type, optional
+            Define the dtype of the returned dataset (default = np.float32)
+
+        Returns
+        -------
+        Dataset
+
+        """
+        self._open()
+
+        item_numbers = _valid_item_numbers(self._dfs.ItemInfo, items)
+        n_items = len(item_numbers)
+
+        single_time_selected, time_steps = _valid_timesteps(self._dfs.FileInfo, time)
+        nt = len(time_steps) if not single_time_selected else 1
+        shape: tuple[int, ...] = (nt, self.nx)
+        dims = self.geometry.default_dims
+
+        if single_time_selected and not keepdims:
+            shape = shape[1:]
+        else:
+            dims = ("time", *dims)
+
+        data_list: list[np.ndarray] = [
+            np.ndarray(shape=shape, dtype=dtype) for _ in range(n_items)
+        ]
+
+        t_seconds = np.zeros(len(time_steps))
+
+        for i, it in enumerate(tqdm(time_steps, disable=not self.show_progress)):
+            for item in range(n_items):
+                itemdata = self._dfs.ReadItemTimeStep(item_numbers[item] + 1, int(it))
+
+                d = itemdata.Data
+                assert d.ndim == 1
+
+                d[d == self.deletevalue] = np.nan
+
+                if single_time_selected:
+                    data_list[item] = np.atleast_2d(d) if keepdims else d
+                else:
+                    data_list[item][i] = d
+
+            t_seconds[i] = itemdata.Time
+
+        time = pd.to_datetime(t_seconds, unit="s", origin=self.start_time)
+
+        items = _get_item_info(self._dfs.ItemInfo, item_numbers)
+
+        self._dfs.Close()
+
+        return Dataset(
+            data=data_list,
+            time=time,
+            items=items,
+            dims=tuple(dims),
+            geometry=self.geometry,
+            validate=False,
+            dt=self._timestep,
+        )
+
     @property
     def geometry(self) -> Grid1D:
         assert isinstance(self._geometry, Grid1D)
@@ -96,15 +192,15 @@ class Dfs1(_Dfs123):
 
     @property
     def x0(self) -> float:
-        """Start point of x values (often 0)"""
+        """Start point of x values (often 0)."""
         return self._x0
 
     @property
     def dx(self) -> float:
-        """Step size in x direction"""
+        """Step size in x direction."""
         return self._dx
 
     @property
     def nx(self) -> int:
-        """Number of node values"""
+        """Number of node values."""
         return self._nx

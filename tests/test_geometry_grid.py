@@ -10,13 +10,11 @@ from mikeio.exceptions import OutsideModelDomainError
 
 
 def test_create_nx_ny():
-
     g = Grid2D(x0=180.0, y0=-90.0, dx=0.25, dy=0.25, nx=1440, ny=721)
     assert g.nx == 1440
 
 
 def test_create_nx_missing_ny():
-
     with pytest.raises(ValueError) as excinfo:
         Grid2D(x0=180.0, y0=-90.0, dx=0.25, dy=0.25, nx=100)
 
@@ -31,6 +29,9 @@ def test_grid1d_x():
     g = Grid1D(x=x)
     assert g.x[0] == x0
     assert g.x[-1] == x1
+
+    text = repr(g)
+    assert "<mikeio.Grid1D>" in text
 
 
 def test_grid1d_isel():
@@ -113,7 +114,6 @@ def test_non_equidistant_axis_grid2d_not_allowed():
 
 
 def test_dx_dy_is_positive():
-
     with pytest.raises(ValueError) as excinfo:
         Grid2D(nx=2, ny=4, dx=-1.0, dy=1.0)
 
@@ -168,6 +168,7 @@ def test_create_in_bbox():
     assert g.dx == dx
     assert g.dy == dy
     assert g.nx * g.ny == 4
+    assert g.ndim == 2
 
     # g = Grid2D(bbox=bbox, dx=dx, dy=2.5)
     # assert g.dx == dx
@@ -182,7 +183,6 @@ def test_create_in_bbox():
 
 
 def test_no_parameters():
-
     with pytest.raises(ValueError):
         Grid2D()
 
@@ -390,9 +390,11 @@ def test_isel():
 
     assert g1.nx == 20
 
+    with pytest.raises(ValueError):
+        g.isel(0, axis=2)
+
 
 def test_grid2d_equality():
-
     g1 = Grid2D(dx=0.1, nx=2, dy=0.2, ny=4)
     g2 = Grid2D(dx=0.1, nx=2, dy=0.2, ny=4)
 
@@ -410,7 +412,6 @@ def test_grid2d_equality():
 
 
 def test_bad_projection_raises_error():
-
     with pytest.raises(ValueError, match="proj"):
         Grid2D(nx=2, ny=2, dx=0.1, projection="Not a WKT projection string")
 

@@ -217,7 +217,6 @@ def test_plot_mesh():
 
 
 def test_layered(simple_3d_geom: GeometryFM3D):
-
     g = simple_3d_geom
 
     assert g.n_elements == 2

@@ -12,6 +12,8 @@ from ._FM_geometry import GeometryFM2D
 
 
 class GeometryFMPointSpectrum(_Geometry):
+    """Flexible mesh point spectrum."""
+
     def __init__(
         self,
         frequencies: np.ndarray | None = None,
@@ -54,22 +56,22 @@ class GeometryFMPointSpectrum(_Geometry):
 
     @property
     def n_frequencies(self) -> int:
-        """Number of frequencies"""
+        """Number of frequencies."""
         return 0 if self.frequencies is None else len(self.frequencies)
 
     @property
     def frequencies(self) -> np.ndarray | None:
-        """Frequency axis"""
+        """Frequency axis."""
         return self._frequencies
 
     @property
     def n_directions(self) -> int:
-        """Number of directions"""
+        """Number of directions."""
         return 0 if self.directions is None else len(self.directions)
 
     @property
     def directions(self) -> np.ndarray | None:
-        """Directional axis"""
+        """Directional axis."""
         return self._directions
 
 
@@ -105,27 +107,29 @@ class _GeometryFMSpectrum(GeometryFM2D):
 
     @property
     def n_frequencies(self) -> int:
-        """Number of frequencies"""
+        """Number of frequencies."""
         return 0 if self.frequencies is None else len(self.frequencies)
 
     @property
     def frequencies(self) -> np.ndarray | None:
-        """Frequency axis"""
+        """Frequency axis."""
         return self._frequencies
 
     @property
     def n_directions(self) -> int:
-        """Number of directions"""
+        """Number of directions."""
         return 0 if self.directions is None else len(self.directions)
 
     @property
     def directions(self) -> np.ndarray | None:
-        """Directional axis"""
+        """Directional axis."""
         return self._directions
 
 
 # TODO reconsider inheritance to avoid overriding method signature
 class GeometryFMAreaSpectrum(_GeometryFMSpectrum):
+    """Flexible mesh area spectrum geometry."""
+
     def isel(  # type: ignore
         self, idx: Sequence[int], **kwargs: Any
     ) -> "GeometryFMPointSpectrum" | "GeometryFMAreaSpectrum":
@@ -135,7 +139,7 @@ class GeometryFMAreaSpectrum(_GeometryFMSpectrum):
         self, elements: Sequence[int], keepdims: bool = False
     ) -> "GeometryFMPointSpectrum" | "GeometryFMAreaSpectrum":
         """export a selection of elements to new flexible file geometry
-        Parameters
+        Parameters.
         ----------
         elements : list(int)
             list of element ids
@@ -145,6 +149,7 @@ class GeometryFMAreaSpectrum(_GeometryFMSpectrum):
         -------
         GeometryFMAreaSpectrum or GeometryFMPointSpectrum
             which can be used for further extraction or saved to file
+
         """
         elements = np.atleast_1d(elements)  # type: ignore
         if len(elements) == 1:
@@ -177,6 +182,8 @@ class GeometryFMAreaSpectrum(_GeometryFMSpectrum):
 
 # TODO this inherits indirectly from GeometryFM2D, which is not ideal
 class GeometryFMLineSpectrum(_GeometryFMSpectrum):
+    """Flexible mesh line spectrum geometry."""
+
     def isel(  # type: ignore
         self, idx: Sequence[int], axis: str = "node"
     ) -> GeometryFMPointSpectrum | GeometryFMLineSpectrum:
@@ -187,7 +194,7 @@ class GeometryFMLineSpectrum(_GeometryFMSpectrum):
     ) -> GeometryFMPointSpectrum | GeometryFMLineSpectrum:
         """export a selection of nodes to new flexible file geometry
         Note: takes only the elements for which all nodes are selected
-        Parameters
+        Parameters.
         ----------
         nodes : list(int)
             list of node ids
@@ -195,6 +202,7 @@ class GeometryFMLineSpectrum(_GeometryFMSpectrum):
         -------
         GeometryFMPointSpectrum | GeometryFMLineSpectrum
             which can be used for further extraction or saved to file
+
         """
         nodes = np.atleast_1d(nodes)
         if len(nodes) == 1:

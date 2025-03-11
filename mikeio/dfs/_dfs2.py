@@ -108,6 +108,17 @@ def _write_dfs2_spatial_axis(
 
 
 class Dfs2(_Dfs123):
+    """Class for reading/writing dfs2 files.
+
+    Parameters
+    ----------
+    filename:
+        Path to dfs2 file
+    type:
+        horizontal, spectral or vertical, default horizontal
+
+    """
+
     _ndim = 2
 
     def __init__(
@@ -152,8 +163,7 @@ class Dfs2(_Dfs123):
         keepdims: bool = False,
         dtype: Any = np.float32,
     ) -> Dataset:
-        """
-        Read data from a dfs2 file
+        """Read data from a dfs2 file.
 
         Parameters
         ---------
@@ -172,8 +182,8 @@ class Dfs2(_Dfs123):
         Returns
         -------
         Dataset
-        """
 
+        """
         self._open()
 
         item_numbers = _valid_item_numbers(self._dfs.ItemInfo, items)
@@ -243,8 +253,7 @@ class Dfs2(_Dfs123):
         )
 
     def append(self, ds: Dataset, validate: bool = True) -> None:
-        """
-        Append a Dataset to an existing dfs2 file
+        """Append a Dataset to an existing dfs2 file.
 
         Parameters
         ----------
@@ -257,6 +266,7 @@ class Dfs2(_Dfs123):
         Notes
         -----
         The original file is modified.
+
         """
         if validate:
             if self.geometry != ds.geometry:
@@ -279,41 +289,41 @@ class Dfs2(_Dfs123):
 
     @property
     def geometry(self) -> Grid2D:
-        """Spatial information"""
+        """Spatial information."""
         assert isinstance(self._geometry, Grid2D)
         return self._geometry
 
     @property
     def x0(self) -> Any:
-        """Start point of x values (often 0)"""
+        """Start point of x values (often 0)."""
         return self.geometry.x[0]
 
     @property
     def y0(self) -> Any:
-        """Start point of y values (often 0)"""
+        """Start point of y values (often 0)."""
         return self.geometry.y[0]
 
     @property
     def dx(self) -> float:
-        """Step size in x direction"""
+        """Step size in x direction."""
         return self.geometry.dx
 
     @property
     def dy(self) -> float:
-        """Step size in y direction"""
+        """Step size in y direction."""
         return self.geometry.dy
 
     @property
     def shape(self) -> tuple[int, ...]:
-        """Tuple with number of values in the t-, y-, x-direction"""
+        """Tuple with number of values in the t-, y-, x-direction."""
         return (self._n_timesteps, self.geometry.ny, self.geometry.nx)
 
     @property
     def nx(self) -> int:
-        """Number of values in the x-direction"""
+        """Number of values in the x-direction."""
         return self.geometry.nx
 
     @property
     def ny(self) -> int:
-        """Number of values in the y-direction"""
+        """Number of values in the y-direction."""
         return self.geometry.ny

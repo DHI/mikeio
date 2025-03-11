@@ -36,3 +36,9 @@ docs/api/
 .testmondata
 objects.json
 .jupyter_cache/
+
+# direnv
+.envrc
+
+# useful, but not sure if it should be in source control
+uv.lock

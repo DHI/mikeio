@@ -99,6 +99,15 @@ def _write_dfs3_header(filename: str | Path, ds: Dataset, title: str) -> DfsFile
 
 
 class Dfs3(_Dfs123):
+    """Class for reading/writing dfs3 files.
+
+    Parameters
+    ----------
+    filename:
+        Path to dfs3 file
+
+    """
+
     _ndim = 3
 
     def __init__(self, filename: str | Path):
@@ -155,8 +164,7 @@ class Dfs3(_Dfs123):
         keepdims: bool = False,
         dtype: Any = np.float32,
     ) -> Dataset:
-        """
-        Read data from a dfs3 file
+        """Read data from a dfs3 file.
 
         Parameters
         ---------
@@ -164,6 +172,8 @@ class Dfs3(_Dfs123):
             Read only selected items, by number (0-based), or by name
         time: int, str, datetime, pd.TimeStamp, sequence, slice or pd.DatetimeIndex, optional
             Read only selected time steps, by default None (=all)
+        area: tuple[float, float, float, float], optional
+            Read only data within the specified rectangular area (x0, x1, y0, y1)
         keepdims: bool, optional
             When reading a single time step or a single layer only,
             should the singleton dimension be kept
@@ -176,8 +186,8 @@ class Dfs3(_Dfs123):
         Returns
         -------
         Dataset
-        """
 
+        """
         if area is not None:
             raise NotImplementedError("area subsetting is not yet implemented for Dfs3")
         # NOTE:
@@ -267,8 +277,7 @@ class Dfs3(_Dfs123):
         )
 
     def append(self, ds: Dataset, validate: bool = True) -> None:
-        """
-        Append a Dataset to an existing dfs3 file
+        """Append a Dataset to an existing dfs3 file.
 
         Parameters
         ----------
@@ -280,6 +289,7 @@ class Dfs3(_Dfs123):
         Notes
         -----
         The original file is modified.
+
         """
         if validate:
             if self.geometry != ds.geometry:
@@ -313,17 +323,17 @@ class Dfs3(_Dfs123):
 
     @property
     def dx(self) -> float:
-        """Step size in x direction"""
+        """Step size in x direction."""
         return self._dx
 
     @property
     def dy(self) -> float:
-        """Step size in y direction"""
+        """Step size in y direction."""
         return self._dy
 
     @property
     def dz(self) -> float:
-        """Step size in y direction"""
+        """Step size in y direction."""
         return self._dz
 
     @property

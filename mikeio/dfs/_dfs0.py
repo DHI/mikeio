@@ -11,6 +11,8 @@ from mikecore.DfsFile import DfsSimpleType, StatType, TimeAxisType
 from mikecore.DfsFileFactory import DfsFileFactory
 from mikecore.eum import eumQuantity
 
+from mikeio.eum._eum import ItemInfoList
+
 from .. import __dfs_version__
 from ..dataset import Dataset, DataArray
 from ._dfs import _get_item_info, _valid_item_numbers, _valid_timesteps
@@ -82,13 +84,16 @@ def _write_dfs0(
 
 
 class Dfs0:
+    """Class for reading/writing dfs0 files."""
+
     def __init__(self, filename: str | Path):
-        """Create a Dfs0 object for reading, writing
+        """Create a Dfs0 object for reading, writing.
 
         Parameters
         ----------
         filename: str or Path
             File name including full path to the dfs0 file.
+
         """
         self._filename = str(filename)
 
@@ -137,8 +142,7 @@ class Dfs0:
         time: int | str | slice | None = None,
         **kwargs: Any,
     ) -> Dataset:
-        """
-        Read data from a dfs0 file.
+        """Read data from a dfs0 file.
 
         Parameters
         ----------
@@ -146,11 +150,14 @@ class Dfs0:
             Read only selected items, by number (0-based), or by name
         time: int, str, datetime, pd.TimeStamp, sequence, slice or pd.DatetimeIndex, optional
             Read only selected time steps, by default None (=all)
+        **kwargs: Any
+            Additional keyword arguments are ignored
 
         Returns
         -------
         Dataset
             A Dataset with data dimensions [t]
+
         """
         path = Path(self._filename)
         if not path.exists():
@@ -184,7 +191,7 @@ class Dfs0:
                 _, time_steps = _valid_timesteps(dfs.FileInfo, time)
 
         if time_steps:
-            ds = ds.isel(time_steps, axis=0)
+            ds = ds.isel(time=time_steps)
 
         if sel_time_step_str:
             parts = sel_time_step_str.split(",")
@@ -202,9 +209,7 @@ class Dfs0:
         return ds
 
     def _read(self, filename: str) -> tuple[list[np.ndarray], pd.DatetimeIndex]:
-        """
-        Read all data from a dfs0 file.
-        """
+        """Read all data from a dfs0 file."""
         self._dfs = DfsFileFactory.DfsGenericOpen(filename)
         raw_data = self._dfs.ReadDfs0DataDouble()  # Bulk read the data
 
@@ -240,8 +245,7 @@ class Dfs0:
     def to_dataframe(
         self, unit_in_name: bool = False, round_time: str = "ms"
     ) -> pd.DataFrame:
-        """
-        Read data from the dfs0 file and return a Pandas DataFrame.
+        """Read data from the dfs0 file and return a Pandas DataFrame.
 
         Parameters
         ----------
@@ -252,6 +256,7 @@ class Dfs0:
         Returns
         -------
         pd.DataFrame
+
         """
         data, time = self._read(self._filename)
         items = self.items
@@ -277,8 +282,7 @@ class Dfs0:
         unit: EUMUnit | None = None,
         items: Sequence[ItemInfo] | None = None,
     ) -> None:
-        """
-        Create a dfs0 from a pandas Dataframe
+        """Create a dfs0 from a pandas Dataframe.
 
         Parameters
         ----------
@@ -293,22 +297,23 @@ class Dfs0:
             Same unit for all items
         items: list[ItemInfo]
             Different types, units for each items
+
         """
         return dataframe_to_dfs0(df, filename, itemtype, unit, items)
 
     @property
     def n_items(self) -> int:
-        """Number of items"""
+        """Number of items."""
         return self._n_items
 
     @property
-    def items(self) -> list[ItemInfo]:
-        """List of items"""
+    def items(self) -> ItemInfoList:
+        """List of items."""
         return self._items
 
     @property
     def start_time(self) -> datetime:
-        """File start time"""
+        """File start time."""
         return self._start_time
 
     @cached_property
@@ -324,12 +329,12 @@ class Dfs0:
 
     @property
     def n_timesteps(self) -> int:
-        """Number of time steps"""
+        """Number of time steps."""
         return self._n_timesteps
 
     @property
     def timestep(self) -> float:
-        """Time step size in seconds"""
+        """Time step size in seconds."""
         if self._timeaxistype == TimeAxisType.CalendarEquidistant:
             return self._source.FileInfo.TimeAxis.TimeStep  # type: ignore
         else:
@@ -337,7 +342,7 @@ class Dfs0:
 
     @property
     def time(self) -> pd.DatetimeIndex:
-        """File all datetimes"""
+        """File all datetimes."""
         if self._timeaxistype == TimeAxisType.CalendarEquidistant:
             freq = pd.Timedelta(seconds=self.timestep)
             return pd.date_range(
@@ -374,11 +379,12 @@ def dataframe_to_dfs0(
     title: str = "",
     dtype: Any | None = None,
 ) -> None:
-    """
-    Create a dfs0
+    """Create a dfs0.
 
     Parameters
     ----------
+    self: pd.DataFrame
+        Dataframe with data
     filename: str
         filename to write output
     itemtype: EUMType, optional
@@ -391,6 +397,7 @@ def dataframe_to_dfs0(
         Title of dfs0 file
     dtype : np.dtype, optional
             default np.float32
+
     """
     if not isinstance(self.index, pd.DatetimeIndex):
         raise ValueError(

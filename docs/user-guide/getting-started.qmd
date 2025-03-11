@@ -1,5 +1,33 @@
 # Getting started
 
+## Requirements
+
+* Windows or Linux operating system
+* Python x64 3.10 - 3.13
+* (Windows) [VC++ redistributables](https://support.microsoft.com/en-us/help/2977003/the-latest-supported-visual-c-downloads>) (already installed if you have MIKE)
+
+## Installation
+
+::: {.callout-tip}
+# Using uv
+[uv](https://docs.astral.sh/uv/) is an extremely fast Python package and project manager that is 10-100x faster than pip, and also makes it easy to install Python and manage projects. With uv, creating a virtual environment is as easy as uv venv.
+:::
+
+To install MIKE IO, run this command in a terminal:
+
+::: {.panel-tabset}
+## pip
+```bash
+pip install mikeio
+```
+
+## uv
+```bash
+uv pip install mikeio
+```
+
+:::
+
 ## {{< fa database >}} Dataset
 The [Dataset](dataset.qmd) is the common MIKE IO data structure for data read from dfs files. 
 The  [](`mikeio.read`) method returns a Dataset with a [DataArray](dataarray.qmd) for each item.

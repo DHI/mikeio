@@ -64,7 +64,7 @@ A common metric for model validation is mean absolute error (MAE).
 
 In the example below we calculate this metric using the model data interpolated to the observed times.
 
-For a more elaborate model validation library which takes care of these things for you as well as calculating a number of relevant metrics, take a look at [`ModelSkill](https://dhi.github.io/modelskill).
+For a more elaborate model validation library which takes care of these things for you as well as calculating a number of relevant metrics, take a look at [ModelSkill](https://dhi.github.io/modelskill).
 
 Use `np.nanmean` to skip NaN.
 

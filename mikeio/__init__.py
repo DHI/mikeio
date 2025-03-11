@@ -1,49 +1,33 @@
 from __future__ import annotations
+from importlib.metadata import PackageNotFoundError, version
 from pathlib import Path
-from platform import architecture
 from collections.abc import Sequence
 from typing import Any
 
-# PEP0440 compatible formatted version, see:
-# https://www.python.org/dev/peps/pep-0440/
-#
-# Generic release markers:
-#   X.Y
-#   X.Y.Z   # For bugfix releases
-#
-# Admissible pre-release markers:
-#   X.YaN   # Alpha release
-#   X.YbN   # Beta release
-#   X.YrcN  # Release Candidate
-#   X.Y     # Final release
-#
-# Dev branch marker is: 'X.Y.dev' or 'X.Y.devN' where N is an integer.
-# 'X.Y.dev0' is the canonical version of 'X.Y.dev'
-#
+try:
+    # read version from installed package
+    __version__ = version("mikeio")
+except PackageNotFoundError:
+    # package is not installed
+    __version__ = "dev"
 
-__version__ = "2.1.0"  # TODO use git hash instead for dev version?
-# __version__ = "1.5.0"
-__dfs_version__: int = 210
+__dfs_version__: int = 220
 
-
-if "64" not in architecture()[0]:
-    raise Exception("This library has not been tested for a 32 bit system.")
 
 from .dataset import DataArray, Dataset, from_pandas, from_polars
 from .dfs import Dfs0, Dfs1, Dfs2, Dfs3
-from .dfsu import Dfsu, Mesh
+from .dfsu import Dfsu, Mesh, Dfsu2DH, Dfsu2DV, Dfsu3D, DfsuSpectral
 from .eum import EUMType, EUMUnit, ItemInfo
 from .pfs import PfsDocument, PfsSection, read_pfs
 
-# Grid geometries are imported into the main module, since they are used to create dfs files
-# Other geometries are available in the spatial module
 from .spatial import (
     Grid1D,
     Grid2D,
     Grid3D,
+    GeometryFM2D,
+    GeometryFM3D,
+    GeometryFMVerticalProfile,
 )
-
-from .xyz import read_xyz
 
 
 def read(
@@ -54,7 +38,7 @@ def read(
     keepdims: bool = False,
     **kwargs: Any,
 ) -> Dataset:
-    """Read all or a subset of the data from a dfs file
+    """Read all or a subset of the data from a dfs file.
 
     All dfs files can be subsetted with the *items* and *time* arguments. But
     the following file types also have the shown additional arguments:
@@ -90,6 +74,8 @@ def read(
     fill_bad_data_value:
             fill value for to impute corrupt data, used in conjunction with error_bad_data=False
             default np.nan
+    **kwargs: Any
+        Additional keyword arguments
 
     Returns
     -------
@@ -124,20 +110,26 @@ def read(
     >>> ds = mikeio.read("MT3D_sigma_z.dfsu", layers=[-2,-1])
     >>> ds = mikeio.read("HD2D.dfsu", error_bad_data=False) # replace corrupt data with np.nan
     >>> ds = mikeio.read("HD2D.dfsu", error_bad_data=False, fill_bad_data_value=0.0) # replace corrupt data with 0.0
-    """
 
+    """
     ext = Path(filename).suffix.lower()
 
     if "dfs" not in ext:
-        raise ValueError("mikeio.read() is only supported for Dfs files")
+        raise ValueError(
+            "mikeio.read() is only supported for dfs files. Use mikeio.open for mesh files."
+        )
 
     dfs = open(filename)
+    if isinstance(dfs, Mesh):
+        raise ValueError("mikeio.read() is not supported for Mesh files")
 
     return dfs.read(items=items, time=time, keepdims=keepdims, **kwargs)
 
 
-def open(filename: str | Path, **kwargs: Any) -> Any:
-    """Open a dfs/mesh file (and read the header)
+def open(
+    filename: str | Path, **kwargs: Any
+) -> Dfs0 | Dfs1 | Dfs2 | Dfs3 | Dfsu2DH | Dfsu2DV | Dfsu3D | DfsuSpectral | Mesh:
+    """Open a dfs/mesh file (and read the header).
 
     The typical workflow for small dfs files is to read all data
     with *mikeio.read* instead of using this function. For big files, however,
@@ -152,6 +144,8 @@ def open(filename: str | Path, **kwargs: Any) -> Any:
     type : str, optional
         Dfs2 only. Additional information about the file, e.g.
         "spectral" for spectral dfs2 files. By default: None.
+    **kwargs: Any
+        Additional keyword arguments, e.g. *type="spectral"*
 
     See also
     --------
@@ -164,6 +158,7 @@ def open(filename: str | Path, **kwargs: Any) -> Any:
     >>> ds = dfs.read(items="Salinity", time="2016-01")
 
     >>> dfs = mikeio.open("pt_spectra.dfs2", type="spectral")
+
     """
     ext = Path(filename).suffix.lower()[1:]
 
@@ -195,6 +190,10 @@ __all__ = [
     "Dfs2",
     "Dfs3",
     "Dfsu",
+    "Dfsu2DH",
+    "Dfsu2DV",
+    "Dfsu3D",
+    "DfsuSpectral",
     "Mesh",
     "EUMType",
     "EUMUnit",
@@ -206,7 +205,9 @@ __all__ = [
     "Grid1D",
     "Grid2D",
     "Grid3D",
-    "read_xyz",
+    "GeometryFM2D",
+    "GeometryFM3D",
+    "GeometryFMVerticalProfile",
     "read",
     "open",
     "from_pandas",

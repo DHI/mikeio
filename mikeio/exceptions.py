@@ -1,8 +1,12 @@
+"""Custom exceptions for mikeio."""
+
 from __future__ import annotations
 from typing import Any
 
 
 class DataDimensionMismatch(ValueError):
+    """Raised when data matrices in the x dimension do not all match in the data list."""
+
     def __init__(self) -> None:
         self.message = (
             "Data matrices in the x dimension do not all match in the data list."
@@ -12,6 +16,8 @@ class DataDimensionMismatch(ValueError):
 
 
 class ItemsError(ValueError):
+    """Raised when items are not integers or strings."""
+
     def __init__(self, n_items_file: int) -> None:
         self.n_items_file = n_items_file
         super().__init__(
@@ -20,6 +26,8 @@ class ItemsError(ValueError):
 
 
 class InvalidGeometry(ValueError):
+    """Raised when an invalid geometry is used."""
+
     def __init__(
         self, message: str = "Invalid operation for this type of geometry"
     ) -> None:
@@ -27,6 +35,8 @@ class InvalidGeometry(ValueError):
 
 
 class InvalidDataValueType(ValueError):
+    """Raised when an invalid data value type is used."""
+
     def __init__(self) -> None:
         super().__init__(
             "Invalid data type. Choose 'Instantaneous', 'Accumulated', 'StepAccumulated', "
@@ -35,6 +45,8 @@ class InvalidDataValueType(ValueError):
 
 
 class OutsideModelDomainError(ValueError):
+    """Raised when point(s) are outside the model domain."""
+
     def __init__(
         self,
         *,

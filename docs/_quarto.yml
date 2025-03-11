@@ -3,7 +3,8 @@ project:
 
 website:
   title: "MIKE IO"
-  page-footer: "© 2024 DHI Group"
+  page-footer: "© 2025 DHI Group"
+  favicon: dhi.ico
   repo-url: https://github.com/DHI/mikeio
   repo-actions: [edit]
   repo-subdir: docs
@@ -22,18 +23,19 @@ website:
     left:
       - href: index.qmd
         text: Home
+      - href: user-guide/getting-started.qmd
+        text: "User Guide"
       - href: examples/index.qmd
         text: Examples
       - href: api/index.qmd
         text: API Reference 
     
+  # use hybrid navigation
+
   sidebar:
-    style: docked
-    search: true
-    contents: 
-      - section: "User Guide"
-        href: user-guide/getting-started.qmd
-        contents:
+    - title: "User Guide"
+      style: docked
+      contents:
         - user-guide/getting-started.qmd 
         - user-guide/data-structures.md
         - user-guide/dataarray.qmd
@@ -46,24 +48,16 @@ website:
         - user-guide/eum.qmd
         - user-guide/generic.qmd
         - user-guide/pfs.qmd
-      - section: Examples
-        href: examples/index.qmd
-        contents:
-          - section: Dfs2
-            href: examples/dfs2/index.qmd
-            contents:
-              - examples/dfs2/bathy.qmd
-              - examples/dfs2/gfs.qmd
-          - examples/Dfsu-2D-interpolation.qmd
-          - examples/Time-interpolation.qmd
-          - examples/Generic.qmd
-      - text: Design philosophy
-        href: design.qmd
-      - text: API Reference
-        href: api/index.qmd
-          
-        
 
+    - title: Examples
+      contents:
+        - examples/index.qmd
+        - examples/dfs0/index.qmd
+        - examples/dfs2/index.qmd
+        - examples/dfsu/index.qmd
+        - examples/Time-interpolation.qmd
+        - examples/Generic.qmd
+        
       
 filters:
   - interlinks
@@ -105,13 +99,6 @@ quartodoc:
       contents:
         - DataArray
         - Dataset
-        - dataset._data_plot._DatasetPlotter  # TODO alias?
-        - dataset._data_plot._DataArrayPlotter
-        - dataset._data_plot._DataArrayPlotterGrid1D
-        - dataset._data_plot._DataArrayPlotterGrid2D
-        - dataset._data_plot._DataArrayPlotterFM
-        - dataset._data_plot._DataArrayPlotterFMVerticalProfile
-        - dataset._data_plot._DataArrayPlotterFMVerticalColumn
     - title: Geometry
       desc: ""
       contents:
@@ -158,9 +145,23 @@ quartodoc:
       contents:
         - PfsDocument
         - PfsSection
+    
+    - title: Dataset plotting
+      desc: "Plotting functions for Dataset and DataArray objects."
+      contents:
+        - dataset._DatasetPlotter
+        - dataset._DataArrayPlotter
+        - dataset._DataArrayPlotterGrid1D
+        - dataset._DataArrayPlotterGrid2D
+        - dataset._DataArrayPlotterFM
+        - dataset._DataArrayPlotterFMVerticalProfile
+        - dataset._DataArrayPlotterFMVerticalColumn
 
     
 format:
   html:
+    theme: cosmo
+    toc: true
+  ipynb: 
     theme: cosmo
     toc: true

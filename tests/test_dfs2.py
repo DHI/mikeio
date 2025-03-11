@@ -26,14 +26,20 @@ def dfs2_random_2items():
 
 
 @pytest.fixture
+def dfs2_pt_spectrum_geographical():
+    filepath = Path("tests/testdata/spectra/pt_spectra_geographical.dfs2")
+    return mikeio.open(filepath, type="spectral")
+
+
+@pytest.fixture
 def dfs2_pt_spectrum():
-    filepath = Path("tests/testdata/pt_spectra.dfs2")
+    filepath = Path("tests/testdata/spectra/pt_spectra.dfs2")
     return mikeio.open(filepath, type="spectral")
 
 
 @pytest.fixture
 def dfs2_pt_spectrum_linearf():
-    filepath = Path("tests/testdata/dir_wave_analysis_spectra.dfs2")
+    filepath = Path("tests/testdata/spectra/dir_wave_analysis_spectra.dfs2")
     return mikeio.open(filepath, type="spectral")
 
 
@@ -58,7 +64,6 @@ def test_get_time_without_reading_data():
 
 
 def test_write_projected(tmp_path):
-
     fp = tmp_path / "utm.dfs2"
 
     nt = 100
@@ -161,7 +166,6 @@ def test_write_without_time(tmp_path):
 
 
 def test_read(dfs2_random):
-
     dfs = dfs2_random
     assert isinstance(dfs.geometry, Grid2D)
     ds = dfs.read(items=["testing water level"])
@@ -180,7 +184,6 @@ def test_read_bad_item(dfs2_random):
 
 
 def test_read_temporal_subset_slice():
-
     filename = r"tests/testdata/eq.dfs2"
     dfs = mikeio.open(filename)
     ds = dfs.read(time=slice("2000-01-01 00:00", "2000-01-01 12:00"))
@@ -189,7 +192,6 @@ def test_read_temporal_subset_slice():
 
 
 def test_read_area_subset_bad_bbox():
-
     filename = "tests/testdata/europe_wind_long_lat.dfs2"
     bbox = (10, 40, 20)
     with pytest.raises(ValueError):
@@ -220,7 +222,6 @@ def test_subset_bbox():
 
 
 def test_read_area_subset():
-
     filename = "tests/testdata/eq.dfs2"
     bbox = [10, 4, 12, 7]
 
@@ -247,7 +248,6 @@ def test_read_area_subset():
 
 
 def test_read_numbered_access(dfs2_random_2items):
-
     dfs = dfs2_random_2items
 
     res = dfs.read(items=[1])
@@ -318,6 +318,31 @@ def test_properties_pt_spectrum(dfs2_pt_spectrum):
     assert g.orientation == 0
 
 
+def test_properties_pt_spectrum_geographical(dfs2_pt_spectrum_geographical):
+    dfs = dfs2_pt_spectrum_geographical
+    assert dfs.x0 == pytest.approx(0.055)
+    assert dfs.y0 == 0
+    assert dfs.dx == pytest.approx(1.1)
+    assert dfs.dy == 22.5
+    assert dfs.nx == 25
+    assert dfs.ny == 16
+    assert dfs.longitude == pytest.approx(0, abs=1e-6)
+    assert dfs.latitude == 0
+    assert dfs.orientation == 0
+    assert dfs.n_items == 1
+    assert dfs.n_timesteps == 31
+
+    g = dfs.geometry
+    assert g.is_spectral
+    assert g.x[0] == pytest.approx(0.055)
+    # assert g.x[-1] > 25  # if considered linear
+    assert g.x[-1] < 0.6  # logarithmic
+    assert g.y[0] == 0
+    assert g.dx == pytest.approx(1.1)
+    assert g.dy == 22.5
+    assert g.orientation == 0
+
+
 def test_properties_pt_spectrum_linearf(dfs2_pt_spectrum_linearf):
     dfs = dfs2_pt_spectrum_linearf
     # This file doesn't have a valid projection string
@@ -349,7 +374,7 @@ def test_properties_pt_spectrum_linearf(dfs2_pt_spectrum_linearf):
 
 def test_dir_wave_spectra_relative_time_axis():
     ds = mikeio.open(
-        "tests/testdata/dir_wave_analysis_spectra.dfs2", type="spectral"
+        "tests/testdata/spectra/dir_wave_analysis_spectra.dfs2", type="spectral"
     ).read()
     assert ds.n_items == 1
     assert ds.geometry.nx == 128
@@ -431,7 +456,6 @@ def test_select_area_rotated_UTM_2():
 
 
 def test_write_selected_item_to_new_file(dfs2_random_2items, tmp_path):
-
     dfs = dfs2_random_2items
 
     fp = tmp_path / "simple.dfs2"
@@ -455,7 +479,6 @@ def test_write_selected_item_to_new_file(dfs2_random_2items, tmp_path):
 
 
 def test_repr(dfs2_gebco):
-
     text = repr(dfs2_gebco)
 
     assert "Dfs2" in text
@@ -464,7 +487,6 @@ def test_repr(dfs2_gebco):
 
 
 def test_repr_time(dfs2_random):
-
     dfs = dfs2_random
     text = repr(dfs)
 
@@ -475,7 +497,6 @@ def test_repr_time(dfs2_random):
 
 
 def test_write_modified_data_to_new_file(dfs2_gebco, tmp_path):
-
     dfs = dfs2_gebco
 
     fp = tmp_path / "mod.dfs2"
@@ -492,7 +513,6 @@ def test_write_modified_data_to_new_file(dfs2_gebco, tmp_path):
 
 
 def test_read_some_time_step(dfs2_random_2items):
-
     dfs = dfs2_random_2items
     res = dfs.read(time=[1, 2])
 
@@ -501,7 +521,6 @@ def test_read_some_time_step(dfs2_random_2items):
 
 
 def test_interpolate_non_equidistant_data(tmp_path):
-
     ds = mikeio.read(
         "tests/testdata/eq.dfs2", time=[0, 2, 3, 6]
     )  # non-equidistant dataset
@@ -525,7 +544,6 @@ def test_interpolate_non_equidistant_data(tmp_path):
 
 
 def test_write_some_time_step(tmp_path):
-
     ds = mikeio.read("tests/testdata/waves.dfs2", time=[1, 2])
 
     assert ds[0].to_numpy().shape[0] == 2
@@ -593,7 +611,6 @@ def test_write_accumulated_datatype(tmp_path):
 
 
 def test_write_NonEqCalendarAxis(tmp_path):
-
     fp = tmp_path / "simple.dfs2"
 
     d = np.random.random([6, 5, 10])
@@ -623,7 +640,6 @@ def test_write_NonEqCalendarAxis(tmp_path):
 
 
 def test_write_non_equidistant_data(tmp_path):
-
     ds = mikeio.read(
         "tests/testdata/eq.dfs2", time=[0, 2, 3, 6]
     )  # non-equidistant dataset
@@ -658,7 +674,6 @@ def test_read_concat_write_dfs2(tmp_path):
 
 
 def test_spatial_aggregation_dfs2_to_dfs0(tmp_path):
-
     outfilename = tmp_path / "waves_max.dfs0"
 
     ds = mikeio.read("tests/testdata/waves.dfs2")
@@ -705,7 +720,6 @@ def test_grid2d_plot():
 
 
 def test_read_single_precision():
-
     ds = mikeio.read("tests/testdata/random.dfs2", items=0, dtype=np.float32)
 
     assert len(ds) == 1
@@ -713,7 +727,6 @@ def test_read_single_precision():
 
 
 def dfs2_props_to_list(d):
-
     lon = d._dfs.FileInfo.Projection.Longitude
     lat = d._dfs.FileInfo.Projection.Latitude
     rot = d._dfs.FileInfo.Projection.Orientation
@@ -788,7 +801,7 @@ def test_read_write_header_unchanged_vertical(tmp_path):
 
 
 def test_read_write_header_unchanged_spectral_2(tmp_path):
-    is_header_unchanged_on_read_write(tmp_path, "pt_spectra.dfs2")
+    is_header_unchanged_on_read_write(tmp_path, "spectra/pt_spectra.dfs2")
 
 
 def test_read_write_header_unchanged_MIKE_SHE_output(tmp_path):
@@ -812,7 +825,6 @@ def test_MIKE_SHE_output():
 
 
 def test_read_dfs2_static_dt_zero():
-
     with pytest.warns(UserWarning, match="positive"):
         ds = mikeio.read("tests/testdata/single_time_dt_zero.dfs2")
     assert ds.n_timesteps == 1
