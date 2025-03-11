@@ -243,7 +243,7 @@ class Dfs2(_Dfs123):
         else:
             dims = ("time", "y", "x")
 
-        return Dataset(
+        return Dataset.from_numpy(
             data_list,
             time=time,
             items=items,

@@ -34,7 +34,7 @@ Selecting a specific item "itemA" (at position 0) from a Dataset ds can be done 
 * `ds[0]` - returns "itemA" DataArray
 * `ds.itemA` - returns "itemA" DataArray
 
-We recommend the use *named* items for readability. 
+We recommend to use *named* items for readability. 
 
 ```{python}
 ds.Surface_elevation

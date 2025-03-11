@@ -156,7 +156,7 @@ def _extract_track(
     for item_info in items:
         items_out.append(item_info)
 
-    return Dataset(data_list, times, items_out)
+    return Dataset.from_numpy(data=data_list, time=times, items=items_out)
 
 
 def _get_track_data_from_dataset(track: Dataset) -> tuple[pd.DatetimeIndex, np.ndarray]:
