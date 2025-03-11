@@ -3,6 +3,7 @@
     "listing": "/examples/index.html",
     "items": [
       "/examples/dfs0/cmems_insitu.html",
+      "/examples/dfs0/relative_time.html",
       "/examples/dfs0/index.html",
       "/examples/dfs2/bathy.html",
       "/examples/dfs2/gfs.html",

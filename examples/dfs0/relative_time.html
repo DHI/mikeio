@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>from_polars – MIKE IO</title>
+<title>Dfs0 - Relative time axis – MIKE IO</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -57,23 +57,23 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </style>
 
 
-<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
-<script src="../site_libs/quarto-nav/headroom.min.js"></script>
-<script src="../site_libs/clipboard/clipboard.min.js"></script>
-<script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
-<script src="../site_libs/quarto-search/fuse.min.js"></script>
-<script src="../site_libs/quarto-search/quarto-search.js"></script>
-<meta name="quarto:offset" content="../">
-<link href="../dhi.ico" rel="icon">
-<script src="../site_libs/quarto-html/quarto.js"></script>
-<script src="../site_libs/quarto-html/popper.min.js"></script>
-<script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
-<script src="../site_libs/quarto-html/anchor.min.js"></script>
-<link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="../site_libs/quarto-html/quarto-syntax-highlighting-2f5df379a58b258e96c21c0638c20c03.css" rel="stylesheet" id="quarto-text-highlighting-styles">
-<script src="../site_libs/bootstrap/bootstrap.min.js"></script>
-<link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="../site_libs/bootstrap/bootstrap-c55491ef36bbbc1896d0375eee332cfe.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js" integrity="sha512-bLT0Qm9VnAYZDflyKcBaQ2gg0hSYNQrJ8RilYldYQ1FxQYoCLtUjuuRuZo+fjqhx/qtq/1itJ0C2ejDxltZVFg==" crossorigin="anonymous"></script><script src="../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../../">
+<link href="../../dhi.ico" rel="icon">
+<script src="../../site_libs/quarto-html/quarto.js"></script>
+<script src="../../site_libs/quarto-html/popper.min.js"></script>
+<script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-2f5df379a58b258e96c21c0638c20c03.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../../site_libs/bootstrap/bootstrap-c55491ef36bbbc1896d0375eee332cfe.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -101,6 +101,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     "search-label": "Search"
   }
 }</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" integrity="sha512-c3Nl8+7g4LMSTdrm621y7kf9v3SDPnhxLNhcjFJbKECVnmZHTdo+IRO05sNLTH/D3vA6u1X32ehoLC7WFVdheg==" crossorigin="anonymous"></script>
+
+<script type="application/javascript">define('jquery', [],function() {return window.jQuery;})</script>
 
 
 </head>
@@ -112,10 +115,10 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
       <div class="navbar-container container-fluid">
       <div class="navbar-brand-container mx-auto">
-    <a href="../index.html" class="navbar-brand navbar-brand-logo">
-    <img src="../MIKE-IO-Icon-Pos-RGB.png" alt="" class="navbar-logo">
+    <a href="../../index.html" class="navbar-brand navbar-brand-logo">
+    <img src="../../MIKE-IO-Icon-Pos-RGB.png" alt="" class="navbar-logo">
     </a>
-    <a class="navbar-brand" href="../index.html">
+    <a class="navbar-brand" href="../../index.html">
     <span class="navbar-title">MIKE IO</span>
     </a>
   </div>
@@ -126,19 +129,19 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
           <div class="collapse navbar-collapse" id="navbarCollapse">
             <ul class="navbar-nav navbar-nav-scroll me-auto">
   <li class="nav-item">
-    <a class="nav-link" href="../index.html"> 
+    <a class="nav-link" href="../../index.html"> 
 <span class="menu-text">Home</span></a>
   </li>  
   <li class="nav-item">
-    <a class="nav-link" href="../user-guide/getting-started.html"> 
+    <a class="nav-link" href="../../user-guide/getting-started.html"> 
 <span class="menu-text">User Guide</span></a>
   </li>  
   <li class="nav-item">
-    <a class="nav-link" href="../examples/index.html"> 
+    <a class="nav-link" href="../../examples/index.html"> 
 <span class="menu-text">Examples</span></a>
   </li>  
   <li class="nav-item">
-    <a class="nav-link" href="../api/index.html"> 
+    <a class="nav-link" href="../../api/index.html"> 
 <span class="menu-text">API Reference</span></a>
   </li>  
 </ul>
@@ -172,18 +175,16 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     <h2 id="toc-title">On this page</h2>
    
   <ul>
-  <li><a href="#parameters" id="toc-parameters" class="nav-link active" data-scroll-target="#parameters">Parameters</a></li>
-  <li><a href="#returns" id="toc-returns" class="nav-link" data-scroll-target="#returns">Returns</a></li>
-  <li><a href="#examples" id="toc-examples" class="nav-link" data-scroll-target="#examples">Examples</a></li>
+  <li><a href="#mikecore" id="toc-mikecore" class="nav-link active" data-scroll-target="#mikecore">mikecore</a></li>
   </ul>
-<div class="quarto-alternate-formats"><h2>Other Formats</h2><ul><li><a href="from_polars.ipynb" download="from_polars.ipynb"><i class="bi bi-journal-code"></i>Jupyter</a></li></ul></div></nav>
+<div class="toc-actions"><ul><li><a href="https://github.com/DHI/mikeio/edit/main/docs/examples/dfs0/relative_time.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li></ul></div><div class="quarto-alternate-formats"><h2>Other Formats</h2><ul><li><a href="relative_time.ipynb" download="relative_time.ipynb"><i class="bi bi-journal-code"></i>Jupyter</a></li></ul></div></nav>
     </div>
 <!-- main -->
 <main class="content" id="quarto-document-content">
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<h1 class="title">from_polars</h1>
+<h1 class="title">Dfs0 - Relative time axis</h1>
 </div>
 
 
@@ -200,97 +201,278 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </header>
 
 
-<div class="sourceCode" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>from_polars(df, items<span class="op">=</span><span class="va">None</span>, datetime_col<span class="op">=</span><span class="va">None</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p>Create a Dataset from a polars DataFrame.</p>
-<section id="parameters" class="level2 doc-section doc-section-parameters">
-<h2 class="doc-section doc-section-parameters anchored" data-anchor-id="parameters">Parameters</h2>
-<table class="caption-top table">
-<colgroup>
-<col style="width: 6%">
-<col style="width: 34%">
-<col style="width: 52%">
-<col style="width: 5%">
-</colgroup>
-<thead>
-<tr class="header">
-<th>Name</th>
-<th>Type</th>
-<th>Description</th>
-<th>Default</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td>df</td>
-<td>'pl.DataFrame'</td>
-<td>DataFrame</td>
-<td><em>required</em></td>
-</tr>
-<tr class="even">
-<td>items</td>
-<td>Mapping[str, ItemInfo] | Sequence[ItemInfo] | ItemInfo | None</td>
-<td>Mapping of item names to ItemInfo objects, or a sequence of ItemInfo objects, or a single ItemInfo object.</td>
-<td><code>None</code></td>
-</tr>
-<tr class="odd">
-<td>datetime_col</td>
-<td>str | None</td>
-<td>Name of the column containing datetime information, default is to use the first datetime column found.</td>
-<td><code>None</code></td>
-</tr>
-</tbody>
-</table>
-</section>
-<section id="returns" class="level2 doc-section doc-section-returns">
-<h2 class="doc-section doc-section-returns anchored" data-anchor-id="returns">Returns</h2>
-<table class="caption-top table">
-<thead>
-<tr class="header">
-<th>Name</th>
-<th>Type</th>
-<th>Description</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td></td>
-<td>Dataset</td>
-<td>time series dataset</td>
-</tr>
-</tbody>
-</table>
-</section>
-<section id="examples" class="level2 doc-section doc-section-examples">
-<h2 class="doc-section doc-section-examples anchored" data-anchor-id="examples">Examples</h2>
-<div id="25fd048f" class="cell" data-execution_count="1">
-<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> polars <span class="im">as</span> pl</span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> mikeio</span>
-<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> datetime <span class="im">import</span> datetime</span>
-<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> pl.DataFrame(</span>
-<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>    {</span>
-<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>        <span class="st">"time"</span>: [datetime(<span class="dv">2021</span>, <span class="dv">1</span>, <span class="dv">1</span>), datetime(<span class="dv">2021</span>, <span class="dv">1</span>, <span class="dv">2</span>)],</span>
-<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>        <span class="st">"A"</span>: [<span class="fl">1.0</span>, <span class="fl">2.0</span>],</span>
-<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>        <span class="st">"B"</span>: [<span class="fl">4.0</span>, <span class="fl">5.0</span>],</span>
-<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>    }</span>
-<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>ds <span class="op">=</span> mikeio.from_polars(</span>
-<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>    df,</span>
-<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>    items<span class="op">=</span>{</span>
-<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a>        <span class="st">"A"</span>: mikeio.ItemInfo(mikeio.EUMType.Water_Level),</span>
-<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a>        <span class="st">"B"</span>: mikeio.ItemInfo(mikeio.EUMType.Discharge),</span>
-<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a>    },</span>
-<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a>ds</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-display" data-execution_count="1">
+<p>MIKE IO uses a pandas DatetimeIndex to represent the time dimension in dfs files. If the Dfs file has a relative time axis it will be converted to DatetimeIndex by using 1970-1-1 00:00:00 as start time.</p>
+<div id="e0e37033" class="cell" data-execution_count="1">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> mikeio</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div id="58f188df" class="cell" data-execution_count="2">
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>ds <span class="op">=</span> mikeio.read(<span class="st">"../../data/eq_relative.dfs0"</span>)</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>ds</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="2">
 <pre><code>&lt;mikeio.Dataset&gt;
-dims: (time:2)
-time: 2021-01-01 00:00:00 - 2021-01-02 00:00:00 (2 records)
+dims: (time:504)
+time: 1970-01-01 00:00:00 - 1970-01-01 00:00:56.237000 (504 non-equidistant records)
 geometry: GeometryUndefined()
 items:
-  0:  A &lt;Water Level&gt; (meter)
-  1:  B &lt;Discharge&gt; (meter pow 3 per sec)</code></pre>
+  0:  Item 1 &lt;Undefined&gt; (undefined)
+  1:  Item 2 &lt;Undefined&gt; (undefined)
+  2:  Item 3 &lt;Undefined&gt; (undefined)
+  3:  Item 4 &lt;Undefined&gt; (undefined)
+  4:  Item 5 &lt;Undefined&gt; (undefined)</code></pre>
+</div>
+</div>
+<div id="743fc62a" class="cell" data-execution_count="3">
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> ds.to_dataframe()</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>df.head()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="3">
+<div>
+
+
+<table class="dataframe caption-top table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">Item 1</th>
+<th data-quarto-table-cell-role="th">Item 2</th>
+<th data-quarto-table-cell-role="th">Item 3</th>
+<th data-quarto-table-cell-role="th">Item 4</th>
+<th data-quarto-table-cell-role="th">Item 5</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">1970-01-01 00:00:00.000</td>
+<td>-0.006862</td>
+<td>-0.000611</td>
+<td>0.177047</td>
+<td>32.484425</td>
+<td>-304.720428</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">1970-01-01 00:00:00.112</td>
+<td>-0.011746</td>
+<td>-0.000611</td>
+<td>0.189257</td>
+<td>32.292774</td>
+<td>-308.553406</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">1970-01-01 00:00:00.224</td>
+<td>-0.006862</td>
+<td>-0.000611</td>
+<td>0.189257</td>
+<td>32.292774</td>
+<td>-308.553406</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">1970-01-01 00:00:00.335</td>
+<td>-0.001978</td>
+<td>0.004273</td>
+<td>0.189257</td>
+<td>32.292774</td>
+<td>-300.887482</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">1970-01-01 00:00:00.447</td>
+<td>0.002906</td>
+<td>0.009157</td>
+<td>0.177047</td>
+<td>32.292774</td>
+<td>-300.887482</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
+<p>Correcting the dataframe index by subtracting start time to get relative time axis.</p>
+<div id="746d7cf6" class="cell" data-execution_count="4">
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>df.index <span class="op">=</span> (df.index <span class="op">-</span> df.index[<span class="dv">0</span>]).total_seconds()</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>df.index.name <span class="op">=</span> <span class="st">"Relative time (s)"</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div id="24b1c07f" class="cell" data-execution_count="5">
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>df.head()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="5">
+<div>
+
+
+<table class="dataframe caption-top table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">Item 1</th>
+<th data-quarto-table-cell-role="th">Item 2</th>
+<th data-quarto-table-cell-role="th">Item 3</th>
+<th data-quarto-table-cell-role="th">Item 4</th>
+<th data-quarto-table-cell-role="th">Item 5</th>
+</tr>
+<tr class="even">
+<th data-quarto-table-cell-role="th">Relative time (s)</th>
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th"></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">0.000</td>
+<td>-0.006862</td>
+<td>-0.000611</td>
+<td>0.177047</td>
+<td>32.484425</td>
+<td>-304.720428</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">0.112</td>
+<td>-0.011746</td>
+<td>-0.000611</td>
+<td>0.189257</td>
+<td>32.292774</td>
+<td>-308.553406</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">0.224</td>
+<td>-0.006862</td>
+<td>-0.000611</td>
+<td>0.189257</td>
+<td>32.292774</td>
+<td>-308.553406</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">0.335</td>
+<td>-0.001978</td>
+<td>0.004273</td>
+<td>0.189257</td>
+<td>32.292774</td>
+<td>-300.887482</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">0.447</td>
+<td>0.002906</td>
+<td>0.009157</td>
+<td>0.177047</td>
+<td>32.292774</td>
+<td>-300.887482</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
+<div id="61bd62d6" class="cell" data-execution_count="6">
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>df[<span class="st">'Item 5'</span>].plot()<span class="op">;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="relative_time_files/figure-html/cell-7-output-1.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+<section id="mikecore" class="level2">
+<h2 class="anchored" data-anchor-id="mikecore">mikecore</h2>
+<p>An alternative is to use the underlying library <a href="https://github.com/DHI/mikecore-python"><code>mikecore</code></a> to read the file.</p>
+<div id="d6dfbc19" class="cell" data-execution_count="7">
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> mikecore.DfsFileFactory <span class="im">import</span> DfsFileFactory</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>dfs <span class="op">=</span> DfsFileFactory.DfsGenericOpen(<span class="st">"../../data/eq_relative.dfs0"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Using the <code>ReadDfs0DataDouble</code> method you get the data as a numpy array, with the time axis or other type of as the first column,</p>
+<div id="340b4e38" class="cell" data-execution_count="8">
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>data <span class="op">=</span> dfs.ReadDfs0DataDouble()</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a><span class="bu">type</span>(data)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="8">
+<pre><code>numpy.ndarray</code></pre>
+</div>
+</div>
+<p>which can be converted to a pandas dataframe. First we extract the name of items (which in this example hapeens to be not very creative).</p>
+<div id="aeaf5879" class="cell" data-execution_count="9">
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>index_name <span class="op">=</span> <span class="st">"time"</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>items <span class="op">=</span> [i.Name <span class="cf">for</span> i <span class="kw">in</span> dfs.ItemInfo]</span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>items <span class="op">=</span> [index_name] <span class="op">+</span> items</span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>items</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="9">
+<pre><code>['time', 'Item 1', 'Item 2', 'Item 3', 'Item 4', 'Item 5']</code></pre>
+</div>
+</div>
+<div id="c6ddf177" class="cell" data-execution_count="10">
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> df</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> df.DataFrame(data, columns<span class="op">=</span>items).set_index(index_name)</span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>df.head()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display" data-execution_count="10">
+<div>
+
+
+<table class="dataframe caption-top table table-sm table-striped small" data-quarto-postprocess="true" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">Item 1</th>
+<th data-quarto-table-cell-role="th">Item 2</th>
+<th data-quarto-table-cell-role="th">Item 3</th>
+<th data-quarto-table-cell-role="th">Item 4</th>
+<th data-quarto-table-cell-role="th">Item 5</th>
+</tr>
+<tr class="even">
+<th data-quarto-table-cell-role="th">time</th>
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th"></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">0.000000</td>
+<td>-0.006862</td>
+<td>-0.000611</td>
+<td>0.177047</td>
+<td>32.484425</td>
+<td>-304.720428</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">0.111803</td>
+<td>-0.011746</td>
+<td>-0.000611</td>
+<td>0.189257</td>
+<td>32.292774</td>
+<td>-308.553406</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">0.223606</td>
+<td>-0.006862</td>
+<td>-0.000611</td>
+<td>0.189257</td>
+<td>32.292774</td>
+<td>-308.553406</td>
+</tr>
+<tr class="even">
+<td data-quarto-table-cell-role="th">0.335409</td>
+<td>-0.001978</td>
+<td>0.004273</td>
+<td>0.189257</td>
+<td>32.292774</td>
+<td>-300.887482</td>
+</tr>
+<tr class="odd">
+<td data-quarto-table-cell-role="th">0.447212</td>
+<td>0.002906</td>
+<td>0.009157</td>
+<td>0.177047</td>
+<td>32.292774</td>
+<td>-300.887482</td>
+</tr>
+</tbody>
+</table>
+
+</div>
 </div>
 </div>
 
@@ -723,7 +905,7 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
     </div>   
     <div class="nav-footer-center">
 <p>© 2025 DHI Group</p>
-</div>
+<div class="toc-actions d-sm-block d-md-none"><ul><li><a href="https://github.com/DHI/mikeio/edit/main/docs/examples/dfs0/relative_time.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li></ul></div></div>
     <div class="nav-footer-right">
       &nbsp;
     </div>
