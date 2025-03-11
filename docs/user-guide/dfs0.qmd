@@ -45,7 +45,6 @@ ds.to_dfs("mauna_loa_co2.dfs0")
 
 ## Dfs0 example notebooks
 
-* [Dfs0](https://nbviewer.jupyter.org/github/DHI/mikeio/blob/main/notebooks/Dfs0%20-%20Timeseries.ipynb) - read, write, to_dataframe, non-equidistant, accumulated timestep, extrapolation
-* [Dfs0 Relative-time](https://nbviewer.jupyter.org/github/DHI/mikeio/blob/main/notebooks/Dfs0%20-%20Relative%20time.ipynb) - read file with relative time axis
+* [Dfs0 | Relative time](../examples/dfs0/relative_time.qmd)
 * [Dfs0 | getting-started-with-mikeio](https://dhi.github.io/getting-started-with-mikeio/dfs0.html) - Course literature
 
