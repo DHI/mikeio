@@ -19,17 +19,17 @@ degree Celsius
 
 from __future__ import annotations
 from enum import IntEnum
-from typing import Dict, List, Sequence, Literal
+from typing import Any, Sequence, Literal
 
 import pandas as pd
 from mikecore.DfsFile import DataValueType, DfsDynamicItemInfo
-from mikecore.eum import eumUnit, eumWrapper
+from mikecore.eum import eumUnit, eumItem, eumWrapper
 
 from ..exceptions import InvalidDataValueType
 
 
-def _type_list(search=None):
-    """Get a dictionary of the EUM items
+def _type_list(search: str | None = None) -> dict[eumItem, str]:
+    """Get a dictionary of the EUM items.
 
     Notes
     -----
@@ -44,6 +44,7 @@ def _type_list(search=None):
     -------
     dict
         names and codes for EUM items
+
     """
     items = {}
     check = True
@@ -69,18 +70,19 @@ def _type_list(search=None):
     return items
 
 
-def _unit_list(eum_type: int) -> Dict[str, eumUnit]:
-    """Get a dictionary of valid units
+def _unit_list(eum_type: int) -> dict[str, eumUnit]:
+    """Get a dictionary of valid units.
 
     Parameters
     ----------
-    type_enum: int
+    eum_type: int
         EUM variable type, e.g. 100006 or EUMType.Temperature
 
     Returns
     -------
     dict
         names and codes for valid units
+
     """
     items = {}
     n_units_for_eum_type = eumWrapper.eumGetItemUnitCount(eum_type)
@@ -92,19 +94,16 @@ def _unit_list(eum_type: int) -> Dict[str, eumUnit]:
 
 
 class TimeAxisType(IntEnum):
-
     EquidistantRelative = 1
     NonEquidistantRelative = 2
     EquidistantCalendar = 3
     NonEquidistantCalendar = 4
 
-    def __repr__(self):
-
+    def __repr__(self) -> str:
         return self.name
 
 
 class TimeStepUnit(IntEnum):
-
     SECOND = 1400
     MINUTE = 1401
     HOUR = 1402
@@ -114,7 +113,7 @@ class TimeStepUnit(IntEnum):
 
 
 class EUMType(IntEnum):
-    """EUM type
+    """EUM type.
 
     Examples
     --------
@@ -126,6 +125,7 @@ class EUMType(IntEnum):
     ```{python}
     mikeio.EUMType.Temperature.units
     ```
+
     """
 
     Water_Level = 100000
@@ -716,35 +716,42 @@ class EUMType(IntEnum):
     ThermalConductivity = 110310
     DirectionalVariance = 110311
     SpecificDissipationRate = 110312
+    AngularFrequency = 110313
+    StemDiameter = 110314
+    VegetationDensity = 110315
+    ElasticModulus = 110316
+    BladeWidth = 110317
+    BladeThickness = 110318
+    PlantDensity = 110319
+    Thickness = 110320
 
-    def __init__(self, code):
+    def __init__(self, code: int) -> None:
         self.code = code
 
     @property
-    def display_name(self):
-        """Display friendly name"""
+    def display_name(self) -> str:
+        """Display friendly name."""
         name = self.name
         name = name.replace("_", " ")
         return name
 
-    def __repr__(self):
-
+    def __repr__(self) -> str:
         return self.display_name
 
     @property
-    def units(self):
-        """List valid units for this EUM type"""
-        temp = _unit_list(self.code).items()
-        return [EUMUnit(value) for _, value in temp]
+    def units(self) -> list[EUMUnit]:
+        """List valid units for this EUM type."""
+        temp = _unit_list(self.code).values()
+        return [EUMUnit(value) for value in temp]
 
     @staticmethod
-    def search(pattern) -> List["EUMType"]:
-        temp = _type_list(pattern).items()
-        return [EUMType(key) for key, _ in temp]
+    def search(pattern: str) -> list[EUMType]:
+        temp = _type_list(pattern).keys()
+        return [EUMType(key) for key in temp]
 
 
 class EUMUnit(IntEnum):
-    """EUM unit
+    """EUM unit.
 
     Examples
     --------
@@ -752,6 +759,7 @@ class EUMUnit(IntEnum):
     import mikeio
     mikeio.EUMUnit.degree_Kelvin
     ```
+
     """
 
     meter = 1000
@@ -1122,6 +1130,7 @@ class EUMUnit(IntEnum):
     psi = 6103
     bar = 6107
     decibar = 6110
+    gigapascal = 6111
     kg_per_meter_pow_2_per_day = 4506
     meter_pow_3_per_mg = 6902
     meter_pow_3_per_mu_g = 6903
@@ -1159,6 +1168,7 @@ class EUMUnit(IntEnum):
     ounce_per_yard_US3 = 2219
     ounce_per_square_feet = 2220
     ounce_per_square_feet_US = 2221
+    gramPerCubicCentimeter = 2222
     kg_per_meter_per_sec = 2300
     Pascal_second = 2301
     kilogram_per_meter_per_day = 2302
@@ -1292,6 +1302,7 @@ class EUMUnit(IntEnum):
     per_acre = 9301
     per_hectare = 9302
     per_km_pow_2 = 9303
+    per_square_feet = 9304
     per_cubic_meter = 9350
     currency_per_meter_pow_3 = 9351
     currency_per_feet_pow_3 = 9352
@@ -1359,19 +1370,18 @@ class EUMUnit(IntEnum):
     lbf_sec_per_feet_pow_2 = 99265
     pound_per__sec_feet_ = 99266
 
-    def __init__(self, code):
+    def __init__(self, code: int) -> None:
         self.code = code
 
     @property
-    def display_name(self):
-        """Display friendly name"""
+    def display_name(self) -> str:
+        """Display friendly name."""
         name = self.name
         name = name.replace("_", " ")
         return name
 
     @property
-    def short_name(self):
-
+    def short_name(self) -> str:
         unit_short_names = {
             "kilometer": "km",
             "centimeter": "cm",
@@ -1395,18 +1405,18 @@ class EUMUnit(IntEnum):
             name = name.replace(key, value)
         return name
 
-    def __repr__(self):
-
+    def __repr__(self) -> str:
         return self.display_name
 
 
 class ItemInfo:
-    """ItemInfo
+    """Info for dynamicc items (variables).
 
     Parameters
     ----------
     name: str or EUMType, optional
-    type: EUMType or int, optional
+        User defined name
+    itemtype: EUMType or int, optional
         Default EUMType.Undefined
     unit: EUMUnit or int, optional
         Default unit matching EUMType
@@ -1424,6 +1434,7 @@ class ItemInfo:
     ```{python}
     mikeio.ItemInfo(mikeio.EUMType.Wind_speed)
     ```
+
     """
 
     def __init__(
@@ -1432,10 +1443,9 @@ class ItemInfo:
         itemtype: EUMType | EUMUnit | None = None,
         unit: EUMUnit | None = None,
         data_value_type: Literal[
-            "Instantaneous", "Accumulated", "StepAccumulated", "MeanStepBackWard"
+            "Instantaneous", "Accumulated", "StepAccumulated", "MeanStepBackward"
         ] = "Instantaneous",
     ) -> None:
-
         # Handle arguments in the wrong place
         if isinstance(name, EUMType):
             if isinstance(itemtype, EUMUnit):
@@ -1457,11 +1467,9 @@ class ItemInfo:
             if name is None:
                 name = itemtype.display_name
         else:
-
             self.type = EUMType.Undefined
 
         if unit is not None:
-
             if isinstance(unit, int):
                 unit = EUMUnit(unit)
 
@@ -1469,12 +1477,12 @@ class ItemInfo:
                 raise ValueError(
                     "Invalid unit. Unit should be supplied as EUMUnit, e.g. ItemInfo('WL',EUMType.Water_Level, EUMUnit.meter)"
                 )
-            self.unit = unit
+            self._unit = unit
         else:
             if self.type == EUMType.Undefined:
-                self.unit = EUMUnit.undefined
+                self._unit = EUMUnit.undefined
             else:
-                self.unit = self.type.units[0]
+                self._unit = self.type.units[0]
 
         self.data_value_type = to_datatype(data_value_type)
 
@@ -1482,7 +1490,7 @@ class ItemInfo:
             raise ValueError("Invalid name, name should be a string")
         self.name: str = name
 
-    def __eq__(self, other):
+    def __eq__(self, other: Any) -> bool:
         if not isinstance(other, ItemInfo):
             return NotImplemented
 
@@ -1494,16 +1502,29 @@ class ItemInfo:
             and self.data_value_type == other.data_value_type
         )
 
-    def __repr__(self):
-
+    def __repr__(self) -> str:
         if self.data_value_type == DataValueType.Instantaneous:
             return f"{self.name} <{self.type.display_name}> ({self.unit.display_name})"
         else:
             return f"{self.name} <{self.type.display_name}> ({self.unit.display_name}) - {self.data_value_type}"
 
+    @property
+    def unit(self) -> EUMUnit:
+        "Item unit."
+        return self._unit
+
+    @unit.setter
+    def unit(self, value: EUMUnit) -> None:
+        "Set unit."
+        if value not in self.type.units:
+            raise ValueError(
+                f"{value} is not a correct unit for {self.type}. Use {self.type.units}"
+            )
+        self._unit = value
+
     @staticmethod
     def from_mikecore_dynamic_item_info(dfsItemInfo: DfsDynamicItemInfo) -> "ItemInfo":
-        """Create ItemInfo from a mikecore.DfsDynamicItemInfo object"""
+        """Create ItemInfo from a mikecore.DfsDynamicItemInfo object."""
         name = dfsItemInfo.Name
         item = dfsItemInfo.Quantity.Item
         unit = dfsItemInfo.Quantity.Unit
@@ -1518,7 +1539,7 @@ class ItemInfoList(list):
     def __init__(self, items: Sequence[ItemInfo]):
         super().__init__(items)
 
-    def to_dataframe(self):
+    def to_dataframe(self) -> pd.DataFrame:
         data = [
             {"name": item.name, "type": item.type.name, "unit": item.unit.name}
             for item in self

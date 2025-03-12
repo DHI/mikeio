@@ -1,0 +1,73 @@
+---
+title: Dfs0 - Relative time axis
+jupyter: python3
+---
+
+
+MIKE IO uses a pandas DatetimeIndex to represent the time dimension in dfs files. If the Dfs file has a relative time axis it will be converted to DatetimeIndex by using 1970-1-1 00:00:00 as start time. 
+
+
+```{python}
+import mikeio
+```
+
+```{python}
+ds = mikeio.read("../../data/eq_relative.dfs0")
+ds
+```
+
+```{python}
+df = ds.to_dataframe()
+df.head()
+```
+
+Correcting the dataframe index by subtracting start time to get relative time axis.
+
+```{python}
+df.index = (df.index - df.index[0]).total_seconds()
+df.index.name = "Relative time (s)"
+```
+
+```{python}
+df.head()
+```
+
+```{python}
+df['Item 5'].plot();
+```
+
+## mikecore
+
+An alternative is to use the underlying library [`mikecore`](https://github.com/DHI/mikecore-python) to read the file.
+
+```{python}
+from mikecore.DfsFileFactory import DfsFileFactory
+
+dfs = DfsFileFactory.DfsGenericOpen("../../data/eq_relative.dfs0")
+```
+
+Using the `ReadDfs0DataDouble` method you get the data as a numpy array, with the time axis or other type of as the first column,
+
+```{python}
+data = dfs.ReadDfs0DataDouble()
+
+type(data)
+```
+
+which can be converted to a pandas dataframe. First we extract the name of items (which in this example hapeens to be not very creative).
+
+```{python}
+index_name = "time"
+items = [i.Name for i in dfs.ItemInfo]
+items = [index_name] + items
+items
+```
+
+```{python}
+import pandas as df
+
+df = df.DataFrame(data, columns=items).set_index(index_name)
+df.head()
+```
+
+

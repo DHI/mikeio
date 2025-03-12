@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import Tuple, TYPE_CHECKING, overload
+from typing import TYPE_CHECKING, overload
 import numpy as np
 
 if TYPE_CHECKING:
@@ -9,7 +9,7 @@ from .spatial import GeometryUndefined
 
 
 def get_idw_interpolant(distances: np.ndarray, p: float = 2) -> np.ndarray:
-    """IDW interpolant for 2d array of distances
+    """IDW interpolant for 2d array of distances.
 
     https://pro.arcgis.com/en/pro-app/help/analysis/geostatistical-analyst/how-inverse-distance-weighted-interpolation-works.htm
 
@@ -24,6 +24,7 @@ def get_idw_interpolant(distances: np.ndarray, p: float = 2) -> np.ndarray:
     -------
     np.array
         weights
+
     """
     is_1d = distances.ndim == 1
     if is_1d:
@@ -49,7 +50,7 @@ def interp2d(
     data: np.ndarray | DataArray,
     elem_ids: np.ndarray,
     weights: np.ndarray | None = None,
-    shape: Tuple[int, ...] | None = None,
+    shape: tuple[int, ...] | None = None,
 ) -> np.ndarray: ...
 
 
@@ -58,7 +59,7 @@ def interp2d(
     data: Dataset,
     elem_ids: np.ndarray,
     weights: np.ndarray | None = None,
-    shape: Tuple[int, ...] | None = None,
+    shape: tuple[int, ...] | None = None,
 ) -> Dataset: ...
 
 
@@ -66,9 +67,9 @@ def interp2d(
     data: Dataset | DataArray | np.ndarray,
     elem_ids: np.ndarray,
     weights: np.ndarray | None = None,
-    shape: Tuple[int, ...] | None = None,
+    shape: tuple[int, ...] | None = None,
 ) -> Dataset | np.ndarray:
-    """interp spatially in data (2d only)
+    """interp spatially in data (2d only).
 
     Parameters
     ----------
@@ -90,6 +91,7 @@ def interp2d(
     --------
     >>> elem_ids, weights = dfs.get_spatial_interpolant(coords)
     >>> dsi = interp2d(ds, elem_ids, weights)
+
     """
     from .dataset import DataArray, Dataset
 
@@ -109,7 +111,8 @@ def interp2d(
 
             else:
                 nt, _ = da.shape
-                idatitem = np.empty(shape=(nt, ni))
+                # use dtype of da
+                idatitem = np.empty(shape=(nt, ni), dtype=da.values.dtype)
                 for step in range(nt):
                     idatitem[step, :] = _interp_itemstep(
                         da[step].to_numpy(), elem_ids, weights
@@ -144,7 +147,7 @@ def interp2d(
     ni = len(elem_ids)
     datitem = data
     nt, _ = datitem.shape
-    idatitem = np.empty(shape=(nt, ni))
+    idatitem = np.empty(shape=(nt, ni), dtype=datitem.dtype)
     for step in range(nt):
         idatitem[step, :] = _interp_itemstep(datitem[step], elem_ids, weights)
     if shape:
@@ -157,26 +160,6 @@ def _interp_itemstep(
     elem_ids: np.ndarray,
     weights: np.ndarray | None = None,
 ) -> np.ndarray:
-    """Interpolate a single item and time step
-
-    Parameters
-    ----------
-    data : ndarray
-        data to interpolate
-    elem_ids : ndarray(int)
-        n sized array of 1 or more element ids used for interpolation
-    weights : ndarray(float), optional
-        weights with same size as elem_ids used for interpolation
-
-    Returns
-    -------
-    ndarray
-        spatially interpolated data
-
-    Notes
-    -----
-    This function is used internally by interp2d
-    """
     if weights is None:
         return data[elem_ids]
     else:

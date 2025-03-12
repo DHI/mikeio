@@ -2,15 +2,25 @@
 requires = ["hatchling"]
 build-backend = "hatchling.build"
 
-[tool.hatch.build.targets.sdist]
-exclude = ["notebooks", "tests", "images"]
+[tool.hatch.build]
+license-files = { paths = ["License.txt"] }
 
-[tool.hatch.metadata]
-allow-direct-references = true
+[tool.hatch.build.targets.sdist]
+exclude = [
+    "notebooks",
+    "tests",
+    "images",
+    ".github",
+    "docs",
+    ".devcontainer",
+    "*.md",
+    "*.txt",
+    ".gitattributes",
+]
 
 [project]
-name="mikeio"
-version="2.0.dev0"
+name = "mikeio"
+version = "2.4.0"
 dependencies = [
     "mikecore>=0.2.1",
     "numpy>=1.22.0",
@@ -23,63 +33,105 @@ dependencies = [
 ]
 
 authors = [
-  { name="Henrik Andersson",email="jan@dhigroup.com"},
-  { name = "Jesper Sandvig Mariegaard", email="jem@dhigroup.com" }
+    { name = "Henrik Andersson", email = "jan@dhigroup.com" },
+    { name = "Jesper Sandvig Mariegaard", email = "jem@dhigroup.com" },
 ]
-description="A package that uses the DHI dfs libraries to create, write and read dfs and mesh files."
-license="BSD-3-Clause"
+description = "A package that uses the DHI dfs libraries to create, write and read dfs and mesh files."
+license = "BSD-3-Clause"
 readme = "README.md"
-requires-python = ">=3.8"
+requires-python = ">=3.10"
 classifiers = [
     "License :: OSI Approved :: BSD License",
     "Development Status :: 5 - Production/Stable",
     "Intended Audience :: Science/Research",
     "Programming Language :: Python",
     "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.8",
-    "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
     "Topic :: Scientific/Engineering",
 ]
 
 [project.optional-dependencies]
-dev = ["pytest",
-       "black==22.3.0",
-       "quarto-cli",
-       "quartodoc@git+https://github.com/machow/quartodoc#d4140b4f804ebc6ec249699d52e3efa62cf53127",
-       "shapely",
-       "pyproj",
-       "xarray",
-       "netcdf4",
-       "rasterio",
-       "ruff",
-       "mypy==1.6.1",
-       ]
+dev = [
+    "pytest",
+    "quarto-cli",
+    "quartodoc==0.9.1",
+    "shapely",
+    "pyproj",
+    "xarray",
+    "netcdf4",
+    "rasterio",
+    "polars",
+    "ruff==0.6.2",
+    "mypy==1.11.1",
+]
 
-test = ["pytest", "pytest-cov", "xarray","mypy==1.6.1","shapely","pyproj"]
+test = [
+    "pytest",
+    "pytest-cov",
+    "xarray",
+    "mypy==1.11.1",
+    "shapely",
+    "pyproj",
+    "polars",
+]
 
-notebooks= [
-            "nbformat",
-            "nbconvert",
-            "jupyter",
-            "xarray",
-            "netcdf4",
-            "rasterio",
-            "geopandas",
-            "scikit-learn",
-            "matplotlib",
-            "folium",
-            "mapclassify",
-        ]
+notebooks = [
+    "nbformat",
+    "nbconvert",
+    "jupyter",
+    "xarray",
+    "netcdf4",
+    "rasterio",
+    "geopandas",
+    "scikit-learn",
+    "matplotlib",
+    "folium",
+    "mapclassify",
+]
 
 [project.urls]
 "Homepage" = "https://github.com/DHI/mikeio"
 "Bug Tracker" = "https://github.com/DHI/mikeio/issues"
 
 
-[tool.ruff]
+[tool.ruff.lint]
 
 # ignore long lines
 ignore = ["E501", "E741"]
+
+select = [
+    # ruff defaults
+    "E4",
+    "E7",
+    "E9",
+    "F",
+    # ruff defaults
+    "D100",
+    "D101",
+    "D102",
+    "D103",
+    "D202",
+    "D212",
+    "D413",
+    "D415",
+    "D417",
+]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/*" = ["D"]
+"notebooks/*" = ["D", "E402"]
+"conftest.py" = ["D"]
+
+[tool.mypy]
+python_version = "3.10"
+warn_return_any = false
+allow_redefinition = true
+warn_unreachable = true
+disallow_untyped_defs = true
+
+[[tool.mypy.overrides]]
+ignore_missing_imports = true
+module = ["pandas", "mikecore.*", "tqdm", "scipy.*", "shapely.*", "yaml.*"]

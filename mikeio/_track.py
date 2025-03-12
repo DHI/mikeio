@@ -1,14 +1,14 @@
 from __future__ import annotations
 from pathlib import Path
 from collections.abc import Sequence
-from typing import Callable, Tuple
+from typing import Any, Callable
 
 import numpy as np
 import pandas as pd
 
 from .dataset import Dataset
 from .dfs import Dfs0
-from .eum import ItemInfo
+from .eum import ItemInfo, EUMUnit, EUMType
 from .spatial import GeometryFM2D
 
 
@@ -19,55 +19,38 @@ def _extract_track(
     end_time: pd.Timestamp,
     timestep: float,
     geometry: GeometryFM2D,
-    track: str | Dataset | pd.DataFrame,
+    track: str | Path | Dataset | pd.DataFrame,
     items: Sequence[ItemInfo],
     item_numbers: Sequence[int],
     time_steps: Sequence[int],
     n_elements: int,
     method: str,
-    dtype,
-    data_read_func: Callable[[int, int], Tuple[np.ndarray, float]],
+    dtype: Any,  # TODO DTypeLike?
+    data_read_func: Callable[[int, int], tuple[np.ndarray, float]],
 ) -> Dataset:
-
     if not isinstance(geometry, GeometryFM2D):
         raise NotImplementedError("Only implemented for 2d flexible mesh geometries")
 
     n_items = len(item_numbers)
 
-    if isinstance(track, str):
-        filename = track
-        path = Path(filename)
-        if not path.exists():
-            raise ValueError(f"{filename} does not exist")
-
-        ext = path.suffix.lower()
-        if ext == ".dfs0":
-            df = Dfs0(filename).to_dataframe()
-        elif ext == ".csv":
-            df = pd.read_csv(filename, index_col=0, parse_dates=True)
-            df.index = pd.DatetimeIndex(df.index)
-        else:
-            raise ValueError(f"{ext} files not supported (dfs0, csv)")
-
-        times = df.index
-        coords = df.iloc[:, 0:2].to_numpy(copy=True)
-
-    elif isinstance(track, Dataset):
-        times = track.time
-        coords = np.zeros(shape=(len(times), 2))
-        coords[:, 0] = track[0].to_numpy().copy()
-        coords[:, 1] = track[1].to_numpy().copy()
-    else:
-        assert isinstance(track, pd.DataFrame)
-        times = track.index
-        coords = track.iloc[:, 0:2].to_numpy(copy=True)
+    match track:
+        case str():
+            times, coords = _get_track_data_from_file(track)
+        case Path():
+            times, coords = _get_track_data_from_file(str(track))
+        case Dataset():
+            times, coords = _get_track_data_from_dataset(track)
+        case pd.DataFrame():
+            times, coords = _get_track_data_from_dataframe(track)
+        case _:
+            raise ValueError(
+                "track must be a file name, a Dataset or a pandas DataFrame"
+            )
 
     assert isinstance(
         times, pd.DatetimeIndex
     ), "The index must be a pandas.DatetimeIndex"
-    assert (
-        times.is_monotonic_increasing
-    ), "The time index must be monotonic increasing. Consider df.sort_index() before passing to extract_track()."
+    assert times.is_monotonic_increasing, "The time index must be monotonic increasing. Consider df.sort_index() before passing to extract_track()."
 
     data_list = [coords[:, 0], coords[:, 1]]  # lon,lat
     for item in range(n_items):
@@ -119,7 +102,7 @@ def _extract_track(
         d[d == deletevalue] = np.nan
         d2[i, :] = d
 
-    def is_EOF(step):
+    def is_EOF(step: int) -> bool:
         return step >= len(time_steps)
 
     # loop over track points
@@ -160,11 +143,55 @@ def _extract_track(
             data_list[item + 2][t] = dati[item]
 
     if geometry.is_geo:
-        items_out = [ItemInfo("Longitude"), ItemInfo("Latitude")]
+        items_out = [
+            ItemInfo("Longitude", EUMType.Latitude_longitude, EUMUnit.degree),
+            ItemInfo("Latitude", EUMType.Latitude_longitude, EUMUnit.degree),
+        ]
     else:
-        items_out = [ItemInfo("x"), ItemInfo("y")]
+        items_out = [
+            ItemInfo("x", EUMType.Geographical_coordinate, EUMUnit.meter),
+            ItemInfo("y", EUMType.Geographical_coordinate, EUMUnit.meter),
+        ]
 
     for item_info in items:
         items_out.append(item_info)
 
-    return Dataset(data_list, times, items_out)
+    return Dataset.from_numpy(data=data_list, time=times, items=items_out)
+
+
+def _get_track_data_from_dataset(track: Dataset) -> tuple[pd.DatetimeIndex, np.ndarray]:
+    times = track.time
+    coords = np.zeros(shape=(len(times), 2))
+    coords[:, 0] = track[0].to_numpy().copy()
+    coords[:, 1] = track[1].to_numpy().copy()
+    return times, coords
+
+
+def _get_track_data_from_dataframe(
+    track: pd.DataFrame,
+) -> tuple[pd.DatetimeIndex, np.ndarray]:
+    times = track.index
+    coords = track.iloc[:, 0:2].to_numpy(copy=True)
+    return times, coords
+
+
+def _get_track_data_from_file(track: str) -> tuple[pd.DatetimeIndex, np.ndarray]:
+    filename = track
+    path = Path(filename)
+    if not path.exists():
+        raise FileNotFoundError(f"{filename} does not exist")
+
+    ext = path.suffix.lower()
+    match ext:
+        case ".dfs0":
+            df = Dfs0(filename).to_dataframe()
+        case ".csv":
+            df = pd.read_csv(filename, index_col=0, parse_dates=True)
+            df.index = pd.DatetimeIndex(df.index)
+        case _:
+            raise ValueError(f"{ext} files not supported (dfs0, csv)")
+
+    times = df.index
+    coords = df.iloc[:, 0:2].to_numpy(copy=True)
+
+    return times, coords

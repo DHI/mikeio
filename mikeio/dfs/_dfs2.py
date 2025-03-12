@@ -1,7 +1,7 @@
 from __future__ import annotations
 from copy import deepcopy
 from pathlib import Path
-from typing import Any, List, Literal, Tuple
+from typing import Any, Literal
 from collections.abc import Sequence
 
 import numpy as np
@@ -108,6 +108,17 @@ def _write_dfs2_spatial_axis(
 
 
 class Dfs2(_Dfs123):
+    """Class for reading/writing dfs2 files.
+
+    Parameters
+    ----------
+    filename:
+        Path to dfs2 file
+    type:
+        horizontal, spectral or vertical, default horizontal
+
+    """
+
     _ndim = 2
 
     def __init__(
@@ -161,12 +172,11 @@ class Dfs2(_Dfs123):
         *,
         items: str | int | Sequence[str | int] | None = None,
         time: int | str | slice | None = None,
-        area: Tuple[float, float, float, float] | None = None,
+        area: tuple[float, float, float, float] | None = None,
         keepdims: bool = False,
         dtype: Any = np.float32,
     ) -> Dataset:
-        """
-        Read data from a dfs2 file
+        """Read data from a dfs2 file.
 
         Parameters
         ---------
@@ -185,8 +195,8 @@ class Dfs2(_Dfs123):
         Returns
         -------
         Dataset
-        """
 
+        """
         self._open()
 
         item_numbers = _valid_item_numbers(self._dfs.ItemInfo, items)
@@ -196,7 +206,7 @@ class Dfs2(_Dfs123):
         single_time_selected, time_steps = _valid_timesteps(self._dfs.FileInfo, time)
         nt = len(time_steps) if not single_time_selected else 1
 
-        shape: Tuple[int, ...]
+        shape: tuple[int, ...]
 
         if area is not None:
             take_subset = True
@@ -211,7 +221,7 @@ class Dfs2(_Dfs123):
         if single_time_selected and not keepdims:
             shape = shape[1:]
 
-        data_list: List[np.ndarray] = [
+        data_list: list[np.ndarray] = [
             np.ndarray(shape=shape, dtype=dtype) for _ in range(n_items)
         ]
 
@@ -239,14 +249,14 @@ class Dfs2(_Dfs123):
 
         time = pd.to_datetime(t_seconds, unit="s", origin=self.start_time)
 
-        dims: Tuple[str, ...]
+        dims: tuple[str, ...]
 
         if single_time_selected and not keepdims:
             dims = ("y", "x")
         else:
             dims = ("time", "y", "x")
 
-        return Dataset(
+        return Dataset.from_numpy(
             data_list,
             time=time,
             items=items,
@@ -255,47 +265,78 @@ class Dfs2(_Dfs123):
             validate=False,
         )
 
+    def append(self, ds: Dataset, validate: bool = True) -> None:
+        """Append a Dataset to an existing dfs2 file.
+
+        Parameters
+        ----------
+        ds: Dataset
+            Dataset to append
+        validate: bool, optional
+            Check if the dataset to append has the same geometry and items as the original file,
+            by default True
+
+        Notes
+        -----
+        The original file is modified.
+
+        """
+        if validate:
+            if self.geometry != ds.geometry:
+                raise ValueError("The geometry of the dataset to append does not match")
+
+            for item_s, item_o in zip(ds.items, self.items):
+                if item_s != item_o:
+                    raise ValueError(
+                        f"Item in dataset {item_s.name} does not match {item_o.name}"
+                    )
+
+        dfs = DfsFileFactory.Dfs2FileOpenAppend(str(self._filename))
+        write_dfs_data(dfs=dfs, ds=ds, n_spatial_dims=2)
+
+        self._n_timesteps = dfs.FileInfo.TimeAxis.NumberOfTimeSteps
+
     def _open(self) -> None:
         self._dfs = DfsFileFactory.Dfs2FileOpen(self._filename)
         self._source = self._dfs
 
     @property
     def geometry(self) -> Grid2D:
-        """Spatial information"""
+        """Spatial information."""
         assert isinstance(self._geometry, Grid2D)
         return self._geometry
 
     @property
     def x0(self) -> Any:
-        """Start point of x values (often 0)"""
+        """Start point of x values (often 0)."""
         return self.geometry.x[0]
 
     @property
     def y0(self) -> Any:
-        """Start point of y values (often 0)"""
+        """Start point of y values (often 0)."""
         return self.geometry.y[0]
 
     @property
     def dx(self) -> float:
-        """Step size in x direction"""
+        """Step size in x direction."""
         return self.geometry.dx
 
     @property
     def dy(self) -> float:
-        """Step size in y direction"""
+        """Step size in y direction."""
         return self.geometry.dy
 
     @property
-    def shape(self) -> Tuple[int, ...]:
-        """Tuple with number of values in the t-, y-, x-direction"""
+    def shape(self) -> tuple[int, ...]:
+        """Tuple with number of values in the t-, y-, x-direction."""
         return (self._n_timesteps, self.geometry.ny, self.geometry.nx)
 
     @property
     def nx(self) -> int:
-        """Number of values in the x-direction"""
+        """Number of values in the x-direction."""
         return self.geometry.nx
 
     @property
     def ny(self) -> int:
-        """Number of values in the y-direction"""
+        """Number of values in the y-direction."""
         return self.geometry.ny

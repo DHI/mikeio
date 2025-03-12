@@ -10,43 +10,49 @@ import mikeio._spectral as _spectral
 
 @pytest.fixture
 def dfsu_pt():
-    filename = "tests/testdata/pt_spectra.dfsu"
+    filename = "tests/testdata/spectra/pt_spectra.dfsu"
     return mikeio.open(filename)
 
 
 @pytest.fixture
 def dfsu_line():
-    filename = "tests/testdata/line_spectra.dfsu"
+    filename = "tests/testdata/spectra/line_spectra.dfsu"
+    return mikeio.open(filename)
+
+
+@pytest.fixture
+def dfsu_line_degrees():
+    filename = "tests/testdata/spectra/line_spectra_degrees.dfsu"
     return mikeio.open(filename)
 
 
 @pytest.fixture
 def dfsu_area():
-    filename = "tests/testdata/area_spectra.dfsu"
+    filename = "tests/testdata/spectra/area_spectra.dfsu"
     return mikeio.open(filename)
 
 
 @pytest.fixture
 def dfsu_area_sector():
-    filename = "tests/testdata/MIKE21SW_dir_sector_area_spectra.dfsu"
+    filename = "tests/testdata/spectra/MIKE21SW_dir_sector_area_spectra.dfsu"
     return mikeio.open(filename)
 
 
 @pytest.fixture
 def dfsu_pt_freq():
-    filename = "tests/testdata/pt_freq_spectra.dfsu"
+    filename = "tests/testdata/spectra/pt_freq_spectra.dfsu"
     return mikeio.open(filename)
 
 
 @pytest.fixture
 def dfsu_line_dir():
-    filename = "tests/testdata/line_dir_spectra.dfsu"
+    filename = "tests/testdata/spectra/line_dir_spectra.dfsu"
     return mikeio.open(filename)
 
 
 @pytest.fixture
 def dfsu_area_freq():
-    filename = "tests/testdata/area_freq_spectra.dfsu"
+    filename = "tests/testdata/spectra/area_freq_spectra.dfsu"
     return mikeio.open(filename)
 
 
@@ -70,6 +76,18 @@ def test_properties_line_spectrum(dfsu_line):
     assert len(dfs.directions) == 16
     assert dfs.geometry.n_nodes == 10
     assert dfs.geometry.n_elements == 9
+    dir = dfs.geometry.directions
+    assert dir[0] == pytest.approx(0.0)
+    assert dir[-1] == pytest.approx(337.5)
+
+
+def test_properties_line_spectrum_degrees(dfsu_line_degrees):
+    dfs = dfsu_line_degrees
+    assert dfs.geometry.is_spectral
+    assert dfs._type == DfsuFileType.DfsuSpectral1D
+    dir = dfs.geometry.directions
+    assert dir[0] == pytest.approx(0.0)
+    assert dir[-1] == pytest.approx(350.0)
 
 
 def test_properties_area_spectrum(dfsu_area):
@@ -161,6 +179,16 @@ def test_read_area_spectrum_elements(dfsu_area):
     ds2 = dfs.read(elements=elems)
     assert ds2.shape[1] == len(elems)
     assert np.all(ds1[0].to_numpy()[:, elems, ...] == ds2[0].to_numpy())
+    assert ds2.geometry.element_coordinates[0, 0] == pytest.approx(2.651450863095597)
+    assert ds2["Energy density"].isel(time=-1).isel(frequency=0).isel(
+        direction=0
+    ).to_numpy()[0] == pytest.approx(1.770e-12)
+
+    ds3 = dfs.read(elements=[4, 3])
+    assert ds3.geometry.element_coordinates[1, 0] == pytest.approx(2.651450863095597)
+    assert ds3["Energy density"].isel(time=-1).isel(frequency=0).isel(
+        direction=0
+    ).to_numpy()[1] == pytest.approx(1.770e-12)
 
 
 def test_read_area_spectrum_xy(dfsu_area):

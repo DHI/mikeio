@@ -1,4 +1,8 @@
-# Dataset
+---
+title: Dataset
+aliases:
+  - ../dataset.html
+---
 
 The [Dataset](`mikeio.Dataset`) is the MIKE IO data structure 
 for data from dfs files. 
@@ -14,19 +18,10 @@ The Dataset has the following primary properties:
 Use Dataset's string representation to get an overview of the Dataset
 
 
-```python
->>> import mikeio
->>> ds = mikeio.read("testdata/HD2D.dfsu")
->>> ds
-<mikeio.Dataset>
-dims: (time:9, element:884)
-time: 1985-08-06 07:00:00 - 1985-08-07 03:00:00 (9 records)
-geometry: Dfsu2D (884 elements, 529 nodes)
-items:
-  0:  Surface elevation <Surface Elevation> (meter)
-  1:  U velocity <u velocity component> (meter per sec)
-  2:  V velocity <v velocity component> (meter per sec)
-  3:  Current speed <Current Speed> (meter per sec)
+```{python}
+import mikeio
+ds = mikeio.read("../data/HD2D.dfsu")
+ds
 ```
 
 ## {{< fa filter >}} Selecting items
@@ -39,15 +34,10 @@ Selecting a specific item "itemA" (at position 0) from a Dataset ds can be done 
 * `ds[0]` - returns "itemA" DataArray
 * `ds.itemA` - returns "itemA" DataArray
 
-We recommend the use *named* items for readability. 
+We recommend to use *named* items for readability. 
 
-```
->>> ds.Surface_elevation
-<mikeio.DataArray>
-name: Surface elevation
-dims: (time:9, element:884)
-time: 1985-08-06 07:00:00 - 1985-08-07 03:00:00 (9 records)
-geometry: Dfsu2D (884 elements, 529 nodes)
+```{python}
+ds.Surface_elevation
 ```
 
 Negative index e.g. ds[-1] can also be used to select from the end. 
@@ -63,46 +53,20 @@ Note that this behavior is similar to pandas and xarray.
 
 A time slice of a Dataset can be selected in several different ways. 
 
-```python
->>> ds.sel(time="1985-08-06 12:00")
-<mikeio.Dataset>
-dims: (element:884)
-time: 1985-08-06 12:00:00 (time-invariant)
-geometry: Dfsu2D (884 elements, 529 nodes)
-items:
-  0:  Surface elevation <Surface Elevation> (meter)
-  1:  U velocity <u velocity component> (meter per sec)
-  2:  V velocity <v velocity component> (meter per sec)
-  3:  Current speed <Current Speed> (meter per sec)
+```{python}
+ds.sel(time="1985-08-06 12:00")
+```
 
->>> ds["1985-8-7":]
-<mikeio.Dataset>
-dims: (time:2, element:884)
-time: 1985-08-07 00:30:00 - 1985-08-07 03:00:00 (2 records)
-geometry: Dfsu2D (884 elements, 529 nodes)
-items:
-  0:  Surface elevation <Surface Elevation> (meter)
-  1:  U velocity <u velocity component> (meter per sec)
-  2:  V velocity <v velocity component> (meter per sec)
-  3:  Current speed <Current Speed> (meter per sec)
-
+```{python}
+ds["1985-8-7":]
 ```
 
 ## {{< fa map >}} Spatial selection
 
-The `sel` method finds the nearest element.
+The `sel` method finds a single element.
 
-```python
->>> ds.sel(x=607002, y=6906734)
-<mikeio.Dataset>
-dims: (time:9)
-time: 1985-08-06 07:00:00 - 1985-08-07 03:00:00 (9 records)
-geometry: GeometryPoint2D(x=607002.7094112666, y=6906734.833048992)
-items:
-  0:  Surface elevation <Surface Elevation> (meter)
-  1:  U velocity <u velocity component> (meter per sec)
-  2:  V velocity <v velocity component> (meter per sec)
-  3:  Current speed <Current Speed> (meter per sec)
+```{python}
+ds.sel(x=607002, y=6906734)
 ```
 
 
@@ -114,6 +78,53 @@ In most cases, you will *not* plot the Dataset, but rather it's DataArrays. But 
 * scatter : compare two items using ds.plot.scatter(x="itemA", y="itemB")
 
 See details in the [Dataset Plotter API](`mikeio.dataset._data_plot._DatasetPlotter`).
+
+
+## Add a new item
+
+A common workflow is to create a new item based on existing items in a dataset.
+
+This can be in done in several ways. Let's try one of the options.
+
+```{python}
+ds = mikeio.read("../data/NorthSea_HD_and_windspeed.dfsu")
+ds
+```
+
+1. Create a copy of the DataArray
+
+```{python}
+ws2 = ds.Wind_speed.copy()
+ws2.plot.hist();
+```
+
+2. Make the modifications, in this case we will clip the values to the interval 1-18 m/s.
+
+```{python}
+import numpy as np
+ws2.values = np.clip(ws2.to_numpy(), 1,18)
+ws2.plot.hist();
+```
+
+3. Assign it to a new name in the dataset
+
+```{python}
+ds["Wind_speed_clipped"] = ws2
+ds
+```
+
+4. Reorder items if necessary (See [selecting items](#selecting-items) above)
+
+```{python}
+ds2 = ds[["Wind_speed_clipped", "Surface elevation", "Wind speed"]]
+ds2
+```
+
+5. Write the new dataset to a new file
+
+```{python}
+ds2.to_dfs("modified.dfsu")
+```
 
 
 ## Properties
@@ -128,8 +139,6 @@ The Dataset (and DataArray) has several properties:
 * timestep - Time step in seconds (if is_equidistant)
 * shape - Shape of each item
 * deletevalue - File delete value (NaN value)
-
-
 
 ## Methods
 
@@ -157,17 +166,20 @@ including different ways of *selecting* data:
 * ds + value
 * ds - value
 * ds * value
-
-and + and - between two Datasets (if number of items and shapes conform):
+* ds / value
+and between two Datasets (if number of items and shapes conform):
 
 * ds1 + ds2
 * ds1 - ds2
+* ds1 * ds2
+* ds1 / ds2
 
 Other methods that also return a Dataset:
 
-* [`interp_like`](`mikeio.Dataset.interp_like`) - Spatio (temporal) interpolation (see [Dfsu interpolation notebook](../examples/Dfsu-2D-interpolation.qmd))
+* [`interp_like`](`mikeio.Dataset.interp_like`) - Spatio (temporal) interpolation (see [Dfsu interpolation notebook](../examples/dfsu/spatial_interpolation.qmd)
 * [`interp_time()`](`mikeio.Dataset.interp_time`) - Temporal interpolation (see [Time interpolation notebook](../examples/Time-interpolation.qmd))
 * [`dropna()`](`mikeio.Dataset.dropna`) - Remove time steps where all items are NaN
+* [`fillna()`](`mikeio.Dataset.fillna`) - Fill missing values with a constant value
 * [`squeeze()`](`mikeio.Dataset.squeeze`) - Remove axes of length 1
 
 ### Conversion:

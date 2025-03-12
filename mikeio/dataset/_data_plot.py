@@ -1,7 +1,9 @@
 from __future__ import annotations
-from typing import Any, Tuple, TYPE_CHECKING
+from typing import Any, TYPE_CHECKING
 
+from matplotlib.figure import Figure
 import numpy as np
+import matplotlib.pyplot as plt
 from matplotlib.axes import Axes
 
 from ..spatial._FM_utils import _plot_map, _plot_vertical_profile
@@ -13,7 +15,7 @@ if TYPE_CHECKING:
 
 
 class _DataArrayPlotter:
-    """Context aware plotter (sensible plotting according to geometry)"""
+    """Context aware plotter (sensible plotting according to geometry)."""
 
     def __init__(self, da: "DataArray") -> None:
         self.da = da
@@ -21,10 +23,10 @@ class _DataArrayPlotter:
     def __call__(
         self,
         ax: Axes | None = None,
-        figsize: Tuple[float, float] | None = None,
+        figsize: tuple[float, float] | None = None,
         **kwargs: Any,
     ) -> Axes:
-        """Plot DataArray according to geometry
+        """Plot DataArray according to geometry.
 
         Parameters
         ----------
@@ -34,10 +36,13 @@ class _DataArrayPlotter:
             specify size of figure
         title: str, optional
             axes title
+        **kwargs: Any
+            additional arguments passed to the plotting function
 
         Returns
         -------
         <matplotlib.axes>
+
         """
         fig, ax = self._get_fig_ax(ax, figsize)
 
@@ -48,23 +53,23 @@ class _DataArrayPlotter:
                 return self._line_not_timeseries(self.da.values, ax, **kwargs)
 
         if self.da.ndim == 2:
-            return ax.imshow(self.da.values, **kwargs)
+            return ax.imshow(self.da.values, **kwargs)  # type: ignore
 
         # if everything else fails, plot histogram
         return self._hist(ax, **kwargs)
 
     @staticmethod
-    def _get_ax(ax=None, figsize=None):
-        import matplotlib.pyplot as plt  # type: ignore
-
+    def _get_ax(
+        ax: Axes | None = None, figsize: tuple[float, float] | None = None
+    ) -> Axes:
         if ax is None:
             _, ax = plt.subplots(figsize=figsize)
         return ax
 
     @staticmethod
-    def _get_fig_ax(ax=None, figsize=None):
-        import matplotlib.pyplot as plt  # type: ignore
-
+    def _get_fig_ax(
+        ax: Axes | None = None, figsize: tuple[float, float] | None = None
+    ) -> tuple[Figure, Axes]:
         if ax is None:
             fig, ax = plt.subplots(figsize=figsize)
         else:
@@ -74,11 +79,11 @@ class _DataArrayPlotter:
     def hist(
         self,
         ax: Axes | None = None,
-        figsize: Tuple[float, float] | None = None,
+        figsize: tuple[float, float] | None = None,
         title: str | None = None,
         **kwargs: Any,
     ) -> Axes:
-        """Plot DataArray as histogram (using ax.hist)
+        """Plot DataArray as histogram (using ax.hist).
 
         Parameters
         ----------
@@ -95,6 +100,8 @@ class _DataArrayPlotter:
             specify size of figure
         title: str, optional
             axes title
+        **kwargs: Any
+            additional arguments passed to the plotting function
 
         See Also
         --------
@@ -103,6 +110,7 @@ class _DataArrayPlotter:
         Returns
         -------
         <matplotlib.axes>
+
         """
         ax = self._get_ax(ax, figsize)
         if title is not None:
@@ -114,15 +122,22 @@ class _DataArrayPlotter:
         ax.set_xlabel(self._label_txt())
         return result
 
-    def line(self, ax=None, figsize=None, **kwargs):
-        """Plot data as lines (timeseries if time is present)"""
+    def line(
+        self,
+        ax: Axes | None = None,
+        figsize: tuple[float, float] | None = None,
+        **kwargs: Any,
+    ) -> Axes:
+        """Plot data as lines (timeseries if time is present)."""
         fig, ax = self._get_fig_ax(ax, figsize)
         if self.da._has_time_axis:
             return self._timeseries(self.da.values, fig, ax, **kwargs)
         else:
             return self._line_not_timeseries(self.da.values, ax, **kwargs)
 
-    def _timeseries(self, values, fig, ax, **kwargs):
+    def _timeseries(
+        self, values: np.ndarray, fig: Figure, ax: Axes, **kwargs: Any
+    ) -> Axes:
         if "title" in kwargs:
             title = kwargs.pop("title")
             ax.set_title(title)
@@ -132,7 +147,7 @@ class _DataArrayPlotter:
         ax.set_ylabel(self._label_txt())
         return ax
 
-    def _line_not_timeseries(self, values, ax, **kwargs):
+    def _line_not_timeseries(self, values: np.ndarray, ax: Axes, **kwargs: Any) -> Axes:
         title = kwargs.pop("title") if "title" in kwargs else f"{self.da.time[0]}"
         ax.set_title(title)
         ax.plot(values, **kwargs)
@@ -140,10 +155,10 @@ class _DataArrayPlotter:
         ax.set_ylabel(self._label_txt())
         return ax
 
-    def _label_txt(self):
+    def _label_txt(self) -> str:
         return f"{self.da.name} [{self.da.unit.short_name}]"
 
-    def _get_first_step_values(self):
+    def _get_first_step_values(self) -> np.ndarray:
         if self.da.n_timesteps > 1:
             return self.da.values[0]
         else:
@@ -151,7 +166,7 @@ class _DataArrayPlotter:
 
 
 class _DataArrayPlotterGrid1D(_DataArrayPlotter):
-    """Plot a DataArray with a Grid1D geometry
+    """Plot a DataArray with a Grid1D geometry.
 
     Examples
     --------
@@ -162,29 +177,50 @@ class _DataArrayPlotterGrid1D(_DataArrayPlotter):
     >>> da.plot.imshow()
     >>> da.plot.pcolormesh()
     >>> da.plot.hist()
+
     """
 
-    def __call__(self, ax=None, figsize=None, **kwargs):
+    def __call__(
+        self,
+        ax: Axes | None = None,
+        figsize: tuple[float, float] | None = None,
+        **kwargs: Any,
+    ) -> Axes:
         _, ax = self._get_fig_ax(ax, figsize)
         if self.da.n_timesteps == 1:
             return self.line(ax, **kwargs)
         else:
             return self.pcolormesh(ax, **kwargs)
 
-    def line(self, ax=None, figsize=None, **kwargs):
-        """Plot as spatial lines"""
+    def line(
+        self,
+        ax: Axes | None = None,
+        figsize: tuple[float, float] | None = None,
+        **kwargs: Any,
+    ) -> Axes:
+        """Plot as spatial lines."""
         _, ax = self._get_fig_ax(ax, figsize)
         return self._lines(ax, **kwargs)
 
-    def timeseries(self, ax=None, figsize=None, **kwargs):
-        """Plot as timeseries"""
+    def timeseries(
+        self,
+        ax: Axes | None = None,
+        figsize: tuple[float, float] | None = None,
+        **kwargs: Any,
+    ) -> Axes:
+        """Plot as timeseries."""
         if self.da.n_timesteps == 1:
             raise ValueError("Not possible with single timestep DataArray")
         fig, ax = self._get_fig_ax(ax, figsize)
         return super()._timeseries(self.da.values, fig, ax, **kwargs)
 
-    def imshow(self, ax=None, figsize=None, **kwargs):
-        """Plot as 2d"""
+    def imshow(
+        self,
+        ax: Axes | None = None,
+        figsize: tuple[float, float] | None = None,
+        **kwargs: Any,
+    ) -> Axes:
+        """Plot as 2d."""
         if not self.da._has_time_axis:
             raise ValueError(
                 "Not possible without time axis. DataArray only has 1 dimension."
@@ -194,15 +230,21 @@ class _DataArrayPlotterGrid1D(_DataArrayPlotter):
         fig.colorbar(pos, ax=ax, label=self._label_txt())
         return ax
 
-    def pcolormesh(self, ax=None, figsize=None, title=None, **kwargs):
-        """Plot multiple lines as 2d color plot"""
+    def pcolormesh(
+        self,
+        ax: Axes | None = None,
+        figsize: tuple[float, float] | None = None,
+        title: str | None = None,
+        **kwargs: Any,
+    ) -> Axes:
+        """Plot multiple lines as 2d color plot."""
         if not self.da._has_time_axis:
             raise ValueError(
                 "Not possible without time axis. DataArray only has 1 dimension."
             )
+        fig, ax = self._get_fig_ax(ax, figsize)
         if title is not None:
             ax.set_title(title)
-        fig, ax = self._get_fig_ax(ax, figsize)
         pos = ax.pcolormesh(
             self.da.geometry.x,
             self.da.time,
@@ -215,8 +257,8 @@ class _DataArrayPlotterGrid1D(_DataArrayPlotter):
         ax.set_ylabel("time")
         return ax
 
-    def _lines(self, ax=None, title=None, **kwargs):
-        """x-lines - one per timestep"""
+    def _lines(self, ax: Axes, title: str | None = None, **kwargs: Any) -> Axes:
+        """x-lines - one per timestep."""
         if title is not None:
             ax.set_title(title)
         elif self.da.n_timesteps == 1:
@@ -228,7 +270,7 @@ class _DataArrayPlotterGrid1D(_DataArrayPlotter):
 
 
 class _DataArrayPlotterGrid2D(_DataArrayPlotter):
-    """Plot a DataArray with a Grid2D geometry
+    """Plot a DataArray with a Grid2D geometry.
 
     If DataArray has multiple time steps, the first step will be plotted.
 
@@ -239,13 +281,25 @@ class _DataArrayPlotterGrid2D(_DataArrayPlotter):
     da = mikeio.read("../data/gebco_sound.dfs2")["Elevation"]
     da.plot()
     ```
+
     """
 
-    def __call__(self, ax=None, figsize=None, **kwargs):
+    def __call__(
+        self,
+        ax: Axes | None = None,
+        figsize: tuple[float, float] | None = None,
+        **kwargs: Any,
+    ) -> Axes:
         return self.pcolormesh(ax, figsize, **kwargs)
 
-    def contour(self, ax=None, figsize=None, title=None, **kwargs):
-        """Plot data as contour lines
+    def contour(
+        self,
+        ax: Axes | None = None,
+        figsize: tuple[float, float] | None = None,
+        title: str | None = None,
+        **kwargs: Any,
+    ) -> Axes:
+        """Plot data as contour lines.
 
         Examples
         --------
@@ -253,6 +307,7 @@ class _DataArrayPlotterGrid2D(_DataArrayPlotter):
         da = mikeio.read("../data/gebco_sound.dfs2")["Elevation"]
         da.plot.contour()
         ```
+
         """
         _, ax = self._get_fig_ax(ax, figsize)
 
@@ -267,8 +322,15 @@ class _DataArrayPlotterGrid2D(_DataArrayPlotter):
             ax.set_title(title)
         return ax
 
-    def contourf(self, ax=None, figsize=None, label=None, title=None, **kwargs):
-        """Plot data as filled contours
+    def contourf(
+        self,
+        ax: Axes | None = None,
+        figsize: tuple[float, float] | None = None,
+        title: str | None = None,
+        label: str | None = None,
+        **kwargs: Any,
+    ) -> Axes:
+        """Plot data as filled contours.
 
         Examples
         --------
@@ -276,6 +338,7 @@ class _DataArrayPlotterGrid2D(_DataArrayPlotter):
         da = mikeio.read("../data/gebco_sound.dfs2")["Elevation"]
         da.plot.contourf()
         ```
+
         """
         fig, ax = self._get_fig_ax(ax, figsize)
 
@@ -291,8 +354,15 @@ class _DataArrayPlotterGrid2D(_DataArrayPlotter):
             ax.set_title(title)
         return ax
 
-    def pcolormesh(self, ax=None, figsize=None, label=None, title=None, **kwargs):
-        """Plot data as coloured patches
+    def pcolormesh(
+        self,
+        ax: Axes | None = None,
+        figsize: tuple[float, float] | None = None,
+        title: str | None = None,
+        label: str | None = None,
+        **kwargs: Any,
+    ) -> Axes:
+        """Plot data as coloured patches.
 
         Examples
         --------
@@ -300,6 +370,7 @@ class _DataArrayPlotterGrid2D(_DataArrayPlotter):
         da = mikeio.read("../data/gebco_sound.dfs2")["Elevation"]
         da.plot.pcolormesh()
         ```
+
         """
         fig, ax = self._get_fig_ax(ax, figsize)
 
@@ -315,18 +386,18 @@ class _DataArrayPlotterGrid2D(_DataArrayPlotter):
             ax.set_title(title)
         return ax
 
-    def _get_x_y(self):
+    def _get_x_y(self) -> tuple[np.ndarray, np.ndarray]:
         x = self.da.geometry.x
         y = self.da.geometry.y
         return x, y
 
-    def _get_xn_yn(self):
+    def _get_xn_yn(self) -> tuple[np.ndarray, np.ndarray]:
         xn = self.da.geometry._centers_to_nodes(self.da.geometry.x)
         yn = self.da.geometry._centers_to_nodes(self.da.geometry.y)
         return xn, yn
 
     @staticmethod
-    def _set_aspect_and_labels(ax, geometry, y):
+    def _set_aspect_and_labels(ax: Axes, geometry: Any, y: np.ndarray) -> None:
         if geometry.is_spectral:
             ax.set_xlabel("Frequency [Hz]")
             ax.set_ylabel("Directions [degree]")
@@ -349,7 +420,7 @@ class _DataArrayPlotterGrid2D(_DataArrayPlotter):
 
 
 class _DataArrayPlotterFM(_DataArrayPlotter):
-    """Plot a DataArray with a GeometryFM geometry
+    """Plot a DataArray with a GeometryFM geometry.
 
     If DataArray has multiple time steps, the first step will be plotted.
 
@@ -362,15 +433,26 @@ class _DataArrayPlotterFM(_DataArrayPlotter):
     da = mikeio.read("../data/HD2D.dfsu")["Surface elevation"]
     da.plot()
     ```
+
     """
 
-    def __call__(self, ax=None, figsize=None, **kwargs):
-        """Plot data as coloured patches"""
+    def __call__(
+        self,
+        ax: Axes | None = None,
+        figsize: tuple[float, float] | None = None,
+        **kwargs: Any,
+    ) -> Axes:
+        """Plot data as coloured patches."""
         ax = self._get_ax(ax, figsize)
         return self._plot_FM_map(ax, **kwargs)
 
-    def patch(self, ax=None, figsize=None, **kwargs):
-        """Plot data as coloured patches
+    def patch(
+        self,
+        ax: Axes | None = None,
+        figsize: tuple[float, float] | None = None,
+        **kwargs: Any,
+    ) -> Axes:
+        """Plot data as coloured patches.
 
         Examples
         --------
@@ -378,13 +460,19 @@ class _DataArrayPlotterFM(_DataArrayPlotter):
         da = mikeio.read("../data/HD2D.dfsu")["Surface elevation"]
         da.plot.patch()
         ```
+
         """
         ax = self._get_ax(ax, figsize)
         kwargs["plot_type"] = "patch"
         return self._plot_FM_map(ax, **kwargs)
 
-    def contour(self, ax=None, figsize=None, **kwargs):
-        """Plot data as contour lines
+    def contour(
+        self,
+        ax: Axes | None = None,
+        figsize: tuple[float, float] | None = None,
+        **kwargs: Any,
+    ) -> Axes:
+        """Plot data as contour lines.
 
         Examples
         --------
@@ -392,13 +480,19 @@ class _DataArrayPlotterFM(_DataArrayPlotter):
         da = mikeio.read("../data/HD2D.dfsu")["Surface elevation"]
         da.plot.contour()
         ```
+
         """
         ax = self._get_ax(ax, figsize)
         kwargs["plot_type"] = "contour"
         return self._plot_FM_map(ax, **kwargs)
 
-    def contourf(self, ax=None, figsize=None, **kwargs):
-        """Plot data as filled contours
+    def contourf(
+        self,
+        ax: Axes | None = None,
+        figsize: tuple[float, float] | None = None,
+        **kwargs: Any,
+    ) -> Axes:
+        """Plot data as filled contours.
 
         Examples
         --------
@@ -406,13 +500,19 @@ class _DataArrayPlotterFM(_DataArrayPlotter):
         da = mikeio.read("../data/HD2D.dfsu")["Surface elevation"]
         da.plot.contourf()
         ```
+
         """
         ax = self._get_ax(ax, figsize)
         kwargs["plot_type"] = "contourf"
         return self._plot_FM_map(ax, **kwargs)
 
-    def mesh(self, ax=None, figsize=None, **kwargs):
-        """Plot mesh only
+    def mesh(
+        self,
+        ax: Axes | None = None,
+        figsize: tuple[float, float] | None = None,
+        **kwargs: Any,
+    ) -> Axes:
+        """Plot mesh only.
 
         Examples
         --------
@@ -420,11 +520,17 @@ class _DataArrayPlotterFM(_DataArrayPlotter):
         da = mikeio.read("../data/HD2D.dfsu")["Surface elevation"]
         da.plot.mesh()
         ```
+
         """
         return self.da.geometry.plot.mesh(figsize=figsize, ax=ax, **kwargs)
 
-    def outline(self, ax=None, figsize=None, **kwargs):
-        """Plot domain outline (using the boundary_polylines property)
+    def outline(
+        self,
+        ax: Axes | None = None,
+        figsize: tuple[float, float] | None = None,
+        **kwargs: Any,
+    ) -> Axes:
+        """Plot domain outline.
 
         Examples
         --------
@@ -432,10 +538,11 @@ class _DataArrayPlotterFM(_DataArrayPlotter):
         da = mikeio.read("../data/HD2D.dfsu")["Surface elevation"]
         da.plot.outline()
         ```
+
         """
         return self.da.geometry.plot.outline(figsize=figsize, ax=ax, **kwargs)
 
-    def _plot_FM_map(self, ax, **kwargs):
+    def _plot_FM_map(self, ax: Axes, **kwargs: Any) -> Axes:
         values = self._get_first_step_values()
 
         title = f"{self.da.time[0]}"
@@ -456,7 +563,7 @@ class _DataArrayPlotterFM(_DataArrayPlotter):
             node_coordinates=geometry.node_coordinates,
             element_table=geometry.element_table,
             element_coordinates=geometry.element_coordinates,
-            boundary_polylines=geometry.boundary_polylines,
+            boundary_polylines=geometry.boundary_polygons.lines,
             projection=geometry.projection,
             z=values,
             ax=ax,
@@ -465,31 +572,58 @@ class _DataArrayPlotterFM(_DataArrayPlotter):
 
 
 class _DataArrayPlotterFMVerticalColumn(_DataArrayPlotter):
-    """Plot a DataArray with a GeometryFMVerticalColumn geometry
+    """Plot a DataArray with a GeometryFMVerticalColumn geometry.
 
     If DataArray has multiple time steps, the first step will be plotted.
 
     Examples
     --------
-    >>> ds = mikeio.read("oresund_sigma_z.dfsu")
-    >>> dsp = ds.sel(x=333934.1, y=6158101.5)
-    >>> da = dsp["Temperature"]
-    >>> dsp.plot()
-    >>> dsp.plot(extrapolate=False, marker='o')
-    >>> dsp.plot.pcolormesh()
-    >>> dsp.plot.hist()
+    ```{python}
+    import mikeio
+    ds = mikeio.read("../data/oresund_sigma_z.dfsu")
+    dsp = ds.sel(x=333934.1, y=6158101.5)
+    da = dsp["Temperature"]
+    da.plot()
+    ```
+    ```{python}
+    da.plot(extrapolate=False, marker='o')
+    ```
+    ```{python}
+    da.plot.pcolormesh()
+    ```
+    ```{python}
+    da.plot.hist()
+    ```
+
     """
 
-    def __call__(self, ax=None, figsize=None, **kwargs):
+    def __call__(
+        self,
+        ax: Axes | None = None,
+        figsize: tuple[float, float] | None = None,
+        **kwargs: Any,
+    ) -> Axes:
         ax = self._get_ax(ax, figsize)
         return self.line(ax, **kwargs)
 
-    def line(self, ax=None, figsize=None, extrapolate=True, **kwargs):
-        """Plot data as vertical lines"""
+    def line(
+        self,
+        ax: Axes | None = None,
+        figsize: tuple[float, float] | None = None,
+        extrapolate: bool = True,
+        **kwargs: Any,
+    ) -> Axes:
+        """Plot data as vertical lines."""
         ax = self._get_ax(ax, figsize)
         return self._line(ax, extrapolate=extrapolate, **kwargs)
 
-    def _line(self, ax=None, show_legend=None, extrapolate=True, **kwargs):
+    def _line(
+        self,
+        ax: Axes,
+        show_legend: bool | None = None,
+        extrapolate: bool = True,
+        **kwargs: Any,
+    ) -> Axes:
         import matplotlib.pyplot as plt
 
         if "title" in kwargs:
@@ -517,8 +651,14 @@ class _DataArrayPlotterFMVerticalColumn(_DataArrayPlotter):
 
         return ax
 
-    def pcolormesh(self, ax=None, figsize=None, title=None, **kwargs):
-        """Plot data as coloured patches"""
+    def pcolormesh(
+        self,
+        ax: Axes | None = None,
+        figsize: tuple[float, float] | None = None,
+        title: str | None = None,
+        **kwargs: Any,
+    ) -> Axes:
+        """Plot data as coloured patches."""
         fig, ax = self._get_fig_ax(ax, figsize)
         ze = self.da.geometry.calc_ze()
         pos = ax.pcolormesh(
@@ -538,29 +678,44 @@ class _DataArrayPlotterFMVerticalColumn(_DataArrayPlotter):
 
 
 class _DataArrayPlotterFMVerticalProfile(_DataArrayPlotter):
-    """Plot a DataArray with a 2DV GeometryFMVerticalProfile geometry
+    """Plot a DataArray with a 2DV GeometryFMVerticalProfile geometry.
 
     If DataArray has multiple time steps, the first step will be plotted.
 
     Examples
     --------
-    >>> da = mikeio.read("oresund_vertical_slice.dfsu")["Temperature"]
-    >>> da.plot()
-    >>> da.plot.mesh()
-    >>> da.plot.hist()
+    ```{python}
+    import mikeio
+    da = mikeio.read("../data/oresund_vertical_slice.dfsu")["Temperature"]
+    da.plot()
+    ```
+    ```{python}
+    da.plot.hist()
+    ```
+
     """
 
-    def __call__(self, ax=None, figsize=None, **kwargs):
+    def __call__(
+        self,
+        ax: Axes | None = None,
+        figsize: tuple[float, float] | None = None,
+        **kwargs: Any,
+    ) -> Axes:
         ax = self._get_ax(ax, figsize)
         return self._plot_transect(ax=ax, **kwargs)
 
-    def _plot_transect(self, **kwargs):
+    def _plot_transect(self, **kwargs: Any) -> Axes:
         if "label" not in kwargs:
             kwargs["label"] = self._label_txt()
         if "title" not in kwargs:
             kwargs["title"] = self.da.time[0]
-
-        values, zn = self._get_first_step_values()
+        assert self.da._zn is not None
+        if self.da.n_timesteps > 1:
+            values = self.da.values[0]
+            zn = self.da._zn[0]
+        else:
+            values = np.squeeze(self.da.values)
+            zn = np.squeeze(self.da._zn)  # type: ignore
         g = self.da.geometry
         return _plot_vertical_profile(
             node_coordinates=g.node_coordinates,
@@ -571,15 +726,14 @@ class _DataArrayPlotterFMVerticalProfile(_DataArrayPlotter):
             **kwargs,
         )
 
-    def _get_first_step_values(self):
-        if self.da.n_timesteps > 1:
-            return self.da.values[0], self.da._zn[0]
-        else:
-            return np.squeeze(self.da.values), np.squeeze(self.da._zn)
-
 
 class _DataArrayPlotterPointSpectrum(_DataArrayPlotter):
-    def __call__(self, ax=None, figsize=None, **kwargs):
+    def __call__(
+        self,
+        ax: Axes | None = None,
+        figsize: tuple[float, float] | None = None,
+        **kwargs: Any,
+    ) -> Axes:
         # ax = self._get_ax(ax, figsize)
         if self.da.n_frequencies > 0 and self.da.n_directions > 0:
             return self._plot_2dspectrum(figsize=figsize, **kwargs)
@@ -590,32 +744,48 @@ class _DataArrayPlotterPointSpectrum(_DataArrayPlotter):
         else:
             raise ValueError("Spectrum could not be plotted")
 
-    def patch(self, **kwargs):
+    def patch(self, **kwargs: Any) -> Axes:
         kwargs["plot_type"] = "patch"
         return self._plot_2dspectrum(**kwargs)
 
-    def contour(self, **kwargs):
+    def contour(self, **kwargs: Any) -> Axes:
         kwargs["plot_type"] = "contour"
         return self._plot_2dspectrum(**kwargs)
 
-    def contourf(self, **kwargs):
+    def contourf(self, **kwargs: Any) -> Axes:
         kwargs["plot_type"] = "contourf"
         return self._plot_2dspectrum(**kwargs)
 
-    def _plot_freqspectrum(self, ax=None, figsize=None, **kwargs):
-        ax = self._plot_1dspectrum(self.da.frequencies, ax, figsize, **kwargs)
+    def _plot_freqspectrum(
+        self,
+        ax: Axes | None = None,
+        figsize: tuple[float, float] | None = None,
+        **kwargs: Any,
+    ) -> Axes:
+        ax = self._plot_1dspectrum(self.da.frequencies, ax, figsize, **kwargs)  # type: ignore
         ax.set_xlabel("frequency [Hz]")
         ax.set_ylabel("directionally integrated energy [m*m*s]")
         return ax
 
-    def _plot_dirspectrum(self, ax=None, figsize=None, **kwargs):
-        ax = self._plot_1dspectrum(self.da.directions, ax, figsize, **kwargs)
+    def _plot_dirspectrum(
+        self,
+        ax: Axes | None = None,
+        figsize: tuple[float, float] | None = None,
+        **kwargs: Any,
+    ) -> Axes:
+        ax = self._plot_1dspectrum(self.da.directions, ax, figsize, **kwargs)  # type: ignore
         ax.set_xlabel("directions [degrees]")
         ax.set_ylabel("directional spectral energy [m*m*s]")
-        ax.set_xticks(self.da.directions[::2])
+        ax.set_xticks(self.da.directions[::2])  # type: ignore
         return ax
 
-    def _plot_1dspectrum(self, x_values, ax=None, figsize=None, **kwargs):
+    def _plot_1dspectrum(
+        self,
+        x_values: np.ndarray,
+        ax: Axes | None = None,
+        figsize: tuple[float, float] | None = None,
+        **kwargs: Any,
+    ) -> Axes:
         ax = self._get_ax(ax, figsize)
         y_values = self._get_first_step_values()
 
@@ -630,7 +800,7 @@ class _DataArrayPlotterPointSpectrum(_DataArrayPlotter):
         ax.plot(x_values, y_values, **kwargs)
         return ax
 
-    def _plot_2dspectrum(self, **kwargs):
+    def _plot_2dspectrum(self, **kwargs: Any) -> Axes:
         values = self._get_first_step_values()
 
         if "figsize" not in kwargs or kwargs["figsize"] is None:
@@ -677,11 +847,15 @@ class _DataArrayPlotterAreaSpectrum(_DataArrayPlotterFM):
 
 
 class _DatasetPlotter:
+    """Class for plotting scatter plots from datasets."""
+
     def __init__(self, ds: Dataset) -> None:
         self.ds = ds
 
-    def __call__(self, figsize=None, **kwargs):
-        """Plot multiple DataArrays as time series (only possible dfs0-type data)"""
+    def __call__(
+        self, figsize: tuple[float, float] | None = None, **kwargs: Any
+    ) -> Axes:
+        """Plot multiple DataArrays as time series (only possible dfs0-type data)."""
         if self.ds.dims == ("time",):
             df = self.ds.to_dataframe()
             return df.plot(figsize=figsize, **kwargs)
@@ -691,7 +865,9 @@ class _DatasetPlotter:
             )
 
     @staticmethod
-    def _get_fig_ax(ax=None, figsize=None):
+    def _get_fig_ax(
+        ax: Axes | None = None, figsize: tuple[float, float] | None = None
+    ) -> tuple[Figure, Axes]:
         import matplotlib.pyplot as plt
 
         if ax is None:
@@ -700,8 +876,15 @@ class _DatasetPlotter:
             fig = plt.gcf()
         return fig, ax
 
-    def scatter(self, x, y, ax=None, figsize=None, **kwargs):
-        """Plot data from two DataArrays against each other in a scatter plot
+    def scatter(
+        self,
+        x: str | int,
+        y: str | int,
+        ax: Axes | None = None,
+        figsize: tuple[float, float] | None = None,
+        **kwargs: Any,
+    ) -> Axes:
+        """Plot data from two DataArrays against each other in a scatter plot.
 
         Parameters
         ----------
@@ -715,7 +898,8 @@ class _DatasetPlotter:
             specify size of figure
         title: str, optional
             axes title
-        **kwargs: additional kwargs will be passed to ax.scatter()
+        **kwargs: Any
+            additional kwargs will be passed to ax.scatter()
 
         Returns
         -------
@@ -726,6 +910,7 @@ class _DatasetPlotter:
         >>> ds = mikeio.read("oresund_sigma_z.dfsu")
         >>> ds.plot.scatter(x="Salinity", y="Temperature", title="S-vs-T")
         >>> ds.plot.scatter(x=0, y=1, figsize=(9,9), marker='*')
+
         """
         _, ax = self._get_fig_ax(ax, figsize)
         if "title" in kwargs:
@@ -740,5 +925,19 @@ class _DatasetPlotter:
         return ax
 
     @staticmethod
-    def _label_txt(da):
+    def _label_txt(da: DataArray) -> str:
         return f"{da.name} [{da.unit.name}]"
+
+
+__all__ = [
+    "_DataArrayPlotter",
+    "_DataArrayPlotterGrid1D",
+    "_DataArrayPlotterGrid2D",
+    "_DataArrayPlotterFM",
+    "_DataArrayPlotterFMVerticalColumn",
+    "_DataArrayPlotterFMVerticalProfile",
+    "_DataArrayPlotterPointSpectrum",
+    "_DataArrayPlotterLineSpectrum",
+    "_DataArrayPlotterAreaSpectrum",
+    "_DatasetPlotter",
+]

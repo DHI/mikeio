@@ -1,10 +1,12 @@
+from __future__ import annotations
+
 import numpy as np
 
 from ._geometry import BoundingBox
 
 
 def xy_to_bbox(xy: np.ndarray, buffer: float = 0.0) -> BoundingBox:
-    """return bounding box for list of coordinates"""
+    """Return bounding box for list of coordinates."""
     left = xy[:, 0].min() - buffer
     bottom = xy[:, 1].min() - buffer
     right = xy[:, 0].max() + buffer
@@ -12,8 +14,10 @@ def xy_to_bbox(xy: np.ndarray, buffer: float = 0.0) -> BoundingBox:
     return BoundingBox(left, bottom, right, top)
 
 
-def dist_in_meters(coords, pt, is_geo=False):
-    """get distance between array of coordinates and point
+def dist_in_meters(
+    coords: np.ndarray, pt: tuple[float, float], is_geo: bool = False
+) -> np.ndarray:
+    """Get distance between array of coordinates and point.
 
     Parameters
     ----------
@@ -28,6 +32,7 @@ def dist_in_meters(coords, pt, is_geo=False):
     -------
     array
         distances in meter
+
     """
     coords = np.atleast_2d(coords)
     xe = coords[:, 0]
@@ -38,10 +43,10 @@ def dist_in_meters(coords, pt, is_geo=False):
         d = _get_dist_geo(xe, ye, xp, yp)
     else:
         d = np.sqrt(np.square(xe - xp) + np.square(ye - yp))
-    return d
+    return d  # type: ignore
 
 
-def _get_dist_geo(lon, lat, lon1, lat1):
+def _get_dist_geo(lon: float, lat: float, lon1: float, lat1: float) -> float:
     # assuming input in degrees!
     R = 6371e3  # Earth radius in metres
     dlon = np.deg2rad(lon1 - lon)
@@ -51,15 +56,18 @@ def _get_dist_geo(lon, lat, lon1, lat1):
     x = dlon * np.cos(np.deg2rad((lat + lat1) / 2))
     y = dlat
     d = R * np.sqrt(np.square(x) + np.square(y))
-    return d
+    return d  # type: ignore
 
 
-def _relative_cumulative_distance(coords, reference=None, is_geo=False):
-    """Calculate the cumulative relative distance along a path"""
+def _relative_cumulative_distance(
+    coords: np.ndarray, reference: np.ndarray | None = None, is_geo: bool = False
+) -> np.ndarray:
+    """Calculate the cumulative relative distance along a path."""
     coords = np.atleast_2d(coords)
     d = np.zeros_like(coords[:, 0])
     if reference is not None:
-        d[0] = dist_in_meters(coords[0, 0:2], reference[0:2], is_geo)[0]
+        pt = (reference[0], reference[1])
+        d[0] = dist_in_meters(coords[0, 0:2], pt=pt, is_geo=is_geo)[0]
     for j in range(1, len(d)):
         d[j] = d[j - 1] + dist_in_meters(coords[j, 0:2], coords[j - 1, 0:2], is_geo)[0]
-    return d
+    return d  # type: ignore

@@ -1,5 +1,6 @@
 import pytest
-from mikeio.spatial._FM_geometry import GeometryFM2D
+
+from mikeio.spatial import GeometryFM2D
 
 
 ##################################################

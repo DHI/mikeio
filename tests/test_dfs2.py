@@ -26,14 +26,20 @@ def dfs2_random_2items():
 
 
 @pytest.fixture
+def dfs2_pt_spectrum_geographical():
+    filepath = Path("tests/testdata/spectra/pt_spectra_geographical.dfs2")
+    return mikeio.open(filepath, type="spectral")
+
+
+@pytest.fixture
 def dfs2_pt_spectrum():
-    filepath = Path("tests/testdata/pt_spectra.dfs2")
+    filepath = Path("tests/testdata/spectra/pt_spectra.dfs2")
     return mikeio.open(filepath, type="spectral")
 
 
 @pytest.fixture
 def dfs2_pt_spectrum_linearf():
-    filepath = Path("tests/testdata/dir_wave_analysis_spectra.dfs2")
+    filepath = Path("tests/testdata/spectra/dir_wave_analysis_spectra.dfs2")
     return mikeio.open(filepath, type="spectral")
 
 
@@ -312,6 +318,31 @@ def test_properties_pt_spectrum(dfs2_pt_spectrum):
     assert g.orientation == 0
 
 
+def test_properties_pt_spectrum_geographical(dfs2_pt_spectrum_geographical):
+    dfs = dfs2_pt_spectrum_geographical
+    assert dfs.x0 == pytest.approx(0.055)
+    assert dfs.y0 == 0
+    assert dfs.dx == pytest.approx(1.1)
+    assert dfs.dy == 22.5
+    assert dfs.nx == 25
+    assert dfs.ny == 16
+    assert dfs.longitude == pytest.approx(0, abs=1e-6)
+    assert dfs.latitude == 0
+    assert dfs.orientation == 0
+    assert dfs.n_items == 1
+    assert dfs.n_timesteps == 31
+
+    g = dfs.geometry
+    assert g.is_spectral
+    assert g.x[0] == pytest.approx(0.055)
+    # assert g.x[-1] > 25  # if considered linear
+    assert g.x[-1] < 0.6  # logarithmic
+    assert g.y[0] == 0
+    assert g.dx == pytest.approx(1.1)
+    assert g.dy == 22.5
+    assert g.orientation == 0
+
+
 def test_properties_pt_spectrum_linearf(dfs2_pt_spectrum_linearf):
     dfs = dfs2_pt_spectrum_linearf
     # This file doesn't have a valid projection string
@@ -343,7 +374,7 @@ def test_properties_pt_spectrum_linearf(dfs2_pt_spectrum_linearf):
 
 def test_dir_wave_spectra_relative_time_axis():
     ds = mikeio.open(
-        "tests/testdata/dir_wave_analysis_spectra.dfs2", type="spectral"
+        "tests/testdata/spectra/dir_wave_analysis_spectra.dfs2", type="spectral"
     ).read()
     assert ds.n_items == 1
     assert ds.geometry.nx == 128
@@ -770,7 +801,7 @@ def test_read_write_header_unchanged_vertical(tmp_path):
 
 
 def test_read_write_header_unchanged_spectral_2(tmp_path):
-    is_header_unchanged_on_read_write(tmp_path, "pt_spectra.dfs2")
+    is_header_unchanged_on_read_write(tmp_path, "spectra/pt_spectra.dfs2")
 
 
 def test_read_write_header_unchanged_MIKE_SHE_output(tmp_path):
@@ -872,3 +903,45 @@ def test_spatial_subset_bathymetry() -> None:
     ds = mikeio.read("tests/testdata/flow.dfs2")
     ds2 = ds.isel(x=range(5, 10), y=range(5, 10))
     assert ds2.geometry.bathymetry.shape == (5, 5)
+
+
+def test_append(tmp_path):
+    ds = mikeio.read("tests/testdata/eq.dfs2", time=[0, 1])
+    ds2 = mikeio.read("tests/testdata/eq.dfs2", time=[2, 3])
+
+    new_filename = tmp_path / "eq_appended.dfs2"
+    ds.to_dfs(new_filename)
+    dfs = mikeio.open(new_filename)
+    assert dfs.n_timesteps == 2
+    dfs.append(ds2)
+    assert dfs.n_timesteps == 4
+
+    ds3 = mikeio.read(new_filename)
+    assert ds3.n_timesteps == 4
+    assert ds3.time[-1] == ds2.time[-1]
+    assert ds3[0].values[-1, 0, 0] == ds2[0].values[-1, 0, 0]
+
+
+def test_append_mismatch_items_not_possible(tmp_path):
+    ds = mikeio.read("tests/testdata/consistency/oresundHD.dfs2", time=[0, 1])
+    ds2 = mikeio.read(
+        "tests/testdata/consistency/oresundHD.dfs2", time=[2, 3], items=[1, 2]
+    )
+
+    new_filename = tmp_path / "eq_appended.dfs2"
+    ds.to_dfs(new_filename)
+    dfs = mikeio.open(new_filename)
+    with pytest.raises(ValueError, match="Item"):
+        dfs.append(ds2)
+
+
+def test_append_mismatch_geometry(tmp_path):
+    ds = mikeio.read("tests/testdata/consistency/oresundHD.dfs2", time=[0, 1])
+    ds2 = mikeio.read("tests/testdata/consistency/oresundHD.dfs2").isel(
+        x=slice(1, None)
+    )
+    new_filename = tmp_path / "append_mismatch_geometry.dfs2"
+    ds.to_dfs(new_filename)
+    dfs = mikeio.open(new_filename)
+    with pytest.raises(ValueError, match="geometry"):
+        dfs.append(ds2)

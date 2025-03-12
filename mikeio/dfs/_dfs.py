@@ -4,10 +4,9 @@ import warnings
 from abc import abstractmethod
 from dataclasses import dataclass
 from datetime import datetime
-from typing import Any, List, Tuple, Sequence
+from typing import Any, Sequence
 import numpy as np
 import pandas as pd
-from tqdm import tqdm
 
 from mikecore.DfsFile import (
     DfsDynamicItemInfo,
@@ -19,7 +18,7 @@ from mikecore.DfsFileFactory import DfsFileFactory
 from mikecore.Projections import Cartography
 
 from ..dataset import Dataset
-from ..eum import EUMType, EUMUnit, ItemInfo, ItemInfoList
+from ..eum import ItemInfo, ItemInfoList
 from ..exceptions import ItemsError
 from .._time import DateTimeSelector
 
@@ -30,8 +29,8 @@ class DfsHeader:
     n_timesteps: int
     start_time: datetime
     dt: float
-    coordinates: Tuple[str, float, float, float]
-    items: List[ItemInfo]
+    coordinates: tuple[str, float, float, float]
+    items: list[ItemInfo]
 
 
 def _read_item_time_step(
@@ -39,15 +38,16 @@ def _read_item_time_step(
     dfs: DfsFile,
     filename: str,
     time: pd.DatetimeIndex,
-    item_numbers: List[int],
+    item_numbers: list[int],
     deletevalue: float,
-    shape: Tuple[int, ...],
+    shape: tuple[int, ...],
     item: int,
     it: int,
     error_bad_data: bool = True,
     fill_bad_data_value: float = np.nan,
-) -> Tuple[DfsFile, np.ndarray]:
+) -> tuple[DfsFile, np.ndarray, float]:
     itemdata = dfs.ReadItemTimeStep(item_numbers[item] + 1, it)
+    t = itemdata.Time
     if itemdata is not None:
         d = itemdata.Data
         d[d == deletevalue] = np.nan
@@ -60,12 +60,12 @@ def _read_item_time_step(
             d[:] = fill_bad_data_value
             dfs.Close()
             dfs = DfsFileFactory.DfsGenericOpen(filename)
-    return dfs, d
+    return dfs, d, t
 
 
 def _fuzzy_item_search(
-    *, dfsItemInfo: List[DfsDynamicItemInfo], search: str, start_idx: int = 0
-) -> List[int]:
+    *, dfsItemInfo: list[DfsDynamicItemInfo], search: str, start_idx: int = 0
+) -> list[int]:
     import fnmatch
 
     names = [info.Name for info in dfsItemInfo]
@@ -78,10 +78,10 @@ def _fuzzy_item_search(
 
 
 def _valid_item_numbers(
-    dfsItemInfo: List[DfsDynamicItemInfo],
+    dfsItemInfo: list[DfsDynamicItemInfo],
     items: str | int | Sequence[int | str] | None = None,
     ignore_first: bool = False,
-) -> List[int]:
+) -> list[int]:
     start_idx = 1 if ignore_first else 0
     n_items_file = len(dfsItemInfo) - start_idx
     if items is None:
@@ -89,7 +89,7 @@ def _valid_item_numbers(
 
     # Handling scalar and sequences is a bit tricky
 
-    item_numbers: List[int] = []
+    item_numbers: list[int] = []
 
     # check if items is a scalar (int or str)
     if isinstance(items, (int, str)):
@@ -125,7 +125,7 @@ def _valid_item_numbers(
 
 def _valid_timesteps(
     dfsFileInfo: DfsFileInfo, time_steps: int | Sequence[int] | str | slice | None
-) -> Tuple[bool, List[int]]:
+) -> tuple[bool, list[int]]:
     time_axis = dfsFileInfo.TimeAxis
 
     single_time_selected = False
@@ -178,16 +178,21 @@ def _valid_timesteps(
 
 
 def _item_numbers_by_name(
-    dfsItemInfo: DfsDynamicItemInfo, item_names: List[str], ignore_first: bool = False
-) -> List[int]:
-    """Utility function to find item numbers
+    dfsItemInfo: list[DfsDynamicItemInfo],
+    item_names: list[str],
+    ignore_first: bool = False,
+) -> list[int]:
+    """Utility function to find item numbers.
 
     Parameters
     ----------
-    dfsItemInfo : MIKE dfs ItemInfo object
-
+    dfsItemInfo : list[DfsDynamicItemInfo]
+        item info from dfs file
     item_names : list[str]
         Names of items to be found
+    ignore_first : bool, optional
+        Ignore first item, by default False
+
 
     Returns
     -------
@@ -198,6 +203,7 @@ def _item_numbers_by_name(
     ------
     KeyError
         In case item is not found in the dfs file
+
     """
     first_idx = 1 if ignore_first else 0
     names = [x.Name for x in dfsItemInfo[first_idx:]]
@@ -212,15 +218,16 @@ def _item_numbers_by_name(
 
 
 def _get_item_info(
-    dfsItemInfo: List[DfsDynamicItemInfo],
-    item_numbers: List[int] | None = None,
+    dfsItemInfo: list[DfsDynamicItemInfo],
+    item_numbers: list[int] | None = None,
     ignore_first: bool = False,
 ) -> ItemInfoList:
-    """Read DFS ItemInfo for specific item numbers
+    """Read DFS ItemInfo for specific item numbers.
 
     Parameters
     ----------
-    dfsItemInfo : List[DfsDynamicItemInfo]
+    dfsItemInfo : list[DfsDynamicItemInfo]
+        Item info from dfs file
     item_numbers : list[int], optional
         Item numbers to read, by default all items are read
     ignore_first : bool, optional
@@ -229,6 +236,7 @@ def _get_item_info(
     Returns
     -------
     ItemInfoList
+
     """
     first_idx = 1 if ignore_first else 0
     if item_numbers is None:
@@ -340,110 +348,25 @@ class _Dfs123:
 
         return str.join("\n", out)
 
-    def read(
-        self,
-        *,
-        items: str | int | Sequence[str | int] | None = None,
-        time: int | str | slice | None = None,
-        keepdims: bool = False,
-        dtype: Any = np.float32,
-    ) -> Dataset:
-        """
-        Read data from a dfs file
-
-        Parameters
-        ---------
-        items: list[int] or list[str], optional
-            Read only selected items, by number (0-based), or by name
-        time: int, str, datetime, pd.TimeStamp, sequence, slice or pd.DatetimeIndex, optional
-            Read only selected time steps, by default None (=all)
-        keepdims: bool, optional
-            When reading a single time step only, should the time-dimension be kept
-            in the returned Dataset? by default: False
-
-        Returns
-        -------
-        Dataset
-        """
-
-        self._open()
-
-        item_numbers = _valid_item_numbers(self._dfs.ItemInfo, items)
-        n_items = len(item_numbers)
-
-        single_time_selected, time_steps = _valid_timesteps(self._dfs.FileInfo, time)
-        nt = len(time_steps) if not single_time_selected else 1
-
-        shape: Tuple[int, ...]
-
-        if self._ndim == 1:
-            shape = (nt, self.nx)  # type: ignore
-        elif self._ndim == 2:
-            shape = (nt, self.ny, self.nx)  # type: ignore
-        else:
-            shape = (nt, self.nz, self.ny, self.nx)  # type: ignore
-
-        if single_time_selected and not keepdims:
-            shape = shape[1:]
-
-        data_list: List[np.ndarray] = [
-            np.ndarray(shape=shape, dtype=dtype) for _ in range(n_items)
-        ]
-
-        t_seconds = np.zeros(len(time_steps))
-
-        for i, it in enumerate(tqdm(time_steps, disable=not self.show_progress)):
-            for item in range(n_items):
-                itemdata = self._dfs.ReadItemTimeStep(item_numbers[item] + 1, int(it))
-
-                src = itemdata.Data
-                d = src
-
-                d[d == self.deletevalue] = np.nan
-
-                if self._ndim == 2:
-                    d = d.reshape(self.ny, self.nx)  # type: ignore
-
-                if single_time_selected:
-                    data_list[item] = d
-                else:
-                    data_list[item][i] = d
-
-            t_seconds[i] = itemdata.Time
-
-        time = pd.to_datetime(t_seconds, unit="s", origin=self.start_time)
-
-        items = _get_item_info(self._dfs.ItemInfo, item_numbers)
-
-        self._dfs.Close()
-        return Dataset(data_list, time, items, geometry=self.geometry, validate=False)
-
     def _open(self) -> None:
         raise NotImplementedError("Should be implemented by subclass")
 
-    def _get_item_info(self, item_numbers: Sequence[int]) -> List[ItemInfo]:
-        """Read DFS ItemInfo
+    def _get_item_info(self, item_numbers: Sequence[int]) -> list[ItemInfo]:
+        """Read DFS ItemInfo.
 
         Parameters
         ----------
-        dfs : MIKE dfs object
         item_numbers : list[int]
+            Item numbers to read
 
         Returns
         -------
         list[Iteminfo]
+
         """
-        items = []
-        for item in item_numbers:
-            name = self._dfs.ItemInfo[item].Name
-            eumItem = self._dfs.ItemInfo[item].Quantity.Item
-            eumUnit = self._dfs.ItemInfo[item].Quantity.Unit
-            itemtype = EUMType(eumItem)
-            unit = EUMUnit(eumUnit)
-            data_value_type = self._dfs.ItemInfo[item].ValueType
-            item_info = ItemInfo(name, itemtype, unit, data_value_type)
-            items.append(item_info)
-        return items
+        infos = self._dfs.ItemInfo
+        nos = item_numbers
+        return [ItemInfo.from_mikecore_dynamic_item_info(infos[i]) for i in nos]
 
     @property
     def geometry(self) -> Any:
@@ -451,17 +374,17 @@ class _Dfs123:
 
     @property
     def deletevalue(self) -> float:
-        "File delete value"
+        "File delete value."
         return self._deletevalue
 
     @property
     def n_items(self) -> int:
-        "Number of items"
+        "Number of items."
         return len(self.items)
 
     @property
-    def items(self) -> List[ItemInfo]:
-        "List of items"
+    def items(self) -> list[ItemInfo]:
+        "List of items."
         return self._items
 
     @property
@@ -470,25 +393,25 @@ class _Dfs123:
 
     @property
     def start_time(self) -> pd.Timestamp:
-        """File start time"""
+        """File start time."""
         return self._start_time
 
     @property
     def end_time(self) -> pd.Timestamp:
-        """File end time"""
+        """File end time."""
         if self._end_time is None:
-            self._end_time = self.read(items=[0]).time[-1].to_pydatetime()
+            self._end_time = self.read(items=[0]).time[-1].to_pydatetime()  # type: ignore
 
         return self._end_time
 
     @property
     def n_timesteps(self) -> int:
-        """Number of time steps"""
+        """Number of time steps."""
         return self._n_timesteps
 
     @property
     def timestep(self) -> Any:
-        """Time step size in seconds"""
+        """Time step size in seconds."""
         # this will fail if the TimeAxisType is not calendar and equidistant, but that is ok
         return self._dfs.FileInfo.TimeAxis.TimeStepInSeconds()
 
@@ -498,22 +421,22 @@ class _Dfs123:
 
     @property
     def longitude(self) -> float:
-        """Origin longitude"""
+        """Origin longitude."""
         return self._longitude
 
     @property
     def latitude(self) -> float:
-        """Origin latitude"""
+        """Origin latitude."""
         return self._latitude
 
     @property
     def origin(self) -> Any:
-        """Origin (in own CRS)"""
+        """Origin (in own CRS)."""
         return self.geometry.origin
 
     @property
     def orientation(self) -> Any:
-        """Orientation (in own CRS)"""
+        """Orientation (in own CRS)."""
         return self.geometry.orientation
 
     @property
@@ -523,16 +446,16 @@ class _Dfs123:
 
     @property
     @abstractmethod
-    def shape(self) -> Tuple[int, ...]:
-        """Shape of the data array"""
+    def shape(self) -> tuple[int, ...]:
+        """Shape of the data array."""
         pass
 
     def _validate_no_orientation_in_geo(self) -> None:
         if self.is_geo and abs(self._orientation) > 1e-6:
             raise ValueError("Orientation is not supported for LONG/LAT coordinates")
 
-    def _origin_and_orientation_in_CRS(self) -> Tuple[Any, float]:
-        """Project origin and orientation to projected CRS (if not LONG/LAT)"""
+    def _origin_and_orientation_in_CRS(self) -> tuple[Any, float]:
+        """Project origin and orientation to projected CRS (if not LONG/LAT)."""
         if self.is_geo:
             origin = self._longitude, self._latitude
             orientation = 0.0

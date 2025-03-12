@@ -11,6 +11,10 @@
     "python.formatting.provider": "black",
     "editor.formatOnSave": true,
     "mypy-type-checker.args": [
-        "--disallow-incomplete-defs",
+        "--disallow-untyped-defs",
     ],
+    "[python]": {
+        "editor.formatOnSave": true,
+        "editor.defaultFormatter": "charliermarsh.ruff"
+    }
 }

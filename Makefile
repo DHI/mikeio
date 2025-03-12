@@ -1,7 +1,5 @@
 LIB = mikeio
 
-LIB = mikeio
-
 check: lint typecheck test
 
 build: typecheck test
@@ -10,8 +8,8 @@ build: typecheck test
 lint:
 	ruff check .
 
-pylint:
-	pylint --disable=all --enable=attribute-defined-outside-init mikeio/
+format:
+	ruff format $(LIB)/
 
 test:
 	pytest --disable-warnings

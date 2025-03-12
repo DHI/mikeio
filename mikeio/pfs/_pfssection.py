@@ -1,13 +1,20 @@
 from __future__ import annotations
+from collections.abc import KeysView, ValuesView
 from datetime import datetime
 from types import SimpleNamespace
-from typing import Any, Callable, Dict, List, Mapping, MutableMapping, Sequence
+from typing import (
+    Any,
+    ItemsView,
+    Mapping,
+    MutableMapping,
+    Sequence,
+)
 
 import pandas as pd
 
 
-def _merge_dict(a: Dict[str, Any], b: Mapping[str, Any]) -> Dict[str, Any]:
-    """merges dict b into dict a; handling non-unique keys"""
+def _merge_dict(a: dict[str, Any], b: Mapping[str, Any]) -> dict[str, Any]:
+    """merges dict b into dict a; handling non-unique keys."""
     for key in b:
         if key in a:
             if isinstance(a[key], dict) and isinstance(b[key], dict):
@@ -21,13 +28,16 @@ def _merge_dict(a: Dict[str, Any], b: Mapping[str, Any]) -> Dict[str, Any]:
 
 
 class PfsNonUniqueList(list):
+    # TODO do we really need this, regular lists are not unique
     pass
 
 
-class PfsSection(SimpleNamespace, MutableMapping):
+class PfsSection(SimpleNamespace, MutableMapping[str, Any]):
+    """Class for reading/writing sections in a pfs file."""
+
     @staticmethod
     def from_dataframe(df: pd.DataFrame, prefix: str) -> "PfsSection":
-        """Create a PfsSection from a DataFrame
+        """Create a PfsSection from a DataFrame.
 
         Parameters
         ----------
@@ -48,12 +58,13 @@ class PfsSection(SimpleNamespace, MutableMapping):
         ```{python}
         mikeio.PfsSection.from_dataframe(df,"STATION_")
         ```
+
         """
         d = {f"{prefix}{idx}": row.to_dict() for idx, row in df.iterrows()}
 
         return PfsSection(d)
 
-    def __init__(self, dictionary, **kwargs):
+    def __init__(self, dictionary: Mapping[str, Any], **kwargs: Any) -> None:
         super().__init__(**kwargs)
         for key, value in dictionary.items():
             self.__set_key_value(key, value, copy=True)
@@ -61,113 +72,92 @@ class PfsSection(SimpleNamespace, MutableMapping):
     def __repr__(self) -> str:
         return "\n".join(self._to_txt_lines())
 
-    def __len__(self):
+    def __len__(self) -> int:
         return len(self.__dict__)
 
-    def __iter__(self):
+    def __iter__(self) -> Any:
         iter(self)
 
-    def __contains__(self, key):
+    def __contains__(self, key: Any) -> bool:
         return key in self.keys()
 
-    def __getitem__(self, key):
+    def __getitem__(self, key: str) -> Any:
         return getattr(self, key)
 
-    def __setitem__(self, key, value):
+    def __setitem__(self, key: str, value: Any) -> None:
         self.__set_key_value(key, value)
 
-    def __delitem__(self, key):
+    def __delitem__(self, key: str) -> None:
         if key in self.keys():
             self.__delattr__(key)
         else:
             raise IndexError("Key not found")
 
-    def __set_key_value(self, key, value, copy=False):
+    def __set_key_value(self, key: str, value: Any, copy: bool = False) -> None:
         if value is None:
             value = {}
 
-        if isinstance(value, dict):
-            d = value.copy() if copy else value
-            self.__setattr__(key, PfsSection(d))
-        elif isinstance(value, PfsNonUniqueList):
-            # multiple keywords/Sections with same name
-            sections = PfsNonUniqueList()
-            for v in value:
-                if isinstance(v, dict):
-                    d = v.copy() if copy else v
-                    sections.append(PfsSection(d))
-                else:
-                    sections.append(self._parse_value(v))
-            self.__setattr__(key, sections)
-        else:
-            self.__setattr__(key, self._parse_value(value))
+        match value:
+            case dict():
+                d = value.copy() if copy else value
+                self.__setattr__(key, PfsSection(d))
+            case PfsNonUniqueList():
+                # multiple keywords/Sections with same name
+                sections = PfsNonUniqueList()
+                for v in value:
+                    match v:
+                        case dict():
+                            d = v.copy() if copy else v
+                            sections.append(PfsSection(d))
+                        case _:
+                            sections.append(self._parse_value(v))
+                self.__setattr__(key, sections)
+            case _:
+                self.__setattr__(key, self._parse_value(value))
 
-    def _parse_value(self, v):
+    def _parse_value(self, v: Any) -> Any:
         if isinstance(v, str) and self._str_is_scientific_float(v):
             return float(v)
         return v
 
     @staticmethod
-    def _str_is_scientific_float(s):
-        """True: -1.0e2, 1E-4, -0.1E+0.5; False: E12, E-4"""
-        if len(s) < 3:
+    def _str_is_scientific_float(s: str) -> bool:
+        """True: -1.0e2, 1E-4, -0.1E+0.5; False: E12, E-4."""
+        if len(s) < 3 or s.lower().startswith('e'):
             return False
-        if (
-            s.count(".") <= 2
-            and s.lower().count("e") == 1
-            and s.lower()[0] != "e"
-            and s.strip()
-            .lower()
-            .replace(".", "")
-            .replace("e", "")
-            .replace("-", "")
-            .replace("+", "")
-            .isnumeric()
-        ):
-            try:
-                float(s)
-                return True
-            except ValueError:
-                return False
-        else:
+        try:
+            float(s)
+            return 'e' in s.lower()
+        except ValueError:
             return False
 
-    def pop(self, key, *args):
+    def pop(self, key: Any, default: Any = None) -> Any:
         """If key is in the dictionary, remove it and return its
         value, else return default. If default is not given and
         key is not in the dictionary, a KeyError is raised."""
-        return self.__dict__.pop(key, *args)
+        return self.__dict__.pop(key, default)
 
-    def get(self, key, *args):
+    def get(self, key: Any, default: Any = None) -> Any:
         """Return the value for key if key is in the PfsSection,
         else default. If default is not given, it defaults to None,
         so that this method never raises a KeyError."""
-        return self.__dict__.get(key, *args)
+        return self.__dict__.get(key, default)
 
-    def clear(self):
+    def clear(self) -> None:
         """Remove all items from the PfsSection."""
         return self.__dict__.clear()
 
-    def keys(self):
-        """Return a new view of the PfsSection's keys"""
+    def keys(self) -> KeysView[str]:
+        """Return a new view of the PfsSection's keys."""
         return self.__dict__.keys()
 
-    def values(self):
+    def values(self) -> ValuesView[Any]:
         """Return a new view of the PfsSection's values."""
         return self.__dict__.values()
 
-    def items(self):
-        """Return a new view of the PfsSection's items ((key, value) pairs)"""
+    def items(self) -> ItemsView[str, Any]:
+        """Return a new view of the PfsSection's items ((key, value) pairs)."""
         return self.__dict__.items()
-
-    # TODO: better name
-    def update_recursive(self, key, value):
-        """Update recursively all matches of key with value"""
-        for k, v in self.items():
-            if isinstance(v, PfsSection):
-                self[k].update_recursive(key, value)
-            elif k == key:
-                self[k] = value
 
     def search(
         self,
@@ -179,7 +169,7 @@ class PfsSection(SimpleNamespace, MutableMapping):
         case: bool = False,
     ) -> PfsSection:
         """Find recursively all keys, sections or parameters
-           matching a pattern
+           matching a pattern.
 
         NOTE: logical OR between multiple conditions
 
@@ -200,26 +190,24 @@ class PfsSection(SimpleNamespace, MutableMapping):
         -------
         PfsSection
             Search result as a nested PfsSection
+
         """
-        results = []
         if text is not None:
-            assert key is None, "text and key cannot both be provided!"
-            assert section is None, "text and section cannot both be provided!"
-            assert param is None, "text and param cannot both be provided!"
-            key = text
-            section = text
-            param = text
-        key = key if (key is None or case) else key.lower()
-        section = section if (section is None or case) else section.lower()
+            # text searches across all fields
+            if key is not None or section is not None or param is not None:
+                raise ValueError("When 'text' is provided, 'key', 'section' and 'param' must be None")
+            key = section = param = text
+            
+        key = key.lower() if (key is not None and not case) else key
+        section = section.lower() if (section is not None and not case) else section
         param = (
             param
             if (param is None or not isinstance(param, str) or case)
             else param.lower()
         )
-        for item in self._find_patterns_generator(
+        results = [item for item in self._find_patterns_generator(
             keypat=key, parampat=param, secpat=section, case=case
-        ):
-            results.append(item)
+        )]
         return (
             self.__class__._merge_PfsSections(results)
             if len(results) > 0
@@ -227,9 +215,15 @@ class PfsSection(SimpleNamespace, MutableMapping):
         )
 
     def _find_patterns_generator(
-        self, keypat=None, parampat=None, secpat=None, keylist=[], case=False
-    ):
-        """Look for patterns in either keys, params or sections"""
+        self,
+        keypat: str | None = None,
+        parampat: Any = None,
+        secpat: str | None = None,
+        keylist: list[str] | None = None,
+        case: bool = False,
+    ) -> Any:
+        """Look for patterns in either keys, params or sections."""
+        keylist = [] if keylist is None else keylist
         for k, v in self.items():
             kk = str(k) if case else str(k).lower()
 
@@ -241,24 +235,22 @@ class PfsSection(SimpleNamespace, MutableMapping):
                         keypat, parampat, secpat, keylist=keylist + [k], case=case
                     )
             else:
-                if keypat and keypat in kk:
-                    yield from self._yield_deep_dict(keylist + [k], v)
-                if self._param_match(parampat, v, case):
+                if (keypat and keypat in kk) or self._param_match(parampat, v, case):
                     yield from self._yield_deep_dict(keylist + [k], v)
 
     @staticmethod
-    def _yield_deep_dict(keys, val):
-        """yield a deep nested dict with keys with a single deep value val"""
+    def _yield_deep_dict(keys: Sequence[str], val: Any) -> Any:
+        """yield a deep nested dict with keys with a single deep value val."""
         for j in range(len(keys) - 1, -1, -1):
             d = {keys[j]: val}
             val = d
         yield d
 
     @staticmethod
-    def _param_match(parampat: Any, v: Any, case: bool) -> bool:
+    def _param_match(parampat: Any, v: Any, case: bool) -> Any:
         if parampat is None:
             return False
-        if type(v) != type(parampat):
+        if type(v) is not type(parampat):
             return False
         if isinstance(v, str):
             vv = str(v) if case else str(v).lower()
@@ -267,7 +259,7 @@ class PfsSection(SimpleNamespace, MutableMapping):
             return parampat == v
 
     def find_replace(self, old_value: Any, new_value: Any) -> None:
-        """Update recursively all old_value with new_value"""
+        """Update recursively all old_value with new_value."""
         for k, v in self.items():
             if isinstance(v, PfsSection):
                 self[k].find_replace(old_value, new_value)
@@ -278,102 +270,80 @@ class PfsSection(SimpleNamespace, MutableMapping):
         """Return a copy of the PfsSection."""
         return PfsSection(self.to_dict())
 
-    def _to_txt_lines(self) -> List[str]:
-        lines: List[str] = []
-        self._write_with_func(lines.append, newline="")
+    def _to_txt_lines(self) -> list[str]:
+        lines: list[str] = []
+        self._append_to_lines_at_level(lines)
         return lines
 
-    def _write_with_func(
-        self, func: Callable, level: int = 0, newline: str = "\n"
-    ) -> None:
-        """Write pfs nested objects
-
-        Parameters
-        ----------
-        func : Callable
-            A function that performs the writing e.g. to a file
-        level : int, optional
-            Level of indentation (add 3 spaces for each), by default 0
-        newline : str, optional
-            newline string, by default "\n"
-        """
-        lvl_prefix = "   "
+    def _append_to_lines_at_level(self, lines: list[str], level: int = 0) -> None:
+        lvl_prefix = "   " * level
         for k, v in self.items():
             # check for empty sections
             if v is None:
-                func(f"{lvl_prefix * level}[{k}]{newline}")
-                func(f"{lvl_prefix * level}EndSect  // {k}{newline}{newline}")
+                lines.append(f"{lvl_prefix}[{k}]")
+                lines.append(f"{lvl_prefix}EndSect  // {k}")
 
-            elif isinstance(v, List) and any(
+            elif isinstance(v, list) and any(
                 isinstance(subv, PfsSection) for subv in v
             ):
                 # duplicate sections
                 for subv in v:
                     if isinstance(subv, PfsSection):
                         subsec = PfsSection({k: subv})
-                        subsec._write_with_func(func, level=level, newline=newline)
+                        subsec._append_to_lines_at_level(lines, level=level)
                     else:
                         subv = self._prepare_value_for_write(subv)
-                        func(f"{lvl_prefix * level}{k} = {subv}{newline}")
+                        lines.append(f"{lvl_prefix}{k} = {subv}")
             elif isinstance(v, PfsSection):
-                func(f"{lvl_prefix * level}[{k}]{newline}")
-                v._write_with_func(func, level=(level + 1), newline=newline)
-                func(f"{lvl_prefix * level}EndSect  // {k}{newline}{newline}")
+                lines.append(f"{lvl_prefix}[{k}]")
+                v._append_to_lines_at_level(lines, level=(level + 1))
+                lines.append(f"{lvl_prefix}EndSect  // {k}")
             elif isinstance(v, PfsNonUniqueList) or (
                 isinstance(v, list) and all([isinstance(vv, list) for vv in v])
             ):
                 if len(v) == 0:
                     # empty list -> keyword with no parameter
-                    func(f"{lvl_prefix * level}{k} = {newline}")
+                    lines.append(f"{lvl_prefix}{k} = ")
                 for subv in v:
-                    subv = self._prepare_value_for_write(subv)
-                    func(f"{lvl_prefix * level}{k} = {subv}{newline}")
+                    psubv = self._prepare_value_for_write(subv)
+                    lines.append(f"{lvl_prefix}{k} = {psubv}")
             else:
-                v = self._prepare_value_for_write(v)
-                func(f"{lvl_prefix * level}{k} = {v}{newline}")
+                pv = self._prepare_value_for_write(v)
+                lines.append(f"{lvl_prefix}{k} = {pv}")
 
-    def _prepare_value_for_write(self, v):
-        """catch peculiarities of string formatted pfs data
+    def _prepare_value_for_write(
+        self, v: str | bool | datetime | list[str | bool | datetime]
+    ) -> str:
+        """Catch peculiarities of string formatted pfs data."""
+        match v:
+            case str():
+                if len(v) > 5 and not ("PROJ" in v or "<CLOB:" in v):
+                    v = v.replace('"', "''")
+                    v = v.replace("\U0001f600", "'")
 
-        Parameters
-        ----------
-        v : str
-            value from one pfs line
+                if v == "":
+                    v = "''"
+                elif v.count("|") == 2 and "CLOB" not in v:
+                    v = f"{v}"
+                else:
+                    v = f"'{v}'"
 
-        Returns
-        -------
-            modified value
-        """
-        # some crude checks and corrections
-        if isinstance(v, str):
-            if len(v) > 5 and not ("PROJ" in v or "<CLOB:" in v):
-                v = v.replace('"', "''")
-                v = v.replace("\U0001F600", "'")
+            case bool():
+                v = str(v).lower()  # stick to MIKE lowercase bool notation
 
-            if v == "":
-                # add either '' or || as pre- and suffix to strings depending on path definition
-                v = "''"
-            elif v.count("|") == 2 and "CLOB" not in v:
-                v = f"{v}"
-            else:
-                v = f"'{v}'"
+            case datetime():
+                v = v.strftime("%Y, %m, %d, %H, %M, %S").replace(" 0", " ")
 
-        elif isinstance(v, bool):
-            v = str(v).lower()  # stick to MIKE lowercase bool notation
-
-        elif isinstance(v, datetime):
-            v = v.strftime("%Y, %m, %d, %H, %M, %S").replace(" 0", " ")
-
-        elif isinstance(v, list):
-            out = []
-            for subv in v:
-                out.append(str(self._prepare_value_for_write(subv)))
-            v = ", ".join(out)
+            case list():
+                out = []
+                for subv in v:
+                    out.append(str(self._prepare_value_for_write(subv)))
+                v = ", ".join(out)
 
         return v
 
-    def to_dict(self) -> dict:
-        """Convert to (nested) dict (as a copy)"""
+    def to_dict(self) -> dict[str, Any]:
+        """Convert to (nested) dict (as a copy)."""
         d = self.__dict__.copy()
         for key, value in d.items():
             if isinstance(value, PfsSection):
@@ -381,12 +351,12 @@ class PfsSection(SimpleNamespace, MutableMapping):
         return d
 
     def to_dataframe(self, prefix: str | None = None) -> pd.DataFrame:
-        """Output enumerated subsections to a DataFrame
+        """Output enumerated subsections to a DataFrame.
 
         Parameters
         ----------
         prefix : str, optional
-            The prefix of the enumerated sections, e.g. "File\_",
+            The prefix of the enumerated sections, e.g. "OUTPUT_",
             which can be supplied if it fails without this argument,
             by default None (will try to "guess" the prefix)
 
@@ -401,6 +371,7 @@ class PfsSection(SimpleNamespace, MutableMapping):
         pfs = mikeio.read_pfs("../data/pfs/lake.sw")
         pfs.SW.OUTPUTS.to_dataframe(prefix="OUTPUT_")
         ```
+
         """
         if prefix is not None:
             sections = [
@@ -430,8 +401,8 @@ class PfsSection(SimpleNamespace, MutableMapping):
         return pd.DataFrame(res, index=range(1, n_sections + 1))
 
     @classmethod
-    def _merge_PfsSections(cls, sections: Sequence[Dict]) -> "PfsSection":
-        """Merge a list of PfsSections/dict"""
+    def _merge_PfsSections(cls, sections: Sequence[dict[str, Any]]) -> "PfsSection":
+        """Merge a list of PfsSections/dict."""
         assert len(sections) > 0
         a = sections[0]
         for b in sections[1:]:

@@ -1,7 +1,12 @@
+"""Coordinate Reference System (CRS) conversion."""
+
 import warnings
+from typing import TYPE_CHECKING
 
 from mikecore.Projections import Cartography, MapProjection
 
+if TYPE_CHECKING:
+    from pyproj import crs
 # import pyproj
 
 
@@ -18,6 +23,8 @@ class CRSConversionError(Exception):
 
 
 class CRS:
+    """Coordinate Reference System (CRS) class."""
+
     def __init__(self, projection_string: str) -> None:
         """Create an instance of the CRS class.
 
@@ -53,28 +60,32 @@ class CRS:
 
     @property
     def map_projection(self) -> MapProjection:
+        """Get the map projection object."""
         # https://manuals.mikepoweredbydhi.help/2021/General/Class_Library/DHI_Projections/html/T_DHI_Projections_MapProjection.htm
         return self.__cartography.Projection
 
     @property
     def name(self) -> str:
+        """Get the name of the projection."""
         return self.__cartography.ProjectionName
 
     @property
     def projection_string(self) -> str:
+        """Get the projection string."""
         return self.__cartography.ProjectionString
 
     @property
     def is_geographical(self) -> bool:
+        """Check if the projection is geographical."""
         return MapProjection.IsGeographical(self.projection_string)
 
     @property
     def is_projected(self) -> bool:
+        """Check if the projection is projected."""
         return not self.is_geographical
 
-    def to_pyproj(self):
-        """
-        Convert projection to pyptoj.CRS object.
+    def to_pyproj(self) -> "crs.CRS":
+        """Convert projection to pyptoj.CRS object.
 
         Returns
         -------
@@ -93,9 +104,8 @@ class CRS:
             return pyproj.CRS.from_string(self.projection_string)
 
     @classmethod
-    def from_pyproj(cls, pyproj_crs):
-        """
-        Create CRS object from pyproj.CRS object.
+    def from_pyproj(cls, pyproj_crs: "crs.CRS") -> "CRS":
+        """Create CRS object from pyproj.CRS object.
 
         Parameters
         ----------
@@ -108,16 +118,14 @@ class CRS:
             CRS instance.
 
         """
-
         return cls(projection_string=pyproj_crs.to_wkt(version="WKT1_ESRI"))
 
-    def to_epsg(self, min_confidence: float = 70.0) -> int:
-        """
-        Convert projection to pyptoj.CRS object.
+    def to_epsg(self, min_confidence: int = 70) -> int:
+        """Convert projection to pyptoj.CRS object.
 
         Parameters
         ----------
-        min_confidence : float, optional
+        min_confidence : integer, optional
             A value between 0-100 where 100 is the most confident. Default is 70.
             See 'pyproj.CRS.to_epsg' for more details.
 
@@ -134,7 +142,6 @@ class CRS:
             Unexpected 'pyproj.to_epsg' return type.
 
         """
-
         epsg_code = self.to_pyproj().to_epsg(min_confidence=min_confidence)
         if epsg_code is None:
             raise CRSConversionError(
@@ -149,9 +156,8 @@ class CRS:
             )
 
     @classmethod
-    def from_epsg(cls, epsg: int):
-        """
-        Create CRS object from EPSG code.
+    def from_epsg(cls, epsg: int) -> "CRS":
+        """Create CRS object from EPSG code.
 
         Parameters
         ----------

@@ -1,9 +1,11 @@
 from __future__ import annotations
 from pathlib import Path
-from typing import Any, Collection, Sequence, Tuple, TYPE_CHECKING
+from typing import Any, Sequence, TYPE_CHECKING
 
+from matplotlib.axes import Axes
 import numpy as np
 from mikecore.DfsuFile import DfsuFile, DfsuFileType
+from mikecore.DfsFileFactory import DfsFileFactory
 import pandas as pd
 from scipy.spatial import cKDTree
 from tqdm import trange
@@ -17,13 +19,19 @@ from ..dfs._dfs import (
 )
 from ..eum import EUMType, ItemInfo
 from .._interpolation import get_idw_interpolant, interp2d
-from ..spatial import GeometryFM3D, GeometryFMVerticalProfile, GeometryPoint3D
+from ..spatial import (
+    GeometryFM3D,
+    GeometryFMVerticalProfile,
+    GeometryPoint3D,
+    GeometryFM2D,
+)
 from ..spatial._FM_utils import _plot_vertical_profile
 from ._dfsu import (
     _get_dfsu_info,
     get_nodes_from_source,
     get_elements_from_source,
     _validate_elements_and_geometry_sel,
+    write_dfsu_data,
 )
 
 if TYPE_CHECKING:
@@ -38,19 +46,22 @@ class DfsuLayered:
         self._filename = info.filename
         self._type = info.type
         self._deletevalue = info.deletevalue
-        self._time = info.time
+        self._equidistant = info.equidistant
+        self._start_time = info.start_time
         self._timestep = info.timestep
+        self._n_timesteps = info.n_timesteps
         self._geometry = self._read_geometry(self._filename)
         # 3d files have a zn item
         self._items = self._read_items(self._filename)
 
-    def __repr__(self):
-        out = [f"<mikeio.{self.__class__.__name__}>"]
-
-        out.append(f"number of elements: {self.geometry.n_elements}")
-        out.append(f"number of nodes: {self.geometry.n_nodes}")
-        out.append(f"projection: {self.geometry.projection_string}")
-        out.append(f"number of sigma layers: {self.geometry.n_sigma_layers}")
+    def __repr__(self) -> str:
+        out = [
+            f"<mikeio.{self.__class__.__name__}>"
+            f"number of nodes: {self.geometry.n_nodes}",
+            f"number of elements: {self.geometry.n_elements}",
+            f"projection: {self.geometry.projection_string}",
+            f"number of sigma layers: {self.geometry.n_sigma_layers}",
+        ]
         if (
             self._type == DfsuFileType.DfsuVerticalProfileSigmaZ
             or self._type == DfsuFileType.Dfsu3DSigmaZ
@@ -63,7 +74,7 @@ class DfsuLayered:
             for i, item in enumerate(self.items):
                 out.append(f"  {i}:  {item}")
         else:
-            out.append(f"number of items: {self.geometry.n_items}")
+            out.append(f"number of items: {self.n_items}")
         if self.n_timesteps == 1:
             out.append(f"time: time-invariant file (1 step) at {self.time[0]}")
         else:
@@ -74,42 +85,56 @@ class DfsuLayered:
 
     @property
     def deletevalue(self) -> float:
-        """File delete value"""
+        """File delete value."""
         return self._deletevalue
 
     @property
     def n_items(self) -> int:
-        """Number of items"""
+        """Number of items."""
         return len(self.items)
 
     @property
     def items(self) -> list[ItemInfo]:
-        """List of items"""
+        """List of items."""
         return self._items
 
     @property
     def start_time(self) -> pd.Timestamp:
-        """File start time"""
-        return self._time[0]
+        """File start time."""
+        return self._start_time
 
     @property
     def n_timesteps(self) -> int:
-        """Number of time steps"""
-        return len(self._time)
+        """Number of time steps."""
+        return self._n_timesteps
 
     @property
     def timestep(self) -> float:
-        """Time step size in seconds"""
+        """Time step size in seconds."""
         return self._timestep
 
     @property
     def end_time(self) -> pd.Timestamp:
-        """File end time"""
-        return self._time[-1]
+        """File end time."""
+        if self._equidistant:
+            return self.time[-1]
+        else:
+            # read the last timestep
+            ds = self.read(items=0, time=-1)
+            return ds.time[-1]
 
     @property
     def time(self) -> pd.DatetimeIndex:
-        return self._time
+        if self._equidistant:
+            return pd.date_range(
+                start=self.start_time,
+                periods=self.n_timesteps,
+                freq=f"{int(self.timestep)}s",
+            )
+        else:
+            raise NotImplementedError(
+                "Non-equidistant time axis. Read the data to get time."
+            )
 
     @property
     def geometry(self) -> GeometryFM3D | GeometryFMVerticalProfile:
@@ -160,17 +185,17 @@ class DfsuLayered:
 
     @property
     def n_layers(self) -> int:
-        """Maximum number of layers"""
+        """Maximum number of layers."""
         return self.geometry._n_layers
 
     @property
     def n_sigma_layers(self) -> int:
-        """Number of sigma layers"""
+        """Number of sigma layers."""
         return self.geometry.n_sigma_layers
 
     @property
     def n_z_layers(self) -> int:
-        """Maximum number of z-layers"""
+        """Maximum number of z-layers."""
         return self.n_layers - self.n_sigma_layers
 
     def read(
@@ -178,8 +203,8 @@ class DfsuLayered:
         *,
         items: str | int | Sequence[str | int] | None = None,
         time: int | str | slice | None = None,
-        elements: Collection[int] | None = None,
-        area: Tuple[float, float, float, float] | None = None,
+        elements: Sequence[int] | np.ndarray | None = None,
+        area: tuple[float, float, float, float] | None = None,
         x: float | None = None,
         y: float | None = None,
         z: float | None = None,
@@ -189,8 +214,7 @@ class DfsuLayered:
         error_bad_data: bool = True,
         fill_bad_data_value: float = np.nan,
     ) -> Dataset:
-        """
-        Read data from a dfsu file
+        """Read data from a dfsu file.
 
         Parameters
         ---------
@@ -220,11 +244,14 @@ class DfsuLayered:
         fill_bad_data_value:
             fill value for to impute corrupt data, used in conjunction with error_bad_data=False
             default np.nan
+        dtype: numpy.dtype, optional
+            Data type to read, by default np.float32
 
         Returns
         -------
         Dataset
             A Dataset with data dimensions [t,elements]
+
         """
         if dtype not in [np.float32, np.float64]:
             raise ValueError("Invalid data type. Choose np.float32 or np.float64")
@@ -246,7 +273,7 @@ class DfsuLayered:
                 elements = self.geometry.find_index(  # type: ignore
                     x=x, y=y, z=z, area=area, layers=layers
                 )
-                if len(elements) == 0:
+                if len(elements) == 0:  # type: ignore
                     raise ValueError("No elements in selection!")
 
         geometry = (
@@ -277,7 +304,7 @@ class DfsuLayered:
         deletevalue = self.deletevalue
 
         data_list = []
-
+        t_seconds = np.zeros(len(time_steps))
         n_steps = len(time_steps)
         item0_is_node_based = False
         for item in range(n_items):
@@ -291,12 +318,10 @@ class DfsuLayered:
         if single_time_selected and not keepdims:
             data = data[0]
 
-        time = self.time
-
         for i in trange(n_steps, disable=not self.show_progress):
             it = time_steps[i]
             for item in range(n_items):
-                dfs, d = _read_item_time_step(
+                dfs, d, t = _read_item_time_step(
                     dfs=dfs,
                     filename=self._filename,
                     time=time,
@@ -308,6 +333,7 @@ class DfsuLayered:
                     error_bad_data=error_bad_data,
                     fill_bad_data_value=fill_bad_data_value,
                 )
+                t_seconds[i] = t
 
                 if elements is not None:
                     if item == 0 and item0_is_node_based:
@@ -320,7 +346,7 @@ class DfsuLayered:
                 else:
                     data_list[item][i] = d
 
-        time = self.time[time_steps]
+        time = pd.to_datetime(t_seconds, unit="s", origin=self.start_time)
 
         dfs.Close()
 
@@ -336,27 +362,73 @@ class DfsuLayered:
             data_list = [np.squeeze(d, axis=-1) for d in data_list]
 
         if layered_data:
-            return Dataset(
+            return Dataset.from_numpy(
                 data_list[1:],  # skip zn item
-                time,
-                items,
+                time=time,
+                items=items,
                 geometry=geometry,
                 zn=data_list[0],
                 dims=dims,
                 validate=False,
+                dt=self.timestep,
             )
         else:
-            return Dataset(
-                data_list, time, items, geometry=geometry, dims=dims, validate=False
+            return Dataset.from_numpy(
+                data_list,
+                time=time,
+                items=items,
+                geometry=geometry,
+                dims=dims,
+                validate=False,
+                dt=self.timestep,
             )
+
+    def append(self, ds: Dataset, validate: bool = True) -> None:
+        """Append data to a dfsu file.
+
+        Parameters
+        ---------
+        ds: Dataset
+            Dataset to append
+        validate: bool, optional
+            Validate that the dataset to append has the same geometry and items, by default True
+
+        """
+        if validate:
+            if self.geometry != ds.geometry:
+                raise ValueError("The geometry of the dataset to append does not match")
+
+            for item_s, item_o in zip(ds.items, self.items):
+                if item_s != item_o:
+                    raise ValueError(
+                        f"Item in dataset {item_s.name} does not match {item_o.name}"
+                    )
+
+        dfs = DfsFileFactory.DfsuFileOpenAppend(str(self._filename), parameters=None)
+        write_dfsu_data(dfs=dfs, ds=ds, is_layered=ds.geometry.is_layered)
+        info = _get_dfsu_info(self._filename)
+        self._n_timesteps = info.n_timesteps
 
 
 class Dfsu2DV(DfsuLayered):
+    """Class for reading/writing dfsu 2d vertical files.
+
+    Parameters
+    ----------
+    filename:
+        Path to dfsu file
+
+    """
+
     def plot_vertical_profile(
-        self, values, time_step=None, cmin=None, cmax=None, label="", **kwargs
-    ):
-        """
-        Plot unstructured vertical profile
+        self,
+        values: np.ndarray | DataArray,
+        cmin: float | None = None,
+        cmax: float | None = None,
+        label: str = "",
+        **kwargs: Any,
+    ) -> Axes:
+        """Plot unstructured vertical profile.
 
         Parameters
         ----------
@@ -376,17 +448,16 @@ class Dfsu2DV(DfsuLayered):
             specify size of figure
         ax: matplotlib.axes, optional
             Adding to existing axis, instead of creating new fig
+        **kwargs: Any
+            Additional keyword arguments
 
         Returns
         -------
         <matplotlib.axes>
+
         """
         if isinstance(values, DataArray):
             values = values.to_numpy()
-        if time_step is not None:
-            raise NotImplementedError(
-                "Deprecated functionality. Instead, read as DataArray da, then use da.plot()"
-            )
 
         g = self.geometry
         return _plot_vertical_profile(
@@ -403,20 +474,29 @@ class Dfsu2DV(DfsuLayered):
 
 
 class Dfsu3D(DfsuLayered):
+    """Class for reading/writing dfsu 3d files.
+
+    Parameters
+    ----------
+    filename:
+        Path to dfsu file
+
+    """
+
     @property
-    def geometry2d(self):
-        """The 2d geometry for a 3d object"""
+    def geometry2d(self) -> GeometryFM2D:
+        """The 2d geometry for a 3d object."""
         return self.geometry.geometry2d
 
     def extract_surface_elevation_from_3d(self, n_nearest: int = 4) -> DataArray:
-        """
-        Extract surface elevation from a 3d dfsu file (based on zn)
+        """Extract surface elevation from a 3d dfsu file (based on zn)
         to a new 2d dfsu file with a surface elevation item.
 
         Parameters
         ---------
         n_nearest: int, optional
             number of points for spatial interpolation (inverse_distance), default=4
+
         """
         # validate input
         assert (

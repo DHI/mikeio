@@ -20,7 +20,7 @@ def ds1():
 
     time = pd.date_range(start=datetime(2000, 1, 1), freq="s", periods=nt)
     items = [ItemInfo("Foo"), ItemInfo("Bar")]
-    return mikeio.Dataset(
+    return mikeio.Dataset.from_numpy(
         data=data, time=time, items=items, geometry=mikeio.Grid1D(nx=7, dx=1)
     )
 
@@ -36,12 +36,11 @@ def ds2():
 
     time = pd.date_range(start=datetime(2000, 1, 1), freq="s", periods=nt)
     items = [ItemInfo("Foo"), ItemInfo("Bar")]
-    return mikeio.Dataset(data, time, items)
+    return mikeio.Dataset.from_numpy(data=data, time=time, items=items)
 
 
 @pytest.fixture
 def ds3():
-
     nt = 100
     d1 = np.zeros([nt, 100, 30]) + 1.5
     d2 = np.zeros([nt, 100, 30]) + 2.0
@@ -51,22 +50,25 @@ def ds3():
 
     time = pd.date_range("2000-1-2", freq="h", periods=nt)
     items = [ItemInfo(x) for x in ["Foo", "Bar", "Baz"]]
-    return mikeio.Dataset(data, time, items)
+    return mikeio.Dataset.from_numpy(data=data, time=time, items=items)
+
+
+def test_list_of_numpy_deprecated() -> None:
+    with pytest.warns(FutureWarning, match="from_numpy"):
+        mikeio.Dataset([np.zeros(2)], pd.date_range("2000-1-2", freq="h", periods=2))
 
 
 def test_create_wrong_data_type_error():
-
     data = ["item 1", "item 2"]
 
     nt = 2
     time = pd.date_range(start=datetime(2000, 1, 1), freq="s", periods=nt)
 
     with pytest.raises(ValueError, match="numpy"):
-        mikeio.Dataset(data=data, time=time)
+        mikeio.Dataset.from_numpy(data=data, time=time)
 
 
 def test_get_names():
-
     nt = 100
     d = np.zeros([nt, 100, 30]) + 1.0
     time = pd.date_range(start=datetime(2000, 1, 1), freq="s", periods=nt)
@@ -125,6 +127,12 @@ def test_insert_fail(ds1):
     with pytest.raises(ValueError, match="refer to the same data"):
         ds1.insert(2, da)
 
+    assert "Foo" in ds1.names
+    da2 = ds1[0].copy()
+    da2.name = "Foo"
+    with pytest.raises(ValueError, match="already in"):
+        ds1.insert(2, da2)
+
 
 def test_remove(ds1):
     ds1.remove(-1)
@@ -138,21 +146,13 @@ def test_remove(ds1):
 
 
 def test_index_with_attribute():
-
-    nt = 10000
+    nt = 10
     d = np.zeros([nt, 100, 30]) + 1.0
     time = pd.date_range(start=datetime(2000, 1, 1), freq="s", periods=nt)
 
     # We cannot create a mikeio.Dataset with multiple references to the same DataArray
     da = mikeio.DataArray(data=d, time=time)
     data = [da, da]
-    with pytest.raises(ValueError):
-        mikeio.Dataset(data)
-
-    # We cannot create a mikeio.Dataset with multiple references to the same data
-    da1 = mikeio.DataArray(item="Foo", data=d, time=time)
-    da2 = mikeio.DataArray(item="Bar", data=d, time=time)
-    data = [da1, da2]
     with pytest.raises(ValueError):
         mikeio.Dataset(data)
 
@@ -208,7 +208,6 @@ def test_getitem_multi_indexing_attempted(ds3):
 
 
 def test_select_subset_isel():
-
     nt = 100
     d1 = np.zeros([nt, 100, 30]) + 1.5
     d2 = np.zeros([nt, 100, 30]) + 2.0
@@ -246,7 +245,6 @@ def test_select_subset_isel():
 
 
 def test_select_subset_isel_axis_out_of_range_error(ds2):
-
     assert len(ds2.shape) == 2
     dss = ds2.isel(idx=0)
 
@@ -263,7 +261,6 @@ def test_isel_named_axis(ds2: mikeio.Dataset):
 
 
 def test_select_temporal_subset_by_idx():
-
     nt = 100
     d1 = np.zeros([nt, 100, 30]) + 1.5
     d2 = np.zeros([nt, 100, 30]) + 2.0
@@ -274,7 +271,7 @@ def test_select_temporal_subset_by_idx():
 
     time = pd.date_range(start=datetime(2000, 1, 1), freq="s", periods=nt)
     items = [ItemInfo("Foo"), ItemInfo("Bar")]
-    ds = mikeio.Dataset(data, time, items)
+    ds = mikeio.Dataset.from_numpy(data=data, time=time, items=items)
 
     selds = ds.isel([0, 1, 2], axis=0)
 
@@ -283,7 +280,6 @@ def test_select_temporal_subset_by_idx():
 
 
 def test_temporal_subset_fancy():
-
     nt = (24 * 31) + 1
     d1 = np.zeros([nt, 100, 30]) + 1.5
     d2 = np.zeros([nt, 100, 30]) + 2.0
@@ -291,7 +287,7 @@ def test_temporal_subset_fancy():
 
     time = pd.date_range("2000-1-1", freq="h", periods=nt)
     items = [ItemInfo("Foo"), ItemInfo("Bar")]
-    ds = mikeio.Dataset(data, time, items)
+    ds = mikeio.Dataset.from_numpy(data=data, time=time, items=items)
 
     assert ds.time[0].hour == 0
     assert ds.time[-1].hour == 0
@@ -319,7 +315,7 @@ def test_subset_with_datetime():
 
     time = pd.date_range("2000-1-2", freq="h", periods=nt)
     items = [ItemInfo("Foo"), ItemInfo("Bar")]
-    ds = mikeio.Dataset(data, time, items)
+    ds = mikeio.Dataset.from_numpy(data=data, time=time, items=items)
 
     dssub = ds[datetime(2000, 1, 2)]
     assert dssub.n_timesteps == 1
@@ -342,7 +338,7 @@ def test_select_item_by_name():
 
     time = pd.date_range("2000-1-2", freq="h", periods=nt)
     items = [ItemInfo("Foo"), ItemInfo("Bar")]
-    ds = mikeio.Dataset(data, time, items)
+    ds = mikeio.Dataset.from_numpy(data=data, time=time, items=items)
 
     foo_data = ds["Foo"]
     assert foo_data.to_numpy()[0, 10, 0] == 2.0
@@ -380,7 +376,7 @@ def test_select_multiple_items_by_name():
     time = pd.date_range("2000-1-2", freq="h", periods=nt)
     # items = [ItemInfo("Foo"), ItemInfo("Bar"), ItemInfo("Baz")]
     items = [ItemInfo(x) for x in ["Foo", "Bar", "Baz"]]
-    ds = mikeio.Dataset(data, time, items)
+    ds = mikeio.Dataset.from_numpy(data=data, time=time, items=items)
 
     assert len(ds) == 3  # Length of a dataset is the number of items
 
@@ -423,7 +419,7 @@ def test_select_item_by_iteminfo():
 
     time = pd.date_range("2000-1-2", freq="h", periods=nt)
     items = [ItemInfo("Foo"), ItemInfo("Bar")]
-    ds = mikeio.Dataset(data, time, items)
+    ds = mikeio.Dataset.from_numpy(data=data, time=time, items=items)
 
     foo_item = items[0]
 
@@ -432,7 +428,6 @@ def test_select_item_by_iteminfo():
 
 
 def test_select_subset_isel_multiple_idxs():
-
     nt = 100
     d1 = np.zeros([nt, 100, 30]) + 1.5
     d2 = np.zeros([nt, 100, 30]) + 2.0
@@ -441,7 +436,7 @@ def test_select_subset_isel_multiple_idxs():
 
     time = pd.date_range("2000-1-2", freq="h", periods=nt)
     items = [ItemInfo("Foo"), ItemInfo("Bar")]
-    ds = mikeio.Dataset(data, time, items)
+    ds = mikeio.Dataset.from_numpy(data=data, time=time, items=items)
 
     selds = ds.isel([10, 15], axis=1)
 
@@ -458,7 +453,6 @@ def test_decribe(ds1):
 
 
 def test_create_undefined():
-
     nt = 100
     d1 = np.zeros([nt])
     d2 = np.zeros([nt])
@@ -480,7 +474,6 @@ def test_create_undefined():
 
 
 def test_create_named_undefined():
-
     nt = 100
     d1 = np.zeros([nt])
     d2 = np.zeros([nt])
@@ -488,7 +481,7 @@ def test_create_named_undefined():
     data = [d1, d2]
 
     time = pd.date_range("2000-1-2", freq="h", periods=nt)
-    ds = mikeio.Dataset(data=data, time=time, items=["Foo", "Bar"])
+    ds = mikeio.Dataset.from_numpy(data=data, time=time, items=["Foo", "Bar"])
 
     assert len(ds.items) == 2
     assert len(ds.to_numpy()) == 2
@@ -497,7 +490,6 @@ def test_create_named_undefined():
 
 
 def test_to_dataframe_single_timestep():
-
     nt = 1
     d1 = np.zeros([nt])
     d2 = np.zeros([nt])
@@ -506,7 +498,7 @@ def test_to_dataframe_single_timestep():
 
     time = pd.date_range("2000-1-2", freq="h", periods=nt)
     items = [ItemInfo("Foo"), ItemInfo("Bar")]
-    ds = mikeio.Dataset(data, time, items)
+    ds = mikeio.Dataset.from_numpy(data=data, time=time, items=items)
     df = ds.to_dataframe()
 
     assert "Bar" in df.columns
@@ -517,7 +509,6 @@ def test_to_dataframe_single_timestep():
 
 
 def test_to_dataframe():
-
     nt = 100
     d1 = np.zeros([nt])
     d2 = np.zeros([nt])
@@ -526,7 +517,7 @@ def test_to_dataframe():
 
     time = pd.date_range("2000-1-2", freq="h", periods=nt)
     items = [ItemInfo("Foo"), ItemInfo("Bar")]
-    ds = mikeio.Dataset(data, time, items)
+    ds = mikeio.Dataset.from_numpy(data=data, time=time, items=items)
     df = ds.to_dataframe()
 
     assert list(df.columns) == ["Foo", "Bar"]
@@ -534,7 +525,6 @@ def test_to_dataframe():
 
 
 def test_to_pandas_single_item_dataset():
-
     da = mikeio.DataArray(
         data=np.zeros(5), time=pd.date_range("2000", freq="D", periods=5), item="Foo"
     )
@@ -547,33 +537,30 @@ def test_to_pandas_single_item_dataset():
 
 
 def test_multidimensional_to_dataframe_no_supported():
-
     nt = 100
     d1 = np.zeros([nt, 2])
 
     time = pd.date_range("2000-1-2", freq="h", periods=nt)
     items = [ItemInfo("Foo")]
-    ds = mikeio.Dataset([d1], time, items)
+    ds = mikeio.Dataset.from_numpy([d1], time, items)
 
     with pytest.raises(ValueError):
         ds.to_dataframe()
 
 
 def test_get_data():
-
     data = []
     nt = 100
     d = np.zeros([nt, 100, 30]) + 1.0
     data.append(d)
     time = pd.date_range("2000-1-2", freq="h", periods=nt)
     items = [ItemInfo("Foo")]
-    ds = mikeio.Dataset(data, time, items)
+    ds = mikeio.Dataset.from_numpy(data=data, time=time, items=items)
 
     assert ds.shape == (100, 100, 30)
 
 
 def test_interp_time():
-
     nt = 4
     d = np.zeros([nt, 10, 3])
     d[1] = 2.0
@@ -581,7 +568,7 @@ def test_interp_time():
     data = [d]
     time = pd.date_range("2000-1-1", freq="d", periods=nt)
     items = [ItemInfo("Foo")]
-    ds = mikeio.Dataset(data, time, items)
+    ds = mikeio.Dataset.from_numpy(data=data, time=time, items=items)
 
     assert ds[0].shape == (nt, 10, 3)
 
@@ -593,16 +580,22 @@ def test_interp_time():
     dsi2 = ds.interp_time(freq="2h")
     assert dsi2.timestep == 2 * 3600
 
+    with pytest.raises(ValueError, match="dt or freq"):
+        ds.interp_time()
+
+    dsi3 = ds.interp(time=pd.date_range("2000-1-1", freq="h", periods=10))
+    assert dsi3.time[0] == pd.Timestamp("2000-01-01 00:00:00")
+    assert dsi3.time[-1] == pd.Timestamp("2000-01-01 09:00:00")
+
 
 def test_interp_time_to_other_dataset():
-
     # Arrange
     ## mikeio.Dataset 1
     nt = 4
     data = [np.zeros([nt, 10, 3])]
     time = pd.date_range("2000-1-1", freq="D", periods=nt)
     items = [ItemInfo("Foo")]
-    ds1 = mikeio.Dataset(data, time, items)
+    ds1 = mikeio.Dataset.from_numpy(data=data, time=time, items=items)
     assert ds1.shape == (nt, 10, 3)
 
     ## mikeio.Dataset 2
@@ -610,7 +603,7 @@ def test_interp_time_to_other_dataset():
     data = [np.ones([nt, 10, 3])]
     time = pd.date_range("2000-1-1", freq="h", periods=nt)
     items = [ItemInfo("Foo")]
-    ds2 = mikeio.Dataset(data, time, items)
+    ds2 = mikeio.Dataset.from_numpy(data=data, time=time, items=items)
 
     # Act
     ## interp
@@ -634,7 +627,7 @@ def test_extrapolate():
     data = [np.zeros([nt, 10, 3])]
     time = pd.date_range("2000-1-1", freq="D", periods=nt)
     items = [ItemInfo("Foo")]
-    ds1 = mikeio.Dataset(data, time, items)
+    ds1 = mikeio.Dataset.from_numpy(data=data, time=time, items=items)
     assert ds1.shape == (nt, 10, 3)
 
     ## mikeio.Dataset 2 partly overlapping with mikeio.Dataset 1
@@ -642,7 +635,7 @@ def test_extrapolate():
     data = [np.ones([nt, 10, 3])]
     time = pd.date_range("2000-1-2", freq="h", periods=nt)
     items = [ItemInfo("Foo")]
-    ds2 = mikeio.Dataset(data, time, items)
+    ds2 = mikeio.Dataset.from_numpy(data=data, time=time, items=items)
 
     # Act
     ## interp
@@ -663,7 +656,7 @@ def test_extrapolate_not_allowed():
     data = [np.zeros([nt, 10, 3])]
     time = pd.date_range("2000-1-1", freq="D", periods=nt)
     items = [ItemInfo("Foo")]
-    ds1 = mikeio.Dataset(data, time, items)
+    ds1 = mikeio.Dataset.from_numpy(data=data, time=time, items=items)
     assert ds1.shape == (nt, 10, 3)
 
     ## mikeio.Dataset 2 partly overlapping with mikeio.Dataset 1
@@ -671,45 +664,42 @@ def test_extrapolate_not_allowed():
     data = [np.ones([nt, 10, 3])]
     time = pd.date_range("2000-1-2", freq="h", periods=nt)
     items = [ItemInfo("Foo")]
-    ds2 = mikeio.Dataset(data, time, items)
+    ds2 = mikeio.Dataset.from_numpy(data=data, time=time, items=items)
 
     with pytest.raises(ValueError):
         ds1.interp_time(dt=ds2.time, fill_value=1.0, extrapolate=False)
 
 
 def test_get_data_2():
-
     nt = 100
     data = []
     d = np.zeros([nt, 100, 30]) + 1.0
     data.append(d)
     time = pd.date_range("2000-1-2", freq="h", periods=nt)
     items = [ItemInfo("Foo")]
-    mikeio.Dataset(data, time, items)
+    mikeio.Dataset.from_numpy(data=data, time=time, items=items)
 
     assert data[0].shape == (100, 100, 30)
 
 
 def test_get_data_name():
-
     nt = 100
     data = []
     d = np.zeros([nt, 100, 30]) + 1.0
     data.append(d)
     time = pd.date_range("2000-1-2", freq="h", periods=nt)
     items = [ItemInfo("Foo")]
-    ds = mikeio.Dataset(data, time, items)
+    ds = mikeio.Dataset.from_numpy(data=data, time=time, items=items)
 
     assert ds["Foo"].shape == (100, 100, 30)
 
 
 def test_modify_selected_variable():
-
     nt = 100
 
     time = pd.date_range("2000-1-2", freq="h", periods=nt)
     items = [ItemInfo("Foo")]
-    ds = mikeio.Dataset([np.zeros((nt, 10))], time, items)
+    ds = mikeio.Dataset.from_numpy([np.zeros((nt, 10))], time, items)
 
     assert ds.Foo.to_numpy()[0, 0] == 0.0
 
@@ -727,19 +717,18 @@ def test_get_bad_name():
     data.append(d)
     time = pd.date_range("2000-1-2", freq="h", periods=nt)
     items = [ItemInfo("Foo")]
-    ds = mikeio.Dataset(data, time, items)
+    ds = mikeio.Dataset.from_numpy(data=data, time=time, items=items)
 
     with pytest.raises(Exception):
         ds["BAR"]
 
 
 def test_flipud():
-
     nt = 2
     d = np.random.random([nt, 100, 30])
     time = pd.date_range("2000-1-2", freq="h", periods=nt)
     items = [ItemInfo("Foo")]
-    ds = mikeio.Dataset([d], time, items)
+    ds = mikeio.Dataset.from_numpy([d], time, items)
 
     dsud = ds.copy()
     dsud.flipud()
@@ -799,7 +788,6 @@ def test_aggregations():
 
 
 def test_to_dfs_extension_validation(tmp_path):
-
     outfilename = tmp_path / "not_gonna_happen.dfs2"
 
     ds = mikeio.read(
@@ -882,7 +870,6 @@ def test_nanquantile():
 
 
 def test_aggregate_across_items():
-
     ds = mikeio.read("tests/testdata/State_wlbc_north_err.dfs1")
 
     dsm = ds.mean(axis="items")
@@ -901,7 +888,6 @@ def test_aggregate_across_items():
 
 
 def test_aggregate_selected_items_dfsu_save_to_new_file(tmp_path):
-
     ds = mikeio.read("tests/testdata/State_Area.dfsu", items="*Level*")
 
     assert ds.n_items == 5
@@ -926,7 +912,7 @@ def test_copy():
 
     time = pd.date_range("2000-1-2", freq="h", periods=nt)
     items = [ItemInfo("Foo"), ItemInfo("Bar")]
-    ds = mikeio.Dataset(data, time, items)
+    ds = mikeio.Dataset.from_numpy(data=data, time=time, items=items)
 
     assert len(ds.items) == 2
     assert len(ds.to_numpy()) == 2
@@ -952,7 +938,7 @@ def test_dropna():
 
     time = pd.date_range("2000-1-2", freq="h", periods=nt)
     items = [ItemInfo("Foo"), ItemInfo("Bar")]
-    ds = mikeio.Dataset(data, time, items)
+    ds = mikeio.Dataset.from_numpy(data=data, time=time, items=items)
 
     assert len(ds.items) == 2
     assert len(ds.to_numpy()) == 2
@@ -963,14 +949,12 @@ def test_dropna():
 
 
 def test_default_type():
-
     item = ItemInfo("Foo")
     assert item.type == EUMType.Undefined
     assert repr(item.unit) == "undefined"
 
 
 def test_int_is_valid_type_info():
-
     item = ItemInfo("Foo", 100123)
     assert item.type == EUMType.Viscosity
 
@@ -979,7 +963,6 @@ def test_int_is_valid_type_info():
 
 
 def test_int_is_valid_unit_info():
-
     item = ItemInfo("U", 100002, 2000)
     assert item.type == EUMType.Wind_Velocity
     assert item.unit == EUMUnit.meter_per_sec
@@ -987,7 +970,6 @@ def test_int_is_valid_unit_info():
 
 
 def test_default_unit_from_type():
-
     item = ItemInfo("Foo", EUMType.Water_Level)
     assert item.type == EUMType.Water_Level
     assert item.unit == EUMUnit.meter
@@ -1005,7 +987,6 @@ def test_default_unit_from_type():
 
 
 def test_default_name_from_type():
-
     item = ItemInfo(EUMType.Current_Speed)
     assert item.name == "Current Speed"
     assert item.unit == EUMUnit.meter_per_sec
@@ -1020,14 +1001,11 @@ def test_default_name_from_type():
 
 
 def test_iteminfo_string_type_should_fail_with_helpful_message():
-
     with pytest.raises(ValueError):
-
         ItemInfo("Water level", "Water level")
 
 
 def test_item_search():
-
     res = EUMType.search("level")
 
     assert len(res) > 0
@@ -1035,7 +1013,6 @@ def test_item_search():
 
 
 def test_dfsu3d_dataset():
-
     filename = "tests/testdata/oresund_sigma_z.dfsu"
 
     dfsu = mikeio.open(filename)
@@ -1064,18 +1041,16 @@ def test_dfsu3d_dataset():
 
 
 def test_items_data_mismatch():
-
     nt = 100
     d = np.zeros([nt, 100, 30]) + 1.0
     time = pd.date_range("2000-1-2", freq="h", periods=nt)
     items = [ItemInfo("Foo"), ItemInfo("Bar")]  # Two items is not correct!
 
     with pytest.raises(ValueError):
-        mikeio.Dataset([d], time, items)
+        mikeio.Dataset.from_numpy([d], time, items)
 
 
 def test_time_data_mismatch():
-
     nt = 100
     d = np.zeros([nt, 100, 30]) + 1.0
     time = pd.date_range(
@@ -1084,7 +1059,7 @@ def test_time_data_mismatch():
     items = [ItemInfo("Foo")]
 
     with pytest.raises(ValueError):
-        mikeio.Dataset([d], time, items)
+        mikeio.Dataset.from_numpy([d], time, items)
 
 
 def test_properties_dfs2():
@@ -1136,11 +1111,10 @@ def test_create_empty_data():
 
 
 def test_create_infer_name_from_eum():
-
     nt = 100
     d = np.random.uniform(size=nt)
 
-    ds = mikeio.Dataset(
+    ds = mikeio.Dataset.from_numpy(
         data=[d],
         time=pd.date_range("2000-01-01", freq="h", periods=nt),
         items=[EUMType.Wind_speed],
@@ -1161,7 +1135,6 @@ def test_add_scalar(ds1):
 
 
 def test_add_inconsistent_dataset(ds1):
-
     ds2 = ds1[[0]]
 
     assert len(ds1) != len(ds2)
@@ -1174,13 +1147,11 @@ def test_add_inconsistent_dataset(ds1):
 
 
 def test_add_bad_value(ds1):
-
     with pytest.raises(TypeError):
         ds1 + ["one"]
 
 
 def test_multiple_bad_value(ds1):
-
     with pytest.raises(TypeError):
         ds1 * ["pi"]
 
@@ -1216,10 +1187,14 @@ def test_add_dataset(ds1, ds2):
 
     ds2b = ds2.copy()
     ds2b[0].item = ItemInfo(EUMType.Wind_Velocity)
-    with pytest.raises(ValueError):
-        # item type does not match
-        ds1 + ds2b
+    # item type does not match, but we don't care about the item type, item is defined by the first dataset
+    ds3 = ds2b + ds1
+    assert ds3.items[0].type == EUMType.Wind_Velocity
+    assert ds3.items[0].name == ds2b.items[0].name
 
+    ds4 = ds1 + ds2b
+    assert ds4.items[0].type == EUMType.Undefined
+    assert ds4.items[0].name == ds1.items[0].name
     ds2c = ds2.copy()
     tt = ds2c.time.to_numpy()
     tt[-1] = tt[-1] + np.timedelta64(1, "s")
@@ -1235,11 +1210,50 @@ def test_sub_dataset(ds1, ds2):
     assert np.all(ds3[1].to_numpy() == 1.8)
 
 
+def test_multiply_dataset(ds1, ds2):
+    dsa = mikeio.Dataset(
+        {
+            "Foo": mikeio.DataArray(
+                [1, 2, 3], item=mikeio.ItemInfo("Foo", EUMType.Water_Level)
+            )
+        }
+    )
+    dsb = mikeio.Dataset({"Foo": mikeio.DataArray([4, 5, 6])})
+    dsr = dsa * dsb
+    assert np.all(dsr.Foo.to_numpy() == np.array([4, 10, 18]))
+    assert dsr.Foo.type == EUMType.Water_Level
+
+
+def test_multiply_number_of_items_datasets_must_match():
+    dsa = mikeio.Dataset(
+        {"Foo": mikeio.DataArray([1, 2, 3]), "Bar": mikeio.DataArray([1, 2, 3])}
+    )
+    dsb = mikeio.Dataset({"Bar": mikeio.DataArray([4, 5, 6])})
+    with pytest.raises(ValueError, match="Number of items"):
+        dsa * dsb
+
+
+def test_divide_dataset(ds1, ds2):
+    ds_nom = mikeio.Dataset({"Foo": mikeio.DataArray([1, 2, 3])})
+    ds_denom = mikeio.Dataset({"Foo": mikeio.DataArray([4, 5, 6])})
+    ds3 = ds_nom / ds_denom
+    assert np.all(ds3[0].to_numpy() == np.array([0.25, 0.4, 0.5]))
+
+
+def test_divide_number_of_items_datasets_must_match():
+    dsa = mikeio.Dataset(
+        {"Foo": mikeio.DataArray([1, 2, 3]), "Bar": mikeio.DataArray([1, 2, 3])}
+    )
+    dsb = mikeio.Dataset({"Bar": mikeio.DataArray([4, 5, 6])})
+    with pytest.raises(ValueError, match="Number of items"):
+        dsa / dsb
+
+
 def test_non_equidistant():
     nt = 4
     d = np.random.uniform(size=nt)
 
-    ds = mikeio.Dataset(
+    ds = mikeio.Dataset.from_numpy(
         data=[d],
         time=[
             datetime(2000, 1, 1),
@@ -1263,6 +1277,21 @@ def test_concat_dataarray_by_time():
     assert da3.end_time > da1.end_time
     assert da3.n_timesteps == 145
     assert da3.is_equidistant
+
+
+def test_concat_dataarray_keep_first() -> None:
+    da1 = mikeio.DataArray(
+        data=np.array([1.0, 2.0, 3.0]), time=pd.date_range("2000-01-01", periods=3)
+    )
+    # another dataarray with partly overlapping time
+    da2 = mikeio.DataArray(
+        data=np.array([4.0, 5.0]), time=pd.date_range("2000-01-02", periods=2)
+    )
+
+    da3 = mikeio.DataArray.concat([da1, da2], keep="first")
+
+    assert da3.n_timesteps == 3
+    assert da3.to_numpy()[2] == 3.0
 
 
 def test_concat_by_time():
@@ -1369,6 +1398,25 @@ def test_merge_by_item():
     assert ds3[1].name == ds1[0].name + " v2"
 
 
+def test_merge_must_have_same_time():
+    ds1 = mikeio.Dataset(
+        {
+            "Foo": mikeio.DataArray(
+                data=np.random.rand(10), time=pd.date_range("2000-01-01", periods=10)
+            )
+        }
+    )
+    ds2 = mikeio.Dataset(
+        {
+            "Bar": mikeio.DataArray(
+                data=np.random.rand(10), time=pd.date_range("2100-01-01", periods=10)
+            )
+        }
+    )
+    with pytest.raises(ValueError, match="timesteps"):
+        mikeio.Dataset.merge([ds1, ds2])
+
+
 def test_merge_by_item_dfsu_3d():
     ds1 = mikeio.read("tests/testdata/oresund_sigma_z.dfsu", items=[0])
     assert ds1.n_items == 1
@@ -1385,7 +1433,6 @@ def test_merge_by_item_dfsu_3d():
 
 
 def test_to_numpy(ds2):
-
     X = ds2.to_numpy()
 
     assert X.shape == (ds2.n_items,) + ds2.shape
@@ -1461,7 +1508,6 @@ def test_merge_same_name_error():
 
 
 def test_incompatible_data_not_allowed():
-
     da1 = mikeio.read("tests/testdata/HD2D.dfsu")[0]
     da2 = mikeio.read("tests/testdata/oresundHD_run1.dfsu")[1]
 
@@ -1504,7 +1550,7 @@ def test_layer_selection():
 
     dss_layer = ds.sel(layers=0)
     # should not be layered after selection
-    assert type(dss_layer.geometry) == mikeio.spatial.GeometryFM2D
+    assert type(dss_layer.geometry) is mikeio.spatial.GeometryFM2D
 
 
 def test_time_selection():
@@ -1515,7 +1561,7 @@ def test_time_selection():
     data.append(d)
     time = pd.date_range("2000-1-2", freq="h", periods=nt)
     items = [ItemInfo("Foo")]
-    ds = mikeio.Dataset(data, time, items)
+    ds = mikeio.Dataset.from_numpy(data=data, time=time, items=items)
 
     # check for string input
     dss_t = ds.sel(time="2000-01-05")
@@ -1535,7 +1581,7 @@ def test_create_dataset_with_many_items():
 
     for i in range(n_items):
         x = np.random.random(nt)
-        da = mikeio.DataArray(data=x, time=time, item=mikeio.ItemInfo(f"Item {i+1}"))
+        da = mikeio.DataArray(data=x, time=time, item=mikeio.ItemInfo(f"Item {i + 1}"))
         das.append(da)
 
     ds = mikeio.Dataset(das)
@@ -1544,7 +1590,6 @@ def test_create_dataset_with_many_items():
 
 
 def test_create_array_with_defaults_from_dataset():
-
     filename = "tests/testdata/oresund_sigma_z.dfsu"
     ds: mikeio.Dataset = mikeio.read(filename)
 
@@ -1609,3 +1654,53 @@ def test_interp_na():
 def test_plot_scatter():
     ds = mikeio.read("tests/testdata/oresund_sigma_z.dfsu", time=0)
     ds.plot.scatter(x="Salinity", y="Temperature", title="S-vs-T")
+
+
+def test_select_single_timestep_preserves_dt():
+    ds = mikeio.read("tests/testdata/tide1.dfs1")
+    assert ds.timestep == pytest.approx(1800.0)
+    ds2 = ds.isel(time=-1)
+    assert ds2.timestep == pytest.approx(1800.0)
+    assert ds2[0].timestep == pytest.approx(1800.0)
+
+
+def test_select_multiple_spaced_timesteps_uses_proper_dt(tmp_path):
+    ds = mikeio.read("tests/testdata/tide1.dfs1")
+    assert ds.timestep == pytest.approx(1800.0)
+    ds2 = ds.isel(time=[0, 2, 4])
+    assert ds2.timestep == pytest.approx(3600.0)
+
+
+def test_read_write_single_timestep_preserves_dt(tmp_path):
+    fn = "tests/testdata/oresund_sigma_z.dfsu"
+    dfs = mikeio.open(fn)
+    assert dfs.timestep == pytest.approx(10800.0)
+
+    ds = dfs.read(time=[0])
+    assert ds.timestep == pytest.approx(dfs.timestep)
+
+    outfn = tmp_path / "single.dfsu"
+    ds.to_dfs(outfn)
+
+    dfs2 = mikeio.open(outfn)
+    assert dfs2.timestep == pytest.approx(10800.0)
+
+
+def test_fillna() -> None:
+    ds = mikeio.Dataset(
+        {
+            "foo": mikeio.DataArray(np.array([np.nan, 1.0])),
+            "bar": mikeio.DataArray(np.array([2.0, np.nan])),
+            "baz": mikeio.DataArray(np.array([2.0, 3.0])),
+        }
+    )
+    assert np.isnan(ds["foo"].to_numpy()[0])
+    assert np.isnan(ds["bar"].to_numpy()[-1])
+
+    ds_filled = ds.fillna()
+
+    assert ds_filled["foo"].to_numpy()[0] == pytest.approx(0.0)
+    assert ds_filled["bar"].to_numpy()[-1] == pytest.approx(0.0)
+
+    # original dataset is not modified
+    assert np.isnan(ds["foo"].to_numpy()[0])

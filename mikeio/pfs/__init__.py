@@ -1,16 +1,15 @@
 from __future__ import annotations
 from pathlib import Path
-from typing import Dict, TextIO
 from ._pfsdocument import PfsDocument
 from ._pfssection import PfsNonUniqueList, PfsSection
 
 
 def read_pfs(
-    filename: str | Path | TextIO | Dict | PfsSection,
+    filename: str | Path,
     encoding: str = "cp1252",
     unique_keywords: bool = False,
 ) -> PfsDocument:
-    """Read a pfs file to a Pfs object for further analysis/manipulation
+    """Read a pfs file to a Pfs object for further analysis/manipulation.
 
     Parameters
     ----------
@@ -29,6 +28,7 @@ def read_pfs(
     -------
     PfsDocument
         A PfsDocument object
+
     """
     return PfsDocument(filename, encoding=encoding, unique_keywords=unique_keywords)
 

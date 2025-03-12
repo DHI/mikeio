@@ -1,4 +1,8 @@
-# Dfs0
+---
+title: Dfs0
+aliases:
+  - ../dfs0.html
+---
 
 A dfs0 file is also called a time series file.
 
@@ -27,10 +31,6 @@ df.head()
 
 ## From pandas DataFrame to Dfs0
 
-::: callout-note
-MIKE IO adds a new method to the DataFrame called `to_dfs0`. This method is used to save the DataFrame to a dfs0 file. (This method becomes available after importing the `mikeio` module.)
-:::
-
 
 ```{python}
 import pandas as pd
@@ -38,12 +38,13 @@ import pandas as pd
 df = pd.read_csv(
     "../data/co2-mm-mlo.csv", parse_dates=True, index_col="Date", na_values=-99.99
 )
-df.to_dfs0("mauna_loa_co2.dfs0")
+ds = mikeio.from_pandas(df)
+ds.to_dfs("mauna_loa_co2.dfs0")
 ```
+
 
 ## Dfs0 example notebooks
 
-* [Dfs0](https://nbviewer.jupyter.org/github/DHI/mikeio/blob/main/notebooks/Dfs0%20-%20Timeseries.ipynb) - read, write, to_dataframe, non-equidistant, accumulated timestep, extrapolation
-* [Dfs0 Relative-time](https://nbviewer.jupyter.org/github/DHI/mikeio/blob/main/notebooks/Dfs0%20-%20Relative%20time.ipynb) - read file with relative time axis
+* [Dfs0 | Relative time](../examples/dfs0/relative_time.qmd)
 * [Dfs0 | getting-started-with-mikeio](https://dhi.github.io/getting-started-with-mikeio/dfs0.html) - Course literature
 

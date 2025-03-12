@@ -1,0 +1,8 @@
+---
+title: Dfs0 examples
+---
+
+A collection of specific examples of working with dfs0 files. For a general introduction to dfs0 see the [user guide](../../user-guide/dfs0.qmd) and the [API reference](../../api/#dfs).
+
+* [CMEMS *In-situ* data](cmems_insitu.qmd)
+* [Relative time](relative_time.qmd)
