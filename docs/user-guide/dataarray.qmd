@@ -1,4 +1,8 @@
-# DataArray
+---
+title: DataArray
+aliases:
+  - ../dataarray.html
+---
 
 The [DataArray](`mikeio.DataArray`) is the common MIKE IO data structure 
 for *item* data from dfs files. 
@@ -92,16 +96,14 @@ See details in the [API specification](`mikeio.dataset._data_plot._DataArrayPlot
 
 The DataArray has several properties:
 
-* n_items - Number of items
-* n_timesteps - Number of timesteps
-* n_elements - Number of elements
-* start_time - First time instance (as datetime)
-* end_time - Last time instance (as datetime)
-* is_equidistant - Is the time series equidistant in time
-* timestep - Time step in seconds (if is_equidistant)
-* shape - Shape of each item
+* time - Time index
+* geometry - geometry of the data (e.g. `spatial.GeometryFM2D`)
+* shape - Shape of the data
 * deletevalue - File delete value (NaN value)
 
+```{python}
+da.geometry
+```
 
 
 ## Methods
@@ -123,7 +125,7 @@ including different ways of *selecting* data:
 * [`aggregate()`](`mikeio.DataArray.aggregate`) - Aggregate along an axis
 * [`quantile()`](`mikeio.DataArray.quantile`) - Quantiles along an axis
 
-### {{< fa calculator >}} Mathematical operations
+## {{< fa calculator >}} Mathematical operations
 * ds + value
 * ds - value
 * ds * value
@@ -133,11 +135,53 @@ and + and - between two DataArrays (if number of items and shapes conform):
 * ds1 + ds2
 * ds1 - ds2
 
+## Multiply or add scalar
+
+```{python}
+da1 = mikeio.read("../data/oresundHD_run1.dfsu", items="Surface elevation")[0]
+da2 = mikeio.read("../data/oresundHD_run2.dfsu", items="Surface elevation")[0]
+
+da1.values.mean()
+```
+
+```{python}
+da1_A = da1 + 1
+da1_B = da1 - 1
+da1_A.values.mean(), da1_B.values.mean()
+```
+
+```{python}
+da1_C = da1 * 2
+da1_D = da1 / 2
+da1_C.values.mean(), da1_D.values.mean()
+```
+
+## Difference between two DataArrays
+
+Assume that we have two calibration runs and we wan't to find the difference...
+
+```{python}
+da_diff = da1-da2
+da_diff.plot(title="Difference");
+```
+
+```{python}
+da_ratio = da1 / da2
+da_ratio.plot(title="", label="Ratio", vmin=0.8, vmax=1.2, levels=9, cmap="coolwarm")
+```
+
+## Unit handling
+
+Multiplication and divison of two physical quantities would normally change the unit of the result, but in the case of DataArrays, the type and unit of the result will be the ones of the first operand.
+
+
+
 Other methods that also return a DataArray:
 
-* [`interp_like`](`mikeio.DataArray.interp_like`) - Spatio (temporal) interpolation (see example [Dfsu interpolation](../examples/Dfsu-2D-interpolation.qmd))
+* [`interp_like`](`mikeio.DataArray.interp_like`) - Spatio (temporal) interpolation (see example [Dfsu interpolation](../examples/dfsu/spatial_interpolation.qmd)
 * [`interp_time()`](`mikeio.DataArray.interp_time`) - Temporal interpolation (see example [Time interpolation](../examples/Time-interpolation.qmd))
 * [`dropna()`](`mikeio.DataArray.dropna`) - Remove time steps where all items are NaN
+* [`fillna()`](`mikeio.DataArray.fillna`) - Fill missing values with a constant value
 * [`squeeze()`](`mikeio.DataArray.squeeze`) - Remove axes of length 1
 
 ### Conversion:

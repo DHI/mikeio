@@ -1,3 +1,7 @@
+---
+toc: false
+format-links: false
+---
 
 ![](MIKE-IO-Logo-Pos-RGB.svg)
 
@@ -5,40 +9,43 @@
  ![Python version](https://img.shields.io/pypi/pyversions/mikeio.svg)
 [![PyPI version](https://badge.fury.io/py/mikeio.svg)](https://badge.fury.io/py/mikeio)
 
+
+::: {.grid}
+
+::: {.g-col-6}
+## {{< fa clock >}} **Set up in 5 minutes**
+
+Install **MIKE IO** with [`pip`](https://pypi.org/project/mikeio/) and get up
+and running in minutes
+
+
+[**Getting started**](user-guide/getting-started.qmd)
+
+## {{< fa brands python >}} **It's just Python**
+
 Read, write and manipulate dfs0, dfs1, dfs2, dfs3, dfsu and mesh files. 
 
-See our sister library [MIKE IO 1D](https://github.com/DHI/mikeio1d) for .res1d and .xns11 files.
+[**API Reference**](api/index.qmd)
 
-## Requirements
-
-* Windows or Linux operating system
-* Python x64 3.8 - 3.11
-* (Windows) [VC++ redistributables](https://support.microsoft.com/en-us/help/2977003/the-latest-supported-visual-c-downloads>) (already installed if you have MIKE)
-
-## Installation
-
-```
-$ pip install mikeio
-```
-
-::: callout-warning
-**Don't use conda to install MIKE IO!**, the version on conda is outdated.
 :::
 
-## Getting started
+::: {.g-col-6}
 
-```{python}
-import mikeio
+## {{< fa solid diagram-project >}} **Associated package**
 
-ds = mikeio.read("data/FakeLake.dfsu")
-ds.Bathymetry.plot()
-```
+See our sister library **MIKE IO 1D** for .res1d and .xns11 files.
 
-Read more in the [getting started guide](user-guide/getting-started.qmd).
+[**MIKE IO 1D**](https://dhi.github.io/mikeio1d/)
 
 
-## Where can I get help?
+## {{< fa scale-balanced >}} **Open Source**
 
-* New ideas and feature requests - [GitHub Discussions](https://github.com/DHI/mikeio/discussions)
-* Bugs - [GitHub Issues](https://github.com/DHI/mikeio/issues)
+MIKE IO is licensed under BSD-3-Clause license and available on [GitHub](https://github.com/DHI/mikeio)
+
+[**License**](license.qmd)
+
+:::
+
+:::
+
 

@@ -1,4 +1,7 @@
-# Dfsu and Mesh Overview
+---
+title: Dfsu
+---
+
 
 Dfsu and mesh files are both flexible mesh file formats used by MIKE 21/3 engines. 
 The .mesh file is an ASCII file for storing the flexible mesh geometry. 
@@ -31,38 +34,7 @@ In MIKE Zero, node ids, element ids and layer ids are 1-based.  In MIKE IO, all 
 
 ## MIKE IO Flexible Mesh Geometry 
 
-MIKE IO has a Flexible Mesh Geometry class, [`GeometryFM`](`mikeio.spatial.GeometryFM2D`), containing the list of node coordinates and the element table which defines the mesh, as well as a number of derived properties (e.g. element coordinates) and methods making it convenient to work with the mesh. 
-
-| Property  |      Description     |
-|----------|--------------|
-| `n_nodes` | Number of nodes | 
-| `node_coordinates` | Coordinates (x,y,z) of all nodes | 
-| `codes` | Codes of all nodes (0:water, 1:land, >=2:open boundary) | 
-| `boundary_polylines` | Lists of closed polylines defining domain outline | 
-| `n_elements` | Number of elements | 
-| `element_coordinates` | Center coordinates of each element | 
-| `element_table` | Element to node connectivity | 
-| `max_nodes_per_element` | The maximum number of nodes for an element | 
-| `is_tri_only` | Does the mesh consist of triangles only? | 
-| `projection_string` | The projection string | 
-| `is_geo` | Are coordinates geographical (LONG/LAT)? | 
-| `is_local_coordinates` | Are coordinates relative (NON-UTM)? | 
-| `type_name` | Type name, e.g. Dfsu2D| 
-
-
-| Method  |      Description     |
-|----------|--------------|
-| `contains()` | test if a list of points are contained by mesh | 
-| `find_index()` | Find index of elements containing points/area|
-| `isel()` | Get subset geometry for list of indicies |
-| `find_nearest_points()` | Find index of nearest elements (optionally for a list) |
-| `plot` | Plot the geometry |
-| `get_overset_grid()` | Get a Grid2D covering the domain |
-| `to_shapely()` | Export mesh as shapely MultiPolygon | 
-| `get_element_area()` | Calculate the horizontal area of each element | 
-
-
-These properties and methods are accessible from the geometry, but also from the Mesh/Dfsu object. 
+MIKE IO has Flexible Mesh Geometry classes, e.g. [`GeometryFM2D`](`mikeio.spatial.GeometryFM2D`), containing the list of node coordinates and the element table which defines the mesh, as well as a number of derived properties (e.g. element coordinates) and methods making it convenient to work with the mesh. 
 
 If a .dfsu file is *read* with [](`mikeio.read`), the returned Dataset ds will contain a Flexible Mesh Geometry `geometry`. If a .dfsu or a .mesh file is *opened* with [](`mikeio.open`), the returned object will also contain a Flexible Mesh Geometry `geometry`. 
 
@@ -108,3 +80,45 @@ but the following values types exists:
 * Face value type, storing values on element faces. This is used e.g. for HD decoupling files, to store the discharge between elements.
 * Spectral value type, for each node or element, storing vales for a number of frequencies and/or directions. This is the file type for spectral output from the MIKE 21 SW. 
 
+
+## Visualization
+
+### Geometry
+
+The geometry (bathymetry) can be visualized in various ways.
+
+```{python}
+geom  = dfs.geometry
+geom.plot();
+```
+
+```{python}
+geom.plot.mesh();
+```
+
+```{python}
+geom.plot(vmin=-20);
+```
+
+
+```{python}
+geom.plot.contour(levels=[-20,-10], cmap='tab10');
+```
+
+```{python}
+geom.plot.contourf(levels=6, vmin=-30);
+```
+
+### Data
+
+The data can be visualized in a similar way.
+
+```{python}
+da = ds["Surface elevation"]
+da.plot(cmap='plasma');
+```
+
+```{python}
+ax = da.plot.contour(show_mesh=True, cmap="tab20")
+ax.set_ylim(6135000, 6160000);
+```

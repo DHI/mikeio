@@ -6,7 +6,6 @@ import numpy as np
 from mikeio.spatial import GeometryUndefined
 
 
-
 def test_get_idw_interpolant():
     d = np.linspace(1, 2, 2)
     w = get_idw_interpolant(d, p=1)
@@ -56,7 +55,7 @@ def test_interp2d_same_points():
     ds = dfs.read(items=["Wind speed"])
     npts = 3
     # same points as data (could cause IDW to diverge)
-    xy = dfs.element_coordinates[:npts, 0:2]
+    xy = dfs.geometry.element_coordinates[:npts, 0:2]
     elem_ids, weights = dfs.geometry.get_2d_interpolant(xy, n_nearest=4)
     assert np.max(weights) <= 1.0
     dat = ds[0].values[0, :]

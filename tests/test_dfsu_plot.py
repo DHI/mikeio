@@ -134,8 +134,50 @@ def test_da_plot():
     plt.close("all")
 
 
-def test_plot_non_utm_file():
+def test_geometry_fm_plot():
+    dfs = mikeio.open("tests/testdata/FakeLake.dfsu")
+    g = dfs.geometry
+    g.plot()
+    g.plot.outline()
+    g.plot.mesh()
+    g.plot.contour()
+    g.plot.contourf()
 
+
+def test_plot_non_utm_file():
     ds = mikeio.read("tests/testdata/FakeLake_NONUTM.dfsu")
     da = ds[0]
     da.plot()
+
+
+def test_plot_timeseries():
+    ds = mikeio.read("tests/testdata/HD2D.dfsu")
+
+    # just make sure it runs
+    ds["Surface elevation"].isel(element=0).plot.line()
+    ds["Surface elevation"].isel(time=-1).plot.line()
+
+
+def test_plot_vertical_transect():
+    ds = mikeio.read("tests/testdata/oresund_sigma_z.dfsu")
+
+    dsp = ds.sel(x=333934.1, y=6158101.5)
+    da = dsp["Temperature"]
+    da.plot.pcolormesh()
+
+
+def test_plot_point_spectrum():
+    # directional spectra
+    da = mikeio.read("tests/testdata/spectra/line_dir_spectra.dfsu")[0]
+    da.isel(node=4).plot()
+
+    # frequency spectra
+    da2 = mikeio.read("tests/testdata/spectra/line_freq_spectra.dfsu")[0]
+    da2_pt = da2.isel(node=4)
+    da2_pt.plot()
+
+    # 2d spectra
+    da_pt = mikeio.read("tests/testdata/spectra/pt_spectra.dfsu")[0]
+    da_pt.plot.patch()
+    da_pt.plot.contour()
+    da_pt.plot.contourf()

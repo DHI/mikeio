@@ -10,7 +10,7 @@ import mikeio
 ```
 
 ```{python}
-ds = mikeio.read("../data/wind_north_sea.dfsu", items="Wind speed")
+ds = mikeio.read("../../data/wind_north_sea.dfsu", items="Wind speed")
 ds
 ```
 
@@ -44,7 +44,7 @@ da_grid.plot();
 da_grid.to_dfs("wind_north_sea_interpolated.dfs2")
 ```
 
-![](../images/dfsu_grid_interp.png)
+![](../../images/dfsu_grid_interp.png)
 
 ## Save to NetCDF
 
@@ -53,7 +53,7 @@ xr_da = da_grid.to_xarray()
 xr_da.to_netcdf("wind_north_sea_interpolated.nc")
 ```
 
-![](../images/dfsu_grid_netcdf.png)
+![](../../images/dfsu_grid_netcdf.png)
 
 ## Save to GeoTiff
 
@@ -84,13 +84,13 @@ with rasterio.open(
     
 ```
 
-![](../images/dfsu_grid_interp_tiff.png)
+![](../../images/dfsu_grid_interp_tiff.png)
 
 # Interpolate to other mesh
 Interpolate the data from this coarse mesh onto a finer resolution mesh
 
 ```{python}
-msh = mikeio.Mesh('../data/north_sea_2.mesh')
+msh = mikeio.Mesh("../../data/north_sea_2.mesh")
 msh
 ```
 
@@ -143,7 +143,7 @@ from mikeio._interpolation import get_idw_interpolant
 ```
 
 ```{python}
-dfs = mikeio.open("../data/wind_north_sea.dfsu")
+dfs = mikeio.open("../../data/wind_north_sea.dfsu")
 ```
 
 ```{python}
@@ -163,7 +163,7 @@ Let's first try the approx for a single element:
 * Interpolate
 
 ```{python}
-dist = dist_in_meters(scatter[:,:2], dfs.element_coordinates[0,:2])
+dist = dist_in_meters(scatter[:,:2], dfs.geometry.element_coordinates[0,:2])
 dist
 ```
 
@@ -179,11 +179,11 @@ np.dot(scatter[:,2], w) # interpolated value in element 0
 Let's do the same for all points in the mesh and plot in the end
 
 ```{python}
-dati = np.zeros((1,dfs.n_elements))
-for j in range(dfs.n_elements):
-    dist = dist_in_meters(scatter[:,:2], dfs.element_coordinates[j,:2])
+dati = np.zeros((1, dfs.geometry.n_elements))
+for j in range(dfs.geometry.n_elements):
+    dist = dist_in_meters(scatter[:, :2], dfs.geometry.element_coordinates[j, :2])
     w = get_idw_interpolant(dist, p=2)
-    dati[0,j] = np.dot(scatter[:,2], w)
+    dati[0, j] = np.dot(scatter[:, 2], w)
 ```
 
 ```{python}

@@ -1,12 +1,11 @@
 from pathlib import Path
-from datetime import datetime
 import shutil
 
 import numpy as np
 import pandas as pd
 import pytest
 import mikeio
-from mikeio import Dataset, DataArray, Dfsu, Mesh, ItemInfo
+from mikeio import Dataset, DataArray, Dfsu, Mesh
 from pytest import approx
 from mikeio.exceptions import OutsideModelDomainError
 
@@ -202,7 +201,7 @@ def test_read_single_time_step_scalar():
     ds = dfs.read(items=[0, 3], time=1)
 
     assert len(ds.time) == 1
-    assert ds[0].to_numpy().shape[0] == dfs.n_elements
+    assert ds[0].to_numpy().shape[0] == dfs.geometry.n_elements
 
 
 def test_read_single_time_step_outside_bounds_fails():
@@ -247,6 +246,45 @@ def test_read_area_polygon():
     subdomain = ds.geometry.to_shapely().buffer(0)
 
     assert subdomain.within(domain)
+
+
+def test_read_elements():
+    ds = mikeio.read(filename="tests/testdata/wind_north_sea.dfsu", elements=[0, 10])
+    assert ds.geometry.element_coordinates[0][0] == pytest.approx(1.4931853081272184)
+    assert ds.Wind_speed.to_numpy()[0, 0] == pytest.approx(9.530759811401367)
+
+    ds2 = mikeio.read(filename="tests/testdata/wind_north_sea.dfsu", elements=[10, 0])
+    assert ds2.geometry.element_coordinates[1][0] == pytest.approx(1.4931853081272184)
+    assert ds2.Wind_speed.to_numpy()[0, 1] == pytest.approx(9.530759811401367)
+
+
+def test_read_x_y() -> None:
+    x = [1.49318531, 3.69276145]
+    y = [53.97088571, 54.08928194]
+    dfs = mikeio.open("tests/testdata/wind_north_sea.dfsu")
+    assert isinstance(dfs, mikeio.Dfsu2DH)
+    ds = dfs.read(x=x, y=y, time=0, keepdims=True)
+    assert isinstance(ds.geometry, mikeio.GeometryFM2D)
+    assert ds.geometry.element_coordinates[0][0] == pytest.approx(1.4931853081272184)
+    assert ds.Wind_speed.to_numpy()[0, 0] == pytest.approx(9.530759811401367)
+
+    x = x[::-1]
+    y = y[::-1]
+    ds2 = mikeio.read(
+        filename="tests/testdata/wind_north_sea.dfsu", x=x, y=y, time=0, keepdims=True
+    )
+    assert isinstance(ds2.geometry, mikeio.GeometryFM2D)
+    assert ds2.geometry.element_coordinates[1][0] == pytest.approx(1.4931853081272184)
+    assert ds2.Wind_speed.to_numpy()[0, 1] == pytest.approx(9.530759811401367)
+
+    x = 1.49318531
+    y = 53.97088571
+    ds3 = mikeio.read(
+        filename="tests/testdata/wind_north_sea.dfsu", x=x, y=y, time=0, keepdims=True
+    )
+    assert isinstance(ds3.geometry, mikeio.spatial.GeometryPoint2D)
+    assert ds3.geometry.x == pytest.approx(1.4931853081272184)
+    assert ds3.geometry.y == pytest.approx(53.97088571)
 
 
 def test_find_index_on_island():
@@ -307,7 +345,7 @@ def test_element_coordinates():
     filename = "tests/testdata/HD2D.dfsu"
     dfs = mikeio.open(filename)
 
-    ec = dfs.element_coordinates
+    ec = dfs.geometry.element_coordinates
     assert ec[1, 1] == pytest.approx(6906790.5928664245)
 
 
@@ -315,8 +353,8 @@ def test_element_coords_is_inside_nodes():
     filename = "tests/testdata/HD2D.dfsu"
     dfs = mikeio.open(filename)
 
-    nc = dfs.node_coordinates
-    ec = dfs.element_coordinates
+    nc = dfs.geometry.node_coordinates
+    ec = dfs.geometry.element_coordinates
     nc_min = nc.min(axis=0)
     nc_max = nc.max(axis=0)
     ec_max = ec.max(axis=0)
@@ -333,7 +371,7 @@ def test_contains():
     dfs = mikeio.open(filename)
 
     pts = [[4, 54], [0, 50]]
-    inside = dfs.contains(pts)
+    inside = dfs.geometry.contains(pts)
     assert inside[0]
     assert not inside[1]
 
@@ -448,36 +486,36 @@ def test_is_2d():
     filename = "tests/testdata/HD2D.dfsu"
     dfs = mikeio.open(filename)
 
-    assert dfs.is_2d
+    assert dfs.geometry.is_2d
 
     filename = "tests/testdata/basin_3d.dfsu"
     dfs = mikeio.open(filename)
 
-    assert not dfs.is_2d
+    assert not dfs.geometry.is_2d
 
 
 def test_is_geo_UTM():
     filename = "tests/testdata/HD2D.dfsu"
     dfs = mikeio.open(filename)
-    assert dfs.is_geo is False
+    assert dfs.geometry.is_geo is False
 
 
 def test_is_geo_LONGLAT():
     filename = "tests/testdata/wind_north_sea.dfsu"
     dfs = mikeio.open(filename)
-    assert dfs.is_geo is True
+    assert dfs.geometry.is_geo is True
 
 
 def test_is_local_coordinates():
     filename = "tests/testdata/wind_north_sea.dfsu"
     dfs = mikeio.open(filename)
-    assert dfs.is_local_coordinates is False
+    assert dfs.geometry.is_local_coordinates is False
 
 
 def test_get_element_area_UTM():
     filename = "tests/testdata/HD2D.dfsu"
     dfs = mikeio.open(filename)
-    areas = dfs.get_element_area()
+    areas = dfs.geometry.get_element_area()
     assert areas[0] == 4949.102548750438
 
 
@@ -485,7 +523,7 @@ def test_get_element_area_LONGLAT():
     filename = "tests/testdata/wind_north_sea.dfsu"
     dfs = mikeio.open(filename)
 
-    areas = dfs.get_element_area()
+    areas = dfs.geometry.get_element_area()
     assert areas[0] == 139524218.81411952
 
 
@@ -493,30 +531,20 @@ def test_get_element_area_tri_quad():
     filename = "tests/testdata/FakeLake.dfsu"
     dfs = mikeio.open(filename)
 
-    areas = dfs.get_element_area()
+    areas = dfs.geometry.get_element_area()
     assert areas[0] == 0.0006875642143608321
 
 
-def test_write(tmp_path):
+def test_write(tmp_path: Path) -> None:
     fp = tmp_path / "simple.dfsu"
     meshfilename = "tests/testdata/odense_rough.mesh"
 
     msh = Mesh(meshfilename)
 
-    n_elements = msh.n_elements
-    d = np.zeros((1, n_elements))
-    data = []
-    data.append(d)
+    da = mikeio.DataArray(np.zeros((1, msh.n_elements)), geometry=msh.geometry)
 
-    ds = Dataset(
-        data,
-        time=[datetime(2000, 1, 1)],
-        items=[ItemInfo("Zeros")],
-        geometry=msh.geometry,
-    )
-
-    ds.to_dfs(fp)
-    ds.isel(time=0).to_dfs(fp)
+    da.to_dfs(fp)
+    da.isel(time=0).to_dfs(fp)
 
 
 def test_write_from_dfsu(tmp_path):
@@ -577,13 +605,28 @@ def test_write_from_dfsu_2_time_steps(tmp_path):
     assert dfs.end_time != newdfs.end_time
 
 
-def test_write_non_equidistant_is_not_possible(tmp_path):
+def test_write_non_equidistant_is_possible(tmp_path):
     sourcefilename = "tests/testdata/HD2D.dfsu"
     fp = tmp_path / "simple.dfsu"
     ds = mikeio.read(sourcefilename, time=[0, 1, 3])
+    assert not ds.is_equidistant
 
-    with pytest.raises(ValueError):
-        ds.to_dfs(fp)
+    ds.to_dfs(fp)
+
+    ds2 = mikeio.read(fp)
+
+    assert all(ds.time == ds2.time)
+
+    dfs = mikeio.open(fp)
+
+    dfs = mikeio.open(fp)
+
+    # it is not possible to get all time without reading the entire file
+    with pytest.raises(NotImplementedError):
+        dfs.time
+
+    # but getting the end time is not that expensive
+    assert dfs.end_time == ds.time[-1]
 
 
 def test_temporal_resample_by_reading_selected_timesteps(tmp_path):
@@ -677,18 +720,18 @@ def test_to_mesh_2d(tmp_path):
 
     fp = tmp_path / "hd2d.mesh"
 
-    dfs.to_mesh(fp)
+    dfs.geometry.to_mesh(fp)
 
     mesh = Mesh(fp)
 
-    assert mesh.n_elements == dfs.n_elements
+    assert mesh.n_elements == dfs.geometry.n_elements
 
 
 def test_element_table():
     filename = "tests/testdata/HD2D.dfsu"
     dfs = mikeio.open(filename)
     eid = 31
-    nid = dfs.element_table[eid]
+    nid = dfs.geometry.element_table[eid]
     assert nid[0] == 32
     assert nid[1] == 28
     assert nid[2] == 23
@@ -700,11 +743,11 @@ def test_get_node_centered_data():
     ds = dfs.read(items="Surface elevation")
     time_step = 0
     wl_cc = ds[0].values[time_step, :]
-    wl_nodes = dfs.get_node_centered_data(wl_cc)
+    wl_nodes = dfs.geometry.get_node_centered_data(wl_cc)
 
     eid = 31
     assert wl_cc[eid] == pytest.approx(0.4593418836)
-    nid = dfs.element_table[eid]
+    nid = dfs.geometry.element_table[eid]
     assert wl_nodes[nid].mean() == pytest.approx(0.4593501736)
 
 
@@ -754,7 +797,7 @@ def test_extract_track():
 
 
 # TODO consider move to test_dataset.py
-def test_extract_track_from_dataset():
+def test_extract_track_from_dataset(tmp_path: Path) -> None:
     ds = mikeio.read("tests/testdata/track_extraction_case02_indata.dfsu")
     csv_file = "tests/testdata/track_extraction_case02_track.csv"
     df = pd.read_csv(
@@ -763,9 +806,16 @@ def test_extract_track_from_dataset():
         parse_dates=True,
     )
     df.index = pd.DatetimeIndex(df.index)
+    assert ds[0].name == "Sign. Wave Height"
     track = ds.extract_track(df)
 
-    assert track[2].values[23] == approx(3.6284972794399653)
+    # This should not change the original dataset
+    track.rename({"Sign. Wave Height": "Hm0"}, inplace=True)
+    assert track["Hm0"].name == "Hm0"
+
+    assert ds[0].name == "Sign. Wave Height"
+
+    assert track["Hm0"].values[23] == approx(3.6284972794399653)
     assert sum(np.isnan(track[2].to_numpy())) == 26
     assert np.all(track[1].to_numpy() == df.latitude.values)
 
@@ -775,6 +825,26 @@ def test_extract_track_from_dataset():
 
     track3 = ds2.extract_track(csv_file, method="inverse_distance")
     assert track3[2].values[23] == approx(3.6469911492412463)
+
+    # test with dataset
+    track_ds = mikeio.from_pandas(df)
+    track4 = ds2.extract_track(track_ds)
+    assert track4[2].values[23] == approx(3.6284972794399653)
+
+    # test with dfs0 file
+    track_ds.to_dfs(tmp_path / "track.dfs0")
+    track5 = ds2.extract_track(tmp_path / "track.dfs0")
+    assert track5[2].values[23] == approx(3.6284972794399653)
+
+    # test with non-existent file
+    with pytest.raises(FileNotFoundError):
+        ds2.extract_track("non_existent_file.csv")
+
+    # test with bad file extension
+    fp = tmp_path / "track.txt"
+    fp.touch()
+    with pytest.raises(ValueError):
+        ds2.extract_track(fp)
 
 
 # TODO consider move to test_datarray.py
@@ -858,8 +928,10 @@ def test_dataset_interp_to_xarray():
 def test_interp_like_grid():
     ds = mikeio.read("tests/testdata/wind_north_sea.dfsu")
     ws = ds[0]
+    assert ws.values.dtype == np.float32
     grid = ds.geometry.get_overset_grid(dx=0.1)
     ws_grid = ws.interp_like(grid)
+    assert ws_grid.values.dtype == np.float32
     assert ws_grid.n_timesteps == ds.n_timesteps
     assert isinstance(ws_grid, DataArray)
     assert isinstance(ws_grid.geometry, Grid2D)
@@ -951,12 +1023,30 @@ def test_interp_like_fm_dataset():
     assert isinstance(dsi.geometry, GeometryFM2D)
 
 
-def test_writing_non_equdistant_dfsu_is_not_possible(tmp_path):
-    ds = mikeio.read("tests/testdata/wind_north_sea.dfsu")
-    dss = ds.isel(time=[0, 2, 3])
-    assert not dss.is_equidistant
+def test_append_dfsu_2d(tmp_path):
+    ds = mikeio.read("tests/testdata/consistency/oresundHD.dfsu", time=[0, 1])
+    ds2 = mikeio.read("tests/testdata/consistency/oresundHD.dfsu", time=[2, 3])
+    new_filename = tmp_path / "appended.dfsu"
+    ds.to_dfs(new_filename)
+    dfs = mikeio.open(new_filename)
+    assert dfs.time[-1] == ds.time[-1]
+    dfs.append(ds2)
+    assert dfs.time[-1] == ds2.time[-1]
 
-    # TODO which exception should be raised, when trying to write non-equidistant dfsu? This operation is not supported
-    with pytest.raises(ValueError, match="equidistant"):
-        fp = tmp_path / "not_gonna_work.dfsu"
-        dss.to_dfs(fp)
+    ds3 = mikeio.read(new_filename)
+    assert ds3.n_timesteps == 4
+    assert ds3.time[-1] == ds2.time[-1]
+    assert (
+        ds3.V_velocity.isel(time=3).values[0] == ds2.V_velocity.isel(time=1).values[0]
+    )
+
+
+def test_repr_dfsu_many_items_only_shows_number_of_items() -> None:
+    ds = mikeio.read("tests/testdata/random_data_20_items_2d.dfsu")
+    txt = repr(ds)
+    assert "number of items: 20" in txt
+
+    # repeat for mikeio.open
+    dfs = mikeio.open("tests/testdata/random_data_20_items_2d.dfsu")
+    txt_dfs = repr(dfs)
+    assert "number of items: 20" in txt_dfs

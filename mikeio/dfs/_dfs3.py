@@ -1,7 +1,7 @@
 from __future__ import annotations
 from pathlib import Path
 from collections.abc import Sequence
-from typing import Any, Tuple
+from typing import Any
 
 import numpy as np
 import pandas as pd
@@ -99,6 +99,14 @@ def _write_dfs3_header(filename: str | Path, ds: Dataset, title: str) -> DfsFile
 
 
 class Dfs3(_Dfs123):
+    """Class for reading/writing dfs3 files.
+
+    Parameters
+    ----------
+    filename:
+        Path to dfs3 file
+
+    """
 
     _ndim = 3
 
@@ -151,13 +159,12 @@ class Dfs3(_Dfs123):
         *,
         items: str | int | Sequence[str | int] | None = None,
         time: int | str | slice | None = None,
-        area: Tuple[float, float, float, float] | None = None,
+        area: tuple[float, float, float, float] | None = None,
         layers: str | int | Sequence[int] | None = None,
         keepdims: bool = False,
         dtype: Any = np.float32,
     ) -> Dataset:
-        """
-        Read data from a dfs3 file
+        """Read data from a dfs3 file.
 
         Parameters
         ---------
@@ -165,6 +172,8 @@ class Dfs3(_Dfs123):
             Read only selected items, by number (0-based), or by name
         time: int, str, datetime, pd.TimeStamp, sequence, slice or pd.DatetimeIndex, optional
             Read only selected time steps, by default None (=all)
+        area: tuple[float, float, float, float], optional
+            Read only data within the specified rectangular area (x0, x1, y0, y1)
         keepdims: bool, optional
             When reading a single time step or a single layer only,
             should the singleton dimension be kept
@@ -177,8 +186,8 @@ class Dfs3(_Dfs123):
         Returns
         -------
         Dataset
-        """
 
+        """
         if area is not None:
             raise NotImplementedError("area subsetting is not yet implemented for Dfs3")
         # NOTE:
@@ -206,8 +215,8 @@ class Dfs3(_Dfs123):
             layers = -1
         layers = None if layers is None else np.atleast_1d(layers)
 
-        dims: Tuple[str, ...]
-        shape: Tuple[int, ...]
+        dims: tuple[str, ...]
+        shape: tuple[int, ...]
 
         nzl = nz if layers is None else len(layers)
         if nzl == 1 and (not keepdims):
@@ -258,7 +267,7 @@ class Dfs3(_Dfs123):
 
         time = pd.to_datetime(t_seconds, unit="s", origin=self.start_time)
         items = _get_item_info(dfs.ItemInfo, item_numbers)
-        return Dataset(
+        return Dataset.from_numpy(
             data_list,
             time=time,
             items=items,
@@ -267,9 +276,37 @@ class Dfs3(_Dfs123):
             validate=False,
         )
 
-    @staticmethod
-    def _get_bottom_values(data):
+    def append(self, ds: Dataset, validate: bool = True) -> None:
+        """Append a Dataset to an existing dfs3 file.
 
+        Parameters
+        ----------
+        ds: Dataset
+            Dataset to append
+        validate: bool, optional
+            Validate that the dataset to append has the same geometry and items as the original file
+
+        Notes
+        -----
+        The original file is modified.
+
+        """
+        if validate:
+            if self.geometry != ds.geometry:
+                raise ValueError("The geometry of the dataset to append does not match")
+
+            for item_s, item_o in zip(ds.items, self.items):
+                if item_s != item_o:
+                    raise ValueError(
+                        f"Item in dataset {item_s.name} does not match {item_o.name}"
+                    )
+
+        dfs = DfsFileFactory.Dfs3FileOpenAppend(str(self._filename))
+        write_dfs_data(dfs=dfs, ds=ds, n_spatial_dims=3)
+        self._n_timesteps = dfs.FileInfo.TimeAxis.NumberOfTimeSteps
+
+    @staticmethod
+    def _get_bottom_values(data: np.ndarray) -> np.ndarray:
         assert len(data.shape) == 3
         b = np.empty_like(data[0])
         b[:] = np.nan
@@ -285,20 +322,20 @@ class Dfs3(_Dfs123):
         return self._geometry
 
     @property
-    def dx(self):
-        """Step size in x direction"""
+    def dx(self) -> float:
+        """Step size in x direction."""
         return self._dx
 
     @property
-    def dy(self):
-        """Step size in y direction"""
+    def dy(self) -> float:
+        """Step size in y direction."""
         return self._dy
 
     @property
-    def dz(self):
-        """Step size in y direction"""
+    def dz(self) -> float:
+        """Step size in y direction."""
         return self._dz
 
     @property
-    def shape(self):
+    def shape(self) -> tuple[int, int, int, int]:
         return (self._n_timesteps, self._nz, self._ny, self._nx)

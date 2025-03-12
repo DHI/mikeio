@@ -1,16 +1,58 @@
 from abc import ABC, abstractmethod
 
-from collections import namedtuple
-from typing import Tuple
+from dataclasses import dataclass
+from typing import Any, Sequence
 
 from mikecore.Projections import MapProjection
 
-BoundingBox = namedtuple("BoundingBox", ["left", "bottom", "right", "top"])
+
+@dataclass
+class BoundingBox:
+    """Bounding box for spatial data."""
+
+    left: float
+    bottom: float
+    right: float
+    top: float
+
+    def __post_init__(self) -> None:
+        if self.left > self.right:
+            raise ValueError(
+                f"Invalid x axis, left: {self.left} must be smaller than right: {self.right}"
+            )
+
+        if self.bottom > self.top:
+            raise ValueError(
+                f"Invalid y axis, bottom: {self.bottom} must be smaller than top: {self.top}"
+            )
+
+    def overlaps(self, other: "BoundingBox") -> bool:
+        """Check if two bounding boxes overlap."""
+        return not (
+            self.left > other.right
+            or self.bottom > other.top
+            or self.right < other.left
+            or self.top < other.bottom
+        )
+
+    @staticmethod
+    def parse(
+        values: "BoundingBox" | Sequence[float],
+    ) -> "BoundingBox":
+        match values:
+            case BoundingBox():
+                bbox = values
+            case left, bottom, right, top:
+                bbox = BoundingBox(left, bottom, right, top)
+            case _:
+                raise ValueError(
+                    "values must be a bounding box of coordinates e.g. (-10.0, 10.0 20.0, 30.0)"
+                )
+        return bbox
 
 
 class _Geometry(ABC):
     def __init__(self, projection: str = "LONG/LAT") -> None:
-
         if not MapProjection.IsValid(projection):
             raise ValueError(f"{projection=} is not a valid projection string")
 
@@ -18,12 +60,12 @@ class _Geometry(ABC):
 
     @property
     def projection_string(self) -> str:
-        """The projection string"""
+        """The projection string."""
         return self._projstr
 
     @property
-    def projection(self):
-        """The projection"""
+    def projection(self) -> str:
+        """The projection."""
         return self._projstr
 
     @property
@@ -43,12 +85,12 @@ class _Geometry(ABC):
 
     @property
     @abstractmethod
-    def default_dims(self) -> Tuple[str, ...]:
+    def default_dims(self) -> tuple[str, ...]:
         pass
 
 
 class GeometryUndefined(_Geometry):
-    def __repr__(self):
+    def __repr__(self) -> str:
         return "GeometryUndefined()"
 
     @property
@@ -56,7 +98,7 @@ class GeometryUndefined(_Geometry):
         raise NotImplementedError()
 
     @property
-    def default_dims(self) -> Tuple[str, ...]:
+    def default_dims(self) -> tuple[str, ...]:
         raise NotImplementedError()
 
 
@@ -67,7 +109,7 @@ class GeometryPoint2D(_Geometry):
         self.y = y
 
     @property
-    def default_dims(self) -> Tuple[str, ...]:
+    def default_dims(self) -> tuple[str, ...]:
         return ()
 
     def __repr__(self) -> str:
@@ -83,10 +125,10 @@ class GeometryPoint2D(_Geometry):
 
     @property
     def ndim(self) -> int:
-        """Geometry dimension"""
+        """Geometry dimension."""
         return 0
 
-    def to_shapely(self):
+    def to_shapely(self) -> Any:
         from shapely.geometry import Point
 
         return Point(self.x, self.y)
@@ -100,11 +142,11 @@ class GeometryPoint3D(_Geometry):
         self.y = y
         self.z = z
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"GeometryPoint3D(x={self.x}, y={self.y}, z={self.z})"
 
     @property
-    def default_dims(self) -> Tuple[str, ...]:
+    def default_dims(self) -> tuple[str, ...]:
         return ()
 
     @property
@@ -115,7 +157,7 @@ class GeometryPoint3D(_Geometry):
     def ndim(self) -> int:
         return 0
 
-    def to_shapely(self):
+    def to_shapely(self) -> Any:
         from shapely.geometry import Point
 
         return Point(self.x, self.y, self.z)

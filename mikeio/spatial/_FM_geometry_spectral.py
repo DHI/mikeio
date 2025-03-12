@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import Collection, Any, Tuple
+from typing import Any, Sequence
 
 
 import numpy as np
@@ -12,6 +12,8 @@ from ._FM_geometry import GeometryFM2D
 
 
 class GeometryFMPointSpectrum(_Geometry):
+    """Flexible mesh point spectrum."""
+
     def __init__(
         self,
         frequencies: np.ndarray | None = None,
@@ -31,7 +33,7 @@ class GeometryFMPointSpectrum(_Geometry):
         self.y = y
 
     @property
-    def default_dims(self) -> Tuple[str, ...]:
+    def default_dims(self) -> tuple[str, ...]:
         if self.directions is None:
             return ("frequency",)
         else:
@@ -54,22 +56,22 @@ class GeometryFMPointSpectrum(_Geometry):
 
     @property
     def n_frequencies(self) -> int:
-        """Number of frequencies"""
+        """Number of frequencies."""
         return 0 if self.frequencies is None else len(self.frequencies)
 
     @property
     def frequencies(self) -> np.ndarray | None:
-        """Frequency axis"""
+        """Frequency axis."""
         return self._frequencies
 
     @property
     def n_directions(self) -> int:
-        """Number of directions"""
+        """Number of directions."""
         return 0 if self.directions is None else len(self.directions)
 
     @property
     def directions(self) -> np.ndarray | None:
-        """Directional axis"""
+        """Directional axis."""
         return self._directions
 
 
@@ -105,37 +107,39 @@ class _GeometryFMSpectrum(GeometryFM2D):
 
     @property
     def n_frequencies(self) -> int:
-        """Number of frequencies"""
+        """Number of frequencies."""
         return 0 if self.frequencies is None else len(self.frequencies)
 
     @property
     def frequencies(self) -> np.ndarray | None:
-        """Frequency axis"""
+        """Frequency axis."""
         return self._frequencies
 
     @property
     def n_directions(self) -> int:
-        """Number of directions"""
+        """Number of directions."""
         return 0 if self.directions is None else len(self.directions)
 
     @property
     def directions(self) -> np.ndarray | None:
-        """Directional axis"""
+        """Directional axis."""
         return self._directions
 
 
 # TODO reconsider inheritance to avoid overriding method signature
 class GeometryFMAreaSpectrum(_GeometryFMSpectrum):
+    """Flexible mesh area spectrum geometry."""
+
     def isel(  # type: ignore
-        self, idx: Collection[int], **kwargs: Any
+        self, idx: Sequence[int], **kwargs: Any
     ) -> "GeometryFMPointSpectrum" | "GeometryFMAreaSpectrum":
         return self.elements_to_geometry(elements=idx)
 
     def elements_to_geometry(  # type: ignore
-        self, elements: Collection[int], keepdims: bool = False
+        self, elements: Sequence[int], keepdims: bool = False
     ) -> "GeometryFMPointSpectrum" | "GeometryFMAreaSpectrum":
         """export a selection of elements to new flexible file geometry
-        Parameters
+        Parameters.
         ----------
         elements : list(int)
             list of element ids
@@ -145,6 +149,7 @@ class GeometryFMAreaSpectrum(_GeometryFMSpectrum):
         -------
         GeometryFMAreaSpectrum or GeometryFMPointSpectrum
             which can be used for further extraction or saved to file
+
         """
         elements = np.atleast_1d(elements)  # type: ignore
         if len(elements) == 1:
@@ -156,7 +161,6 @@ class GeometryFMAreaSpectrum(_GeometryFMSpectrum):
                 y=coords[1],
             )
 
-        elements = np.sort(elements)  # make sure elements are sorted!
         node_ids, elem_tbl = self._get_nodes_and_table_for_elements(elements)
         node_coords = self.node_coordinates[node_ids]
         codes = self.codes[node_ids]
@@ -178,20 +182,27 @@ class GeometryFMAreaSpectrum(_GeometryFMSpectrum):
 
 # TODO this inherits indirectly from GeometryFM2D, which is not ideal
 class GeometryFMLineSpectrum(_GeometryFMSpectrum):
-    def isel(self, idx=None, axis="node"):
+    """Flexible mesh line spectrum geometry."""
+
+    def isel(  # type: ignore
+        self, idx: Sequence[int], axis: str = "node"
+    ) -> GeometryFMPointSpectrum | GeometryFMLineSpectrum:
         return self._nodes_to_geometry(nodes=idx)
 
-    def _nodes_to_geometry(self, nodes):
+    def _nodes_to_geometry(  # type: ignore
+        self, nodes: Sequence[int]
+    ) -> GeometryFMPointSpectrum | GeometryFMLineSpectrum:
         """export a selection of nodes to new flexible file geometry
         Note: takes only the elements for which all nodes are selected
-        Parameters
+        Parameters.
         ----------
         nodes : list(int)
             list of node ids
         Returns
         -------
-        UnstructuredGeometry
+        GeometryFMPointSpectrum | GeometryFMLineSpectrum
             which can be used for further extraction or saved to file
+
         """
         nodes = np.atleast_1d(nodes)
         if len(nodes) == 1:
@@ -209,7 +220,6 @@ class GeometryFMLineSpectrum(_GeometryFMSpectrum):
                 elements.append(j)
 
         assert len(elements) > 0, "no elements found"
-        elements = np.sort(elements)  # make sure elements are sorted!
 
         node_ids, elem_tbl = self._get_nodes_and_table_for_elements(elements)
         node_coords = self.node_coordinates[node_ids]
@@ -220,11 +230,11 @@ class GeometryFMLineSpectrum(_GeometryFMSpectrum):
             codes=codes,
             node_ids=node_ids,
             projection=self.projection_string,
+            dfsu_type=self._type,
             element_table=elem_tbl,
             element_ids=self.element_ids[elements],
             frequencies=self._frequencies,
             directions=self._directions,
             reindex=True,
         )
-        geom._type = self._type  # TODO
         return geom

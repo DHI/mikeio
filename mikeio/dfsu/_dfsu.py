@@ -1,14 +1,18 @@
 from __future__ import annotations
+from copy import deepcopy
+from dataclasses import dataclass
+from datetime import datetime
 from pathlib import Path
-import warnings
-from functools import wraps
-from typing import Any, Collection, Sequence, Tuple
+
+from typing import Any, Literal, Sequence
 
 import numpy as np
 import pandas as pd
+from mikecore.DfsFile import TimeAxisType
 from mikecore.DfsFactory import DfsFactory
 from mikecore.DfsuBuilder import DfsuBuilder
 from mikecore.DfsuFile import DfsuFile, DfsuFileType
+from mikecore.DfsFileFactory import DfsFileFactory
 from mikecore.eum import eumQuantity, eumUnit
 from tqdm import trange
 
@@ -28,11 +32,11 @@ from ..spatial import (
 from ..spatial import Grid2D
 from .._track import _extract_track
 from ._common import get_elements_from_source, get_nodes_from_source
-from ..eum import ItemInfo
+from ..eum import ItemInfo, TimeStepUnit
 
 
 def write_dfsu(filename: str | Path, data: Dataset) -> None:
-    """Write a dfsu file
+    """Write a dfsu file.
 
     Parameters
     ----------
@@ -40,17 +44,9 @@ def write_dfsu(filename: str | Path, data: Dataset) -> None:
         dfsu filename
     data: Dataset
         Dataset to be written
+
     """
     filename = str(filename)
-
-    if len(data.time) == 1:
-        dt = 1  # TODO is there any sensible default?
-    else:
-        if not data.is_equidistant:
-            raise ValueError("Non-equidistant time axis is not supported.")
-
-        dt = (data.time[1] - data.time[0]).total_seconds()  # type: ignore
-    n_time_steps = len(data.time)
 
     geometry = data.geometry
     dfsu_filetype = DfsuFileType.Dfsu2D
@@ -74,7 +70,16 @@ def write_dfsu(filename: str | Path, data: Dataset) -> None:
     factory = DfsFactory()
     proj = factory.CreateProjection(geometry.projection_string)
     builder.SetProjection(proj)
-    builder.SetTimeInfo(data.time[0], dt)
+
+    if data.is_equidistant:
+        temporal_axis = factory.CreateTemporalEqCalendarAxis(
+            TimeStepUnit.SECOND, data.time[0], 0, data.timestep
+        )
+    else:
+        temporal_axis = factory.CreateTemporalNonEqCalendarAxis(
+            TimeStepUnit.SECOND, data.time[0]
+        )
+    builder.SetTemporalAxis(temporal_axis)
     builder.SetZUnit(eumUnit.eumUmeter)
 
     if dfsu_filetype != DfsuFileType.Dfsu2D:
@@ -87,78 +92,114 @@ def write_dfsu(filename: str | Path, data: Dataset) -> None:
     builder.ApplicationVersion = __dfs_version__
     dfs = builder.CreateFile(filename)
 
+    write_dfsu_data(dfs, data, geometry.is_layered)
+
+
+def write_dfsu_data(dfs: DfsuFile, ds: Dataset, is_layered: bool) -> None:
+    n_time_steps = len(ds.time)
+    data = ds
+
+    if data.is_equidistant:
+        t_rel = np.zeros(data.n_timesteps)
+    else:
+        t_rel = (data.time - data.time[0]).total_seconds()
+
     for i in range(n_time_steps):
-        if geometry.is_layered:
+        if is_layered:
             if "time" in data.dims:
                 assert data._zn is not None
                 zn = data._zn[i]
             else:
                 zn = data._zn
-            dfs.WriteItemTimeStepNext(0, zn.astype(np.float32))
+            dfs.WriteItemTimeStepNext(t_rel[i], zn.astype(np.float32))
         for da in data:
             if "time" in data.dims:
                 d = da.to_numpy()[i, :]
             else:
                 d = da.to_numpy()
             d[np.isnan(d)] = data.deletevalue
-            dfs.WriteItemTimeStepNext(0, d.astype(np.float32))
+            dfs.WriteItemTimeStepNext(t_rel[i], d.astype(np.float32))
     dfs.Close()
 
 
-class _Dfsu:
+def _validate_elements_and_geometry_sel(elements: Any, **kwargs: Any) -> None:
+    """Check that only one of elements, area, x, y is selected."""
+    used_kwargs = [key for key, val in kwargs.items() if val is not None]
+
+    if elements is not None and len(used_kwargs) > 0:
+        raise ValueError(f"Cannot select both {used_kwargs} and elements!")
+
+    if "area" in used_kwargs and ("x" in used_kwargs or "y" in used_kwargs):
+        raise ValueError("Cannot select both x,y and area!")
+
+
+@dataclass
+class _DfsuInfo:
+    filename: str
+    type: DfsuFileType
+    start_time: datetime
+    equidistant: bool
+    timestep: float
+    n_timesteps: int
+    items: list[ItemInfo]
+    deletevalue: float
+
+
+def _get_dfsu_info(filename: str | Path) -> _DfsuInfo:
+    filename = str(filename)
+    path = Path(filename)
+    if not path.exists():
+        raise FileNotFoundError(f"file {path} does not exist!")
+    dfs = DfsuFile.Open(filename)
+    type = DfsuFileType(dfs.DfsuFileType)
+    deletevalue = dfs.DeleteValueFloat
+
+    timestep = dfs.TimeStepInSeconds
+    items = _get_item_info(dfs.ItemInfo)
+    equidistant = dfs.FileInfo.TimeAxis.TimeAxisType == TimeAxisType.CalendarEquidistant
+    dfs.Close()
+    return _DfsuInfo(
+        filename=filename,
+        type=type,
+        timestep=timestep,
+        equidistant=equidistant,
+        n_timesteps=dfs.NumberOfTimeSteps,
+        items=items,
+        start_time=dfs.FileInfo.TimeAxis.StartDateTime,
+        deletevalue=deletevalue,
+    )
+
+
+class Dfsu2DH:
+    """Class for reading/writing dfsu 2d horizontal files.
+
+    Parameters
+    ----------
+    filename:
+        Path to dfsu file
+
+    """
+
     show_progress = False
 
     def __init__(self, filename: str | Path) -> None:
-        """
-        Create a Dfsu object
+        info = _get_dfsu_info(filename)
+        self._filename = info.filename
+        self._type = info.type
+        self._deletevalue = info.deletevalue
+        self._equidistant = info.equidistant
+        self._start_time = info.start_time
+        self._timestep = info.timestep
+        self._n_timesteps = info.n_timesteps
+        self._items = info.items
+        self._geometry = self._read_geometry(self._filename)
 
-        Parameters
-        ---------
-        filename: str
-            dfsu filename
-        """
-        filename = str(filename)
-        self._filename = filename
-        path = Path(filename)
-        if not path.exists():
-            raise FileNotFoundError(f"file {path} does not exist!")
-
-        dfs = DfsuFile.Open(filename)
-        self._type = DfsuFileType(dfs.DfsuFileType)
-        self._deletevalue = dfs.DeleteValueFloat
-
-        freq = pd.Timedelta(seconds=dfs.TimeStepInSeconds)
-
-        self._time = pd.date_range(
-            start=dfs.StartDateTime,
-            periods=dfs.NumberOfTimeSteps,
-            freq=freq,
-        )
-        self._timestep = dfs.TimeStepInSeconds
-        dfs.Close()
-        self._items = self._read_items(filename)
-
-    def __repr__(self):
+    def __repr__(self) -> str:
         out = [f"<mikeio.{self.__class__.__name__}>"]
 
-        if self._type is not DfsuFileType.DfsuSpectral0D:
-            if self._type is not DfsuFileType.DfsuSpectral1D:
-                out.append(f"number of elements: {self.n_elements}")
-            out.append(f"number of nodes: {self.n_nodes}")
-        if self.is_spectral:
-            if self.n_directions > 0:
-                out.append(f"number of directions: {self.n_directions}")
-            if self.n_frequencies > 0:
-                out.append(f"number of frequencies: {self.n_frequencies}")
-        if self.geometry.projection_string:
-            out.append(f"projection: {self.projection_string}")
-        if self.geometry.is_layered:
-            out.append(f"number of sigma layers: {self.n_sigma_layers}")
-        if (
-            self._type == DfsuFileType.DfsuVerticalProfileSigmaZ
-            or self._type == DfsuFileType.Dfsu3DSigmaZ
-        ):
-            out.append(f"max number of z layers: {self.n_layers - self.n_sigma_layers}")
+        out.append(f"number of elements: {self.geometry.n_elements}")
+        out.append(f"number of nodes: {self.geometry.n_nodes}")
+        out.append(f"projection: {self.geometry.projection_string}")
         if self.n_items < 10:
             out.append("items:")
             for i, item in enumerate(self.items):
@@ -173,388 +214,62 @@ class _Dfsu:
             )
         return str.join("\n", out)
 
-    def _read_items(self, filename: str) -> list[ItemInfo]:
-        dfs = DfsuFile.Open(filename)
-        items = _get_item_info(dfs.ItemInfo)
-        dfs.Close()
-        return items
-
     @property
-    def type_name(self):
-        """Type name, e.g. Mesh, Dfsu2D"""
-        return self._type.name
-
-    @property
-    def geometry(self):
+    def geometry(self) -> Any:
         return self._geometry
 
     @property
-    def n_nodes(self):
-        """Number of nodes"""
-        return self.geometry.n_nodes
-
-    @property
-    def node_coordinates(self):
-        """Coordinates (x,y,z) of all nodes"""
-        return self.geometry.node_coordinates
-
-    @property
-    def node_ids(self):
-        return self.geometry.node_ids
-
-    @property
-    def n_elements(self):
-        """Number of elements"""
-        return self.geometry.n_elements
-
-    @property
-    def element_ids(self):
-        return self.geometry.element_ids
-
-    @property
-    def codes(self):
-        warnings.warn(
-            "property codes is deprecated, use .geometry.codes instead",
-            FutureWarning,
-        )
-        return self.geometry.codes
-
-    @codes.setter
-    def codes(self, v):
-        if len(v) != self.n_nodes:
-            raise ValueError(f"codes must have length of nodes ({self.n_nodes})")
-        self._geometry._codes = np.array(v, dtype=np.int32)
-
-    @property
-    def valid_codes(self):
-        """Unique list of node codes"""
-        return list(set(self.geometry.codes))
-
-    @property
-    def boundary_codes(self):
-        """Unique list of boundary codes"""
-        return [code for code in self.valid_codes if code > 0]
-
-    @property
-    def projection_string(self):
-        """The projection string"""
-        return self.geometry.projection_string
-
-    @property
-    def is_geo(self):
-        """Are coordinates geographical (LONG/LAT)?"""
-        return self.geometry.projection_string == "LONG/LAT"
-
-    @property
-    def is_local_coordinates(self):
-        """Are coordinates relative (NON-UTM)?"""
-        return self.geometry.projection_string == "NON-UTM"
-
-    @property
-    def element_table(self):
-        """Element to node connectivity"""
-        return self.geometry.element_table
-
-    @property
-    def max_nodes_per_element(self):
-        """The maximum number of nodes for an element"""
-        return self.geometry.max_nodes_per_element
-
-    @property
-    def is_2d(self) -> bool:
-        return self._type in (
-            DfsuFileType.Dfsu2D,
-            DfsuFileType.DfsuSpectral2D,
-        )
-
-    @property
-    def is_layered(self) -> bool:
-        """Type is layered dfsu (3d, vertical profile or vertical column)"""
-        return self.geometry.is_layered
-
-    @property
-    def is_spectral(self) -> bool:
-        """Type is spectral dfsu (point, line or area spectrum)"""
-        return self.geometry.is_spectral
-
-    @property
-    def is_tri_only(self) -> bool:
-        """Does the mesh consist of triangles only?"""
-        return self.geometry.is_tri_only
-
-    @property
-    def boundary_polylines(self):
-        """Lists of closed polylines defining domain outline"""
-        return self.geometry.boundary_polylines
-
-    @wraps(GeometryFM2D.elements_to_geometry)
-    def elements_to_geometry(self, elements, node_layers="all"):
-        return self.geometry.elements_to_geometry(elements, node_layers)
-
-    @property
-    def element_coordinates(self):
-        """Center coordinates of each element"""
-        return self.geometry.element_coordinates
-
-    @wraps(GeometryFM2D.contains)
-    def contains(self, points):
-        return self.geometry.contains(points)
-
-    @wraps(GeometryFM2D.get_element_area)
-    def get_element_area(self):
-        return self.geometry.get_element_area()
-
-    @wraps(GeometryFM2D.to_shapely)
-    def to_shapely(self):
-        return self.geometry.to_shapely()
-
-    @wraps(GeometryFM2D.get_node_centered_data)
-    def get_node_centered_data(self, data, extrapolate=True):
-        return self.geometry.get_node_centered_data(data, extrapolate)
-
-    @property
     def deletevalue(self) -> float:
-        """File delete value"""
+        """File delete value."""
         return self._deletevalue
 
     @property
     def n_items(self) -> int:
-        """Number of items"""
+        """Number of items."""
         return len(self.items)
 
     @property
     def items(self) -> list[ItemInfo]:
-        """List of items"""
+        """List of items."""
         return self._items
 
     @property
-    def start_time(self) -> pd.Timestamp:
-        """File start time"""
-        return self._time[0]
+    def start_time(self) -> datetime:
+        """File start time."""
+        return self._start_time
 
     @property
     def n_timesteps(self) -> int:
-        """Number of time steps"""
-        return len(self._time)
+        """Number of time steps."""
+        return self._n_timesteps
 
     @property
     def timestep(self) -> float:
-        """Time step size in seconds"""
+        """Time step size in seconds."""
         return self._timestep
 
     @property
     def end_time(self) -> pd.Timestamp:
-        """File end time"""
-        return self._time[-1]
+        """File end time."""
+        if self._equidistant:
+            return self.time[-1]
+        else:
+            # read the last timestep
+            ds = self.read(items=0, time=-1)
+            return ds.time[-1]
 
     @property
     def time(self) -> pd.DatetimeIndex:
-        return self._time
-
-    def _read(
-        self,
-        *,
-        items: str | int | Sequence[str | int] | None = None,
-        time: int | str | slice | None = None,
-        elements: Collection[int] | None = None,
-        area: Tuple[float, float, float, float] | None = None,
-        x: float | None = None,
-        y: float | None = None,
-        keepdims: bool = False,
-        dtype: Any = np.float32,
-        error_bad_data: bool = True,
-        fill_bad_data_value: float = np.nan,
-    ) -> Dataset:
-        if dtype not in [np.float32, np.float64]:
-            raise ValueError("Invalid data type. Choose np.float32 or np.float64")
-
-        # Open the dfs file for reading
-        # self._read_dfsu_header(self._filename)
-        dfs = DfsuFile.Open(self._filename)
-        # time may have changes since we read the header
-        # (if engine is continuously writing to this file)
-        # TODO: add more checks that this is actually still the same file
-        # (could have been replaced in the meantime)
-
-        single_time_selected, time_steps = _valid_timesteps(dfs, time)
-
-        self._validate_elements_and_geometry_sel(elements, area=area, x=x, y=y)
-        if elements is None:
-            elements = self._parse_geometry_sel(area=area, x=x, y=y)
-
-        if elements is None:
-            geometry = self.geometry
-            n_elems = geometry.n_elements
+        if self._equidistant:
+            return pd.date_range(
+                start=self.start_time,
+                periods=self.n_timesteps,
+                freq=f"{int(self.timestep)}s",
+            )
         else:
-            elements = [elements] if np.isscalar(elements) else list(elements)  # type: ignore
-            n_elems = len(elements)
-            geometry = self.geometry.elements_to_geometry(elements)
-
-        item_numbers = _valid_item_numbers(
-            dfs.ItemInfo, items, ignore_first=self.is_layered
-        )
-        items = _get_item_info(dfs.ItemInfo, item_numbers, ignore_first=self.is_layered)
-        n_items = len(item_numbers)
-
-        deletevalue = self.deletevalue
-
-        data_list = []
-
-        shape: Tuple[int, ...]
-
-        n_steps = len(time_steps)
-        shape = (
-            (n_elems,)
-            if (single_time_selected and not keepdims)
-            else (n_steps, n_elems)
-        )
-        for item in range(n_items):
-            # Initialize an empty data block
-            data: np.ndarray = np.ndarray(shape=shape, dtype=dtype)
-            data_list.append(data)
-
-        time = self.time
-
-        for i in trange(n_steps, disable=not self.show_progress):
-            it = time_steps[i]
-            for item in range(n_items):
-                dfs, d = _read_item_time_step(
-                    dfs=dfs,
-                    filename=self._filename,
-                    time=time,
-                    item_numbers=item_numbers,
-                    deletevalue=deletevalue,
-                    shape=shape,
-                    item=item,
-                    it=it,
-                    error_bad_data=error_bad_data,
-                    fill_bad_data_value=fill_bad_data_value,
-                )
-
-                if elements is not None:
-                    d = d[elements]
-
-                if single_time_selected and not keepdims:
-                    data_list[item] = d
-                else:
-                    data_list[item][i] = d
-
-        time = self.time[time_steps]
-
-        dfs.Close()
-
-        dims: Tuple[str, ...]
-
-        dims = ("time", "element")
-
-        if single_time_selected and not keepdims:
-            dims = ("element",)
-
-        if elements is not None and len(elements) == 1:
-            # squeeze point data
-            dims = tuple([d for d in dims if d != "element"])
-            data_list = [np.squeeze(d, axis=-1) for d in data_list]
-
-        return Dataset(
-            data_list, time, items, geometry=geometry, dims=dims, validate=False
-        )
-
-    def _validate_elements_and_geometry_sel(self, elements, **kwargs):
-        """Check that only one of elements, area, x, y is selected
-
-        Parameters
-        ----------
-        elements : list[int], optional
-            Read only selected element ids, by default None
-        area : list[float], optional
-            Read only data inside (horizontal) area given as a
-            bounding box (tuple with left, lower, right, upper)
-            or as list of coordinates for a polygon, by default None
-        x : float, optional
-            Read only data for elements containing the (x,y) points(s),
-            by default None
-        y : float, optional
-            Read only data for elements containing the (x,y) points(s),
-            by default None
-
-        Returns
-        -------
-        None
-
-        Raises
-        ------
-        ValueError
-            If more than one of elements, area, x, y is selected
-        """
-        used_kwargs = []
-        for kw, val in kwargs.items():
-            if val is not None:
-                used_kwargs.append(kw)
-
-        if elements is not None:
-            for kw in used_kwargs:
-                raise ValueError(f"Cannot select both {kw} and elements!")
-
-        if "area" in used_kwargs and ("x" in used_kwargs or "y" in used_kwargs):
-            raise ValueError("Cannot select both x,y and area!")
-
-    def _parse_geometry_sel(self, area, x, y):
-        """Parse geometry selection
-
-        Parameters
-        ----------
-        area : list[float], optional
-            Read only data inside (horizontal) area given as a
-            bounding box (tuple with left, lower, right, upper)
-            or as list of coordinates for a polygon, by default None
-        x : float, optional
-            Read only data for elements containing the (x,y) points(s),
-            by default None
-        y : float, optional
-            Read only data for elements containing the (x,y) points(s),
-            by default None
-
-        Returns
-        -------
-        list[int]
-            List of element ids
-
-        Raises
-        ------
-        ValueError
-            If no elements are found in selection
-        """
-        elements = None
-
-        if area is not None:
-            elements = self.geometry._elements_in_area(area)
-
-        if (x is not None) or (y is not None):
-            elements = self.geometry.find_index(x=x, y=y)
-
-        if (x is not None) or (y is not None) or (area is not None):
-            # selection was attempted
-            if (elements is None) or len(elements) == 0:
-                raise ValueError("No elements in selection!")
-
-        return elements
-
-    def to_mesh(self, outfilename):
-        """write object to mesh file
-
-        Parameters
-        ----------
-        outfilename : str
-            path to file to be written
-        """
-        self.geometry.geometry2d.to_mesh(outfilename)
-
-
-class Dfsu2DH(_Dfsu):
-
-    def __init__(self, filename: str | Path) -> None:
-        super().__init__(filename)
-        self._geometry = self._read_geometry(self._filename)
+            raise NotImplementedError(
+                "Non-equidistant time axis. Read the data to get time."
+            )
 
     @staticmethod
     def _read_geometry(filename: str) -> GeometryFM2D:
@@ -582,17 +297,16 @@ class Dfsu2DH(_Dfsu):
         *,
         items: str | int | Sequence[str | int] | None = None,
         time: int | str | slice | None = None,
-        elements: Collection[int] | None = None,
-        area: Tuple[float, float, float, float] | None = None,
-        x: float | None = None,
-        y: float | None = None,
+        elements: Sequence[int] | np.ndarray | None = None,
+        area: tuple[float, float, float, float] | None = None,
+        x: float | Sequence[float] | None = None,
+        y: float | Sequence[float] | None = None,
         keepdims: bool = False,
         dtype: Any = np.float32,
         error_bad_data: bool = True,
         fill_bad_data_value: float = np.nan,
     ) -> Dataset:
-        """
-        Read data from a dfsu file
+        """Read data from a dfsu file.
 
         Parameters
         ---------
@@ -607,7 +321,7 @@ class Dfsu2DH(_Dfsu):
             Read only data inside (horizontal) area given as a
             bounding box (tuple with left, lower, right, upper)
             or as list of coordinates for a polygon, by default None
-        x, y: float, optional
+        x, y: float or list[float], optional
             Read only data for elements containing the (x,y) points(s),
             by default None
         elements: list[int], optional
@@ -617,28 +331,134 @@ class Dfsu2DH(_Dfsu):
         fill_bad_data_value:
             fill value for to impute corrupt data, used in conjunction with error_bad_data=False
             default np.nan
+        dtype: Any, optional
+            Data type to read, by default np.float32
 
         Returns
         -------
         Dataset
             A Dataset with data dimensions [t,elements]
-        """
 
-        return self._read(
-            items=items,
+        """
+        if dtype not in [np.float32, np.float64]:
+            raise ValueError("Invalid data type. Choose np.float32 or np.float64")
+        dfs = DfsuFile.Open(self._filename)
+
+        single_time_selected, time_steps = _valid_timesteps(dfs, time)
+
+        _validate_elements_and_geometry_sel(elements, area=area, x=x, y=y)
+        if area is not None:
+            elements = self.geometry._elements_in_area(area)
+
+        if (x is not None) or (y is not None):
+            elements = self.geometry.find_index(x=x, y=y)
+
+        if elements is None:
+            geometry = self.geometry
+            n_elems = geometry.n_elements
+        else:
+            elements = [elements] if np.isscalar(elements) else list(elements)  # type: ignore
+            n_elems = len(elements)
+            geometry = self.geometry.elements_to_geometry(elements)
+
+        item_numbers = _valid_item_numbers(dfs.ItemInfo, items)
+        n_items = len(item_numbers)
+
+        t_rel = np.zeros(len(time_steps))
+
+        n_steps = len(time_steps)
+        shape: tuple[int, ...] = (
+            (n_elems,)
+            if (single_time_selected and not keepdims)
+            else (n_steps, n_elems)
+        )
+        data_list: list[np.ndarray] = [
+            np.ndarray(shape=shape, dtype=dtype) for _ in range(n_items)
+        ]
+
+        for i in trange(n_steps, disable=not self.show_progress):
+            for item in range(n_items):
+                dfs, d, t_rel[i] = _read_item_time_step(
+                    dfs=dfs,
+                    filename=self._filename,
+                    time=time,
+                    item_numbers=item_numbers,
+                    deletevalue=self.deletevalue,
+                    shape=shape,
+                    item=item,
+                    it=time_steps[i],
+                    error_bad_data=error_bad_data,
+                    fill_bad_data_value=fill_bad_data_value,
+                )
+
+                if elements is not None:
+                    d = d[elements]
+
+                if single_time_selected and not keepdims:
+                    data_list[item] = d
+                else:
+                    data_list[item][i] = d
+
+        dfs.Close()
+
+        dims: tuple[str, ...] = ("time", "element")
+
+        if single_time_selected and not keepdims:
+            dims = ("element",)
+
+        if elements is not None and len(elements) == 1:
+            # squeeze point data
+            dims = tuple([d for d in dims if d != "element"])
+            data_list = [np.squeeze(d, axis=-1) for d in data_list]
+
+        time = pd.to_datetime(t_rel, unit="s", origin=self.start_time)
+        item_infos = _get_item_info(dfs.ItemInfo, item_numbers)
+
+        return Dataset.from_numpy(
+            data_list,
             time=time,
-            elements=elements,
-            area=area,
-            x=x,
-            y=y,
-            keepdims=keepdims,
-            dtype=dtype,
-            error_bad_data=error_bad_data,
-            fill_bad_data_value=fill_bad_data_value,
+            items=item_infos,
+            geometry=geometry,
+            dims=dims,
+            validate=False,
+            dt=self.timestep,
         )
 
-    def get_overset_grid(self, dx=None, dy=None, nx=None, ny=None, buffer=0.0):
-        """get a 2d grid that covers the domain by specifying spacing or shape
+    def append(self, ds: Dataset, validate: bool = True) -> None:
+        """Append data to an existing dfsu file.
+
+        Parameters
+        ----------
+        ds: Dataset
+            Dataset to be appended
+        validate: bool, optional
+            Validate that the items and geometry match, by default True
+
+        """
+        if validate:
+            if ds.geometry != self.geometry:
+                raise ValueError("The geometry of the dataset to append does not match")
+
+            for item_s, item_o in zip(ds.items, self.items):
+                if item_s != item_o:
+                    raise ValueError(
+                        f"Item in dataset {item_s.name} does not match {item_o.name}"
+                    )
+
+        dfs = DfsFileFactory.DfsuFileOpenAppend(str(self._filename), parameters=None)
+        write_dfsu_data(dfs=dfs, ds=ds, is_layered=False)
+        info = _get_dfsu_info(self._filename)
+        self._n_timesteps = info.n_timesteps
+
+    def get_overset_grid(
+        self,
+        dx: float | None = None,
+        dy: float | None = None,
+        nx: int | None = None,
+        ny: int | None = None,
+        buffer: float = 0.0,
+    ) -> Grid2D:
+        """get a 2d grid that covers the domain by specifying spacing or shape.
 
         Parameters
         ----------
@@ -661,6 +481,7 @@ class Dfsu2DH(_Dfsu):
         -------
         <mikeio.Grid2D>
             2d grid
+
         """
         nc = self.geometry.geometry2d.node_coordinates
         bbox = xy_to_bbox(nc, buffer=buffer)
@@ -675,15 +496,20 @@ class Dfsu2DH(_Dfsu):
 
     def _dfs_read_item_time_func(
         self, item: int, step: int
-    ) -> Tuple[np.ndarray, pd.Timestamp]:
+    ) -> tuple[np.ndarray, pd.Timestamp]:
         dfs = DfsuFile.Open(self._filename)
         itemdata = dfs.ReadItemTimeStep(item + 1, step)
 
         return itemdata.Data, itemdata.Time
 
-    def extract_track(self, track, items=None, method="nearest", dtype=np.float32):
-        """
-        Extract track data from a dfsu file
+    def extract_track(
+        self,
+        track: pd.DataFrame,
+        items: int | str | Sequence[int | str] | None = None,
+        method: Literal["nearest", "inverse_distance"] = "nearest",
+        dtype: Any = np.float32,
+    ) -> Dataset:
+        """Extract track data from a dfsu file.
 
         Parameters
         ---------
@@ -697,6 +523,8 @@ class Dfsu2DH(_Dfsu):
         method: str, optional
             Spatial interpolation method ('nearest' or 'inverse_distance')
             default='nearest'
+        dtype: Any, optional
+            Data type to read, by default np.float32
 
         Returns
         -------
@@ -706,18 +534,16 @@ class Dfsu2DH(_Dfsu):
 
         Examples
         --------
-        >>> dfsu = mikeio.open("tests/testdata/NorthSea_HD_and_windspeed.dfsu")
-        >>> ds = dfsu.extract_track("tests/testdata/altimetry_NorthSea_20171027.csv")
-        >>> ds
-        <mikeio.Dataset>
-        dims: (time:1115)
-        time: 2017-10-26 04:37:37 - 2017-10-30 20:54:47 (1115 non-equidistant records)
-        geometry: GeometryUndefined()
-        items:
-          0:  Longitude <Undefined> (undefined)
-          1:  Latitude <Undefined> (undefined)
-          2:  Surface elevation <Surface Elevation> (meter)
-          3:  Wind speed <Wind speed> (meter per sec)
+        ```{python}
+        import mikeio
+
+        ds = (
+            mikeio.open("../data/NorthSea_HD_and_windspeed.dfsu")
+                  .extract_track("../data/altimetry_NorthSea_20171027.csv")
+            )
+        ds
+        ```
+
         """
         dfs = DfsuFile.Open(self._filename)
 
@@ -731,9 +557,9 @@ class Dfsu2DH(_Dfsu):
             end_time=self.end_time,
             timestep=self.timestep,
             geometry=self.geometry,
-            n_elements=self.n_elements,
+            n_elements=self.geometry.n_elements,
             track=track,
-            items=items,
+            items=deepcopy(items),
             time_steps=time_steps,
             item_numbers=item_numbers,
             method=method,

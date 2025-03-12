@@ -1,4 +1,8 @@
-# Dfs1
+---
+title: Dfs1
+aliases:
+  - ../dfs1.html
+---
 
 A dfs1 file contains node-based line series data. Dfs1 files do not contain enough metadata to determine their geographical position, but have a relative distance from the origo. 
 
@@ -27,3 +31,61 @@ Grid1D's primary properties and methods are:
 * `isel()`
 
 See [API specification](`mikeio.Grid1D`) for details.
+
+
+## Creating a dfs1 file
+
+1. Create a datetime index
+2. Create a data array with dimensions (time, x)
+
+In this example the grid consist of two points (west and east), but the same approach can be used for any number of points.
+
+```{python}
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+import mikeio
+
+t = pd.date_range("2021-01-01", periods=100, freq="15min")
+t_rel = (t - t[0]).total_seconds().values
+
+west = np.sin(t_rel / 3600)
+east = 1.2*np.sin(t_rel / 3600 + 0.5)
+
+data = np.column_stack((west, east))
+data.shape
+```
+
+3. Create a `Grid1D` geometry with the number of points in the x-direction and the spacing.
+
+```{python}
+geometry = mikeio.Grid1D(nx=2, dx=1)
+geometry
+```
+
+4. Create a `DataArray` object with the data, time, geometry, and item information.
+
+```{python}
+da = mikeio.DataArray(
+    data,
+    time=t,
+    geometry=geometry,
+    item=mikeio.ItemInfo("Water level", mikeio.EUMType.Water_Level),
+)
+da
+```
+
+```{python}
+da.plot.timeseries()
+```
+
+Optional, repeat step 4 for additional items to create a Dataset.
+
+5. Write to a dfs1 file.
+
+```{python}
+da.to_dfs("boundary.dfs1")
+```
+
+
+

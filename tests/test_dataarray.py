@@ -592,35 +592,32 @@ def test_dropna(da2):
 def test_da_isel_space(da_grid2d):
     assert da_grid2d.geometry.nx == 7
     assert da_grid2d.geometry.ny == 14
-    da_sel = da_grid2d.isel(0, axis="y")
-    assert da_sel.dims[0][0] == "t"
-    assert da_sel.dims[1] == "x"
+    da_sel = da_grid2d.isel(y=0)
+    assert da_sel.dims == ("time", "x")
     assert isinstance(da_sel.geometry, mikeio.Grid1D)
 
-    da_sel = da_grid2d.isel(0, axis="x")
-    assert da_sel.dims[0][0] == "t"
-    assert da_sel.dims[1] == "y"
+    da_sel = da_grid2d.isel(x=0)
+    assert da_sel.dims == ("time", "y")
     assert isinstance(da_sel.geometry, mikeio.Grid1D)
 
-    da_sel = da_grid2d.isel(0, axis="t")
-    assert da_sel.dims[0] == "y"
-    assert da_sel.dims[1] == "x"
+    da_sel = da_grid2d.isel(time=0)
+    assert da_sel.dims == ("y", "x")
 
 
 def test_da_isel_empty(da_grid2d):
     with pytest.raises(ValueError):
-        da_grid2d.isel(slice(100, 200), axis="y")
+        da_grid2d.isel(y=slice(100, 200))
 
 
 def test_da_isel_space_multiple_elements(da_grid2d):
     assert da_grid2d.geometry.nx == 7
     assert da_grid2d.geometry.ny == 14
-    da_sel = da_grid2d.isel((0, 1, 2, 10), axis="y")
+    da_sel = da_grid2d.isel(y=(0, 1, 2, 10))
     assert da_sel.dims == ("time", "y", "x")
     assert da_sel.shape == (10, 4, 7)
     assert isinstance(da_sel.geometry, mikeio.spatial.GeometryUndefined)
 
-    da_sel = da_grid2d.isel(slice(None, 3), axis="x")
+    da_sel = da_grid2d.isel(x=slice(None, 3))
     assert da_sel.dims == ("time", "y", "x")
     assert da_sel.shape == (10, 14, 3)
     assert isinstance(da_sel.geometry, mikeio.Grid2D)
@@ -631,12 +628,10 @@ def test_da_isel_space_named_axis(da_grid2d: mikeio.DataArray):
     assert da_sel.dims[0] == "time"
 
     da_sel = da_grid2d.isel(x=0)
-    assert da_sel.dims[0] == "time"
-    assert da_sel.dims[1] == "y"
+    assert da_sel.dims == ("time", "y")
 
     da_sel = da_grid2d.isel(time=0)
-    assert da_sel.dims[0] == "y"
-    assert da_sel.dims[1] == "x"
+    assert da_sel.dims == ("y", "x")
 
 
 def test_da_isel_space_named_missing_axis(da_grid2d: mikeio.DataArray):
@@ -694,6 +689,27 @@ def test_da_sel_area_dfsu2d():
     area = (-0.1, 0.15, 0.0, 0.2)
     da1 = da.sel(area=area)
     assert da1.geometry.n_elements == 14
+
+
+def test_da_isel_order_is_important_dfsu2d():
+    filename = "tests/testdata/FakeLake.dfsu"
+    da = mikeio.read(filename, items=0, time=0)[0]
+
+    # select elements sorted
+    da1 = da.isel(element=[0, 1])
+    assert da1.values[0] == pytest.approx(-3.2252840995788574)
+    assert da1.geometry.element_coordinates[0, 0] == pytest.approx(-0.61049269425)
+
+    # select elements in arbitrary order
+    da2 = da.isel(element=[1, 0])
+    assert da2.values[1] == pytest.approx(-3.2252840995788574)
+    assert da2.geometry.element_coordinates[1, 0] == pytest.approx(-0.61049269425)
+
+    # select same elements multiple times, not sure why, but consistent with NumPy, xarray
+    da3 = da.isel(element=[1, 0, 1])
+    assert da3.values[1] == pytest.approx(-3.2252840995788574)
+    assert da3.geometry.element_coordinates[1, 0] == pytest.approx(-0.61049269425)
+    assert len(da3.geometry.element_coordinates) == 3
 
 
 def test_da_sel_area_grid2d():
@@ -1249,7 +1265,7 @@ def test_xzy_selection():
     das_xzy = ds.Temperature.sel(x=348946, y=6173673, z=0)
 
     # check for point geometry after selection
-    assert type(das_xzy.geometry) == mikeio.spatial.GeometryPoint3D
+    assert type(das_xzy.geometry) is mikeio.spatial.GeometryPoint3D
     assert das_xzy.values[0] == pytest.approx(17.381)
 
     # do the same but go one level deeper, but finding the index first
@@ -1280,7 +1296,7 @@ def test_layer_selection():
 
     das_layer = ds.Temperature.sel(layers=0)
     # should not be layered after selection
-    assert type(das_layer.geometry) == mikeio.spatial.GeometryFM2D
+    assert type(das_layer.geometry) is mikeio.spatial.GeometryFM2D
 
 
 def test_time_selection():
@@ -1291,7 +1307,7 @@ def test_time_selection():
     data.append(d)
     time = pd.date_range("2000-1-2", freq="h", periods=nt)
     items = [ItemInfo("Foo")]
-    ds = mikeio.Dataset(data, time, items)
+    ds = mikeio.Dataset.from_numpy(data=data, time=time, items=items)
 
     das_t = ds.Foo.sel(time="2000-01-05")
 
@@ -1355,3 +1371,24 @@ def test_set_by_mask():
     mask = da < threshold
     wl_capped = da.copy()
     wl_capped[mask] = np.nan
+
+
+def test_set_unit() -> None:
+    da = mikeio.DataArray(
+        data=np.array([0.0, 1.0]),
+        item=mikeio.ItemInfo("Water", mikeio.EUMType.Water_Level, mikeio.EUMUnit.meter),
+    )
+
+    da.unit = mikeio.EUMUnit.feet
+
+    assert da.unit == mikeio.EUMUnit.feet
+
+
+def test_set_bad_unit_fails() -> None:
+    da = mikeio.DataArray(
+        data=np.array([0.0, 1.0]),
+        item=mikeio.ItemInfo("Water", mikeio.EUMType.Water_Level, mikeio.EUMUnit.meter),
+    )
+
+    with pytest.raises(ValueError, match="unit"):
+        da.unit = mikeio.EUMUnit.decibar

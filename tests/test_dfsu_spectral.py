@@ -10,95 +10,113 @@ import mikeio._spectral as _spectral
 
 @pytest.fixture
 def dfsu_pt():
-    filename = "tests/testdata/pt_spectra.dfsu"
+    filename = "tests/testdata/spectra/pt_spectra.dfsu"
     return mikeio.open(filename)
 
 
 @pytest.fixture
 def dfsu_line():
-    filename = "tests/testdata/line_spectra.dfsu"
+    filename = "tests/testdata/spectra/line_spectra.dfsu"
+    return mikeio.open(filename)
+
+
+@pytest.fixture
+def dfsu_line_degrees():
+    filename = "tests/testdata/spectra/line_spectra_degrees.dfsu"
     return mikeio.open(filename)
 
 
 @pytest.fixture
 def dfsu_area():
-    filename = "tests/testdata/area_spectra.dfsu"
+    filename = "tests/testdata/spectra/area_spectra.dfsu"
     return mikeio.open(filename)
 
 
 @pytest.fixture
 def dfsu_area_sector():
-    filename = "tests/testdata/MIKE21SW_dir_sector_area_spectra.dfsu"
+    filename = "tests/testdata/spectra/MIKE21SW_dir_sector_area_spectra.dfsu"
     return mikeio.open(filename)
 
 
 @pytest.fixture
 def dfsu_pt_freq():
-    filename = "tests/testdata/pt_freq_spectra.dfsu"
+    filename = "tests/testdata/spectra/pt_freq_spectra.dfsu"
     return mikeio.open(filename)
 
 
 @pytest.fixture
 def dfsu_line_dir():
-    filename = "tests/testdata/line_dir_spectra.dfsu"
+    filename = "tests/testdata/spectra/line_dir_spectra.dfsu"
     return mikeio.open(filename)
 
 
 @pytest.fixture
 def dfsu_area_freq():
-    filename = "tests/testdata/area_freq_spectra.dfsu"
+    filename = "tests/testdata/spectra/area_freq_spectra.dfsu"
     return mikeio.open(filename)
 
 
 def test_properties_pt_spectrum(dfsu_pt):
     dfs = dfsu_pt
-    assert dfs.is_spectral
+    assert dfs.geometry.is_spectral
     assert dfs._type == DfsuFileType.DfsuSpectral0D
-    assert dfs.n_frequencies == 25
+    assert dfs.geometry.n_frequencies == 25
     assert len(dfs.frequencies) == 25
-    assert dfs.n_directions == 16
+    assert dfs.geometry.n_directions == 16
     assert len(dfs.directions) == 16
 
 
 def test_properties_line_spectrum(dfsu_line):
     dfs = dfsu_line
-    assert dfs.is_spectral
+    assert dfs.geometry.is_spectral
     assert dfs._type == DfsuFileType.DfsuSpectral1D
-    assert dfs.n_frequencies == 25
+    assert dfs.geometry.n_frequencies == 25
     assert len(dfs.frequencies) == 25
-    assert dfs.n_directions == 16
+    assert dfs.geometry.n_directions == 16
     assert len(dfs.directions) == 16
-    assert dfs.n_nodes == 10
-    assert dfs.n_elements == 9
+    assert dfs.geometry.n_nodes == 10
+    assert dfs.geometry.n_elements == 9
+    dir = dfs.geometry.directions
+    assert dir[0] == pytest.approx(0.0)
+    assert dir[-1] == pytest.approx(337.5)
+
+
+def test_properties_line_spectrum_degrees(dfsu_line_degrees):
+    dfs = dfsu_line_degrees
+    assert dfs.geometry.is_spectral
+    assert dfs._type == DfsuFileType.DfsuSpectral1D
+    dir = dfs.geometry.directions
+    assert dir[0] == pytest.approx(0.0)
+    assert dir[-1] == pytest.approx(350.0)
 
 
 def test_properties_area_spectrum(dfsu_area):
     dfs = dfsu_area
-    assert dfs.is_spectral
+    assert dfs.geometry.is_spectral
     assert dfs._type == DfsuFileType.DfsuSpectral2D
-    assert dfs.n_frequencies == 25
+    assert dfs.geometry.n_frequencies == 25
     assert len(dfs.frequencies) == 25
-    assert dfs.n_directions == 16
+    assert dfs.geometry.n_directions == 16
     assert len(dfs.directions) == 16
 
 
 def test_properties_line_dir_spectrum(dfsu_line_dir):
     dfs = dfsu_line_dir
-    assert dfs.is_spectral
+    assert dfs.geometry.is_spectral
     assert dfs._type == DfsuFileType.DfsuSpectral1D
-    assert dfs.n_frequencies == 0
+    assert dfs.geometry.n_frequencies == 0
     assert dfs.frequencies is None
-    assert dfs.n_directions == 16
+    assert dfs.geometry.n_directions == 16
     assert len(dfs.directions) == 16
 
 
 def test_properties_area_freq_spectrum(dfsu_area_freq):
     dfs = dfsu_area_freq
-    assert dfs.is_spectral
+    assert dfs.geometry.is_spectral
     assert dfs._type == DfsuFileType.DfsuSpectral2D
-    assert dfs.n_frequencies == 25
+    assert dfs.geometry.n_frequencies == 25
     assert len(dfs.frequencies) == 25
-    assert dfs.n_directions == 0
+    assert dfs.geometry.n_directions == 0
     assert dfs.directions is None
 
 
@@ -115,9 +133,9 @@ def test_read_spectrum_pt(dfsu_pt):
 
 def test_read_spectrum_area_sector(dfsu_area_sector):
     dfs = dfsu_area_sector
-    assert dfs.n_frequencies == 25
+    assert dfs.geometry.n_frequencies == 25
     assert len(dfs.frequencies) == 25
-    assert dfs.n_directions == 19
+    assert dfs.geometry.n_directions == 19
     assert len(dfs.directions) == 19
     assert dfs.directions.min() == pytest.approx(-90)
     assert dfs.directions.max() == pytest.approx(45)
@@ -131,7 +149,7 @@ def test_read_spectrum_area_sector(dfsu_area_sector):
 
 def test_read_pt_freq_spectrum(dfsu_pt_freq):
     dfs = dfsu_pt_freq
-    assert dfs.n_directions == 0
+    assert dfs.geometry.n_directions == 0
     assert dfs.directions is None
 
     ds = dfs.read()
@@ -143,7 +161,7 @@ def test_read_pt_freq_spectrum(dfsu_pt_freq):
 
 def test_read_area_freq_spectrum(dfsu_area_freq):
     dfs = dfsu_area_freq
-    assert dfs.n_directions == 0
+    assert dfs.geometry.n_directions == 0
     assert dfs.directions is None
 
     ds = dfs.read()
@@ -161,6 +179,16 @@ def test_read_area_spectrum_elements(dfsu_area):
     ds2 = dfs.read(elements=elems)
     assert ds2.shape[1] == len(elems)
     assert np.all(ds1[0].to_numpy()[:, elems, ...] == ds2[0].to_numpy())
+    assert ds2.geometry.element_coordinates[0, 0] == pytest.approx(2.651450863095597)
+    assert ds2["Energy density"].isel(time=-1).isel(frequency=0).isel(
+        direction=0
+    ).to_numpy()[0] == pytest.approx(1.770e-12)
+
+    ds3 = dfs.read(elements=[4, 3])
+    assert ds3.geometry.element_coordinates[1, 0] == pytest.approx(2.651450863095597)
+    assert ds3["Energy density"].isel(time=-1).isel(frequency=0).isel(
+        direction=0
+    ).to_numpy()[1] == pytest.approx(1.770e-12)
 
 
 def test_read_area_spectrum_xy(dfsu_area):
@@ -307,7 +335,7 @@ def test_spectrum_area_sel_area(dfsu_area):
 
 def test_read_spectrum_dir_line(dfsu_line_dir):
     dfs = dfsu_line_dir
-    assert dfs.n_frequencies == 0
+    assert dfs.geometry.n_frequencies == 0
     assert dfs.frequencies is None
 
     ds1 = dfs.read(time=[0, 1])
@@ -333,8 +361,8 @@ def test_calc_frequency_bin_sizes(dfsu_line):
 
 def test_calc_Hm0_from_spectrum_line(dfsu_line):
     dfs = dfsu_line
-    assert dfs.n_elements == 9
-    assert dfs.n_nodes == 10
+    assert dfs.geometry.n_elements == 9
+    assert dfs.geometry.n_nodes == 10
     ds = dfs.read()
     assert ds.shape == (4, 10, 16, 25)
 

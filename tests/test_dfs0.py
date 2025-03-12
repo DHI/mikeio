@@ -1,7 +1,9 @@
+from datetime import datetime
 import numpy as np
 import pandas as pd
 import mikeio
 from mikeio import Dfs0, EUMType, EUMUnit, ItemInfo
+from mikecore.DfsFile import DataValueType
 
 
 import pytest
@@ -267,6 +269,166 @@ def test_write_dataframe_different_eum_types_to_dfs0(tmp_path):
     assert len(ds) == 2
     assert ds.end_time == dfr.index[-1]
     assert ds.is_equidistant
+
+
+def test_from_pandas_mapping_eum_types() -> None:
+    time = pd.DatetimeIndex(["2001-01-01", "2001-01-01 01:00", "2001-01-01 01:10"])
+
+    df = pd.DataFrame(
+        {"flow": np.array([1, np.nan, 2]), "rain": np.array([2, 3.0, -1.3])}
+    )
+    df.index = time
+
+    dfr = df.resample("5min").mean().fillna(0.0)  # .interpolate()
+
+    item_with_dvt = mikeio.ItemInfo(
+        itemtype=mikeio.EUMType.Rainfall,
+        unit=mikeio.EUMUnit.centimeter,
+        data_value_type="StepAccumulated",
+    )
+    ds = mikeio.from_pandas(
+        dfr,
+        items={
+            "flow": mikeio.ItemInfo(itemtype=mikeio.EUMType.Discharge),
+            "rain": item_with_dvt,
+        },
+    )
+    item_with_dvt.name = "rain"
+
+    assert ds.n_timesteps == 15
+    assert ds[0].type == mikeio.EUMType.Discharge
+    assert ds[1].type == mikeio.EUMType.Rainfall
+    assert ds[1].item is not item_with_dvt
+    assert ds[1].item == item_with_dvt
+    assert len(ds) == 2
+    assert ds.end_time == dfr.index[-1]
+    assert ds.is_equidistant
+    assert ds[0].name == "flow"
+
+
+def test_from_pandas_same_eum_type() -> None:
+    df = pd.DataFrame(
+        {"station_a": np.array([1, np.nan, 2]), "station_b": np.array([2, 3.0, -1.3])},
+        index=pd.date_range("2001-01-01", periods=3, freq="h"),
+    )
+
+    ds = mikeio.from_pandas(
+        df,
+        items=ItemInfo(EUMType.Water_Level, data_value_type=DataValueType.Accumulated),
+    )
+
+    assert ds.n_timesteps == 3
+    assert ds[0].type == EUMType.Water_Level
+    assert ds[0].item.data_value_type == DataValueType.Accumulated
+    assert ds["station_b"].item.name == "station_b"
+
+
+def test_from_pandas_sequence_eum_types() -> None:
+    time = pd.DatetimeIndex(["2001-01-01", "2001-01-01 01:00", "2001-01-01 01:10"])
+
+    df = pd.DataFrame(
+        {"flow": np.array([1, np.nan, 2]), "level": np.array([2, 3.0, -1.3])}
+    )
+    df.index = time
+
+    dfr = df.resample("5min").mean().fillna(0.0)  # .interpolate()
+
+    ds = mikeio.from_pandas(
+        dfr,
+        items=[
+            mikeio.ItemInfo("Ignored", itemtype=mikeio.EUMType.Discharge),
+            mikeio.ItemInfo(
+                "Also Ignored",
+                itemtype=mikeio.EUMType.Water_Level,
+                unit=mikeio.EUMUnit.millimeter,
+                data_value_type=DataValueType.Accumulated,
+            ),
+        ],
+    )
+
+    assert ds.n_timesteps == 15
+    assert ds[0].type == mikeio.EUMType.Discharge
+    assert ds[1].type == mikeio.EUMType.Water_Level
+    assert ds[1].item.unit == mikeio.EUMUnit.millimeter
+    assert ds[1].item.data_value_type == DataValueType.Accumulated
+    assert ds["level"].item.name == "level"
+
+
+def test_from_pandas_use_first_datetime_column() -> None:
+    df = pd.DataFrame(
+        {
+            "time": pd.date_range("2001-01-01", periods=3, freq="h"),
+            "flow": np.array([1, np.nan, 2]),
+            "level": np.array([2, 3.0, -1.3]),
+        }
+    )
+    # no index set, uses first datetime column
+    ds = mikeio.from_pandas(df)
+
+    assert ds.n_timesteps == 3
+    assert ds.time[-1].year == 2001
+
+
+def test_from_pandas_no_time_raises_error() -> None:
+    df = pd.DataFrame(
+        {
+            "flow": np.array([1, np.nan, 2]),
+            "level": np.array([2, 3.0, -1.3]),
+        }
+    )
+
+    with pytest.raises(ValueError, match="datetime"):
+        mikeio.from_pandas(df)
+
+
+def test_from_polars_explicit_time_column() -> None:
+    import polars as pl
+
+    df = pl.DataFrame(
+        {
+            "flow": [1.0, None, 2.0],
+            "level": [2.0, 3.0, -1.3],
+            "time": [
+                datetime(2001, 1, 1, 0),
+                datetime(2001, 1, 1, 1),
+                datetime(2001, 1, 1, 2),
+            ],
+        }
+    )
+
+    ds = mikeio.from_polars(
+        df,
+        datetime_col="time",
+        items={
+            "flow": ItemInfo(EUMType.Discharge),
+            "level": ItemInfo(EUMType.Water_Level),
+        },
+    )
+    assert ds.time[0].year == 2001
+    assert ds["flow"].item.type == EUMType.Discharge
+    assert ds["level"].item.name == "level"
+
+
+def test_from_polars_use_first_datetime_column() -> None:
+    import polars as pl
+
+    df = pl.DataFrame(
+        {
+            "time": [
+                datetime(2001, 1, 1, 0),
+                datetime(2001, 1, 1, 1),
+                datetime(2001, 1, 1, 2),
+            ],
+            "flow": [1.0, None, 2.0],
+            "level": [2.0, 3.0, -1.3],
+        }
+    )
+
+    ds = mikeio.from_polars(df)
+
+    assert ds.n_timesteps == 3
+    assert ds.time[-1].year == 2001
+    assert ds["flow"].values[-1] == pytest.approx(2.0)
 
 
 def test_write_from_pandas_series_monkey_patched(tmp_path):
@@ -578,7 +740,6 @@ def test_read_dfs0_with_non_unique_item_names():
 
 
 def test_non_equidistant_time_can_read_correctly_with_open(tmp_path):
-
     dfs = mikeio.open("tests/testdata/neq_daily_time_unit.dfs0")
     dfs.time
     ds = dfs.read()

@@ -30,9 +30,9 @@ def test_transect_open(vslice):
     dfs = vslice
     assert dfs._type == DfsuFileType.DfsuVerticalProfileSigmaZ
     assert dfs.n_items == 2
-    assert dfs.n_elements == 441
-    assert dfs.n_sigma_layers == 4
-    assert dfs.n_z_layers == 5
+    assert dfs.geometry.n_elements == 441
+    assert dfs.geometry.n_sigma_layers == 4
+    assert dfs.geometry.n_z_layers == 5
     assert dfs.n_timesteps == 3
 
 
@@ -63,7 +63,7 @@ def test_transect_geometry_properties_geo(vslice_geo):
 def test_transect_read(vslice):
     ds = vslice.read()
     assert ds.geometry._type == DfsuFileType.DfsuVerticalProfileSigmaZ
-    assert type(ds.geometry) == GeometryFMVerticalProfile
+    assert type(ds.geometry) is GeometryFMVerticalProfile
     assert ds.n_items == 2
     assert ds.Salinity.name == "Salinity"
     assert ds.geometry.n_elements == 441
@@ -78,7 +78,7 @@ def test_transect_getitem_element(vslice):
     da = vslice.read().Salinity
     idx = 5
     da2 = da[:, idx]
-    assert type(da2.geometry) == GeometryPoint3D
+    assert type(da2.geometry) is GeometryPoint3D
     assert da2.geometry.x == da.geometry.element_coordinates[idx, 0]
     assert da2.geometry.y == da.geometry.element_coordinates[idx, 1]
     assert da2.geometry.z == da.geometry.element_coordinates[idx, 2]
@@ -90,7 +90,7 @@ def test_transect_isel(vslice):
     da = vslice.read().Salinity
     idx = 5
     da2 = da.isel(element=idx)
-    assert type(da2.geometry) == GeometryPoint3D
+    assert type(da2.geometry) is GeometryPoint3D
     assert da2.geometry.x == da.geometry.element_coordinates[idx, 0]
     assert da2.geometry.y == da.geometry.element_coordinates[idx, 1]
     assert da2.geometry.z == da.geometry.element_coordinates[idx, 2]
@@ -105,7 +105,7 @@ def test_transect_isel_multiple(vslice_geo):
 
     ds2 = ds.isel(element=idx)
     assert ds2.geometry.n_elements == 579
-    assert type(ds2.geometry) == GeometryFMVerticalProfile
+    assert type(ds2.geometry) is GeometryFMVerticalProfile
     rd2 = ds2.geometry.relative_element_distance
     assert rd2.max() < 15000
 
@@ -114,7 +114,7 @@ def test_transect_sel_time(vslice):
     da = vslice.read()[0]
     idx = 1
     da2 = da.sel(time="1997-09-16 00:00")
-    assert type(da2.geometry) == GeometryFMVerticalProfile
+    assert type(da2.geometry) is GeometryFMVerticalProfile
     assert np.all(da2.to_numpy() == da.to_numpy()[idx, :])
     assert da2.time[0] == da.time[1]
     assert da2.dims == ("element",)
@@ -124,7 +124,7 @@ def test_transect_sel_time(vslice):
 def test_transect_sel_xyz(vslice_geo):
     da = vslice_geo.read().Temperature
     da2 = da.sel(x=10.8, y=55.6, z=-3)
-    assert type(da2.geometry) == GeometryPoint3D
+    assert type(da2.geometry) is GeometryPoint3D
     assert da2.geometry.x == pytest.approx(10.802878)
     assert da2.geometry.y == pytest.approx(55.603096)
     assert da2.geometry.z == pytest.approx(-2.3)
@@ -134,13 +134,13 @@ def test_transect_sel_xyz(vslice_geo):
 def test_transect_sel_layers(vslice_geo):
     ds = vslice_geo.read()
     ds2 = ds.sel(layers=range(-6, -1))
-    assert type(ds2.geometry) == GeometryFMVerticalProfile
+    assert type(ds2.geometry) is GeometryFMVerticalProfile
 
 
 def test_transect_sel_xy(vslice_geo):
     da = vslice_geo.read().Temperature
     da2 = da.sel(x=10.8, y=55.6)
-    assert type(da2.geometry) == GeometryFMVerticalColumn
+    assert type(da2.geometry) is GeometryFMVerticalColumn
     gx, gy, _ = da2.geometry.element_coordinates.mean(axis=0)
     assert gx == pytest.approx(10.802878)
     assert gy == pytest.approx(55.603096)

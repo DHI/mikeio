@@ -1,5 +1,4 @@
 from pathlib import Path
-from typing import List
 
 
 import nbformat
@@ -26,7 +25,7 @@ def _process_notebook(fp: Path):
     return
 
 
-def _get_all_notebooks_in_repo() -> List[Path]:
+def _get_all_notebooks_in_repo() -> list[Path]:
     ROOT_DIR = Path(__file__).parent.parent.parent
     NOTEBOOK_DIR = ROOT_DIR / "notebooks"
 
@@ -35,6 +34,7 @@ def _get_all_notebooks_in_repo() -> List[Path]:
 
 def test_notebook(notebook):
     _process_notebook(notebook)
+
 
 def pytest_generate_tests(metafunc):
     notebooks = _get_all_notebooks_in_repo()
