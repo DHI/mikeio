@@ -444,7 +444,7 @@ class Grid2D(_Geometry):
         if True, the grid is spectral, by default False
     is_vertical : bool, optional
         if True, the grid is vertical, by default False
-        bathymetry : array_like, optional
+    bathymetry : array_like, optional
             bathymetry data, by default None
 
     Examples
@@ -466,6 +466,7 @@ class Grid2D(_Geometry):
     _origin: tuple[float, float]
     _orientation: float
     is_spectral: bool
+    bathymetry: DataArray | None
 
     def __init__(
         self,
@@ -488,6 +489,7 @@ class Grid2D(_Geometry):
         axis_names: tuple[str, str] = ("x", "y"),
         is_spectral: bool = False,
         is_vertical: bool = False,
+        bathymetry: np.ndarray | None = None,
     ):
         super().__init__(projection=projection)
         self._shift_origin_on_write = origin is None  # user-constructed
