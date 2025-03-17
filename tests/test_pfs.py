@@ -9,6 +9,36 @@ import pytest
 import mikeio
 
 
+def assert_txt_files_match(f1, f2, comment="//") -> None:
+    """Checks that non-comment lines in two files match exactly.
+    Empty lines and lines starting with the comment string are ignored."""
+    file1lines = Path(f1).read_text().splitlines()
+    file2lines = Path(f2).read_text().splitlines()
+
+    # Filter out comments and empty lines
+    content1 = [
+        line.strip()
+        for line in file1lines
+        if line.strip() and not line.strip().startswith(comment)
+    ]
+    content2 = [
+        line.strip()
+        for line in file2lines
+        if line.strip() and not line.strip().startswith(comment)
+    ]
+
+    # Check lengths match after filtering
+    if len(content1) != len(content2):
+        raise AssertionError(
+            f"Files have different number of non-comment lines: {len(content1)} vs {len(content2)}"
+        )
+
+    # Compare remaining lines
+    for i, (line1, line2) in enumerate(zip(content1, content2)):
+        if line1 != line2:
+            raise AssertionError(f"Line {i} differs:\n{line1}\nvs\n{line2}")
+
+
 @pytest.fixture
 def d1() -> dict:
     return dict(
@@ -291,36 +321,6 @@ def test_mztoolbox() -> None:
     pfs = mikeio.PfsDocument("tests/testdata/pfs/concat.mzt")
     assert "tide1.dfs" in pfs.txconc.Setup.File_1.InputFile
     assert "|" in pfs.txconc.Setup.File_1.InputFile
-
-
-def assert_txt_files_match(f1, f2, comment="//") -> None:
-    """Checks that non-comment lines in two files match exactly.
-    Empty lines and lines starting with the comment string are ignored."""
-    file1lines = Path(f1).read_text().splitlines()
-    file2lines = Path(f2).read_text().splitlines()
-
-    # Filter out comments and empty lines
-    content1 = [
-        line.strip()
-        for line in file1lines
-        if line.strip() and not line.strip().startswith(comment)
-    ]
-    content2 = [
-        line.strip()
-        for line in file2lines
-        if line.strip() and not line.strip().startswith(comment)
-    ]
-
-    # Check lengths match after filtering
-    if len(content1) != len(content2):
-        raise AssertionError(
-            f"Files have different number of non-comment lines: {len(content1)} vs {len(content2)}"
-        )
-
-    # Compare remaining lines
-    for i, (line1, line2) in enumerate(zip(content1, content2)):
-        if line1 != line2:
-            raise AssertionError(f"Line {i} differs:\n{line1}\nvs\n{line2}")
 
 
 def test_read_write(tmp_path: Path) -> None:
@@ -1257,3 +1257,13 @@ def test_ignores_comments_in_quotes() -> None:
 def test_filenames_may_contain_comma() -> None:
     pfs = mikeio.read_pfs("tests/testdata/pfs/tidal.21t")
     assert pfs.m21_tideph.Setup.File_1.mesh_file == "|.\\b,athy.mesh|"
+
+
+def test_strip_comments() -> None:
+    text = """
+[Engine]
+    var = 'x'  //  'y' (default)  
+EndSect  // Engine
+"""
+    pfs = mikeio.PfsDocument.from_text(text)
+    assert pfs.Engine.var == "x"
