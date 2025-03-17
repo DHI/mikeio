@@ -1262,7 +1262,7 @@ def test_filenames_may_contain_comma() -> None:
 def test_strip_comments() -> None:
     text = """
 [Engine]
-    var = 'x'  //  'y' (default)  
+    var = 'x'  //  'y' (default)  🤖 ,.!//\\(foo,bar*) 😻
 EndSect  // Engine
 """
     pfs = mikeio.PfsDocument.from_text(text)
