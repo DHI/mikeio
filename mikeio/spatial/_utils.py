@@ -15,7 +15,7 @@ def xy_to_bbox(xy: np.ndarray, buffer: float = 0.0) -> BoundingBox:
 
 
 def dist_in_meters(
-    coords: np.ndarray, pt: tuple[float, float], is_geo: bool = False
+    coords: np.ndarray, pt: tuple[float, float] | np.ndarray, is_geo: bool = False
 ) -> np.ndarray:
     """Get distance between array of coordinates and point.
 
@@ -46,7 +46,9 @@ def dist_in_meters(
     return d  # type: ignore
 
 
-def _get_dist_geo(lon: float, lat: float, lon1: float, lat1: float) -> float:
+def _get_dist_geo(
+    lon: float | np.ndarray, lat: float | np.ndarray, lon1: float, lat1: float
+) -> float:
     # assuming input in degrees!
     R = 6371e3  # Earth radius in metres
     dlon = np.deg2rad(lon1 - lon)
