@@ -285,7 +285,7 @@ class PfsDocument(PfsSection):
     def _strip_comments(self, s: str) -> str:
         pattern = r"(\".*?\"|\'.*?\')|//.*"
 
-        def replacer(match):
+        def replacer(match):  # type: ignore
             # Keep strings intact, remove comments
             return match.group(1) if match.group(1) else ""
 
@@ -295,16 +295,6 @@ class PfsDocument(PfsSection):
         section_header = False
         s = line.strip()
         s = self._strip_comments(s).strip()
-        parts = re.split(r'(".*?"|\'.*?\')', s)  # Preserve quoted strings
-        for i, part in enumerate(parts):
-            if not (
-                part.startswith('"') or part.startswith("'")
-            ):  # Ignore quoted parts
-                part = re.sub(
-                    r"\s*//.*", "", part
-                )  # Remove comments only outside quotes
-            parts[i] = part
-        s = "".join(parts)  # Reassemble the line
 
         if len(s) > 0:
             if s[0] == "[":
