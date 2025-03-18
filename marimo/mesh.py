@@ -1,35 +1,20 @@
 import marimo
 
-__generated_with = "0.10.2"
+__generated_with = "0.11.21"
 app = marimo.App()
 
 
 @app.cell
 def _(mo):
-    mo.md(
-        r"""
-        # Mesh
-        * read mesh file
-        * plot mesh 
-        * convert to shapely
-        * check if point is inside or outside mesh
-        * subset mesh, plot subset
-        * change z values
-        * change boundary codes
-        """
-    )
+    mo.md(r"""# Mesh""")
     return
 
 
 @app.cell
 def _():
     import matplotlib.pyplot as plt
-    from matplotlib_inline.backend_inline import set_matplotlib_formats
-    set_matplotlib_formats('png')
-    plt.rcParams["figure.figsize"] = (6,6)
-
     import mikeio
-    return mikeio, plt, set_matplotlib_formats
+    return mikeio, plt
 
 
 @app.cell
@@ -42,7 +27,7 @@ def _(mikeio):
 @app.cell
 def _(msh):
     msh.plot()
-    msh.plot.boundary_nodes(boundary_names=['Land','Open boundary']);
+    msh.plot.boundary_nodes(boundary_names=['Land','Open boundary'])
     return
 
 
@@ -62,16 +47,6 @@ def _(msh):
     mp = msh.to_shapely()
     mp
     return (mp,)
-
-
-@app.cell
-def _(mo):
-    mo.md(
-        r"""
-        Now a lot of methods are available
-        """
-    )
-    return
 
 
 @app.cell
@@ -104,11 +79,7 @@ def _(domain):
 
 @app.cell
 def _(mo):
-    mo.md(
-        r"""
-        Find if points are inside the domain
-        """
-    )
+    mo.md(r"""Find if points are inside the domain""")
     return
 
 
@@ -118,19 +89,11 @@ def _(mp):
 
     p1 = Point(216000, 6162000)
     p2 = Point(220000, 6156000)
-    print(mp.contains(p1))
-    print(mp.contains(p2))
+    [
+        mp.contains(p1),
+        mp.contains(p2)
+    ]
     return Point, p1, p2
-
-
-@app.cell
-def _(mo):
-    mo.md(
-        r"""
-        ## Mesh class can also check if a mesh contains points 
-        """
-    )
-    return
 
 
 @app.cell
@@ -142,63 +105,11 @@ def _(msh):
 
 @app.cell
 def _(msh, p1, p2):
-    ax = msh.plot()
+    ax = msh.plot(title="", levels=range(-10,1))
     ax.scatter(p1.x, p1.y, marker="*", s=200, c="red", label="inside")
     ax.scatter(p2.x, p2.y, marker="+", s=200, c="green", label="outside")
-    ax.legend();
+    ax.legend()
     return (ax,)
-
-
-@app.cell
-def _(mo):
-    mo.md(
-        r"""
-        # Subset mesh
-        Select only elements with more than 3m depth. Plot these elements. 
-        """
-    )
-    return
-
-
-@app.cell
-def _(msh):
-    _zc = msh.element_coordinates[:, 2]
-    return
-
-
-@app.cell
-def _(mo):
-    mo.md(
-        r"""
-        # Change z values and boundary code
-        Assume that we want to have a minimum depth of 2 meters and change the open boundary (code 2) to a closed one (code 1). 
-        """
-    )
-    return
-
-
-@app.cell
-def _(msh, zc):
-    print(f'max z before: {msh.node_coordinates[:, 2].max()}')
-    _zc = msh.node_coordinates[:, 2]
-    zc[zc > -2] = -2
-    msh.zn = zc
-    print(f'max z after: {msh.node_coordinates[:, 2].max()}')
-    return
-
-
-@app.cell
-def _(msh):
-    c = msh.geometry.codes
-    c[c==2] = 1
-    msh.geometry.codes = c
-    return (c,)
-
-
-@app.cell
-def _(msh):
-    msh.geometry.codes
-    return
 
 
 @app.cell
@@ -209,4 +120,3 @@ def _():
 
 if __name__ == "__main__":
     app.run()
-

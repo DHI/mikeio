@@ -1,6 +1,6 @@
 import marimo
 
-__generated_with = "0.10.2"
+__generated_with = "0.11.21"
 app = marimo.App()
 
 
@@ -31,8 +31,8 @@ def _():
 def _(mo):
     mo.md(
         r"""
-        # Load dfsu result file
-        The file contains surface elevation and wind speed model data. We wish to compare the model data with altimetry data 
+        ## Load dfsu result file
+        The file contains surface elevation and wind speed model data. We wish to compare the model data with altimetry data
         """
     )
     return
@@ -56,7 +56,7 @@ def _(data_file, mikeio):
 def _(mo):
     mo.md(
         r"""
-        # Load and visualize altimetry tracks 
+        ## Load and visualize altimetry tracks 
         The altimetry data is stored in a csv file. We plot the data on top of the dfsu mesh.
         """
     )
@@ -77,15 +77,15 @@ def _(track):
 
 @app.cell
 def _(dfs, track):
-    ax = dfs.geometry.plot.mesh(figsize=(8,7))
-    track.plot.scatter('lon','lat', ax=ax);
+    ax = dfs.geometry.plot.mesh(figsize=(8,7), title="")
+    track.plot.scatter('lon','lat', ax=ax)
     return (ax,)
 
 
 @app.cell
 def _(dfs, track):
     track_xy = track[['lon','lat']].values
-    print(f'Inside domain: {sum(dfs.geometry.contains(track_xy))} points of the track (total: {len(track_xy)})')
+    f'Inside domain: {sum(dfs.geometry.contains(track_xy))} points of the track (total: {len(track_xy)})'
     return (track_xy,)
 
 
@@ -93,8 +93,8 @@ def _(dfs, track):
 def _(mo):
     mo.md(
         r"""
-        # Extract track data from dfsu file
-        The extract_track() takes a track definition (time, longitude, latitude of each point) as either a dataframe, a csv-file, a dfs0 file or a mikeio.Dataset. 
+        ## Extract track data from dfsu file
+        The extract_track() takes a track definition (time, longitude, latitude of each point) as either a dataframe, a csv-file, a dfs0 file or a mikeio.Dataset.
         """
     )
     return
@@ -108,61 +108,7 @@ def _(dfs, track_file):
 
 @app.cell
 def _(e_track):
-    # convert to dataframe and rename columns
-    df = e_track.to_dataframe()
-    df.columns = ['Longitude', 'Latitude', 'Model_surface_elevation', 'Model_wind_speed']
-    return (df,)
-
-
-@app.cell
-def _(mo):
-    mo.md(
-        r"""
-        # Compare with the observed altimetry values
-        """
-    )
-    return
-
-
-@app.cell
-def _(df, track):
-    df['Obs_surface_elevation'] = track['surface_elevation']
-    df['Obs_wind_speed'] = track['wind_speed']
-    df.dropna(inplace=True)
-    return
-
-
-@app.cell
-def _(df, np, resi):
-    _resi = df.Model_wind_speed - df.Obs_wind_speed
-    _bias = resi.median()
-    _rmse = np.sqrt(np.mean(resi ** 2))
-    print(f'Wind speed: bias={_bias:.2f}m/s, rmse={_rmse:.2f}m/s')
-    return
-
-
-@app.cell
-def _(df, plt):
-    df.plot.scatter('Obs_wind_speed','Model_wind_speed')
-    plt.plot([0,25],[0,25], color='r')
-    plt.gca().set_aspect('equal')
-    return
-
-
-@app.cell
-def _(df, np, resi):
-    _resi = df.Model_surface_elevation - df.Obs_surface_elevation
-    _bias = resi.median()
-    _rmse = np.sqrt(np.mean(resi ** 2))
-    print(f'Surface elevation: bias={100 * _bias:.2f}cm, rmse={100 * _rmse:.2f}cm')
-    return
-
-
-@app.cell
-def _(df, plt):
-    df.plot.scatter('Obs_surface_elevation','Model_surface_elevation')
-    plt.plot([-0.6,2.5],[-0.6,2.5], color='r')
-    plt.gca().set_aspect('equal')
+    e_track
     return
 
 
@@ -174,4 +120,3 @@ def _():
 
 if __name__ == "__main__":
     app.run()
-

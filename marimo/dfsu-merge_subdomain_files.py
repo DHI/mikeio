@@ -1,6 +1,6 @@
 import marimo
 
-__generated_with = "0.10.2"
+__generated_with = "0.11.21"
 app = marimo.App()
 
 
@@ -13,7 +13,6 @@ def _(mo):
         during simulation MIKE will commonly split simulation files into subdomains and output results with a p_# suffix. This script will merge dfsu files of this type into a single file.
 
         Note: Below implementation considers a 2D dfsu file. For 3D dfsu file, the script needs to be modified accordingly.
-
         """
     )
     return
@@ -21,11 +20,7 @@ def _(mo):
 
 @app.cell
 def _(mo):
-    mo.md(
-        r"""
-        **import libraries**
-        """
-    )
+    mo.md(r"""**import libraries**""")
     return
 
 
@@ -46,11 +41,7 @@ def _(mikeio):
 
 @app.cell
 def _(mo):
-    mo.md(
-        r"""
-        **choose items to process**
-        """
-    )
+    mo.md(r"""**choose items to process**""")
     return
 
 
@@ -74,7 +65,7 @@ def _(mo):
 
 
 @app.cell
-def _(dfs_files, items, mikeio):
+def _(items, mikeio):
     import glob
     import os
     basename = '../tests/testdata/SimA_HD'
@@ -89,34 +80,26 @@ def _(dfs_files, items, mikeio):
     print(f'Found {len(_dfs_files)} files:')
     for file in _dfs_files:
         print(f'  - {os.path.basename(file)}')
-    dfs_list = [mikeio.read(file, items=items) for file in dfs_files]
+    dfs_list = [mikeio.read(file, items=items) for file in _dfs_files]
     return basename, dfs_list, file, find_dfsu_files, glob, os
 
 
 @app.cell
 def _(mo):
-    mo.md(
-        r"""
-        Option B: manually select files
-        """
-    )
+    mo.md(r"""Option B: manually select files""")
     return
 
 
 @app.cell
-def _(dfs_files, items, mikeio):
+def _(items, mikeio):
     _dfs_files = ['../tests/testdata/SimA_HD_p0.dfsu', '../tests/testdata/SimA_HD_p1.dfsu', '../tests/testdata/SimA_HD_p2.dfsu', '../tests/testdata/SimA_HD_p3.dfsu']
-    dfs_list_1 = [mikeio.read(file, items=items) for file in dfs_files]
+    dfs_list_1 = [mikeio.read(file, items=items) for file in _dfs_files]
     return (dfs_list_1,)
 
 
 @app.cell
 def _(mo):
-    mo.md(
-        r"""
-        **extract data of all subdomains**
-        """
-    )
+    mo.md(r"""**extract data of all subdomains**""")
     return
 
 
@@ -135,11 +118,7 @@ def _(dfs_list_1, items, np):
 
 @app.cell
 def _(mo):
-    mo.md(
-        r"""
-        **merge geometry of all subdomains**
-        """
-    )
+    mo.md(r"""**merge geometry of all subdomains**""")
     return
 
 
@@ -182,17 +161,13 @@ def _(combined_geometry):
 
 @app.cell
 def _(mo):
-    mo.md(
-        r"""
-        **merge everything into dataset**
-        """
-    )
+    mo.md(r"""**merge everything into dataset**""")
     return
 
 
 @app.cell
 def _(combined_geometry, items, merged_data, mikeio, time_steps):
-    ds_out = mikeio.Dataset(
+    ds_out = mikeio.Dataset.from_numpy(
         data=merged_data,  # n_items, timesteps, n_elements
         items=items, 
         time=time_steps,
@@ -209,11 +184,7 @@ def _(ds_out, items):
 
 @app.cell
 def _(mo):
-    mo.md(
-        r"""
-        **write output to single file**
-        """
-    )
+    mo.md(r"""**write output to single file**""")
     return
 
 
@@ -232,4 +203,3 @@ def _():
 
 if __name__ == "__main__":
     app.run()
-
