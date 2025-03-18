@@ -1,16 +1,12 @@
 import marimo
 
-__generated_with = "0.10.2"
+__generated_with = "0.11.21"
 app = marimo.App()
 
 
 @app.cell
 def _(mo):
-    mo.md(
-        r"""
-        # Global Forecasting System - Meteorological forecast
-        """
-    )
+    mo.md(r"""# Global Forecasting System - Meteorological forecast""")
     return
 
 
@@ -24,11 +20,7 @@ def _():
 
 @app.cell
 def _(mo):
-    mo.md(
-        r"""
-        The file `gfs_wind.nc` contains a small sample of the [GFS](https://nomads.ncep.noaa.gov/) forecast data downloaded via their OpenDAP service
-        """
-    )
+    mo.md(r"""The file `gfs_wind.nc` contains a small sample of the [GFS](https://nomads.ncep.noaa.gov/) forecast data downloaded via their OpenDAP service""")
     return
 
 
@@ -43,6 +35,7 @@ def _(mo):
     mo.md(
         r"""
         Running a Mike 21 HD model, needs at least three variables of meteorological forcing
+
         * Mean Sea Level Pressure
         * U 10m
         * V 10m
@@ -70,28 +63,28 @@ def _(ds):
 
 
 @app.cell
-def _(ds):
-    ds.ugrd10m[0].plot();
+def _(ds, mo):
+    variable = mo.ui.dropdown(ds.data_vars, value=list(ds.data_vars)[0], label="Variable")
+    variable
+    return (variable,)
+
+
+@app.cell
+def _(mo):
+    t = mo.ui.slider(0,2, label="Time")
+    t
+    return (t,)
+
+
+@app.cell
+def _(ds, t, variable):
+    ds[variable.value].isel(time=t.value).plot()
     return
 
 
 @app.cell
 def _(mo):
-    mo.md(
-        r"""
-        ## Convert to dfs2
-        """
-    )
-    return
-
-
-@app.cell
-def _(mo):
-    mo.md(
-        r"""
-        ## Time
-        """
-    )
+    mo.md(r"""## Convert to dfs2""")
     return
 
 
@@ -103,16 +96,6 @@ def _(ds, pd):
 
 
 @app.cell
-def _(mo):
-    mo.md(
-        r"""
-        ## Variable types
-        """
-    )
-    return
-
-
-@app.cell
 def _(mikeio):
     mikeio.EUMType.Air_Pressure
     return
@@ -120,7 +103,7 @@ def _(mikeio):
 
 @app.cell
 def _(mikeio):
-    mikeio.EUMType.Air_Pressure.units
+    [u.name for u in mikeio.EUMType.Air_Pressure.units]
     return
 
 
@@ -132,7 +115,7 @@ def _(mikeio):
 
 @app.cell
 def _(mikeio):
-    mikeio.EUMType.Wind_Velocity.units
+    [u.name for u in mikeio.EUMType.Wind_Velocity.units]
     return
 
 
@@ -169,29 +152,6 @@ def _(mikeio, mslp_da, u_da, v_da):
 
 
 @app.cell
-def _(mds):
-    mds.to_dfs("gfs.dfs2")
-    return
-
-
-@app.cell
-def _(mo):
-    mo.md(
-        r"""
-        ## Clean up (don't run this)
-        """
-    )
-    return
-
-
-@app.cell
-def _():
-    import os
-    os.remove("gfs.dfs2")
-    return (os,)
-
-
-@app.cell
 def _():
     import marimo as mo
     return (mo,)
@@ -199,4 +159,3 @@ def _():
 
 if __name__ == "__main__":
     app.run()
-

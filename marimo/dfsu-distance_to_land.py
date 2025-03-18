@@ -1,6 +1,6 @@
 import marimo
 
-__generated_with = "0.10.2"
+__generated_with = "0.11.21"
 app = marimo.App()
 
 
@@ -32,23 +32,19 @@ def _(mikeio):
 
 @app.cell
 def _(msh):
-    msh.plot();
+    msh.plot()
     return
 
 
 @app.cell
 def _(msh):
-    msh.geometry.plot.outline();
+    msh.geometry.plot.outline()
     return
 
 
 @app.cell
 def _(mo):
-    mo.md(
-        r"""
-        # Get a list of land nodes
-        """
-    )
+    mo.md(r"""## Get a list of land nodes""")
     return
 
 
@@ -56,17 +52,13 @@ def _(mo):
 def _(msh, plt):
     ncland = msh.node_coordinates[msh.codes==1]
 
-    plt.scatter(ncland[:,0], ncland[:,1]);
+    plt.scatter(ncland[:,0], ncland[:,1])
     return (ncland,)
 
 
 @app.cell
 def _(mo):
-    mo.md(
-        r"""
-        # Get element coordinates
-        """
-    )
+    mo.md(r"""## Get element coordinates""")
     return
 
 
@@ -78,71 +70,44 @@ def _(msh):
 
 @app.cell
 def _(mo):
-    mo.md(
-        r"""
-        # Calculate distance to nearest land node
-        """
-    )
+    mo.md(r"""## Calculate distance to nearest land node""")
     return
 
 
 @app.cell
 def _(ec, ncland, np):
-    i = 0
-    ne = ec.shape[0]
-    d = np.zeros(ne)
-
-    for i in range(ne):
-        d[i] = np.min(np.sqrt((ec[i,0] - ncland[:,0])**2 + (ec[i,1] -ncland[:,1])**2))
-    return d, i, ne
+    d = np.min(np.sqrt((ec[:, np.newaxis, 0] - ncland[:, 0])**2 + 
+                        (ec[:, np.newaxis, 1] - ncland[:, 1])**2), axis=1)
+    return (d,)
 
 
 @app.cell
-def _(d, mikeio, msh):
+def _(mo):
+    name = mo.ui.text(placeholder="Distance to land")
+    name
+    return (name,)
+
+
+@app.cell
+def _(d, mikeio, msh, name):
     da = mikeio.DataArray(data=d,
                           geometry=msh.geometry,
-                          item=mikeio.ItemInfo("Distance to land", mikeio.EUMType.Distance, mikeio.EUMUnit.meter))
+                          item=mikeio.ItemInfo(name.value, mikeio.EUMType.Distance, mikeio.EUMUnit.meter))
     da
     return (da,)
 
 
 @app.cell
-def _(da):
-    da.plot();
-    return
-
-
-@app.cell
 def _(mo):
-    mo.md(
-        r"""
-        # Store result in a new Dfsu file
-        """
-    )
-    return
+    threshold = mo.ui.slider(500,2000,100)
+    threshold
+    return (threshold,)
 
 
 @app.cell
-def _(da):
-    da.to_dfs("distance.dfsu")
+def _(da, threshold):
+    da.plot(title="", levels=[0,threshold.value])
     return
-
-
-@app.cell
-def _(mo):
-    mo.md(
-        r"""
-        # Clean up
-        """
-    )
-    return
-
-
-@app.cell
-def _():
-    import os
-    os.remove("distance.dfsu")
-    return (os,)
 
 
 @app.cell
@@ -153,4 +118,3 @@ def _():
 
 if __name__ == "__main__":
     app.run()
-

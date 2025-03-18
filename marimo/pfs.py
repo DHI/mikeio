@@ -1,18 +1,12 @@
 import marimo
 
-__generated_with = "0.10.2"
+__generated_with = "0.11.21"
 app = marimo.App()
 
 
 @app.cell
 def _(mo):
-    mo.md(
-        r"""
-        # PFS 
-
-        The support for PFS files have been extended with MIKE IO release 1.2. It was previously only possible to *read* PFS files. It is now also possible to *modify* and *create* new PFS files. 
-        """
-    )
+    mo.md(r"""# PFS""")
     return
 
 
@@ -24,28 +18,19 @@ def _():
 
 @app.cell
 def _(mo):
-    mo.md(
-        r"""
-        ## Read
-        """
-    )
+    mo.md(r"""## Read""")
     return
 
 
 @app.cell
 def _(mikeio):
     pfs = mikeio.read_pfs("../tests/testdata/pfs/lake.sw")
-    pfs
     return (pfs,)
 
 
 @app.cell
 def _(mo):
-    mo.md(
-        r"""
-        The "target" (root section) is in this case called FemEngineSW. `pfs.FemEngineSW` is a PfsSection object that contains other PfsSection objects. Let's print the names of it's subsections:
-        """
-    )
+    mo.md(r"""The "target" (root section) is in this case called FemEngineSW. `pfs.FemEngineSW` is a PfsSection object that contains other PfsSection objects. Let's print the names of it's subsections:""")
     return
 
 
@@ -57,11 +42,7 @@ def _(pfs):
 
 @app.cell
 def _(mo):
-    mo.md(
-        r"""
-        It is possible to navigate to each section and keyword in the pfs file:
-        """
-    )
+    mo.md(r"""It is possible to navigate to each section and keyword in the pfs file:""")
     return
 
 
@@ -84,52 +65,51 @@ def _(pfs):
 
 
 @app.cell
-def _(mo):
+def _(mo, phrase):
     mo.md(
-        r"""
-        If you are unsure the name of a section, it is also possible to search for a specific string in the file, to find the name of a specific section.
+        f"""
+        mo.md(f"If you are unsure the name of a section, it is also possible to search for a specific string in the file, to find the name of a specific section.
 
-        In the example below we do an case-insensitive search for the string 'charnock', which occurs at 6 different places in this file.
+        In the example below we do an case-insensitive search for the string '{phrase.value}'.
         """
     )
     return
 
 
 @app.cell
-def _(pfs):
-    pfs.search("charnock")
+def _(mo):
+    phrase = mo.ui.text(value="charnock", label="Search phrase")
+    phrase
+    return (phrase,)
+
+
+@app.cell
+def _(pfs, phrase):
+    pfs.search(phrase.value)
     return
 
 
 @app.cell
 def _(mo):
-    mo.md(
-        r"""
-        The same search can be done at any level of the hierarchy, i.e. to search only within the OUTPUTS section:
-        """
-    )
+    mo.md(r"""The same search can be done at any level of the hierarchy, i.e. to search only within the OUTPUTS section:""")
     return
 
 
 @app.cell
-def _(pfs):
-    pfs.FemEngineSW.SPECTRAL_WAVE_MODULE.OUTPUTS.search("charnock")
+def _(pfs, phrase):
+    pfs.FemEngineSW.SPECTRAL_WAVE_MODULE.OUTPUTS.search(phrase.value)
     return
 
 
 @app.cell
-def _(pfs):
-    pfs.FemEngineSW.SPECTRAL_WAVE_MODULE.WIND.search("charnock")
+def _(pfs, phrase):
+    pfs.FemEngineSW.SPECTRAL_WAVE_MODULE.WIND.search(phrase.value)
     return
 
 
 @app.cell
 def _(mo):
-    mo.md(
-        r"""
-        MIKE FM PFS files has a specific structure and active FM modules can be accessed by an alias on the Pfs object. In this case, `pfs.SW` can be used as a short-hand for `pfs.FemEngineSW.SPECTRAL_WAVE_MODULE`.
-        """
-    )
+    mo.md(r"""MIKE FM PFS files has a specific structure and active FM modules can be accessed by an alias on the Pfs object. In this case, `pfs.SW` can be used as a short-hand for `pfs.FemEngineSW.SPECTRAL_WAVE_MODULE`.""")
     return
 
 
@@ -147,11 +127,7 @@ def _(pfs):
 
 @app.cell
 def _(mo):
-    mo.md(
-        r"""
-        Enumerated sections (e.g. [OUTPUT_1], [OUTPUT_2], ...) can be outputted in tabular form (dataframe).
-        """
-    )
+    mo.md(r"""Enumerated sections (e.g. [OUTPUT_1], [OUTPUT_2], ...) can be outputted in tabular form (dataframe).""")
     return
 
 
@@ -168,7 +144,7 @@ def _(mo):
         r"""
         ## Modify
 
-        The PfsSection object can be modified. Existing values can be changes, new key-value pairs can be added, subsections can added or removed. 
+        The PfsSection object can be modified. Existing values can be changes, new key-value pairs can be added, subsections can added or removed.
         """
     )
     return
@@ -188,11 +164,7 @@ def _(pfs):
 
 @app.cell
 def _(mo):
-    mo.md(
-        r"""
-        ### Add a new keyword
-        """
-    )
+    mo.md(r"""### Add a new keyword""")
     return
 
 
@@ -272,16 +244,9 @@ def _(pfs):
 
 @app.cell
 def _(pfs):
-    pfs.to_dict()
-    return
-
-
-@app.cell
-def _(pfs):
-    # write to yaml file
-    import yaml
-    yaml.dump(pfs.to_dict(), open('lake_modified.yaml', 'w+'))
-    return (yaml,)
+    d = pfs.to_dict()
+    d.keys()
+    return (d,)
 
 
 @app.cell
@@ -326,11 +291,7 @@ def _(pfs_1):
 
 @app.cell
 def _(mo):
-    mo.md(
-        r"""
-        ## Clean up
-        """
-    )
+    mo.md(r"""## Clean up""")
     return
 
 
@@ -351,4 +312,3 @@ def _():
 
 if __name__ == "__main__":
     app.run()
-
