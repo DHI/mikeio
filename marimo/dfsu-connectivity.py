@@ -1,16 +1,12 @@
 import marimo
 
-__generated_with = "0.10.2"
+__generated_with = "0.11.21"
 app = marimo.App()
 
 
 @app.cell
 def _(mo):
-    mo.md(
-        r"""
-        # Dfsu - Connectivity
-        """
-    )
+    mo.md(r"""# Dfsu - Connectivity""")
     return
 
 
@@ -31,11 +27,7 @@ def _(mikeio):
 
 @app.cell
 def _(mo):
-    mo.md(
-        r"""
-        The info on the connectivity between nodes and elements can be found in the element table
-        """
-    )
+    mo.md(r"""The info on the connectivity between nodes and elements can be found in the element table""")
     return
 
 
@@ -54,20 +46,19 @@ def _(et):
 
 @app.cell
 def _(mo):
-    mo.md(
-        r"""
-        Let's find out if any of these nodes are also found in another element, this would imply that these elements are neigbours (adjacent).
-        """
-    )
+    mo.md(r"""Let's find out if any of these nodes are also found in another element, this would imply that these elements are neigbours (adjacent).""")
     return
 
 
 @app.cell
 def _(et):
-    for _i, _e in enumerate(et):
-        for _n in et[0]:
-            if _n in _e:
-                print(f'Node: {_n} found in element {_i}')
+    def _():
+        for i, e in enumerate(et):
+            for n in et[0]:
+                if n in e:
+                    print(f'Node: {n} found in element {i}')
+
+    _()
     return
 
 
@@ -78,40 +69,43 @@ def _(ds):
 
 
 @app.cell
-def _(ds, el, et):
+def _(ds, et):
     nodetable = {}
-    for _el in range(ds.geometry.n_elements):
-        _nodes = et[el]
-        for node in _nodes:
+    for el in range(ds.geometry.n_elements):
+        nodes = et[el]
+        for node in nodes:
             if node in nodetable:
-                nodetable[node].append(_el)
+                nodetable[node].append(el)
             else:
                 nodetable[node] = [el]
-    return node, nodetable
+    return el, node, nodes, nodetable
 
 
 @app.cell
-def _():
+def is_neighbour():
     def is_neighbour(a, b) -> bool:
         return len(set(a).intersection(set(b))) == 2
     return (is_neighbour,)
 
 
 @app.cell
-def _(e, el, et, is_neighbour, n, ne, nodetable):
-    ec = {}
-    for _el in range(ne):
-        _nodes = et[el]
-        for _n in _nodes:
-            elements = nodetable[n]
-            for _e in elements:
-                if is_neighbour(et[_el], et[_e]):
-                    if _el in ec:
-                        if _e not in ec[_el]:
-                            ec[_el].append(_e)
-                    else:
-                        ec[el] = [e]
-    return ec, elements
+def _(et, is_neighbour, ne, nodetable):
+    def find_neighbours():
+        ec = {}
+        for el in range(ne):
+            nodes = et[el]
+            for n in nodes:
+                elements = nodetable[n]
+                for e in elements:
+                    if is_neighbour(et[el], et[e]):
+                        if el in ec:
+                            if e not in ec[el]:
+                                ec[el].append(e)
+                        else:
+                            ec[el] = [e]
+        return ec
+    ec = find_neighbours()
+    return ec, find_neighbours
 
 
 @app.cell
@@ -122,11 +116,7 @@ def _(ec):
 
 @app.cell
 def _(mo):
-    mo.md(
-        r"""
-        ## Neighbours
-        """
-    )
+    mo.md(r"""## Neighbours""")
     return
 
 
@@ -158,11 +148,7 @@ def _(coords, ds, e1, e1_n, plt):
 
 @app.cell
 def _(mo):
-    mo.md(
-        r"""
-        ## Shortest path
-        """
-    )
+    mo.md(r"""## Shortest path""")
     return
 
 
@@ -174,18 +160,18 @@ def _(ds):
 
 
 @app.cell
-def _(coords, ec, i, j, ne, np):
+def _(coords, ec, ne, np):
     from scipy.sparse import lil_matrix, csr_matrix
     from scipy.sparse.csgraph import shortest_path
     D = lil_matrix((ne, ne))
-    for _i in range(ne):
-        _row = ec[i]
-        for _j in _row:
+    for i in range(ne):
+        row = ec[i]
+        for j in row:
             d = np.sqrt((coords[i, 0] - coords[j, 0]) ** 2 + (coords[i, 1] - coords[j, 1]) ** 2)
             D[i, j] = d
     D = csr_matrix(D)
     dist, pred = shortest_path(D, return_predecessors=True)
-    return D, csr_matrix, d, dist, lil_matrix, pred, shortest_path
+    return D, csr_matrix, d, dist, i, j, lil_matrix, pred, row, shortest_path
 
 
 @app.cell
@@ -206,33 +192,25 @@ def _(mo):
 
 
 @app.cell
-def _(ea, eb, n, pred):
+def _(ea, eb, pred):
     path = [eb]
-    _n = eb
-    while _n != ea:
-        _n = pred[ea, n]
-        path.append(_n)
+    n = eb
+    while n != ea:
+        n = pred[ea, n]
+        path.append(n)
     path[0:10]
-    return (path,)
+    return n, path
 
 
 @app.cell
 def _(mo):
-    mo.md(
-        r"""
-        The path between two elements is here to illustrate how the distance along the shortest path is calculated, you don't need to use the `pred` matrix if you are only interested in the distance.
-        """
-    )
+    mo.md(r"""The path between two elements is here to illustrate how the distance along the shortest path is calculated, you don't need to use the `pred` matrix if you are only interested in the distance.""")
     return
 
 
 @app.cell
 def _(mo):
-    mo.md(
-        r"""
-        Calculate the distance through air (ignoring land).
-        """
-    )
+    mo.md(r"""Calculate the distance through air (ignoring land).""")
     return
 
 
@@ -244,7 +222,7 @@ def _(coords, ea, eb, np):
 
 @app.cell
 def _(coords, dist, ds, ea, eb, euc_dist, path, plt):
-    _ax = ds.geometry.plot.mesh(figsize=(12, 12), title=f'Distance through air: {euc_dist / 1000:.0f} km\nDistance through water: {dist[ea, eb] / 1000:.0f} km')
+    _ax = ds.geometry.plot.mesh(figsize=(12, 12), title=f'Distance through air: {euc_dist / 1000:.0f} km\nDistance through element centers: {dist[ea, eb] / 1000:.0f} km')
     plt.xlim(330000, 370000)
     plt.ylim(6150000.0, 6180000.0)
     plt.scatter(coords[ea, 0], coords[ea, 1], marker='*', s=200, label='Element A')
@@ -256,22 +234,22 @@ def _(coords, dist, ds, ea, eb, euc_dist, path, plt):
 
 @app.cell
 def _(mo):
-    mo.md(
-        r"""
-        ## Clustering
-        """
-    )
+    mo.md(r"""## Clustering""")
     return
 
 
 @app.cell
-def _(ec, i, j, lil_matrix, ne):
-    C = lil_matrix((ne, ne))
-    for _i in range(ne):
-        _row = ec[i]
-        for _j in _row:
-            C[i, j] = 1
-    return (C,)
+def _(ec, lil_matrix, ne):
+
+    def connectity_matrix():
+        C = lil_matrix((ne, ne))
+        for i in range(ne):
+            row = ec[i]
+            for j in row:
+                C[i, j] = 1
+        return C
+    C = connectity_matrix()
+    return C, connectity_matrix
 
 
 @app.cell
@@ -285,6 +263,12 @@ def _(ds):
     data = ds.Surface_elevation.values.T
     data.shape
     return (data,)
+
+
+@app.cell
+def _(C):
+    C
+    return
 
 
 @app.cell
@@ -324,4 +308,3 @@ def _():
 
 if __name__ == "__main__":
     app.run()
-

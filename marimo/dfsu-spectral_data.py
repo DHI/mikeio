@@ -1,6 +1,6 @@
 import marimo
 
-__generated_with = "0.10.2"
+__generated_with = "0.11.21"
 app = marimo.App()
 
 
@@ -17,7 +17,6 @@ def _(mo):
         * point
         * line
         * area
-
         """
     )
     return
@@ -33,35 +32,26 @@ def _():
 
 @app.cell
 def _(mo):
-    mo.md(
-        r"""
-        ## Read dfsu point spectrum
-        """
-    )
+    mo.md(r"""## Read dfsu point spectrum""")
     return
 
 
 @app.cell
-def _(fn, mikeio):
-    _fn = '../tests/testdata/spectra/pt_spectra.dfsu'
-    da = mikeio.read(fn)[0]
+def _(mikeio):
+    da = mikeio.read('../tests/testdata/spectra/pt_spectra.dfsu')[0]
     da
     return (da,)
 
 
 @app.cell
 def _(da):
-    da.plot(); # plots first timestep by default
+    da.plot() # plots first timestep by default
     return
 
 
 @app.cell
 def _(mo):
-    mo.md(
-        r"""
-        Don't like the default plot? No worries, it can be customized.
-        """
-    )
+    mo.md(r"""Don't like the default plot? No worries, it can be customized.""")
     return
 
 
@@ -69,7 +59,8 @@ def _(mo):
 def _(da, np):
     ax = da.plot.patch(rmax=8)
     dird = np.round(da.directions, 2)
-    ax.set_thetagrids(dird, labels=dird);
+    ax.set_thetagrids(dird, labels=dird)
+    ax
     return ax, dird
 
 
@@ -86,9 +77,8 @@ def _(mo):
 
 
 @app.cell
-def _(fn, mikeio):
-    _fn = '../tests/testdata/spectra/line_spectra.dfsu'
-    da_1 = mikeio.read(fn).Energy_density
+def _(mikeio):
+    da_1 = mikeio.read('../tests/testdata/spectra/line_spectra.dfsu').Energy_density
     da_1
     return (da_1,)
 
@@ -102,17 +92,13 @@ def _(da_1):
 
 @app.cell
 def _(spec):
-    spec.plot(cmap="Greys", rmax=8, r_as_periods=True);
+    spec.plot(cmap="Greys", rmax=8, r_as_periods=True)
     return
 
 
 @app.cell
 def _(mo):
-    mo.md(
-        r"""
-        ### Plot Hm0 on a line
-        """
-    )
+    mo.md(r"""### Plot Hm0 on a line""")
     return
 
 
@@ -125,18 +111,13 @@ def _(da_1):
 
 @app.cell
 def _(mo):
-    mo.md(
-        r"""
-        ## Dfsu area spectrum
-        """
-    )
+    mo.md(r"""## Dfsu area spectrum""")
     return
 
 
 @app.cell
-def _(fn, mikeio):
-    _fn = '../tests/testdata/spectra/area_spectra.dfsu'
-    da_2 = mikeio.read(fn, items='Energy density')[0]
+def _(mikeio):
+    da_2 = mikeio.read('../tests/testdata/spectra/area_spectra.dfsu', items='Energy density')[0]
     da_2
     return (da_2,)
 
@@ -162,30 +143,33 @@ def _(da_pt):
 
 @app.cell
 def _(mo):
-    mo.md(
-        r"""
-        ### Interactive widget for exploring spectra in different points 
-        """
-    )
+    mo.md(r"""### Interactive widget for exploring spectra in different points""")
     return
 
 
 @app.cell
 def _():
-    from ipywidgets import interact
     from datetime import timedelta
-    return interact, timedelta
+    return (timedelta,)
 
 
 @app.cell
-def _(da_2, interact, plt, timedelta):
-    @interact
-    def plot_element(id=(0, da_2.geometry.n_elements - 1), step=(0, da_2.n_timesteps - 1)):
-        spec = da_2[step, id]
-        time = da_2.start_time + timedelta(seconds=step * da_2.timestep)
-        spec.plot(vmax=0.04, vmin=0, rmax=8, title=f'Wave spectrum, {time}, element: {id}')
-        plt.show()
-    return (plot_element,)
+def _(da_2, mo):
+    el = mo.ui.slider(start=0, stop=(da_2.geometry.n_elements -1), label="Element")
+    t = mo.ui.slider(start=0, stop=(da_2.n_timesteps -1), label="Time")
+    [el,t]
+    return el, t
+
+
+@app.cell
+def _(da_2, el, t, timedelta):
+    id = el.value
+    step = t.value
+
+    dspec = da_2[step, id]
+    time = da_2.start_time + timedelta(seconds=step * da_2.timestep)
+    dspec.plot(vmax=0.04, vmin=0, rmax=8, title=f'Wave spectrum, {time}, element: {id}')
+    return dspec, id, step, time
 
 
 @app.cell
@@ -196,4 +180,3 @@ def _():
 
 if __name__ == "__main__":
     app.run()
-
