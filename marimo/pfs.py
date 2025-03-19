@@ -237,8 +237,8 @@ def _(mo):
 
 
 @app.cell
-def _(pfs):
-    pfs.write("lake_modified.pfs")
+def _():
+    #pfs.write("lake_modified.pfs")
     return
 
 
@@ -281,27 +281,6 @@ def _(mikeio, t1_t0):
     pfs_1 = mikeio.PfsDocument({'t1_t0': t1_t0})
     pfs_1
     return (pfs_1,)
-
-
-@app.cell
-def _(pfs_1):
-    pfs_1.write('extract_point.mzt')
-    return
-
-
-@app.cell
-def _(mo):
-    mo.md(r"""## Clean up""")
-    return
-
-
-@app.cell
-def _():
-    import os
-    os.remove("lake_modified.pfs")
-    os.remove('lake_modified.yaml')
-    os.remove("extract_point.mzt")
-    return (os,)
 
 
 @app.cell
