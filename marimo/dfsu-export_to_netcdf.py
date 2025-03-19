@@ -1,7 +1,13 @@
 import marimo
 
-__generated_with = "0.10.2"
+__generated_with = "0.11.21"
 app = marimo.App()
+
+
+@app.cell
+def _():
+    import marimo as mo
+    return (mo,)
 
 
 @app.cell
@@ -130,33 +136,10 @@ def _(
 
 
 @app.cell
-def _(xr_ds):
-    xr_ds.to_netcdf("oresund_sigma_z.nc")
-    return
-
-
-@app.cell
-def _(mo):
-    mo.md(
-        r"""
-        # Clean up
-        """
-    )
-    return
-
-
-@app.cell
-def _(os):
-    os.remove("oresund_sigma_z.nc")
-    return
-
-
-@app.cell
 def _():
-    import marimo as mo
-    return (mo,)
+    # xr_ds.to_netcdf("oresund_sigma_z.nc")
+    return
 
 
 if __name__ == "__main__":
     app.run()
-
