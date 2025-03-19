@@ -230,7 +230,7 @@ def test_select_subset_isel():
 
     ds = mikeio.Dataset(data)
 
-    selds = ds.isel(10, axis=1)
+    selds = ds.isel(y=10)
 
     assert len(selds.items) == 2
     assert len(selds.to_numpy()) == 2
@@ -238,21 +238,16 @@ def test_select_subset_isel():
     assert selds["Foo"].to_numpy()[0, 0] == 2.0
     assert selds["Bar"].to_numpy()[0, 0] == 3.0
 
-    selds_named_axis = ds.isel(10, axis="y")
-
-    assert len(selds_named_axis.items) == 2
-    assert selds_named_axis["Foo"].shape == (100, 30)
-
 
 def test_select_subset_isel_axis_out_of_range_error(ds2):
     assert len(ds2.shape) == 2
     dss = ds2.isel(idx=0)
 
     # After subsetting there is only one dimension
-    assert len(dss.shape) == 1
+    assert "y" not in dss.dims
 
-    with pytest.raises(IndexError):
-        dss.isel(idx=0, axis=1)
+    with pytest.raises(ValueError):
+        dss.isel(y=0)
 
 
 def test_isel_named_axis(ds2: mikeio.Dataset):
@@ -273,7 +268,7 @@ def test_select_temporal_subset_by_idx():
     items = [ItemInfo("Foo"), ItemInfo("Bar")]
     ds = mikeio.Dataset.from_numpy(data=data, time=time, items=items)
 
-    selds = ds.isel([0, 1, 2], axis=0)
+    selds = ds.isel(time=[0, 1, 2])
 
     assert len(selds) == 2
     assert selds["Foo"].shape == (3, 100, 30)
@@ -438,7 +433,7 @@ def test_select_subset_isel_multiple_idxs():
     items = [ItemInfo("Foo"), ItemInfo("Bar")]
     ds = mikeio.Dataset.from_numpy(data=data, time=time, items=items)
 
-    selds = ds.isel([10, 15], axis=1)
+    selds = ds.isel(y=[10, 15])
 
     assert len(selds.items) == 2
     assert len(selds.to_numpy()) == 2

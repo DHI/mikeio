@@ -531,7 +531,7 @@ class DataArray:
         # this seems overly complicated...
         axes = tuple(range(1, x.ndim))
         idx = list(np.where(~np.isnan(x).all(axis=axes))[0])
-        return self.isel(idx, axis=0)
+        return self.isel(time=idx)
 
     def flipud(self) -> "DataArray":
         """Flip upside down (on first non-time axis)."""
@@ -604,7 +604,7 @@ class DataArray:
                     k = self._get_time_idx_list(self.time, k)
                     if self._n_selected_timesteps(self.time, k) == 0:
                         raise IndexError("No timesteps found!")
-                da = da.isel(k, axis=dims[j])
+                da = da.isel(**{dims[j]: k})
         return da
 
     def _getitem_parse_key(self, key: Any) -> Any:
@@ -634,7 +634,7 @@ class DataArray:
         layer: IndexType = None,
         frequency: IndexType = None,
         direction: IndexType = None,
-        axis: int | str = 0,
+        axis: Any = 0,
     ) -> "DataArray":
         """Return a new DataArray whose data is given by
         integer indexing along the specified dimension(s).
@@ -957,7 +957,7 @@ class DataArray:
 
                 idx = slice(start, stop)
 
-                self = self.isel(idx, axis=k)
+                self = self.isel(**{k: idx})
 
         return self
 
