@@ -513,12 +513,25 @@ def test_read_dfs0_temporal_subset():
     assert ds.time[0].strftime("%H") == "05"
 
 
-def test_read_non_eq_dfs0__temporal_subset():
+def test_read_non_eq_dfs0_temporal_subset():
     dfs0file = r"tests/testdata/da_diagnostic.dfs0"
 
     dfs = Dfs0(dfs0file)
+    # TODO should this syntax be supported?
     ds = dfs.read(time="2017-10-27 01:00,2017-10-27 02:00")
 
+    assert len(ds.time) == 7
+
+
+def test_read_non_eq_dfs0_temporal_slice():
+    dfs0file = r"tests/testdata/da_diagnostic.dfs0"
+
+    dfs = Dfs0(dfs0file)
+    start = "2017-10-27 01:00"
+    end = "2017-10-27 02:00"
+    ds = dfs.read(time=slice(start, end))
+    assert ds.time[0].strftime("%Y-%m-%d %H:%M") == start
+    assert ds.time[-1].strftime("%Y-%m-%d %H:%M") == end
     assert len(ds.time) == 7
 
 
