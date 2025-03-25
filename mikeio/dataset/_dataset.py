@@ -679,7 +679,6 @@ class Dataset:
     @overload
     def __getitem__(self, key: Hashable | int) -> DataArray: ...
 
-    # Mapping is Iterable
     @overload
     def __getitem__(self, key: Iterable[Hashable]) -> "Dataset": ...
 

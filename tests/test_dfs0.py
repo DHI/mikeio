@@ -517,8 +517,10 @@ def test_read_non_eq_dfs0_temporal_subset():
     dfs0file = r"tests/testdata/da_diagnostic.dfs0"
 
     dfs = Dfs0(dfs0file)
-    # TODO should this syntax be supported?
-    ds = dfs.read(time="2017-10-27 01:00,2017-10-27 02:00")
+
+    # deprecated
+    with pytest.warns(FutureWarning, match="time=slice"):
+        ds = dfs.read(time="2017-10-27 01:00,2017-10-27 02:00")
 
     assert len(ds.time) == 7
 
