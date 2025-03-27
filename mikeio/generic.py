@@ -478,6 +478,60 @@ def concat(
                 )  # get end time from current file
                 dfs_i.Close()
 
+        elif keep == "average":
+            ALPHA = 0.5  # averaging factor
+            last_file = i == (len(infilenames) - 1)
+            overlapping_with_next = False  # lets first asume no overlap
+
+            # Find the start time of next file
+            if not last_file:
+                dfs_n = DfsFileFactory.DfsGenericOpen(str(infilenames[i + 1]))
+                nf = dfs_n.FileInfo.TimeAxis.StartDateTime
+                next_start_time = datetime(
+                    nf.year, nf.month, nf.day, nf.hour, nf.minute, nf.second
+                )
+            else:
+                next_start_time = datetime.max  # end of time ...
+
+            if i == 0:
+                timestep_n = 0  # have not read anything before
+
+            timestep = timestep_n  # lets start where we left off (if overlap)
+            while timestep < n_time_steps:
+                current_time = start_time + timedelta(seconds=timestep * dt)
+                if current_time >= next_start_time:  # false if last time
+                    overlapping_with_next = True
+                    break
+                for item in range(n_items):
+                    itemdata = dfs_i.ReadItemTimeStep(item + 1, timestep)
+                    d = itemdata.Data
+                    darray = d.astype(np.float32)
+                    dfs_o.WriteItemTimeStepNext(0, darray)
+
+                timestep += 1
+
+            timestep_n = 0  # have not read anything from next file yet
+
+            if not overlapping_with_next:
+                dfs_n.Close()
+                continue  # next file
+
+            # Otherwhise read overlapping part
+            while timestep < n_time_steps:
+                for item in range(n_items):
+                    itemdata_i = dfs_i.ReadItemTimeStep(item + 1, timestep)
+                    itemdata_n = dfs_n.ReadItemTimeStep(item + 1, timestep_n)
+                    d_i = itemdata_i.Data
+                    d_n = itemdata_n.Data
+                    d_av = d_i * ALPHA + d_n * (1 - ALPHA)
+                    darray = d_av.astype(np.float32)
+                    dfs_o.WriteItemTimeStepNext(0, (darray))
+                timestep += 1
+                timestep_n += 1
+
+            # Close next file before opening it again
+            dfs_n.Close()
+
     dfs_o.Close()
 
 

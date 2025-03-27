@@ -268,7 +268,7 @@ def test_concat_keep(tmp_path: Path) -> None:
     test keep arguments of concatenation function
     """
     # added keep arguments to test
-    keep_args = ["first", "last"]
+    keep_args = ["first", "last", "average"]
 
     infiles = [
         "tests/testdata/tide1.dfs1",
@@ -317,11 +317,53 @@ def test_concat_keep(tmp_path: Path) -> None:
                     .all()
                     .all()
                 )
+                av_out = (
+                    (
+                        0.5 * (df_first.loc[overlap_idx] + df_last.loc[overlap_idx])
+                        == df_o.loc[overlap_idx]
+                    )
+                    .eq(True)
+                    .all()
+                    .all()
+                )
 
                 if keep_arg == "first":
                     assert first_out, "overlap should be with first dataset"
                 elif keep_arg == "last":
                     assert last_out, "overlap should be with last dataset"
+                elif keep_arg == "average":
+                    assert av_out, "overlap should be average of datasets"
+
+
+def test_concat_average(tmp_path: Path) -> None:
+    # Test for multiple items?
+    g = mikeio.Grid1D(x=range(5), projection="LONG/LAT")
+    t = pd.date_range(start="2020-01-01", periods=5, freq="D")
+    d = np.zeros((5, 5))
+    #     x x x o o
+    #           o o x o o
+    #                 o o x x x
+    da_1 = mikeio.DataArray(data=d, time=t, geometry=g)
+    da_2 = mikeio.DataArray(data=d + 1, time=t + pd.DateOffset(days=3), geometry=g)
+    da_3 = mikeio.DataArray(data=d + 2, time=t + pd.DateOffset(days=6), geometry=g)
+
+    files = [tmp_path / "test1.dfs1", tmp_path / "test2.dfs1", tmp_path / "test3.dfs1"]
+    da_1.to_dfs(files[0])
+    da_2.to_dfs(files[1])
+    da_3.to_dfs(files[2])
+
+    # concat
+    fp = tmp_path / "concat.dfs1"
+
+    mikeio.generic.concat(files, fp, keep="average")
+    ds = mikeio.read(fp)
+    da_x0 = ds[0].isel(x=0)
+
+    assert np.allclose(
+        da_x0.values.flatten(),
+        np.array([0.0, 0.0, 0.0, 0.5, 0.5, 1.0, 1.5, 1.5, 2.0, 2.0, 2.0]),
+        atol=1e-6,
+    )
 
 
 def test_concat_non_equidistant_dfs0(tmp_path: Path) -> None:
