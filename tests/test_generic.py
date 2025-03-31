@@ -3,7 +3,7 @@ import numpy as np
 import pandas as pd
 import mikeio
 from mikeio import generic
-from mikeio.generic import scale, diff, extract, avg_time, fill_corrupt, add
+from mikeio.generic import scale, diff, sum, extract, avg_time, fill_corrupt, add
 import pytest
 
 
@@ -95,6 +95,21 @@ def test_diff_itself(tmp_path: Path) -> None:
     assert np.isnan(diffed["Elevation"].to_numpy()[0, -1, -1])
 
 
+def test_sum_itself_deprecated(tmp_path: Path) -> None:
+    infilename_1 = "tests/testdata/gebco_sound.dfs2"
+    infilename_2 = "tests/testdata/gebco_sound.dfs2"
+    fp = tmp_path / "diff.dfs2"
+
+    with pytest.warns(FutureWarning):
+        sum(infilename_1, infilename_2, fp)
+
+    mikeio.read(infilename_1)
+
+    summed = mikeio.read(fp)
+
+    assert np.isnan(summed["Elevation"].to_numpy()[0][-1, -1])
+
+
 def test_add_itself(tmp_path: Path) -> None:
     infilename_1 = "tests/testdata/gebco_sound.dfs2"
     infilename_2 = "tests/testdata/gebco_sound.dfs2"
@@ -182,12 +197,13 @@ def test_linear_transform_dfsu(tmp_path: Path) -> None:
     assert scaledvalue == pytest.approx(expected)
 
 
-def test_add_dfsu(tmp_path: Path) -> None:
+def test_sum_dfsu(tmp_path: Path) -> None:
     infilename_a = "tests/testdata/HD2D.dfsu"
     infilename_b = "tests/testdata/HD2D.dfsu"
     fp = tmp_path / "sum.dfsu"
 
-    mikeio.generic.add(infilename_a, infilename_b, fp)
+    with pytest.warns(FutureWarning):
+        mikeio.generic.sum(infilename_a, infilename_b, fp)
 
     org = mikeio.read(infilename_a)
 
