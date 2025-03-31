@@ -11,7 +11,7 @@ from datetime import datetime, timedelta
 from shutil import copyfile
 from collections.abc import Iterable, Sequence
 from typing import Callable, Union
-import warnings
+from warnings import deprecated
 
 
 import numpy as np
@@ -329,14 +329,13 @@ def _process_dfs_files(
 
 
 # TODO sum is conflicting with the built-in sum function, which we could haved used above.
+@deprecated("Use add instead.")
 def sum(
     infilename_a: str | pathlib.Path,
     infilename_b: str | pathlib.Path,
     outfilename: str | pathlib.Path,
 ) -> None:
     """Sum two dfs files (a+b)."""
-    # deprecated
-    warnings.warn(FutureWarning("This function is deprecated. Use add instead."))
     _process_dfs_files(infilename_a, infilename_b, outfilename, operator.add)
 
 

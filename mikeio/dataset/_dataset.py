@@ -1,6 +1,5 @@
 from __future__ import annotations
 from pathlib import Path
-import warnings
 from datetime import datetime
 from copy import deepcopy
 from typing import (
@@ -16,6 +15,7 @@ from typing import (
     TYPE_CHECKING,
     Callable,
 )
+from warnings import deprecated
 
 
 import numpy as np
@@ -97,6 +97,22 @@ class Dataset:
 
     """
 
+    @overload
+    @deprecated(
+        "Supplying data as a list of numpy arrays is deprecated. Use Dataset.from_numpy instead"
+    )
+    def __init__(
+        self,
+        data: (Sequence[NDArray[np.floating]]),
+        time: pd.DatetimeIndex | None = None,
+        items: Sequence[ItemInfo] | None = None,
+        geometry: Any = None,
+        zn: NDArray[np.floating] | None = None,
+        dims: tuple[str, ...] | None = None,
+        validate: bool = True,
+        dt: float = 1.0,
+    ): ...
+
     def __init__(
         self,
         data: (
@@ -113,10 +129,6 @@ class Dataset:
         dt: float = 1.0,
     ):
         if not self._is_DataArrays(data):
-            warnings.warn(
-                "Supplying data as a list of numpy arrays is deprecated. Use Dataset.from_numpy",
-                FutureWarning,
-            )
             data = self._create_dataarrays(
                 data=data,
                 time=time,
