@@ -53,6 +53,11 @@ def ds3():
     return mikeio.Dataset.from_numpy(data=data, time=time, items=items)
 
 
+def test_list_of_numpy_deprecated() -> None:
+    with pytest.warns(FutureWarning, match="from_numpy"):
+        mikeio.Dataset([np.zeros(2)], pd.date_range("2000-1-2", freq="h", periods=2))
+
+
 def test_create_wrong_data_type_error():
     data = ["item 1", "item 2"]
 

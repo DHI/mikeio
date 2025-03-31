@@ -144,6 +144,10 @@ class Dataset:
         dt: float = 1.0,
     ):
         if not self._is_DataArrays(data):
+            warnings.warn(
+                "Supplying data as a list of numpy arrays is deprecated. Use Dataset.from_numpy",
+                FutureWarning,
+            )
             data = self._create_dataarrays(
                 data=data,
                 time=time,
