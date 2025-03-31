@@ -11,7 +11,9 @@ from datetime import datetime, timedelta
 from shutil import copyfile
 from collections.abc import Iterable, Sequence
 from typing import Callable, Union
-from warnings import deprecated
+
+from typing_extensions import deprecated
+# from warnings import deprecated
 
 
 import numpy as np

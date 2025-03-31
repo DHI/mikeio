@@ -15,7 +15,9 @@ from typing import (
     TYPE_CHECKING,
     Callable,
 )
-from warnings import deprecated
+import warnings
+from typing_extensions import deprecated
+# from warnings import deprecated
 
 
 import numpy as np
@@ -104,6 +106,19 @@ class Dataset:
     def __init__(
         self,
         data: (Sequence[NDArray[np.floating]]),
+        time: pd.DatetimeIndex | None = None,
+        items: Sequence[ItemInfo] | None = None,
+        geometry: Any = None,
+        zn: NDArray[np.floating] | None = None,
+        dims: tuple[str, ...] | None = None,
+        validate: bool = True,
+        dt: float = 1.0,
+    ): ...
+
+    @overload
+    def __init__(
+        self,
+        data: (Mapping[str, DataArray] | Sequence[DataArray]),
         time: pd.DatetimeIndex | None = None,
         items: Sequence[ItemInfo] | None = None,
         geometry: Any = None,
