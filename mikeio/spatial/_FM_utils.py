@@ -94,6 +94,8 @@ def _plot_map(
     figsize: tuple[float, float] | None = None,
     ax: Axes | None = None,
     add_colorbar: bool = True,
+    show_triangulation: bool = True,
+    show_contour_labels: bool = True,
 ) -> Axes:
     """Plot unstructured data and/or mesh, mesh outline.
 
@@ -140,6 +142,8 @@ def _plot_map(
         Adding to existing axis, instead of creating new fig
     add_colorbar: bool
         Add colorbar to plot, default True
+    show_triangulation: bool
+        Show triangulation used for contour plots, default False
 
     Returns
     -------
@@ -225,7 +229,7 @@ def _plot_map(
         if show_mesh and __is_tri_only(element_table):
             mesh_linewidth = 0.4
             n_refinements = 0
-        triang, zn = __get_tris(nc, element_table, ec, z, n_refinements)
+        triang, zn = _get_tris(nc, element_table, ec, z, n_refinements)
 
         if plot_type == "shaded":
             ax.triplot(triang, lw=mesh_linewidth, color=MESH_COL)
@@ -250,7 +254,8 @@ def _plot_map(
                 cmap=cmap,
                 norm=cmap_norm,
             )
-            ax.clabel(fig_obj, fmt="%1.2f", inline=1, fontsize=9)
+            if show_contour_labels:
+                ax.clabel(fig_obj, fmt="%1.2f", inline=1, fontsize=9)
             ax.set_title(label)
             add_colorbar = False
 
@@ -385,7 +390,7 @@ def __plot_patch(
     return fig_obj
 
 
-def __get_tris(
+def _get_tris(
     nc: np.ndarray,
     element_table: np.ndarray,
     ec: np.ndarray,
