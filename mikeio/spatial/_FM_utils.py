@@ -98,7 +98,7 @@ def _plot_map(
     add_colorbar: bool = True,
     show_triangulation: bool = True,
     show_contour_labels: bool = True,
-    node_interpolation_strategy: Union[str, NodeInterpolationStrategy] = "pseudo-laplacian",
+    node_interpolation_strategy: str = "pseudo-laplacian",
 ) -> Axes:
     """Plot unstructured data and/or mesh, mesh outline.
 
@@ -403,7 +403,7 @@ def _get_tris(
     ec: np.ndarray,
     z: np.ndarray,
     n_refinements: int,
-    node_interpolation_strategy: Union[str, NodeInterpolationStrategy] = "pseudo-laplacian",
+    node_interpolation_strategy: str = "pseudo-laplacian",
 ) -> tuple[Triangulation, np.ndarray]:
     import matplotlib.tri as tri
 
@@ -639,7 +639,7 @@ def _get_node_centered_data(
     element_coordinates: np.ndarray,
     data: np.ndarray,
     extrapolate: bool = True,
-    strategy: Union[str, NodeInterpolationStrategy] = "pseudo-laplacian",
+    strategy: str = "pseudo-laplacian",
 ) -> np.ndarray:
     """Convert cell-centered data to node-centered data using the specified interpolation method.
     
