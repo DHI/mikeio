@@ -1152,9 +1152,9 @@ class GeometryFM2D(_GeometryFM):
         return nodes, elem_tbl
 
     def get_node_centered_data(
-        self, data: np.ndarray, extrapolate: bool = True
+        self, data: np.ndarray, extrapolate: bool = True, strategy="pseudo-laplacian"
     ) -> np.ndarray:
-        """Convert cell-centered data to node-centered by pseudo-laplacian method.
+        """Convert cell-centered data to node-centered using the specified interpolation method.
 
         Parameters
         ----------
@@ -1162,18 +1162,36 @@ class GeometryFM2D(_GeometryFM):
             cell-centered data
         extrapolate : bool, optional
             allow the method to extrapolate, default:True
+        strategy : Union[str, NodeInterpolationStrategy], optional
+            Interpolation strategy to use, by default "pseudo-laplacian".
+            If a string, must be one of: "pseudo-laplacian", "inverse-distance", "average".
+            If a NodeInterpolationStrategy instance, that strategy will be used directly.
 
         Returns
         -------
         np.array(float)
             node-centered data
 
+        Examples
+        --------
+        Using a built-in strategy by name:
+        >>> node_data = mesh.get_node_centered_data(data, strategy="inverse-distance")
+
+        Using a custom strategy:
+        >>> from mikeio.spatial._FM_utils import NodeInterpolationStrategy
+        >>> class MyCustomStrategy(NodeInterpolationStrategy):
+        ...     def interpolate(self, node_coordinates, element_table,
+        ...                     element_coordinates, data, **kwargs):
+        ...         # Custom implementation
+        ...         return result
+        >>> my_strategy = MyCustomStrategy()
+        >>> node_data = mesh.get_node_centered_data(data, strategy=my_strategy)
         """
         geometry = self
         nc = geometry.node_coordinates
         ec = geometry.element_coordinates
         elem_table = geometry.element_table
-        return _get_node_centered_data(nc, elem_table, ec, data, extrapolate)
+        return _get_node_centered_data(nc, elem_table, ec, data, extrapolate, strategy)
 
     def to_shapely(self) -> Any:
         """Export mesh as shapely MultiPolygon.

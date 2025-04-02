@@ -1,5 +1,7 @@
 from dataclasses import dataclass
-from typing import Any, Literal, Sequence
+from typing import Any, Literal, Protocol, Sequence
+from abc import ABC, abstractmethod
+from typing import Union
 
 from numpy.typing import NDArray
 from matplotlib.axes import Axes
@@ -96,6 +98,7 @@ def _plot_map(
     add_colorbar: bool = True,
     show_triangulation: bool = True,
     show_contour_labels: bool = True,
+    node_interpolation_strategy: Union[str, NodeInterpolationStrategy] = "pseudo-laplacian",
 ) -> Axes:
     """Plot unstructured data and/or mesh, mesh outline.
 
@@ -144,6 +147,10 @@ def _plot_map(
         Add colorbar to plot, default True
     show_triangulation: bool
         Show triangulation used for contour plots, default False
+    node_interpolation_strategy: Union[str, NodeInterpolationStrategy], optional
+        Interpolation strategy to use for converting cell-centered data to node-centered data, by default "pseudo-laplacian".
+        If a string, must be one of: "pseudo-laplacian".
+        If a NodeInterpolationStrategy instance, that strategy will be used directly.
 
     Returns
     -------
@@ -229,7 +236,7 @@ def _plot_map(
         if show_mesh and __is_tri_only(element_table):
             mesh_linewidth = 0.4
             n_refinements = 0
-        triang, zn = _get_tris(nc, element_table, ec, z, n_refinements)
+        triang, zn = _get_tris(nc, element_table, ec, z, n_refinements, node_interpolation_strategy)
 
         if plot_type == "shaded":
             ax.triplot(triang, lw=mesh_linewidth, color=MESH_COL)
@@ -396,13 +403,14 @@ def _get_tris(
     ec: np.ndarray,
     z: np.ndarray,
     n_refinements: int,
+    node_interpolation_strategy: Union[str, NodeInterpolationStrategy] = "pseudo-laplacian",
 ) -> tuple[Triangulation, np.ndarray]:
     import matplotlib.tri as tri
 
-    elem_table, ec, z = __create_tri_only_element_table(nc, element_table, ec, data=z)
+    elem_table, ec, z = _create_tri_only_element_table(nc, element_table, ec, data=z)
     triang = tri.Triangulation(nc[:, 0], nc[:, 1], elem_table)
 
-    zn = _get_node_centered_data(nc, elem_table, ec, z)
+    zn = _get_node_centered_data(nc, elem_table, ec, z, strategy=node_interpolation_strategy)
 
     if n_refinements > 0:
         # TODO: refinements doesn't seem to work for 3d files?
@@ -516,49 +524,186 @@ def _create_node_element_matrix(
     return connectivity_matrix
 
 
+class NodeInterpolationStrategy(ABC):
+    """Abstract strategy for interpolation from element values to node values."""
+
+    @abstractmethod
+    def interpolate(
+        self,
+        node_coordinates: np.ndarray,
+        element_table: np.ndarray,
+        element_coordinates: np.ndarray,
+        data: np.ndarray,
+        **kwargs
+    ) -> np.ndarray:
+        """Interpolate element values to node values.
+        
+        Parameters
+        ----------
+        node_coordinates : np.ndarray
+            Coordinates of mesh nodes with shape (n, 3) where n is the number of nodes
+        element_table : np.ndarray
+            Table of element node connections
+        element_coordinates : np.ndarray
+            Coordinates of element centers
+        data : np.ndarray
+            Data values at element centers
+        **kwargs
+            Additional parameters specific to the interpolation method
+            
+        Returns
+        -------
+        np.ndarray
+            Interpolated values at node positions with shape (n,) where n is the number of nodes,
+            matching the order and dimensions of node_coordinates
+        """
+        pass
+
+
+class PseudoLaplacianStrategy(NodeInterpolationStrategy):
+    """Interpolate using pseudo-laplacian method."""
+
+    def interpolate(
+        self,
+        node_coordinates: np.ndarray,
+        element_table: np.ndarray,
+        element_coordinates: np.ndarray,
+        data: np.ndarray,
+        **kwargs
+    ) -> np.ndarray:
+        """Interpolate from element values to node values using pseudo-laplacian method.
+        
+        Parameters
+        ----------
+        node_coordinates : np.ndarray
+            Coordinates of mesh nodes
+        element_table : np.ndarray
+            Table of element node connections
+        element_coordinates : np.ndarray
+            Coordinates of element centers
+        data : np.ndarray
+            Data values at element centers
+        **kwargs
+            extrapolate: bool, optional
+                Whether to allow extrapolation, default True
+            
+        Returns
+        -------
+        np.ndarray
+            Interpolated values at node positions
+        """
+        extrapolate = kwargs.get("extrapolate", True)
+        nc = node_coordinates
+        ec = element_coordinates
+        elem_table, ec, data = _create_tri_only_element_table(
+            nc, element_table, ec, data
+        )
+        connectivity_matrix = _create_node_element_matrix(elem_table, nc.shape[0])
+        
+        node_centered_data = np.zeros(shape=nc.shape[0])
+        for n in range(connectivity_matrix.shape[0]):
+            item = connectivity_matrix.getrow(n).indices
+            if len(item) == 0:
+                continue
+                
+            I = ec[item][:, :2] - nc[n][:2]
+            I2 = (I**2).sum(axis=0)
+            Ixy = (I[:, 0] * I[:, 1]).sum(axis=0)
+            lamb = I2[0] * I2[1] - Ixy**2
+            omega = np.zeros(1)
+            
+            if lamb > 1e-10 * (I2[0] * I2[1]):
+                # Standard case - Pseudo
+                lambda_x = (Ixy * I[:, 1] - I2[1] * I[:, 0]) / lamb
+                lambda_y = (Ixy * I[:, 0] - I2[0] * I[:, 1]) / lamb
+                omega = 1.0 + lambda_x * I[:, 0] + lambda_y * I[:, 1]
+                
+                if not extrapolate:
+                    omega[np.where(omega > 2)] = 2
+                    omega[np.where(omega < 0)] = 0
+                    
+            if omega.sum() > 0:
+                node_centered_data[n] = np.sum(omega * data[item]) / np.sum(omega)
+            else:
+                # Fallback to inverse distance if pseudo-laplacian fails
+                InvDis = [
+                    1 / np.hypot(case[0], case[1]) for case in ec[item][:, :2] - nc[n][:2]
+                ]
+                node_centered_data[n] = np.sum(InvDis * data[item]) / np.sum(InvDis)
+        
+        return node_centered_data
+
 def _get_node_centered_data(
     node_coordinates: np.ndarray,
     element_table: np.ndarray,
     element_coordinates: np.ndarray,
     data: np.ndarray,
     extrapolate: bool = True,
+    strategy: Union[str, NodeInterpolationStrategy] = "pseudo-laplacian",
 ) -> np.ndarray:
-    """convert cell-centered data to node-centered by pseudo-laplacian method."""
-    nc = node_coordinates
-    elem_table, ec, data = __create_tri_only_element_table(
-        nc, element_table, element_coordinates, data
+    """Convert cell-centered data to node-centered data using the specified interpolation method.
+    
+    Parameters
+    ----------
+    node_coordinates : np.ndarray
+        Coordinates of mesh nodes
+    element_table : np.ndarray
+        Table of element node connections
+    element_coordinates : np.ndarray
+        Coordinates of element centers
+    data : np.ndarray
+        Data values at element centers
+    extrapolate : bool, optional
+        Whether to allow extrapolation in pseudo-laplacian method, by default True
+    strategy : Union[str, NodeInterpolationStrategy], optional
+        Interpolation strategy to use, by default "pseudo-laplacian".
+        If a string, must be one of: "pseudo-laplacian".
+        If a NodeInterpolationStrategy instance, that strategy will be used directly.
+        
+    Returns
+    -------
+    np.ndarray
+        Data values interpolated to node positions
+        
+    Examples
+    --------
+    Using a built-in strategy by name:
+    >>> node_data = _get_node_centered_data(nc, elem_table, ec, data, strategy="pseudo-laplacian")
+    
+    Using a custom strategy:
+    >>> class MyCustomStrategy(NodeInterpolationStrategy):
+    ...     def interpolate(self, node_coordinates, element_table,
+    ...                     element_coordinates, data, **kwargs):
+    ...         # Custom implementation
+    ...         return result
+    >>> my_strategy = MyCustomStrategy()
+    >>> node_data = _get_node_centered_data(nc, elem_table, ec, data, strategy=my_strategy)
+    """
+    # Create mapping of string names to strategy instances
+    strategies = {
+        "pseudo-laplacian": PseudoLaplacianStrategy(),
+    }
+    
+    # Handle string strategy
+    if isinstance(strategy, str):
+        strategy_str = strategy.lower()
+        if strategy_str not in strategies:
+            raise ValueError(
+                f"Unknown strategy: {strategy}. Available strategies: {list(strategies.keys())}"
+            )
+        strategy = strategies[strategy_str]
+    
+    # Apply the selected or provided strategy
+    return strategy.interpolate(
+        node_coordinates, 
+        element_table, 
+        element_coordinates, 
+        data, 
+        extrapolate=extrapolate
     )
-    connectivity_matrix = _create_node_element_matrix(elem_table, nc.shape[0])
-
-    node_centered_data = np.zeros(shape=nc.shape[0])
-    for n in range(connectivity_matrix.shape[0]):
-        item = connectivity_matrix.getrow(n).indices
-        I = ec[item][:, :2] - nc[n][:2]
-        I2 = (I**2).sum(axis=0)
-        Ixy = (I[:, 0] * I[:, 1]).sum(axis=0)
-        lamb = I2[0] * I2[1] - Ixy**2
-        omega = np.zeros(1)
-        if lamb > 1e-10 * (I2[0] * I2[1]):
-            # Standard case - Pseudo
-            lambda_x = (Ixy * I[:, 1] - I2[1] * I[:, 0]) / lamb
-            lambda_y = (Ixy * I[:, 0] - I2[0] * I[:, 1]) / lamb
-            omega = 1.0 + lambda_x * I[:, 0] + lambda_y * I[:, 1]
-            if not extrapolate:
-                omega[np.where(omega > 2)] = 2
-                omega[np.where(omega < 0)] = 0
-        if omega.sum() > 0:
-            node_centered_data[n] = np.sum(omega * data[item]) / np.sum(omega)
-        else:
-            # We did not succeed using pseudo laplace procedure, use inverse distance instead
-            InvDis = [
-                1 / np.hypot(case[0], case[1]) for case in ec[item][:, :2] - nc[n][:2]
-            ]
-            node_centered_data[n] = np.sum(InvDis * data[item]) / np.sum(InvDis)
-
-    return node_centered_data
 
 
-def __create_tri_only_element_table(
+def _create_tri_only_element_table(
     node_coordinates: np.ndarray,
     element_table: np.ndarray,
     element_coordinates: np.ndarray,
