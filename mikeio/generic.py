@@ -496,10 +496,10 @@ def concat(
             if i == 0:
                 timestep_n = 0  # have not read anything before
 
-            timestep = timestep_n  # lets start where we left off (if overlap)
+            timestep = timestep_n  # lets start where we left off (if last file overlapped)
             while timestep < n_time_steps:
                 current_time = start_time + timedelta(seconds=timestep * dt)
-                if current_time >= next_start_time:  # false if last time
+                if current_time >= next_start_time:  # false if last file
                     overlapping_with_next = True
                     break
                 for item in range(n_items):
