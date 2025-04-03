@@ -3,6 +3,7 @@ from functools import cached_property
 from pathlib import Path
 from datetime import datetime, timedelta
 from typing import Any, Sequence
+import warnings
 
 import numpy as np
 import pandas as pd
@@ -188,13 +189,21 @@ class Dfs0:
             sel_time_step_str = None
             time_steps = None
             if time is not None:
-                _, time_steps = _valid_timesteps(dfs.FileInfo, time)
+                if isinstance(time, slice) and isinstance(time.start, str):
+                    return ds.sel(time=time)
+                else:
+                    _, time_steps = _valid_timesteps(dfs.FileInfo, time)
 
         if time_steps:
             ds = ds.isel(time=time_steps)
 
         if sel_time_step_str:
             parts = sel_time_step_str.split(",")
+            if len(parts) > 0:
+                warnings.warn(
+                    f'Comma separated time slicing is deprecated use read(time=slice("{parts[0]}", "{parts[1]}")) instead.',
+                    FutureWarning,
+                )
             if len(parts) == 1:
                 parts.append(parts[0])  # end=start
 
@@ -204,7 +213,8 @@ class Dfs0:
                 sel = slice(parts[0], None)  # start only
             else:
                 sel = slice(parts[0], parts[1])
-            ds = ds[sel]  # type: ignore
+
+            return ds.sel(time=sel)
 
         return ds
 

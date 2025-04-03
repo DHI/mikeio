@@ -1,6 +1,5 @@
 from __future__ import annotations
 from pathlib import Path
-import warnings
 from datetime import datetime
 from copy import deepcopy
 from typing import (
@@ -16,6 +15,9 @@ from typing import (
     TYPE_CHECKING,
     Callable,
 )
+import warnings
+from typing_extensions import deprecated
+# from warnings import deprecated
 
 
 import numpy as np
@@ -96,6 +98,35 @@ class Dataset:
     ```
 
     """
+
+    @overload
+    @deprecated(
+        "Supplying data as a list of numpy arrays is deprecated. Use Dataset.from_numpy instead"
+    )
+    def __init__(
+        self,
+        data: (Sequence[NDArray[np.floating]]),
+        time: pd.DatetimeIndex | None = None,
+        items: Sequence[ItemInfo] | None = None,
+        geometry: Any = None,
+        zn: NDArray[np.floating] | None = None,
+        dims: tuple[str, ...] | None = None,
+        validate: bool = True,
+        dt: float = 1.0,
+    ): ...
+
+    @overload
+    def __init__(
+        self,
+        data: (Mapping[str, DataArray] | Sequence[DataArray]),
+        time: pd.DatetimeIndex | None = None,
+        items: Sequence[ItemInfo] | None = None,
+        geometry: Any = None,
+        zn: NDArray[np.floating] | None = None,
+        dims: tuple[str, ...] | None = None,
+        validate: bool = True,
+        dt: float = 1.0,
+    ): ...
 
     def __init__(
         self,
@@ -679,7 +710,6 @@ class Dataset:
     @overload
     def __getitem__(self, key: Hashable | int) -> DataArray: ...
 
-    # Mapping is Iterable
     @overload
     def __getitem__(self, key: Iterable[Hashable]) -> "Dataset": ...
 
