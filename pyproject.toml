@@ -30,6 +30,7 @@ dependencies = [
     "PyYAML",
     "tqdm",
     "xarray",
+    "typing-extensions",
 ]
 
 authors = [
