@@ -284,33 +284,6 @@ class Dfs0:
 
         return df
 
-    @staticmethod
-    def from_dataframe(
-        df: pd.DataFrame,
-        filename: str,
-        itemtype: EUMType | None = None,
-        unit: EUMUnit | None = None,
-        items: Sequence[ItemInfo] | None = None,
-    ) -> None:
-        """Create a dfs0 from a pandas Dataframe.
-
-        Parameters
-        ----------
-
-        df: pd.DataFrame
-            Dataframe with data
-        filename: str
-            filename to write output
-        itemtype: EUMType, optional
-            Same type for all items
-        unit: EUMUnit, optional
-            Same unit for all items
-        items: list[ItemInfo]
-            Different types, units for each items
-
-        """
-        return dataframe_to_dfs0(df, filename, itemtype, unit, items)
-
     @property
     def n_items(self) -> int:
         """Number of items."""
@@ -365,6 +338,20 @@ class Dfs0:
             return self.read().time
         else:
             raise ValueError("Time axis type not supported")
+
+    # ======================
+    # Deprecated in 2.5.0
+    # ======================
+
+    @staticmethod
+    def from_dataframe(
+        df: pd.DataFrame,
+        filename: str,
+        itemtype: EUMType | None = None,
+        unit: EUMUnit | None = None,
+        items: Sequence[ItemInfo] | None = None,
+    ) -> None:
+        return dataframe_to_dfs0(df, filename, itemtype, unit, items)
 
 
 def series_to_dfs0(

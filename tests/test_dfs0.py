@@ -210,9 +210,13 @@ def test_write_from_data_frame(tmp_path):
     )
 
     filename = tmp_path / "dataframe.dfs0"
-    Dfs0.from_dataframe(
-        df, filename, itemtype=EUMType.Concentration, unit=EUMUnit.gram_per_meter_pow_3
-    )  # Could not find better type
+    with pytest.warns(FutureWarning):
+        Dfs0.from_dataframe(
+            df,
+            filename,
+            itemtype=EUMType.Concentration,
+            unit=EUMUnit.gram_per_meter_pow_3,
+        )
 
     ds = mikeio.read(filename)
 
@@ -237,15 +241,15 @@ def test_write_dataframe_different_eum_types_to_dfs0(tmp_path: Path) -> None:
     mikeio.from_pandas(
         dfr,
         items=[
-            mikeio.ItemInfo("Flow", itemtype=mikeio.EUMType.Discharge),
-            mikeio.ItemInfo("Level", itemtype=mikeio.EUMType.Water_Level),
+            mikeio.ItemInfo(mikeio.EUMType.Discharge),
+            mikeio.ItemInfo(mikeio.EUMType.Water_Level),
         ],
     ).to_dfs(fp)
 
     ds = mikeio.read(fp)
     assert ds.n_timesteps == 15
-    assert ds[0].type == mikeio.EUMType.Discharge
-    assert ds[1].type == mikeio.EUMType.Water_Level
+    assert ds["flow"].type == mikeio.EUMType.Discharge
+    assert ds["level"].type == mikeio.EUMType.Water_Level
     assert len(ds) == 2
     assert ds.end_time == dfr.index[-1]
     assert ds.is_equidistant
@@ -276,10 +280,10 @@ def test_from_pandas_mapping_eum_types() -> None:
     item_with_dvt.name = "rain"
 
     assert ds.n_timesteps == 15
-    assert ds[0].type == mikeio.EUMType.Discharge
-    assert ds[1].type == mikeio.EUMType.Rainfall
-    assert ds[1].item is not item_with_dvt
-    assert ds[1].item == item_with_dvt
+    assert ds["flow"].type == mikeio.EUMType.Discharge
+    assert ds["rain"].type == mikeio.EUMType.Rainfall
+    assert ds["rain"].item is not item_with_dvt
+    assert ds["rain"].item == item_with_dvt
     assert len(ds) == 2
     assert ds.end_time == dfr.index[-1]
     assert ds.is_equidistant
@@ -327,10 +331,10 @@ def test_from_pandas_sequence_eum_types() -> None:
     )
 
     assert ds.n_timesteps == 15
-    assert ds[0].type == mikeio.EUMType.Discharge
-    assert ds[1].type == mikeio.EUMType.Water_Level
-    assert ds[1].item.unit == mikeio.EUMUnit.millimeter
-    assert ds[1].item.data_value_type == DataValueType.Accumulated
+    assert ds["flow"].type == mikeio.EUMType.Discharge
+    assert ds["level"].type == mikeio.EUMType.Water_Level
+    assert ds["level"].item.unit == mikeio.EUMUnit.millimeter
+    assert ds["level"].item.data_value_type == DataValueType.Accumulated
     assert ds["level"].item.name == "level"
 
 
@@ -411,7 +415,7 @@ def test_from_polars_use_first_datetime_column() -> None:
     assert ds["flow"].values[-1] == pytest.approx(2.0)
 
 
-def test_write_from_pandas_series_monkey_patched(tmp_path: Path) -> None:
+def test_write_from_pandas_series(tmp_path: Path) -> None:
     df = pd.read_csv(
         "tests/testdata/co2-mm-mlo.csv",
         parse_dates=True,
