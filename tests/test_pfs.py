@@ -1290,3 +1290,5 @@ EndSect
 
     part_of_the_path = "foo/bar"
     assert pfs[part_of_the_path].baz.simple == 0
+    # we can mix and match
+    assert pfs["foo"]["bar/baz/simple"] == 0
