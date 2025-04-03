@@ -284,33 +284,6 @@ class Dfs0:
 
         return df
 
-    @staticmethod
-    def from_dataframe(
-        df: pd.DataFrame,
-        filename: str,
-        itemtype: EUMType | None = None,
-        unit: EUMUnit | None = None,
-        items: Sequence[ItemInfo] | None = None,
-    ) -> None:
-        """Create a dfs0 from a pandas Dataframe.
-
-        Parameters
-        ----------
-
-        df: pd.DataFrame
-            Dataframe with data
-        filename: str
-            filename to write output
-        itemtype: EUMType, optional
-            Same type for all items
-        unit: EUMUnit, optional
-            Same unit for all items
-        items: list[ItemInfo]
-            Different types, units for each items
-
-        """
-        return dataframe_to_dfs0(df, filename, itemtype, unit, items)
-
     @property
     def n_items(self) -> int:
         """Number of items."""
@@ -366,6 +339,20 @@ class Dfs0:
         else:
             raise ValueError("Time axis type not supported")
 
+    # ======================
+    # Deprecated in 2.5.0
+    # ======================
+
+    @staticmethod
+    def from_dataframe(
+        df: pd.DataFrame,
+        filename: str,
+        itemtype: EUMType | None = None,
+        unit: EUMUnit | None = None,
+        items: Sequence[ItemInfo] | None = None,
+    ) -> None:
+        return dataframe_to_dfs0(df, filename, itemtype, unit, items)
+
 
 def series_to_dfs0(
     self: pd.Series,
@@ -389,26 +376,10 @@ def dataframe_to_dfs0(
     title: str = "",
     dtype: Any | None = None,
 ) -> None:
-    """Create a dfs0.
-
-    Parameters
-    ----------
-    self: pd.DataFrame
-        Dataframe with data
-    filename: str
-        filename to write output
-    itemtype: EUMType, optional
-        Same type for all items
-    unit: EUMUnit, optional
-        Same unit for all items
-    items: list[ItemInfo]
-        Different types, units for each items
-    title: str, optional
-        Title of dfs0 file
-    dtype : np.dtype, optional
-            default np.float32
-
-    """
+    warnings.warn(
+        "series/dataframe_to_dfs0 is deprecated. Use mikeio.from_pandas instead.",
+        FutureWarning,
+    )
     if not isinstance(self.index, pd.DatetimeIndex):
         raise ValueError(
             "Dataframe index must be a DatetimeIndex. Hint: pd.read_csv(..., parse_dates=True)"

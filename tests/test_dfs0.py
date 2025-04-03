@@ -1,4 +1,5 @@
 from datetime import datetime
+from pathlib import Path
 import numpy as np
 import pandas as pd
 import mikeio
@@ -209,9 +210,13 @@ def test_write_from_data_frame(tmp_path):
     )
 
     filename = tmp_path / "dataframe.dfs0"
-    Dfs0.from_dataframe(
-        df, filename, itemtype=EUMType.Concentration, unit=EUMUnit.gram_per_meter_pow_3
-    )  # Could not find better type
+    with pytest.warns(FutureWarning):
+        Dfs0.from_dataframe(
+            df,
+            filename,
+            itemtype=EUMType.Concentration,
+            unit=EUMUnit.gram_per_meter_pow_3,
+        )
 
     ds = mikeio.read(filename)
 
@@ -221,28 +226,7 @@ def test_write_from_data_frame(tmp_path):
     assert ds.items[0].data_value_type == 0
 
 
-def test_write_from_data_frame_monkey_patched(tmp_path):
-    df = pd.read_csv(
-        "tests/testdata/co2-mm-mlo.csv",
-        parse_dates=True,
-        index_col="Date",
-        na_values=-99.99,
-    )
-
-    fp = tmp_path / "dataframe.dfs0"
-
-    df.to_dfs0(fp, itemtype=EUMType.Concentration, unit=EUMUnit.gram_per_meter_pow_3)
-
-    ds = mikeio.read(fp)
-
-    assert len(ds.items) == 5
-    assert ds[0].type == EUMType.Concentration
-    assert ds[0].unit == EUMUnit.gram_per_meter_pow_3
-    assert np.isnan(ds["Average"].to_numpy()[3])
-    assert ds.time[0].year == 1958
-
-
-def test_write_dataframe_different_eum_types_to_dfs0(tmp_path):
+def test_write_dataframe_different_eum_types_to_dfs0(tmp_path: Path) -> None:
     time = pd.DatetimeIndex(["2001-01-01", "2001-01-01 01:00", "2001-01-01 01:10"])
 
     df = pd.DataFrame(
@@ -254,18 +238,18 @@ def test_write_dataframe_different_eum_types_to_dfs0(tmp_path):
 
     fp = tmp_path / "dataframe.dfs0"
 
-    dfr.to_dfs0(
-        fp,
+    mikeio.from_pandas(
+        dfr,
         items=[
-            mikeio.ItemInfo("Flow", itemtype=mikeio.EUMType.Discharge),
-            mikeio.ItemInfo("Level", itemtype=mikeio.EUMType.Water_Level),
+            mikeio.ItemInfo(mikeio.EUMType.Discharge),
+            mikeio.ItemInfo(mikeio.EUMType.Water_Level),
         ],
-    )
+    ).to_dfs(fp)
 
     ds = mikeio.read(fp)
     assert ds.n_timesteps == 15
-    assert ds[0].type == mikeio.EUMType.Discharge
-    assert ds[1].type == mikeio.EUMType.Water_Level
+    assert ds["flow"].type == mikeio.EUMType.Discharge
+    assert ds["level"].type == mikeio.EUMType.Water_Level
     assert len(ds) == 2
     assert ds.end_time == dfr.index[-1]
     assert ds.is_equidistant
@@ -296,10 +280,10 @@ def test_from_pandas_mapping_eum_types() -> None:
     item_with_dvt.name = "rain"
 
     assert ds.n_timesteps == 15
-    assert ds[0].type == mikeio.EUMType.Discharge
-    assert ds[1].type == mikeio.EUMType.Rainfall
-    assert ds[1].item is not item_with_dvt
-    assert ds[1].item == item_with_dvt
+    assert ds["flow"].type == mikeio.EUMType.Discharge
+    assert ds["rain"].type == mikeio.EUMType.Rainfall
+    assert ds["rain"].item is not item_with_dvt
+    assert ds["rain"].item == item_with_dvt
     assert len(ds) == 2
     assert ds.end_time == dfr.index[-1]
     assert ds.is_equidistant
@@ -347,10 +331,10 @@ def test_from_pandas_sequence_eum_types() -> None:
     )
 
     assert ds.n_timesteps == 15
-    assert ds[0].type == mikeio.EUMType.Discharge
-    assert ds[1].type == mikeio.EUMType.Water_Level
-    assert ds[1].item.unit == mikeio.EUMUnit.millimeter
-    assert ds[1].item.data_value_type == DataValueType.Accumulated
+    assert ds["flow"].type == mikeio.EUMType.Discharge
+    assert ds["level"].type == mikeio.EUMType.Water_Level
+    assert ds["level"].item.unit == mikeio.EUMUnit.millimeter
+    assert ds["level"].item.data_value_type == DataValueType.Accumulated
     assert ds["level"].item.name == "level"
 
 
@@ -431,7 +415,7 @@ def test_from_polars_use_first_datetime_column() -> None:
     assert ds["flow"].values[-1] == pytest.approx(2.0)
 
 
-def test_write_from_pandas_series_monkey_patched(tmp_path):
+def test_write_from_pandas_series(tmp_path: Path) -> None:
     df = pd.read_csv(
         "tests/testdata/co2-mm-mlo.csv",
         parse_dates=True,
@@ -443,8 +427,11 @@ def test_write_from_pandas_series_monkey_patched(tmp_path):
 
     series = df["Average"]
 
-    series.to_dfs0(
-        filename, itemtype=EUMType.Concentration, unit=EUMUnit.gram_per_meter_pow_3
+    mikeio.from_pandas(
+        series,
+        items=mikeio.ItemInfo(EUMType.Concentration, EUMUnit.gram_per_meter_pow_3),
+    ).to_dfs(
+        filename=filename,
     )
 
     ds = mikeio.read(filename)
@@ -455,8 +442,14 @@ def test_write_from_pandas_series_monkey_patched(tmp_path):
     assert np.isnan(ds["Average"].to_numpy()[3])
     assert ds.time[0].year == 1958
 
+    # Deprecated
+    with pytest.warns(FutureWarning, match="from_pandas"):
+        series.to_dfs0(
+            filename, itemtype=EUMType.Concentration, unit=EUMUnit.gram_per_meter_pow_3
+        )
 
-def test_write_from_data_frame_different_types(tmp_path):
+
+def test_write_from_data_frame_different_types(tmp_path: Path) -> None:
     df = pd.read_csv(
         "tests/testdata/co2-mm-mlo.csv",
         parse_dates=True,
@@ -473,7 +466,7 @@ def test_write_from_data_frame_different_types(tmp_path):
         ItemInfo("Trend", EUMType.Undefined),
     ]
 
-    Dfs0.from_dataframe(df, filename, items=items)
+    mikeio.from_pandas(df, items=items).to_dfs(filename)
 
     ds = mikeio.read(filename)
 
@@ -637,7 +630,7 @@ def test_write_default_datatype(tmp_path):
     assert newds[0].item.data_value_type == 0
 
 
-def test_write_from_pandas_series_monkey_patched_data_value_not_default(tmp_path):
+def test_write_from_pandas_series_data_value_not_default(tmp_path: Path) -> None:
     df = pd.read_csv(
         "tests/testdata/co2-mm-mlo.csv",
         parse_dates=True,
@@ -649,17 +642,18 @@ def test_write_from_pandas_series_monkey_patched_data_value_not_default(tmp_path
 
     series = df["Average"]
 
-    series.to_dfs0(
-        filename,
+    mikeio.from_pandas(
+        series,
         items=[
             ItemInfo(
-                "Average",
                 EUMType.Concentration,
                 EUMUnit.gram_per_meter_pow_3,
                 data_value_type="MeanStepBackward",
             )
         ],
-    )
+    ).to_dfs(filename)
+
+    # TODO skip writing to disk?
 
     ds = mikeio.read(filename)
 
@@ -671,7 +665,7 @@ def test_write_from_pandas_series_monkey_patched_data_value_not_default(tmp_path
     assert ds.items[0].data_value_type == 3
 
 
-def test_write_from_data_frame_monkey_patched_data_value_not_default(tmp_path):
+def test_write_from_data_frame_data_value_not_default(tmp_path: Path) -> None:
     df = pd.read_csv(
         "tests/testdata/co2-mm-mlo.csv",
         parse_dates=True,
@@ -692,7 +686,7 @@ def test_write_from_data_frame_monkey_patched_data_value_not_default(tmp_path):
             )
         )
 
-    df.to_dfs0(filename, items=items)
+    mikeio.from_pandas(df, items=items).to_dfs(filename)
 
     ds = mikeio.read(filename)
 

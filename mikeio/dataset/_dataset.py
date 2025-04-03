@@ -2041,14 +2041,14 @@ class Dataset:
 
 
 def from_pandas(
-    df: pd.DataFrame,
+    df: pd.DataFrame | pd.Series,
     items: Mapping[str, ItemInfo] | Sequence[ItemInfo] | ItemInfo | None = None,
 ) -> "Dataset":
     """Create a Dataset from a pandas DataFrame.
 
     Parameters
     ----------
-    df: pd.DataFrame
+    df: pd.DataFrame or pd.Series
         DataFrame with time index
     items: Mapping[str, ItemInfo] | Sequence[ItemInfo] | ItemInfo | None, optional
         Mapping of item names to ItemInfo objects, or a sequence of ItemInfo objects, or a single ItemInfo object.
@@ -2077,6 +2077,8 @@ def from_pandas(
     ```
 
     """
+    if isinstance(df, pd.Series):
+        df = df.to_frame()
     if not isinstance(df.index, pd.DatetimeIndex):
         # look for datetime column
         for col in df.columns:
