@@ -1392,3 +1392,54 @@ def test_set_bad_unit_fails() -> None:
 
     with pytest.raises(ValueError, match="unit"):
         da.unit = mikeio.EUMUnit.decibar
+
+
+def test_create_dataarray_with_name() -> None:
+    da = mikeio.DataArray(
+        data=[0, 1], time=pd.date_range("2000", periods=2), name="Level"
+    )
+    assert da.name == "Level"
+
+
+def test_create_dataarray_with_name_and_type() -> None:
+    da = mikeio.DataArray(
+        data=[0, 1],
+        time=pd.date_range("2000", periods=2),
+        name="Level",
+        type=mikeio.EUMType.Water_Level,
+    )
+    assert da.name == "Level"
+    assert da.type == mikeio.EUMType.Water_Level
+
+
+def test_create_dataarray_with_name_type_and_unit() -> None:
+    da = mikeio.DataArray(
+        data=[0, 1],
+        time=pd.date_range("2000", periods=2),
+        name="Level",
+        type=mikeio.EUMType.Water_Level,
+        unit=mikeio.EUMUnit.feet,
+    )
+    assert da.name == "Level"
+    assert da.type == mikeio.EUMType.Water_Level
+    assert da.unit == mikeio.EUMUnit.feet
+
+
+def test_create_dataarray_with_type_can_not_be_passed_along_with_item() -> None:
+    with pytest.raises(ValueError, match="item"):
+        mikeio.DataArray(
+            data=[0, 1],
+            time=pd.date_range("2000", periods=2),
+            name="Level",
+            type=mikeio.EUMType.Water_Level,
+            item=mikeio.ItemInfo(mikeio.EUMType.Discharge),
+        )
+
+
+def test_dataarray_to_dataset() -> None:
+    ds = mikeio.DataArray(
+        data=[0, 1],
+        name="Level",
+    ).to_dataset()
+    da = ds["Level"]
+    assert da.name == "Level"
