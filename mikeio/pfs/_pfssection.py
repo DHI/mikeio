@@ -81,11 +81,11 @@ class PfsSection(SimpleNamespace, MutableMapping[str, Any]):
     def __contains__(self, key: Any) -> bool:
         return key in self.keys()
 
-    def __getitem__(self, key: str) -> PfsSection:
+    def __getitem__(self, key: str) -> Any:
         SECTION_SEPARATOR = "/"
-        sections = key.split(SECTION_SEPARATOR)
-        item = getattr(self, sections[0])
-        for section in sections[1:]:
+        subsections = key.split(SECTION_SEPARATOR)
+        item = getattr(self, subsections[0])
+        for section in subsections[1:]:
             item = getattr(item, section)
         return item
 
