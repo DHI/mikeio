@@ -148,6 +148,14 @@ class PfsDocument(PfsSection):
         _ = d.pop("_ALIAS_LIST")
         return d
 
+    def __getitem__(self, key: str) -> PfsSection:
+        SECTION_SEPARATOR = "/"
+        sections = key.split(SECTION_SEPARATOR)
+        item = getattr(self, sections[0])
+        for section in sections[1:]:
+            item = getattr(item, section)
+        return item
+
     @staticmethod
     def _unravel_items(items: Callable) -> tuple[list, list]:
         rkeys = []
