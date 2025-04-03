@@ -337,7 +337,7 @@ def test_concat_keep(tmp_path: Path) -> None:
 
 def test_concat_average(tmp_path: Path) -> None:
     # Test for multiple items?
-    g = mikeio.Grid1D(x=range(5), projection="LONG/LAT")
+    g = mikeio.Grid1D(x=range(5))
     t = pd.date_range(start="2020-01-01", periods=5, freq="D")
     d = np.zeros((5, 5))
     #     x x x o o
