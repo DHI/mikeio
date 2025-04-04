@@ -239,7 +239,6 @@ def _plot_map(
         triang, zn = _get_tris(nc, element_table, ec, z, n_refinements, node_interpolation_strategy)
 
         if plot_type == "shaded":
-            ax.triplot(triang, lw=mesh_linewidth, color=MESH_COL)
             fig_obj = ax.tripcolor(
                 triang,
                 zn,
@@ -252,7 +251,6 @@ def _plot_map(
             )
 
         elif plot_type == "contour":
-            ax.triplot(triang, lw=mesh_linewidth, color=MESH_COL_DARK)
             fig_obj = ax.tricontour(
                 triang,
                 zn,
@@ -267,7 +265,6 @@ def _plot_map(
             add_colorbar = False
 
         elif plot_type == "contourf":
-            ax.triplot(triang, lw=mesh_linewidth, color=MESH_COL)
             fig_obj = ax.tricontourf(
                 triang,
                 zn,
@@ -278,6 +275,10 @@ def _plot_map(
                 vmin=vmin,
                 vmax=vmax,
             )
+
+        if show_triangulation:
+            mesh_linewidth = 0.4
+            ax.triplot(triang, lw=mesh_linewidth, color=MESH_COL)
 
         if show_mesh and (not __is_tri_only(element_table)):
             __add_non_tri_mesh(ax, nc, element_table, plot_type)
