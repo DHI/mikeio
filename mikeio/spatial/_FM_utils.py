@@ -261,6 +261,12 @@ def _plot_map(
             )
             if show_contour_labels:
                 ax.clabel(fig_obj, fmt="%1.2f", inline=1, fontsize=9)
+                
+            legend_handles, _ = fig_obj.legend_elements()
+            legend_labels = [f"{level:.2f}" for level in fig_obj.levels]
+            ax.legend(legend_handles, legend_labels, title="",
+                bbox_to_anchor=(1.05, 1), loc='upper left', borderaxespad=0)
+
             ax.set_title(label)
             add_colorbar = False
 
