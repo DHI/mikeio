@@ -1916,12 +1916,9 @@ class Dataset:
             )
 
         if unit_in_name:
-            data = {
-                f"{item.name} ({item.unit.name})": item.to_numpy().ravel()
-                for item in self
-            }
+            data = {f"{item.name} ({item.unit.name})": item.to_numpy() for item in self}
         else:
-            data = {item.name: item.to_numpy().ravel() for item in self}
+            data = {item.name: item.to_numpy() for item in self}
         df = pd.DataFrame(data, index=self.time)
 
         if round_time:

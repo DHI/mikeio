@@ -138,8 +138,14 @@ class DataArray:
         a numpy array containing the data
     time:
         a pandas.DatetimeIndex with the time instances of the data
+    name:
+        Name of the array
+    type:
+        EUM type
+    unit:
+        EUM unit
     item:
-        an ItemInfo with name, type and unit
+        an ItemInfo with name, type and unit, as an alternative to name, type and unit
     geometry:
         a geometry object e.g. Grid2D or GeometryFM2D
     zn:
@@ -171,6 +177,9 @@ class DataArray:
         data: np.ndarray,
         *,
         time: pd.DatetimeIndex | str | None = None,
+        name: str | None = None,
+        type: EUMType | None = None,
+        unit: EUMUnit | None = None,
         item: ItemInfo | None = None,
         geometry: GeometryType | None = None,
         zn: np.ndarray | None = None,
@@ -187,7 +196,7 @@ class DataArray:
 
         self._check_time_data_length(self.time)
 
-        self.item = self._parse_item(item)
+        self.item = self._parse_item(item=item, name=name, type=type, unit=unit)
         self.geometry = self._parse_geometry(geometry, self.dims, self.shape)
         self._zn = self._parse_zn(zn, self.geometry, self.n_timesteps)
         self._set_spectral_attributes(geometry)
@@ -247,12 +256,22 @@ class DataArray:
             )
 
     @staticmethod
-    def _parse_item(item: ItemInfo | str | EUMType | None) -> ItemInfo:
+    def _parse_item(
+        item: ItemInfo | str | EUMType | None,
+        name: str | None = None,
+        type: EUMType | None = None,
+        unit: EUMUnit | None = None,
+    ) -> ItemInfo:
         if isinstance(item, ItemInfo):
+            if name is not None:
+                raise ValueError("Can not pass both item and name")
             return item
 
         if item is None:
-            return ItemInfo("NoName")
+            if name is not None:
+                return ItemInfo(name, itemtype=type, unit=unit)
+            else:
+                return ItemInfo("NoName")
 
         if isinstance(item, (str, EUMType, EUMUnit)):
             return ItemInfo(item)
@@ -1896,6 +1915,8 @@ class DataArray:
         )
 
     # ============= output methods: to_xxx() ===========
+    def to_dataset(self) -> "Dataset":
+        return self._to_dataset()
 
     def _to_dataset(self) -> "Dataset":
         """Create a single-item dataset."""
