@@ -1267,3 +1267,28 @@ EndSect  // Engine
 """
     pfs = mikeio.PfsDocument.from_text(text)
     assert pfs.Engine.var == "x"
+
+
+def test_nested_path() -> None:
+    text = """
+[foo]
+    random = 1
+    [bar]
+        speed = 'fast'
+        [baz]
+            simple = 0
+        EndSect
+    EndSect
+EndSect
+"""
+
+    pfs = mikeio.PfsDocument.from_text(text)
+    assert pfs.foo.bar.baz.simple == 0
+    assert pfs["foo"]["bar"]["baz"]["simple"] == 0
+    path = "foo/bar/baz/simple"
+    assert pfs[path] == 0
+
+    part_of_the_path = "foo/bar"
+    assert pfs[part_of_the_path].baz.simple == 0
+    # we can mix and match
+    assert pfs["foo"]["bar/baz/simple"] == 0

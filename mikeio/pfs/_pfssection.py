@@ -82,7 +82,12 @@ class PfsSection(SimpleNamespace, MutableMapping[str, Any]):
         return key in self.keys()
 
     def __getitem__(self, key: str) -> Any:
-        return getattr(self, key)
+        SECTION_SEPARATOR = "/"
+        subsections = key.split(SECTION_SEPARATOR)
+        item = getattr(self, subsections[0])
+        for section in subsections[1:]:
+            item = getattr(item, section)
+        return item
 
     def __setitem__(self, key: str, value: Any) -> None:
         self.__set_key_value(key, value)
@@ -123,11 +128,11 @@ class PfsSection(SimpleNamespace, MutableMapping[str, Any]):
     @staticmethod
     def _str_is_scientific_float(s: str) -> bool:
         """True: -1.0e2, 1E-4, -0.1E+0.5; False: E12, E-4."""
-        if len(s) < 3 or s.lower().startswith('e'):
+        if len(s) < 3 or s.lower().startswith("e"):
             return False
         try:
             float(s)
-            return 'e' in s.lower()
+            return "e" in s.lower()
         except ValueError:
             return False
 
@@ -195,9 +200,11 @@ class PfsSection(SimpleNamespace, MutableMapping[str, Any]):
         if text is not None:
             # text searches across all fields
             if key is not None or section is not None or param is not None:
-                raise ValueError("When 'text' is provided, 'key', 'section' and 'param' must be None")
+                raise ValueError(
+                    "When 'text' is provided, 'key', 'section' and 'param' must be None"
+                )
             key = section = param = text
-            
+
         key = key.lower() if (key is not None and not case) else key
         section = section.lower() if (section is not None and not case) else section
         param = (
@@ -205,9 +212,12 @@ class PfsSection(SimpleNamespace, MutableMapping[str, Any]):
             if (param is None or not isinstance(param, str) or case)
             else param.lower()
         )
-        results = [item for item in self._find_patterns_generator(
-            keypat=key, parampat=param, secpat=section, case=case
-        )]
+        results = [
+            item
+            for item in self._find_patterns_generator(
+                keypat=key, parampat=param, secpat=section, case=case
+            )
+        ]
         return (
             self.__class__._merge_PfsSections(results)
             if len(results) > 0
@@ -396,7 +406,7 @@ class PfsSection(SimpleNamespace, MutableMapping[str, Any]):
         prefix = sections[0][:-1]
         res = []
         for j in range(n_sections):
-            k = f"{prefix}{j+1}"
+            k = f"{prefix}{j + 1}"
             res.append(self[k].to_dict())
         return pd.DataFrame(res, index=range(1, n_sections + 1))
 

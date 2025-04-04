@@ -89,6 +89,12 @@ A PfsSection can be converted to a dictionary with the to_dict() method:
 pfs.txconc.Setup.File_1.to_dict()
 ```
 
+You can access nested subsections by passing a path-like string, using "/" as a separator character:
+
+```{python}
+pfs["txconc/Setup/File_1"]
+```
+
 If a PfsSection contains enumerated subsections, they can be converted to a pandas DataFrame with the `to_dataframe()` method: 
 
 ```{python}
