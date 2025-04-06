@@ -18,9 +18,12 @@ from ._geometry import (
     _Geometry,
 )
 
+from ..eum import EUMType, ItemInfo
+
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
     from ..spatial import GeometryFM2D
+    from ..dataset import DataArray
 
 
 def _check_equidistant(x: np.ndarray) -> None:
@@ -441,6 +444,8 @@ class Grid2D(_Geometry):
         if True, the grid is spectral, by default False
     is_vertical : bool, optional
         if True, the grid is vertical, by default False
+    bathymetry : array_like, optional
+            bathymetry data, by default None
 
     Examples
     --------
@@ -461,6 +466,7 @@ class Grid2D(_Geometry):
     _origin: tuple[float, float]
     _orientation: float
     is_spectral: bool
+    bathymetry: DataArray | None
 
     def __init__(
         self,
@@ -483,6 +489,7 @@ class Grid2D(_Geometry):
         axis_names: tuple[str, str] = ("x", "y"),
         is_spectral: bool = False,
         is_vertical: bool = False,
+        bathymetry: np.ndarray | None = None,
     ):
         super().__init__(projection=projection)
         self._shift_origin_on_write = origin is None  # user-constructed
@@ -505,6 +512,18 @@ class Grid2D(_Geometry):
 
         self.is_spectral = is_spectral
         self.is_vertical = is_vertical
+
+        if bathymetry is not None:
+            from ..dataset import DataArray
+
+            bathy_da = DataArray(
+                data=bathymetry,
+                geometry=self,
+                item=ItemInfo(name="Bathymetry", itemtype=EUMType.Bathymetry),
+            )
+            self.bathymetry = bathy_da
+        else:
+            self.bathymetry = None
 
         self.plot = _Grid2DPlotter(self)
 
