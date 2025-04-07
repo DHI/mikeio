@@ -420,7 +420,6 @@ class Dfsu2DH:
             items=item_infos,
             geometry=geometry,
             dims=dims,
-            validate=False,
             dt=self.timestep,
         )
 

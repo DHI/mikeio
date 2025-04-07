@@ -176,7 +176,7 @@ class Dfs0:
             fitems = [self.items[it] for it in item_numbers]
         else:
             fitems = self.items
-        ds = Dataset.from_numpy(fdata, time=ftime, items=fitems, validate=False)
+        ds = Dataset.from_numpy(fdata, time=ftime, items=fitems)
 
         # select time steps
         self._n_timesteps = dfs.FileInfo.TimeAxis.NumberOfTimeSteps

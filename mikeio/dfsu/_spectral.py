@@ -398,7 +398,6 @@ class DfsuSpectral:
             items=items,
             geometry=geometry,
             dims=dims,
-            validate=False,
         )
 
     def _parse_geometry_sel(
