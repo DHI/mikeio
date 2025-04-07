@@ -92,16 +92,12 @@ class PfsSection(SimpleNamespace, MutableMapping[str, Any]):
     def __setitem__(self, key: str, value: Any) -> None:
         SECTION_SEPARATOR = "/"
         subsections = key.split(SECTION_SEPARATOR)
-        if len(subsections) > 1:
-            # Traverse or create nested sections
-            current_section = self
-            for section in subsections[:-1]:
-                if not hasattr(current_section, section):
-                    current_section.__setattr__(section, PfsSection({}))
-                current_section = getattr(current_section, section)
-            current_section.__set_key_value(subsections[-1], value)
-        else:
-            self.__set_key_value(key, value)
+        current_section = self
+        for section in subsections[:-1]:
+            if not hasattr(current_section, section):
+                setattr(current_section, section, PfsSection({}))
+            current_section = getattr(current_section, section)
+        current_section.__set_key_value(subsections[-1], value)
 
     def __delitem__(self, key: str) -> None:
         if key in self.keys():
