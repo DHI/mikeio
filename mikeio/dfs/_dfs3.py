@@ -273,7 +273,6 @@ class Dfs3(_Dfs123):
             items=items,
             geometry=geometry,
             dims=dims,
-            validate=False,
         )
 
     def append(self, ds: Dataset, validate: bool = True) -> None:
