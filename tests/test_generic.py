@@ -360,7 +360,7 @@ def test_concat_average(tmp_path: Path) -> None:
     da_x0 = ds[0].isel(x=0)
 
     assert np.allclose(
-        da_x0.values.flatten(),
+        da_x0.values,
         np.array([0.0, 0.0, 0.0, 0.5, 0.5, 1.0, 1.5, 1.5, 2.0, 2.0, 2.0]),
         atol=1e-6,
     )
