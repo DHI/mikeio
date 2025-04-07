@@ -417,10 +417,7 @@ def concat(
         if keep == "last":
             if i < (len(infilenames) - 1):
                 dfs_n = DfsFileFactory.DfsGenericOpen(str(infilenames[i + 1]))
-                nf = dfs_n.FileInfo.TimeAxis.StartDateTime
-                next_start_time = datetime(
-                    nf.year, nf.month, nf.day, nf.hour, nf.minute, nf.second
-                )
+                next_start_time = dfs_n.FileInfo.TimeAxis.StartDateTime
                 dfs_n.Close()
 
             for timestep in range(n_time_steps):
@@ -486,10 +483,7 @@ def concat(
             # Find the start time of next file
             if not last_file:
                 dfs_n = DfsFileFactory.DfsGenericOpen(str(infilenames[i + 1]))
-                nf = dfs_n.FileInfo.TimeAxis.StartDateTime
-                next_start_time = datetime(
-                    nf.year, nf.month, nf.day, nf.hour, nf.minute, nf.second
-                )
+                next_start_time = dfs_n.FileInfo.TimeAxis.StartDateTime
             else:
                 next_start_time = datetime.max  # end of time ...
 
