@@ -50,53 +50,55 @@ The material from the last Academy by DHI course is available here: [Getting sta
 MIKE IO is tested extensively.
 
 See detailed test coverage report below:
+```bash
+$ pytest --cov=mikeio
 ```
----------- coverage: platform linux, python 3.12.4-final-0 -----------
+<pre>
+---------- coverage: platform linux, python 3.13.0-final-0 -----------
 Name                                      Stmts   Miss  Cover
 -------------------------------------------------------------
-mikeio/__init__.py                           31      3    90%
+mikeio/__init__.py                           33      5    85%
 mikeio/_interpolation.py                     68      6    91%
 mikeio/_spectral.py                          97      7    93%
-mikeio/_time.py                              29      1    97%
-mikeio/_track.py                            103     14    86%
-mikeio/dataset/__init__.py                    3      0   100%
-mikeio/dataset/_data_plot.py                358     38    89%
-mikeio/dataset/_data_utils.py                20      0   100%
-mikeio/dataset/_dataarray.py                730     52    93%
-mikeio/dataset/_dataset.py                  734     57    92%
+mikeio/_time.py                              28      1    96%
+mikeio/_track.py                            119      9    92%
+mikeio/dataset/__init__.py                    4      0   100%
+mikeio/dataset/_data_plot.py                359     38    89%
+mikeio/dataset/_data_utils.py                19      0   100%
+mikeio/dataset/_dataarray.py                725     46    94%
+mikeio/dataset/_dataset.py                  766     51    93%
 mikeio/dfs/__init__.py                        5      0   100%
-mikeio/dfs/_dfs0.py                         198     13    93%
-mikeio/dfs/_dfs1.py                          58      2    97%
-mikeio/dfs/_dfs2.py                         132      3    98%
-mikeio/dfs/_dfs3.py                         147      9    94%
-mikeio/dfs/_dfs.py                          290     18    94%
+mikeio/dfs/_dfs0.py                         205     13    94%
+mikeio/dfs/_dfs1.py                          89      2    98%
+mikeio/dfs/_dfs2.py                         142      3    98%
+mikeio/dfs/_dfs3.py                         157     11    93%
+mikeio/dfs/_dfs.py                          251     14    94%
 mikeio/dfsu/__init__.py                       6      0   100%
 mikeio/dfsu/_common.py                       36      1    97%
-mikeio/dfsu/_dfsu.py                        223      7    97%
+mikeio/dfsu/_dfsu.py                        239      6    97%
 mikeio/dfsu/_factory.py                      20      1    95%
-mikeio/dfsu/_layered.py                     190      7    96%
+mikeio/dfsu/_layered.py                     204      9    96%
 mikeio/dfsu/_mesh.py                         54      8    85%
-mikeio/dfsu/_spectral.py                    214     36    83%
+mikeio/dfsu/_spectral.py                    234     42    82%
 mikeio/eum/__init__.py                        2      0   100%
-mikeio/eum/_eum.py                         1334      9    99%
+mikeio/eum/_eum.py                         1353      9    99%
 mikeio/exceptions.py                         24      4    83%
-mikeio/generic.py                           451     17    96%
-mikeio/pfs/__init__.py                        8      0   100%
-mikeio/pfs/_pfsdocument.py                  248     13    95%
-mikeio/pfs/_pfssection.py                   223      9    96%
-mikeio/spatial/_FM_geometry.py              521     24    95%
-mikeio/spatial/_FM_geometry_layered.py      415     30    93%
+mikeio/generic.py                           475     13    97%
+mikeio/pfs/__init__.py                        7      0   100%
+mikeio/pfs/_pfsdocument.py                  233      4    98%
+mikeio/pfs/_pfssection.py                   225     11    95%
+mikeio/spatial/_FM_geometry.py              511     13    97%
+mikeio/spatial/_FM_geometry_layered.py      417     30    93%
 mikeio/spatial/_FM_geometry_spectral.py      94      9    90%
-mikeio/spatial/_FM_utils.py                 275     22    92%
+mikeio/spatial/_FM_utils.py                 306     22    93%
 mikeio/spatial/__init__.py                    6      0   100%
-mikeio/spatial/_geometry.py                  78      8    90%
-mikeio/spatial/_grid_geometry.py            639     45    93%
-mikeio/spatial/_utils.py                     39      0   100%
+mikeio/spatial/_geometry.py                 100      8    92%
+mikeio/spatial/_grid_geometry.py            629     41    93%
+mikeio/spatial/_utils.py                     38      0   100%
 mikeio/spatial/crs.py                        51      5    90%
-mikeio/xyz.py                                14      0   100%
 -------------------------------------------------------------
-TOTAL                                      8168    478    94%
-```
+TOTAL                                      8331    442    95%
+</pre>
 
 ## Cloud enabled
 
