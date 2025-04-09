@@ -1,3 +1,4 @@
+from datetime import datetime
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -1443,3 +1444,71 @@ def test_dataarray_to_dataset() -> None:
     ).to_dataset()
     da = ds["Level"]
     assert da.name == "Level"
+
+# ===============================================================================================================
+# TODO the tests private methods, Options: 1. declare methods as public, 2. Test at a higher level of abstraction
+
+def test_parse_time_None():
+    time = mikeio.DataArray._parse_time(None)
+    assert isinstance(time, pd.DatetimeIndex)
+    assert len(time) == 1
+    assert time[0] == pd.Timestamp(2018, 1, 1)
+
+
+def test_parse_time_constant_str():
+    time = mikeio.DataArray._parse_time("2018")
+    assert isinstance(time, pd.DatetimeIndex)
+    assert len(time) == 1
+    assert time[0] == pd.Timestamp(2018, 1, 1)
+
+
+def test_parse_time_constant_datetime():
+    time = mikeio.DataArray._parse_time(datetime(2018, 1, 1))
+    assert isinstance(time, pd.DatetimeIndex)
+    assert len(time) == 1
+    assert time[0] == pd.Timestamp(2018, 1, 1)
+
+
+def test_parse_time_constant_Timestamp():
+    time = mikeio.DataArray._parse_time(pd.Timestamp(2018, 1, 1))
+    assert isinstance(time, pd.DatetimeIndex)
+    assert len(time) == 1
+    assert time[0] == pd.Timestamp(2018, 1, 1)
+
+
+def test_parse_time_list_str():
+    time = mikeio.DataArray._parse_time(["2018", "2018-1-2", "2018-1-3"])
+    assert isinstance(time, pd.DatetimeIndex)
+    assert len(time) == 3
+    assert time[-1] == pd.Timestamp(2018, 1, 3)
+
+
+def test_parse_time_list_datetime():
+    time = mikeio.DataArray._parse_time(
+        [datetime(2018, 1, 1), datetime(2018, 1, 2), datetime(2018, 1, 3)]
+    )
+    assert isinstance(time, pd.DatetimeIndex)
+    assert len(time) == 3
+    assert time[-1] == pd.Timestamp(2018, 1, 3)
+
+
+def test_parse_time_list_Timestamp():
+    time = mikeio.DataArray._parse_time(
+        [pd.Timestamp(2018, 1, 1), pd.Timestamp(2018, 1, 2), pd.Timestamp(2018, 1, 3)]
+    )
+    assert isinstance(time, pd.DatetimeIndex)
+    assert len(time) == 3
+    assert time[-1] == pd.Timestamp(2018, 1, 3)
+
+
+def test_parse_time_decreasing():
+    times = [
+        pd.Timestamp(2018, 2, 1),
+        pd.Timestamp(2018, 1, 1),
+        pd.Timestamp(2018, 1, 15),
+    ]
+
+    with pytest.raises(ValueError, match="must be monotonic increasing"):
+        mikeio.DataArray._parse_time(times)
+
+# ===============================================================================================================

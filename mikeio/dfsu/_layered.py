@@ -25,7 +25,7 @@ from ..spatial import (
     GeometryPoint3D,
     GeometryFM2D,
 )
-from ..spatial._FM_utils import _plot_vertical_profile
+from ..spatial._FM_plot import _plot_vertical_profile
 from ._dfsu import (
     _get_dfsu_info,
     get_nodes_from_source,

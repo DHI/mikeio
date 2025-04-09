@@ -10,7 +10,7 @@ from mikecore.MeshFile import MeshFile
 
 
 from ..spatial import GeometryFM2D
-from ._common import (
+from ._topology import (
     get_elements_from_source,
     get_nodes_from_source,
 )

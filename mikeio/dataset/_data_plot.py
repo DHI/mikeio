@@ -6,7 +6,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.axes import Axes
 
-from ..spatial._FM_utils import _plot_map, _plot_vertical_profile
+from ..spatial._FM_plot import _plot_map, _plot_vertical_profile
 
 from .._spectral import plot_2dspectrum
 

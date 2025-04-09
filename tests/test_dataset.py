@@ -1699,3 +1699,14 @@ def test_fillna() -> None:
 
     # original dataset is not modified
     assert np.isnan(ds["foo"].to_numpy()[0])
+
+def test_safe_name() -> None:
+    from mikeio.dataset._dataset import _to_safe_name
+    good_name = "MSLP"
+
+    assert _to_safe_name(good_name) == good_name
+
+    bad_name = "MSLP., 1:st level\n 2nd chain"
+    safe_name = "MSLP_1_st_level_2nd_chain"
+    assert _to_safe_name(bad_name) == safe_name
+    
