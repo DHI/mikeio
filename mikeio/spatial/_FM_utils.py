@@ -284,7 +284,11 @@ def _plot_map(
 
         if show_triangulation:
             mesh_linewidth = 0.4
-            ax.triplot(triang, lw=mesh_linewidth, color=MESH_COL)
+            if plot_type == "contour":
+                mesh_col = MESH_COL_DARK
+            else:
+                mesh_col = MESH_COL
+            ax.triplot(triang, lw=mesh_linewidth, color=mesh_col)
 
         if show_mesh and (not __is_tri_only(element_table)):
             __add_non_tri_mesh(ax, nc, element_table, plot_type)
@@ -414,15 +418,21 @@ def _get_tris(
 ) -> tuple[Triangulation, np.ndarray]:
     import matplotlib.tri as tri
 
-    elem_table, ec, z = _create_tri_only_element_table(nc, element_table, ec, data=z)
+    # First, get node-centered data from the original mixed element mesh
+    # This preserves quad information before triangulation
+    zn_original = _get_node_centered_data(nc, element_table, ec, z, strategy=node_interpolation_strategy)
+    
+    # Now create triangulation with properly interpolated values
+    elem_table, ec, z = _create_tri_only_element_table(nc, element_table, ec, data=z, zn=zn_original)
     triang = tri.Triangulation(nc[:, 0], nc[:, 1], elem_table)
 
-    zn = _get_node_centered_data(nc, elem_table, ec, z, strategy=node_interpolation_strategy)
-
+    # For refinements, use the node values already computed
     if n_refinements > 0:
         # TODO: refinements doesn't seem to work for 3d files?
         refiner = tri.UniformTriRefiner(triang)
-        triang, zn = refiner.refine_field(zn, subdiv=n_refinements)
+        triang, zn = refiner.refine_field(zn_original, subdiv=n_refinements)
+    else:
+        zn = zn_original
 
     return triang, zn
 
@@ -715,6 +725,7 @@ def _create_tri_only_element_table(
     element_table: np.ndarray,
     element_coordinates: np.ndarray,
     data: np.ndarray,
+    zn: np.ndarray = None,
 ) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
     """Convert quad/tri mesh to pure tri-mesh."""
     if __is_tri_only(element_table):
@@ -722,6 +733,7 @@ def _create_tri_only_element_table(
         return np.stack(element_table), element_coordinates, data  # type: ignore
 
     ec = element_coordinates.copy()
+    z = data.copy()
 
     elem_table = [list(element_table[i]) for i in range(len(element_table))]
     tmp_elmnt_nodes = elem_table.copy()
@@ -739,10 +751,20 @@ def _create_tri_only_element_table(
             tri2_ec = node_coordinates[tri2_nodes].mean(axis=1)
             ec = np.append(ec, tri2_ec.reshape(1, -1), axis=0)
 
-            # use same data in two new tri elements
-            data = np.append(data, data[el])
+            # if we have node values, calculate more accurate triangle centroid values
+            if zn is not None:
+                # Calculate data values at the new triangle centroids using interpolation from nodes
+                # For the first triangle
+                tri1_val = np.mean([zn[item[0]], zn[item[1]], zn[item[2]]])
+                # For the second triangle
+                tri2_val = np.mean([zn[item[2]], zn[item[3]], zn[item[0]]])
+                z[el] = tri1_val
+                z = np.append(z, tri2_val)
+            else:
+                # Fallback to original method if no node values available
+                z = np.append(z, z[el])
 
-    return np.asarray(elem_table), ec, data
+    return np.asarray(elem_table), ec, z
 
 
 def __cbar_extend(
