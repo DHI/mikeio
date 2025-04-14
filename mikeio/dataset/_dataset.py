@@ -16,8 +16,6 @@ from typing import (
     Callable,
 )
 import warnings
-from typing_extensions import deprecated
-# from warnings import deprecated
 
 
 import numpy as np
@@ -62,23 +60,9 @@ class Dataset:
     Parameters
     ----------
     data:
-        a sequence or mapping of numpy arrays
-        By providing a mapping of data arrays, the remaining parameters are not needed
-    time:
-        a pandas.DatetimeIndex with the time instances of the data
-    items:
-        a list of ItemInfo with name, type and unit
-    geometry:
-        a geometry object e.g. Grid2D or GeometryFM2D
-    zn:
-        only relevant for Dfsu3d
-    dims:
-        named dimensions
+        Data arrays used to create a dataset.
     validate:
         Optional validation of consistency of data arrays.
-    dt:
-        placeholder timestep
-
 
     Notes
     ---------------
@@ -99,66 +83,13 @@ class Dataset:
 
     """
 
-    @overload
-    @deprecated(
-        "Supplying data as a list of numpy arrays is deprecated. Use Dataset.from_numpy instead"
-    )
-    def __init__(
-        self,
-        data: (Sequence[NDArray[np.floating]]),
-        time: pd.DatetimeIndex | None = None,
-        items: Sequence[ItemInfo] | None = None,
-        geometry: Any = None,
-        zn: NDArray[np.floating] | None = None,
-        dims: tuple[str, ...] | None = None,
-        validate: bool = True,
-        dt: float = 1.0,
-    ): ...
-
-    @overload
     def __init__(
         self,
         data: (Mapping[str, DataArray] | Sequence[DataArray]),
-        time: pd.DatetimeIndex | None = None,
-        items: Sequence[ItemInfo] | None = None,
-        geometry: Any = None,
-        zn: NDArray[np.floating] | None = None,
-        dims: tuple[str, ...] | None = None,
         validate: bool = True,
-        dt: float = 1.0,
-    ): ...
-
-    def __init__(
-        self,
-        data: (
-            Mapping[str, DataArray]
-            | Sequence[DataArray]
-            | Sequence[NDArray[np.floating]]
-        ),
-        time: pd.DatetimeIndex | None = None,
-        items: Sequence[ItemInfo] | None = None,
-        geometry: Any = None,
-        zn: NDArray[np.floating] | None = None,
-        dims: tuple[str, ...] | None = None,
-        validate: bool = True,
-        dt: float = 1.0,
     ):
-        if not self._is_DataArrays(data):
-            warnings.warn(
-                "Supplying data as a list of numpy arrays is deprecated. Use Dataset.from_numpy",
-                FutureWarning,
-            )
-            data = self._create_dataarrays(
-                data=data,
-                time=time,
-                items=items,
-                geometry=geometry,
-                zn=zn,
-                dims=dims,
-                dt=dt,
-            )
         self._data_vars = self._init_from_DataArrays(
-            data,  # type: ignore
+            data,
             validate=validate,
         )
         self.plot = _DatasetPlotter(self)
@@ -172,9 +103,28 @@ class Dataset:
         geometry: Any | None = None,
         zn: NDArray[np.floating] | None = None,
         dims: tuple[str, ...] | None = None,
-        validate: bool = True,
         dt: float = 1.0,
     ) -> Dataset:
+        """Create Dataset from list of NumPy arrays.
+
+        Parameters
+        ----------
+        data:
+            a sequence or mapping of numpy arrays
+        time:
+            a pandas.DatetimeIndex with the time instances of the data
+        items:
+            a list of ItemInfo with name, type and unit
+        geometry:
+            a geometry object e.g. Grid2D or GeometryFM2D
+        zn:
+            only relevant for Dfsu3d
+        dims:
+            named dimensions
+        dt:
+            placeholder timestep
+
+        """
         das = Dataset._create_dataarrays(
             data=data,
             time=time,
@@ -184,26 +134,7 @@ class Dataset:
             dims=dims,
             dt=dt,
         )
-
         return Dataset(das)
-
-    @staticmethod
-    def _is_DataArrays(data: Any) -> bool:
-        """Check if input is Sequence/Mapping of DataArrays."""
-        if isinstance(data, (Dataset, DataArray)):
-            return True
-        if isinstance(data, Mapping):
-            for da in data.values():
-                if not isinstance(da, DataArray):
-                    raise TypeError("Please provide List/Mapping of DataArrays")
-            return True
-        if isinstance(data, Iterable):
-            for da in data:
-                if not isinstance(da, DataArray):
-                    return False
-                    # raise TypeError("Please provide List/Mapping of DataArrays")
-            return True
-        return False
 
     @staticmethod
     def _create_dataarrays(
