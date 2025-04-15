@@ -135,10 +135,8 @@ We want to interpolate scatter data onto an existing mesh and create a new dfsu 
 
 **This uses lower level private utility methods not part of the public API**.
 
-Interpolating from scatter data will soon be possible in a simpler way.
-
 ```{python}
-from mikeio.spatial._utils import dist_in_meters
+from mikeio.spatial._distance import dist_in_meters
 from mikeio._interpolation import get_idw_interpolant
 ```
 

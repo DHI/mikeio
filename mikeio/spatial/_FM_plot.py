@@ -11,7 +11,7 @@ from matplotlib.tri import Triangulation
 import numpy as np
 from scipy.sparse import csr_matrix
 
-from ._utils import _relative_cumulative_distance
+from ._distance import relative_cumulative_distance
 
 
 MESH_COL = "0.95"
@@ -622,7 +622,7 @@ def _plot_vertical_profile(
     from matplotlib.collections import PolyCollection
 
     nc = node_coordinates
-    s_coordinate = _relative_cumulative_distance(nc, is_geo=is_geo)
+    s_coordinate = relative_cumulative_distance(nc, is_geo=is_geo)
     z_coordinate = nc[:, 2] if zn is None else zn
 
     elements = _Get_2DVertical_elements(element_table)
