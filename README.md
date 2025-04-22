@@ -21,7 +21,7 @@ MIKE IO facilitates common data processing workflows for [MIKE files](https://ww
 ## Requirements
 * Windows or Linux operating system
 * Python x64 3.10 - 3.13
-* (Windows) [VC++ redistributables](https://support.microsoft.com/en-us/help/2977003/the-latest-supported-visual-c-downloads) (already installed if you have MIKE)
+* (Windows) [VC++ redistributables](https://aka.ms/vs/17/release/vc_redist.x64.exe) (already installed if you have MIKE)
 
 ## Installation
 
