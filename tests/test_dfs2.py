@@ -878,6 +878,33 @@ def test_to_xarray():
     assert xr_da.y[0] == pytest.approx(0.25)
 
 
+def test_read_static_bathymetry():
+    dfs = mikeio.open("tests/testdata/flow.dfs2")
+    assert dfs.geometry.dx == pytest.approx(4994.15966796)
+    assert dfs.geometry.dy == pytest.approx(4994.15966796)
+
+    assert dfs.geometry.bathymetry.shape == (20, 13)
+    assert dfs.geometry.bathymetry.sel(x=345000, y=6150000).values == pytest.approx(
+        -13.49011
+    )
+    assert dfs.geometry.bathymetry.isel(x=4, y=4).values
+    dfs.geometry.bathymetry.type == EUMType.Bathymetry
+
+
+def test_read_write_bathymetry(tmp_path: Path) -> None:
+    ds = mikeio.read("tests/testdata/flow.dfs2")
+    fp = tmp_path / "bathymetry.dfs2"
+    ds.to_dfs(fp)
+    ds2 = mikeio.read(fp)
+    assert ds2.geometry.bathymetry.shape == (20, 13)
+
+
+def test_spatial_subset_bathymetry() -> None:
+    ds = mikeio.read("tests/testdata/flow.dfs2")
+    ds2 = ds.isel(x=range(5, 10), y=range(5, 10))
+    assert ds2.geometry.bathymetry.shape == (5, 5)
+
+
 def test_append(tmp_path):
     ds = mikeio.read("tests/testdata/eq.dfs2", time=[0, 1])
     ds2 = mikeio.read("tests/testdata/eq.dfs2", time=[2, 3])
