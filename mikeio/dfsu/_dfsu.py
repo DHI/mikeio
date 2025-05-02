@@ -16,6 +16,7 @@ from mikecore.DfsFileFactory import DfsFileFactory
 from mikecore.eum import eumQuantity, eumUnit
 from tqdm import trange
 
+from mikeio.dataset._fm_dataset import GeometryFM2DDataset, GeometryFM2DDataArray
 from mikeio.spatial._utils import xy_to_bbox
 
 from .. import __dfs_version__
@@ -305,7 +306,7 @@ class Dfsu2DH:
         dtype: Any = np.float32,
         error_bad_data: bool = True,
         fill_bad_data_value: float = np.nan,
-    ) -> Dataset:
+    ) -> GeometryFM2DDataset:
         """Read data from a dfsu file.
 
         Parameters
@@ -413,16 +414,15 @@ class Dfsu2DH:
 
         time = pd.to_datetime(t_rel, unit="s", origin=self.start_time)
         item_infos = _get_item_info(dfs.ItemInfo, item_numbers)
+    
+        das = []
+        for ii, data in zip(item_infos, data_list):
+            da = GeometryFM2DDataArray(data=data, time=time, name=ii.name, type=ii.type,unit=ii.unit, dims=tuple(dims), geometry=self.geometry, dt=self.timestep)
+            das.append(da)
 
-        return Dataset.from_numpy(
-            data_list,
-            time=time,
-            items=item_infos,
-            geometry=geometry,
-            dims=dims,
-            validate=False,
-            dt=self.timestep,
-        )
+        return GeometryFM2DDataset(das)
+    
+
 
     def append(self, ds: Dataset, validate: bool = True) -> None:
         """Append data to an existing dfsu file.

@@ -10,6 +10,9 @@ import numpy as np
 import pandas as pd
 from tqdm import tqdm
 
+from mikeio.dataset._grid_dataset import Grid1DDataArray, Grid1DDataset
+from mikeio.eum._eum import ItemInfo
+
 from .. import __dfs_version__
 from ..dataset import Dataset
 from ._dfs import (
@@ -112,7 +115,7 @@ class Dfs1(_Dfs123):
         time: int | str | slice | None = None,
         keepdims: bool = False,
         dtype: Any = np.float32,
-    ) -> Dataset:
+    ) -> Grid1DDataset:
         """Read data from a dfs1 file.
 
         Parameters
@@ -171,19 +174,16 @@ class Dfs1(_Dfs123):
 
         time = pd.to_datetime(t_seconds, unit="s", origin=self.start_time)
 
-        items = _get_item_info(self._dfs.ItemInfo, item_numbers)
+        item_infos: list[ItemInfo] = _get_item_info(self._dfs.ItemInfo, item_numbers)
 
         self._dfs.Close()
+        
+        das = []
+        for ii, data in zip(item_infos, data_list):
+            da = Grid1DDataArray(data=data, time=time, name=ii.name, type=ii.type,unit=ii.unit, dims=tuple(dims), geometry=self.geometry, dt=self.timestep)
+            das.append(da)
 
-        return Dataset.from_numpy(
-            data=data_list,
-            time=time,
-            items=items,
-            dims=tuple(dims),
-            geometry=self.geometry,
-            validate=False,
-            dt=self._timestep,
-        )
+        return Grid1DDataset(das)
 
     @property
     def geometry(self) -> Grid1D:
