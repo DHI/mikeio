@@ -248,8 +248,8 @@ def test_read_area_polygon():
     assert subdomain.within(domain)
 
 
-def test_read_elements():
-    ds = mikeio.read(filename="tests/testdata/wind_north_sea.dfsu", elements=[0, 10])
+def test_read_elements() -> None:
+    ds = mikeio.Dfsu2DH("tests/testdata/wind_north_sea.dfsu").read(elements=[0, 10])
     assert ds.geometry.element_coordinates[0][0] == pytest.approx(1.4931853081272184)
     assert ds.Wind_speed.to_numpy()[0, 0] == pytest.approx(9.530759811401367)
 

@@ -1,3 +1,4 @@
+from pathlib import Path
 import numpy as np
 import pytest
 import pandas as pd
@@ -23,9 +24,9 @@ def test_repr():
     assert "dx" in text
 
 
-def test_properties():
+def test_properties() -> None:
     filename = r"tests/testdata/tide1.dfs1"
-    dfs = mikeio.open(filename)
+    dfs = mikeio.Dfs1(filename)
 
     assert dfs.dx == 0.06666692346334457
     assert dfs.x0 == 0.0
@@ -45,10 +46,10 @@ def test_properties():
     assert g.orientation == 180
 
 
-def test_read_write_properties(tmp_path):
+def test_read_write_properties(tmp_path:Path) -> None:
     # test that properties are the same after read-write
     filename = r"tests/testdata/tide1.dfs1"
-    ds1 = mikeio.read(filename)
+    ds1 = mikeio.Dfs1(filename).read()
 
     fp = tmp_path / "tide1.dfs1"
     ds1.to_dfs(fp)
