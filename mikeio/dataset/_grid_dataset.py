@@ -49,6 +49,6 @@ class Grid2DDataArray(DataArray):
     ) -> None:
         super().__init__(data=data,time=time, name=name, type=type, unit=unit, item=item,geometry=geometry, zn=zn, dims=dims, dt=dt)
 
-class Grid2DDataset(Dataset):
+class Grid2DDataset(Dataset[Grid2DDataArray, Grid2D]):
     def __init__(self, data: Mapping[str, Grid2DDataArray] | Sequence[Grid2DDataArray], validate:bool=False) -> None:
         super().__init__(data=data, validate=validate)

@@ -55,7 +55,7 @@ class GeometryFM3DDataArray(DataArray):
     ) -> None:
         super().__init__(data=data,time=time, name=name, type=type, unit=unit, item=item,geometry=geometry, zn=zn, dims=dims, dt=dt)
 
-class GeometryFM3DDataset(Dataset[GeometryFM2DDataArray]):
+class GeometryFM3DDataset(Dataset[GeometryFM2DDataArray, GeometryFM3D]):
     def __init__(self, data: Mapping[str, GeometryFM3DDataArray] | Sequence[GeometryFM3DDataArray], validate:bool=False) -> None:
         super().__init__(data=data, validate=validate)
 
