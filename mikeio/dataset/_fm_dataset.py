@@ -10,6 +10,8 @@ from ..eum import EUMType, EUMUnit, ItemInfo
 
 class GeometryFM2DDataArray(DataArray):
 
+    geometry: GeometryFM2D
+
     def __init__(
         self,
         data: np.ndarray,
@@ -25,10 +27,6 @@ class GeometryFM2DDataArray(DataArray):
         dt: float = 1.0,
     ) -> None:
         super().__init__(data=data,time=time, name=name, type=type, unit=unit, item=item,geometry=geometry, zn=zn, dims=dims, dt=dt)
-
-    @property
-    def geometry(self) -> GeometryFM2D:
-        return super()._geometry_txt()
 
 class GeometryFM2DDataset(Dataset[GeometryFM2DDataArray, GeometryFM2D]):
     def __init__(self, data: Mapping[str, GeometryFM2DDataArray] | Sequence[GeometryFM2DDataArray], validate:bool=False) -> None:
