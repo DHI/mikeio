@@ -61,7 +61,7 @@ def _get_dist_geo(
     return d  # type: ignore
 
 
-def _relative_cumulative_distance(
+def relative_cumulative_distance(
     coords: np.ndarray, reference: np.ndarray | None = None, is_geo: bool = False
 ) -> np.ndarray:
     """Calculate the cumulative relative distance along a path."""

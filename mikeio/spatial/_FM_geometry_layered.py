@@ -13,9 +13,9 @@ from mikecore.DfsuFile import DfsuFileType
 from ._FM_geometry import GeometryFM2D, _GeometryFM, _GeometryFMPlotter
 from ._geometry import GeometryPoint3D
 
-from ._FM_utils import _plot_vertical_profile, BoundaryPolygons
+from ._FM_plot import _plot_vertical_profile, BoundaryPolygons
 
-from ._utils import _relative_cumulative_distance
+from ._distance import relative_cumulative_distance
 
 Layer = Literal["all", "bottom", "top"]
 
@@ -753,7 +753,7 @@ class GeometryFMVerticalProfile(_GeometryFMLayered):
     def relative_element_distance(self) -> np.ndarray:
         ec = self.element_coordinates
         nc0 = self.node_coordinates[0, :2]
-        return _relative_cumulative_distance(ec, nc0, is_geo=self.is_geo)
+        return relative_cumulative_distance(ec, reference=nc0, is_geo=self.is_geo)
 
     def get_nearest_relative_distance(self, coords: tuple[float, float]) -> float:
         """For a point near a transect, find the nearest relative distance

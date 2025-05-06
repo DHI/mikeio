@@ -20,7 +20,7 @@ from scipy.spatial import cKDTree
 from ..eum import EUMType, EUMUnit
 from ..exceptions import OutsideModelDomainError
 from .._interpolation import get_idw_interpolant, interp2d
-from ._FM_utils import (
+from ._FM_plot import (
     _get_node_centered_data,
     _plot_map,
     BoundaryPolygons,
@@ -31,7 +31,7 @@ from ._FM_utils import (
 from ._geometry import GeometryPoint2D, _Geometry
 
 from ._grid_geometry import Grid2D
-from ._utils import xy_to_bbox
+from ._distance import xy_to_bbox
 
 
 if TYPE_CHECKING:

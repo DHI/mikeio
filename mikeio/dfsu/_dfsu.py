@@ -16,7 +16,7 @@ from mikecore.DfsFileFactory import DfsFileFactory
 from mikecore.eum import eumQuantity, eumUnit
 from tqdm import trange
 
-from mikeio.spatial._utils import xy_to_bbox
+from mikeio.spatial._distance import xy_to_bbox
 
 from .. import __dfs_version__
 from ..dataset import Dataset
@@ -31,7 +31,7 @@ from ..spatial import (
 )
 from ..spatial import Grid2D
 from .._track import _extract_track
-from ._common import get_elements_from_source, get_nodes_from_source
+from ._topology import get_elements_from_source, get_nodes_from_source
 from ..eum import ItemInfo, TimeStepUnit
 
 

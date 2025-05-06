@@ -26,7 +26,7 @@ import pandas as pd
 from mikecore.DfsuFile import DfsuFileType
 
 from ..eum import EUMType, EUMUnit, ItemInfo
-from ._data_utils import _get_time_idx_list, _n_selected_timesteps
+from .._time import _get_time_idx_list, _n_selected_timesteps
 
 if TYPE_CHECKING:
     from ._dataset import Dataset
@@ -620,8 +620,8 @@ class DataArray:
             if isinstance(k, Iterable) or k != slice(None):
                 if dims[j] == "time":
                     # getitem accepts fancy indexing only for time
-                    k = self._get_time_idx_list(self.time, k)
-                    if self._n_selected_timesteps(self.time, k) == 0:
+                    k = _get_time_idx_list(self.time, k)
+                    if _n_selected_timesteps(self.time, k) == 0:
                         raise IndexError("No timesteps found!")
                 da = da.isel(**{dims[j]: k})
         return da
@@ -2088,17 +2088,6 @@ class DataArray:
 
         return time
 
-    @staticmethod
-    def _get_time_idx_list(
-        time: pd.DatetimeIndex,
-        steps: int | Iterable[int] | str | datetime | pd.DatetimeIndex | slice,
-    ) -> list[int] | slice:
-        """Find list of idx in DatetimeIndex."""
-        return _get_time_idx_list(time, steps)
-
-    @staticmethod
-    def _n_selected_timesteps(time: Sized, k: slice | Sized) -> int:
-        return _n_selected_timesteps(time, k)
 
     @staticmethod
     def _is_boolean_mask(x: Any) -> bool:

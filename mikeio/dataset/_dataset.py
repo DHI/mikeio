@@ -2,6 +2,7 @@ from __future__ import annotations
 from pathlib import Path
 from datetime import datetime
 from copy import deepcopy
+import re
 from typing import (
     Iterable,
     Iterator,
@@ -30,7 +31,7 @@ if TYPE_CHECKING:
     import polars as pl
 
 from ._dataarray import DataArray
-from ._data_utils import _to_safe_name, _get_time_idx_list, _n_selected_timesteps
+from .._time import _get_time_idx_list, _n_selected_timesteps
 from ..eum import EUMType, EUMUnit, ItemInfo
 from ..spatial import (
     GeometryFM2D,
@@ -47,6 +48,10 @@ from ..spatial._FM_geometry import _GeometryFM
 from ._data_plot import _DatasetPlotter
 
 from ._dataarray import IndexType
+
+def _to_safe_name(name: str) -> str:
+    tmp = re.sub("[^0-9a-zA-Z]", "_", name)
+    return re.sub("_+", "_", tmp)  # Collapse multiple underscores
 
 
 class Dataset:
