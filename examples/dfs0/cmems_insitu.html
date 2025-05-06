@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.6.42">
+<meta name="generator" content="quarto-1.7.30">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
@@ -21,8 +21,9 @@ ul.task-list li input[type="checkbox"] {
   vertical-align: middle;
 }
 /* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
 pre > code.sourceCode { white-space: pre; position: relative; }
-pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
 pre > code.sourceCode > span:empty { height: 1.2em; }
 .sourceCode { overflow: visible; }
 code.sourceCode > span { color: inherit; text-decoration: inherit; }
@@ -33,7 +34,7 @@ div.sourceCode { overflow: auto; }
 }
 @media print {
 pre > code.sourceCode { white-space: pre-wrap; }
-pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
 }
 pre.numberSource code
   { counter-reset: source-line 0; }
@@ -65,15 +66,16 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <script src="../../site_libs/quarto-search/quarto-search.js"></script>
 <meta name="quarto:offset" content="../../">
 <link href="../../dhi.ico" rel="icon">
-<script src="../../site_libs/quarto-html/quarto.js"></script>
+<script src="../../site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="../../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
 <script src="../../site_libs/quarto-html/popper.min.js"></script>
 <script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
 <script src="../../site_libs/quarto-html/anchor.min.js"></script>
 <link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-2f5df379a58b258e96c21c0638c20c03.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-de070a7b0ab54f8780927367ac907214.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="../../site_libs/bootstrap/bootstrap-c55491ef36bbbc1896d0375eee332cfe.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<link href="../../site_libs/bootstrap/bootstrap-6c437caa095562069354f84ede9975ef.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -108,7 +110,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 </head>
 
-<body class="nav-fixed">
+<body class="nav-fixed quarto-light">
 
 <div id="quarto-search-results"></div>
   <header id="quarto-header" class="headroom fixed-top">
@@ -196,12 +198,12 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 
 <p>Copernicus Marine provides access to a wide range of model and <a href="https://marine.copernicus.eu/about/producers/insitu-tac"><em>in-situ</em> data</a>. In this example we will look at how to access the <em>in-situ</em> data and convert it to a MIKE IO dataset.</p>
-<div id="f291b568" class="cell" data-execution_count="1">
+<div id="9ac1f494" class="cell" data-execution_count="1">
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> xarray <span class="im">as</span> xr</span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> mikeio</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<div id="b544d92a" class="cell" data-execution_count="2">
+<div id="4d75e0dc" class="cell" data-execution_count="2">
 <div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>fino <span class="op">=</span> xr.open_dataset(<span class="st">"../../data/NO_TS_MO_FINO1_202209.nc"</span>)</span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>fino</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="2">
@@ -611,11 +613,11 @@ Attributes: (12/46)
     qc_manual:                      OceanSITES User's Manual v1.2
     date_update:                    2022-10-07T05:39:40Z
     history:                        2022-10-01T18:04:25Z : Creation; 2022-10-...
-    wmo_inst_type:                  </pre><div class="xr-wrap" style="display:none"><div class="xr-header"><div class="xr-obj-type">xarray.Dataset</div></div><ul class="xr-sections"><li class="xr-section-item"><input id="section-c3573e25-446e-44c6-89fb-a54df2fdd98e" class="xr-section-summary-in" type="checkbox" disabled=""><label for="section-c3573e25-446e-44c6-89fb-a54df2fdd98e" class="xr-section-summary" title="Expand/collapse section">Dimensions:</label><div class="xr-section-inline-details"><ul class="xr-dim-list"><li><span class="xr-has-index">TIME</span>: 2879</li><li><span class="xr-has-index">LATITUDE</span>: 2879</li><li><span class="xr-has-index">LONGITUDE</span>: 2879</li><li><span>DEPTH</span>: 7</li><li><span>POSITION</span>: 2879</li></ul></div><div class="xr-section-details"></div></li><li class="xr-section-item"><input id="section-1c06349b-10b4-4032-87e7-ebb833d195ae" class="xr-section-summary-in" type="checkbox" checked=""><label for="section-1c06349b-10b4-4032-87e7-ebb833d195ae" class="xr-section-summary">Coordinates: <span>(4)</span></label><div class="xr-section-inline-details"></div><div class="xr-section-details"><ul class="xr-var-list"><li class="xr-var-item"><div class="xr-var-name"><span class="xr-has-index">TIME</span></div><div class="xr-var-dims">(TIME)</div><div class="xr-var-dtype">datetime64[ns]</div><div class="xr-var-preview xr-preview">2022-09-01 ... 2022-09-30T23:31:...</div><input id="attrs-7d21b982-bbbb-4dfc-95b0-02cb26d657fa" class="xr-var-attrs-in" type="checkbox"><label for="attrs-7d21b982-bbbb-4dfc-95b0-02cb26d657fa" title="Show/Hide attributes"><svg class="icon xr-icon-file-text2"><use href="#icon-file-text2"></use></svg></label><input id="data-7610f758-43b0-40be-aae9-8f23554522d2" class="xr-var-data-in" type="checkbox"><label for="data-7610f758-43b0-40be-aae9-8f23554522d2" title="Show/Hide data repr"><svg class="icon xr-icon-database"><use href="#icon-database"></use></svg></label><div class="xr-var-attrs"><dl class="xr-attrs"><dt><span>long_name :</span></dt><dd>Time</dd><dt><span>standard_name :</span></dt><dd>time</dd><dt><span>valid_min :</span></dt><dd>-90000.0</dd><dt><span>valid_max :</span></dt><dd>90000.0</dd><dt><span>uncertainty :</span></dt><dd> </dd><dt><span>comment :</span></dt><dd> </dd><dt><span>axis :</span></dt><dd>T</dd><dt><span>ancillary_variables :</span></dt><dd>TIME_QC</dd></dl></div><div class="xr-var-data"><pre>array(['2022-09-01T00:00:00.000000000', '2022-09-01T00:02:00.000000000',
+    wmo_inst_type:                  </pre><div class="xr-wrap" style="display:none"><div class="xr-header"><div class="xr-obj-type">xarray.Dataset</div></div><ul class="xr-sections"><li class="xr-section-item"><input id="section-75ad9f42-3be4-47db-b611-b7e5440f18f6" class="xr-section-summary-in" type="checkbox" disabled=""><label for="section-75ad9f42-3be4-47db-b611-b7e5440f18f6" class="xr-section-summary" title="Expand/collapse section">Dimensions:</label><div class="xr-section-inline-details"><ul class="xr-dim-list"><li><span class="xr-has-index">TIME</span>: 2879</li><li><span class="xr-has-index">LATITUDE</span>: 2879</li><li><span class="xr-has-index">LONGITUDE</span>: 2879</li><li><span>DEPTH</span>: 7</li><li><span>POSITION</span>: 2879</li></ul></div><div class="xr-section-details"></div></li><li class="xr-section-item"><input id="section-481a607c-9203-4062-97b2-449aac25e7ff" class="xr-section-summary-in" type="checkbox" checked=""><label for="section-481a607c-9203-4062-97b2-449aac25e7ff" class="xr-section-summary">Coordinates: <span>(4)</span></label><div class="xr-section-inline-details"></div><div class="xr-section-details"><ul class="xr-var-list"><li class="xr-var-item"><div class="xr-var-name"><span class="xr-has-index">TIME</span></div><div class="xr-var-dims">(TIME)</div><div class="xr-var-dtype">datetime64[ns]</div><div class="xr-var-preview xr-preview">2022-09-01 ... 2022-09-30T23:31:...</div><input id="attrs-2cee4915-a388-4386-9a71-df4dac8fc609" class="xr-var-attrs-in" type="checkbox"><label for="attrs-2cee4915-a388-4386-9a71-df4dac8fc609" title="Show/Hide attributes"><svg class="icon xr-icon-file-text2"><use href="#icon-file-text2"></use></svg></label><input id="data-f6ec06b7-2aa5-48fa-81ea-1e6b08ba6db1" class="xr-var-data-in" type="checkbox"><label for="data-f6ec06b7-2aa5-48fa-81ea-1e6b08ba6db1" title="Show/Hide data repr"><svg class="icon xr-icon-database"><use href="#icon-database"></use></svg></label><div class="xr-var-attrs"><dl class="xr-attrs"><dt><span>long_name :</span></dt><dd>Time</dd><dt><span>standard_name :</span></dt><dd>time</dd><dt><span>valid_min :</span></dt><dd>-90000.0</dd><dt><span>valid_max :</span></dt><dd>90000.0</dd><dt><span>uncertainty :</span></dt><dd> </dd><dt><span>comment :</span></dt><dd> </dd><dt><span>axis :</span></dt><dd>T</dd><dt><span>ancillary_variables :</span></dt><dd>TIME_QC</dd></dl></div><div class="xr-var-data"><pre>array(['2022-09-01T00:00:00.000000000', '2022-09-01T00:02:00.000000000',
        '2022-09-01T00:30:00.000000000', ..., '2022-09-30T23:02:00.000000000',
        '2022-09-30T23:30:00.000000000', '2022-09-30T23:31:59.999999744'],
-      shape=(2879,), dtype='datetime64[ns]')</pre></div></li><li class="xr-var-item"><div class="xr-var-name"><span class="xr-has-index">LATITUDE</span></div><div class="xr-var-dims">(LATITUDE)</div><div class="xr-var-dtype">float32</div><div class="xr-var-preview xr-preview">54.0 54.0 54.0 ... 54.0 54.0 54.0</div><input id="attrs-48658bfc-285d-4c17-81ff-8cd7db089fc8" class="xr-var-attrs-in" type="checkbox"><label for="attrs-48658bfc-285d-4c17-81ff-8cd7db089fc8" title="Show/Hide attributes"><svg class="icon xr-icon-file-text2"><use href="#icon-file-text2"></use></svg></label><input id="data-4452bcb1-df48-4dfc-b838-39a8d9b7434b" class="xr-var-data-in" type="checkbox"><label for="data-4452bcb1-df48-4dfc-b838-39a8d9b7434b" title="Show/Hide data repr"><svg class="icon xr-icon-database"><use href="#icon-database"></use></svg></label><div class="xr-var-attrs"><dl class="xr-attrs"><dt><span>long_name :</span></dt><dd>Latitude of each location</dd><dt><span>standard_name :</span></dt><dd>latitude</dd><dt><span>units :</span></dt><dd>degree_north</dd><dt><span>valid_min :</span></dt><dd>-90.0</dd><dt><span>valid_max :</span></dt><dd>90.0</dd><dt><span>uncertainty :</span></dt><dd></dd><dt><span>comment :</span></dt><dd></dd><dt><span>axis :</span></dt><dd>Y</dd><dt><span>ancillary_variables :</span></dt><dd>POSITION_QC</dd></dl></div><div class="xr-var-data"><pre>array([54., 54., 54., ..., 54., 54., 54.], shape=(2879,), dtype=float32)</pre></div></li><li class="xr-var-item"><div class="xr-var-name"><span class="xr-has-index">LONGITUDE</span></div><div class="xr-var-dims">(LONGITUDE)</div><div class="xr-var-dtype">float32</div><div class="xr-var-preview xr-preview">6.583 6.583 6.583 ... 6.583 6.583</div><input id="attrs-797d7b1d-f3d3-45a6-84fe-0ff57bc00ec7" class="xr-var-attrs-in" type="checkbox"><label for="attrs-797d7b1d-f3d3-45a6-84fe-0ff57bc00ec7" title="Show/Hide attributes"><svg class="icon xr-icon-file-text2"><use href="#icon-file-text2"></use></svg></label><input id="data-9636637f-38a2-42ef-aa4d-6b1ebb5e43bb" class="xr-var-data-in" type="checkbox"><label for="data-9636637f-38a2-42ef-aa4d-6b1ebb5e43bb" title="Show/Hide data repr"><svg class="icon xr-icon-database"><use href="#icon-database"></use></svg></label><div class="xr-var-attrs"><dl class="xr-attrs"><dt><span>long_name :</span></dt><dd>Longitude of each location</dd><dt><span>standard_name :</span></dt><dd>longitude</dd><dt><span>units :</span></dt><dd>degree_east</dd><dt><span>valid_min :</span></dt><dd>-180.0</dd><dt><span>valid_max :</span></dt><dd>180.0</dd><dt><span>uncertainty :</span></dt><dd></dd><dt><span>comment :</span></dt><dd></dd><dt><span>axis :</span></dt><dd>X</dd><dt><span>ancillary_variables :</span></dt><dd>POSITION_QC</dd></dl></div><div class="xr-var-data"><pre>array([6.583333, 6.583333, 6.583333, ..., 6.583333, 6.583333, 6.583333],
-      shape=(2879,), dtype=float32)</pre></div></li><li class="xr-var-item"><div class="xr-var-name"><span>DEPH</span></div><div class="xr-var-dims">(TIME, DEPTH)</div><div class="xr-var-dtype">float32</div><div class="xr-var-preview xr-preview">...</div><input id="attrs-fe5edd6d-0382-4e0f-99db-53b264a84fbb" class="xr-var-attrs-in" type="checkbox"><label for="attrs-fe5edd6d-0382-4e0f-99db-53b264a84fbb" title="Show/Hide attributes"><svg class="icon xr-icon-file-text2"><use href="#icon-file-text2"></use></svg></label><input id="data-95cf3e2b-2bb3-4ac1-acf4-bf5760894635" class="xr-var-data-in" type="checkbox"><label for="data-95cf3e2b-2bb3-4ac1-acf4-bf5760894635" title="Show/Hide data repr"><svg class="icon xr-icon-database"><use href="#icon-database"></use></svg></label><div class="xr-var-attrs"><dl class="xr-attrs"><dt><span>long_name :</span></dt><dd>Depth</dd><dt><span>standard_name :</span></dt><dd>depth</dd><dt><span>units :</span></dt><dd>m</dd><dt><span>positive :</span></dt><dd>down</dd><dt><span>valid_min :</span></dt><dd>-12000.0</dd><dt><span>valid_max :</span></dt><dd>12000.0</dd><dt><span>uncertainty :</span></dt><dd></dd><dt><span>comment :</span></dt><dd></dd><dt><span>axis :</span></dt><dd>Z</dd><dt><span>reference :</span></dt><dd>sea_level</dd><dt><span>data_mode :</span></dt><dd>R</dd><dt><span>ancillary_variables :</span></dt><dd>DEPH_QC</dd></dl></div><div class="xr-var-data"><pre>[20153 values with dtype=float32]</pre></div></li></ul></div></li><li class="xr-section-item"><input id="section-36ffb3b4-3488-4345-9ae5-229eb4e46235" class="xr-section-summary-in" type="checkbox"><label for="section-36ffb3b4-3488-4345-9ae5-229eb4e46235" class="xr-section-summary">Data variables: <span>(22)</span></label><div class="xr-section-inline-details"></div><div class="xr-section-details"><ul class="xr-var-list"><li class="xr-var-item"><div class="xr-var-name"><span>DEPH_QC</span></div><div class="xr-var-dims">(TIME, DEPTH)</div><div class="xr-var-dtype">float32</div><div class="xr-var-preview xr-preview">...</div><input id="attrs-c68ce3ab-2537-463c-a762-87830974e649" class="xr-var-attrs-in" type="checkbox"><label for="attrs-c68ce3ab-2537-463c-a762-87830974e649" title="Show/Hide attributes"><svg class="icon xr-icon-file-text2"><use href="#icon-file-text2"></use></svg></label><input id="data-6de4de83-e3a8-4524-ab9f-0c5becad67a2" class="xr-var-data-in" type="checkbox"><label for="data-6de4de83-e3a8-4524-ab9f-0c5becad67a2" title="Show/Hide data repr"><svg class="icon xr-icon-database"><use href="#icon-database"></use></svg></label><div class="xr-var-attrs"><dl class="xr-attrs"><dt><span>long_name :</span></dt><dd>Depth quality flag</dd><dt><span>conventions :</span></dt><dd>Copernicus Marine In Situ reference table 2</dd><dt><span>valid_min :</span></dt><dd>0</dd><dt><span>valid_max :</span></dt><dd>9</dd><dt><span>flag_values :</span></dt><dd>[0 1 2 3 4 5 6 7 8 9]</dd><dt><span>flag_meanings :</span></dt><dd>no_qc_performed good_data probably_good_data bad_data_that_are_potentially_correctable bad_data value_changed value_below_detection nominal_value interpolated_value missing_value</dd></dl></div><div class="xr-var-data"><pre>[20153 values with dtype=float32]</pre></div></li><li class="xr-var-item"><div class="xr-var-name"><span>TIME_QC</span></div><div class="xr-var-dims">(TIME)</div><div class="xr-var-dtype">float32</div><div class="xr-var-preview xr-preview">...</div><input id="attrs-c4836b5e-4292-43bb-a423-e312c4739338" class="xr-var-attrs-in" type="checkbox"><label for="attrs-c4836b5e-4292-43bb-a423-e312c4739338" title="Show/Hide attributes"><svg class="icon xr-icon-file-text2"><use href="#icon-file-text2"></use></svg></label><input id="data-b0599b00-ef2a-4c4b-b89e-58c2821ebe76" class="xr-var-data-in" type="checkbox"><label for="data-b0599b00-ef2a-4c4b-b89e-58c2821ebe76" title="Show/Hide data repr"><svg class="icon xr-icon-database"><use href="#icon-database"></use></svg></label><div class="xr-var-attrs"><dl class="xr-attrs"><dt><span>long_name :</span></dt><dd>Time quality flag</dd><dt><span>conventions :</span></dt><dd>Copernicus Marine In Situ reference table 2</dd><dt><span>valid_min :</span></dt><dd>0</dd><dt><span>valid_max :</span></dt><dd>9</dd><dt><span>flag_values :</span></dt><dd>[0 1 2 3 4 5 6 7 8 9]</dd><dt><span>flag_meanings :</span></dt><dd>no_qc_performed good_data probably_good_data bad_data_that_are_potentially_correctable bad_data value_changed value_below_detection nominal_value interpolated_value missing_value</dd></dl></div><div class="xr-var-data"><pre>[2879 values with dtype=float32]</pre></div></li><li class="xr-var-item"><div class="xr-var-name"><span>POSITION_QC</span></div><div class="xr-var-dims">(POSITION)</div><div class="xr-var-dtype">float32</div><div class="xr-var-preview xr-preview">...</div><input id="attrs-90e732f9-13b8-4dde-87b0-259db92ed4ca" class="xr-var-attrs-in" type="checkbox"><label for="attrs-90e732f9-13b8-4dde-87b0-259db92ed4ca" title="Show/Hide attributes"><svg class="icon xr-icon-file-text2"><use href="#icon-file-text2"></use></svg></label><input id="data-2579f2a7-00f6-4716-bcb2-66de0579f513" class="xr-var-data-in" type="checkbox"><label for="data-2579f2a7-00f6-4716-bcb2-66de0579f513" title="Show/Hide data repr"><svg class="icon xr-icon-database"><use href="#icon-database"></use></svg></label><div class="xr-var-attrs"><dl class="xr-attrs"><dt><span>long_name :</span></dt><dd>Position quality flag</dd><dt><span>conventions :</span></dt><dd>Copernicus Marine In Situ reference table 2</dd><dt><span>valid_min :</span></dt><dd>0</dd><dt><span>valid_max :</span></dt><dd>9</dd><dt><span>flag_values :</span></dt><dd>[0 1 2 3 4 5 6 7 8 9]</dd><dt><span>flag_meanings :</span></dt><dd>no_qc_performed good_data probably_good_data bad_data_that_are_potentially_correctable bad_data value_changed value_below_detection nominal_value interpolated_value missing_value</dd></dl></div><div class="xr-var-data"><pre>[2879 values with dtype=float32]</pre></div></li><li class="xr-var-item"><div class="xr-var-name"><span>TEMP</span></div><div class="xr-var-dims">(TIME, DEPTH)</div><div class="xr-var-dtype">float64</div><div class="xr-var-preview xr-preview">...</div><input id="attrs-c03fc726-3f06-4f83-a195-7ca4ac6560a0" class="xr-var-attrs-in" type="checkbox"><label for="attrs-c03fc726-3f06-4f83-a195-7ca4ac6560a0" title="Show/Hide attributes"><svg class="icon xr-icon-file-text2"><use href="#icon-file-text2"></use></svg></label><input id="data-009e5142-5d97-4137-8ca0-1bc75153b53d" class="xr-var-data-in" type="checkbox"><label for="data-009e5142-5d97-4137-8ca0-1bc75153b53d" title="Show/Hide data repr"><svg class="icon xr-icon-database"><use href="#icon-database"></use></svg></label><div class="xr-var-attrs"><dl class="xr-attrs"><dt><span>standard_name :</span></dt><dd>sea_water_temperature</dd><dt><span>units :</span></dt><dd>degrees_C</dd><dt><span>long_name :</span></dt><dd>Sea temperature</dd><dt><span>valid_min :</span></dt><dd>-2000</dd><dt><span>valid_max :</span></dt><dd>32000</dd><dt><span>comment :</span></dt><dd> </dd><dt><span>uncertainty :</span></dt><dd> </dd><dt><span>accuracy :</span></dt><dd> </dd><dt><span>precision :</span></dt><dd> </dd><dt><span>resolution :</span></dt><dd> </dd><dt><span>cell_methods :</span></dt><dd> </dd><dt><span>sensor_depth :</span></dt><dd>0.0</dd><dt><span>sensor_mount :</span></dt><dd> </dd><dt><span>sensor_orientation :</span></dt><dd> </dd><dt><span>data_mode :</span></dt><dd>R</dd><dt><span>ancillary_variables :</span></dt><dd>TEMP_QC</dd></dl></div><div class="xr-var-data"><pre>[20153 values with dtype=float64]</pre></div></li><li class="xr-var-item"><div class="xr-var-name"><span>TEMP_QC</span></div><div class="xr-var-dims">(TIME, DEPTH)</div><div class="xr-var-dtype">float32</div><div class="xr-var-preview xr-preview">...</div><input id="attrs-6948959c-c307-4846-9ff2-a161985fa84c" class="xr-var-attrs-in" type="checkbox"><label for="attrs-6948959c-c307-4846-9ff2-a161985fa84c" title="Show/Hide attributes"><svg class="icon xr-icon-file-text2"><use href="#icon-file-text2"></use></svg></label><input id="data-91e288d3-5c79-49d8-8f21-8e3723eeaece" class="xr-var-data-in" type="checkbox"><label for="data-91e288d3-5c79-49d8-8f21-8e3723eeaece" title="Show/Hide data repr"><svg class="icon xr-icon-database"><use href="#icon-database"></use></svg></label><div class="xr-var-attrs"><dl class="xr-attrs"><dt><span>long_name :</span></dt><dd>Sea temperature quality flag</dd><dt><span>conventions :</span></dt><dd>Copernicus Marine In Situ reference table 2</dd><dt><span>valid_min :</span></dt><dd>0</dd><dt><span>valid_max :</span></dt><dd>9</dd><dt><span>flag_values :</span></dt><dd>[0 1 2 3 4 5 6 7 8 9]</dd><dt><span>flag_meanings :</span></dt><dd>no_qc_performed good_data probably_good_data bad_data_that_are_potentially_correctable bad_data value_changed value_below_detection nominal_value interpolated_value missing_value</dd></dl></div><div class="xr-var-data"><pre>[20153 values with dtype=float32]</pre></div></li><li class="xr-var-item"><div class="xr-var-name"><span>VHM0</span></div><div class="xr-var-dims">(TIME, DEPTH)</div><div class="xr-var-dtype">float64</div><div class="xr-var-preview xr-preview">...</div><input id="attrs-8749c622-634a-4581-8751-30c26da28f62" class="xr-var-attrs-in" type="checkbox"><label for="attrs-8749c622-634a-4581-8751-30c26da28f62" title="Show/Hide attributes"><svg class="icon xr-icon-file-text2"><use href="#icon-file-text2"></use></svg></label><input id="data-fba22d28-3304-4fa8-9d9e-f89753b582dd" class="xr-var-data-in" type="checkbox"><label for="data-fba22d28-3304-4fa8-9d9e-f89753b582dd" title="Show/Hide data repr"><svg class="icon xr-icon-database"><use href="#icon-database"></use></svg></label><div class="xr-var-attrs"><dl class="xr-attrs"><dt><span>standard_name :</span></dt><dd>sea_surface_wave_significant_height</dd><dt><span>units :</span></dt><dd>m</dd><dt><span>long_name :</span></dt><dd>Spectral significant wave height (Hm0)</dd><dt><span>valid_min :</span></dt><dd>1</dd><dt><span>valid_max :</span></dt><dd>25000</dd><dt><span>comment :</span></dt><dd> </dd><dt><span>uncertainty :</span></dt><dd> </dd><dt><span>accuracy :</span></dt><dd> </dd><dt><span>precision :</span></dt><dd> </dd><dt><span>resolution :</span></dt><dd> </dd><dt><span>cell_methods :</span></dt><dd> </dd><dt><span>type_of_analysis :</span></dt><dd>spectral analysis</dd><dt><span>sensor_depth :</span></dt><dd>0.0</dd><dt><span>sensor_mount :</span></dt><dd> </dd><dt><span>sensor_orientation :</span></dt><dd> </dd><dt><span>data_mode :</span></dt><dd>M</dd><dt><span>ancillary_variables :</span></dt><dd>VHM0_QC VHM0_DM</dd></dl></div><div class="xr-var-data"><pre>[20153 values with dtype=float64]</pre></div></li><li class="xr-var-item"><div class="xr-var-name"><span>VHM0_QC</span></div><div class="xr-var-dims">(TIME, DEPTH)</div><div class="xr-var-dtype">float32</div><div class="xr-var-preview xr-preview">...</div><input id="attrs-b19f5926-11df-400c-8670-6acc2bf96d24" class="xr-var-attrs-in" type="checkbox"><label for="attrs-b19f5926-11df-400c-8670-6acc2bf96d24" title="Show/Hide attributes"><svg class="icon xr-icon-file-text2"><use href="#icon-file-text2"></use></svg></label><input id="data-fd2990d4-8751-4a7c-9c56-0dd756a9a956" class="xr-var-data-in" type="checkbox"><label for="data-fd2990d4-8751-4a7c-9c56-0dd756a9a956" title="Show/Hide data repr"><svg class="icon xr-icon-database"><use href="#icon-database"></use></svg></label><div class="xr-var-attrs"><dl class="xr-attrs"><dt><span>long_name :</span></dt><dd>Spectral significant wave height (Hm0) quality flag</dd><dt><span>conventions :</span></dt><dd>Copernicus Marine In Situ reference table 2</dd><dt><span>valid_min :</span></dt><dd>0</dd><dt><span>valid_max :</span></dt><dd>9</dd><dt><span>flag_values :</span></dt><dd>[0 1 2 3 4 5 6 7 8 9]</dd><dt><span>flag_meanings :</span></dt><dd>no_qc_performed good_data probably_good_data bad_data_that_are_potentially_correctable bad_data value_changed value_below_detection nominal_value interpolated_value missing_value</dd></dl></div><div class="xr-var-data"><pre>[20153 values with dtype=float32]</pre></div></li><li class="xr-var-item"><div class="xr-var-name"><span>VHM0_DM</span></div><div class="xr-var-dims">(TIME, DEPTH)</div><div class="xr-var-dtype">object</div><div class="xr-var-preview xr-preview">...</div><input id="attrs-7fab9e1e-889b-4138-acc0-8df2db029aa6" class="xr-var-attrs-in" type="checkbox"><label for="attrs-7fab9e1e-889b-4138-acc0-8df2db029aa6" title="Show/Hide attributes"><svg class="icon xr-icon-file-text2"><use href="#icon-file-text2"></use></svg></label><input id="data-597df487-985e-4856-b704-e3ba6cc389a7" class="xr-var-data-in" type="checkbox"><label for="data-597df487-985e-4856-b704-e3ba6cc389a7" title="Show/Hide data repr"><svg class="icon xr-icon-database"><use href="#icon-database"></use></svg></label><div class="xr-var-attrs"><dl class="xr-attrs"><dt><span>long_name :</span></dt><dd>Spectral significant wave height (Hm0) method of data processing</dd><dt><span>conventions :</span></dt><dd>Copernicus Marine In Situ reference table 1</dd><dt><span>flag_values :</span></dt><dd>R, A, D</dd><dt><span>flag_meanings :</span></dt><dd>real-time adjusted-in-real-time delayed-mode</dd></dl></div><div class="xr-var-data"><pre>[20153 values with dtype=object]</pre></div></li><li class="xr-var-item"><div class="xr-var-name"><span>VZMX</span></div><div class="xr-var-dims">(TIME, DEPTH)</div><div class="xr-var-dtype">float64</div><div class="xr-var-preview xr-preview">...</div><input id="attrs-8ded6c39-98fb-4305-9a4c-1274cc730117" class="xr-var-attrs-in" type="checkbox"><label for="attrs-8ded6c39-98fb-4305-9a4c-1274cc730117" title="Show/Hide attributes"><svg class="icon xr-icon-file-text2"><use href="#icon-file-text2"></use></svg></label><input id="data-2dab856c-5651-46d4-b41a-73fad3132d90" class="xr-var-data-in" type="checkbox"><label for="data-2dab856c-5651-46d4-b41a-73fad3132d90" title="Show/Hide data repr"><svg class="icon xr-icon-database"><use href="#icon-database"></use></svg></label><div class="xr-var-attrs"><dl class="xr-attrs"><dt><span>standard_name :</span></dt><dd>sea_surface_wave_maximum_height</dd><dt><span>units :</span></dt><dd>m</dd><dt><span>long_name :</span></dt><dd>Maximum zero crossing wave height (Hmax)</dd><dt><span>valid_min :</span></dt><dd>0</dd><dt><span>valid_max :</span></dt><dd>40000</dd><dt><span>comment :</span></dt><dd> </dd><dt><span>uncertainty :</span></dt><dd> </dd><dt><span>accuracy :</span></dt><dd> </dd><dt><span>precision :</span></dt><dd> </dd><dt><span>resolution :</span></dt><dd> </dd><dt><span>cell_methods :</span></dt><dd> </dd><dt><span>type_of_analysis :</span></dt><dd>zero crossing</dd><dt><span>sensor_depth :</span></dt><dd>0.0</dd><dt><span>sensor_mount :</span></dt><dd> </dd><dt><span>sensor_orientation :</span></dt><dd> </dd><dt><span>data_mode :</span></dt><dd>M</dd><dt><span>ancillary_variables :</span></dt><dd>VZMX_QC VZMX_DM</dd></dl></div><div class="xr-var-data"><pre>[20153 values with dtype=float64]</pre></div></li><li class="xr-var-item"><div class="xr-var-name"><span>VZMX_QC</span></div><div class="xr-var-dims">(TIME, DEPTH)</div><div class="xr-var-dtype">float32</div><div class="xr-var-preview xr-preview">...</div><input id="attrs-6df4f9a3-a79a-4a78-ba69-ab425c4d449e" class="xr-var-attrs-in" type="checkbox"><label for="attrs-6df4f9a3-a79a-4a78-ba69-ab425c4d449e" title="Show/Hide attributes"><svg class="icon xr-icon-file-text2"><use href="#icon-file-text2"></use></svg></label><input id="data-3474d978-966c-4b91-935d-9ba8ede29129" class="xr-var-data-in" type="checkbox"><label for="data-3474d978-966c-4b91-935d-9ba8ede29129" title="Show/Hide data repr"><svg class="icon xr-icon-database"><use href="#icon-database"></use></svg></label><div class="xr-var-attrs"><dl class="xr-attrs"><dt><span>long_name :</span></dt><dd>Maximum zero crossing wave height (Hmax) quality flag</dd><dt><span>conventions :</span></dt><dd>Copernicus Marine In Situ reference table 2</dd><dt><span>valid_min :</span></dt><dd>0</dd><dt><span>valid_max :</span></dt><dd>9</dd><dt><span>flag_values :</span></dt><dd>[0 1 2 3 4 5 6 7 8 9]</dd><dt><span>flag_meanings :</span></dt><dd>no_qc_performed good_data probably_good_data bad_data_that_are_potentially_correctable bad_data value_changed value_below_detection nominal_value interpolated_value missing_value</dd></dl></div><div class="xr-var-data"><pre>[20153 values with dtype=float32]</pre></div></li><li class="xr-var-item"><div class="xr-var-name"><span>VZMX_DM</span></div><div class="xr-var-dims">(TIME, DEPTH)</div><div class="xr-var-dtype">object</div><div class="xr-var-preview xr-preview">...</div><input id="attrs-97237014-24f8-49bb-ab70-98f801b9c6e5" class="xr-var-attrs-in" type="checkbox"><label for="attrs-97237014-24f8-49bb-ab70-98f801b9c6e5" title="Show/Hide attributes"><svg class="icon xr-icon-file-text2"><use href="#icon-file-text2"></use></svg></label><input id="data-d527d233-7961-4be6-8aba-5e2dbb9de7b6" class="xr-var-data-in" type="checkbox"><label for="data-d527d233-7961-4be6-8aba-5e2dbb9de7b6" title="Show/Hide data repr"><svg class="icon xr-icon-database"><use href="#icon-database"></use></svg></label><div class="xr-var-attrs"><dl class="xr-attrs"><dt><span>long_name :</span></dt><dd>Maximum zero crossing wave height (Hmax) method of data processing</dd><dt><span>conventions :</span></dt><dd>Copernicus Marine In Situ reference table 1</dd><dt><span>flag_values :</span></dt><dd>R, A, D</dd><dt><span>flag_meanings :</span></dt><dd>real-time adjusted-in-real-time delayed-mode</dd></dl></div><div class="xr-var-data"><pre>[20153 values with dtype=object]</pre></div></li><li class="xr-var-item"><div class="xr-var-name"><span>VTM02</span></div><div class="xr-var-dims">(TIME, DEPTH)</div><div class="xr-var-dtype">float64</div><div class="xr-var-preview xr-preview">...</div><input id="attrs-bb8dda34-0006-42b2-92d0-1bca6b922895" class="xr-var-attrs-in" type="checkbox"><label for="attrs-bb8dda34-0006-42b2-92d0-1bca6b922895" title="Show/Hide attributes"><svg class="icon xr-icon-file-text2"><use href="#icon-file-text2"></use></svg></label><input id="data-712f5c3f-a299-4d1e-85b1-774aa81debd7" class="xr-var-data-in" type="checkbox"><label for="data-712f5c3f-a299-4d1e-85b1-774aa81debd7" title="Show/Hide data repr"><svg class="icon xr-icon-database"><use href="#icon-database"></use></svg></label><div class="xr-var-attrs"><dl class="xr-attrs"><dt><span>standard_name :</span></dt><dd>sea_surface_wave_mean_period_from_variance_spectral_density_second_frequency_moment</dd><dt><span>units :</span></dt><dd>s</dd><dt><span>long_name :</span></dt><dd>Spectral moments (0,2) wave period (Tm02)</dd><dt><span>valid_min :</span></dt><dd>1000</dd><dt><span>valid_max :</span></dt><dd>25000</dd><dt><span>comment :</span></dt><dd> </dd><dt><span>uncertainty :</span></dt><dd> </dd><dt><span>accuracy :</span></dt><dd> </dd><dt><span>precision :</span></dt><dd> </dd><dt><span>resolution :</span></dt><dd> </dd><dt><span>cell_methods :</span></dt><dd> </dd><dt><span>type_of_analysis :</span></dt><dd>spectral analysis</dd><dt><span>sensor_depth :</span></dt><dd>0.0</dd><dt><span>sensor_mount :</span></dt><dd> </dd><dt><span>sensor_orientation :</span></dt><dd> </dd><dt><span>data_mode :</span></dt><dd>M</dd><dt><span>ancillary_variables :</span></dt><dd>VTM02_QC VTM02_DM</dd></dl></div><div class="xr-var-data"><pre>[20153 values with dtype=float64]</pre></div></li><li class="xr-var-item"><div class="xr-var-name"><span>VTM02_QC</span></div><div class="xr-var-dims">(TIME, DEPTH)</div><div class="xr-var-dtype">float32</div><div class="xr-var-preview xr-preview">...</div><input id="attrs-dbad3809-2759-4b4b-8bf1-a29966e7163e" class="xr-var-attrs-in" type="checkbox"><label for="attrs-dbad3809-2759-4b4b-8bf1-a29966e7163e" title="Show/Hide attributes"><svg class="icon xr-icon-file-text2"><use href="#icon-file-text2"></use></svg></label><input id="data-a79cc68a-e579-4405-b9d6-a957737479e2" class="xr-var-data-in" type="checkbox"><label for="data-a79cc68a-e579-4405-b9d6-a957737479e2" title="Show/Hide data repr"><svg class="icon xr-icon-database"><use href="#icon-database"></use></svg></label><div class="xr-var-attrs"><dl class="xr-attrs"><dt><span>long_name :</span></dt><dd>Spectral moments (0,2) wave period (Tm02) quality flag</dd><dt><span>conventions :</span></dt><dd>Copernicus Marine In Situ reference table 2</dd><dt><span>valid_min :</span></dt><dd>0</dd><dt><span>valid_max :</span></dt><dd>9</dd><dt><span>flag_values :</span></dt><dd>[0 1 2 3 4 5 6 7 8 9]</dd><dt><span>flag_meanings :</span></dt><dd>no_qc_performed good_data probably_good_data bad_data_that_are_potentially_correctable bad_data value_changed value_below_detection nominal_value interpolated_value missing_value</dd></dl></div><div class="xr-var-data"><pre>[20153 values with dtype=float32]</pre></div></li><li class="xr-var-item"><div class="xr-var-name"><span>VTM02_DM</span></div><div class="xr-var-dims">(TIME, DEPTH)</div><div class="xr-var-dtype">object</div><div class="xr-var-preview xr-preview">...</div><input id="attrs-bb73ab71-7ced-4853-8d1b-b39c659065d0" class="xr-var-attrs-in" type="checkbox"><label for="attrs-bb73ab71-7ced-4853-8d1b-b39c659065d0" title="Show/Hide attributes"><svg class="icon xr-icon-file-text2"><use href="#icon-file-text2"></use></svg></label><input id="data-0c0decf4-9fdb-473e-8544-a3a4cea47c2d" class="xr-var-data-in" type="checkbox"><label for="data-0c0decf4-9fdb-473e-8544-a3a4cea47c2d" title="Show/Hide data repr"><svg class="icon xr-icon-database"><use href="#icon-database"></use></svg></label><div class="xr-var-attrs"><dl class="xr-attrs"><dt><span>long_name :</span></dt><dd>Spectral moments (0,2) wave period (Tm02) method of data processing</dd><dt><span>conventions :</span></dt><dd>Copernicus Marine In Situ reference table 1</dd><dt><span>flag_values :</span></dt><dd>R, A, D</dd><dt><span>flag_meanings :</span></dt><dd>real-time adjusted-in-real-time delayed-mode</dd></dl></div><div class="xr-var-data"><pre>[20153 values with dtype=object]</pre></div></li><li class="xr-var-item"><div class="xr-var-name"><span>VTPK</span></div><div class="xr-var-dims">(TIME, DEPTH)</div><div class="xr-var-dtype">float64</div><div class="xr-var-preview xr-preview">...</div><input id="attrs-391db3bc-c564-41b7-9e11-8fed0494638d" class="xr-var-attrs-in" type="checkbox"><label for="attrs-391db3bc-c564-41b7-9e11-8fed0494638d" title="Show/Hide attributes"><svg class="icon xr-icon-file-text2"><use href="#icon-file-text2"></use></svg></label><input id="data-f75b8fb9-f626-4382-ac1a-ddd0838321af" class="xr-var-data-in" type="checkbox"><label for="data-f75b8fb9-f626-4382-ac1a-ddd0838321af" title="Show/Hide data repr"><svg class="icon xr-icon-database"><use href="#icon-database"></use></svg></label><div class="xr-var-attrs"><dl class="xr-attrs"><dt><span>standard_name :</span></dt><dd>sea_surface_wave_period_at_variance_spectral_density_maximum</dd><dt><span>units :</span></dt><dd>s</dd><dt><span>long_name :</span></dt><dd>Wave period at spectral peak / peak period (Tp)</dd><dt><span>valid_min :</span></dt><dd>1000</dd><dt><span>valid_max :</span></dt><dd>30000</dd><dt><span>comment :</span></dt><dd> </dd><dt><span>uncertainty :</span></dt><dd> </dd><dt><span>accuracy :</span></dt><dd> </dd><dt><span>precision :</span></dt><dd> </dd><dt><span>resolution :</span></dt><dd> </dd><dt><span>cell_methods :</span></dt><dd> </dd><dt><span>type_of_analysis :</span></dt><dd>spectral analysis</dd><dt><span>sensor_depth :</span></dt><dd>0.0</dd><dt><span>sensor_mount :</span></dt><dd> </dd><dt><span>sensor_orientation :</span></dt><dd> </dd><dt><span>data_mode :</span></dt><dd>M</dd><dt><span>ancillary_variables :</span></dt><dd>VTPK_QC VTPK_DM</dd></dl></div><div class="xr-var-data"><pre>[20153 values with dtype=float64]</pre></div></li><li class="xr-var-item"><div class="xr-var-name"><span>VTPK_QC</span></div><div class="xr-var-dims">(TIME, DEPTH)</div><div class="xr-var-dtype">float32</div><div class="xr-var-preview xr-preview">...</div><input id="attrs-f62331ed-eb83-4612-8272-5e31a4f6618c" class="xr-var-attrs-in" type="checkbox"><label for="attrs-f62331ed-eb83-4612-8272-5e31a4f6618c" title="Show/Hide attributes"><svg class="icon xr-icon-file-text2"><use href="#icon-file-text2"></use></svg></label><input id="data-f25d1fa4-b3fe-4555-a035-42406d2eb65a" class="xr-var-data-in" type="checkbox"><label for="data-f25d1fa4-b3fe-4555-a035-42406d2eb65a" title="Show/Hide data repr"><svg class="icon xr-icon-database"><use href="#icon-database"></use></svg></label><div class="xr-var-attrs"><dl class="xr-attrs"><dt><span>long_name :</span></dt><dd>Wave period at spectral peak / peak period (Tp) quality flag</dd><dt><span>conventions :</span></dt><dd>Copernicus Marine In Situ reference table 2</dd><dt><span>valid_min :</span></dt><dd>0</dd><dt><span>valid_max :</span></dt><dd>9</dd><dt><span>flag_values :</span></dt><dd>[0 1 2 3 4 5 6 7 8 9]</dd><dt><span>flag_meanings :</span></dt><dd>no_qc_performed good_data probably_good_data bad_data_that_are_potentially_correctable bad_data value_changed value_below_detection nominal_value interpolated_value missing_value</dd></dl></div><div class="xr-var-data"><pre>[20153 values with dtype=float32]</pre></div></li><li class="xr-var-item"><div class="xr-var-name"><span>VTPK_DM</span></div><div class="xr-var-dims">(TIME, DEPTH)</div><div class="xr-var-dtype">object</div><div class="xr-var-preview xr-preview">...</div><input id="attrs-2eb605bc-022c-400c-8835-e36765b8d14f" class="xr-var-attrs-in" type="checkbox"><label for="attrs-2eb605bc-022c-400c-8835-e36765b8d14f" title="Show/Hide attributes"><svg class="icon xr-icon-file-text2"><use href="#icon-file-text2"></use></svg></label><input id="data-2a84deed-7473-485a-9643-071453234439" class="xr-var-data-in" type="checkbox"><label for="data-2a84deed-7473-485a-9643-071453234439" title="Show/Hide data repr"><svg class="icon xr-icon-database"><use href="#icon-database"></use></svg></label><div class="xr-var-attrs"><dl class="xr-attrs"><dt><span>long_name :</span></dt><dd>Wave period at spectral peak / peak period (Tp) method of data processing</dd><dt><span>conventions :</span></dt><dd>Copernicus Marine In Situ reference table 1</dd><dt><span>flag_values :</span></dt><dd>R, A, D</dd><dt><span>flag_meanings :</span></dt><dd>real-time adjusted-in-real-time delayed-mode</dd></dl></div><div class="xr-var-data"><pre>[20153 values with dtype=object]</pre></div></li><li class="xr-var-item"><div class="xr-var-name"><span>VTZA</span></div><div class="xr-var-dims">(TIME, DEPTH)</div><div class="xr-var-dtype">float64</div><div class="xr-var-preview xr-preview">...</div><input id="attrs-bb49f09e-c550-452b-8922-abd6cce96de0" class="xr-var-attrs-in" type="checkbox"><label for="attrs-bb49f09e-c550-452b-8922-abd6cce96de0" title="Show/Hide attributes"><svg class="icon xr-icon-file-text2"><use href="#icon-file-text2"></use></svg></label><input id="data-5b2dcc5d-4449-4272-af05-e2f6f17a0a5b" class="xr-var-data-in" type="checkbox"><label for="data-5b2dcc5d-4449-4272-af05-e2f6f17a0a5b" title="Show/Hide data repr"><svg class="icon xr-icon-database"><use href="#icon-database"></use></svg></label><div class="xr-var-attrs"><dl class="xr-attrs"><dt><span>standard_name :</span></dt><dd>sea_surface_wave_mean_period</dd><dt><span>units :</span></dt><dd>s</dd><dt><span>long_name :</span></dt><dd>Average zero crossing wave period (Tz)</dd><dt><span>valid_min :</span></dt><dd>2000</dd><dt><span>valid_max :</span></dt><dd>25000</dd><dt><span>comment :</span></dt><dd> </dd><dt><span>uncertainty :</span></dt><dd> </dd><dt><span>accuracy :</span></dt><dd> </dd><dt><span>precision :</span></dt><dd> </dd><dt><span>resolution :</span></dt><dd> </dd><dt><span>cell_methods :</span></dt><dd> </dd><dt><span>type_of_analysis :</span></dt><dd>zero crossing</dd><dt><span>sensor_depth :</span></dt><dd>0.0</dd><dt><span>sensor_mount :</span></dt><dd> </dd><dt><span>sensor_orientation :</span></dt><dd> </dd><dt><span>data_mode :</span></dt><dd>R</dd><dt><span>ancillary_variables :</span></dt><dd>VTZA_QC</dd></dl></div><div class="xr-var-data"><pre>[20153 values with dtype=float64]</pre></div></li><li class="xr-var-item"><div class="xr-var-name"><span>VTZA_QC</span></div><div class="xr-var-dims">(TIME, DEPTH)</div><div class="xr-var-dtype">float32</div><div class="xr-var-preview xr-preview">...</div><input id="attrs-e97d620e-8c1c-4ea1-99ca-218f6b7c3b8b" class="xr-var-attrs-in" type="checkbox"><label for="attrs-e97d620e-8c1c-4ea1-99ca-218f6b7c3b8b" title="Show/Hide attributes"><svg class="icon xr-icon-file-text2"><use href="#icon-file-text2"></use></svg></label><input id="data-29caf148-6fe3-41d0-b5bb-e129bd5e38d4" class="xr-var-data-in" type="checkbox"><label for="data-29caf148-6fe3-41d0-b5bb-e129bd5e38d4" title="Show/Hide data repr"><svg class="icon xr-icon-database"><use href="#icon-database"></use></svg></label><div class="xr-var-attrs"><dl class="xr-attrs"><dt><span>long_name :</span></dt><dd>Average zero crossing wave period (Tz) quality flag</dd><dt><span>conventions :</span></dt><dd>Copernicus Marine In Situ reference table 2</dd><dt><span>valid_min :</span></dt><dd>0</dd><dt><span>valid_max :</span></dt><dd>9</dd><dt><span>flag_values :</span></dt><dd>[0 1 2 3 4 5 6 7 8 9]</dd><dt><span>flag_meanings :</span></dt><dd>no_qc_performed good_data probably_good_data bad_data_that_are_potentially_correctable bad_data value_changed value_below_detection nominal_value interpolated_value missing_value</dd></dl></div><div class="xr-var-data"><pre>[20153 values with dtype=float32]</pre></div></li><li class="xr-var-item"><div class="xr-var-name"><span>VPED</span></div><div class="xr-var-dims">(TIME, DEPTH)</div><div class="xr-var-dtype">float64</div><div class="xr-var-preview xr-preview">...</div><input id="attrs-ce8b9ae4-cd6a-4c40-bd59-5a07b53452e6" class="xr-var-attrs-in" type="checkbox"><label for="attrs-ce8b9ae4-cd6a-4c40-bd59-5a07b53452e6" title="Show/Hide attributes"><svg class="icon xr-icon-file-text2"><use href="#icon-file-text2"></use></svg></label><input id="data-2880874c-7b77-4e87-b7ce-06a199bb9252" class="xr-var-data-in" type="checkbox"><label for="data-2880874c-7b77-4e87-b7ce-06a199bb9252" title="Show/Hide data repr"><svg class="icon xr-icon-database"><use href="#icon-database"></use></svg></label><div class="xr-var-attrs"><dl class="xr-attrs"><dt><span>standard_name :</span></dt><dd>sea_surface_wave_from_direction_at_variance_spectral_density_maximum</dd><dt><span>units :</span></dt><dd>degree</dd><dt><span>long_name :</span></dt><dd>Wave principal direction at spectral peak</dd><dt><span>valid_min :</span></dt><dd>0</dd><dt><span>valid_max :</span></dt><dd>360000</dd><dt><span>comment :</span></dt><dd> </dd><dt><span>uncertainty :</span></dt><dd> </dd><dt><span>accuracy :</span></dt><dd> </dd><dt><span>precision :</span></dt><dd> </dd><dt><span>resolution :</span></dt><dd> </dd><dt><span>cell_methods :</span></dt><dd> </dd><dt><span>type_of_analysis :</span></dt><dd>spectral analysis</dd><dt><span>sensor_depth :</span></dt><dd>0.0</dd><dt><span>sensor_mount :</span></dt><dd> </dd><dt><span>sensor_orientation :</span></dt><dd> </dd><dt><span>data_mode :</span></dt><dd>M</dd><dt><span>ancillary_variables :</span></dt><dd>VPED_QC VPED_DM</dd></dl></div><div class="xr-var-data"><pre>[20153 values with dtype=float64]</pre></div></li><li class="xr-var-item"><div class="xr-var-name"><span>VPED_QC</span></div><div class="xr-var-dims">(TIME, DEPTH)</div><div class="xr-var-dtype">float32</div><div class="xr-var-preview xr-preview">...</div><input id="attrs-71424bf5-98a8-40e1-ba1b-406ca4f35e30" class="xr-var-attrs-in" type="checkbox"><label for="attrs-71424bf5-98a8-40e1-ba1b-406ca4f35e30" title="Show/Hide attributes"><svg class="icon xr-icon-file-text2"><use href="#icon-file-text2"></use></svg></label><input id="data-d510c6e5-077d-4368-ac5a-738fd8f58cd3" class="xr-var-data-in" type="checkbox"><label for="data-d510c6e5-077d-4368-ac5a-738fd8f58cd3" title="Show/Hide data repr"><svg class="icon xr-icon-database"><use href="#icon-database"></use></svg></label><div class="xr-var-attrs"><dl class="xr-attrs"><dt><span>long_name :</span></dt><dd>Wave principal direction at spectral peak quality flag</dd><dt><span>conventions :</span></dt><dd>Copernicus Marine In Situ reference table 2</dd><dt><span>valid_min :</span></dt><dd>0</dd><dt><span>valid_max :</span></dt><dd>9</dd><dt><span>flag_values :</span></dt><dd>[0 1 2 3 4 5 6 7 8 9]</dd><dt><span>flag_meanings :</span></dt><dd>no_qc_performed good_data probably_good_data bad_data_that_are_potentially_correctable bad_data value_changed value_below_detection nominal_value interpolated_value missing_value</dd></dl></div><div class="xr-var-data"><pre>[20153 values with dtype=float32]</pre></div></li><li class="xr-var-item"><div class="xr-var-name"><span>VPED_DM</span></div><div class="xr-var-dims">(TIME, DEPTH)</div><div class="xr-var-dtype">object</div><div class="xr-var-preview xr-preview">...</div><input id="attrs-faf670c9-6b1a-434f-9fb3-5d7917a14ccf" class="xr-var-attrs-in" type="checkbox"><label for="attrs-faf670c9-6b1a-434f-9fb3-5d7917a14ccf" title="Show/Hide attributes"><svg class="icon xr-icon-file-text2"><use href="#icon-file-text2"></use></svg></label><input id="data-0dc56755-7ea6-4fd3-b0df-327bc813f384" class="xr-var-data-in" type="checkbox"><label for="data-0dc56755-7ea6-4fd3-b0df-327bc813f384" title="Show/Hide data repr"><svg class="icon xr-icon-database"><use href="#icon-database"></use></svg></label><div class="xr-var-attrs"><dl class="xr-attrs"><dt><span>long_name :</span></dt><dd>Wave principal direction at spectral peak method of data processing</dd><dt><span>conventions :</span></dt><dd>Copernicus Marine In Situ reference table 1</dd><dt><span>flag_values :</span></dt><dd>R, A, D</dd><dt><span>flag_meanings :</span></dt><dd>real-time adjusted-in-real-time delayed-mode</dd></dl></div><div class="xr-var-data"><pre>[20153 values with dtype=object]</pre></div></li></ul></div></li><li class="xr-section-item"><input id="section-05469c60-3f5f-4359-9871-df68dba90819" class="xr-section-summary-in" type="checkbox"><label for="section-05469c60-3f5f-4359-9871-df68dba90819" class="xr-section-summary">Indexes: <span>(3)</span></label><div class="xr-section-inline-details"></div><div class="xr-section-details"><ul class="xr-var-list"><li class="xr-var-item"><div class="xr-index-name"><div>TIME</div></div><div class="xr-index-preview">PandasIndex</div><input type="checkbox" disabled=""><label></label><input id="index-c44af243-3178-4e47-b18e-ddc7850a9a8f" class="xr-index-data-in" type="checkbox"><label for="index-c44af243-3178-4e47-b18e-ddc7850a9a8f" title="Show/Hide index repr"><svg class="icon xr-icon-database"><use href="#icon-database"></use></svg></label><div class="xr-index-data"><pre>PandasIndex(DatetimeIndex([          '2022-09-01 00:00:00',
+      shape=(2879,), dtype='datetime64[ns]')</pre></div></li><li class="xr-var-item"><div class="xr-var-name"><span class="xr-has-index">LATITUDE</span></div><div class="xr-var-dims">(LATITUDE)</div><div class="xr-var-dtype">float32</div><div class="xr-var-preview xr-preview">54.0 54.0 54.0 ... 54.0 54.0 54.0</div><input id="attrs-fdc4595f-29b3-4461-92ee-748f00643435" class="xr-var-attrs-in" type="checkbox"><label for="attrs-fdc4595f-29b3-4461-92ee-748f00643435" title="Show/Hide attributes"><svg class="icon xr-icon-file-text2"><use href="#icon-file-text2"></use></svg></label><input id="data-2d5fcfdf-6427-49aa-b6c1-62045d718ab8" class="xr-var-data-in" type="checkbox"><label for="data-2d5fcfdf-6427-49aa-b6c1-62045d718ab8" title="Show/Hide data repr"><svg class="icon xr-icon-database"><use href="#icon-database"></use></svg></label><div class="xr-var-attrs"><dl class="xr-attrs"><dt><span>long_name :</span></dt><dd>Latitude of each location</dd><dt><span>standard_name :</span></dt><dd>latitude</dd><dt><span>units :</span></dt><dd>degree_north</dd><dt><span>valid_min :</span></dt><dd>-90.0</dd><dt><span>valid_max :</span></dt><dd>90.0</dd><dt><span>uncertainty :</span></dt><dd></dd><dt><span>comment :</span></dt><dd></dd><dt><span>axis :</span></dt><dd>Y</dd><dt><span>ancillary_variables :</span></dt><dd>POSITION_QC</dd></dl></div><div class="xr-var-data"><pre>array([54., 54., 54., ..., 54., 54., 54.], shape=(2879,), dtype=float32)</pre></div></li><li class="xr-var-item"><div class="xr-var-name"><span class="xr-has-index">LONGITUDE</span></div><div class="xr-var-dims">(LONGITUDE)</div><div class="xr-var-dtype">float32</div><div class="xr-var-preview xr-preview">6.583 6.583 6.583 ... 6.583 6.583</div><input id="attrs-161a57fb-3f54-4e48-8355-aa3017a5933a" class="xr-var-attrs-in" type="checkbox"><label for="attrs-161a57fb-3f54-4e48-8355-aa3017a5933a" title="Show/Hide attributes"><svg class="icon xr-icon-file-text2"><use href="#icon-file-text2"></use></svg></label><input id="data-c5eba1e2-0149-40b0-8c4f-b05b16e5441a" class="xr-var-data-in" type="checkbox"><label for="data-c5eba1e2-0149-40b0-8c4f-b05b16e5441a" title="Show/Hide data repr"><svg class="icon xr-icon-database"><use href="#icon-database"></use></svg></label><div class="xr-var-attrs"><dl class="xr-attrs"><dt><span>long_name :</span></dt><dd>Longitude of each location</dd><dt><span>standard_name :</span></dt><dd>longitude</dd><dt><span>units :</span></dt><dd>degree_east</dd><dt><span>valid_min :</span></dt><dd>-180.0</dd><dt><span>valid_max :</span></dt><dd>180.0</dd><dt><span>uncertainty :</span></dt><dd></dd><dt><span>comment :</span></dt><dd></dd><dt><span>axis :</span></dt><dd>X</dd><dt><span>ancillary_variables :</span></dt><dd>POSITION_QC</dd></dl></div><div class="xr-var-data"><pre>array([6.583333, 6.583333, 6.583333, ..., 6.583333, 6.583333, 6.583333],
+      shape=(2879,), dtype=float32)</pre></div></li><li class="xr-var-item"><div class="xr-var-name"><span>DEPH</span></div><div class="xr-var-dims">(TIME, DEPTH)</div><div class="xr-var-dtype">float32</div><div class="xr-var-preview xr-preview">...</div><input id="attrs-772460bb-12d4-4a2a-80b9-7a57c3a8eca6" class="xr-var-attrs-in" type="checkbox"><label for="attrs-772460bb-12d4-4a2a-80b9-7a57c3a8eca6" title="Show/Hide attributes"><svg class="icon xr-icon-file-text2"><use href="#icon-file-text2"></use></svg></label><input id="data-bd827ebf-cdee-4333-ae42-badf83f1a2c9" class="xr-var-data-in" type="checkbox"><label for="data-bd827ebf-cdee-4333-ae42-badf83f1a2c9" title="Show/Hide data repr"><svg class="icon xr-icon-database"><use href="#icon-database"></use></svg></label><div class="xr-var-attrs"><dl class="xr-attrs"><dt><span>long_name :</span></dt><dd>Depth</dd><dt><span>standard_name :</span></dt><dd>depth</dd><dt><span>units :</span></dt><dd>m</dd><dt><span>positive :</span></dt><dd>down</dd><dt><span>valid_min :</span></dt><dd>-12000.0</dd><dt><span>valid_max :</span></dt><dd>12000.0</dd><dt><span>uncertainty :</span></dt><dd></dd><dt><span>comment :</span></dt><dd></dd><dt><span>axis :</span></dt><dd>Z</dd><dt><span>reference :</span></dt><dd>sea_level</dd><dt><span>data_mode :</span></dt><dd>R</dd><dt><span>ancillary_variables :</span></dt><dd>DEPH_QC</dd></dl></div><div class="xr-var-data"><pre>[20153 values with dtype=float32]</pre></div></li></ul></div></li><li class="xr-section-item"><input id="section-0277fcc9-f410-410c-951e-6e83f8e83ded" class="xr-section-summary-in" type="checkbox"><label for="section-0277fcc9-f410-410c-951e-6e83f8e83ded" class="xr-section-summary">Data variables: <span>(22)</span></label><div class="xr-section-inline-details"></div><div class="xr-section-details"><ul class="xr-var-list"><li class="xr-var-item"><div class="xr-var-name"><span>DEPH_QC</span></div><div class="xr-var-dims">(TIME, DEPTH)</div><div class="xr-var-dtype">float32</div><div class="xr-var-preview xr-preview">...</div><input id="attrs-84535abf-26e8-46ba-af62-ec2724e52811" class="xr-var-attrs-in" type="checkbox"><label for="attrs-84535abf-26e8-46ba-af62-ec2724e52811" title="Show/Hide attributes"><svg class="icon xr-icon-file-text2"><use href="#icon-file-text2"></use></svg></label><input id="data-0a2e06b1-dd75-4397-8b4c-434a261cc89a" class="xr-var-data-in" type="checkbox"><label for="data-0a2e06b1-dd75-4397-8b4c-434a261cc89a" title="Show/Hide data repr"><svg class="icon xr-icon-database"><use href="#icon-database"></use></svg></label><div class="xr-var-attrs"><dl class="xr-attrs"><dt><span>long_name :</span></dt><dd>Depth quality flag</dd><dt><span>conventions :</span></dt><dd>Copernicus Marine In Situ reference table 2</dd><dt><span>valid_min :</span></dt><dd>0</dd><dt><span>valid_max :</span></dt><dd>9</dd><dt><span>flag_values :</span></dt><dd>[0 1 2 3 4 5 6 7 8 9]</dd><dt><span>flag_meanings :</span></dt><dd>no_qc_performed good_data probably_good_data bad_data_that_are_potentially_correctable bad_data value_changed value_below_detection nominal_value interpolated_value missing_value</dd></dl></div><div class="xr-var-data"><pre>[20153 values with dtype=float32]</pre></div></li><li class="xr-var-item"><div class="xr-var-name"><span>TIME_QC</span></div><div class="xr-var-dims">(TIME)</div><div class="xr-var-dtype">float32</div><div class="xr-var-preview xr-preview">...</div><input id="attrs-b8410fbe-f98e-40d2-9260-557dcc88ca98" class="xr-var-attrs-in" type="checkbox"><label for="attrs-b8410fbe-f98e-40d2-9260-557dcc88ca98" title="Show/Hide attributes"><svg class="icon xr-icon-file-text2"><use href="#icon-file-text2"></use></svg></label><input id="data-bf6fe269-9c00-4d07-aa66-597298220ed3" class="xr-var-data-in" type="checkbox"><label for="data-bf6fe269-9c00-4d07-aa66-597298220ed3" title="Show/Hide data repr"><svg class="icon xr-icon-database"><use href="#icon-database"></use></svg></label><div class="xr-var-attrs"><dl class="xr-attrs"><dt><span>long_name :</span></dt><dd>Time quality flag</dd><dt><span>conventions :</span></dt><dd>Copernicus Marine In Situ reference table 2</dd><dt><span>valid_min :</span></dt><dd>0</dd><dt><span>valid_max :</span></dt><dd>9</dd><dt><span>flag_values :</span></dt><dd>[0 1 2 3 4 5 6 7 8 9]</dd><dt><span>flag_meanings :</span></dt><dd>no_qc_performed good_data probably_good_data bad_data_that_are_potentially_correctable bad_data value_changed value_below_detection nominal_value interpolated_value missing_value</dd></dl></div><div class="xr-var-data"><pre>[2879 values with dtype=float32]</pre></div></li><li class="xr-var-item"><div class="xr-var-name"><span>POSITION_QC</span></div><div class="xr-var-dims">(POSITION)</div><div class="xr-var-dtype">float32</div><div class="xr-var-preview xr-preview">...</div><input id="attrs-64fd2d0d-2c30-4e1a-9f1b-336171590d55" class="xr-var-attrs-in" type="checkbox"><label for="attrs-64fd2d0d-2c30-4e1a-9f1b-336171590d55" title="Show/Hide attributes"><svg class="icon xr-icon-file-text2"><use href="#icon-file-text2"></use></svg></label><input id="data-b5c973a8-9735-412d-a223-3e0c9e2ce61a" class="xr-var-data-in" type="checkbox"><label for="data-b5c973a8-9735-412d-a223-3e0c9e2ce61a" title="Show/Hide data repr"><svg class="icon xr-icon-database"><use href="#icon-database"></use></svg></label><div class="xr-var-attrs"><dl class="xr-attrs"><dt><span>long_name :</span></dt><dd>Position quality flag</dd><dt><span>conventions :</span></dt><dd>Copernicus Marine In Situ reference table 2</dd><dt><span>valid_min :</span></dt><dd>0</dd><dt><span>valid_max :</span></dt><dd>9</dd><dt><span>flag_values :</span></dt><dd>[0 1 2 3 4 5 6 7 8 9]</dd><dt><span>flag_meanings :</span></dt><dd>no_qc_performed good_data probably_good_data bad_data_that_are_potentially_correctable bad_data value_changed value_below_detection nominal_value interpolated_value missing_value</dd></dl></div><div class="xr-var-data"><pre>[2879 values with dtype=float32]</pre></div></li><li class="xr-var-item"><div class="xr-var-name"><span>TEMP</span></div><div class="xr-var-dims">(TIME, DEPTH)</div><div class="xr-var-dtype">float64</div><div class="xr-var-preview xr-preview">...</div><input id="attrs-2119ea3e-4be4-494c-81fe-5e75ecac90c3" class="xr-var-attrs-in" type="checkbox"><label for="attrs-2119ea3e-4be4-494c-81fe-5e75ecac90c3" title="Show/Hide attributes"><svg class="icon xr-icon-file-text2"><use href="#icon-file-text2"></use></svg></label><input id="data-43d31651-6989-49e0-b511-75e285812118" class="xr-var-data-in" type="checkbox"><label for="data-43d31651-6989-49e0-b511-75e285812118" title="Show/Hide data repr"><svg class="icon xr-icon-database"><use href="#icon-database"></use></svg></label><div class="xr-var-attrs"><dl class="xr-attrs"><dt><span>standard_name :</span></dt><dd>sea_water_temperature</dd><dt><span>units :</span></dt><dd>degrees_C</dd><dt><span>long_name :</span></dt><dd>Sea temperature</dd><dt><span>valid_min :</span></dt><dd>-2000</dd><dt><span>valid_max :</span></dt><dd>32000</dd><dt><span>comment :</span></dt><dd> </dd><dt><span>uncertainty :</span></dt><dd> </dd><dt><span>accuracy :</span></dt><dd> </dd><dt><span>precision :</span></dt><dd> </dd><dt><span>resolution :</span></dt><dd> </dd><dt><span>cell_methods :</span></dt><dd> </dd><dt><span>sensor_depth :</span></dt><dd>0.0</dd><dt><span>sensor_mount :</span></dt><dd> </dd><dt><span>sensor_orientation :</span></dt><dd> </dd><dt><span>data_mode :</span></dt><dd>R</dd><dt><span>ancillary_variables :</span></dt><dd>TEMP_QC</dd></dl></div><div class="xr-var-data"><pre>[20153 values with dtype=float64]</pre></div></li><li class="xr-var-item"><div class="xr-var-name"><span>TEMP_QC</span></div><div class="xr-var-dims">(TIME, DEPTH)</div><div class="xr-var-dtype">float32</div><div class="xr-var-preview xr-preview">...</div><input id="attrs-b5aeeec7-9773-45a2-b0d7-66125cad282e" class="xr-var-attrs-in" type="checkbox"><label for="attrs-b5aeeec7-9773-45a2-b0d7-66125cad282e" title="Show/Hide attributes"><svg class="icon xr-icon-file-text2"><use href="#icon-file-text2"></use></svg></label><input id="data-d6daec71-348d-46b2-9cf7-01fd609bdf53" class="xr-var-data-in" type="checkbox"><label for="data-d6daec71-348d-46b2-9cf7-01fd609bdf53" title="Show/Hide data repr"><svg class="icon xr-icon-database"><use href="#icon-database"></use></svg></label><div class="xr-var-attrs"><dl class="xr-attrs"><dt><span>long_name :</span></dt><dd>Sea temperature quality flag</dd><dt><span>conventions :</span></dt><dd>Copernicus Marine In Situ reference table 2</dd><dt><span>valid_min :</span></dt><dd>0</dd><dt><span>valid_max :</span></dt><dd>9</dd><dt><span>flag_values :</span></dt><dd>[0 1 2 3 4 5 6 7 8 9]</dd><dt><span>flag_meanings :</span></dt><dd>no_qc_performed good_data probably_good_data bad_data_that_are_potentially_correctable bad_data value_changed value_below_detection nominal_value interpolated_value missing_value</dd></dl></div><div class="xr-var-data"><pre>[20153 values with dtype=float32]</pre></div></li><li class="xr-var-item"><div class="xr-var-name"><span>VHM0</span></div><div class="xr-var-dims">(TIME, DEPTH)</div><div class="xr-var-dtype">float64</div><div class="xr-var-preview xr-preview">...</div><input id="attrs-3133d2ac-b16c-4311-8dfb-7d5b62161a34" class="xr-var-attrs-in" type="checkbox"><label for="attrs-3133d2ac-b16c-4311-8dfb-7d5b62161a34" title="Show/Hide attributes"><svg class="icon xr-icon-file-text2"><use href="#icon-file-text2"></use></svg></label><input id="data-eeda060a-6666-4f67-b01c-8494e0672476" class="xr-var-data-in" type="checkbox"><label for="data-eeda060a-6666-4f67-b01c-8494e0672476" title="Show/Hide data repr"><svg class="icon xr-icon-database"><use href="#icon-database"></use></svg></label><div class="xr-var-attrs"><dl class="xr-attrs"><dt><span>standard_name :</span></dt><dd>sea_surface_wave_significant_height</dd><dt><span>units :</span></dt><dd>m</dd><dt><span>long_name :</span></dt><dd>Spectral significant wave height (Hm0)</dd><dt><span>valid_min :</span></dt><dd>1</dd><dt><span>valid_max :</span></dt><dd>25000</dd><dt><span>comment :</span></dt><dd> </dd><dt><span>uncertainty :</span></dt><dd> </dd><dt><span>accuracy :</span></dt><dd> </dd><dt><span>precision :</span></dt><dd> </dd><dt><span>resolution :</span></dt><dd> </dd><dt><span>cell_methods :</span></dt><dd> </dd><dt><span>type_of_analysis :</span></dt><dd>spectral analysis</dd><dt><span>sensor_depth :</span></dt><dd>0.0</dd><dt><span>sensor_mount :</span></dt><dd> </dd><dt><span>sensor_orientation :</span></dt><dd> </dd><dt><span>data_mode :</span></dt><dd>M</dd><dt><span>ancillary_variables :</span></dt><dd>VHM0_QC VHM0_DM</dd></dl></div><div class="xr-var-data"><pre>[20153 values with dtype=float64]</pre></div></li><li class="xr-var-item"><div class="xr-var-name"><span>VHM0_QC</span></div><div class="xr-var-dims">(TIME, DEPTH)</div><div class="xr-var-dtype">float32</div><div class="xr-var-preview xr-preview">...</div><input id="attrs-1dd5a9c9-40bd-40d1-83fe-1353de494953" class="xr-var-attrs-in" type="checkbox"><label for="attrs-1dd5a9c9-40bd-40d1-83fe-1353de494953" title="Show/Hide attributes"><svg class="icon xr-icon-file-text2"><use href="#icon-file-text2"></use></svg></label><input id="data-cce42346-31fc-435e-a2cc-f2a9311254e0" class="xr-var-data-in" type="checkbox"><label for="data-cce42346-31fc-435e-a2cc-f2a9311254e0" title="Show/Hide data repr"><svg class="icon xr-icon-database"><use href="#icon-database"></use></svg></label><div class="xr-var-attrs"><dl class="xr-attrs"><dt><span>long_name :</span></dt><dd>Spectral significant wave height (Hm0) quality flag</dd><dt><span>conventions :</span></dt><dd>Copernicus Marine In Situ reference table 2</dd><dt><span>valid_min :</span></dt><dd>0</dd><dt><span>valid_max :</span></dt><dd>9</dd><dt><span>flag_values :</span></dt><dd>[0 1 2 3 4 5 6 7 8 9]</dd><dt><span>flag_meanings :</span></dt><dd>no_qc_performed good_data probably_good_data bad_data_that_are_potentially_correctable bad_data value_changed value_below_detection nominal_value interpolated_value missing_value</dd></dl></div><div class="xr-var-data"><pre>[20153 values with dtype=float32]</pre></div></li><li class="xr-var-item"><div class="xr-var-name"><span>VHM0_DM</span></div><div class="xr-var-dims">(TIME, DEPTH)</div><div class="xr-var-dtype">object</div><div class="xr-var-preview xr-preview">...</div><input id="attrs-a325f166-e59a-41af-917c-0aead34a6297" class="xr-var-attrs-in" type="checkbox"><label for="attrs-a325f166-e59a-41af-917c-0aead34a6297" title="Show/Hide attributes"><svg class="icon xr-icon-file-text2"><use href="#icon-file-text2"></use></svg></label><input id="data-c1dd1d19-788e-4db7-b3cb-5b34c622cde4" class="xr-var-data-in" type="checkbox"><label for="data-c1dd1d19-788e-4db7-b3cb-5b34c622cde4" title="Show/Hide data repr"><svg class="icon xr-icon-database"><use href="#icon-database"></use></svg></label><div class="xr-var-attrs"><dl class="xr-attrs"><dt><span>long_name :</span></dt><dd>Spectral significant wave height (Hm0) method of data processing</dd><dt><span>conventions :</span></dt><dd>Copernicus Marine In Situ reference table 1</dd><dt><span>flag_values :</span></dt><dd>R, A, D</dd><dt><span>flag_meanings :</span></dt><dd>real-time adjusted-in-real-time delayed-mode</dd></dl></div><div class="xr-var-data"><pre>[20153 values with dtype=object]</pre></div></li><li class="xr-var-item"><div class="xr-var-name"><span>VZMX</span></div><div class="xr-var-dims">(TIME, DEPTH)</div><div class="xr-var-dtype">float64</div><div class="xr-var-preview xr-preview">...</div><input id="attrs-9b88988c-6053-4be0-86be-d42fdcd0d2ad" class="xr-var-attrs-in" type="checkbox"><label for="attrs-9b88988c-6053-4be0-86be-d42fdcd0d2ad" title="Show/Hide attributes"><svg class="icon xr-icon-file-text2"><use href="#icon-file-text2"></use></svg></label><input id="data-1302befc-9389-4935-a49b-0eac22f578d2" class="xr-var-data-in" type="checkbox"><label for="data-1302befc-9389-4935-a49b-0eac22f578d2" title="Show/Hide data repr"><svg class="icon xr-icon-database"><use href="#icon-database"></use></svg></label><div class="xr-var-attrs"><dl class="xr-attrs"><dt><span>standard_name :</span></dt><dd>sea_surface_wave_maximum_height</dd><dt><span>units :</span></dt><dd>m</dd><dt><span>long_name :</span></dt><dd>Maximum zero crossing wave height (Hmax)</dd><dt><span>valid_min :</span></dt><dd>0</dd><dt><span>valid_max :</span></dt><dd>40000</dd><dt><span>comment :</span></dt><dd> </dd><dt><span>uncertainty :</span></dt><dd> </dd><dt><span>accuracy :</span></dt><dd> </dd><dt><span>precision :</span></dt><dd> </dd><dt><span>resolution :</span></dt><dd> </dd><dt><span>cell_methods :</span></dt><dd> </dd><dt><span>type_of_analysis :</span></dt><dd>zero crossing</dd><dt><span>sensor_depth :</span></dt><dd>0.0</dd><dt><span>sensor_mount :</span></dt><dd> </dd><dt><span>sensor_orientation :</span></dt><dd> </dd><dt><span>data_mode :</span></dt><dd>M</dd><dt><span>ancillary_variables :</span></dt><dd>VZMX_QC VZMX_DM</dd></dl></div><div class="xr-var-data"><pre>[20153 values with dtype=float64]</pre></div></li><li class="xr-var-item"><div class="xr-var-name"><span>VZMX_QC</span></div><div class="xr-var-dims">(TIME, DEPTH)</div><div class="xr-var-dtype">float32</div><div class="xr-var-preview xr-preview">...</div><input id="attrs-e9f74306-dfda-4147-a667-a7d7b1c9b6cd" class="xr-var-attrs-in" type="checkbox"><label for="attrs-e9f74306-dfda-4147-a667-a7d7b1c9b6cd" title="Show/Hide attributes"><svg class="icon xr-icon-file-text2"><use href="#icon-file-text2"></use></svg></label><input id="data-e2ff7f1d-c84d-4a33-a8d3-e6d754817857" class="xr-var-data-in" type="checkbox"><label for="data-e2ff7f1d-c84d-4a33-a8d3-e6d754817857" title="Show/Hide data repr"><svg class="icon xr-icon-database"><use href="#icon-database"></use></svg></label><div class="xr-var-attrs"><dl class="xr-attrs"><dt><span>long_name :</span></dt><dd>Maximum zero crossing wave height (Hmax) quality flag</dd><dt><span>conventions :</span></dt><dd>Copernicus Marine In Situ reference table 2</dd><dt><span>valid_min :</span></dt><dd>0</dd><dt><span>valid_max :</span></dt><dd>9</dd><dt><span>flag_values :</span></dt><dd>[0 1 2 3 4 5 6 7 8 9]</dd><dt><span>flag_meanings :</span></dt><dd>no_qc_performed good_data probably_good_data bad_data_that_are_potentially_correctable bad_data value_changed value_below_detection nominal_value interpolated_value missing_value</dd></dl></div><div class="xr-var-data"><pre>[20153 values with dtype=float32]</pre></div></li><li class="xr-var-item"><div class="xr-var-name"><span>VZMX_DM</span></div><div class="xr-var-dims">(TIME, DEPTH)</div><div class="xr-var-dtype">object</div><div class="xr-var-preview xr-preview">...</div><input id="attrs-3318890e-e01c-49e5-883c-c251b2a81669" class="xr-var-attrs-in" type="checkbox"><label for="attrs-3318890e-e01c-49e5-883c-c251b2a81669" title="Show/Hide attributes"><svg class="icon xr-icon-file-text2"><use href="#icon-file-text2"></use></svg></label><input id="data-50147fcf-50a2-4684-9ff3-f3adcc1e5049" class="xr-var-data-in" type="checkbox"><label for="data-50147fcf-50a2-4684-9ff3-f3adcc1e5049" title="Show/Hide data repr"><svg class="icon xr-icon-database"><use href="#icon-database"></use></svg></label><div class="xr-var-attrs"><dl class="xr-attrs"><dt><span>long_name :</span></dt><dd>Maximum zero crossing wave height (Hmax) method of data processing</dd><dt><span>conventions :</span></dt><dd>Copernicus Marine In Situ reference table 1</dd><dt><span>flag_values :</span></dt><dd>R, A, D</dd><dt><span>flag_meanings :</span></dt><dd>real-time adjusted-in-real-time delayed-mode</dd></dl></div><div class="xr-var-data"><pre>[20153 values with dtype=object]</pre></div></li><li class="xr-var-item"><div class="xr-var-name"><span>VTM02</span></div><div class="xr-var-dims">(TIME, DEPTH)</div><div class="xr-var-dtype">float64</div><div class="xr-var-preview xr-preview">...</div><input id="attrs-987c0c80-08ee-410a-94a6-7bdcb7003bd0" class="xr-var-attrs-in" type="checkbox"><label for="attrs-987c0c80-08ee-410a-94a6-7bdcb7003bd0" title="Show/Hide attributes"><svg class="icon xr-icon-file-text2"><use href="#icon-file-text2"></use></svg></label><input id="data-e2d57231-bd04-46fc-87d2-6b74a26ce4b2" class="xr-var-data-in" type="checkbox"><label for="data-e2d57231-bd04-46fc-87d2-6b74a26ce4b2" title="Show/Hide data repr"><svg class="icon xr-icon-database"><use href="#icon-database"></use></svg></label><div class="xr-var-attrs"><dl class="xr-attrs"><dt><span>standard_name :</span></dt><dd>sea_surface_wave_mean_period_from_variance_spectral_density_second_frequency_moment</dd><dt><span>units :</span></dt><dd>s</dd><dt><span>long_name :</span></dt><dd>Spectral moments (0,2) wave period (Tm02)</dd><dt><span>valid_min :</span></dt><dd>1000</dd><dt><span>valid_max :</span></dt><dd>25000</dd><dt><span>comment :</span></dt><dd> </dd><dt><span>uncertainty :</span></dt><dd> </dd><dt><span>accuracy :</span></dt><dd> </dd><dt><span>precision :</span></dt><dd> </dd><dt><span>resolution :</span></dt><dd> </dd><dt><span>cell_methods :</span></dt><dd> </dd><dt><span>type_of_analysis :</span></dt><dd>spectral analysis</dd><dt><span>sensor_depth :</span></dt><dd>0.0</dd><dt><span>sensor_mount :</span></dt><dd> </dd><dt><span>sensor_orientation :</span></dt><dd> </dd><dt><span>data_mode :</span></dt><dd>M</dd><dt><span>ancillary_variables :</span></dt><dd>VTM02_QC VTM02_DM</dd></dl></div><div class="xr-var-data"><pre>[20153 values with dtype=float64]</pre></div></li><li class="xr-var-item"><div class="xr-var-name"><span>VTM02_QC</span></div><div class="xr-var-dims">(TIME, DEPTH)</div><div class="xr-var-dtype">float32</div><div class="xr-var-preview xr-preview">...</div><input id="attrs-8f81a831-e798-4a98-8fac-20567f9d9b29" class="xr-var-attrs-in" type="checkbox"><label for="attrs-8f81a831-e798-4a98-8fac-20567f9d9b29" title="Show/Hide attributes"><svg class="icon xr-icon-file-text2"><use href="#icon-file-text2"></use></svg></label><input id="data-a186e0d2-e0d7-4ef4-b3f5-8125af9cf68e" class="xr-var-data-in" type="checkbox"><label for="data-a186e0d2-e0d7-4ef4-b3f5-8125af9cf68e" title="Show/Hide data repr"><svg class="icon xr-icon-database"><use href="#icon-database"></use></svg></label><div class="xr-var-attrs"><dl class="xr-attrs"><dt><span>long_name :</span></dt><dd>Spectral moments (0,2) wave period (Tm02) quality flag</dd><dt><span>conventions :</span></dt><dd>Copernicus Marine In Situ reference table 2</dd><dt><span>valid_min :</span></dt><dd>0</dd><dt><span>valid_max :</span></dt><dd>9</dd><dt><span>flag_values :</span></dt><dd>[0 1 2 3 4 5 6 7 8 9]</dd><dt><span>flag_meanings :</span></dt><dd>no_qc_performed good_data probably_good_data bad_data_that_are_potentially_correctable bad_data value_changed value_below_detection nominal_value interpolated_value missing_value</dd></dl></div><div class="xr-var-data"><pre>[20153 values with dtype=float32]</pre></div></li><li class="xr-var-item"><div class="xr-var-name"><span>VTM02_DM</span></div><div class="xr-var-dims">(TIME, DEPTH)</div><div class="xr-var-dtype">object</div><div class="xr-var-preview xr-preview">...</div><input id="attrs-8692b4ac-c3db-4f3c-bd2d-cdd101622683" class="xr-var-attrs-in" type="checkbox"><label for="attrs-8692b4ac-c3db-4f3c-bd2d-cdd101622683" title="Show/Hide attributes"><svg class="icon xr-icon-file-text2"><use href="#icon-file-text2"></use></svg></label><input id="data-e3a99b5e-80f9-467b-b7d0-80f0814dd56a" class="xr-var-data-in" type="checkbox"><label for="data-e3a99b5e-80f9-467b-b7d0-80f0814dd56a" title="Show/Hide data repr"><svg class="icon xr-icon-database"><use href="#icon-database"></use></svg></label><div class="xr-var-attrs"><dl class="xr-attrs"><dt><span>long_name :</span></dt><dd>Spectral moments (0,2) wave period (Tm02) method of data processing</dd><dt><span>conventions :</span></dt><dd>Copernicus Marine In Situ reference table 1</dd><dt><span>flag_values :</span></dt><dd>R, A, D</dd><dt><span>flag_meanings :</span></dt><dd>real-time adjusted-in-real-time delayed-mode</dd></dl></div><div class="xr-var-data"><pre>[20153 values with dtype=object]</pre></div></li><li class="xr-var-item"><div class="xr-var-name"><span>VTPK</span></div><div class="xr-var-dims">(TIME, DEPTH)</div><div class="xr-var-dtype">float64</div><div class="xr-var-preview xr-preview">...</div><input id="attrs-8a1f81fe-f45e-482b-a5e2-581754b75417" class="xr-var-attrs-in" type="checkbox"><label for="attrs-8a1f81fe-f45e-482b-a5e2-581754b75417" title="Show/Hide attributes"><svg class="icon xr-icon-file-text2"><use href="#icon-file-text2"></use></svg></label><input id="data-e732ec4a-0014-44d1-849c-57567ba4d860" class="xr-var-data-in" type="checkbox"><label for="data-e732ec4a-0014-44d1-849c-57567ba4d860" title="Show/Hide data repr"><svg class="icon xr-icon-database"><use href="#icon-database"></use></svg></label><div class="xr-var-attrs"><dl class="xr-attrs"><dt><span>standard_name :</span></dt><dd>sea_surface_wave_period_at_variance_spectral_density_maximum</dd><dt><span>units :</span></dt><dd>s</dd><dt><span>long_name :</span></dt><dd>Wave period at spectral peak / peak period (Tp)</dd><dt><span>valid_min :</span></dt><dd>1000</dd><dt><span>valid_max :</span></dt><dd>30000</dd><dt><span>comment :</span></dt><dd> </dd><dt><span>uncertainty :</span></dt><dd> </dd><dt><span>accuracy :</span></dt><dd> </dd><dt><span>precision :</span></dt><dd> </dd><dt><span>resolution :</span></dt><dd> </dd><dt><span>cell_methods :</span></dt><dd> </dd><dt><span>type_of_analysis :</span></dt><dd>spectral analysis</dd><dt><span>sensor_depth :</span></dt><dd>0.0</dd><dt><span>sensor_mount :</span></dt><dd> </dd><dt><span>sensor_orientation :</span></dt><dd> </dd><dt><span>data_mode :</span></dt><dd>M</dd><dt><span>ancillary_variables :</span></dt><dd>VTPK_QC VTPK_DM</dd></dl></div><div class="xr-var-data"><pre>[20153 values with dtype=float64]</pre></div></li><li class="xr-var-item"><div class="xr-var-name"><span>VTPK_QC</span></div><div class="xr-var-dims">(TIME, DEPTH)</div><div class="xr-var-dtype">float32</div><div class="xr-var-preview xr-preview">...</div><input id="attrs-058c7e58-1431-4c3d-a7c7-8aaf278fb92f" class="xr-var-attrs-in" type="checkbox"><label for="attrs-058c7e58-1431-4c3d-a7c7-8aaf278fb92f" title="Show/Hide attributes"><svg class="icon xr-icon-file-text2"><use href="#icon-file-text2"></use></svg></label><input id="data-08d3596a-08c2-4106-803a-2bc4c01cea40" class="xr-var-data-in" type="checkbox"><label for="data-08d3596a-08c2-4106-803a-2bc4c01cea40" title="Show/Hide data repr"><svg class="icon xr-icon-database"><use href="#icon-database"></use></svg></label><div class="xr-var-attrs"><dl class="xr-attrs"><dt><span>long_name :</span></dt><dd>Wave period at spectral peak / peak period (Tp) quality flag</dd><dt><span>conventions :</span></dt><dd>Copernicus Marine In Situ reference table 2</dd><dt><span>valid_min :</span></dt><dd>0</dd><dt><span>valid_max :</span></dt><dd>9</dd><dt><span>flag_values :</span></dt><dd>[0 1 2 3 4 5 6 7 8 9]</dd><dt><span>flag_meanings :</span></dt><dd>no_qc_performed good_data probably_good_data bad_data_that_are_potentially_correctable bad_data value_changed value_below_detection nominal_value interpolated_value missing_value</dd></dl></div><div class="xr-var-data"><pre>[20153 values with dtype=float32]</pre></div></li><li class="xr-var-item"><div class="xr-var-name"><span>VTPK_DM</span></div><div class="xr-var-dims">(TIME, DEPTH)</div><div class="xr-var-dtype">object</div><div class="xr-var-preview xr-preview">...</div><input id="attrs-7340bb7d-8772-45db-be23-65230ef3a385" class="xr-var-attrs-in" type="checkbox"><label for="attrs-7340bb7d-8772-45db-be23-65230ef3a385" title="Show/Hide attributes"><svg class="icon xr-icon-file-text2"><use href="#icon-file-text2"></use></svg></label><input id="data-a6975000-052b-4433-906d-4317282205bf" class="xr-var-data-in" type="checkbox"><label for="data-a6975000-052b-4433-906d-4317282205bf" title="Show/Hide data repr"><svg class="icon xr-icon-database"><use href="#icon-database"></use></svg></label><div class="xr-var-attrs"><dl class="xr-attrs"><dt><span>long_name :</span></dt><dd>Wave period at spectral peak / peak period (Tp) method of data processing</dd><dt><span>conventions :</span></dt><dd>Copernicus Marine In Situ reference table 1</dd><dt><span>flag_values :</span></dt><dd>R, A, D</dd><dt><span>flag_meanings :</span></dt><dd>real-time adjusted-in-real-time delayed-mode</dd></dl></div><div class="xr-var-data"><pre>[20153 values with dtype=object]</pre></div></li><li class="xr-var-item"><div class="xr-var-name"><span>VTZA</span></div><div class="xr-var-dims">(TIME, DEPTH)</div><div class="xr-var-dtype">float64</div><div class="xr-var-preview xr-preview">...</div><input id="attrs-82effe9b-a7aa-420e-883d-96dae3955dc3" class="xr-var-attrs-in" type="checkbox"><label for="attrs-82effe9b-a7aa-420e-883d-96dae3955dc3" title="Show/Hide attributes"><svg class="icon xr-icon-file-text2"><use href="#icon-file-text2"></use></svg></label><input id="data-b34f8467-86f6-4ff3-81c4-d1010a1730a2" class="xr-var-data-in" type="checkbox"><label for="data-b34f8467-86f6-4ff3-81c4-d1010a1730a2" title="Show/Hide data repr"><svg class="icon xr-icon-database"><use href="#icon-database"></use></svg></label><div class="xr-var-attrs"><dl class="xr-attrs"><dt><span>standard_name :</span></dt><dd>sea_surface_wave_mean_period</dd><dt><span>units :</span></dt><dd>s</dd><dt><span>long_name :</span></dt><dd>Average zero crossing wave period (Tz)</dd><dt><span>valid_min :</span></dt><dd>2000</dd><dt><span>valid_max :</span></dt><dd>25000</dd><dt><span>comment :</span></dt><dd> </dd><dt><span>uncertainty :</span></dt><dd> </dd><dt><span>accuracy :</span></dt><dd> </dd><dt><span>precision :</span></dt><dd> </dd><dt><span>resolution :</span></dt><dd> </dd><dt><span>cell_methods :</span></dt><dd> </dd><dt><span>type_of_analysis :</span></dt><dd>zero crossing</dd><dt><span>sensor_depth :</span></dt><dd>0.0</dd><dt><span>sensor_mount :</span></dt><dd> </dd><dt><span>sensor_orientation :</span></dt><dd> </dd><dt><span>data_mode :</span></dt><dd>R</dd><dt><span>ancillary_variables :</span></dt><dd>VTZA_QC</dd></dl></div><div class="xr-var-data"><pre>[20153 values with dtype=float64]</pre></div></li><li class="xr-var-item"><div class="xr-var-name"><span>VTZA_QC</span></div><div class="xr-var-dims">(TIME, DEPTH)</div><div class="xr-var-dtype">float32</div><div class="xr-var-preview xr-preview">...</div><input id="attrs-74e90381-fa68-4f36-bc7c-2c478740aca1" class="xr-var-attrs-in" type="checkbox"><label for="attrs-74e90381-fa68-4f36-bc7c-2c478740aca1" title="Show/Hide attributes"><svg class="icon xr-icon-file-text2"><use href="#icon-file-text2"></use></svg></label><input id="data-f58200eb-0367-4ddd-b6db-66ae132789c1" class="xr-var-data-in" type="checkbox"><label for="data-f58200eb-0367-4ddd-b6db-66ae132789c1" title="Show/Hide data repr"><svg class="icon xr-icon-database"><use href="#icon-database"></use></svg></label><div class="xr-var-attrs"><dl class="xr-attrs"><dt><span>long_name :</span></dt><dd>Average zero crossing wave period (Tz) quality flag</dd><dt><span>conventions :</span></dt><dd>Copernicus Marine In Situ reference table 2</dd><dt><span>valid_min :</span></dt><dd>0</dd><dt><span>valid_max :</span></dt><dd>9</dd><dt><span>flag_values :</span></dt><dd>[0 1 2 3 4 5 6 7 8 9]</dd><dt><span>flag_meanings :</span></dt><dd>no_qc_performed good_data probably_good_data bad_data_that_are_potentially_correctable bad_data value_changed value_below_detection nominal_value interpolated_value missing_value</dd></dl></div><div class="xr-var-data"><pre>[20153 values with dtype=float32]</pre></div></li><li class="xr-var-item"><div class="xr-var-name"><span>VPED</span></div><div class="xr-var-dims">(TIME, DEPTH)</div><div class="xr-var-dtype">float64</div><div class="xr-var-preview xr-preview">...</div><input id="attrs-b8ee8735-2121-4962-a41f-2f39a279a75c" class="xr-var-attrs-in" type="checkbox"><label for="attrs-b8ee8735-2121-4962-a41f-2f39a279a75c" title="Show/Hide attributes"><svg class="icon xr-icon-file-text2"><use href="#icon-file-text2"></use></svg></label><input id="data-af691566-f771-4ce9-9da3-4d8b8d9518ab" class="xr-var-data-in" type="checkbox"><label for="data-af691566-f771-4ce9-9da3-4d8b8d9518ab" title="Show/Hide data repr"><svg class="icon xr-icon-database"><use href="#icon-database"></use></svg></label><div class="xr-var-attrs"><dl class="xr-attrs"><dt><span>standard_name :</span></dt><dd>sea_surface_wave_from_direction_at_variance_spectral_density_maximum</dd><dt><span>units :</span></dt><dd>degree</dd><dt><span>long_name :</span></dt><dd>Wave principal direction at spectral peak</dd><dt><span>valid_min :</span></dt><dd>0</dd><dt><span>valid_max :</span></dt><dd>360000</dd><dt><span>comment :</span></dt><dd> </dd><dt><span>uncertainty :</span></dt><dd> </dd><dt><span>accuracy :</span></dt><dd> </dd><dt><span>precision :</span></dt><dd> </dd><dt><span>resolution :</span></dt><dd> </dd><dt><span>cell_methods :</span></dt><dd> </dd><dt><span>type_of_analysis :</span></dt><dd>spectral analysis</dd><dt><span>sensor_depth :</span></dt><dd>0.0</dd><dt><span>sensor_mount :</span></dt><dd> </dd><dt><span>sensor_orientation :</span></dt><dd> </dd><dt><span>data_mode :</span></dt><dd>M</dd><dt><span>ancillary_variables :</span></dt><dd>VPED_QC VPED_DM</dd></dl></div><div class="xr-var-data"><pre>[20153 values with dtype=float64]</pre></div></li><li class="xr-var-item"><div class="xr-var-name"><span>VPED_QC</span></div><div class="xr-var-dims">(TIME, DEPTH)</div><div class="xr-var-dtype">float32</div><div class="xr-var-preview xr-preview">...</div><input id="attrs-608c09b2-ac00-433a-912a-26d224412810" class="xr-var-attrs-in" type="checkbox"><label for="attrs-608c09b2-ac00-433a-912a-26d224412810" title="Show/Hide attributes"><svg class="icon xr-icon-file-text2"><use href="#icon-file-text2"></use></svg></label><input id="data-3a1ad22b-612f-4b4f-9038-1aa412cb7dea" class="xr-var-data-in" type="checkbox"><label for="data-3a1ad22b-612f-4b4f-9038-1aa412cb7dea" title="Show/Hide data repr"><svg class="icon xr-icon-database"><use href="#icon-database"></use></svg></label><div class="xr-var-attrs"><dl class="xr-attrs"><dt><span>long_name :</span></dt><dd>Wave principal direction at spectral peak quality flag</dd><dt><span>conventions :</span></dt><dd>Copernicus Marine In Situ reference table 2</dd><dt><span>valid_min :</span></dt><dd>0</dd><dt><span>valid_max :</span></dt><dd>9</dd><dt><span>flag_values :</span></dt><dd>[0 1 2 3 4 5 6 7 8 9]</dd><dt><span>flag_meanings :</span></dt><dd>no_qc_performed good_data probably_good_data bad_data_that_are_potentially_correctable bad_data value_changed value_below_detection nominal_value interpolated_value missing_value</dd></dl></div><div class="xr-var-data"><pre>[20153 values with dtype=float32]</pre></div></li><li class="xr-var-item"><div class="xr-var-name"><span>VPED_DM</span></div><div class="xr-var-dims">(TIME, DEPTH)</div><div class="xr-var-dtype">object</div><div class="xr-var-preview xr-preview">...</div><input id="attrs-67894d9e-40c1-4c45-8874-171bed14766e" class="xr-var-attrs-in" type="checkbox"><label for="attrs-67894d9e-40c1-4c45-8874-171bed14766e" title="Show/Hide attributes"><svg class="icon xr-icon-file-text2"><use href="#icon-file-text2"></use></svg></label><input id="data-03fbcea6-f5e5-4427-9d31-28424f0ff119" class="xr-var-data-in" type="checkbox"><label for="data-03fbcea6-f5e5-4427-9d31-28424f0ff119" title="Show/Hide data repr"><svg class="icon xr-icon-database"><use href="#icon-database"></use></svg></label><div class="xr-var-attrs"><dl class="xr-attrs"><dt><span>long_name :</span></dt><dd>Wave principal direction at spectral peak method of data processing</dd><dt><span>conventions :</span></dt><dd>Copernicus Marine In Situ reference table 1</dd><dt><span>flag_values :</span></dt><dd>R, A, D</dd><dt><span>flag_meanings :</span></dt><dd>real-time adjusted-in-real-time delayed-mode</dd></dl></div><div class="xr-var-data"><pre>[20153 values with dtype=object]</pre></div></li></ul></div></li><li class="xr-section-item"><input id="section-bb2549a9-b040-4999-b1a6-0e43135946db" class="xr-section-summary-in" type="checkbox"><label for="section-bb2549a9-b040-4999-b1a6-0e43135946db" class="xr-section-summary">Indexes: <span>(3)</span></label><div class="xr-section-inline-details"></div><div class="xr-section-details"><ul class="xr-var-list"><li class="xr-var-item"><div class="xr-index-name"><div>TIME</div></div><div class="xr-index-preview">PandasIndex</div><input type="checkbox" disabled=""><label></label><input id="index-dd8afc4f-b2dc-451d-8958-bcdbe826699f" class="xr-index-data-in" type="checkbox"><label for="index-dd8afc4f-b2dc-451d-8958-bcdbe826699f" title="Show/Hide index repr"><svg class="icon xr-icon-database"><use href="#icon-database"></use></svg></label><div class="xr-index-data"><pre>PandasIndex(DatetimeIndex([          '2022-09-01 00:00:00',
                          '2022-09-01 00:02:00',
                          '2022-09-01 00:30:00',
                          '2022-09-01 00:32:00',
@@ -636,10 +638,10 @@ Attributes: (12/46)
                          '2022-09-30 23:02:00',
                          '2022-09-30 23:30:00',
                '2022-09-30 23:31:59.999999744'],
-              dtype='datetime64[ns]', name='TIME', length=2879, freq=None))</pre></div></li><li class="xr-var-item"><div class="xr-index-name"><div>LATITUDE</div></div><div class="xr-index-preview">PandasIndex</div><input type="checkbox" disabled=""><label></label><input id="index-17ff32d7-6b9f-45a3-b4d6-1f3ceb9f0e80" class="xr-index-data-in" type="checkbox"><label for="index-17ff32d7-6b9f-45a3-b4d6-1f3ceb9f0e80" title="Show/Hide index repr"><svg class="icon xr-icon-database"><use href="#icon-database"></use></svg></label><div class="xr-index-data"><pre>PandasIndex(Index([54.0, 54.0, 54.0, 54.0, 54.0, 54.0, 54.0, 54.0, 54.0, 54.0,
+              dtype='datetime64[ns]', name='TIME', length=2879, freq=None))</pre></div></li><li class="xr-var-item"><div class="xr-index-name"><div>LATITUDE</div></div><div class="xr-index-preview">PandasIndex</div><input type="checkbox" disabled=""><label></label><input id="index-637199cf-e39b-4ae0-807a-f7d6a508fbb9" class="xr-index-data-in" type="checkbox"><label for="index-637199cf-e39b-4ae0-807a-f7d6a508fbb9" title="Show/Hide index repr"><svg class="icon xr-icon-database"><use href="#icon-database"></use></svg></label><div class="xr-index-data"><pre>PandasIndex(Index([54.0, 54.0, 54.0, 54.0, 54.0, 54.0, 54.0, 54.0, 54.0, 54.0,
        ...
        54.0, 54.0, 54.0, 54.0, 54.0, 54.0, 54.0, 54.0, 54.0, 54.0],
-      dtype='float32', name='LATITUDE', length=2879))</pre></div></li><li class="xr-var-item"><div class="xr-index-name"><div>LONGITUDE</div></div><div class="xr-index-preview">PandasIndex</div><input type="checkbox" disabled=""><label></label><input id="index-31e1336a-1d89-4094-ab44-72fbad4ac3df" class="xr-index-data-in" type="checkbox"><label for="index-31e1336a-1d89-4094-ab44-72fbad4ac3df" title="Show/Hide index repr"><svg class="icon xr-icon-database"><use href="#icon-database"></use></svg></label><div class="xr-index-data"><pre>PandasIndex(Index([6.5833330154418945, 6.5833330154418945, 6.5833330154418945,
+      dtype='float32', name='LATITUDE', length=2879))</pre></div></li><li class="xr-var-item"><div class="xr-index-name"><div>LONGITUDE</div></div><div class="xr-index-preview">PandasIndex</div><input type="checkbox" disabled=""><label></label><input id="index-4c974c0a-8a42-417f-9333-440ce1971131" class="xr-index-data-in" type="checkbox"><label for="index-4c974c0a-8a42-417f-9333-440ce1971131" title="Show/Hide index repr"><svg class="icon xr-icon-database"><use href="#icon-database"></use></svg></label><div class="xr-index-data"><pre>PandasIndex(Index([6.5833330154418945, 6.5833330154418945, 6.5833330154418945,
        6.5833330154418945, 6.5833330154418945, 6.5833330154418945,
        6.5833330154418945, 6.5833330154418945, 6.5833330154418945,
        6.5833330154418945,
@@ -648,12 +650,12 @@ Attributes: (12/46)
        6.5833330154418945, 6.5833330154418945, 6.5833330154418945,
        6.5833330154418945, 6.5833330154418945, 6.5833330154418945,
        6.5833330154418945],
-      dtype='float32', name='LONGITUDE', length=2879))</pre></div></li></ul></div></li><li class="xr-section-item"><input id="section-3ce0d657-38d0-4e2d-8f31-522423884d4a" class="xr-section-summary-in" type="checkbox"><label for="section-3ce0d657-38d0-4e2d-8f31-522423884d4a" class="xr-section-summary">Attributes: <span>(46)</span></label><div class="xr-section-inline-details"></div><div class="xr-section-details"><dl class="xr-attrs"><dt><span>platform_code :</span></dt><dd>FINO1</dd><dt><span>platform_name :</span></dt><dd></dd><dt><span>data_mode :</span></dt><dd>M</dd><dt><span>title :</span></dt><dd>NWS - NRT in situ Observations</dd><dt><span>summary :</span></dt><dd>Oceanographic data from North West Shelf</dd><dt><span>naming_authority :</span></dt><dd>Copernicus Marine In Situ</dd><dt><span>id :</span></dt><dd>NO_TS_MO_FINO1_202209</dd><dt><span>wmo_platform_code :</span></dt><dd>6201065</dd><dt><span>ices_platform_code :</span></dt><dd></dd><dt><span>source :</span></dt><dd>mooring</dd><dt><span>source_platform_category_code :</span></dt><dd>48</dd><dt><span>institution_edmo_code :</span></dt><dd>3356</dd><dt><span>institution :</span></dt><dd>R and D centre Kiel University of Applied Sciences</dd><dt><span>institution_references :</span></dt><dd>www.fh-kiel-gmbh.de/en/</dd><dt><span>site_code :</span></dt><dd></dd><dt><span>comment :</span></dt><dd></dd><dt><span>contact :</span></dt><dd>cmems-service@bsh.de</dd><dt><span>area :</span></dt><dd>North Atlantic Ocean</dd><dt><span>geospatial_lat_min :</span></dt><dd>54.00000</dd><dt><span>geospatial_lat_max :</span></dt><dd>54.00000</dd><dt><span>geospatial_lon_min :</span></dt><dd>6.58333</dd><dt><span>geospatial_lon_max :</span></dt><dd>6.58333</dd><dt><span>last_date_observation :</span></dt><dd>2022-09-30T23:32:00Z</dd><dt><span>last_latitude_observation :</span></dt><dd>54.00000</dd><dt><span>last_longitude_observation :</span></dt><dd>6.58333</dd><dt><span>geospatial_vertical_min :</span></dt><dd>0.00000</dd><dt><span>geospatial_vertical_max :</span></dt><dd>25.00000</dd><dt><span>time_coverage_start :</span></dt><dd>2022-09-01T00:00:00Z</dd><dt><span>time_coverage_end :</span></dt><dd>2022-09-30T23:32:00Z</dd><dt><span>cdm_data_type :</span></dt><dd>timeSeries</dd><dt><span>data_type :</span></dt><dd>OceanSITES time-series data</dd><dt><span>bottom_depth :</span></dt><dd></dd><dt><span>format_version :</span></dt><dd>1.4</dd><dt><span>Conventions :</span></dt><dd>CF-1.6 Copernicus-InSituTAC-FormatManual-1.42 Copernicus-InSituTAC-SRD-1.5 Copernicus-InSituTAC-ParametersList-3.2.1</dd><dt><span>netcdf_version :</span></dt><dd>netCDF-4 classic model</dd><dt><span>references :</span></dt><dd>http://marine.copernicus.eu http://www.marineinsitu.eu</dd><dt><span>data_assembly_center :</span></dt><dd>BSH</dd><dt><span>update_interval :</span></dt><dd>PT1H</dd><dt><span>citation :</span></dt><dd>These data were collected and made freely available by the Copernicus project and the programs that contribute to it</dd><dt><span>distribution_statement :</span></dt><dd>These data follow Copernicus standards; they are public and free of charge. User assumes all risk for use of data. User must display citation in any publication or product using data. User must contact PI prior to any commercial use of data.</dd><dt><span>doi :</span></dt><dd></dd><dt><span>pi_name :</span></dt><dd></dd><dt><span>qc_manual :</span></dt><dd>OceanSITES User's Manual v1.2</dd><dt><span>date_update :</span></dt><dd>2022-10-07T05:39:40Z</dd><dt><span>history :</span></dt><dd>2022-10-01T18:04:25Z : Creation; 2022-10-07T05:39:40Z, BSH North West Shelf PU: Monthly subset 202209 extracted from history file NO_TS_MO_FINO1.nc</dd><dt><span>wmo_inst_type :</span></dt><dd></dd></dl></div></li></ul></div></div>
+      dtype='float32', name='LONGITUDE', length=2879))</pre></div></li></ul></div></li><li class="xr-section-item"><input id="section-20c9bc9d-ec03-4472-8e1a-7f71b892eaa4" class="xr-section-summary-in" type="checkbox"><label for="section-20c9bc9d-ec03-4472-8e1a-7f71b892eaa4" class="xr-section-summary">Attributes: <span>(46)</span></label><div class="xr-section-inline-details"></div><div class="xr-section-details"><dl class="xr-attrs"><dt><span>platform_code :</span></dt><dd>FINO1</dd><dt><span>platform_name :</span></dt><dd></dd><dt><span>data_mode :</span></dt><dd>M</dd><dt><span>title :</span></dt><dd>NWS - NRT in situ Observations</dd><dt><span>summary :</span></dt><dd>Oceanographic data from North West Shelf</dd><dt><span>naming_authority :</span></dt><dd>Copernicus Marine In Situ</dd><dt><span>id :</span></dt><dd>NO_TS_MO_FINO1_202209</dd><dt><span>wmo_platform_code :</span></dt><dd>6201065</dd><dt><span>ices_platform_code :</span></dt><dd></dd><dt><span>source :</span></dt><dd>mooring</dd><dt><span>source_platform_category_code :</span></dt><dd>48</dd><dt><span>institution_edmo_code :</span></dt><dd>3356</dd><dt><span>institution :</span></dt><dd>R and D centre Kiel University of Applied Sciences</dd><dt><span>institution_references :</span></dt><dd>www.fh-kiel-gmbh.de/en/</dd><dt><span>site_code :</span></dt><dd></dd><dt><span>comment :</span></dt><dd></dd><dt><span>contact :</span></dt><dd>cmems-service@bsh.de</dd><dt><span>area :</span></dt><dd>North Atlantic Ocean</dd><dt><span>geospatial_lat_min :</span></dt><dd>54.00000</dd><dt><span>geospatial_lat_max :</span></dt><dd>54.00000</dd><dt><span>geospatial_lon_min :</span></dt><dd>6.58333</dd><dt><span>geospatial_lon_max :</span></dt><dd>6.58333</dd><dt><span>last_date_observation :</span></dt><dd>2022-09-30T23:32:00Z</dd><dt><span>last_latitude_observation :</span></dt><dd>54.00000</dd><dt><span>last_longitude_observation :</span></dt><dd>6.58333</dd><dt><span>geospatial_vertical_min :</span></dt><dd>0.00000</dd><dt><span>geospatial_vertical_max :</span></dt><dd>25.00000</dd><dt><span>time_coverage_start :</span></dt><dd>2022-09-01T00:00:00Z</dd><dt><span>time_coverage_end :</span></dt><dd>2022-09-30T23:32:00Z</dd><dt><span>cdm_data_type :</span></dt><dd>timeSeries</dd><dt><span>data_type :</span></dt><dd>OceanSITES time-series data</dd><dt><span>bottom_depth :</span></dt><dd></dd><dt><span>format_version :</span></dt><dd>1.4</dd><dt><span>Conventions :</span></dt><dd>CF-1.6 Copernicus-InSituTAC-FormatManual-1.42 Copernicus-InSituTAC-SRD-1.5 Copernicus-InSituTAC-ParametersList-3.2.1</dd><dt><span>netcdf_version :</span></dt><dd>netCDF-4 classic model</dd><dt><span>references :</span></dt><dd>http://marine.copernicus.eu http://www.marineinsitu.eu</dd><dt><span>data_assembly_center :</span></dt><dd>BSH</dd><dt><span>update_interval :</span></dt><dd>PT1H</dd><dt><span>citation :</span></dt><dd>These data were collected and made freely available by the Copernicus project and the programs that contribute to it</dd><dt><span>distribution_statement :</span></dt><dd>These data follow Copernicus standards; they are public and free of charge. User assumes all risk for use of data. User must display citation in any publication or product using data. User must contact PI prior to any commercial use of data.</dd><dt><span>doi :</span></dt><dd></dd><dt><span>pi_name :</span></dt><dd></dd><dt><span>qc_manual :</span></dt><dd>OceanSITES User's Manual v1.2</dd><dt><span>date_update :</span></dt><dd>2022-10-07T05:39:40Z</dd><dt><span>history :</span></dt><dd>2022-10-01T18:04:25Z : Creation; 2022-10-07T05:39:40Z, BSH North West Shelf PU: Monthly subset 202209 extracted from history file NO_TS_MO_FINO1.nc</dd><dt><span>wmo_inst_type :</span></dt><dd></dd></dl></div></li></ul></div></div>
 </div>
 </div>
 <p>CMEMS <em>in-situ</em> data is provided in a <a href="https://archimer.ifremer.fr/doc/00488/59938/">standardised format</a>.</p>
 <p>Find out which variables we are interested in to extract:</p>
-<div id="21a44100" class="cell" data-execution_count="3">
+<div id="7ddf0684" class="cell" data-execution_count="3">
 <div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>data <span class="op">=</span> [</span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>    {</span>
 <span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>        <span class="st">"name"</span>: fino[var].name,</span>
@@ -729,7 +731,7 @@ Attributes: (12/46)
 </div>
 <p>The data have a DEPTH dimension, even though variables are only measured at a single level and doesn’t vary in time although the format allows for it.</p>
 <p>I.e. temperature (TEMP) is available at level 1 (0.5 m)</p>
-<div id="4247ff12" class="cell" data-execution_count="4">
+<div id="4346ad4e" class="cell" data-execution_count="4">
 <div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>fino.DEPH.plot.line(x<span class="op">=</span><span class="st">"TIME"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display">
 <div>
@@ -739,7 +741,7 @@ Attributes: (12/46)
 </div>
 </div>
 </div>
-<div id="789e0fc5" class="cell" data-execution_count="5">
+<div id="239b8751" class="cell" data-execution_count="5">
 <div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>fino[<span class="st">'TEMP'</span>].plot.line(<span class="st">"-^"</span>,x<span class="op">=</span><span class="st">'TIME'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display">
 <div>
@@ -749,7 +751,7 @@ Attributes: (12/46)
 </div>
 </div>
 </div>
-<div id="6c4811c1" class="cell" data-execution_count="6">
+<div id="f0a54383" class="cell" data-execution_count="6">
 <div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>fino[<span class="st">'VHM0'</span>].plot.line(<span class="st">"-^"</span>,x<span class="op">=</span><span class="st">'TIME'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display">
 <div>
@@ -760,7 +762,7 @@ Attributes: (12/46)
 </div>
 </div>
 <p>Wave data are only available at the surface.</p>
-<div id="17756696" class="cell" data-execution_count="7">
+<div id="75994ab3" class="cell" data-execution_count="7">
 <div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>fino[[<span class="st">'VHM0'</span>,<span class="st">'VTZA'</span>,<span class="st">'VPED'</span>]].isel(DEPTH<span class="op">=</span><span class="dv">0</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="7">
 <div><svg style="position: absolute; width: 0; height: 0; overflow: hidden">
@@ -1155,10 +1157,10 @@ Attributes: (12/46)
     qc_manual:                      OceanSITES User's Manual v1.2
     date_update:                    2022-10-07T05:39:40Z
     history:                        2022-10-01T18:04:25Z : Creation; 2022-10-...
-    wmo_inst_type:                  </pre><div class="xr-wrap" style="display:none"><div class="xr-header"><div class="xr-obj-type">xarray.Dataset</div></div><ul class="xr-sections"><li class="xr-section-item"><input id="section-0bf59429-a950-46ba-b45c-25af77090e4d" class="xr-section-summary-in" type="checkbox" disabled=""><label for="section-0bf59429-a950-46ba-b45c-25af77090e4d" class="xr-section-summary" title="Expand/collapse section">Dimensions:</label><div class="xr-section-inline-details"><ul class="xr-dim-list"><li><span class="xr-has-index">TIME</span>: 2879</li></ul></div><div class="xr-section-details"></div></li><li class="xr-section-item"><input id="section-58aa31ad-1065-4616-9de7-2bf11f4071cf" class="xr-section-summary-in" type="checkbox" checked=""><label for="section-58aa31ad-1065-4616-9de7-2bf11f4071cf" class="xr-section-summary">Coordinates: <span>(2)</span></label><div class="xr-section-inline-details"></div><div class="xr-section-details"><ul class="xr-var-list"><li class="xr-var-item"><div class="xr-var-name"><span class="xr-has-index">TIME</span></div><div class="xr-var-dims">(TIME)</div><div class="xr-var-dtype">datetime64[ns]</div><div class="xr-var-preview xr-preview">2022-09-01 ... 2022-09-30T23:31:...</div><input id="attrs-26ee408c-f38d-4fe0-90dc-20c7796af057" class="xr-var-attrs-in" type="checkbox"><label for="attrs-26ee408c-f38d-4fe0-90dc-20c7796af057" title="Show/Hide attributes"><svg class="icon xr-icon-file-text2"><use href="#icon-file-text2"></use></svg></label><input id="data-82b96f95-8166-42f0-bcb7-78e86a1e054c" class="xr-var-data-in" type="checkbox"><label for="data-82b96f95-8166-42f0-bcb7-78e86a1e054c" title="Show/Hide data repr"><svg class="icon xr-icon-database"><use href="#icon-database"></use></svg></label><div class="xr-var-attrs"><dl class="xr-attrs"><dt><span>long_name :</span></dt><dd>Time</dd><dt><span>standard_name :</span></dt><dd>time</dd><dt><span>valid_min :</span></dt><dd>-90000.0</dd><dt><span>valid_max :</span></dt><dd>90000.0</dd><dt><span>uncertainty :</span></dt><dd> </dd><dt><span>comment :</span></dt><dd> </dd><dt><span>axis :</span></dt><dd>T</dd><dt><span>ancillary_variables :</span></dt><dd>TIME_QC</dd></dl></div><div class="xr-var-data"><pre>array(['2022-09-01T00:00:00.000000000', '2022-09-01T00:02:00.000000000',
+    wmo_inst_type:                  </pre><div class="xr-wrap" style="display:none"><div class="xr-header"><div class="xr-obj-type">xarray.Dataset</div></div><ul class="xr-sections"><li class="xr-section-item"><input id="section-f826cbe6-6207-4f04-a0d3-7069973768cf" class="xr-section-summary-in" type="checkbox" disabled=""><label for="section-f826cbe6-6207-4f04-a0d3-7069973768cf" class="xr-section-summary" title="Expand/collapse section">Dimensions:</label><div class="xr-section-inline-details"><ul class="xr-dim-list"><li><span class="xr-has-index">TIME</span>: 2879</li></ul></div><div class="xr-section-details"></div></li><li class="xr-section-item"><input id="section-be15dad4-f4c3-4c2f-829f-bcb5ab5d1050" class="xr-section-summary-in" type="checkbox" checked=""><label for="section-be15dad4-f4c3-4c2f-829f-bcb5ab5d1050" class="xr-section-summary">Coordinates: <span>(2)</span></label><div class="xr-section-inline-details"></div><div class="xr-section-details"><ul class="xr-var-list"><li class="xr-var-item"><div class="xr-var-name"><span class="xr-has-index">TIME</span></div><div class="xr-var-dims">(TIME)</div><div class="xr-var-dtype">datetime64[ns]</div><div class="xr-var-preview xr-preview">2022-09-01 ... 2022-09-30T23:31:...</div><input id="attrs-2ba8ff5c-e1e7-4b75-b088-13bf68044311" class="xr-var-attrs-in" type="checkbox"><label for="attrs-2ba8ff5c-e1e7-4b75-b088-13bf68044311" title="Show/Hide attributes"><svg class="icon xr-icon-file-text2"><use href="#icon-file-text2"></use></svg></label><input id="data-b7578e2d-1ddc-4ff1-b2db-84b637c506b8" class="xr-var-data-in" type="checkbox"><label for="data-b7578e2d-1ddc-4ff1-b2db-84b637c506b8" title="Show/Hide data repr"><svg class="icon xr-icon-database"><use href="#icon-database"></use></svg></label><div class="xr-var-attrs"><dl class="xr-attrs"><dt><span>long_name :</span></dt><dd>Time</dd><dt><span>standard_name :</span></dt><dd>time</dd><dt><span>valid_min :</span></dt><dd>-90000.0</dd><dt><span>valid_max :</span></dt><dd>90000.0</dd><dt><span>uncertainty :</span></dt><dd> </dd><dt><span>comment :</span></dt><dd> </dd><dt><span>axis :</span></dt><dd>T</dd><dt><span>ancillary_variables :</span></dt><dd>TIME_QC</dd></dl></div><div class="xr-var-data"><pre>array(['2022-09-01T00:00:00.000000000', '2022-09-01T00:02:00.000000000',
        '2022-09-01T00:30:00.000000000', ..., '2022-09-30T23:02:00.000000000',
        '2022-09-30T23:30:00.000000000', '2022-09-30T23:31:59.999999744'],
-      shape=(2879,), dtype='datetime64[ns]')</pre></div></li><li class="xr-var-item"><div class="xr-var-name"><span>DEPH</span></div><div class="xr-var-dims">(TIME)</div><div class="xr-var-dtype">float32</div><div class="xr-var-preview xr-preview">...</div><input id="attrs-672da682-ec3f-4e02-9fe5-f32f580321da" class="xr-var-attrs-in" type="checkbox"><label for="attrs-672da682-ec3f-4e02-9fe5-f32f580321da" title="Show/Hide attributes"><svg class="icon xr-icon-file-text2"><use href="#icon-file-text2"></use></svg></label><input id="data-febccc2d-d1d6-4717-9a90-36662c0710ec" class="xr-var-data-in" type="checkbox"><label for="data-febccc2d-d1d6-4717-9a90-36662c0710ec" title="Show/Hide data repr"><svg class="icon xr-icon-database"><use href="#icon-database"></use></svg></label><div class="xr-var-attrs"><dl class="xr-attrs"><dt><span>long_name :</span></dt><dd>Depth</dd><dt><span>standard_name :</span></dt><dd>depth</dd><dt><span>units :</span></dt><dd>m</dd><dt><span>positive :</span></dt><dd>down</dd><dt><span>valid_min :</span></dt><dd>-12000.0</dd><dt><span>valid_max :</span></dt><dd>12000.0</dd><dt><span>uncertainty :</span></dt><dd></dd><dt><span>comment :</span></dt><dd></dd><dt><span>axis :</span></dt><dd>Z</dd><dt><span>reference :</span></dt><dd>sea_level</dd><dt><span>data_mode :</span></dt><dd>R</dd><dt><span>ancillary_variables :</span></dt><dd>DEPH_QC</dd></dl></div><div class="xr-var-data"><pre>[2879 values with dtype=float32]</pre></div></li></ul></div></li><li class="xr-section-item"><input id="section-d807c207-32e6-419c-8059-f25ee493b25f" class="xr-section-summary-in" type="checkbox" checked=""><label for="section-d807c207-32e6-419c-8059-f25ee493b25f" class="xr-section-summary">Data variables: <span>(3)</span></label><div class="xr-section-inline-details"></div><div class="xr-section-details"><ul class="xr-var-list"><li class="xr-var-item"><div class="xr-var-name"><span>VHM0</span></div><div class="xr-var-dims">(TIME)</div><div class="xr-var-dtype">float64</div><div class="xr-var-preview xr-preview">...</div><input id="attrs-1c953fc1-4aaf-4acc-a367-f0c99f5cd5f2" class="xr-var-attrs-in" type="checkbox"><label for="attrs-1c953fc1-4aaf-4acc-a367-f0c99f5cd5f2" title="Show/Hide attributes"><svg class="icon xr-icon-file-text2"><use href="#icon-file-text2"></use></svg></label><input id="data-e2ed2aec-25ad-4869-97c9-a2df397636f9" class="xr-var-data-in" type="checkbox"><label for="data-e2ed2aec-25ad-4869-97c9-a2df397636f9" title="Show/Hide data repr"><svg class="icon xr-icon-database"><use href="#icon-database"></use></svg></label><div class="xr-var-attrs"><dl class="xr-attrs"><dt><span>standard_name :</span></dt><dd>sea_surface_wave_significant_height</dd><dt><span>units :</span></dt><dd>m</dd><dt><span>long_name :</span></dt><dd>Spectral significant wave height (Hm0)</dd><dt><span>valid_min :</span></dt><dd>1</dd><dt><span>valid_max :</span></dt><dd>25000</dd><dt><span>comment :</span></dt><dd> </dd><dt><span>uncertainty :</span></dt><dd> </dd><dt><span>accuracy :</span></dt><dd> </dd><dt><span>precision :</span></dt><dd> </dd><dt><span>resolution :</span></dt><dd> </dd><dt><span>cell_methods :</span></dt><dd> </dd><dt><span>type_of_analysis :</span></dt><dd>spectral analysis</dd><dt><span>sensor_depth :</span></dt><dd>0.0</dd><dt><span>sensor_mount :</span></dt><dd> </dd><dt><span>sensor_orientation :</span></dt><dd> </dd><dt><span>data_mode :</span></dt><dd>M</dd><dt><span>ancillary_variables :</span></dt><dd>VHM0_QC VHM0_DM</dd></dl></div><div class="xr-var-data"><pre>[2879 values with dtype=float64]</pre></div></li><li class="xr-var-item"><div class="xr-var-name"><span>VTZA</span></div><div class="xr-var-dims">(TIME)</div><div class="xr-var-dtype">float64</div><div class="xr-var-preview xr-preview">...</div><input id="attrs-9f86637b-325d-4d29-9098-d2599c174577" class="xr-var-attrs-in" type="checkbox"><label for="attrs-9f86637b-325d-4d29-9098-d2599c174577" title="Show/Hide attributes"><svg class="icon xr-icon-file-text2"><use href="#icon-file-text2"></use></svg></label><input id="data-56926d54-55ee-454f-94ae-fd4a0afcdf03" class="xr-var-data-in" type="checkbox"><label for="data-56926d54-55ee-454f-94ae-fd4a0afcdf03" title="Show/Hide data repr"><svg class="icon xr-icon-database"><use href="#icon-database"></use></svg></label><div class="xr-var-attrs"><dl class="xr-attrs"><dt><span>standard_name :</span></dt><dd>sea_surface_wave_mean_period</dd><dt><span>units :</span></dt><dd>s</dd><dt><span>long_name :</span></dt><dd>Average zero crossing wave period (Tz)</dd><dt><span>valid_min :</span></dt><dd>2000</dd><dt><span>valid_max :</span></dt><dd>25000</dd><dt><span>comment :</span></dt><dd> </dd><dt><span>uncertainty :</span></dt><dd> </dd><dt><span>accuracy :</span></dt><dd> </dd><dt><span>precision :</span></dt><dd> </dd><dt><span>resolution :</span></dt><dd> </dd><dt><span>cell_methods :</span></dt><dd> </dd><dt><span>type_of_analysis :</span></dt><dd>zero crossing</dd><dt><span>sensor_depth :</span></dt><dd>0.0</dd><dt><span>sensor_mount :</span></dt><dd> </dd><dt><span>sensor_orientation :</span></dt><dd> </dd><dt><span>data_mode :</span></dt><dd>R</dd><dt><span>ancillary_variables :</span></dt><dd>VTZA_QC</dd></dl></div><div class="xr-var-data"><pre>[2879 values with dtype=float64]</pre></div></li><li class="xr-var-item"><div class="xr-var-name"><span>VPED</span></div><div class="xr-var-dims">(TIME)</div><div class="xr-var-dtype">float64</div><div class="xr-var-preview xr-preview">...</div><input id="attrs-a1edeb13-963b-4fcf-b5c5-cbdceac7efb1" class="xr-var-attrs-in" type="checkbox"><label for="attrs-a1edeb13-963b-4fcf-b5c5-cbdceac7efb1" title="Show/Hide attributes"><svg class="icon xr-icon-file-text2"><use href="#icon-file-text2"></use></svg></label><input id="data-393b2efc-c74c-4248-a375-741461e4e04f" class="xr-var-data-in" type="checkbox"><label for="data-393b2efc-c74c-4248-a375-741461e4e04f" title="Show/Hide data repr"><svg class="icon xr-icon-database"><use href="#icon-database"></use></svg></label><div class="xr-var-attrs"><dl class="xr-attrs"><dt><span>standard_name :</span></dt><dd>sea_surface_wave_from_direction_at_variance_spectral_density_maximum</dd><dt><span>units :</span></dt><dd>degree</dd><dt><span>long_name :</span></dt><dd>Wave principal direction at spectral peak</dd><dt><span>valid_min :</span></dt><dd>0</dd><dt><span>valid_max :</span></dt><dd>360000</dd><dt><span>comment :</span></dt><dd> </dd><dt><span>uncertainty :</span></dt><dd> </dd><dt><span>accuracy :</span></dt><dd> </dd><dt><span>precision :</span></dt><dd> </dd><dt><span>resolution :</span></dt><dd> </dd><dt><span>cell_methods :</span></dt><dd> </dd><dt><span>type_of_analysis :</span></dt><dd>spectral analysis</dd><dt><span>sensor_depth :</span></dt><dd>0.0</dd><dt><span>sensor_mount :</span></dt><dd> </dd><dt><span>sensor_orientation :</span></dt><dd> </dd><dt><span>data_mode :</span></dt><dd>M</dd><dt><span>ancillary_variables :</span></dt><dd>VPED_QC VPED_DM</dd></dl></div><div class="xr-var-data"><pre>[2879 values with dtype=float64]</pre></div></li></ul></div></li><li class="xr-section-item"><input id="section-09d84b46-c78a-4e1e-aa01-c64f3d57c468" class="xr-section-summary-in" type="checkbox"><label for="section-09d84b46-c78a-4e1e-aa01-c64f3d57c468" class="xr-section-summary">Indexes: <span>(1)</span></label><div class="xr-section-inline-details"></div><div class="xr-section-details"><ul class="xr-var-list"><li class="xr-var-item"><div class="xr-index-name"><div>TIME</div></div><div class="xr-index-preview">PandasIndex</div><input type="checkbox" disabled=""><label></label><input id="index-0ec80628-50ac-43b0-8772-ae6dacc0e464" class="xr-index-data-in" type="checkbox"><label for="index-0ec80628-50ac-43b0-8772-ae6dacc0e464" title="Show/Hide index repr"><svg class="icon xr-icon-database"><use href="#icon-database"></use></svg></label><div class="xr-index-data"><pre>PandasIndex(DatetimeIndex([          '2022-09-01 00:00:00',
+      shape=(2879,), dtype='datetime64[ns]')</pre></div></li><li class="xr-var-item"><div class="xr-var-name"><span>DEPH</span></div><div class="xr-var-dims">(TIME)</div><div class="xr-var-dtype">float32</div><div class="xr-var-preview xr-preview">...</div><input id="attrs-0b98e83c-93de-4697-af6c-074b3b9cfcc7" class="xr-var-attrs-in" type="checkbox"><label for="attrs-0b98e83c-93de-4697-af6c-074b3b9cfcc7" title="Show/Hide attributes"><svg class="icon xr-icon-file-text2"><use href="#icon-file-text2"></use></svg></label><input id="data-10904f1a-f785-4eae-9912-95a926f6a61e" class="xr-var-data-in" type="checkbox"><label for="data-10904f1a-f785-4eae-9912-95a926f6a61e" title="Show/Hide data repr"><svg class="icon xr-icon-database"><use href="#icon-database"></use></svg></label><div class="xr-var-attrs"><dl class="xr-attrs"><dt><span>long_name :</span></dt><dd>Depth</dd><dt><span>standard_name :</span></dt><dd>depth</dd><dt><span>units :</span></dt><dd>m</dd><dt><span>positive :</span></dt><dd>down</dd><dt><span>valid_min :</span></dt><dd>-12000.0</dd><dt><span>valid_max :</span></dt><dd>12000.0</dd><dt><span>uncertainty :</span></dt><dd></dd><dt><span>comment :</span></dt><dd></dd><dt><span>axis :</span></dt><dd>Z</dd><dt><span>reference :</span></dt><dd>sea_level</dd><dt><span>data_mode :</span></dt><dd>R</dd><dt><span>ancillary_variables :</span></dt><dd>DEPH_QC</dd></dl></div><div class="xr-var-data"><pre>[2879 values with dtype=float32]</pre></div></li></ul></div></li><li class="xr-section-item"><input id="section-e32adb3d-e775-4241-91cb-33c03f1dac65" class="xr-section-summary-in" type="checkbox" checked=""><label for="section-e32adb3d-e775-4241-91cb-33c03f1dac65" class="xr-section-summary">Data variables: <span>(3)</span></label><div class="xr-section-inline-details"></div><div class="xr-section-details"><ul class="xr-var-list"><li class="xr-var-item"><div class="xr-var-name"><span>VHM0</span></div><div class="xr-var-dims">(TIME)</div><div class="xr-var-dtype">float64</div><div class="xr-var-preview xr-preview">...</div><input id="attrs-c191e27b-f73d-48a5-8f1e-d1aaf80b2c34" class="xr-var-attrs-in" type="checkbox"><label for="attrs-c191e27b-f73d-48a5-8f1e-d1aaf80b2c34" title="Show/Hide attributes"><svg class="icon xr-icon-file-text2"><use href="#icon-file-text2"></use></svg></label><input id="data-998ecf06-7a97-4d37-a401-eba499176582" class="xr-var-data-in" type="checkbox"><label for="data-998ecf06-7a97-4d37-a401-eba499176582" title="Show/Hide data repr"><svg class="icon xr-icon-database"><use href="#icon-database"></use></svg></label><div class="xr-var-attrs"><dl class="xr-attrs"><dt><span>standard_name :</span></dt><dd>sea_surface_wave_significant_height</dd><dt><span>units :</span></dt><dd>m</dd><dt><span>long_name :</span></dt><dd>Spectral significant wave height (Hm0)</dd><dt><span>valid_min :</span></dt><dd>1</dd><dt><span>valid_max :</span></dt><dd>25000</dd><dt><span>comment :</span></dt><dd> </dd><dt><span>uncertainty :</span></dt><dd> </dd><dt><span>accuracy :</span></dt><dd> </dd><dt><span>precision :</span></dt><dd> </dd><dt><span>resolution :</span></dt><dd> </dd><dt><span>cell_methods :</span></dt><dd> </dd><dt><span>type_of_analysis :</span></dt><dd>spectral analysis</dd><dt><span>sensor_depth :</span></dt><dd>0.0</dd><dt><span>sensor_mount :</span></dt><dd> </dd><dt><span>sensor_orientation :</span></dt><dd> </dd><dt><span>data_mode :</span></dt><dd>M</dd><dt><span>ancillary_variables :</span></dt><dd>VHM0_QC VHM0_DM</dd></dl></div><div class="xr-var-data"><pre>[2879 values with dtype=float64]</pre></div></li><li class="xr-var-item"><div class="xr-var-name"><span>VTZA</span></div><div class="xr-var-dims">(TIME)</div><div class="xr-var-dtype">float64</div><div class="xr-var-preview xr-preview">...</div><input id="attrs-d5faf8f4-0324-4ea1-8abb-1a0bcebef395" class="xr-var-attrs-in" type="checkbox"><label for="attrs-d5faf8f4-0324-4ea1-8abb-1a0bcebef395" title="Show/Hide attributes"><svg class="icon xr-icon-file-text2"><use href="#icon-file-text2"></use></svg></label><input id="data-d4f9c1c8-5447-49ba-bd6a-4f55d7ca894b" class="xr-var-data-in" type="checkbox"><label for="data-d4f9c1c8-5447-49ba-bd6a-4f55d7ca894b" title="Show/Hide data repr"><svg class="icon xr-icon-database"><use href="#icon-database"></use></svg></label><div class="xr-var-attrs"><dl class="xr-attrs"><dt><span>standard_name :</span></dt><dd>sea_surface_wave_mean_period</dd><dt><span>units :</span></dt><dd>s</dd><dt><span>long_name :</span></dt><dd>Average zero crossing wave period (Tz)</dd><dt><span>valid_min :</span></dt><dd>2000</dd><dt><span>valid_max :</span></dt><dd>25000</dd><dt><span>comment :</span></dt><dd> </dd><dt><span>uncertainty :</span></dt><dd> </dd><dt><span>accuracy :</span></dt><dd> </dd><dt><span>precision :</span></dt><dd> </dd><dt><span>resolution :</span></dt><dd> </dd><dt><span>cell_methods :</span></dt><dd> </dd><dt><span>type_of_analysis :</span></dt><dd>zero crossing</dd><dt><span>sensor_depth :</span></dt><dd>0.0</dd><dt><span>sensor_mount :</span></dt><dd> </dd><dt><span>sensor_orientation :</span></dt><dd> </dd><dt><span>data_mode :</span></dt><dd>R</dd><dt><span>ancillary_variables :</span></dt><dd>VTZA_QC</dd></dl></div><div class="xr-var-data"><pre>[2879 values with dtype=float64]</pre></div></li><li class="xr-var-item"><div class="xr-var-name"><span>VPED</span></div><div class="xr-var-dims">(TIME)</div><div class="xr-var-dtype">float64</div><div class="xr-var-preview xr-preview">...</div><input id="attrs-3dd66857-ab20-4f41-b738-92c22bc39561" class="xr-var-attrs-in" type="checkbox"><label for="attrs-3dd66857-ab20-4f41-b738-92c22bc39561" title="Show/Hide attributes"><svg class="icon xr-icon-file-text2"><use href="#icon-file-text2"></use></svg></label><input id="data-81e2779f-1fef-409f-a2f6-af8461ee4315" class="xr-var-data-in" type="checkbox"><label for="data-81e2779f-1fef-409f-a2f6-af8461ee4315" title="Show/Hide data repr"><svg class="icon xr-icon-database"><use href="#icon-database"></use></svg></label><div class="xr-var-attrs"><dl class="xr-attrs"><dt><span>standard_name :</span></dt><dd>sea_surface_wave_from_direction_at_variance_spectral_density_maximum</dd><dt><span>units :</span></dt><dd>degree</dd><dt><span>long_name :</span></dt><dd>Wave principal direction at spectral peak</dd><dt><span>valid_min :</span></dt><dd>0</dd><dt><span>valid_max :</span></dt><dd>360000</dd><dt><span>comment :</span></dt><dd> </dd><dt><span>uncertainty :</span></dt><dd> </dd><dt><span>accuracy :</span></dt><dd> </dd><dt><span>precision :</span></dt><dd> </dd><dt><span>resolution :</span></dt><dd> </dd><dt><span>cell_methods :</span></dt><dd> </dd><dt><span>type_of_analysis :</span></dt><dd>spectral analysis</dd><dt><span>sensor_depth :</span></dt><dd>0.0</dd><dt><span>sensor_mount :</span></dt><dd> </dd><dt><span>sensor_orientation :</span></dt><dd> </dd><dt><span>data_mode :</span></dt><dd>M</dd><dt><span>ancillary_variables :</span></dt><dd>VPED_QC VPED_DM</dd></dl></div><div class="xr-var-data"><pre>[2879 values with dtype=float64]</pre></div></li></ul></div></li><li class="xr-section-item"><input id="section-b4f5fa9a-e783-4214-908d-dc97008cafa0" class="xr-section-summary-in" type="checkbox"><label for="section-b4f5fa9a-e783-4214-908d-dc97008cafa0" class="xr-section-summary">Indexes: <span>(1)</span></label><div class="xr-section-inline-details"></div><div class="xr-section-details"><ul class="xr-var-list"><li class="xr-var-item"><div class="xr-index-name"><div>TIME</div></div><div class="xr-index-preview">PandasIndex</div><input type="checkbox" disabled=""><label></label><input id="index-d5d627b0-9da4-4939-ac73-4957ca107913" class="xr-index-data-in" type="checkbox"><label for="index-d5d627b0-9da4-4939-ac73-4957ca107913" title="Show/Hide index repr"><svg class="icon xr-icon-database"><use href="#icon-database"></use></svg></label><div class="xr-index-data"><pre>PandasIndex(DatetimeIndex([          '2022-09-01 00:00:00',
                          '2022-09-01 00:02:00',
                          '2022-09-01 00:30:00',
                          '2022-09-01 00:32:00',
@@ -1179,14 +1181,14 @@ Attributes: (12/46)
                          '2022-09-30 23:02:00',
                          '2022-09-30 23:30:00',
                '2022-09-30 23:31:59.999999744'],
-              dtype='datetime64[ns]', name='TIME', length=2879, freq=None))</pre></div></li></ul></div></li><li class="xr-section-item"><input id="section-b157a86a-6657-4b56-be1e-65b313828125" class="xr-section-summary-in" type="checkbox"><label for="section-b157a86a-6657-4b56-be1e-65b313828125" class="xr-section-summary">Attributes: <span>(46)</span></label><div class="xr-section-inline-details"></div><div class="xr-section-details"><dl class="xr-attrs"><dt><span>platform_code :</span></dt><dd>FINO1</dd><dt><span>platform_name :</span></dt><dd></dd><dt><span>data_mode :</span></dt><dd>M</dd><dt><span>title :</span></dt><dd>NWS - NRT in situ Observations</dd><dt><span>summary :</span></dt><dd>Oceanographic data from North West Shelf</dd><dt><span>naming_authority :</span></dt><dd>Copernicus Marine In Situ</dd><dt><span>id :</span></dt><dd>NO_TS_MO_FINO1_202209</dd><dt><span>wmo_platform_code :</span></dt><dd>6201065</dd><dt><span>ices_platform_code :</span></dt><dd></dd><dt><span>source :</span></dt><dd>mooring</dd><dt><span>source_platform_category_code :</span></dt><dd>48</dd><dt><span>institution_edmo_code :</span></dt><dd>3356</dd><dt><span>institution :</span></dt><dd>R and D centre Kiel University of Applied Sciences</dd><dt><span>institution_references :</span></dt><dd>www.fh-kiel-gmbh.de/en/</dd><dt><span>site_code :</span></dt><dd></dd><dt><span>comment :</span></dt><dd></dd><dt><span>contact :</span></dt><dd>cmems-service@bsh.de</dd><dt><span>area :</span></dt><dd>North Atlantic Ocean</dd><dt><span>geospatial_lat_min :</span></dt><dd>54.00000</dd><dt><span>geospatial_lat_max :</span></dt><dd>54.00000</dd><dt><span>geospatial_lon_min :</span></dt><dd>6.58333</dd><dt><span>geospatial_lon_max :</span></dt><dd>6.58333</dd><dt><span>last_date_observation :</span></dt><dd>2022-09-30T23:32:00Z</dd><dt><span>last_latitude_observation :</span></dt><dd>54.00000</dd><dt><span>last_longitude_observation :</span></dt><dd>6.58333</dd><dt><span>geospatial_vertical_min :</span></dt><dd>0.00000</dd><dt><span>geospatial_vertical_max :</span></dt><dd>25.00000</dd><dt><span>time_coverage_start :</span></dt><dd>2022-09-01T00:00:00Z</dd><dt><span>time_coverage_end :</span></dt><dd>2022-09-30T23:32:00Z</dd><dt><span>cdm_data_type :</span></dt><dd>timeSeries</dd><dt><span>data_type :</span></dt><dd>OceanSITES time-series data</dd><dt><span>bottom_depth :</span></dt><dd></dd><dt><span>format_version :</span></dt><dd>1.4</dd><dt><span>Conventions :</span></dt><dd>CF-1.6 Copernicus-InSituTAC-FormatManual-1.42 Copernicus-InSituTAC-SRD-1.5 Copernicus-InSituTAC-ParametersList-3.2.1</dd><dt><span>netcdf_version :</span></dt><dd>netCDF-4 classic model</dd><dt><span>references :</span></dt><dd>http://marine.copernicus.eu http://www.marineinsitu.eu</dd><dt><span>data_assembly_center :</span></dt><dd>BSH</dd><dt><span>update_interval :</span></dt><dd>PT1H</dd><dt><span>citation :</span></dt><dd>These data were collected and made freely available by the Copernicus project and the programs that contribute to it</dd><dt><span>distribution_statement :</span></dt><dd>These data follow Copernicus standards; they are public and free of charge. User assumes all risk for use of data. User must display citation in any publication or product using data. User must contact PI prior to any commercial use of data.</dd><dt><span>doi :</span></dt><dd></dd><dt><span>pi_name :</span></dt><dd></dd><dt><span>qc_manual :</span></dt><dd>OceanSITES User's Manual v1.2</dd><dt><span>date_update :</span></dt><dd>2022-10-07T05:39:40Z</dd><dt><span>history :</span></dt><dd>2022-10-01T18:04:25Z : Creation; 2022-10-07T05:39:40Z, BSH North West Shelf PU: Monthly subset 202209 extracted from history file NO_TS_MO_FINO1.nc</dd><dt><span>wmo_inst_type :</span></dt><dd></dd></dl></div></li></ul></div></div>
+              dtype='datetime64[ns]', name='TIME', length=2879, freq=None))</pre></div></li></ul></div></li><li class="xr-section-item"><input id="section-99f84243-428e-4159-b752-df3da3332860" class="xr-section-summary-in" type="checkbox"><label for="section-99f84243-428e-4159-b752-df3da3332860" class="xr-section-summary">Attributes: <span>(46)</span></label><div class="xr-section-inline-details"></div><div class="xr-section-details"><dl class="xr-attrs"><dt><span>platform_code :</span></dt><dd>FINO1</dd><dt><span>platform_name :</span></dt><dd></dd><dt><span>data_mode :</span></dt><dd>M</dd><dt><span>title :</span></dt><dd>NWS - NRT in situ Observations</dd><dt><span>summary :</span></dt><dd>Oceanographic data from North West Shelf</dd><dt><span>naming_authority :</span></dt><dd>Copernicus Marine In Situ</dd><dt><span>id :</span></dt><dd>NO_TS_MO_FINO1_202209</dd><dt><span>wmo_platform_code :</span></dt><dd>6201065</dd><dt><span>ices_platform_code :</span></dt><dd></dd><dt><span>source :</span></dt><dd>mooring</dd><dt><span>source_platform_category_code :</span></dt><dd>48</dd><dt><span>institution_edmo_code :</span></dt><dd>3356</dd><dt><span>institution :</span></dt><dd>R and D centre Kiel University of Applied Sciences</dd><dt><span>institution_references :</span></dt><dd>www.fh-kiel-gmbh.de/en/</dd><dt><span>site_code :</span></dt><dd></dd><dt><span>comment :</span></dt><dd></dd><dt><span>contact :</span></dt><dd>cmems-service@bsh.de</dd><dt><span>area :</span></dt><dd>North Atlantic Ocean</dd><dt><span>geospatial_lat_min :</span></dt><dd>54.00000</dd><dt><span>geospatial_lat_max :</span></dt><dd>54.00000</dd><dt><span>geospatial_lon_min :</span></dt><dd>6.58333</dd><dt><span>geospatial_lon_max :</span></dt><dd>6.58333</dd><dt><span>last_date_observation :</span></dt><dd>2022-09-30T23:32:00Z</dd><dt><span>last_latitude_observation :</span></dt><dd>54.00000</dd><dt><span>last_longitude_observation :</span></dt><dd>6.58333</dd><dt><span>geospatial_vertical_min :</span></dt><dd>0.00000</dd><dt><span>geospatial_vertical_max :</span></dt><dd>25.00000</dd><dt><span>time_coverage_start :</span></dt><dd>2022-09-01T00:00:00Z</dd><dt><span>time_coverage_end :</span></dt><dd>2022-09-30T23:32:00Z</dd><dt><span>cdm_data_type :</span></dt><dd>timeSeries</dd><dt><span>data_type :</span></dt><dd>OceanSITES time-series data</dd><dt><span>bottom_depth :</span></dt><dd></dd><dt><span>format_version :</span></dt><dd>1.4</dd><dt><span>Conventions :</span></dt><dd>CF-1.6 Copernicus-InSituTAC-FormatManual-1.42 Copernicus-InSituTAC-SRD-1.5 Copernicus-InSituTAC-ParametersList-3.2.1</dd><dt><span>netcdf_version :</span></dt><dd>netCDF-4 classic model</dd><dt><span>references :</span></dt><dd>http://marine.copernicus.eu http://www.marineinsitu.eu</dd><dt><span>data_assembly_center :</span></dt><dd>BSH</dd><dt><span>update_interval :</span></dt><dd>PT1H</dd><dt><span>citation :</span></dt><dd>These data were collected and made freely available by the Copernicus project and the programs that contribute to it</dd><dt><span>distribution_statement :</span></dt><dd>These data follow Copernicus standards; they are public and free of charge. User assumes all risk for use of data. User must display citation in any publication or product using data. User must contact PI prior to any commercial use of data.</dd><dt><span>doi :</span></dt><dd></dd><dt><span>pi_name :</span></dt><dd></dd><dt><span>qc_manual :</span></dt><dd>OceanSITES User's Manual v1.2</dd><dt><span>date_update :</span></dt><dd>2022-10-07T05:39:40Z</dd><dt><span>history :</span></dt><dd>2022-10-01T18:04:25Z : Creation; 2022-10-07T05:39:40Z, BSH North West Shelf PU: Monthly subset 202209 extracted from history file NO_TS_MO_FINO1.nc</dd><dt><span>wmo_inst_type :</span></dt><dd></dd></dl></div></li></ul></div></div>
 </div>
 </div>
-<div id="a88f06f3" class="cell" data-execution_count="8">
+<div id="2fad85ac" class="cell" data-execution_count="8">
 <div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> fino[[<span class="st">'VHM0'</span>,<span class="st">'VTZA'</span>,<span class="st">'VPED'</span>]].isel(DEPTH<span class="op">=</span><span class="dv">0</span>).to_dataframe()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>The data are stored on the concurrent timesteps.</p>
-<div id="a67651a0" class="cell" data-execution_count="9">
+<div id="a3ba0d00" class="cell" data-execution_count="9">
 <div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>df[[<span class="st">'VHM0'</span>,<span class="st">'VTZA'</span>,<span class="st">'VPED'</span>]].head()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="9">
 <div>
@@ -1244,7 +1246,7 @@ Attributes: (12/46)
 </div>
 </div>
 </div>
-<div id="efea2517" class="cell" data-execution_count="10">
+<div id="b8c5b404" class="cell" data-execution_count="10">
 <div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>df[[<span class="st">'VHM0'</span>,<span class="st">'VTZA'</span>]].plot(style<span class="op">=</span><span class="st">'+'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display">
 <div>
@@ -1255,7 +1257,7 @@ Attributes: (12/46)
 </div>
 </div>
 <p>Convert the wave height data to a mikeio dataset.</p>
-<div id="cb16dafd" class="cell" data-execution_count="11">
+<div id="ea405d85" class="cell" data-execution_count="11">
 <div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>ds <span class="op">=</span> mikeio.from_pandas(</span>
 <span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>    df[[<span class="st">"VHM0"</span>]].dropna(), items<span class="op">=</span>mikeio.ItemInfo(mikeio.EUMType.Significant_wave_height)</span>
 <span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>)</span>
@@ -1270,11 +1272,11 @@ items:
 </div>
 </div>
 <p>Store the results in Dfs0 format.</p>
-<div id="47d96c5b" class="cell" data-execution_count="12">
+<div id="60a8e9b3" class="cell" data-execution_count="12">
 <div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>ds.to_dfs(<span class="st">"FINO1_VHM0.dfs0"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>Read the file again to check…</p>
-<div id="4d0eb0cf" class="cell" data-execution_count="13">
+<div id="83335564" class="cell" data-execution_count="13">
 <div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>ds <span class="op">=</span> mikeio.read(<span class="st">"FINO1_VHM0.dfs0"</span>)</span>
 <span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>ds</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="13">
@@ -1291,236 +1293,242 @@ items:
 
 </main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
-window.document.addEventListener("DOMContentLoaded", function (event) {
-  const toggleBodyColorMode = (bsSheetEl) => {
-    const mode = bsSheetEl.getAttribute("data-mode");
-    const bodyEl = window.document.querySelector("body");
-    if (mode === "dark") {
-      bodyEl.classList.add("quarto-dark");
-      bodyEl.classList.remove("quarto-light");
-    } else {
-      bodyEl.classList.add("quarto-light");
-      bodyEl.classList.remove("quarto-dark");
-    }
-  }
-  const toggleBodyColorPrimary = () => {
-    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
-    if (bsSheetEl) {
-      toggleBodyColorMode(bsSheetEl);
-    }
-  }
-  toggleBodyColorPrimary();  
-  const icon = "";
-  const anchorJS = new window.AnchorJS();
-  anchorJS.options = {
-    placement: 'right',
-    icon: icon
-  };
-  anchorJS.add('.anchored');
-  const isCodeAnnotation = (el) => {
-    for (const clz of el.classList) {
-      if (clz.startsWith('code-annotation-')) {                     
-        return true;
-      }
-    }
-    return false;
-  }
-  const onCopySuccess = function(e) {
-    // button target
-    const button = e.trigger;
-    // don't keep focus
-    button.blur();
-    // flash "checked"
-    button.classList.add('code-copy-button-checked');
-    var currentTitle = button.getAttribute("title");
-    button.setAttribute("title", "Copied!");
-    let tooltip;
-    if (window.bootstrap) {
-      button.setAttribute("data-bs-toggle", "tooltip");
-      button.setAttribute("data-bs-placement", "left");
-      button.setAttribute("data-bs-title", "Copied!");
-      tooltip = new bootstrap.Tooltip(button, 
-        { trigger: "manual", 
-          customClass: "code-copy-button-tooltip",
-          offset: [0, -8]});
-      tooltip.show();    
-    }
-    setTimeout(function() {
-      if (tooltip) {
-        tooltip.hide();
-        button.removeAttribute("data-bs-title");
-        button.removeAttribute("data-bs-toggle");
-        button.removeAttribute("data-bs-placement");
-      }
-      button.setAttribute("title", currentTitle);
-      button.classList.remove('code-copy-button-checked');
-    }, 1000);
-    // clear code selection
-    e.clearSelection();
-  }
-  const getTextToCopy = function(trigger) {
-      const codeEl = trigger.previousElementSibling.cloneNode(true);
-      for (const childEl of codeEl.children) {
-        if (isCodeAnnotation(childEl)) {
-          childEl.remove();
-        }
-      }
-      return codeEl.innerText;
-  }
-  const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
-    text: getTextToCopy
-  });
-  clipboard.on('success', onCopySuccess);
-  if (window.document.getElementById('quarto-embedded-source-code-modal')) {
-    const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
-      text: getTextToCopy,
-      container: window.document.getElementById('quarto-embedded-source-code-modal')
-    });
-    clipboardModal.on('success', onCopySuccess);
-  }
-    var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
-    var mailtoRegex = new RegExp(/^mailto:/);
-      var filterRegex = new RegExp('/' + window.location.host + '/');
-    var isInternal = (href) => {
-        return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
-    }
-    // Inspect non-navigation links and adorn them if external
- 	var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
-    for (var i=0; i<links.length; i++) {
-      const link = links[i];
-      if (!isInternal(link.href)) {
-        // undo the damage that might have been done by quarto-nav.js in the case of
-        // links that we want to consider external
-        if (link.dataset.originalHref !== undefined) {
-          link.href = link.dataset.originalHref;
-        }
-      }
-    }
-  function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
-    const config = {
-      allowHTML: true,
-      maxWidth: 500,
-      delay: 100,
-      arrow: false,
-      appendTo: function(el) {
-          return el.parentElement;
-      },
-      interactive: true,
-      interactiveBorder: 10,
-      theme: 'quarto',
-      placement: 'bottom-start',
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
     };
-    if (contentFn) {
-      config.content = contentFn;
-    }
-    if (onTriggerFn) {
-      config.onTrigger = onTriggerFn;
-    }
-    if (onUntriggerFn) {
-      config.onUntrigger = onUntriggerFn;
-    }
-    window.tippy(el, config); 
-  }
-  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
-  for (var i=0; i<noterefs.length; i++) {
-    const ref = noterefs[i];
-    tippyHover(ref, function() {
-      // use id or data attribute instead here
-      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
-      try { href = new URL(href).hash; } catch {}
-      const id = href.replace(/^#\/?/, "");
-      const note = window.document.getElementById(id);
-      if (note) {
-        return note.innerHTML;
-      } else {
-        return "";
-      }
-    });
-  }
-  const xrefs = window.document.querySelectorAll('a.quarto-xref');
-  const processXRef = (id, note) => {
-    // Strip column container classes
-    const stripColumnClz = (el) => {
-      el.classList.remove("page-full", "page-columns");
-      if (el.children) {
-        for (const child of el.children) {
-          stripColumnClz(child);
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
         }
       }
+      return false;
     }
-    stripColumnClz(note)
-    if (id === null || id.startsWith('sec-')) {
-      // Special case sections, only their first couple elements
-      const container = document.createElement("div");
-      if (note.children && note.children.length > 2) {
-        container.appendChild(note.children[0].cloneNode(true));
-        for (let i = 1; i < note.children.length; i++) {
-          const child = note.children[i];
-          if (child.tagName === "P" && child.innerText === "") {
-            continue;
-          } else {
-            container.appendChild(child.cloneNode(true));
-            break;
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+        const codeEl = trigger.previousElementSibling.cloneNode(true);
+        for (const childEl of codeEl.children) {
+          if (isCodeAnnotation(childEl)) {
+            childEl.remove();
           }
         }
-        if (window.Quarto?.typesetMath) {
-          window.Quarto.typesetMath(container);
+        return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp('/' + window.location.host + '/');
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
         }
-        return container.innerHTML
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
       } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
         if (window.Quarto?.typesetMath) {
           window.Quarto.typesetMath(note);
         }
-        return note.innerHTML;
-      }
-    } else {
-      // Remove any anchor links if they are present
-      const anchorLink = note.querySelector('a.anchorjs-link');
-      if (anchorLink) {
-        anchorLink.remove();
-      }
-      if (window.Quarto?.typesetMath) {
-        window.Quarto.typesetMath(note);
-      }
-      if (note.classList.contains("callout")) {
-        return note.outerHTML;
-      } else {
-        return note.innerHTML;
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
       }
     }
-  }
-  for (var i=0; i<xrefs.length; i++) {
-    const xref = xrefs[i];
-    tippyHover(xref, undefined, function(instance) {
-      instance.disable();
-      let url = xref.getAttribute('href');
-      let hash = undefined; 
-      if (url.startsWith('#')) {
-        hash = url;
-      } else {
-        try { hash = new URL(url).hash; } catch {}
-      }
-      if (hash) {
-        const id = hash.replace(/^#\/?/, "");
-        const note = window.document.getElementById(id);
-        if (note !== null) {
-          try {
-            const html = processXRef(id, note.cloneNode(true));
-            instance.setContent(html);
-          } finally {
-            instance.enable();
-            instance.show();
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
           }
         } else {
-          // See if we can fetch this
-          fetch(url.split('#')[0])
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
           .then(res => res.text())
           .then(html => {
             const parser = new DOMParser();
             const htmlDoc = parser.parseFromString(html, "text/html");
-            const note = htmlDoc.getElementById(id);
+            const note = htmlDoc.querySelector('main.content');
             if (note !== null) {
-              const html = processXRef(id, note);
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
               instance.setContent(html);
             } 
           }).finally(() => {
@@ -1528,185 +1536,161 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
             instance.show();
           });
         }
-      } else {
-        // See if we can fetch a full url (with no hash to target)
-        // This is a special case and we should probably do some content thinning / targeting
-        fetch(url)
-        .then(res => res.text())
-        .then(html => {
-          const parser = new DOMParser();
-          const htmlDoc = parser.parseFromString(html, "text/html");
-          const note = htmlDoc.querySelector('main.content');
-          if (note !== null) {
-            // This should only happen for chapter cross references
-            // (since there is no id in the URL)
-            // remove the first header
-            if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
-              note.children[0].remove();
-            }
-            const html = processXRef(null, note);
-            instance.setContent(html);
-          } 
-        }).finally(() => {
-          instance.enable();
-          instance.show();
-        });
-      }
-    }, function(instance) {
-    });
-  }
-      let selectedAnnoteEl;
-      const selectorForAnnotation = ( cell, annotation) => {
-        let cellAttr = 'data-code-cell="' + cell + '"';
-        let lineAttr = 'data-code-annotation="' +  annotation + '"';
-        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
-        return selector;
-      }
-      const selectCodeLines = (annoteEl) => {
-        const doc = window.document;
-        const targetCell = annoteEl.getAttribute("data-target-cell");
-        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
-        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
-        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
-        const lineIds = lines.map((line) => {
-          return targetCell + "-" + line;
-        })
-        let top = null;
-        let height = null;
-        let parent = null;
-        if (lineIds.length > 0) {
-            //compute the position of the single el (top and bottom and make a div)
-            const el = window.document.getElementById(lineIds[0]);
-            top = el.offsetTop;
-            height = el.offsetHeight;
-            parent = el.parentElement.parentElement;
-          if (lineIds.length > 1) {
-            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
-            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
-            height = bottom - top;
-          }
-          if (top !== null && height !== null && parent !== null) {
-            // cook up a div (if necessary) and position it 
-            let div = window.document.getElementById("code-annotation-line-highlight");
-            if (div === null) {
-              div = window.document.createElement("div");
-              div.setAttribute("id", "code-annotation-line-highlight");
-              div.style.position = 'absolute';
-              parent.appendChild(div);
-            }
-            div.style.top = top - 2 + "px";
-            div.style.height = height + 4 + "px";
-            div.style.left = 0;
-            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
-            if (gutterDiv === null) {
-              gutterDiv = window.document.createElement("div");
-              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
-              gutterDiv.style.position = 'absolute';
-              const codeCell = window.document.getElementById(targetCell);
-              const gutter = codeCell.querySelector('.code-annotation-gutter');
-              gutter.appendChild(gutterDiv);
-            }
-            gutterDiv.style.top = top - 2 + "px";
-            gutterDiv.style.height = height + 4 + "px";
-          }
-          selectedAnnoteEl = annoteEl;
-        }
-      };
-      const unselectCodeLines = () => {
-        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
-        elementsIds.forEach((elId) => {
-          const div = window.document.getElementById(elId);
-          if (div) {
-            div.remove();
-          }
-        });
-        selectedAnnoteEl = undefined;
-      };
-        // Handle positioning of the toggle
-    window.addEventListener(
-      "resize",
-      throttle(() => {
-        elRect = undefined;
-        if (selectedAnnoteEl) {
-          selectCodeLines(selectedAnnoteEl);
-        }
-      }, 10)
-    );
-    function throttle(fn, ms) {
-    let throttle = false;
-    let timer;
-      return (...args) => {
-        if(!throttle) { // first call gets through
-            fn.apply(this, args);
-            throttle = true;
-        } else { // all the others get throttled
-            if(timer) clearTimeout(timer); // cancel #2
-            timer = setTimeout(() => {
-              fn.apply(this, args);
-              timer = throttle = false;
-            }, ms);
-        }
-      };
-    }
-      // Attach click handler to the DT
-      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
-      for (const annoteDlNode of annoteDls) {
-        annoteDlNode.addEventListener('click', (event) => {
-          const clickedEl = event.target;
-          if (clickedEl !== selectedAnnoteEl) {
-            unselectCodeLines();
-            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
-            if (activeEl) {
-              activeEl.classList.remove('code-annotation-active');
-            }
-            selectCodeLines(clickedEl);
-            clickedEl.classList.add('code-annotation-active');
-          } else {
-            // Unselect the line
-            unselectCodeLines();
-            clickedEl.classList.remove('code-annotation-active');
-          }
-        });
-      }
-  const findCites = (el) => {
-    const parentEl = el.parentElement;
-    if (parentEl) {
-      const cites = parentEl.dataset.cites;
-      if (cites) {
-        return {
-          el,
-          cites: cites.split(' ')
-        };
-      } else {
-        return findCites(el.parentElement)
-      }
-    } else {
-      return undefined;
-    }
-  };
-  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
-  for (var i=0; i<bibliorefs.length; i++) {
-    const ref = bibliorefs[i];
-    const citeInfo = findCites(ref);
-    if (citeInfo) {
-      tippyHover(citeInfo.el, function() {
-        var popup = window.document.createElement('div');
-        citeInfo.cites.forEach(function(cite) {
-          var citeDiv = window.document.createElement('div');
-          citeDiv.classList.add('hanging-indent');
-          citeDiv.classList.add('csl-entry');
-          var biblioDiv = window.document.getElementById('ref-' + cite);
-          if (biblioDiv) {
-            citeDiv.innerHTML = biblioDiv.innerHTML;
-          }
-          popup.appendChild(citeDiv);
-        });
-        return popup.innerHTML;
+      }, function(instance) {
       });
     }
-  }
-});
-</script>
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
 </div> <!-- /content -->
 <footer class="footer">
   <div class="nav-footer">
