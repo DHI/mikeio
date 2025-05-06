@@ -161,7 +161,7 @@ Let's first try the approx for a single element:
 * Interpolate
 
 ```{python}
-dist = dist_in_meters(scatter[:,:2], dfs.geometry.element_coordinates[0,:2])
+dist = dist_in_meters(scatter[:,:2], dfs.geometry.element_coordinates[0,:2], is_geo=dfs.geometry.is_geo)
 dist
 ```
 
@@ -179,7 +179,7 @@ Let's do the same for all points in the mesh and plot in the end
 ```{python}
 dati = np.zeros((1, dfs.geometry.n_elements))
 for j in range(dfs.geometry.n_elements):
-    dist = dist_in_meters(scatter[:, :2], dfs.geometry.element_coordinates[j, :2])
+    dist = dist_in_meters(scatter[:, :2], dfs.geometry.element_coordinates[j, :2], is_geo=dfs.geometry.is_geo)
     w = get_idw_interpolant(dist, p=2)
     dati[0, j] = np.dot(scatter[:, 2], w)
 ```
@@ -190,7 +190,8 @@ da
 ```
 
 ```{python}
-da.plot(title="Interpolated scatter data");
+ax = da.plot(title="Interpolated scatter data");
+ax.scatter(scatter[:,0], scatter[:,1], s=30, c='red')
 ```
 
 ```{python}
