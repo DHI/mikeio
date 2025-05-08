@@ -158,7 +158,7 @@ class Dfs3(_Dfs123):
         self,
         *,
         items: str | int | Sequence[str | int] | None = None,
-        time: int | str | slice | None = None,
+        time: int | str | slice | Sequence[int] | None = None,
         area: tuple[float, float, float, float] | None = None,
         layers: str | int | Sequence[int] | None = None,
         keepdims: bool = False,

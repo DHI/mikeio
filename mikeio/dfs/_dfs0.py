@@ -140,7 +140,7 @@ class Dfs0:
     def read(
         self,
         items: str | int | Sequence[str | int] | None = None,
-        time: int | str | slice | None = None,
+        time: int | str | slice | Sequence[int] | None = None,
         **kwargs: Any,
     ) -> Dataset:
         """Read data from a dfs0 file.

@@ -158,7 +158,7 @@ class Dfs2(_Dfs123):
         self,
         *,
         items: str | int | Sequence[str | int] | None = None,
-        time: int | str | slice | None = None,
+        time: int | str | slice | Sequence[int] | None = None,
         area: tuple[float, float, float, float] | None = None,
         keepdims: bool = False,
         dtype: Any = np.float32,
