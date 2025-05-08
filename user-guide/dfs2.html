@@ -77,7 +77,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <link href="../site_libs/quarto-html/quarto-syntax-highlighting-de070a7b0ab54f8780927367ac907214.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="../site_libs/bootstrap/bootstrap-cd74cba69e18857596157f6e1f3f0483.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<link href="../site_libs/bootstrap/bootstrap-6c437caa095562069354f84ede9975ef.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -294,7 +294,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 
 <p>A dfs2 file is also called a grid series file. Values in a dfs2 file are ‘element based’, i.e.&nbsp;values are defined in the centre of each grid cell.</p>
-<div id="f96832e3" class="cell" data-execution_count="1">
+<div id="164c6a3f" class="cell" data-execution_count="1">
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> mikeio</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>ds <span class="op">=</span> mikeio.read(<span class="st">"../data/gebco_sound.dfs2"</span>)</span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>ds</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
@@ -310,7 +310,7 @@ items:
 <section id="subset-in-space" class="level2">
 <h2 class="anchored" data-anchor-id="subset-in-space">Subset in space</h2>
 <p>The most convenient way to subset in space is to use the <code>sel</code> method, which returns a new (smaller) dataset, which can be further processed or written to disk using the <code>to_dfs</code> method.</p>
-<div id="1e06b838" class="cell" data-execution_count="2">
+<div id="c13b9ef6" class="cell" data-execution_count="2">
 <div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>ds.geometry</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="2">
 <pre><code>&lt;mikeio.Grid2D&gt;
@@ -319,7 +319,7 @@ y: [55.2, 55.21, ..., 56.3] (ny=264, dy=0.004167)
 projection: LONG/LAT</code></pre>
 </div>
 </div>
-<div id="5bf7a03b" class="cell" data-execution_count="3">
+<div id="4564908d" class="cell" data-execution_count="3">
 <div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>ds_aoi <span class="op">=</span> ds.sel(x<span class="op">=</span><span class="bu">slice</span>(<span class="fl">12.5</span>, <span class="fl">13.0</span>), y<span class="op">=</span><span class="bu">slice</span>(<span class="fl">55.5</span>, <span class="fl">56.0</span>))</span>
 <span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>ds_aoi.geometry</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="3">
@@ -330,7 +330,7 @@ projection: LONG/LAT</code></pre>
 </div>
 </div>
 <p>In order to specify an open-ended subset (i.e.&nbsp;where the end of the subset is the end of the domain), use <code>None</code> as the end of the slice.</p>
-<div id="af028227" class="cell" data-execution_count="4">
+<div id="8b50a699" class="cell" data-execution_count="4">
 <div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>ds.sel(x<span class="op">=</span><span class="bu">slice</span>(<span class="va">None</span>, <span class="fl">13.0</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="4">
 <pre><code>&lt;mikeio.Dataset&gt;
@@ -345,7 +345,7 @@ items:
 <section id="grid2d" class="level2">
 <h2 class="anchored" data-anchor-id="grid2d">Grid2D</h2>
 <p>The spatial information is available in the <code>geometry</code> attribute (accessible from Dfs2, Dataset, and DataArray), which in the case of a dfs2 file is a <a href="../api/Grid2D.html#mikeio.Grid2D"><code>Grid2D</code></a> geometry.</p>
-<div id="a4fc60a4" class="cell" data-execution_count="5">
+<div id="a8dd62cf" class="cell" data-execution_count="5">
 <div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>ds.geometry</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="5">
 <pre><code>&lt;mikeio.Grid2D&gt;
