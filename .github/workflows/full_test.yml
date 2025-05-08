@@ -37,9 +37,7 @@ jobs:
         pip install .[test]
     - name: Test with pytest
       run: |
-        pytest --cov=mikeio tests --ignore tests/performance/ --ignore tests/notebooks/ --disable-warnings
-    - name: Test docstrings with doctest
-      run: make doctest
+        make test
     - name: Static type check
       run: make typecheck
     - name: Build package
