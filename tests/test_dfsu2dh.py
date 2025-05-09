@@ -231,7 +231,7 @@ def test_read_elements() -> None:
 
     ds2 = mikeio.read(filename="tests/testdata/wind_north_sea.dfsu", elements=[10, 0])
     assert ds2.geometry.element_coordinates[1][0] == pytest.approx(1.4931853081272184)
-    assert ds2["Wind_speed"].to_numpy()[0, 1] == pytest.approx(9.530759811401367)
+    assert ds2["Wind speed"].to_numpy()[0, 1] == pytest.approx(9.530759811401367)
 
 
 def test_read_x_y() -> None:
