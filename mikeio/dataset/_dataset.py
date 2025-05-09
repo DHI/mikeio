@@ -1449,7 +1449,7 @@ class Dataset:
     # ============ aggregate =============
 
     def aggregate(
-        self, axis: int | str = 0, func: Callable = np.nanmean, **kwargs: Any
+        self, axis: int | str | None = 0, func: Callable = np.nanmean, **kwargs: Any
     ) -> "Dataset":
         """Aggregate along an axis.
 

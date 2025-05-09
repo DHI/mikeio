@@ -32,7 +32,7 @@ def _check_equidistant(x: np.ndarray) -> None:
 
 def _parse_grid_axis(
     name: str,
-    x: np.ndarray | None,
+    x: ArrayLike | None,
     x0: float = 0.0,
     dx: float | None = None,
     nx: int | None = None,
