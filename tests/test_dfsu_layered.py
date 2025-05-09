@@ -11,7 +11,14 @@ from mikeio.spatial import (
 from mikeio.spatial import GeometryPoint3D
 
 
-def test_read_simple_3d():
+def test_repr() -> None:
+    filename = "tests/testdata/oresund_sigma_z.dfsu"
+    dfs = mikeio.Dfsu3D(filename)
+    text = repr(dfs)
+    assert "number of z layers" in text
+
+
+def test_read_simple_3d() -> None:
     filename = "tests/testdata/basin_3d.dfsu"
     ds = mikeio.read(filename)
 
@@ -22,7 +29,7 @@ def test_read_simple_3d():
     assert ds.items[2].name == "W velocity"
 
 
-def test_read_simple_2dv():
+def test_read_simple_2dv() -> None:
     filename = "tests/testdata/basin_2dv.dfsu"
     dfs = mikeio.open(filename)
 
@@ -35,7 +42,7 @@ def test_read_simple_2dv():
     assert ds.items[2].name == "W velocity"
 
 
-def test_read_returns_correct_items_sigma_z():
+def test_read_returns_correct_items_sigma_z() -> None:
     filename = "tests/testdata/oresund_sigma_z.dfsu"
     dfs = mikeio.open(filename)
 
@@ -46,7 +53,7 @@ def test_read_returns_correct_items_sigma_z():
     assert ds.items[1].name == "Salinity"
 
 
-def test_read_top_layer():
+def test_read_top_layer() -> None:
     filename = "tests/testdata/oresund_sigma_z.dfsu"
     dfs = mikeio.open(filename)
 
@@ -62,7 +69,7 @@ def test_read_top_layer():
     assert np.all(dstop1.to_numpy() == dstop2.to_numpy())
 
 
-def test_read_bottom_layer():
+def test_read_bottom_layer() -> None:
     filename = "tests/testdata/oresund_sigma_z.dfsu"
     dfs = mikeio.open(filename)
 
@@ -78,7 +85,7 @@ def test_read_bottom_layer():
     assert dsbot1.geometry.max_nodes_per_element <= 4
 
 
-def test_read_single_step_bottom_layer():
+def test_read_single_step_bottom_layer() -> None:
     filename = "tests/testdata/oresund_sigma_z.dfsu"
     dfs = mikeio.open(filename)
 
@@ -86,7 +93,7 @@ def test_read_single_step_bottom_layer():
     ds.sel(layers="bottom")
 
 
-def test_read_multiple_layers():
+def test_read_multiple_layers() -> None:
     filename = "tests/testdata/oresund_sigma_z.dfsu"
     dfs = mikeio.open(filename)
 
@@ -102,7 +109,7 @@ def test_read_multiple_layers():
     assert dstop1.geometry.max_nodes_per_element >= 6
 
 
-def test_read_dfsu3d_area():
+def test_read_dfsu3d_area() -> None:
     filename = "tests/testdata/oresund_sigma_z.dfsu"
     dfs = mikeio.open(filename)
 
@@ -122,7 +129,7 @@ def test_read_dfsu3d_area():
     assert np.all(dsa1.to_numpy() == dsa2.to_numpy())
 
 
-def test_read_dfsu3d_area_single_element():
+def test_read_dfsu3d_area_single_element() -> None:
     filename = "tests/testdata/oresund_sigma_z.dfsu"
     dfs = mikeio.open(filename)
 
@@ -140,7 +147,7 @@ def test_read_dfsu3d_area_single_element():
     assert len(ds.dims) == 0
 
 
-def test_read_dfsu3d_area_empty_fails():
+def test_read_dfsu3d_area_empty_fails() -> None:
     filename = "tests/testdata/oresund_sigma_z.dfsu"
     dfs = mikeio.open(filename)
 
@@ -149,7 +156,7 @@ def test_read_dfsu3d_area_empty_fails():
         dfs.read(area=bbox)
 
 
-def test_read_dfsu3d_column():
+def test_read_dfsu3d_column() -> None:
     filename = "tests/testdata/oresund_sigma_z.dfsu"
     dfs = mikeio.open(filename)
 
@@ -172,7 +179,7 @@ def test_read_dfsu3d_column():
     assert dscol2._zn.shape == (ds.n_timesteps, 5 * 3)
 
 
-def test_flip_column_upside_down():
+def test_flip_column_upside_down() -> None:
     filename = "tests/testdata/oresund_sigma_z.dfsu"
     dfs = mikeio.open(filename)
 
@@ -191,7 +198,7 @@ def test_flip_column_upside_down():
     assert dscol_ud.isel(time=-1).Temperature.values[-1] == pytest.approx(17.460058)
 
 
-def test_read_dfsu3d_column_save(tmp_path):
+def test_read_dfsu3d_column_save(tmp_path) -> None:
     filename = "tests/testdata/oresund_sigma_z.dfsu"
     dfs = mikeio.open(filename)
     assert dfs.geometry.n_sigma_layers == 4
@@ -217,7 +224,7 @@ def test_read_dfsu3d_column_save(tmp_path):
     ds.to_dfs(fp)
 
 
-def test_read_dfsu3d_columns_sigma_only():
+def test_read_dfsu3d_columns_sigma_only() -> None:
     dfs = mikeio.open("tests/testdata/basin_3d.dfsu")
     dscol = dfs.read(x=500, y=50)
     assert isinstance(dscol.geometry, GeometryFMVerticalColumn)
@@ -229,7 +236,7 @@ def test_read_dfsu3d_columns_sigma_only():
     assert dscol.shape == dscol2.shape
 
 
-def test_read_dfsu3d_columns_sigma_only_save(tmp_path):
+def test_read_dfsu3d_columns_sigma_only_save(tmp_path) -> None:
     dfs = mikeio.open("tests/testdata/basin_3d.dfsu")
     assert dfs.geometry.n_sigma_layers == 10
     assert dfs.geometry.n_z_layers == 0
@@ -240,7 +247,7 @@ def test_read_dfsu3d_columns_sigma_only_save(tmp_path):
     dscol.to_dfs(fp)
 
 
-def test_read_dfsu3d_xyz():
+def test_read_dfsu3d_xyz() -> None:
     filename = "tests/testdata/oresund_sigma_z.dfsu"
     dfs = mikeio.open(filename)
 
@@ -263,7 +270,7 @@ def test_read_dfsu3d_xyz():
     # 20.531237
 
 
-def test_read_dfsu3d_xyz_to_xarray():
+def test_read_dfsu3d_xyz_to_xarray() -> None:
     filename = "tests/testdata/oresund_sigma_z.dfsu"
     dfs = mikeio.open(filename)
 
@@ -278,7 +285,7 @@ def test_read_dfsu3d_xyz_to_xarray():
     assert float(xr_ds.z) == pytest.approx(z)
 
 
-def test_read_column_select_single_time_plot():
+def test_read_column_select_single_time_plot() -> None:
     filename = "tests/testdata/oresund_sigma_z.dfsu"
     dfs = mikeio.open(filename)
 
@@ -290,7 +297,7 @@ def test_read_column_select_single_time_plot():
     sal_prof.plot.line()
 
 
-def test_read_column_interp_time_and_select_time():
+def test_read_column_interp_time_and_select_time() -> None:
     filename = "tests/testdata/oresund_sigma_z.dfsu"
     dfs = mikeio.open(filename)
 
@@ -320,7 +327,7 @@ def test_read_column_interp_time_and_select_time():
         da.sel(time="1997-09-15 00:00")
 
 
-def test_number_of_nodes_and_elements_sigma_z():
+def test_number_of_nodes_and_elements_sigma_z() -> None:
     filename = "tests/testdata/oresund_sigma_z.dfsu"
     dfs = mikeio.open(filename)
 
@@ -328,7 +335,7 @@ def test_number_of_nodes_and_elements_sigma_z():
     assert dfs.geometry.n_nodes == 12042
 
 
-def test_read_and_select_single_element_dfsu_3d():
+def test_read_and_select_single_element_dfsu_3d() -> None:
     filename = "tests/testdata/basin_3d.dfsu"
     dfs = mikeio.open(filename)
 
@@ -339,7 +346,7 @@ def test_read_and_select_single_element_dfsu_3d():
     assert selds[0].shape == (3,)
 
 
-def test_n_layers():
+def test_n_layers() -> None:
     filename = "tests/testdata/basin_3d.dfsu"
     dfs = mikeio.open(filename)
     assert dfs.n_layers == 10
@@ -357,7 +364,7 @@ def test_n_layers():
     assert not hasattr(dfs, "n_layers")
 
 
-def test_n_sigma_layers():
+def test_n_sigma_layers() -> None:
     filename = "tests/testdata/basin_3d.dfsu"
     dfs = mikeio.open(filename)
     assert dfs.n_sigma_layers == 10
@@ -375,7 +382,7 @@ def test_n_sigma_layers():
     assert not hasattr(dfs, "n_sigma_layers")
 
 
-def test_n_z_layers():
+def test_n_z_layers() -> None:
     filename = "tests/testdata/basin_3d.dfsu"
     dfs = mikeio.open(filename)
     assert dfs.n_z_layers == 0
@@ -393,7 +400,7 @@ def test_n_z_layers():
     assert not hasattr(dfs, "n_z_layers")
 
 
-def test_boundary_codes():
+def test_boundary_codes() -> None:
     filename = "tests/testdata/basin_3d.dfsu"
     dfs = mikeio.open(filename)
     assert len(dfs.geometry.boundary_codes) == 1
@@ -404,7 +411,7 @@ def test_boundary_codes():
     assert len(dfs.geometry.boundary_codes) == 3
 
 
-def test_top_elements():
+def test_top_elements() -> None:
     filename = "tests/testdata/basin_3d.dfsu"
     dfs = mikeio.open(filename)
     assert len(dfs.geometry.top_elements) == 174
@@ -447,7 +454,7 @@ def test_top_elements_subset() -> None:
     _ = mikeio.Dfsu3D(filename).read(elements=idx3d)
 
 
-def test_bottom_elements():
+def test_bottom_elements() -> None:
     filename = "tests/testdata/basin_3d.dfsu"
     dfs = mikeio.open(filename)
     assert len(dfs.geometry.bottom_elements) == 174
@@ -468,7 +475,7 @@ def test_bottom_elements():
     assert not hasattr(dfs, "bottom_elements")
 
 
-def test_n_layers_per_column():
+def test_n_layers_per_column() -> None:
     filename = "tests/testdata/basin_3d.dfsu"
     dfs = mikeio.open(filename)
     assert len(dfs.geometry.n_layers_per_column) == 174
@@ -490,7 +497,7 @@ def test_n_layers_per_column():
     assert not hasattr(dfs, "n_layers_per_column")
 
 
-# def test_get_layer_elements():
+# def test_get_layer_elements() -> None:
 #     filename = "tests/testdata/oresund_sigma_z.dfsu"
 #     dfs = mikeio.open(filename)
 
@@ -511,7 +518,7 @@ def test_n_layers_per_column():
 #         elem_ids = dfs.get_layer_elements(11)
 
 
-def test_write_from_dfsu3D(tmp_path):
+def test_write_from_dfsu3D(tmp_path) -> None:
     sourcefilename = "tests/testdata/basin_3d.dfsu"
     fp = tmp_path / "basin_3d.dfsu"
     dfs = mikeio.open(sourcefilename)
@@ -523,7 +530,7 @@ def test_write_from_dfsu3D(tmp_path):
     assert fp.exists()
 
 
-def test_extract_top_layer_to_2d(tmp_path):
+def test_extract_top_layer_to_2d(tmp_path) -> None:
     filename = "tests/testdata/oresund_sigma_z.dfsu"
 
     dfs = mikeio.open(filename)
@@ -538,7 +545,7 @@ def test_extract_top_layer_to_2d(tmp_path):
     assert newdfs.geometry.is_2d
 
 
-def test_modify_values_in_layer(tmp_path):
+def test_modify_values_in_layer(tmp_path) -> None:
     ds = mikeio.read("tests/testdata/oresund_sigma_z.dfsu")
     selected_layer = 6  # Zero-based indexing!
     layer_elem_ids = ds.geometry.get_layer_elements(selected_layer)
@@ -553,7 +560,7 @@ def test_modify_values_in_layer(tmp_path):
     assert np.all(np.isclose(ds_sel_layer.Salinity.to_numpy(), 35.0))
 
 
-def test_to_mesh_3d(tmp_path):
+def test_to_mesh_3d(tmp_path) -> None:
     filename = "tests/testdata/oresund_sigma_z.dfsu"
 
     dfs = mikeio.open(filename)
@@ -569,7 +576,7 @@ def test_to_mesh_3d(tmp_path):
     Mesh(fp)
 
 
-def test_extract_surface_elevation_from_3d():
+def test_extract_surface_elevation_from_3d() -> None:
     dfs = mikeio.open("tests/testdata/oresund_sigma_z.dfsu")
     n_top1 = len(dfs.geometry.top_elements)
 
@@ -578,7 +585,7 @@ def test_extract_surface_elevation_from_3d():
     assert da.geometry.n_elements == n_top1
 
 
-def test_dataset_write_dfsu3d(tmp_path):
+def test_dataset_write_dfsu3d(tmp_path) -> None:
     fp = tmp_path / "oresund_sigma_z.dfsu"
     ds = mikeio.read("tests/testdata/oresund_sigma_z.dfsu", time=[0, 1])
     ds.to_dfs(fp)
@@ -587,7 +594,7 @@ def test_dataset_write_dfsu3d(tmp_path):
     assert ds2.n_timesteps == 2
 
 
-def test_dataset_write_dfsu3d_max(tmp_path):
+def test_dataset_write_dfsu3d_max(tmp_path) -> None:
     fp = tmp_path / "oresund_sigma_z.dfsu"
     ds = mikeio.read("tests/testdata/oresund_sigma_z.dfsu")
     assert ds._zn is not None
@@ -600,7 +607,7 @@ def test_dataset_write_dfsu3d_max(tmp_path):
     assert ds2.geometry.is_layered
 
 
-def test_read_wildcard_items():
+def test_read_wildcard_items() -> None:
     dfs = mikeio.open("tests/testdata/oresund_sigma_z.dfsu")
     assert dfs.items[1].name == "Salinity"
 
@@ -609,7 +616,7 @@ def test_read_wildcard_items():
     assert ds.n_items == 1
 
 
-def test_append_dfsu_3d(tmp_path):
+def test_append_dfsu_3d(tmp_path) -> None:
     ds = mikeio.read("tests/testdata/oresund_sigma_z.dfsu", time=[0])
     assert ds.timestep == pytest.approx(10800)
     ds2 = mikeio.read("tests/testdata/oresund_sigma_z.dfsu", time=[1])
@@ -628,7 +635,7 @@ def test_append_dfsu_3d(tmp_path):
     assert ds3.time[-1] == ds2.time[-1]
 
 
-def test_read_elements_3d():
+def test_read_elements_3d() -> None:
     ds = mikeio.read("tests/testdata/oresund_sigma_z.dfsu", elements=[0, 10])
     assert ds.geometry.element_coordinates[0][0] == pytest.approx(354020.46382194717)
     assert ds.Salinity.to_numpy()[0, 0] == pytest.approx(23.18906021118164)
@@ -638,7 +645,7 @@ def test_read_elements_3d():
     assert ds2.Salinity.to_numpy()[0, 1] == pytest.approx(23.18906021118164)
 
 
-def test_write_3d_non_equidistant(tmp_path):
+def test_write_3d_non_equidistant(tmp_path) -> None:
     sourcefilename = "tests/testdata/basin_3d.dfsu"
     fp = tmp_path / "simple.dfsu"
     ds = mikeio.read(sourcefilename)
@@ -663,3 +670,12 @@ def test_write_3d_non_equidistant(tmp_path):
 
     # but getting the end time is not that expensive
     assert dfs.end_time == pd.Timestamp("2000-01-10")
+
+
+def find_nearest_profile_elements() -> None:
+    filename = "tests/testdata/oresund_sigma_z.dfsu"
+    dfs = mikeio.Dfsu3D(filename)
+    elem_ids = dfs.find_nearest_profile_elements(333934, 6158101)
+
+    assert elem_ids[0] == 5320
+    assert elem_ids[-1] == 5323

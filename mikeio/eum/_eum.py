@@ -1440,8 +1440,8 @@ class ItemInfo:
     def __init__(
         self,
         name: str | EUMType | None = None,
-        itemtype: EUMType | EUMUnit | None = None,
-        unit: EUMUnit | None = None,
+        itemtype: EUMType | EUMUnit | int | None = None,
+        unit: EUMUnit | int | None = None,
         data_value_type: Literal[
             "Instantaneous", "Accumulated", "StepAccumulated", "MeanStepBackward"
         ] = "Instantaneous",

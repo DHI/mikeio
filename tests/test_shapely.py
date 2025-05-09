@@ -9,7 +9,7 @@ from mikeio.spatial import GeometryFM2D
 pytest.importorskip("shapely")
 
 
-def test_to_shapely():
+def test_to_shapely() -> None:
     #     x     y    z
     nc = [
         (0.0, 0.0, 0.0),  # 0

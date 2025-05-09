@@ -9,19 +9,19 @@ from mikeio.spatial import GeometryUndefined
 from mikeio.exceptions import OutsideModelDomainError
 
 
-def test_create_nx_ny():
+def test_create_nx_ny() -> None:
     g = Grid2D(x0=180.0, y0=-90.0, dx=0.25, dy=0.25, nx=1440, ny=721)
     assert g.nx == 1440
 
 
-def test_create_nx_missing_ny():
+def test_create_nx_missing_ny() -> None:
     with pytest.raises(ValueError) as excinfo:
         Grid2D(x0=180.0, y0=-90.0, dx=0.25, dy=0.25, nx=100)
 
     assert "ny" in str(excinfo.value)
 
 
-def test_grid1d_x():
+def test_grid1d_x() -> None:
     x0 = 2.0
     x1 = 8.0
     nx = 4
@@ -34,7 +34,7 @@ def test_grid1d_x():
     assert "<mikeio.Grid1D>" in text
 
 
-def test_grid1d_isel():
+def test_grid1d_isel() -> None:
     g = Grid1D(nx=10, dx=0.1)
 
     g2 = g.isel([0, 1, 2])
@@ -49,7 +49,7 @@ def test_grid1d_isel():
     )  # the only info we have is how far along a 1d axis we are, not enough to create a 2d point
 
 
-def test_grid1d_equality():
+def test_grid1d_equality() -> None:
     g1 = Grid1D(dx=0.1, nx=10)
     g2 = Grid1D(dx=0.1, nx=10)
 
@@ -61,7 +61,7 @@ def test_grid1d_equality():
     assert g3 != g4
 
 
-def test_x_y():
+def test_x_y() -> None:
     x0 = 2.0
     x1 = 8.0
     nx = 4
@@ -89,7 +89,7 @@ def test_x_y():
     assert "<mikeio.Grid2D>" in text
 
 
-def test_non_equidistant_axis_grid1d_not_allowed():
+def test_non_equidistant_axis_grid1d_not_allowed() -> None:
     x = [0.0, 1.0, 2.0, 2.9]
 
     with pytest.raises(Exception) as excinfo:  # this could be allowed in the future
@@ -98,7 +98,7 @@ def test_non_equidistant_axis_grid1d_not_allowed():
     assert "equidistant" in str(excinfo.value)
 
 
-def test_non_equidistant_axis_grid2d_not_allowed():
+def test_non_equidistant_axis_grid2d_not_allowed() -> None:
     x = [0, 1]
     y = [0.0, 1.0, 2.0, 2.9]
 
@@ -113,7 +113,7 @@ def test_non_equidistant_axis_grid2d_not_allowed():
     assert "equidistant" in str(excinfo.value)
 
 
-def test_dx_dy_is_positive():
+def test_dx_dy_is_positive() -> None:
     with pytest.raises(ValueError) as excinfo:
         Grid2D(nx=2, ny=4, dx=-1.0, dy=1.0)
 
@@ -125,14 +125,14 @@ def test_dx_dy_is_positive():
     assert "positive" in str(excinfo.value).lower()
 
 
-def test_x_is_increasing():
+def test_x_is_increasing() -> None:
     with pytest.raises(ValueError) as excinfo:
         Grid1D(x=[2.0, 1.0])
 
     assert "increasing" in str(excinfo.value)
 
 
-def test_x_y_is_increasing():
+def test_x_y_is_increasing() -> None:
     with pytest.raises(ValueError) as excinfo:
         Grid2D(x=[2.0, 1.0], y=[0.0, 1.0])
 
@@ -144,7 +144,7 @@ def test_x_y_is_increasing():
     assert "increasing" in str(excinfo.value)
 
 
-def test_create_in_bbox():
+def test_create_in_bbox() -> None:
     bbox = [0, 0, 1, 5]
     g = Grid2D(bbox=bbox, nx=2, ny=5)
     assert g.x[0] == 0.25
@@ -182,12 +182,12 @@ def test_create_in_bbox():
     #     Grid2D(bbox=bbox, nx=None, ny=None)
 
 
-def test_no_parameters():
+def test_no_parameters() -> None:
     with pytest.raises(ValueError):
         Grid2D()
 
 
-def test_invalid_grid_not_possible():
+def test_invalid_grid_not_possible() -> None:
     bbox = [0, 0, -1, 1]  # x0 > x1
     with pytest.raises(ValueError):
         Grid2D(bbox=bbox, nx=2, ny=2)
@@ -197,7 +197,7 @@ def test_invalid_grid_not_possible():
         Grid2D(bbox=bbox, nx=2, ny=2)
 
 
-def test_contains():
+def test_contains() -> None:
     bbox = [0, 0, 1, 5]
     g = Grid2D(bbox=bbox)
     xy1 = [0.5, 4.5]
@@ -215,7 +215,7 @@ def test_contains():
     # assert not inside[1]
 
 
-def test_in():
+def test_in() -> None:
     bbox = [0, 0, 1, 5]
     g = Grid2D(bbox=bbox)
     xy1 = [0.5, 4.5]
@@ -224,7 +224,7 @@ def test_in():
     assert xy2 not in g
 
 
-def test_find_index():
+def test_find_index() -> None:
     bbox = [0, 0, 1, 5]
     g = Grid2D(bbox=bbox, dx=0.2)
     xy1 = [0.52, 1.52]
@@ -259,7 +259,7 @@ def test_find_index():
         g.find_index(coords=[(-0.1, 0.1), (-0.1, 0.1)])
 
 
-def test_find_index_grid_with_negative_origin():
+def test_find_index_grid_with_negative_origin() -> None:
     # create a grid with negative origin
     bbox = [-1, -1, 1, 5]
     g = Grid2D(bbox=bbox, dx=0.5)
@@ -283,7 +283,7 @@ def test_find_index_grid_with_negative_origin():
         g.find_index(coords=xy)
 
 
-def test_find_index_y_array_not_possible():
+def test_find_index_y_array_not_possible() -> None:
     # create a simple grid
     bbox = [0, 0, 1, 5]
     g = Grid2D(bbox=bbox, dx=0.5)
@@ -298,7 +298,7 @@ def test_find_index_y_array_not_possible():
     assert "y=" in str(excinfo.value)
 
 
-def test_to_geometryFM():
+def test_to_geometryFM() -> None:
     nx = 5
     ny = 3
     grd = Grid2D(nx=nx, dx=1, ny=ny, dy=2)
@@ -323,7 +323,7 @@ def test_to_geometryFM():
     assert g.codes[-1] == 4  # east (upper right corner)
 
 
-def test_to_geometryFM_custom_z_custom_code():
+def test_to_geometryFM_custom_z_custom_code() -> None:
     nx = 5
     ny = 3
     grd = Grid2D(nx=nx, dx=1, ny=ny, dy=2)
@@ -368,7 +368,7 @@ def test_to_mesh(tmp_path: Path):
     assert mesh.node_coordinates[0, 2] == -10
 
 
-# def test_xy_to_bbox():
+# def test_xy_to_bbox() -> None:
 #     bbox = [0, 0, 1, 5]
 #     g = Grid2D(bbox)
 #     xy = np.array([[0, 0], [0, 1], [1, 0], [1, 1], [0, 5], [1, 5]], dtype=float)
@@ -381,7 +381,7 @@ def test_to_mesh(tmp_path: Path):
 #     assert bbox2[3] == 5.2
 
 
-def test_isel():
+def test_isel() -> None:
     bbox = [0, 0, 1, 5]
     g = Grid2D(bbox=bbox, nx=10, ny=20)
     assert g.nx == 10
@@ -394,7 +394,7 @@ def test_isel():
         g.isel(0, axis=2)
 
 
-def test_grid2d_equality():
+def test_grid2d_equality() -> None:
     g1 = Grid2D(dx=0.1, nx=2, dy=0.2, ny=4)
     g2 = Grid2D(dx=0.1, nx=2, dy=0.2, ny=4)
 
@@ -411,11 +411,11 @@ def test_grid2d_equality():
     assert g5 != g6
 
 
-def test_bad_projection_raises_error():
+def test_bad_projection_raises_error() -> None:
     with pytest.raises(ValueError, match="proj"):
         Grid2D(nx=2, ny=2, dx=0.1, projection="Not a WKT projection string")
 
 
-def test_grid3d_repr():
+def test_grid3d_repr() -> None:
     g = Grid3D(nx=2, ny=2, nz=2, dx=1, dy=1, dz=1, projection="UTM-33")
     assert "Grid3D" in repr(g)

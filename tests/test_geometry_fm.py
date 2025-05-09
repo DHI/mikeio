@@ -45,7 +45,7 @@ def test_isel_list_of_indices(simple_3d_geom: GeometryFM3D) -> None:
     assert g2.element_coordinates[1, 0] == pytest.approx(0.6666666666666666)
 
 
-def test_basic():
+def test_basic() -> None:
     #     x     y    z
     nc = [
         (0.0, 0.0, 0.0),  # 0
@@ -70,7 +70,7 @@ def test_basic():
     assert "nodes: 3" in repr(g)
 
 
-def test_too_many_elements():
+def test_too_many_elements() -> None:
     #     x     y    z
     nc = [
         (0.0, 0.0, 0.0),  # 0
@@ -86,7 +86,7 @@ def test_too_many_elements():
     assert "element" in str(excinfo.value).lower()
 
 
-def test_overset_grid():
+def test_overset_grid() -> None:
     #     x     y    z
     nc = [
         (0.0, 0.0, 0.0),  # 0
@@ -104,7 +104,7 @@ def test_overset_grid():
     assert grid.projection_string == proj
 
 
-def test_area():
+def test_area() -> None:
     #     x     y    z
     nc = [
         (0.0, 0.0, 0.0),  # 0
@@ -122,7 +122,7 @@ def test_area():
     assert area > 0.0
 
 
-def test_find_index_simple_domain():
+def test_find_index_simple_domain() -> None:
     #     x     y    z
     nc = [
         (0.0, 0.0, 0.0),  # 0
@@ -162,7 +162,7 @@ def test_find_index_simple_domain():
     assert 0 in ex.value.indices
 
 
-def test_isel_simple_domain():
+def test_isel_simple_domain() -> None:
     #     x     y    z
     nc = [
         (0.0, 0.0, 0.0),  # 0
@@ -180,7 +180,7 @@ def test_isel_simple_domain():
     assert gp.projection == g.projection
 
 
-def test_isel_list_of_indices_simple_domain():
+def test_isel_list_of_indices_simple_domain() -> None:
     #     x     y    z
     nc = [
         (0.0, 0.0, 0.0),  # 0
@@ -200,7 +200,7 @@ def test_isel_list_of_indices_simple_domain():
     assert g2.element_coordinates[1, 0] == pytest.approx(0.6666666666666666)
 
 
-def test_plot_mesh():
+def test_plot_mesh() -> None:
     #     x     y    z
     nc = [
         (0.0, 0.0, 0.0),  # 0
@@ -237,7 +237,7 @@ def test_layered(simple_3d_geom: GeometryFM3D):
     assert "layers: 2" in repr(g2)
 
 
-def test_equality():
+def test_equality() -> None:
     nc = [
         (0.0, 0.0, 0.0),  # 0
         (1.0, 0.0, 0.0),  # 1
@@ -256,7 +256,7 @@ def test_equality():
     assert g != g3
 
 
-def test_equality_shifted_coords():
+def test_equality_shifted_coords() -> None:
     nc1 = [
         (0.0, 0.0, 0.0),  # 0
         (1.0, 0.0, 0.0),  # 1

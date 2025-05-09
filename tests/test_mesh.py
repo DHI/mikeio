@@ -15,7 +15,7 @@ def mixed_mesh() -> Mesh:
     return Mesh("tests/testdata/quad_tri.mesh")
 
 
-def test_read_mesh_from_path():
+def test_read_mesh_from_path() -> None:
     testdata = Path("tests/testdata")
     fp = testdata / "odense_rough.mesh"
     msh = Mesh(fp)
@@ -133,7 +133,7 @@ def test_write_part_isel(tri_mesh, tmp_path):
     assert outfilename.exists()
 
 
-def test_write_mesh_from_dfsu(tmp_path):
+def test_write_mesh_from_dfsu(tmp_path) -> None:
     outfilename = tmp_path / "quad_tri.mesh"
     dfsufilename = "tests/testdata/FakeLake.dfsu"
 

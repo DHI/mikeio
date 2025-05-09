@@ -8,7 +8,7 @@ from mikeio.spatial import GeometryUndefined
 import mikeio.generic
 
 
-def test_read_dfs0():
+def test_read_dfs0() -> None:
     ds = mikeio.read(
         "tests/testdata/consistency/oresundHD.dfs0",
         items=[0, 1],
@@ -19,7 +19,7 @@ def test_read_dfs0():
     assert ds.n_timesteps == 4
 
 
-def test_read_dfs1():
+def test_read_dfs1() -> None:
     ds = mikeio.read(
         "tests/testdata/consistency/oresundHD.dfs1",
         items=[0, 1],
@@ -30,7 +30,7 @@ def test_read_dfs1():
     assert ds.n_timesteps == 4
 
 
-def test_dfs1_isel_t():
+def test_dfs1_isel_t() -> None:
     ds = mikeio.read("tests/testdata/consistency/oresundHD.dfs1")
 
     ds1 = ds.isel(time=[0, 1])
@@ -39,7 +39,7 @@ def test_dfs1_isel_t():
     assert ds1[0].values[0, 8] == pytest.approx(0.203246)
 
 
-def test_dfs1_isel_x():
+def test_dfs1_isel_x() -> None:
     ds = mikeio.read("tests/testdata/consistency/oresundHD.dfs1")
 
     ds1 = ds.isel(x=8)
@@ -48,7 +48,7 @@ def test_dfs1_isel_x():
     assert ds1[0].isel(time=0).values == pytest.approx(0.203246)
 
 
-def test_dfs1_sel_t():
+def test_dfs1_sel_t() -> None:
     ds = mikeio.read("tests/testdata/consistency/oresundHD.dfs1")
 
     ds1 = ds.sel(time=slice("2018", "2018-03-10"))
@@ -57,7 +57,7 @@ def test_dfs1_sel_t():
     assert ds1[0].values[0, 8] == pytest.approx(0.203246)
 
 
-def test_dfs1_sel_x():
+def test_dfs1_sel_x() -> None:
     ds = mikeio.read("tests/testdata/consistency/oresundHD.dfs1")
 
     ds1 = ds.sel(x=7.8)
@@ -72,7 +72,7 @@ def test_dfs1_sel_x():
     assert da1.isel(time=0).values == pytest.approx(0.203246)
 
 
-def test_dfs1_interp_x():
+def test_dfs1_interp_x() -> None:
     ds = mikeio.read("tests/testdata/consistency/oresundHD.dfs1")
 
     ds1 = ds.interp(x=7.75)
@@ -82,7 +82,7 @@ def test_dfs1_interp_x():
 
 
 # Nice to have...
-# def test_dfs1_interp_like():
+# def test_dfs1_interp_like() -> None:
 #    ds = mikeio.read("tests/testdata/consistency/oresundHD.dfs1")
 
 # ds1 = ds.interp_like(ds.geometry)
@@ -98,7 +98,7 @@ def test_dfs1_interp_x():
 #    dsi.to_dfs("tests/testdata/consistency/oresundHD.dfs2")
 
 
-def test_read_dfs2():
+def test_read_dfs2() -> None:
     ds = mikeio.read(
         "tests/testdata/consistency/oresundHD.dfs2",
         items=[0, 1],
@@ -109,7 +109,7 @@ def test_read_dfs2():
     assert ds.n_timesteps == 4
 
 
-def test_sel_line_dfs2():
+def test_sel_line_dfs2() -> None:
     x = 350000
     y = 6145000
     ds = mikeio.read("tests/testdata/consistency/oresundHD.dfs2")
@@ -120,7 +120,7 @@ def test_sel_line_dfs2():
     assert dsselx.geometry != dssely.geometry
 
 
-def test_sel_mult_line_not_possible():
+def test_sel_mult_line_not_possible() -> None:
     xs = [350000, 360000]
     ds = mikeio.read("tests/testdata/consistency/oresundHD.dfs2")
     with pytest.raises(
@@ -129,7 +129,7 @@ def test_sel_mult_line_not_possible():
         ds.sel(x=xs)
 
 
-def test_read_dfs2_single_time():
+def test_read_dfs2_single_time() -> None:
     ds = mikeio.read(
         "tests/testdata/consistency/oresundHD.dfs2",
         time=-1,
@@ -154,7 +154,7 @@ def test_read_dfs2_single_time():
     assert "time" in ds.dims
 
 
-def test_read_single_row_dfs2_single_time_step():
+def test_read_single_row_dfs2_single_time_step() -> None:
     ds = mikeio.read("tests/testdata/single_row.dfs2", time="2000-01-01")
     assert ds.n_timesteps == 1
     assert "time" not in ds.dims
@@ -165,7 +165,7 @@ def test_read_single_row_dfs2_single_time_step():
     assert all(ds.time == ds2.time)
 
 
-def test_interp_x_y_dfs2():
+def test_interp_x_y_dfs2() -> None:
     ds = mikeio.read("tests/testdata/consistency/oresundHD.dfs2")
 
     x = 350000
@@ -181,7 +181,7 @@ def test_interp_x_y_dfs2():
     assert dss.geometry.y == y
 
 
-def test_sel_x_y_dfsu2d():
+def test_sel_x_y_dfsu2d() -> None:
     ds = mikeio.read("tests/testdata/consistency/oresundHD.dfsu")
 
     x = 350000
@@ -193,7 +193,7 @@ def test_sel_x_y_dfsu2d():
     assert dss[0].values[0] == pytest.approx(0.179145)
 
 
-def test_interp_x_y_dfsu2d():
+def test_interp_x_y_dfsu2d() -> None:
     ds = mikeio.read("tests/testdata/consistency/oresundHD.dfsu")
 
     x = 350000
@@ -204,7 +204,7 @@ def test_interp_x_y_dfsu2d():
     assert dss.geometry.y == y
 
 
-def test_interp_x_y_dfsu3d_not_yet_implemented():
+def test_interp_x_y_dfsu3d_not_yet_implemented() -> None:
     ds = mikeio.read("tests/testdata/oresund_sigma_z.dfsu")
 
     x = 350000
@@ -214,7 +214,7 @@ def test_interp_x_y_dfsu3d_not_yet_implemented():
         ds.interp(x=x, y=y)
 
 
-def test_read_dfsu2d():
+def test_read_dfsu2d() -> None:
     ds = mikeio.read(
         "tests/testdata/consistency/oresundHD.dfsu",
         items=[0, 1],
@@ -225,7 +225,7 @@ def test_read_dfsu2d():
     assert ds.n_timesteps == 4
 
 
-def test_read_dfsu2d_single_time():
+def test_read_dfsu2d_single_time() -> None:
     ds = mikeio.read(
         "tests/testdata/consistency/oresundHD.dfsu",
         time=-1,
@@ -244,7 +244,7 @@ def test_read_dfsu2d_single_time():
     assert "time" in ds.dims
 
 
-def test_read_dfs_time_selection_str():
+def test_read_dfs_time_selection_str() -> None:
     extensions = ["dfsu", "dfs2", "dfs1", "dfs0"]
     extensions = sorted(extensions)
     for ext in extensions:
@@ -263,7 +263,7 @@ def test_read_dfs_time_selection_str():
         assert dsr.shape == dsgetitem.shape
 
 
-def test_open_dfs_repr():
+def test_open_dfs_repr() -> None:
     extensions = ["dfsu", "dfs2", "dfs1", "dfs0"]
     for ext in extensions:
         filename = f"tests/testdata/consistency/oresundHD.{ext}"
@@ -272,7 +272,7 @@ def test_open_dfs_repr():
         assert "<mikeio" in text
 
 
-def test_read_dfs_time_selection_str_specific():
+def test_read_dfs_time_selection_str_specific() -> None:
     extensions = ["dfsu", "dfs2", "dfs1", "dfs0"]
     for ext in extensions:
         filename = f"tests/testdata/consistency/oresundHD.{ext}"
@@ -291,7 +291,7 @@ def test_read_dfs_time_selection_str_specific():
         assert dsr.shape == dsgetitem.shape
 
 
-def test_read_dfs_time_selection_list_str():
+def test_read_dfs_time_selection_list_str() -> None:
     extensions = ["dfsu", "dfs2", "dfs1", "dfs0"]
     for ext in extensions:
         filename = f"tests/testdata/consistency/oresundHD.{ext}"
@@ -309,7 +309,7 @@ def test_read_dfs_time_selection_list_str():
         assert dsr.shape == dsgetitem.shape
 
 
-def test_read_dfs_time_selection_pdTimestamp():
+def test_read_dfs_time_selection_pdTimestamp() -> None:
     extensions = ["dfsu", "dfs2", "dfs1", "dfs0"]
     for ext in extensions:
         filename = f"tests/testdata/consistency/oresundHD.{ext}"
@@ -328,7 +328,7 @@ def test_read_dfs_time_selection_pdTimestamp():
         assert dsr.shape == dsgetitem.shape
 
 
-def test_read_dfs_time_selection_pdDatetimeIndex():
+def test_read_dfs_time_selection_pdDatetimeIndex() -> None:
     extensions = ["dfsu", "dfs2", "dfs1", "dfs0"]
     for ext in extensions:
         filename = f"tests/testdata/consistency/oresundHD.{ext}"
@@ -346,7 +346,7 @@ def test_read_dfs_time_selection_pdDatetimeIndex():
         assert dsr.shape == dsgetitem.shape
 
 
-def test_read_dfs_time_selection_datetime():
+def test_read_dfs_time_selection_datetime() -> None:
     extensions = ["dfsu", "dfs2", "dfs1", "dfs0"]
     for ext in extensions:
         filename = f"tests/testdata/consistency/oresundHD.{ext}"
@@ -369,7 +369,7 @@ def test_read_dfs_time_selection_datetime():
         assert dsr2.shape == dsr.shape
 
 
-def test_read_dfs_time_list_datetime():
+def test_read_dfs_time_list_datetime() -> None:
     extensions = ["dfsu", "dfs2", "dfs1", "dfs0"]
     for ext in extensions:
         filename = f"tests/testdata/consistency/oresundHD.{ext}"
@@ -387,7 +387,7 @@ def test_read_dfs_time_list_datetime():
         assert dsr.shape == dsgetitem.shape
 
 
-def test_read_dfs_time_slice_datetime():
+def test_read_dfs_time_slice_datetime() -> None:
     extensions = ["dfsu", "dfs2", "dfs1", "dfs0"]
     for ext in extensions:
         filename = f"tests/testdata/consistency/oresundHD.{ext}"
@@ -405,7 +405,7 @@ def test_read_dfs_time_slice_datetime():
         assert dsr.shape == dsgetitem.shape
 
 
-def test_read_dfs_time_slice_str():
+def test_read_dfs_time_slice_str() -> None:
     extensions = ["dfsu", "dfs2", "dfs1", "dfs0"]
     for ext in extensions:
         filename = f"tests/testdata/consistency/oresundHD.{ext}"
@@ -423,7 +423,7 @@ def test_read_dfs_time_slice_str():
         assert dsr.shape == dsgetitem.shape
 
 
-def test_read_dfs_time_selection_str_slice():
+def test_read_dfs_time_selection_str_slice() -> None:
     extensions = ["dfs0", "dfs2", "dfs1", "dfs0"]
     for ext in extensions:
         filename = f"tests/testdata/consistency/oresundHD.{ext}"
@@ -442,7 +442,7 @@ def test_read_dfs_time_selection_str_slice():
         assert dsr.shape == dsgetitem.shape
 
 
-def test_read_dfs_time_int():
+def test_read_dfs_time_int() -> None:
     extensions = ["dfsu", "dfs2", "dfs1", "dfs0"]
     for ext in extensions:
         filename = f"tests/testdata/consistency/oresundHD.{ext}"
@@ -462,7 +462,7 @@ def test_read_dfs_time_int():
         assert dsr[0].shape == dsgetitem.shape
 
 
-def test_read_dfs_time_list_int():
+def test_read_dfs_time_list_int() -> None:
     extensions = ["dfsu", "dfs2", "dfs1", "dfs0"]
     for ext in extensions:
         filename = f"tests/testdata/consistency/oresundHD.{ext}"
@@ -481,7 +481,7 @@ def test_read_dfs_time_list_int():
         assert dsr[0].shape == dsgetitem.shape
 
 
-def test_read_dfs_time_slice_int():
+def test_read_dfs_time_slice_int() -> None:
     extensions = ["dfsu", "dfs2", "dfs1", "dfs0"]
     for ext in extensions:
         filename = f"tests/testdata/consistency/oresundHD.{ext}"
@@ -509,7 +509,7 @@ def test_read_dfs_time_slice_int():
         assert dsr.shape == dssel.shape
 
 
-def test_filter_items_dfs0():
+def test_filter_items_dfs0() -> None:
     ds = mikeio.read("tests/testdata/sw_points.dfs0", items="*Point 42*")
     assert ds.n_items == 15
 
@@ -528,26 +528,26 @@ def test_filter_items_dfs0():
         )  # Note missing wildcard in beginning
 
 
-def test_filter_items_wildcard_getitem():
+def test_filter_items_wildcard_getitem() -> None:
     dsall = mikeio.read("tests/testdata/sw_points.dfs0")
 
     ds = dsall["*Height*"]
     assert ds.n_items == 12
 
 
-def test_filter_items_dfsu():
+def test_filter_items_dfsu() -> None:
     ds = mikeio.read("tests/testdata/wind_north_sea.dfsu", items="*direction*")
     assert ds.n_items == 1
 
 
-def test_filter_items_dfsu_getitem():
+def test_filter_items_dfsu_getitem() -> None:
     dsall = mikeio.read("tests/testdata/wind_north_sea.dfsu")
     ds = dsall["*direction*"]
     assert ds.n_items == 1
     assert "direction" in ds[0].name
 
 
-def test_concat_dfsu3d_single_timesteps_generic_vs_dataset(tmp_path):
+def test_concat_dfsu3d_single_timesteps_generic_vs_dataset(tmp_path) -> None:
     filename = "tests/testdata/basin_3d.dfsu"
 
     fn_1 = tmp_path / "ts_1.dfsu"

@@ -253,7 +253,7 @@ class Dfs0:
         raise TypeError("Dfs files only support float or double")
 
     def to_dataframe(
-        self, unit_in_name: bool = False, round_time: str = "ms"
+        self, unit_in_name: bool = False, round_time: str | bool = "ms"
     ) -> pd.DataFrame:
         """Read data from the dfs0 file and return a Pandas DataFrame.
 
@@ -346,7 +346,7 @@ class Dfs0:
     @staticmethod
     def from_dataframe(
         df: pd.DataFrame,
-        filename: str,
+        filename: str | Path,
         itemtype: EUMType | None = None,
         unit: EUMUnit | None = None,
         items: Sequence[ItemInfo] | None = None,
@@ -369,7 +369,7 @@ def series_to_dfs0(
 
 def dataframe_to_dfs0(
     self: pd.DataFrame,
-    filename: str,
+    filename: str | Path,
     itemtype: EUMType | None = None,
     unit: EUMUnit | None = None,
     items: Sequence[ItemInfo] | None = None,

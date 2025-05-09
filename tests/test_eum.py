@@ -4,46 +4,46 @@ from mikeio.eum import ItemInfoList
 from mikecore.eum import eumItem, eumUnit
 
 
-def test_item_is_equivalent_to_int():
+def test_item_is_equivalent_to_int() -> None:
 
     assert EUMType.Temperature == 100006
 
 
-def test_item_code():
+def test_item_code() -> None:
 
     assert EUMType.Temperature.code == 100006
 
 
-def test_get_unit():
+def test_get_unit() -> None:
 
     assert len(EUMType.Temperature.units) == 3
 
 
-def test_get_item_name():
+def test_get_item_name() -> None:
 
     assert EUMType.Water_Level.display_name == "Water Level"
 
 
-def test_get_item_repr():
+def test_get_item_repr() -> None:
 
     assert repr(EUMType.Water_Level) == "Water Level"
 
 
-def test_create_info_with_name():
+def test_create_info_with_name() -> None:
 
     item = ItemInfo("Foo")
 
     assert item.name == "Foo"
 
 
-def test_create_info_with_type_only():
+def test_create_info_with_type_only() -> None:
 
     item = ItemInfo(itemtype=EUMType.Water_Level)
 
     assert item.name == "Water Level"
 
 
-def test_create_info_with_type_only_positional():
+def test_create_info_with_type_only_positional() -> None:
 
     item = ItemInfo(EUMType.Water_Level)
 
@@ -51,7 +51,7 @@ def test_create_info_with_type_only_positional():
     assert item.type == EUMType.Water_Level
 
 
-def test_equality():
+def test_equality() -> None:
 
     item1 = ItemInfo("Foo", EUMType.Water_Level)
     item2 = ItemInfo("Foo", EUMType.Water_Level)
@@ -59,14 +59,14 @@ def test_equality():
     assert item1 == item2
 
 
-def test_eum_type_search():
+def test_eum_type_search() -> None:
 
     types = EUMType.search("velocity")
 
     assert len(types) > 0
 
 
-def test_eum_conversion():
+def test_eum_conversion() -> None:
     """Verify that all EUM types and units in mikecore have equivalents in MIKE IO"""
 
     for code in eumItem:
@@ -78,7 +78,7 @@ def test_eum_conversion():
     assert True
 
 
-def test_short_name():
+def test_short_name() -> None:
     assert EUMType.Water_Level.units[0].name == "meter"
     assert EUMType.Water_Level.units[0].short_name == "m"
 
@@ -89,7 +89,7 @@ def test_short_name():
     assert EUMUnit.gallonUK.short_name == "gallonUK"
 
 
-def test_item_info_list():
+def test_item_info_list() -> None:
 
     items = [ItemInfo("Foo", EUMType.Water_Level), ItemInfo("Bar", EUMType.Temperature)]
 

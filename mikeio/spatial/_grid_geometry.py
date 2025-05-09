@@ -21,6 +21,7 @@ from ._geometry import (
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
     from ..spatial import GeometryFM2D
+    from numpy.typing import ArrayLike
 
 
 def _check_equidistant(x: np.ndarray) -> None:
@@ -116,7 +117,7 @@ class Grid1D(_Geometry):
 
     def __init__(
         self,
-        x: np.ndarray | None = None,
+        x: ArrayLike | None = None,
         *,
         x0: float = 0.0,
         dx: float | None = None,
@@ -465,11 +466,11 @@ class Grid2D(_Geometry):
     def __init__(
         self,
         *,
-        x: np.ndarray | None = None,
+        x: ArrayLike | None = None,
         x0: float = 0.0,
         dx: float | None = None,
         nx: int | None = None,
-        y: np.ndarray | None = None,
+        y: ArrayLike | None = None,
         y0: float = 0.0,
         dy: float | None = None,
         ny: int | None = None,

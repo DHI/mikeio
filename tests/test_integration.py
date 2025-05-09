@@ -4,7 +4,7 @@
 import mikeio
 
 
-def test_read_file_multiply_two_items_and_save_to_new_file(tmp_path):
+def test_read_file_multiply_two_items_and_save_to_new_file(tmp_path) -> None:
 
     ds = mikeio.read("tests/testdata/oresundHD_run1.dfsu")
 

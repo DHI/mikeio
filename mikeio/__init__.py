@@ -34,7 +34,7 @@ def read(
     filename: str | Path,
     *,
     items: str | int | Sequence[str | int] | None = None,
-    time: int | str | slice | None = None,
+    time: int | str | slice | Sequence[int] | None = None,
     keepdims: bool = False,
     **kwargs: Any,
 ) -> Dataset:
@@ -126,6 +126,7 @@ def read(
     return dfs.read(items=items, time=time, keepdims=keepdims, **kwargs)
 
 
+# TODO Mesh doesn't comply with the interface of dfs files
 def open(
     filename: str | Path, **kwargs: Any
 ) -> Dfs0 | Dfs1 | Dfs2 | Dfs3 | Dfsu2DH | Dfsu2DV | Dfsu3D | DfsuSpectral | Mesh:

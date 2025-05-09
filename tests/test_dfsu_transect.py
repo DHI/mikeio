@@ -12,14 +12,14 @@ from mikecore.DfsuFile import DfsuFileType
 
 
 @pytest.fixture
-def vslice():
+def vslice() -> None:
     # sigma, z vertical profile (=transect)
     filename = "tests/testdata/oresund_vertical_slice.dfsu"
     return mikeio.open(filename)
 
 
 @pytest.fixture
-def vslice_geo():
+def vslice_geo() -> None:
     # sigma, z vertical profile (=transect)
     # in LONG/LAT, non-straight
     filename = "tests/testdata/kalundborg_transect.dfsu"
