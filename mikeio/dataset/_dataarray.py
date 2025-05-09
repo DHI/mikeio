@@ -187,7 +187,9 @@ class DataArray:
         dims: Sequence[str] | None = None,
         dt: float = 1.0,
     ) -> None:
-        self._values = np.asarray(data)
+        # TODO consider np.asarray, e.g. self._values = np.asarray(data)
+        self._values = self._parse_data(data)
+
         self.time: pd.DatetimeIndex = self._parse_time(time)
         self._dt = dt
 
@@ -201,6 +203,15 @@ class DataArray:
         self._zn = self._parse_zn(zn, self.geometry, self.n_timesteps)
         self._set_spectral_attributes(geometry)
         self.plot = self._get_plotter_by_geometry()
+
+    @staticmethod
+    def _parse_data(data: ArrayLike) -> Any:  # np.ndarray | float:
+        if not hasattr(data, "shape"):
+            try:
+                data = np.array(data, dtype=float)
+            except ValueError:
+                raise ValueError("Data must be convertible to a numpy array")
+        return data
 
     def _parse_dims(
         self, dims: Sequence[str] | None, geometry: GeometryType
