@@ -16,11 +16,11 @@ pytest.importorskip("matplotlib")
 
 
 @pytest.fixture
-def hd2d_dfs():
+def hd2d_dfs() -> None:
     return mikeio.open("tests/testdata/HD2D.dfsu")
 
 
-def test_plot_dfsu_contour_mixedmesh():
+def test_plot_dfsu_contour_mixedmesh() -> None:
     dfs = mikeio.open("tests/testdata/FakeLake.dfsu")
     geometry = dfs.geometry
     geometry.plot(plot_type="contour", levels=5)
@@ -33,7 +33,7 @@ def test_plot_dfsu_contour_mixedmesh():
     assert True
 
 
-def test_plot_dfsu_n_refinements():
+def test_plot_dfsu_n_refinements() -> None:
     dfs = mikeio.open("tests/testdata/FakeLake.dfsu")
     geometry = dfs.geometry
     geometry.plot(plot_type="contourf", levels=None, n_refinements=1)
@@ -48,13 +48,13 @@ def test_plot_dfsu_contour_subset_not_allowed(hd2d_dfs):
         da.plot.contour(elements=elem40)
 
 
-def test_plot_mesh():
+def test_plot_mesh() -> None:
     msh = Mesh("tests/testdata/odense_rough.mesh")
     msh.plot(show_mesh=False)
     assert True
 
 
-def test_plot_mesh_outline():
+def test_plot_mesh_outline() -> None:
     msh = Mesh("tests/testdata/odense_rough.mesh")
     msh.plot(plot_type="outline_only")
     assert True
@@ -62,7 +62,7 @@ def test_plot_mesh_outline():
     assert True
 
 
-def test_plot_mesh_ax():
+def test_plot_mesh_ax() -> None:
     import matplotlib.pyplot as plt
 
     msh = Mesh("tests/testdata/odense_rough.mesh")
@@ -71,14 +71,14 @@ def test_plot_mesh_ax():
     assert True
 
 
-def test_plot_mesh_boundary_nodes():
+def test_plot_mesh_boundary_nodes() -> None:
     msh = Mesh("tests/testdata/odense_rough.mesh")
     msh.plot.boundary_nodes()
     msh.plot.boundary_nodes(["Land", "Sea"])
     assert True
 
 
-def test_plot_invalid():
+def test_plot_invalid() -> None:
     msh = Mesh("tests/testdata/odense_rough.mesh")
     with pytest.raises(Exception):
         msh.plot(plot_type="invalid")
@@ -86,7 +86,7 @@ def test_plot_invalid():
         msh.plot(plot_type="invalid")
 
 
-def test_plot_dfsu_vertical_profile():
+def test_plot_dfsu_vertical_profile() -> None:
     import matplotlib.pyplot as plt
 
     dfs = mikeio.open("tests/testdata/oresund_vertical_slice.dfsu")
@@ -113,7 +113,7 @@ def test_plot_dfsu_vertical_profile():
     plt.close("all")
 
 
-def test_da_plot():
+def test_da_plot() -> None:
     import matplotlib.pyplot as plt
 
     ds = mikeio.read("tests/testdata/FakeLake.dfsu")
@@ -134,7 +134,7 @@ def test_da_plot():
     plt.close("all")
 
 
-def test_geometry_fm_plot():
+def test_geometry_fm_plot() -> None:
     dfs = mikeio.open("tests/testdata/FakeLake.dfsu")
     g = dfs.geometry
     g.plot()
@@ -144,13 +144,13 @@ def test_geometry_fm_plot():
     g.plot.contourf()
 
 
-def test_plot_non_utm_file():
+def test_plot_non_utm_file() -> None:
     ds = mikeio.read("tests/testdata/FakeLake_NONUTM.dfsu")
     da = ds[0]
     da.plot()
 
 
-def test_plot_timeseries():
+def test_plot_timeseries() -> None:
     ds = mikeio.read("tests/testdata/HD2D.dfsu")
 
     # just make sure it runs
@@ -158,7 +158,7 @@ def test_plot_timeseries():
     ds["Surface elevation"].isel(time=-1).plot.line()
 
 
-def test_plot_vertical_transect():
+def test_plot_vertical_transect() -> None:
     ds = mikeio.read("tests/testdata/oresund_sigma_z.dfsu")
 
     dsp = ds.sel(x=333934.1, y=6158101.5)
@@ -166,7 +166,7 @@ def test_plot_vertical_transect():
     da.plot.pcolormesh()
 
 
-def test_plot_point_spectrum():
+def test_plot_point_spectrum() -> None:
     # directional spectra
     da = mikeio.read("tests/testdata/spectra/line_dir_spectra.dfsu")[0]
     da.isel(node=4).plot()

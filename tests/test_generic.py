@@ -537,8 +537,8 @@ def test_time_average_dfsu_3d(tmp_path: Path) -> None:
     fp = tmp_path / "oresund_sigma_z_avg.dfsu"
     avg_time(infilename, fp)
 
-    org = mikeio.open(infilename)
-    averaged = mikeio.open(fp)
+    org = mikeio.Dfsu3D(infilename)
+    averaged = mikeio.Dfsu3D(fp)
 
     assert averaged.n_timesteps == 1
     assert org.start_time == averaged.start_time
@@ -612,13 +612,12 @@ def test_quantile_dfsu_3d(tmp_path: Path) -> None:
     fp = tmp_path / "oresund_sigma_z_q10_90.dfsu"
     generic.quantile(infilename, fp, q=[0.1, 0.9], items=["Temperature"])
 
-    qd = mikeio.open(fp)
+    qd = mikeio.Dfsu3D(fp)
     assert qd.n_timesteps == 1
 
 
 def test_dfs_ext_capitalisation(tmp_path: Path) -> None:
     filename = "tests/testdata/waves2.DFS0"
-    ds = mikeio.open(filename)
     ds = mikeio.read(filename)
     ds.to_dfs(tmp_path / "void.DFS0")
     filename = "tests/testdata/oresund_vertical_slice2.DFSU"

@@ -7,29 +7,29 @@ from mikeio.spatial import GeometryUndefined
 from mikeio.spatial import Grid2D, Grid3D
 
 
-def test_dfs3_repr():
-    dfs = mikeio.open("tests/testdata/test_dfs3.dfs3")
+def test_dfs3_repr() -> None:
+    dfs = mikeio.Dfs3("tests/testdata/test_dfs3.dfs3")
     assert "<mikeio.Dfs3>" in repr(dfs)
     assert "geometry: Grid3D" in repr(dfs)
 
 
-def test_dfs3_projection():
-    dfs = mikeio.open("tests/testdata/test_dfs3.dfs3")
+def test_dfs3_projection() -> None:
+    dfs = mikeio.Dfs3("tests/testdata/test_dfs3.dfs3")
     assert dfs.projection_string == "LONG/LAT"
     assert dfs.dx == 0.25
     assert dfs.dy == 0.25
     assert dfs.dz == 1.0
 
 
-def test_dfs3_geometry():
-    dfs = mikeio.open("tests/testdata/test_dfs3.dfs3")
+def test_dfs3_geometry() -> None:
+    dfs = mikeio.Dfs3("tests/testdata/test_dfs3.dfs3")
     assert isinstance(dfs.geometry, Grid3D)
     assert dfs.geometry.nx == 21
     assert dfs.geometry.ny == 17
     assert dfs.geometry.nz == 34
 
 
-def test_dfs_to_xarray():
+def test_dfs_to_xarray() -> None:
     ds = mikeio.read("tests/testdata/test_dfs3.dfs3")
     xr_ds = ds.to_xarray()
     assert xr_ds.sizes["time"] == 2
@@ -39,7 +39,7 @@ def test_dfs_to_xarray():
     assert xr_ds_1d.sizes["time"] == 2
 
 
-def test_dfs3_read():
+def test_dfs3_read() -> None:
     ds = mikeio.read("tests/testdata/Grid1.dfs3")
     assert ds.n_items == 2
     assert ds.n_timesteps == 30
@@ -50,12 +50,12 @@ def test_dfs3_read():
     assert da.to_numpy().dtype == np.float32
 
 
-def test_dfs3_read_double_precision():
+def test_dfs3_read_double_precision() -> None:
     ds = mikeio.read("tests/testdata/Grid1.dfs3", dtype=np.float64)
     assert ds[0].to_numpy().dtype == np.float64
 
 
-def test_dfs3_read_time():
+def test_dfs3_read_time() -> None:
     fn = "tests/testdata/test_dfs3.dfs3"
     ds = mikeio.read(fn, time="2020-12-30 00:00")
     assert ds.n_timesteps == 1
@@ -66,7 +66,7 @@ def test_dfs3_read_time():
     assert isinstance(ds.geometry, Grid3D)
 
 
-def test_dfs3_read_1_layer():
+def test_dfs3_read_1_layer() -> None:
     fn = "tests/testdata/test_dfs3.dfs3"
     ds = mikeio.read(fn, layers=-1)
     assert ds.shape == (2, 17, 21)
@@ -81,7 +81,7 @@ def test_dfs3_read_1_layer():
     assert isinstance(ds.geometry, Grid2D)
 
 
-def test_dfs3_read_multiple_layers():
+def test_dfs3_read_multiple_layers() -> None:
     fn = "tests/testdata/test_dfs3.dfs3"
     ds = mikeio.read(fn, layers=(0, 1, 2, 3))
     assert ds.geometry.nz == 4
@@ -93,8 +93,8 @@ def test_dfs3_read_multiple_layers():
     assert ds.shape == (2, 3, 17, 21)
 
 
-def test_read_rotated_grid():
-    dfs = mikeio.open("tests/testdata/dissolved_oxygen.dfs3")
+def test_read_rotated_grid() -> None:
+    dfs = mikeio.Dfs3("tests/testdata/dissolved_oxygen.dfs3")
     # North to Y orientation: 18.124689102173
     # Grid rotation: 17.0003657182497
 
@@ -103,7 +103,7 @@ def test_read_rotated_grid():
     assert dfs.geometry.orientation == pytest.approx(17.0003657)  # in own CRS
 
 
-def test_dfs3_to_dfs(tmp_path):
+def test_dfs3_to_dfs(tmp_path: Path) -> None:
     ds = mikeio.read("tests/testdata/dissolved_oxygen.dfs3")
     fp = tmp_path / "test.dfs3"
     ds.to_dfs(fp)
@@ -114,7 +114,7 @@ def test_dfs3_to_dfs(tmp_path):
     assert ds.geometry == dsnew.geometry
 
 
-def test_read_top_layer():
+def test_read_top_layer() -> None:
     dsall = mikeio.read("tests/testdata/dissolved_oxygen.dfs3")
     ds = mikeio.read("tests/testdata/dissolved_oxygen.dfs3", layers="top")
     assert "z" not in ds.dims
@@ -131,14 +131,14 @@ def test_read_top_layer():
     assert dsdiff.nanmin(axis=None).to_numpy()[0] == 0.0
 
 
-def test_read_bottom_layer():
+def test_read_bottom_layer() -> None:
     ds = mikeio.read("tests/testdata/dissolved_oxygen.dfs3", layers="bottom")
     assert "z" not in ds.dims
     assert isinstance(ds.geometry, Grid2D)
     assert pytest.approx(ds[0].to_numpy()[0, 58, 52]) == 0.05738005042076111
 
 
-def test_sel_bottom_layer():
+def test_sel_bottom_layer() -> None:
     dsall = mikeio.read("tests/testdata/dissolved_oxygen.dfs3")
     with pytest.raises(NotImplementedError) as excinfo:
         dsall.sel(layers="bottom")
@@ -148,7 +148,7 @@ def test_sel_bottom_layer():
     # assert pytest.approx(ds[0].to_numpy()[0, 58, 52]) == 0.05738005042076111
 
 
-def test_read_single_layer_dfs3():
+def test_read_single_layer_dfs3() -> None:
     fn = "tests/testdata/single_layer.dfs3"
     ds = mikeio.read(fn, keepdims=True)
     assert isinstance(ds.geometry, Grid3D)
@@ -159,7 +159,7 @@ def test_read_single_layer_dfs3():
     assert ds.dims == ("time", "y", "x")
 
 
-def test_read_single_timestep_dfs3():
+def test_read_single_timestep_dfs3() -> None:
     fn = "tests/testdata/single_timestep.dfs3"
     ds = mikeio.read(fn, keepdims=True)
     assert ds.dims == ("time", "z", "y", "x")
@@ -174,7 +174,7 @@ def test_read_single_timestep_dfs3():
     assert ds.shape == (5, 17, 21)
 
 
-def test_read_write_single_layer_as_dfs3(tmp_path):
+def test_read_write_single_layer_as_dfs3(tmp_path: Path) -> None:
     fn = "tests/testdata/single_layer.dfs3"
     ds1 = mikeio.read(fn, keepdims=True)
     assert isinstance(ds1.geometry, Grid3D)
@@ -188,7 +188,7 @@ def test_read_write_single_layer_as_dfs3(tmp_path):
     ds2.to_dfs(fp)
 
 
-def test_MIKE_SHE_dfs3_output():
+def test_MIKE_SHE_dfs3_output() -> None:
     ds = mikeio.read("tests/testdata/Karup_MIKE_SHE_head_output.dfs3")
     assert ds.n_timesteps == 6
     assert ds.n_items == 1
@@ -204,7 +204,7 @@ def test_MIKE_SHE_dfs3_output():
     assert g2.origin == pytest.approx((g2.x[0], g2.y[0]))
 
 
-def test_local_coordinates_read_single_layer_dfs3():
+def test_local_coordinates_read_single_layer_dfs3() -> None:
     fn = "tests/testdata/local_coordinates.dfs3"
 
     ds = mikeio.read(fn)
@@ -214,7 +214,7 @@ def test_local_coordinates_read_single_layer_dfs3():
     assert ds1.geometry.x[0] == pytest.approx(0.25)
 
 
-def test_local_coordinates_read_subset_layer_dfs3():
+def test_local_coordinates_read_subset_layer_dfs3() -> None:
     fn = "tests/testdata/local_coordinates.dfs3"
 
     ds = mikeio.read(fn, layers=[0, 1])
@@ -268,7 +268,7 @@ def test_to_xarray() -> None:
     assert xr_da.y[0] == pytest.approx(0.25)
 
 
-def test_append_dfs3(tmp_path):
+def test_append_dfs3(tmp_path: Path) -> None:
     fn = "tests/testdata/Karup_MIKE_SHE_head_output.dfs3"
     ds = mikeio.read(fn, time=[0, 1])
     new_fp = tmp_path / "test_append.dfs3"
@@ -276,6 +276,6 @@ def test_append_dfs3(tmp_path):
 
     ds2 = mikeio.read(fn, time=[2, 3])
 
-    dfs = mikeio.open(new_fp)
+    dfs = mikeio.Dfs3(new_fp)
 
     dfs.append(ds2)

@@ -1,7 +1,6 @@
 from __future__ import annotations
 from pathlib import Path
 import warnings
-from abc import abstractmethod
 from dataclasses import dataclass
 from datetime import datetime
 from typing import Any, Sequence
@@ -443,12 +442,6 @@ class _Dfs123:
     def is_geo(self) -> bool:
         """Are coordinates geographical (LONG/LAT)?"""
         return self._projstr == "LONG/LAT"
-
-    @property
-    @abstractmethod
-    def shape(self) -> tuple[int, ...]:
-        """Shape of the data array."""
-        pass
 
     def _validate_no_orientation_in_geo(self) -> None:
         if self.is_geo and abs(self._orientation) > 1e-6:

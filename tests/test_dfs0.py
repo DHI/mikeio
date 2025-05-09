@@ -10,7 +10,7 @@ from mikecore.DfsFile import DataValueType
 import pytest
 
 
-def test_repr():
+def test_repr() -> None:
     dfs = Dfs0("tests/testdata/da_diagnostic.dfs0")
 
     text = repr(dfs)
@@ -18,7 +18,7 @@ def test_repr():
     assert "NonEquidistant" in text
 
 
-def test_repr_equidistant():
+def test_repr_equidistant() -> None:
     dfs = Dfs0("tests/testdata/random.dfs0")
 
     text = repr(dfs)
@@ -28,7 +28,7 @@ def test_repr_equidistant():
     assert "NonEquidistant" not in text
 
 
-def test_write_float(tmp_path):
+def test_write_float(tmp_path: Path) -> None:
     fp = tmp_path / "simple_float.dfs0"
 
     nt = 100
@@ -43,7 +43,7 @@ def test_write_float(tmp_path):
     assert fp.exists()
 
 
-def test_write_double(tmp_path):
+def test_write_double(tmp_path: Path) -> None:
     fp = tmp_path / "simple_float.dfs0"
 
     nt = 100
@@ -58,7 +58,7 @@ def test_write_double(tmp_path):
     assert fp.exists()
 
 
-def test_write_int_not_possible(tmp_path):
+def test_write_int_not_possible(tmp_path: Path) -> None:
     fp = tmp_path / "simple_float.dfs0"
 
     nt = 100
@@ -72,7 +72,7 @@ def test_write_int_not_possible(tmp_path):
         da.to_dfs(fp, dtype=np.int32)
 
 
-def test_read_units_write_new(tmp_path):
+def test_read_units_write_new(tmp_path: Path) -> None:
     fp = tmp_path / "random.dfs0"
 
     ds = mikeio.read("tests/testdata/random.dfs0")
@@ -86,7 +86,7 @@ def test_read_units_write_new(tmp_path):
     assert ds2.items[0] == ds.items[0]
 
 
-def test_read_start_end_time():
+def test_read_start_end_time() -> None:
     dfs0file = r"tests/testdata/random.dfs0"
 
     dfs = Dfs0(dfs0file)
@@ -96,29 +96,29 @@ def test_read_start_end_time():
     assert dfs.end_time == ds.end_time
 
 
-def test_read_all_time_steps_without_reading_items():
+def test_read_all_time_steps_without_reading_items() -> None:
     dfs0file = r"tests/testdata/random.dfs0"
-    dfs = mikeio.open(dfs0file)
+    dfs = mikeio.Dfs0(dfs0file)
     assert isinstance(dfs.time, pd.DatetimeIndex)
     assert len(dfs.time) == 1000
 
 
-def test_items_dataframe():
-    dfs = mikeio.open("tests/testdata/random.dfs0")
+def test_items_dataframe() -> None:
+    dfs = mikeio.Dfs0("tests/testdata/random.dfs0")
     df = dfs.items.to_dataframe()
     assert "name" in df.columns
     assert "type" in df.columns  # or EUMType ?
     assert df.type.iloc[1] == "Water_Level"  # Is this the correct way to show it?
 
 
-def test_read_all_time_steps_without_reading_items_neq():
+def test_read_all_time_steps_without_reading_items_neq() -> None:
     dfs0file = "tests/testdata/da_diagnostic.dfs0"
-    dfs = mikeio.open(dfs0file)
+    dfs = mikeio.Dfs0(dfs0file)
     assert isinstance(dfs.time, pd.DatetimeIndex)
     assert len(dfs.time) == 744
 
 
-def test_write_non_equidistant_calendar(tmp_path):
+def test_write_non_equidistant_calendar(tmp_path: Path) -> None:
     dfs0file = tmp_path / "neq.dfs0"
     time = pd.DatetimeIndex(["2001-01-01", "2001-01-01 01:00", "2001-01-01 01:10"])
     da1 = mikeio.DataArray(
@@ -139,7 +139,7 @@ def test_write_non_equidistant_calendar(tmp_path):
     assert not ds2.is_equidistant
 
 
-def test_read_equidistant_dfs0_to_dataframe_fixed_freq():
+def test_read_equidistant_dfs0_to_dataframe_fixed_freq() -> None:
     dfs0file = "tests/testdata/random.dfs0"
 
     dfs = Dfs0(dfs0file)
@@ -150,7 +150,7 @@ def test_read_equidistant_dfs0_to_dataframe_fixed_freq():
     df = dfs.to_dataframe(round_time=False)
 
 
-def test_read_equidistant_dfs0_to_dataframe_unit_in_name():
+def test_read_equidistant_dfs0_to_dataframe_unit_in_name() -> None:
     dfs0file = "tests/testdata/random.dfs0"
 
     dfs = Dfs0(dfs0file)
@@ -159,7 +159,7 @@ def test_read_equidistant_dfs0_to_dataframe_unit_in_name():
     assert "meter" in df.columns[0]
 
 
-def test_read_nonequidistant_dfs0_to_dataframe_no_freq():
+def test_read_nonequidistant_dfs0_to_dataframe_no_freq() -> None:
     dfs0file = "tests/testdata/da_diagnostic.dfs0"
 
     dfs = Dfs0(dfs0file)
@@ -168,7 +168,7 @@ def test_read_nonequidistant_dfs0_to_dataframe_no_freq():
     assert df.index.freq is None
 
 
-def test_read_dfs0_delete_value_conversion():
+def test_read_dfs0_delete_value_conversion() -> None:
     dfs0file = "tests/testdata/da_diagnostic.dfs0"
 
     dfs = Dfs0(dfs0file)
@@ -184,7 +184,7 @@ def test_read_dfs0_delete_value_conversion():
     assert np.isnan(ds[0].values[2])
 
 
-def test_read_dfs0_small_value_not_delete_value(tmp_path):
+def test_read_dfs0_small_value_not_delete_value(tmp_path: Path) -> None:
     filename = tmp_path / "small.dfs0"
     d = np.array([0.0, 0.0000001, -0.0001])
     assert np.isclose(d, -1e-35, atol=1e-33).any()
@@ -201,7 +201,7 @@ def test_read_dfs0_small_value_not_delete_value(tmp_path):
     assert not np.isnan(ds[0].to_numpy()).any()
 
 
-def test_write_from_data_frame(tmp_path):
+def test_write_from_data_frame(tmp_path: Path) -> None:
     df = pd.read_csv(
         "tests/testdata/co2-mm-mlo.csv",
         parse_dates=True,
@@ -478,7 +478,7 @@ def test_write_from_data_frame_different_types(tmp_path: Path) -> None:
     assert ds.items[1].unit == EUMUnit.undefined
 
 
-def test_read_dfs0_single_item():
+def test_read_dfs0_single_item() -> None:
     dfs0file = r"tests/testdata/random.dfs0"
 
     dfs = Dfs0(dfs0file)
@@ -487,7 +487,7 @@ def test_read_dfs0_single_item():
     assert len(ds.to_numpy()) == 1
 
 
-def test_read_dfs0_single_item_named_access():
+def test_read_dfs0_single_item_named_access() -> None:
     dfs0file = r"tests/testdata/random.dfs0"
 
     dfs = Dfs0(dfs0file)
@@ -496,7 +496,7 @@ def test_read_dfs0_single_item_named_access():
     assert len(res.to_numpy()) == 1
 
 
-def test_read_dfs0_temporal_subset():
+def test_read_dfs0_temporal_subset() -> None:
     dfs0file = r"tests/testdata/random.dfs0"
 
     dfs = Dfs0(dfs0file)
@@ -506,7 +506,7 @@ def test_read_dfs0_temporal_subset():
     assert ds.time[0].strftime("%H") == "05"
 
 
-def test_read_non_eq_dfs0_temporal_subset():
+def test_read_non_eq_dfs0_temporal_subset() -> None:
     dfs0file = r"tests/testdata/da_diagnostic.dfs0"
 
     dfs = Dfs0(dfs0file)
@@ -518,7 +518,7 @@ def test_read_non_eq_dfs0_temporal_subset():
     assert len(ds.time) == 7
 
 
-def test_read_non_eq_dfs0_temporal_slice():
+def test_read_non_eq_dfs0_temporal_slice() -> None:
     dfs0file = r"tests/testdata/da_diagnostic.dfs0"
 
     dfs = Dfs0(dfs0file)
@@ -530,7 +530,7 @@ def test_read_non_eq_dfs0_temporal_slice():
     assert len(ds.time) == 7
 
 
-def test_read_dfs0_single_item_read_by_name():
+def test_read_dfs0_single_item_read_by_name() -> None:
     dfs0file = r"tests/testdata/random.dfs0"
 
     items = ["NotFun", "VarFun01"]
@@ -546,7 +546,7 @@ def test_read_dfs0_single_item_read_by_name():
     assert repr(res.items[0].unit) == "meter"
 
 
-def test_read_dfs0_to_dataframe():
+def test_read_dfs0_to_dataframe() -> None:
     dfs0file = r"tests/testdata/random.dfs0"
 
     dfs = Dfs0(dfs0file)
@@ -555,7 +555,7 @@ def test_read_dfs0_to_dataframe():
     assert np.isnan(df[df.columns[0]].iloc[2])
 
 
-def test_read_dfs0_to_matrix():
+def test_read_dfs0_to_matrix() -> None:
     dfs0file = r"tests/testdata/random.dfs0"
 
     dfs = Dfs0(dfs0file)
@@ -564,7 +564,7 @@ def test_read_dfs0_to_matrix():
     assert len(ds.to_numpy()) == 2
 
 
-def test_write_data_with_missing_values(tmp_path):
+def test_write_data_with_missing_values(tmp_path: Path) -> None:
     dfs0file = r"tests/testdata/random.dfs0"
     tmpfile = tmp_path / "random.dfs0"
 
@@ -587,14 +587,14 @@ def test_write_data_with_missing_values(tmp_path):
     assert np.isnan(modified[1].values[5])
 
 
-def test_read_relative_time_axis():
+def test_read_relative_time_axis() -> None:
     filename = "tests/testdata/eq_relative.dfs0"
 
     ds = mikeio.read(filename)
     assert len(ds) == 5
 
 
-def test_write_accumulated_datatype(tmp_path):
+def test_write_accumulated_datatype(tmp_path: Path) -> None:
     filename = tmp_path / "simple.dfs0"
 
     da = mikeio.DataArray(
@@ -614,7 +614,7 @@ def test_write_accumulated_datatype(tmp_path):
     assert newds[0].item.data_value_type == 3
 
 
-def test_write_default_datatype(tmp_path):
+def test_write_default_datatype(tmp_path: Path) -> None:
     filename = tmp_path / "simple.dfs0"
     da = mikeio.DataArray(
         data=np.random.random(100),
@@ -698,7 +698,7 @@ def test_write_from_data_frame_data_value_not_default(tmp_path: Path) -> None:
     assert ds.items[0].data_value_type == 3
 
 
-def test_read_write_eum(tmp_path):
+def test_read_write_eum(tmp_path: Path) -> None:
     ds = mikeio.read("tests/testdata/waterlevel_viken.dfs0")
     assert ds["ST 2: WL (m)"].type == EUMType.Water_Level
     assert ds["ST 2: WL (m)"].unit == EUMUnit.meter
@@ -712,7 +712,7 @@ def test_read_write_eum(tmp_path):
     assert ds2["ST 2: WL (m)"].unit == EUMUnit.meter
 
 
-def test_read_write_single_step(tmp_path):
+def test_read_write_single_step(tmp_path: Path) -> None:
     ds = mikeio.read("tests/testdata/waterlevel_viken.dfs0", time=-1)
     outfilename = tmp_path / "last_step.dfs0"
     ds.to_dfs(outfilename)
@@ -722,7 +722,7 @@ def test_read_write_single_step(tmp_path):
     assert dsnew[0].to_numpy() == pytest.approx(-0.08139999955892563)
 
 
-def test_read_write_single_step_to_dataframe(tmp_path):
+def test_read_write_single_step_to_dataframe(tmp_path: Path) -> None:
     ds = mikeio.read("tests/testdata/da_diagnostic.dfs0", time=1)
     df = ds.to_dataframe()
     assert df.shape[0] == 1
@@ -730,26 +730,26 @@ def test_read_write_single_step_to_dataframe(tmp_path):
     assert np.isnan(df.iloc[0, 3])
 
 
-def test_read_dfs0_with_many_items():
+def test_read_dfs0_with_many_items() -> None:
     ds = mikeio.read("tests/testdata/many_items.dfs0")
 
     assert ds.n_items == 800
 
 
-def test_read_dfs0_with_non_unique_item_names():
+def test_read_dfs0_with_non_unique_item_names() -> None:
     with pytest.warns(match="item name"):
         ds = mikeio.read("tests/testdata/untitled_3_items.dfs0")
 
     assert ds.n_items == 3
 
-    assert ds.Untitled.values[0] == pytest.approx(1.0)
+    assert ds["Untitled"].values[0] == pytest.approx(1.0)
 
-    assert ds.Untitled_3.values[0] == pytest.approx(0.0)
-    assert np.isnan(ds.Untitled_3.values[1])
+    assert ds["Untitled_3"].values[0] == pytest.approx(0.0)
+    assert np.isnan(ds.Untitled_3.values[1])  # type: ignore
 
 
-def test_non_equidistant_time_can_read_correctly_with_open(tmp_path):
-    dfs = mikeio.open("tests/testdata/neq_daily_time_unit.dfs0")
+def test_non_equidistant_time_can_read_correctly_with_open(tmp_path: Path) -> None:
+    dfs = mikeio.Dfs0("tests/testdata/neq_daily_time_unit.dfs0")
     dfs.time
     ds = dfs.read()
 

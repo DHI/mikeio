@@ -823,7 +823,7 @@ def quantile(
     outfilename: str | pathlib.Path,
     q: float | Sequence[float],
     *,
-    items: Sequence[int | str] | None = None,
+    items: Sequence[int | str] | int | str | None = None,
     skipna: bool = True,
     buffer_size: float = 1.0e9,
 ) -> None:

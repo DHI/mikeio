@@ -3,7 +3,7 @@ import pandas as pd
 import mikeio
 
 
-def test_write_read_long_dfs0(tmp_path):
+def test_write_read_long_dfs0(tmp_path) -> None:
 
     filename = tmp_path / "big.dfs0"
 
@@ -21,7 +21,7 @@ def test_write_read_long_dfs0(tmp_path):
     assert len(ds.time) == nt
 
 
-def test_write_read_many_items_dataset_pandas(tmp_path):
+def test_write_read_many_items_dataset_pandas(tmp_path) -> None:
 
     filename = tmp_path / "many_items.dfs0"
 
