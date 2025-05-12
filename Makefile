@@ -17,7 +17,7 @@ test:
 	pytest
 
 typecheck:
-	mypy $(LIB)/ tests/test_{dataarray,dataset,generic,dfs0,dfs1,dfs2,dfs3,dfsu2dh}.py
+	mypy $(LIB)/ tests/test_{dataarray,dataset,generic,dfs0,dfs1,dfs2,dfs3,dfsu2dh,dfsu3d}.py
 
 coverage: 
 	pytest --cov-report html --cov=$(LIB) tests/
