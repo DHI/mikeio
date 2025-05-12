@@ -194,9 +194,11 @@ def test_isel_list_of_indices_simple_domain() -> None:
 
     g = GeometryFM2D(node_coordinates=nc, element_table=el, projection="LONG/LAT")
     g1 = g.isel([0, 1])
+    assert isinstance(g1, GeometryFM2D)
     assert g1.element_coordinates[0, 0] == pytest.approx(0.6666666666666666)
 
     g2 = g.isel([1, 0])
+    assert isinstance(g2, GeometryFM2D)
     assert g2.element_coordinates[1, 0] == pytest.approx(0.6666666666666666)
 
 
@@ -216,7 +218,7 @@ def test_plot_mesh() -> None:
     g.plot.mesh()
 
 
-def test_layered(simple_3d_geom: GeometryFM3D):
+def test_layered(simple_3d_geom: GeometryFM3D) -> None:
     g = simple_3d_geom
 
     assert g.n_elements == 2
@@ -231,6 +233,7 @@ def test_layered(simple_3d_geom: GeometryFM3D):
 
     # subset
     g2 = g.isel(idx)
+    assert isinstance(g2, GeometryFM3D)
     assert g2.n_elements == 2
 
     assert "elements: 2" in repr(g2)

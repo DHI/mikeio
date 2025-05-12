@@ -42,3 +42,5 @@ objects.json
 
 # useful, but not sure if it should be in source control
 uv.lock
+
+.mypy_cache/

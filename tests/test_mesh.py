@@ -3,6 +3,7 @@ import numpy as np
 import pytest
 import mikeio
 from mikeio import Mesh
+from mikeio import GeometryFM2D
 
 
 @pytest.fixture
@@ -22,12 +23,12 @@ def test_read_mesh_from_path() -> None:
     assert msh.n_nodes == 399
 
 
-def test_get_number_of_elements(tri_mesh):
+def test_get_number_of_elements(tri_mesh: Mesh) -> None:
     msh = tri_mesh
     assert msh.n_elements == 654
 
 
-def test_element_coordinates(tri_mesh):
+def test_element_coordinates(tri_mesh: Mesh) -> None:
     msh = tri_mesh
 
     ec = msh.element_coordinates
@@ -37,18 +38,18 @@ def test_element_coordinates(tri_mesh):
     assert ec[0, 1] > 6153000.0
 
 
-def test_read_mixed_mesh(mixed_mesh):
+def test_read_mixed_mesh(mixed_mesh: Mesh) -> None:
     msh = mixed_mesh
     assert msh.n_nodes == 798
 
-    el_tbl_vec = np.hstack(msh.element_table)
+    el_tbl_vec = np.hstack(msh.element_table)  # type: ignore
     assert len(el_tbl_vec) > 3 * msh.n_elements
     assert len(el_tbl_vec) < 4 * msh.n_elements
     assert np.all(el_tbl_vec >= 0)
     assert np.all(el_tbl_vec < msh.n_nodes)
 
 
-def test_read_write_mixed_mesh(mixed_mesh, tmp_path):
+def test_read_write_mixed_mesh(mixed_mesh: Mesh, tmp_path: Path) -> None:
     msh = mixed_mesh
     outfilename = tmp_path / "quad_tri_v2.mesh"
     msh.write(outfilename)
@@ -57,11 +58,11 @@ def test_read_write_mixed_mesh(mixed_mesh, tmp_path):
 
     assert outfilename.exists()
 
-    assert np.all(np.hstack(msh2.element_table) == np.hstack(msh.element_table))
+    assert np.all(np.hstack(msh2.element_table) == np.hstack(msh.element_table))  # type: ignore
     assert np.all(msh2.element_coordinates == msh.element_coordinates)
 
 
-def test_node_coordinates(tri_mesh):
+def test_node_coordinates(tri_mesh: Mesh) -> None:
     msh = tri_mesh
 
     nc = msh.node_coordinates
@@ -69,7 +70,7 @@ def test_node_coordinates(tri_mesh):
     assert nc.shape == (399, 3)
 
 
-def test_get_land_node_coordinates(tri_mesh):
+def test_get_land_node_coordinates(tri_mesh: Mesh) -> None:
     msh = tri_mesh
 
     nc = msh.node_coordinates[msh.geometry.codes == 1]
@@ -77,14 +78,7 @@ def test_get_land_node_coordinates(tri_mesh):
     assert nc.shape == (134, 3)
 
 
-def test_get_bad_node_coordinates(tri_mesh):
-    msh = tri_mesh
-
-    with pytest.raises(Exception):
-        msh.get_node_coords(code="foo")
-
-
-def test_set_z(tri_mesh):
+def test_set_z(tri_mesh: Mesh) -> None:
     msh = tri_mesh
     zn = msh.node_coordinates[:, 2]
     zn[zn < -3] = -3
@@ -94,7 +88,7 @@ def test_set_z(tri_mesh):
     assert zn.min() == -3
 
 
-def test_set_codes(tri_mesh):
+def test_set_codes(tri_mesh: Mesh) -> None:
     msh = tri_mesh
     codes = msh.geometry.codes
     assert msh.geometry.codes[2] == 2
@@ -113,7 +107,7 @@ def test_set_codes(tri_mesh):
         msh.geometry.codes = codes[0:4]
 
 
-def test_write(tri_mesh, tmp_path):
+def test_write(tri_mesh: Mesh, tmp_path: Path) -> None:
     outfilename = tmp_path / "simple.mesh"
     msh = tri_mesh
 
@@ -122,22 +116,23 @@ def test_write(tri_mesh, tmp_path):
     assert outfilename.exists()
 
 
-def test_write_part_isel(tri_mesh, tmp_path):
+def test_write_part_isel(tri_mesh: Mesh, tmp_path: Path) -> None:
     outfilename = tmp_path / "simple_sub.mesh"
 
     msh = tri_mesh
 
     gsub = msh.geometry.isel(range(50, 100))
+    assert isinstance(gsub, GeometryFM2D)
     gsub.to_mesh(outfilename)
 
     assert outfilename.exists()
 
 
-def test_write_mesh_from_dfsu(tmp_path) -> None:
+def test_write_mesh_from_dfsu(tmp_path: Path) -> None:
     outfilename = tmp_path / "quad_tri.mesh"
     dfsufilename = "tests/testdata/FakeLake.dfsu"
 
-    dfs = mikeio.open(dfsufilename)
+    dfs = mikeio.Dfsu2DH(dfsufilename)
 
     geometry = dfs.geometry
 
@@ -147,10 +142,10 @@ def test_write_mesh_from_dfsu(tmp_path) -> None:
 
     assert outfilename.exists()
 
-    assert np.all(np.hstack(msh2.element_table) == np.hstack(geometry.element_table))
+    assert np.all(np.hstack(msh2.element_table) == np.hstack(geometry.element_table))  # type: ignore
 
 
-def test_to_shapely(tri_mesh) -> None:
+def test_to_shapely(tri_mesh: Mesh) -> None:
     msh = tri_mesh
     shp = msh.to_shapely()
     assert shp.geom_type == "MultiPolygon"

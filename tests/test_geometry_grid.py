@@ -38,6 +38,7 @@ def test_grid1d_isel() -> None:
     g = Grid1D(nx=10, dx=0.1)
 
     g2 = g.isel([0, 1, 2])
+    assert isinstance(g2, Grid1D)
     assert g2.nx == 3
 
     with pytest.raises(NotImplementedError, match="equidistant"):
@@ -294,7 +295,7 @@ def test_find_index_y_array_not_possible() -> None:
 
     # supply y as array
     with pytest.raises(ValueError) as excinfo:
-        g.find_index(y=xy[:, 1])
+        g.find_index(y=xy[:, 1])  # type: ignore
     assert "y=" in str(excinfo.value)
 
 
@@ -334,7 +335,7 @@ def test_to_geometryFM_custom_z_custom_code() -> None:
     assert g.codes[0] == 30
 
 
-def test_to_mesh(tmp_path: Path):
+def test_to_mesh(tmp_path: Path) -> None:
     outfilename = tmp_path / "temp.mesh"
 
     # 1

@@ -228,7 +228,7 @@ class Grid1D(_Geometry):
         return self._orientation
 
     def isel(
-        self, idx: int | np.int64 | slice, axis: int | None = None
+        self, idx: int | Sequence[int] | np.ndarray | slice, axis: int | None = None
     ) -> "Grid1D" | GeometryPoint2D | GeometryPoint3D | GeometryUndefined:
         """Get a subset geometry from this geometry.
 
@@ -758,7 +758,7 @@ class Grid2D(_Geometry):
             self._x0, self._y0 = 0.0, 0.0
             self._origin = (self._origin[0] + x0, self._origin[1] + y0)
 
-    def contains(self, coords: np.ndarray) -> Any:
+    def contains(self, coords: ArrayLike) -> Any:
         """Test if a list of points are inside grid.
 
         Parameters
@@ -787,7 +787,7 @@ class Grid2D(_Geometry):
         self,
         x: float | None = None,
         y: float | None = None,
-        coords: np.ndarray | None = None,
+        coords: ArrayLike | None = None,
         area: tuple[float, float, float, float] | None = None,
     ) -> tuple[Any, Any]:
         """Find nearest index (i,j) of point(s).
@@ -840,7 +840,7 @@ class Grid2D(_Geometry):
         else:
             raise ValueError("Provide x,y or coords")
 
-    def _xy_to_index(self, xy: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
+    def _xy_to_index(self, xy: ArrayLike) -> tuple[np.ndarray, np.ndarray]:
         """Find specific points in this geometry."""
         xy = np.atleast_2d(xy)
         y = xy[:, 1]

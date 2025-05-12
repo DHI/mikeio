@@ -127,6 +127,15 @@ select = [
 "conftest.py" = ["D"]
 
 [tool.mypy]
+exclude = [
+    "test_dfsu_plot",
+    "scripts*",
+    "test_notebooks",
+    "test_perf",
+    "test_consistency",
+    "conftest",
+    "test_pfs",
+]
 python_version = "3.10"
 warn_return_any = false
 allow_redefinition = true

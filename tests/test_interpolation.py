@@ -14,7 +14,7 @@ def test_get_idw_interpolant() -> None:
 
 
 def test_interp2d() -> None:
-    dfs = mikeio.open("tests/testdata/wind_north_sea.dfsu")
+    dfs = mikeio.Dfsu2DH("tests/testdata/wind_north_sea.dfsu")
     ds = dfs.read(items=["Wind speed"])
 
     npts = 5
@@ -51,7 +51,7 @@ def test_interp2d() -> None:
 
 
 def test_interp2d_same_points() -> None:
-    dfs = mikeio.open("tests/testdata/wind_north_sea.dfsu")
+    dfs = mikeio.Dfsu2DH("tests/testdata/wind_north_sea.dfsu")
     ds = dfs.read(items=["Wind speed"])
     npts = 3
     # same points as data (could cause IDW to diverge)
@@ -64,7 +64,7 @@ def test_interp2d_same_points() -> None:
 
 
 def test_interp2d_outside() -> None:
-    dfs = mikeio.open("tests/testdata/wind_north_sea.dfsu")
+    dfs = mikeio.Dfsu2DH("tests/testdata/wind_north_sea.dfsu")
     ds = dfs.read(items=["Wind speed"])
     # outside domain
     npts = 2
@@ -82,7 +82,7 @@ def test_interp2d_outside() -> None:
 
 
 def test_interp_itemstep() -> None:
-    dfs = mikeio.open("tests/testdata/wind_north_sea.dfsu")
+    dfs = mikeio.Dfsu2DH("tests/testdata/wind_north_sea.dfsu")
     ds = dfs.read(items=["Wind speed"])
 
     npts = 5

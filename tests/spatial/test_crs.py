@@ -6,8 +6,6 @@ from mikeio.spatial.crs import CRS, CRSConversionError, CRSConversionWarning
 pytest.importorskip("pyproj")
 
 
-
-
 class TestCRS:
     @pytest.mark.parametrize(
         ["projection_string", "name", "is_projected"],
@@ -16,7 +14,7 @@ class TestCRS:
             ("UTM-32", "UTM-32", True),
         ],
     )
-    def test_init(self, projection_string, name, is_projected):
+    def test_init(self, projection_string: str, name: str, is_projected: bool) -> None:
         crs = CRS(projection_string=projection_string)
         assert crs.name == name
         assert crs.is_geographical is not is_projected
@@ -29,7 +27,7 @@ class TestCRS:
             (32632, True),
         ],
     )
-    def test_to_from_pyproj(self, epsg, is_projected):
+    def test_to_from_pyproj(self, epsg: int | str, is_projected: bool) -> None:
         # Test from_pyproj
         pyproj_crs = pyproj.CRS.from_epsg(epsg)
         crs = CRS.from_pyproj(pyproj_crs=pyproj_crs)
@@ -39,14 +37,14 @@ class TestCRS:
         exported = crs.to_pyproj()
         assert exported.to_epsg() == epsg
 
-    def test_to_pyproj_errors(self):
+    def test_to_pyproj_errors(self) -> None:
         with pytest.warns(
             CRSConversionWarning,
             match=r"LONG/LAT projection.+EPSG:4326",
         ):
             CRS(projection_string="LONG/LAT").to_epsg()
 
-    def test_to_epsg(self):
+    def test_to_epsg(self) -> None:
         with pytest.raises(CRSConversionError, match=r"cannot convert.+to EPSG"):
             CRS("UTM-32").to_epsg()
 
@@ -55,7 +53,7 @@ class TestCRS:
         crs = CRS(projection_string=wkt)
         assert crs.to_epsg() == 32632
 
-    def test_from_epsg(self):
+    def test_from_epsg(self) -> None:
         # Test WGS84
         crs = CRS.from_epsg(epsg=4326)
         assert crs.is_geographical
