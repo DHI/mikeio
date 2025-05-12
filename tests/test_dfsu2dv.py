@@ -2,7 +2,6 @@ import numpy as np
 import pytest
 import matplotlib.pyplot as plt
 
-import mikeio
 from mikeio import Dfsu2DV
 from mikeio.spatial import (
     GeometryFMVerticalColumn,
