@@ -131,7 +131,6 @@ exclude = [
     "test_dfsu_plot",
     "scripts*",
     "test_notebooks",
-    "test_perf",
     "test_consistency",
     "conftest",
     "test_pfs",
