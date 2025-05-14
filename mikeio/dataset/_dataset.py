@@ -49,6 +49,7 @@ from ._data_plot import _DatasetPlotter
 
 from ._dataarray import IndexType
 
+
 def _to_safe_name(name: str) -> str:
     tmp = re.sub("[^0-9a-zA-Z]", "_", name)
     return re.sub("_+", "_", tmp)  # Collapse multiple underscores
@@ -545,7 +546,10 @@ class Dataset:
         return Dataset(data=res, validate=False)
 
     def create_data_array(
-        self, data: NDArray[np.floating], item: ItemInfo | None = None
+        self,
+        data: NDArray[np.floating],
+        item: ItemInfo | None = None,
+        name: str | None = None,
     ) -> DataArray:
         """Create a new  DataArray with the same time and geometry as the dataset.
 
@@ -560,7 +564,12 @@ class Dataset:
 
         """
         return DataArray(
-            data=data, time=self.time, geometry=self.geometry, zn=self._zn, item=item
+            data=data,
+            time=self.time,
+            geometry=self.geometry,
+            zn=self._zn,
+            item=item,
+            name=name,
         )
 
     # TODO: delete this?
@@ -714,6 +723,9 @@ class Dataset:
 
     @overload
     def __getitem__(self, key: Hashable | int) -> DataArray: ...
+
+    @overload
+    def __getitem__(self, key: slice) -> Dataset: ...
 
     @overload
     def __getitem__(self, key: Iterable[Hashable]) -> "Dataset": ...
@@ -1437,7 +1449,7 @@ class Dataset:
     # ============ aggregate =============
 
     def aggregate(
-        self, axis: int | str = 0, func: Callable = np.nanmean, **kwargs: Any
+        self, axis: int | str | None = 0, func: Callable = np.nanmean, **kwargs: Any
     ) -> "Dataset":
         """Aggregate along an axis.
 
@@ -1744,7 +1756,7 @@ class Dataset:
 
         return self.aggregate(axis=axis, func=func, **kwargs)
 
-    def nanmax(self, axis: int | str = 0, **kwargs: Any) -> "Dataset":
+    def nanmax(self, axis: int | str | None = 0, **kwargs: Any) -> "Dataset":
         """Max value along an axis (NaN removed).
 
         Parameters
@@ -1766,7 +1778,7 @@ class Dataset:
         """
         return self.aggregate(axis=axis, func=np.nanmax, **kwargs)
 
-    def nanmin(self, axis: int | str = 0, **kwargs: Any) -> "Dataset":
+    def nanmin(self, axis: int | str | None = 0, **kwargs: Any) -> "Dataset":
         """Min value along an axis (NaN removed).
 
         Parameters

@@ -2,7 +2,7 @@ import pytest
 import mikeio
 
 
-def test_read_dfs0_generic_read():
+def test_read_dfs0_generic_read() -> None:
     filename = r"tests/testdata/random.dfs0"
 
     res = mikeio.read(filename)
@@ -11,7 +11,7 @@ def test_read_dfs0_generic_read():
     assert len(data) == 2
 
 
-def test_read_dfs1_generic_read():
+def test_read_dfs1_generic_read() -> None:
     filename = r"tests/testdata/random.dfs1"
 
     res = mikeio.read(filename)
@@ -19,14 +19,14 @@ def test_read_dfs1_generic_read():
     assert data.shape == (100, 3)  # time, x
 
 
-def test_read_dfs2_generic_read():
+def test_read_dfs2_generic_read() -> None:
     filename = "tests/testdata/gebco_sound.dfs2"
 
     ds = mikeio.read(filename)
     assert ds.geometry.nx == 216
 
 
-def test_read_dfsu_generic_read():
+def test_read_dfsu_generic_read() -> None:
     filename = "tests/testdata/HD2D.dfsu"
 
     ds = mikeio.read(filename)
@@ -34,7 +34,7 @@ def test_read_dfsu_generic_read():
     assert len(ds) == 4
 
 
-# def test_read_dfsu_generic_read_single_item_number():
+# def test_read_dfsu_generic_read_single_item_number() -> None:
 
 #   filename = "tests/testdata/HD2D.dfsu"
 
@@ -43,14 +43,14 @@ def test_read_dfsu_generic_read():
 #    assert len(ds) == 1
 
 
-def test_read_generic_read_unsupported_format():
+def test_read_generic_read_unsupported_format() -> None:
     filename = "foo.txt"
 
     with pytest.raises(Exception):
         mikeio.read(filename)
 
 
-def test_read_not_supported_for_mesh():
+def test_read_not_supported_for_mesh() -> None:
     filename = "tests/testdata/odense_rough.mesh"
 
     with pytest.raises(ValueError, match="open"):

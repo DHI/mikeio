@@ -420,6 +420,11 @@ class Dfsu2DV(DfsuLayered):
 
     """
 
+    @property
+    def geometry(self) -> GeometryFMVerticalProfile:
+        assert isinstance(self._geometry, GeometryFMVerticalProfile)
+        return self._geometry
+
     def plot_vertical_profile(
         self,
         values: np.ndarray | DataArray,

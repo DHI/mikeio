@@ -2,7 +2,7 @@ import numpy as np
 import pytest
 import matplotlib.pyplot as plt
 
-import mikeio
+from mikeio import Dfsu2DV
 from mikeio.spatial import (
     GeometryFMVerticalColumn,
     GeometryFMVerticalProfile,
@@ -12,21 +12,21 @@ from mikecore.DfsuFile import DfsuFileType
 
 
 @pytest.fixture
-def vslice():
+def vslice() -> Dfsu2DV:
     # sigma, z vertical profile (=transect)
     filename = "tests/testdata/oresund_vertical_slice.dfsu"
-    return mikeio.open(filename)
+    return Dfsu2DV(filename)
 
 
 @pytest.fixture
-def vslice_geo():
+def vslice_geo() -> Dfsu2DV:
     # sigma, z vertical profile (=transect)
     # in LONG/LAT, non-straight
     filename = "tests/testdata/kalundborg_transect.dfsu"
-    return mikeio.open(filename)
+    return Dfsu2DV(filename)
 
 
-def test_transect_open(vslice):
+def test_transect_open(vslice: Dfsu2DV) -> None:
     dfs = vslice
     assert dfs._type == DfsuFileType.DfsuVerticalProfileSigmaZ
     assert dfs.n_items == 2
@@ -36,17 +36,17 @@ def test_transect_open(vslice):
     assert dfs.n_timesteps == 3
 
 
-def test_transect_geometry_properties(vslice):
+def test_transect_geometry_properties(vslice: Dfsu2DV) -> None:
     g = vslice.geometry
     assert isinstance(g, GeometryFMVerticalProfile)
     assert len(g.top_elements) == 99
     assert len(g.bottom_elements) == 99
     assert len(g.relative_element_distance) == 441
-    d1 = g.get_nearest_relative_distance([3.55e05, 6.145e06])
+    d1 = g.get_nearest_relative_distance((3.55e05, 6.145e06))
     assert d1 == pytest.approx(5462.3273)
 
 
-def test_transect_geometry_properties_geo(vslice_geo):
+def test_transect_geometry_properties_geo(vslice_geo: Dfsu2DV) -> None:
     g = vslice_geo.geometry
     ec = g.element_coordinates
     x, y = ec[:, 0], ec[:, 1]
@@ -56,26 +56,26 @@ def test_transect_geometry_properties_geo(vslice_geo):
     d = g.relative_element_distance  # in meters and cummulative
     assert d.max() > 38000
 
-    d1 = g.get_nearest_relative_distance([10.77, 55.62])
+    d1 = g.get_nearest_relative_distance((10.77, 55.62))
     assert d1 == pytest.approx(25673.318)
 
 
-def test_transect_read(vslice):
+def test_transect_read(vslice: Dfsu2DV) -> None:
     ds = vslice.read()
     assert ds.geometry._type == DfsuFileType.DfsuVerticalProfileSigmaZ
     assert type(ds.geometry) is GeometryFMVerticalProfile
     assert ds.n_items == 2
-    assert ds.Salinity.name == "Salinity"
+    assert ds["Salinity"].name == "Salinity"
     assert ds.geometry.n_elements == 441
 
 
-def test_transect_getitem_time(vslice):
+def test_transect_getitem_time(vslice: Dfsu2DV) -> None:
     da = vslice.read()[1]
     assert da[-1].time[0] == da.time[2]
 
 
-def test_transect_getitem_element(vslice):
-    da = vslice.read().Salinity
+def test_transect_getitem_element(vslice: Dfsu2DV) -> None:
+    da = vslice.read()["Salinity"]
     idx = 5
     da2 = da[:, idx]
     assert type(da2.geometry) is GeometryPoint3D
@@ -86,8 +86,8 @@ def test_transect_getitem_element(vslice):
     assert np.all(da2.to_numpy() == da.to_numpy()[:, idx])
 
 
-def test_transect_isel(vslice):
-    da = vslice.read().Salinity
+def test_transect_isel(vslice: Dfsu2DV) -> None:
+    da = vslice.read()["Salinity"]
     idx = 5
     da2 = da.isel(element=idx)
     assert type(da2.geometry) is GeometryPoint3D
@@ -98,7 +98,7 @@ def test_transect_isel(vslice):
     assert np.all(da2.to_numpy() == da.to_numpy()[:, idx])
 
 
-def test_transect_isel_multiple(vslice_geo):
+def test_transect_isel_multiple(vslice_geo: Dfsu2DV) -> None:
     ds = vslice_geo.read()
     rd = ds.geometry.relative_element_distance
     idx = np.where(np.logical_and(10000 < rd, rd < 25000))[0]
@@ -110,7 +110,7 @@ def test_transect_isel_multiple(vslice_geo):
     assert rd2.max() < 15000
 
 
-def test_transect_sel_time(vslice):
+def test_transect_sel_time(vslice: Dfsu2DV) -> None:
     da = vslice.read()[0]
     idx = 1
     da2 = da.sel(time="1997-09-16 00:00")
@@ -121,8 +121,8 @@ def test_transect_sel_time(vslice):
     assert da2.shape == (441,)
 
 
-def test_transect_sel_xyz(vslice_geo):
-    da = vslice_geo.read().Temperature
+def test_transect_sel_xyz(vslice_geo: Dfsu2DV) -> None:
+    da = vslice_geo.read()["Temperature"]
     da2 = da.sel(x=10.8, y=55.6, z=-3)
     assert type(da2.geometry) is GeometryPoint3D
     assert da2.geometry.x == pytest.approx(10.802878)
@@ -131,14 +131,14 @@ def test_transect_sel_xyz(vslice_geo):
     assert da2.n_timesteps == da.n_timesteps
 
 
-def test_transect_sel_layers(vslice_geo):
+def test_transect_sel_layers(vslice_geo: Dfsu2DV) -> None:
     ds = vslice_geo.read()
     ds2 = ds.sel(layers=range(-6, -1))
     assert type(ds2.geometry) is GeometryFMVerticalProfile
 
 
-def test_transect_sel_xy(vslice_geo):
-    da = vslice_geo.read().Temperature
+def test_transect_sel_xy(vslice_geo: Dfsu2DV) -> None:
+    da = vslice_geo.read()["Temperature"]
     da2 = da.sel(x=10.8, y=55.6)
     assert type(da2.geometry) is GeometryFMVerticalColumn
     gx, gy, _ = da2.geometry.element_coordinates.mean(axis=0)
@@ -148,8 +148,8 @@ def test_transect_sel_xy(vslice_geo):
     assert da2.n_timesteps == da.n_timesteps
 
 
-def test_transect_plot(vslice):
-    da = vslice.read().Salinity
+def test_transect_plot(vslice: Dfsu2DV) -> None:
+    da = vslice.read()["Salinity"]
     da.plot()
     da.plot(cmin=0, cmax=1)
     da.plot(label="l", title="t", add_colorbar=False)
@@ -164,7 +164,7 @@ def test_transect_plot(vslice):
     plt.close("all")
 
 
-def test_transect_plot_geometry(vslice):
+def test_transect_plot_geometry(vslice: Dfsu2DV) -> None:
     g = vslice.geometry
     g.plot()
     g.plot.mesh()

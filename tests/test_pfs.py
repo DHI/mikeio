@@ -444,7 +444,7 @@ def test_encoding() -> None:
 @pytest.mark.skipif(sys.platform == "win32", reason="does not run on windows")
 def test_encoding_linux() -> None:
     with pytest.raises(ValueError):
-        mikeio.PfsDocument("tests/testdata/pfs/OresundHD2D_EnKF10.m21fm", encoding=None)
+        mikeio.PfsDocument("tests/testdata/pfs/OresundHD2D_EnKF10.m21fm", encoding=None) # type: ignore
 
 
 def test_multiple_identical_roots() -> None:

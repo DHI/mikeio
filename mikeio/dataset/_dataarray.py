@@ -31,6 +31,7 @@ from .._time import _get_time_idx_list, _n_selected_timesteps
 if TYPE_CHECKING:
     from ._dataset import Dataset
     import xarray
+    from numpy.typing import ArrayLike
 
 
 from ..spatial import (
@@ -174,7 +175,7 @@ class DataArray:
 
     def __init__(
         self,
-        data: np.ndarray,
+        data: ArrayLike,
         *,
         time: pd.DatetimeIndex | str | None = None,
         name: str | None = None,
@@ -186,8 +187,9 @@ class DataArray:
         dims: Sequence[str] | None = None,
         dt: float = 1.0,
     ) -> None:
-        # TODO: add optional validation validate=True
+        # TODO consider np.asarray, e.g. self._values = np.asarray(data)
         self._values = self._parse_data(data)
+
         self.time: pd.DatetimeIndex = self._parse_time(time)
         self._dt = dt
 
@@ -203,7 +205,7 @@ class DataArray:
         self.plot = self._get_plotter_by_geometry()
 
     @staticmethod
-    def _parse_data(data: Any) -> Any:  # np.ndarray | float:
+    def _parse_data(data: ArrayLike) -> Any:  # np.ndarray | float:
         if not hasattr(data, "shape"):
             try:
                 data = np.array(data, dtype=float)
@@ -1581,7 +1583,7 @@ class DataArray:
         """
         return self.aggregate(axis=axis, func=np.nanmin, **kwargs)
 
-    def nanmean(self, axis: int | str = 0, **kwargs: Any) -> "DataArray":
+    def nanmean(self, axis: int | str | None = 0, **kwargs: Any) -> "DataArray":
         """Mean value along an axis (NaN removed).
 
         Parameters
@@ -1626,7 +1628,10 @@ class DataArray:
         return self.aggregate(axis=axis, func=np.nanstd, **kwargs)
 
     def aggregate(
-        self, axis: int | str = 0, func: Callable[..., Any] = np.nanmean, **kwargs: Any
+        self,
+        axis: int | str | None = 0,
+        func: Callable[..., Any] = np.nanmean,
+        **kwargs: Any,
     ) -> "DataArray":
         """Aggregate along an axis.
 
@@ -2087,7 +2092,6 @@ class DataArray:
             time = pd.DatetimeIndex([time[0]])
 
         return time
-
 
     @staticmethod
     def _is_boolean_mask(x: Any) -> bool:

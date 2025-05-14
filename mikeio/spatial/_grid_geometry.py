@@ -21,6 +21,7 @@ from ._geometry import (
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
     from ..spatial import GeometryFM2D
+    from numpy.typing import ArrayLike
 
 
 def _check_equidistant(x: np.ndarray) -> None:
@@ -31,7 +32,7 @@ def _check_equidistant(x: np.ndarray) -> None:
 
 def _parse_grid_axis(
     name: str,
-    x: np.ndarray | None,
+    x: ArrayLike | None,
     x0: float = 0.0,
     dx: float | None = None,
     nx: int | None = None,
@@ -116,7 +117,7 @@ class Grid1D(_Geometry):
 
     def __init__(
         self,
-        x: np.ndarray | None = None,
+        x: ArrayLike | None = None,
         *,
         x0: float = 0.0,
         dx: float | None = None,
@@ -227,7 +228,7 @@ class Grid1D(_Geometry):
         return self._orientation
 
     def isel(
-        self, idx: int | np.int64 | slice, axis: int | None = None
+        self, idx: int | Sequence[int] | np.ndarray | slice, axis: int | None = None
     ) -> "Grid1D" | GeometryPoint2D | GeometryPoint3D | GeometryUndefined:
         """Get a subset geometry from this geometry.
 
@@ -465,11 +466,11 @@ class Grid2D(_Geometry):
     def __init__(
         self,
         *,
-        x: np.ndarray | None = None,
+        x: ArrayLike | None = None,
         x0: float = 0.0,
         dx: float | None = None,
         nx: int | None = None,
-        y: np.ndarray | None = None,
+        y: ArrayLike | None = None,
         y0: float = 0.0,
         dy: float | None = None,
         ny: int | None = None,
@@ -757,7 +758,7 @@ class Grid2D(_Geometry):
             self._x0, self._y0 = 0.0, 0.0
             self._origin = (self._origin[0] + x0, self._origin[1] + y0)
 
-    def contains(self, coords: np.ndarray) -> Any:
+    def contains(self, coords: ArrayLike) -> Any:
         """Test if a list of points are inside grid.
 
         Parameters
@@ -786,7 +787,7 @@ class Grid2D(_Geometry):
         self,
         x: float | None = None,
         y: float | None = None,
-        coords: np.ndarray | None = None,
+        coords: ArrayLike | None = None,
         area: tuple[float, float, float, float] | None = None,
     ) -> tuple[Any, Any]:
         """Find nearest index (i,j) of point(s).
@@ -839,7 +840,7 @@ class Grid2D(_Geometry):
         else:
             raise ValueError("Provide x,y or coords")
 
-    def _xy_to_index(self, xy: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
+    def _xy_to_index(self, xy: ArrayLike) -> tuple[np.ndarray, np.ndarray]:
         """Find specific points in this geometry."""
         xy = np.atleast_2d(xy)
         y = xy[:, 1]

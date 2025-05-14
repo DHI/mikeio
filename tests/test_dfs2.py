@@ -1,5 +1,6 @@
 from pathlib import Path
 import datetime
+from typing import Any
 from matplotlib import pyplot as plt
 import numpy as np
 import pandas as pd
@@ -8,62 +9,62 @@ import xarray
 
 import mikeio
 
-from mikeio import EUMType, ItemInfo, EUMUnit
+from mikeio import EUMType, ItemInfo, EUMUnit, Dfs2
 from mikeio.exceptions import ItemsError
 from mikeio.spatial import GeometryPoint2D, Grid2D
 
 
 @pytest.fixture
-def dfs2_random():
+def dfs2_random() -> Dfs2:
     filepath = Path("tests/testdata/random.dfs2")
-    return mikeio.open(filepath)
+    return mikeio.Dfs2(filepath)
 
 
 @pytest.fixture
-def dfs2_random_2items():
+def dfs2_random_2items() -> Dfs2:
     filepath = Path("tests/testdata/random_two_item.dfs2")
-    return mikeio.open(filepath)
+    return mikeio.Dfs2(filepath)
 
 
 @pytest.fixture
-def dfs2_pt_spectrum_geographical():
+def dfs2_pt_spectrum_geographical() -> Dfs2:
     filepath = Path("tests/testdata/spectra/pt_spectra_geographical.dfs2")
-    return mikeio.open(filepath, type="spectral")
+    return mikeio.Dfs2(filepath, type="spectral")
 
 
 @pytest.fixture
-def dfs2_pt_spectrum():
+def dfs2_pt_spectrum() -> Dfs2:
     filepath = Path("tests/testdata/spectra/pt_spectra.dfs2")
-    return mikeio.open(filepath, type="spectral")
+    return mikeio.Dfs2(filepath, type="spectral")
 
 
 @pytest.fixture
-def dfs2_pt_spectrum_linearf():
+def dfs2_pt_spectrum_linearf() -> Dfs2:
     filepath = Path("tests/testdata/spectra/dir_wave_analysis_spectra.dfs2")
-    return mikeio.open(filepath, type="spectral")
+    return mikeio.Dfs2(filepath, type="spectral")
 
 
 @pytest.fixture
-def dfs2_vertical_nonutm():
+def dfs2_vertical_nonutm() -> Dfs2:
     filepath = Path("tests/testdata/hd_vertical_slice.dfs2")
-    return mikeio.open(filepath, type="vertical")
+    return mikeio.Dfs2(filepath, type="vertical")
 
 
 @pytest.fixture
-def dfs2_gebco():
+def dfs2_gebco() -> Dfs2:
     filepath = Path("tests/testdata/gebco_sound.dfs2")
-    return mikeio.open(filepath)
+    return mikeio.Dfs2(filepath)
 
 
-def test_get_time_without_reading_data():
-    dfs = mikeio.open("tests/testdata/hd_vertical_slice.dfs2", type="vertical")
+def test_get_time_without_reading_data() -> None:
+    dfs = mikeio.Dfs2("tests/testdata/hd_vertical_slice.dfs2", type="vertical")
 
     assert isinstance(dfs.time, pd.DatetimeIndex)
     assert len(dfs.time) == 13
     assert dfs.time[-1].hour == 12
 
 
-def test_write_projected(tmp_path):
+def test_write_projected(tmp_path: Path) -> None:
     fp = tmp_path / "utm.dfs2"
 
     nt = 100
@@ -142,7 +143,7 @@ def test_write_projected(tmp_path):
     assert ds3.geometry.origin[1] == pytest.approx(y0)
 
 
-def test_write_without_time(tmp_path):
+def test_write_without_time(tmp_path: Path) -> None:
     fp = tmp_path / "utm.dfs2"
 
     ny = 2
@@ -165,7 +166,7 @@ def test_write_without_time(tmp_path):
     assert ds.shape == (ny, nx)
 
 
-def test_read(dfs2_random):
+def test_read(dfs2_random: Dfs2) -> None:
     dfs = dfs2_random
     assert isinstance(dfs.geometry, Grid2D)
     ds = dfs.read(items=["testing water level"])
@@ -175,7 +176,7 @@ def test_read(dfs2_random):
     assert data.shape == (3, 100, 2)  # time, y, x
 
 
-def test_read_bad_item(dfs2_random):
+def test_read_bad_item(dfs2_random: Dfs2) -> None:
     dfs = dfs2_random
     with pytest.raises(ItemsError) as ex:
         dfs.read(items=100)
@@ -183,22 +184,22 @@ def test_read_bad_item(dfs2_random):
     assert ex.value.n_items_file == 1
 
 
-def test_read_temporal_subset_slice():
+def test_read_temporal_subset_slice() -> None:
     filename = r"tests/testdata/eq.dfs2"
-    dfs = mikeio.open(filename)
+    dfs = mikeio.Dfs2(filename)
     ds = dfs.read(time=slice("2000-01-01 00:00", "2000-01-01 12:00"))
 
     assert len(ds.time) == 13
 
 
-def test_read_area_subset_bad_bbox():
+def test_read_area_subset_bad_bbox() -> None:
     filename = "tests/testdata/europe_wind_long_lat.dfs2"
     bbox = (10, 40, 20)
     with pytest.raises(ValueError):
         mikeio.read(filename, area=bbox)
 
 
-def test_read_area_subset_geo():
+def test_read_area_subset_geo() -> None:
     # x: [-15, -14.75, ..., 40] (nx=221, dx=0.25)
     # y: [30, 30.25, ..., 55] (ny=101, dy=0.25)
     filename = "tests/testdata/europe_wind_long_lat.dfs2"
@@ -214,16 +215,16 @@ def test_read_area_subset_geo():
     assert ds.geometry.y[-1] == pytest.approx(bbox[3])
 
 
-def test_subset_bbox():
+def test_subset_bbox() -> None:
     filename = "tests/testdata/europe_wind_long_lat.dfs2"
     ds = mikeio.read(filename)
     dssel = ds.sel(area=ds.geometry.bbox)  # this is the entire area
     assert ds.geometry == dssel.geometry
 
 
-def test_read_area_subset():
+def test_read_area_subset() -> None:
     filename = "tests/testdata/eq.dfs2"
-    bbox = [10, 4, 12, 7]
+    bbox = (10, 4, 12, 7)
 
     dsall = mikeio.read(filename)
     dssel = dsall.sel(area=bbox)
@@ -247,7 +248,7 @@ def test_read_area_subset():
     assert da2.values[4, 2, 1] == ds[0].values[4, 2, 1]
 
 
-def test_read_numbered_access(dfs2_random_2items):
+def test_read_numbered_access(dfs2_random_2items: Dfs2) -> None:
     dfs = dfs2_random_2items
 
     res = dfs.read(items=[1])
@@ -257,7 +258,7 @@ def test_read_numbered_access(dfs2_random_2items):
     assert res.items[0].name == "Untitled"
 
 
-def test_properties_vertical_nonutm(dfs2_vertical_nonutm):
+def test_properties_vertical_nonutm(dfs2_vertical_nonutm: Dfs2) -> None:
     dfs = dfs2_vertical_nonutm
     assert dfs.x0 == 0
     assert dfs.y0 == 0
@@ -279,7 +280,7 @@ def test_properties_vertical_nonutm(dfs2_vertical_nonutm):
     assert g.orientation == 0
 
 
-def test_isel_vertical_nonutm(dfs2_vertical_nonutm):
+def test_isel_vertical_nonutm(dfs2_vertical_nonutm: Dfs2) -> None:
     ds = dfs2_vertical_nonutm.read()
     assert ds.geometry.is_vertical
     dssel = ds.isel(y=slice(45, None))
@@ -293,7 +294,7 @@ def test_isel_vertical_nonutm(dfs2_vertical_nonutm):
     assert g.origin[1] == 45  # TODO: should this be 0?
 
 
-def test_properties_pt_spectrum(dfs2_pt_spectrum):
+def test_properties_pt_spectrum(dfs2_pt_spectrum: Dfs2) -> None:
     dfs = dfs2_pt_spectrum
     assert dfs.x0 == pytest.approx(0.055)
     assert dfs.y0 == 0
@@ -318,7 +319,9 @@ def test_properties_pt_spectrum(dfs2_pt_spectrum):
     assert g.orientation == 0
 
 
-def test_properties_pt_spectrum_geographical(dfs2_pt_spectrum_geographical):
+def test_properties_pt_spectrum_geographical(
+    dfs2_pt_spectrum_geographical: Dfs2,
+) -> None:
     dfs = dfs2_pt_spectrum_geographical
     assert dfs.x0 == pytest.approx(0.055)
     assert dfs.y0 == 0
@@ -343,7 +346,7 @@ def test_properties_pt_spectrum_geographical(dfs2_pt_spectrum_geographical):
     assert g.orientation == 0
 
 
-def test_properties_pt_spectrum_linearf(dfs2_pt_spectrum_linearf):
+def test_properties_pt_spectrum_linearf(dfs2_pt_spectrum_linearf: Dfs2) -> None:
     dfs = dfs2_pt_spectrum_linearf
     # This file doesn't have a valid projection string
     # dfs.FileInfo.Projection.WKTString = ''
@@ -372,8 +375,8 @@ def test_properties_pt_spectrum_linearf(dfs2_pt_spectrum_linearf):
     assert g.x[-1] == 0.5  # still linear
 
 
-def test_dir_wave_spectra_relative_time_axis():
-    ds = mikeio.open(
+def test_dir_wave_spectra_relative_time_axis() -> None:
+    ds = mikeio.Dfs2(
         "tests/testdata/spectra/dir_wave_analysis_spectra.dfs2", type="spectral"
     ).read()
     assert ds.n_items == 1
@@ -384,15 +387,15 @@ def test_dir_wave_spectra_relative_time_axis():
     assert da.type == EUMType._3D_Surface_Elevation_Spectrum
 
 
-def test_properties_rotated_longlat():
+def test_properties_rotated_longlat() -> None:
     filepath = Path("tests/testdata/gebco_sound_crop_rotate.dfs2")
     with pytest.raises(ValueError, match="Orientation is not supported for LONG/LAT"):
-        mikeio.open(filepath)
+        mikeio.Dfs2(filepath)
 
 
-def test_properties_rotated_UTM():
+def test_properties_rotated_UTM() -> None:
     filepath = Path("tests/testdata/BW_Ronne_Layout1998_rotated.dfs2")
-    dfs = mikeio.open(filepath)
+    dfs = mikeio.Dfs2(filepath)
     g = dfs.geometry
     assert dfs.x0 == 0
     assert dfs.y0 == 0
@@ -408,7 +411,7 @@ def test_properties_rotated_UTM():
     assert g.origin == pytest.approx((479670, 6104860))
 
 
-def test_select_area_rotated_UTM(tmp_path):
+def test_select_area_rotated_UTM(tmp_path: Path) -> None:
     filepath = Path("tests/testdata/BW_Ronne_Layout1998_rotated.dfs2")
     ds = mikeio.read(filepath)
     assert ds.geometry.origin == pytest.approx((479670, 6104860))
@@ -420,7 +423,7 @@ def test_select_area_rotated_UTM(tmp_path):
 
     tmpfile = tmp_path / "subset_rotated.dfs2"
     dssel.to_dfs(tmpfile)
-    dfs = mikeio.open(tmpfile)
+    dfs = mikeio.Dfs2(tmpfile)
     g = dfs.geometry
 
     assert dfs.x0 == 0
@@ -435,7 +438,7 @@ def test_select_area_rotated_UTM(tmp_path):
     assert g.origin == pytest.approx(dssel.geometry.origin)
 
 
-def test_select_area_rotated_UTM_2():
+def test_select_area_rotated_UTM_2() -> None:
     fn = Path("tests/testdata/BW_Ronne_Layout1998_rotated.dfs2")
     ds = mikeio.read(fn)
     dssel = ds.isel(x=range(50, 61), y=range(75, 106))
@@ -455,7 +458,9 @@ def test_select_area_rotated_UTM_2():
     assert g1.projection_string == g2.projection_string
 
 
-def test_write_selected_item_to_new_file(dfs2_random_2items, tmp_path):
+def test_write_selected_item_to_new_file(
+    dfs2_random_2items: Dfs2, tmp_path: Path
+) -> None:
     dfs = dfs2_random_2items
 
     fp = tmp_path / "simple.dfs2"
@@ -464,7 +469,7 @@ def test_write_selected_item_to_new_file(dfs2_random_2items, tmp_path):
 
     ds.to_dfs(fp)
 
-    dfs2 = mikeio.open(fp)
+    dfs2 = mikeio.Dfs2(fp)
 
     ds2 = dfs2.read()
 
@@ -478,7 +483,7 @@ def test_write_selected_item_to_new_file(dfs2_random_2items, tmp_path):
     assert dfs.orientation == pytest.approx(dfs2.orientation)
 
 
-def test_repr(dfs2_gebco):
+def test_repr(dfs2_gebco: Dfs2) -> None:
     text = repr(dfs2_gebco)
 
     assert "Dfs2" in text
@@ -486,7 +491,7 @@ def test_repr(dfs2_gebco):
     # assert "dx" in text
 
 
-def test_repr_time(dfs2_random):
+def test_repr_time(dfs2_random: Dfs2) -> None:
     dfs = dfs2_random
     text = repr(dfs)
 
@@ -496,7 +501,7 @@ def test_repr_time(dfs2_random):
     assert "steps" in text
 
 
-def test_write_modified_data_to_new_file(dfs2_gebco, tmp_path):
+def test_write_modified_data_to_new_file(dfs2_gebco: Dfs2, tmp_path: Path) -> None:
     dfs = dfs2_gebco
 
     fp = tmp_path / "mod.dfs2"
@@ -507,12 +512,12 @@ def test_write_modified_data_to_new_file(dfs2_gebco, tmp_path):
 
     ds.to_dfs(fp)
 
-    dfsmod = mikeio.open(fp)
+    dfsmod = mikeio.Dfs2(fp)
 
     assert dfs._longitude == dfsmod._longitude
 
 
-def test_read_some_time_step(dfs2_random_2items):
+def test_read_some_time_step(dfs2_random_2items: Dfs2) -> None:
     dfs = dfs2_random_2items
     res = dfs.read(time=[1, 2])
 
@@ -520,7 +525,7 @@ def test_read_some_time_step(dfs2_random_2items):
     assert len(res.time) == 2
 
 
-def test_interpolate_non_equidistant_data(tmp_path):
+def test_interpolate_non_equidistant_data(tmp_path: Path) -> None:
     ds = mikeio.read(
         "tests/testdata/eq.dfs2", time=[0, 2, 3, 6]
     )  # non-equidistant dataset
@@ -535,7 +540,7 @@ def test_interpolate_non_equidistant_data(tmp_path):
 
     ds2.to_dfs(fp)
 
-    dfs2 = mikeio.open(fp)
+    dfs2 = mikeio.Dfs2(fp)
     assert dfs2.timestep == 3600.0
 
     ds3 = dfs2.read()
@@ -543,7 +548,7 @@ def test_interpolate_non_equidistant_data(tmp_path):
     assert ds3.is_equidistant
 
 
-def test_write_some_time_step(tmp_path):
+def test_write_some_time_step(tmp_path: Path) -> None:
     ds = mikeio.read("tests/testdata/waves.dfs2", time=[1, 2])
 
     assert ds[0].to_numpy().shape[0] == 2
@@ -553,19 +558,19 @@ def test_write_some_time_step(tmp_path):
 
     ds.to_dfs(fp)
 
-    dfs2 = mikeio.open(fp)
+    dfs2 = mikeio.Dfs2(fp)
     assert dfs2.timestep == 86400.0
     assert dfs2.start_time.day == 2
 
 
-def test_find_by_x_y():
+def test_find_by_x_y() -> None:
     ds = mikeio.read("tests/testdata/gebco_sound.dfs2")
 
     ds_point = ds.sel(x=12.74792, y=55.865)
     assert ds_point[0].values[0] == pytest.approx(-43.0)
     assert isinstance(ds_point.geometry, GeometryPoint2D)
 
-    da = ds.Elevation
+    da = ds["Elevation"]
     da_point = da.sel(x=12.74792, y=55.865)
     assert da_point.values[0] == pytest.approx(-43.0)
     assert isinstance(da_point.geometry, GeometryPoint2D)
@@ -575,19 +580,19 @@ def test_find_by_x_y():
     # da.sel(x=xx, y=yy)
 
 
-def test_interp_to_x_y():
+def test_interp_to_x_y() -> None:
     ds = mikeio.read("tests/testdata/gebco_sound.dfs2")
 
     x = 12.74792
     y = 55.865
-    dai = ds.Elevation.interp(x=x, y=y)
+    dai = ds["Elevation"].interp(x=x, y=y)
     assert dai.values[0] == pytest.approx(-42.69764538978391)
 
     assert dai.geometry.x == x
     assert dai.geometry.y == y
 
 
-def test_write_accumulated_datatype(tmp_path):
+def test_write_accumulated_datatype(tmp_path: Path) -> None:
     fp = tmp_path / "simple.dfs2"
 
     d = np.random.random([100, 2, 3])
@@ -606,11 +611,11 @@ def test_write_accumulated_datatype(tmp_path):
 
     da.to_dfs(fp)
 
-    newdfs = mikeio.open(fp)
+    newdfs = mikeio.Dfs2(fp)
     assert newdfs.items[0].data_value_type == 3
 
 
-def test_write_NonEqCalendarAxis(tmp_path):
+def test_write_NonEqCalendarAxis(tmp_path: Path) -> None:
     fp = tmp_path / "simple.dfs2"
 
     d = np.random.random([6, 5, 10])
@@ -639,7 +644,7 @@ def test_write_NonEqCalendarAxis(tmp_path):
     assert newds.end_time.day == 28
 
 
-def test_write_non_equidistant_data(tmp_path):
+def test_write_non_equidistant_data(tmp_path: Path) -> None:
     ds = mikeio.read(
         "tests/testdata/eq.dfs2", time=[0, 2, 3, 6]
     )  # non-equidistant dataset
@@ -655,7 +660,7 @@ def test_write_non_equidistant_data(tmp_path):
     assert not ds3.is_equidistant
 
 
-def test_read_concat_write_dfs2(tmp_path):
+def test_read_concat_write_dfs2(tmp_path: Path) -> None:
     outfilename = tmp_path / "waves_concat.dfs2"
 
     ds1 = mikeio.read("tests/testdata/waves.dfs2", time=[0, 1])
@@ -673,7 +678,7 @@ def test_read_concat_write_dfs2(tmp_path):
     assert dsnew.end_time == ds2.end_time
 
 
-def test_spatial_aggregation_dfs2_to_dfs0(tmp_path):
+def test_spatial_aggregation_dfs2_to_dfs0(tmp_path: Path) -> None:
     outfilename = tmp_path / "waves_max.dfs0"
 
     ds = mikeio.read("tests/testdata/waves.dfs2")
@@ -686,20 +691,20 @@ def test_spatial_aggregation_dfs2_to_dfs0(tmp_path):
     assert dsnew.n_items == ds.n_items
 
 
-def test_da_to_xarray():
+def test_da_to_xarray() -> None:
     ds = mikeio.read("tests/testdata/waves.dfs2")
     da = ds[0]
     xr_da = da.to_xarray()
     assert isinstance(xr_da, xarray.DataArray)
 
 
-def test_ds_to_xarray():
+def test_ds_to_xarray() -> None:
     ds = mikeio.read("tests/testdata/waves.dfs2")
     xr_ds = ds.to_xarray()
     assert isinstance(xr_ds, xarray.Dataset)
 
 
-def test_da_plot():
+def test_da_plot() -> None:
     ds = mikeio.read("tests/testdata/gebco_sound.dfs2")
     da = ds[0]
     da.plot()
@@ -710,7 +715,7 @@ def test_da_plot():
     plt.close("all")
 
 
-def test_grid2d_plot():
+def test_grid2d_plot() -> None:
     ds = mikeio.read("tests/testdata/gebco_sound.dfs2")
     g = ds[0].geometry
     g.plot(color="0.2", linewidth=2, title="grid plot")
@@ -719,14 +724,14 @@ def test_grid2d_plot():
     plt.close("all")
 
 
-def test_read_single_precision():
+def test_read_single_precision() -> None:
     ds = mikeio.read("tests/testdata/random.dfs2", items=0, dtype=np.float32)
 
     assert len(ds) == 1
     assert ds[0].dtype == np.float32
 
 
-def dfs2_props_to_list(d):
+def dfs2_props_to_list(d: Dfs2) -> list[Any]:
     lon = d._dfs.FileInfo.Projection.Longitude
     lat = d._dfs.FileInfo.Projection.Latitude
     rot = d._dfs.FileInfo.Projection.Orientation
@@ -756,59 +761,59 @@ def dfs2_props_to_list(d):
     return res
 
 
-def is_header_unchanged_on_read_write(tmp_path, filename):
-    dfsA = mikeio.open("tests/testdata/" + filename)
+def is_header_unchanged_on_read_write(tmp_path: Path, filename: str) -> None:
+    dfsA = mikeio.Dfs2("tests/testdata/" + filename)
     props_A = dfs2_props_to_list(dfsA)
 
     ds = dfsA.read()
     filename_out = tmp_path / filename
     ds.to_dfs(filename_out)
-    dfsB = mikeio.open(filename_out)
+    dfsB = mikeio.Dfs2(filename_out)
     props_B = dfs2_props_to_list(dfsB)
     for pA, pB in zip(props_A, props_B):
         assert pytest.approx(pA) == pB
 
 
-def test_read_write_header_unchanged_utm_not_rotated(tmp_path):
+def test_read_write_header_unchanged_utm_not_rotated(tmp_path: Path) -> None:
     is_header_unchanged_on_read_write(tmp_path, "utm_not_rotated_neurope_temp.dfs2")
 
 
-def test_read_write_header_unchanged_longlat(tmp_path):
+def test_read_write_header_unchanged_longlat(tmp_path: Path) -> None:
     is_header_unchanged_on_read_write(tmp_path, "europe_wind_long_lat.dfs2")
 
 
-def test_read_write_header_unchanged_global_longlat(tmp_path):
+def test_read_write_header_unchanged_global_longlat(tmp_path: Path) -> None:
     is_header_unchanged_on_read_write(
         tmp_path, "global_long_lat_pacific_view_temperature_delta.dfs2"
     )
 
 
-def test_read_write_header_unchanged_local_coordinates(tmp_path):
+def test_read_write_header_unchanged_local_coordinates(tmp_path: Path) -> None:
     is_header_unchanged_on_read_write(tmp_path, "M3WFM_sponge_local_coordinates.dfs2")
 
 
-def test_read_write_header_unchanged_utm_rotated(tmp_path):
+def test_read_write_header_unchanged_utm_rotated(tmp_path: Path) -> None:
     is_header_unchanged_on_read_write(tmp_path, "BW_Ronne_Layout1998_rotated.dfs2")
 
 
-def test_read_write_header_unchanged_vertical(tmp_path):
+def test_read_write_header_unchanged_vertical(tmp_path: Path) -> None:
     is_header_unchanged_on_read_write(tmp_path, "hd_vertical_slice.dfs2")
 
 
-# def test_read_write_header_unchanged_spectral(tmp_path):
+# def test_read_write_header_unchanged_spectral(tmp_path:Path) -> None:
 #     # fails: <TimeAxisType.TimeEquidistant: 1> != <TimeAxisType.CalendarEquidistant: 3>
 #     is_header_unchanged_on_read_write(tmp_path, "dir_wave_analysis_spectra.dfs2")
 
 
-def test_read_write_header_unchanged_spectral_2(tmp_path):
+def test_read_write_header_unchanged_spectral_2(tmp_path: Path) -> None:
     is_header_unchanged_on_read_write(tmp_path, "spectra/pt_spectra.dfs2")
 
 
-def test_read_write_header_unchanged_MIKE_SHE_output(tmp_path):
+def test_read_write_header_unchanged_MIKE_SHE_output(tmp_path: Path) -> None:
     is_header_unchanged_on_read_write(tmp_path, "Karup_MIKE_SHE_output.dfs2")
 
 
-def test_MIKE_SHE_output():
+def test_MIKE_SHE_output() -> None:
     ds = mikeio.read("tests/testdata/Karup_MIKE_SHE_output.dfs2")
     assert ds.n_timesteps == 6
     assert ds.n_items == 2
@@ -824,7 +829,7 @@ def test_MIKE_SHE_output():
     assert g2.origin == pytest.approx((g2.x[0], g2.y[0]))
 
 
-def test_read_dfs2_static_dt_zero():
+def test_read_dfs2_static_dt_zero() -> None:
     with pytest.warns(UserWarning, match="positive"):
         ds = mikeio.read("tests/testdata/single_time_dt_zero.dfs2")
     assert ds.n_timesteps == 1
@@ -837,7 +842,7 @@ def test_read_dfs2_static_dt_zero():
     assert "time" not in ds2.dims
 
 
-def test_write_read_local_coordinates(tmp_path):
+def test_write_read_local_coordinates(tmp_path: Path) -> None:
     da = mikeio.DataArray(
         np.array([[1, 2, 3], [4, 5, 6]]),
         geometry=mikeio.Grid2D(nx=3, ny=2, dx=0.5, projection="NON-UTM"),
@@ -849,7 +854,7 @@ def test_write_read_local_coordinates(tmp_path):
     assert da.geometry == ds.geometry
 
 
-def test_to_xarray():
+def test_to_xarray() -> None:
     # data is not important here
     data = np.array([[1, 2, 3], [4, 5, 6]])
 
@@ -878,13 +883,13 @@ def test_to_xarray():
     assert xr_da.y[0] == pytest.approx(0.25)
 
 
-def test_append(tmp_path):
+def test_append(tmp_path: Path) -> None:
     ds = mikeio.read("tests/testdata/eq.dfs2", time=[0, 1])
     ds2 = mikeio.read("tests/testdata/eq.dfs2", time=[2, 3])
 
     new_filename = tmp_path / "eq_appended.dfs2"
     ds.to_dfs(new_filename)
-    dfs = mikeio.open(new_filename)
+    dfs = mikeio.Dfs2(new_filename)
     assert dfs.n_timesteps == 2
     dfs.append(ds2)
     assert dfs.n_timesteps == 4
@@ -895,7 +900,7 @@ def test_append(tmp_path):
     assert ds3[0].values[-1, 0, 0] == ds2[0].values[-1, 0, 0]
 
 
-def test_append_mismatch_items_not_possible(tmp_path):
+def test_append_mismatch_items_not_possible(tmp_path: Path) -> None:
     ds = mikeio.read("tests/testdata/consistency/oresundHD.dfs2", time=[0, 1])
     ds2 = mikeio.read(
         "tests/testdata/consistency/oresundHD.dfs2", time=[2, 3], items=[1, 2]
@@ -903,18 +908,18 @@ def test_append_mismatch_items_not_possible(tmp_path):
 
     new_filename = tmp_path / "eq_appended.dfs2"
     ds.to_dfs(new_filename)
-    dfs = mikeio.open(new_filename)
+    dfs = mikeio.Dfs2(new_filename)
     with pytest.raises(ValueError, match="Item"):
         dfs.append(ds2)
 
 
-def test_append_mismatch_geometry(tmp_path):
+def test_append_mismatch_geometry(tmp_path: Path) -> None:
     ds = mikeio.read("tests/testdata/consistency/oresundHD.dfs2", time=[0, 1])
     ds2 = mikeio.read("tests/testdata/consistency/oresundHD.dfs2").isel(
         x=slice(1, None)
     )
     new_filename = tmp_path / "append_mismatch_geometry.dfs2"
     ds.to_dfs(new_filename)
-    dfs = mikeio.open(new_filename)
+    dfs = mikeio.Dfs2(new_filename)
     with pytest.raises(ValueError, match="geometry"):
         dfs.append(ds2)

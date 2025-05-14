@@ -267,8 +267,8 @@ class DfsuSpectral:
         *,
         items: str | int | Sequence[str | int] | None = None,
         time: int | str | slice | Sequence[int] | None = None,
-        elements: Sequence[int] | np.ndarray | None = None,
-        nodes: Sequence[int] | np.ndarray | None = None,
+        elements: Sequence[int] | np.ndarray | int | None = None,
+        nodes: Sequence[int] | np.ndarray | int | None = None,
         area: tuple[float, float, float, float] | None = None,
         x: float | None = None,
         y: float | None = None,
@@ -456,8 +456,8 @@ class DfsuSpectral:
 
     def _parse_elements_nodes(
         self,
-        elements: Sequence[int] | np.ndarray | None,
-        nodes: Sequence[int] | np.ndarray | None,
+        elements: Sequence[int] | np.ndarray | int | None,
+        nodes: Sequence[int] | np.ndarray | int | None,
     ) -> tuple[Any, Any]:
         if self._type == DfsuFileType.DfsuSpectral0D:
             if elements is not None or nodes is not None:

@@ -37,6 +37,7 @@ from ._distance import xy_to_bbox
 if TYPE_CHECKING:
     from ._FM_geometry_layered import GeometryFM3D
     from matplotlib.axes import Axes
+    from numpy.typing import ArrayLike
 
 
 class _GeometryFMPlotter:
@@ -264,8 +265,8 @@ class _GeometryFM(_Geometry):
     def __init__(
         self,
         *,
-        node_coordinates: np.ndarray,
-        element_table: np.ndarray | list[Sequence[int]] | list[np.ndarray],
+        node_coordinates: ArrayLike,
+        element_table: ArrayLike,
         projection: str,
         codes: np.ndarray | None = None,
         dfsu_type: DfsuFileType,
@@ -277,7 +278,7 @@ class _GeometryFM(_Geometry):
         super().__init__(projection=projection)
         self.node_coordinates = np.asarray(node_coordinates)
 
-        n_nodes = len(node_coordinates)
+        n_nodes = len(self.node_coordinates)
         self._codes = (
             np.zeros((n_nodes,), dtype=int) if codes is None else np.asarray(codes)
         )
@@ -289,7 +290,7 @@ class _GeometryFM(_Geometry):
         self._type = dfsu_type
 
         self.element_table, self._element_ids = self._check_elements(
-            element_table=element_table,
+            element_table=element_table,  # type: ignore
             element_ids=element_ids,
             validate=validate,
         )
@@ -443,9 +444,8 @@ class GeometryFM2D(_GeometryFM):
 
     def __init__(
         self,
-        node_coordinates: np.ndarray,
-        # TODO settle on type for element_table
-        element_table: Any,
+        node_coordinates: ArrayLike,
+        element_table: ArrayLike,
         codes: np.ndarray | None = None,
         projection: str = "LONG/LAT",
         dfsu_type: DfsuFileType = DfsuFileType.Dfsu2D,  # Reasonable default?
@@ -965,7 +965,7 @@ class GeometryFM2D(_GeometryFM):
         return all_faces[uf_id[bnd_face_id]]
 
     def isel(
-        self, idx: Sequence[int], keepdims: bool = False, **kwargs: Any
+        self, idx: Sequence[int] | int, keepdims: bool = False, **kwargs: Any
     ) -> "GeometryFM2D" | GeometryPoint2D:
         """Export a selection of elements to a new geometry.
 
@@ -999,7 +999,7 @@ class GeometryFM2D(_GeometryFM):
         self,
         x: float | np.ndarray | None = None,
         y: float | np.ndarray | None = None,
-        coords: np.ndarray | None = None,
+        coords: ArrayLike | None = None,
         area: (
             tuple[float, float, float, float] | Sequence[tuple[float, float]] | None
         ) = None,

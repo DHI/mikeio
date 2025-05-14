@@ -2,7 +2,7 @@ from __future__ import annotations
 from functools import cached_property
 from pathlib import Path
 
-from typing import Any, Iterable, Literal, Sequence
+from typing import TYPE_CHECKING, Any, Iterable, Literal, Sequence
 import warnings
 
 from matplotlib.axes import Axes
@@ -17,6 +17,9 @@ from ._FM_plot import _plot_vertical_profile, BoundaryPolygons
 
 from ._distance import relative_cumulative_distance
 
+if TYPE_CHECKING:
+    from numpy.typing import ArrayLike
+
 Layer = Literal["all", "bottom", "top"]
 
 
@@ -24,8 +27,8 @@ class _GeometryFMLayered(_GeometryFM):
     def __init__(
         self,
         *,
-        node_coordinates: np.ndarray,
-        element_table: np.ndarray | list[Sequence[int]] | list[np.ndarray],
+        node_coordinates: ArrayLike,
+        element_table: ArrayLike,
         codes: np.ndarray | None = None,
         projection: str = "LONG/LAT",
         dfsu_type: DfsuFileType = DfsuFileType.Dfsu3DSigma,
@@ -626,8 +629,8 @@ class GeometryFM3D(_GeometryFMLayered):
     def __init__(
         self,
         *,
-        node_coordinates: np.ndarray,
-        element_table: np.ndarray | list[Sequence[int]] | list[np.ndarray],
+        node_coordinates: ArrayLike,
+        element_table: ArrayLike,
         codes: np.ndarray | None = None,
         projection: str = "LONG/LAT",
         dfsu_type: DfsuFileType = DfsuFileType.Dfsu3DSigma,

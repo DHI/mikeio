@@ -1,10 +1,10 @@
+from pathlib import Path
 import numpy as np
 import pandas as pd
 import mikeio
 
 
-def test_write_read_long_dfs0(tmp_path):
-
+def test_write_read_long_dfs0(tmp_path: Path) -> None:
     filename = tmp_path / "big.dfs0"
 
     nt = 10_000_000
@@ -21,8 +21,7 @@ def test_write_read_long_dfs0(tmp_path):
     assert len(ds.time) == nt
 
 
-def test_write_read_many_items_dataset_pandas(tmp_path):
-
+def test_write_read_many_items_dataset_pandas(tmp_path: Path) -> None:
     filename = tmp_path / "many_items.dfs0"
 
     n_items = 10_000
@@ -46,7 +45,7 @@ def test_write_read_many_items_dataset_pandas(tmp_path):
     assert ds.n_items == n_items
 
     # skip dataset, read directly to dataframe
-    dfs = mikeio.open(filename=filename)
+    dfs = mikeio.Dfs0(filename=filename)
     df = dfs.to_dataframe()
 
     assert len(df) == nt

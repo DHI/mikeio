@@ -1,3 +1,5 @@
+SHELL := /bin/bash
+
 LIB = mikeio
 
 check: lint typecheck test
@@ -15,7 +17,7 @@ test:
 	pytest
 
 typecheck:
-	mypy $(LIB)/
+	mypy .
 
 coverage: 
 	pytest --cov-report html --cov=$(LIB) tests/
