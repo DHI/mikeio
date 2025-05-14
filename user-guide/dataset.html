@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.7.30">
+<meta name="generator" content="quarto-1.7.31">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
@@ -74,7 +74,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
 <script src="../site_libs/quarto-html/anchor.min.js"></script>
 <link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="../site_libs/quarto-html/quarto-syntax-highlighting-de070a7b0ab54f8780927367ac907214.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-e1a5c8363afafaef2c763b6775fbf3ca.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
 <link href="../site_libs/bootstrap/bootstrap-6c437caa095562069354f84ede9975ef.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
@@ -311,7 +311,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <li><strong>geometry</strong> - a Geometry object with the spatial description of the data</li>
 </ul>
 <p>Use Dataset’s string representation to get an overview of the Dataset</p>
-<div id="a2afd4b0" class="cell" data-execution_count="1">
+<div id="fbcbc226" class="cell" data-execution_count="1">
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> mikeio</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>ds <span class="op">=</span> mikeio.read(<span class="st">"../data/HD2D.dfsu"</span>)</span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>ds</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
@@ -338,7 +338,7 @@ items:
 <li><code>ds.itemA</code> - returns “itemA” DataArray</li>
 </ul>
 <p>We recommend to use <em>named</em> items for readability.</p>
-<div id="0bee3072" class="cell" data-execution_count="2">
+<div id="6737cd1b" class="cell" data-execution_count="2">
 <div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>ds.Surface_elevation</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="2">
 <pre><code>&lt;mikeio.DataArray&gt;
@@ -358,7 +358,7 @@ geometry: Dfsu2D (884 elements, 529 nodes)</code></pre>
 <section id="temporal-selection" class="level2">
 <h2 class="anchored" data-anchor-id="temporal-selection"><i class="fa-solid fa-calendar" aria-label="calendar"></i> Temporal selection</h2>
 <p>A time slice of a Dataset can be selected in several different ways.</p>
-<div id="b8c479b1" class="cell" data-execution_count="3">
+<div id="499ae093" class="cell" data-execution_count="3">
 <div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>ds.sel(time<span class="op">=</span><span class="st">"1985-08-06 12:00"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="3">
 <pre><code>&lt;mikeio.Dataset&gt;
@@ -372,7 +372,7 @@ items:
   3:  Current speed &lt;Current Speed&gt; (meter per sec)</code></pre>
 </div>
 </div>
-<div id="4ddc6137" class="cell" data-execution_count="4">
+<div id="fb3e40bc" class="cell" data-execution_count="4">
 <div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>ds[<span class="st">"1985-8-7"</span>:]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="4">
 <pre><code>&lt;mikeio.Dataset&gt;
@@ -390,7 +390,7 @@ items:
 <section id="spatial-selection" class="level2">
 <h2 class="anchored" data-anchor-id="spatial-selection"><i class="fa-solid fa-map" aria-label="map"></i> Spatial selection</h2>
 <p>The <code>sel</code> method finds a single element.</p>
-<div id="b3663ba9" class="cell" data-execution_count="5">
+<div id="37c00945" class="cell" data-execution_count="5">
 <div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>ds.sel(x<span class="op">=</span><span class="dv">607002</span>, y<span class="op">=</span><span class="dv">6906734</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="5">
 <pre><code>&lt;mikeio.Dataset&gt;
@@ -418,7 +418,7 @@ items:
 <h2 class="anchored" data-anchor-id="add-a-new-item">Add a new item</h2>
 <p>A common workflow is to create a new item based on existing items in a dataset.</p>
 <p>This can be in done in several ways. Let’s try one of the options.</p>
-<div id="04c0f66d" class="cell" data-execution_count="6">
+<div id="7e68329d" class="cell" data-execution_count="6">
 <div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>ds <span class="op">=</span> mikeio.read(<span class="st">"../data/NorthSea_HD_and_windspeed.dfsu"</span>)</span>
 <span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>ds</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="6">
@@ -434,7 +434,7 @@ items:
 <ol type="1">
 <li>Create a copy of the DataArray</li>
 </ol>
-<div id="74e2e80d" class="cell" data-execution_count="7">
+<div id="7f4e28b0" class="cell" data-execution_count="7">
 <div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>ws2 <span class="op">=</span> ds.Wind_speed.copy()</span>
 <span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>ws2.plot.hist()<span class="op">;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display">
@@ -448,7 +448,7 @@ items:
 <ol start="2" type="1">
 <li>Make the modifications, in this case we will clip the values to the interval 1-18 m/s.</li>
 </ol>
-<div id="fbf274f9" class="cell" data-execution_count="8">
+<div id="8fb8e4fd" class="cell" data-execution_count="8">
 <div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
 <span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>ws2.values <span class="op">=</span> np.clip(ws2.to_numpy(), <span class="dv">1</span>,<span class="dv">18</span>)</span>
 <span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>ws2.plot.hist()<span class="op">;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
@@ -463,7 +463,7 @@ items:
 <ol start="3" type="1">
 <li>Assign it to a new name in the dataset</li>
 </ol>
-<div id="f5a979a8" class="cell" data-execution_count="9">
+<div id="16236d1f" class="cell" data-execution_count="9">
 <div class="sourceCode cell-code" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>ds[<span class="st">"Wind_speed_clipped"</span>] <span class="op">=</span> ws2</span>
 <span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>ds</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="9">
@@ -480,7 +480,7 @@ items:
 <ol start="4" type="1">
 <li>Reorder items if necessary (See <a href="#selecting-items">selecting items</a> above)</li>
 </ol>
-<div id="70abfcd7" class="cell" data-execution_count="10">
+<div id="44dfcced" class="cell" data-execution_count="10">
 <div class="sourceCode cell-code" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>ds2 <span class="op">=</span> ds[[<span class="st">"Wind_speed_clipped"</span>, <span class="st">"Surface elevation"</span>, <span class="st">"Wind speed"</span>]]</span>
 <span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>ds2</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="10">
@@ -497,7 +497,7 @@ items:
 <ol start="5" type="1">
 <li>Write the new dataset to a new file</li>
 </ol>
-<div id="90a5e50f" class="cell" data-execution_count="11">
+<div id="02e7a2de" class="cell" data-execution_count="11">
 <div class="sourceCode cell-code" id="cb19"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>ds2.to_dfs(<span class="st">"modified.dfsu"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </section>
