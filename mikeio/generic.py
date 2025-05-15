@@ -51,6 +51,7 @@ __all__ = [
     "quantile",
     "scale",
     "sum",
+    "change_datatype",
 ]
 
 
@@ -94,6 +95,7 @@ def _clone(
     start_time: datetime | None = None,
     timestep: float | None = None,
     items: Sequence[int | DfsDynamicItemInfo] | None = None,
+    datatype: int = None,
 ) -> DfsFile:
     source = DfsFileFactory.DfsGenericOpen(str(infilename))
     fi = source.FileInfo
@@ -101,7 +103,11 @@ def _clone(
     builder = DfsBuilder.Create(fi.FileTitle, "mikeio", __dfs_version__)
 
     # Set up the header
-    builder.SetDataType(fi.DataType)
+    if datatype is None:
+        builder.SetDataType(fi.DataType)
+    else:
+        builder.SetDataType(datatype)
+
     builder.SetGeographicalProjection(fi.Projection)
 
     # Copy time axis
@@ -959,3 +965,50 @@ def _get_repeated_items(
             new_items.append(item)
 
     return new_items
+
+
+def change_datatype(
+    infilename: str | pathlib.Path,
+    outfilename: str | pathlib.Path,
+    datatype: int,
+):
+    """Create temporal quantiles of all items in dfs file.
+
+    Parameters
+    ----------
+    infilename : str | pathlib.Path
+        input filename
+    outfilename : str | pathlib.Path
+        output filename
+    datatype: int
+        DataType to be used for the output file
+
+    Examples
+    --------
+    >>> quantile("in.dfsu", "out.dfsu", datatype=107)
+
+    >>> quantile("huge.dfsu", "Q01.dfsu", q=0.1, buffer_size=5.0e9)
+
+    """
+    dfs_out = _clone(infilename, outfilename, datatype=datatype)
+    dfs_in = DfsFileFactory.DfsGenericOpen(infilename)
+
+    item_numbers = _valid_item_numbers(dfs_in.ItemInfo)
+    n_items = len(item_numbers)
+    n_time_steps = dfs_in.FileInfo.TimeAxis.NumberOfTimeSteps
+    deletevalue = dfs_in.FileInfo.DeleteValueFloat
+
+    # Rewrite the data FIXME: can we do this in a more elegant way?
+    for timestep in trange(n_time_steps, disable=True):
+        for item in range(n_items):
+            itemdata = dfs_in.ReadItemTimeStep(item_numbers[item] + 1, timestep)
+            time = itemdata.Time
+            d = itemdata.Data
+            d[d == deletevalue] = np.nan
+            outdata = d
+            outdata[np.isnan(outdata)] = deletevalue
+            darray = outdata.astype(np.float32)
+            dfs_out.WriteItemTimeStep(item_numbers[item] + 1, timestep, time, darray)
+
+    dfs_out.Close()
+    dfs_in.Close()

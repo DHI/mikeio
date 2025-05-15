@@ -3,8 +3,18 @@ import numpy as np
 import pandas as pd
 import mikeio
 from mikeio import generic
-from mikeio.generic import scale, diff, sum, extract, avg_time, fill_corrupt, add
+from mikeio.generic import (
+    scale,
+    diff,
+    sum,
+    extract,
+    avg_time,
+    fill_corrupt,
+    add,
+    change_datatype,
+)
 import pytest
+from mikecore.DfsFileFactory import DfsFileFactory
 
 
 def test_add_constant(tmp_path: Path) -> None:
@@ -638,3 +648,43 @@ def test_fill_corrupt_data(tmp_path: Path) -> None:
     orig = mikeio.read(infile)
     extracted = mikeio.read(fp)
     assert extracted.n_timesteps == orig.n_timesteps
+
+
+def test_change_datatype_dfs0(tmp_path: Path) -> None:
+    infilename = "tests/testdata/random.dfs0"
+    outfilename = str(tmp_path / "random_datatype107.dfs0")
+    OUT_DATA_TYPE = 107
+
+    change_datatype(infilename, outfilename, datatype=OUT_DATA_TYPE)
+    dfs_out = DfsFileFactory.DfsGenericOpen(outfilename)
+    dfs_in = DfsFileFactory.DfsGenericOpen(infilename)
+
+    n_timesteps_in = dfs_in.FileInfo.TimeAxis.NumberOfTimeSteps
+    n_timesteps_out = dfs_out.FileInfo.TimeAxis.NumberOfTimeSteps
+    datatype_out = dfs_out.FileInfo.DataType
+
+    dfs_out.Close()
+    dfs_in.Close()
+
+    assert datatype_out == OUT_DATA_TYPE
+    assert n_timesteps_in == n_timesteps_out
+
+
+def test_change_datatype_dfsu(tmp_path: Path) -> None:
+    infilename = "tests/testdata/oresund_sigma_z.dfsu"
+    outfilename = str(tmp_path / "oresund_sigma_z_datatype107.dfsu")
+    OUT_DATA_TYPE = 107
+
+    change_datatype(infilename, outfilename, datatype=OUT_DATA_TYPE)
+    dfs_out = DfsFileFactory.DfsGenericOpen(outfilename)
+    dfs_in = DfsFileFactory.DfsGenericOpen(infilename)
+
+    n_timesteps_in = dfs_in.FileInfo.TimeAxis.NumberOfTimeSteps
+    n_timesteps_out = dfs_out.FileInfo.TimeAxis.NumberOfTimeSteps
+    datatype_out = dfs_out.FileInfo.DataType
+
+    dfs_out.Close()
+    dfs_in.Close()
+
+    assert datatype_out == OUT_DATA_TYPE
+    assert n_timesteps_in == n_timesteps_out
