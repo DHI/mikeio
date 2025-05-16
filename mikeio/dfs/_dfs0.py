@@ -12,13 +12,11 @@ from mikecore.DfsFile import DfsSimpleType, StatType, TimeAxisType
 from mikecore.DfsFileFactory import DfsFileFactory
 from mikecore.eum import eumQuantity
 
-from mikeio._time import DateTimeSelector
-from mikeio.eum._eum import ItemInfoList
-
 from .. import __dfs_version__
 from ..dataset import Dataset, DataArray
-from ._dfs import _get_item_info, _valid_item_numbers, _valid_timesteps
-from ..eum import EUMType, EUMUnit, ItemInfo, TimeStepUnit
+from ._dfs import _get_item_info, _valid_item_numbers
+from ..eum import EUMType, EUMUnit, ItemInfo, TimeStepUnit, ItemInfoList
+from .._time import DateTimeSelector
 
 
 def _write_dfs0(
