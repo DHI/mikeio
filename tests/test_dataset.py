@@ -163,25 +163,32 @@ def test_index_with_attribute() -> None:
 
 def test_getitem_time(ds3: Dataset) -> None:
     # time = pd.date_range("2000-1-2", freq="h", periods=100)
-    ds_sel = ds3["2000-1-2"]
+
+    # deprecated use .sel(time=...) or .isel(time=...) instead
+    with pytest.warns(FutureWarning, match="time"):
+        ds_sel = ds3["2000-1-2"]  # type: ignore
     assert ds_sel.n_timesteps == 24
     assert ds_sel.is_equidistant
 
-    ds_sel = ds3["2000-1-2":"2000-1-3 00:00"]  # type: ignore
+    with pytest.warns(FutureWarning, match="time"):
+        ds_sel = ds3["2000-1-2":"2000-1-3 00:00"]  # type: ignore
     assert ds_sel.n_timesteps == 25
     assert ds_sel.is_equidistant
 
-    time = ["2000-1-2 04:00:00", "2000-1-2 08:00:00", "2000-1-2 12:00:00"]
-    ds_sel = ds3[time]
+    with pytest.warns(FutureWarning, match="time"):
+        time = ["2000-1-2 04:00:00", "2000-1-2 08:00:00", "2000-1-2 12:00:00"]
+        ds_sel = ds3[time]  # type: ignore
     assert ds_sel.n_timesteps == 3
     assert ds_sel.is_equidistant
 
-    time = [ds3.time[0], ds3.time[1], ds3.time[7], ds3.time[23]]
-    ds_sel = ds3[time]
+    with pytest.warns(FutureWarning, match="time"):
+        time = [ds3.time[0], ds3.time[1], ds3.time[7], ds3.time[23]]
+        ds_sel = ds3[time]  # type: ignore
     assert ds_sel.n_timesteps == 4
     assert not ds_sel.is_equidistant
 
-    ds_sel = ds3[ds3.time[:10]]
+    with pytest.warns(FutureWarning, match="time"):
+        ds_sel = ds3[ds3.time[:10]]  # type: ignore
     assert ds_sel.n_timesteps == 10
     assert ds_sel.is_equidistant
 
@@ -278,18 +285,22 @@ def test_temporal_subset_fancy() -> None:
     assert ds.time[0].hour == 0
     assert ds.time[-1].hour == 0
 
-    selds = ds["2000-01-01 00:00":"2000-01-02 00:00"]  # type: ignore
+    with pytest.warns(FutureWarning, match="time"):
+        selds = ds["2000-01-01 00:00":"2000-01-02 00:00"]  # type: ignore
 
     assert len(selds) == 2
     assert selds["Foo"].shape == (25, 100, 30)
 
-    selds = ds[:"2000-01-02 00:00"]  # type: ignore
+    with pytest.warns(FutureWarning, match="time"):
+        selds = ds[:"2000-01-02 00:00"]  # type: ignore
     assert selds["Foo"].shape == (25, 100, 30)
 
-    selds = ds["2000-01-31 00:00":]  # type: ignore
+    with pytest.warns(FutureWarning, match="time"):
+        selds = ds["2000-01-31 00:00":]  # type: ignore
     assert selds["Foo"].shape == (25, 100, 30)
 
-    selds = ds["2000-01-30":]  # type: ignore
+    with pytest.warns(FutureWarning, match="time"):
+        selds = ds["2000-01-30":]  # type: ignore
     assert selds["Foo"].shape == (49, 100, 30)
 
 

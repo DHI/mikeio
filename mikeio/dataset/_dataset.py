@@ -740,6 +740,10 @@ class Dataset:
             time_steps = _get_time_idx_list(self.time, key)
             if _n_selected_timesteps(self.time, time_steps) == 0:
                 raise IndexError("No timesteps found!")
+            warnings.warn(
+                "Subsetting in time using indexing is deprecated. Use .sel(time=...) or .isel(time=...) instead.",
+                FutureWarning,
+            )
             return self.isel(time=time_steps)
         if isinstance(key, slice):
             if self._is_slice_time_slice(key):
@@ -748,6 +752,11 @@ class Dataset:
                     time_steps = list(range(s.start, s.stop))
                 except ValueError:
                     time_steps = list(range(*key.indices(len(self.time))))
+                # deprecated, use sel instead or isel instead
+                warnings.warn(
+                    "Subsetting in time using indexing is deprecated. Use .sel(time=...) or .isel(time=...) instead.",
+                    FutureWarning,
+                )
                 return self.isel(time=time_steps)
 
         if self._multi_indexing_attempted(key):
