@@ -748,9 +748,14 @@ def test_read_dfs0_with_non_unique_item_names() -> None:
     assert np.isnan(ds.Untitled_3.values[1])  # type: ignore
 
 
-def test_non_equidistant_time_can_read_correctly_with_open(tmp_path: Path) -> None:
+def test_non_equidistant_time_can_read_correctly_with_open() -> None:
     dfs = mikeio.Dfs0("tests/testdata/neq_daily_time_unit.dfs0")
-    dfs.time
     ds = dfs.read()
 
     assert all(dfs.time == ds.time)
+
+
+def test_temporal_selection_neq_time() -> None:
+    dfs = mikeio.Dfs0("tests/testdata/Sirius_IDF_rainfall.dfs0")
+    ds1 = dfs.read(time=[0, 1])
+    assert ds1.n_timesteps == 2
