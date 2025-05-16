@@ -166,7 +166,7 @@ def test_getitem_time(ds3: Dataset) -> None:
 
     # deprecated use .sel(time=...) or .isel(time=...) instead
     with pytest.warns(FutureWarning, match="time"):
-        ds_sel = ds3["2000-1-2"]
+        ds_sel = ds3["2000-1-2"]  # type: ignore
     assert ds_sel.n_timesteps == 24
     assert ds_sel.is_equidistant
 
@@ -177,18 +177,18 @@ def test_getitem_time(ds3: Dataset) -> None:
 
     with pytest.warns(FutureWarning, match="time"):
         time = ["2000-1-2 04:00:00", "2000-1-2 08:00:00", "2000-1-2 12:00:00"]
-        ds_sel = ds3[time]
+        ds_sel = ds3[time]  # type: ignore
     assert ds_sel.n_timesteps == 3
     assert ds_sel.is_equidistant
 
     with pytest.warns(FutureWarning, match="time"):
         time = [ds3.time[0], ds3.time[1], ds3.time[7], ds3.time[23]]
-        ds_sel = ds3[time]
+        ds_sel = ds3[time]  # type: ignore
     assert ds_sel.n_timesteps == 4
     assert not ds_sel.is_equidistant
 
     with pytest.warns(FutureWarning, match="time"):
-        ds_sel = ds3[ds3.time[:10]]
+        ds_sel = ds3[ds3.time[:10]]  # type: ignore
     assert ds_sel.n_timesteps == 10
     assert ds_sel.is_equidistant
 
