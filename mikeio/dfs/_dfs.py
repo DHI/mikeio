@@ -1,4 +1,5 @@
 from __future__ import annotations
+from collections.abc import Iterable
 from pathlib import Path
 import warnings
 from dataclasses import dataclass
@@ -160,10 +161,25 @@ def _valid_timesteps(
         time = pd.date_range(start_time_file, periods=nt, freq=freq)
     elif time_axis.TimeAxisType == TimeAxisType.CalendarNonEquidistant:
         idx = list(range(nt))
+        if time_steps is None:
+            return False, idx
 
         if isinstance(time_steps, int):
             return True, [idx[time_steps]]
-        return single_time_selected, idx
+
+        if isinstance(time_steps, Iterable):
+            # check that all elements are integers and are in the range of nt
+            if not all(isinstance(i, int) for i in time_steps):
+                raise ValueError("All elements in time_steps must be integers.")
+            if not all(0 <= i < nt for i in time_steps):  # type: ignore
+                raise ValueError(
+                    f"All elements in time_steps must be in the range of 0 to {nt-1}."
+                )
+            return False, list(time_steps)  # type: ignore
+
+        raise TypeError(
+            f"Temporal selection with type: {type(time_steps)} is not supported"
+        )
 
     dts = DateTimeSelector(time)
 

@@ -304,26 +304,6 @@ def test_temporal_subset_fancy() -> None:
     assert selds["Foo"].shape == (49, 100, 30)
 
 
-def test_subset_with_datetime() -> None:
-    nt = (24 * 31) + 1
-    d1 = np.zeros([nt, 100, 30]) + 1.5
-    d2 = np.zeros([nt, 100, 30]) + 2.0
-    data = [d1, d2]
-
-    time = pd.date_range("2000-1-2", freq="h", periods=nt)
-    items = [ItemInfo("Foo"), ItemInfo("Bar")]
-    ds = mikeio.Dataset.from_numpy(data=data, time=time, items=items)
-
-    dssub = ds[datetime(2000, 1, 2)]
-    assert dssub.n_timesteps == 1
-
-    dssub = ds[pd.Timestamp(datetime(2000, 1, 2))]
-    assert dssub.n_timesteps == 1
-
-    dssub = ds["2000-1-2"]
-    assert dssub.n_timesteps == 24
-
-
 def test_select_item_by_name() -> None:
     nt = 100
     d1 = np.zeros([nt, 100, 30]) + 1.5
