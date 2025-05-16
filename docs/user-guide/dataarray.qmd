@@ -29,13 +29,24 @@ da
 
 ## {{< fa calendar >}} Temporal selection
 
+A time slice of a DataArray can be selected in several different ways. 
+
 ```{python}
 da.sel(time="1985-08-06 12:00")
 ```
 
 ```{python}
-da["1985-8-7":]
+da.sel(time=slice("1985-08-06 12:00", "1985-08-06 17:00"))
 ```
+
+```{python}
+da.isel(time=2)
+```
+
+```{python}
+da.isel(time=range(2, ds.n_timesteps, 2))
+```
+
 
 ## {{< fa map >}} Spatial selection
              

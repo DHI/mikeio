@@ -258,10 +258,6 @@ def test_read_dfs_time_selection_str() -> None:
         assert all(dsr.time == dssel.time)
         assert dsr.shape == dssel.shape
 
-        dsgetitem = ds[time]
-        assert all(dsr.time == dsgetitem.time)
-        assert dsr.shape == dsgetitem.shape
-
 
 def test_open_dfs_repr() -> None:
     extensions = ["dfsu", "dfs2", "dfs1", "dfs0"]
@@ -286,10 +282,6 @@ def test_read_dfs_time_selection_str_specific() -> None:
         assert all(dsr.time == dssel.time)
         assert dsr.shape == dssel.shape
 
-        dsgetitem = ds[time]
-        assert all(dsr.time == dsgetitem.time)
-        assert dsr.shape == dsgetitem.shape
-
 
 def test_read_dfs_time_selection_list_str() -> None:
     extensions = ["dfsu", "dfs2", "dfs1", "dfs0"]
@@ -303,10 +295,6 @@ def test_read_dfs_time_selection_list_str() -> None:
         dsr = mikeio.read(filename=filename, time=time)
         assert all(dsr.time == dssel.time)
         assert dsr.shape == dssel.shape
-
-        dsgetitem = ds[time]
-        assert all(dsr.time == dsgetitem.time)
-        assert dsr.shape == dsgetitem.shape
 
 
 def test_read_dfs_time_selection_pdTimestamp() -> None:
@@ -323,10 +311,6 @@ def test_read_dfs_time_selection_pdTimestamp() -> None:
         assert all(dsr.time == dssel.time)
         assert dsr.shape == dssel.shape
 
-        dsgetitem = ds[time]
-        assert all(dsr.time == dsgetitem.time)
-        assert dsr.shape == dsgetitem.shape
-
 
 def test_read_dfs_time_selection_pdDatetimeIndex() -> None:
     extensions = ["dfsu", "dfs2", "dfs1", "dfs0"]
@@ -340,10 +324,6 @@ def test_read_dfs_time_selection_pdDatetimeIndex() -> None:
         dsr = mikeio.read(filename=filename, time=time)
         assert all(dsr.time == dssel.time)
         assert dsr.shape == dssel.shape
-
-        dsgetitem = ds[time]
-        assert all(dsr.time == dsgetitem.time)
-        assert dsr.shape == dsgetitem.shape
 
 
 def test_read_dfs_time_selection_datetime() -> None:
@@ -359,10 +339,6 @@ def test_read_dfs_time_selection_datetime() -> None:
         dsr = mikeio.read(filename=filename, time=time)
         assert all(dsr.time == dssel.time)
         assert dsr.shape == dssel.shape
-
-        dsgetitem = ds[time]
-        assert all(dsr.time == dsgetitem.time)
-        assert dsr.shape == dsgetitem.shape
 
         dsr2 = mikeio.read(filename=filename, time=pd.Timestamp(time))
         assert all(dsr2.time == dsr.time)
@@ -382,10 +358,6 @@ def test_read_dfs_time_list_datetime() -> None:
         assert all(dsr.time == dssel.time)
         assert dsr.shape == dssel.shape
 
-        dsgetitem = ds[time]
-        assert all(dsr.time == dsgetitem.time)
-        assert dsr.shape == dsgetitem.shape
-
 
 def test_read_dfs_time_slice_datetime() -> None:
     extensions = ["dfsu", "dfs2", "dfs1", "dfs0"]
@@ -400,10 +372,6 @@ def test_read_dfs_time_slice_datetime() -> None:
         assert all(dsr.time == dssel.time)
         assert dsr.shape == dssel.shape
 
-        dsgetitem = ds[time]
-        assert all(dsr.time == dsgetitem.time)
-        assert dsr.shape == dsgetitem.shape
-
 
 def test_read_dfs_time_slice_str() -> None:
     extensions = ["dfsu", "dfs2", "dfs1", "dfs0"]
@@ -417,10 +385,6 @@ def test_read_dfs_time_slice_str() -> None:
         dsr = mikeio.read(filename=filename, time=time)
         assert all(dsr.time == dssel.time)
         assert dsr.shape == dssel.shape
-
-        dsgetitem = ds[time]
-        assert all(dsr.time == dsgetitem.time)
-        assert dsr.shape == dsgetitem.shape
 
 
 def test_read_dfs_time_selection_str_slice() -> None:
@@ -437,10 +401,6 @@ def test_read_dfs_time_selection_str_slice() -> None:
         assert all(dsr.time == dssel.time)
         assert dsr.shape == dssel.shape
 
-        dsgetitem = ds[time]
-        assert all(dsr.time == dsgetitem.time)
-        assert dsr.shape == dsgetitem.shape
-
 
 def test_read_dfs_time_int() -> None:
     extensions = ["dfsu", "dfs2", "dfs1", "dfs0"]
@@ -456,11 +416,6 @@ def test_read_dfs_time_int() -> None:
         assert all(dsr.time == dssel.time)
         assert dsr.shape == dssel.shape
 
-        # integer time selection for DataArray (not Dataset)
-        dsgetitem = ds[0][time]
-        assert all(dsr[0].time == dsgetitem.time)
-        assert dsr[0].shape == dsgetitem.shape
-
 
 def test_read_dfs_time_list_int() -> None:
     extensions = ["dfsu", "dfs2", "dfs1", "dfs0"]
@@ -474,11 +429,6 @@ def test_read_dfs_time_list_int() -> None:
         dsr = mikeio.read(filename=filename, time=time)
         assert all(dsr.time == dssel.time)
         assert dsr.shape == dssel.shape
-
-        # integer time selection for DataArray (not Dataset)
-        dsgetitem = ds[0][time]
-        assert all(dsr[0].time == dsgetitem.time)
-        assert dsr[0].shape == dsgetitem.shape
 
 
 def test_read_dfs_time_slice_int() -> None:
@@ -531,7 +481,7 @@ def test_filter_items_dfs0() -> None:
 def test_filter_items_wildcard_getitem() -> None:
     dsall = mikeio.read("tests/testdata/sw_points.dfs0")
 
-    ds = dsall["*Height*"]
+    ds = dsall["*Height*"]  # type: ignore
     assert ds.n_items == 12
 
 
@@ -543,7 +493,7 @@ def test_filter_items_dfsu() -> None:
 def test_filter_items_dfsu_getitem() -> None:
     dsall = mikeio.read("tests/testdata/wind_north_sea.dfsu")
     ds = dsall["*direction*"]
-    assert ds.n_items == 1
+    assert ds.n_items == 1  # type: ignore
     assert "direction" in ds[0].name
 
 
