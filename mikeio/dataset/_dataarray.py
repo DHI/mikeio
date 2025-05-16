@@ -967,7 +967,10 @@ class DataArray:
                 if isinstance(time.time, pd.DatetimeIndex):
                     time = time.time
 
-            da = da[time]  # __getitem__ is 🚀
+            time = _get_time_idx_list(self.time, time)
+            if _n_selected_timesteps(self.time, time) == 0:
+                raise IndexError("No timesteps found!")
+            da = da.isel(time=time)
 
         return da
 
