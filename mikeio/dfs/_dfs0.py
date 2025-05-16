@@ -12,6 +12,7 @@ from mikecore.DfsFile import DfsSimpleType, StatType, TimeAxisType
 from mikecore.DfsFileFactory import DfsFileFactory
 from mikecore.eum import eumQuantity
 
+from mikeio._time import DateTimeSelector
 from mikeio.eum._eum import ItemInfoList
 
 from .. import __dfs_version__
@@ -192,14 +193,15 @@ class Dfs0:
                 if isinstance(time, slice) and isinstance(time.start, str):
                     return ds.sel(time=time)
                 else:
-                    _, time_steps = _valid_timesteps(dfs.FileInfo, time)
+                    dts = DateTimeSelector(self.time)
+                    time_steps = dts.isel(time)
 
         if time_steps:
             ds = ds.isel(time=time_steps)
 
         if sel_time_step_str:
             parts = sel_time_step_str.split(",")
-            if len(parts) > 0:
+            if len(parts) > 1:
                 warnings.warn(
                     f'Comma separated time slicing is deprecated use read(time=slice("{parts[0]}", "{parts[1]}")) instead.',
                     FutureWarning,

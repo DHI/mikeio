@@ -597,6 +597,9 @@ def test_write_non_equidistant_is_possible(tmp_path: Path) -> None:
     # but getting the end time is not that expensive
     assert dfs.end_time == ds.time[-1]
 
+    ds3 = mikeio.read(fp, time=[0, 1])
+    assert ds3.n_timesteps == 2
+
 
 def test_temporal_resample_by_reading_selected_timesteps(tmp_path: Path) -> None:
     sourcefilename = "tests/testdata/HD2D.dfsu"
