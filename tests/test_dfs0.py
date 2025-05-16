@@ -759,3 +759,13 @@ def test_temporal_selection_neq_time() -> None:
     dfs = mikeio.Dfs0("tests/testdata/Sirius_IDF_rainfall.dfs0")
     ds1 = dfs.read(time=[0, 1])
     assert ds1.n_timesteps == 2
+
+    ds2 = dfs.read(time=slice(0, 2))
+    assert ds2.n_timesteps == 2
+
+    ds3 = dfs.read(time="2019-01-01 12:00:00")
+    assert ds3.n_timesteps == 1
+
+    assert dfs.n_timesteps == 22
+    with pytest.raises(IndexError):
+        ds1 = dfs.read(time=[0, 23])
