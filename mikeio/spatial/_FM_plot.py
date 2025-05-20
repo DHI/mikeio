@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 from typing import Any, Literal, Sequence
 
+from matplotlib.colorbar import Colorbar
 from numpy.typing import NDArray
 from matplotlib.axes import Axes
 from matplotlib.cm import ScalarMappable
@@ -94,6 +95,7 @@ def _plot_map(
     figsize: tuple[float, float] | None = None,
     ax: Axes | None = None,
     add_colorbar: bool = True,
+    return_colorbar: bool = False,
 ) -> Axes:
     """Plot unstructured data and/or mesh, mesh outline.
 
@@ -274,14 +276,17 @@ def _plot_map(
         __add_outline(ax, boundary_polylines)
 
     if add_colorbar:
-        __add_colorbar(ax, cmap_ScMappable, fig_obj, label, levels, cbar_extend)
+        cbar = __add_colorbar(ax, cmap_ScMappable, fig_obj, label, levels, cbar_extend)
 
     __set_plot_limits(ax, nc)
 
     if title:
         ax.set_title(title)
 
-    return ax
+    if return_colorbar:
+        return ax, cbar
+    else:
+        return ax
 
 
 def __set_colormap_levels(
@@ -414,14 +419,14 @@ def __add_colorbar(
     label: str,
     levels: np.ndarray,
     cbar_extend: str,
-) -> None:
+) -> Colorbar:
     from mpl_toolkits.axes_grid1 import make_axes_locatable  # type: ignore
     import matplotlib.pyplot as plt
 
     cax = make_axes_locatable(ax).append_axes("right", size="5%", pad=0.05)
     cmap_sm = cmap_ScMappable if cmap_ScMappable else fig_obj
 
-    plt.colorbar(
+    cbar = plt.colorbar(
         cmap_sm,  # type: ignore
         label=label,
         cax=cax,
@@ -429,6 +434,7 @@ def __add_colorbar(
         boundaries=levels,
         extend=cbar_extend,
     )
+    return cbar
 
 
 def __set_aspect_ratio(ax: Axes, nc: np.ndarray, projection: str) -> None:
