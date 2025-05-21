@@ -653,7 +653,7 @@ class GeometryFM3D(_GeometryFMLayered):
             validate=validate,
             reindex=reindex,
         )
-        self.element_table = np.asarray(self.element_table)
+        self.element_table = np.asarray(self.element_table)  # type: ignore
         self.plot = _GeometryFMPlotter(self)
 
     @property
