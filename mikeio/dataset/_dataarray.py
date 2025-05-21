@@ -809,7 +809,6 @@ class DataArray:
                     idx, node_layers="all"
                 )
                 assert isinstance(self._zn, np.ndarray)
-                # TODO imagine if values and _zn were xarray.DataArray instead
                 if self._zn.ndim == 2:
                     zn = self._zn[:, node_ids]
                 else:
