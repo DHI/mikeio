@@ -65,7 +65,7 @@ class Dataset:
     Parameters
     ----------
     data:
-        By providing a mapping of data arrays, the remaining parameters are not needed
+        DataArray, list of DataArrays or dict of DataArrays
     validate:
         Optional validation of consistency of data arrays.
 
@@ -167,10 +167,7 @@ class Dataset:
                     f"Number of items ({len(items)}) must match len of data ({n_items_data})"
                 )
 
-            item_infos = [
-                ItemInfo(item) if not isinstance(item, ItemInfo) else item
-                for item in items
-            ]
+            item_infos = list(items)
 
             item_names = [it.name for it in item_infos]
             item_names = Dataset._modify_list(item_names)
@@ -405,14 +402,6 @@ class Dataset:
             name=name,
         )
 
-    @staticmethod
-    def _create_empty_data(
-        n_items: int = 1,
-        n_timesteps: int = 1,
-        shape: tuple[int, ...] | None = None,
-    ) -> list:
-        return [np.full((n_timesteps, *shape), np.nan) for _ in range(n_items)]
-
     # ============= Dataset is (almost) a MutableMapping ===========
 
     def __len__(self) -> int:
@@ -421,14 +410,13 @@ class Dataset:
     def __iter__(self) -> Iterator[DataArray]:
         yield from self._data_vars.values()
 
-    def __setitem__(self, key: int | str, value: DataArray) -> None:  # type: ignore
+    def __setitem__(self, key: int | str, value: DataArray) -> None:
         self.__set_or_insert_item(key, value, insert=False)
 
     def __set_or_insert_item(
         self, key: int | str, value: DataArray, insert: bool = False
-    ) -> None:  # type: ignore
-        if len(self) > 0:
-            self[0]._is_compatible(value)
+    ) -> None:
+        self[0]._is_compatible(value)
 
         item_name = value.name
 
@@ -448,8 +436,7 @@ class Dataset:
                 self._data_vars[key_str] = value
                 self._set_name_attr(item_name, value)
         else:
-            if key != item_name:
-                value.name = key
+            value.name = key
             self._data_vars[key] = value
             self._set_name_attr(key, value)
 
