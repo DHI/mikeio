@@ -569,27 +569,20 @@ class Dataset:
         item_name = value.name
 
         if isinstance(key, int):
-            is_replacement = not insert
-            if is_replacement:
-                key_str = self.names[key]
-                self._data_vars[key_str] = value
-            else:
+            if insert:
                 if item_name in self.names:
                     raise ValueError(
                         f"Item name {item_name} already in Dataset ({self.names})"
                     )
-                all_keys = list(self._data_vars.keys())
-                all_keys.insert(key, item_name)
-
-                data_vars = {}
-                for k in all_keys:
-                    if k in self._data_vars.keys():
-                        data_vars[k] = self._data_vars[k]
-                    else:
-                        data_vars[k] = value
-                self._data_vars = data_vars
-
-            self._set_name_attr(item_name, value)
+                keys = list(self._data_vars.keys())
+                keys.insert(key, item_name)
+                values = list(self._data_vars.values())
+                values.insert(key, value)
+                self._data_vars = dict(zip(keys, values))
+            else:
+                key_str = self.names[key]
+                self._data_vars[key_str] = value
+                self._set_name_attr(item_name, value)
         else:
             if key != item_name:
                 value.name = key
