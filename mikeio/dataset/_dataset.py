@@ -8,7 +8,6 @@ from typing import (
     Iterator,
     Literal,
     Mapping,
-    MutableMapping,
     Sequence,
     Any,
     overload,
