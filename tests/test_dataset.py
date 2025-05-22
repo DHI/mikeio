@@ -1006,29 +1006,6 @@ def test_properties_dfsu() -> None:
     assert ds.is_equidistant
 
 
-def test_create_empty_data() -> None:
-    ne = 34
-    d = mikeio.Dataset.create_empty_data(n_elements=ne)
-    assert len(d) == 1
-    assert d[0].shape == (1, ne)
-
-    nt = 100
-    d = mikeio.Dataset.create_empty_data(n_timesteps=nt, shape=(3, 4, 6))
-    assert len(d) == 1
-    assert d[0].shape == (nt, 3, 4, 6)
-
-    ni = 4
-    d = mikeio.Dataset.create_empty_data(n_items=ni, n_elements=ne)
-    assert len(d) == ni
-    assert d[-1].shape == (1, ne)
-
-    with pytest.raises(Exception):
-        d = mikeio.Dataset.create_empty_data()
-
-    with pytest.raises(Exception):
-        d = mikeio.Dataset.create_empty_data(n_elements=None, shape=None)
-
-
 def test_create_infer_name_from_eum() -> None:
     nt = 100
     d = np.random.uniform(size=nt)

@@ -21,7 +21,6 @@ import warnings
 import numpy as np
 from numpy.typing import NDArray
 import pandas as pd
-from mikecore.DfsFile import DfsSimpleType
 
 if TYPE_CHECKING:
     import xarray
@@ -39,6 +38,7 @@ from ..spatial import (
     Grid2D,
     Grid3D,
 )
+
 
 from ..spatial._FM_geometry import _GeometryFM
 
@@ -119,13 +119,13 @@ class Dataset:
         validate: bool = True,
         dt: float = 1.0,
     ) -> Dataset:
-        items = Dataset._parse_items(items, len(data))
+        item_infos = Dataset._parse_items(items, len(data))
 
         data_vars = {
             it.name: DataArray(
                 data=dd, time=time, item=it, geometry=geometry, zn=zn, dims=dims, dt=dt
             )
-            for dd, it in zip(data, items)
+            for dd, it in zip(data, item_infos)
         }
 
         return Dataset(data_vars, validate=validate)
@@ -157,10 +157,9 @@ class Dataset:
 
     @staticmethod
     def _parse_items(
-        items: None | Sequence[ItemInfo | EUMType | str], n_items_data: int
+        items: None | Sequence[ItemInfo], n_items_data: int
     ) -> list[ItemInfo]:
         if items is None:
-            # default Undefined items
             item_infos = [ItemInfo(f"Item_{j + 1}") for j in range(n_items_data)]
         else:
             if len(items) != n_items_data:
@@ -168,14 +167,10 @@ class Dataset:
                     f"Number of items ({len(items)}) must match len of data ({n_items_data})"
                 )
 
-            item_infos = []
-            for item in items:
-                if isinstance(item, (EUMType, str)):
-                    item = ItemInfo(item)
-                elif not isinstance(item, ItemInfo):
-                    raise TypeError(f"items of type: {type(item)} is not supported")
-                # TODO: item.name = self._to_safe_name(item.name)
-                item_infos.append(item)
+            item_infos = [
+                ItemInfo(item) if not isinstance(item, ItemInfo) else item
+                for item in items
+            ]
 
             item_names = [it.name for it in item_infos]
             item_names = Dataset._modify_list(item_names)
@@ -410,27 +405,13 @@ class Dataset:
             name=name,
         )
 
-    # TODO: delete this?
     @staticmethod
-    def create_empty_data(
+    def _create_empty_data(
         n_items: int = 1,
         n_timesteps: int = 1,
-        n_elements: IndexType = None,
         shape: tuple[int, ...] | None = None,
     ) -> list:
-        data = []
-        if shape is None:
-            if n_elements is None:
-                raise ValueError("n_elements and shape cannot both be None")
-            else:
-                shape = n_elements  # type: ignore
-        if np.isscalar(shape):
-            shape = [shape]  # type: ignore
-        dati = np.empty(shape=(n_timesteps, *shape))  # type: ignore
-        dati[:] = np.nan
-        for _ in range(n_items):
-            data.append(dati.copy())
-        return data
+        return [np.full((n_timesteps, *shape), np.nan) for _ in range(n_items)]
 
     # ============= Dataset is (almost) a MutableMapping ===========
 
@@ -1206,9 +1187,8 @@ class Dataset:
         df12 = pd.concat([s1, s2], axis=1)
 
         newtime = df12.index
-        newdata = self.create_empty_data(
-            n_items=ds.n_items, n_timesteps=len(newtime), shape=ds.shape[start_dim:]
-        )
+        shape = ds.shape[start_dim:]
+        newdata = [np.full((len(newtime), *shape), np.nan) for _ in range(ds.n_items)]
         idx1 = np.where(~df12["idx1"].isna())
         idx2 = np.where(~df12["idx2"].isna())
         for j in range(ds.n_items):
@@ -1705,12 +1685,14 @@ class Dataset:
 
     # ===============================================
 
-    def to_pandas(self, **kwargs: Any) -> pd.Series | pd.DataFrame:
+    def to_pandas(
+        self, *, unit_in_name: bool = False, round_time: str | bool = "ms"
+    ) -> pd.Series | pd.DataFrame:
         """Convert Dataset to a Pandas DataFrame."""
         if self.n_items != 1:
-            return self.to_dataframe(**kwargs)
+            return self.to_dataframe(unit_in_name=unit_in_name, round_time=round_time)
         else:
-            return self[0].to_pandas(**kwargs)
+            return self[0].to_pandas()
 
     def to_dataframe(
         self, *, unit_in_name: bool = False, round_time: str | bool = "ms"
@@ -1759,6 +1741,12 @@ class Dataset:
             additional arguments passed to the writing function, e.g. dtype for dfs0
 
         """
+        from ..dfs._dfs0 import write_dfs0
+        from ..dfs._dfs1 import write_dfs1
+        from ..dfs._dfs2 import write_dfs2
+        from ..dfs._dfs3 import write_dfs3
+        from ..dfsu import write_dfsu
+
         filename = str(filename)
 
         # TODO is this a candidate for match/case?
@@ -1767,25 +1755,25 @@ class Dataset:
         ):
             if self.ndim == 0:  # Not very common, but still...
                 self._validate_extension(filename, ".dfs0")
-                self._to_dfs0(filename=filename, **kwargs)
+                write_dfs0(filename, self, **kwargs)
             elif self.ndim == 1 and self[0]._has_time_axis:
                 self._validate_extension(filename, ".dfs0")
-                self._to_dfs0(filename=filename, **kwargs)
+                write_dfs0(filename, self, **kwargs)
             else:
                 raise ValueError("Cannot write Dataset with no geometry to file!")
         elif isinstance(self.geometry, Grid2D):
             self._validate_extension(filename, ".dfs2")
-            self._to_dfs2(filename)
+            write_dfs2(filename, self)
         elif isinstance(self.geometry, Grid3D):
             self._validate_extension(filename, ".dfs3")
-            self._to_dfs3(filename)
+            write_dfs3(filename, self)
 
         elif isinstance(self.geometry, Grid1D):
             self._validate_extension(filename, ".dfs1")
-            self._to_dfs1(filename)
+            write_dfs1(filename, self)
         elif isinstance(self.geometry, _GeometryFM):
             self._validate_extension(filename, ".dfsu")
-            self._to_dfsu(filename)
+            write_dfsu(filename, self)
         else:
             raise NotImplementedError(
                 "Writing this type of dataset is not yet implemented"
@@ -1797,38 +1785,6 @@ class Dataset:
         ext = path.suffix.lower()
         if ext != valid_extension:
             raise ValueError(f"File extension must be {valid_extension}")
-
-    def _to_dfs0(
-        self,
-        filename: str | Path,
-        dtype: DfsSimpleType = DfsSimpleType.Float,
-        title: str = "",
-    ) -> None:
-        from ..dfs._dfs0 import _write_dfs0
-
-        _write_dfs0(filename, self, dtype=dtype, title=title)
-
-    def _to_dfs2(self, filename: str | Path) -> None:
-        # assumes Grid2D geometry
-        from ..dfs._dfs2 import write_dfs2
-
-        write_dfs2(filename, self)
-
-    def _to_dfs3(self, filename: str | Path) -> None:
-        # assumes Grid3D geometry
-        from ..dfs._dfs3 import write_dfs3
-
-        write_dfs3(filename, self)
-
-    def _to_dfs1(self, filename: str | Path) -> None:
-        from ..dfs._dfs1 import write_dfs1
-
-        write_dfs1(filename=filename, ds=self)
-
-    def _to_dfsu(self, filename: str | Path) -> None:
-        from ..dfsu import write_dfsu
-
-        write_dfsu(filename, self)
 
     def to_xarray(self) -> "xarray.Dataset":
         """Export to xarray.Dataset."""
@@ -1910,7 +1866,7 @@ def from_pandas(
     ncol = df.values.shape[1]
     data = [df.values[:, i] for i in range(ncol)]
 
-    item_list = _parse_items(df.columns, items)
+    item_list = _parse_items_for_columns(df.columns, items)
 
     das = {
         item.name: DataArray(data=d, item=item, time=df.index)
@@ -1985,7 +1941,7 @@ def from_polars(
     array = df.to_numpy()
     data = [array[:, i] for i in range(array.shape[1])]
 
-    item_list = _parse_items(df.columns, items)
+    item_list = _parse_items_for_columns(df.columns, items)
 
     das = {
         item.name: DataArray(data=d, item=item, time=time)
@@ -1995,7 +1951,7 @@ def from_polars(
     return ds
 
 
-def _parse_items(
+def _parse_items_for_columns(
     column_names: Sequence[str],
     items: Mapping[str, ItemInfo] | Sequence[ItemInfo] | ItemInfo | None = None,
 ) -> list[ItemInfo]:
