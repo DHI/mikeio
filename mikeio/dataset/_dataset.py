@@ -101,6 +101,8 @@ class Dataset:
             for da in rest:
                 first._is_compatible(da, raise_error=True)
 
+        self._data_vars = data_vars
+
         for key, value in data_vars.items():
             self._set_name_attr(key, value)
         self.plot = _DatasetPlotter(self)
