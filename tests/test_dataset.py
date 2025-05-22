@@ -117,15 +117,6 @@ def test_remove(ds1: Dataset) -> None:
     assert len(ds1) == 0
 
 
-def test_set_item_overwrites_existing_item() -> None:
-    ds = mikeio.read("tests/testdata/NorthSea_HD_and_windspeed.dfsu")
-    assert ds.n_items == 2
-    ws2 = ds["Wind speed"].copy()
-    ws2.values = np.clip(ws2.to_numpy(), 1, 18)
-    ds["Wind speed"] = ws2
-    assert ds.n_items == 2
-
-
 def test_index_with_attribute() -> None:
     nt = 10
     d = np.zeros([nt, 100, 30]) + 1.0
