@@ -53,11 +53,6 @@ def ds3() -> Dataset:
     return mikeio.Dataset.from_numpy(data=data, time=time, items=items)
 
 
-def test_list_of_numpy_deprecated() -> None:
-    with pytest.warns(FutureWarning, match="from_numpy"):
-        mikeio.Dataset([np.zeros(2)], pd.date_range("2000-1-2", freq="h", periods=2))  # type: ignore
-
-
 def test_get_names() -> None:
     nt = 100
     d = np.zeros([nt, 100, 30]) + 1.0
@@ -106,7 +101,20 @@ def test_insert(ds1: Dataset) -> None:
     assert ds1[-1] == da
 
 
+def test_insert_bad_index(ds1: Dataset) -> None:
+    da = ds1[0].copy()
+    da.name = "Baz"
+    assert len(ds1) == 2
+    with pytest.raises(IndexError):
+        ds1[2] = da
+
+    # inserting at high index is consistent list.insert
+    ds1.insert(999, da)
+    assert len(ds1) == 3
+
+
 def test_remove(ds1: Dataset) -> None:
+    ds2 = ds1.copy()
     ds1.remove(-1)
     assert len(ds1) == 1
     assert ds1.names == ["Foo"]
@@ -115,6 +123,10 @@ def test_remove(ds1: Dataset) -> None:
     with pytest.raises(KeyError):
         ds1.remove("Foo")
     assert len(ds1) == 0
+
+    # idiomatic Python uses del
+    del ds2["Foo"]
+    assert "Foo" not in ds2.names
 
 
 def test_index_with_attribute() -> None:
@@ -167,17 +179,6 @@ def test_getitem_time(ds3: Dataset) -> None:
         ds_sel = ds3[ds3.time[:10]]  # type: ignore
     assert ds_sel.n_timesteps == 10
     assert ds_sel.is_equidistant
-
-
-def test_getitem_multi_indexing_attempted(ds3: Dataset) -> None:
-    with pytest.raises(TypeError, match="not allow multi-index"):
-        ds3[0, 0]
-    with pytest.warns(Warning, match="ambiguity"):
-        ds3[0, 1]  # indistinguishable from ds3[(0,1)]
-    with pytest.raises(TypeError, match="not allow multi-index"):
-        ds3[:, 1]
-    with pytest.raises(TypeError, match="not allow multi-index"):
-        ds3[-1, [0, 1], 1]
 
 
 def test_select_subset_isel() -> None:
@@ -359,25 +360,6 @@ def test_select_multiple_items_by_slice(ds3: Dataset) -> None:
     assert newds.items[0].name == "Foo"
     assert newds.items[1].name == "Bar"
     assert newds["Foo"].to_numpy()[0, 10, 0] == 1.5
-
-
-def test_select_item_by_iteminfo() -> None:
-    nt = 100
-    d1 = np.zeros([nt, 100, 30]) + 1.5
-    d2 = np.zeros([nt, 100, 30]) + 2.0
-
-    d1[0, 10, :] = 2.0
-    d2[0, 10, :] = 3.0
-    data = [d1, d2]
-
-    time = pd.date_range("2000-1-2", freq="h", periods=nt)
-    items = [ItemInfo("Foo"), ItemInfo("Bar")]
-    ds = mikeio.Dataset.from_numpy(data=data, time=time, items=items)
-
-    foo_item = items[0]
-
-    foo_data = ds[foo_item]
-    assert foo_data.to_numpy()[0, 10, 0] == 2.0
 
 
 def test_select_subset_isel_multiple_idxs() -> None:

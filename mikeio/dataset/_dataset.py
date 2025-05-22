@@ -16,8 +16,6 @@ from typing import (
     Callable,
 )
 import warnings
-from typing_extensions import deprecated
-# from warnings import deprecated
 
 
 import numpy as np
@@ -67,22 +65,9 @@ class Dataset:
     Parameters
     ----------
     data:
-        a sequence or mapping of numpy arrays
         By providing a mapping of data arrays, the remaining parameters are not needed
-    time:
-        a pandas.DatetimeIndex with the time instances of the data
-    items:
-        a list of ItemInfo with name, type and unit
-    geometry:
-        a geometry object e.g. Grid2D or GeometryFM2D
-    zn:
-        only relevant for Dfsu3d
-    dims:
-        named dimensions
     validate:
         Optional validation of consistency of data arrays.
-    dt:
-        placeholder timestep
 
 
     Notes
@@ -104,68 +89,20 @@ class Dataset:
 
     """
 
-    @overload
-    @deprecated(
-        "Supplying data as a list of numpy arrays is deprecated. Use Dataset.from_numpy instead"
-    )
     def __init__(
         self,
-        data: (Sequence[NDArray[np.floating]]),
-        time: pd.DatetimeIndex | None = None,
-        items: Sequence[ItemInfo] | None = None,
-        geometry: Any = None,
-        zn: NDArray[np.floating] | None = None,
-        dims: tuple[str, ...] | None = None,
+        data: Mapping[str, DataArray] | Sequence[DataArray],
         validate: bool = True,
-        dt: float = 1.0,
-    ): ...
-
-    @overload
-    def __init__(
-        self,
-        data: (Mapping[str, DataArray] | Sequence[DataArray]),
-        time: pd.DatetimeIndex | None = None,
-        items: Sequence[ItemInfo] | None = None,
-        geometry: Any = None,
-        zn: NDArray[np.floating] | None = None,
-        dims: tuple[str, ...] | None = None,
-        validate: bool = True,
-        dt: float = 1.0,
-    ): ...
-
-    def __init__(
-        self,
-        data: (
-            Mapping[str, DataArray]
-            | Sequence[DataArray]
-            | Sequence[NDArray[np.floating]]
-        ),
-        time: pd.DatetimeIndex | None = None,
-        items: Sequence[ItemInfo] | None = None,
-        geometry: Any = None,
-        zn: NDArray[np.floating] | None = None,
-        dims: tuple[str, ...] | None = None,
-        validate: bool = True,
-        dt: float = 1.0,
     ):
-        if not self._is_DataArrays(data):
-            warnings.warn(
-                "Supplying data as a list of numpy arrays is deprecated. Use Dataset.from_numpy",
-                FutureWarning,
-            )
-            data = self._create_dataarrays(
-                data=data,
-                time=time,
-                items=items,
-                geometry=geometry,
-                zn=zn,
-                dims=dims,
-                dt=dt,
-            )
-        self._data_vars = self._init_from_dataarrays(
-            data,  # type: ignore
-            validate=validate,
-        )
+        data_vars = self._dataarrays_as_mapping(data)
+
+        if validate:
+            first, *rest = data_vars.values()
+            for da in rest:
+                first._is_compatible(da, raise_error=True)
+
+        for key, value in data_vars.items():
+            self._set_name_attr(key, value)
         self.plot = _DatasetPlotter(self)
 
     @staticmethod
@@ -180,72 +117,16 @@ class Dataset:
         validate: bool = True,
         dt: float = 1.0,
     ) -> Dataset:
-        das = Dataset._create_dataarrays(
-            data=data,
-            time=time,
-            items=items,
-            geometry=geometry,
-            zn=zn,
-            dims=dims,
-            dt=dt,
-        )
-
-        return Dataset(das)
-
-    @staticmethod
-    def _is_DataArrays(data: Any) -> bool:
-        """Check if input is Sequence/Mapping of DataArrays."""
-        if isinstance(data, (Dataset, DataArray)):
-            return True
-        if isinstance(data, Mapping):
-            for da in data.values():
-                if not isinstance(da, DataArray):
-                    raise TypeError("Please provide List/Mapping of DataArrays")
-            return True
-        if isinstance(data, Iterable):
-            for da in data:
-                if not isinstance(da, DataArray):
-                    return False
-                    # raise TypeError("Please provide List/Mapping of DataArrays")
-            return True
-        return False
-
-    @staticmethod
-    def _create_dataarrays(
-        data: Any,
-        time: pd.DatetimeIndex,
-        items: Any,
-        geometry: Any,
-        zn: Any,
-        dims: Any,
-        dt: float,
-    ) -> Mapping[str, DataArray]:
-        if not isinstance(data, Iterable):
-            data = [data]
         items = Dataset._parse_items(items, len(data))
 
-        # TODO: skip validation for all items after the first?
-        data_vars = {}
-        for dd, it in zip(data, items):
-            data_vars[it.name] = DataArray(
+        data_vars = {
+            it.name: DataArray(
                 data=dd, time=time, item=it, geometry=geometry, zn=zn, dims=dims, dt=dt
             )
-        return data_vars
+            for dd, it in zip(data, items)
+        }
 
-    def _init_from_dataarrays(
-        self, data: Sequence[DataArray] | Mapping[str, DataArray], validate: bool = True
-    ) -> dict[str, DataArray]:
-        data_vars = self._dataarrays_as_mapping(data)
-
-        if validate:
-            first, *rest = data_vars.values()
-            for da in rest:
-                first._is_compatible(da, raise_error=True)
-
-        for key, value in data_vars.items():
-            self._set_name_attr(key, value)
-
-        return data_vars
+        return Dataset(data_vars, validate=validate)
 
     @property
     def values(self) -> None:
@@ -700,11 +581,6 @@ class Dataset:
                 )
                 return self.isel(time=time_steps)
 
-        if self._multi_indexing_attempted(key):
-            raise TypeError(
-                f"Indexing with key {key} failed. Dataset does not allow multi-indexing. Use isel() or sel() instead."
-            )
-
         # select items
         key = self._key_to_str(key)
 
@@ -726,9 +602,7 @@ class Dataset:
                 raise KeyError(f"No item named: {key}. Valid items: {item_names}")
 
         if isinstance(key, Iterable):
-            data_vars = {}
-            for v in key:
-                data_vars[v] = self._data_vars[v]
+            data_vars = {v: self._data_vars[v] for v in key}
             return Dataset(data=data_vars, validate=False)
 
         raise TypeError(f"indexing with a {type(key)} is not (yet) supported")
@@ -759,25 +633,6 @@ class Dataset:
 
         return False  # type: ignore
 
-    def _multi_indexing_attempted(self, key: Any) -> bool:
-        # find out if user is attempting ds[2, :, 1] or similar (not allowed)
-        # this is not bullet-proof, but a good estimate
-        if not isinstance(key, tuple):
-            return False
-        for k in key:
-            if isinstance(k, slice):
-                # warnings.warn(f"Key is a tuple containing a slice")
-                return True
-            if not isinstance(k, (str, int)):
-                # warnings.warn(f"Key is a tuple containing illegal type {type(k)}")
-                return True
-        if len(set(key)) != len(key):
-            return True
-        warnings.warn(
-            "A tuple of item numbers/names was provided as index to Dataset. This can lead to ambiguity and it is recommended to use a list instead."
-        )
-        return False
-
     # TODO change this to return a single type
     def _key_to_str(self, key: Any) -> Any:
         """Translate item selection key to str (or list[str])."""
@@ -786,15 +641,10 @@ class Dataset:
         if isinstance(key, int):
             return list(self._data_vars.keys())[key]
         if isinstance(key, slice):
-            s = key.indices(len(self))
-            return self._key_to_str(list(range(*s)))
+            start, stop, step = key.indices(len(self))
+            return self._key_to_str(list(range(start, stop, step)))
         if isinstance(key, Iterable):
-            keys = []
-            for k in key:
-                keys.append(self._key_to_str(k))
-            return keys
-        if hasattr(key, "name"):
-            return key.name
+            return [self._key_to_str(k) for k in key]
         raise TypeError(f"indexing with type {type(key)} is not supported")
 
     def __delitem__(self, key: Hashable | int) -> None:
