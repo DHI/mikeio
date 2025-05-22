@@ -206,19 +206,18 @@ class _GeometryFMLayered(_GeometryFM):
 
         """
         elem_tbl = np.empty(len(elements), dtype=np.dtype("O"))
-        if (node_layers == "all") or self.is_2d:
+        if node_layers == "all":
             for j, eid in enumerate(elements):
-                elem_tbl[j] = np.asarray(self.element_table[eid])
+                elem_tbl[j] = self.element_table[eid]
 
         else:
             # 3D => 2D
             for j, eid in enumerate(elements):
-                elem_nodes = np.asarray(self.element_table[eid])
-                nn = len(elem_nodes)
-                halfn = int(nn / 2)
+                elem_nodes = self.element_table[eid]
+                halfn = len(elem_nodes) // 2
                 if node_layers == "bottom":
                     elem_nodes = elem_nodes[:halfn]
-                if node_layers == "top":
+                elif node_layers == "top":
                     elem_nodes = elem_nodes[halfn:]
                 elem_tbl[j] = elem_nodes
 

@@ -662,3 +662,14 @@ def test_write_3d_non_equidistant(tmp_path: Path) -> None:
 
     # but getting the end time is not that expensive
     assert dfs.end_time == pd.Timestamp("2000-01-10")
+
+
+def test_isel_3d_single_time() -> None:
+    ds = mikeio.Dfsu3D("tests/testdata/basin_3d.dfsu").read()
+    ds1 = ds.isel(element=[0, 1])
+    assert ds1.geometry.n_elements == 2
+
+    ds2 = ds.isel(time=-1)
+    assert "time" not in ds2.dims
+    ds3 = ds2.isel(element=[0, 1])
+    assert ds3.geometry.n_elements == 2

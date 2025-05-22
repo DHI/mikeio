@@ -804,12 +804,15 @@ class DataArray:
                 spatial_axis = axis - 1 if self.dims[0] == "time" else axis
                 geometry = self.geometry.isel(idx, axis=spatial_axis)
 
-            # TODO this is ugly
             if isinstance(geometry, _GeometryFMLayered):
                 node_ids, _ = self.geometry._get_nodes_and_table_for_elements(
                     idx, node_layers="all"
                 )
-                zn = self._zn[:, node_ids]  # type: ignore
+                assert isinstance(self._zn, np.ndarray)
+                if self._zn.ndim == 2:
+                    zn = self._zn[:, node_ids]
+                else:
+                    zn = self._zn[node_ids]
 
         # reduce dims only if singleton idx
         dims = (
