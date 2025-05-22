@@ -163,7 +163,7 @@ class Dataset:
                 dims=dims,
                 dt=dt,
             )
-        self._data_vars = self._init_from_DataArrays(
+        self._data_vars = self._init_from_dataarrays(
             data,  # type: ignore
             validate=validate,
         )
@@ -233,15 +233,14 @@ class Dataset:
             )
         return data_vars
 
-    def _init_from_DataArrays(
+    def _init_from_dataarrays(
         self, data: Sequence[DataArray] | Mapping[str, DataArray], validate: bool = True
-    ) -> MutableMapping[str, DataArray]:
-        """Initialize Dataset object with Iterable of DataArrays."""
-        data_vars = self._DataArrays_as_mapping(data)
+    ) -> dict[str, DataArray]:
+        data_vars = self._dataarrays_as_mapping(data)
 
-        if (len(data_vars) > 1) and validate:
-            first = list(data_vars.values())[0]
-            for da in data_vars.values():
+        if validate:
+            first, *rest = data_vars.values()
+            for da in rest:
                 first._is_compatible(da, raise_error=True)
 
         for key, value in data_vars.items():
@@ -304,62 +303,19 @@ class Dataset:
         return item_infos
 
     @staticmethod
-    def _DataArrays_as_mapping(
+    def _dataarrays_as_mapping(
         data: DataArray | Sequence[DataArray] | Mapping[str, DataArray],
-    ) -> MutableMapping[str, DataArray]:
-        """Create dict of DataArrays if necessary."""
-        if isinstance(data, MutableMapping):
-            data_vars = Dataset._validate_item_names_and_keys(
-                data
-            )  # TODO is this necessary?
-            _ = Dataset._unique_item_names(list(data_vars.values()))
-            return data_vars
+    ) -> dict[str, DataArray]:
+        if isinstance(data, Mapping):
+            for key, da in data.items():
+                da.name = key
+            return {key: da for key, da in data.items()}
 
         if isinstance(data, DataArray):
             data = [data]
         assert isinstance(data, Sequence)
-        item_names = Dataset._unique_item_names(data)
+        item_names = [da.name for da in data]
         return {key: da for key, da in zip(item_names, data)}
-
-    @staticmethod
-    def _validate_item_names_and_keys(
-        data_map: MutableMapping[str, DataArray],
-    ) -> MutableMapping[str, DataArray]:
-        for key, da in data_map.items():
-            if da.name == "NoName":
-                da.name = key
-            elif da.name != key:
-                warnings.warn(
-                    f"The key {key} does not match the item name ({da.name}) of the corresponding DataArray. Item name will be replaced with key."
-                )
-                da.name = key
-        return data_map
-
-    @staticmethod
-    def _unique_item_names(das: Sequence[DataArray]) -> list[str]:
-        item_names = [da.name for da in das]
-        if len(set(item_names)) != len(item_names):
-            raise ValueError(
-                f"Item names must be unique! ({item_names}). Please rename before constructing Dataset."
-            )
-        return item_names
-
-    @staticmethod
-    def _id_of_DataArrays_equal(da1: DataArray, da2: DataArray) -> None:
-        """Check if two DataArrays are actually the same object."""
-        if id(da1) == id(da2):
-            raise ValueError(
-                f"Cannot add the same object ({da1.name}) twice! Create a copy first."
-            )
-        if id(da1.values) == id(da2.values):
-            raise ValueError(
-                f"DataArrays {da1.name} and {da2.name} refer to the same data! Create a copy first."
-            )
-
-    def _check_already_present(self, new_da: DataArray) -> None:
-        """Is the DataArray already present in the Dataset?"""
-        for da in self:
-            self._id_of_DataArrays_equal(da, new_da)
 
     # ============ end of init =============
 
@@ -619,8 +575,6 @@ class Dataset:
                 key_str = self.names[key]
                 self._data_vars[key_str] = value
             else:
-                self._check_already_present(value)
-
                 if item_name in self.names:
                     raise ValueError(
                         f"Item name {item_name} already in Dataset ({self.names})"
@@ -638,13 +592,8 @@ class Dataset:
 
             self._set_name_attr(item_name, value)
         else:
-            is_replacement = key in self.names
             if key != item_name:
-                # TODO: what would be best in this situation?
-                # Assignment to a key is enough indication that the user wants to name the item like this
                 value.name = key
-            if not is_replacement:
-                self._check_already_present(value)
             self._data_vars[key] = value
             self._set_name_attr(key, value)
 

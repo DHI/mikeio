@@ -106,24 +106,6 @@ def test_insert(ds1: Dataset) -> None:
     assert ds1[-1] == da
 
 
-def test_insert_fail(ds1: Dataset) -> None:
-    da = ds1[0]
-    with pytest.raises(ValueError, match="Cannot add the same object"):
-        ds1.insert(2, da)
-
-    vals = ds1[0].values
-    da = ds1[0].copy()
-    da.values = vals
-    with pytest.raises(ValueError, match="refer to the same data"):
-        ds1.insert(2, da)
-
-    assert "Foo" in ds1.names
-    da2 = ds1[0].copy()
-    da2.name = "Foo"
-    with pytest.raises(ValueError, match="already in"):
-        ds1.insert(2, da2)
-
-
 def test_remove(ds1: Dataset) -> None:
     ds1.remove(-1)
     assert len(ds1) == 1
@@ -135,16 +117,19 @@ def test_remove(ds1: Dataset) -> None:
     assert len(ds1) == 0
 
 
+def test_set_item_overwrites_existing_item() -> None:
+    ds = mikeio.read("tests/testdata/NorthSea_HD_and_windspeed.dfsu")
+    assert ds.n_items == 2
+    ws2 = ds["Wind speed"].copy()
+    ws2.values = np.clip(ws2.to_numpy(), 1, 18)
+    ds["Wind speed"] = ws2
+    assert ds.n_items == 2
+
+
 def test_index_with_attribute() -> None:
     nt = 10
     d = np.zeros([nt, 100, 30]) + 1.0
     time = pd.date_range(start=datetime(2000, 1, 1), freq="s", periods=nt)
-
-    # We cannot create a mikeio.Dataset with multiple references to the same DataArray
-    da = mikeio.DataArray(data=d, time=time)
-    data = [da, da]
-    with pytest.raises(ValueError):
-        mikeio.Dataset(data)
 
     da1 = mikeio.DataArray(name="Foo", data=d, time=time)
     da2 = mikeio.DataArray(name="Bar", data=d.copy(), time=time)
@@ -1476,23 +1461,6 @@ def test_incompatible_data_not_allowed() -> None:
         mikeio.Dataset([da1, da2])
 
     assert "shape" in str(excinfo.value).lower()
-
-    da1 = mikeio.read("tests/testdata/tide1.dfs1")[0]
-    da2 = mikeio.read("tests/testdata/tide2.dfs1")[0]
-
-    with pytest.raises(ValueError) as excinfo:
-        mikeio.Dataset([da1, da2])
-
-    assert "name" in str(excinfo.value).lower()
-
-    da1 = mikeio.read("tests/testdata/tide1.dfs1")[0]
-    da2 = mikeio.read("tests/testdata/tide2.dfs1")[0]
-    da2.name = "Foo"
-
-    with pytest.raises(ValueError) as excinfo:
-        mikeio.Dataset([da1, da2])
-
-    assert "time" in str(excinfo.value).lower()
 
 
 def test_xzy_selection() -> None:
