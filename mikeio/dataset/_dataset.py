@@ -111,7 +111,7 @@ class Dataset:
     def from_numpy(
         data: Sequence[NDArray[np.floating]],
         time: pd.DatetimeIndex | None = None,
-        items: Sequence[ItemInfo] | None = None,
+        items: Sequence[ItemInfo] | Sequence[str] | None = None,
         *,
         geometry: Any | None = None,
         zn: NDArray[np.floating] | None = None,
@@ -119,6 +119,27 @@ class Dataset:
         validate: bool = True,
         dt: float = 1.0,
     ) -> Dataset:
+        """Create a Dataset from numpy arrays.
+
+        Parameters
+        ----------
+        data: Sequence[NDArray[np.floating]]
+            Data to be converted to DataArrays
+        time: pd.DatetimeIndex, optional
+            Time axis, by default None
+        items: Sequence[ItemInfo], optional
+            ItemInfo for each DataArray, by default None
+        geometry: Any, optional
+            Geometry of the DataArrays, by default None
+        zn: NDArray[np.floating], optional
+            Z-coordinates of the DataArrays, by default None
+        dims: tuple[str, ...], optional
+            Named dimensions of the DataArrays, by default None
+        validate: bool, optional
+            Validate the DataArrays, by default True
+        dt: float, optional
+            Dummy time step in seconds, by default 1.0
+        """
         item_infos = Dataset._parse_items(items, len(data))
 
         data_vars = {
@@ -157,7 +178,7 @@ class Dataset:
 
     @staticmethod
     def _parse_items(
-        items: None | Sequence[ItemInfo], n_items_data: int
+        items: None | Sequence[ItemInfo | str], n_items_data: int
     ) -> list[ItemInfo]:
         if items is None:
             item_infos = [ItemInfo(f"Item_{j + 1}") for j in range(n_items_data)]
@@ -167,7 +188,13 @@ class Dataset:
                     f"Number of items ({len(items)}) must match len of data ({n_items_data})"
                 )
 
-            item_infos = list(items)
+            item_infos = []
+            for item in items:
+                if isinstance(item, str):
+                    item = ItemInfo(item)
+                elif not isinstance(item, ItemInfo):
+                    raise TypeError(f"items of type: {type(item)} is not supported")
+                item_infos.append(item)
 
             item_names = [it.name for it in item_infos]
             item_names = Dataset._modify_list(item_names)
