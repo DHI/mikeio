@@ -1003,22 +1003,11 @@ def change_datatype(
     dfs_out = _clone(infilename, outfilename, datatype=datatype)
     dfs_in = DfsFileFactory.DfsGenericOpen(infilename)
 
-    item_numbers = _valid_item_numbers(dfs_in.ItemInfo)
-    n_items = len(item_numbers)
-    n_time_steps = dfs_in.FileInfo.TimeAxis.NumberOfTimeSteps
-    deletevalue = dfs_in.FileInfo.DeleteValueFloat
-
-    # Write data to outputfile with new datatype
-    for timestep in trange(n_time_steps, disable=True):
-        for item in range(n_items):
-            itemdata = dfs_in.ReadItemTimeStep(item_numbers[item] + 1, timestep)
-            time = itemdata.Time
-            d = itemdata.Data
-            d[d == deletevalue] = np.nan
-            outdata = d
-            outdata[np.isnan(outdata)] = deletevalue
-            darray = outdata.astype(np.float32)
-            dfs_out.WriteItemTimeStep(item_numbers[item] + 1, timestep, time, darray)
+    # Copy dynamic item data
+    sourceData = dfs_in.ReadItemTimeStepNext()
+    while sourceData:
+        dfs_out.WriteItemTimeStepNext(sourceData.Time, sourceData.Data)
+        sourceData = dfs_in.ReadItemTimeStepNext()
 
     dfs_out.Close()
     dfs_in.Close()
