@@ -139,6 +139,7 @@ class Dataset:
             Validate the DataArrays, by default True
         dt: float, optional
             Dummy time step in seconds, by default 1.0
+
         """
         item_infos = Dataset._parse_items(items, len(data))
 
