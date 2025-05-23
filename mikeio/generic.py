@@ -95,7 +95,7 @@ def _clone(
     start_time: datetime | None = None,
     timestep: float | None = None,
     items: Sequence[int | DfsDynamicItemInfo] | None = None,
-    datatype: int = None,
+    datatype: int | None = None,
 ) -> DfsFile:
     source = DfsFileFactory.DfsGenericOpen(str(infilename))
     fi = source.FileInfo
@@ -971,7 +971,7 @@ def change_datatype(
     infilename: str | pathlib.Path,
     outfilename: str | pathlib.Path,
     datatype: int,
-):
+) -> None:
     """Change datatype of a DFS file.
 
     The data type tag is used to classify the file within a specific modeling context,
