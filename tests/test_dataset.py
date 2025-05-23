@@ -988,7 +988,6 @@ def test_properties_dfs2() -> None:
     assert ds.n_timesteps == 1
     assert ds.n_items == 1
     assert np.all(ds.shape == (1, 264, 216))
-    assert ds.n_elements == (264 * 216)
     assert ds.is_equidistant
 
 
@@ -1002,7 +1001,6 @@ def test_properties_dfsu() -> None:
     assert ds.timestep == (3 * 3600)
     assert ds.n_items == 2
     assert np.all(ds.shape == (3, 441))
-    assert ds.n_elements == 441
     assert ds.is_equidistant
 
 

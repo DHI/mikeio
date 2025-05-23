@@ -213,13 +213,11 @@ class Dataset:
     @property
     def start_time(self) -> datetime:
         """First time instance (as datetime)."""
-        # TODO: use pd.Timestamp instead
         return self.time[0].to_pydatetime()  # type: ignore
 
     @property
     def end_time(self) -> datetime:
         """Last time instance (as datetime)."""
-        # TODO: use pd.Timestamp instead
         return self.time[-1].to_pydatetime()  # type: ignore
 
     @property
@@ -300,15 +298,6 @@ class Dataset:
     @property
     def _zn(self) -> np.ndarray | None:
         return self[0]._zn
-
-    # TODO: remove this
-    @property
-    def n_elements(self) -> int:
-        """Number of spatial elements/points."""
-        n_elem = int(np.prod(self.shape))
-        if self.n_timesteps > 1:
-            n_elem = int(n_elem / self.n_timesteps)
-        return n_elem
 
     def describe(self, **kwargs: Any) -> pd.DataFrame:
         """Generate descriptive statistics.
