@@ -287,7 +287,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <li>unit - an <a href="../api/EUMUnit.html#mikeio.EUMUnit"><code>EUMUnit</code></a></li>
 </ul>
 <p>The ItemInfo class has some sensible defaults, thus you can specify only a name or a type. If you don’t specify a unit, the default unit for that type will be used.</p>
-<div id="703164c0" class="cell" data-execution_count="1">
+<div id="6374083f" class="cell" data-execution_count="1">
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> mikeio <span class="im">import</span> ItemInfo, EUMType, EUMUnit</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>item <span class="op">=</span> ItemInfo(<span class="st">"Viken"</span>, EUMType.Water_Level)</span>
@@ -296,47 +296,47 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <pre><code>Viken &lt;Water Level&gt; (meter)</code></pre>
 </div>
 </div>
-<div id="f42f8bf5" class="cell" data-execution_count="2">
+<div id="7535744e" class="cell" data-execution_count="2">
 <div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>ItemInfo(EUMType.Wind_speed)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="2">
 <pre><code>Wind speed &lt;Wind speed&gt; (meter per sec)</code></pre>
 </div>
 </div>
-<div id="69389881" class="cell" data-execution_count="3">
+<div id="37e52821" class="cell" data-execution_count="3">
 <div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>ItemInfo(<span class="st">"Viken"</span>, EUMType.Water_Level, EUMUnit.feet)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="3">
 <pre><code>Viken &lt;Water Level&gt; (feet)</code></pre>
 </div>
 </div>
 <p>Matching units for specific type:</p>
-<div id="f11db75e" class="cell" data-execution_count="4">
+<div id="21919b18" class="cell" data-execution_count="4">
 <div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>EUMType.Wind_speed.units</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="4">
 <pre><code>[meter per sec, feet per sec, knot, km per hour, miles per hour]</code></pre>
 </div>
 </div>
 <p>Default unit:</p>
-<div id="0a3ea9e2" class="cell" data-execution_count="5">
+<div id="03e2d1ca" class="cell" data-execution_count="5">
 <div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>EUMType.Precipitation_Rate.units[<span class="dv">0</span>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="5">
 <pre><code>mm per day</code></pre>
 </div>
 </div>
-<div id="cd712cbc" class="cell" data-execution_count="6">
+<div id="8ec883e6" class="cell" data-execution_count="6">
 <div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>unit <span class="op">=</span> EUMType.Precipitation_Rate.units[<span class="dv">0</span>]</span>
 <span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>unit</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="6">
 <pre><code>mm per day</code></pre>
 </div>
 </div>
-<div id="61a87896" class="cell" data-execution_count="7">
+<div id="7c1fe621" class="cell" data-execution_count="7">
 <div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="bu">type</span>(unit)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="7">
 <pre><code>&lt;enum 'EUMUnit'&gt;</code></pre>
 </div>
 </div>
 <p>an <a href="../api/EUMUnit.html#mikeio.EUMUnit"><code>EUMUnit</code></a> is encoded as integers, which you can utilize in some MIKE applications.</p>
-<div id="21e11467" class="cell" data-execution_count="8">
+<div id="80298da1" class="cell" data-execution_count="8">
 <div class="sourceCode cell-code" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="bu">int</span>(unit)</span>
 <span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a><span class="dv">2004</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="8">
@@ -346,7 +346,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <section id="eum-type-search" class="level2">
 <h2 class="anchored" data-anchor-id="eum-type-search">EUM type search</h2>
 <p>It is also possible to do a string based search, e.g.&nbsp;to find all EUM types containing the substring ‘period’:</p>
-<div id="6c6c2d4d" class="cell" data-execution_count="9">
+<div id="9accc70c" class="cell" data-execution_count="9">
 <div class="sourceCode cell-code" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>EUMType.search(<span class="st">"period"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="9">
 <pre><code>[Wave period, Return period, Update Period, Threshold period]</code></pre>
