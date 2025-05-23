@@ -972,7 +972,19 @@ def change_datatype(
     outfilename: str | pathlib.Path,
     datatype: int,
 ):
-    """Create temporal quantiles of all items in dfs file.
+    """Change datatype of a DFS file.
+
+    The data type tag is used to classify the file within a specific modeling context,
+    such as MIKE 21. There is no global standard for these tags—they are interpreted
+    locally within a model setup.
+
+    Application developers can use these tags to classify files such as
+    bathymetries, input data, or result files according to their own conventions.
+
+    Default data type values assigned by MikeIO when creating new files are:
+    - dfs0: datatype=1
+    - dfs1-3: datatype=0
+    - dfsu: datatype=2001
 
     Parameters
     ----------
@@ -985,9 +997,7 @@ def change_datatype(
 
     Examples
     --------
-    >>> quantile("in.dfsu", "out.dfsu", datatype=107)
-
-    >>> quantile("huge.dfsu", "Q01.dfsu", q=0.1, buffer_size=5.0e9)
+    >>> change_datatype("in.dfsu", "out.dfsu", datatype=107)
 
     """
     dfs_out = _clone(infilename, outfilename, datatype=datatype)
@@ -998,7 +1008,7 @@ def change_datatype(
     n_time_steps = dfs_in.FileInfo.TimeAxis.NumberOfTimeSteps
     deletevalue = dfs_in.FileInfo.DeleteValueFloat
 
-    # Rewrite the data FIXME: can we do this in a more elegant way?
+    # Write data to outputfile with new datatype
     for timestep in trange(n_time_steps, disable=True):
         for item in range(n_items):
             itemdata = dfs_in.ReadItemTimeStep(item_numbers[item] + 1, timestep)
