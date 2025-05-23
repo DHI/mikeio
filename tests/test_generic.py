@@ -668,6 +668,10 @@ def test_change_datatype_dfs0(tmp_path: Path) -> None:
 
     assert datatype_out == OUT_DATA_TYPE
     assert n_timesteps_in == n_timesteps_out
+    # Also check that data is not modified
+    org = mikeio.read(infilename).to_numpy()
+    new = mikeio.read(outfilename).to_numpy()
+    assert np.allclose(org, new, rtol=1e-08, atol=1e-10, equal_nan=True)
 
 
 def test_change_datatype_dfsu(tmp_path: Path) -> None:
@@ -688,3 +692,8 @@ def test_change_datatype_dfsu(tmp_path: Path) -> None:
 
     assert datatype_out == OUT_DATA_TYPE
     assert n_timesteps_in == n_timesteps_out
+
+    # Also check that data is not modified
+    org = mikeio.read(infilename).to_numpy()
+    new = mikeio.read(outfilename).to_numpy()
+    assert np.allclose(org, new, rtol=1e-08, atol=1e-10, equal_nan=True)
