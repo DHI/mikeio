@@ -347,7 +347,7 @@ class DataArray:
                 raise ValueError("zn can only be provided for layered dfsu data")
         return zn
 
-    def _is_compatible(self, other: "DataArray", raise_error: bool = False) -> bool:
+    def _is_compatible(self, other: "DataArray") -> bool:
         """check if other DataArray has equivalent dimensions, time and geometry."""
         problems = []
         assert isinstance(other, DataArray)
@@ -376,7 +376,7 @@ class DataArray:
         if self.dims != other.dims:
             problems.append("Dimension names (dims) must be the same")
 
-        if raise_error and len(problems) > 0:
+        if len(problems) > 0:
             raise ValueError(", ".join(problems))
 
         return len(problems) == 0

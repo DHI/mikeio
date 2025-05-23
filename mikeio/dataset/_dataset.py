@@ -99,7 +99,7 @@ class Dataset:
         if validate:
             first, *rest = data_vars.values()
             for da in rest:
-                first._is_compatible(da, raise_error=True)
+                first._is_compatible(da)
 
         self._data_vars = data_vars
 
@@ -566,6 +566,7 @@ class Dataset:
 
         raise TypeError(f"indexing with a {type(key)} is not (yet) supported")
 
+    # deprecated
     def _is_slice_time_slice(self, s: slice) -> bool:
         if (s.start is None) and (s.stop is None):
             return False
@@ -577,6 +578,7 @@ class Dataset:
                 return False
         return True
 
+    # deprecated
     def _is_key_time(self, key: Any) -> bool:
         if isinstance(key, slice):
             return False
@@ -592,7 +594,6 @@ class Dataset:
 
         return False  # type: ignore
 
-    # TODO change this to return a single type
     def _key_to_str(self, key: Any) -> Any:
         """Translate item selection key to str (or list[str])."""
         if isinstance(key, str):

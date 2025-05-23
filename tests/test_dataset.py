@@ -1411,6 +1411,16 @@ def test_incompatible_data_not_allowed() -> None:
     assert "shape" in str(excinfo.value).lower()
 
 
+def test_setitem_incompatible_data_not_allowed() -> None:
+    ds1 = mikeio.read("tests/testdata/HD2D.dfsu")
+    da2 = mikeio.read("tests/testdata/oresundHD_run1.dfsu")[1]
+
+    with pytest.raises(ValueError) as excinfo:
+        ds1["foo"] = da2
+
+    assert "shape" in str(excinfo.value).lower()
+
+
 def test_xzy_selection() -> None:
     # select in space via x,y,z coordinates test
     filename = "tests/testdata/oresund_sigma_z.dfsu"
