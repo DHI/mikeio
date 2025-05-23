@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import Any, TYPE_CHECKING
+from typing import Any, TYPE_CHECKING, Sequence
 
 from matplotlib.figure import Figure
 import numpy as np
@@ -78,6 +78,7 @@ class _DataArrayPlotter:
 
     def hist(
         self,
+        bins: int | str | Sequence[float] | None = None,
         ax: Axes | None = None,
         figsize: tuple[float, float] | None = None,
         title: str | None = None,
@@ -115,7 +116,7 @@ class _DataArrayPlotter:
         ax = self._get_ax(ax, figsize)
         if title is not None:
             ax.set_title(title)
-        return self._hist(ax, **kwargs)
+        return self._hist(ax, bins=bins, **kwargs)
 
     def _hist(self, ax: Axes, **kwargs: Any) -> Any:
         result = ax.hist(self.da.values.ravel(), **kwargs)
@@ -882,6 +883,7 @@ class _DatasetPlotter:
         y: str | int,
         ax: Axes | None = None,
         figsize: tuple[float, float] | None = None,
+        title: str | None = None,
         **kwargs: Any,
     ) -> Axes:
         """Plot data from two DataArrays against each other in a scatter plot.
@@ -913,8 +915,7 @@ class _DatasetPlotter:
 
         """
         _, ax = self._get_fig_ax(ax, figsize)
-        if "title" in kwargs:
-            title = kwargs.pop("title")
+        if title is not None:
             ax.set_title(title)
         xval = self.ds[x].values.ravel()
         yval = self.ds[y].values.ravel()

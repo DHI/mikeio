@@ -1962,9 +1962,6 @@ class DataArray:
         ----------
         filename: str
             full path to the new dfs file
-        dtype: str, np.dtype, DfsSimpleType, optional
-            Dfs0 only: set the dfs data type of the written data
-            to e.g. np.float64, by default: DfsSimpleType.Float (=np.float32)
         **kwargs: Any
             additional arguments passed to the writing function, e.g. dtype for dfs0
 

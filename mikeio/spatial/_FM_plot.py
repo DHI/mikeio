@@ -616,6 +616,10 @@ def _plot_vertical_profile(
     cmax: float | None = None,
     label: str = "",
     add_colorbar: bool = True,
+    title: str | None = None,
+    cmap: str | Colormap | None = None,
+    ax: Axes | None = None,
+    figsize: tuple[float, float] | None = None,
     **kwargs: Any,
 ) -> Axes:
     import matplotlib.pyplot as plt
@@ -628,9 +632,7 @@ def _plot_vertical_profile(
     elements = _Get_2DVertical_elements(element_table)
 
     # plot in existing or new axes?
-    if "ax" in kwargs:
-        ax = kwargs["ax"]
-    else:
+    if ax is None:
         figsize = None
         if "figsize" in kwargs:
             figsize = kwargs["figsize"]
@@ -639,9 +641,7 @@ def _plot_vertical_profile(
     sz = np.c_[s_coordinate, z_coordinate]
     verts = sz[elements]
 
-    if "cmap" in kwargs:
-        cmap = kwargs["cmap"]
-    else:
+    if cmap is None:
         cmap = "jet"
     pc = PolyCollection(verts, cmap=cmap)
 
@@ -666,8 +666,8 @@ def _plot_vertical_profile(
     ax.set_xlabel("relative distance [m]")
     ax.set_ylabel("z [m]")
 
-    if "title" in kwargs:
-        ax.set_title(kwargs["title"])
+    if title is not None:
+        ax.set_title(title)
 
     return ax
 

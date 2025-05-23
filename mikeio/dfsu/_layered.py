@@ -3,6 +3,7 @@ from pathlib import Path
 from typing import Any, Sequence, TYPE_CHECKING
 
 from matplotlib.axes import Axes
+from matplotlib.colors import Colormap
 import numpy as np
 from mikecore.DfsuFile import DfsuFile, DfsuFileType
 from mikecore.DfsFileFactory import DfsFileFactory
@@ -431,6 +432,10 @@ class Dfsu2DV(DfsuLayered):
         cmin: float | None = None,
         cmax: float | None = None,
         label: str = "",
+        title: str | None = None,
+        cmap: str | Colormap | None = None,
+        ax: Axes | None = None,
+        figsize: tuple[float, float] | None = None,
         **kwargs: Any,
     ) -> Axes:
         """Plot unstructured vertical profile.
@@ -474,6 +479,10 @@ class Dfsu2DV(DfsuLayered):
             cmin=cmin,
             cmax=cmax,
             label=label,
+            title=title,
+            cmap=cmap,
+            figsize=figsize,
+            ax=ax,
             **kwargs,
         )
 
