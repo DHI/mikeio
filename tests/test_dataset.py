@@ -53,11 +53,6 @@ def ds3() -> Dataset:
     return mikeio.Dataset.from_numpy(data=data, time=time, items=items)
 
 
-def test_list_of_numpy_deprecated() -> None:
-    with pytest.warns(FutureWarning, match="from_numpy"):
-        mikeio.Dataset([np.zeros(2)], pd.date_range("2000-1-2", freq="h", periods=2))  # type: ignore
-
-
 def test_get_names() -> None:
     nt = 100
     d = np.zeros([nt, 100, 30]) + 1.0
@@ -106,25 +101,20 @@ def test_insert(ds1: Dataset) -> None:
     assert ds1[-1] == da
 
 
-def test_insert_fail(ds1: Dataset) -> None:
-    da = ds1[0]
-    with pytest.raises(ValueError, match="Cannot add the same object"):
-        ds1.insert(2, da)
-
-    vals = ds1[0].values
+def test_insert_bad_index(ds1: Dataset) -> None:
     da = ds1[0].copy()
-    da.values = vals
-    with pytest.raises(ValueError, match="refer to the same data"):
-        ds1.insert(2, da)
+    da.name = "Baz"
+    assert len(ds1) == 2
+    with pytest.raises(IndexError):
+        ds1[2] = da
 
-    assert "Foo" in ds1.names
-    da2 = ds1[0].copy()
-    da2.name = "Foo"
-    with pytest.raises(ValueError, match="already in"):
-        ds1.insert(2, da2)
+    # inserting at high index is consistent list.insert
+    ds1.insert(999, da)
+    assert len(ds1) == 3
 
 
 def test_remove(ds1: Dataset) -> None:
+    ds2 = ds1.copy()
     ds1.remove(-1)
     assert len(ds1) == 1
     assert ds1.names == ["Foo"]
@@ -134,17 +124,15 @@ def test_remove(ds1: Dataset) -> None:
         ds1.remove("Foo")
     assert len(ds1) == 0
 
+    # idiomatic Python uses del
+    del ds2["Foo"]
+    assert "Foo" not in ds2.names
+
 
 def test_index_with_attribute() -> None:
     nt = 10
     d = np.zeros([nt, 100, 30]) + 1.0
     time = pd.date_range(start=datetime(2000, 1, 1), freq="s", periods=nt)
-
-    # We cannot create a mikeio.Dataset with multiple references to the same DataArray
-    da = mikeio.DataArray(data=d, time=time)
-    data = [da, da]
-    with pytest.raises(ValueError):
-        mikeio.Dataset(data)
 
     da1 = mikeio.DataArray(name="Foo", data=d, time=time)
     da2 = mikeio.DataArray(name="Bar", data=d.copy(), time=time)
@@ -191,17 +179,6 @@ def test_getitem_time(ds3: Dataset) -> None:
         ds_sel = ds3[ds3.time[:10]]  # type: ignore
     assert ds_sel.n_timesteps == 10
     assert ds_sel.is_equidistant
-
-
-def test_getitem_multi_indexing_attempted(ds3: Dataset) -> None:
-    with pytest.raises(TypeError, match="not allow multi-index"):
-        ds3[0, 0]
-    with pytest.warns(Warning, match="ambiguity"):
-        ds3[0, 1]  # indistinguishable from ds3[(0,1)]
-    with pytest.raises(TypeError, match="not allow multi-index"):
-        ds3[:, 1]
-    with pytest.raises(TypeError, match="not allow multi-index"):
-        ds3[-1, [0, 1], 1]
 
 
 def test_select_subset_isel() -> None:
@@ -383,25 +360,6 @@ def test_select_multiple_items_by_slice(ds3: Dataset) -> None:
     assert newds.items[0].name == "Foo"
     assert newds.items[1].name == "Bar"
     assert newds["Foo"].to_numpy()[0, 10, 0] == 1.5
-
-
-def test_select_item_by_iteminfo() -> None:
-    nt = 100
-    d1 = np.zeros([nt, 100, 30]) + 1.5
-    d2 = np.zeros([nt, 100, 30]) + 2.0
-
-    d1[0, 10, :] = 2.0
-    d2[0, 10, :] = 3.0
-    data = [d1, d2]
-
-    time = pd.date_range("2000-1-2", freq="h", periods=nt)
-    items = [ItemInfo("Foo"), ItemInfo("Bar")]
-    ds = mikeio.Dataset.from_numpy(data=data, time=time, items=items)
-
-    foo_item = items[0]
-
-    foo_data = ds[foo_item]
-    assert foo_data.to_numpy()[0, 10, 0] == 2.0
 
 
 def test_select_subset_isel_multiple_idxs() -> None:
@@ -1030,7 +988,6 @@ def test_properties_dfs2() -> None:
     assert ds.n_timesteps == 1
     assert ds.n_items == 1
     assert np.all(ds.shape == (1, 264, 216))
-    assert ds.n_elements == (264 * 216)
     assert ds.is_equidistant
 
 
@@ -1044,31 +1001,7 @@ def test_properties_dfsu() -> None:
     assert ds.timestep == (3 * 3600)
     assert ds.n_items == 2
     assert np.all(ds.shape == (3, 441))
-    assert ds.n_elements == 441
     assert ds.is_equidistant
-
-
-def test_create_empty_data() -> None:
-    ne = 34
-    d = mikeio.Dataset.create_empty_data(n_elements=ne)
-    assert len(d) == 1
-    assert d[0].shape == (1, ne)
-
-    nt = 100
-    d = mikeio.Dataset.create_empty_data(n_timesteps=nt, shape=(3, 4, 6))
-    assert len(d) == 1
-    assert d[0].shape == (nt, 3, 4, 6)
-
-    ni = 4
-    d = mikeio.Dataset.create_empty_data(n_items=ni, n_elements=ne)
-    assert len(d) == ni
-    assert d[-1].shape == (1, ne)
-
-    with pytest.raises(Exception):
-        d = mikeio.Dataset.create_empty_data()
-
-    with pytest.raises(Exception):
-        d = mikeio.Dataset.create_empty_data(n_elements=None, shape=None)
 
 
 def test_create_infer_name_from_eum() -> None:
@@ -1477,22 +1410,15 @@ def test_incompatible_data_not_allowed() -> None:
 
     assert "shape" in str(excinfo.value).lower()
 
-    da1 = mikeio.read("tests/testdata/tide1.dfs1")[0]
-    da2 = mikeio.read("tests/testdata/tide2.dfs1")[0]
+
+def test_setitem_incompatible_data_not_allowed() -> None:
+    ds1 = mikeio.read("tests/testdata/HD2D.dfsu")
+    da2 = mikeio.read("tests/testdata/oresundHD_run1.dfsu")[1]
 
     with pytest.raises(ValueError) as excinfo:
-        mikeio.Dataset([da1, da2])
+        ds1["foo"] = da2
 
-    assert "name" in str(excinfo.value).lower()
-
-    da1 = mikeio.read("tests/testdata/tide1.dfs1")[0]
-    da2 = mikeio.read("tests/testdata/tide2.dfs1")[0]
-    da2.name = "Foo"
-
-    with pytest.raises(ValueError) as excinfo:
-        mikeio.Dataset([da1, da2])
-
-    assert "time" in str(excinfo.value).lower()
+    assert "shape" in str(excinfo.value).lower()
 
 
 def test_xzy_selection() -> None:

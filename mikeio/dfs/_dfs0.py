@@ -19,7 +19,7 @@ from ..eum import EUMType, EUMUnit, ItemInfo, TimeStepUnit, ItemInfoList
 from .._time import DateTimeSelector
 
 
-def _write_dfs0(
+def write_dfs0(
     filename: str | Path,
     dataset: Dataset,
     title: str = "",
@@ -402,7 +402,7 @@ def dataframe_to_dfs0(
         for d, item in zip(data, items)
     }
     ds = Dataset(das)
-    _write_dfs0(filename=filename, dataset=ds, title=title, dtype=dtype)
+    write_dfs0(filename=filename, dataset=ds, title=title, dtype=dtype)
 
 
 # Monkey patching onto Pandas classes

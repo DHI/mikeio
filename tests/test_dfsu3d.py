@@ -193,7 +193,7 @@ def test_flip_column_upside_down() -> None:
     assert dscol.geometry.element_coordinates[0, 2] == pytest.approx(-7.0)
     assert dscol.isel(time=-1)["Temperature"].values[0] == pytest.approx(17.460058)
 
-    idx = list(reversed(range(dscol.n_elements)))
+    idx = list(reversed(range(dscol.geometry.n_elements)))
 
     dscol_ud = dscol.isel(element=idx)
 
@@ -231,7 +231,7 @@ def test_read_dfsu3d_columns_sigma_only() -> None:
     dfs = mikeio.Dfsu3D("tests/testdata/basin_3d.dfsu")
     dscol = dfs.read(x=500, y=50)
     assert isinstance(dscol.geometry, GeometryFMVerticalColumn)
-    assert dscol.n_elements == 10
+    assert dscol.geometry.n_elements == 10
     assert dscol.n_items == dfs.n_items
     assert dscol["U velocity"].isel(time=-1)[-1].values == pytest.approx(0.363413)
 

@@ -8,7 +8,6 @@ from typing import (
     Iterator,
     Literal,
     Mapping,
-    MutableMapping,
     Sequence,
     Any,
     overload,
@@ -17,14 +16,11 @@ from typing import (
     Callable,
 )
 import warnings
-from typing_extensions import deprecated
-# from warnings import deprecated
 
 
 import numpy as np
 from numpy.typing import NDArray
 import pandas as pd
-from mikecore.DfsFile import DfsSimpleType
 
 if TYPE_CHECKING:
     import xarray
@@ -42,6 +38,7 @@ from ..spatial import (
     Grid2D,
     Grid3D,
 )
+
 
 from ..spatial._FM_geometry import _GeometryFM
 
@@ -68,22 +65,9 @@ class Dataset:
     Parameters
     ----------
     data:
-        a sequence or mapping of numpy arrays
-        By providing a mapping of data arrays, the remaining parameters are not needed
-    time:
-        a pandas.DatetimeIndex with the time instances of the data
-    items:
-        a list of ItemInfo with name, type and unit
-    geometry:
-        a geometry object e.g. Grid2D or GeometryFM2D
-    zn:
-        only relevant for Dfsu3d
-    dims:
-        named dimensions
+        DataArray, list of DataArrays or dict of DataArrays
     validate:
         Optional validation of consistency of data arrays.
-    dt:
-        placeholder timestep
 
 
     Notes
@@ -105,68 +89,22 @@ class Dataset:
 
     """
 
-    @overload
-    @deprecated(
-        "Supplying data as a list of numpy arrays is deprecated. Use Dataset.from_numpy instead"
-    )
     def __init__(
         self,
-        data: (Sequence[NDArray[np.floating]]),
-        time: pd.DatetimeIndex | None = None,
-        items: Sequence[ItemInfo] | None = None,
-        geometry: Any = None,
-        zn: NDArray[np.floating] | None = None,
-        dims: tuple[str, ...] | None = None,
+        data: Mapping[str, DataArray] | Sequence[DataArray],
         validate: bool = True,
-        dt: float = 1.0,
-    ): ...
-
-    @overload
-    def __init__(
-        self,
-        data: (Mapping[str, DataArray] | Sequence[DataArray]),
-        time: pd.DatetimeIndex | None = None,
-        items: Sequence[ItemInfo] | None = None,
-        geometry: Any = None,
-        zn: NDArray[np.floating] | None = None,
-        dims: tuple[str, ...] | None = None,
-        validate: bool = True,
-        dt: float = 1.0,
-    ): ...
-
-    def __init__(
-        self,
-        data: (
-            Mapping[str, DataArray]
-            | Sequence[DataArray]
-            | Sequence[NDArray[np.floating]]
-        ),
-        time: pd.DatetimeIndex | None = None,
-        items: Sequence[ItemInfo] | None = None,
-        geometry: Any = None,
-        zn: NDArray[np.floating] | None = None,
-        dims: tuple[str, ...] | None = None,
-        validate: bool = True,
-        dt: float = 1.0,
     ):
-        if not self._is_DataArrays(data):
-            warnings.warn(
-                "Supplying data as a list of numpy arrays is deprecated. Use Dataset.from_numpy",
-                FutureWarning,
-            )
-            data = self._create_dataarrays(
-                data=data,
-                time=time,
-                items=items,
-                geometry=geometry,
-                zn=zn,
-                dims=dims,
-                dt=dt,
-            )
-        self._data_vars = self._init_from_DataArrays(
-            data,  # type: ignore
-            validate=validate,
-        )
+        data_vars = self._dataarrays_as_mapping(data)
+
+        if validate:
+            first, *rest = data_vars.values()
+            for da in rest:
+                first._is_compatible(da)
+
+        self._data_vars = data_vars
+
+        for key, value in data_vars.items():
+            self._set_name_attr(key, value)
         self.plot = _DatasetPlotter(self)
 
     @staticmethod
@@ -181,73 +119,16 @@ class Dataset:
         validate: bool = True,
         dt: float = 1.0,
     ) -> Dataset:
-        das = Dataset._create_dataarrays(
-            data=data,
-            time=time,
-            items=items,
-            geometry=geometry,
-            zn=zn,
-            dims=dims,
-            dt=dt,
-        )
+        item_infos = Dataset._parse_items(items, len(data))
 
-        return Dataset(das)
-
-    @staticmethod
-    def _is_DataArrays(data: Any) -> bool:
-        """Check if input is Sequence/Mapping of DataArrays."""
-        if isinstance(data, (Dataset, DataArray)):
-            return True
-        if isinstance(data, Mapping):
-            for da in data.values():
-                if not isinstance(da, DataArray):
-                    raise TypeError("Please provide List/Mapping of DataArrays")
-            return True
-        if isinstance(data, Iterable):
-            for da in data:
-                if not isinstance(da, DataArray):
-                    return False
-                    # raise TypeError("Please provide List/Mapping of DataArrays")
-            return True
-        return False
-
-    @staticmethod
-    def _create_dataarrays(
-        data: Any,
-        time: pd.DatetimeIndex,
-        items: Any,
-        geometry: Any,
-        zn: Any,
-        dims: Any,
-        dt: float,
-    ) -> Mapping[str, DataArray]:
-        if not isinstance(data, Iterable):
-            data = [data]
-        items = Dataset._parse_items(items, len(data))
-
-        # TODO: skip validation for all items after the first?
-        data_vars = {}
-        for dd, it in zip(data, items):
-            data_vars[it.name] = DataArray(
+        data_vars = {
+            it.name: DataArray(
                 data=dd, time=time, item=it, geometry=geometry, zn=zn, dims=dims, dt=dt
             )
-        return data_vars
+            for dd, it in zip(data, item_infos)
+        }
 
-    def _init_from_DataArrays(
-        self, data: Sequence[DataArray] | Mapping[str, DataArray], validate: bool = True
-    ) -> MutableMapping[str, DataArray]:
-        """Initialize Dataset object with Iterable of DataArrays."""
-        data_vars = self._DataArrays_as_mapping(data)
-
-        if (len(data_vars) > 1) and validate:
-            first = list(data_vars.values())[0]
-            for da in data_vars.values():
-                first._is_compatible(da, raise_error=True)
-
-        for key, value in data_vars.items():
-            self._set_name_attr(key, value)
-
-        return data_vars
+        return Dataset(data_vars, validate=validate)
 
     @property
     def values(self) -> None:
@@ -276,10 +157,9 @@ class Dataset:
 
     @staticmethod
     def _parse_items(
-        items: None | Sequence[ItemInfo | EUMType | str], n_items_data: int
+        items: None | Sequence[ItemInfo], n_items_data: int
     ) -> list[ItemInfo]:
         if items is None:
-            # default Undefined items
             item_infos = [ItemInfo(f"Item_{j + 1}") for j in range(n_items_data)]
         else:
             if len(items) != n_items_data:
@@ -287,14 +167,7 @@ class Dataset:
                     f"Number of items ({len(items)}) must match len of data ({n_items_data})"
                 )
 
-            item_infos = []
-            for item in items:
-                if isinstance(item, (EUMType, str)):
-                    item = ItemInfo(item)
-                elif not isinstance(item, ItemInfo):
-                    raise TypeError(f"items of type: {type(item)} is not supported")
-                # TODO: item.name = self._to_safe_name(item.name)
-                item_infos.append(item)
+            item_infos = list(items)
 
             item_names = [it.name for it in item_infos]
             item_names = Dataset._modify_list(item_names)
@@ -304,62 +177,19 @@ class Dataset:
         return item_infos
 
     @staticmethod
-    def _DataArrays_as_mapping(
+    def _dataarrays_as_mapping(
         data: DataArray | Sequence[DataArray] | Mapping[str, DataArray],
-    ) -> MutableMapping[str, DataArray]:
-        """Create dict of DataArrays if necessary."""
-        if isinstance(data, MutableMapping):
-            data_vars = Dataset._validate_item_names_and_keys(
-                data
-            )  # TODO is this necessary?
-            _ = Dataset._unique_item_names(list(data_vars.values()))
-            return data_vars
+    ) -> dict[str, DataArray]:
+        if isinstance(data, Mapping):
+            for key, da in data.items():
+                da.name = key
+            return {key: da for key, da in data.items()}
 
         if isinstance(data, DataArray):
             data = [data]
         assert isinstance(data, Sequence)
-        item_names = Dataset._unique_item_names(data)
+        item_names = [da.name for da in data]
         return {key: da for key, da in zip(item_names, data)}
-
-    @staticmethod
-    def _validate_item_names_and_keys(
-        data_map: MutableMapping[str, DataArray],
-    ) -> MutableMapping[str, DataArray]:
-        for key, da in data_map.items():
-            if da.name == "NoName":
-                da.name = key
-            elif da.name != key:
-                warnings.warn(
-                    f"The key {key} does not match the item name ({da.name}) of the corresponding DataArray. Item name will be replaced with key."
-                )
-                da.name = key
-        return data_map
-
-    @staticmethod
-    def _unique_item_names(das: Sequence[DataArray]) -> list[str]:
-        item_names = [da.name for da in das]
-        if len(set(item_names)) != len(item_names):
-            raise ValueError(
-                f"Item names must be unique! ({item_names}). Please rename before constructing Dataset."
-            )
-        return item_names
-
-    @staticmethod
-    def _id_of_DataArrays_equal(da1: DataArray, da2: DataArray) -> None:
-        """Check if two DataArrays are actually the same object."""
-        if id(da1) == id(da2):
-            raise ValueError(
-                f"Cannot add the same object ({da1.name}) twice! Create a copy first."
-            )
-        if id(da1.values) == id(da2.values):
-            raise ValueError(
-                f"DataArrays {da1.name} and {da2.name} refer to the same data! Create a copy first."
-            )
-
-    def _check_already_present(self, new_da: DataArray) -> None:
-        """Is the DataArray already present in the Dataset?"""
-        for da in self:
-            self._id_of_DataArrays_equal(da, new_da)
 
     # ============ end of init =============
 
@@ -383,13 +213,11 @@ class Dataset:
     @property
     def start_time(self) -> datetime:
         """First time instance (as datetime)."""
-        # TODO: use pd.Timestamp instead
         return self.time[0].to_pydatetime()  # type: ignore
 
     @property
     def end_time(self) -> datetime:
         """Last time instance (as datetime)."""
-        # TODO: use pd.Timestamp instead
         return self.time[-1].to_pydatetime()  # type: ignore
 
     @property
@@ -470,15 +298,6 @@ class Dataset:
     @property
     def _zn(self) -> np.ndarray | None:
         return self[0]._zn
-
-    # TODO: remove this
-    @property
-    def n_elements(self) -> int:
-        """Number of spatial elements/points."""
-        n_elem = int(np.prod(self.shape))
-        if self.n_timesteps > 1:
-            n_elem = int(n_elem / self.n_timesteps)
-        return n_elem
 
     def describe(self, **kwargs: Any) -> pd.DataFrame:
         """Generate descriptive statistics.
@@ -572,28 +391,6 @@ class Dataset:
             name=name,
         )
 
-    # TODO: delete this?
-    @staticmethod
-    def create_empty_data(
-        n_items: int = 1,
-        n_timesteps: int = 1,
-        n_elements: IndexType = None,
-        shape: tuple[int, ...] | None = None,
-    ) -> list:
-        data = []
-        if shape is None:
-            if n_elements is None:
-                raise ValueError("n_elements and shape cannot both be None")
-            else:
-                shape = n_elements  # type: ignore
-        if np.isscalar(shape):
-            shape = [shape]  # type: ignore
-        dati = np.empty(shape=(n_timesteps, *shape))  # type: ignore
-        dati[:] = np.nan
-        for _ in range(n_items):
-            data.append(dati.copy())
-        return data
-
     # ============= Dataset is (almost) a MutableMapping ===========
 
     def __len__(self) -> int:
@@ -602,49 +399,33 @@ class Dataset:
     def __iter__(self) -> Iterator[DataArray]:
         yield from self._data_vars.values()
 
-    def __setitem__(self, key: int | str, value: DataArray) -> None:  # type: ignore
+    def __setitem__(self, key: int | str, value: DataArray) -> None:
         self.__set_or_insert_item(key, value, insert=False)
 
     def __set_or_insert_item(
         self, key: int | str, value: DataArray, insert: bool = False
-    ) -> None:  # type: ignore
-        if len(self) > 0:
-            self[0]._is_compatible(value)
+    ) -> None:
+        self[0]._is_compatible(value)
 
         item_name = value.name
 
         if isinstance(key, int):
-            is_replacement = not insert
-            if is_replacement:
-                key_str = self.names[key]
-                self._data_vars[key_str] = value
-            else:
-                self._check_already_present(value)
-
+            if insert:
                 if item_name in self.names:
                     raise ValueError(
                         f"Item name {item_name} already in Dataset ({self.names})"
                     )
-                all_keys = list(self._data_vars.keys())
-                all_keys.insert(key, item_name)
-
-                data_vars = {}
-                for k in all_keys:
-                    if k in self._data_vars.keys():
-                        data_vars[k] = self._data_vars[k]
-                    else:
-                        data_vars[k] = value
-                self._data_vars = data_vars
-
-            self._set_name_attr(item_name, value)
+                keys = list(self._data_vars.keys())
+                keys.insert(key, item_name)
+                values = list(self._data_vars.values())
+                values.insert(key, value)
+                self._data_vars = dict(zip(keys, values))
+            else:
+                key_str = self.names[key]
+                self._data_vars[key_str] = value
+                self._set_name_attr(item_name, value)
         else:
-            is_replacement = key in self.names
-            if key != item_name:
-                # TODO: what would be best in this situation?
-                # Assignment to a key is enough indication that the user wants to name the item like this
-                value.name = key
-            if not is_replacement:
-                self._check_already_present(value)
+            value.name = key
             self._data_vars[key] = value
             self._set_name_attr(key, value)
 
@@ -759,11 +540,6 @@ class Dataset:
                 )
                 return self.isel(time=time_steps)
 
-        if self._multi_indexing_attempted(key):
-            raise TypeError(
-                f"Indexing with key {key} failed. Dataset does not allow multi-indexing. Use isel() or sel() instead."
-            )
-
         # select items
         key = self._key_to_str(key)
 
@@ -785,13 +561,12 @@ class Dataset:
                 raise KeyError(f"No item named: {key}. Valid items: {item_names}")
 
         if isinstance(key, Iterable):
-            data_vars = {}
-            for v in key:
-                data_vars[v] = self._data_vars[v]
+            data_vars = {v: self._data_vars[v] for v in key}
             return Dataset(data=data_vars, validate=False)
 
         raise TypeError(f"indexing with a {type(key)} is not (yet) supported")
 
+    # deprecated
     def _is_slice_time_slice(self, s: slice) -> bool:
         if (s.start is None) and (s.stop is None):
             return False
@@ -803,6 +578,7 @@ class Dataset:
                 return False
         return True
 
+    # deprecated
     def _is_key_time(self, key: Any) -> bool:
         if isinstance(key, slice):
             return False
@@ -818,26 +594,6 @@ class Dataset:
 
         return False  # type: ignore
 
-    def _multi_indexing_attempted(self, key: Any) -> bool:
-        # find out if user is attempting ds[2, :, 1] or similar (not allowed)
-        # this is not bullet-proof, but a good estimate
-        if not isinstance(key, tuple):
-            return False
-        for k in key:
-            if isinstance(k, slice):
-                # warnings.warn(f"Key is a tuple containing a slice")
-                return True
-            if not isinstance(k, (str, int)):
-                # warnings.warn(f"Key is a tuple containing illegal type {type(k)}")
-                return True
-        if len(set(key)) != len(key):
-            return True
-        warnings.warn(
-            "A tuple of item numbers/names was provided as index to Dataset. This can lead to ambiguity and it is recommended to use a list instead."
-        )
-        return False
-
-    # TODO change this to return a single type
     def _key_to_str(self, key: Any) -> Any:
         """Translate item selection key to str (or list[str])."""
         if isinstance(key, str):
@@ -845,15 +601,10 @@ class Dataset:
         if isinstance(key, int):
             return list(self._data_vars.keys())[key]
         if isinstance(key, slice):
-            s = key.indices(len(self))
-            return self._key_to_str(list(range(*s)))
+            start, stop, step = key.indices(len(self))
+            return self._key_to_str(list(range(start, stop, step)))
         if isinstance(key, Iterable):
-            keys = []
-            for k in key:
-                keys.append(self._key_to_str(k))
-            return keys
-        if hasattr(key, "name"):
-            return key.name
+            return [self._key_to_str(k) for k in key]
         raise TypeError(f"indexing with type {type(key)} is not supported")
 
     def __delitem__(self, key: Hashable | int) -> None:
@@ -1413,9 +1164,8 @@ class Dataset:
         df12 = pd.concat([s1, s2], axis=1)
 
         newtime = df12.index
-        newdata = self.create_empty_data(
-            n_items=ds.n_items, n_timesteps=len(newtime), shape=ds.shape[start_dim:]
-        )
+        shape = ds.shape[start_dim:]
+        newdata = [np.full((len(newtime), *shape), np.nan) for _ in range(ds.n_items)]
         idx1 = np.where(~df12["idx1"].isna())
         idx2 = np.where(~df12["idx2"].isna())
         for j in range(ds.n_items):
@@ -1912,12 +1662,14 @@ class Dataset:
 
     # ===============================================
 
-    def to_pandas(self, **kwargs: Any) -> pd.Series | pd.DataFrame:
+    def to_pandas(
+        self, *, unit_in_name: bool = False, round_time: str | bool = "ms"
+    ) -> pd.Series | pd.DataFrame:
         """Convert Dataset to a Pandas DataFrame."""
         if self.n_items != 1:
-            return self.to_dataframe(**kwargs)
+            return self.to_dataframe(unit_in_name=unit_in_name, round_time=round_time)
         else:
-            return self[0].to_pandas(**kwargs)
+            return self[0].to_pandas()
 
     def to_dataframe(
         self, *, unit_in_name: bool = False, round_time: str | bool = "ms"
@@ -1966,6 +1718,12 @@ class Dataset:
             additional arguments passed to the writing function, e.g. dtype for dfs0
 
         """
+        from ..dfs._dfs0 import write_dfs0
+        from ..dfs._dfs1 import write_dfs1
+        from ..dfs._dfs2 import write_dfs2
+        from ..dfs._dfs3 import write_dfs3
+        from ..dfsu import write_dfsu
+
         filename = str(filename)
 
         # TODO is this a candidate for match/case?
@@ -1974,25 +1732,25 @@ class Dataset:
         ):
             if self.ndim == 0:  # Not very common, but still...
                 self._validate_extension(filename, ".dfs0")
-                self._to_dfs0(filename=filename, **kwargs)
+                write_dfs0(filename, self, **kwargs)
             elif self.ndim == 1 and self[0]._has_time_axis:
                 self._validate_extension(filename, ".dfs0")
-                self._to_dfs0(filename=filename, **kwargs)
+                write_dfs0(filename, self, **kwargs)
             else:
                 raise ValueError("Cannot write Dataset with no geometry to file!")
         elif isinstance(self.geometry, Grid2D):
             self._validate_extension(filename, ".dfs2")
-            self._to_dfs2(filename)
+            write_dfs2(filename, self)
         elif isinstance(self.geometry, Grid3D):
             self._validate_extension(filename, ".dfs3")
-            self._to_dfs3(filename)
+            write_dfs3(filename, self)
 
         elif isinstance(self.geometry, Grid1D):
             self._validate_extension(filename, ".dfs1")
-            self._to_dfs1(filename)
+            write_dfs1(filename, self)
         elif isinstance(self.geometry, _GeometryFM):
             self._validate_extension(filename, ".dfsu")
-            self._to_dfsu(filename)
+            write_dfsu(filename, self)
         else:
             raise NotImplementedError(
                 "Writing this type of dataset is not yet implemented"
@@ -2004,38 +1762,6 @@ class Dataset:
         ext = path.suffix.lower()
         if ext != valid_extension:
             raise ValueError(f"File extension must be {valid_extension}")
-
-    def _to_dfs0(
-        self,
-        filename: str | Path,
-        dtype: DfsSimpleType = DfsSimpleType.Float,
-        title: str = "",
-    ) -> None:
-        from ..dfs._dfs0 import _write_dfs0
-
-        _write_dfs0(filename, self, dtype=dtype, title=title)
-
-    def _to_dfs2(self, filename: str | Path) -> None:
-        # assumes Grid2D geometry
-        from ..dfs._dfs2 import write_dfs2
-
-        write_dfs2(filename, self)
-
-    def _to_dfs3(self, filename: str | Path) -> None:
-        # assumes Grid3D geometry
-        from ..dfs._dfs3 import write_dfs3
-
-        write_dfs3(filename, self)
-
-    def _to_dfs1(self, filename: str | Path) -> None:
-        from ..dfs._dfs1 import write_dfs1
-
-        write_dfs1(filename=filename, ds=self)
-
-    def _to_dfsu(self, filename: str | Path) -> None:
-        from ..dfsu import write_dfsu
-
-        write_dfsu(filename, self)
 
     def to_xarray(self) -> "xarray.Dataset":
         """Export to xarray.Dataset."""
@@ -2117,7 +1843,7 @@ def from_pandas(
     ncol = df.values.shape[1]
     data = [df.values[:, i] for i in range(ncol)]
 
-    item_list = _parse_items(df.columns, items)
+    item_list = _parse_items_for_columns(df.columns, items)
 
     das = {
         item.name: DataArray(data=d, item=item, time=df.index)
@@ -2192,7 +1918,7 @@ def from_polars(
     array = df.to_numpy()
     data = [array[:, i] for i in range(array.shape[1])]
 
-    item_list = _parse_items(df.columns, items)
+    item_list = _parse_items_for_columns(df.columns, items)
 
     das = {
         item.name: DataArray(data=d, item=item, time=time)
@@ -2202,7 +1928,7 @@ def from_polars(
     return ds
 
 
-def _parse_items(
+def _parse_items_for_columns(
     column_names: Sequence[str],
     items: Mapping[str, ItemInfo] | Sequence[ItemInfo] | ItemInfo | None = None,
 ) -> list[ItemInfo]:

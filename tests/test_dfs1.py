@@ -153,29 +153,12 @@ def test_get_time_axis_without_reading_data_relative() -> None:
     assert len(dfs.time) == 200
 
 
-def test_select_point_dfs1_to_dfs0(tmp_path: Path) -> None:
-    outfilename = tmp_path / "vu_tide_hourly_p0.dfs0"
-
-    ds = mikeio.read("tests/testdata/vu_tide_hourly.dfs1")
-
-    assert ds.n_elements > 1
-    ds_0 = ds.isel(x=0)
-    assert ds_0.n_elements == 1
-    ds_0.to_dfs(outfilename)
-
-    dsnew = mikeio.read(outfilename)
-
-    assert dsnew.n_timesteps == ds.n_timesteps
-
-
 def test_select_point_and_single_step_dfs1_to_dfs0(tmp_path: Path) -> None:
     outfilename = tmp_path / "vu_tide_hourly_p0.dfs0"
 
     ds = mikeio.read("tests/testdata/vu_tide_hourly.dfs1")
 
-    assert ds.n_elements > 1
     ds_0 = ds.isel(0, axis="space")
-    assert ds_0.n_elements == 1
     ds_0_0 = ds_0.isel(0)
     assert ds_0_0.n_timesteps == 1
     ds_0_0.to_dfs(outfilename)
@@ -183,21 +166,6 @@ def test_select_point_and_single_step_dfs1_to_dfs0(tmp_path: Path) -> None:
     dsnew = mikeio.read(outfilename)
 
     assert dsnew.n_timesteps == 1
-
-
-def test_select_point_dfs1_to_dfs0_double(tmp_path: Path) -> None:
-    outfilename = tmp_path / "vu_tide_hourly_p0_dbl.dfs0"
-
-    ds = mikeio.read("tests/testdata/vu_tide_hourly.dfs1")
-
-    assert ds.n_elements > 1
-    ds_0 = ds.isel(x=0)
-    assert ds_0.n_elements == 1
-    ds_0.to_dfs(outfilename, dtype=np.float64)
-
-    dsnew = mikeio.read(outfilename)
-
-    assert dsnew.n_timesteps == ds.n_timesteps
 
 
 def test_interp_dfs1() -> None:
