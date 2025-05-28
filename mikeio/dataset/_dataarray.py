@@ -1148,7 +1148,7 @@ class DataArray:
 
     def extract_track(
         self,
-        track: pd.DataFrame,
+        track: str | Path | Dataset | pd.DataFrame,
         method: Literal["nearest", "inverse_distance"] = "nearest",
         dtype: Any = np.float32,
     ) -> "Dataset":
@@ -1156,11 +1156,9 @@ class DataArray:
 
         Parameters
         ---------
-        track: pandas.DataFrame
+        track: pandas.DataFrame, str or Dataset
             with DatetimeIndex and (x, y) of track points as first two columns
-            x,y coordinates must be in same coordinate system as dfsu
-        track: str
-            filename of csv or dfs0 file containing t,x,y
+            x,y coordinates must be in same coordinate system
         method: str, optional
             Spatial interpolation method ('nearest' or 'inverse_distance')
             default='nearest'

@@ -506,7 +506,7 @@ class Dfsu2DH:
 
     def extract_track(
         self,
-        track: pd.DataFrame,
+        track: str | Path | Dataset | pd.DataFrame,
         items: int | str | Sequence[int | str] | None = None,
         method: Literal["nearest", "inverse_distance"] = "nearest",
         dtype: Any = np.float32,
@@ -518,8 +518,6 @@ class Dfsu2DH:
         track: pandas.DataFrame
             with DatetimeIndex and (x, y) of track points as first two columns
             x,y coordinates must be in same coordinate system as dfsu
-        track: str
-            filename of csv or dfs0 file containing t,x,y
         items: list[int] or list[str], optional
             Extract only selected items, by number (0-based), or by name
         method: str, optional
