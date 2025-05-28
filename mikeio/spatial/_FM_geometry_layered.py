@@ -60,6 +60,9 @@ class _GeometryFMLayered(_GeometryFM):
         self._2d_ids: np.ndarray | None = None
         self._layer_ids: np.ndarray | None = None
 
+    def __str__(self) -> str:
+        return f"{self._type.name} ({self.n_elements} elements, {self.n_nodes} nodes)"
+
     def __repr__(self) -> str:
         return (
             f"Flexible Mesh Geometry: {self._type.name}\n"

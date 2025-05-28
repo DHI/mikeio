@@ -171,13 +171,15 @@ class _DataArrayPlotterGrid1D(_DataArrayPlotter):
 
     Examples
     --------
-    >>> da = mikeio.read("tide1.dfs1")["Level"]
-    >>> da.plot()
-    >>> da.plot.line()
-    >>> da.plot.timeseries()
-    >>> da.plot.imshow()
-    >>> da.plot.pcolormesh()
-    >>> da.plot.hist()
+    ```{python}
+    import mikeio
+    da = mikeio.read("../data/tide1.dfs1")["Level"]
+    da.plot()
+    ```
+    ```{python}
+    da.plot.timeseries()
+    ```
+
 
     """
 
@@ -575,7 +577,6 @@ class _DataArrayPlotterFM(_DataArrayPlotter):
 class _DataArrayPlotterFMVerticalColumn(_DataArrayPlotter):
     """Plot a DataArray with a GeometryFMVerticalColumn geometry.
 
-    If DataArray has multiple time steps, the first step will be plotted.
 
     Examples
     --------
@@ -591,9 +592,6 @@ class _DataArrayPlotterFMVerticalColumn(_DataArrayPlotter):
     ```
     ```{python}
     da.plot.pcolormesh()
-    ```
-    ```{python}
-    da.plot.hist()
     ```
 
     """
@@ -909,9 +907,15 @@ class _DatasetPlotter:
 
         Examples
         --------
-        >>> ds = mikeio.read("oresund_sigma_z.dfsu")
-        >>> ds.plot.scatter(x="Salinity", y="Temperature", title="S-vs-T")
-        >>> ds.plot.scatter(x=0, y=1, figsize=(9,9), marker='*')
+        ```{python}
+        import mikeio
+        ds = mikeio.read("../data/oresund_sigma_z.dfsu")
+        ds.plot.scatter(x="Salinity", y="Temperature", title="S-vs-T")
+        ```
+
+        ```{python}
+        ds.plot.scatter(x=0, y=1, figsize=(9,9), marker='*')
+        ```
 
         """
         _, ax = self._get_fig_ax(ax, figsize)

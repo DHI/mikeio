@@ -1010,7 +1010,7 @@ class DataArray:
         # TODO find out optimal syntax to allow interpolation to single point, new time, grid, mesh...
         self,
         # *, # TODO: make this a keyword-only argument in the future
-        time: pd.DatetimeIndex | DataArray | None = None,
+        time: pd.DatetimeIndex | DataArray | Dataset | int | float | None = None,
         x: float | None = None,
         y: float | None = None,
         z: float | None = None,
@@ -1064,12 +1064,12 @@ class DataArray:
 
         Examples
         --------
-        >>> da = mikeio.read("random.dfs1")[0]
-        >>> da.interp(time=3600)
-        >>> da.interp(x=110)
+        ```{python}
+        import mikeio
 
-        >>> da = mikeio.read("HD2D.dfsu").Salinity
-        >>> da.interp(x=340000, y=6160000)
+        da = mikeio.read("../data/HD2D.dfsu")["Current speed"]
+        da.interp(x=340000, y=6160000)
+        ```
 
         """
         if z is not None:
@@ -1194,7 +1194,7 @@ class DataArray:
 
     def interp_time(
         self,
-        dt: float | pd.DatetimeIndex | DataArray,
+        dt: pd.DatetimeIndex | DataArray | Dataset | int | float,
         *,
         method: str = "linear",
         extrapolate: bool = True,
@@ -1302,11 +1302,6 @@ class DataArray:
         **kwargs: Any
             additional kwargs are passed to interpolation method
 
-        Examples
-        --------
-        >>> dai = da.interp_like(da2)
-        >>> dae = da.interp_like(da2, extrapolate=True)
-        >>> dat = da.interp_like(da2.time)
 
         Returns
         -------
@@ -1546,10 +1541,12 @@ class DataArray:
 
         Examples
         --------
-        >>> dfs = Dfsu("HD2D.dfsu")
-        >>> da = dfs.read(["Current speed"])[0]
-        >>> area = dfs.get_element_area()
-        >>> da2 = da.average(axis="space", weights=area)
+        ```{python}
+        import mikeio
+        da= mikeio.read("../data/HD2D.dfsu")["Current speed"]
+        area = da.geometry.get_element_area()
+        da.average(axis="space", weights=area)
+        ```
 
         """
 
@@ -2087,7 +2084,8 @@ class DataArray:
 
     @staticmethod
     def _parse_interp_time(
-        old_time: pd.DatetimeIndex, new_time: Any
+        old_time: pd.DatetimeIndex,
+        new_time: pd.DatetimeIndex | DataArray | Dataset | int | float,
     ) -> pd.DatetimeIndex:
         if isinstance(new_time, pd.DatetimeIndex):
             t_out_index = new_time

@@ -469,7 +469,7 @@ class GeometryFM2D(_GeometryFM):
         self.plot = _GeometryFMPlotter(self)
 
     def __str__(self) -> str:
-        return f"{self.type_name} ({self.n_elements} elements, {self.n_nodes} nodes)"
+        return f"{self._type.name} ({self.n_elements} elements, {self.n_nodes} nodes)"
 
     def __repr__(self) -> str:
         return (
@@ -499,11 +499,6 @@ class GeometryFM2D(_GeometryFM):
     def _area_is_polygon(area: Sequence[tuple[float, float]] | Sequence[float]) -> bool:
         polygon = np.array(area)
         return polygon.ndim == 2 and polygon.shape[1] == 2
-
-    @property
-    def type_name(self) -> str:
-        """Type name, e.g. Mesh, Dfsu2D."""
-        return self._type.name if self._type else "Mesh"
 
     @property
     def ndim(self) -> int:

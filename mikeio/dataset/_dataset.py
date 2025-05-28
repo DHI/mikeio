@@ -398,18 +398,7 @@ class Dataset:
         item: ItemInfo | None = None,
         name: str | None = None,
     ) -> DataArray:
-        """Create a new  DataArray with the same time and geometry as the dataset.
-
-        Examples
-        --------
-
-        >>> ds = mikeio.read("file.dfsu")
-        >>> values = np.zeros(ds.Temperature.shape)
-        >>> da = ds.create_data_array(values)
-        >>> da_name = ds.create_data_array(values,"Foo")
-        >>> da_eum = ds.create_data_array(values, item=mikeio.ItemInfo("TS", mikeio.EUMType.Temperature))
-
-        """
+        """Create a new  DataArray with the same time and geometry as the dataset."""
         return DataArray(
             data=data,
             time=self.time,
@@ -503,9 +492,15 @@ class Dataset:
 
         Examples
         --------
-        >>> ds = mikeio.read("tide1.dfs1")
-        >>> newds = ds.rename({"Level":"Surface Elevation"})
-        >>> ds.rename({"Level":"Surface Elevation"}, inplace=True)
+        ```{python}
+        import mikeio
+        ds = mikeio.read("../data/tide1.dfs1")
+        ds
+        ```
+        ```{python}
+        ds.rename({"Level":"Surface Elevation"})
+        ```
+
 
         """
         if inplace:
@@ -701,14 +696,11 @@ class Dataset:
 
         Examples
         --------
-        >>> ds = mikeio.read("europe_wind_long_lat.dfs2")
-        >>> ds.isel(time=-1)
-        >>> ds.isel(x=slice(10,20), y=slice(40,60))
-        >>> ds.isel(y=34)
-
-        >>> ds = mikeio.read("tests/testdata/HD2D.dfsu")
-        >>> ds2 = ds.isel(time=[0,1,2])
-        >>> ds3 = ds2.isel(elements=[100,200])
+        ```{python}
+        import mikeio
+        ds = mikeio.read("../data/europe_wind_long_lat.dfs2")
+        ds.isel(x=slice(10,20), y=slice(40,60))
+        ```
 
         """
         # TODO deprecate idx, axis to prefer x= instead
@@ -791,15 +783,19 @@ class Dataset:
 
         Examples
         --------
-        >>> ds = mikeio.read("random.dfs1")
-        >>> ds.sel(time=slice(None, "2012-1-1 00:02"))
-        >>> ds.sel(x=100)
+        ```{python}
+        import mikeio
+        ds = mikeio.read("../data/oresund_sigma_z.dfsu")
+        ds.sel(x=340000, y=6160000, z=-3)
+        ```
 
-        >>> ds = mikeio.read("oresund_sigma_z.dfsu")
-        >>> ds.sel(time="1997-09-15")
-        >>> ds.sel(x=340000, y=6160000, z=-3)
-        >>> ds.sel(area=(340000, 6160000, 350000, 6170000))
-        >>> ds.sel(layers="bottom")
+        ```{python}
+        ds.sel(area=(340000, 6160000, 350000, 6170000))
+        ```
+
+        ```{python}
+        ds.sel(layers="bottom")
+        ```
 
         """
         res = [
@@ -960,7 +956,7 @@ class Dataset:
 
     def interp_time(
         self,
-        dt: float | pd.DatetimeIndex | Dataset | DataArray | None = None,
+        dt: float | int | pd.DatetimeIndex | Dataset | DataArray | None = None,
         *,
         freq: str | None = None,
         method: str = "linear",
