@@ -105,7 +105,7 @@ class PfsDocument(PfsSection):
         d = self._to_nonunique_key_dict(names, sections)
         super().__init__(d)
 
-        self._ALIAS_LIST = set(["_ALIAS_LIST"])  # ignore these in key list
+        self._ALIAS_LIST = {"_ALIAS_LIST"}  # ignore these in key list
         if self._is_FM_engine:
             self._add_all_FM_aliases()
 

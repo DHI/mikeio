@@ -966,7 +966,7 @@ class GeometryFM2D(_GeometryFM):
 
     def isel(
         self, idx: Sequence[int] | int, keepdims: bool = False, **kwargs: Any
-    ) -> "GeometryFM2D" | GeometryPoint2D:
+    ) -> GeometryFM2D | GeometryPoint2D:
         """Export a selection of elements to a new geometry.
 
         Typically not called directly, but by Dataset/DataArray's
@@ -1097,7 +1097,7 @@ class GeometryFM2D(_GeometryFM):
 
     def elements_to_geometry(
         self, elements: int | Sequence[int], keepdims: bool = False
-    ) -> "GeometryFM2D" | GeometryPoint2D:
+    ) -> GeometryFM2D | GeometryPoint2D:
         if isinstance(elements, (int, np.integer)):
             sel_elements: list[int] = [elements]
         else:

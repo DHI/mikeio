@@ -77,7 +77,7 @@ class _ChunkInfo:
     @staticmethod
     def from_dfs(
         dfs: DfsFile, item_numbers: list[int], buffer_size: float
-    ) -> "_ChunkInfo":
+    ) -> _ChunkInfo:
         """Calculate chunk info based on # of elements in dfs file and selected buffer size."""
         n_time_steps = dfs.FileInfo.TimeAxis.NumberOfTimeSteps
         n_data_all: int = np.sum([dfs.ItemInfo[i].ElementCount for i in item_numbers])

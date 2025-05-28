@@ -36,7 +36,7 @@ class PfsSection(SimpleNamespace, MutableMapping[str, Any]):
     """Class for reading/writing sections in a pfs file."""
 
     @staticmethod
-    def from_dataframe(df: pd.DataFrame, prefix: str) -> "PfsSection":
+    def from_dataframe(df: pd.DataFrame, prefix: str) -> PfsSection:
         """Create a PfsSection from a DataFrame.
 
         Parameters
@@ -283,7 +283,7 @@ class PfsSection(SimpleNamespace, MutableMapping[str, Any]):
             elif self[k] == old_value:
                 self[k] = new_value
 
-    def copy(self) -> "PfsSection":
+    def copy(self) -> PfsSection:
         """Return a copy of the PfsSection."""
         return PfsSection(self.to_dict())
 
@@ -418,7 +418,7 @@ class PfsSection(SimpleNamespace, MutableMapping[str, Any]):
         return pd.DataFrame(res, index=range(1, n_sections + 1))
 
     @classmethod
-    def _merge_PfsSections(cls, sections: Sequence[dict[str, Any]]) -> "PfsSection":
+    def _merge_PfsSections(cls, sections: Sequence[dict[str, Any]]) -> PfsSection:
         """Merge a list of PfsSections/dict."""
         assert len(sections) > 0
         a = sections[0]
