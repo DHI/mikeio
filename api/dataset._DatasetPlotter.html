@@ -174,24 +174,35 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     <h2 id="toc-title">On this page</h2>
    
   <ul>
-  <li><a href="#mikeio.dataset._DatasetPlotter" id="toc-mikeio.dataset._DatasetPlotter" class="nav-link active" data-scroll-target="#mikeio.dataset._DatasetPlotter">dataset._DatasetPlotter</a>
-  <ul class="collapse">
-  <li><a href="#methods" id="toc-methods" class="nav-link" data-scroll-target="#methods">Methods</a>
+  <li><a href="#methods" id="toc-methods" class="nav-link active" data-scroll-target="#methods">Methods</a>
   <ul class="collapse">
   <li><a href="#mikeio.dataset._DatasetPlotter.scatter" id="toc-mikeio.dataset._DatasetPlotter.scatter" class="nav-link" data-scroll-target="#mikeio.dataset._DatasetPlotter.scatter">scatter</a></li>
-  </ul></li>
   </ul></li>
   </ul>
 <div class="quarto-alternate-formats"><h2>Other Formats</h2><ul><li><a href="dataset._DatasetPlotter.ipynb" download="dataset._DatasetPlotter.ipynb"><i class="bi bi-journal-code"></i>Jupyter</a></li></ul></div></nav>
     </div>
 <!-- main -->
-<main class="content" id="quarto-document-content"><header id="title-block-header" class="quarto-title-block"></header>
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">dataset._DatasetPlotter</h1>
+</div>
 
 
 
+<div class="quarto-title-meta">
 
-<section id="mikeio.dataset._DatasetPlotter" class="level1">
-<h1>dataset._DatasetPlotter</h1>
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
 <div class="sourceCode" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>dataset._DatasetPlotter(<span class="va">self</span>, ds)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <p>Class for plotting scatter plots from datasets.</p>
 <section id="methods" class="level2">
@@ -299,12 +310,30 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </section>
 <section id="examples" class="level4 doc-section doc-section-examples">
 <h4 class="doc-section doc-section-examples anchored" data-anchor-id="examples">Examples</h4>
-<div class="sourceCode" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> ds <span class="op">=</span> mikeio.read(<span class="st">"oresund_sigma_z.dfsu"</span>)</span>
-<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> ds.plot.scatter(x<span class="op">=</span><span class="st">"Salinity"</span>, y<span class="op">=</span><span class="st">"Temperature"</span>, title<span class="op">=</span><span class="st">"S-vs-T"</span>)</span>
-<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> ds.plot.scatter(x<span class="op">=</span><span class="dv">0</span>, y<span class="op">=</span><span class="dv">1</span>, figsize<span class="op">=</span>(<span class="dv">9</span>,<span class="dv">9</span>), marker<span class="op">=</span><span class="st">'*'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div id="deff1231" class="cell" data-execution_count="1">
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> mikeio</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>ds <span class="op">=</span> mikeio.read(<span class="st">"../data/oresund_sigma_z.dfsu"</span>)</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>ds.plot.scatter(x<span class="op">=</span><span class="st">"Salinity"</span>, y<span class="op">=</span><span class="st">"Temperature"</span>, title<span class="op">=</span><span class="st">"S-vs-T"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="dataset._DatasetPlotter_files/figure-html/cell-2-output-1.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+<div id="d98f5ca3" class="cell" data-execution_count="2">
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>ds.plot.scatter(x<span class="op">=</span><span class="dv">0</span>, y<span class="op">=</span><span class="dv">1</span>, figsize<span class="op">=</span>(<span class="dv">9</span>,<span class="dv">9</span>), marker<span class="op">=</span><span class="st">'*'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="dataset._DatasetPlotter_files/figure-html/cell-3-output-1.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
 
 
-</section>
 </section>
 </section>
 </section>
