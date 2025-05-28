@@ -220,17 +220,13 @@ class Dfs0:
 
         raise TypeError("Dfs files only support float or double")
 
-    def to_dataframe(
-        self, unit_in_name: bool = False, round_time: str | bool = "ms"
-    ) -> pd.DataFrame:
+    def to_dataframe(self, unit_in_name: bool = False) -> pd.DataFrame:
         """Read data from the dfs0 file and return a Pandas DataFrame.
 
         Parameters
         ----------
         unit_in_name: bool, optional
             include unit in column name, default False
-        round_time: string, bool, optional
-            round time to avoid problem with floating point inaccurcy, set to False to avoid rounding
         Returns
         -------
         pd.DataFrame
@@ -244,10 +240,6 @@ class Dfs0:
                 item.name: f"{item.name} ({item.unit.name})" for item in ds.items
             }
             df = df.rename(columns=mapping)
-
-        if round_time:
-            rounded_idx = pd.DatetimeIndex(ds.time).round(round_time)
-            df.index = pd.DatetimeIndex(rounded_idx, freq="infer")
 
         return df
 

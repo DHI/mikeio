@@ -139,17 +139,6 @@ def test_write_non_equidistant_calendar(tmp_path: Path) -> None:
     assert not ds2.is_equidistant
 
 
-def test_read_equidistant_dfs0_to_dataframe_fixed_freq() -> None:
-    dfs0file = "tests/testdata/random.dfs0"
-
-    dfs = Dfs0(dfs0file)
-    df = dfs.to_dataframe()
-
-    assert df.index.freq is not None
-
-    df = dfs.to_dataframe(round_time=False)
-
-
 def test_read_equidistant_dfs0_to_dataframe_unit_in_name() -> None:
     dfs0file = "tests/testdata/random.dfs0"
 
