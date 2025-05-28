@@ -511,9 +511,7 @@ def test_read_non_eq_dfs0_temporal_subset() -> None:
 
     dfs = Dfs0(dfs0file)
 
-    # deprecated
-    with pytest.warns(FutureWarning, match="time=slice"):
-        ds = dfs.read(time="2017-10-27 01:00,2017-10-27 02:00")
+    ds = dfs.read(time=slice("2017-10-27 01:00", "2017-10-27 02:00"))
 
     assert len(ds.time) == 7
 
