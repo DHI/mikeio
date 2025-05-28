@@ -17,7 +17,7 @@ if TYPE_CHECKING:
 class _DataArrayPlotter:
     """Context aware plotter (sensible plotting according to geometry)."""
 
-    def __init__(self, da: "DataArray") -> None:
+    def __init__(self, da: DataArray) -> None:
         self.da = da
 
     def __call__(

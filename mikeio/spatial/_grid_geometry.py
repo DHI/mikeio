@@ -229,7 +229,7 @@ class Grid1D(_Geometry):
 
     def isel(
         self, idx: int | Sequence[int] | np.ndarray | slice, axis: int | None = None
-    ) -> "Grid1D" | GeometryPoint2D | GeometryPoint3D | GeometryUndefined:
+    ) -> Grid1D | GeometryPoint2D | GeometryPoint3D | GeometryUndefined:
         """Get a subset geometry from this geometry.
 
         Parameters
@@ -296,7 +296,7 @@ class _Grid2DPlotter:
 
     """
 
-    def __init__(self, geometry: "Grid2D") -> None:
+    def __init__(self, geometry: Grid2D) -> None:
         self.g = geometry
 
     def __call__(
@@ -875,14 +875,14 @@ class Grid2D(_Geometry):
         return i, j
 
     @overload
-    def isel(self, idx: int, axis: int) -> "Grid1D": ...
+    def isel(self, idx: int, axis: int) -> Grid1D: ...
 
     @overload
-    def isel(self, idx: slice, axis: int) -> "Grid2D": ...
+    def isel(self, idx: slice, axis: int) -> Grid2D: ...
 
     def isel(
         self, idx: np.ndarray | int | slice, axis: int
-    ) -> "Grid2D | Grid1D | GeometryUndefined":
+    ) -> Grid2D | Grid1D | GeometryUndefined:
         """Return a new geometry as a subset of Grid2D along the given axis."""
         assert isinstance(axis, int), "axis must be an integer (or 'x' or 'y')"
         axis = axis + 2 if axis < 0 else axis
@@ -912,7 +912,7 @@ class Grid2D(_Geometry):
 
     def _index_to_Grid2D(
         self, ii: range | None = None, jj: range | None = None
-    ) -> "Grid2D | GeometryUndefined":
+    ) -> Grid2D | GeometryUndefined:
         ii = range(self.nx) if ii is None else ii
         jj = range(self.ny) if jj is None else jj
         assert len(ii) > 1 and len(jj) > 1, "Index must be at least len 2"
@@ -1375,7 +1375,7 @@ class Grid3D(_Geometry):
 
     def _geometry_for_layers(
         self, layers: Sequence[int] | None, keepdims: bool = False
-    ) -> Grid2D | "Grid3D" | "GeometryUndefined":
+    ) -> Grid2D | Grid3D | GeometryUndefined:
         if layers is None:
             return self
 

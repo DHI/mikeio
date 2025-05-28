@@ -59,13 +59,11 @@ def _type_list(search: str | None = None) -> dict[eumItem, str]:
 
     if search is not None:
         search = search.lower()
-        items = dict(
-            [
-                [key, value]
+        items = {
+                key: value
                 for key, value in items.items()
                 if search in value.lower() or search == value.lower()
-            ]
-        )
+        }
 
     return items
 
@@ -1523,7 +1521,7 @@ class ItemInfo:
         self._unit = value
 
     @staticmethod
-    def from_mikecore_dynamic_item_info(dfsItemInfo: DfsDynamicItemInfo) -> "ItemInfo":
+    def from_mikecore_dynamic_item_info(dfsItemInfo: DfsDynamicItemInfo) -> ItemInfo:
         """Create ItemInfo from a mikecore.DfsDynamicItemInfo object."""
         name = dfsItemInfo.Name
         item = dfsItemInfo.Quantity.Item

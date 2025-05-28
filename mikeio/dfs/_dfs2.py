@@ -85,7 +85,7 @@ def _write_dfs2_header(filename: str | Path, ds: Dataset, title: str = "") -> Df
 
     try:
         builder.CreateFile(str(filename))
-    except IOError:
+    except OSError:
         print("cannot create dfs file: ", filename)
 
     return builder.GetFile()

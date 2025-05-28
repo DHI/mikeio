@@ -896,7 +896,7 @@ class GeometryFMVerticalColumn(GeometryFM3D):
 
 
 class _GeometryFMVerticalProfilePlotter:
-    def __init__(self, geometry: "GeometryFMVerticalProfile") -> None:
+    def __init__(self, geometry: GeometryFMVerticalProfile) -> None:
         self.g = geometry
 
     def __call__(
