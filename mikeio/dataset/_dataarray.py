@@ -2139,7 +2139,7 @@ class DataArray:
         if isinstance(time, str) or (not isinstance(time, Iterable)):
             time = [time]
 
-        if not isinstance(time, pd.DatetimeIndex):
+        if not isinstance(time, (pd.DatetimeIndex, pd.TimedeltaIndex)):
             index = pd.DatetimeIndex(time)
         else:
             index = time
@@ -2148,7 +2148,7 @@ class DataArray:
             raise ValueError(
                 "Time must be monotonic increasing (only equal or increasing) instances."
             )
-        assert isinstance(index, pd.DatetimeIndex)
+        assert isinstance(index, (pd.DatetimeIndex, pd.TimedeltaIndex))
         return index
 
     @staticmethod

@@ -135,8 +135,9 @@ def test_read_start_end_time_relative_time() -> None:
     dfs = mikeio.Dfs1("tests/testdata/physical_basin_wave_maker_signal.dfs1")
     ds = dfs.read()
 
-    assert dfs.start_time == ds.start_time
-    assert dfs.end_time == ds.end_time
+    assert dfs.start_time is None
+    assert ds.start_time.total_seconds() == 0.0
+    assert ds.end_time.total_seconds() == 9.95
 
 
 def test_get_time_axis_without_reading_data() -> None:
@@ -149,7 +150,7 @@ def test_get_time_axis_without_reading_data() -> None:
 def test_get_time_axis_without_reading_data_relative() -> None:
     dfs0file = r"tests/testdata/physical_basin_wave_maker_signal.dfs1"
     dfs = mikeio.Dfs1(dfs0file)
-    assert isinstance(dfs.time, pd.DatetimeIndex)  # start time is not correct !
+    assert isinstance(dfs.time, pd.TimedeltaIndex)
     assert len(dfs.time) == 200
 
 

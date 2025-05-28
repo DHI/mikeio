@@ -229,7 +229,7 @@ class Dataset:
         return self[0]._dt
 
     @property
-    def time(self) -> pd.DatetimeIndex:
+    def time(self) -> pd.DatetimeIndex | pd.TimedeltaIndex:
         """Time axis."""
         return list(self)[0].time
 
@@ -239,14 +239,14 @@ class Dataset:
             da.time = new_time
 
     @property
-    def start_time(self) -> datetime:
-        """First time instance (as datetime)."""
-        return self.time[0].to_pydatetime()  # type: ignore
+    def start_time(self) -> pd.Timestamp | pd.Timedelta:
+        """First time instance."""
+        return self.time[0]
 
     @property
-    def end_time(self) -> datetime:
-        """Last time instance (as datetime)."""
-        return self.time[-1].to_pydatetime()  # type: ignore
+    def end_time(self) -> pd.Timestamp | pd.Timedelta:
+        """Last time instance."""
+        return self.time[-1]
 
     @property
     def timestep(self) -> float:

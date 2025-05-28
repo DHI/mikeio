@@ -135,8 +135,7 @@ def _valid_timesteps(
     nt = time_axis.NumberOfTimeSteps
 
     if time_axis.TimeAxisType != TimeAxisType.CalendarEquidistant:
-        # TODO is this the proper epoch, should this magic number be somewhere else?
-        start_time_file = datetime(1970, 1, 1)
+        start_time_file = None
     else:
         start_time_file = time_axis.StartDateTime
 
@@ -158,7 +157,10 @@ def _valid_timesteps(
             time_step_file = 1
 
         freq = pd.Timedelta(seconds=time_step_file)
-        time = pd.date_range(start_time_file, periods=nt, freq=freq)
+        if time_axis.TimeAxisType == TimeAxisType.CalendarEquidistant:
+            time = pd.date_range(start_time_file, periods=nt, freq=freq)
+        else:
+            time = pd.timedelta_range(0.0, freq=freq, periods=nt)
     elif time_axis.TimeAxisType == TimeAxisType.CalendarNonEquidistant:
         idx = list(range(nt))
         if time_steps is None:
@@ -310,11 +312,9 @@ class _Dfs123:
             TimeAxisType.CalendarEquidistant,
             TimeAxisType.CalendarNonEquidistant,
         }:
-            self._start_time = dfs.FileInfo.TimeAxis.StartDateTime
+            self._start_time: datetime | None = dfs.FileInfo.TimeAxis.StartDateTime
         else:  # relative time axis
-            self._start_time = datetime(
-                1970, 1, 1
-            )  # TODO is this the proper epoch, should this magic number be somewhere else?
+            self._start_time = None
 
         if hasattr(dfs.FileInfo.TimeAxis, "TimeStep"):
             self._timestep = (
@@ -325,11 +325,22 @@ class _Dfs123:
             )  # TODO handle other timeunits
 
             freq = pd.Timedelta(seconds=self._timestep)
-            self._time = pd.date_range(
-                start=self._start_time,
-                periods=dfs.FileInfo.TimeAxis.NumberOfTimeSteps,
-                freq=freq,
-            )
+
+            if dfs.FileInfo.TimeAxis.TimeAxisType in {
+                TimeAxisType.CalendarEquidistant,
+                TimeAxisType.CalendarNonEquidistant,
+            }:
+                self._time = pd.date_range(
+                    start=self._start_time,
+                    periods=dfs.FileInfo.TimeAxis.NumberOfTimeSteps,
+                    freq=freq,
+                )
+            else:
+                self._time = pd.timedelta_range(
+                    start=0.0,
+                    periods=dfs.FileInfo.TimeAxis.NumberOfTimeSteps,
+                    freq=freq,
+                )
         else:
             self._timestep = None
             self._time = None

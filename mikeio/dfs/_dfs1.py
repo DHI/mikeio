@@ -109,7 +109,7 @@ class Dfs1(_Dfs123):
         self,
         *,
         items: str | int | Sequence[str | int] | None = None,
-        time: int | str | slice | Sequence[int] |  None = None,
+        time: int | str | slice | Sequence[int] | None = None,
         keepdims: bool = False,
         dtype: Any = np.float32,
     ) -> Dataset:
@@ -169,7 +169,10 @@ class Dfs1(_Dfs123):
 
             t_seconds[i] = itemdata.Time
 
-        time = pd.to_datetime(t_seconds, unit="s", origin=self.start_time)
+        if self.start_time is not None:
+            time = pd.to_datetime(t_seconds, unit="s", origin=self.start_time)
+        else:
+            time = pd.to_timedelta(t_seconds, unit="s")
 
         items = _get_item_info(self._dfs.ItemInfo, item_numbers)
 

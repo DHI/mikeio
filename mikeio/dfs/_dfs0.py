@@ -113,9 +113,9 @@ class Dfs0:
             TimeAxisType.CalendarEquidistant,
             TimeAxisType.CalendarNonEquidistant,
         }:
-            self._start_time: datetime = dfs.FileInfo.TimeAxis.StartDateTime
+            self._start_time: datetime | None = dfs.FileInfo.TimeAxis.StartDateTime
         else:  # relative time axis
-            self._start_time = datetime(1970, 1, 1)
+            self._start_time = None
 
         # time
         self._n_timesteps: int = dfs.FileInfo.TimeAxis.NumberOfTimeSteps
@@ -174,9 +174,15 @@ class Dfs0:
         data = [matrix[:, i] for i in range(ncol)]
 
         t_seconds = raw_data[:, 0]
-        ftime = pd.to_datetime(t_seconds, unit="s", origin=self.start_time).round(
-            freq="ms"
-        )
+        if dfs.FileInfo.TimeAxis.TimeAxisType in {
+            TimeAxisType.CalendarEquidistant,
+            TimeAxisType.CalendarNonEquidistant,
+        }:
+            ftime = pd.to_datetime(t_seconds, unit="s", origin=self.start_time).round(
+                freq="ms"
+            )
+        else:
+            ftime = pd.to_timedelta(t_seconds, unit="s")
 
         # TODO common for all dfs files , extract
         # select items
@@ -254,19 +260,20 @@ class Dfs0:
         return self._items
 
     @property
-    def start_time(self) -> datetime:
+    def start_time(self) -> datetime | None:
         """File start time."""
         return self._start_time
 
     @cached_property
-    def end_time(self) -> datetime:
+    def end_time(self) -> datetime | None:
         if self._dfs.FileInfo.TimeAxis.IsEquidistant():
             dt = self._dfs.FileInfo.TimeAxis.TimeStep
             n_steps = self._dfs.FileInfo.TimeAxis.NumberOfTimeSteps
             timespan = dt * (n_steps - 1)
         else:
             timespan = self._dfs.FileInfo.TimeAxis.TimeSpan
-
+        if self.start_time is None:
+            return None
         return self.start_time + timedelta(seconds=timespan)
 
     @property

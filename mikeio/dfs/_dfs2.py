@@ -234,7 +234,10 @@ class Dfs2(_Dfs123):
 
         self._dfs.Close()
 
-        time = pd.to_datetime(t_seconds, unit="s", origin=self.start_time)
+        if self.start_time is not None:
+            time = pd.to_datetime(t_seconds, unit="s", origin=self.start_time)
+        else:
+            time = pd.to_timedelta(t_seconds, unit="s")
 
         dims: tuple[str, ...]
 
