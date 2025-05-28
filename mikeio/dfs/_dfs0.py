@@ -23,7 +23,7 @@ def write_dfs0(
     filename: str | Path,
     dataset: Dataset,
     title: str = "",
-    dtype: DfsSimpleType = DfsSimpleType.Float,
+    dtype: DfsSimpleType | np.float32 | np.float64 = DfsSimpleType.Float,
 ) -> None:
     filename = str(filename)
 
@@ -102,11 +102,10 @@ class Dfs0:
             raise FileNotFoundError(path)
 
         dfs = DfsFileFactory.DfsGenericOpen(str(path))
-        self._source = dfs
+        self._dfs = dfs
 
         # Read items
-        self._n_items = len(dfs.ItemInfo)
-        self._items = _get_item_info(dfs.ItemInfo, list(range(self._n_items)))
+        self._items = _get_item_info(dfs.ItemInfo)
 
         self._timeaxistype = dfs.FileInfo.TimeAxis.TimeAxisType
 
@@ -127,12 +126,12 @@ class Dfs0:
         out = ["<mikeio.Dfs0>"]
         out.append(f"timeaxis: {repr(self._timeaxistype)}")
 
-        if self._n_items < 10:
+        if self.n_items < 10:
             out.append("items:")
             for i, item in enumerate(self.items):
                 out.append(f"  {i}:  {item}")
         else:
-            out.append(f"number of items: {self._n_items}")
+            out.append(f"number of items: {self.n_items}")
 
         return str.join("\n", out)
 
@@ -164,90 +163,59 @@ class Dfs0:
             raise FileNotFoundError(f"File {path} not found")
 
         # read data from file
-        fdata, ftime = self._read(self._filename)
-        dfs = self._dfs
+        dfs = DfsFileFactory.DfsGenericOpen(self._filename)
+        raw_data = dfs.ReadDfs0DataDouble()  # Bulk read the data
+        dfs.Close()
 
+        matrix = raw_data[:, 1:]
+        matrix[matrix == dfs.FileInfo.DeleteValueDouble] = np.nan  # cutil
+        matrix[matrix == dfs.FileInfo.DeleteValueFloat] = np.nan  # linux
+        ncol = matrix.shape[1]
+        data = [matrix[:, i] for i in range(ncol)]
+
+        t_seconds = raw_data[:, 0]
+        ftime = pd.to_datetime(t_seconds, unit="s", origin=self.start_time).round(
+            freq="ms"
+        )
+
+        # TODO common for all dfs files , extract
         # select items
-        self._n_items = len(dfs.ItemInfo)
         item_numbers = _valid_item_numbers(dfs.ItemInfo, items)
         if items is not None:
-            fdata = [fdata[it] for it in item_numbers]
-            fitems = [self.items[it] for it in item_numbers]
+            data = [data[it] for it in item_numbers]
+            item_infos = [self.items[it] for it in item_numbers]
         else:
-            fitems = self.items
-        ds = Dataset.from_numpy(fdata, time=ftime, items=fitems, validate=False)
+            item_infos = self.items
+        ds = Dataset.from_numpy(data, time=ftime, items=item_infos, validate=False)
 
         # select time steps
-        self._n_timesteps = dfs.FileInfo.TimeAxis.NumberOfTimeSteps
         if self._timeaxistype == TimeAxisType.CalendarNonEquidistant and isinstance(
             time, str
         ):
-            sel_time_step_str = time
-            time_steps = None
+            return ds.sel(time=time)
+
         else:
-            sel_time_step_str = None
             time_steps = None
             if time is not None:
                 if isinstance(time, slice) and isinstance(time.start, str):
                     return ds.sel(time=time)
                 else:
-                    dts = DateTimeSelector(self.time)
+                    dts = DateTimeSelector(ftime)
                     time_steps = dts.isel(time)
 
         if time_steps:
             ds = ds.isel(time=time_steps)
 
-        if sel_time_step_str:
-            parts = sel_time_step_str.split(",")
-            if len(parts) > 1:
-                warnings.warn(
-                    f'Comma separated time slicing is deprecated use read(time=slice("{parts[0]}", "{parts[1]}")) instead.',
-                    FutureWarning,
-                )
-            if len(parts) == 1:
-                parts.append(parts[0])  # end=start
-
-            if parts[0] == "":
-                sel = slice(parts[1])  # stop only
-            elif parts[1] == "":
-                sel = slice(parts[0], None)  # start only
-            else:
-                sel = slice(parts[0], parts[1])
-
-            return ds.sel(time=sel)
-
         return ds
 
-    def _read(self, filename: str) -> tuple[list[np.ndarray], pd.DatetimeIndex]:
-        """Read all data from a dfs0 file."""
-        self._dfs = DfsFileFactory.DfsGenericOpen(filename)
-        raw_data = self._dfs.ReadDfs0DataDouble()  # Bulk read the data
-
-        self._dfs.Close()
-
-        matrix = raw_data[:, 1:]
-        # matrix[matrix == self._deletevalue] = np.nan
-        matrix[matrix == self._dfs.FileInfo.DeleteValueDouble] = np.nan  # cutil
-        matrix[matrix == self._dfs.FileInfo.DeleteValueFloat] = np.nan  # linux
-        data = []
-        for i in range(matrix.shape[1]):
-            data.append(matrix[:, i])
-
-        t_seconds = raw_data[:, 0]
-        time = pd.to_datetime(t_seconds, unit="s", origin=self.start_time)
-        time = time.round(freq="ms")  # accept nothing finer than milliseconds
-
-        return data, time
-
     @staticmethod
-    def _to_dfs_datatype(dtype: Any = None) -> DfsSimpleType:
-        if dtype is None:
-            return DfsSimpleType.Float
-
-        if dtype in {np.float64, DfsSimpleType.Double, "double"}:
+    def _to_dfs_datatype(
+        dtype: DfsSimpleType | np.float32 | np.float64,
+    ) -> DfsSimpleType:
+        if dtype in {np.float64, DfsSimpleType.Double}:
             return DfsSimpleType.Double
 
-        if dtype in {np.float32, DfsSimpleType.Float, "float", "single"}:
+        if dtype in {np.float32, DfsSimpleType.Float}:
             return DfsSimpleType.Float
 
         raise TypeError("Dfs files only support float or double")
@@ -268,26 +236,25 @@ class Dfs0:
         pd.DataFrame
 
         """
-        data, time = self._read(self._filename)
-        items = self.items
+        ds = self.read()
+        df = ds.to_dataframe()
+
         if unit_in_name:
-            cols = [f"{item.name} ({item.unit.name})" for item in items]
-        else:
-            cols = [f"{item.name}" for item in items]
-        df = pd.DataFrame(np.atleast_2d(data).T, index=time, columns=cols)
+            mapping = {
+                item.name: f"{item.name} ({item.unit.name})" for item in ds.items
+            }
+            df = df.rename(columns=mapping)
 
         if round_time:
-            rounded_idx = pd.DatetimeIndex(time).round(round_time)
+            rounded_idx = pd.DatetimeIndex(ds.time).round(round_time)
             df.index = pd.DatetimeIndex(rounded_idx, freq="infer")
-        else:
-            df.index = pd.DatetimeIndex(time, freq="infer")
 
         return df
 
     @property
     def n_items(self) -> int:
         """Number of items."""
-        return self._n_items
+        return len(self._items)
 
     @property
     def items(self) -> ItemInfoList:
@@ -301,12 +268,12 @@ class Dfs0:
 
     @cached_property
     def end_time(self) -> datetime:
-        if self._source.FileInfo.TimeAxis.IsEquidistant():
-            dt = self._source.FileInfo.TimeAxis.TimeStep
-            n_steps = self._source.FileInfo.TimeAxis.NumberOfTimeSteps
+        if self._dfs.FileInfo.TimeAxis.IsEquidistant():
+            dt = self._dfs.FileInfo.TimeAxis.TimeStep
+            n_steps = self._dfs.FileInfo.TimeAxis.NumberOfTimeSteps
             timespan = dt * (n_steps - 1)
         else:
-            timespan = self._source.FileInfo.TimeAxis.TimeSpan
+            timespan = self._dfs.FileInfo.TimeAxis.TimeSpan
 
         return self.start_time + timedelta(seconds=timespan)
 
@@ -319,7 +286,7 @@ class Dfs0:
     def timestep(self) -> float:
         """Time step size in seconds."""
         if self._timeaxistype == TimeAxisType.CalendarEquidistant:
-            return self._source.FileInfo.TimeAxis.TimeStep  # type: ignore
+            return self._dfs.FileInfo.TimeAxis.TimeStep  # type: ignore
         else:
             raise ValueError("Time axis type not supported")
 
@@ -361,7 +328,7 @@ def series_to_dfs0(
     unit: EUMUnit | None = None,
     items: Sequence[ItemInfo] | None = None,
     title: str | None = None,
-    dtype: Any | None = None,
+    dtype: Any = DfsSimpleType.Float,
 ) -> None:
     df = pd.DataFrame(self)
     df.to_dfs0(filename, itemtype, unit, items, title, dtype)
@@ -374,7 +341,7 @@ def dataframe_to_dfs0(
     unit: EUMUnit | None = None,
     items: Sequence[ItemInfo] | None = None,
     title: str = "",
-    dtype: Any | None = None,
+    dtype: Any = DfsSimpleType.Float,
 ) -> None:
     warnings.warn(
         "series/dataframe_to_dfs0 is deprecated. Use mikeio.from_pandas instead.",
