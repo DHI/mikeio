@@ -1,5 +1,5 @@
 from mikeio.dataset import Dataset
-from mikeio._interpolation import get_idw_interpolant, interp2d, _interp_itemstep
+from mikeio._interpolation import get_idw_interpolant, interp2d, _interp_item
 import mikeio
 import numpy as np
 
@@ -25,10 +25,10 @@ def test_interp2d() -> None:
     xy[3, :] = [0, 55]
     xy[4, :] = [5, 54]
 
-    elem_ids, weights = dfs.geometry.get_2d_interpolant(xy, n_nearest=1)
+    interpolant = dfs.geometry.get_2d_interpolant(xy, n_nearest=1)
 
     # with pytest.warns(match="Geometry"):
-    dati = interp2d(ds, elem_ids, weights)
+    dati = interp2d(ds, interpolant)
     assert isinstance(dati, Dataset)
     assert isinstance(
         dati.geometry, GeometryUndefined
@@ -37,15 +37,15 @@ def test_interp2d() -> None:
     assert dati[0].values[0, 0] == 8.262675285339355
 
     dat = ds[0].to_numpy()  # first item, all time steps
-    dati = interp2d(dat, elem_ids, weights)
+    dati = interp2d(dat, interpolant)
     assert isinstance(dati, np.ndarray)
     assert dati.size == ds.n_timesteps * npts
     assert dati[0, 0] == 8.262675285339355
 
-    elem_ids, weights = dfs.geometry.get_2d_interpolant(xy, n_nearest=3)
+    interpolant = dfs.geometry.get_2d_interpolant(xy, n_nearest=3)
 
     dat = ds[0].values[0, :]  # a single time step
-    dati = interp2d(dat, elem_ids, weights)
+    dati = interp2d(dat, interpolant)
     assert isinstance(dati, np.ndarray)
     assert dati.size == npts
 
@@ -56,10 +56,10 @@ def test_interp2d_same_points() -> None:
     npts = 3
     # same points as data (could cause IDW to diverge)
     xy = dfs.geometry.element_coordinates[:npts, 0:2]
-    elem_ids, weights = dfs.geometry.get_2d_interpolant(xy, n_nearest=4)
-    assert np.max(weights) <= 1.0
+    interpolant = dfs.geometry.get_2d_interpolant(xy, n_nearest=4)
+    assert np.max(interpolant.weights) <= 1.0
     dat = ds[0].values[0, :]
-    dati = interp2d(dat, elem_ids, weights)
+    dati = interp2d(dat, interpolant)
     assert np.all(dati == dat[:npts])
 
 
@@ -71,13 +71,11 @@ def test_interp2d_outside() -> None:
     xy = np.zeros((npts, 2))
     xy[0, :] = [2, 50]
     xy[1, :] = [3, 51]
-    elem_ids, weights = dfs.geometry.get_2d_interpolant(xy, n_nearest=4)
-    dati = interp2d(ds[0].values[0, :], elem_ids, weights)
+    interpolant = dfs.geometry.get_2d_interpolant(xy, n_nearest=4)
+    dati = interp2d(ds[0].values[0, :], interpolant)
     assert np.all(np.isnan(dati))
-    elem_ids, weights = dfs.geometry.get_2d_interpolant(
-        xy, n_nearest=4, extrapolate=True
-    )
-    dati = interp2d(ds[0].values[0, :], elem_ids, weights)
+    interpolant = dfs.geometry.get_2d_interpolant(xy, n_nearest=4, extrapolate=True)
+    dati = interp2d(ds[0].values[0, :], interpolant)
     assert np.all(~np.isnan(dati))
 
 
@@ -92,9 +90,9 @@ def test_interp_itemstep() -> None:
     xy[2, :] = [7, 54]
     xy[3, :] = [0, 55]
     xy[4, :] = [5, 54]
-    elem_ids, weights = dfs.geometry.get_2d_interpolant(xy, n_nearest=1)
+    interpolant = dfs.geometry.get_2d_interpolant(xy, n_nearest=1)
 
     dat = ds[0].values[0, :]
-    dati = _interp_itemstep(dat, elem_ids, weights)
+    dati = _interp_item(dat, interpolant)
     assert len(dati) == npts
     assert dati[0] == 8.262675285339355

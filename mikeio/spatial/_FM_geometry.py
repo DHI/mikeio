@@ -19,7 +19,7 @@ from scipy.spatial import cKDTree
 
 from ..eum import EUMType, EUMUnit
 from ..exceptions import OutsideModelDomainError
-from .._interpolation import get_idw_interpolant, interp2d
+from .._interpolation import Interpolant, get_idw_interpolant, interp2d
 from ._FM_plot import (
     _get_node_centered_data,
     _plot_map,
@@ -604,7 +604,7 @@ class GeometryFM2D(_GeometryFM):
         extrapolate: bool = False,
         p: int = 2,
         radius: float | None = None,
-    ) -> tuple[Any, Any]:
+    ) -> Interpolant:
         """IDW interpolant for list of coordinates.
 
         Parameters
@@ -623,7 +623,7 @@ class GeometryFM2D(_GeometryFM):
 
         Returns
         -------
-        (np.array, np.array)
+        Interpolant
             element ids and weights
 
         """
@@ -645,13 +645,12 @@ class GeometryFM2D(_GeometryFM):
         if radius is not None:
             weights[dists > radius] = np.nan  # type: ignore
 
-        return ids, weights
+        return Interpolant(ids, weights)
 
     def interp2d(
         self,
         data: np.ndarray,
-        elem_ids: np.ndarray,
-        weights: np.ndarray | None = None,
+        interpolant: Interpolant,
         shape: tuple[int, ...] | None = None,
     ) -> np.ndarray | list[np.ndarray]:
         """Interpolate spatially in data (2d only).
@@ -660,27 +659,18 @@ class GeometryFM2D(_GeometryFM):
         ----------
         data : ndarray or list(ndarray)
             dfsu data
-        elem_ids : ndarray(int)
-            n sized array of 1 or more element ids used for interpolation
-        weights : ndarray(float), optional
-            weights with same size as elem_ids used for interpolation
+        interpolant: Interpolant
+            ids and weights
         shape: tuple, optional
             reshape output
 
         Returns
         -------
         ndarray or list(ndarray)
-            spatially interped data
-
-        Examples
-        --------
-        >>> ds = dfsu.read()
-        >>> g = dfs.get_overset_grid(shape=(50,40))
-        >>> elem_ids, weights = dfs.get_2d_interpolant(g.xy)
-        >>> dsi = dfs.interp2d(ds, elem_ids, weights)
+            spatially interpolateded data
 
         """
-        return interp2d(data, elem_ids, weights, shape)  # type: ignore
+        return interp2d(data, interpolant, shape)
 
     def _find_n_nearest_2d_elements(
         self, x: float | np.ndarray, y: float | np.ndarray | None = None, n: int = 1

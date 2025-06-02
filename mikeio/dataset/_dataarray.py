@@ -25,6 +25,7 @@ import numpy as np
 import pandas as pd
 from mikecore.DfsuFile import DfsuFileType
 
+
 from ..eum import EUMType, EUMUnit, ItemInfo
 from .._time import _get_time_idx_list, _n_selected_timesteps
 
@@ -32,6 +33,7 @@ if TYPE_CHECKING:
     from ._dataset import Dataset
     import xarray
     from numpy.typing import ArrayLike
+    from mikeio._interpolation import Interpolant
 
 
 from ..spatial import (
@@ -1015,7 +1017,7 @@ class DataArray:
         y: float | None = None,
         z: float | None = None,
         n_nearest: int = 3,
-        interpolant: tuple[Any, Any] | None = None,
+        interpolant: Interpolant | None = None,
         **kwargs: Any,
     ) -> DataArray:
         """Interpolate data in time and space.
@@ -1095,7 +1097,7 @@ class DataArray:
             elif isinstance(self.geometry, Grid1D):
                 if interpolant is None:
                     interpolant = self.geometry.get_spatial_interpolant(coords)  # type: ignore
-                dai = self.geometry.interp(self.to_numpy(), *interpolant).flatten()
+                dai = self.geometry.interp(self.to_numpy(), interpolant).flatten()
                 geometry = GeometryUndefined()
             elif isinstance(self.geometry, GeometryFM3D):
                 raise NotImplementedError("Interpolation in 3d is not yet implemented")
@@ -1109,7 +1111,7 @@ class DataArray:
                         n_nearest=n_nearest,
                         **kwargs,  # type: ignore
                     )
-                dai = self.geometry.interp2d(self, *interpolant).flatten()  # type: ignore
+                dai = self.geometry.interp2d(self, interpolant).flatten()  # type: ignore
                 if z is None:
                     geometry = GeometryPoint2D(
                         x=x, y=y, projection=self.geometry.projection
@@ -1285,7 +1287,7 @@ class DataArray:
     def interp_like(
         self,
         other: DataArray | Grid2D | GeometryFM2D | pd.DatetimeIndex,
-        interpolant: tuple[Any, Any] | None = None,
+        interpolant: Interpolant | None = None,
         **kwargs: Any,
     ) -> DataArray:
         """Interpolate in space (and in time) to other geometry (and time axis).
@@ -1297,7 +1299,7 @@ class DataArray:
         ----------
         other: Dataset, DataArray, Grid2D, GeometryFM, pd.DatetimeIndex
             The target geometry (and time axis) to interpolate to
-        interpolant: tuple, optional
+        interpolant: Interpolant, optional
             Reuse pre-calculated index and weights
         **kwargs: Any
             additional kwargs are passed to interpolation method
@@ -1337,15 +1339,13 @@ class DataArray:
             raise NotImplementedError()
 
         if interpolant is None:
-            elem_ids, weights = self.geometry.get_2d_interpolant(xy, **kwargs)
-        else:
-            elem_ids, weights = interpolant
+            interpolant = self.geometry.get_2d_interpolant(xy, **kwargs)
 
         if isinstance(geom, (Grid2D, GeometryFM2D)):
             shape = (geom.ny, geom.nx) if isinstance(geom, Grid2D) else None
 
             ari = self.geometry.interp2d(
-                data=self.to_numpy(), elem_ids=elem_ids, weights=weights, shape=shape
+                data=self.to_numpy(), interpolant=interpolant, shape=shape
             )
         else:
             raise NotImplementedError(

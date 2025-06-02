@@ -8,6 +8,8 @@ import numpy as np
 
 from mikecore.Projections import Cartography
 
+from mikeio._interpolation import Interpolant
+
 from ..exceptions import OutsideModelDomainError
 
 from ._geometry import (
@@ -184,7 +186,7 @@ class Grid1D(_Geometry):
 
     def get_spatial_interpolant(
         self, coords: tuple[np.ndarray, np.ndarray], **kwargs: Any
-    ) -> tuple[np.ndarray, np.ndarray]:
+    ) -> Interpolant:
         x = coords[0][0]  # TODO accept list of points
 
         assert self.nx > 1, "Interpolation not possible for Grid1D with one point"
@@ -198,9 +200,12 @@ class Grid1D(_Geometry):
             assert np.allclose(weights.sum(), 1.0)
         assert len(ids) == 2
         assert len(weights) == 2
-        return ids, weights
+        return Interpolant(ids, weights)
 
-    def interp(self, data: np.ndarray, ids: np.ndarray, weights: np.ndarray) -> Any:
+    def interp(self, data: np.ndarray, interpolant: Interpolant) -> Any:
+        ids = interpolant.ids
+        weights = interpolant.weights
+        assert weights is not None
         return np.dot(data[:, ids], weights)
 
     @property

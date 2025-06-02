@@ -84,7 +84,7 @@ def _extract_track(
 
     # spatial interpolation
     n_pts = 1 if method == "nearest" else 5
-    elem_ids, weights = geometry.get_2d_interpolant(
+    interpolant = geometry.get_2d_interpolant(
         coords[i_start : (i_end + 1)], n_nearest=n_pts
     )
 
@@ -131,7 +131,9 @@ def _extract_track(
             continue
 
         w = (t_rel[t] - t1) / timestep  # time-weight
-        eid = elem_ids[i_interp]
+        eid = interpolant.ids[i_interp]
+        weights = interpolant.weights
+        assert weights is not None
         if np.any(eid > 0):
             dati = (1 - w) * np.dot(d1[:, eid], weights[i_interp])
             dati = dati + w * np.dot(d2[:, eid], weights[i_interp])
