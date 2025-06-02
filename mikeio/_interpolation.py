@@ -118,8 +118,7 @@ class Interpolant:
             if weights is None:
                 return data[elem_ids]
             else:
-                idat = data[elem_ids] * weights
-                idat = idat.astype(data.dtype)
+                idat = data[elem_ids] * weights.astype(data.dtype)
                 return np.sum(idat, axis=1) if weights.ndim == 2 else idat
         elif data.ndim == 2:
             # data shape: (nt, nelem)
@@ -128,8 +127,7 @@ class Interpolant:
             else:
                 # data[:, elem_ids]: (nt, ni)
                 # weights: (ni,) or (ni, nweights)
-                idat = data[:, elem_ids] * weights  # broadcasting
-                idat = idat.astype(data.dtype)
+                idat = data[:, elem_ids] * weights.astype(data.dtype)  # broadcasting
                 return np.sum(idat, axis=-1) if weights.ndim == 2 else idat
         else:
             raise ValueError("data must be 1D or 2D array")
