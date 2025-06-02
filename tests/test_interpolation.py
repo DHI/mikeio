@@ -1,5 +1,5 @@
 from mikeio.dataset import Dataset
-from mikeio._interpolation import get_idw_interpolant, _interp_item
+from mikeio._interpolation import get_idw_interpolant
 import mikeio
 import numpy as np
 
@@ -27,7 +27,6 @@ def test_interp2d() -> None:
 
     interpolant = dfs.geometry.get_2d_interpolant(xy, n_nearest=1)
 
-    # with pytest.warns(match="Geometry"):
     dati = interpolant.interp2d(ds)
     assert isinstance(dati, Dataset)
     assert isinstance(
@@ -93,6 +92,6 @@ def test_interp_itemstep() -> None:
     interpolant = dfs.geometry.get_2d_interpolant(xy, n_nearest=1)
 
     dat = ds[0].values[0, :]
-    dati = _interp_item(dat, interpolant)
+    dati = interpolant._interp_item(dat)
     assert len(dati) == npts
     assert dati[0] == 8.262675285339355

@@ -3,10 +3,10 @@ from dataclasses import dataclass
 from typing import TYPE_CHECKING, overload
 import numpy as np
 
-if TYPE_CHECKING:
-    from .dataset import Dataset, DataArray
-
 from .spatial import GeometryUndefined
+
+if TYPE_CHECKING:
+    from .dataset import Dataset
 
 
 def get_idw_interpolant(distances: np.ndarray, p: float = 2) -> np.ndarray:
@@ -49,8 +49,6 @@ def get_idw_interpolant(distances: np.ndarray, p: float = 2) -> np.ndarray:
 @dataclass
 class Interpolant:
     ids: np.ndarray
-
-    # TODO should this allowed to be None?
     weights: np.ndarray | None
 
     # TODO data is inconsistent with interp2d, but I have the feeling this is never used
@@ -65,77 +63,49 @@ class Interpolant:
     @overload
     def interp2d(
         self,
-        data: np.ndarray | DataArray,
-        shape: tuple[int, ...] | None = None,
+        data: np.ndarray,
     ) -> np.ndarray: ...
 
     @overload
     def interp2d(
         self,
         data: Dataset,
-        shape: tuple[int, ...] | None = None,
     ) -> Dataset: ...
 
     def interp2d(
         self,
-        data: Dataset | DataArray | np.ndarray,
-        shape: tuple[int, ...] | None = None,
+        data: Dataset | np.ndarray,
     ) -> Dataset | np.ndarray:
         """interp spatially in data (2d only).
 
         Parameters
         ----------
-        data : mikeio.Dataset, DataArray, or ndarray
+        data : mikeio.Dataset, or ndarray
             dfsu data
-        shape: tuple, optional
-                reshape output
 
         Returns
         -------
         ndarray, Dataset, or DataArray
-            spatially interped data with same type and shape as input
+            spatially interped data with same type as input
 
         """
         from .dataset import DataArray, Dataset
 
         if isinstance(data, Dataset):
-            data_vars = {}
-
-            for da in data:
-                idatitem = self._interp_item(da.to_numpy(), self)
-                if shape:
-                    if da.ndim == 2:
-                        nt = da.shape[0]
-                        idatitem = idatitem.reshape((nt, *shape))
-                    else:
-                        idatitem = idatitem.reshape(shape)
-
-                data_vars[da.name] == DataArray(
-                    data=idatitem,
+            das = [
+                DataArray(
+                    data=self._interp_item(da.to_numpy()),
                     time=da.time,
                     item=da.item,
+                    dims=da.dims,
+                    geometry=GeometryUndefined(),
                 )
+                for da in data
+            ]
 
-            return Dataset(data_vars, validate=False)
+            return Dataset(das, validate=False)
 
-        if isinstance(data, DataArray):
-            # TODO why doesn't this return a DataArray?
-            data = data.to_numpy()
-
-        if isinstance(data, np.ndarray):
-            if data.ndim == 1:
-                # data is single item and single time step
-                idatitem = self._interp_item(data)
-                if shape:
-                    idatitem = idatitem.reshape(*shape)
-                return idatitem
-
-        datitem = data
-        nt, _ = datitem.shape
-        idatitem = self._interp_item(datitem)
-        if shape:
-            idatitem = idatitem.reshape((nt, *shape))
-        return idatitem
+        return self._interp_item(data)
 
     def _interp_item(
         self,

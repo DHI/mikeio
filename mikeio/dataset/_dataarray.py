@@ -1111,7 +1111,7 @@ class DataArray:
                         n_nearest=n_nearest,
                         **kwargs,  # type: ignore
                     )
-                dai = interpolant.interp2d(self).flatten()
+                dai = interpolant.interp2d(self.to_numpy()).flatten()
                 if z is None:
                     geometry = GeometryPoint2D(
                         x=x, y=y, projection=self.geometry.projection
@@ -1342,9 +1342,15 @@ class DataArray:
             interpolant = self.geometry.get_2d_interpolant(xy, **kwargs)
 
         if isinstance(geom, (Grid2D, GeometryFM2D)):
-            shape = (geom.ny, geom.nx) if isinstance(geom, Grid2D) else None
+            ari = interpolant.interp2d(data=self.to_numpy())
+            if isinstance(geom, Grid2D):
+                shape = (
+                    (self.n_timesteps, geom.ny, geom.nx)
+                    if self.dims[0] == "time"
+                    else (geom.ny, geom.nx)
+                )
+                ari = ari.reshape(shape)
 
-            ari = interpolant.interp2d(data=self.to_numpy(), shape=shape)
             assert ari.dtype == self.dtype
         else:
             raise NotImplementedError(
