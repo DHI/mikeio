@@ -9,14 +9,6 @@ if TYPE_CHECKING:
 from .spatial import GeometryUndefined
 
 
-@dataclass
-class Interpolant:
-    ids: np.ndarray
-
-    # TODO should this allowed to be None?
-    weights: np.ndarray | None
-
-
 def get_idw_interpolant(distances: np.ndarray, p: float = 2) -> np.ndarray:
     """IDW interpolant for 2d array of distances.
 
@@ -54,98 +46,101 @@ def get_idw_interpolant(distances: np.ndarray, p: float = 2) -> np.ndarray:
     return weights
 
 
-@overload
-def interp2d(
-    data: np.ndarray | DataArray,
-    interpolant: Interpolant,
-    shape: tuple[int, ...] | None = None,
-) -> np.ndarray: ...
+@dataclass
+class Interpolant:
+    ids: np.ndarray
 
+    # TODO should this allowed to be None?
+    weights: np.ndarray | None
 
-@overload
-def interp2d(
-    data: Dataset,
-    interpolant: Interpolant,
-    shape: tuple[int, ...] | None = None,
-) -> Dataset: ...
+    @overload
+    def interp2d(
+        self,
+        data: np.ndarray | DataArray,
+        shape: tuple[int, ...] | None = None,
+    ) -> np.ndarray: ...
 
+    @overload
+    def interp2d(
+        self,
+        data: Dataset,
+        shape: tuple[int, ...] | None = None,
+    ) -> Dataset: ...
 
-def interp2d(
-    data: Dataset | DataArray | np.ndarray,
-    interpolant: Interpolant,
-    shape: tuple[int, ...] | None = None,
-) -> Dataset | np.ndarray:
-    """interp spatially in data (2d only).
+    def interp2d(
+        self,
+        data: Dataset | DataArray | np.ndarray,
+        shape: tuple[int, ...] | None = None,
+    ) -> Dataset | np.ndarray:
+        """interp spatially in data (2d only).
 
-    Parameters
-    ----------
-    data : mikeio.Dataset, DataArray, or ndarray
-        dfsu data
-    interpolant: Interpolant
-        ids and weights used for interpolation
-    shape: tuple, optional
-            reshape output
+        Parameters
+        ----------
+        data : mikeio.Dataset, DataArray, or ndarray
+            dfsu data
+        shape: tuple, optional
+                reshape output
 
-    Returns
-    -------
-    ndarray, Dataset, or DataArray
-        spatially interped data with same type and shape as input
+        Returns
+        -------
+        ndarray, Dataset, or DataArray
+            spatially interped data with same type and shape as input
 
-    """
-    from .dataset import DataArray, Dataset
+        """
+        from .dataset import DataArray, Dataset
 
-    ni = len(interpolant.ids)
+        ni = len(self.ids)
 
-    if isinstance(data, Dataset):
-        ds = data.copy()
+        if isinstance(data, Dataset):
+            ds = data.copy()
 
-        interp_data_vars = {}
+            interp_data_vars = {}
 
-        for da in ds:
-            key = da.name
-            if "time" not in da.dims:
-                idatitem = _interp_item(da.to_numpy(), interpolant)
+            for da in ds:
+                key = da.name
+                if "time" not in da.dims:
+                    idatitem = _interp_item(da.to_numpy(), self)
+                    if shape:
+                        idatitem = idatitem.reshape(*shape)
+
+                else:
+                    nt, _ = da.shape
+                    idatitem = _interp_item(da.to_numpy(), self)
+                    if shape:
+                        idatitem = idatitem.reshape((nt, *shape))
+
+                dims = ("time", "element")  # TODO is this the best?
+                interp_data_vars[key] = DataArray(
+                    data=idatitem,
+                    time=da.time,
+                    dims=dims,
+                    item=da.item,
+                    geometry=GeometryUndefined(),
+                )
+
+            new_ds = Dataset(interp_data_vars, validate=False)
+            return new_ds
+
+        if isinstance(data, DataArray):
+            # TODO why doesn't this return a DataArray?
+            data = data.to_numpy()
+
+        if isinstance(data, np.ndarray):
+            if data.ndim == 1:
+                # data is single item and single time step
+                idatitem = _interp_item(data, self)
                 if shape:
                     idatitem = idatitem.reshape(*shape)
+                return idatitem
 
-            else:
-                nt, _ = da.shape
-                idatitem = _interp_item(da.to_numpy(), interpolant)
-                if shape:
-                    idatitem = idatitem.reshape((nt, *shape))
-
-            dims = ("time", "element")  # TODO is this the best?
-            interp_data_vars[key] = DataArray(
-                data=idatitem,
-                time=da.time,
-                dims=dims,
-                item=da.item,
-                geometry=GeometryUndefined(),
-            )
-
-        new_ds = Dataset(interp_data_vars, validate=False)
-        return new_ds
-
-    if isinstance(data, DataArray):
-        # TODO why doesn't this return a DataArray?
-        data = data.to_numpy()
-
-    if isinstance(data, np.ndarray):
-        if data.ndim == 1:
-            # data is single item and single time step
-            idatitem = _interp_item(data, interpolant)
-            if shape:
-                idatitem = idatitem.reshape(*shape)
-            return idatitem
-
-    datitem = data
-    nt, _ = datitem.shape
-    idatitem = np.empty(shape=(nt, ni), dtype=datitem.dtype)
-    for step in range(nt):
-        idatitem[step, :] = _interp_item(datitem[step], interpolant)
-    if shape:
-        idatitem = idatitem.reshape((nt, *shape))
-    return idatitem
+        datitem = data
+        nt, _ = datitem.shape
+        idatitem = np.empty(shape=(nt, ni), dtype=datitem.dtype)
+        for step in range(nt):
+            idatitem[step, :] = _interp_item(datitem[step], self)
+        if shape:
+            idatitem = idatitem.reshape((nt, *shape))
+        return idatitem
 
 
 def _interp_item(

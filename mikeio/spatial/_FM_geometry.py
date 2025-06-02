@@ -19,7 +19,7 @@ from scipy.spatial import cKDTree
 
 from ..eum import EUMType, EUMUnit
 from ..exceptions import OutsideModelDomainError
-from .._interpolation import Interpolant, get_idw_interpolant, interp2d
+from .._interpolation import Interpolant, get_idw_interpolant
 from ._FM_plot import (
     _get_node_centered_data,
     _plot_map,
@@ -670,7 +670,7 @@ class GeometryFM2D(_GeometryFM):
             spatially interpolateded data
 
         """
-        return interp2d(data, interpolant, shape)
+        return interpolant.interp2d(data, shape)
 
     def _find_n_nearest_2d_elements(
         self, x: float | np.ndarray, y: float | np.ndarray | None = None, n: int = 1

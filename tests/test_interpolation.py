@@ -1,5 +1,5 @@
 from mikeio.dataset import Dataset
-from mikeio._interpolation import get_idw_interpolant, interp2d, _interp_item
+from mikeio._interpolation import get_idw_interpolant, _interp_item
 import mikeio
 import numpy as np
 
@@ -28,7 +28,7 @@ def test_interp2d() -> None:
     interpolant = dfs.geometry.get_2d_interpolant(xy, n_nearest=1)
 
     # with pytest.warns(match="Geometry"):
-    dati = interp2d(ds, interpolant)
+    dati = interpolant.interp2d(ds)
     assert isinstance(dati, Dataset)
     assert isinstance(
         dati.geometry, GeometryUndefined
@@ -37,7 +37,7 @@ def test_interp2d() -> None:
     assert dati[0].values[0, 0] == 8.262675285339355
 
     dat = ds[0].to_numpy()  # first item, all time steps
-    dati = interp2d(dat, interpolant)
+    dati = interpolant.interp2d(dat)
     assert isinstance(dati, np.ndarray)
     assert dati.size == ds.n_timesteps * npts
     assert dati[0, 0] == 8.262675285339355
@@ -45,7 +45,7 @@ def test_interp2d() -> None:
     interpolant = dfs.geometry.get_2d_interpolant(xy, n_nearest=3)
 
     dat = ds[0].values[0, :]  # a single time step
-    dati = interp2d(dat, interpolant)
+    dati = interpolant.interp2d(dat)
     assert isinstance(dati, np.ndarray)
     assert dati.size == npts
 
@@ -59,7 +59,7 @@ def test_interp2d_same_points() -> None:
     interpolant = dfs.geometry.get_2d_interpolant(xy, n_nearest=4)
     assert np.max(interpolant.weights) <= 1.0
     dat = ds[0].values[0, :]
-    dati = interp2d(dat, interpolant)
+    dati = interpolant.interp2d(dat)
     assert np.all(dati == dat[:npts])
 
 
@@ -72,10 +72,10 @@ def test_interp2d_outside() -> None:
     xy[0, :] = [2, 50]
     xy[1, :] = [3, 51]
     interpolant = dfs.geometry.get_2d_interpolant(xy, n_nearest=4)
-    dati = interp2d(ds[0].values[0, :], interpolant)
+    dati = interpolant.interp2d(ds[0].values[0, :])
     assert np.all(np.isnan(dati))
     interpolant = dfs.geometry.get_2d_interpolant(xy, n_nearest=4, extrapolate=True)
-    dati = interp2d(ds[0].values[0, :], interpolant)
+    dati = interpolant.interp2d(ds[0].values[0, :])
     assert np.all(~np.isnan(dati))
 
 

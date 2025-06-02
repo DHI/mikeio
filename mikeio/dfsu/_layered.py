@@ -19,7 +19,7 @@ from ..dfs._dfs import (
     _valid_timesteps,
 )
 from ..eum import EUMType, ItemInfo
-from .._interpolation import Interpolant, get_idw_interpolant, interp2d
+from .._interpolation import Interpolant, get_idw_interpolant
 from ..spatial import (
     GeometryFM3D,
     GeometryFMVerticalProfile,
@@ -539,7 +539,7 @@ class Dfsu3D(DfsuLayered):
         assert isinstance(ds[0]._zn, np.ndarray)
         zn_surf = ds[0]._zn[:, node_ids_surf]  # surface
         interpolant = Interpolant(node_ids, weights)
-        surf2d = interp2d(zn_surf, interpolant)
+        surf2d = interpolant.interp2d(zn_surf)
         surf_da = DataArray(
             data=surf2d,
             time=ds.time,

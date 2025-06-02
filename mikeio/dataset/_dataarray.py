@@ -1111,7 +1111,7 @@ class DataArray:
                         n_nearest=n_nearest,
                         **kwargs,  # type: ignore
                     )
-                dai = self.geometry.interp2d(self, interpolant).flatten()  # type: ignore
+                dai = interpolant.interp2d(self).flatten()
                 if z is None:
                     geometry = GeometryPoint2D(
                         x=x, y=y, projection=self.geometry.projection
@@ -1344,9 +1344,7 @@ class DataArray:
         if isinstance(geom, (Grid2D, GeometryFM2D)):
             shape = (geom.ny, geom.nx) if isinstance(geom, Grid2D) else None
 
-            ari = self.geometry.interp2d(
-                data=self.to_numpy(), interpolant=interpolant, shape=shape
-            )
+            ari = interpolant.interp2d(data=self.to_numpy(), shape=shape)
         else:
             raise NotImplementedError(
                 "Interpolation to other geometry not yet supported"
