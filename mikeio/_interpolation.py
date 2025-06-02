@@ -43,12 +43,11 @@ def get_idw_interpolant(distances: np.ndarray, p: float = 2) -> np.ndarray:
 @dataclass
 class Interpolant:
     ids: np.ndarray
-    weights: np.ndarray | None
+    weights: np.ndarray
 
     def interp1d(self, data: np.ndarray) -> np.ndarray:
         ids = self.ids
         weights = self.weights
-        assert weights is not None
         result = np.dot(data[:, ids], weights)
         assert isinstance(result, np.ndarray)
         return result
@@ -74,19 +73,14 @@ class Interpolant:
         elem_ids = self.ids
 
         if data.ndim == 1:
-            if weights is None:
-                return data[elem_ids]
-            else:
-                idat = data[elem_ids] * weights.astype(data.dtype)
-                return np.sum(idat, axis=1) if weights.ndim == 2 else idat
+            idat = data[elem_ids] * weights.astype(data.dtype)
+            return np.sum(idat, axis=1) if weights.ndim == 2 else idat
         elif data.ndim == 2:
             # data shape: (nt, nelem)
-            if weights is None:
-                return data[:, elem_ids]
-            else:
-                # data[:, elem_ids]: (nt, ni)
-                # weights: (ni,) or (ni, nweights)
-                idat = data[:, elem_ids] * weights.astype(data.dtype)  # broadcasting
-                return np.sum(idat, axis=-1) if weights.ndim == 2 else idat
+
+            # data[:, elem_ids]: (nt, ni)
+            # weights: (ni,) or (ni, nweights)
+            idat = data[:, elem_ids] * weights.astype(data.dtype)  # broadcasting
+            return np.sum(idat, axis=-1) if weights.ndim == 2 else idat
         else:
             raise ValueError("data must be 1D or 2D array")
