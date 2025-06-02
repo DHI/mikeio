@@ -89,6 +89,6 @@ def test_interp_itemstep() -> None:
     interpolant = dfs.geometry.get_2d_interpolant(xy, n_nearest=1)
 
     dat = ds[0].values[0, :]
-    dati = interpolant._interp_item(dat)
+    dati = interpolant.interp2d(dat)
     assert len(dati) == npts
     assert dati[0] == 8.262675285339355

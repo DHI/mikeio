@@ -70,12 +70,6 @@ class Interpolant:
             spatially interpolated data
 
         """
-        return self._interp_item(data)
-
-    def _interp_item(
-        self,
-        data: np.ndarray,
-    ) -> np.ndarray:
         weights = self.weights
         elem_ids = self.ids
 
