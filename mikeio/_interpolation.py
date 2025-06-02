@@ -1,12 +1,6 @@
 from __future__ import annotations
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, overload
 import numpy as np
-
-from .spatial import GeometryUndefined
-
-if TYPE_CHECKING:
-    from .dataset import Dataset
 
 
 def get_idw_interpolant(distances: np.ndarray, p: float = 2) -> np.ndarray:
@@ -51,7 +45,6 @@ class Interpolant:
     ids: np.ndarray
     weights: np.ndarray | None
 
-    # TODO data is inconsistent with interp2d, but I have the feeling this is never used
     def interp1d(self, data: np.ndarray) -> np.ndarray:
         ids = self.ids
         weights = self.weights
@@ -60,51 +53,23 @@ class Interpolant:
         assert isinstance(result, np.ndarray)
         return result
 
-    @overload
     def interp2d(
         self,
         data: np.ndarray,
-    ) -> np.ndarray: ...
-
-    @overload
-    def interp2d(
-        self,
-        data: Dataset,
-    ) -> Dataset: ...
-
-    def interp2d(
-        self,
-        data: Dataset | np.ndarray,
-    ) -> Dataset | np.ndarray:
+    ) -> np.ndarray:
         """interp spatially in data (2d only).
 
         Parameters
         ----------
-        data : mikeio.Dataset, or ndarray
+        data : ndarray
             dfsu data
 
         Returns
         -------
-        ndarray, Dataset, or DataArray
-            spatially interped data with same type as input
+        ndarray
+            spatially interpolated data
 
         """
-        from .dataset import DataArray, Dataset
-
-        if isinstance(data, Dataset):
-            das = [
-                DataArray(
-                    data=self._interp_item(da.to_numpy()),
-                    time=da.time,
-                    item=da.item,
-                    dims=da.dims,
-                    geometry=GeometryUndefined(),
-                )
-                for da in data
-            ]
-
-            return Dataset(das, validate=False)
-
         return self._interp_item(data)
 
     def _interp_item(

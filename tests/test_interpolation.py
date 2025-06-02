@@ -1,9 +1,6 @@
-from mikeio.dataset import Dataset
 from mikeio._interpolation import get_idw_interpolant
 import mikeio
 import numpy as np
-
-from mikeio.spatial import GeometryUndefined
 
 
 def test_get_idw_interpolant() -> None:
@@ -27,13 +24,13 @@ def test_interp2d() -> None:
 
     interpolant = dfs.geometry.get_2d_interpolant(xy, n_nearest=1)
 
-    dati = interpolant.interp2d(ds)
-    assert isinstance(dati, Dataset)
-    assert isinstance(
-        dati.geometry, GeometryUndefined
-    )  # There is no suitable file format for this, thus no suitable geometry :-(
-    assert np.all(dati.shape == (ds.n_timesteps, npts))
-    assert dati[0].values[0, 0] == 8.262675285339355
+    dati = interpolant.interp2d(ds[0].to_numpy())
+    # assert isinstance(dati, Dataset)
+    # assert isinstance(
+    #    dati.geometry, GeometryUndefined
+    # )  # There is no suitable file format for this, thus no suitable geometry :-(
+    assert dati.shape == (ds.n_timesteps, npts)
+    assert dati[0, 0] == 8.262675285339355
 
     dat = ds[0].to_numpy()  # first item, all time steps
     dati = interpolant.interp2d(dat)
