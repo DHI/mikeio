@@ -184,11 +184,7 @@ class Grid1D(_Geometry):
 
         return int(np.argmin(d))
 
-    def get_spatial_interpolant(
-        self, coords: tuple[np.ndarray, np.ndarray], **kwargs: Any
-    ) -> Interpolant:
-        x = coords[0][0]  # TODO accept list of points
-
+    def get_spatial_interpolant(self, x: float) -> Interpolant:
         assert self.nx > 1, "Interpolation not possible for Grid1D with one point"
         d = np.abs(self.x - x)
         ids = np.argsort(d)[0:2]
@@ -201,9 +197,6 @@ class Grid1D(_Geometry):
         assert len(ids) == 2
         assert len(weights) == 2
         return Interpolant(ids, weights)
-
-    def interp(self, data: np.ndarray, interpolant: Interpolant) -> np.ndarray:
-        return interpolant.interp1d(data)
 
     @property
     def dx(self) -> float:

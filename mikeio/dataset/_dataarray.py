@@ -1096,11 +1096,9 @@ class DataArray:
                 )
             elif isinstance(self.geometry, Grid1D):
                 if interpolant is None:
-                    interpolant = self.geometry.get_spatial_interpolant(coords)  # type: ignore
-                dai = self.geometry.interp(self.to_numpy(), interpolant).flatten()
+                    interpolant = self.geometry.get_spatial_interpolant(x)
+                dai = interpolant.interp1d(self.to_numpy()).flatten()
                 geometry = GeometryUndefined()
-            elif isinstance(self.geometry, GeometryFM3D):
-                raise NotImplementedError("Interpolation in 3d is not yet implemented")
             elif isinstance(self.geometry, GeometryFM2D):
                 if x is None or y is None:
                     raise ValueError("both x and y must be specified")
@@ -1116,11 +1114,10 @@ class DataArray:
                     geometry = GeometryPoint2D(
                         x=x, y=y, projection=self.geometry.projection
                     )
-                # this is not supported yet (see above)
-                # else:
-                #    geometry = GeometryPoint3D(
-                #        x=x, y=y, z=z, projection=self.geometry.projection
-                #    )
+            else:
+                raise NotImplementedError(
+                    f"Interpolation in {self.geometry} is not yet implemented"
+                )
 
             da = DataArray(
                 data=dai,
