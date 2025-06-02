@@ -526,10 +526,7 @@ class Dfsu3D(DfsuLayered):
         xyn = geom.node_coordinates[:, 0:2]  # type: ignore
         tree2d = cKDTree(xyn)
         dist, node_ids = tree2d.query(xye, k=n_nearest)
-        if n_nearest == 1:
-            weights = None
-        else:
-            weights = get_idw_interpolant(dist)
+        weights = get_idw_interpolant(dist)
 
         # read zn from 3d file and interpolate to element centers
         ds = self.read(items=0, keepdims=True)  # read only zn

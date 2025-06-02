@@ -629,21 +629,19 @@ class GeometryFM2D(_GeometryFM):
         """
         xy = np.atleast_2d(xy)
         ids, dists = self._find_n_nearest_2d_elements(xy, n=n_nearest)
-        weights = None
+        weights = np.ones(dists.shape)
 
-        if n_nearest == 1:
-            weights = np.ones(dists.shape)
-            if not extrapolate:
-                weights[~self.contains(xy)] = np.nan  # type: ignore
+        if n_nearest == 1 and not extrapolate:
+            weights[~self.contains(xy)] = np.nan
         elif n_nearest > 1:
             weights = get_idw_interpolant(dists, p=p)
             if not extrapolate:
-                weights[~self.contains(xy), :] = np.nan  # type: ignore
+                weights[~self.contains(xy), :] = np.nan
         else:
             ValueError("n_nearest must be at least 1")
 
         if radius is not None:
-            weights[dists > radius] = np.nan  # type: ignore
+            weights[dists > radius] = np.nan
 
         return Interpolant(ids, weights)
 

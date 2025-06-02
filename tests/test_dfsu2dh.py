@@ -890,9 +890,15 @@ def test_dataset_interp_to_xarray() -> None:
 def test_interp_like_grid() -> None:
     ds = mikeio.read("tests/testdata/wind_north_sea.dfsu")
     ws = ds[0]
+    assert ws.sel(x=0, y=55).to_numpy()[0] == pytest.approx(9.062851)
+    with pytest.raises(OutsideModelDomainError):
+        assert ws.sel(x=6, y=51)
     assert ws.values.dtype == np.float32
     grid = ds.geometry.get_overset_grid(dx=0.1)
-    ws_grid = ws.interp_like(grid)
+    ws_grid = ws.interp_like(grid, n_nearest=1)
+    # outside the domain, but inside the grid
+    assert ws_grid.sel(x=0, y=55).to_numpy()[0] == pytest.approx(9.062851)
+    assert np.isnan(ws_grid.sel(x=6, y=51).to_numpy()[0])
     assert ws_grid.values.dtype == np.float32
     assert ws_grid.n_timesteps == ds.n_timesteps
     assert isinstance(ws_grid, DataArray)
