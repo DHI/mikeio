@@ -8,7 +8,7 @@ from mikecore.DfsuFile import DfsuFileType
 
 from ._geometry import _Geometry
 
-from ._FM_geometry import GeometryFM2D
+from ._FM_geometry import _GeometryFM, GeometryFM2D
 
 
 class GeometryFMPointSpectrum(_Geometry):
@@ -50,11 +50,6 @@ class GeometryFMPointSpectrum(_Geometry):
         return txt + ")"
 
     @property
-    def ndim(self) -> int:
-        # TODO: 0, 1 or 2 ?
-        return 0
-
-    @property
     def n_frequencies(self) -> int:
         """Number of frequencies."""
         return 0 if self.frequencies is None else len(self.frequencies)
@@ -75,7 +70,7 @@ class GeometryFMPointSpectrum(_Geometry):
         return self._directions
 
 
-class _GeometryFMSpectrum(GeometryFM2D):
+class _GeometryFMSpectrum(_GeometryFM):
     def __init__(
         self,
         node_coordinates: np.ndarray,
@@ -125,9 +120,13 @@ class _GeometryFMSpectrum(GeometryFM2D):
         """Directional axis."""
         return self._directions
 
+    @property
+    def is_spectral(self) -> bool:
+        """Type is spectral dfsu (point, line or area spectrum)."""
+        return True
 
-# TODO reconsider inheritance to avoid overriding method signature
-class GeometryFMAreaSpectrum(_GeometryFMSpectrum):
+
+class GeometryFMAreaSpectrum(_GeometryFMSpectrum, GeometryFM2D):
     """Flexible mesh area spectrum geometry."""
 
     def isel(  # type: ignore
@@ -180,7 +179,6 @@ class GeometryFMAreaSpectrum(_GeometryFMSpectrum):
         return geom
 
 
-# TODO this inherits indirectly from GeometryFM2D, which is not ideal
 class GeometryFMLineSpectrum(_GeometryFMSpectrum):
     """Flexible mesh line spectrum geometry."""
 
@@ -188,6 +186,17 @@ class GeometryFMLineSpectrum(_GeometryFMSpectrum):
         self, idx: Sequence[int], axis: str = "node"
     ) -> GeometryFMPointSpectrum | GeometryFMLineSpectrum:
         return self._nodes_to_geometry(nodes=idx)
+
+    def _get_nodes_and_table_for_elements(
+        self, elements: np.ndarray | list[int]
+    ) -> tuple[Any, Any]:
+        elem_tbl = np.empty(len(elements), dtype=np.dtype("O"))
+
+        for j, eid in enumerate(elements):
+            elem_tbl[j] = np.asarray(self.element_table[eid])
+
+        nodes = np.unique(np.hstack(elem_tbl))  # type: ignore
+        return nodes, elem_tbl
 
     def _nodes_to_geometry(  # type: ignore
         self, nodes: Sequence[int]

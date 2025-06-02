@@ -80,11 +80,6 @@ class _Geometry(ABC):
 
     @property
     @abstractmethod
-    def ndim(self) -> int:
-        pass
-
-    @property
-    @abstractmethod
     def default_dims(self) -> tuple[str, ...]:
         pass
 
@@ -92,10 +87,6 @@ class _Geometry(ABC):
 class GeometryUndefined(_Geometry):
     def __repr__(self) -> str:
         return "GeometryUndefined()"
-
-    @property
-    def ndim(self) -> int:
-        raise NotImplementedError()
 
     @property
     def default_dims(self) -> tuple[str, ...]:
@@ -123,11 +114,6 @@ class GeometryPoint2D(_Geometry):
     def wkt(self) -> str:
         return f"POINT ({self.x} {self.y})"
 
-    @property
-    def ndim(self) -> int:
-        """Geometry dimension."""
-        return 0
-
     def to_shapely(self) -> Any:
         from shapely.geometry import Point
 
@@ -152,10 +138,6 @@ class GeometryPoint3D(_Geometry):
     @property
     def wkt(self) -> str:
         return f"POINT Z ({self.x} {self.y} {self.z})"
-
-    @property
-    def ndim(self) -> int:
-        return 0
 
     def to_shapely(self) -> Any:
         from shapely.geometry import Point

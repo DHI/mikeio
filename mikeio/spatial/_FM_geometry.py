@@ -501,10 +501,6 @@ class GeometryFM2D(_GeometryFM):
         return polygon.ndim == 2 and polygon.shape[1] == 2
 
     @property
-    def ndim(self) -> int:
-        return 2
-
-    @property
     def geometry2d(self) -> GeometryFM2D:
         return self
 
