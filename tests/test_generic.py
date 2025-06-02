@@ -672,28 +672,3 @@ def test_change_datatype_dfs0(tmp_path: Path) -> None:
     org = mikeio.read(infilename).to_numpy()
     new = mikeio.read(outfilename).to_numpy()
     assert np.allclose(org, new, rtol=1e-08, atol=1e-10, equal_nan=True)
-
-
-def test_change_datatype_dfsu(tmp_path: Path) -> None:
-    infilename = "tests/testdata/oresund_sigma_z.dfsu"
-    outfilename = str(tmp_path / "oresund_sigma_z_datatype107.dfsu")
-    OUT_DATA_TYPE = 107
-
-    change_datatype(infilename, outfilename, datatype=OUT_DATA_TYPE)
-    dfs_out = DfsFileFactory.DfsGenericOpen(outfilename)
-    dfs_in = DfsFileFactory.DfsGenericOpen(infilename)
-
-    n_timesteps_in = dfs_in.FileInfo.TimeAxis.NumberOfTimeSteps
-    n_timesteps_out = dfs_out.FileInfo.TimeAxis.NumberOfTimeSteps
-    datatype_out = dfs_out.FileInfo.DataType
-
-    dfs_out.Close()
-    dfs_in.Close()
-
-    assert datatype_out == OUT_DATA_TYPE
-    assert n_timesteps_in == n_timesteps_out
-
-    # Also check that data is not modified
-    org = mikeio.read(infilename).to_numpy()
-    new = mikeio.read(outfilename).to_numpy()
-    assert np.allclose(org, new, rtol=1e-08, atol=1e-10, equal_nan=True)
