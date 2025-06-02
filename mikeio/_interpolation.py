@@ -53,6 +53,15 @@ class Interpolant:
     # TODO should this allowed to be None?
     weights: np.ndarray | None
 
+    # TODO data is inconsistent with interp2d, but I have the feeling this is never used
+    def interp1d(self, data: np.ndarray) -> np.ndarray:
+        ids = self.ids
+        weights = self.weights
+        assert weights is not None
+        result = np.dot(data[:, ids], weights)
+        assert isinstance(result, np.ndarray)
+        return result
+
     @overload
     def interp2d(
         self,

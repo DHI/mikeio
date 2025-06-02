@@ -134,6 +134,7 @@ def _extract_track(
         eid = interpolant.ids[i_interp]
         weights = interpolant.weights
         assert weights is not None
+        # TODO move to interpolation module?
         if np.any(eid > 0):
             dati = (1 - w) * np.dot(d1[:, eid], weights[i_interp])
             dati = dati + w * np.dot(d2[:, eid], weights[i_interp])

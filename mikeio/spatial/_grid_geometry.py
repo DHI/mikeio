@@ -8,8 +8,6 @@ import numpy as np
 
 from mikecore.Projections import Cartography
 
-from mikeio._interpolation import Interpolant
-
 from ..exceptions import OutsideModelDomainError
 
 from ._geometry import (
@@ -19,6 +17,8 @@ from ._geometry import (
     GeometryUndefined,
     _Geometry,
 )
+
+from .._interpolation import Interpolant
 
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
@@ -202,11 +202,8 @@ class Grid1D(_Geometry):
         assert len(weights) == 2
         return Interpolant(ids, weights)
 
-    def interp(self, data: np.ndarray, interpolant: Interpolant) -> Any:
-        ids = interpolant.ids
-        weights = interpolant.weights
-        assert weights is not None
-        return np.dot(data[:, ids], weights)
+    def interp(self, data: np.ndarray, interpolant: Interpolant) -> np.ndarray:
+        return interpolant.interp1d(data)
 
     @property
     def dx(self) -> float:
