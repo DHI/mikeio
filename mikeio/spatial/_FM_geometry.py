@@ -647,31 +647,6 @@ class GeometryFM2D(_GeometryFM):
 
         return Interpolant(ids, weights)
 
-    def interp2d(
-        self,
-        data: np.ndarray,
-        interpolant: Interpolant,
-        shape: tuple[int, ...] | None = None,
-    ) -> np.ndarray | list[np.ndarray]:
-        """Interpolate spatially in data (2d only).
-
-        Parameters
-        ----------
-        data : ndarray or list(ndarray)
-            dfsu data
-        interpolant: Interpolant
-            ids and weights
-        shape: tuple, optional
-            reshape output
-
-        Returns
-        -------
-        ndarray or list(ndarray)
-            spatially interpolateded data
-
-        """
-        return interpolant.interp2d(data, shape)
-
     def _find_n_nearest_2d_elements(
         self, x: float | np.ndarray, y: float | np.ndarray | None = None, n: int = 1
     ) -> tuple[Any, Any]:

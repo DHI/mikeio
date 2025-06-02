@@ -98,37 +98,25 @@ class Interpolant:
         """
         from .dataset import DataArray, Dataset
 
-        ni = len(self.ids)
-
         if isinstance(data, Dataset):
-            ds = data.copy()
+            data_vars = {}
 
-            interp_data_vars = {}
-
-            for da in ds:
-                key = da.name
-                if "time" not in da.dims:
-                    idatitem = _interp_item(da.to_numpy(), self)
-                    if shape:
-                        idatitem = idatitem.reshape(*shape)
-
-                else:
-                    nt, _ = da.shape
-                    idatitem = _interp_item(da.to_numpy(), self)
-                    if shape:
+            for da in data:
+                idatitem = self._interp_item(da.to_numpy(), self)
+                if shape:
+                    if da.ndim == 2:
+                        nt = da.shape[0]
                         idatitem = idatitem.reshape((nt, *shape))
+                    else:
+                        idatitem = idatitem.reshape(shape)
 
-                dims = ("time", "element")  # TODO is this the best?
-                interp_data_vars[key] = DataArray(
+                data_vars[da.name] == DataArray(
                     data=idatitem,
                     time=da.time,
-                    dims=dims,
                     item=da.item,
-                    geometry=GeometryUndefined(),
                 )
 
-            new_ds = Dataset(interp_data_vars, validate=False)
-            return new_ds
+            return Dataset(data_vars, validate=False)
 
         if isinstance(data, DataArray):
             # TODO why doesn't this return a DataArray?
@@ -137,49 +125,41 @@ class Interpolant:
         if isinstance(data, np.ndarray):
             if data.ndim == 1:
                 # data is single item and single time step
-                idatitem = _interp_item(data, self)
+                idatitem = self._interp_item(data)
                 if shape:
                     idatitem = idatitem.reshape(*shape)
                 return idatitem
 
         datitem = data
         nt, _ = datitem.shape
-        idatitem = np.empty(shape=(nt, ni), dtype=datitem.dtype)
-        for step in range(nt):
-            idatitem[step, :] = _interp_item(datitem[step], self)
+        idatitem = self._interp_item(datitem)
         if shape:
             idatitem = idatitem.reshape((nt, *shape))
         return idatitem
 
+    def _interp_item(
+        self,
+        data: np.ndarray,
+    ) -> np.ndarray:
+        weights = self.weights
+        elem_ids = self.ids
 
-def _interp_item(
-    data: np.ndarray,
-    interpolant: Interpolant,
-) -> np.ndarray:
-    """Vectorized interpolation for 1D or 2D data.
-
-    data: shape (nelem,) or (nt, nelem)
-
-    Returns: shape (ni,) or (nt, ni)
-
-    """
-    weights = interpolant.weights
-    elem_ids = interpolant.ids
-
-    if data.ndim == 1:
-        if weights is None:
-            return data[elem_ids]
+        if data.ndim == 1:
+            if weights is None:
+                return data[elem_ids]
+            else:
+                idat = data[elem_ids] * weights
+                idat = idat.astype(data.dtype)
+                return np.sum(idat, axis=1) if weights.ndim == 2 else idat
+        elif data.ndim == 2:
+            # data shape: (nt, nelem)
+            if weights is None:
+                return data[:, elem_ids]
+            else:
+                # data[:, elem_ids]: (nt, ni)
+                # weights: (ni,) or (ni, nweights)
+                idat = data[:, elem_ids] * weights  # broadcasting
+                idat = idat.astype(data.dtype)
+                return np.sum(idat, axis=-1) if weights.ndim == 2 else idat
         else:
-            idat = data[elem_ids] * weights
-            return np.sum(idat, axis=1) if weights.ndim == 2 else idat
-    elif data.ndim == 2:
-        # data shape: (nt, nelem)
-        if weights is None:
-            return data[:, elem_ids]
-        else:
-            # data[:, elem_ids]: (nt, ni)
-            # weights: (ni,) or (ni, nweights)
-            idat = data[:, elem_ids] * weights  # broadcasting
-            return np.sum(idat, axis=-1) if weights.ndim == 2 else idat
-    else:
-        raise ValueError("data must be 1D or 2D array")
+            raise ValueError("data must be 1D or 2D array")

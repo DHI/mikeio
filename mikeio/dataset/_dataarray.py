@@ -1345,6 +1345,7 @@ class DataArray:
             shape = (geom.ny, geom.nx) if isinstance(geom, Grid2D) else None
 
             ari = interpolant.interp2d(data=self.to_numpy(), shape=shape)
+            assert ari.dtype == self.dtype
         else:
             raise NotImplementedError(
                 "Interpolation to other geometry not yet supported"
