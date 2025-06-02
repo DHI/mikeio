@@ -438,6 +438,14 @@ class _GeometryFM(_Geometry):
 
         return True
 
+    def __repr__(self) -> str:
+        return (
+            f"Flexible Mesh Geometry: {self._type.name}\n"
+            f"number of nodes: {self.n_nodes}\n"
+            f"number of elements: {self.n_elements}\n"
+            f"projection: {self.projection_string}"
+        )
+
 
 class GeometryFM2D(_GeometryFM):
     """Flexible 2d mesh geometry."""
@@ -470,14 +478,6 @@ class GeometryFM2D(_GeometryFM):
 
     def __str__(self) -> str:
         return f"{self._type.name} ({self.n_elements} elements, {self.n_nodes} nodes)"
-
-    def __repr__(self) -> str:
-        return (
-            f"Flexible Mesh Geometry: {self._type.name}\n"
-            f"number of nodes: {self.n_nodes}\n"
-            f"number of elements: {self.n_elements}\n"
-            f"projection: {self.projection_string}"
-        )
 
     @staticmethod
     def _point_in_polygon(xn: np.ndarray, yn: np.ndarray, xp: float, yp: float) -> bool:
