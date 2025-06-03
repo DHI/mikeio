@@ -1179,17 +1179,15 @@ class GeometryFM2D(_GeometryFM):
             polygons with mesh elements
 
         """
-        from shapely.geometry import MultiPolygon, Polygon  # type: ignore
+        from shapely.geometry import (
+            MultiPolygon,
+            Polygon,
+        )  # make sure this import is present
 
-        polygons = []
-        for j in range(self.n_elements):
-            nodes = self.element_table[j]
-            pcoords = np.empty([len(nodes), 2])
-            for i in range(len(nodes)):
-                nidx = nodes[i]
-                pcoords[i, :] = self.node_coordinates[nidx, 0:2]
-            polygon = Polygon(pcoords)
-            polygons.append(polygon)
+        polygons = [
+            Polygon(self.node_coordinates[self.element_table[j], 0:2])
+            for j in range(self.n_elements)
+        ]
         mp = MultiPolygon(polygons)
 
         return mp
