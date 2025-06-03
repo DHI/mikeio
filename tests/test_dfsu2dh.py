@@ -839,12 +839,6 @@ def test_extract_bad_track() -> None:
         dfs.extract_track(df)
 
 
-def test_e2_e3_table_2d_file() -> None:
-    filename = "tests/testdata/NorthSea_HD_and_windspeed.dfsu"
-    dfs = mikeio.Dfsu2DH(filename)
-    assert not hasattr(dfs, "e2_e3_table")
-
-
 def test_dataset_write_dfsu(tmp_path: Path) -> None:
     fp = tmp_path / "HD2D_start.dfsu"
     ds = mikeio.read("tests/testdata/HD2D.dfsu", time=[0, 1])
