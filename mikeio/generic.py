@@ -51,6 +51,7 @@ __all__ = [
     "quantile",
     "scale",
     "sum",
+    "change_datatype",
 ]
 
 
@@ -94,6 +95,7 @@ def _clone(
     start_time: datetime | None = None,
     timestep: float | None = None,
     items: Sequence[int | DfsDynamicItemInfo] | None = None,
+    datatype: int | None = None,
 ) -> DfsFile:
     source = DfsFileFactory.DfsGenericOpen(str(infilename))
     fi = source.FileInfo
@@ -101,7 +103,11 @@ def _clone(
     builder = DfsBuilder.Create(fi.FileTitle, "mikeio", __dfs_version__)
 
     # Set up the header
-    builder.SetDataType(fi.DataType)
+    if datatype is None:
+        builder.SetDataType(fi.DataType)
+    else:
+        builder.SetDataType(datatype)
+
     builder.SetGeographicalProjection(fi.Projection)
 
     # Copy time axis
@@ -959,3 +965,49 @@ def _get_repeated_items(
             new_items.append(item)
 
     return new_items
+
+
+def change_datatype(
+    infilename: str | pathlib.Path,
+    outfilename: str | pathlib.Path,
+    datatype: int,
+) -> None:
+    """Change datatype of a DFS file.
+
+    The data type tag is used to classify the file within a specific modeling context,
+    such as MIKE 21. There is no global standard for these tags—they are interpreted
+    locally within a model setup.
+
+    Application developers can use these tags to classify files such as
+    bathymetries, input data, or result files according to their own conventions.
+
+    Default data type values assigned by MikeIO when creating new files are:
+    - dfs0: datatype=1
+    - dfs1-3: datatype=0
+    - dfsu: datatype=2001
+
+    Parameters
+    ----------
+    infilename : str | pathlib.Path
+        input filename
+    outfilename : str | pathlib.Path
+        output filename
+    datatype: int
+        DataType to be used for the output file
+
+    Examples
+    --------
+    >>> change_datatype("in.dfsu", "out.dfsu", datatype=107)
+
+    """
+    dfs_out = _clone(infilename, outfilename, datatype=datatype)
+    dfs_in = DfsFileFactory.DfsGenericOpen(infilename)
+
+    # Copy dynamic item data
+    sourceData = dfs_in.ReadItemTimeStepNext()
+    while sourceData:
+        dfs_out.WriteItemTimeStepNext(sourceData.Time, sourceData.Data)
+        sourceData = dfs_in.ReadItemTimeStepNext()
+
+    dfs_out.Close()
+    dfs_in.Close()
