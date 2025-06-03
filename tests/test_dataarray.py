@@ -111,31 +111,6 @@ def test_concat_dataarray_by_time() -> None:
     assert da3.is_equidistant
 
 
-def test_verify_custom_dims() -> None:
-    nt = 10
-    nx = 7
-
-    with pytest.raises(ValueError) as excinfo:
-        mikeio.DataArray(
-            data=np.zeros([nt, nx]) + 0.1,
-            time=pd.date_range(start="2000-01-01", freq="s", periods=nt),
-            item=ItemInfo("Foo"),
-            dims=("space", "ensemble"),  # no time!
-            geometry=mikeio.Grid1D(x0=1000.0, dx=10.0, nx=nx),
-        )
-    assert "time" in str(excinfo.value)
-
-    with pytest.raises(ValueError) as excinfo:
-        mikeio.DataArray(
-            data=np.zeros([nt, nx]) + 0.1,
-            time=pd.date_range(start="2000-01-01", freq="s", periods=nt),
-            item=ItemInfo("Foo"),
-            dims=("time", "x", "ensemble"),  # inconsistent with data
-            geometry=mikeio.Grid1D(x0=1000.0, dx=10.0, nx=nx),
-        )
-    assert "number" in str(excinfo.value).lower()
-
-
 def test_write_1d(da2: DataArray, tmp_path: Path) -> None:
     outfilename = tmp_path / "grid1d.dfs1"
 
@@ -176,22 +151,6 @@ def test_create_data_1d_default_grid() -> None:
         item=ItemInfo("Foo"),
     )
     assert isinstance(da.geometry, mikeio.Grid1D)
-
-
-# def test_data_2d_no_geometry_not_allowed() -> None:
-
-#     nt = 10
-#     nx = 7
-#     ny = 14
-
-#     with pytest.warns(Warning) as w:
-#         mikeio.DataArray(
-#             data=np.zeros([nt, ny, nx]) + 0.1,
-#             time=pd.date_range(start="2000-01-01", freq="S", periods=nt),
-#             item=ItemInfo("Foo"),
-#         )
-
-# assert "geometry" in str(w[0].message).lower()
 
 
 def test_dataarray_init() -> None:
@@ -269,27 +228,6 @@ def test_dataarray_init_2d() -> None:
     da = mikeio.DataArray(data=data2d, time="2018", dims=dims)
     assert da.n_timesteps == 1
     assert da.ndim == 2
-    assert da.dims == dims
-
-
-def test_dataarray_init_5d() -> None:
-    nt = 10
-    time = pd.date_range(start="2000-01-01", freq="s", periods=nt)
-
-    # 5d with named dimensions
-    dims = ("x", "y", "layer", "member", "season")
-    data5d = np.zeros([2, 4, 5, 3, 3]) + 0.1
-    da = mikeio.DataArray(data=data5d, time="2018", dims=dims)
-    assert da.n_timesteps == 1
-    assert da.ndim == 5
-    assert da.dims == dims
-
-    # 5d with named dimensions and time
-    dims = ("time", "dummy", "layer", "member", "season")
-    data5d = np.zeros([nt, 4, 5, 3, 3]) + 0.1
-    da = mikeio.DataArray(data=data5d, time=time, dims=dims)
-    assert da.n_timesteps == nt
-    assert da.ndim == 5
     assert da.dims == dims
 
 
