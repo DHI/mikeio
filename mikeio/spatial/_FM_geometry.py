@@ -19,7 +19,7 @@ from scipy.spatial import cKDTree
 
 from ..eum import EUMType, EUMUnit
 from ..exceptions import OutsideModelDomainError
-from .._interpolation import Interpolant, get_idw_interpolant
+from .._interpolation import Interpolant
 from ._FM_plot import (
     _get_node_centered_data,
     _plot_map,
@@ -634,7 +634,7 @@ class GeometryFM2D(_GeometryFM):
         if n_nearest == 1 and not extrapolate:
             weights[~self.contains(xy)] = np.nan
         elif n_nearest > 1:
-            weights = get_idw_interpolant(dists, p=p)
+            weights = Interpolant.from_distances(dists, p=p)
             if not extrapolate:
                 weights[~self.contains(xy), :] = np.nan
         else:

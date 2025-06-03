@@ -4,23 +4,6 @@ import numpy as np
 
 
 def get_idw_interpolant(distances: np.ndarray, p: float = 2) -> np.ndarray:
-    """IDW interpolant for 2d array of distances.
-
-    https://pro.arcgis.com/en/pro-app/help/analysis/geostatistical-analyst/how-inverse-distance-weighted-interpolation-works.htm
-
-    Parameters
-    ----------
-    distances : array-like
-        distances between interpolation point and grid point
-    p : float, optional
-        power of inverse distance weighting, default=2
-
-    Returns
-    -------
-    np.array
-        weights
-
-    """
     is_1d = distances.ndim == 1
     if is_1d:
         distances = np.atleast_2d(distances)
@@ -44,6 +27,27 @@ def get_idw_interpolant(distances: np.ndarray, p: float = 2) -> np.ndarray:
 class Interpolant:
     ids: np.ndarray
     weights: np.ndarray
+
+    @staticmethod
+    def from_distances(distances: np.ndarray, p: float = 2) -> np.ndarray:
+        """IDW interpolant for 2d array of distances.
+
+        https://pro.arcgis.com/en/pro-app/help/analysis/geostatistical-analyst/how-inverse-distance-weighted-interpolation-works.htm
+
+        Parameters
+        ----------
+        distances : array-like
+            distances between interpolation point and grid point
+        p : float, optional
+            power of inverse distance weighting, default=2
+
+        Returns
+        -------
+        np.array
+            weights
+
+        """
+        return get_idw_interpolant(distances, p)
 
     def interp1d(self, data: np.ndarray) -> np.ndarray:
         ids = self.ids

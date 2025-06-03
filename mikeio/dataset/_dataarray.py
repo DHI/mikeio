@@ -1077,15 +1077,11 @@ class DataArray:
         if z is not None:
             raise NotImplementedError()
 
-        geometry: GeometryPoint2D | GeometryPoint3D | GeometryUndefined = (
-            GeometryUndefined()
-        )
+        geometry: GeometryPoint2D | GeometryUndefined = GeometryUndefined()
 
         # interp in space
-        if (x is not None) or (y is not None) or (z is not None):
-            coords = [(x, y)]
-
-            if isinstance(self.geometry, Grid2D):  # TODO DIY bilinear interpolation
+        if (x is not None) or (y is not None):
+            if isinstance(self.geometry, Grid2D):
                 if x is None or y is None:
                     raise ValueError("both x and y must be specified")
 
@@ -1096,6 +1092,7 @@ class DataArray:
                 )
             elif isinstance(self.geometry, Grid1D):
                 if interpolant is None:
+                    assert x is not None
                     interpolant = self.geometry.get_spatial_interpolant(x)
                 dai = interpolant.interp1d(self.to_numpy()).flatten()
                 geometry = GeometryUndefined()
@@ -1105,15 +1102,14 @@ class DataArray:
 
                 if interpolant is None:
                     interpolant = self.geometry.get_2d_interpolant(
-                        coords,  # type: ignore
+                        xy=[(x, y)],  # type: ignore
                         n_nearest=n_nearest,
                         **kwargs,  # type: ignore
                     )
                 dai = interpolant.interp2d(self.to_numpy()).flatten()
-                if z is None:
-                    geometry = GeometryPoint2D(
-                        x=x, y=y, projection=self.geometry.projection
-                    )
+                geometry = GeometryPoint2D(
+                    x=x, y=y, projection=self.geometry.projection
+                )
             else:
                 raise NotImplementedError(
                     f"Interpolation in {self.geometry} is not yet implemented"
