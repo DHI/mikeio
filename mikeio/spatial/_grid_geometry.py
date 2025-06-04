@@ -141,10 +141,6 @@ class Grid1D(_Geometry):
         self._axis_name = axis_name
 
     @property
-    def ndim(self) -> int:
-        return 1
-
-    @property
     def default_dims(self) -> tuple[str, ...]:
         return ("x",)
 
@@ -512,10 +508,6 @@ class Grid2D(_Geometry):
     @property
     def default_dims(self) -> tuple[str, ...]:
         return ("y", "x")
-
-    @property
-    def ndim(self) -> int:
-        return 2
 
     @property
     def _is_rotated(self) -> Any:
@@ -1166,10 +1158,6 @@ class Grid3D(_Geometry):
     @property
     def default_dims(self) -> tuple[str, ...]:
         return ("z", "y", "x")
-
-    @property
-    def ndim(self) -> int:
-        return 3
 
     @property
     def _is_rotated(self) -> Any:

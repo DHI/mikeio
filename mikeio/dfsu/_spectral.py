@@ -436,15 +436,11 @@ class DfsuSpectral:
         elements = None
 
         if area is not None:
-            assert isinstance(
-                self.geometry, (GeometryFMLineSpectrum, GeometryFMAreaSpectrum)
-            )
+            assert isinstance(self.geometry, GeometryFMAreaSpectrum)
             elements = self.geometry._elements_in_area(area)
 
         if (x is not None) or (y is not None):
-            assert isinstance(
-                self.geometry, (GeometryFMLineSpectrum, GeometryFMAreaSpectrum)
-            )
+            assert isinstance(self.geometry, GeometryFMAreaSpectrum)
             elements = self.geometry.find_index(x=x, y=y)
 
         if (x is not None) or (y is not None) or (area is not None):

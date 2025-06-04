@@ -438,6 +438,14 @@ class _GeometryFM(_Geometry):
 
         return True
 
+    def __repr__(self) -> str:
+        return (
+            f"Flexible Mesh Geometry: {self._type.name}\n"
+            f"number of nodes: {self.n_nodes}\n"
+            f"number of elements: {self.n_elements}\n"
+            f"projection: {self.projection_string}"
+        )
+
 
 class GeometryFM2D(_GeometryFM):
     """Flexible 2d mesh geometry."""
@@ -471,14 +479,6 @@ class GeometryFM2D(_GeometryFM):
     def __str__(self) -> str:
         return f"{self._type.name} ({self.n_elements} elements, {self.n_nodes} nodes)"
 
-    def __repr__(self) -> str:
-        return (
-            f"Flexible Mesh Geometry: {self._type.name}\n"
-            f"number of nodes: {self.n_nodes}\n"
-            f"number of elements: {self.n_elements}\n"
-            f"projection: {self.projection_string}"
-        )
-
     @staticmethod
     def _point_in_polygon(xn: np.ndarray, yn: np.ndarray, xp: float, yp: float) -> bool:
         """Check for each side in the polygon that the point is on the correct side."""
@@ -499,10 +499,6 @@ class GeometryFM2D(_GeometryFM):
     def _area_is_polygon(area: Sequence[tuple[float, float]] | Sequence[float]) -> bool:
         polygon = np.array(area)
         return polygon.ndim == 2 and polygon.shape[1] == 2
-
-    @property
-    def ndim(self) -> int:
-        return 2
 
     @property
     def geometry2d(self) -> GeometryFM2D:
