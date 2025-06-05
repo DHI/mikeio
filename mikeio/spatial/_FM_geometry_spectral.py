@@ -106,6 +106,10 @@ class _GeometryFMSpectrum(_GeometryFM):
         return 0 if self.frequencies is None else len(self.frequencies)
 
     @property
+    def is_layered(self) -> bool:
+        return False
+
+    @property
     def frequencies(self) -> np.ndarray | None:
         """Frequency axis."""
         return self._frequencies

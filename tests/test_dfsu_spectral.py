@@ -439,3 +439,10 @@ def test_plot_da_spectrum(dfsu_pt: DfsuSpectral) -> None:
     # dfs.plot_spectrum(spec, title="pt", plot_type="shaded")
     # dfs.plot_spectrum(spec, r_as_periods=False, plot_type="contour")
     plt.close("all")
+
+
+def test_write_line_spectra(dfsu_line: DfsuSpectral) -> None:
+    ds = dfsu_line.read()
+    ds.to_dfs("line.dfsu")
+
+    ds2 = mikeio.read("line.dfsu")
