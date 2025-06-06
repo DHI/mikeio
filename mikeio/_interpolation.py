@@ -1,31 +1,9 @@
 from __future__ import annotations
-from typing import TYPE_CHECKING, overload
+from dataclasses import dataclass
 import numpy as np
-
-if TYPE_CHECKING:
-    from .dataset import Dataset, DataArray
-
-from .spatial import GeometryUndefined
 
 
 def get_idw_interpolant(distances: np.ndarray, p: float = 2) -> np.ndarray:
-    """IDW interpolant for 2d array of distances.
-
-    https://pro.arcgis.com/en/pro-app/help/analysis/geostatistical-analyst/how-inverse-distance-weighted-interpolation-works.htm
-
-    Parameters
-    ----------
-    distances : array-like
-        distances between interpolation point and grid point
-    p : float, optional
-        power of inverse distance weighting, default=2
-
-    Returns
-    -------
-    np.array
-        weights
-
-    """
     is_1d = distances.ndim == 1
     if is_1d:
         distances = np.atleast_2d(distances)
@@ -45,123 +23,68 @@ def get_idw_interpolant(distances: np.ndarray, p: float = 2) -> np.ndarray:
     return weights
 
 
-@overload
-def interp2d(
-    data: np.ndarray | DataArray,
-    elem_ids: np.ndarray,
-    weights: np.ndarray | None = None,
-    shape: tuple[int, ...] | None = None,
-) -> np.ndarray: ...
+@dataclass
+class Interpolant:
+    ids: np.ndarray
+    weights: np.ndarray
 
+    @staticmethod
+    def from_distances(distances: np.ndarray, p: float = 2) -> np.ndarray:
+        """IDW interpolant for 2d array of distances.
 
-@overload
-def interp2d(
-    data: Dataset,
-    elem_ids: np.ndarray,
-    weights: np.ndarray | None = None,
-    shape: tuple[int, ...] | None = None,
-) -> Dataset: ...
+        https://pro.arcgis.com/en/pro-app/help/analysis/geostatistical-analyst/how-inverse-distance-weighted-interpolation-works.htm
 
+        Parameters
+        ----------
+        distances : array-like
+            distances between interpolation point and grid point
+        p : float, optional
+            power of inverse distance weighting, default=2
 
-def interp2d(
-    data: Dataset | DataArray | np.ndarray,
-    elem_ids: np.ndarray,
-    weights: np.ndarray | None = None,
-    shape: tuple[int, ...] | None = None,
-) -> Dataset | np.ndarray:
-    """interp spatially in data (2d only).
+        Returns
+        -------
+        np.array
+            weights
 
-    Parameters
-    ----------
-    data : mikeio.Dataset, DataArray, or ndarray
-        dfsu data
-    elem_ids : ndarray(int)
-        n sized array of 1 or more element ids used for interpolation
-    weights : ndarray(float), optional
-        weights with same size as elem_ids used for interpolation
-    shape: tuple, optional
-            reshape output
+        """
+        return get_idw_interpolant(distances, p)
 
-    Returns
-    -------
-    ndarray, Dataset, or DataArray
-        spatially interped data with same type and shape as input
+    def interp1d(self, data: np.ndarray) -> np.ndarray:
+        ids = self.ids
+        weights = self.weights
+        result = np.dot(data[:, ids], weights)
+        assert isinstance(result, np.ndarray)
+        return result
 
-    Examples
-    --------
-    >>> elem_ids, weights = dfs.get_spatial_interpolant(coords)
-    >>> dsi = interp2d(ds, elem_ids, weights)
+    def interp2d(
+        self,
+        data: np.ndarray,
+    ) -> np.ndarray:
+        """interp spatially in data (2d only).
 
-    """
-    from .dataset import DataArray, Dataset
+        Parameters
+        ----------
+        data : ndarray
+            dfsu data
 
-    if isinstance(data, Dataset):
-        ds = data.copy()
+        Returns
+        -------
+        ndarray
+            spatially interpolated data
 
-        ni = len(elem_ids)
+        """
+        weights = self.weights
+        elem_ids = self.ids
 
-        interp_data_vars = {}
-
-        for da in ds:
-            key = da.name
-            if "time" not in da.dims:
-                idatitem = _interp_itemstep(da.to_numpy(), elem_ids, weights)
-                if shape:
-                    idatitem = idatitem.reshape(*shape)
-
-            else:
-                nt, _ = da.shape
-                # use dtype of da
-                idatitem = np.empty(shape=(nt, ni), dtype=da.values.dtype)
-                for step in range(nt):
-                    idatitem[step, :] = _interp_itemstep(
-                        da[step].to_numpy(), elem_ids, weights
-                    )
-                if shape:
-                    idatitem = idatitem.reshape((nt, *shape))
-
-            dims = ("time", "element")  # TODO is this the best?
-            interp_data_vars[key] = DataArray(
-                data=idatitem,
-                time=da.time,
-                dims=dims,
-                item=da.item,
-                geometry=GeometryUndefined(),
-            )
-
-        new_ds = Dataset(interp_data_vars, validate=False)
-        return new_ds
-
-    if isinstance(data, DataArray):
-        # TODO why doesn't this return a DataArray?
-        data = data.to_numpy()
-
-    if isinstance(data, np.ndarray):
         if data.ndim == 1:
-            # data is single item and single time step
-            idatitem = _interp_itemstep(data, elem_ids, weights)
-            if shape:
-                idatitem = idatitem.reshape(*shape)
-            return idatitem
+            idat = data[elem_ids] * weights.astype(data.dtype)
+            return np.sum(idat, axis=1) if weights.ndim == 2 else idat
+        elif data.ndim == 2:
+            # data shape: (nt, nelem)
 
-    ni = len(elem_ids)
-    datitem = data
-    nt, _ = datitem.shape
-    idatitem = np.empty(shape=(nt, ni), dtype=datitem.dtype)
-    for step in range(nt):
-        idatitem[step, :] = _interp_itemstep(datitem[step], elem_ids, weights)
-    if shape:
-        idatitem = idatitem.reshape((nt, *shape))
-    return idatitem
-
-
-def _interp_itemstep(
-    data: np.ndarray,
-    elem_ids: np.ndarray,
-    weights: np.ndarray | None = None,
-) -> np.ndarray:
-    if weights is None:
-        return data[elem_ids]
-    else:
-        idat = data[elem_ids] * weights
-        return np.sum(idat, axis=1) if weights.ndim == 2 else idat
+            # data[:, elem_ids]: (nt, ni)
+            # weights: (ni,) or (ni, nweights)
+            idat = data[:, elem_ids] * weights.astype(data.dtype)  # broadcasting
+            return np.sum(idat, axis=-1) if weights.ndim == 2 else idat
+        else:
+            raise ValueError("data must be 1D or 2D array")
