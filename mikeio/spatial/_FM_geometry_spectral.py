@@ -186,6 +186,31 @@ class GeometryFMAreaSpectrum(_GeometryFMSpectrum, GeometryFM2D):
 class GeometryFMLineSpectrum(_GeometryFMSpectrum):
     """Flexible mesh line spectrum geometry."""
 
+    @staticmethod
+    def create_dummy_coordinates(
+        n_nodes: int, frequencies: np.ndarray, directions: np.ndarray
+    ) -> GeometryFMLineSpectrum:
+        # boogus x, y, z 1..n, 1..n, -10
+        node_coordinates = np.zeros((n_nodes, 3), dtype=float)
+        node_coordinates[:, 0] = np.arange(1, n_nodes + 1)  # x
+        node_coordinates[:, 1] = np.arange(1, n_nodes + 1)  # y
+        node_coordinates[:, 2] = -10.0  # z
+
+        # element table with nodes [0,1], [1,2], ..., [n-2,n-1]
+        element_table = np.zeros((n_nodes - 1, 2), dtype=int)
+        for i in range(n_nodes - 1):
+            element_table[i, 0] = i
+            element_table[i, 1] = i + 1
+        return GeometryFMLineSpectrum(
+            node_coordinates=node_coordinates,
+            element_table=element_table,
+            codes=np.zeros(n_nodes, dtype=int),
+            dfsu_type=DfsuFileType.DfsuSpectral1D,
+            projection="LONG/LAT",
+            frequencies=frequencies,
+            directions=directions,
+        )
+
     def isel(  # type: ignore
         self, idx: Sequence[int], axis: str = "node"
     ) -> GeometryFMPointSpectrum | GeometryFMLineSpectrum:

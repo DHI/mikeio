@@ -1,12 +1,14 @@
+from pathlib import Path
 import pytest
 import numpy as np
 import matplotlib.pyplot as plt
 import mikeio
 from mikecore.DfsuFile import DfsuFileType
 
-from mikeio import DfsuSpectral
+from mikeio import DfsuSpectral, EUMType, EUMUnit
 from mikeio.spatial import GeometryFMPointSpectrum, GeometryFMAreaSpectrum
 import mikeio._spectral as _spectral
+from mikeio.spatial._FM_geometry_spectral import GeometryFMLineSpectrum
 
 
 @pytest.fixture
@@ -441,8 +443,65 @@ def test_plot_da_spectrum(dfsu_pt: DfsuSpectral) -> None:
     plt.close("all")
 
 
-def test_write_line_spectra(dfsu_line: DfsuSpectral) -> None:
+def test_write_line_spectra(dfsu_line: DfsuSpectral, tmp_path: Path) -> None:
     ds = dfsu_line.read()
-    ds.to_dfs("line.dfsu")
 
-    ds2 = mikeio.read("line.dfsu")
+    fp = tmp_path / "line.dfsu"
+
+    ds.to_dfs(fp)
+
+    ds2 = mikeio.read(fp)
+
+
+def test_write_line_spectra_energy(tmp_path: Path) -> None:
+    ds = mikeio.read("tests/testdata/spectra/North_BC_2024_subset.dfsu")
+    assert ds["Energy density"].type == EUMType.Wave_energy_density
+    assert ds["Energy density"].unit == EUMUnit.meter_pow_2_sec_per_deg
+    assert ds.geometry.directions[-1] == pytest.approx(350)
+    assert ds.geometry.frequencies[0] == pytest.approx(0.035)
+    assert ds.geometry.frequencies[-1] == pytest.approx(0.983586)
+    assert ds["Energy density"].isel(time=-1).isel(node=0).isel(frequency=35).isel(
+        direction=28
+    ).to_numpy() == pytest.approx(2.6239042e-05)
+
+    fp = tmp_path / "line_energy.dfsu"
+    ds.to_dfs(fp)
+
+    ds2 = mikeio.read(fp)
+    assert ds2["Energy density"].type == EUMType.Wave_energy_density
+    assert ds2["Energy density"].unit == EUMUnit.meter_pow_2_sec_per_deg
+    assert ds2.geometry.directions[-1] == pytest.approx(350)
+    assert ds2.geometry.frequencies[0] == pytest.approx(0.035)
+    assert ds2.geometry.frequencies[-1] == pytest.approx(0.983586)
+    assert ds2["Energy density"].isel(time=-1).isel(node=0).isel(frequency=35).isel(
+        direction=28
+    ).to_numpy() == pytest.approx(2.6239042e-05)
+    assert np.all(ds2.to_numpy() == ds.to_numpy())
+
+
+def test_write_area_spectra(dfsu_area: DfsuSpectral, tmp_path: Path) -> None:
+    ds = dfsu_area.read()
+    fp = tmp_path / "area.dfsu"
+    ds.to_dfs(fp)
+
+    dfs = mikeio.DfsuSpectral(fp)
+    assert dfs.geometry.is_spectral
+    assert dfs._type == DfsuFileType.DfsuSpectral2D
+    assert dfs.geometry.n_frequencies == 25
+    assert dfs.frequencies is not None
+    assert len(dfs.frequencies) == 25
+    assert dfs.geometry.n_directions == 16
+    assert dfs.directions is not None
+    assert len(dfs.directions) == 16
+
+    ds2 = dfs.read()
+    assert np.all(ds2.to_numpy() == ds.to_numpy())
+
+
+def test_create_line_spectrum_dummy_coordinates() -> None:
+    freq = np.array([0.035, 0.983586])
+    dirs = np.arange(5.0, 360.0, step=10.0)
+    geometry = GeometryFMLineSpectrum.create_dummy_coordinates(
+        n_nodes=10, frequencies=freq, directions=dirs
+    )
+    assert geometry.n_nodes == 10
