@@ -22,6 +22,8 @@ jobs:
         - name: Install MIKE IO
           run: |
             python -m pip install --upgrade pip
+            # TODO remove after release of mikecore
+            pip install https://github.com/DHI/mikecore-python/releases/download/v0.3.a0/mikecore-0.3.0a0-py3-none-any.whl
             pip install .[test]
             pip install -r requirements_min.txt
         - name: Test with pytest

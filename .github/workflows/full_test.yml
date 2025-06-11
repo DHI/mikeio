@@ -34,6 +34,8 @@ jobs:
         
     - name: Install mikeio
       run: |
+        # TODO remove after release of mikecore
+        pip install https://github.com/DHI/mikecore-python/releases/download/v0.3.a0/mikecore-0.3.0a0-py3-none-any.whl
         pip install .[test]
     - name: Test with pytest
       run: |

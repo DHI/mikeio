@@ -51,7 +51,7 @@ def write_dfsu(filename: str | Path, data: Dataset) -> None:
     geometry = data.geometry
     dfsu_filetype = DfsuFileType.Dfsu2D
 
-    if geometry.is_layered:
+    if geometry.is_layered or geometry.is_spectral:
         dfsu_filetype = geometry._type.value
 
     xn = geometry.node_coordinates[:, 0]
@@ -61,8 +61,23 @@ def write_dfsu(filename: str | Path, data: Dataset) -> None:
     elem_table = [np.array(e) + 1 for e in geometry.element_table]
 
     builder = DfsuBuilder.Create(dfsu_filetype)
-    if dfsu_filetype != DfsuFileType.Dfsu2D:
+    if dfsu_filetype in (
+        DfsuFileType.Dfsu3DSigma,
+        DfsuFileType.Dfsu3DSigmaZ,
+        DfsuFileType.DfsuVerticalColumn,
+        DfsuFileType.DfsuVerticalProfileSigma,
+        DfsuFileType.DfsuVerticalProfileSigmaZ,
+    ):
         builder.SetNumberOfSigmaLayers(geometry.n_sigma_layers)
+
+    if dfsu_filetype in (
+        DfsuFileType.DfsuSpectral0D,
+        DfsuFileType.DfsuSpectral1D,
+        DfsuFileType.DfsuSpectral2D,
+    ):
+        builder.SetFrequencies(geometry.frequencies)
+        # TODO should directions always be converted to radians
+        builder.SetDirections(np.deg2rad(geometry.directions))
 
     builder.SetNodes(xn, yn, zn, geometry.codes)
     builder.SetElements(elem_table)
@@ -81,9 +96,6 @@ def write_dfsu(filename: str | Path, data: Dataset) -> None:
         )
     builder.SetTemporalAxis(temporal_axis)
     builder.SetZUnit(eumUnit.eumUmeter)
-
-    if dfsu_filetype != DfsuFileType.Dfsu2D:
-        builder.SetNumberOfSigmaLayers(geometry.n_sigma_layers)
 
     for item in data.items:
         builder.AddDynamicItem(item.name, eumQuantity.Create(item.type, item.unit))
@@ -117,7 +129,13 @@ def write_dfsu_data(dfs: DfsuFile, ds: Dataset, is_layered: bool) -> None:
                 d = da.to_numpy()[i, :]
             else:
                 d = da.to_numpy()
+            d = d.copy()  # to avoid modifying the input
             d[np.isnan(d)] = data.deletevalue
+
+            if d.ndim != 1:
+                d = np.moveaxis(d, 0, -1)
+                d = d.reshape(-1)
+
             dfs.WriteItemTimeStepNext(t_rel[i], d.astype(np.float32))
     dfs.Close()
 
