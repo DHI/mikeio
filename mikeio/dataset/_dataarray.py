@@ -554,7 +554,7 @@ class DataArray:
         # this seems overly complicated...
         axes = tuple(range(1, x.ndim))
         idx = list(np.where(~np.isnan(x).all(axis=axes))[0])
-        return self.isel(time=idx)
+        return self.isel(time=idx)  # type: ignore
 
     def flipud(self) -> DataArray:
         """Flip upside down (on first non-time axis)."""

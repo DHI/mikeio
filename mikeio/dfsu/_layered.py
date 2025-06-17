@@ -351,7 +351,7 @@ class DfsuLayered:
 
         dfs.Close()
 
-        dims = (
+        dims: tuple[str, ...] = (
             ("time", "element")
             if not (single_time_selected and not keepdims)  # TODO extract variable
             else ("element",)

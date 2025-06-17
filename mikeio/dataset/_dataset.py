@@ -365,7 +365,7 @@ class Dataset:
 
             # this seems overly complicated...
             axes = tuple(range(1, x.ndim))
-            idx = list(np.where(~np.isnan(x).all(axis=axes))[0])
+            idx: Any = list(np.where(~np.isnan(x).all(axis=axes))[0])
             if i == 0:
                 all_index = idx
             else:
