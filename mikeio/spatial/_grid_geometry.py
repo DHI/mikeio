@@ -18,6 +18,8 @@ from ._geometry import (
     _Geometry,
 )
 
+from .._interpolation import Interpolant
+
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
     from ..spatial import GeometryFM2D
@@ -178,11 +180,7 @@ class Grid1D(_Geometry):
 
         return int(np.argmin(d))
 
-    def get_spatial_interpolant(
-        self, coords: tuple[np.ndarray, np.ndarray], **kwargs: Any
-    ) -> tuple[np.ndarray, np.ndarray]:
-        x = coords[0][0]  # TODO accept list of points
-
+    def get_spatial_interpolant(self, x: float) -> Interpolant:
         assert self.nx > 1, "Interpolation not possible for Grid1D with one point"
         d = np.abs(self.x - x)
         ids = np.argsort(d)[0:2]
@@ -194,10 +192,7 @@ class Grid1D(_Geometry):
             assert np.allclose(weights.sum(), 1.0)
         assert len(ids) == 2
         assert len(weights) == 2
-        return ids, weights
-
-    def interp(self, data: np.ndarray, ids: np.ndarray, weights: np.ndarray) -> Any:
-        return np.dot(data[:, ids], weights)
+        return Interpolant(ids, weights)
 
     @property
     def dx(self) -> float:

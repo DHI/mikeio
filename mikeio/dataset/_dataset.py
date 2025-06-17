@@ -811,7 +811,6 @@ class Dataset:
         x: float | None = None,
         y: float | None = None,
         z: float | None = None,
-        n_nearest: int = 3,
         **kwargs: Any,
     ) -> Dataset:
         """Interpolate data in time and space.
@@ -878,7 +877,6 @@ class Dataset:
             ):  # TODO remove this when all geometries implements the same method
                 interpolant = self.geometry.get_2d_interpolant(
                     xy,  # type: ignore
-                    n_nearest=n_nearest,
                     **kwargs,  # type: ignore
                 )
                 das = [da.interp(x=x, y=y, interpolant=interpolant) for da in self]

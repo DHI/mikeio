@@ -214,6 +214,7 @@ class Dfsu2DH:
             )
         return str.join("\n", out)
 
+    # TODO change to GeometryFM2D
     @property
     def geometry(self) -> Any:
         return self._geometry
