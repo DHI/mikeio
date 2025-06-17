@@ -1016,8 +1016,6 @@ class DataArray:
         x: float | None = None,
         y: float | None = None,
         z: float | None = None,
-        n_nearest: int = 3,
-        interpolant: Interpolant | None = None,
         **kwargs: Any,
     ) -> DataArray:
         """Interpolate data in time and space.
@@ -1047,7 +1045,7 @@ class DataArray:
             z-coordinate of point to be interpolated to, by default None
         n_nearest : int, optional
             When using IDW interpolation, how many nearest points should
-            be used, by default: 3
+            be used.
         interpolant : tuple, optional
             Precomputed interpolant, by default None
         **kwargs: Any
@@ -1078,6 +1076,7 @@ class DataArray:
             raise NotImplementedError()
 
         geometry: GeometryPoint2D | GeometryUndefined = GeometryUndefined()
+        interpolant = kwargs.get("interpolant")
 
         # interp in space
         if (x is not None) or (y is not None):
@@ -1103,7 +1102,6 @@ class DataArray:
                 if interpolant is None:
                     interpolant = self.geometry.get_2d_interpolant(
                         xy=[(x, y)],  # type: ignore
-                        n_nearest=n_nearest,
                         **kwargs,  # type: ignore
                     )
                 dai = interpolant.interp2d(self.to_numpy()).flatten()

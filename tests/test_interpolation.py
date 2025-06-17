@@ -25,10 +25,6 @@ def test_interp2d() -> None:
     interpolant = dfs.geometry.get_2d_interpolant(xy, n_nearest=1)
 
     dati = interpolant.interp2d(ds[0].to_numpy())
-    # assert isinstance(dati, Dataset)
-    # assert isinstance(
-    #    dati.geometry, GeometryUndefined
-    # )  # There is no suitable file format for this, thus no suitable geometry :-(
     assert dati.shape == (ds.n_timesteps, npts)
     assert dati[0, 0] == 8.262675285339355
 
