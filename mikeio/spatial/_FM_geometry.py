@@ -332,7 +332,7 @@ class _GeometryFM(_Geometry):
 
     def _check_elements(
         self,
-        element_table: np.ndarray | list[Sequence[int]] | list[np.ndarray],
+        element_table: np.ndarray | list[Sequence[int] | np.ndarray],
         element_ids: np.ndarray | None = None,
         validate: bool = True,
     ) -> tuple[Any, Any]:
