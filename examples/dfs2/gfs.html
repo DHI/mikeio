@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.7.31">
+<meta name="generator" content="quarto-1.7.32">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
@@ -73,10 +73,10 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
 <script src="../../site_libs/quarto-html/anchor.min.js"></script>
 <link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-e1a5c8363afafaef2c763b6775fbf3ca.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-37eea08aefeeee20ff55810ff984fec1.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="../../site_libs/bootstrap/bootstrap-ecd7484abd448711fd8810a5eeb38bee.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<link href="../../site_libs/bootstrap/bootstrap-293e81bb0733230b9e755d5a7d46e87a.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -213,13 +213,13 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </header>
 
 
-<div id="e9380f20" class="cell" data-execution_count="1">
+<div id="fb5f0b4a" class="cell" data-execution_count="1">
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> xarray</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> mikeio</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>The file <code>gfs_wind.nc</code> contains a small sample of the <a href="https://nomads.ncep.noaa.gov/">GFS</a> forecast data downloaded via their OpenDAP service</p>
-<div id="a783b638" class="cell" data-execution_count="3">
+<div id="18861bf6" class="cell" data-execution_count="3">
 <div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>ds <span class="op">=</span> xarray.open_dataset(<span class="st">'../../data/gfs_wind.nc'</span>)</span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>ds</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="3">
@@ -243,28 +243,76 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
  */
 
 :root {
-  --xr-font-color0: var(--jp-content-font-color0, rgba(0, 0, 0, 1));
-  --xr-font-color2: var(--jp-content-font-color2, rgba(0, 0, 0, 0.54));
-  --xr-font-color3: var(--jp-content-font-color3, rgba(0, 0, 0, 0.38));
-  --xr-border-color: var(--jp-border-color2, #e0e0e0);
-  --xr-disabled-color: var(--jp-layout-color3, #bdbdbd);
-  --xr-background-color: var(--jp-layout-color0, white);
-  --xr-background-color-row-even: var(--jp-layout-color1, white);
-  --xr-background-color-row-odd: var(--jp-layout-color2, #eeeeee);
+  --xr-font-color0: var(
+    --jp-content-font-color0,
+    var(--pst-color-text-base rgba(0, 0, 0, 1))
+  );
+  --xr-font-color2: var(
+    --jp-content-font-color2,
+    var(--pst-color-text-base, rgba(0, 0, 0, 0.54))
+  );
+  --xr-font-color3: var(
+    --jp-content-font-color3,
+    var(--pst-color-text-base, rgba(0, 0, 0, 0.38))
+  );
+  --xr-border-color: var(
+    --jp-border-color2,
+    hsl(from var(--pst-color-on-background, white) h s calc(l - 10))
+  );
+  --xr-disabled-color: var(
+    --jp-layout-color3,
+    hsl(from var(--pst-color-on-background, white) h s calc(l - 40))
+  );
+  --xr-background-color: var(
+    --jp-layout-color0,
+    var(--pst-color-on-background, white)
+  );
+  --xr-background-color-row-even: var(
+    --jp-layout-color1,
+    hsl(from var(--pst-color-on-background, white) h s calc(l - 5))
+  );
+  --xr-background-color-row-odd: var(
+    --jp-layout-color2,
+    hsl(from var(--pst-color-on-background, white) h s calc(l - 15))
+  );
 }
 
 html[theme="dark"],
 html[data-theme="dark"],
 body[data-theme="dark"],
 body.vscode-dark {
-  --xr-font-color0: rgba(255, 255, 255, 1);
-  --xr-font-color2: rgba(255, 255, 255, 0.54);
-  --xr-font-color3: rgba(255, 255, 255, 0.38);
-  --xr-border-color: #1f1f1f;
-  --xr-disabled-color: #515151;
-  --xr-background-color: #111111;
-  --xr-background-color-row-even: #111111;
-  --xr-background-color-row-odd: #313131;
+  --xr-font-color0: var(
+    --jp-content-font-color0,
+    var(--pst-color-text-base, rgba(255, 255, 255, 1))
+  );
+  --xr-font-color2: var(
+    --jp-content-font-color2,
+    var(--pst-color-text-base, rgba(255, 255, 255, 0.54))
+  );
+  --xr-font-color3: var(
+    --jp-content-font-color3,
+    var(--pst-color-text-base, rgba(255, 255, 255, 0.38))
+  );
+  --xr-border-color: var(
+    --jp-border-color2,
+    hsl(from var(--pst-color-on-background, #111111) h s calc(l + 10))
+  );
+  --xr-disabled-color: var(
+    --jp-layout-color3,
+    hsl(from var(--pst-color-on-background, #111111) h s calc(l + 40))
+  );
+  --xr-background-color: var(
+    --jp-layout-color0,
+    var(--pst-color-on-background, #111111)
+  );
+  --xr-background-color-row-even: var(
+    --jp-layout-color1,
+    hsl(from var(--pst-color-on-background, #111111) h s calc(l + 5))
+  );
+  --xr-background-color-row-odd: var(
+    --jp-layout-color2,
+    hsl(from var(--pst-color-on-background, #111111) h s calc(l + 15))
+  );
 }
 
 .xr-wrap {
@@ -320,6 +368,7 @@ body.vscode-dark {
 
 .xr-section-item input + label {
   color: var(--xr-disabled-color);
+  border: 2px solid transparent !important;
 }
 
 .xr-section-item input:enabled + label {
@@ -328,7 +377,7 @@ body.vscode-dark {
 }
 
 .xr-section-item input:focus + label {
-  border: 2px solid var(--xr-font-color0);
+  border: 2px solid var(--xr-font-color0) !important;
 }
 
 .xr-section-item input:enabled + label:hover {
@@ -460,7 +509,9 @@ body.vscode-dark {
 .xr-var-item label,
 .xr-var-item > .xr-var-name span {
   background-color: var(--xr-background-color-row-even);
+  border-color: var(--xr-background-color-row-odd);
   margin-bottom: 0;
+  padding-top: 2px;
 }
 
 .xr-var-item > .xr-var-name:hover span {
@@ -471,6 +522,7 @@ body.vscode-dark {
 .xr-var-list > li:nth-child(odd) > label,
 .xr-var-list > li:nth-child(odd) > .xr-var-name span {
   background-color: var(--xr-background-color-row-odd);
+  border-color: var(--xr-background-color-row-even);
 }
 
 .xr-var-name {
@@ -520,8 +572,15 @@ body.vscode-dark {
 .xr-var-data,
 .xr-index-data {
   display: none;
-  background-color: var(--xr-background-color) !important;
-  padding-bottom: 5px !important;
+  border-top: 2px dotted var(--xr-background-color);
+  padding-bottom: 20px !important;
+  padding-top: 10px !important;
+}
+
+.xr-var-attrs-in + label,
+.xr-var-data-in + label,
+.xr-index-data-in + label {
+  padding: 0 1px;
 }
 
 .xr-var-attrs-in:checked ~ .xr-var-attrs,
@@ -532,6 +591,12 @@ body.vscode-dark {
 
 .xr-var-data > table {
   float: right;
+}
+
+.xr-var-data > pre,
+.xr-index-data > pre,
+.xr-var-data > table > tbody > tr {
+  background-color: transparent !important;
 }
 
 .xr-var-name span,
@@ -593,6 +658,14 @@ dl.xr-attrs {
   stroke: currentColor;
   fill: currentColor;
 }
+
+.xr-var-attrs-in:checked + label > .xr-icon-file-text2,
+.xr-var-data-in:checked + label > .xr-icon-database,
+.xr-index-data-in:checked + label > .xr-icon-database {
+  color: var(--xr-font-color0);
+  filter: drop-shadow(1px 1px 5px var(--xr-font-color2));
+  stroke-width: 0.8px;
+}
 </style><pre class="xr-text-repr-fallback">&lt;xarray.Dataset&gt; Size: 32kB
 Dimensions:   (time: 3, lat: 41, lon: 21)
 Coordinates: (3)
@@ -600,30 +673,30 @@ Data variables:
     msletmsl  (time, lat, lon) float32 10kB ...
     ugrd10m   (time, lat, lon) float32 10kB ...
     vgrd10m   (time, lat, lon) float32 10kB ...
-Attributes: (4)</pre><div class="xr-wrap" style="display:none"><div class="xr-header"><div class="xr-obj-type">xarray.Dataset</div></div><ul class="xr-sections"><li class="xr-section-item"><input id="section-7bd3ffce-98bc-4e1f-aeaa-9ba4e383a910" class="xr-section-summary-in" type="checkbox" disabled=""><label for="section-7bd3ffce-98bc-4e1f-aeaa-9ba4e383a910" class="xr-section-summary" title="Expand/collapse section">Dimensions:</label><div class="xr-section-inline-details"><ul class="xr-dim-list"><li><span class="xr-has-index">time</span>: 3</li><li><span class="xr-has-index">lat</span>: 41</li><li><span class="xr-has-index">lon</span>: 21</li></ul></div><div class="xr-section-details"></div></li><li class="xr-section-item"><input id="section-d9402bc1-ea19-400e-bcc5-62be8672a5d8" class="xr-section-summary-in" type="checkbox"><label for="section-d9402bc1-ea19-400e-bcc5-62be8672a5d8" class="xr-section-summary">Coordinates: <span>(3)</span></label><div class="xr-section-inline-details"></div><div class="xr-section-details"><ul class="xr-var-list"><li class="xr-var-item"><div class="xr-var-name"><span class="xr-has-index">time</span></div><div class="xr-var-dims">(time)</div><div class="xr-var-dtype">datetime64[ns]</div><div class="xr-var-preview xr-preview">2021-09-02T12:00:00 ... 2021-09-...</div><input id="attrs-bf124be5-f5d1-4ef5-8756-159541e22804" class="xr-var-attrs-in" type="checkbox"><label for="attrs-bf124be5-f5d1-4ef5-8756-159541e22804" title="Show/Hide attributes"><svg class="icon xr-icon-file-text2"><use href="#icon-file-text2"></use></svg></label><input id="data-851833c1-e2d8-498f-b44c-f0f3da5ccaec" class="xr-var-data-in" type="checkbox"><label for="data-851833c1-e2d8-498f-b44c-f0f3da5ccaec" title="Show/Hide data repr"><svg class="icon xr-icon-database"><use href="#icon-database"></use></svg></label><div class="xr-var-attrs"><dl class="xr-attrs"><dt><span>grads_dim :</span></dt><dd>t</dd><dt><span>grads_mapping :</span></dt><dd>linear</dd><dt><span>grads_size :</span></dt><dd>129</dd><dt><span>grads_min :</span></dt><dd>12z02sep2021</dd><dt><span>grads_step :</span></dt><dd>3hr</dd><dt><span>long_name :</span></dt><dd>time</dd><dt><span>minimum :</span></dt><dd>12z02sep2021</dd><dt><span>maximum :</span></dt><dd>12z18sep2021</dd><dt><span>resolution :</span></dt><dd>0.125</dd></dl></div><div class="xr-var-data"><pre>array(['2021-09-02T12:00:00.000000000', '2021-09-02T15:00:00.000000000',
-       '2021-09-02T18:00:00.000000000'], dtype='datetime64[ns]')</pre></div></li><li class="xr-var-item"><div class="xr-var-name"><span class="xr-has-index">lat</span></div><div class="xr-var-dims">(lat)</div><div class="xr-var-dtype">float64</div><div class="xr-var-preview xr-preview">30.0 30.25 30.5 ... 39.5 39.75 40.0</div><input id="attrs-4ed23395-f79a-4bba-b5c7-c85afe89cb41" class="xr-var-attrs-in" type="checkbox"><label for="attrs-4ed23395-f79a-4bba-b5c7-c85afe89cb41" title="Show/Hide attributes"><svg class="icon xr-icon-file-text2"><use href="#icon-file-text2"></use></svg></label><input id="data-696e8661-7040-4c98-83d0-fe1f39709753" class="xr-var-data-in" type="checkbox"><label for="data-696e8661-7040-4c98-83d0-fe1f39709753" title="Show/Hide data repr"><svg class="icon xr-icon-database"><use href="#icon-database"></use></svg></label><div class="xr-var-attrs"><dl class="xr-attrs"><dt><span>grads_dim :</span></dt><dd>y</dd><dt><span>grads_mapping :</span></dt><dd>linear</dd><dt><span>grads_size :</span></dt><dd>721</dd><dt><span>units :</span></dt><dd>degrees_north</dd><dt><span>long_name :</span></dt><dd>latitude</dd><dt><span>minimum :</span></dt><dd>-90.0</dd><dt><span>maximum :</span></dt><dd>90.0</dd><dt><span>resolution :</span></dt><dd>0.25</dd></dl></div><div class="xr-var-data"><pre>array([30.  , 30.25, 30.5 , 30.75, 31.  , 31.25, 31.5 , 31.75, 32.  , 32.25,
+Attributes: (4)</pre><div class="xr-wrap" style="display:none"><div class="xr-header"><div class="xr-obj-type">xarray.Dataset</div></div><ul class="xr-sections"><li class="xr-section-item"><input id="section-7f98c47c-ca90-4281-a8ae-159b8bb76a0f" class="xr-section-summary-in" type="checkbox" disabled=""><label for="section-7f98c47c-ca90-4281-a8ae-159b8bb76a0f" class="xr-section-summary" title="Expand/collapse section">Dimensions:</label><div class="xr-section-inline-details"><ul class="xr-dim-list"><li><span class="xr-has-index">time</span>: 3</li><li><span class="xr-has-index">lat</span>: 41</li><li><span class="xr-has-index">lon</span>: 21</li></ul></div><div class="xr-section-details"></div></li><li class="xr-section-item"><input id="section-03567e2d-b074-46d5-9285-3cf08f4dab67" class="xr-section-summary-in" type="checkbox"><label for="section-03567e2d-b074-46d5-9285-3cf08f4dab67" class="xr-section-summary">Coordinates: <span>(3)</span></label><div class="xr-section-inline-details"></div><div class="xr-section-details"><ul class="xr-var-list"><li class="xr-var-item"><div class="xr-var-name"><span class="xr-has-index">time</span></div><div class="xr-var-dims">(time)</div><div class="xr-var-dtype">datetime64[ns]</div><div class="xr-var-preview xr-preview">2021-09-02T12:00:00 ... 2021-09-...</div><input id="attrs-b90640ad-cc36-4b26-99ee-05d88bc98976" class="xr-var-attrs-in" type="checkbox"><label for="attrs-b90640ad-cc36-4b26-99ee-05d88bc98976" title="Show/Hide attributes"><svg class="icon xr-icon-file-text2"><use href="#icon-file-text2"></use></svg></label><input id="data-62bb7374-f5ed-4461-8b46-8bba7a7edc1e" class="xr-var-data-in" type="checkbox"><label for="data-62bb7374-f5ed-4461-8b46-8bba7a7edc1e" title="Show/Hide data repr"><svg class="icon xr-icon-database"><use href="#icon-database"></use></svg></label><div class="xr-var-attrs"><dl class="xr-attrs"><dt><span>grads_dim :</span></dt><dd>t</dd><dt><span>grads_mapping :</span></dt><dd>linear</dd><dt><span>grads_size :</span></dt><dd>129</dd><dt><span>grads_min :</span></dt><dd>12z02sep2021</dd><dt><span>grads_step :</span></dt><dd>3hr</dd><dt><span>long_name :</span></dt><dd>time</dd><dt><span>minimum :</span></dt><dd>12z02sep2021</dd><dt><span>maximum :</span></dt><dd>12z18sep2021</dd><dt><span>resolution :</span></dt><dd>0.125</dd></dl></div><div class="xr-var-data"><pre>array(['2021-09-02T12:00:00.000000000', '2021-09-02T15:00:00.000000000',
+       '2021-09-02T18:00:00.000000000'], dtype='datetime64[ns]')</pre></div></li><li class="xr-var-item"><div class="xr-var-name"><span class="xr-has-index">lat</span></div><div class="xr-var-dims">(lat)</div><div class="xr-var-dtype">float64</div><div class="xr-var-preview xr-preview">30.0 30.25 30.5 ... 39.5 39.75 40.0</div><input id="attrs-68339cb6-5c8c-4d4e-ad32-e7b58349d749" class="xr-var-attrs-in" type="checkbox"><label for="attrs-68339cb6-5c8c-4d4e-ad32-e7b58349d749" title="Show/Hide attributes"><svg class="icon xr-icon-file-text2"><use href="#icon-file-text2"></use></svg></label><input id="data-ec38f1c6-0b1c-4288-ba2c-aff377a898dd" class="xr-var-data-in" type="checkbox"><label for="data-ec38f1c6-0b1c-4288-ba2c-aff377a898dd" title="Show/Hide data repr"><svg class="icon xr-icon-database"><use href="#icon-database"></use></svg></label><div class="xr-var-attrs"><dl class="xr-attrs"><dt><span>grads_dim :</span></dt><dd>y</dd><dt><span>grads_mapping :</span></dt><dd>linear</dd><dt><span>grads_size :</span></dt><dd>721</dd><dt><span>units :</span></dt><dd>degrees_north</dd><dt><span>long_name :</span></dt><dd>latitude</dd><dt><span>minimum :</span></dt><dd>-90.0</dd><dt><span>maximum :</span></dt><dd>90.0</dd><dt><span>resolution :</span></dt><dd>0.25</dd></dl></div><div class="xr-var-data"><pre>array([30.  , 30.25, 30.5 , 30.75, 31.  , 31.25, 31.5 , 31.75, 32.  , 32.25,
        32.5 , 32.75, 33.  , 33.25, 33.5 , 33.75, 34.  , 34.25, 34.5 , 34.75,
        35.  , 35.25, 35.5 , 35.75, 36.  , 36.25, 36.5 , 36.75, 37.  , 37.25,
        37.5 , 37.75, 38.  , 38.25, 38.5 , 38.75, 39.  , 39.25, 39.5 , 39.75,
-       40.  ])</pre></div></li><li class="xr-var-item"><div class="xr-var-name"><span class="xr-has-index">lon</span></div><div class="xr-var-dims">(lon)</div><div class="xr-var-dtype">float64</div><div class="xr-var-preview xr-preview">10.0 10.25 10.5 ... 14.5 14.75 15.0</div><input id="attrs-0e0285ac-c501-44d9-b062-90f4279858d3" class="xr-var-attrs-in" type="checkbox"><label for="attrs-0e0285ac-c501-44d9-b062-90f4279858d3" title="Show/Hide attributes"><svg class="icon xr-icon-file-text2"><use href="#icon-file-text2"></use></svg></label><input id="data-0b474f7f-c118-482c-bdd2-ace8cf006ae4" class="xr-var-data-in" type="checkbox"><label for="data-0b474f7f-c118-482c-bdd2-ace8cf006ae4" title="Show/Hide data repr"><svg class="icon xr-icon-database"><use href="#icon-database"></use></svg></label><div class="xr-var-attrs"><dl class="xr-attrs"><dt><span>grads_dim :</span></dt><dd>x</dd><dt><span>grads_mapping :</span></dt><dd>linear</dd><dt><span>grads_size :</span></dt><dd>1440</dd><dt><span>units :</span></dt><dd>degrees_east</dd><dt><span>long_name :</span></dt><dd>longitude</dd><dt><span>minimum :</span></dt><dd>0.0</dd><dt><span>maximum :</span></dt><dd>359.75</dd><dt><span>resolution :</span></dt><dd>0.25</dd></dl></div><div class="xr-var-data"><pre>array([10.  , 10.25, 10.5 , 10.75, 11.  , 11.25, 11.5 , 11.75, 12.  , 12.25,
+       40.  ])</pre></div></li><li class="xr-var-item"><div class="xr-var-name"><span class="xr-has-index">lon</span></div><div class="xr-var-dims">(lon)</div><div class="xr-var-dtype">float64</div><div class="xr-var-preview xr-preview">10.0 10.25 10.5 ... 14.5 14.75 15.0</div><input id="attrs-b87db1d4-a12d-40f8-9762-4c34da56615f" class="xr-var-attrs-in" type="checkbox"><label for="attrs-b87db1d4-a12d-40f8-9762-4c34da56615f" title="Show/Hide attributes"><svg class="icon xr-icon-file-text2"><use href="#icon-file-text2"></use></svg></label><input id="data-7965a561-50d0-405b-99b3-bcabd447599f" class="xr-var-data-in" type="checkbox"><label for="data-7965a561-50d0-405b-99b3-bcabd447599f" title="Show/Hide data repr"><svg class="icon xr-icon-database"><use href="#icon-database"></use></svg></label><div class="xr-var-attrs"><dl class="xr-attrs"><dt><span>grads_dim :</span></dt><dd>x</dd><dt><span>grads_mapping :</span></dt><dd>linear</dd><dt><span>grads_size :</span></dt><dd>1440</dd><dt><span>units :</span></dt><dd>degrees_east</dd><dt><span>long_name :</span></dt><dd>longitude</dd><dt><span>minimum :</span></dt><dd>0.0</dd><dt><span>maximum :</span></dt><dd>359.75</dd><dt><span>resolution :</span></dt><dd>0.25</dd></dl></div><div class="xr-var-data"><pre>array([10.  , 10.25, 10.5 , 10.75, 11.  , 11.25, 11.5 , 11.75, 12.  , 12.25,
        12.5 , 12.75, 13.  , 13.25, 13.5 , 13.75, 14.  , 14.25, 14.5 , 14.75,
-       15.  ])</pre></div></li></ul></div></li><li class="xr-section-item"><input id="section-87c67e7d-d866-4e14-95de-38ce23b12a05" class="xr-section-summary-in" type="checkbox" checked=""><label for="section-87c67e7d-d866-4e14-95de-38ce23b12a05" class="xr-section-summary">Data variables: <span>(3)</span></label><div class="xr-section-inline-details"></div><div class="xr-section-details"><ul class="xr-var-list"><li class="xr-var-item"><div class="xr-var-name"><span>msletmsl</span></div><div class="xr-var-dims">(time, lat, lon)</div><div class="xr-var-dtype">float32</div><div class="xr-var-preview xr-preview">...</div><input id="attrs-7babf23c-aac3-4427-a232-e3eb3f091644" class="xr-var-attrs-in" type="checkbox"><label for="attrs-7babf23c-aac3-4427-a232-e3eb3f091644" title="Show/Hide attributes"><svg class="icon xr-icon-file-text2"><use href="#icon-file-text2"></use></svg></label><input id="data-e3ed1064-9d9f-4a54-9bcd-c2688feada96" class="xr-var-data-in" type="checkbox"><label for="data-e3ed1064-9d9f-4a54-9bcd-c2688feada96" title="Show/Hide data repr"><svg class="icon xr-icon-database"><use href="#icon-database"></use></svg></label><div class="xr-var-attrs"><dl class="xr-attrs"><dt><span>long_name :</span></dt><dd>** mean sea level mslp (eta model reduction) [pa] </dd></dl></div><div class="xr-var-data"><pre>[2583 values with dtype=float32]</pre></div></li><li class="xr-var-item"><div class="xr-var-name"><span>ugrd10m</span></div><div class="xr-var-dims">(time, lat, lon)</div><div class="xr-var-dtype">float32</div><div class="xr-var-preview xr-preview">...</div><input id="attrs-9eaa922a-019a-4f63-9c33-581f877ac26d" class="xr-var-attrs-in" type="checkbox"><label for="attrs-9eaa922a-019a-4f63-9c33-581f877ac26d" title="Show/Hide attributes"><svg class="icon xr-icon-file-text2"><use href="#icon-file-text2"></use></svg></label><input id="data-d12eda3e-bc16-41ae-97f5-fabfd6783ead" class="xr-var-data-in" type="checkbox"><label for="data-d12eda3e-bc16-41ae-97f5-fabfd6783ead" title="Show/Hide data repr"><svg class="icon xr-icon-database"><use href="#icon-database"></use></svg></label><div class="xr-var-attrs"><dl class="xr-attrs"><dt><span>long_name :</span></dt><dd>** 10 m above ground u-component of wind [m/s] </dd></dl></div><div class="xr-var-data"><pre>[2583 values with dtype=float32]</pre></div></li><li class="xr-var-item"><div class="xr-var-name"><span>vgrd10m</span></div><div class="xr-var-dims">(time, lat, lon)</div><div class="xr-var-dtype">float32</div><div class="xr-var-preview xr-preview">...</div><input id="attrs-27ac812d-7355-405d-96e3-51150e1eba3f" class="xr-var-attrs-in" type="checkbox"><label for="attrs-27ac812d-7355-405d-96e3-51150e1eba3f" title="Show/Hide attributes"><svg class="icon xr-icon-file-text2"><use href="#icon-file-text2"></use></svg></label><input id="data-5dbec294-576a-4327-a427-e04cd9afc6ac" class="xr-var-data-in" type="checkbox"><label for="data-5dbec294-576a-4327-a427-e04cd9afc6ac" title="Show/Hide data repr"><svg class="icon xr-icon-database"><use href="#icon-database"></use></svg></label><div class="xr-var-attrs"><dl class="xr-attrs"><dt><span>long_name :</span></dt><dd>** 10 m above ground v-component of wind [m/s] </dd></dl></div><div class="xr-var-data"><pre>[2583 values with dtype=float32]</pre></div></li></ul></div></li><li class="xr-section-item"><input id="section-b9b42605-6003-4a24-b39e-fe79db03460b" class="xr-section-summary-in" type="checkbox"><label for="section-b9b42605-6003-4a24-b39e-fe79db03460b" class="xr-section-summary">Indexes: <span>(3)</span></label><div class="xr-section-inline-details"></div><div class="xr-section-details"><ul class="xr-var-list"><li class="xr-var-item"><div class="xr-index-name"><div>time</div></div><div class="xr-index-preview">PandasIndex</div><input type="checkbox" disabled=""><label></label><input id="index-30ad37a8-6537-4165-86fb-9de6932c397f" class="xr-index-data-in" type="checkbox"><label for="index-30ad37a8-6537-4165-86fb-9de6932c397f" title="Show/Hide index repr"><svg class="icon xr-icon-database"><use href="#icon-database"></use></svg></label><div class="xr-index-data"><pre>PandasIndex(DatetimeIndex(['2021-09-02 12:00:00', '2021-09-02 15:00:00',
+       15.  ])</pre></div></li></ul></div></li><li class="xr-section-item"><input id="section-76f80085-c3dc-4faa-a1b8-f5bc39e6df0c" class="xr-section-summary-in" type="checkbox" checked=""><label for="section-76f80085-c3dc-4faa-a1b8-f5bc39e6df0c" class="xr-section-summary">Data variables: <span>(3)</span></label><div class="xr-section-inline-details"></div><div class="xr-section-details"><ul class="xr-var-list"><li class="xr-var-item"><div class="xr-var-name"><span>msletmsl</span></div><div class="xr-var-dims">(time, lat, lon)</div><div class="xr-var-dtype">float32</div><div class="xr-var-preview xr-preview">...</div><input id="attrs-4a69d66e-79a9-400d-b3e9-44d79707d7cf" class="xr-var-attrs-in" type="checkbox"><label for="attrs-4a69d66e-79a9-400d-b3e9-44d79707d7cf" title="Show/Hide attributes"><svg class="icon xr-icon-file-text2"><use href="#icon-file-text2"></use></svg></label><input id="data-d722825f-d767-4127-b70b-ea7e07aa53d2" class="xr-var-data-in" type="checkbox"><label for="data-d722825f-d767-4127-b70b-ea7e07aa53d2" title="Show/Hide data repr"><svg class="icon xr-icon-database"><use href="#icon-database"></use></svg></label><div class="xr-var-attrs"><dl class="xr-attrs"><dt><span>long_name :</span></dt><dd>** mean sea level mslp (eta model reduction) [pa] </dd></dl></div><div class="xr-var-data"><pre>[2583 values with dtype=float32]</pre></div></li><li class="xr-var-item"><div class="xr-var-name"><span>ugrd10m</span></div><div class="xr-var-dims">(time, lat, lon)</div><div class="xr-var-dtype">float32</div><div class="xr-var-preview xr-preview">...</div><input id="attrs-45e69738-1009-42ef-9922-6d7ae492ec8f" class="xr-var-attrs-in" type="checkbox"><label for="attrs-45e69738-1009-42ef-9922-6d7ae492ec8f" title="Show/Hide attributes"><svg class="icon xr-icon-file-text2"><use href="#icon-file-text2"></use></svg></label><input id="data-329b238b-e144-491e-9109-a49f690d9482" class="xr-var-data-in" type="checkbox"><label for="data-329b238b-e144-491e-9109-a49f690d9482" title="Show/Hide data repr"><svg class="icon xr-icon-database"><use href="#icon-database"></use></svg></label><div class="xr-var-attrs"><dl class="xr-attrs"><dt><span>long_name :</span></dt><dd>** 10 m above ground u-component of wind [m/s] </dd></dl></div><div class="xr-var-data"><pre>[2583 values with dtype=float32]</pre></div></li><li class="xr-var-item"><div class="xr-var-name"><span>vgrd10m</span></div><div class="xr-var-dims">(time, lat, lon)</div><div class="xr-var-dtype">float32</div><div class="xr-var-preview xr-preview">...</div><input id="attrs-c6150973-d89e-4d51-b2f3-c6ceaf3b4fde" class="xr-var-attrs-in" type="checkbox"><label for="attrs-c6150973-d89e-4d51-b2f3-c6ceaf3b4fde" title="Show/Hide attributes"><svg class="icon xr-icon-file-text2"><use href="#icon-file-text2"></use></svg></label><input id="data-9481add9-8a75-4335-9284-5bd823f9c1c6" class="xr-var-data-in" type="checkbox"><label for="data-9481add9-8a75-4335-9284-5bd823f9c1c6" title="Show/Hide data repr"><svg class="icon xr-icon-database"><use href="#icon-database"></use></svg></label><div class="xr-var-attrs"><dl class="xr-attrs"><dt><span>long_name :</span></dt><dd>** 10 m above ground v-component of wind [m/s] </dd></dl></div><div class="xr-var-data"><pre>[2583 values with dtype=float32]</pre></div></li></ul></div></li><li class="xr-section-item"><input id="section-5751a7b5-c1fc-4944-a1b8-62c1c5c2c337" class="xr-section-summary-in" type="checkbox"><label for="section-5751a7b5-c1fc-4944-a1b8-62c1c5c2c337" class="xr-section-summary">Indexes: <span>(3)</span></label><div class="xr-section-inline-details"></div><div class="xr-section-details"><ul class="xr-var-list"><li class="xr-var-item"><div class="xr-index-name"><div>time</div></div><div class="xr-index-preview">PandasIndex</div><input type="checkbox" disabled=""><label></label><input id="index-25882a61-a199-4287-a52b-06fb93236f5a" class="xr-index-data-in" type="checkbox"><label for="index-25882a61-a199-4287-a52b-06fb93236f5a" title="Show/Hide index repr"><svg class="icon xr-icon-database"><use href="#icon-database"></use></svg></label><div class="xr-index-data"><pre>PandasIndex(DatetimeIndex(['2021-09-02 12:00:00', '2021-09-02 15:00:00',
                '2021-09-02 18:00:00'],
-              dtype='datetime64[ns]', name='time', freq=None))</pre></div></li><li class="xr-var-item"><div class="xr-index-name"><div>lat</div></div><div class="xr-index-preview">PandasIndex</div><input type="checkbox" disabled=""><label></label><input id="index-0c7ac4c6-549c-4d08-9d5f-742c3d532647" class="xr-index-data-in" type="checkbox"><label for="index-0c7ac4c6-549c-4d08-9d5f-742c3d532647" title="Show/Hide index repr"><svg class="icon xr-icon-database"><use href="#icon-database"></use></svg></label><div class="xr-index-data"><pre>PandasIndex(Index([ 30.0, 30.25,  30.5, 30.75,  31.0, 31.25,  31.5, 31.75,  32.0, 32.25,
+              dtype='datetime64[ns]', name='time', freq=None))</pre></div></li><li class="xr-var-item"><div class="xr-index-name"><div>lat</div></div><div class="xr-index-preview">PandasIndex</div><input type="checkbox" disabled=""><label></label><input id="index-22099aa9-3978-45d1-a6f0-5cd22028bb8f" class="xr-index-data-in" type="checkbox"><label for="index-22099aa9-3978-45d1-a6f0-5cd22028bb8f" title="Show/Hide index repr"><svg class="icon xr-icon-database"><use href="#icon-database"></use></svg></label><div class="xr-index-data"><pre>PandasIndex(Index([ 30.0, 30.25,  30.5, 30.75,  31.0, 31.25,  31.5, 31.75,  32.0, 32.25,
         32.5, 32.75,  33.0, 33.25,  33.5, 33.75,  34.0, 34.25,  34.5, 34.75,
         35.0, 35.25,  35.5, 35.75,  36.0, 36.25,  36.5, 36.75,  37.0, 37.25,
         37.5, 37.75,  38.0, 38.25,  38.5, 38.75,  39.0, 39.25,  39.5, 39.75,
         40.0],
-      dtype='float64', name='lat'))</pre></div></li><li class="xr-var-item"><div class="xr-index-name"><div>lon</div></div><div class="xr-index-preview">PandasIndex</div><input type="checkbox" disabled=""><label></label><input id="index-1189ee7a-1573-434a-b5ca-1485e9f7793f" class="xr-index-data-in" type="checkbox"><label for="index-1189ee7a-1573-434a-b5ca-1485e9f7793f" title="Show/Hide index repr"><svg class="icon xr-icon-database"><use href="#icon-database"></use></svg></label><div class="xr-index-data"><pre>PandasIndex(Index([ 10.0, 10.25,  10.5, 10.75,  11.0, 11.25,  11.5, 11.75,  12.0, 12.25,
+      dtype='float64', name='lat'))</pre></div></li><li class="xr-var-item"><div class="xr-index-name"><div>lon</div></div><div class="xr-index-preview">PandasIndex</div><input type="checkbox" disabled=""><label></label><input id="index-f6d49e8b-74d6-4f0d-a15a-3e8f0a1963c2" class="xr-index-data-in" type="checkbox"><label for="index-f6d49e8b-74d6-4f0d-a15a-3e8f0a1963c2" title="Show/Hide index repr"><svg class="icon xr-icon-database"><use href="#icon-database"></use></svg></label><div class="xr-index-data"><pre>PandasIndex(Index([ 10.0, 10.25,  10.5, 10.75,  11.0, 11.25,  11.5, 11.75,  12.0, 12.25,
         12.5, 12.75,  13.0, 13.25,  13.5, 13.75,  14.0, 14.25,  14.5, 14.75,
         15.0],
-      dtype='float64', name='lon'))</pre></div></li></ul></div></li><li class="xr-section-item"><input id="section-b42d068a-3e02-42ba-ae71-7c1d7bcb2b40" class="xr-section-summary-in" type="checkbox"><label for="section-b42d068a-3e02-42ba-ae71-7c1d7bcb2b40" class="xr-section-summary">Attributes: <span>(4)</span></label><div class="xr-section-inline-details"></div><div class="xr-section-details"><dl class="xr-attrs"><dt><span>title :</span></dt><dd>GFS 0.25 deg starting from 12Z02sep2021, downloaded Sep 02 17:14 UTC</dd><dt><span>Conventions :</span></dt><dd>COARDS
+      dtype='float64', name='lon'))</pre></div></li></ul></div></li><li class="xr-section-item"><input id="section-0645e56f-f377-4d2c-8901-eec52d035cd0" class="xr-section-summary-in" type="checkbox"><label for="section-0645e56f-f377-4d2c-8901-eec52d035cd0" class="xr-section-summary">Attributes: <span>(4)</span></label><div class="xr-section-inline-details"></div><div class="xr-section-details"><dl class="xr-attrs"><dt><span>title :</span></dt><dd>GFS 0.25 deg starting from 12Z02sep2021, downloaded Sep 02 17:14 UTC</dd><dt><span>Conventions :</span></dt><dd>COARDS
 GrADS</dd><dt><span>dataType :</span></dt><dd>Grid</dd><dt><span>history :</span></dt><dd>Thu Sep 02 17:27:02 GMT 2021 : imported by GrADS Data Server 2.0</dd></dl></div></li></ul></div></div>
 </div>
 </div>
 <p>Running a Mike 21 HD model, needs at least three variables of meteorological forcing * Mean Sea Level Pressure * U 10m * V 10m</p>
 <p>Let’s take a look the U 10m</p>
-<div id="d304107f" class="cell" data-execution_count="4">
+<div id="cd468e53" class="cell" data-execution_count="4">
 <div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>ds.ugrd10m.isel(time<span class="op">=</span><span class="dv">0</span>).plot()<span class="op">;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display">
 <div>
@@ -637,7 +710,7 @@ GrADS</dd><dt><span>dataType :</span></dt><dd>Grid</dd><dt><span>history :</span
 <h2 class="anchored" data-anchor-id="convert-to-dfs2">Convert to dfs2</h2>
 <section id="time" class="level3">
 <h3 class="anchored" data-anchor-id="time">Time</h3>
-<div id="3e098fd6" class="cell" data-execution_count="5">
+<div id="b0682ada" class="cell" data-execution_count="5">
 <div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>time <span class="op">=</span> pd.DatetimeIndex(ds.time)</span>
 <span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>time</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="5">
@@ -649,36 +722,36 @@ GrADS</dd><dt><span>dataType :</span></dt><dd>Grid</dd><dt><span>history :</span
 </section>
 <section id="variable-types" class="level3">
 <h3 class="anchored" data-anchor-id="variable-types">Variable types</h3>
-<div id="0cd33081" class="cell" data-execution_count="6">
+<div id="66dd33d6" class="cell" data-execution_count="6">
 <div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>mikeio.EUMType.Air_Pressure</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="6">
 <pre><code>Air Pressure</code></pre>
 </div>
 </div>
-<div id="a7bdb6ff" class="cell" data-execution_count="7">
+<div id="0eceb2fd" class="cell" data-execution_count="7">
 <div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>mikeio.EUMType.Air_Pressure.units</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="7">
 <pre><code>[hectopascal, millibar]</code></pre>
 </div>
 </div>
-<div id="5c4f3fdf" class="cell" data-execution_count="8">
+<div id="8641d695" class="cell" data-execution_count="8">
 <div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>mikeio.EUMType.Wind_Velocity</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="8">
 <pre><code>Wind Velocity</code></pre>
 </div>
 </div>
-<div id="2d03de39" class="cell" data-execution_count="9">
+<div id="daae373e" class="cell" data-execution_count="9">
 <div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>mikeio.EUMType.Wind_Velocity.units</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="9">
 <pre><code>[meter per sec, feet per sec, miles per hour, km per hour, knot]</code></pre>
 </div>
 </div>
-<div id="2e79e7f1" class="cell" data-execution_count="10">
+<div id="9b994a4c" class="cell" data-execution_count="10">
 <div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>mslp <span class="op">=</span> ds.msletmsl.values <span class="op">/</span> <span class="dv">100</span> <span class="co"># conversion from Pa to hPa</span></span>
 <span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>u <span class="op">=</span> ds.ugrd10m.values</span>
 <span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>v <span class="op">=</span> ds.vgrd10m.values</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<div id="9bf29290" class="cell" data-execution_count="11">
+<div id="6653526d" class="cell" data-execution_count="11">
 <div class="sourceCode cell-code" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>geometry <span class="op">=</span> mikeio.Grid2D(x<span class="op">=</span>ds.lon.values, y<span class="op">=</span>ds.lat.values, projection<span class="op">=</span><span class="st">"LONG/LAT"</span>)</span>
 <span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>geometry</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="11">
@@ -688,14 +761,14 @@ y: [30, 30.25, ..., 40] (ny=41, dy=0.25)
 projection: LONG/LAT</code></pre>
 </div>
 </div>
-<div id="9badcc49" class="cell" data-execution_count="12">
+<div id="e462c13f" class="cell" data-execution_count="12">
 <div class="sourceCode cell-code" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> mikeio <span class="im">import</span> ItemInfo, EUMType, EUMUnit</span>
 <span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>mslp_da <span class="op">=</span> mikeio.DataArray(data<span class="op">=</span>mslp,time<span class="op">=</span>time, geometry<span class="op">=</span>geometry, item<span class="op">=</span>ItemInfo(<span class="st">"Mean Sea Level Pressure"</span>, EUMType.Air_Pressure, EUMUnit.hectopascal))</span>
 <span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a>u_da <span class="op">=</span> mikeio.DataArray(data<span class="op">=</span>u,time<span class="op">=</span>time, geometry<span class="op">=</span>geometry, item<span class="op">=</span>ItemInfo(<span class="st">"Wind U"</span>, EUMType.Wind_Velocity, EUMUnit.meter_per_sec))</span>
 <span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a>v_da <span class="op">=</span> mikeio.DataArray(data<span class="op">=</span>v,time<span class="op">=</span>time, geometry<span class="op">=</span>geometry, item<span class="op">=</span>ItemInfo(<span class="st">"Wind V"</span>, EUMType.Wind_Velocity, EUMUnit.meter_per_sec))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<div id="68722a90" class="cell" data-execution_count="13">
+<div id="6082c858" class="cell" data-execution_count="13">
 <div class="sourceCode cell-code" id="cb18"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>mds <span class="op">=</span> mikeio.Dataset([mslp_da, u_da, v_da])</span>
 <span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>mds</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-display" data-execution_count="13">
@@ -709,11 +782,11 @@ items:
   2:  Wind V &lt;Wind Velocity&gt; (meter per sec)</code></pre>
 </div>
 </div>
-<div id="1ef4ad47" class="cell" data-execution_count="14">
+<div id="97c05458" class="cell" data-execution_count="14">
 <div class="sourceCode cell-code" id="cb20"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>mds.to_dfs(<span class="st">"gfs.dfs2"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>Clean up</p>
-<div id="dfaa0573" class="cell" data-execution_count="15">
+<div id="170e817f" class="cell" data-execution_count="15">
 <div class="sourceCode cell-code" id="cb21"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> os</span>
 <span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>os.remove(<span class="st">"gfs.dfs2"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>

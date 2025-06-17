@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.7.31">
+<meta name="generator" content="quarto-1.7.32">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
@@ -72,10 +72,10 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
 <script src="../site_libs/quarto-html/anchor.min.js"></script>
 <link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="../site_libs/quarto-html/quarto-syntax-highlighting-e1a5c8363afafaef2c763b6775fbf3ca.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-37eea08aefeeee20ff55810ff984fec1.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="../site_libs/bootstrap/bootstrap-ecd7484abd448711fd8810a5eeb38bee.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<link href="../site_libs/bootstrap/bootstrap-293e81bb0733230b9e755d5a7d46e87a.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -186,7 +186,6 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <li><a href="#mikeio.spatial.GeometryFM2D.get_element_area" id="toc-mikeio.spatial.GeometryFM2D.get_element_area" class="nav-link" data-scroll-target="#mikeio.spatial.GeometryFM2D.get_element_area">get_element_area</a></li>
   <li><a href="#mikeio.spatial.GeometryFM2D.get_node_centered_data" id="toc-mikeio.spatial.GeometryFM2D.get_node_centered_data" class="nav-link" data-scroll-target="#mikeio.spatial.GeometryFM2D.get_node_centered_data">get_node_centered_data</a></li>
   <li><a href="#mikeio.spatial.GeometryFM2D.get_overset_grid" id="toc-mikeio.spatial.GeometryFM2D.get_overset_grid" class="nav-link" data-scroll-target="#mikeio.spatial.GeometryFM2D.get_overset_grid">get_overset_grid</a></li>
-  <li><a href="#mikeio.spatial.GeometryFM2D.interp2d" id="toc-mikeio.spatial.GeometryFM2D.interp2d" class="nav-link" data-scroll-target="#mikeio.spatial.GeometryFM2D.interp2d">interp2d</a></li>
   <li><a href="#mikeio.spatial.GeometryFM2D.isel" id="toc-mikeio.spatial.GeometryFM2D.isel" class="nav-link" data-scroll-target="#mikeio.spatial.GeometryFM2D.isel">isel</a></li>
   <li><a href="#mikeio.spatial.GeometryFM2D.to_mesh" id="toc-mikeio.spatial.GeometryFM2D.to_mesh" class="nav-link" data-scroll-target="#mikeio.spatial.GeometryFM2D.to_mesh">to_mesh</a></li>
   <li><a href="#mikeio.spatial.GeometryFM2D.to_shapely" id="toc-mikeio.spatial.GeometryFM2D.to_shapely" class="nav-link" data-scroll-target="#mikeio.spatial.GeometryFM2D.to_shapely">to_shapely</a></li>
@@ -328,18 +327,14 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <td>Get a 2d grid that covers the domain by specifying spacing or shape.</td>
 </tr>
 <tr class="even">
-<td><a href="#mikeio.spatial.GeometryFM2D.interp2d">interp2d</a></td>
-<td>Interpolate spatially in data (2d only).</td>
-</tr>
-<tr class="odd">
 <td><a href="#mikeio.spatial.GeometryFM2D.isel">isel</a></td>
 <td>Export a selection of elements to a new geometry.</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td><a href="#mikeio.spatial.GeometryFM2D.to_mesh">to_mesh</a></td>
 <td>Export geometry to new mesh file.</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td><a href="#mikeio.spatial.GeometryFM2D.to_shapely">to_shapely</a></td>
 <td>Export mesh as shapely MultiPolygon.</td>
 </tr>
@@ -662,7 +657,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <tbody>
 <tr class="odd">
 <td></td>
-<td>(np.array, np.array)</td>
+<td>Interpolant</td>
 <td>element ids and weights</td>
 </tr>
 </tbody>
@@ -831,89 +826,13 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </table>
 </section>
 </section>
-<section id="mikeio.spatial.GeometryFM2D.interp2d" class="level3">
-<h3 class="anchored" data-anchor-id="mikeio.spatial.GeometryFM2D.interp2d">interp2d</h3>
-<div class="sourceCode" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>spatial.GeometryFM2D.interp2d(data, elem_ids, weights<span class="op">=</span><span class="va">None</span>, shape<span class="op">=</span><span class="va">None</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p>Interpolate spatially in data (2d only).</p>
-<section id="parameters-6" class="level4 doc-section doc-section-parameters">
-<h4 class="doc-section doc-section-parameters anchored" data-anchor-id="parameters-6">Parameters</h4>
-<table class="caption-top table">
-<colgroup>
-<col style="width: 8%">
-<col style="width: 24%">
-<col style="width: 56%">
-<col style="width: 10%">
-</colgroup>
-<thead>
-<tr class="header">
-<th>Name</th>
-<th>Type</th>
-<th>Description</th>
-<th>Default</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td>data</td>
-<td>ndarray or list(ndarray)</td>
-<td>dfsu data</td>
-<td><em>required</em></td>
-</tr>
-<tr class="even">
-<td>elem_ids</td>
-<td>ndarray(int)</td>
-<td>n sized array of 1 or more element ids used for interpolation</td>
-<td><em>required</em></td>
-</tr>
-<tr class="odd">
-<td>weights</td>
-<td>ndarray(float)</td>
-<td>weights with same size as elem_ids used for interpolation</td>
-<td><code>None</code></td>
-</tr>
-<tr class="even">
-<td>shape</td>
-<td>tuple[int, …] | None</td>
-<td>reshape output</td>
-<td><code>None</code></td>
-</tr>
-</tbody>
-</table>
-</section>
-<section id="returns-7" class="level4 doc-section doc-section-returns">
-<h4 class="doc-section doc-section-returns anchored" data-anchor-id="returns-7">Returns</h4>
-<table class="caption-top table">
-<thead>
-<tr class="header">
-<th>Name</th>
-<th>Type</th>
-<th>Description</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td></td>
-<td>ndarray or list(ndarray)</td>
-<td>spatially interped data</td>
-</tr>
-</tbody>
-</table>
-</section>
-<section id="examples-2" class="level4 doc-section doc-section-examples">
-<h4 class="doc-section doc-section-examples anchored" data-anchor-id="examples-2">Examples</h4>
-<div class="sourceCode" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> ds <span class="op">=</span> dfsu.read()</span>
-<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> g <span class="op">=</span> dfs.get_overset_grid(shape<span class="op">=</span>(<span class="dv">50</span>,<span class="dv">40</span>))</span>
-<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> elem_ids, weights <span class="op">=</span> dfs.get_2d_interpolant(g.xy)</span>
-<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> dsi <span class="op">=</span> dfs.interp2d(ds, elem_ids, weights)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</section>
-</section>
 <section id="mikeio.spatial.GeometryFM2D.isel" class="level3">
 <h3 class="anchored" data-anchor-id="mikeio.spatial.GeometryFM2D.isel">isel</h3>
-<div class="sourceCode" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>spatial.GeometryFM2D.isel(idx, keepdims<span class="op">=</span><span class="va">False</span>, <span class="op">**</span>kwargs)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>spatial.GeometryFM2D.isel(idx, keepdims<span class="op">=</span><span class="va">False</span>, <span class="op">**</span>kwargs)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <p>Export a selection of elements to a new geometry.</p>
 <p>Typically not called directly, but by Dataset/DataArray’s isel() or sel() methods.</p>
-<section id="parameters-7" class="level4 doc-section doc-section-parameters">
-<h4 class="doc-section doc-section-parameters anchored" data-anchor-id="parameters-7">Parameters</h4>
+<section id="parameters-6" class="level4 doc-section doc-section-parameters">
+<h4 class="doc-section doc-section-parameters anchored" data-anchor-id="parameters-6">Parameters</h4>
 <table class="caption-top table">
 <colgroup>
 <col style="width: 5%">
@@ -951,8 +870,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </tbody>
 </table>
 </section>
-<section id="returns-8" class="level4 doc-section doc-section-returns">
-<h4 class="doc-section doc-section-returns anchored" data-anchor-id="returns-8">Returns</h4>
+<section id="returns-7" class="level4 doc-section doc-section-returns">
+<h4 class="doc-section doc-section-returns anchored" data-anchor-id="returns-7">Returns</h4>
 <table class="caption-top table">
 <thead>
 <tr class="header">
@@ -977,10 +896,10 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </section>
 <section id="mikeio.spatial.GeometryFM2D.to_mesh" class="level3">
 <h3 class="anchored" data-anchor-id="mikeio.spatial.GeometryFM2D.to_mesh">to_mesh</h3>
-<div class="sourceCode" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>spatial.GeometryFM2D.to_mesh(outfilename)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>spatial.GeometryFM2D.to_mesh(outfilename)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <p>Export geometry to new mesh file.</p>
-<section id="parameters-8" class="level4 doc-section doc-section-parameters">
-<h4 class="doc-section doc-section-parameters anchored" data-anchor-id="parameters-8">Parameters</h4>
+<section id="parameters-7" class="level4 doc-section doc-section-parameters">
+<h4 class="doc-section doc-section-parameters anchored" data-anchor-id="parameters-7">Parameters</h4>
 <table class="caption-top table">
 <thead>
 <tr class="header">
@@ -1003,10 +922,10 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </section>
 <section id="mikeio.spatial.GeometryFM2D.to_shapely" class="level3">
 <h3 class="anchored" data-anchor-id="mikeio.spatial.GeometryFM2D.to_shapely">to_shapely</h3>
-<div class="sourceCode" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>spatial.GeometryFM2D.to_shapely()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>spatial.GeometryFM2D.to_shapely()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <p>Export mesh as shapely MultiPolygon.</p>
-<section id="returns-9" class="level4 doc-section doc-section-returns">
-<h4 class="doc-section doc-section-returns anchored" data-anchor-id="returns-9">Returns</h4>
+<section id="returns-8" class="level4 doc-section doc-section-returns">
+<h4 class="doc-section doc-section-returns anchored" data-anchor-id="returns-8">Returns</h4>
 <table class="caption-top table">
 <thead>
 <tr class="header">
