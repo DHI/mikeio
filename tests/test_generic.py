@@ -672,3 +672,24 @@ def test_change_datatype_dfs0(tmp_path: Path) -> None:
     org = mikeio.read(infilename).to_numpy()
     new = mikeio.read(outfilename).to_numpy()
     assert np.allclose(org, new, rtol=1e-08, atol=1e-10, equal_nan=True)
+
+
+def test_derived_variables(tmp_path: Path) -> None:
+    from mikeio.generic import DerivedVariable, derived
+    from mikeio import ItemInfo
+
+    infilename = "tests/testdata/oresundHD_run1.dfsu"
+    outfilename = tmp_path / "need_for_speed.dfsu"
+
+    vars = [
+        DerivedVariable(
+            item=ItemInfo("Current Speed", mikeio.EUMType.Current_Speed),
+            func=lambda x: np.sqrt(x["U velocity"] ** 2 + x["V velocity"] ** 2),
+        )
+    ]
+
+    # TODO add option to include existing items
+    derived(infilename, outfilename, vars=vars)
+    dfs = mikeio.Dfsu2DH(outfilename)
+    assert dfs.items[0].type == mikeio.EUMType.Current_Speed
+    assert len(dfs.items) == 1
