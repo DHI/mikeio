@@ -10,7 +10,7 @@ from copy import deepcopy
 from datetime import datetime, timedelta
 from shutil import copyfile
 from collections.abc import Iterable, Sequence
-from typing import Callable, Union
+from typing import Callable, Mapping, Union
 import warnings
 
 
@@ -94,7 +94,7 @@ def _clone(
     outfilename: str | pathlib.Path,
     start_time: datetime | None = None,
     timestep: float | None = None,
-    items: Sequence[int | DfsDynamicItemInfo] | None = None,
+    items: Sequence[int | DfsDynamicItemInfo | ItemInfo] | None = None,
     datatype: int | None = None,
 ) -> DfsFile:
     source = DfsFileFactory.DfsGenericOpen(str(infilename))
@@ -1011,3 +1011,73 @@ def change_datatype(
 
     dfs_out.Close()
     dfs_in.Close()
+
+
+@dataclass
+class DerivedItem:
+    """Item derived from other items.
+
+    Parameters
+    ----------
+    item: ItemInfo
+        ItemInfo object for the derived item
+    func: Callable[[Mapping[str, np.ndarray]], np.ndarray] | None
+        Function to compute the derived item from a mapping of item names to data arrays.
+        If None, the item data will be returned directly from the mapping using the item's name.
+        Default is None.
+
+    Example
+    -------
+    ```{python}
+    import numpy as np
+    import mikeio
+    from mikeio.generic import DerivedItem
+
+    item = DerivedItem(
+            item=ItemInfo("Current Speed", mikeio.EUMType.Current_Speed),
+            func=lambda x: np.sqrt(x["U velocity"] ** 2 + x["V velocity"] ** 2),
+        )
+
+    """
+
+    item: ItemInfo
+    func: Callable[[Mapping[str, np.ndarray]], np.ndarray] | None = None
+
+
+def transform(
+    infilename: str | pathlib.Path,
+    outfilename: str | pathlib.Path,
+    vars: Sequence[DerivedItem],
+) -> None:
+    dfs_i = DfsFileFactory.DfsGenericOpen(str(infilename))
+
+    item_numbers = _valid_item_numbers(dfs_i.ItemInfo)
+    n_items = len(item_numbers)
+
+    items = [v.item for v in vars]
+    funcs = {v.item.name: v.func for v in vars}
+
+    dfs = _clone(
+        str(infilename),
+        str(outfilename),
+        items=items,
+    )
+
+    n_time_steps = dfs_i.FileInfo.TimeAxis.NumberOfTimeSteps
+
+    for timestep in range(n_time_steps):
+        data = {}
+        for item in range(n_items):
+            name = dfs_i.ItemInfo[item].Name
+            data[name] = dfs_i.ReadItemTimeStep(item_numbers[item] + 1, timestep).Data
+
+        for item in items:
+            func = funcs.get(item.name, None)
+            if func is None:
+                darray = data[item.name]
+            else:
+                darray = func(data)
+            dfs.WriteItemTimeStepNext(0.0, darray)
+
+    dfs_i.Close()
+    dfs.Close()
