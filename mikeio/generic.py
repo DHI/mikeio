@@ -1014,16 +1014,40 @@ def change_datatype(
 
 
 @dataclass
-class DerivedVariable:
+class DerivedItem:
+    """Item derived from other items.
+
+    Parameters
+    ----------
     item: ItemInfo
-    func: Callable[[Mapping[str, np.ndarray]], np.ndarray]
+        ItemInfo object for the derived item
+    func: Callable[[Mapping[str, np.ndarray]], np.ndarray] | None
+        Function to compute the derived item from a mapping of item names to data arrays.
+        If None, the item data will be returned directly from the mapping using the item's name.
+        Default is None.
+
+    Example
+    -------
+    ```{python}
+    import numpy as np
+    import mikeio
+    from mikeio.generic import DerivedItem
+
+    item = DerivedItem(
+            item=ItemInfo("Current Speed", mikeio.EUMType.Current_Speed),
+            func=lambda x: np.sqrt(x["U velocity"] ** 2 + x["V velocity"] ** 2),
+        )
+
+    """
+
+    item: ItemInfo
+    func: Callable[[Mapping[str, np.ndarray]], np.ndarray] | None = None
 
 
-# TODO option to include existing items
-def derived(
+def transform(
     infilename: str | pathlib.Path,
     outfilename: str | pathlib.Path,
-    vars: Sequence[DerivedVariable],
+    vars: Sequence[DerivedItem],
 ) -> None:
     dfs_i = DfsFileFactory.DfsGenericOpen(str(infilename))
 
@@ -1048,7 +1072,11 @@ def derived(
             data[name] = dfs_i.ReadItemTimeStep(item_numbers[item] + 1, timestep).Data
 
         for item in items:
-            darray = funcs[item.name](data)
+            func = funcs.get(item.name, None)
+            if func is None:
+                darray = data[item.name]
+            else:
+                darray = func(data)
             dfs.WriteItemTimeStepNext(0.0, darray)
 
     dfs_i.Close()
