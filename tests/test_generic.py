@@ -729,3 +729,7 @@ def test_transform_can_include_existing_items(tmp_path: Path) -> None:
     dfs = mikeio.Dfsu2DH(outfilename)
     assert dfs.items[-1].type == mikeio.EUMType.Current_Speed
     assert len(dfs.items) == 5
+    ds = dfs.read(time=-1, elements=0)
+    assert ds["U velocity"].values == pytest.approx(0.0292403083)
+    assert ds["V velocity"].values == pytest.approx(0.127983957)
+    assert ds["Current Speed"].values == pytest.approx(0.13128172)
