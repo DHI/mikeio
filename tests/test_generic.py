@@ -676,14 +676,14 @@ def test_change_datatype_dfs0(tmp_path: Path) -> None:
 
 def test_derived_variables(tmp_path: Path) -> None:
     from mikeio.generic import DerivedItem, transform
-    from mikeio import ItemInfo
 
     infilename = "tests/testdata/oresundHD_run1.dfsu"
     outfilename = tmp_path / "need_for_speed.dfsu"
 
     items = [
         DerivedItem(
-            item=ItemInfo("Current Speed", mikeio.EUMType.Current_Speed),
+            name="Current Speed",
+            type=mikeio.EUMType.Current_Speed,
             func=lambda x: np.sqrt(x["U velocity"] ** 2 + x["V velocity"] ** 2),
         )
     ]
@@ -695,7 +695,7 @@ def test_derived_variables(tmp_path: Path) -> None:
 
     dfs1 = mikeio.Dfsu2DH(infilename)
     sel_items = [
-        DerivedItem(item=item)
+        DerivedItem(name=item.name, type=item.type, unit=item.unit)
         for item in dfs1.items
         if item.name != "Surface elevation"
     ]

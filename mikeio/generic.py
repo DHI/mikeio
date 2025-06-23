@@ -30,9 +30,10 @@ from mikecore.DfsFileFactory import DfsFileFactory
 from mikecore.eum import eumQuantity
 from tqdm import tqdm, trange
 
+
 from . import __dfs_version__
 from .dfs._dfs import _get_item_info, _valid_item_numbers
-from .eum import ItemInfo
+from .eum import ItemInfo, EUMType, EUMUnit
 import mikeio
 
 
@@ -1013,7 +1014,6 @@ def change_datatype(
     dfs_in.Close()
 
 
-@dataclass
 class DerivedItem:
     """Item derived from other items.
 
@@ -1040,8 +1040,30 @@ class DerivedItem:
 
     """
 
-    item: ItemInfo
-    func: Callable[[Mapping[str, np.ndarray]], np.ndarray] | None = None
+    def __init__(
+        self,
+        name: str,
+        type: EUMType,
+        unit: EUMUnit | None = None,
+        func: Callable[[Mapping[str, np.ndarray]], np.ndarray] | None = None,
+    ) -> None:
+        """Create a DerivedItem.
+
+        Parameters
+        ----------
+        name: str
+            Name of the derived item.
+        type: EUMType
+            EUMType of the derived item.
+        unit: EUMUnit | None, optional
+            EUMUnit of the derived item, pass None to use the default unit for the type.
+            Default is None.
+        func: Callable[[Mapping[str, np.ndarray]], np.ndarray] | None, optional
+            Function to compute the derived item from a mapping of item names to data arrays.
+
+        """
+        self.item = ItemInfo(name, type, unit)
+        self.func = func
 
 
 def transform(
