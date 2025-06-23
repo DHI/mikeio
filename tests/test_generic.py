@@ -674,7 +674,7 @@ def test_change_datatype_dfs0(tmp_path: Path) -> None:
     assert np.allclose(org, new, rtol=1e-08, atol=1e-10, equal_nan=True)
 
 
-def test_derived_variables(tmp_path: Path) -> None:
+def test_transform_variables(tmp_path: Path) -> None:
     from mikeio.generic import DerivedItem, transform
 
     infilename = "tests/testdata/oresundHD_run1.dfsu"
@@ -688,7 +688,7 @@ def test_derived_variables(tmp_path: Path) -> None:
         )
     ]
 
-    transform(infilename, outfilename, vars=items)
+    transform(infilename, outfilename, vars=items, keep_existing_items=False)
     dfs = mikeio.Dfsu2DH(outfilename)
     assert dfs.items[0].type == mikeio.EUMType.Current_Speed
     assert len(dfs.items) == 1
@@ -703,9 +703,29 @@ def test_derived_variables(tmp_path: Path) -> None:
 
     outfilename2 = tmp_path / "existing_and_speed.dfsu"
 
-    transform(infilename, outfilename2, vars=sel_items)
+    transform(infilename, outfilename2, vars=sel_items, keep_existing_items=False)
     dfs2 = mikeio.Dfsu2DH(outfilename2)
     assert dfs2.items[0].name == "Total water depth"  # existing item
     assert dfs2.items[1].name == "U velocity"  # existing item
     assert dfs2.items[2].name == "V velocity"  # existing item
     assert dfs2.items[3].name == "Current Speed"  # derived item
+
+
+def test_transform_can_include_existing_items(tmp_path: Path) -> None:
+    from mikeio.generic import DerivedItem, transform
+
+    infilename = "tests/testdata/oresundHD_run1.dfsu"
+    outfilename = tmp_path / "need_for_speed.dfsu"
+
+    items = [
+        DerivedItem(
+            name="Current Speed",
+            type=mikeio.EUMType.Current_Speed,
+            func=lambda x: np.sqrt(x["U velocity"] ** 2 + x["V velocity"] ** 2),
+        )
+    ]
+
+    transform(infilename, outfilename, vars=items, keep_existing_items=True)
+    dfs = mikeio.Dfsu2DH(outfilename)
+    assert dfs.items[-1].type == mikeio.EUMType.Current_Speed
+    assert len(dfs.items) == 5

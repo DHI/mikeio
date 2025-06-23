@@ -1070,7 +1070,24 @@ def transform(
     infilename: str | pathlib.Path,
     outfilename: str | pathlib.Path,
     vars: Sequence[DerivedItem],
+    keep_existing_items: bool = True,
 ) -> None:
+    """Transform a dfs file by applying functions to items.
+
+    Parameters
+    ----------
+    infilename: str | pathlib.Path
+        full path to the input file
+    outfilename: str | pathlib.Path
+        full path to the output file
+    vars: Sequence[DerivedItem]
+        List of derived items to compute.
+    keep_existing_items: bool, optional
+        If True, existing items in the input file will be kept in the output file.
+        If False, only the derived items will be written to the output file.
+        Default is True.
+
+    """
     dfs_i = DfsFileFactory.DfsGenericOpen(str(infilename))
 
     item_numbers = _valid_item_numbers(dfs_i.ItemInfo)
@@ -1078,6 +1095,15 @@ def transform(
 
     items = [v.item for v in vars]
     funcs = {v.item.name: v.func for v in vars}
+
+    if keep_existing_items:
+        existing_items = [
+            ItemInfo.from_mikecore_dynamic_item_info(
+                dfs_i.ItemInfo[i],
+            )
+            for i in item_numbers
+        ]
+        items = existing_items + items
 
     dfs = _clone(
         str(infilename),
