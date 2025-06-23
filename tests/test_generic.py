@@ -12,6 +12,8 @@ from mikeio.generic import (
     fill_corrupt,
     add,
     change_datatype,
+    transform,
+    DerivedItem,
 )
 import pytest
 from mikecore.DfsFileFactory import DfsFileFactory
@@ -675,8 +677,6 @@ def test_change_datatype_dfs0(tmp_path: Path) -> None:
 
 
 def test_transform_variables(tmp_path: Path) -> None:
-    from mikeio.generic import DerivedItem, transform
-
     infilename = "tests/testdata/oresundHD_run1.dfsu"
     outfilename = tmp_path / "need_for_speed.dfsu"
 
@@ -712,8 +712,6 @@ def test_transform_variables(tmp_path: Path) -> None:
 
 
 def test_transform_can_include_existing_items(tmp_path: Path) -> None:
-    from mikeio.generic import DerivedItem, transform
-
     infilename = "tests/testdata/oresundHD_run1.dfsu"
     outfilename = tmp_path / "need_for_speed.dfsu"
 
@@ -733,3 +731,13 @@ def test_transform_can_include_existing_items(tmp_path: Path) -> None:
     assert ds["U velocity"].values == pytest.approx(0.0292403083)
     assert ds["V velocity"].values == pytest.approx(0.127983957)
     assert ds["Current Speed"].values == pytest.approx(0.13128172)
+
+
+def test_transform_func_with_missing_item_reports_existing_items() -> None:
+    infilename = "tests/testdata/oresundHD_run1.dfsu"
+    outfilename = "notgonnahappen.dfsu"
+
+    items = [DerivedItem(name="Not relevant", func=lambda x: x["not in the file"])]
+    with pytest.raises(KeyError) as excinfo:
+        transform(infilename, outfilename, items)
+    assert "U velocity" in str(excinfo.value)

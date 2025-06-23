@@ -1043,7 +1043,7 @@ class DerivedItem:
     def __init__(
         self,
         name: str,
-        type: EUMType,
+        type: EUMType | None = None,
         unit: EUMUnit | None = None,
         func: Callable[[Mapping[str, np.ndarray]], np.ndarray] | None = None,
     ) -> None:
@@ -1124,7 +1124,14 @@ def transform(
             if func is None:
                 darray = data[item.name]
             else:
-                darray = func(data)
+                try:
+                    darray = func(data)
+                except KeyError as e:
+                    missing_key = e.args[0]
+                    keys = ", ".join(data.keys())
+                    raise KeyError(
+                        f"Item '{missing_key}' is not available in the file. Available items: {keys}"
+                    )
             dfs.WriteItemTimeStepNext(0.0, darray)
 
     dfs_i.Close()
