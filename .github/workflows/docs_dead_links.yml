@@ -7,6 +7,8 @@ on:
 jobs:
   crawl_for_broken_links:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     name: Broken-Links-Crawler
     steps:
     - name: Checking links
