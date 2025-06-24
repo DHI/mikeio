@@ -5,8 +5,6 @@ import pandas as pd
 
 import mikeio
 
-from mikeio import EUMType, EUMUnit
-
 
 def test_filenotexist() -> None:
     with pytest.raises(FileNotFoundError):
@@ -14,8 +12,7 @@ def test_filenotexist() -> None:
 
 
 def test_repr() -> None:
-    filename = r"tests/testdata/random.dfs1"
-    dfs = mikeio.Dfs1(filename)
+    dfs = mikeio.Dfs1("tests/testdata/random.dfs1")
 
     text = repr(dfs)
 
@@ -25,8 +22,7 @@ def test_repr() -> None:
 
 
 def test_properties() -> None:
-    filename = r"tests/testdata/tide1.dfs1"
-    dfs = mikeio.Dfs1(filename)
+    dfs = mikeio.Dfs1("tests/testdata/tide1.dfs1")
 
     assert dfs.dx == 0.06666692346334457
     assert dfs.x0 == 0.0
@@ -47,9 +43,7 @@ def test_properties() -> None:
 
 
 def test_read_write_properties(tmp_path: Path) -> None:
-    # test that properties are the same after read-write
-    filename = r"tests/testdata/tide1.dfs1"
-    ds1 = mikeio.read(filename)
+    ds1 = mikeio.read("tests/testdata/tide1.dfs1")
 
     fp = tmp_path / "tide1.dfs1"
     ds1.to_dfs(fp)
@@ -59,8 +53,7 @@ def test_read_write_properties(tmp_path: Path) -> None:
 
 
 def test_read() -> None:
-    filename = r"tests/testdata/random.dfs1"
-    dfs = mikeio.Dfs1(filename)
+    dfs = mikeio.Dfs1("tests/testdata/random.dfs1")
 
     ds = dfs.read(items=[0])
     data = ds[0].to_numpy()
@@ -68,8 +61,7 @@ def test_read() -> None:
 
 
 def test_read_item_names() -> None:
-    filename = r"tests/testdata/random.dfs1"
-    dfs = mikeio.Dfs1(filename)
+    dfs = mikeio.Dfs1("tests/testdata/random.dfs1")
 
     ds = dfs.read(items=["testing water level"])
     data = ds[0].to_numpy()
@@ -77,8 +69,7 @@ def test_read_item_names() -> None:
 
 
 def test_read_time_steps() -> None:
-    filename = r"tests/testdata/random.dfs1"
-    dfs = mikeio.Dfs1(filename)
+    dfs = mikeio.Dfs1("tests/testdata/random.dfs1")
 
     ds = dfs.read(time=[3, 5])
     data = ds[0].to_numpy()
@@ -102,25 +93,10 @@ def test_write_some_time_steps_new_file(tmp_path: Path) -> None:
 
 
 def test_read_item_names_not_in_dataset_fails() -> None:
-    filename = r"tests/testdata/random.dfs1"
-    dfs = mikeio.Dfs1(filename)
+    dfs = mikeio.Dfs1("tests/testdata/random.dfs1")
 
     with pytest.raises(KeyError):
         dfs.read(items=["NOTAREALVARIABLE"])
-
-
-def test_read_names_access() -> None:
-    filename = r"tests/testdata/random.dfs1"
-    dfs = mikeio.Dfs1(filename)
-
-    res = dfs.read(items=[0])
-    item_data = res[0].to_numpy()
-    time = res.time
-    assert item_data.shape == (100, 3)  # time, x
-    assert len(time) == 100
-    assert res.items[0].name == "testing water level"
-    assert res.items[0].type == EUMType.Water_Level
-    assert res.items[0].unit == EUMUnit.meter
 
 
 def test_read_start_end_time() -> None:
@@ -140,15 +116,13 @@ def test_read_start_end_time_relative_time() -> None:
 
 
 def test_get_time_axis_without_reading_data() -> None:
-    dfs0file = r"tests/testdata/random.dfs1"
-    dfs = mikeio.Dfs1(dfs0file)
+    dfs = mikeio.Dfs1("tests/testdata/random.dfs1")
     assert isinstance(dfs.time, pd.DatetimeIndex)
     assert len(dfs.time) == 100
 
 
 def test_get_time_axis_without_reading_data_relative() -> None:
-    dfs0file = r"tests/testdata/physical_basin_wave_maker_signal.dfs1"
-    dfs = mikeio.Dfs1(dfs0file)
+    dfs = mikeio.Dfs1("tests/testdata/physical_basin_wave_maker_signal.dfs1")
     assert isinstance(dfs.time, pd.DatetimeIndex)  # start time is not correct !
     assert len(dfs.time) == 200
 

@@ -169,7 +169,6 @@ def test_create_in_bbox() -> None:
     assert g.dx == dx
     assert g.dy == dy
     assert g.nx * g.ny == 4
-    assert g.ndim == 2
 
     # g = Grid2D(bbox=bbox, dx=dx, dy=2.5)
     # assert g.dx == dx

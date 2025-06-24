@@ -19,7 +19,7 @@ from ..dfs._dfs import (
     _valid_timesteps,
 )
 from ..eum import EUMType, ItemInfo
-from .._interpolation import get_idw_interpolant, interp2d
+from .._interpolation import Interpolant
 from ..spatial import (
     GeometryFM3D,
     GeometryFMVerticalProfile,
@@ -351,7 +351,7 @@ class DfsuLayered:
 
         dfs.Close()
 
-        dims = (
+        dims: tuple[str, ...] = (
             ("time", "element")
             if not (single_time_selected and not keepdims)  # TODO extract variable
             else ("element",)
@@ -526,10 +526,7 @@ class Dfsu3D(DfsuLayered):
         xyn = geom.node_coordinates[:, 0:2]  # type: ignore
         tree2d = cKDTree(xyn)
         dist, node_ids = tree2d.query(xye, k=n_nearest)
-        if n_nearest == 1:
-            weights = None
-        else:
-            weights = get_idw_interpolant(dist)
+        weights = Interpolant.from_distances(dist)
 
         # read zn from 3d file and interpolate to element centers
         ds = self.read(items=0, keepdims=True)  # read only zn
@@ -538,7 +535,8 @@ class Dfsu3D(DfsuLayered):
         )
         assert isinstance(ds[0]._zn, np.ndarray)
         zn_surf = ds[0]._zn[:, node_ids_surf]  # surface
-        surf2d = interp2d(zn_surf, node_ids, weights)
+        interpolant = Interpolant(node_ids, weights)
+        surf2d = interpolant.interp2d(zn_surf)
         surf_da = DataArray(
             data=surf2d,
             time=ds.time,

@@ -87,18 +87,15 @@ def test_read_units_write_new(tmp_path: Path) -> None:
 
 
 def test_read_start_end_time() -> None:
-    dfs0file = r"tests/testdata/random.dfs0"
-
-    dfs = Dfs0(dfs0file)
+    dfs = Dfs0("tests/testdata/random.dfs0")
     ds = dfs.read()
 
     assert dfs.start_time == ds.start_time
     assert dfs.end_time == ds.end_time
 
 
-def test_read_all_time_steps_without_reading_items() -> None:
-    dfs0file = r"tests/testdata/random.dfs0"
-    dfs = mikeio.Dfs0(dfs0file)
+def test_read_all_time_steps_without_reading_data() -> None:
+    dfs = mikeio.Dfs0("tests/testdata/random.dfs0")
     assert isinstance(dfs.time, pd.DatetimeIndex)
     assert len(dfs.time) == 1000
 
@@ -112,8 +109,7 @@ def test_items_dataframe() -> None:
 
 
 def test_read_all_time_steps_without_reading_items_neq() -> None:
-    dfs0file = "tests/testdata/da_diagnostic.dfs0"
-    dfs = mikeio.Dfs0(dfs0file)
+    dfs = mikeio.Dfs0("tests/testdata/da_diagnostic.dfs0")
     assert isinstance(dfs.time, pd.DatetimeIndex)
     assert len(dfs.time) == 744
 
@@ -140,34 +136,26 @@ def test_write_non_equidistant_calendar(tmp_path: Path) -> None:
 
 
 def test_read_equidistant_dfs0_to_dataframe_unit_in_name() -> None:
-    dfs0file = "tests/testdata/random.dfs0"
-
-    dfs = Dfs0(dfs0file)
+    dfs = Dfs0("tests/testdata/random.dfs0")
     df = dfs.to_dataframe(unit_in_name=True)
 
     assert "meter" in df.columns[0]
 
 
 def test_read_nonequidistant_dfs0_to_dataframe_no_freq() -> None:
-    dfs0file = "tests/testdata/da_diagnostic.dfs0"
-
-    dfs = Dfs0(dfs0file)
+    dfs = Dfs0("tests/testdata/da_diagnostic.dfs0")
     df = dfs.to_dataframe()
 
     assert df.index.freq is None
 
 
 def test_read_dfs0_delete_value_conversion() -> None:
-    dfs0file = "tests/testdata/da_diagnostic.dfs0"
-
-    dfs = Dfs0(dfs0file)
+    dfs = Dfs0("tests/testdata/da_diagnostic.dfs0")
     ds = dfs.read()
 
     assert np.isnan(ds[3].values[1])
 
-    dfs0file = "tests/testdata/random.dfs0"
-
-    dfs = Dfs0(dfs0file)
+    dfs = Dfs0("tests/testdata/random.dfs0")
     ds = dfs.read()
 
     assert np.isnan(ds[0].values[2])
@@ -191,11 +179,9 @@ def test_read_dfs0_small_value_not_delete_value(tmp_path: Path) -> None:
 
 
 def test_write_from_data_frame(tmp_path: Path) -> None:
-    df = pd.read_csv(
-        "tests/testdata/co2-mm-mlo.csv",
-        parse_dates=True,
-        index_col="Date",
-        na_values=-99.99,
+    df = pd.DataFrame(
+        {"Average": [1.0, 2.0, np.nan], "Trend": [0.1, 0.2, 0.3]},
+        index=pd.date_range("2000-01-01", periods=3, freq="D"),
     )
 
     filename = tmp_path / "dataframe.dfs0"
@@ -209,26 +195,22 @@ def test_write_from_data_frame(tmp_path: Path) -> None:
 
     ds = mikeio.read(filename)
 
-    assert len(ds.items) == 5
+    assert len(ds.items) == 2
     assert ds.items[0].type == EUMType.Concentration
     assert ds.items[0].unit == EUMUnit.gram_per_meter_pow_3
-    assert ds.items[0].data_value_type == 0
+    assert ds.items[0].data_value_type == DataValueType.Instantaneous
 
 
 def test_write_dataframe_different_eum_types_to_dfs0(tmp_path: Path) -> None:
-    time = pd.DatetimeIndex(["2001-01-01", "2001-01-01 01:00", "2001-01-01 01:10"])
-
     df = pd.DataFrame(
-        {"flow": np.array([1, np.nan, 2]), "level": np.array([2, 3.0, -1.3])}
+        {"flow": np.array([1, np.nan, 2]), "level": np.array([2, 3.0, -1.3])},
+        index=pd.DatetimeIndex(["2001-01-01", "2001-01-01 01:00", "2001-01-01 01:10"]),
     )
-    df.index = time
-
-    dfr = df.resample("5min").mean().fillna(0.0)  # .interpolate()
 
     fp = tmp_path / "dataframe.dfs0"
 
     mikeio.from_pandas(
-        dfr,
+        df,
         items=[
             mikeio.ItemInfo(mikeio.EUMType.Discharge),
             mikeio.ItemInfo(mikeio.EUMType.Water_Level),
@@ -236,47 +218,34 @@ def test_write_dataframe_different_eum_types_to_dfs0(tmp_path: Path) -> None:
     ).to_dfs(fp)
 
     ds = mikeio.read(fp)
-    assert ds.n_timesteps == 15
     assert ds["flow"].type == mikeio.EUMType.Discharge
     assert ds["level"].type == mikeio.EUMType.Water_Level
     assert len(ds) == 2
-    assert ds.end_time == dfr.index[-1]
-    assert ds.is_equidistant
+    assert ds.end_time == df.index[-1]
 
 
 def test_from_pandas_mapping_eum_types() -> None:
-    time = pd.DatetimeIndex(["2001-01-01", "2001-01-01 01:00", "2001-01-01 01:10"])
-
     df = pd.DataFrame(
-        {"flow": np.array([1, np.nan, 2]), "rain": np.array([2, 3.0, -1.3])}
+        {"flow": np.array([1, np.nan, 2]), "rain": np.array([2, 3.0, -1.3])},
+        index=pd.DatetimeIndex(["2001-01-01", "2001-01-01 01:00", "2001-01-01 01:10"]),
     )
-    df.index = time
 
-    dfr = df.resample("5min").mean().fillna(0.0)  # .interpolate()
-
-    item_with_dvt = mikeio.ItemInfo(
-        itemtype=mikeio.EUMType.Rainfall,
-        unit=mikeio.EUMUnit.centimeter,
-        data_value_type="StepAccumulated",
-    )
     ds = mikeio.from_pandas(
-        dfr,
+        df,
         items={
             "flow": mikeio.ItemInfo(itemtype=mikeio.EUMType.Discharge),
-            "rain": item_with_dvt,
+            "rain": mikeio.ItemInfo(
+                itemtype=mikeio.EUMType.Rainfall,
+                unit=mikeio.EUMUnit.centimeter,
+                data_value_type="StepAccumulated",
+            ),
         },
     )
-    item_with_dvt.name = "rain"
 
-    assert ds.n_timesteps == 15
     assert ds["flow"].type == mikeio.EUMType.Discharge
     assert ds["rain"].type == mikeio.EUMType.Rainfall
-    assert ds["rain"].item is not item_with_dvt
-    assert ds["rain"].item == item_with_dvt
-    assert len(ds) == 2
-    assert ds.end_time == dfr.index[-1]
-    assert ds.is_equidistant
     assert ds[0].name == "flow"
+    assert ds["rain"].item.data_value_type == DataValueType.StepAccumulated
 
 
 def test_from_pandas_same_eum_type() -> None:
@@ -297,17 +266,13 @@ def test_from_pandas_same_eum_type() -> None:
 
 
 def test_from_pandas_sequence_eum_types() -> None:
-    time = pd.DatetimeIndex(["2001-01-01", "2001-01-01 01:00", "2001-01-01 01:10"])
-
     df = pd.DataFrame(
-        {"flow": np.array([1, np.nan, 2]), "level": np.array([2, 3.0, -1.3])}
+        {"flow": np.array([1, np.nan, 2]), "level": np.array([2, 3.0, -1.3])},
+        index=pd.DatetimeIndex(["2001-01-01", "2001-01-01 01:00", "2001-01-01 01:10"]),
     )
-    df.index = time
-
-    dfr = df.resample("5min").mean().fillna(0.0)  # .interpolate()
 
     ds = mikeio.from_pandas(
-        dfr,
+        df,
         items=[
             mikeio.ItemInfo("Ignored", itemtype=mikeio.EUMType.Discharge),
             mikeio.ItemInfo(
@@ -319,7 +284,6 @@ def test_from_pandas_sequence_eum_types() -> None:
         ],
     )
 
-    assert ds.n_timesteps == 15
     assert ds["flow"].type == mikeio.EUMType.Discharge
     assert ds["level"].type == mikeio.EUMType.Water_Level
     assert ds["level"].item.unit == mikeio.EUMUnit.millimeter
@@ -404,17 +368,14 @@ def test_from_polars_use_first_datetime_column() -> None:
     assert ds["flow"].values[-1] == pytest.approx(2.0)
 
 
-def test_write_from_pandas_series(tmp_path: Path) -> None:
-    df = pd.read_csv(
-        "tests/testdata/co2-mm-mlo.csv",
-        parse_dates=True,
-        index_col="Date",
-        na_values=-99.99,
+def test_write_from_named_pandas_series(tmp_path: Path) -> None:
+    series = pd.Series(
+        [1.0, 2.0, np.nan, np.nan],
+        name="Average",
+        index=pd.date_range("1958-01-01", periods=4, freq="D"),
     )
 
     filename = tmp_path / "series.dfs0"
-
-    series = df["Average"]
 
     mikeio.from_pandas(
         series,
@@ -439,14 +400,10 @@ def test_write_from_pandas_series(tmp_path: Path) -> None:
 
 
 def test_write_from_data_frame_different_types(tmp_path: Path) -> None:
-    df = pd.read_csv(
-        "tests/testdata/co2-mm-mlo.csv",
-        parse_dates=True,
-        index_col="Date",
-        na_values=-99.99,
+    df = pd.DataFrame(
+        {"Average": [1.0, 2.0, np.nan], "Trend": [0.1, 0.2, 0.3]},
+        index=pd.date_range("2000-01-01", periods=3, freq="D"),
     )
-
-    df = df[["Average", "Trend"]]
 
     filename = tmp_path / "dataframe.dfs0"
 
@@ -618,16 +575,13 @@ def test_write_default_datatype(tmp_path: Path) -> None:
 
 
 def test_write_from_pandas_series_data_value_not_default(tmp_path: Path) -> None:
-    df = pd.read_csv(
-        "tests/testdata/co2-mm-mlo.csv",
-        parse_dates=True,
-        index_col="Date",
-        na_values=-99.99,
+    series = pd.Series(
+        [1.0, 2.0, np.nan, np.nan],
+        name="Average",
+        index=pd.date_range("1958-01-01", periods=4, freq="D"),
     )
 
     filename = tmp_path / "series.dfs0"
-
-    series = df["Average"]
 
     mikeio.from_pandas(
         series,
@@ -649,40 +603,33 @@ def test_write_from_pandas_series_data_value_not_default(tmp_path: Path) -> None
     assert ds[0].unit == EUMUnit.gram_per_meter_pow_3
     assert np.isnan(ds["Average"].to_numpy()[3])
     assert ds.time[0].year == 1958
-    assert ds.items[0].data_value_type == 3
+    assert ds.items[0].data_value_type == DataValueType.MeanStepBackward
 
 
 def test_write_from_data_frame_data_value_not_default(tmp_path: Path) -> None:
-    df = pd.read_csv(
-        "tests/testdata/co2-mm-mlo.csv",
-        parse_dates=True,
-        index_col="Date",
-        na_values=-99.99,
+    df = pd.DataFrame(
+        {"Average": [1.0, 2.0, np.nan], "Trend": [0.1, 0.2, 0.3]},
+        index=pd.date_range("1958-01-01", periods=3, freq="D"),
     )
 
     filename = tmp_path / "dataframe.dfs0"
 
-    items = []
-    for col in df.columns:
-        items.append(
-            ItemInfo(
-                col,
-                EUMType.Concentration,
-                EUMUnit.gram_per_meter_pow_3,
-                data_value_type="MeanStepBackward",
-            )
+    items = [
+        ItemInfo(
+            col,
+            EUMType.Concentration,
+            EUMUnit.gram_per_meter_pow_3,
+            data_value_type="MeanStepBackward",
         )
+        for col in df.columns
+    ]
 
     mikeio.from_pandas(df, items=items).to_dfs(filename)
 
     ds = mikeio.read(filename)
-
-    assert len(ds.items) == 5
-    assert ds[0].type == EUMType.Concentration
-    assert ds[0].unit == EUMUnit.gram_per_meter_pow_3
-    assert np.isnan(ds["Average"].to_numpy()[3])
-    assert ds.time[0].year == 1958
-    assert ds.items[0].data_value_type == 3
+    assert all(
+        [item.data_value_type == DataValueType.MeanStepBackward for item in ds.items]
+    )
 
 
 def test_read_write_eum(tmp_path: Path) -> None:

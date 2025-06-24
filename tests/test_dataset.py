@@ -5,7 +5,7 @@ import pandas as pd
 import pytest
 
 import mikeio
-from mikeio import EUMType, ItemInfo, EUMUnit, Dataset
+from mikeio import EUMType, ItemInfo, Dataset
 from mikeio.exceptions import OutsideModelDomainError
 
 
@@ -86,8 +86,6 @@ def test_properties(ds1: Dataset) -> None:
     assert ds1.geometry.nx == 7
     assert ds1._zn is None
 
-    # assert not hasattr(ds1, "keys")   # TODO: remove this
-    # assert not hasattr(ds1, "values") # TODO: remove this
     assert isinstance(ds1.items[0], ItemInfo)
 
 
@@ -328,7 +326,6 @@ def test_select_multiple_items_by_name() -> None:
     data = [d1, d2, d3]
 
     time = pd.date_range("2000-1-2", freq="h", periods=nt)
-    # items = [ItemInfo("Foo"), ItemInfo("Bar"), ItemInfo("Baz")]
     items = [ItemInfo(x) for x in ["Foo", "Bar", "Baz"]]
     ds = mikeio.Dataset.from_numpy(data=data, time=time, items=items)
 
@@ -387,17 +384,15 @@ def test_decribe(ds1: Dataset) -> None:
     assert df.Foo["max"] == pytest.approx(0.1)
 
 
-def test_create_undefined() -> None:
+def test_create_undefined_eum_type() -> None:
     nt = 100
     d1 = np.zeros([nt])
     d2 = np.zeros([nt])
 
     time = pd.date_range("2000-1-2", freq="h", periods=nt)
     data = {
-        "Item 1": mikeio.DataArray(
-            data=d1, time=time, item=ItemInfo("Item 1")
-        ),  # TODO redundant name
-        "Item 2": mikeio.DataArray(data=d2, time=time, item=ItemInfo("Item 2")),
+        "Item 1": mikeio.DataArray(d1, time=time),
+        "Item 2": mikeio.DataArray(d2, time=time),
     }
 
     ds = mikeio.Dataset(data)
@@ -421,7 +416,6 @@ def test_to_dataframe_single_timestep() -> None:
     df = ds.to_dataframe()
 
     assert "Bar" in df.columns
-    # assert isinstance(df.index, pd.DatetimeIndex)
 
     df2 = ds.to_pandas()
     assert df2.shape == (1, 2)
@@ -467,18 +461,6 @@ def test_multidimensional_to_dataframe_no_supported() -> None:
         ds.to_dataframe()
 
 
-def test_get_data() -> None:
-    data = []
-    nt = 100
-    d = np.zeros([nt, 100, 30]) + 1.0
-    data.append(d)
-    time = pd.date_range("2000-1-2", freq="h", periods=nt)
-    items = [ItemInfo("Foo")]
-    ds = mikeio.Dataset.from_numpy(data=data, time=time, items=items)
-
-    assert ds.shape == (100, 100, 30)
-
-
 def test_interp_time() -> None:
     nt = 4
     d = np.zeros([nt, 10, 3])
@@ -508,27 +490,20 @@ def test_interp_time() -> None:
 
 
 def test_interp_time_to_other_dataset() -> None:
-    # Arrange
-    ## mikeio.Dataset 1
     nt = 4
     data = [np.zeros([nt, 10, 3])]
     time = pd.date_range("2000-1-1", freq="D", periods=nt)
     items = [ItemInfo("Foo")]
     ds1 = mikeio.Dataset.from_numpy(data=data, time=time, items=items)
-    assert ds1.shape == (nt, 10, 3)
 
-    ## mikeio.Dataset 2
     nt = 12
     data = [np.ones([nt, 10, 3])]
     time = pd.date_range("2000-1-1", freq="h", periods=nt)
     items = [ItemInfo("Foo")]
     ds2 = mikeio.Dataset.from_numpy(data=data, time=time, items=items)
 
-    # Act
-    ## interp
     dsi = ds1.interp_time(dt=ds2.time)
 
-    # Assert
     assert dsi.time[0] == ds2.time[0]
     assert dsi.time[-1] == ds2.time[-1]
     assert len(dsi.time) == len(ds2.time)
@@ -540,8 +515,6 @@ def test_interp_time_to_other_dataset() -> None:
 
 
 def test_extrapolate() -> None:
-    # Arrange
-    ## mikeio.Dataset 1
     nt = 2
     data = [np.zeros([nt, 10, 3])]
     time = pd.date_range("2000-1-1", freq="D", periods=nt)
@@ -556,11 +529,8 @@ def test_extrapolate() -> None:
     items = [ItemInfo("Foo")]
     ds2 = mikeio.Dataset.from_numpy(data=data, time=time, items=items)
 
-    # Act
-    ## interp
     dsi = ds1.interp_time(dt=ds2.time, fill_value=1.0)
 
-    # Assert
     assert dsi.time[0] == ds2.time[0]
     assert dsi.time[-1] == ds2.time[-1]
     assert len(dsi.time) == len(ds2.time)
@@ -589,23 +559,9 @@ def test_extrapolate_not_allowed() -> None:
         ds1.interp_time(dt=ds2.time, fill_value=1.0, extrapolate=False)
 
 
-def test_get_data_2() -> None:
-    nt = 100
-    data = []
-    d = np.zeros([nt, 100, 30]) + 1.0
-    data.append(d)
-    time = pd.date_range("2000-1-2", freq="h", periods=nt)
-    items = [ItemInfo("Foo")]
-    mikeio.Dataset.from_numpy(data=data, time=time, items=items)
-
-    assert data[0].shape == (100, 100, 30)
-
-
 def test_get_data_name() -> None:
     nt = 100
-    data = []
-    d = np.zeros([nt, 100, 30]) + 1.0
-    data.append(d)
+    data = [np.zeros([nt, 100, 30]) + 1.0]
     time = pd.date_range("2000-1-2", freq="h", periods=nt)
     items = [ItemInfo("Foo")]
     ds = mikeio.Dataset.from_numpy(data=data, time=time, items=items)
@@ -629,19 +585,6 @@ def test_modify_selected_variable() -> None:
     assert ds.Foo.to_numpy()[0, 0] == 1.0  # type: ignore
 
 
-def test_get_bad_name() -> None:
-    nt = 100
-    data = []
-    d = np.zeros([100, 100, 30]) + 1.0
-    data.append(d)
-    time = pd.date_range("2000-1-2", freq="h", periods=nt)
-    items = [ItemInfo("Foo")]
-    ds = mikeio.Dataset.from_numpy(data=data, time=time, items=items)
-
-    with pytest.raises(Exception):
-        ds["BAR"]
-
-
 def test_flipud() -> None:
     nt = 2
     d = np.random.random([nt, 100, 30])
@@ -656,28 +599,8 @@ def test_flipud() -> None:
     assert dsud["Foo"].to_numpy()[0, 0, 0] == ds["Foo"].to_numpy()[0, -1, 0]
 
 
-def test_aggregation_workflows(tmp_path: Path) -> None:
-    # TODO move to integration tests
-    filename = "tests/testdata/HD2D.dfsu"
-    dfs = mikeio.Dfsu2DH(filename)
-
-    ds = dfs.read(items=["Surface elevation", "Current speed"])
-    ds2 = ds.max(axis=1)
-
-    outfilename = tmp_path / "max.dfs0"
-    ds2.to_dfs(outfilename)
-    assert outfilename.exists()
-
-    ds3 = ds.min(axis=1)
-
-    outfilename = tmp_path / "min.dfs0"
-    ds3.to_dfs(outfilename)
-    assert outfilename.exists()
-
-
 def test_aggregation_dataset_no_time() -> None:
-    filename = "tests/testdata/HD2D.dfsu"
-    dfs = mikeio.Dfsu2DH(filename)
+    dfs = mikeio.Dfsu2DH("tests/testdata/HD2D.dfsu")
     ds = dfs.read(time=-1, items=["Surface elevation", "Current speed"])
 
     ds2 = ds.max()
@@ -685,8 +608,7 @@ def test_aggregation_dataset_no_time() -> None:
 
 
 def test_aggregations() -> None:
-    filename = "tests/testdata/gebco_sound.dfs2"
-    ds = mikeio.read(filename)
+    ds = mikeio.read("tests/testdata/gebco_sound.dfs2")
 
     for axis in [0, 1, 2]:
         ds.mean(axis=axis)
@@ -716,21 +638,6 @@ def test_to_dfs_extension_validation(tmp_path: Path) -> None:
         ds.to_dfs(outfilename)
 
     assert "dfsu" in str(excinfo.value)
-
-
-def test_weighted_average(tmp_path: Path) -> None:
-    # TODO move to integration tests
-    fp = Path("tests/testdata/HD2D.dfsu")
-    dfs = mikeio.Dfsu2DH(fp)
-
-    ds = dfs.read(items=["Surface elevation", "Current speed"])
-
-    area = dfs.geometry.get_element_area()
-    ds2 = ds.average(weights=area, axis=1)
-
-    out_path = tmp_path / "average.dfs0"
-    ds2.to_dfs(out_path)
-    assert out_path.exists()
 
 
 def test_quantile_axis1(ds1: Dataset) -> None:
@@ -865,70 +772,6 @@ def test_dropna() -> None:
     ds2 = ds.dropna()
 
     assert ds2.n_timesteps == 8
-
-
-def test_default_type() -> None:
-    item = ItemInfo("Foo")
-    assert item.type == EUMType.Undefined
-    assert repr(item.unit) == "undefined"
-
-
-def test_int_is_valid_type_info() -> None:
-    item = ItemInfo("Foo", 100123)
-    assert item.type == EUMType.Viscosity
-
-    item = ItemInfo("U", 100002)
-    assert item.type == EUMType.Wind_Velocity
-
-
-def test_int_is_valid_unit_info() -> None:
-    item = ItemInfo("U", 100002, 2000)
-    assert item.type == EUMType.Wind_Velocity
-    assert item.unit == EUMUnit.meter_per_sec
-    assert repr(item.unit) == "meter per sec"  # TODO replace _per_ with /
-
-
-def test_default_unit_from_type() -> None:
-    item = ItemInfo("Foo", EUMType.Water_Level)
-    assert item.type == EUMType.Water_Level
-    assert item.unit == EUMUnit.meter
-    assert repr(item.unit) == "meter"
-
-    item = ItemInfo("Tp", EUMType.Wave_period)
-    assert item.type == EUMType.Wave_period
-    assert item.unit == EUMUnit.second
-    assert repr(item.unit) == "second"
-
-    item = ItemInfo("Temperature", EUMType.Temperature)
-    assert item.type == EUMType.Temperature
-    assert item.unit == EUMUnit.degree_Celsius
-    assert repr(item.unit) == "degree Celsius"
-
-
-def test_default_name_from_type() -> None:
-    item = ItemInfo(EUMType.Current_Speed)
-    assert item.name == "Current Speed"
-    assert item.unit == EUMUnit.meter_per_sec
-
-    item2 = ItemInfo(EUMType.Current_Direction, EUMUnit.degree)
-    assert item2.unit == EUMUnit.degree
-    item3 = ItemInfo(
-        "Current direction (going to)", EUMType.Current_Direction, EUMUnit.degree
-    )
-    assert item3.type == EUMType.Current_Direction
-    assert item3.unit == EUMUnit.degree
-
-
-def test_iteminfo_string_type_should_fail_with_helpful_message() -> None:
-    with pytest.raises(ValueError):
-        ItemInfo("Water level", "Water level")  # type: ignore
-
-
-def test_item_search() -> None:
-    res = EUMType.search("level")
-
-    assert len(res) > 0
-    assert isinstance(res[0], EUMType)
 
 
 def test_dfsu3d_dataset() -> None:

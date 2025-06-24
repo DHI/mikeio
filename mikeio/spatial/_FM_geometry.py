@@ -19,7 +19,7 @@ from scipy.spatial import cKDTree
 
 from ..eum import EUMType, EUMUnit
 from ..exceptions import OutsideModelDomainError
-from .._interpolation import get_idw_interpolant, interp2d
+from .._interpolation import Interpolant
 from ._FM_plot import (
     _get_node_centered_data,
     _plot_map,
@@ -332,7 +332,7 @@ class _GeometryFM(_Geometry):
 
     def _check_elements(
         self,
-        element_table: np.ndarray | list[Sequence[int]] | list[np.ndarray],
+        element_table: np.ndarray | list[Sequence[int] | np.ndarray],
         element_ids: np.ndarray | None = None,
         validate: bool = True,
     ) -> tuple[Any, Any]:
@@ -438,6 +438,14 @@ class _GeometryFM(_Geometry):
 
         return True
 
+    def __repr__(self) -> str:
+        return (
+            f"Flexible Mesh Geometry: {self._type.name}\n"
+            f"number of nodes: {self.n_nodes}\n"
+            f"number of elements: {self.n_elements}\n"
+            f"projection: {self.projection_string}"
+        )
+
 
 class GeometryFM2D(_GeometryFM):
     """Flexible 2d mesh geometry."""
@@ -471,14 +479,6 @@ class GeometryFM2D(_GeometryFM):
     def __str__(self) -> str:
         return f"{self._type.name} ({self.n_elements} elements, {self.n_nodes} nodes)"
 
-    def __repr__(self) -> str:
-        return (
-            f"Flexible Mesh Geometry: {self._type.name}\n"
-            f"number of nodes: {self.n_nodes}\n"
-            f"number of elements: {self.n_elements}\n"
-            f"projection: {self.projection_string}"
-        )
-
     @staticmethod
     def _point_in_polygon(xn: np.ndarray, yn: np.ndarray, xp: float, yp: float) -> bool:
         """Check for each side in the polygon that the point is on the correct side."""
@@ -499,10 +499,6 @@ class GeometryFM2D(_GeometryFM):
     def _area_is_polygon(area: Sequence[tuple[float, float]] | Sequence[float]) -> bool:
         polygon = np.array(area)
         return polygon.ndim == 2 and polygon.shape[1] == 2
-
-    @property
-    def ndim(self) -> int:
-        return 2
 
     @property
     def geometry2d(self) -> GeometryFM2D:
@@ -604,7 +600,7 @@ class GeometryFM2D(_GeometryFM):
         extrapolate: bool = False,
         p: int = 2,
         radius: float | None = None,
-    ) -> tuple[Any, Any]:
+    ) -> Interpolant:
         """IDW interpolant for list of coordinates.
 
         Parameters
@@ -623,64 +619,27 @@ class GeometryFM2D(_GeometryFM):
 
         Returns
         -------
-        (np.array, np.array)
+        Interpolant
             element ids and weights
 
         """
         xy = np.atleast_2d(xy)
         ids, dists = self._find_n_nearest_2d_elements(xy, n=n_nearest)
-        weights = None
+        weights = np.ones(dists.shape)
 
-        if n_nearest == 1:
-            weights = np.ones(dists.shape)
-            if not extrapolate:
-                weights[~self.contains(xy)] = np.nan  # type: ignore
+        if n_nearest == 1 and not extrapolate:
+            weights[~self.contains(xy)] = np.nan
         elif n_nearest > 1:
-            weights = get_idw_interpolant(dists, p=p)
+            weights = Interpolant.from_distances(dists, p=p)
             if not extrapolate:
-                weights[~self.contains(xy), :] = np.nan  # type: ignore
+                weights[~self.contains(xy), :] = np.nan
         else:
             ValueError("n_nearest must be at least 1")
 
         if radius is not None:
-            weights[dists > radius] = np.nan  # type: ignore
+            weights[dists > radius] = np.nan
 
-        return ids, weights
-
-    def interp2d(
-        self,
-        data: np.ndarray,
-        elem_ids: np.ndarray,
-        weights: np.ndarray | None = None,
-        shape: tuple[int, ...] | None = None,
-    ) -> np.ndarray | list[np.ndarray]:
-        """Interpolate spatially in data (2d only).
-
-        Parameters
-        ----------
-        data : ndarray or list(ndarray)
-            dfsu data
-        elem_ids : ndarray(int)
-            n sized array of 1 or more element ids used for interpolation
-        weights : ndarray(float), optional
-            weights with same size as elem_ids used for interpolation
-        shape: tuple, optional
-            reshape output
-
-        Returns
-        -------
-        ndarray or list(ndarray)
-            spatially interped data
-
-        Examples
-        --------
-        >>> ds = dfsu.read()
-        >>> g = dfs.get_overset_grid(shape=(50,40))
-        >>> elem_ids, weights = dfs.get_2d_interpolant(g.xy)
-        >>> dsi = dfs.interp2d(ds, elem_ids, weights)
-
-        """
-        return interp2d(data, elem_ids, weights, shape)  # type: ignore
+        return Interpolant(ids, weights)
 
     def _find_n_nearest_2d_elements(
         self, x: float | np.ndarray, y: float | np.ndarray | None = None, n: int = 1
@@ -1179,17 +1138,15 @@ class GeometryFM2D(_GeometryFM):
             polygons with mesh elements
 
         """
-        from shapely.geometry import MultiPolygon, Polygon  # type: ignore
+        from shapely.geometry import (
+            MultiPolygon,
+            Polygon,
+        )  # make sure this import is present
 
-        polygons = []
-        for j in range(self.n_elements):
-            nodes = self.element_table[j]
-            pcoords = np.empty([len(nodes), 2])
-            for i in range(len(nodes)):
-                nidx = nodes[i]
-                pcoords[i, :] = self.node_coordinates[nidx, 0:2]
-            polygon = Polygon(pcoords)
-            polygons.append(polygon)
+        polygons = [
+            Polygon(self.node_coordinates[self.element_table[j], 0:2])
+            for j in range(self.n_elements)
+        ]
         mp = MultiPolygon(polygons)
 
         return mp

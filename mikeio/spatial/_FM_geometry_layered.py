@@ -294,10 +294,6 @@ class _GeometryFMLayered(_GeometryFM):
         return False
 
     @property
-    def ndim(self) -> int:
-        return 3
-
-    @property
     def is_layered(self) -> bool:
         return True
 

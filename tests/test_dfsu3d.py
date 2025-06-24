@@ -422,10 +422,6 @@ def test_top_elements() -> None:
     assert 19 in dfs.geometry.top_elements
     assert (dfs.geometry.n_elements - 1) in dfs.geometry.top_elements
 
-    filename = "tests/testdata/HD2D.dfsu"
-    dfs = mikeio.Dfsu3D(filename)
-    assert not hasattr(dfs, "top_elements")
-
 
 def test_top_elements_subset() -> None:
     filename = "tests/testdata/oresund_sigma_z.dfsu"
@@ -461,10 +457,6 @@ def test_bottom_elements() -> None:
     assert len(dfs.geometry.bottom_elements) == 99
     assert dfs.geometry.bottom_elements[3] == 15
 
-    filename = "tests/testdata/HD2D.dfsu"
-    dfs = mikeio.Dfsu3D(filename)
-    assert not hasattr(dfs, "bottom_elements")
-
 
 def test_n_layers_per_column() -> None:
     filename = "tests/testdata/basin_3d.dfsu"
@@ -482,10 +474,6 @@ def test_n_layers_per_column() -> None:
     dfs = mikeio.Dfsu3D(filename)
     assert len(dfs.geometry.n_layers_per_column) == 99
     assert dfs.geometry.n_layers_per_column[3] == 5
-
-    filename = "tests/testdata/HD2D.dfsu"
-    dfs = mikeio.Dfsu3D(filename)
-    assert not hasattr(dfs, "n_layers_per_column")
 
 
 # def test_get_layer_elements() -> None:

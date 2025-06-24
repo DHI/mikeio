@@ -185,18 +185,16 @@ def test_read_bad_item(dfs2_random: Dfs2) -> None:
 
 
 def test_read_temporal_subset_slice() -> None:
-    filename = r"tests/testdata/eq.dfs2"
-    dfs = mikeio.Dfs2(filename)
+    dfs = mikeio.Dfs2("tests/testdata/eq.dfs2")
     ds = dfs.read(time=slice("2000-01-01 00:00", "2000-01-01 12:00"))
 
     assert len(ds.time) == 13
 
 
 def test_read_area_subset_bad_bbox() -> None:
-    filename = "tests/testdata/europe_wind_long_lat.dfs2"
-    bbox = (10, 40, 20)
+    bbox = (10, 40, 20)  # bbox should be 4 elements long
     with pytest.raises(ValueError):
-        mikeio.read(filename, area=bbox)
+        mikeio.read("tests/testdata/europe_wind_long_lat.dfs2", area=bbox)
 
 
 def test_read_area_subset_geo() -> None:
@@ -216,8 +214,7 @@ def test_read_area_subset_geo() -> None:
 
 
 def test_subset_bbox() -> None:
-    filename = "tests/testdata/europe_wind_long_lat.dfs2"
-    ds = mikeio.read(filename)
+    ds = mikeio.read("tests/testdata/europe_wind_long_lat.dfs2")
     dssel = ds.sel(area=ds.geometry.bbox)  # this is the entire area
     assert ds.geometry == dssel.geometry
 
