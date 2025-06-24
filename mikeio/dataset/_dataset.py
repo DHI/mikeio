@@ -365,7 +365,7 @@ class Dataset:
 
             # this seems overly complicated...
             axes = tuple(range(1, x.ndim))
-            idx = list(np.where(~np.isnan(x).all(axis=axes))[0])
+            idx: Any = list(np.where(~np.isnan(x).all(axis=axes))[0])
             if i == 0:
                 all_index = idx
             else:
@@ -811,7 +811,6 @@ class Dataset:
         x: float | None = None,
         y: float | None = None,
         z: float | None = None,
-        n_nearest: int = 3,
         **kwargs: Any,
     ) -> Dataset:
         """Interpolate data in time and space.
@@ -878,7 +877,6 @@ class Dataset:
             ):  # TODO remove this when all geometries implements the same method
                 interpolant = self.geometry.get_2d_interpolant(
                     xy,  # type: ignore
-                    n_nearest=n_nearest,
                     **kwargs,  # type: ignore
                 )
                 das = [da.interp(x=x, y=y, interpolant=interpolant) for da in self]

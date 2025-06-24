@@ -65,14 +65,14 @@ dev = [
     "rasterio",
     "polars",
     "ruff==0.6.2",
-    "mypy==1.11.1",
+    "mypy==1.16.1",
 ]
 
 test = [
     "pytest",
     "pytest-cov",
     "xarray",
-    "mypy==1.11.1",
+    "mypy==1.16.1",
     "shapely",
     "pyproj",
     "polars",

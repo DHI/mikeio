@@ -232,6 +232,7 @@ class Dfsu2DH:
             )
         return str.join("\n", out)
 
+    # TODO change to GeometryFM2D
     @property
     def geometry(self) -> Any:
         return self._geometry
@@ -315,7 +316,7 @@ class Dfsu2DH:
         *,
         items: str | int | Sequence[str | int] | None = None,
         time: int | str | slice | Sequence[int] | None = None,
-        elements: Sequence[int] | np.ndarray | None = None,
+        elements: int | Sequence[int] | np.ndarray | None = None,
         area: tuple[float, float, float, float]
         | Sequence[tuple[float, float]]
         | None = None,

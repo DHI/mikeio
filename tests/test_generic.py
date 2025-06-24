@@ -12,6 +12,8 @@ from mikeio.generic import (
     fill_corrupt,
     add,
     change_datatype,
+    transform,
+    DerivedItem,
 )
 import pytest
 from mikecore.DfsFileFactory import DfsFileFactory
@@ -672,3 +674,70 @@ def test_change_datatype_dfs0(tmp_path: Path) -> None:
     org = mikeio.read(infilename).to_numpy()
     new = mikeio.read(outfilename).to_numpy()
     assert np.allclose(org, new, rtol=1e-08, atol=1e-10, equal_nan=True)
+
+
+def test_transform_variables(tmp_path: Path) -> None:
+    infilename = "tests/testdata/oresundHD_run1.dfsu"
+    outfilename = tmp_path / "need_for_speed.dfsu"
+
+    items = [
+        DerivedItem(
+            name="Current Speed",
+            type=mikeio.EUMType.Current_Speed,
+            func=lambda x: np.sqrt(x["U velocity"] ** 2 + x["V velocity"] ** 2),
+        )
+    ]
+
+    transform(infilename, outfilename, vars=items, keep_existing_items=False)
+    dfs = mikeio.Dfsu2DH(outfilename)
+    assert dfs.items[0].type == mikeio.EUMType.Current_Speed
+    assert len(dfs.items) == 1
+
+    dfs1 = mikeio.Dfsu2DH(infilename)
+    sel_items = [
+        DerivedItem(name=item.name, type=item.type, unit=item.unit)
+        for item in dfs1.items
+        if item.name != "Surface elevation"
+    ]
+    sel_items.extend(items)
+
+    outfilename2 = tmp_path / "existing_and_speed.dfsu"
+
+    transform(infilename, outfilename2, vars=sel_items, keep_existing_items=False)
+    dfs2 = mikeio.Dfsu2DH(outfilename2)
+    assert dfs2.items[0].name == "Total water depth"  # existing item
+    assert dfs2.items[1].name == "U velocity"  # existing item
+    assert dfs2.items[2].name == "V velocity"  # existing item
+    assert dfs2.items[3].name == "Current Speed"  # derived item
+
+
+def test_transform_can_include_existing_items(tmp_path: Path) -> None:
+    infilename = "tests/testdata/oresundHD_run1.dfsu"
+    outfilename = tmp_path / "need_for_speed.dfsu"
+
+    items = [
+        DerivedItem(
+            name="Current Speed",
+            type=mikeio.EUMType.Current_Speed,
+            func=lambda x: np.sqrt(x["U velocity"] ** 2 + x["V velocity"] ** 2),
+        )
+    ]
+
+    transform(infilename, outfilename, vars=items, keep_existing_items=True)
+    dfs = mikeio.Dfsu2DH(outfilename)
+    assert dfs.items[-1].type == mikeio.EUMType.Current_Speed
+    assert len(dfs.items) == 5
+    ds = dfs.read(time=-1, elements=0)
+    assert ds["U velocity"].values == pytest.approx(0.0292403083)
+    assert ds["V velocity"].values == pytest.approx(0.127983957)
+    assert ds["Current Speed"].values == pytest.approx(0.13128172)
+
+
+def test_transform_func_with_missing_item_reports_existing_items() -> None:
+    infilename = "tests/testdata/oresundHD_run1.dfsu"
+    outfilename = "notgonnahappen.dfsu"
+
+    items = [DerivedItem(name="Not relevant", func=lambda x: x["not in the file"])]
+    with pytest.raises(KeyError) as excinfo:
+        transform(infilename, outfilename, items)
+    assert "U velocity" in str(excinfo.value)
