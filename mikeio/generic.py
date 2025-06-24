@@ -10,7 +10,7 @@ from copy import deepcopy
 from datetime import datetime, timedelta
 from shutil import copyfile
 from collections.abc import Iterable, Sequence
-from typing import Callable, Union
+from typing import Callable, Mapping, Union
 import warnings
 
 
@@ -30,9 +30,10 @@ from mikecore.DfsFileFactory import DfsFileFactory
 from mikecore.eum import eumQuantity
 from tqdm import tqdm, trange
 
+
 from . import __dfs_version__
 from .dfs._dfs import _get_item_info, _valid_item_numbers
-from .eum import ItemInfo
+from .eum import ItemInfo, EUMType, EUMUnit
 import mikeio
 
 
@@ -94,7 +95,7 @@ def _clone(
     outfilename: str | pathlib.Path,
     start_time: datetime | None = None,
     timestep: float | None = None,
-    items: Sequence[int | DfsDynamicItemInfo] | None = None,
+    items: Sequence[int | DfsDynamicItemInfo | ItemInfo] | None = None,
     datatype: int | None = None,
 ) -> DfsFile:
     source = DfsFileFactory.DfsGenericOpen(str(infilename))
@@ -1011,3 +1012,127 @@ def change_datatype(
 
     dfs_out.Close()
     dfs_in.Close()
+
+
+class DerivedItem:
+    """Item derived from other items.
+
+    Parameters
+    ----------
+    item: ItemInfo
+        ItemInfo object for the derived item
+    func: Callable[[Mapping[str, np.ndarray]], np.ndarray] | None
+        Function to compute the derived item from a mapping of item names to data arrays.
+        If None, the item data will be returned directly from the mapping using the item's name.
+        Default is None.
+
+    Example
+    -------
+    ```{python}
+    import numpy as np
+    import mikeio
+    from mikeio.generic import DerivedItem
+
+    item = DerivedItem(
+            item=ItemInfo("Current Speed", mikeio.EUMType.Current_Speed),
+            func=lambda x: np.sqrt(x["U velocity"] ** 2 + x["V velocity"] ** 2),
+        )
+
+    """
+
+    def __init__(
+        self,
+        name: str,
+        type: EUMType | None = None,
+        unit: EUMUnit | None = None,
+        func: Callable[[Mapping[str, np.ndarray]], np.ndarray] | None = None,
+    ) -> None:
+        """Create a DerivedItem.
+
+        Parameters
+        ----------
+        name: str
+            Name of the derived item.
+        type: EUMType
+            EUMType of the derived item.
+        unit: EUMUnit | None, optional
+            EUMUnit of the derived item, pass None to use the default unit for the type.
+            Default is None.
+        func: Callable[[Mapping[str, np.ndarray]], np.ndarray] | None, optional
+            Function to compute the derived item from a mapping of item names to data arrays.
+
+        """
+        self.item = ItemInfo(name, type, unit)
+        self.func = func
+
+
+def transform(
+    infilename: str | pathlib.Path,
+    outfilename: str | pathlib.Path,
+    vars: Sequence[DerivedItem],
+    keep_existing_items: bool = True,
+) -> None:
+    """Transform a dfs file by applying functions to items.
+
+    Parameters
+    ----------
+    infilename: str | pathlib.Path
+        full path to the input file
+    outfilename: str | pathlib.Path
+        full path to the output file
+    vars: Sequence[DerivedItem]
+        List of derived items to compute.
+    keep_existing_items: bool, optional
+        If True, existing items in the input file will be kept in the output file.
+        If False, only the derived items will be written to the output file.
+        Default is True.
+
+    """
+    dfs_i = DfsFileFactory.DfsGenericOpen(str(infilename))
+
+    item_numbers = _valid_item_numbers(dfs_i.ItemInfo)
+    n_items = len(item_numbers)
+
+    items = [v.item for v in vars]
+    funcs = {v.item.name: v.func for v in vars}
+
+    if keep_existing_items:
+        existing_items = [
+            ItemInfo.from_mikecore_dynamic_item_info(
+                dfs_i.ItemInfo[i],
+            )
+            for i in item_numbers
+        ]
+        items = existing_items + items
+
+    dfs = _clone(
+        str(infilename),
+        str(outfilename),
+        items=items,
+    )
+
+    n_time_steps = dfs_i.FileInfo.TimeAxis.NumberOfTimeSteps
+
+    for timestep in range(n_time_steps):
+        data = {}
+        for item in range(n_items):
+            name = dfs_i.ItemInfo[item].Name
+            data[name] = dfs_i.ReadItemTimeStep(item_numbers[item] + 1, timestep).Data
+
+        for item in items:
+            func = funcs.get(item.name, None)
+            if func is None:
+                darray = data[item.name]
+            else:
+                try:
+                    darray = func(data)
+                except KeyError as e:
+                    missing_key = e.args[0]
+                    keys = ", ".join(data.keys())
+                    raise KeyError(
+                        f"Item '{missing_key}' is not available in the file. Available items: {keys}"
+                    )
+            dfs.WriteItemTimeStepNext(0.0, darray)
+
+    dfs_i.Close()
+    dfs.Close()

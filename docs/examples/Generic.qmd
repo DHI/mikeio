@@ -169,6 +169,29 @@ ds3 = mikeio.read("gebco_sound_spatial.dfs2")
 ds3.Elevation[0].plot();
 ```
 
+## Derived items
+
+Creating derived items from existing items, e.g. current speed from u and v velocities.
+```{python}
+from mikeio.generic import DerivedItem
+
+fn = "../data/oresundHD_run1.dfsu"
+fn_derived = "oresundHD_speed.dfsu"
+mikeio.generic.transform(
+    fn,
+    fn_derived,
+    [
+        DerivedItem(
+            name="Current speed",
+            type=mikeio.EUMType.Current_Speed,
+            unit=mikeio.EUMUnit.knot,
+            func=lambda x: 1.94 * np.sqrt(x["U velocity"] ** 2 + x["V velocity"] ** 2),
+        )
+    ],
+)
+```
+
+
 ## Time average
 
 ```{python}
@@ -211,6 +234,7 @@ da_q75.plot(title="75th percentile, wind speed", label="m/s")
 
 ```{python}
 import os
+
 os.remove("concat.dfs1")
 os.remove("oresundHD_difference.dfsu")
 os.remove("extracted.dfs1")
@@ -219,5 +243,6 @@ os.remove("gebco_sound_local_datum.dfs2")
 os.remove("gebco_sound_spatial.dfs2")
 os.remove("Avg_NorthSea_HD_and_windspeed.dfsu")
 os.remove(fn_q)
+os.remove("oresundHD_speed.dfsu")
 ```
 
