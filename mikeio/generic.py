@@ -1129,7 +1129,7 @@ def transform(
                     missing_key = e.args[0]
                     keys = ", ".join(data.keys())
                     dfs.Close()
-                    outfilename.unlink()
+                    pathlib.Path(outfilename).unlink()
                     raise KeyError(
                         f"Item '{missing_key}' is not available in the file. Available items: {keys}"
                     )
