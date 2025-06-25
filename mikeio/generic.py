@@ -1,41 +1,40 @@
 """Generic functions for working with all types of dfs files."""
 
 from __future__ import annotations
-from dataclasses import dataclass
+
 import math
 import operator
 import os
 import pathlib
+import warnings
+from collections.abc import Iterable, Sequence
 from copy import deepcopy
+from dataclasses import dataclass
 from datetime import datetime, timedelta
 from shutil import copyfile
-from collections.abc import Iterable, Sequence
 from typing import Callable, Mapping, Union
-import warnings
-
 
 import numpy as np
 import pandas as pd
 from mikecore.DfsBuilder import DfsBuilder
 from mikecore.DfsFile import (
     DfsDynamicItemInfo,
-    DfsFile,
-    DfsEqTimeAxis,
-    DfsNonEqTimeAxis,
     DfsEqCalendarAxis,
+    DfsEqTimeAxis,
+    DfsFile,
     DfsNonEqCalendarAxis,
+    DfsNonEqTimeAxis,
     TimeAxisType,
 )
 from mikecore.DfsFileFactory import DfsFileFactory
 from mikecore.eum import eumQuantity
 from tqdm import tqdm, trange
 
+import mikeio
 
 from . import __dfs_version__
 from .dfs._dfs import _get_item_info, _valid_item_numbers
-from .eum import ItemInfo, EUMType, EUMUnit
-import mikeio
-
+from .eum import EUMType, EUMUnit, ItemInfo
 
 TimeAxis = Union[
     DfsEqTimeAxis, DfsNonEqTimeAxis, DfsEqCalendarAxis, DfsNonEqCalendarAxis
@@ -1129,6 +1128,8 @@ def transform(
                 except KeyError as e:
                     missing_key = e.args[0]
                     keys = ", ".join(data.keys())
+                    dfs.Close()
+                    outfilename.unlink()
                     raise KeyError(
                         f"Item '{missing_key}' is not available in the file. Available items: {keys}"
                     )
