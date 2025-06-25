@@ -1,22 +1,24 @@
 from pathlib import Path
+
 import numpy as np
 import pandas as pd
+import pytest
+from mikecore.DfsFileFactory import DfsFileFactory
+
 import mikeio
 from mikeio import generic
 from mikeio.generic import (
-    scale,
-    diff,
-    sum,
-    extract,
-    avg_time,
-    fill_corrupt,
-    add,
-    change_datatype,
-    transform,
     DerivedItem,
+    add,
+    avg_time,
+    change_datatype,
+    diff,
+    extract,
+    fill_corrupt,
+    scale,
+    sum,
+    transform,
 )
-import pytest
-from mikecore.DfsFileFactory import DfsFileFactory
 
 
 def test_add_constant(tmp_path: Path) -> None:
@@ -733,11 +735,14 @@ def test_transform_can_include_existing_items(tmp_path: Path) -> None:
     assert ds["Current Speed"].values == pytest.approx(0.13128172)
 
 
-def test_transform_func_with_missing_item_reports_existing_items() -> None:
+def test_transform_func_with_missing_item_reports_existing_items(
+    tmp_path: Path,
+) -> None:
     infilename = "tests/testdata/oresundHD_run1.dfsu"
-    outfilename = "notgonnahappen.dfsu"
+    outfilename = tmp_path / "notgonnahappen.dfsu"
 
     items = [DerivedItem(name="Not relevant", func=lambda x: x["not in the file"])]
     with pytest.raises(KeyError) as excinfo:
         transform(infilename, outfilename, items)
     assert "U velocity" in str(excinfo.value)
+    assert not outfilename.exists()
