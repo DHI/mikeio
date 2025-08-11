@@ -10,18 +10,14 @@ jobs:
 
     steps:
     - uses: actions/checkout@v4
-    - name: Set up Python
-      uses: actions/setup-python@v5
+    
+    - name: Set up uv
+      uses: astral-sh/setup-uv@v6
       with:
-        python-version: 3.12
-        
+        enable-cache: true
+
     - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        
-    - name: Install mikeio
-      run: |
-        pip install .[dev]
+      run: uv sync --dev
     
     - name: Build documentation
       run: |

@@ -15,13 +15,12 @@ jobs:
 
     steps:
     - uses: actions/checkout@v4
-    - name: Set up Python
-      uses: actions/setup-python@v5
+    - name: Set up uv
+      uses: astral-sh/setup-uv@v6
       with:
-        python-version: "3.13"    
-    - name: Install mikeio
-      run: |
-        pip install .[test,notebooks]    
+        enable-cache: true
+    - name: Install dependencies
+      run: uv sync --group test --no-dev
     - name: Test notebooks
       run: |
-        pytest tests/notebooks/
+        uv run pytest tests/notebooks/
