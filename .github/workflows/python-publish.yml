@@ -46,7 +46,7 @@ jobs:
     - name: Install dependencies
       run: uv sync --group test --no-dev
     - name: Build
-      run: make build
+      run: uv build
     #- name: Publish package distributions to PyPI
     #  uses: pypa/gh-action-pypi-publish@release/v1
 
