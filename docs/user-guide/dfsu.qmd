@@ -8,7 +8,8 @@ The .mesh file is an ASCII file for storing the flexible mesh geometry.
 The .dfsu file is a binary dfs file with data on this mesh. The mesh geometry is 
 available in a .dfsu file as static items.  
 
-For a detailed description of the .mesh and .dfsu file specification see the [flexible file format documentation](https://manuals.mikepoweredbydhi.help/2024/General/FM_FileSpecification.pdf).
+
+For a detailed description of the .mesh and .dfsu file specification see the [flexible file format documentation](../FM_FileSpecification.pdf).
 
 
 ## The flexible mesh
