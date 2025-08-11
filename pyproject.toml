@@ -53,7 +53,7 @@ classifiers = [
     "Topic :: Scientific/Engineering",
 ]
 
-[project.optional-dependencies]
+[dependency-groups]
 dev = [
     "pytest",
     "quarto-cli",
