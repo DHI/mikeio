@@ -19,7 +19,7 @@ jobs:
       - uses: astral-sh/ruff-action@v2
         with:
           version: 0.6.2
-          src: mikeio
+          src: src
 
       - name: Set up uv
         uses: astral-sh/setup-uv@v6
