@@ -60,7 +60,6 @@ dev = [
     "quartodoc==0.9.1",
     "shapely",
     "pyproj",
-    "xarray",
     "netcdf4",
     "rasterio",
     "polars",
@@ -68,21 +67,12 @@ dev = [
     "mypy==1.16.1",
 ]
 
-test = [
-    "pytest",
-    "pytest-cov",
-    "xarray",
-    "mypy==1.16.1",
-    "shapely",
-    "pyproj",
-    "polars",
-]
+test = ["pytest", "pytest-cov", "mypy==1.16.1", "shapely", "pyproj", "polars"]
 
 notebooks = [
     "nbformat",
     "nbconvert",
     "jupyter",
-    "xarray",
     "netcdf4",
     "rasterio",
     "geopandas",
