@@ -1,22 +1,7 @@
 [build-system]
-requires = ["hatchling"]
-build-backend = "hatchling.build"
+requires = ["uv_build>=0.8.9,<0.9.0"]
+build-backend = "uv_build"
 
-[tool.hatch.build]
-license-files = { paths = ["License.txt"] }
-
-[tool.hatch.build.targets.sdist]
-exclude = [
-    "notebooks",
-    "tests",
-    "images",
-    ".github",
-    "docs",
-    ".devcontainer",
-    "*.md",
-    "*.txt",
-    ".gitattributes",
-]
 
 [project]
 name = "mikeio"
