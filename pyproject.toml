@@ -58,6 +58,7 @@ dev = [
     "pytest",
     "quarto-cli",
     "quartodoc==0.9.1",
+    "griffe==1.1.0",    # compatible with quartodoc 0.9.1
     "shapely",
     "pyproj",
     "xarray",
