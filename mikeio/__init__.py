@@ -70,10 +70,10 @@ def read(
         Dfs3/Dfsu-layered: read only data from specific layers,
         by default None (=all layers)
     error_bad_data: bool, optional
-            raise error if data is corrupt, by default True,
-    fill_bad_data_value:
-            fill value for to impute corrupt data, used in conjunction with error_bad_data=False
-            default np.nan
+        Dfsu: raise error if data is corrupt, by default True,
+    fill_bad_data_value: float, optional
+        Dfsu: fill value for to impute corrupt data, used in conjunction with error_bad_data=False
+        by default np.nan
     **kwargs: Any
         Additional keyword arguments
 
