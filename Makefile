@@ -5,31 +5,31 @@ LIB = mikeio
 check: lint typecheck test
 
 build: typecheck test
-	python -m build
+	uv build
 
 lint:
-	ruff check .
+	uv run ruff check .
 
 format:
-	ruff format $(LIB)/
+	uv run ruff format $(LIB)/
 
 test:
-	pytest
+	uv run pytest
 
 typecheck:
-	mypy .
+	uv run mypy .
 
 coverage: 
-	pytest --cov-report html --cov=$(LIB) tests/
+	uv run pytest --cov-report html --cov=$(LIB) tests/
 
 perftest:
-	pytest tests/performance/ --durations=0
+	uv run pytest tests/performance/ --durations=0
 
 docs: FORCE
 	set -e; \
 	cd docs; \
-	quartodoc build; \
-	quarto render; \
+	uv run quartodoc build; \
+	uv run quarto render; \
 	if [ ! -f _site/index.html ]; then \
         echo "Error: index.html not found. Quarto render failed."; \
         exit 1; \

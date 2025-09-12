@@ -19,21 +19,15 @@ jobs:
 
     steps:
     - uses: actions/checkout@v4
-    - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v5
+    - name: Set up uv
+      uses: astral-sh/setup-uv@v6
       with:
-        python-version: ${{ matrix.python-version }}
+        enable-cache: true
     - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install pytest
-        
-    - name: Install mikeio
-      run: |
-        pip install .[test]
+      run: uv sync --group test --no-dev
     - name: Test with pytest
       run: |
-        pytest --ignore tests/performance/ --ignore tests/notebooks/ --disable-warnings
+        uv run pytest --ignore tests/performance/ --ignore tests/notebooks/ --disable-warnings
 
   deploy:
     needs: test
@@ -45,18 +39,14 @@ jobs:
 
     steps:
     - uses: actions/checkout@v4
-    - name: Set up Python
-      uses: actions/setup-python@v5
+    - name: Set up uv
+      uses: astral-sh/setup-uv@v6
       with:
-        python-version: '3.13'
+        enable-cache: true
     - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install build wheel twine
-    - name: Install mikeio
-      run: pip install .[test]
+      run: uv sync --group test --no-dev
     - name: Build
-      run: python -m build
+      run: uv build
     - name: Publish package distributions to PyPI
       uses: pypa/gh-action-pypi-publish@release/v1
 
