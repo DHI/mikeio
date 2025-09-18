@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.7.34">
+<meta name="generator" content="quarto-1.8.24">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
@@ -36,14 +36,15 @@ ul.task-list li input[type="checkbox"] {
 <script src="../site_libs/quarto-listing/quarto-listing.js"></script>
 <script src="../site_libs/quarto-html/quarto.js" type="module"></script>
 <script src="../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="../site_libs/quarto-html/axe/axe-check.js" type="module"></script>
 <script src="../site_libs/quarto-html/popper.min.js"></script>
 <script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
 <script src="../site_libs/quarto-html/anchor.min.js"></script>
 <link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="../site_libs/quarto-html/quarto-syntax-highlighting-c8ad9e5dbd60b7b70b38521ab19b7da4.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-dc55a5b9e770e841cd82e46aadbfb9b0.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="../site_libs/bootstrap/bootstrap-94599a0eca3b0000ac8b8cb7c63e4b76.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<link href="../site_libs/bootstrap/bootstrap-5df47603e3b75ee8f755543cdaab90e4.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -115,7 +116,7 @@ const typesetMath = (el) => {
     var macros = [];
     for (var i = 0; i < mathElements.length; i++) {
       var texText = mathElements[i].firstChild;
-      if (mathElements[i].tagName == "SPAN") {
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
         window.katex.render(texText.data, mathElements[i], {
           displayMode: mathElements[i].classList.contains('display'),
           throwOnError: false,
@@ -141,7 +142,8 @@ window.Quarto = {
       <div class="navbar-container container-fluid">
       <div class="navbar-brand-container mx-auto">
     <a href="../index.html" class="navbar-brand navbar-brand-logo">
-    <img src="../MIKE-IO-Icon-Pos-RGB.png" alt="" class="navbar-logo">
+    <img src="../MIKE-IO-Icon-Pos-RGB.png" alt="" class="navbar-logo light-content">
+    <img src="../MIKE-IO-Icon-Pos-RGB.png" alt="" class="navbar-logo dark-content">
     </a>
     <a class="navbar-brand" href="../index.html">
     <span class="navbar-title">MIKE IO</span>
@@ -154,7 +156,7 @@ window.Quarto = {
           <div class="collapse navbar-collapse" id="navbarCollapse">
             <ul class="navbar-nav navbar-nav-scroll me-auto">
   <li class="nav-item">
-    <a class="nav-link" href="../index.html"> 
+    <a class="nav-link active" href="../index.html" aria-current="page"> 
 <span class="menu-text">Home</span></a>
   </li>  
   <li class="nav-item">
@@ -162,7 +164,7 @@ window.Quarto = {
 <span class="menu-text">User Guide</span></a>
   </li>  
   <li class="nav-item">
-    <a class="nav-link active" href="../examples/index.html" aria-current="page"> 
+    <a class="nav-link" href="../examples/index.html"> 
 <span class="menu-text">Examples</span></a>
   </li>  
   <li class="nav-item">
@@ -205,6 +207,10 @@ window.Quarto = {
 <div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
 <!-- sidebar -->
   <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation docked overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header sidebar-header-stacked">
+      <a href="../index.html" class="sidebar-logo-link">
+      </a>
+      </div>
     <div class="sidebar-menu-container"> 
     <ul class="list-unstyled mt-1">
         <li class="sidebar-item">
@@ -274,12 +280,12 @@ window.Quarto = {
 
 
 <div class="callout callout-style-default callout-tip callout-titled" title="Example data">
-<div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-1-contents" aria-controls="callout-1" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-1-contents" aria-controls="callout-1" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
 </div>
 <div class="callout-title-container flex-fill">
-Example data
+<span class="screen-reader-only">Tip</span>Example data
 </div>
 <div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
 </div>
@@ -346,7 +352,7 @@ Description
 </thead>
 <tbody class="list">
 
-<tr data-index="0" data-listing-file-modified-sort="1757514082065" data-listing-reading-time-sort="1" data-listing-word-count-sort="188" data-listing-title-sort="Dfs0 - CMEMS *in-situ* data" data-listing-filename-sort="cmems_insitu.qmd">
+<tr data-index="0" data-listing-file-modified-sort="1758175565615" data-listing-reading-time-sort="1" data-listing-word-count-sort="188" data-listing-title-sort="Dfs0 - CMEMS *in-situ* data" data-listing-filename-sort="cmems_insitu.qmd">
 <td>
 <a href="../examples/dfs0/cmems_insitu.html" class="title listing-title">Dfs0 - CMEMS <em>in-situ</em> data</a>
 </td>
@@ -356,7 +362,7 @@ Description
 
 </tr>
 
-<tr data-index="1" data-listing-file-modified-sort="1757514082065" data-listing-reading-time-sort="1" data-listing-word-count-sort="147" data-listing-title-sort="Dfs0 - Relative time axis" data-listing-filename-sort="relative_time.qmd">
+<tr data-index="1" data-listing-file-modified-sort="1758175565615" data-listing-reading-time-sort="1" data-listing-word-count-sort="147" data-listing-title-sort="Dfs0 - Relative time axis" data-listing-filename-sort="relative_time.qmd">
 <td>
 <a href="../examples/dfs0/relative_time.html" class="title listing-title">Dfs0 - Relative time axis</a>
 </td>
@@ -366,7 +372,7 @@ Description
 
 </tr>
 
-<tr data-index="2" data-listing-file-modified-sort="1757514082065" data-listing-reading-time-sort="1" data-listing-word-count-sort="29" data-listing-title-sort="Dfs0 examples" data-listing-filename-sort="index.qmd">
+<tr data-index="2" data-listing-file-modified-sort="1758175565615" data-listing-reading-time-sort="1" data-listing-word-count-sort="29" data-listing-title-sort="Dfs0 examples" data-listing-filename-sort="index.qmd">
 <td>
 <a href="../examples/dfs0/index.html" class="title listing-title">Dfs0 examples</a>
 </td>
@@ -376,7 +382,7 @@ Description
 
 </tr>
 
-<tr data-index="3" data-listing-file-modified-sort="1757514082065" data-listing-reading-time-sort="1" data-listing-word-count-sort="121" data-listing-title-sort="Dfs2 - Bathymetric data" data-listing-filename-sort="bathy.qmd">
+<tr data-index="3" data-listing-file-modified-sort="1758175565615" data-listing-reading-time-sort="1" data-listing-word-count-sort="121" data-listing-title-sort="Dfs2 - Bathymetric data" data-listing-filename-sort="bathy.qmd">
 <td>
 <a href="../examples/dfs2/bathy.html" class="title listing-title">Dfs2 - Bathymetric data</a>
 </td>
@@ -386,7 +392,7 @@ Description
 
 </tr>
 
-<tr data-index="4" data-listing-file-modified-sort="1757514082065" data-listing-reading-time-sort="1" data-listing-word-count-sort="115" data-listing-title-sort="Dfs2 - Meteo data" data-listing-filename-sort="gfs.qmd">
+<tr data-index="4" data-listing-file-modified-sort="1758175565615" data-listing-reading-time-sort="1" data-listing-word-count-sort="115" data-listing-title-sort="Dfs2 - Meteo data" data-listing-filename-sort="gfs.qmd">
 <td>
 <a href="../examples/dfs2/gfs.html" class="title listing-title">Dfs2 - Meteo data</a>
 </td>
@@ -396,7 +402,7 @@ Description
 
 </tr>
 
-<tr data-index="5" data-listing-file-modified-sort="1757514082065" data-listing-reading-time-sort="1" data-listing-word-count-sort="27" data-listing-title-sort="Dfs2 examples" data-listing-filename-sort="index.qmd">
+<tr data-index="5" data-listing-file-modified-sort="1758175565615" data-listing-reading-time-sort="1" data-listing-word-count-sort="27" data-listing-title-sort="Dfs2 examples" data-listing-filename-sort="index.qmd">
 <td>
 <a href="../examples/dfs2/index.html" class="title listing-title">Dfs2 examples</a>
 </td>
@@ -406,7 +412,7 @@ Description
 
 </tr>
 
-<tr data-index="6" data-listing-file-modified-sort="1757514082065" data-listing-reading-time-sort="2" data-listing-word-count-sort="355" data-listing-title-sort="Dfsu - 2D interpolation" data-listing-filename-sort="spatial_interpolation.qmd">
+<tr data-index="6" data-listing-file-modified-sort="1758175565616" data-listing-reading-time-sort="2" data-listing-word-count-sort="355" data-listing-title-sort="Dfsu - 2D interpolation" data-listing-filename-sort="spatial_interpolation.qmd">
 <td>
 <a href="../examples/dfsu/spatial_interpolation.html" class="title listing-title">Dfsu - 2D interpolation</a>
 </td>
@@ -416,7 +422,7 @@ Description
 
 </tr>
 
-<tr data-index="7" data-listing-file-modified-sort="1757514082065" data-listing-reading-time-sort="1" data-listing-word-count-sort="31" data-listing-title-sort="Dfsu examples" data-listing-filename-sort="index.qmd">
+<tr data-index="7" data-listing-file-modified-sort="1758175565615" data-listing-reading-time-sort="1" data-listing-word-count-sort="31" data-listing-title-sort="Dfsu examples" data-listing-filename-sort="index.qmd">
 <td>
 <a href="../examples/dfsu/index.html" class="title listing-title">Dfsu examples</a>
 </td>
@@ -426,7 +432,7 @@ Description
 
 </tr>
 
-<tr data-index="8" data-listing-file-modified-sort="1757514082065" data-listing-reading-time-sort="4" data-listing-word-count-sort="656" data-listing-title-sort="Generic dfs processing" data-listing-filename-sort="Generic.qmd">
+<tr data-index="8" data-listing-file-modified-sort="1758175565615" data-listing-reading-time-sort="4" data-listing-word-count-sort="656" data-listing-title-sort="Generic dfs processing" data-listing-filename-sort="Generic.qmd">
 <td>
 <a href="../examples/Generic.html" class="title listing-title">Generic dfs processing</a>
 </td>
@@ -436,7 +442,7 @@ Description
 
 </tr>
 
-<tr data-index="9" data-listing-file-modified-sort="1757514082065" data-listing-reading-time-sort="3" data-listing-word-count-sort="485" data-listing-title-sort="Merging subdomain dfsu files" data-listing-filename-sort="merge_subdomains.qmd">
+<tr data-index="9" data-listing-file-modified-sort="1758175565616" data-listing-reading-time-sort="3" data-listing-word-count-sort="485" data-listing-title-sort="Merging subdomain dfsu files" data-listing-filename-sort="merge_subdomains.qmd">
 <td>
 <a href="../examples/dfsu/merge_subdomains.html" class="title listing-title">Merging subdomain dfsu files</a>
 </td>
@@ -446,7 +452,7 @@ Description
 
 </tr>
 
-<tr data-index="10" data-listing-file-modified-sort="1757514082065" data-listing-reading-time-sort="1" data-listing-word-count-sort="155" data-listing-title-sort="Time interpolation" data-listing-filename-sort="Time-interpolation.qmd">
+<tr data-index="10" data-listing-file-modified-sort="1758175565615" data-listing-reading-time-sort="1" data-listing-word-count-sort="155" data-listing-title-sort="Time interpolation" data-listing-filename-sort="Time-interpolation.qmd">
 <td>
 <a href="../examples/Time-interpolation.html" class="title listing-title">Time interpolation</a>
 </td>
@@ -511,13 +517,14 @@ Description
       e.clearSelection();
     }
     const getTextToCopy = function(trigger) {
-        const codeEl = trigger.previousElementSibling.cloneNode(true);
-        for (const childEl of codeEl.children) {
-          if (isCodeAnnotation(childEl)) {
-            childEl.remove();
-          }
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
         }
-        return codeEl.innerText;
+      }
+      return codeEl.innerText;
     }
     const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
       text: getTextToCopy
