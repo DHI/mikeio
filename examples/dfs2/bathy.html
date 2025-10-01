@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.8.24">
+<meta name="generator" content="quarto-1.8.25">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
@@ -74,10 +74,10 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
 <script src="../../site_libs/quarto-html/anchor.min.js"></script>
 <link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-dc55a5b9e770e841cd82e46aadbfb9b0.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting-7b89279ff1a6dce999919e0e67d4d9ec.css" rel="stylesheet" id="quarto-text-highlighting-styles">
 <script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="../../site_libs/bootstrap/bootstrap-5df47603e3b75ee8f755543cdaab90e4.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<link href="../../site_libs/bootstrap/bootstrap-29a19b5acbeac218a8c860e48340d4df.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -212,11 +212,11 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 
 <p><a href="https://www.gebco.net/data_and_products/gridded_bathymetry_data/"><em>GEBCO Compilation Group (2020) GEBCO 2020 Grid (doi:10.5285/a29c5465-b138-234d-e053-6c86abc040b9</em>)</a></p>
-<div id="9f157e90" class="cell" data-execution_count="1">
+<div id="c211dce5" class="cell" data-execution_count="1">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> xarray</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> mikeio</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
-<div id="7a2a0302" class="cell" data-execution_count="3">
+<div id="37bbbb23" class="cell" data-execution_count="3">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>ds <span class="op">=</span> xarray.open_dataset(<span class="st">"../../data/gebco_2020_n56.3_s55.2_w12.2_e13.1.nc"</span>)</span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>ds</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-display" data-execution_count="3">
@@ -235,9 +235,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </symbol>
 </defs>
 </svg>
-<style>/* CSS stylesheet for displaying xarray objects in jupyterlab.
- *
- */
+<style>/* CSS stylesheet for displaying xarray objects in notebooks */
 
 :root {
   --xr-font-color0: var(
@@ -316,6 +314,7 @@ body.vscode-dark {
   display: block !important;
   min-width: 300px;
   max-width: 700px;
+  line-height: 1.6;
 }
 
 .xr-text-repr-fallback {
@@ -338,11 +337,18 @@ body.vscode-dark {
 }
 
 .xr-obj-type,
-.xr-array-name {
+.xr-obj-name,
+.xr-group-name {
   margin-left: 2px;
   margin-right: 10px;
 }
 
+.xr-group-name::before {
+  content: "📁";
+  padding-right: 0.3em;
+}
+
+.xr-group-name,
 .xr-obj-type {
   color: var(--xr-font-color2);
 }
@@ -351,6 +357,8 @@ body.vscode-dark {
   padding-left: 0 !important;
   display: grid;
   grid-template-columns: 150px auto auto 1fr 0 20px 0 20px;
+  margin-block-start: 0;
+  margin-block-end: 0;
 }
 
 .xr-section-item {
@@ -361,6 +369,7 @@ body.vscode-dark {
   display: inline-block;
   opacity: 0;
   height: 0;
+  margin: 0;
 }
 
 .xr-section-item input + label {
@@ -419,7 +428,6 @@ body.vscode-dark {
 .xr-section-summary,
 .xr-section-inline-details {
   padding-top: 4px;
-  padding-bottom: 4px;
 }
 
 .xr-section-inline-details {
@@ -429,11 +437,38 @@ body.vscode-dark {
 .xr-section-details {
   display: none;
   grid-column: 1 / -1;
+  margin-top: 4px;
   margin-bottom: 5px;
 }
 
 .xr-section-summary-in:checked ~ .xr-section-details {
   display: contents;
+}
+
+.xr-group-box {
+  display: inline-grid;
+  grid-template-columns: 0px 20px auto;
+  width: 100%;
+}
+
+.xr-group-box-vline {
+  grid-column-start: 1;
+  border-right: 0.2em solid;
+  border-color: var(--xr-border-color);
+  width: 0px;
+}
+
+.xr-group-box-hline {
+  grid-column-start: 2;
+  grid-row-start: 1;
+  height: 1em;
+  width: 20px;
+  border-bottom: 0.2em solid;
+  border-color: var(--xr-border-color);
+}
+
+.xr-group-box-contents {
+  grid-column-start: 3;
 }
 
 .xr-array-wrap {
@@ -668,30 +703,12 @@ Dimensions:    (lat: 264, lon: 216)
 Coordinates: (2)
 Data variables:
     elevation  (lat, lon) int16 114kB ...
-Attributes: (8)</pre><div class="xr-wrap" style="display:none"><div class="xr-header"><div class="xr-obj-type">xarray.Dataset</div></div><ul class="xr-sections"><li class="xr-section-item"><input id="section-1ca7c05b-3a68-42d4-af45-f718d814d6e8" class="xr-section-summary-in" type="checkbox" disabled=""><label for="section-1ca7c05b-3a68-42d4-af45-f718d814d6e8" class="xr-section-summary" title="Expand/collapse section">Dimensions:</label><div class="xr-section-inline-details"><ul class="xr-dim-list"><li><span class="xr-has-index">lat</span>: 264</li><li><span class="xr-has-index">lon</span>: 216</li></ul></div><div class="xr-section-details"></div></li><li class="xr-section-item"><input id="section-a60adf0a-a45f-4ba4-8cbf-0c15e9e6b398" class="xr-section-summary-in" type="checkbox"><label for="section-a60adf0a-a45f-4ba4-8cbf-0c15e9e6b398" class="xr-section-summary">Coordinates: <span>(2)</span></label><div class="xr-section-inline-details"></div><div class="xr-section-details"><ul class="xr-var-list"><li class="xr-var-item"><div class="xr-var-name"><span class="xr-has-index">lat</span></div><div class="xr-var-dims">(lat)</div><div class="xr-var-dtype">float64</div><div class="xr-var-preview xr-preview">55.2 55.21 55.21 ... 56.29 56.3</div><input id="attrs-f26fdb61-fab7-472d-bd6f-9a2121cf5480" class="xr-var-attrs-in" type="checkbox"><label for="attrs-f26fdb61-fab7-472d-bd6f-9a2121cf5480" title="Show/Hide attributes"><svg class="icon xr-icon-file-text2"><use href="#icon-file-text2"></use></svg></label><input id="data-8d489070-732c-4ff4-a0a3-99b0d0d6975e" class="xr-var-data-in" type="checkbox"><label for="data-8d489070-732c-4ff4-a0a3-99b0d0d6975e" title="Show/Hide data repr"><svg class="icon xr-icon-database"><use href="#icon-database"></use></svg></label><div class="xr-var-attrs"><dl class="xr-attrs"><dt><span>standard_name :</span></dt><dd>latitude</dd><dt><span>long_name :</span></dt><dd>latitude</dd><dt><span>units :</span></dt><dd>degrees_north</dd><dt><span>axis :</span></dt><dd>Y</dd><dt><span>sdn_parameter_urn :</span></dt><dd>SDN:P01::ALATZZ01</dd><dt><span>sdn_parameter_name :</span></dt><dd>Latitude north</dd><dt><span>sdn_uom_urn :</span></dt><dd>SDN:P06::DEGN</dd><dt><span>sdn_uom_name :</span></dt><dd>Degrees north</dd></dl></div><div class="xr-var-data"><pre>array([55.202083, 55.20625 , 55.210417, ..., 56.289583, 56.29375 , 56.297917],
-      shape=(264,))</pre></div></li><li class="xr-var-item"><div class="xr-var-name"><span class="xr-has-index">lon</span></div><div class="xr-var-dims">(lon)</div><div class="xr-var-dtype">float64</div><div class="xr-var-preview xr-preview">12.2 12.21 12.21 ... 13.09 13.1</div><input id="attrs-9de86fe0-9269-43ae-b6d5-ed0888899e0a" class="xr-var-attrs-in" type="checkbox"><label for="attrs-9de86fe0-9269-43ae-b6d5-ed0888899e0a" title="Show/Hide attributes"><svg class="icon xr-icon-file-text2"><use href="#icon-file-text2"></use></svg></label><input id="data-5186da94-c17e-45e6-b4a4-3ebe0d1622f8" class="xr-var-data-in" type="checkbox"><label for="data-5186da94-c17e-45e6-b4a4-3ebe0d1622f8" title="Show/Hide data repr"><svg class="icon xr-icon-database"><use href="#icon-database"></use></svg></label><div class="xr-var-attrs"><dl class="xr-attrs"><dt><span>standard_name :</span></dt><dd>longitude</dd><dt><span>long_name :</span></dt><dd>longitude</dd><dt><span>units :</span></dt><dd>degrees_east</dd><dt><span>axis :</span></dt><dd>X</dd><dt><span>sdn_parameter_urn :</span></dt><dd>SDN:P01::ALONZZ01</dd><dt><span>sdn_parameter_name :</span></dt><dd>Longitude east</dd><dt><span>sdn_uom_urn :</span></dt><dd>SDN:P06::DEGE</dd><dt><span>sdn_uom_name :</span></dt><dd>Degrees east</dd></dl></div><div class="xr-var-data"><pre>array([12.202083, 12.20625 , 12.210417, ..., 13.089583, 13.09375 , 13.097917],
-      shape=(216,))</pre></div></li></ul></div></li><li class="xr-section-item"><input id="section-ecfc3e3b-df00-4d67-8d81-2e37433a8f4d" class="xr-section-summary-in" type="checkbox" checked=""><label for="section-ecfc3e3b-df00-4d67-8d81-2e37433a8f4d" class="xr-section-summary">Data variables: <span>(1)</span></label><div class="xr-section-inline-details"></div><div class="xr-section-details"><ul class="xr-var-list"><li class="xr-var-item"><div class="xr-var-name"><span>elevation</span></div><div class="xr-var-dims">(lat, lon)</div><div class="xr-var-dtype">int16</div><div class="xr-var-preview xr-preview">...</div><input id="attrs-3b9dffbe-f2ed-4080-bf1a-536b725e765f" class="xr-var-attrs-in" type="checkbox"><label for="attrs-3b9dffbe-f2ed-4080-bf1a-536b725e765f" title="Show/Hide attributes"><svg class="icon xr-icon-file-text2"><use href="#icon-file-text2"></use></svg></label><input id="data-e34ca4c9-f4c9-4b1a-8c82-762761ab6b5b" class="xr-var-data-in" type="checkbox"><label for="data-e34ca4c9-f4c9-4b1a-8c82-762761ab6b5b" title="Show/Hide data repr"><svg class="icon xr-icon-database"><use href="#icon-database"></use></svg></label><div class="xr-var-attrs"><dl class="xr-attrs"><dt><span>standard_name :</span></dt><dd>height_above_reference_ellipsoid</dd><dt><span>long_name :</span></dt><dd>Elevation relative to sea level</dd><dt><span>units :</span></dt><dd>m</dd><dt><span>sdn_parameter_urn :</span></dt><dd>SDN:P01::BATHHGHT</dd><dt><span>sdn_parameter_name :</span></dt><dd>Sea floor height (above mean sea level) {bathymetric height}</dd><dt><span>sdn_uom_urn :</span></dt><dd>SDN:P06::ULAA</dd><dt><span>sdn_uom_name :</span></dt><dd>Metres</dd></dl></div><div class="xr-var-data"><pre>[57024 values with dtype=int16]</pre></div></li></ul></div></li><li class="xr-section-item"><input id="section-defe1518-3142-49f6-baa1-c3899968a8b0" class="xr-section-summary-in" type="checkbox"><label for="section-defe1518-3142-49f6-baa1-c3899968a8b0" class="xr-section-summary">Indexes: <span>(2)</span></label><div class="xr-section-inline-details"></div><div class="xr-section-details"><ul class="xr-var-list"><li class="xr-var-item"><div class="xr-index-name"><div>lat</div></div><div class="xr-index-preview">PandasIndex</div><input type="checkbox" disabled=""><label></label><input id="index-e80507b6-c795-43ee-bf18-f731e7222740" class="xr-index-data-in" type="checkbox"><label for="index-e80507b6-c795-43ee-bf18-f731e7222740" title="Show/Hide index repr"><svg class="icon xr-icon-database"><use href="#icon-database"></use></svg></label><div class="xr-index-data"><pre>PandasIndex(Index([ 55.20208333333332,  55.20625000000001, 55.210416666666674,
-        55.21458333333334,           55.21875,  55.22291666666666,
-       55.227083333333326,  55.23124999999999,  55.23541666666665,
-        55.23958333333334,
-       ...
-        56.26041666666666,  56.26458333333332,  56.26875000000001,
-       56.272916666666674,  56.27708333333334,           56.28125,
-        56.28541666666666, 56.289583333333326,  56.29374999999999,
-        56.29791666666665],
-      dtype='float64', name='lat', length=264))</pre></div></li><li class="xr-var-item"><div class="xr-index-name"><div>lon</div></div><div class="xr-index-preview">PandasIndex</div><input type="checkbox" disabled=""><label></label><input id="index-6b4066ed-4a97-4c20-8d34-b6da4175970a" class="xr-index-data-in" type="checkbox"><label for="index-6b4066ed-4a97-4c20-8d34-b6da4175970a" title="Show/Hide index repr"><svg class="icon xr-icon-database"><use href="#icon-database"></use></svg></label><div class="xr-index-data"><pre>PandasIndex(Index([ 12.20208333333332, 12.206250000000011, 12.210416666666674,
-       12.214583333333337,           12.21875, 12.222916666666663,
-       12.227083333333326, 12.231249999999989, 12.235416666666652,
-       12.239583333333343,
-       ...
-       13.060416666666669, 13.064583333333331, 13.068749999999994,
-       13.072916666666657,  13.07708333333332, 13.081250000000011,
-       13.085416666666674, 13.089583333333337,           13.09375,
-       13.097916666666663],
-      dtype='float64', name='lon', length=216))</pre></div></li></ul></div></li><li class="xr-section-item"><input id="section-20b07b8f-98fa-48ce-9dfe-eca148e9a73e" class="xr-section-summary-in" type="checkbox"><label for="section-20b07b8f-98fa-48ce-9dfe-eca148e9a73e" class="xr-section-summary">Attributes: <span>(8)</span></label><div class="xr-section-inline-details"></div><div class="xr-section-details"><dl class="xr-attrs"><dt><span>Conventions :</span></dt><dd>CF-1.6</dd><dt><span>title :</span></dt><dd>The GEBCO_2020 Grid - a continuous terrain model for oceans and land at 15 arc-second intervals</dd><dt><span>institution :</span></dt><dd>On behalf of the General Bathymetric Chart of the Oceans (GEBCO), the data are held at the British Oceanographic Data Centre (BODC).</dd><dt><span>source :</span></dt><dd>The GEBCO_2020 Grid is the latest global bathymetric product released by the General Bathymetric Chart of the Oceans (GEBCO) and has been developed through the Nippon Foundation-GEBCO Seabed 2030 Project. This is a collaborative project between the Nippon Foundation of Japan and GEBCO. The Seabed 2030 Project aims to bring together all available bathymetric data to produce the definitive map of the world ocean floor and make it available to all.</dd><dt><span>history :</span></dt><dd>Information on the development of the data set and the source data sets included in the grid can be found in the data set documentation available from https://www.gebco.net</dd><dt><span>references :</span></dt><dd>DOI: 10.5285/a29c5465-b138-234d-e053-6c86abc040b9</dd><dt><span>comment :</span></dt><dd>The data in the GEBCO_2020 Grid should not be used for navigation or any purpose relating to safety at sea.</dd><dt><span>node_offset :</span></dt><dd>1.0</dd></dl></div></li></ul></div></div>
+Attributes: (8)</pre><div class="xr-wrap" style="display:none"><div class="xr-header"><div class="xr-obj-type">xarray.Dataset</div></div><ul class="xr-sections"><li class="xr-section-item"><input id="section-28d03ef9-b5a7-4686-9f03-e19b08b06933" class="xr-section-summary-in" type="checkbox" disabled=""><label for="section-28d03ef9-b5a7-4686-9f03-e19b08b06933" class="xr-section-summary" title="Expand/collapse section">Dimensions:</label><div class="xr-section-inline-details"><ul class="xr-dim-list"><li><span class="xr-has-index">lat</span>: 264</li><li><span class="xr-has-index">lon</span>: 216</li></ul></div><div class="xr-section-details"></div></li><li class="xr-section-item"><input id="section-41c99d24-e2b0-4bb6-96a2-488357d86577" class="xr-section-summary-in" type="checkbox"><label for="section-41c99d24-e2b0-4bb6-96a2-488357d86577" class="xr-section-summary">Coordinates: <span>(2)</span></label><div class="xr-section-inline-details"></div><div class="xr-section-details"><ul class="xr-var-list"><li class="xr-var-item"><div class="xr-var-name"><span class="xr-has-index">lat</span></div><div class="xr-var-dims">(lat)</div><div class="xr-var-dtype">float64</div><div class="xr-var-preview xr-preview">55.2 55.21 55.21 ... 56.29 56.3</div><input id="attrs-9c965a21-7c69-4032-bd2b-af15361ec0eb" class="xr-var-attrs-in" type="checkbox"><label for="attrs-9c965a21-7c69-4032-bd2b-af15361ec0eb" title="Show/Hide attributes"><svg class="icon xr-icon-file-text2"><use href="#icon-file-text2"></use></svg></label><input id="data-11b19776-b98a-436e-b363-88d644e6a116" class="xr-var-data-in" type="checkbox"><label for="data-11b19776-b98a-436e-b363-88d644e6a116" title="Show/Hide data repr"><svg class="icon xr-icon-database"><use href="#icon-database"></use></svg></label><div class="xr-var-attrs"><dl class="xr-attrs"><dt><span>standard_name :</span></dt><dd>latitude</dd><dt><span>long_name :</span></dt><dd>latitude</dd><dt><span>units :</span></dt><dd>degrees_north</dd><dt><span>axis :</span></dt><dd>Y</dd><dt><span>sdn_parameter_urn :</span></dt><dd>SDN:P01::ALATZZ01</dd><dt><span>sdn_parameter_name :</span></dt><dd>Latitude north</dd><dt><span>sdn_uom_urn :</span></dt><dd>SDN:P06::DEGN</dd><dt><span>sdn_uom_name :</span></dt><dd>Degrees north</dd></dl></div><div class="xr-var-data"><pre>array([55.202083, 55.20625 , 55.210417, ..., 56.289583, 56.29375 , 56.297917],
+      shape=(264,))</pre></div></li><li class="xr-var-item"><div class="xr-var-name"><span class="xr-has-index">lon</span></div><div class="xr-var-dims">(lon)</div><div class="xr-var-dtype">float64</div><div class="xr-var-preview xr-preview">12.2 12.21 12.21 ... 13.09 13.1</div><input id="attrs-6f3ec186-116d-429c-8d1d-0b13c296b0e6" class="xr-var-attrs-in" type="checkbox"><label for="attrs-6f3ec186-116d-429c-8d1d-0b13c296b0e6" title="Show/Hide attributes"><svg class="icon xr-icon-file-text2"><use href="#icon-file-text2"></use></svg></label><input id="data-7193997d-aae0-4737-a681-e93e205048e7" class="xr-var-data-in" type="checkbox"><label for="data-7193997d-aae0-4737-a681-e93e205048e7" title="Show/Hide data repr"><svg class="icon xr-icon-database"><use href="#icon-database"></use></svg></label><div class="xr-var-attrs"><dl class="xr-attrs"><dt><span>standard_name :</span></dt><dd>longitude</dd><dt><span>long_name :</span></dt><dd>longitude</dd><dt><span>units :</span></dt><dd>degrees_east</dd><dt><span>axis :</span></dt><dd>X</dd><dt><span>sdn_parameter_urn :</span></dt><dd>SDN:P01::ALONZZ01</dd><dt><span>sdn_parameter_name :</span></dt><dd>Longitude east</dd><dt><span>sdn_uom_urn :</span></dt><dd>SDN:P06::DEGE</dd><dt><span>sdn_uom_name :</span></dt><dd>Degrees east</dd></dl></div><div class="xr-var-data"><pre>array([12.202083, 12.20625 , 12.210417, ..., 13.089583, 13.09375 , 13.097917],
+      shape=(216,))</pre></div></li></ul></div></li><li class="xr-section-item"><input id="section-b1c07733-78b2-49ec-87c6-4fe2d3135461" class="xr-section-summary-in" type="checkbox" checked=""><label for="section-b1c07733-78b2-49ec-87c6-4fe2d3135461" class="xr-section-summary">Data variables: <span>(1)</span></label><div class="xr-section-inline-details"></div><div class="xr-section-details"><ul class="xr-var-list"><li class="xr-var-item"><div class="xr-var-name"><span>elevation</span></div><div class="xr-var-dims">(lat, lon)</div><div class="xr-var-dtype">int16</div><div class="xr-var-preview xr-preview">...</div><input id="attrs-b00556cb-d8a3-440b-8b21-6f5af6e0143e" class="xr-var-attrs-in" type="checkbox"><label for="attrs-b00556cb-d8a3-440b-8b21-6f5af6e0143e" title="Show/Hide attributes"><svg class="icon xr-icon-file-text2"><use href="#icon-file-text2"></use></svg></label><input id="data-5a12464c-bf6a-4344-8997-772667ae2e98" class="xr-var-data-in" type="checkbox"><label for="data-5a12464c-bf6a-4344-8997-772667ae2e98" title="Show/Hide data repr"><svg class="icon xr-icon-database"><use href="#icon-database"></use></svg></label><div class="xr-var-attrs"><dl class="xr-attrs"><dt><span>standard_name :</span></dt><dd>height_above_reference_ellipsoid</dd><dt><span>long_name :</span></dt><dd>Elevation relative to sea level</dd><dt><span>units :</span></dt><dd>m</dd><dt><span>sdn_parameter_urn :</span></dt><dd>SDN:P01::BATHHGHT</dd><dt><span>sdn_parameter_name :</span></dt><dd>Sea floor height (above mean sea level) {bathymetric height}</dd><dt><span>sdn_uom_urn :</span></dt><dd>SDN:P06::ULAA</dd><dt><span>sdn_uom_name :</span></dt><dd>Metres</dd></dl></div><div class="xr-var-data"><pre>[57024 values with dtype=int16]</pre></div></li></ul></div></li><li class="xr-section-item"><input id="section-a860f033-4974-4f0d-9bbd-60d83c6d77de" class="xr-section-summary-in" type="checkbox"><label for="section-a860f033-4974-4f0d-9bbd-60d83c6d77de" class="xr-section-summary">Attributes: <span>(8)</span></label><div class="xr-section-inline-details"></div><div class="xr-section-details"><dl class="xr-attrs"><dt><span>Conventions :</span></dt><dd>CF-1.6</dd><dt><span>title :</span></dt><dd>The GEBCO_2020 Grid - a continuous terrain model for oceans and land at 15 arc-second intervals</dd><dt><span>institution :</span></dt><dd>On behalf of the General Bathymetric Chart of the Oceans (GEBCO), the data are held at the British Oceanographic Data Centre (BODC).</dd><dt><span>source :</span></dt><dd>The GEBCO_2020 Grid is the latest global bathymetric product released by the General Bathymetric Chart of the Oceans (GEBCO) and has been developed through the Nippon Foundation-GEBCO Seabed 2030 Project. This is a collaborative project between the Nippon Foundation of Japan and GEBCO. The Seabed 2030 Project aims to bring together all available bathymetric data to produce the definitive map of the world ocean floor and make it available to all.</dd><dt><span>history :</span></dt><dd>Information on the development of the data set and the source data sets included in the grid can be found in the data set documentation available from https://www.gebco.net</dd><dt><span>references :</span></dt><dd>DOI: 10.5285/a29c5465-b138-234d-e053-6c86abc040b9</dd><dt><span>comment :</span></dt><dd>The data in the GEBCO_2020 Grid should not be used for navigation or any purpose relating to safety at sea.</dd><dt><span>node_offset :</span></dt><dd>1.0</dd></dl></div></li></ul></div></div>
 </div>
 </div>
-<div id="4543e9a2" class="cell" data-execution_count="4">
+<div id="d5a1f6dc" class="cell" data-execution_count="4">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>ds.elevation.plot()<span class="op">;</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-display">
 <div>
@@ -701,7 +718,7 @@ Attributes: (8)</pre><div class="xr-wrap" style="display:none"><div class="xr-he
 </div>
 </div>
 </div>
-<div id="33d59576" class="cell" data-execution_count="5">
+<div id="0acfc713" class="cell" data-execution_count="5">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>ds.elevation.sel(lon<span class="op">=</span><span class="fl">12.74792</span>, lat<span class="op">=</span><span class="fl">55.865</span>, method<span class="op">=</span><span class="st">"nearest"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-display" data-execution_count="5">
 <div><svg style="position: absolute; width: 0; height: 0; overflow: hidden">
@@ -719,9 +736,7 @@ Attributes: (8)</pre><div class="xr-wrap" style="display:none"><div class="xr-he
 </symbol>
 </defs>
 </svg>
-<style>/* CSS stylesheet for displaying xarray objects in jupyterlab.
- *
- */
+<style>/* CSS stylesheet for displaying xarray objects in notebooks */
 
 :root {
   --xr-font-color0: var(
@@ -800,6 +815,7 @@ body.vscode-dark {
   display: block !important;
   min-width: 300px;
   max-width: 700px;
+  line-height: 1.6;
 }
 
 .xr-text-repr-fallback {
@@ -822,11 +838,18 @@ body.vscode-dark {
 }
 
 .xr-obj-type,
-.xr-array-name {
+.xr-obj-name,
+.xr-group-name {
   margin-left: 2px;
   margin-right: 10px;
 }
 
+.xr-group-name::before {
+  content: "📁";
+  padding-right: 0.3em;
+}
+
+.xr-group-name,
 .xr-obj-type {
   color: var(--xr-font-color2);
 }
@@ -835,6 +858,8 @@ body.vscode-dark {
   padding-left: 0 !important;
   display: grid;
   grid-template-columns: 150px auto auto 1fr 0 20px 0 20px;
+  margin-block-start: 0;
+  margin-block-end: 0;
 }
 
 .xr-section-item {
@@ -845,6 +870,7 @@ body.vscode-dark {
   display: inline-block;
   opacity: 0;
   height: 0;
+  margin: 0;
 }
 
 .xr-section-item input + label {
@@ -903,7 +929,6 @@ body.vscode-dark {
 .xr-section-summary,
 .xr-section-inline-details {
   padding-top: 4px;
-  padding-bottom: 4px;
 }
 
 .xr-section-inline-details {
@@ -913,11 +938,38 @@ body.vscode-dark {
 .xr-section-details {
   display: none;
   grid-column: 1 / -1;
+  margin-top: 4px;
   margin-bottom: 5px;
 }
 
 .xr-section-summary-in:checked ~ .xr-section-details {
   display: contents;
+}
+
+.xr-group-box {
+  display: inline-grid;
+  grid-template-columns: 0px 20px auto;
+  width: 100%;
+}
+
+.xr-group-box-vline {
+  grid-column-start: 1;
+  border-right: 0.2em solid;
+  border-color: var(--xr-border-color);
+  width: 0px;
+}
+
+.xr-group-box-hline {
+  grid-column-start: 2;
+  grid-row-start: 1;
+  height: 1em;
+  width: 20px;
+  border-bottom: 0.2em solid;
+  border-color: var(--xr-border-color);
+}
+
+.xr-group-box-contents {
+  grid-column-start: 3;
 }
 
 .xr-array-wrap {
@@ -1150,17 +1202,17 @@ dl.xr-attrs {
 </style><pre class="xr-text-repr-fallback">&lt;xarray.DataArray 'elevation' ()&gt; Size: 2B
 [1 values with dtype=int16]
 Coordinates: (2)
-Attributes: (7)</pre><div class="xr-wrap" style="display:none"><div class="xr-header"><div class="xr-obj-type">xarray.DataArray</div><div class="xr-array-name">'elevation'</div></div><ul class="xr-sections"><li class="xr-section-item"><div class="xr-array-wrap"><input id="section-a37783ee-cc1c-456e-bbd2-02d3034a003d" class="xr-array-in" type="checkbox" checked=""><label for="section-a37783ee-cc1c-456e-bbd2-02d3034a003d" title="Show/hide data repr"><svg class="icon xr-icon-database"><use href="#icon-database"></use></svg></label><div class="xr-array-preview xr-preview"><span>...</span></div><div class="xr-array-data"><pre>[1 values with dtype=int16]</pre></div></div></li><li class="xr-section-item"><input id="section-d43d06d9-6010-4805-ab10-4d9f46520b00" class="xr-section-summary-in" type="checkbox"><label for="section-d43d06d9-6010-4805-ab10-4d9f46520b00" class="xr-section-summary">Coordinates: <span>(2)</span></label><div class="xr-section-inline-details"></div><div class="xr-section-details"><ul class="xr-var-list"><li class="xr-var-item"><div class="xr-var-name"><span>lat</span></div><div class="xr-var-dims">()</div><div class="xr-var-dtype">float64</div><div class="xr-var-preview xr-preview">55.86</div><input id="attrs-6b081bc6-4331-4996-a8cb-a3d82d37a3b1" class="xr-var-attrs-in" type="checkbox"><label for="attrs-6b081bc6-4331-4996-a8cb-a3d82d37a3b1" title="Show/Hide attributes"><svg class="icon xr-icon-file-text2"><use href="#icon-file-text2"></use></svg></label><input id="data-617fe289-b9d0-4375-ab93-b11f01f1efe2" class="xr-var-data-in" type="checkbox"><label for="data-617fe289-b9d0-4375-ab93-b11f01f1efe2" title="Show/Hide data repr"><svg class="icon xr-icon-database"><use href="#icon-database"></use></svg></label><div class="xr-var-attrs"><dl class="xr-attrs"><dt><span>standard_name :</span></dt><dd>latitude</dd><dt><span>long_name :</span></dt><dd>latitude</dd><dt><span>units :</span></dt><dd>degrees_north</dd><dt><span>axis :</span></dt><dd>Y</dd><dt><span>sdn_parameter_urn :</span></dt><dd>SDN:P01::ALATZZ01</dd><dt><span>sdn_parameter_name :</span></dt><dd>Latitude north</dd><dt><span>sdn_uom_urn :</span></dt><dd>SDN:P06::DEGN</dd><dt><span>sdn_uom_name :</span></dt><dd>Degrees north</dd></dl></div><div class="xr-var-data"><pre>array(55.86458333)</pre></div></li><li class="xr-var-item"><div class="xr-var-name"><span>lon</span></div><div class="xr-var-dims">()</div><div class="xr-var-dtype">float64</div><div class="xr-var-preview xr-preview">12.75</div><input id="attrs-b77da165-1eae-4861-8722-2b762370a507" class="xr-var-attrs-in" type="checkbox"><label for="attrs-b77da165-1eae-4861-8722-2b762370a507" title="Show/Hide attributes"><svg class="icon xr-icon-file-text2"><use href="#icon-file-text2"></use></svg></label><input id="data-f4ef5f6d-5536-4562-b0f6-3bc436b86531" class="xr-var-data-in" type="checkbox"><label for="data-f4ef5f6d-5536-4562-b0f6-3bc436b86531" title="Show/Hide data repr"><svg class="icon xr-icon-database"><use href="#icon-database"></use></svg></label><div class="xr-var-attrs"><dl class="xr-attrs"><dt><span>standard_name :</span></dt><dd>longitude</dd><dt><span>long_name :</span></dt><dd>longitude</dd><dt><span>units :</span></dt><dd>degrees_east</dd><dt><span>axis :</span></dt><dd>X</dd><dt><span>sdn_parameter_urn :</span></dt><dd>SDN:P01::ALONZZ01</dd><dt><span>sdn_parameter_name :</span></dt><dd>Longitude east</dd><dt><span>sdn_uom_urn :</span></dt><dd>SDN:P06::DEGE</dd><dt><span>sdn_uom_name :</span></dt><dd>Degrees east</dd></dl></div><div class="xr-var-data"><pre>array(12.74791667)</pre></div></li></ul></div></li><li class="xr-section-item"><input id="section-0c5e3b05-2db9-4241-9441-4ab4751f9ca9" class="xr-section-summary-in" type="checkbox" disabled=""><label for="section-0c5e3b05-2db9-4241-9441-4ab4751f9ca9" class="xr-section-summary" title="Expand/collapse section">Indexes: <span>(0)</span></label><div class="xr-section-inline-details"></div><div class="xr-section-details"><ul class="xr-var-list"></ul></div></li><li class="xr-section-item"><input id="section-7500f143-ad23-440b-9040-f51761dc5443" class="xr-section-summary-in" type="checkbox"><label for="section-7500f143-ad23-440b-9040-f51761dc5443" class="xr-section-summary">Attributes: <span>(7)</span></label><div class="xr-section-inline-details"></div><div class="xr-section-details"><dl class="xr-attrs"><dt><span>standard_name :</span></dt><dd>height_above_reference_ellipsoid</dd><dt><span>long_name :</span></dt><dd>Elevation relative to sea level</dd><dt><span>units :</span></dt><dd>m</dd><dt><span>sdn_parameter_urn :</span></dt><dd>SDN:P01::BATHHGHT</dd><dt><span>sdn_parameter_name :</span></dt><dd>Sea floor height (above mean sea level) {bathymetric height}</dd><dt><span>sdn_uom_urn :</span></dt><dd>SDN:P06::ULAA</dd><dt><span>sdn_uom_name :</span></dt><dd>Metres</dd></dl></div></li></ul></div></div>
+Attributes: (7)</pre><div class="xr-wrap" style="display:none"><div class="xr-header"><div class="xr-obj-type">xarray.DataArray</div><div class="xr-obj-name">'elevation'</div></div><ul class="xr-sections"><li class="xr-section-item"><div class="xr-array-wrap"><input id="section-7799fe5e-26af-42b7-a68b-d436eee64cf9" class="xr-array-in" type="checkbox" checked=""><label for="section-7799fe5e-26af-42b7-a68b-d436eee64cf9" title="Show/hide data repr"><svg class="icon xr-icon-database"><use href="#icon-database"></use></svg></label><div class="xr-array-preview xr-preview"><span>...</span></div><div class="xr-array-data"><pre>[1 values with dtype=int16]</pre></div></div></li><li class="xr-section-item"><input id="section-43e50204-b305-42d4-a7c2-dafb5ce26950" class="xr-section-summary-in" type="checkbox"><label for="section-43e50204-b305-42d4-a7c2-dafb5ce26950" class="xr-section-summary">Coordinates: <span>(2)</span></label><div class="xr-section-inline-details"></div><div class="xr-section-details"><ul class="xr-var-list"><li class="xr-var-item"><div class="xr-var-name"><span>lat</span></div><div class="xr-var-dims">()</div><div class="xr-var-dtype">float64</div><div class="xr-var-preview xr-preview">55.86</div><input id="attrs-f321f912-6e80-4b6d-ba97-cc42f75929a3" class="xr-var-attrs-in" type="checkbox"><label for="attrs-f321f912-6e80-4b6d-ba97-cc42f75929a3" title="Show/Hide attributes"><svg class="icon xr-icon-file-text2"><use href="#icon-file-text2"></use></svg></label><input id="data-50b31b8c-4524-44ab-869e-53a8089d85d3" class="xr-var-data-in" type="checkbox"><label for="data-50b31b8c-4524-44ab-869e-53a8089d85d3" title="Show/Hide data repr"><svg class="icon xr-icon-database"><use href="#icon-database"></use></svg></label><div class="xr-var-attrs"><dl class="xr-attrs"><dt><span>standard_name :</span></dt><dd>latitude</dd><dt><span>long_name :</span></dt><dd>latitude</dd><dt><span>units :</span></dt><dd>degrees_north</dd><dt><span>axis :</span></dt><dd>Y</dd><dt><span>sdn_parameter_urn :</span></dt><dd>SDN:P01::ALATZZ01</dd><dt><span>sdn_parameter_name :</span></dt><dd>Latitude north</dd><dt><span>sdn_uom_urn :</span></dt><dd>SDN:P06::DEGN</dd><dt><span>sdn_uom_name :</span></dt><dd>Degrees north</dd></dl></div><div class="xr-var-data"><pre>array(55.86458333)</pre></div></li><li class="xr-var-item"><div class="xr-var-name"><span>lon</span></div><div class="xr-var-dims">()</div><div class="xr-var-dtype">float64</div><div class="xr-var-preview xr-preview">12.75</div><input id="attrs-7fc3c587-58f5-4a79-b160-165abadd00ac" class="xr-var-attrs-in" type="checkbox"><label for="attrs-7fc3c587-58f5-4a79-b160-165abadd00ac" title="Show/Hide attributes"><svg class="icon xr-icon-file-text2"><use href="#icon-file-text2"></use></svg></label><input id="data-b872ff29-d8b0-4471-ba2d-27ca53d8053a" class="xr-var-data-in" type="checkbox"><label for="data-b872ff29-d8b0-4471-ba2d-27ca53d8053a" title="Show/Hide data repr"><svg class="icon xr-icon-database"><use href="#icon-database"></use></svg></label><div class="xr-var-attrs"><dl class="xr-attrs"><dt><span>standard_name :</span></dt><dd>longitude</dd><dt><span>long_name :</span></dt><dd>longitude</dd><dt><span>units :</span></dt><dd>degrees_east</dd><dt><span>axis :</span></dt><dd>X</dd><dt><span>sdn_parameter_urn :</span></dt><dd>SDN:P01::ALONZZ01</dd><dt><span>sdn_parameter_name :</span></dt><dd>Longitude east</dd><dt><span>sdn_uom_urn :</span></dt><dd>SDN:P06::DEGE</dd><dt><span>sdn_uom_name :</span></dt><dd>Degrees east</dd></dl></div><div class="xr-var-data"><pre>array(12.74791667)</pre></div></li></ul></div></li><li class="xr-section-item"><input id="section-801f1541-2984-45d3-afb3-72804a082788" class="xr-section-summary-in" type="checkbox"><label for="section-801f1541-2984-45d3-afb3-72804a082788" class="xr-section-summary">Attributes: <span>(7)</span></label><div class="xr-section-inline-details"></div><div class="xr-section-details"><dl class="xr-attrs"><dt><span>standard_name :</span></dt><dd>height_above_reference_ellipsoid</dd><dt><span>long_name :</span></dt><dd>Elevation relative to sea level</dd><dt><span>units :</span></dt><dd>m</dd><dt><span>sdn_parameter_urn :</span></dt><dd>SDN:P01::BATHHGHT</dd><dt><span>sdn_parameter_name :</span></dt><dd>Sea floor height (above mean sea level) {bathymetric height}</dd><dt><span>sdn_uom_urn :</span></dt><dd>SDN:P06::ULAA</dd><dt><span>sdn_uom_name :</span></dt><dd>Metres</dd></dl></div></li></ul></div></div>
 </div>
 </div>
 <p>Check ordering of dimensions, should be (y,x)</p>
-<div id="610d6e95" class="cell" data-execution_count="6">
+<div id="6a1235fd" class="cell" data-execution_count="6">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>ds.elevation.dims</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-display" data-execution_count="6">
 <pre><code>('lat', 'lon')</code></pre>
 </div>
 </div>
-<div id="2f78dbe7" class="cell" data-execution_count="7">
+<div id="bfa4b056" class="cell" data-execution_count="7">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>el <span class="op">=</span> ds.elevation.values</span>
 <span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>el.shape</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-display" data-execution_count="7">
@@ -1168,37 +1220,37 @@ Attributes: (7)</pre><div class="xr-wrap" style="display:none"><div class="xr-he
 </div>
 </div>
 <p>Check that axes are increasing, S-&gt;N W-&gt;E</p>
-<div id="17c642bd" class="cell" data-execution_count="8">
+<div id="6dcaeadd" class="cell" data-execution_count="8">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>ds.lat.values[<span class="dv">0</span>],ds.lat.values[<span class="op">-</span><span class="dv">1</span>] </span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-display" data-execution_count="8">
 <pre><code>(np.float64(55.20208333333332), np.float64(56.29791666666665))</code></pre>
 </div>
 </div>
-<div id="d4fe6ea0" class="cell" data-execution_count="9">
+<div id="ab7080d5" class="cell" data-execution_count="9">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>ds.lat.values[<span class="dv">0</span>] <span class="op">&lt;</span> ds.lat.values[<span class="op">-</span><span class="dv">1</span>] </span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-display" data-execution_count="9">
 <pre><code>np.True_</code></pre>
 </div>
 </div>
-<div id="d50bc7e4" class="cell" data-execution_count="10">
+<div id="ea83ba8e" class="cell" data-execution_count="10">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>ds.lon.values[<span class="dv">0</span>],ds.lon.values[<span class="op">-</span><span class="dv">1</span>] </span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-display" data-execution_count="10">
 <pre><code>(np.float64(12.20208333333332), np.float64(13.097916666666663))</code></pre>
 </div>
 </div>
-<div id="3ac88f5a" class="cell" data-execution_count="11">
+<div id="02792992" class="cell" data-execution_count="11">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>el[<span class="dv">0</span>,<span class="dv">0</span>] <span class="co"># Bottom left</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-display" data-execution_count="11">
 <pre><code>np.int16(-8)</code></pre>
 </div>
 </div>
-<div id="86edba31" class="cell" data-execution_count="12">
+<div id="52cc35f0" class="cell" data-execution_count="12">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>el[<span class="op">-</span><span class="dv">1</span>,<span class="dv">0</span>] <span class="co"># Top Left</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-display" data-execution_count="12">
 <pre><code>np.int16(-31)</code></pre>
 </div>
 </div>
-<div id="d4010f56" class="cell" data-execution_count="13">
+<div id="e48b0762" class="cell" data-execution_count="13">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb19"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>geometry <span class="op">=</span> mikeio.Grid2D(x<span class="op">=</span>ds.lon.values, y<span class="op">=</span>ds.lat.values, projection<span class="op">=</span><span class="st">"LONG/LAT"</span>)</span>
 <span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>geometry</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-display" data-execution_count="13">
@@ -1208,7 +1260,7 @@ y: [55.2, 55.21, ..., 56.3] (ny=264, dy=0.004167)
 projection: LONG/LAT</code></pre>
 </div>
 </div>
-<div id="306b5ec1" class="cell" data-execution_count="14">
+<div id="0512914a" class="cell" data-execution_count="14">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb21"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>da <span class="op">=</span> mikeio.DataArray(data<span class="op">=</span>el,</span>
 <span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>               item<span class="op">=</span>mikeio.ItemInfo(<span class="st">"Elevation"</span>, mikeio.EUMType.Total_Water_Depth),</span>
 <span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>               geometry<span class="op">=</span>geometry,</span>
@@ -1223,7 +1275,7 @@ time: 2018-01-01 00:00:00 (time-invariant)
 geometry: Grid2D (ny=264, nx=216)</code></pre>
 </div>
 </div>
-<div id="0f39ff9a" class="cell" data-execution_count="15">
+<div id="7a87b03d" class="cell" data-execution_count="15">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb23"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>da.plot()<span class="op">;</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-display">
 <div>
@@ -1233,7 +1285,7 @@ geometry: Grid2D (ny=264, nx=216)</code></pre>
 </div>
 </div>
 </div>
-<div id="45da1a98" class="cell" data-execution_count="16">
+<div id="f8ba4404" class="cell" data-execution_count="16">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb24"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>da.plot(cmap<span class="op">=</span><span class="st">'coolwarm'</span>, vmin<span class="op">=-</span><span class="dv">100</span>, vmax<span class="op">=</span><span class="dv">100</span>)<span class="op">;</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-display">
 <div>
@@ -1243,10 +1295,10 @@ geometry: Grid2D (ny=264, nx=216)</code></pre>
 </div>
 </div>
 </div>
-<div id="b4764e79" class="cell" data-execution_count="17">
+<div id="590393dc" class="cell" data-execution_count="17">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb25"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a>da.to_dfs(<span class="st">"gebco.dfs2"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
-<div id="a82b3368" class="cell" data-execution_count="18">
+<div id="c3522d61" class="cell" data-execution_count="18">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb26"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a>ds <span class="op">=</span> mikeio.read(<span class="st">"gebco.dfs2"</span>)</span>
 <span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a>ds.Elevation.plot()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-display">
@@ -1259,7 +1311,7 @@ geometry: Grid2D (ny=264, nx=216)</code></pre>
 </div>
 <section id="clean-up" class="level1">
 <h1>Clean up</h1>
-<div id="7f515f1b" class="cell" data-execution_count="19">
+<div id="468772b0" class="cell" data-execution_count="19">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb27"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> os</span>
 <span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a>os.remove(<span class="st">"gebco.dfs2"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
