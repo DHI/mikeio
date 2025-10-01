@@ -36,7 +36,8 @@ website:
     - title: "User Guide"
       style: docked
       contents:
-        - user-guide/getting-started.qmd 
+        - user-guide/getting-started.qmd
+        - design.qmd
         - user-guide/data-structures.md
         - user-guide/dataarray.qmd
         - user-guide/dataset.qmd

@@ -42,7 +42,7 @@ See our sister library **MIKE IO 1D** for .res1d and .xns11 files.
 
 MIKE IO is licensed under BSD-3-Clause license and available on [GitHub](https://github.com/DHI/mikeio)
 
-[**License**](license.qmd)
+[**Design philosophy**](design.qmd)
 
 :::
 
