@@ -450,7 +450,7 @@ def test_write_line_spectra(dfsu_line: DfsuSpectral, tmp_path: Path) -> None:
 
     ds.to_dfs(fp)
 
-    ds2 = mikeio.read(fp)
+    _ = mikeio.read(fp)
 
 
 def test_write_line_spectra_energy(tmp_path: Path) -> None:

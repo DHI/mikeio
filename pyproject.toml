@@ -1,22 +1,7 @@
 [build-system]
-requires = ["hatchling"]
-build-backend = "hatchling.build"
+requires = ["uv_build>=0.8.9,<0.9.0"]
+build-backend = "uv_build"
 
-[tool.hatch.build]
-license-files = { paths = ["License.txt"] }
-
-[tool.hatch.build.targets.sdist]
-exclude = [
-    "notebooks",
-    "tests",
-    "images",
-    ".github",
-    "docs",
-    ".devcontainer",
-    "*.md",
-    "*.txt",
-    ".gitattributes",
-]
 
 [project]
 name = "mikeio"
@@ -53,7 +38,7 @@ classifiers = [
     "Topic :: Scientific/Engineering",
 ]
 
-[project.optional-dependencies]
+[dependency-groups]
 dev = [
     "pytest",
     "quarto-cli",
@@ -61,7 +46,6 @@ dev = [
     "griffe==1.1.0",    # compatible with quartodoc 0.9.1
     "shapely",
     "pyproj",
-    "xarray",
     "netcdf4",
     "rasterio",
     "polars",
@@ -69,21 +53,12 @@ dev = [
     "mypy==1.16.1",
 ]
 
-test = [
-    "pytest",
-    "pytest-cov",
-    "xarray",
-    "mypy==1.16.1",
-    "shapely",
-    "pyproj",
-    "polars",
-]
+test = ["pytest", "pytest-cov", "mypy==1.16.1", "shapely", "pyproj", "polars"]
 
 notebooks = [
     "nbformat",
     "nbconvert",
     "jupyter",
-    "xarray",
     "netcdf4",
     "rasterio",
     "geopandas",
