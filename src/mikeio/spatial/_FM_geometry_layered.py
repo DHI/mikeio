@@ -183,7 +183,7 @@ class _GeometryFMLayered(_GeometryFM):
     @cached_property
     def element_coordinates(self) -> np.ndarray:
         """Center coordinates of each element."""
-        return self._calc_element_coordinates(maxnodes=8)
+        return self._calc_element_coordinates()
 
     def _get_nodes_and_table_for_elements(
         self,
