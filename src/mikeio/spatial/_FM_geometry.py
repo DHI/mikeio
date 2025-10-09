@@ -294,7 +294,6 @@ class _GeometryFM(_Geometry):
     ) -> None:
         super().__init__(projection=projection)
         self.node_coordinates = np.asarray(node_coordinates)
-        self.nodes = CoordinateView(self.node_coordinates)
 
         n_nodes = len(self.node_coordinates)
         self._codes = (
@@ -405,6 +404,10 @@ class _GeometryFM(_Geometry):
     @property
     def node_ids(self) -> np.ndarray:
         return self._node_ids
+
+    @property
+    def nodes(self) -> CoordinateView:
+        return CoordinateView(self.node_coordinates)
 
     @property
     def n_elements(self) -> int:
