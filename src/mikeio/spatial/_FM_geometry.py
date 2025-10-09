@@ -261,6 +261,23 @@ class _GeometryFMPlotter:
             return "equal"
 
 
+class CoordinateView:
+    def __init__(self, node_coordinates: np.ndarray) -> None:
+        self._nc = node_coordinates
+
+    @property
+    def x(self) -> np.ndarray:
+        return self._nc[:, 0]
+
+    @property
+    def y(self) -> np.ndarray:
+        return self._nc[:, 1]
+
+    @property
+    def z(self) -> np.ndarray:
+        return self._nc[:, 2]
+
+
 class _GeometryFM(_Geometry):
     def __init__(
         self,
@@ -277,6 +294,7 @@ class _GeometryFM(_Geometry):
     ) -> None:
         super().__init__(projection=projection)
         self.node_coordinates = np.asarray(node_coordinates)
+        self.nodes = CoordinateView(self.node_coordinates)
 
         n_nodes = len(self.node_coordinates)
         self._codes = (
@@ -532,6 +550,11 @@ class GeometryFM2D(_GeometryFM):
         """Does the mesh consist of triangles only."""
         return self.max_nodes_per_element == 3 or self.max_nodes_per_element == 6
 
+    @property
+    def elements(self) -> CoordinateView:
+        """Center coordinates of each element."""
+        return CoordinateView(self.element_coordinates)
+
     @cached_property
     def element_coordinates(self) -> np.ndarray:
         """Center coordinates of each element."""
@@ -764,8 +787,8 @@ class GeometryFM2D(_GeometryFM):
         n_elements = self.n_elements
 
         # Node coordinates
-        xn = self.node_coordinates[:, 0]
-        yn = self.node_coordinates[:, 1]
+        xn = self.nodes.x
+        yn = self.nodes.y
 
         area = np.empty(n_elements)
         xcoords = np.empty(8)
@@ -1035,8 +1058,8 @@ class GeometryFM2D(_GeometryFM):
         """Find 2d element ids of elements inside area."""
         if self._area_is_bbox(area):
             x0, y0, x1, y1 = area
-            xc = self.element_coordinates[:, 0]
-            yc = self.element_coordinates[:, 1]
+            xc = self.elements.x
+            yc = self.elements.y
             mask = (xc >= x0) & (xc <= x1) & (yc >= y0) & (yc <= y1)
         elif self._area_is_polygon(area):
             polygon = np.array(area)

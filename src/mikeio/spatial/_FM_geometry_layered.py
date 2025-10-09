@@ -10,7 +10,7 @@ import numpy as np
 from mikecore.DfsuFile import DfsuFileType
 
 
-from ._FM_geometry import GeometryFM2D, _GeometryFM, _GeometryFMPlotter
+from ._FM_geometry import CoordinateView, GeometryFM2D, _GeometryFM, _GeometryFMPlotter
 from ._geometry import GeometryPoint3D
 
 from ._FM_plot import _plot_vertical_profile, BoundaryPolygons
@@ -180,10 +180,16 @@ class _GeometryFMLayered(_GeometryFM):
                     n_sigma=n_sigma,
                 )
 
+    # TODO move this into base class
     @cached_property
     def element_coordinates(self) -> np.ndarray:
         """Center coordinates of each element."""
         return self._calc_element_coordinates(maxnodes=8)
+
+    @property
+    def elements(self) -> CoordinateView:
+        """Center coordinates of each element."""
+        return CoordinateView(self.element_coordinates)
 
     def _get_nodes_and_table_for_elements(
         self,
@@ -605,7 +611,7 @@ class _GeometryFMLayered(_GeometryFM):
         element_table = self.element_table
         n_elements = len(element_table)
 
-        zn = self.node_coordinates[:, 2]
+        zn = self.nodes.z
         zn_is_2d = len(zn.shape) == 2
         shape = (zn.shape[0], n_elements) if zn_is_2d else (n_elements,)
         dz = np.full(shape=shape, fill_value=np.nan)
@@ -771,8 +777,8 @@ class GeometryFMVerticalProfile(_GeometryFMLayered):
             relative distance in meters from start of transect
 
         """
-        xe = self.element_coordinates[:, 0]
-        ye = self.element_coordinates[:, 1]
+        xe = self.elements.x
+        ye = self.elements.y
         dd2 = np.square(xe - coords[0]) + np.square(ye - coords[1])
         idx = np.argmin(dd2)
         return self.relative_element_distance[idx]
@@ -832,12 +838,12 @@ class GeometryFMVerticalColumn(GeometryFM3D):
 
     def calc_ze(self, zn: np.ndarray | None = None) -> np.ndarray:
         if zn is None:
-            zn = self.node_coordinates[:, 2]
+            zn = self.nodes.z
         return self._calc_z_using_idx(zn, self._idx_e)
 
     def calc_zf(self, zn: np.ndarray | None = None) -> np.ndarray:
         if zn is None:
-            zn = self.node_coordinates[:, 2]
+            zn = self.nodes.z
         return self._calc_z_using_idx(zn, self._idx_f)
 
     def _calc_zee(self, zn: np.ndarray | None = None) -> np.ndarray:
@@ -908,8 +914,8 @@ class _GeometryFMVerticalProfilePlotter:
 
         if ax is None:
             _, ax = plt.subplots(figsize=figsize)
-        x = self.g.node_coordinates[:, 0]
-        y = self.g.node_coordinates[:, 1]
+        x = self.g.nodes.x
+        y = self.g.nodes.y
         ax.plot(x, y, **kwargs)
         return ax
 

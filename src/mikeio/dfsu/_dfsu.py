@@ -54,9 +54,9 @@ def write_dfsu(filename: str | Path, data: Dataset) -> None:
     if geometry.is_layered or geometry.is_spectral:
         dfsu_filetype = geometry._type.value
 
-    xn = geometry.node_coordinates[:, 0]
-    yn = geometry.node_coordinates[:, 1]
-    zn = geometry.node_coordinates[:, 2]
+    xn = geometry.nodes.x
+    yn = geometry.nodes.y
+    zn = geometry.nodes.z
 
     elem_table = [np.array(e) + 1 for e in geometry.element_table]
 

@@ -308,8 +308,8 @@ def test_to_geometryFM() -> None:
     assert g.n_nodes == (nx + 1) * (ny + 1)
     assert g.projection_string == "LONG/LAT"
 
-    xe = g.element_coordinates[:, 0]
-    ye = g.element_coordinates[:, 1]
+    xe = g.elements.x
+    ye = g.elements.y
     assert xe[0] == grd.x[0]
     assert xe[ny - 1] == grd.x[0]
     assert ye[0] == grd.y[0]
