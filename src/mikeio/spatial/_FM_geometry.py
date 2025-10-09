@@ -303,7 +303,7 @@ class _GeometryFM(_Geometry):
         element_table = self.element_table
         node_coords = self.node_coordinates
 
-        ec = np.array([node_coords[e].mean(axis=0) for e in element_table])
+        ec = np.array([node_coords[e.astype(int)].mean(axis=0) for e in element_table])
 
         return ec
 
