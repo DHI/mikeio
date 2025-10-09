@@ -375,6 +375,11 @@ class _GeometryFM(_Geometry):
         return self._element_ids
 
     @cached_property
+    def element_coordinates(self) -> np.ndarray:
+        """Center coordinates of each element."""
+        return self._calc_element_coordinates()
+
+    @cached_property
     def max_nodes_per_element(self) -> int:
         """The maximum number of nodes for an element."""
         maxnodes = 0
@@ -508,11 +513,6 @@ class GeometryFM2D(_GeometryFM):
     def is_tri_only(self) -> bool:
         """Does the mesh consist of triangles only."""
         return self.max_nodes_per_element == 3 or self.max_nodes_per_element == 6
-
-    @cached_property
-    def element_coordinates(self) -> np.ndarray:
-        """Center coordinates of each element."""
-        return self._calc_element_coordinates()
 
     @cached_property
     def _tree2d(self) -> cKDTree:
