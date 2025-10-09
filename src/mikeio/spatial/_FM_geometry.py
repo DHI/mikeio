@@ -12,6 +12,7 @@ import warnings
 
 
 import numpy as np
+from numpy.typing import NDArray
 from mikecore.DfsuFile import DfsuFileType
 from mikecore.eum import eumQuantity
 from mikecore.MeshBuilder import MeshBuilder
@@ -298,35 +299,11 @@ class _GeometryFM(_Geometry):
         if reindex:
             self._reindex()
 
-    def _calc_element_coordinates(self, maxnodes: int = 4) -> np.ndarray:
+    def _calc_element_coordinates(self) -> NDArray[np.floating]:
         element_table = self.element_table
+        node_coords = self.node_coordinates
 
-        n_elements = len(element_table)
-        ec = np.empty([n_elements, 3])
-
-        # pre-allocate for speed
-        idx = np.zeros(maxnodes, dtype=int)
-        xcoords = np.zeros([maxnodes, n_elements])
-        ycoords = np.zeros([maxnodes, n_elements])
-        zcoords = np.zeros([maxnodes, n_elements])
-        nnodes_per_elem = np.zeros(n_elements)
-
-        for j in range(n_elements):
-            nodes = element_table[j]
-            nnodes = len(nodes)
-            nnodes_per_elem[j] = nnodes
-            for i in range(nnodes):
-                idx[i] = nodes[i]  # - 1
-
-            x, y, z = self.node_coordinates[idx[:nnodes]].T
-
-            xcoords[:nnodes, j] = x
-            ycoords[:nnodes, j] = y
-            zcoords[:nnodes, j] = z
-
-        ec[:, 0] = np.sum(xcoords, axis=0) / nnodes_per_elem
-        ec[:, 1] = np.sum(ycoords, axis=0) / nnodes_per_elem
-        ec[:, 2] = np.sum(zcoords, axis=0) / nnodes_per_elem
+        ec = np.array([node_coords[e.astype(int)].mean(axis=0) for e in element_table])
 
         return ec
 
@@ -396,6 +373,11 @@ class _GeometryFM(_Geometry):
     @property
     def element_ids(self) -> np.ndarray:
         return self._element_ids
+
+    @cached_property
+    def element_coordinates(self) -> np.ndarray:
+        """Center coordinates of each element."""
+        return self._calc_element_coordinates()
 
     @cached_property
     def max_nodes_per_element(self) -> int:
@@ -531,11 +513,6 @@ class GeometryFM2D(_GeometryFM):
     def is_tri_only(self) -> bool:
         """Does the mesh consist of triangles only."""
         return self.max_nodes_per_element == 3 or self.max_nodes_per_element == 6
-
-    @cached_property
-    def element_coordinates(self) -> np.ndarray:
-        """Center coordinates of each element."""
-        return self._calc_element_coordinates()
 
     @cached_property
     def _tree2d(self) -> cKDTree:
