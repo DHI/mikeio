@@ -47,7 +47,6 @@ dev = [
     "shapely",
     "pyproj",
     "netcdf4",
-    "rasterio",
     "polars",
     "ruff==0.6.2",
     "mypy==1.16.1",
