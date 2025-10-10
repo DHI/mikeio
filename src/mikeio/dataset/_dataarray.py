@@ -1998,26 +1998,29 @@ class DataArray:
         if self._has_time_axis:
             coords["time"] = xr.DataArray(self.time, dims="time")
 
-        if isinstance(self.geometry, Grid1D):
-            coords["x"] = xr.DataArray(data=self.geometry.x, dims="x")
-        elif isinstance(self.geometry, Grid2D):
-            coords["y"] = xr.DataArray(data=self.geometry.y, dims="y")
-            coords["x"] = xr.DataArray(data=self.geometry.x, dims="x")
-        elif isinstance(self.geometry, Grid3D):
-            coords["z"] = xr.DataArray(data=self.geometry.z, dims="z")
-            coords["y"] = xr.DataArray(data=self.geometry.y, dims="y")
-            coords["x"] = xr.DataArray(data=self.geometry.x, dims="x")
-        elif isinstance(self.geometry, GeometryFM2D):
-            coords["element"] = xr.DataArray(
-                data=self.geometry.element_ids, dims="element"
-            )
-        elif isinstance(self.geometry, GeometryPoint2D):
-            coords["x"] = self.geometry.x
-            coords["y"] = self.geometry.y
-        elif isinstance(self.geometry, GeometryPoint3D):
-            coords["x"] = self.geometry.x
-            coords["y"] = self.geometry.y
-            coords["z"] = self.geometry.z
+        g = self.geometry
+
+        match g:
+            case Grid1D():
+                coords["x"] = xr.DataArray(data=g.x, dims="x")
+            case Grid2D():
+                coords["y"] = xr.DataArray(data=g.y, dims="y")
+                coords["x"] = xr.DataArray(data=g.x, dims="x")
+            case Grid3D():
+                coords["z"] = xr.DataArray(data=g.z, dims="z")
+                coords["y"] = xr.DataArray(data=g.y, dims="y")
+                coords["x"] = xr.DataArray(data=g.x, dims="x")
+            case GeometryFM2D():
+                coords["element"] = xr.DataArray(data=g.element_ids, dims="element")
+            case GeometryPoint2D():
+                coords["x"] = g.x
+                coords["y"] = g.y
+            case GeometryPoint3D():
+                coords["x"] = g.x
+                coords["y"] = g.y
+                coords["z"] = g.z
+            case _:
+                pass
 
         xr_da = xr.DataArray(
             data=self.values,
