@@ -229,7 +229,7 @@ class Dataset:
         return self[0]._dt
 
     @property
-    def time(self) -> pd.DatetimeIndex:
+    def time(self) -> pd.DatetimeIndex | pd.TimedeltaIndex:
         """Time axis."""
         return list(self)[0].time
 
@@ -1722,10 +1722,7 @@ class Dataset:
         df = pd.DataFrame(data, index=self.time)
 
         if round_time:
-            rounded_idx = pd.DatetimeIndex(self.time).round(round_time)  # type: ignore
-            df.index = pd.DatetimeIndex(rounded_idx, freq="infer")
-        else:
-            df.index = pd.DatetimeIndex(self.time, freq="infer")
+            self.time = self.time.round(round_time)  # type: ignore
 
         return df
 

@@ -179,7 +179,7 @@ class DataArray:
         self,
         data: ArrayLike,
         *,
-        time: pd.DatetimeIndex | str | None = None,
+        time: pd.DatetimeIndex | pd.TimedeltaIndex | str | None = None,
         name: str | None = None,
         type: EUMType | None = None,
         unit: EUMUnit | None = None,
@@ -192,7 +192,7 @@ class DataArray:
         # TODO consider np.asarray, e.g. self._values = np.asarray(data)
         self._values = self._parse_data(data)
 
-        self.time: pd.DatetimeIndex = self._parse_time(time)
+        self.time: pd.DatetimeIndex | pd.TimedeltaIndex = self._parse_time(time)
         self._dt = dt
 
         geometry = GeometryUndefined() if geometry is None else geometry
@@ -2128,8 +2128,10 @@ class DataArray:
             data[mask] = value
 
     @staticmethod
-    def _parse_time(time: Any) -> pd.DatetimeIndex:
-        """Allow anything that we can create a DatetimeIndex from."""
+    def _parse_time(time: Any) -> pd.DatetimeIndex | pd.TimedeltaIndex:
+        if isinstance(time, pd.TimedeltaIndex):
+            return time
+
         if time is None:
             time = [pd.Timestamp(2018, 1, 1)]  # TODO is this the correct epoch?
         if isinstance(time, str) or (not isinstance(time, Iterable)):
@@ -2144,7 +2146,6 @@ class DataArray:
             raise ValueError(
                 "Time must be monotonic increasing (only equal or increasing) instances."
             )
-        assert isinstance(index, pd.DatetimeIndex)
         return index
 
     @staticmethod

@@ -113,9 +113,9 @@ class Dfs0:
             TimeAxisType.CalendarEquidistant,
             TimeAxisType.CalendarNonEquidistant,
         }:
-            self._start_time: datetime = dfs.FileInfo.TimeAxis.StartDateTime
+            self._start_time: datetime | None = dfs.FileInfo.TimeAxis.StartDateTime
         else:  # relative time axis
-            self._start_time = datetime(1970, 1, 1)
+            self._start_time = None
 
         # time
         self._n_timesteps: int = dfs.FileInfo.TimeAxis.NumberOfTimeSteps
@@ -174,9 +174,13 @@ class Dfs0:
         data = [matrix[:, i] for i in range(ncol)]
 
         t_seconds = raw_data[:, 0]
-        ftime = pd.to_datetime(t_seconds, unit="s", origin=self.start_time).round(
-            freq="ms"
-        )
+        if self._start_time is not None:
+            ftime = pd.to_datetime(t_seconds, unit="s", origin=self.start_time).round(
+                freq="ms"
+            )
+        else:
+            # relative time use timedelta
+            ftime = pd.to_timedelta(t_seconds, unit="s")
 
         # TODO common for all dfs files , extract
         # select items
