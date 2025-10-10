@@ -258,12 +258,14 @@ class Dfs0:
         return self._items
 
     @property
-    def start_time(self) -> datetime:
+    def start_time(self) -> datetime | None:
         """File start time."""
         return self._start_time
 
     @cached_property
-    def end_time(self) -> datetime:
+    def end_time(self) -> datetime | None:
+        if self.start_time is None:
+            return None
         if self._dfs.FileInfo.TimeAxis.IsEquidistant():
             dt = self._dfs.FileInfo.TimeAxis.TimeStep
             n_steps = self._dfs.FileInfo.TimeAxis.NumberOfTimeSteps
