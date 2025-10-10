@@ -23,7 +23,6 @@ from typing import (
 
 import numpy as np
 import pandas as pd
-from mikecore.DfsuFile import DfsuFileType
 
 
 from ..eum import EUMType, EUMUnit, ItemInfo
@@ -286,6 +285,8 @@ class DataArray:
     def _parse_geometry(
         geometry: Any, dims: tuple[str, ...], shape: tuple[int, ...]
     ) -> Any:
+        """Parse and validate geometry based on dims and data shape."""
+        # Handle undefined geometry for 2D dims
         if len(dims) > 1 and (
             geometry is None or isinstance(geometry, GeometryUndefined)
         ):
@@ -293,40 +294,47 @@ class DataArray:
                 return Grid1D(nx=shape[1], dx=1.0 / (shape[1] - 1))
 
         axis = 1 if "time" in dims else 0
-        # dims_no_time = tuple([d for d in dims if d != "time"])
-        # shape_no_time = shape[1:] if ("time" in dims) else shape
 
+        # Handle time-only data
         if len(dims) == 1 and dims[0] == "time":
-            if geometry is not None:
-                # assert geometry.ndim == 0
-                return geometry
-            else:
-                return GeometryUndefined()
+            return geometry if geometry is not None else GeometryUndefined()
 
-        if isinstance(geometry, GeometryFMPointSpectrum):
-            pass
-        elif isinstance(geometry, GeometryFM2D):
-            if geometry.is_spectral:
-                if geometry._type == DfsuFileType.DfsuSpectral1D:
-                    assert (
-                        shape[axis] == geometry.n_nodes
-                    ), "data shape does not match number of nodes"
-                elif geometry._type == DfsuFileType.DfsuSpectral2D:
-                    assert (
-                        shape[axis] == geometry.n_elements
-                    ), "data shape does not match number of elements"
-            else:
-                assert (
-                    shape[axis] == geometry.n_elements
-                ), "data shape does not match number of elements"
-        elif isinstance(geometry, Grid1D):
-            assert (
-                shape[axis] == geometry.nx
-            ), "data shape does not match number of grid points"
-        elif isinstance(geometry, Grid2D):
-            assert shape[axis] == geometry.ny, "data shape does not match ny"
-            assert shape[axis + 1] == geometry.nx, "data shape does not match nx"
-        # elif isinstance(geometry, Grid3D): # TODO
+        # Validate geometry for data shape
+        match geometry:
+            case GeometryFM2D() as g:
+                if shape[axis] != g.n_elements:
+                    raise ValueError(
+                        f"Shape mismatch: expected {g.n_elements} elements along axis {axis}, got {shape[axis]}"
+                    )
+            case GeometryFMLineSpectrum() as g:
+                if shape[axis] != g.n_nodes:
+                    raise ValueError(
+                        f"Shape mismatch: expected {g.n_nodes} nodes along axis {axis}, got {shape[axis]}"
+                    )
+            case GeometryFMAreaSpectrum() as g:
+                if shape[axis] != g.n_elements:
+                    raise ValueError(
+                        f"Shape mismatch: expected {g.n_elements} elements along axis {axis}, got {shape[axis]}"
+                    )
+
+            case Grid1D() as g:
+                if shape[axis] != g.nx:
+                    raise ValueError(
+                        f"Shape mismatch: expected {g.nx} grid points along axis {axis}, got {shape[axis]}"
+                    )
+
+            case Grid2D() as g:
+                if shape[axis] != g.ny:
+                    raise ValueError(
+                        f"Shape mismatch: expected {g.ny} rows along axis {axis}, got {shape[axis]}"
+                    )
+                if shape[axis + 1] != g.nx:
+                    raise ValueError(
+                        f"Shape mismatch: expected {g.nx} columns along axis {axis + 1}, got {shape[axis + 1]}"
+                    )
+
+            # case Grid3D() as g: # TODO: handle 3D grids
+            #     pass
 
         return geometry
 
