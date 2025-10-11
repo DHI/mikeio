@@ -200,7 +200,7 @@ class DataArray:
         self._check_time_data_length(self.time)
 
         self.item = self._parse_item(item=item, name=name, type=type, unit=unit)
-        self.geometry = self._parse_geometry(geometry, self.dims, self.shape)
+        self.geometry = geometry
         self._zn = self._parse_zn(zn, self.geometry, self.n_timesteps)
         self._set_spectral_attributes(geometry)
         self.plot = self._get_plotter_by_geometry()
@@ -280,63 +280,6 @@ class DataArray:
             return ItemInfo(item)
 
         raise ValueError("item must be str, EUMType or EUMUnit")
-
-    @staticmethod
-    def _parse_geometry(
-        geometry: Any, dims: tuple[str, ...], shape: tuple[int, ...]
-    ) -> Any:
-        """Parse and validate geometry based on dims and data shape."""
-        # Handle undefined geometry for 2D dims
-        if len(dims) > 1 and (
-            geometry is None or isinstance(geometry, GeometryUndefined)
-        ):
-            if dims == ("time", "x"):
-                return Grid1D(nx=shape[1], dx=1.0 / (shape[1] - 1))
-
-        axis = 1 if "time" in dims else 0
-
-        # Handle time-only data
-        if len(dims) == 1 and dims[0] == "time":
-            return geometry if geometry is not None else GeometryUndefined()
-
-        # Validate geometry for data shape
-        match geometry:
-            case GeometryFM2D() as g:
-                if shape[axis] != g.n_elements:
-                    raise ValueError(
-                        f"Shape mismatch: expected {g.n_elements} elements along axis {axis}, got {shape[axis]}"
-                    )
-            case GeometryFMLineSpectrum() as g:
-                if shape[axis] != g.n_nodes:
-                    raise ValueError(
-                        f"Shape mismatch: expected {g.n_nodes} nodes along axis {axis}, got {shape[axis]}"
-                    )
-            case GeometryFMAreaSpectrum() as g:
-                if shape[axis] != g.n_elements:
-                    raise ValueError(
-                        f"Shape mismatch: expected {g.n_elements} elements along axis {axis}, got {shape[axis]}"
-                    )
-
-            case Grid1D() as g:
-                if shape[axis] != g.nx:
-                    raise ValueError(
-                        f"Shape mismatch: expected {g.nx} grid points along axis {axis}, got {shape[axis]}"
-                    )
-
-            case Grid2D() as g:
-                if shape[axis] != g.ny:
-                    raise ValueError(
-                        f"Shape mismatch: expected {g.ny} rows along axis {axis}, got {shape[axis]}"
-                    )
-                if shape[axis + 1] != g.nx:
-                    raise ValueError(
-                        f"Shape mismatch: expected {g.nx} columns along axis {axis + 1}, got {shape[axis + 1]}"
-                    )
-
-            # case Grid3D() as g: # TODO: handle 3D grids
-            #     pass
-
-        return geometry
 
     @staticmethod
     def _parse_zn(
