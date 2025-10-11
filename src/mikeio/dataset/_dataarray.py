@@ -200,7 +200,8 @@ class DataArray:
         self._check_time_data_length(self.time)
 
         self.item = self._parse_item(item=item, name=name, type=type, unit=unit)
-        self.geometry = geometry
+        # geometries are very diverse without a common interface
+        self.geometry: Any = geometry
         self._zn = self._parse_zn(zn, self.geometry, self.n_timesteps)
         self._set_spectral_attributes(geometry)
         self.plot = self._get_plotter_by_geometry()
