@@ -1730,16 +1730,7 @@ class Dataset:
         return df
 
     def to_dfs(self, filename: str | Path, **kwargs: Any) -> None:
-        """Write dataset to a new dfs file.
-
-        Parameters
-        ----------
-        filename: str
-            full path to the new dfs file
-        **kwargs: Any
-            additional arguments passed to the writing function, e.g. dtype for dfs0
-
-        """
+        """Write dataset to a new dfs file."""
         from ..dfs._dfs0 import write_dfs0
         from ..dfs._dfs1 import write_dfs1
         from ..dfs._dfs2 import write_dfs2
@@ -1748,35 +1739,34 @@ class Dataset:
 
         filename = str(filename)
 
-        # TODO is this a candidate for match/case?
-        if isinstance(
-            self.geometry, (GeometryPoint2D, GeometryPoint3D, GeometryUndefined)
-        ):
-            if self.ndim == 0:  # Not very common, but still...
-                self._validate_extension(filename, ".dfs0")
-                write_dfs0(filename, self, **kwargs)
-            elif self.ndim == 1 and self[0]._has_time_axis:
-                self._validate_extension(filename, ".dfs0")
-                write_dfs0(filename, self, **kwargs)
-            else:
-                raise ValueError("Cannot write Dataset with no geometry to file!")
-        elif isinstance(self.geometry, Grid2D):
-            self._validate_extension(filename, ".dfs2")
-            write_dfs2(filename, self)
-        elif isinstance(self.geometry, Grid3D):
-            self._validate_extension(filename, ".dfs3")
-            write_dfs3(filename, self)
+        match self.geometry:
+            case GeometryPoint2D() | GeometryPoint3D() | GeometryUndefined():
+                if self.ndim == 0 or (self.ndim == 1 and self[0]._has_time_axis):
+                    self._validate_extension(filename, ".dfs0")
+                    write_dfs0(filename, self, **kwargs)
+                else:
+                    raise ValueError("Cannot write Dataset with no geometry to file!")
 
-        elif isinstance(self.geometry, Grid1D):
-            self._validate_extension(filename, ".dfs1")
-            write_dfs1(filename, self)
-        elif isinstance(self.geometry, _GeometryFM):
-            self._validate_extension(filename, ".dfsu")
-            write_dfsu(filename, self)
-        else:
-            raise NotImplementedError(
-                "Writing this type of dataset is not yet implemented"
-            )
+            case Grid2D():
+                self._validate_extension(filename, ".dfs2")
+                write_dfs2(filename, self)
+
+            case Grid3D():
+                self._validate_extension(filename, ".dfs3")
+                write_dfs3(filename, self)
+
+            case Grid1D():
+                self._validate_extension(filename, ".dfs1")
+                write_dfs1(filename, self)
+
+            case _GeometryFM():
+                self._validate_extension(filename, ".dfsu")
+                write_dfsu(filename, self)
+
+            case _:
+                raise NotImplementedError(
+                    "Writing this type of dataset is not yet implemented"
+                )
 
     @staticmethod
     def _validate_extension(filename: str | Path, valid_extension: str) -> None:

@@ -1032,38 +1032,39 @@ class DataArray:
 
         # interp in space
         if (x is not None) or (y is not None):
-            if isinstance(self.geometry, Grid2D):
-                if x is None or y is None:
-                    raise ValueError("both x and y must be specified")
+            g = self.geometry
+            match g:
+                case Grid2D():
+                    if x is None or y is None:
+                        raise ValueError("both x and y must be specified")
 
-                xr_da = self.to_xarray()
-                dai = xr_da.interp(x=x, y=y).values
-                geometry = GeometryPoint2D(
-                    x=x, y=y, projection=self.geometry.projection
-                )
-            elif isinstance(self.geometry, Grid1D):
-                if interpolant is None:
-                    assert x is not None
-                    interpolant = self.geometry.get_spatial_interpolant(x)
-                dai = interpolant.interp1d(self.to_numpy()).flatten()
-                geometry = GeometryUndefined()
-            elif isinstance(self.geometry, GeometryFM2D):
-                if x is None or y is None:
-                    raise ValueError("both x and y must be specified")
+                    xr_da = self.to_xarray()
+                    dai = xr_da.interp(x=x, y=y).values
+                    geometry = GeometryPoint2D(x=x, y=y, projection=g.projection)
 
-                if interpolant is None:
-                    interpolant = self.geometry.get_2d_interpolant(
-                        xy=[(x, y)],  # type: ignore
-                        **kwargs,  # type: ignore
+                case Grid1D():
+                    if interpolant is None:
+                        assert x is not None
+                        interpolant = g.get_spatial_interpolant(x)
+                    dai = interpolant.interp1d(self.to_numpy()).flatten()
+                    geometry = GeometryUndefined()
+
+                case GeometryFM2D():
+                    if x is None or y is None:
+                        raise ValueError("both x and y must be specified")
+
+                    if interpolant is None:
+                        interpolant = g.get_2d_interpolant(
+                            xy=[(x, y)],  # type: ignore
+                            **kwargs,  # type: ignore
+                        )
+                    dai = interpolant.interp2d(self.to_numpy()).flatten()
+                    geometry = GeometryPoint2D(x=x, y=y, projection=g.projection)
+
+                case _:
+                    raise NotImplementedError(
+                        f"Interpolation in {g} is not yet implemented"
                     )
-                dai = interpolant.interp2d(self.to_numpy()).flatten()
-                geometry = GeometryPoint2D(
-                    x=x, y=y, projection=self.geometry.projection
-                )
-            else:
-                raise NotImplementedError(
-                    f"Interpolation in {self.geometry} is not yet implemented"
-                )
 
             da = DataArray(
                 data=dai,
