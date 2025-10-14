@@ -7,7 +7,7 @@ import operator
 import os
 import pathlib
 import warnings
-from collections.abc import Iterable, Sequence
+from collections.abc import Sequence
 from copy import deepcopy
 from dataclasses import dataclass
 from datetime import datetime, timedelta
