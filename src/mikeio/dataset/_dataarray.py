@@ -1230,77 +1230,71 @@ class DataArray:
 
     def interp_like(
         self,
-        other: DataArray | Grid2D | GeometryFM2D | pd.DatetimeIndex,
+        other: DataArray | Dataset | Grid2D | GeometryFM2D | pd.DatetimeIndex,
         interpolant: Interpolant | None = None,
         **kwargs: Any,
     ) -> DataArray:
         """Interpolate in space (and in time) to other geometry (and time axis).
 
-        Note: currently only supports interpolation from dfsu-2d to
-              dfs2 or other dfsu-2d DataArrays
-
         Parameters
         ----------
-        other: Dataset, DataArray, Grid2D, GeometryFM, pd.DatetimeIndex
-            The target geometry (and time axis) to interpolate to
-        interpolant: Interpolant, optional
-            Reuse pre-calculated index and weights
+        other : DataArray, Dataset, Grid2D, GeometryFM2D or pd.DatetimeIndex
+            The geometry (and time axis) to interpolate to.
+        interpolant : Interpolant, optional
+            Precomputed interpolant, by default None
         **kwargs: Any
-            additional kwargs are passed to interpolation method
-
+            Additional keyword arguments to be passed to the interpolation
 
         Returns
         -------
         DataArray
-            Interpolated DataArray
+            New DataArray with interpolated data
+
+        Notes
+        -----
+        Currently only supports interpolation from dfsu-2d to
+              dfs2 or other dfsu-2d DataArrays
 
         """
-        if not (isinstance(self.geometry, GeometryFM2D) and self.geometry.is_2d):
-            raise NotImplementedError(
-                "Currently only supports interpolating from 2d flexible mesh data!"
-            )
+        from ._dataset import Dataset
 
-        if isinstance(other, pd.DatetimeIndex):
-            return self.interp_time(other, **kwargs)
-
-        if not (isinstance(self.geometry, GeometryFM2D) and self.geometry.is_2d):
+        if not isinstance(self.geometry, GeometryFM2D):
             raise NotImplementedError("Currently only supports 2d flexible mesh data!")
 
-        if hasattr(other, "geometry"):
-            geom = other.geometry
-        else:
-            geom = other
+        match other:
+            case pd.DatetimeIndex():
+                return self.interp_time(other, **kwargs)
 
-        if isinstance(geom, Grid2D):
-            xy = geom.xy
-        elif isinstance(geom, GeometryFM2D):
-            xy = geom.element_coordinates[:, :2]
-            if geom.is_layered:
+            case DataArray() | Dataset():
+                geom = other.geometry
+                time = other.time
+
+            case _:
+                geom = other
+                time = None
+
+        match geom:
+            case Grid2D():
+                xy = geom.xy
+            case GeometryFM2D():
+                xy = geom.element_coordinates[:, :2]
+            case _:
                 raise NotImplementedError(
-                    "Does not yet support layered flexible mesh data!"
+                    "Interpolation to other geometry not yet supported"
                 )
-        else:
-            raise NotImplementedError()
 
         if interpolant is None:
             interpolant = self.geometry.get_2d_interpolant(xy, **kwargs)
 
-        if isinstance(geom, (Grid2D, GeometryFM2D)):
-            ari = interpolant.interp2d(data=self.to_numpy())
-            if isinstance(geom, Grid2D):
-                shape = (
-                    (self.n_timesteps, geom.ny, geom.nx)
-                    if self.dims[0] == "time"
-                    else (geom.ny, geom.nx)
-                )
-                ari = ari.reshape(shape)
-
-            assert ari.dtype == self.dtype
-        else:
-            raise NotImplementedError(
-                "Interpolation to other geometry not yet supported"
+        ari = interpolant.interp2d(data=self.to_numpy())
+        if isinstance(geom, Grid2D):
+            shape = (
+                (self.n_timesteps, geom.ny, geom.nx)
+                if self.dims[0] == "time"
+                else (geom.ny, geom.nx)
             )
-        assert isinstance(ari, np.ndarray)
+            ari = ari.reshape(shape)
+
         dai = DataArray(
             data=ari,
             time=self.time,
@@ -1309,10 +1303,8 @@ class DataArray:
             dt=self._dt,
         )
 
-        if hasattr(other, "time"):
-            dai = dai.interp_time(other.time)
-
-        assert isinstance(dai, DataArray)
+        if time is not None:
+            dai = dai.interp_time(time)
 
         return dai
 

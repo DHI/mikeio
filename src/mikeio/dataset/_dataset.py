@@ -1029,15 +1029,17 @@ class Dataset:
     ) -> Dataset:
         """Interpolate in space (and in time) to other geometry (and time axis).
 
-        Note: currently only supports interpolation from dfsu-2d to
-              dfs2 or other dfsu-2d Datasets
-
         Parameters
         ----------
-        other: Dataset, DataArray, Grid2D, GeometryFM, pd.DatetimeIndex
+        other: Dataset, DataArray, Grid2D, GeometryFM2D or pd.DatetimeIndex
             Dataset, DataArray, Grid2D or GeometryFM2D to interpolate to
         **kwargs: Any
             additional kwargs are passed to interpolation method
+
+        Notes
+        -----
+        Currently only supports interpolation from dfsu-2d to
+              dfs2 or other dfsu-2d Datasets
 
         Examples
         --------
@@ -1059,32 +1061,34 @@ class Dataset:
                 "Currently only supports interpolating from 2d flexible mesh data!"
             )
 
-        if isinstance(other, pd.DatetimeIndex):
-            return self.interp_time(other, **kwargs)
+        match other:
+            case pd.DatetimeIndex():
+                return self.interp_time(other, **kwargs)
 
-        if hasattr(other, "geometry"):
-            geom = other.geometry
-        else:
-            geom = other
+            case DataArray() | Dataset():
+                geom = other.geometry
+                time = other.time
 
-        if isinstance(geom, Grid2D):
-            xy = geom.xy
+            case _:
+                geom = other
+                time = None
 
-        elif isinstance(geom, GeometryFM2D):
-            xy = geom.element_coordinates[:, :2]
-            if geom.is_layered:
+        match geom:
+            case Grid2D():
+                xy = geom.xy
+            case GeometryFM2D():
+                xy = geom.element_coordinates[:, :2]
+            case _:
                 raise NotImplementedError(
-                    "Does not yet support layered flexible mesh data!"
+                    "Interpolation to other geometry not yet supported"
                 )
-        else:
-            raise NotImplementedError()
 
         interpolant = self.geometry.get_2d_interpolant(xy, **kwargs)
         das = [da.interp_like(geom, interpolant=interpolant) for da in self]
         ds = Dataset(das, validate=False)
 
-        if hasattr(other, "time"):
-            ds = ds.interp_time(other.time)
+        if time is not None:
+            ds = ds.interp_time(time)
 
         return ds
 
