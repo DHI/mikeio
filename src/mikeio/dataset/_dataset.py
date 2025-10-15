@@ -1734,7 +1734,16 @@ class Dataset:
         return df
 
     def to_dfs(self, filename: str | Path, **kwargs: Any) -> None:
-        """Write dataset to a new dfs file."""
+        """Write dataset to a new dfs file.
+
+        Parameters
+        ----------
+        filename: str
+            full path to the new dfs file
+        **kwargs: Any
+            additional arguments passed to the writing function, e.g. dtype for dfs0
+
+        """
         from ..dfs._dfs0 import write_dfs0
         from ..dfs._dfs1 import write_dfs1
         from ..dfs._dfs2 import write_dfs2
