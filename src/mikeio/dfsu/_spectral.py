@@ -225,9 +225,13 @@ class DfsuSpectral:
         return self.geometry._directions
 
     def _get_spectral_data_shape(
-        self, n_steps: int, elements: Sized | None, dfsu_type: DfsuFileType
+        self,
+        n_steps: int,
+        elements: Sized | None,
+        dfsu_type: DfsuFileType,
+        keepdims: bool,
     ) -> tuple[tuple[int, ...], tuple[int, ...], tuple[str, ...]]:
-        dims = [] if n_steps == 1 else ["time"]
+        dims = [] if (n_steps == 1 and not keepdims) else ["time"]
         n_freq = self.geometry.n_frequencies
         n_dir = self.geometry.n_directions
         shape: tuple[int, ...] = (n_dir, n_freq)
@@ -356,7 +360,7 @@ class DfsuSpectral:
 
         n_steps = len(time_steps)
         read_shape, shape, dims = self._get_spectral_data_shape(
-            n_steps, pts, self._type
+            n_steps, pts, self._type, keepdims
         )
         for item in range(n_items):
             # Initialize an empty data block
