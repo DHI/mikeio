@@ -239,25 +239,30 @@ class DfsuSpectral:
             shape = (n_freq,)
         elif n_freq == 0:
             shape = (n_dir,)
-        if dfsu_type == DfsuFileType.DfsuSpectral0D:
-            read_shape = (n_steps, *shape)
-        elif dfsu_type == DfsuFileType.DfsuSpectral1D:
-            # node-based, FE-style
-            n_nodes = self.geometry.n_nodes if elements is None else len(elements)
-            if n_nodes == 1:
+        match dfsu_type:
+            case DfsuFileType.DfsuSpectral0D:
                 read_shape = (n_steps, *shape)
-            else:
-                dims.append("node")
-                read_shape = (n_steps, n_nodes, *shape)
-            shape = (*shape, self.geometry.n_nodes)
-        else:
-            n_elems = self.geometry.n_elements if elements is None else len(elements)
-            if n_elems == 1:
-                read_shape = (n_steps, *shape)
-            else:
-                dims.append("element")
-                read_shape = (n_steps, n_elems, *shape)
-            shape = (*shape, self.geometry.n_elements)
+
+            case DfsuFileType.DfsuSpectral1D:
+                # node-based, FE-style
+                n_nodes = self.geometry.n_nodes if elements is None else len(elements)
+                if n_nodes == 1:
+                    read_shape = (n_steps, *shape)
+                else:
+                    dims.append("node")
+                    read_shape = (n_steps, n_nodes, *shape)
+                shape = (*shape, self.geometry.n_nodes)
+
+            case DfsuFileType.DfsuSpectral2D:
+                n_elems = (
+                    self.geometry.n_elements if elements is None else len(elements)
+                )
+                if n_elems == 1:
+                    read_shape = (n_steps, *shape)
+                else:
+                    dims.append("element")
+                    read_shape = (n_steps, n_elems, *shape)
+                shape = (*shape, self.geometry.n_elements)
 
         if n_dir > 1:
             dims.append("direction")
@@ -356,21 +361,15 @@ class DfsuSpectral:
 
         deletevalue = self.deletevalue
 
-        data_list = []
-
         n_steps = len(time_steps)
         read_shape, shape, dims = self._get_spectral_data_shape(
             n_steps, pts, self._type, keepdims
         )
-        for item in range(n_items):
-            # Initialize an empty data block
-            data: np.ndarray = np.ndarray(shape=read_shape, dtype=dtype)
-            data_list.append(data)
+        data_list: list[np.ndarray] = [
+            np.ndarray(shape=read_shape, dtype=dtype) for _ in range(n_items)
+        ]
 
         t_seconds = np.zeros(n_steps, dtype=float)
-
-        if single_time_selected and not keepdims:
-            data = data[0]
 
         for i in trange(n_steps, disable=not self.show_progress):
             it = time_steps[i]
