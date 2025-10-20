@@ -31,7 +31,7 @@ Examples are available in two forms:
 MIKE IO is an open source project licensed under the [BSD-3 license](license.qmd).
 The software is provided free of charge with the source code available for inspection and modification.
 
-Contributions are welcome, more details can be found in our [contribution guidelines](https://github.com/DHI/mikeio/blob/main/CONTRIBUTING.md).
+Contributions are welcome!
 
 ## {{< fa comments >}} Easy to collaborate
 By developing MIKE IO on GitHub along with a completely open discussion, we believe that the collaboration between developers and end-users results in a useful library.
