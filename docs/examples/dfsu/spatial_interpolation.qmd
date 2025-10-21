@@ -63,11 +63,10 @@ This section requires the [`rasterio`](https://rasterio.readthedocs.io/en/latest
 
 :::
 
-```{python}
+```python
 import numpy as np
 import rasterio
 from rasterio.transform import from_origin
-# Dcoumentation https://rasterio.readthedocs.io/en/latest/index.html
 
 with rasterio.open(
      fp='wind.tif',
