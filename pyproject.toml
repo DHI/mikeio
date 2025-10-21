@@ -35,6 +35,7 @@ classifiers = [
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
     "Topic :: Scientific/Engineering",
 ]
 
@@ -47,7 +48,6 @@ dev = [
     "shapely",
     "pyproj",
     "netcdf4",
-    "rasterio",
     "polars",
     "ruff==0.6.2",
     "mypy==1.16.1",
