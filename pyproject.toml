@@ -69,8 +69,10 @@ notebooks = [
 ]
 
 [project.urls]
-"Homepage" = "https://github.com/DHI/mikeio"
-"Bug Tracker" = "https://github.com/DHI/mikeio/issues"
+Homepage = "https://dhi.github.io/"
+Documentation = "https://dhi.github.io/"
+Source = "https://github.com/DHI/mikeio"
+Issues = "https://github.com/DHI/mikeio/issues"
 
 
 [tool.ruff.lint]
