@@ -28,67 +28,24 @@ from mikecore.eum import eumUnit, eumItem, eumWrapper
 from ..exceptions import InvalidDataValueType
 
 
-def _type_list(search: str | None = None) -> dict[eumItem, str]:
-    """Get a dictionary of the EUM items.
-
-    Notes
-    -----
-    An alternative to `type_list` is to use `mikeio.eum.Item`
-
-    Parameters
-    ----------
-    search: str, optional
-        a search string (caseinsensitive) to filter out results
-
-    Returns
-    -------
-    dict
-        names and codes for EUM items
-
-    """
-    items = {}
-    check = True
-    i = 1
-    while check:
-        d = eumWrapper.eumGetItemTypeSeq(i)
-        if d[0] is True:
-            items[d[1]] = d[2]
-            i += 1
-        else:
-            check = False
+def _type_list(search: str | None = None) -> list[eumItem]:
+    n_items = eumWrapper.eumGetItemTypeCount()
+    all_eum_types = [eumWrapper.eumGetItemTypeSeq(i + 1) for i in range(n_items)]
+    mapping = {d[2]: d[1] for d in all_eum_types}
 
     if search is not None:
         search = search.lower()
-        items = {
-                key: value
-                for key, value in items.items()
-                if search in value.lower() or search == value.lower()
+        mapping = {
+            key: value for key, value in mapping.items() if search in key.lower()
         }
 
-    return items
+    return list(mapping.values())
 
 
-def _unit_list(eum_type: int) -> dict[str, eumUnit]:
-    """Get a dictionary of valid units.
-
-    Parameters
-    ----------
-    eum_type: int
-        EUM variable type, e.g. 100006 or EUMType.Temperature
-
-    Returns
-    -------
-    dict
-        names and codes for valid units
-
-    """
-    items = {}
-    n_units_for_eum_type = eumWrapper.eumGetItemUnitCount(eum_type)
-    for i in range(n_units_for_eum_type):
-        _, value, key = eumWrapper.eumGetItemUnitSeq(eum_type, i + 1)
-        items[key] = value
-
-    return items
+def _unit_list(eum_type: int) -> list[eumUnit]:
+    n = eumWrapper.eumGetItemUnitCount(eum_type)
+    units = [eumWrapper.eumGetItemUnitSeq(eum_type, i + 1) for i in range(n)]
+    return [d[1] for d in units]
 
 
 class TimeAxisType(IntEnum):
@@ -739,13 +696,24 @@ class EUMType(IntEnum):
     @property
     def units(self) -> list[EUMUnit]:
         """List valid units for this EUM type."""
-        temp = _unit_list(self.code).values()
-        return [EUMUnit(value) for value in temp]
+        return [EUMUnit(code) for code in _unit_list(self.code)]
 
     @staticmethod
     def search(pattern: str) -> list[EUMType]:
-        temp = _type_list(pattern).keys()
-        return [EUMType(key) for key in temp]
+        """Search EUM types by name pattern.
+
+        Parameters
+        ----------
+        pattern : str
+            Search pattern (case insensitive).
+
+        Returns
+        -------
+        list[EUMType]
+            List of matching EUM types.
+
+        """
+        return [EUMType(code) for code in _type_list(pattern)]
 
 
 class EUMUnit(IntEnum):
@@ -1408,7 +1376,7 @@ class EUMUnit(IntEnum):
 
 
 class ItemInfo:
-    """Info for dynamicc items (variables).
+    """Info for dynamic items (variables).
 
     Parameters
     ----------
