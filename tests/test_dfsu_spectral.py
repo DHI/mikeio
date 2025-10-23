@@ -79,6 +79,7 @@ def test_properties_line_spectrum(dfsu_line: DfsuSpectral) -> None:
     assert dfs.frequencies is not None
     assert len(dfs.frequencies) == 25
     assert dfs.geometry.n_directions == 16
+    assert dfs.n_directions == 16
     assert dfs.directions is not None
     assert len(dfs.directions) == 16
     assert dfs.geometry.n_nodes == 10
@@ -127,10 +128,12 @@ def test_properties_area_freq_spectrum(dfsu_area_freq: DfsuSpectral) -> None:
     assert dfs.geometry.is_spectral
     assert dfs._type == DfsuFileType.DfsuSpectral2D
     assert dfs.geometry.n_frequencies == 25
+    assert dfs.n_frequencies == 25
     assert dfs.frequencies is not None
     assert len(dfs.frequencies) == 25
     assert dfs.geometry.n_directions == 0
     assert dfs.directions is None
+    assert dfs.n_directions == 0  # Really?
 
 
 def test_read_spectrum_pt(dfsu_pt: DfsuSpectral) -> None:
@@ -352,6 +355,7 @@ def test_read_spectrum_dir_line(dfsu_line_dir: DfsuSpectral) -> None:
     dfs = dfsu_line_dir
     assert dfs.geometry.n_frequencies == 0
     assert dfs.frequencies is None
+    assert dfs.n_frequencies == 0  # Really?
 
     ds1 = dfs.read(time=[0, 1])
     assert ds1.shape == (2, 10, 16)
@@ -505,3 +509,27 @@ def test_create_line_spectrum_dummy_coordinates() -> None:
         n_nodes=10, frequencies=freq, directions=dirs
     )
     assert geometry.n_nodes == 10
+
+
+def test_read_only_supports_dtype_float32_64(dfsu_pt: DfsuSpectral) -> None:
+    with pytest.raises(ValueError, match="32"):
+        dfsu_pt.read(dtype=np.int32)
+
+
+def test_node_selection_not_possible_for_area_spectrum(dfsu_area: DfsuSpectral) -> None:
+    with pytest.raises(ValueError, match="nodes"):
+        dfsu_area.read(nodes=[1, 2, 3])
+
+
+def test_element_selection_not_possible_for_line_spectrum(
+    dfsu_line: DfsuSpectral,
+) -> None:
+    with pytest.raises(ValueError, match="elements"):
+        dfsu_line.read(elements=[1, 2, 3])
+
+
+def test_element_selection_not_possible_for_point_spectrum(
+    dfsu_pt: DfsuSpectral,
+) -> None:
+    with pytest.raises(ValueError, match="elements"):
+        dfsu_pt.read(elements=[1, 2, 3])

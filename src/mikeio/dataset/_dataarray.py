@@ -209,10 +209,7 @@ class DataArray:
     @staticmethod
     def _parse_data(data: ArrayLike) -> Any:  # np.ndarray | float:
         if not hasattr(data, "shape"):
-            try:
-                data = np.array(data, dtype=float)
-            except ValueError:
-                raise ValueError("Data must be convertible to a numpy array")
+            data = np.array(data, dtype=float)
         return data
 
     def _parse_dims(
