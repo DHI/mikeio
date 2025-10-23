@@ -150,3 +150,8 @@ def test_to_shapely(tri_mesh: Mesh) -> None:
     shp = msh.to_shapely()
     assert shp.geom_type == "MultiPolygon"
     assert shp.area == pytest.approx(68931409.58160606)
+
+
+def test_mikeio_read_no_support_for_mesh() -> None:
+    with pytest.raises(ValueError, match="mesh"):
+        mikeio.read("tests/testdata/odense_rough.mesh")
