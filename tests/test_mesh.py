@@ -155,3 +155,17 @@ def test_to_shapely(tri_mesh: Mesh) -> None:
 def test_mikeio_read_no_support_for_mesh() -> None:
     with pytest.raises(ValueError, match="mesh"):
         mikeio.read("tests/testdata/odense_rough.mesh")
+
+
+def test_setting_zn_is_possible(tri_mesh: Mesh) -> None:
+    tri_mesh.zn = tri_mesh.zn + 1.0
+
+
+def test_setting_zn_must_have_correct_n_nodes(tri_mesh: Mesh) -> None:
+    with pytest.raises(ValueError, match="nodes"):
+        tri_mesh.zn = np.zeros(10)
+
+
+def test_mesh_has_codes(tri_mesh: Mesh) -> None:
+    codes = tri_mesh.codes
+    assert len(codes) == tri_mesh.n_nodes
