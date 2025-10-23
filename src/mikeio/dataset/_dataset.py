@@ -111,7 +111,7 @@ class Dataset:
     def from_numpy(
         data: Sequence[NDArray[np.floating]],
         time: pd.DatetimeIndex | None = None,
-        items: Sequence[ItemInfo] | Sequence[str] | None = None,
+        items: Sequence[ItemInfo] | None = None,
         *,
         geometry: Any | None = None,
         zn: NDArray[np.floating] | None = None,
@@ -141,7 +141,22 @@ class Dataset:
             Dummy time step in seconds, by default 1.0
 
         """
-        item_infos = Dataset._parse_items(items, len(data))
+        n_items_data = len(data)
+        if items is None:
+            item_infos: Sequence[ItemInfo] = [
+                ItemInfo(f"Item_{j + 1}") for j in range(n_items_data)
+            ]
+        else:
+            if len(items) != n_items_data:
+                raise ValueError(
+                    f"Number of items ({len(items)}) must match len of data ({n_items_data})"
+                )
+            assert all(isinstance(it, ItemInfo) for it in items)
+            item_infos = items
+            item_names = [it.name for it in item_infos]
+            item_names = Dataset._modify_duplicates(item_names)
+            for it, item_name in zip(item_infos, item_names):
+                it.name = item_name
 
         data_vars = {
             it.name: DataArray(
@@ -152,14 +167,8 @@ class Dataset:
 
         return Dataset(data_vars, validate=validate)
 
-    @property
-    def values(self) -> None:
-        raise AttributeError(
-            "Dataset has no property 'values' - use to_numpy() instead or maybe you were looking for DataArray.values?"
-        )
-
     @staticmethod
-    def _modify_list(lst: Iterable[str]) -> list[str]:
+    def _modify_duplicates(lst: Iterable[str]) -> list[str]:
         modified_list = []
         count_dict = {}
 
@@ -178,44 +187,14 @@ class Dataset:
         return modified_list
 
     @staticmethod
-    def _parse_items(
-        items: None | Sequence[ItemInfo | str], n_items_data: int
-    ) -> list[ItemInfo]:
-        if items is None:
-            item_infos = [ItemInfo(f"Item_{j + 1}") for j in range(n_items_data)]
-        else:
-            if len(items) != n_items_data:
-                raise ValueError(
-                    f"Number of items ({len(items)}) must match len of data ({n_items_data})"
-                )
-
-            item_infos = []
-            for item in items:
-                if isinstance(item, str):
-                    item = ItemInfo(item)
-                elif not isinstance(item, ItemInfo):
-                    raise TypeError(f"items of type: {type(item)} is not supported")
-                item_infos.append(item)
-
-            item_names = [it.name for it in item_infos]
-            item_names = Dataset._modify_list(item_names)
-            for it, item_name in zip(item_infos, item_names):
-                it.name = item_name
-
-        return item_infos
-
-    @staticmethod
     def _dataarrays_as_mapping(
-        data: DataArray | Sequence[DataArray] | Mapping[str, DataArray],
+        data: Sequence[DataArray] | Mapping[str, DataArray],
     ) -> dict[str, DataArray]:
         if isinstance(data, Mapping):
             for key, da in data.items():
                 da.name = key
             return {key: da for key, da in data.items()}
 
-        if isinstance(data, DataArray):
-            data = [data]
-        assert isinstance(data, Sequence)
         item_names = [da.name for da in data]
         return {key: da for key, da in zip(item_names, data)}
 
@@ -294,9 +273,6 @@ class Dataset:
     def names(self) -> list[str]:
         """Name of each of the DataArrays as a list."""
         return [da.name for da in self]
-
-    def _ipython_key_completions_(self):  # type: ignore
-        return [x.name for x in self.items]  # type: ignore
 
     @property
     def ndim(self) -> int:
