@@ -35,6 +35,7 @@ classifiers = [
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
     "Topic :: Scientific/Engineering",
 ]
 
@@ -47,7 +48,6 @@ dev = [
     "shapely",
     "pyproj",
     "netcdf4",
-    "rasterio",
     "polars",
     "ruff==0.6.2",
     "mypy==1.16.1",
@@ -69,8 +69,10 @@ notebooks = [
 ]
 
 [project.urls]
-"Homepage" = "https://github.com/DHI/mikeio"
-"Bug Tracker" = "https://github.com/DHI/mikeio/issues"
+Homepage = "https://dhi.github.io/"
+Documentation = "https://dhi.github.io/"
+Source = "https://github.com/DHI/mikeio"
+Issues = "https://github.com/DHI/mikeio/issues"
 
 
 [tool.ruff.lint]

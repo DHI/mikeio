@@ -40,7 +40,7 @@ da_grid.plot();
 
 ## Save to dfs2 file
 
-```{python}
+```python
 da_grid.to_dfs("wind_north_sea_interpolated.dfs2")
 ```
 
@@ -48,7 +48,7 @@ da_grid.to_dfs("wind_north_sea_interpolated.dfs2")
 
 ## Save to NetCDF
 
-```{python}
+```python
 xr_da = da_grid.to_xarray()
 xr_da.to_netcdf("wind_north_sea_interpolated.nc")
 ```
@@ -63,11 +63,10 @@ This section requires the [`rasterio`](https://rasterio.readthedocs.io/en/latest
 
 :::
 
-```{python}
+```python
 import numpy as np
 import rasterio
 from rasterio.transform import from_origin
-# Dcoumentation https://rasterio.readthedocs.io/en/latest/index.html
 
 with rasterio.open(
      fp='wind.tif',
@@ -110,6 +109,8 @@ dsi[0].plot(figsize=(9,7), show_mesh=True);
 ### Note: 3 of the new elements are outside the original mesh and data are therefore NaN by default
 
 ```{python}
+import numpy as np
+
 nan_elements = np.where(np.isnan(dsi[0].to_numpy()))[0]
 nan_elements
 ```
@@ -194,18 +195,8 @@ ax = da.plot(title="Interpolated scatter data");
 ax.scatter(scatter[:,0], scatter[:,1], s=30, c='red')
 ```
 
-```{python}
+```python
 da.to_dfs("interpolated_scatter.dfsu")
 ```
 
-## Clean up
-
-```{python}
-import os
-
-os.remove("wind_north_sea_interpolated.dfs2")
-os.remove("wind_north_sea_interpolated.nc")
-os.remove("wind.tif")
-os.remove("interpolated_scatter.dfsu")
-```
 
