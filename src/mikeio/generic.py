@@ -7,7 +7,7 @@ import operator
 import os
 import pathlib
 import warnings
-from collections.abc import Iterable, Sequence
+from collections.abc import Sequence
 from copy import deepcopy
 from dataclasses import dataclass
 from datetime import datetime, timedelta
@@ -102,15 +102,10 @@ def _clone(
 
     builder = DfsBuilder.Create(fi.FileTitle, "mikeio", __dfs_version__)
 
-    # Set up the header
-    if datatype is None:
-        builder.SetDataType(fi.DataType)
-    else:
-        builder.SetDataType(datatype)
+    builder.SetDataType(datatype if datatype is not None else fi.DataType)
 
     builder.SetGeographicalProjection(fi.Projection)
 
-    # Copy time axis
     time_axis = fi.TimeAxis
     if start_time is not None:
         time_axis.StartDateTime = start_time
@@ -125,31 +120,31 @@ def _clone(
     builder.DeleteValueInt = fi.DeleteValueInt
     builder.DeleteValueUnsignedInt = fi.DeleteValueUnsignedInt
 
-    # Copy custom blocks - if any
     for customBlock in fi.CustomBlocks:
         builder.AddCustomBlock(customBlock)
 
-    if isinstance(items, Iterable) and not isinstance(items, str):
-        for item in items:
-            if isinstance(item, ItemInfo):
-                builder.AddCreateDynamicItem(
-                    item.name,
-                    eumQuantity.Create(item.type, item.unit),
-                    spatialAxis=source.ItemInfo[-1].SpatialAxis,
-                )
-            elif isinstance(item, DfsDynamicItemInfo):
+    match items:
+        case None:
+            for item in source.ItemInfo:
                 builder.AddDynamicItem(item)
-            elif isinstance(item, int):
-                builder.AddDynamicItem(source.ItemInfo[item])
 
-    elif isinstance(items, (int)) or items is None:
-        # must be str/int refering to original file (or None)
-        item_numbers = _valid_item_numbers(source.ItemInfo, items)
-        items = [source.ItemInfo[item] for item in item_numbers]
-        for item in items:
-            builder.AddDynamicItem(item)
-    else:
-        raise ValueError("Items of type: {type(items)} is not supported")
+        case int():
+            builder.AddDynamicItem(source.ItemInfo[items])
+
+        case list():
+            for item in items:
+                match item:
+                    case ItemInfo():
+                        builder.AddCreateDynamicItem(
+                            name=item.name,
+                            quantity=eumQuantity.Create(item.type, item.unit),
+                            valueType=item.data_value_type,
+                            spatialAxis=source.ItemInfo[-1].SpatialAxis,
+                        )
+                    case DfsDynamicItemInfo():
+                        builder.AddDynamicItem(item)
+                    case int():
+                        builder.AddDynamicItem(source.ItemInfo[item])
 
     builder.CreateFile(str(outfilename))
 
