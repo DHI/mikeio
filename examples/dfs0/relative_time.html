@@ -206,10 +206,10 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 
 <p>MIKE IO uses a pandas DatetimeIndex to represent the time dimension in dfs files. If the Dfs file has a relative time axis it will be converted to DatetimeIndex by using 1970-1-1 00:00:00 as start time.</p>
-<div id="73f65d2f" class="cell" data-execution_count="1">
+<div id="6e8c1122" class="cell" data-execution_count="1">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> mikeio</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
-<div id="b4961862" class="cell" data-execution_count="2">
+<div id="b722e22f" class="cell" data-execution_count="2">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>ds <span class="op">=</span> mikeio.read(<span class="st">"../../data/eq_relative.dfs0"</span>)</span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>ds</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-display" data-execution_count="2">
@@ -225,7 +225,7 @@ items:
   4:  Item 5 &lt;Undefined&gt; (undefined)</code></pre>
 </div>
 </div>
-<div id="238d9ffd" class="cell" data-execution_count="3">
+<div id="1fcbdb12" class="cell" data-execution_count="3">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> ds.to_dataframe()</span>
 <span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>df.head()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-display" data-execution_count="3">
@@ -291,11 +291,11 @@ items:
 </div>
 </div>
 <p>Correcting the dataframe index by subtracting start time to get relative time axis.</p>
-<div id="433dd840" class="cell" data-execution_count="4">
+<div id="66116342" class="cell" data-execution_count="4">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>df.index <span class="op">=</span> (df.index <span class="op">-</span> df.index[<span class="dv">0</span>]).total_seconds()</span>
 <span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>df.index.name <span class="op">=</span> <span class="st">"Relative time (s)"</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
-<div id="4360e81d" class="cell" data-execution_count="5">
+<div id="d49149b5" class="cell" data-execution_count="5">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>df.head()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-display" data-execution_count="5">
 <div>
@@ -367,7 +367,7 @@ items:
 </div>
 </div>
 </div>
-<div id="16b3a355" class="cell" data-execution_count="6">
+<div id="5e0a1007" class="cell" data-execution_count="6">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>df[<span class="st">'Item 5'</span>].plot()<span class="op">;</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-display">
 <div>
@@ -380,13 +380,13 @@ items:
 <section id="mikecore" class="level2">
 <h2 class="anchored" data-anchor-id="mikecore">mikecore</h2>
 <p>An alternative is to use the underlying library <a href="https://github.com/DHI/mikecore-python"><code>mikecore</code></a> to read the file.</p>
-<div id="d1daf2df" class="cell" data-execution_count="7">
+<div id="d9209965" class="cell" data-execution_count="7">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> mikecore.DfsFileFactory <span class="im">import</span> DfsFileFactory</span>
 <span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>dfs <span class="op">=</span> DfsFileFactory.DfsGenericOpen(<span class="st">"../../data/eq_relative.dfs0"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 <p>Using the <code>ReadDfs0DataDouble</code> method you get the data as a numpy array, with the time axis or other type of as the first column,</p>
-<div id="a1f197f1" class="cell" data-execution_count="8">
+<div id="301045c8" class="cell" data-execution_count="8">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>data <span class="op">=</span> dfs.ReadDfs0DataDouble()</span>
 <span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a><span class="bu">type</span>(data)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
@@ -395,7 +395,7 @@ items:
 </div>
 </div>
 <p>which can be converted to a pandas dataframe. First we extract the name of items (which in this example hapeens to be not very creative).</p>
-<div id="5632b332" class="cell" data-execution_count="9">
+<div id="e25a9c7e" class="cell" data-execution_count="9">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>index_name <span class="op">=</span> <span class="st">"time"</span></span>
 <span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>items <span class="op">=</span> [i.Name <span class="cf">for</span> i <span class="kw">in</span> dfs.ItemInfo]</span>
 <span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>items <span class="op">=</span> [index_name] <span class="op">+</span> items</span>
@@ -404,7 +404,7 @@ items:
 <pre><code>['time', 'Item 1', 'Item 2', 'Item 3', 'Item 4', 'Item 5']</code></pre>
 </div>
 </div>
-<div id="ea5a3545" class="cell" data-execution_count="10">
+<div id="f16cab47" class="cell" data-execution_count="10">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> df</span>
 <span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> df.DataFrame(data, columns<span class="op">=</span>items).set_index(index_name)</span>
