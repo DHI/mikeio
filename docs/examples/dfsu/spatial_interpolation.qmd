@@ -122,7 +122,7 @@ da.geometry.contains(msh.element_coordinates[nan_elements,:2])
 ### We can force extrapolation to avoid the NaN values
 
 ```{python}
-dat_interp = da.interp_like(msh, extrapolate=True)
+dat_interp = da.interp_like(msh.geometry, extrapolate=True)
 ```
 
 ```{python}
