@@ -94,7 +94,7 @@ msh
 ```
 
 ```{python}
-dsi = da.interp_like(msh)
+dsi = da.interp_like(msh.geometry)
 dsi
 ```
 
