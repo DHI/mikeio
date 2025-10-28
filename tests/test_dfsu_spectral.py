@@ -147,6 +147,17 @@ def test_read_spectrum_pt(dfsu_pt: DfsuSpectral) -> None:
     assert ds2.shape == (31, 16, 25)
 
 
+def test_read_single_time(dfsu_pt: DfsuSpectral) -> None:
+    dfs = dfsu_pt
+    ds1 = dfs.read(time=0)
+    assert ds1.shape == (16, 25)
+    assert ds1.dims == ("direction", "frequency")
+
+    ds2 = dfs.read(time=0, keepdims=True)
+    assert ds2.shape == (1, 16, 25)
+    assert ds2.dims == ("time", "direction", "frequency")
+
+
 def test_read_spectrum_area_sector(dfsu_area_sector: DfsuSpectral) -> None:
     dfs = dfsu_area_sector
     assert dfs.geometry.n_frequencies == 25

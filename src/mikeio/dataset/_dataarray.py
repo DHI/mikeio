@@ -23,7 +23,6 @@ from typing import (
 
 import numpy as np
 import pandas as pd
-from mikecore.DfsuFile import DfsuFileType
 
 
 from ..eum import EUMType, EUMUnit, ItemInfo
@@ -201,7 +200,8 @@ class DataArray:
         self._check_time_data_length(self.time)
 
         self.item = self._parse_item(item=item, name=name, type=type, unit=unit)
-        self.geometry = self._parse_geometry(geometry, self.dims, self.shape)
+        # geometries are very diverse without a common interface
+        self.geometry: Any = geometry
         self._zn = self._parse_zn(zn, self.geometry, self.n_timesteps)
         self._set_spectral_attributes(geometry)
         self.plot = self._get_plotter_by_geometry()
@@ -278,54 +278,6 @@ class DataArray:
             return ItemInfo(item)
 
         raise ValueError("item must be str, EUMType or EUMUnit")
-
-    @staticmethod
-    def _parse_geometry(
-        geometry: Any, dims: tuple[str, ...], shape: tuple[int, ...]
-    ) -> Any:
-        if len(dims) > 1 and (
-            geometry is None or isinstance(geometry, GeometryUndefined)
-        ):
-            if dims == ("time", "x"):
-                return Grid1D(nx=shape[1], dx=1.0 / (shape[1] - 1))
-
-        axis = 1 if "time" in dims else 0
-        # dims_no_time = tuple([d for d in dims if d != "time"])
-        # shape_no_time = shape[1:] if ("time" in dims) else shape
-
-        if len(dims) == 1 and dims[0] == "time":
-            if geometry is not None:
-                # assert geometry.ndim == 0
-                return geometry
-            else:
-                return GeometryUndefined()
-
-        if isinstance(geometry, GeometryFMPointSpectrum):
-            pass
-        elif isinstance(geometry, GeometryFM2D):
-            if geometry.is_spectral:
-                if geometry._type == DfsuFileType.DfsuSpectral1D:
-                    assert (
-                        shape[axis] == geometry.n_nodes
-                    ), "data shape does not match number of nodes"
-                elif geometry._type == DfsuFileType.DfsuSpectral2D:
-                    assert (
-                        shape[axis] == geometry.n_elements
-                    ), "data shape does not match number of elements"
-            else:
-                assert (
-                    shape[axis] == geometry.n_elements
-                ), "data shape does not match number of elements"
-        elif isinstance(geometry, Grid1D):
-            assert (
-                shape[axis] == geometry.nx
-            ), "data shape does not match number of grid points"
-        elif isinstance(geometry, Grid2D):
-            assert shape[axis] == geometry.ny, "data shape does not match ny"
-            assert shape[axis + 1] == geometry.nx, "data shape does not match nx"
-        # elif isinstance(geometry, Grid3D): # TODO
-
-        return geometry
 
     @staticmethod
     def _parse_zn(
@@ -1077,38 +1029,39 @@ class DataArray:
 
         # interp in space
         if (x is not None) or (y is not None):
-            if isinstance(self.geometry, Grid2D):
-                if x is None or y is None:
-                    raise ValueError("both x and y must be specified")
+            g = self.geometry
+            match g:
+                case Grid2D():
+                    if x is None or y is None:
+                        raise ValueError("both x and y must be specified")
 
-                xr_da = self.to_xarray()
-                dai = xr_da.interp(x=x, y=y).values
-                geometry = GeometryPoint2D(
-                    x=x, y=y, projection=self.geometry.projection
-                )
-            elif isinstance(self.geometry, Grid1D):
-                if interpolant is None:
-                    assert x is not None
-                    interpolant = self.geometry.get_spatial_interpolant(x)
-                dai = interpolant.interp1d(self.to_numpy()).flatten()
-                geometry = GeometryUndefined()
-            elif isinstance(self.geometry, GeometryFM2D):
-                if x is None or y is None:
-                    raise ValueError("both x and y must be specified")
+                    xr_da = self.to_xarray()
+                    dai = xr_da.interp(x=x, y=y).values
+                    geometry = GeometryPoint2D(x=x, y=y, projection=g.projection)
 
-                if interpolant is None:
-                    interpolant = self.geometry.get_2d_interpolant(
-                        xy=[(x, y)],  # type: ignore
-                        **kwargs,  # type: ignore
+                case Grid1D():
+                    if interpolant is None:
+                        assert x is not None
+                        interpolant = g.get_spatial_interpolant(x)
+                    dai = interpolant.interp1d(self.to_numpy()).flatten()
+                    geometry = GeometryUndefined()
+
+                case GeometryFM2D():
+                    if x is None or y is None:
+                        raise ValueError("both x and y must be specified")
+
+                    if interpolant is None:
+                        interpolant = g.get_2d_interpolant(
+                            xy=[(x, y)],  # type: ignore
+                            **kwargs,  # type: ignore
+                        )
+                    dai = interpolant.interp2d(self.to_numpy()).flatten()
+                    geometry = GeometryPoint2D(x=x, y=y, projection=g.projection)
+
+                case _:
+                    raise NotImplementedError(
+                        f"Interpolation in {g} is not yet implemented"
                     )
-                dai = interpolant.interp2d(self.to_numpy()).flatten()
-                geometry = GeometryPoint2D(
-                    x=x, y=y, projection=self.geometry.projection
-                )
-            else:
-                raise NotImplementedError(
-                    f"Interpolation in {self.geometry} is not yet implemented"
-                )
 
             da = DataArray(
                 data=dai,
@@ -1274,77 +1227,71 @@ class DataArray:
 
     def interp_like(
         self,
-        other: DataArray | Grid2D | GeometryFM2D | pd.DatetimeIndex,
+        other: DataArray | Dataset | Grid2D | GeometryFM2D | pd.DatetimeIndex,
         interpolant: Interpolant | None = None,
         **kwargs: Any,
     ) -> DataArray:
         """Interpolate in space (and in time) to other geometry (and time axis).
 
-        Note: currently only supports interpolation from dfsu-2d to
-              dfs2 or other dfsu-2d DataArrays
-
         Parameters
         ----------
-        other: Dataset, DataArray, Grid2D, GeometryFM, pd.DatetimeIndex
-            The target geometry (and time axis) to interpolate to
-        interpolant: Interpolant, optional
-            Reuse pre-calculated index and weights
+        other : DataArray, Dataset, Grid2D, GeometryFM2D or pd.DatetimeIndex
+            The geometry (and time axis) to interpolate to.
+        interpolant : Interpolant, optional
+            Precomputed interpolant, by default None
         **kwargs: Any
-            additional kwargs are passed to interpolation method
-
+            Additional keyword arguments to be passed to the interpolation
 
         Returns
         -------
         DataArray
-            Interpolated DataArray
+            New DataArray with interpolated data
+
+        Notes
+        -----
+        Currently only supports interpolation from dfsu-2d to
+              dfs2 or other dfsu-2d DataArrays
 
         """
-        if not (isinstance(self.geometry, GeometryFM2D) and self.geometry.is_2d):
-            raise NotImplementedError(
-                "Currently only supports interpolating from 2d flexible mesh data!"
-            )
+        from ._dataset import Dataset
 
-        if isinstance(other, pd.DatetimeIndex):
-            return self.interp_time(other, **kwargs)
-
-        if not (isinstance(self.geometry, GeometryFM2D) and self.geometry.is_2d):
+        if not isinstance(self.geometry, GeometryFM2D):
             raise NotImplementedError("Currently only supports 2d flexible mesh data!")
 
-        if hasattr(other, "geometry"):
-            geom = other.geometry
-        else:
-            geom = other
+        match other:
+            case pd.DatetimeIndex():
+                return self.interp_time(other, **kwargs)
 
-        if isinstance(geom, Grid2D):
-            xy = geom.xy
-        elif isinstance(geom, GeometryFM2D):
-            xy = geom.element_coordinates[:, :2]
-            if geom.is_layered:
+            case DataArray() | Dataset():
+                geom = other.geometry
+                time = other.time
+
+            case _:
+                geom = other
+                time = None
+
+        match geom:
+            case Grid2D():
+                xy = geom.xy
+            case GeometryFM2D():
+                xy = geom.element_coordinates[:, :2]
+            case _:
                 raise NotImplementedError(
-                    "Does not yet support layered flexible mesh data!"
+                    "Interpolation to other geometry not yet supported"
                 )
-        else:
-            raise NotImplementedError()
 
         if interpolant is None:
             interpolant = self.geometry.get_2d_interpolant(xy, **kwargs)
 
-        if isinstance(geom, (Grid2D, GeometryFM2D)):
-            ari = interpolant.interp2d(data=self.to_numpy())
-            if isinstance(geom, Grid2D):
-                shape = (
-                    (self.n_timesteps, geom.ny, geom.nx)
-                    if self.dims[0] == "time"
-                    else (geom.ny, geom.nx)
-                )
-                ari = ari.reshape(shape)
-
-            assert ari.dtype == self.dtype
-        else:
-            raise NotImplementedError(
-                "Interpolation to other geometry not yet supported"
+        ari = interpolant.interp2d(data=self.to_numpy())
+        if isinstance(geom, Grid2D):
+            shape = (
+                (self.n_timesteps, geom.ny, geom.nx)
+                if self.dims[0] == "time"
+                else (geom.ny, geom.nx)
             )
-        assert isinstance(ari, np.ndarray)
+            ari = ari.reshape(shape)
+
         dai = DataArray(
             data=ari,
             time=self.time,
@@ -1353,10 +1300,8 @@ class DataArray:
             dt=self._dt,
         )
 
-        if hasattr(other, "time"):
-            dai = dai.interp_time(other.time)
-
-        assert isinstance(dai, DataArray)
+        if time is not None:
+            dai = dai.interp_time(time)
 
         return dai
 
@@ -1995,26 +1940,29 @@ class DataArray:
         if self._has_time_axis:
             coords["time"] = xr.DataArray(self.time, dims="time")
 
-        if isinstance(self.geometry, Grid1D):
-            coords["x"] = xr.DataArray(data=self.geometry.x, dims="x")
-        elif isinstance(self.geometry, Grid2D):
-            coords["y"] = xr.DataArray(data=self.geometry.y, dims="y")
-            coords["x"] = xr.DataArray(data=self.geometry.x, dims="x")
-        elif isinstance(self.geometry, Grid3D):
-            coords["z"] = xr.DataArray(data=self.geometry.z, dims="z")
-            coords["y"] = xr.DataArray(data=self.geometry.y, dims="y")
-            coords["x"] = xr.DataArray(data=self.geometry.x, dims="x")
-        elif isinstance(self.geometry, GeometryFM2D):
-            coords["element"] = xr.DataArray(
-                data=self.geometry.element_ids, dims="element"
-            )
-        elif isinstance(self.geometry, GeometryPoint2D):
-            coords["x"] = self.geometry.x
-            coords["y"] = self.geometry.y
-        elif isinstance(self.geometry, GeometryPoint3D):
-            coords["x"] = self.geometry.x
-            coords["y"] = self.geometry.y
-            coords["z"] = self.geometry.z
+        g = self.geometry
+
+        match g:
+            case Grid1D():
+                coords["x"] = xr.DataArray(data=g.x, dims="x")
+            case Grid2D():
+                coords["y"] = xr.DataArray(data=g.y, dims="y")
+                coords["x"] = xr.DataArray(data=g.x, dims="x")
+            case Grid3D():
+                coords["z"] = xr.DataArray(data=g.z, dims="z")
+                coords["y"] = xr.DataArray(data=g.y, dims="y")
+                coords["x"] = xr.DataArray(data=g.x, dims="x")
+            case GeometryFM2D():
+                coords["element"] = xr.DataArray(data=g.element_ids, dims="element")
+            case GeometryPoint2D():
+                coords["x"] = g.x
+                coords["y"] = g.y
+            case GeometryPoint3D():
+                coords["x"] = g.x
+                coords["y"] = g.y
+                coords["z"] = g.z
+            case _:
+                pass
 
         xr_da = xr.DataArray(
             data=self.values,

@@ -1005,15 +1005,17 @@ class Dataset:
     ) -> Dataset:
         """Interpolate in space (and in time) to other geometry (and time axis).
 
-        Note: currently only supports interpolation from dfsu-2d to
-              dfs2 or other dfsu-2d Datasets
-
         Parameters
         ----------
-        other: Dataset, DataArray, Grid2D, GeometryFM, pd.DatetimeIndex
+        other: Dataset, DataArray, Grid2D, GeometryFM2D or pd.DatetimeIndex
             Dataset, DataArray, Grid2D or GeometryFM2D to interpolate to
         **kwargs: Any
             additional kwargs are passed to interpolation method
+
+        Notes
+        -----
+        Currently only supports interpolation from dfsu-2d to
+              dfs2 or other dfsu-2d Datasets
 
         Examples
         --------
@@ -1035,32 +1037,34 @@ class Dataset:
                 "Currently only supports interpolating from 2d flexible mesh data!"
             )
 
-        if isinstance(other, pd.DatetimeIndex):
-            return self.interp_time(other, **kwargs)
+        match other:
+            case pd.DatetimeIndex():
+                return self.interp_time(other, **kwargs)
 
-        if hasattr(other, "geometry"):
-            geom = other.geometry
-        else:
-            geom = other
+            case DataArray() | Dataset():
+                geom = other.geometry
+                time = other.time
 
-        if isinstance(geom, Grid2D):
-            xy = geom.xy
+            case _:
+                geom = other
+                time = None
 
-        elif isinstance(geom, GeometryFM2D):
-            xy = geom.element_coordinates[:, :2]
-            if geom.is_layered:
+        match geom:
+            case Grid2D():
+                xy = geom.xy
+            case GeometryFM2D():
+                xy = geom.element_coordinates[:, :2]
+            case _:
                 raise NotImplementedError(
-                    "Does not yet support layered flexible mesh data!"
+                    "Interpolation to other geometry not yet supported"
                 )
-        else:
-            raise NotImplementedError()
 
         interpolant = self.geometry.get_2d_interpolant(xy, **kwargs)
         das = [da.interp_like(geom, interpolant=interpolant) for da in self]
         ds = Dataset(das, validate=False)
 
-        if hasattr(other, "time"):
-            ds = ds.interp_time(other.time)
+        if time is not None:
+            ds = ds.interp_time(time)
 
         return ds
 
@@ -1724,35 +1728,34 @@ class Dataset:
 
         filename = str(filename)
 
-        # TODO is this a candidate for match/case?
-        if isinstance(
-            self.geometry, (GeometryPoint2D, GeometryPoint3D, GeometryUndefined)
-        ):
-            if self.ndim == 0:  # Not very common, but still...
-                self._validate_extension(filename, ".dfs0")
-                write_dfs0(filename, self, **kwargs)
-            elif self.ndim == 1 and self[0]._has_time_axis:
-                self._validate_extension(filename, ".dfs0")
-                write_dfs0(filename, self, **kwargs)
-            else:
-                raise ValueError("Cannot write Dataset with no geometry to file!")
-        elif isinstance(self.geometry, Grid2D):
-            self._validate_extension(filename, ".dfs2")
-            write_dfs2(filename, self)
-        elif isinstance(self.geometry, Grid3D):
-            self._validate_extension(filename, ".dfs3")
-            write_dfs3(filename, self)
+        match self.geometry:
+            case GeometryPoint2D() | GeometryPoint3D() | GeometryUndefined():
+                if self.ndim == 0 or (self.ndim == 1 and self[0]._has_time_axis):
+                    self._validate_extension(filename, ".dfs0")
+                    write_dfs0(filename, self, **kwargs)
+                else:
+                    raise ValueError("Cannot write Dataset with no geometry to file!")
 
-        elif isinstance(self.geometry, Grid1D):
-            self._validate_extension(filename, ".dfs1")
-            write_dfs1(filename, self)
-        elif isinstance(self.geometry, _GeometryFM):
-            self._validate_extension(filename, ".dfsu")
-            write_dfsu(filename, self)
-        else:
-            raise NotImplementedError(
-                "Writing this type of dataset is not yet implemented"
-            )
+            case Grid2D():
+                self._validate_extension(filename, ".dfs2")
+                write_dfs2(filename, self)
+
+            case Grid3D():
+                self._validate_extension(filename, ".dfs3")
+                write_dfs3(filename, self)
+
+            case Grid1D():
+                self._validate_extension(filename, ".dfs1")
+                write_dfs1(filename, self)
+
+            case _GeometryFM():
+                self._validate_extension(filename, ".dfsu")
+                write_dfsu(filename, self)
+
+            case _:
+                raise NotImplementedError(
+                    "Writing this type of dataset is not yet implemented"
+                )
 
     @staticmethod
     def _validate_extension(filename: str | Path, valid_extension: str) -> None:
