@@ -444,7 +444,7 @@ def test_encoding() -> None:
 @pytest.mark.skipif(sys.platform == "win32", reason="does not run on windows")
 def test_encoding_linux() -> None:
     with pytest.raises(ValueError):
-        mikeio.PfsDocument("tests/testdata/pfs/OresundHD2D_EnKF10.m21fm", encoding=None) # type: ignore
+        mikeio.PfsDocument("tests/testdata/pfs/OresundHD2D_EnKF10.m21fm", encoding=None)  # type: ignore
 
 
 def test_multiple_identical_roots() -> None:
@@ -1316,3 +1316,8 @@ EndSect
     pfs.foo["bar/bat"] = {"n": 5, "s": "foo"}
     assert pfs.foo.bar.bat.n == 5
     assert pfs.foo.bar.bat.s == "foo"
+
+
+def test_mikeio_open_no_support_for_pfs() -> None:
+    with pytest.raises(ValueError, match="format"):
+        mikeio.open("tests/testdata/pfs/lake.sw")

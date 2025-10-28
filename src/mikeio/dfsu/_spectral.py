@@ -215,7 +215,7 @@ class DfsuSpectral:
         return self.geometry._frequencies
 
     @property
-    def n_directions(self) -> int | None:
+    def n_directions(self) -> int:
         """Number of directions."""
         return 0 if self.directions is None else len(self.directions)
 

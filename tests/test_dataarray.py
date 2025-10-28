@@ -175,6 +175,24 @@ def test_dataarray_init() -> None:
     assert da.time[0] == pd.Timestamp(2018, 1, 1)
 
 
+def test_dataarray_missing_time_dimension() -> None:
+    with pytest.raises(ValueError, match="time"):
+        mikeio.DataArray(
+            data=np.zeros(shape=(2, 2)),
+            dims=("y", "x"),
+            time=pd.date_range("2000", periods=2),
+        )
+
+
+def test_dataarray_missing_dimension() -> None:
+    with pytest.raises(ValueError, match="dimensions"):
+        mikeio.DataArray(
+            data=np.zeros(shape=(2, 2, 2)),
+            dims=("y", "x"),
+            time=pd.date_range("2000", periods=2),
+        )
+
+
 def test_dataarray_init_no_item() -> None:
     nt = 10
     data = data = np.zeros([nt, 4]) + 0.1

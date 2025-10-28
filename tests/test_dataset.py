@@ -99,6 +99,12 @@ def test_insert(ds1: Dataset) -> None:
     assert ds1[-1] == da
 
 
+def test_insert_at_index_duplicate_name_not_allowed(ds1: Dataset) -> None:
+    da = ds1[0].copy()
+    with pytest.raises(ValueError, match="name"):
+        ds1.insert(1, da)
+
+
 def test_insert_bad_index(ds1: Dataset) -> None:
     da = ds1[0].copy()
     da.name = "Baz"

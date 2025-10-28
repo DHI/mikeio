@@ -25,8 +25,6 @@ import pandas as pd
 from mikecore.DfsFile import DataValueType, DfsDynamicItemInfo
 from mikecore.eum import eumUnit, eumItem, eumWrapper
 
-from ..exceptions import InvalidDataValueType
-
 
 def _type_list(search: str | None = None) -> list[eumItem]:
     n_items = eumWrapper.eumGetItemTypeCount()
@@ -1526,20 +1524,7 @@ def to_datatype(datatype: str | int | DataValueType) -> DataValueType:
         3: DataValueType.MeanStepBackward,
         4: DataValueType.MeanStepForward,
     }
-
-    if isinstance(datatype, str):
-        if datatype not in string_datatype_mapping.keys():
-            raise InvalidDataValueType
-
+    if isinstance(datatype, DataValueType):
+        return datatype
+    else:
         return string_datatype_mapping[datatype]
-
-    if isinstance(datatype, int):
-        if datatype not in string_datatype_mapping.keys():
-            raise InvalidDataValueType
-
-        return string_datatype_mapping[datatype]
-
-    if not isinstance(datatype, DataValueType):
-        raise ValueError("Data value type not supported")
-
-    return datatype

@@ -1,6 +1,6 @@
 SHELL := /bin/bash
 
-LIB = mikeio
+LIB = src
 
 check: lint typecheck test
 
