@@ -15,6 +15,7 @@ def test_item_code() -> None:
 
 def test_get_unit() -> None:
     assert len(EUMType.Temperature.units) == 3
+    assert EUMType.Temperature.units[0] == EUMUnit.degree_Celsius
 
 
 def test_get_item_name() -> None:
@@ -55,6 +56,7 @@ def test_eum_type_search() -> None:
     types = EUMType.search("velocity")
 
     assert len(types) > 0
+    assert EUMType.Wind_Velocity in types
 
 
 def test_eum_conversion() -> None:
@@ -145,10 +147,3 @@ def test_default_name_from_type() -> None:
 def test_iteminfo_string_type_should_fail_with_helpful_message() -> None:
     with pytest.raises(ValueError):
         ItemInfo("Water level", "Water level")  # type: ignore
-
-
-def test_item_search() -> None:
-    res = EUMType.search("level")
-
-    assert len(res) > 0
-    assert isinstance(res[0], EUMType)
