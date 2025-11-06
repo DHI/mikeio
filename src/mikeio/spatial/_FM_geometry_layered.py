@@ -180,11 +180,6 @@ class _GeometryFMLayered(_GeometryFM):
                     n_sigma=n_sigma,
                 )
 
-    @cached_property
-    def element_coordinates(self) -> np.ndarray:
-        """Center coordinates of each element."""
-        return self._calc_element_coordinates(maxnodes=8)
-
     def _get_nodes_and_table_for_elements(
         self,
         elements: Sequence[int] | np.ndarray,
