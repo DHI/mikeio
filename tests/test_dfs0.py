@@ -34,7 +34,7 @@ def test_write_float(tmp_path: Path) -> None:
     nt = 100
 
     da = mikeio.DataArray(
-        data=np.random.random([nt]).astype(np.float32),
+        data=np.ones(nt).astype(np.float32),
         time=pd.date_range("2000", periods=nt, freq="h"),
     )
 
@@ -49,7 +49,7 @@ def test_write_double(tmp_path: Path) -> None:
     nt = 100
 
     da = mikeio.DataArray(
-        data=np.random.random([nt]).astype(np.float32),
+        data=np.ones(nt).astype(np.float32),
         time=pd.date_range("2000", periods=nt, freq="h"),
     )
 
@@ -64,7 +64,7 @@ def test_write_int_not_possible(tmp_path: Path) -> None:
     nt = 100
 
     da = mikeio.DataArray(
-        data=np.random.random([nt]).astype(np.float32),
+        data=np.ones(nt).astype(np.float32),
         time=pd.date_range("2000", periods=nt, freq="h"),
     )
 
@@ -542,7 +542,7 @@ def test_write_accumulated_datatype(tmp_path: Path) -> None:
     filename = tmp_path / "simple.dfs0"
 
     da = mikeio.DataArray(
-        data=np.random.random(100),
+        data=np.ones((100)),
         time=pd.date_range("2012-01-01", periods=100, freq="h"),
         item=ItemInfo(
             name="testing water level",
@@ -561,7 +561,7 @@ def test_write_accumulated_datatype(tmp_path: Path) -> None:
 def test_write_default_datatype(tmp_path: Path) -> None:
     filename = tmp_path / "simple.dfs0"
     da = mikeio.DataArray(
-        data=np.random.random(100),
+        data=np.ones(100),
         time=pd.date_range("2012-01-01", periods=100, freq="h"),
         item=ItemInfo(
             name="testing water level",

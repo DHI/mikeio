@@ -550,9 +550,7 @@ def test_incremental_write_using_mikecore(tmp_path: Path) -> None:
 
     for _ in range(nt):
         for _ in range(n_items):
-            data = np.random.random(size=n_elements).astype(
-                np.float32
-            )  # Replace with actual data
+            data = np.ones(n_elements).astype(np.float32)  # Replace with actual data
             dfs.WriteItemTimeStepNext(0.0, data)
     dfs.Close()
 
