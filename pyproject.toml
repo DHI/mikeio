@@ -96,6 +96,7 @@ select = [
     "D413",
     "D415",
     "D417",
+    "NPY",  # Numpy related
 ]
 
 [tool.ruff.lint.per-file-ignores]
