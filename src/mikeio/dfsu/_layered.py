@@ -438,34 +438,14 @@ class Dfsu2DV(DfsuLayered):
         figsize: tuple[float, float] | None = None,
         **kwargs: Any,
     ) -> Axes:
-        """Plot unstructured vertical profile.
+        # deprecated remove in 3.1
+        import warnings
 
-        Parameters
-        ----------
-        values: np.array
-            value for each element to plot
-        cmin: real, optional
-            lower bound of values to be shown on plot, default:None
-        cmax: real, optional
-            upper bound of values to be shown on plot, default:None
-        title: str, optional
-            axes title
-        label: str, optional
-            colorbar label
-        cmap: matplotlib.cm.cmap, optional
-            colormap, default viridis
-        figsize: (float, float), optional
-            specify size of figure
-        ax: matplotlib.axes, optional
-            Adding to existing axis, instead of creating new fig
-        **kwargs: Any
-            Additional keyword arguments
+        warnings.warn(
+            "Dfsu2DV.plot_vertical_profile is deprecated Use DataArray.plot() instead.",
+            FutureWarning,
+        )
 
-        Returns
-        -------
-        <matplotlib.axes>
-
-        """
         if isinstance(values, DataArray):
             values = values.to_numpy()
 
