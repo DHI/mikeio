@@ -155,11 +155,11 @@ def test_transect_plot(vslice: Dfsu2DV) -> None:
     da.plot(label="l", title="t", add_colorbar=False)
     da.plot(cmap="Blues", edge_color="0.9")
 
-    # the old way
+    # deprecated remove in 3.1
     vals = da.isel(time=0).to_numpy()
-    vslice.plot_vertical_profile(vals, label="l", figsize=(3, 3))
-    vslice.plot_vertical_profile(vals, title="t", add_colorbar=False)
-    vslice.plot_vertical_profile(vals, cmax=12, cmap="Reds")
+
+    with pytest.warns(FutureWarning):
+        vslice.plot_vertical_profile(vals, label="l", figsize=(3, 3))
 
     plt.close("all")
 

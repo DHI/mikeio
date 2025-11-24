@@ -89,15 +89,13 @@ def test_plot_invalid() -> None:
 def test_plot_dfsu_vertical_profile() -> None:
     import matplotlib.pyplot as plt
 
-    dfs = mikeio.open("tests/testdata/oresund_vertical_slice.dfsu")
-    time_step = 1
-    item_number = 1
-    data = dfs.read()[item_number].to_numpy()[time_step, :]
+    dfs = mikeio.Dfsu2DV("tests/testdata/oresund_vertical_slice.dfsu")
+
+    da = dfs.read(time=1, items=1)[0]
+
     # defaults
-    dfs.plot_vertical_profile(data)
-    # dfs.plot_vertical_profile(data, time_step, 0, 20)
-    dfs.plot_vertical_profile(
-        data,
+    da.plot()
+    da.plot(
         title="txt",
         label="txt",
         edge_color="0.3",
@@ -107,7 +105,7 @@ def test_plot_dfsu_vertical_profile() -> None:
         figsize=(2, 2),
     )
     _, ax = plt.subplots()
-    dfs.plot_vertical_profile(data, ax=ax)
+    da.plot(ax=ax)
     assert True
 
     plt.close("all")
