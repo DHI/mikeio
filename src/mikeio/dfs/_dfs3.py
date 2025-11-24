@@ -265,11 +265,11 @@ class Dfs3(_Dfs123):
         dfs.Close()
 
         time = pd.to_datetime(t_seconds, unit="s", origin=self.start_time)
-        items = [self.items[i] for i in item_numbers]
+        item_infos = [self.items[i] for i in item_numbers]
         return Dataset.from_numpy(
             data_list,
             time=time,
-            items=items,
+            items=item_infos,
             geometry=geometry,
             dims=dims,
             validate=False,

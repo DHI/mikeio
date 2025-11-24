@@ -187,7 +187,6 @@ class Dfs2(_Dfs123):
 
         item_numbers = _valid_item_numbers(self._dfs.ItemInfo, items)
         n_items = len(item_numbers)
-        items = [self.items for i in item_numbers]
 
         single_time_selected, time_steps = _valid_timesteps(self._dfs.FileInfo, time)
         nt = len(time_steps) if not single_time_selected else 1

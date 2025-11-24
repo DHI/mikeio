@@ -289,11 +289,11 @@ class DfsuLayered:
         item_numbers = _valid_item_numbers(
             dfs.ItemInfo, items, ignore_first=self.geometry.is_layered
         )
-        items = [self.items[i] for i in item_numbers]
-        item_numbers = [it + 1 for it in item_numbers]
+        item_infos = [self.items[i] for i in item_numbers]
+        raw_item_numbers = [it + 1 for it in item_numbers]
         if layered_data := hasattr(geometry, "is_layered") and geometry.is_layered:
-            item_numbers.insert(0, 0)
-        n_items = len(item_numbers)
+            raw_item_numbers.insert(0, 0)
+        n_items = len(raw_item_numbers)
 
         deletevalue = self.deletevalue
 
@@ -319,7 +319,7 @@ class DfsuLayered:
                     dfs=dfs,
                     filename=self._filename,
                     time=time,
-                    item_numbers=item_numbers,
+                    item_numbers=raw_item_numbers,
                     deletevalue=deletevalue,
                     shape=(data.shape[-1],),
                     item=item,
@@ -359,7 +359,7 @@ class DfsuLayered:
             return Dataset.from_numpy(
                 data_list[1:],  # skip zn item
                 time=time,
-                items=items,
+                items=item_infos,
                 geometry=geometry,
                 zn=data_list[0],
                 dims=dims,
@@ -370,7 +370,7 @@ class DfsuLayered:
             return Dataset.from_numpy(
                 data_list,
                 time=time,
-                items=items,
+                items=item_infos,
                 geometry=geometry,
                 dims=dims,
                 validate=False,

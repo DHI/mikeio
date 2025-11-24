@@ -170,14 +170,14 @@ class Dfs1(_Dfs123):
 
         time = pd.to_datetime(t_seconds, unit="s", origin=self.start_time)
 
-        items = [self.items[i] for i in item_numbers]
+        item_infos = [self.items[i] for i in item_numbers]
 
         self._dfs.Close()
 
         return Dataset.from_numpy(
             data=data_list,
             time=time,
-            items=items,
+            items=item_infos,
             dims=tuple(dims),
             geometry=self.geometry,
             validate=False,
