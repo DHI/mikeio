@@ -535,6 +535,9 @@ def test_read_relative_time_axis() -> None:
     filename = "tests/testdata/eq_relative.dfs0"
 
     ds = mikeio.read(filename)
+    assert isinstance(ds.time, pd.TimedeltaIndex)
+    assert ds.time[0].total_seconds() == 0.0
+    assert ds.time[-1].total_seconds() == pytest.approx(56.236909)
     assert len(ds) == 5
 
 
