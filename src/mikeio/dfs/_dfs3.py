@@ -17,7 +17,6 @@ from .. import __dfs_version__
 from ..dataset import Dataset
 from ._dfs import (
     _Dfs123,
-    _get_item_info,
     _valid_item_numbers,
     _valid_timesteps,
     write_dfs_data,
@@ -266,7 +265,7 @@ class Dfs3(_Dfs123):
         dfs.Close()
 
         time = pd.to_datetime(t_seconds, unit="s", origin=self.start_time)
-        items = _get_item_info(dfs.ItemInfo, item_numbers)
+        items = [self.items[i] for i in item_numbers]
         return Dataset.from_numpy(
             data_list,
             time=time,

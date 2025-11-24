@@ -19,9 +19,8 @@ degree Celsius
 
 from __future__ import annotations
 from enum import IntEnum
-from typing import Any, Sequence, Literal
+from typing import Any, Literal
 
-import pandas as pd
 from mikecore.DfsFile import DataValueType, DfsDynamicItemInfo
 from mikecore.eum import eumUnit, eumItem, eumWrapper
 
@@ -1499,18 +1498,6 @@ class ItemInfo:
         data_value_type = dfsItemInfo.ValueType
 
         return ItemInfo(name, itemtype, unit, data_value_type)
-
-
-class ItemInfoList(list):
-    def __init__(self, items: Sequence[ItemInfo]):
-        super().__init__(items)
-
-    def to_dataframe(self) -> pd.DataFrame:
-        data = [
-            {"name": item.name, "type": item.type.name, "unit": item.unit.name}
-            for item in self
-        ]
-        return pd.DataFrame(data)
 
 
 def to_datatype(datatype: str | int | DataValueType) -> DataValueType:
