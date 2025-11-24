@@ -475,16 +475,13 @@ class Dataset:
         """
         self.__delitem__(key)
 
-    def rename(self, mapper: Mapping[str, str], inplace: bool = False) -> Dataset:
+    def rename(self, mapper: Mapping[str, str], **kwargs: Any) -> Dataset:  # noqa: D417
         """Rename items (DataArrays) in Dataset.
 
         Parameters
         ----------
         mapper : Mapping[str, str]
             dictionary (or similar) mapping from old to new names
-        inplace : bool, optional
-            Should the renaming be done in the original dataset(=True)
-            or return a new(=False)?, by default False
 
         Returns
         -------
@@ -503,6 +500,14 @@ class Dataset:
 
 
         """
+        # deprecated inplace parameter
+        if "inplace" in kwargs:
+            warnings.warn(
+                "'inplace' parameter is deprecated and will be removed in future versions. Use ds = ds.rename(...) instead.",
+                FutureWarning,
+            )
+        inplace = kwargs.get("inplace", False)
+
         if inplace:
             ds = self
         else:
