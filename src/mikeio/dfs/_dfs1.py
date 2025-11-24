@@ -14,7 +14,6 @@ from .. import __dfs_version__
 from ..dataset import Dataset
 from ._dfs import (
     _Dfs123,
-    _get_item_info,
     _valid_item_numbers,
     _valid_timesteps,
     write_dfs_data,
@@ -109,7 +108,7 @@ class Dfs1(_Dfs123):
         self,
         *,
         items: str | int | Sequence[str | int] | None = None,
-        time: int | str | slice | Sequence[int] |  None = None,
+        time: int | str | slice | Sequence[int] | None = None,
         keepdims: bool = False,
         dtype: Any = np.float32,
     ) -> Dataset:
@@ -171,14 +170,14 @@ class Dfs1(_Dfs123):
 
         time = pd.to_datetime(t_seconds, unit="s", origin=self.start_time)
 
-        items = _get_item_info(self._dfs.ItemInfo, item_numbers)
+        item_infos = [self.items[i] for i in item_numbers]
 
         self._dfs.Close()
 
         return Dataset.from_numpy(
             data=data_list,
             time=time,
-            items=items,
+            items=item_infos,
             dims=tuple(dims),
             geometry=self.geometry,
             validate=False,

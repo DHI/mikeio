@@ -433,7 +433,7 @@ class Dfsu2DH:
             data_list = [np.squeeze(d, axis=-1) for d in data_list]
 
         time = pd.to_datetime(t_rel, unit="s", origin=self.start_time)
-        item_infos = _get_item_info(dfs.ItemInfo, item_numbers)
+        item_infos = [self.items[i] for i in item_numbers]
 
         return Dataset.from_numpy(
             data_list,
@@ -567,7 +567,7 @@ class Dfsu2DH:
         dfs = DfsuFile.Open(self._filename)
 
         item_numbers = _valid_item_numbers(dfs.ItemInfo, items)
-        items = _get_item_info(dfs.ItemInfo, item_numbers)
+        items = [self.items[i] for i in item_numbers]
         _, time_steps = _valid_timesteps(dfs, time_steps=None)
 
         res = _extract_track(

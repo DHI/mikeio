@@ -1,3 +1,3 @@
-from ._eum import ItemInfo, ItemInfoList, EUMType, EUMUnit, TimeStepUnit
+from ._eum import ItemInfo, EUMType, EUMUnit, TimeStepUnit
 
-__all__ = ["ItemInfo", "ItemInfoList", "EUMType", "EUMUnit", "TimeStepUnit"]
+__all__ = ["ItemInfo", "EUMType", "EUMUnit", "TimeStepUnit"]
