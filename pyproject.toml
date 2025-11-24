@@ -62,7 +62,6 @@ notebooks = [
     "netcdf4",
     "rasterio",
     "geopandas",
-    "scikit-learn",
     "matplotlib",
     "folium",
     "mapclassify",
