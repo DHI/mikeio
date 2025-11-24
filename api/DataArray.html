@@ -258,10 +258,10 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <h2 class="doc-section doc-section-parameters anchored" data-anchor-id="parameters">Parameters</h2>
 <table class="caption-top table">
 <colgroup>
+<col style="width: 6%">
+<col style="width: 34%">
+<col style="width: 51%">
 <col style="width: 7%">
-<col style="width: 24%">
-<col style="width: 59%">
-<col style="width: 8%">
 </colgroup>
 <thead>
 <tr class="header">
@@ -280,7 +280,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </tr>
 <tr class="even">
 <td>time</td>
-<td>pd.DatetimeIndex | str | None</td>
+<td>pd.DatetimeIndex | pd.TimedeltaIndex | str | None</td>
 <td>a pandas.DatetimeIndex with the time instances of the data</td>
 <td><code>None</code></td>
 </tr>
@@ -337,7 +337,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </section>
 <section id="examples" class="level2 doc-section doc-section-examples">
 <h2 class="doc-section doc-section-examples anchored" data-anchor-id="examples">Examples</h2>
-<div id="fe26514f" class="cell" data-execution_count="1">
+<div id="867dc789" class="cell" data-execution_count="1">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> mikeio</span>
 <span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a></span>
@@ -692,7 +692,7 @@ nanmax : Max values with NaN values removed</code></pre>
 </section>
 <section id="examples-1" class="level4 doc-section doc-section-examples">
 <h4 class="doc-section doc-section-examples anchored" data-anchor-id="examples-1">Examples</h4>
-<div id="a10cf488" class="cell" data-execution_count="2">
+<div id="81a86d14" class="cell" data-execution_count="2">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> mikeio</span>
 <span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>da<span class="op">=</span> mikeio.read(<span class="st">"../data/HD2D.dfsu"</span>)[<span class="st">"Current speed"</span>]</span>
 <span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>area <span class="op">=</span> da.geometry.get_element_area()</span>
@@ -766,7 +766,7 @@ values: [0.05017, 0.05321, ..., 0.06071]</code></pre>
 </section>
 <section id="examples-2" class="level4 doc-section doc-section-examples">
 <h4 class="doc-section doc-section-examples anchored" data-anchor-id="examples-2">Examples</h4>
-<div id="9317a506" class="cell" data-execution_count="3">
+<div id="0df0e1ff" class="cell" data-execution_count="3">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>da1 <span class="op">=</span> mikeio.read(<span class="st">"../data/HD2D.dfsu"</span>, time<span class="op">=</span>[<span class="dv">0</span>,<span class="dv">1</span>])[<span class="dv">0</span>]</span>
 <span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>da2 <span class="op">=</span> mikeio.read(<span class="st">"../data/HD2D.dfsu"</span>, time<span class="op">=</span>[<span class="dv">2</span>,<span class="dv">3</span>])[<span class="dv">0</span>]</span>
 <span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>da1.time</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
@@ -774,7 +774,7 @@ values: [0.05017, 0.05321, ..., 0.06071]</code></pre>
 <pre><code>DatetimeIndex(['1985-08-06 07:00:00', '1985-08-06 09:30:00'], dtype='datetime64[ns]', freq=None)</code></pre>
 </div>
 </div>
-<div id="f6cdd264" class="cell" data-execution_count="4">
+<div id="604ab198" class="cell" data-execution_count="4">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>da3 <span class="op">=</span> mikeio.DataArray.concat([da1,da2])</span>
 <span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>da3</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-display" data-execution_count="4">
@@ -961,7 +961,7 @@ geometry: Dfsu2D (884 elements, 529 nodes)</code></pre>
 </section>
 <section id="examples-3" class="level4 doc-section doc-section-examples">
 <h4 class="doc-section doc-section-examples anchored" data-anchor-id="examples-3">Examples</h4>
-<div id="09cc7337" class="cell" data-execution_count="5">
+<div id="04ecfd04" class="cell" data-execution_count="5">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb20"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
 <span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> mikeio</span>
 <span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a></span>
@@ -976,7 +976,7 @@ geometry: GeometryUndefined()
 values: [nan, 1]</code></pre>
 </div>
 </div>
-<div id="8e794da1" class="cell" data-execution_count="6">
+<div id="a2af9b6f" class="cell" data-execution_count="6">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb22"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>da.fillna(<span class="fl">0.0</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-display" data-execution_count="6">
 <pre><code>&lt;mikeio.DataArray&gt;
@@ -1095,7 +1095,7 @@ values: [0, 1]</code></pre>
 </section>
 <section id="examples-4" class="level4 doc-section doc-section-examples">
 <h4 class="doc-section doc-section-examples anchored" data-anchor-id="examples-4">Examples</h4>
-<div id="9a62eee2" class="cell" data-execution_count="7">
+<div id="a4b95eb8" class="cell" data-execution_count="7">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb26"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> mikeio</span>
 <span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a>da <span class="op">=</span> mikeio.read(<span class="st">"../data/HD2D.dfsu"</span>)[<span class="st">"Current speed"</span>]</span>
@@ -1185,7 +1185,7 @@ values: [nan, nan, ..., nan]</code></pre>
 <p>Wrapper of <a href="https://xarray.pydata.org/en/stable/generated/xarray.DataArray.interpolate_na.html#xarray.DataArray.interpolate_na"><code>xarray.DataArray.interpolate_na</code></a></p>
 <section id="examples-5" class="level4 doc-section doc-section-examples">
 <h4 class="doc-section doc-section-examples anchored" data-anchor-id="examples-5">Examples</h4>
-<div id="f6a0aa91" class="cell" data-execution_count="8">
+<div id="2c8e958b" class="cell" data-execution_count="8">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb30"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
 <span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
 <span id="cb30-3"><a href="#cb30-3" aria-hidden="true" tabindex="-1"></a>time <span class="op">=</span> pd.date_range(<span class="st">"2000"</span>, periods<span class="op">=</span><span class="dv">3</span>, freq<span class="op">=</span><span class="st">"D"</span>)</span>
@@ -1200,7 +1200,7 @@ geometry: GeometryUndefined()
 values: [0, nan, 2]</code></pre>
 </div>
 </div>
-<div id="e0110f13" class="cell" data-execution_count="9">
+<div id="b5b2e2b9" class="cell" data-execution_count="9">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb32"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a>da.interp_na()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-display" data-execution_count="9">
 <pre><code>&lt;mikeio.DataArray&gt;
@@ -1426,7 +1426,7 @@ values: [0, 1, 2]</code></pre>
 </section>
 <section id="examples-6" class="level4 doc-section doc-section-examples">
 <h4 class="doc-section doc-section-examples anchored" data-anchor-id="examples-6">Examples</h4>
-<div id="d2ef3bf6" class="cell" data-execution_count="10">
+<div id="b6377831" class="cell" data-execution_count="10">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb36"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a>da <span class="op">=</span> mikeio.read(<span class="st">"../data/europe_wind_long_lat.dfs2"</span>)[<span class="dv">0</span>]</span>
 <span id="cb36-2"><a href="#cb36-2" aria-hidden="true" tabindex="-1"></a>da</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-display" data-execution_count="10">
@@ -1437,7 +1437,7 @@ time: 2012-01-01 00:00:00 (time-invariant)
 geometry: Grid2D (ny=101, nx=221)</code></pre>
 </div>
 </div>
-<div id="ddbea759" class="cell" data-execution_count="11">
+<div id="22a5b280" class="cell" data-execution_count="11">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb38"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a>da.isel(time<span class="op">=-</span><span class="dv">1</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-display" data-execution_count="11">
 <pre><code>&lt;mikeio.DataArray&gt;
@@ -1447,7 +1447,7 @@ time: 2012-01-01 00:00:00 (time-invariant)
 geometry: Grid2D (ny=101, nx=221)</code></pre>
 </div>
 </div>
-<div id="a0b65cd2" class="cell" data-execution_count="12">
+<div id="de314a0f" class="cell" data-execution_count="12">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb40"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a>da.isel(x<span class="op">=</span><span class="bu">slice</span>(<span class="dv">10</span>,<span class="dv">20</span>), y<span class="op">=</span><span class="bu">slice</span>(<span class="dv">40</span>,<span class="dv">60</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-display" data-execution_count="12">
 <pre><code>&lt;mikeio.DataArray&gt;
@@ -1457,7 +1457,7 @@ time: 2012-01-01 00:00:00 (time-invariant)
 geometry: Grid2D (ny=20, nx=10)</code></pre>
 </div>
 </div>
-<div id="d59f8e74" class="cell" data-execution_count="13">
+<div id="d2b8c381" class="cell" data-execution_count="13">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb42"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a>da <span class="op">=</span> mikeio.read(<span class="st">"../data/oresund_sigma_z.dfsu"</span>).Temperature</span>
 <span id="cb42-2"><a href="#cb42-2" aria-hidden="true" tabindex="-1"></a>da.isel(element<span class="op">=</span><span class="bu">range</span>(<span class="dv">200</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-display" data-execution_count="13">
@@ -2211,7 +2211,7 @@ geometry: Dfsu3DSigmaZ (200 elements, 638 nodes)</code></pre>
 </section>
 <section id="examples-9" class="level4 doc-section doc-section-examples">
 <h4 class="doc-section doc-section-examples anchored" data-anchor-id="examples-9">Examples</h4>
-<div id="fbfdc321" class="cell" data-execution_count="14">
+<div id="23ec92ca" class="cell" data-execution_count="14">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb64"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb64-1"><a href="#cb64-1" aria-hidden="true" tabindex="-1"></a>da <span class="op">=</span> mikeio.read(<span class="st">"../data/random.dfs1"</span>)[<span class="dv">0</span>]</span>
 <span id="cb64-2"><a href="#cb64-2" aria-hidden="true" tabindex="-1"></a>da</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-display" data-execution_count="14">
@@ -2222,7 +2222,7 @@ time: 2012-01-01 00:00:00 - 2012-01-01 00:19:48 (100 records)
 geometry: Grid1D (n=3, dx=100)</code></pre>
 </div>
 </div>
-<div id="32ddff83" class="cell" data-execution_count="15">
+<div id="907cc41b" class="cell" data-execution_count="15">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb66"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb66-1"><a href="#cb66-1" aria-hidden="true" tabindex="-1"></a>da.sel(time<span class="op">=</span><span class="bu">slice</span>(<span class="va">None</span>, <span class="st">"2012-1-1 00:02"</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-display" data-execution_count="15">
 <pre><code>&lt;mikeio.DataArray&gt;
@@ -2232,7 +2232,7 @@ time: 2012-01-01 00:00:00 - 2012-01-01 00:02:48 (15 records)
 geometry: Grid1D (n=3, dx=100)</code></pre>
 </div>
 </div>
-<div id="1f9bba46" class="cell" data-execution_count="16">
+<div id="a8bcd56f" class="cell" data-execution_count="16">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb68"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb68-1"><a href="#cb68-1" aria-hidden="true" tabindex="-1"></a>da.sel(x<span class="op">=</span><span class="dv">100</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-display" data-execution_count="16">
 <pre><code>&lt;mikeio.DataArray&gt;
@@ -2243,7 +2243,7 @@ geometry: GeometryUndefined()
 values: [0.3231, 0.6315, ..., 0.7506]</code></pre>
 </div>
 </div>
-<div id="cda3d906" class="cell" data-execution_count="17">
+<div id="80aac3cb" class="cell" data-execution_count="17">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb70"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb70-1"><a href="#cb70-1" aria-hidden="true" tabindex="-1"></a>da <span class="op">=</span> mikeio.read(<span class="st">"../data/oresund_sigma_z.dfsu"</span>).Temperature</span>
 <span id="cb70-2"><a href="#cb70-2" aria-hidden="true" tabindex="-1"></a>da</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-display" data-execution_count="17">
@@ -2254,7 +2254,7 @@ time: 1997-09-15 21:00:00 - 1997-09-16 03:00:00 (3 records)
 geometry: Dfsu3DSigmaZ (17118 elements, 12042 nodes)</code></pre>
 </div>
 </div>
-<div id="1963aa44" class="cell" data-execution_count="18">
+<div id="bf06b5e1" class="cell" data-execution_count="18">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb72"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb72-1"><a href="#cb72-1" aria-hidden="true" tabindex="-1"></a>da.sel(time<span class="op">=</span><span class="st">"1997-09-15"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-display" data-execution_count="18">
 <pre><code>&lt;mikeio.DataArray&gt;
@@ -2265,7 +2265,7 @@ geometry: Dfsu3DSigmaZ (17118 elements, 12042 nodes)
 values: [16.31, 16.43, ..., 16.69]</code></pre>
 </div>
 </div>
-<div id="468cc226" class="cell" data-execution_count="19">
+<div id="46d96aa3" class="cell" data-execution_count="19">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb74"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb74-1"><a href="#cb74-1" aria-hidden="true" tabindex="-1"></a>da.sel(x<span class="op">=</span><span class="dv">340000</span>, y<span class="op">=</span><span class="dv">6160000</span>, z<span class="op">=-</span><span class="dv">3</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-display" data-execution_count="19">
 <pre><code>&lt;mikeio.DataArray&gt;
@@ -2276,7 +2276,7 @@ geometry: GeometryPoint3D(x=340028.1116933554, y=6159980.070243686, z=-3.0)
 values: [17.54, 17.31, 17.08]</code></pre>
 </div>
 </div>
-<div id="726f4759" class="cell" data-execution_count="20">
+<div id="882f28bc" class="cell" data-execution_count="20">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb76"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb76-1"><a href="#cb76-1" aria-hidden="true" tabindex="-1"></a>da.sel(layers<span class="op">=</span><span class="st">"bottom"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-display" data-execution_count="20">
 <pre><code>&lt;mikeio.DataArray&gt;
