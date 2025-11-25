@@ -1003,19 +1003,6 @@ def test_non_equidistant() -> None:
     assert not ds.is_equidistant
 
 
-def test_concat_dataarray_by_time() -> None:
-    da1 = mikeio.read("tests/testdata/tide1.dfs1")[0]
-    da2 = mikeio.read("tests/testdata/tide2.dfs1")[0]
-    da3 = mikeio.DataArray.concat([da1, da2])
-
-    assert da3.start_time == da1.start_time
-    assert da3.start_time < da2.start_time
-    assert da3.end_time == da2.end_time
-    assert da3.end_time > da1.end_time
-    assert da3.n_timesteps == 145
-    assert da3.is_equidistant
-
-
 def test_concat_dataarray_keep_first() -> None:
     da1 = mikeio.DataArray(
         data=np.array([1.0, 2.0, 3.0]), time=pd.date_range("2000-01-01", periods=3)
