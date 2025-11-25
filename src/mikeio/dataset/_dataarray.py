@@ -1963,6 +1963,9 @@ class DataArray:
                 coords["y"] = xr.DataArray(
                     data=g.element_coordinates[:, 1], dims="element"
                 )
+                coords["z"] = xr.DataArray(
+                    data=g.element_coordinates[:, 2], dims="element"
+                )
             case GeometryPoint2D():
                 coords["x"] = g.x
                 coords["y"] = g.y
