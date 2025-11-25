@@ -7,6 +7,3 @@
 5. Verify that all tests passes by running `uv run pytest` from the package root directory
 6. Format the code by running `uv run ruff format .`
 7. Make a pull request with a summary of the changes
-
-Tests can also be run with tools like VS Code
-![testing](images/testing.png)
