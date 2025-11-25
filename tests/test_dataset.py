@@ -150,7 +150,8 @@ def test_index_with_attribute() -> None:
 def test_getitem_time(ds3: Dataset) -> None:
     # time = pd.date_range("2000-1-2", freq="h", periods=100)
 
-    # deprecated use .sel(time=...) or .isel(time=...) instead
+    # Testing deprecated time-based string indexing for backward compatibility
+    # Users should use .sel(time=...) or .isel(time=...) instead
     with pytest.warns(FutureWarning, match="time"):
         ds_sel = ds3["2000-1-2"]  # type: ignore
     assert ds_sel.n_timesteps == 24
@@ -247,7 +248,8 @@ def test_select_temporal_subset_by_idx() -> None:
 
 
 def test_temporal_subset_fancy() -> None:
-    # TODO use .sel(time=...) instead, more explicit
+    # Testing deprecated time-based string indexing for backward compatibility
+    # Users should use .sel(time=...) instead (more explicit)
     nt = (24 * 31) + 1
     d1 = np.zeros([nt, 100, 30]) + 1.5
     d2 = np.zeros([nt, 100, 30]) + 2.0
@@ -314,7 +316,7 @@ def test_missing_item_error() -> None:
     ds = mikeio.Dataset([da1, da2])
 
     with pytest.raises(KeyError, match="Baz"):
-        ds["Baz"]  # there is no Bar item
+        ds["Baz"]  # there is no Baz item
 
 
 def test_select_multiple_items_by_name() -> None:
@@ -377,7 +379,7 @@ def test_select_subset_isel_multiple_idxs() -> None:
     assert selds["Foo"].shape == (100, 2, 30)
 
 
-def test_decribe(ds1: Dataset) -> None:
+def test_describe(ds1: Dataset) -> None:
     df = ds1.describe()
     assert df.columns[0] == "Foo"
     assert df.Bar["mean"] == pytest.approx(0.2)
