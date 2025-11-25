@@ -11,7 +11,10 @@ MIKE IO is a Python package for reading, writing, and manipulating MIKE files (d
 ### Setup
 ```bash
 # Install package in editable mode with dev dependencies
-pip install -e .[dev]
+uv sync --group dev
+
+# Or install all dependency groups (dev, test, notebooks)
+uv sync --all-groups
 ```
 
 ### Testing
@@ -117,6 +120,130 @@ make docs
 
 **Composition over inheritance**: Dataset contains DataArrays; DataArray contains data, time, geometry, and item metadata. Geometry objects are composed into the data structures rather than inherited.
 
+## Documentation Structure
+
+The project uses **Quartodoc** and **Quarto** to build comprehensive documentation with user guides, examples, and API reference.
+
+### Documentation Tools
+
+- **Quartodoc** (v0.9.1): Generates API documentation from docstrings and type annotations
+- **Quarto**: Static site generator that renders the final documentation website
+- **Configuration**: `docs/_quarto.yml` defines the website structure, navigation, and quartodoc settings
+
+### Building Documentation
+
+```bash
+# Build and render documentation (from project root)
+make docs
+
+# Manual build (from docs/ directory)
+cd docs
+uv run quartodoc build    # Generate API docs from source code
+uv run quarto render      # Render the complete website
+```
+
+The build process:
+1. `quartodoc build` reads the source code and generates API reference pages in `docs/api/`
+2. `quarto render` processes all `.qmd` files (Quarto markdown) and builds the static site in `docs/_site/`
+
+### Documentation Folder Structure
+
+```
+docs/
+├── _quarto.yml           # Main Quarto configuration (website structure, navigation, quartodoc settings)
+├── _sidebar.yml          # Sidebar navigation configuration (legacy, mostly unused)
+├── index.qmd             # Documentation homepage
+├── design.qmd            # Architecture and design decisions
+├── license.qmd           # License information
+│
+├── user-guide/           # User guide documentation
+│   ├── getting-started.qmd    # Installation and quickstart
+│   ├── data-structures.md     # Overview of Dataset and DataArray
+│   ├── dataarray.qmd          # DataArray usage guide
+│   ├── dataset.qmd            # Dataset usage guide
+│   ├── dfs0.qmd               # Dfs0 (time series) guide
+│   ├── dfs1.qmd               # Dfs1 (1D grid) guide
+│   ├── dfs2.qmd               # Dfs2 (2D grid) guide
+│   ├── dfsu.qmd               # Dfsu (flexible mesh) guide
+│   ├── mesh.qmd               # Mesh file guide
+│   ├── eum.qmd                # EUM (units and types) guide
+│   ├── generic.qmd            # Generic operations guide
+│   └── pfs.qmd                # PFS parameter files guide
+│
+├── examples/             # Executable examples (Quarto notebooks)
+│   ├── index.qmd             # Examples overview page
+│   ├── dfs0/                 # Dfs0 examples
+│   │   ├── index.qmd
+│   │   ├── cmems_insitu.qmd
+│   │   └── relative_time.qmd
+│   ├── dfs2/                 # Dfs2 examples
+│   │   └── index.qmd
+│   ├── dfsu/                 # Dfsu examples
+│   │   ├── index.qmd
+│   │   ├── merge_subdomains.qmd
+│   │   └── spatial_interpolation.qmd
+│   ├── Generic.qmd           # Generic operations examples
+│   └── Time-interpolation.qmd
+│
+├── api/                  # Auto-generated API reference (by quartodoc)
+│   ├── index.qmd             # API reference overview
+│   ├── DataArray.qmd         # DataArray API
+│   ├── Dataset.qmd           # Dataset API
+│   ├── Dfs0.qmd, Dfs1.qmd, Dfs2.qmd, Dfs3.qmd  # DFS file type APIs
+│   ├── Dfsu.qmd              # Base Dfsu API
+│   ├── dfsu.Dfsu2DH.qmd, dfsu.Dfsu2DV.qmd, dfsu.Dfsu3D.qmd  # Specific Dfsu types
+│   ├── Grid1D.qmd, Grid2D.qmd, Grid3D.qmd  # Grid geometry APIs
+│   ├── spatial.GeometryFM*.qmd  # Flexible mesh geometry APIs
+│   ├── dataset._DataArrayPlotter*.qmd  # Plotting APIs
+│   ├── generic.qmd           # Generic functions API
+│   ├── PfsDocument.qmd, PfsSection.qmd  # PFS APIs
+│   └── ... (many more auto-generated files)
+│
+├── _site/                # Generated website (output directory)
+├── data -> ../tests/testdata  # Symlink to test data for examples
+└── images -> ../images   # Symlink to images directory
+```
+
+### Quartodoc Configuration
+
+The API reference is auto-generated from source code using quartodoc. Key settings in `_quarto.yml`:
+
+```yaml
+quartodoc:
+  style: pkgdown           # Use R pkgdown-style layout
+  title: API Reference
+  dir: api                 # Output directory for API docs
+  package: mikeio          # Package name to document
+  options:
+    include_inherited: true  # Include inherited methods
+  renderer:
+    style: markdown        # Render as markdown
+    display_name: relative # Use relative names
+```
+
+The `sections:` list in `_quarto.yml` defines which classes, functions, and modules to document and their organization in the API reference.
+
+### Content Types
+
+1. **User Guide** (`user-guide/*.qmd`): Conceptual documentation and tutorials
+   - Written in Quarto markdown (`.qmd`)
+   - Executable code blocks with outputs
+   - Organized by file type and concept
+
+2. **Examples** (`examples/*.qmd`): Real-world usage examples
+   - Organized by file type (dfs0, dfs2, dfsu)
+   - Each example is a complete, executable Quarto notebook
+   - Uses symlinked test data from `tests/testdata/`
+
+3. **API Reference** (`api/*.qmd`): Auto-generated from docstrings
+   - Generated by `quartodoc build` - DO NOT edit manually
+   - Re-generated on every docs build
+   - Source docstrings are in `src/mikeio/` Python files
+
+### Interlinks
+
+The documentation supports cross-linking to external library documentation (numpy, xarray, pandas, scipy) using the `interlinks` filter configured in `_quarto.yml`.
+
 ## Data Flow Pattern
 
 1. **Open**: `dfs = mikeio.open("file.dfs2")` → Returns Dfs2 object with metadata only
@@ -131,6 +258,10 @@ Alternative: `ds = mikeio.read("file.dfs2")` combines open and read.
 ### Dependencies
 - Uses `mikecore` library (Python module with bindings to DFS and EUM C libraries) for low-level file I/O
 - Do NOT use conda for installation (outdated version on conda-forge)
+- Project uses **uv** for dependency management with `dependency-groups` in pyproject.toml
+  - `dev`: Development tools (pytest, quartodoc, ruff, mypy, etc.)
+  - `test`: Testing dependencies only
+  - `notebooks`: Jupyter notebook dependencies
 
 ### Testing
 - Uses pytest with type hints (all test functions must be typed)
