@@ -1157,7 +1157,7 @@ def test_write_dfs2(tmp_path: Path) -> None:
     )
     assert g.origin == (0, 0)
     da = mikeio.DataArray(
-        np.random.random(size=(nt, g.ny, g.nx)),
+        np.ones((nt, g.ny, g.nx)),
         time=pd.date_range(start="2000", freq="h", periods=nt),
         item=ItemInfo("Random"),
         geometry=g,
@@ -1182,7 +1182,7 @@ def test_write_dfs2_single_time_no_time_dim(tmp_path: Path) -> None:
         projection="LONG/LAT",
     )
     da = mikeio.DataArray(
-        np.random.random(size=(g.ny, g.nx)),  # No singleton time
+        np.ones((g.ny, g.nx)),  # No singleton time
         time=pd.date_range(start="2000", periods=1),
         item=ItemInfo("Random"),
         geometry=g,
@@ -1240,7 +1240,7 @@ def test_time_selection() -> None:
     # select time test
     nt = 100
     data = []
-    d = np.random.rand(nt)
+    d = np.ones(nt)
     data.append(d)
     time = pd.date_range("2000-1-2", freq="h", periods=nt)
     items = [ItemInfo("Foo")]
