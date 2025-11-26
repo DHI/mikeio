@@ -128,9 +128,6 @@ def _clone(
             for item in source.ItemInfo:
                 builder.AddDynamicItem(item)
 
-        case int():
-            builder.AddDynamicItem(source.ItemInfo[items])
-
         case list():
             for item in items:
                 match item:
