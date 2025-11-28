@@ -1013,3 +1013,40 @@ def test_repr_dfsu_many_items_only_shows_number_of_items() -> None:
     dfs = mikeio.Dfsu2DH("tests/testdata/random_data_20_items_2d.dfsu")
     txt_dfs = repr(dfs)
     assert "number of items: 20" in txt_dfs
+
+
+def test_dfsu_to_xarray_has_element_coordinates() -> None:
+    ds = mikeio.read("mikeio/tests/testdata/FakeLake.dfsu")
+    da = ds[0]
+
+    example_tri_element = 5
+    example_tri_coordinates = [
+        -0.6155248853333334,
+        0.175671869,
+        -4.971006711324056,
+    ]
+
+    example_quad_element = 150
+    example_quad_coordinates = [
+        -0.4014337815,
+        0.069547867575,
+        -26.11973285675049,
+    ]
+
+    xr_da = da.to_xarray()
+
+    # coordinate existence and dimension checks
+    for coord in ["x", "y", "z"]:
+        assert coord in xr_da.coords
+        assert xr_da.coords[coord].dims == ("element",)
+        assert xr_da.coords[coord].sizes["element"] == da.geometry.n_elements
+
+    # TRI element values match
+    assert xr_da.x.values[example_tri_element] == approx(example_tri_coordinates[0])
+    assert xr_da.y.values[example_tri_element] == approx(example_tri_coordinates[1])
+    assert xr_da.z.values[example_tri_element] == approx(example_tri_coordinates[2])
+
+    # QUAD element values match
+    assert xr_da.x.values[example_quad_element] == approx(example_quad_coordinates[0])
+    assert xr_da.y.values[example_quad_element] == approx(example_quad_coordinates[1])
+    assert xr_da.z.values[example_quad_element] == approx(example_quad_coordinates[2])
