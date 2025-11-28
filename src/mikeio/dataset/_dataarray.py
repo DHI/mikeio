@@ -1957,6 +1957,10 @@ class DataArray:
                 coords["x"] = xr.DataArray(data=g.x, dims="x")
             case GeometryFM2D():
                 coords["element"] = xr.DataArray(data=g.element_ids, dims="element")
+                ec = g.element_coordinates
+                coords["x"] = xr.DataArray(data=ec[:, 0], dims="element")
+                coords["y"] = xr.DataArray(data=ec[:, 1], dims="element")
+                coords["z"] = xr.DataArray(data=ec[:, 2], dims="element")
             case GeometryPoint2D():
                 coords["x"] = g.x
                 coords["y"] = g.y
