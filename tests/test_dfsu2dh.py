@@ -1016,7 +1016,7 @@ def test_repr_dfsu_many_items_only_shows_number_of_items() -> None:
 
 
 def test_dfsu_to_xarray_has_element_coordinates() -> None:
-    ds = mikeio.read("mikeio/tests/testdata/FakeLake.dfsu")
+    ds = mikeio.read("tests/testdata/FakeLake.dfsu")
     da = ds[0]
 
     example_tri_element = 5
