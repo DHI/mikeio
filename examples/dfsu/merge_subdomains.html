@@ -212,12 +212,12 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <p>Note: Below implementation considers a 2D dfsu file. For 3D dfsu file, the script needs to be modified accordingly.</p>
 <section id="import-libraries" class="level2">
 <h2 class="anchored" data-anchor-id="import-libraries">Import libraries</h2>
-<div id="5e7ea877" class="cell" data-execution_count="1">
+<div id="c25a7d65" class="cell" data-execution_count="1">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> mikeio </span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> mikeio.spatial <span class="im">import</span> GeometryFM2D</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
-<div id="1946ddd4" class="cell" data-execution_count="2">
+<div id="e0f1fad4" class="cell" data-execution_count="2">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co"># (optional) check first file, items etc. </span></span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>mikeio.<span class="bu">open</span>(<span class="st">"../../data/SimA_HD_p0.dfsu"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-display" data-execution_count="2">
@@ -235,7 +235,7 @@ time: 2014-01-01 00:00:00 - 2014-01-01 10:00:00 (3 records)</code></pre>
 </section>
 <section id="choose-items-to-process" class="level2">
 <h2 class="anchored" data-anchor-id="choose-items-to-process">Choose items to process</h2>
-<div id="c6f1a9f6" class="cell" data-execution_count="3">
+<div id="323ac0fc" class="cell" data-execution_count="3">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co"># choose items to process (when in doubt look at one of the files you want to process with mikeio.open)</span></span>
 <span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>items <span class="op">=</span> [<span class="st">"Surface elevation"</span>, <span class="st">"Current speed"</span>, <span class="st">"Current direction"</span>]</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
@@ -243,7 +243,7 @@ time: 2014-01-01 00:00:00 - 2014-01-01 10:00:00 (3 records)</code></pre>
 <section id="read-files" class="level2">
 <h2 class="anchored" data-anchor-id="read-files">Read files</h2>
 <p>Option A: automatically find all with _p# suffix</p>
-<div id="5b398b6b" class="cell" data-execution_count="4">
+<div id="7c912927" class="cell" data-execution_count="4">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> glob</span>
 <span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> os</span>
 <span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a></span>
@@ -273,7 +273,7 @@ time: 2014-01-01 00:00:00 - 2014-01-01 10:00:00 (3 records)</code></pre>
 </div>
 </div>
 <p>Option B: manually select files</p>
-<div id="8e78cc33" class="cell" data-execution_count="5">
+<div id="f1686db3" class="cell" data-execution_count="5">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="co"># List of input dfsu files</span></span>
 <span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>dfs_files <span class="op">=</span> [</span>
 <span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>    <span class="st">"../../data/SimA_HD_p0.dfsu"</span>,</span>
@@ -288,7 +288,7 @@ time: 2014-01-01 00:00:00 - 2014-01-01 10:00:00 (3 records)</code></pre>
 </section>
 <section id="extract-data-of-all-subdomains" class="level2">
 <h2 class="anchored" data-anchor-id="extract-data-of-all-subdomains">Extract data of all subdomains</h2>
-<div id="9c887b91" class="cell" data-execution_count="6">
+<div id="5015fa9b" class="cell" data-execution_count="6">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Create a dictionary to store data for each item</span></span>
 <span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>data_dict <span class="op">=</span> {item: [] <span class="cf">for</span> item <span class="kw">in</span> items}</span>
 <span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a></span>
@@ -311,7 +311,7 @@ time: 2014-01-01 00:00:00 - 2014-01-01 10:00:00 (3 records)</code></pre>
 </section>
 <section id="merge-geometry-of-all-subdomains" class="level2">
 <h2 class="anchored" data-anchor-id="merge-geometry-of-all-subdomains">Merge geometry of all subdomains</h2>
-<div id="0687e70f" class="cell" data-execution_count="7">
+<div id="f3b14635" class="cell" data-execution_count="7">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>geometries <span class="op">=</span> [dfs.geometry <span class="cf">for</span> dfs <span class="kw">in</span> dfs_list]</span>
 <span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>combined_node_coordinates <span class="op">=</span> []</span>
@@ -340,7 +340,7 @@ time: 2014-01-01 00:00:00 - 2014-01-01 10:00:00 (3 records)</code></pre>
 <span id="cb9-26"><a href="#cb9-26" aria-hidden="true" tabindex="-1"></a>    projection<span class="op">=</span>projection</span>
 <span id="cb9-27"><a href="#cb9-27" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
-<div id="a462379f" class="cell" data-execution_count="8">
+<div id="1a5b9922" class="cell" data-execution_count="8">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>combined_geometry.plot()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-display">
 <div>
@@ -353,7 +353,7 @@ time: 2014-01-01 00:00:00 - 2014-01-01 10:00:00 (3 records)</code></pre>
 </section>
 <section id="merge-everything-into-dataset" class="level2">
 <h2 class="anchored" data-anchor-id="merge-everything-into-dataset">Merge everything into dataset</h2>
-<div id="5b01fe94" class="cell" data-execution_count="9">
+<div id="25c97674" class="cell" data-execution_count="9">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>ds_out <span class="op">=</span> mikeio.Dataset.from_numpy(</span>
 <span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>    data<span class="op">=</span>merged_data,  <span class="co"># n_items, timesteps, n_elements</span></span>
 <span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>    items<span class="op">=</span>items,</span>
@@ -361,7 +361,7 @@ time: 2014-01-01 00:00:00 - 2014-01-01 10:00:00 (3 records)</code></pre>
 <span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>    geometry<span class="op">=</span>combined_geometry,</span>
 <span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
-<div id="48a58b01" class="cell" data-execution_count="10">
+<div id="a4595a9b" class="cell" data-execution_count="10">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>ds_out[items[<span class="dv">0</span>]].sel(time<span class="op">=</span><span class="dv">1</span>).plot() <span class="co"># plot the first time step of the first item</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-display">
 <div>
@@ -374,7 +374,7 @@ time: 2014-01-01 00:00:00 - 2014-01-01 10:00:00 (3 records)</code></pre>
 </section>
 <section id="write-output-to-single-file" class="level2">
 <h2 class="anchored" data-anchor-id="write-output-to-single-file">Write output to single file</h2>
-<div id="1b993028" class="cell" data-execution_count="11">
+<div id="eb1b64e7" class="cell" data-execution_count="11">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>output_file <span class="op">=</span> <span class="st">"area_merged.dfsu"</span></span>
 <span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>ds_out.to_dfs(output_file)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
