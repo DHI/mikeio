@@ -1114,12 +1114,6 @@ def test_renamed_dataset_has_updated_attributes(ds1: mikeio.Dataset) -> None:
     assert hasattr(ds2, "Baz")
     assert isinstance(ds2.Baz, mikeio.DataArray)
 
-    # inplace version
-    ds1.rename(dict(Foo="Baz"), inplace=True)
-    assert not hasattr(ds1, "Foo")
-    assert hasattr(ds1, "Baz")
-    assert isinstance(ds1.Baz, mikeio.DataArray)
-
 
 def test_merge_by_item() -> None:
     ds1 = mikeio.read("tests/testdata/tide1.dfs1")
@@ -1127,7 +1121,7 @@ def test_merge_by_item() -> None:
     old_name = ds2[0].name
     new_name = old_name + " v2"
     # ds2[0].name = ds2[0].name + " v2"
-    ds2.rename({old_name: new_name}, inplace=True)
+    ds2 = ds2.rename({old_name: new_name})
     ds3 = mikeio.Dataset.merge([ds1, ds2])
 
     assert isinstance(ds3, mikeio.Dataset)

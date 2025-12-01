@@ -772,7 +772,7 @@ def test_extract_track_from_dataset(tmp_path: Path) -> None:
     track = ds.extract_track(df)
 
     # This should not change the original dataset
-    track.rename({"Sign. Wave Height": "Hm0"}, inplace=True)
+    track = track.rename({"Sign. Wave Height": "Hm0"})
     assert track["Hm0"].name == "Hm0"
 
     assert ds[0].name == "Sign. Wave Height"
