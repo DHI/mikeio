@@ -557,6 +557,7 @@ class DataArray:
 
         Examples
         --------
+
         ```python
         import mikeio
         da = mikeio.read("data.dfs0")[0]
@@ -567,6 +568,7 @@ class DataArray:
         # Shallow copy - shares data but independent metadata
         da_shallow = da.copy(deep=False)
         ```
+
         """
         if deep:
             return deepcopy(self)
