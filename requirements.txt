@@ -1,7 +1,7 @@
 # this file is only intended to be used by snyk for code scanning
 contourpy==1.3.0
 cycler==0.12.1
-fonttools==4.54.1
+fonttools==4.61.0
 kiwisolver==1.4.7
 matplotlib==3.9.2
 mikecore==0.2.2
