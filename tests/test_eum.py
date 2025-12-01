@@ -1,5 +1,6 @@
 import pytest
 from mikeio import EUMType, EUMUnit, ItemInfo
+from mikeio.eum import ItemInfoList
 
 from mikecore.eum import eumItem, eumUnit
 
@@ -79,6 +80,16 @@ def test_short_name() -> None:
 
     assert EUMUnit.gallonUK.name == "gallonUK"
     assert EUMUnit.gallonUK.short_name == "gallonUK"
+
+
+def test_item_info_list() -> None:
+    items = [ItemInfo("Foo", EUMType.Water_Level), ItemInfo("Bar", EUMType.Temperature)]
+
+    itemlist = ItemInfoList(items)
+
+    assert itemlist[0].name == "Foo"
+    df = itemlist.to_dataframe()
+    assert df["name"][0] == "Foo"
 
 
 def test_default_type() -> None:

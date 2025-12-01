@@ -10,7 +10,7 @@ from tqdm import trange
 
 from ..dataset import DataArray, Dataset
 from ..eum import ItemInfo, EUMUnit
-from ..dfs._dfs import _valid_item_numbers, _valid_timesteps
+from ..dfs._dfs import _get_item_info, _valid_item_numbers, _valid_timesteps
 from .._spectral import calc_m0_from_spectrum
 from ._dfsu import (
     _get_dfsu_info,
@@ -356,7 +356,7 @@ class DfsuSpectral:
         geometry, pts = self._parse_elements_nodes(elements, nodes)
 
         item_numbers = _valid_item_numbers(dfs.ItemInfo, items)
-        items = [self.items[i] for i in item_numbers]
+        items = _get_item_info(dfs.ItemInfo, item_numbers)
         n_items = len(item_numbers)
 
         deletevalue = self.deletevalue

@@ -15,7 +15,7 @@ from mikecore.eum import eumQuantity
 from .. import __dfs_version__
 from ..dataset import Dataset, DataArray
 from ._dfs import _get_item_info, _valid_item_numbers
-from ..eum import EUMType, EUMUnit, ItemInfo, TimeStepUnit
+from ..eum import EUMType, EUMUnit, ItemInfo, TimeStepUnit, ItemInfoList
 from .._time import DateTimeSelector
 
 
@@ -253,7 +253,7 @@ class Dfs0:
         return len(self._items)
 
     @property
-    def items(self) -> list[ItemInfo]:
+    def items(self) -> ItemInfoList:
         """List of items."""
         return self._items
 

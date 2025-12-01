@@ -18,6 +18,7 @@ from .. import __dfs_version__
 from ..dataset import Dataset
 from ._dfs import (
     _Dfs123,
+    _get_item_info,
     _valid_item_numbers,
     _valid_timesteps,
     write_dfs_data,
@@ -187,6 +188,7 @@ class Dfs2(_Dfs123):
 
         item_numbers = _valid_item_numbers(self._dfs.ItemInfo, items)
         n_items = len(item_numbers)
+        items = _get_item_info(self._dfs.ItemInfo, item_numbers)
 
         single_time_selected, time_steps = _valid_timesteps(self._dfs.FileInfo, time)
         nt = len(time_steps) if not single_time_selected else 1
@@ -233,7 +235,6 @@ class Dfs2(_Dfs123):
         self._dfs.Close()
 
         time = pd.to_datetime(t_seconds, unit="s", origin=self.start_time)
-        item_infos = [self.items[i] for i in item_numbers]
 
         dims: tuple[str, ...]
 
@@ -245,7 +246,7 @@ class Dfs2(_Dfs123):
         return Dataset.from_numpy(
             data_list,
             time=time,
-            items=item_infos,
+            items=items,
             geometry=geometry,
             dims=dims,
             validate=False,

@@ -18,7 +18,7 @@ from mikecore.DfsFileFactory import DfsFileFactory
 from mikecore.Projections import Cartography
 
 from ..dataset import Dataset
-from ..eum import ItemInfo
+from ..eum import ItemInfo, ItemInfoList
 from ..exceptions import ItemsError
 from .._time import DateTimeSelector
 
@@ -235,14 +235,33 @@ def _item_numbers_by_name(
 def _get_item_info(
     dfsItemInfo: list[DfsDynamicItemInfo],
     item_numbers: list[int] | None = None,
-) -> list[ItemInfo]:
-    if item_numbers is None:
-        item_numbers = list(range(len(dfsItemInfo)))
+    ignore_first: bool = False,
+) -> ItemInfoList:
+    """Read DFS ItemInfo for specific item numbers.
 
+    Parameters
+    ----------
+    dfsItemInfo : list[DfsDynamicItemInfo]
+        Item info from dfs file
+    item_numbers : list[int], optional
+        Item numbers to read, by default all items are read
+    ignore_first : bool, optional
+        Ignore first item, by default False, used for Dfsu3D
+
+    Returns
+    -------
+    ItemInfoList
+
+    """
+    first_idx = 1 if ignore_first else 0
+    if item_numbers is None:
+        item_numbers = list(range(len(dfsItemInfo) - first_idx))
+
+    item_numbers = [i + first_idx for i in item_numbers]
     items = [
         ItemInfo.from_mikecore_dynamic_item_info(dfsItemInfo[i]) for i in item_numbers
     ]
-    return items
+    return ItemInfoList(items)
 
 
 def write_dfs_data(*, dfs: DfsFile, ds: Dataset, n_spatial_dims: int) -> None:

@@ -100,6 +100,14 @@ def test_read_all_time_steps_without_reading_data() -> None:
     assert len(dfs.time) == 1000
 
 
+def test_items_dataframe() -> None:
+    dfs = mikeio.Dfs0("tests/testdata/random.dfs0")
+    df = dfs.items.to_dataframe()
+    assert "name" in df.columns
+    assert "type" in df.columns  # or EUMType ?
+    assert df.type.iloc[1] == "Water_Level"  # Is this the correct way to show it?
+
+
 def test_read_all_time_steps_without_reading_items_neq() -> None:
     dfs = mikeio.Dfs0("tests/testdata/da_diagnostic.dfs0")
     assert isinstance(dfs.time, pd.DatetimeIndex)
