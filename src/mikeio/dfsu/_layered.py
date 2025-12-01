@@ -13,7 +13,6 @@ from tqdm import trange
 
 from ..dataset import DataArray, Dataset
 from ..dfs._dfs import (
-    _get_item_info,
     _read_item_time_step,
     _valid_item_numbers,
     _valid_timesteps,
@@ -144,13 +143,9 @@ class DfsuLayered:
     @staticmethod
     def _read_items(filename: str) -> list[ItemInfo]:
         dfs = DfsuFile.Open(filename)
-        n_items = len(dfs.ItemInfo)
-        first_idx = 1
-        items = _get_item_info(
-            dfs.ItemInfo,
-            list(range(n_items - first_idx)),
-            ignore_first=True,
-        )
+        items = [
+            ItemInfo.from_mikecore_dynamic_item_info(ii) for ii in dfs.ItemInfo[1:]
+        ]
         dfs.Close()
         return items
 
@@ -294,13 +289,11 @@ class DfsuLayered:
         item_numbers = _valid_item_numbers(
             dfs.ItemInfo, items, ignore_first=self.geometry.is_layered
         )
-        items = _get_item_info(
-            dfs.ItemInfo, item_numbers, ignore_first=self.geometry.is_layered
-        )
-        item_numbers = [it + 1 for it in item_numbers]
+        item_infos = [self.items[i] for i in item_numbers]
+        raw_item_numbers = [it + 1 for it in item_numbers]
         if layered_data := hasattr(geometry, "is_layered") and geometry.is_layered:
-            item_numbers.insert(0, 0)
-        n_items = len(item_numbers)
+            raw_item_numbers.insert(0, 0)
+        n_items = len(raw_item_numbers)
 
         deletevalue = self.deletevalue
 
@@ -326,7 +319,7 @@ class DfsuLayered:
                     dfs=dfs,
                     filename=self._filename,
                     time=time,
-                    item_numbers=item_numbers,
+                    item_numbers=raw_item_numbers,
                     deletevalue=deletevalue,
                     shape=(data.shape[-1],),
                     item=item,
@@ -366,7 +359,7 @@ class DfsuLayered:
             return Dataset.from_numpy(
                 data_list[1:],  # skip zn item
                 time=time,
-                items=items,
+                items=item_infos,
                 geometry=geometry,
                 zn=data_list[0],
                 dims=dims,
@@ -377,7 +370,7 @@ class DfsuLayered:
             return Dataset.from_numpy(
                 data_list,
                 time=time,
-                items=items,
+                items=item_infos,
                 geometry=geometry,
                 dims=dims,
                 validate=False,
