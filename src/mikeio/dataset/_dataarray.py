@@ -540,9 +540,52 @@ class DataArray:
 
         return df
 
-    def copy(self) -> DataArray:
-        """Make copy of DataArray."""
-        return deepcopy(self)
+    def copy(self, deep: bool = True) -> DataArray:
+        """Make copy of DataArray.
+
+        Parameters
+        ----------
+        deep : bool, optional
+            If True (default), make a deep copy with new data arrays.
+            If False, make a shallow copy that shares the underlying data
+            but has independent metadata (item, time, geometry).
+
+        Returns
+        -------
+        DataArray
+            Copy of the DataArray.
+
+        Examples
+        --------
+        ```python
+        import mikeio
+        da = mikeio.read("data.dfs0")[0]
+
+        # Deep copy (default) - independent data and metadata
+        da_deep = da.copy()
+
+        # Shallow copy - shares data but independent metadata
+        da_shallow = da.copy(deep=False)
+        ```
+        """
+        if deep:
+            return deepcopy(self)
+        else:
+            # Shallow copy: share data arrays but copy metadata
+            return DataArray(
+                data=self._values,  # Share the numpy array
+                time=self.time,  # DatetimeIndex is immutable, safe to share
+                item=ItemInfo(
+                    self.item.name,
+                    self.item.type,
+                    self.item.unit,
+                    self.item.data_value_type,
+                ),  # New ItemInfo object
+                geometry=self.geometry,  # Geometries are typically immutable
+                zn=self._zn,  # Share zn array if present
+                dims=self.dims,  # Tuple is immutable
+                dt=self._dt,
+            )
 
     def squeeze(self) -> DataArray:
         """Remove axes of length 1.

@@ -574,7 +574,7 @@ class Dataset:
                 import fnmatch
 
                 data_vars = {
-                    k: da
+                    k: da.copy(deep=False)
                     for k, da in self._data_vars.items()
                     if fnmatch.fnmatch(k, key)
                 }
@@ -584,7 +584,7 @@ class Dataset:
                 raise KeyError(f"No item named: {key}. Valid items: {item_names}")
 
         if isinstance(key, Iterable):
-            data_vars = {v: self._data_vars[v] for v in key}
+            data_vars = {v: self._data_vars[v].copy(deep=False) for v in key}
             return Dataset(data=data_vars, validate=False)
 
         raise TypeError(f"indexing with a {type(key)} is not (yet) supported")

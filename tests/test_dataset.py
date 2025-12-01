@@ -1121,6 +1121,52 @@ def test_renamed_dataset_has_updated_attributes(ds1: mikeio.Dataset) -> None:
     assert isinstance(ds1.Baz, mikeio.DataArray)
 
 
+def test_rename_does_not_affect_original_dataset() -> None:
+    """Test that renaming a dataset doesn't affect other datasets.
+
+    This verifies that ItemInfo objects (and DataArrays) are not shared
+    between datasets, preventing accidental modification of item names in
+    the original dataset when a derived dataset is renamed.
+
+    This is a regression test for issues caused by:
+    1. File reading code returning references to shared ItemInfo objects
+    2. Dataset subsetting returning references to shared DataArray objects
+
+    The bug manifested when:
+    - Multiple reads from the same file handle shared ItemInfo objects
+    - Dataset subsetting (ds[[0]]) shared DataArray references with parent
+    """
+    # Scenario 1: Using the same file object and reading multiple times
+    # With the buggy code (commit b4558b79), this would share ItemInfo objects
+    dfs = mikeio.open("tests/testdata/tide1.dfs1")
+    ds1 = dfs.read()
+    ds2 = dfs.read()  # Read from same file handle
+
+    original_name = ds1[0].name
+    assert ds2[0].name == original_name
+
+    # Rename in ds2 (not inplace, so ds2 gets a new dataset)
+    ds2_renamed = ds2.rename({original_name: "NewName"})
+
+    # ds1 should still have the original name
+    assert ds1[0].name == original_name, "ds1 item name was modified when ds2 was renamed!"
+    assert ds2[0].name == original_name, "ds2 item name was modified when returning a new dataset!"
+    assert ds2_renamed[0].name == "NewName"
+
+    # Scenario 2: Subsetting a dataset should not share DataArray/ItemInfo
+    # Dataset.__getitem__ creates a new Dataset but with references to the same DataArrays
+    # When rename modifies da.name (which modifies da.item.name), it affects the shared ItemInfo
+    ds3 = mikeio.read("tests/testdata/tide1.dfs1")
+    ds3_subset = ds3[[0]]  # Subset to first item only
+
+    original_name = ds3[0].name
+    ds3_subset.rename({original_name: "SubsetName"}, inplace=True)
+
+    # ds3 should still have the original name (currently fails - known issue)
+    assert ds3[0].name == original_name, "ds3 item name was modified when ds3_subset was renamed!"
+    assert ds3_subset[0].name == "SubsetName"
+
+
 def test_merge_by_item() -> None:
     ds1 = mikeio.read("tests/testdata/tide1.dfs1")
     ds2 = mikeio.read("tests/testdata/tide1.dfs1")
