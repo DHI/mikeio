@@ -81,7 +81,8 @@ class _ChunkInfo:
     ) -> _ChunkInfo:
         """Calculate chunk info based on # of elements in dfs file and selected buffer size."""
         n_time_steps = dfs.FileInfo.TimeAxis.NumberOfTimeSteps
-        n_data_all: int = np.sum([dfs.ItemInfo[i].ElementCount for i in item_numbers])
+        # TODO: Change to builtin sum() once deprecated generic.sum() is removed
+        n_data_all: int = int(np.sum([dfs.ItemInfo[i].ElementCount for i in item_numbers]))
         mem_need = 8 * n_time_steps * n_data_all  # n_items *
         n_chunks = math.ceil(mem_need / buffer_size)
         n_data = n_data_all // len(item_numbers)
@@ -251,6 +252,10 @@ def fill_corrupt(
                 time = itemdata.Time
                 d = itemdata.Data
             else:
+                # Compute time from timestep index when data is corrupt
+                time_axis = dfs_i.FileInfo.TimeAxis
+                time = timestep * time_axis.TimeStep
+
                 iteminfo: DfsDynamicItemInfo = dfs_i.ItemInfo[item]
                 d = np.zeros(iteminfo.ElementCount)
                 d[:] = fill_value
@@ -876,14 +881,14 @@ def quantile(
     qvec: Sequence[float] = [q] if isinstance(q, float) else q
     qtxt = [f"Quantile {q!r}" for q in qvec]
     core_items = [dfs_i.ItemInfo[i] for i in item_numbers]
-    items = _get_repeated_items(core_items, prefixes=qtxt)
+    output_items = _get_repeated_items(core_items, prefixes=qtxt)
 
     if is_dfsu_3d:
-        items.insert(0, dfs_i.ItemInfo[0])
+        output_items.insert(0, dfs_i.ItemInfo[0])
 
-    dfs_o = _clone(infilename, outfilename, items=items)
+    dfs_o = _clone(infilename, outfilename, items=output_items)
 
-    n_items_out = len(items)
+    n_items_out = len(output_items)
     if is_dfsu_3d:
         n_items_out = n_items_out - 1
 

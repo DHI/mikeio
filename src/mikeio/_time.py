@@ -14,10 +14,10 @@ def _n_selected_timesteps(x: Sized, k: slice | Sized) -> int:
 
 
 def _get_time_idx_list(
-    time: pd.DatetimeIndex,
+    time: pd.DatetimeIndex | pd.TimedeltaIndex,
     steps: int | Iterable[int] | str | datetime | pd.DatetimeIndex | slice,
 ) -> list[int] | slice:
-    """Find list of idx in DatetimeIndex."""
+    """Find list of idx in DatetimeIndex or TimedeltaIndex."""
     # indexing with a slice needs to be handled differently, since slicing returns a view
 
     if isinstance(steps, slice):
@@ -30,9 +30,9 @@ def _get_time_idx_list(
 
 @dataclass
 class DateTimeSelector:
-    """Helper class for selecting time steps from a pandas DatetimeIndex."""
+    """Helper class for selecting time steps from a pandas DatetimeIndex or TimedeltaIndex."""
 
-    index: pd.DatetimeIndex
+    index: pd.DatetimeIndex | pd.TimedeltaIndex
 
     def isel(
         self,
