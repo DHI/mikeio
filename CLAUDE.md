@@ -178,6 +178,13 @@ Alternative: `ds = mikeio.read("file.dfs2")` combines open and read.
 
 ## Important Conventions
 
+### Versioning
+- **Development versions**: Use `.dev0` suffix (e.g., `3.1.0.dev0`) to indicate unreleased code
+  - This clearly marks versions installed directly from GitHub as development/pre-release
+  - Version is set in `pyproject.toml` line 8
+- **Released versions**: Remove `.dev0` suffix for official releases (e.g., `3.0.0`, `3.1.0`)
+- **Latest release**: v3.0.0 (December 2024)
+
 ### Dependencies
 - Uses `mikecore` library (Python module with bindings to DFS and EUM C libraries) for low-level file I/O
 - Do NOT use conda for installation (outdated version on conda-forge)
