@@ -2,7 +2,8 @@ SHELL := /bin/bash
 
 LIB = mikeio
 
-check: lint typecheck test
+check:
+	@$(MAKE) -j3 lint typecheck test
 
 build: typecheck test
 	uv build
@@ -14,7 +15,7 @@ format:
 	uv run ruff format $(LIB)/
 
 test:
-	uv run pytest
+	uv run pytest -n auto
 
 typecheck:
 	uv run mypy .

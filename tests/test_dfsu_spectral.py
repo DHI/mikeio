@@ -1,11 +1,10 @@
-from pathlib import Path
 import pytest
 import numpy as np
 import matplotlib.pyplot as plt
 import mikeio
 from mikecore.DfsuFile import DfsuFileType
 
-from mikeio import DfsuSpectral, EUMType, EUMUnit
+from mikeio import DfsuSpectral
 from mikeio.spatial import GeometryFMPointSpectrum, GeometryFMAreaSpectrum
 import mikeio._spectral as _spectral
 from mikeio.spatial._FM_geometry_spectral import GeometryFMLineSpectrum

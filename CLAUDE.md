@@ -6,6 +6,12 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 MIKE IO is a Python package for reading, writing, and manipulating MIKE files (dfs0, dfs1, dfs2, dfs3, dfsu, mesh). It provides a high-level API for common data processing workflows with MIKE files from DHI.
 
+## Git Workflow
+
+- **Never commit directly to main** - Always create a feature branch for changes
+- Create descriptive branch names (e.g., `fix-dfs0-bug`, `add-feature-xyz`)
+- Use pull requests for code review before merging to main
+
 ## Development Commands
 
 ### Setup
@@ -198,6 +204,12 @@ Alternative: `ds = mikeio.read("file.dfs2")` combines open and read.
 - Test files in `tests/` mirror source structure
 - Tests use fixtures from `conftest.py` and test data from `tests/testdata/`
 - Type checking is enforced with mypy (excludes some test files, see pyproject.toml)
+- Tests run in parallel using pytest-xdist (`pytest -n auto`)
+
+### CI/CD
+- Uses **GitHub Actions only** (no GitLab CI, CircleCI, Azure Pipelines, etc.)
+- CI workflows are located in `.github/workflows/`
+- Main test workflow: `full_test.yml` runs on Python 3.10 and 3.14
 
 ### Code Style
 - Uses ruff for linting and formatting
