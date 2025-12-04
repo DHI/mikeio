@@ -23,6 +23,8 @@ uv sync --group dev
 uv sync --all-groups
 ```
 
+**Note:** All make targets use `uv run --frozen` to prevent unexpected package installations. After adding dependencies to `pyproject.toml`, run `uv sync` before running make targets.
+
 ### Testing
 ```bash
 # Run all tests (excludes performance and notebook tests by default)

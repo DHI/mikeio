@@ -9,16 +9,16 @@ build: typecheck test
 	uv build
 
 lint:
-	uv run ruff check .
+	uv run --frozen ruff check .
 
 format:
 	uv run ruff format $(LIB)/
 
 test:
-	uv run pytest -n auto
+	uv run --frozen pytest -n auto
 
 typecheck:
-	uv run mypy .
+	uv run --frozen mypy .
 
 coverage: 
 	uv run pytest --cov-report html --cov=$(LIB) tests/
