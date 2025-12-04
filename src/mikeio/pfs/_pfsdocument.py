@@ -241,7 +241,9 @@ class PfsDocument(PfsSection):
                     value = self._parse_pfs_value(full_value)
                     if stack:
                         _, current_dict = stack[-1]
-                        self._add_to_dict(current_dict, multiline_key, value, unique_keywords)
+                        self._add_to_dict(
+                            current_dict, multiline_key, value, unique_keywords
+                        )
                     in_multiline_string = False
                     multiline_key = ""
                     multiline_value_parts = []
@@ -264,7 +266,9 @@ class PfsDocument(PfsSection):
                     else:
                         # Add to parent section
                         _, parent_dict = stack[-1]
-                        self._add_to_dict(parent_dict, section_name, section_dict, unique_keywords)
+                        self._add_to_dict(
+                            parent_dict, section_name, section_dict, unique_keywords
+                        )
 
             # Key-value pair
             elif "=" in s:
@@ -273,11 +277,13 @@ class PfsDocument(PfsSection):
                     idx = s.index("=")
                     key_part = s[:idx]
                     if "]]" in key_part or "[[" in key_part:
-                        raise ValueError(f"Malformed PFS file: found ']]' or '[[' in line: {s}")
+                        raise ValueError(
+                            f"Malformed PFS file: found ']]' or '[[' in line: {s}"
+                        )
 
                 idx = s.index("=")
                 key = s[:idx].strip()
-                value_str = s[idx + 1:].strip()
+                value_str = s[idx + 1 :].strip()
 
                 # Check if this starts a multiline string
                 # A multiline string starts with ' but the ENTIRE value doesn't end with '
@@ -348,7 +354,11 @@ class PfsDocument(PfsSection):
             return []
 
         # Special case: pipe-delimited strings
-        if value_str.startswith("|") and value_str.endswith("|") and value_str.count("|") == 2:
+        if (
+            value_str.startswith("|")
+            and value_str.endswith("|")
+            and value_str.count("|") == 2
+        ):
             return self._parse_token(value_str)
 
         # Special case: MULTIPOLYGON
@@ -361,7 +371,9 @@ class PfsDocument(PfsSection):
             # But if there's a comma, it's treated as a list per PFS convention
             if "," in value_str:
                 tokens = self._split_line_by_comma(value_str)
-                parsed_tokens = [self._parse_token(t, context=value_str) for t in tokens]
+                parsed_tokens = [
+                    self._parse_token(t, context=value_str) for t in tokens
+                ]
                 return parsed_tokens
             else:
                 return self._parse_token(value_str)
@@ -391,14 +403,14 @@ class PfsDocument(PfsSection):
                 in_double_quote = not in_double_quote
                 current_token.append(char)
             elif char == "," and not in_single_quote and not in_double_quote:
-                tokens.append(''.join(current_token))
+                tokens.append("".join(current_token))
                 current_token = []
             else:
                 current_token.append(char)
 
         # Add the last token
         if current_token:
-            tokens.append(''.join(current_token))
+            tokens.append("".join(current_token))
 
         return tokens
 

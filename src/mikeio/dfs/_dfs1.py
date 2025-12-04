@@ -109,7 +109,7 @@ class Dfs1(_Dfs123):
         self,
         *,
         items: str | int | Sequence[str | int] | None = None,
-        time: int | str | slice | Sequence[int] |  None = None,
+        time: int | str | slice | Sequence[int] | None = None,
         keepdims: bool = False,
         dtype: Any = np.float32,
     ) -> Dataset:

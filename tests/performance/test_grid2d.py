@@ -3,7 +3,6 @@ import mikeio
 
 
 def test_find_index_inside_domain() -> None:
-
     g = mikeio.Grid2D(bbox=[-1, -1, 1, 5], dx=0.2)
 
     np.random.seed(0)
