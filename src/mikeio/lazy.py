@@ -32,6 +32,7 @@ from collections.abc import Callable, Sequence
 from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
+from typing import Any
 
 import numpy as np
 from mikecore.DfsFile import DfsFile
@@ -174,7 +175,7 @@ class RollingOp(Operation):
     def affects_metadata(self) -> bool:
         return False  # Same structure, different values
 
-    def get_stat_func(self) -> Callable[[np.ndarray], float]:
+    def get_stat_func(self) -> Callable[..., Any]:
         """Get the statistic function to apply."""
         if isinstance(self.stat, str):
             if self.stat not in self._stat_functions:
@@ -488,7 +489,7 @@ class PipelineExecutor:
         if time_info is not None:
             start_step = time_info.start_step
             end_step = time_info.end_step
-            step = context.time_info.timestep if context.time_info.timestep else 1
+            step = time_info.timestep if time_info.timestep else 1
             start_sec = time_info.start_sec
             end_sec = time_info.end_sec
         else:
