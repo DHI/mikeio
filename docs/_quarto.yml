@@ -48,6 +48,7 @@ website:
         - user-guide/mesh.qmd
         - user-guide/eum.qmd
         - user-guide/generic.qmd
+        - user-guide/lazy.qmd
         - user-guide/pfs.qmd
 
     - title: Examples

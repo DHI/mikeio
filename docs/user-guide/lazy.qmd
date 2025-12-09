@@ -1,0 +1,166 @@
+---
+title: Lazy
+---
+
+# {{< fa forward >}} Lazy Evaluation API
+
+The `mikeio.lazy` module provides a specialized API for processing DFS files that are **too large to load into memory**.
+
+:::{.callout-note}
+## When to use lazy
+
+**Most users should use [`mikeio.read()`](`mikeio.read`) and work with Dataset/DataArray** - it's simpler and more feature-rich.
+
+Only use the lazy API when files don't fit in memory or when you specifically need rolling statistics on large files.
+:::
+
+Operations are queued and executed in a single pass, avoiding intermediate files and minimizing memory usage.
+
+## Quick example
+
+Process a large file by chaining operations:
+
+```{python}
+from mikeio.lazy import scan_dfs
+
+(scan_dfs("../data/HD2D.dfsu")
+    .select(["Surface elevation"])
+    .rolling(window=3, stat="mean")
+    .to_dfs("smoothed.dfsu")
+)
+```
+
+The operations are lazy - nothing happens until `.to_dfs()` is called. Then all operations execute in a single pass through the file.
+
+## {{< fa link >}} Chaining operations
+
+Operations can be chained in any logical order:
+
+```{python}
+(scan_dfs("../data/HD2D.dfsu")
+    .select(["Surface elevation", "Current speed"])  # Select items
+    .filter(time=slice(0, 5))                        # First 5 timesteps
+    .rolling(window=3, stat="mean")                  # Smooth with rolling mean
+    .to_dfs("processed.dfsu")                        # Execute and write
+)
+```
+
+## {{< fa filter >}} Selecting items
+
+Select items by name or index, just like with Dataset:
+
+```{python}
+# By name
+(scan_dfs("../data/HD2D.dfsu")
+    .select(["Surface elevation"])
+    .to_dfs("surface_only.dfsu")
+)
+```
+
+```{python}
+# By index
+(scan_dfs("../data/HD2D.dfsu")
+    .select([0, 1])  # First two items
+    .to_dfs("first_two.dfsu")
+)
+```
+
+## {{< fa calendar >}} Filtering time
+
+Use slice notation to filter timesteps:
+
+```{python}
+# By index
+(scan_dfs("../data/HD2D.dfsu")
+    .filter(time=slice(0, 5))  # First 5 timesteps
+    .to_dfs("early.dfsu")
+)
+```
+
+## {{< fa chart-line >}} Rolling statistics
+
+Apply rolling window statistics without loading data into memory:
+
+```{python}
+# Built-in statistics
+(scan_dfs("../data/HD2D.dfsu")
+    .select(["Surface elevation"])
+    .rolling(window=3, stat="mean")
+    .to_dfs("smoothed.dfsu")
+)
+```
+
+Available statistics: `"mean"`, `"min"`, `"max"`, `"median"`, `"sum"`, `"std"`.
+
+### Custom statistics
+
+Pass a custom function for specialized statistics:
+
+```{python}
+import numpy as np
+
+# 90th percentile
+(scan_dfs("../data/HD2D.dfsu")
+    .select(["Surface elevation"])
+    .rolling(window=3, stat=lambda x: np.nanpercentile(x, 90))
+    .to_dfs("p90.dfsu")
+)
+```
+
+The function receives a 1D array of `window` values and should return a scalar.
+
+## {{< fa calculator >}} Transforming data
+
+Apply custom transformations to items:
+
+```{python}
+# Convert meters to centimeters
+(scan_dfs("../data/HD2D.dfsu")
+    .select(["Surface elevation"])
+    .with_columns(**{"Surface elevation": lambda x: x * 100})
+    .to_dfs("in_cm.dfsu")
+)
+```
+
+## Complete pipeline
+
+Combine multiple operations:
+
+```{python}
+import numpy as np
+
+(scan_dfs("../data/HD2D.dfsu")
+    .select(["Surface elevation"])
+    .filter(time=slice(0, 7))
+    .rolling(window=3, stat="mean", min_periods=1)
+    .with_columns(**{"Surface elevation": lambda x: x * 100})  # to cm
+    .to_dfs("pipeline.dfsu")
+)
+```
+
+## When to use lazy API vs generic module
+
+The lazy API complements the existing [`generic`](generic.qmd) module.
+
+**Use lazy API when:**
+
+* You need to chain multiple operations
+* You want rolling statistics
+* You want to avoid intermediate files
+
+**Use generic module when:**
+
+* You need `concat()` to join multiple files
+* You need `diff()` to compare two files
+* You only need a single operation
+
+**Example:** If you need to concatenate files *and* apply a rolling mean, use `generic.concat()` first, then `lazy` for the rolling operation.
+
+## API Reference
+
+* [`scan_dfs()`](`mikeio.lazy.scan_dfs`) - Create a lazy processor
+* [`.select()`](`mikeio.lazy.LazyDfs.select`) - Select items
+* [`.filter()`](`mikeio.lazy.LazyDfs.filter`) - Filter timesteps
+* [`.rolling()`](`mikeio.lazy.LazyDfs.rolling`) - Rolling statistics
+* [`.with_columns()`](`mikeio.lazy.LazyDfs.with_columns`) - Transform items
+* [`.to_dfs()`](`mikeio.lazy.LazyDfs.to_dfs`) - Execute and write
