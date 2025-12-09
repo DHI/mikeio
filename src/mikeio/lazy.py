@@ -301,6 +301,8 @@ class RollingOp(Operation):
 class AggregateOp(Operation):
     """Operation to aggregate over time dimension."""
 
+    stats: list[str | Callable[..., Any]]
+
     # Map string stats to numpy functions
     _stat_functions = {
         "mean": np.nanmean,
@@ -331,10 +333,10 @@ class AggregateOp(Operation):
         if isinstance(stat, str):
             self.stats = [stat]
         elif isinstance(stat, list):
-            self.stats = stat
+            self.stats = cast(list[str | Callable[..., Any]], stat)
         else:
             # Custom callable - treat as single stat
-            self.stats = [stat]  # type: ignore
+            self.stats = [stat]
 
         # Validate all string stats
         for s in self.stats:
@@ -364,7 +366,7 @@ class AggregateOp(Operation):
 
     def get_stat_funcs(self) -> list[Callable[..., Any]]:
         """Get the list of statistic functions to apply."""
-        funcs = []
+        funcs: list[Callable[..., Any]] = []
         for stat in self.stats:
             if isinstance(stat, str):
                 if stat not in self._stat_functions:
@@ -372,7 +374,7 @@ class AggregateOp(Operation):
                         f"Unknown stat '{stat}'. "
                         f"Available: {list(self._stat_functions.keys())}"
                     )
-                funcs.append(self._stat_functions[stat])
+                funcs.append(cast(Callable[..., Any], self._stat_functions[stat]))
             else:
                 funcs.append(cast(Callable[..., Any], stat))
         return funcs
@@ -1044,7 +1046,7 @@ class PipelineExecutor:
         if context.aggregate is not None and len(context.aggregate.stats) > 1:
             # Multi-aggregation: create custom items with "Stat: ItemName" naming
             stat_labels = context.aggregate.get_stat_labels()
-            items_list = []
+            items_list: list[int | ItemInfo] = []
 
             # Get original item info for selected items
             # Skip Z coordinate for layered dfsu
