@@ -77,8 +77,8 @@ def test_scan_dfs_select_and_filter(tmp_path: Path) -> None:
     np.testing.assert_array_equal(result[0].to_numpy(), org[0].to_numpy()[:5])
 
 
-def test_scan_dfs_with_columns(tmp_path: Path) -> None:
-    """Test with_columns transformation."""
+def test_scan_dfs_with_items(tmp_path: Path) -> None:
+    """Test with_items transformation."""
     infilename = "tests/testdata/random.dfs0"
     outfile = tmp_path / "transformed.dfs0"
 
@@ -89,7 +89,7 @@ def test_scan_dfs_with_columns(tmp_path: Path) -> None:
     (
         scan_dfs(infilename)
         .select([0])
-        .with_columns(**{item_name: lambda x: x * 2.0})
+        .with_items(**{item_name: lambda x: x * 2.0})
         .to_dfs(outfile)
     )
 
@@ -144,7 +144,7 @@ def test_scan_dfs_complete_pipeline(tmp_path: Path) -> None:
         .select([0])
         .filter(time=slice(0, 10))
         .rolling(window=3, stat="mean")
-        .with_columns(**{item_name: lambda x: x + 100.0})
+        .with_items(**{item_name: lambda x: x + 100.0})
         .to_dfs(outfile)
     )
 

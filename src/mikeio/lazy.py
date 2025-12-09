@@ -19,7 +19,7 @@ Examples
 >>> (scan_dfs("hourly.dfs0")
 ...     .select(["WaterLevel"])
 ...     .rolling(window=24, stat=lambda x: np.nanpercentile(x, 90))
-...     .with_columns(WaterLevel=lambda x: x * 1.8 + 32)  # to Fahrenheit
+...     .with_items(WaterLevel=lambda x: x * 1.8 + 32)  # to Fahrenheit
 ...     .to_dfs("processed.dfs0")
 ... )
 
@@ -129,7 +129,7 @@ class FilterOp(Operation):
         context.time_info = _TimeInfo.parse(time_axis, self.start, self.end, self.step)
 
 
-class WithColumnsOp(Operation):
+class WithItemsOp(Operation):
     """Operation to transform items with custom functions."""
 
     def __init__(self, transforms: dict[str, Callable[[np.ndarray], np.ndarray]]):
@@ -324,7 +324,7 @@ class LazyDfs:
         )
         return self
 
-    def with_columns(self, **transforms: Callable[[np.ndarray], np.ndarray]) -> LazyDfs:
+    def with_items(self, **transforms: Callable[[np.ndarray], np.ndarray]) -> LazyDfs:
         """Transform items with custom functions.
 
         Parameters
@@ -342,16 +342,16 @@ class LazyDfs:
         Examples
         --------
         >>> # Convert temperature from Celsius to Fahrenheit
-        >>> df.with_columns(Temperature=lambda x: x * 1.8 + 32)
+        >>> df.with_items(Temperature=lambda x: x * 1.8 + 32)
 
         >>> # Multiple transformations
-        >>> df.with_columns(
+        >>> df.with_items(
         ...     Temperature=lambda x: x + 273.15,  # to Kelvin
         ...     Salinity=lambda x: x * 1.2,
         ... )
 
         """
-        self._operations.append(WithColumnsOp(transforms))
+        self._operations.append(WithItemsOp(transforms))
         return self
 
     def to_dfs(self, path: str | Path, buffer_size: float = 1e9) -> None:
@@ -446,7 +446,7 @@ class PipelineExecutor:
                 op.apply(context)
 
     def _apply_data_operations(self, context: ExecutionContext) -> None:
-        """Apply operations that transform data (with_columns, rolling)."""
+        """Apply operations that transform data (with_items, rolling)."""
         for op in self.operations:
             if not op.affects_metadata():
                 op.apply(context)

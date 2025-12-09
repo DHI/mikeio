@@ -34,14 +34,14 @@ The operations are lazy - nothing happens until `.to_dfs()` is called. Then all 
 
 ## {{< fa link >}} Chaining operations
 
-Operations can be chained in any logical order:
+Operations can be chained in any logical order. Works with all DFS file types (dfs0, dfs1, dfs2, dfs3, dfsu):
 
 ```{python}
-(scan_dfs("../data/HD2D.dfsu")
-    .select(["Surface elevation", "Current speed"])  # Select items
-    .filter(time=slice(0, 5))                        # First 5 timesteps
-    .rolling(window=3, stat="mean")                  # Smooth with rolling mean
-    .to_dfs("processed.dfsu")                        # Execute and write
+(scan_dfs("../data/eq.dfs2")
+    .select([0])                         # Select first item
+    .filter(time=slice(0, 10))           # First 10 timesteps
+    .rolling(window=3, stat="mean")      # Smooth with rolling mean
+    .to_dfs("processed.dfs2")            # Execute and write
 )
 ```
 
@@ -50,18 +50,18 @@ Operations can be chained in any logical order:
 Select items by name or index, just like with Dataset:
 
 ```{python}
-# By name
-(scan_dfs("../data/HD2D.dfsu")
-    .select(["Surface elevation"])
-    .to_dfs("surface_only.dfsu")
+# By name (dfsu file)
+(scan_dfs("../data/NorthSea_HD_and_windspeed.dfsu")
+    .select(["Wind speed"])
+    .to_dfs("wind_only.dfsu")
 )
 ```
 
 ```{python}
-# By index
-(scan_dfs("../data/HD2D.dfsu")
+# By index (dfs2 file)
+(scan_dfs("../data/consistency/oresundHD.dfs2")
     .select([0, 1])  # First two items
-    .to_dfs("first_two.dfsu")
+    .to_dfs("first_two.dfs2")
 )
 ```
 
@@ -70,10 +70,10 @@ Select items by name or index, just like with Dataset:
 Use slice notation to filter timesteps:
 
 ```{python}
-# By index
-(scan_dfs("../data/HD2D.dfsu")
-    .filter(time=slice(0, 5))  # First 5 timesteps
-    .to_dfs("early.dfsu")
+# By index (dfs2 file)
+(scan_dfs("../data/waves.dfs2")
+    .filter(time=slice(0, 2))  # First 2 timesteps
+    .to_dfs("early.dfs2")
 )
 ```
 
@@ -82,8 +82,8 @@ Use slice notation to filter timesteps:
 Apply rolling window statistics without loading data into memory:
 
 ```{python}
-# Built-in statistics
-(scan_dfs("../data/HD2D.dfsu")
+# Built-in statistics (dfsu file)
+(scan_dfs("../data/NorthSea_HD_and_windspeed.dfsu")
     .select(["Surface elevation"])
     .rolling(window=3, stat="mean")
     .to_dfs("smoothed.dfsu")
@@ -99,11 +99,11 @@ Pass a custom function for specialized statistics:
 ```{python}
 import numpy as np
 
-# 90th percentile
-(scan_dfs("../data/HD2D.dfsu")
-    .select(["Surface elevation"])
+# 90th percentile (dfs2 file)
+(scan_dfs("../data/waves.dfs2")
+    .select(["Sign. Wave Height"])
     .rolling(window=3, stat=lambda x: np.nanpercentile(x, 90))
-    .to_dfs("p90.dfsu")
+    .to_dfs("p90_waves.dfs2")
 )
 ```
 
@@ -114,11 +114,11 @@ The function receives a 1D array of `window` values and should return a scalar.
 Apply custom transformations to items:
 
 ```{python}
-# Convert meters to centimeters
-(scan_dfs("../data/HD2D.dfsu")
-    .select(["Surface elevation"])
-    .with_columns(**{"Surface elevation": lambda x: x * 100})
-    .to_dfs("in_cm.dfsu")
+# Convert wind components (dfs2 file)
+(scan_dfs("../data/europe_wind_long_lat.dfs2")
+    .select(["Wind x-comp (10m)"])
+    .with_items(**{"Wind x-comp (10m)": lambda x: x * 1.94384})  # m/s to knots
+    .to_dfs("wind_knots.dfs2")
 )
 ```
 
@@ -133,7 +133,7 @@ import numpy as np
     .select(["Surface elevation"])
     .filter(time=slice(0, 7))
     .rolling(window=3, stat="mean", min_periods=1)
-    .with_columns(**{"Surface elevation": lambda x: x * 100})  # to cm
+    .with_items(**{"Surface elevation": lambda x: x * 100})  # to cm
     .to_dfs("pipeline.dfsu")
 )
 ```
@@ -162,5 +162,5 @@ The lazy API complements the existing [`generic`](generic.qmd) module.
 * [`.select()`](`mikeio.lazy.LazyDfs.select`) - Select items
 * [`.filter()`](`mikeio.lazy.LazyDfs.filter`) - Filter timesteps
 * [`.rolling()`](`mikeio.lazy.LazyDfs.rolling`) - Rolling statistics
-* [`.with_columns()`](`mikeio.lazy.LazyDfs.with_columns`) - Transform items
+* [`.with_items()`](`mikeio.lazy.LazyDfs.with_items`) - Transform items
 * [`.to_dfs()`](`mikeio.lazy.LazyDfs.to_dfs`) - Execute and write
