@@ -3,6 +3,7 @@ from pathlib import Path
 import numpy as np
 
 import mikeio
+from mikeio.generic import DerivedItem
 from mikeio.lazy import scan_dfs
 
 
@@ -433,7 +434,8 @@ def test_scan_dfs_aggregate_custom_labels(tmp_path: Path) -> None:
 
     # Use custom labels for stats
     scan_dfs(infilename).select([0]).aggregate(
-        ["min", "max", "mean"], labels={"mean": "Avg", "max": "Maximum", "min": "Minimum"}
+        ["min", "max", "mean"],
+        labels={"mean": "Avg", "max": "Maximum", "min": "Minimum"},
     ).to_dfs(outfile)
 
     # Verify
@@ -614,10 +616,10 @@ def test_scan_dfs_diff_with_scale(tmp_path: Path) -> None:
 def test_validation_invalid_stat_name() -> None:
     """Test that invalid stat names are caught immediately."""
     import pytest
-    
+
     with pytest.raises(ValueError, match="Unknown stat 'invalid_stat'"):
         scan_dfs("tests/testdata/HD2D.dfsu").aggregate("invalid_stat")
-    
+
     with pytest.raises(ValueError, match="Unknown stat 'bad_rolling'"):
         scan_dfs("tests/testdata/HD2D.dfsu").rolling(window=3, stat="bad_rolling")
 
@@ -625,9 +627,9 @@ def test_validation_invalid_stat_name() -> None:
 def test_validation_invalid_item_selection() -> None:
     """Test that invalid item selection is caught in explain()."""
     import pytest
-    
+
     lazy = scan_dfs("tests/testdata/HD2D.dfsu").select(["NonexistentItem"])
-    
+
     with pytest.raises(ValueError, match="Invalid item selection"):
         lazy.explain()
 
@@ -635,10 +637,10 @@ def test_validation_invalid_item_selection() -> None:
 def test_validation_invalid_time_range() -> None:
     """Test that invalid time ranges are caught in explain()."""
     import pytest
-    
+
     # End before start
     lazy = scan_dfs("tests/testdata/HD2D.dfsu").filter(start=10, end=5)
-    
+
     with pytest.raises(ValueError, match="Invalid time filter"):
         lazy.explain()
 
@@ -646,9 +648,9 @@ def test_validation_invalid_time_range() -> None:
 def test_validation_invalid_diff_file() -> None:
     """Test that missing diff file is caught in explain()."""
     import pytest
-    
+
     lazy = scan_dfs("tests/testdata/HD2D.dfsu").diff("nonexistent_file.dfsu")
-    
+
     with pytest.raises(ValueError, match="Diff file not found"):
         lazy.explain()
 
@@ -656,9 +658,88 @@ def test_validation_invalid_diff_file() -> None:
 def test_validation_in_execute(tmp_path: Path) -> None:
     """Test that validation also happens during to_dfs() execution."""
     import pytest
-    
+
     outfile = tmp_path / "output.dfsu"
     lazy = scan_dfs("tests/testdata/HD2D.dfsu").select(["InvalidItem"])
-    
+
     with pytest.raises(ValueError, match="Invalid item selection"):
         lazy.to_dfs(outfile)
+
+
+def test_scan_dfs_derive_from_multiple_items(tmp_path: Path) -> None:
+    """Test deriving new item from multiple existing items."""
+    infilename = "tests/testdata/HD2D.dfsu"
+    outfile = tmp_path / "derived.dfsu"
+
+    # Derive current speed from U and V velocity
+    (
+        scan_dfs(infilename)
+        .select(["U velocity", "V velocity"])
+        .derive(
+            DerivedItem(
+                name="Derived Speed",
+                type=mikeio.EUMType.Current_Speed,
+                func=lambda x: np.sqrt(x["U velocity"] ** 2 + x["V velocity"] ** 2),
+            )
+        )
+        .to_dfs(outfile)
+    )
+
+    # Verify
+    org = mikeio.read(infilename)
+    result = mikeio.read(outfile)
+
+    # Should have 3 items: U velocity, V velocity, and Derived Speed
+    assert len(result.items) == 3
+    assert result.items[0].name == "U velocity"
+    assert result.items[1].name == "V velocity"
+    assert result.items[2].name == "Derived Speed"
+    assert result.items[2].type == mikeio.EUMType.Current_Speed
+
+    # Verify the derived speed matches manual calculation
+    u = org["U velocity"].to_numpy()
+    v = org["V velocity"].to_numpy()
+    expected_speed = np.sqrt(u**2 + v**2)
+    np.testing.assert_array_almost_equal(
+        result["Derived Speed"].to_numpy(), expected_speed, decimal=5
+    )
+
+
+def test_scan_dfs_derive_with_aggregate(tmp_path: Path) -> None:
+    """Test deriving items from aggregated data (composability)."""
+    infilename = "tests/testdata/HD2D.dfsu"
+    outfile = tmp_path / "aggregated_derived.dfsu"
+
+    # Aggregate U and V to mean, then derive speed from mean velocities
+    (
+        scan_dfs(infilename)
+        .select(["U velocity", "V velocity"])
+        .aggregate("mean")
+        .derive(
+            DerivedItem(
+                name="Mean Current Speed",
+                type=mikeio.EUMType.Current_Speed,
+                func=lambda x: np.sqrt(x["U velocity"] ** 2 + x["V velocity"] ** 2),
+            )
+        )
+        .to_dfs(outfile)
+    )
+
+    # Verify
+    org = mikeio.read(infilename)
+    result = mikeio.read(outfile)
+
+    # Should have single timestep (aggregated)
+    assert len(result.time) == 1
+
+    # Should have 3 items
+    assert len(result.items) == 3
+    assert result.items[2].name == "Mean Current Speed"
+
+    # Verify the derived speed matches manual calculation from aggregated data
+    u_mean = org["U velocity"].to_numpy().mean(axis=0)
+    v_mean = org["V velocity"].to_numpy().mean(axis=0)
+    expected_speed = np.sqrt(u_mean**2 + v_mean**2)
+    np.testing.assert_array_almost_equal(
+        result["Mean Current Speed"].to_numpy()[0], expected_speed, decimal=5
+    )

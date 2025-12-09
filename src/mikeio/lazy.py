@@ -42,7 +42,7 @@ from mikecore.DfsFileFactory import DfsFileFactory
 
 # Import utilities from generic module
 from .eum import ItemInfo
-from .generic import _TimeInfo, _clone, _valid_item_numbers
+from .generic import DerivedItem, _TimeInfo, _clone, _valid_item_numbers
 
 __all__ = ["scan_dfs", "LazyDfs"]
 
@@ -97,6 +97,7 @@ class ExecutionContext:
     rolling: "RollingOp | None" = None
     aggregate: "AggregateOp | None" = None
     diff_file: Path | None = None
+    derived_items: list[DerivedItem] | None = None
 
 
 # ============================================================================
@@ -433,6 +434,28 @@ class DiffOp(Operation):
     def apply(self, context: ExecutionContext) -> None:
         """Store diff config for later application."""
         context.diff_file = self.other_file
+
+
+class DeriveOp(Operation):
+    """Operation to derive new items from existing items."""
+
+    def __init__(self, derived_items: list[DerivedItem]):
+        self.derived_items = derived_items
+
+    @property
+    def affects_metadata(self) -> bool:
+        return True  # Adds new items to the output
+
+    def name(self) -> str:
+        return "derive"
+
+    def explain(self) -> str:
+        item_names = ", ".join(item.item.name for item in self.derived_items)
+        return f"DERIVE new items: [{item_names}]"
+
+    def apply(self, context: ExecutionContext) -> None:
+        """Store derived items for later application."""
+        context.derived_items = self.derived_items
 
 
 # ============================================================================
@@ -814,6 +837,67 @@ class LazyDfs:
         self._operations.append(DiffOp(other))
         return self
 
+    def derive(self, *derived_items: DerivedItem) -> LazyDfs:
+        """Derive new items from existing items.
+
+        This operation allows creating new variables computed from multiple existing items,
+        with proper EUM types and units. Similar to the generic.transform() function but
+        in the lazy API pipeline.
+
+        Parameters
+        ----------
+        *derived_items : DerivedItem
+            One or more DerivedItem objects specifying the new items to compute.
+            Each DerivedItem has:
+            - name: Name of the new item
+            - type: EUMType for the new item
+            - unit: EUMUnit for the new item (optional)
+            - func: Function that takes a dict of all items and returns computed array
+
+        Returns
+        -------
+        LazyDfs
+            Self for method chaining
+
+        Examples
+        --------
+        >>> from mikeio.generic import DerivedItem
+        >>> import mikeio
+        >>> import numpy as np
+        >>>
+        >>> # Calculate current speed from U and V velocity components
+        >>> (scan_dfs("currents.dfsu")
+        ...     .derive(
+        ...         DerivedItem(
+        ...             name="Current Speed",
+        ...             type=mikeio.EUMType.Current_Speed,
+        ...             func=lambda x: np.sqrt(x["U velocity"]**2 + x["V velocity"]**2)
+        ...         )
+        ...     )
+        ...     .to_dfs("output.dfsu")
+        ... )
+        >>>
+        >>> # Derive multiple items at once
+        >>> (scan_dfs("data.dfsu")
+        ...     .derive(
+        ...         DerivedItem(
+        ...             name="Speed",
+        ...             type=mikeio.EUMType.Current_Speed,
+        ...             func=lambda x: np.sqrt(x["U"]**2 + x["V"]**2)
+        ...         ),
+        ...         DerivedItem(
+        ...             name="Direction",
+        ...             type=mikeio.EUMType.Current_Direction,
+        ...             func=lambda x: np.arctan2(x["V"], x["U"]) * 180 / np.pi
+        ...         )
+        ...     )
+        ...     .to_dfs("output.dfsu")
+        ... )
+
+        """
+        self._operations.append(DeriveOp(list(derived_items)))
+        return self
+
     def _validate_operations(self, dfs_in: DfsFile) -> None:
         """Validate all operations against file metadata.
 
@@ -1042,11 +1126,14 @@ class PipelineExecutor:
             start_time = context.time_info.file_start_new
             timestep = context.time_info.timestep
 
+        # Declare items_list with proper type
+        items_list: list[int | ItemInfo]
+
         # Check for multi-aggregation
         if context.aggregate is not None and len(context.aggregate.stats) > 1:
             # Multi-aggregation: create custom items with "Stat: ItemName" naming
             stat_labels = context.aggregate.get_stat_labels()
-            items_list: list[int | ItemInfo] = []
+            items_list = []
 
             # Get original item info for selected items
             # Skip Z coordinate for layered dfsu
@@ -1075,6 +1162,11 @@ class PipelineExecutor:
                         stat_label, orig_item_info.name
                     )
                     items_list.append(new_item)
+
+            # Add derived items if present
+            if context.derived_items is not None:
+                for derived in context.derived_items:
+                    items_list.append(derived.item)
 
             dfs_out = _clone(
                 infilename=str(self.infilename),
@@ -1115,6 +1207,11 @@ class PipelineExecutor:
                 )
                 items_list.append(new_item)
 
+            # Add derived items if present
+            if context.derived_items is not None:
+                for derived in context.derived_items:
+                    items_list.append(derived.item)
+
             dfs_out = _clone(
                 infilename=str(self.infilename),
                 outfilename=str(self.outfilename),
@@ -1123,14 +1220,32 @@ class PipelineExecutor:
                 items=items_list,
             )
         else:
-            # No aggregation or other operations: clone with selected items
-            dfs_out = _clone(
-                infilename=str(self.infilename),
-                outfilename=str(self.outfilename),
-                start_time=start_time,
-                timestep=timestep,
-                items=context.item_numbers,
-            )
+            # Check if we have derived items to add
+            if context.derived_items is not None:
+                # Add existing items plus derived items
+                items_list = cast(list[int | ItemInfo], context.item_numbers.copy())
+                # Add the ItemInfo objects for derived items
+                for derived in context.derived_items:
+                    items_list.append(derived.item)
+
+                dfs_out = _clone(
+                    infilename=str(self.infilename),
+                    outfilename=str(self.outfilename),
+                    start_time=start_time,
+                    timestep=timestep,
+                    items=items_list,
+                )
+            else:
+                # No aggregation or derived items: clone with selected items
+                items_list = cast(list[int | ItemInfo], context.item_numbers)
+
+                dfs_out = _clone(
+                    infilename=str(self.infilename),
+                    outfilename=str(self.outfilename),
+                    start_time=start_time,
+                    timestep=timestep,
+                    items=items_list,
+                )
 
         return dfs_out
 
@@ -1146,6 +1261,67 @@ class PipelineExecutor:
             self._process_with_rolling(context, context.rolling)
         else:
             self._process_simple(context)
+
+    def _compute_and_write_derived_items(
+        self,
+        context: ExecutionContext,
+        item_data_dict: dict[str, np.ndarray],
+        timestep_out: int,
+        time_sec: float,
+        use_sequential_write: bool = False,
+    ) -> None:
+        """Compute and write derived items for a single timestep.
+
+        Parameters
+        ----------
+        context : ExecutionContext
+            Execution context with derived item definitions
+        item_data_dict : dict[str, np.ndarray]
+            Dictionary mapping item names to their data arrays for this timestep
+        timestep_out : int
+            Output timestep index
+        time_sec : float
+            Time in seconds for this timestep
+        use_sequential_write : bool, optional
+            If True, use WriteItemTimeStepNext instead of WriteItemTimeStep.
+            This is required when writing aggregate results. Default is False.
+
+        """
+        if context.derived_items is None:
+            return
+
+        n_existing_items = len(context.item_numbers)
+
+        for derived_idx, derived in enumerate(context.derived_items):
+            if derived.func is None:
+                # No function - skip
+                continue
+
+            try:
+                # Compute derived item from dict of all items
+                derived_data = derived.func(item_data_dict)
+
+                # Handle NaN values
+                derived_data = np.asarray(derived_data, dtype=np.float32)
+                derived_data[np.isnan(derived_data)] = context.deletevalue
+
+                # Write derived item (after all existing items)
+                if use_sequential_write:
+                    # For aggregate: use sequential write
+                    context.dfs_out.WriteItemTimeStepNext(time_sec, derived_data)
+                else:
+                    # For normal processing: use indexed write
+                    output_item_idx = n_existing_items + derived_idx + 1
+                    context.dfs_out.WriteItemTimeStep(
+                        output_item_idx, timestep_out, time_sec, derived_data
+                    )
+            except KeyError as e:
+                missing_key = e.args[0]
+                available = ", ".join(item_data_dict.keys())
+                raise KeyError(
+                    f"Derived item '{derived.item.name}' requires '{missing_key}' "
+                    f"which is not available. Available items: {available}"
+                ) from e
 
     def _process_simple(self, context: ExecutionContext) -> None:
         """Process data without rolling (simple passthrough with transforms)."""
@@ -1177,11 +1353,15 @@ class PipelineExecutor:
             dfs_diff = DfsFileFactory.DfsGenericOpen(str(diff_file))
 
         try:
-            # Get item names for transforms
+            # Get item names for transforms and derived items
             item_names = [context.dfs_in.ItemInfo[i].Name for i in context.item_numbers]
+            has_derived = context.derived_items is not None
 
             timestep_out = -1
             for timestep in range(start_step, end_step, int(step)):
+                # Collect item data in dict if we have derived items
+                item_data_dict: dict[str, np.ndarray] = {}
+                time_sec = 0.0
                 for item_idx, item_num in enumerate(context.item_numbers):
                     itemdata = context.dfs_in.ReadItemTimeStep(item_num + 1, timestep)
                     time_sec = itemdata.Time
@@ -1244,9 +1424,19 @@ class PipelineExecutor:
                         # Convert NaN back to delete value
                         data[np.isnan(data)] = context.deletevalue
 
-                    # Write to output
+                    # Store in dict for derived items (after all transformations)
+                    if has_derived:
+                        item_data_dict[item_name] = data.copy()
+
+                    # Write existing item to output
                     context.dfs_out.WriteItemTimeStep(
                         item_idx + 1, timestep_out, time_sec, data
+                    )
+
+                # Compute and write derived items for this timestep
+                if has_derived:
+                    self._compute_and_write_derived_items(
+                        context, item_data_dict, timestep_out, time_sec
                     )
         finally:
             if dfs_diff is not None:
@@ -1315,6 +1505,15 @@ class PipelineExecutor:
                     timestep_out = timestep_in - start_step
 
                 # Compute rolling statistic for each item
+                item_data_dict: dict[str, np.ndarray] = {}
+                item_names = [
+                    context.dfs_in.ItemInfo[i].Name for i in context.item_numbers
+                ]
+                itemdata = context.dfs_in.ReadItemTimeStep(
+                    context.item_numbers[0] + 1, timestep_in
+                )
+                output_time = itemdata.Time
+
                 for item_idx in range(n_items):
                     # Get the window data
                     if timesteps_filled < window:
@@ -1330,11 +1529,36 @@ class PipelineExecutor:
                     # Replace NaN with delete value
                     result[np.isnan(result)] = context.deletevalue
 
+                    # Store for derived items before replacing NaN
+                    if context.derived_items is not None:
+                        item_data_dict[item_names[item_idx]] = result.copy()
+
                     # Write to output (use WriteItemTimeStepNext for sequential writing)
-                    itemdata = context.dfs_in.ReadItemTimeStep(
-                        context.item_numbers[item_idx] + 1, timestep_in
-                    )
-                    context.dfs_out.WriteItemTimeStepNext(itemdata.Time, result)
+                    context.dfs_out.WriteItemTimeStepNext(output_time, result)
+
+                # Compute and write derived items for this timestep
+                if context.derived_items is not None:
+                    # Need to write derived items with WriteItemTimeStep since we're not sequential
+                    for derived_idx, derived in enumerate(context.derived_items):
+                        if derived.func is None:
+                            continue
+
+                        try:
+                            derived_data = derived.func(item_data_dict)
+                            derived_data = np.asarray(derived_data, dtype=np.float32)
+                            derived_data[np.isnan(derived_data)] = context.deletevalue
+
+                            # Write derived item
+                            context.dfs_out.WriteItemTimeStepNext(
+                                output_time, derived_data
+                            )
+                        except KeyError as e:
+                            missing_key = e.args[0]
+                            available = ", ".join(item_data_dict.keys())
+                            raise KeyError(
+                                f"Derived item '{derived.item.name}' requires '{missing_key}' "
+                                f"which is not available. Available items: {available}"
+                            ) from e
 
             buffer_idx += 1
 
@@ -1440,12 +1664,43 @@ class PipelineExecutor:
 
         # Write results (single timestep at time 0.0)
         # Write order: for each item, write all stats before moving to next item
+        # Also collect aggregated data for derived items
+        item_data_dict: dict[str, np.ndarray] = {}
+        item_names = [
+            context.dfs_in.ItemInfo[item_num].Name
+            for item_num in item_numbers_to_aggregate
+        ]
+
         for item_idx in range(n_items):
             for stat_idx in range(n_stats):
                 # Replace NaN with delete value before writing
                 output = output_arrays[item_idx][stat_idx]
                 output[np.isnan(output)] = context.deletevalue
                 context.dfs_out.WriteItemTimeStepNext(0.0, output)
+
+                # Store in dict for derived items (use item name for single stat,
+                # or stat-prefixed name for multi-stat)
+                if context.derived_items is not None:
+                    if n_stats == 1:
+                        # Single stat: use original item name
+                        key = item_names[item_idx]
+                    else:
+                        # Multi-stat: use "Stat: ItemName" format to match output items
+                        stat_label = aggregate_op.get_stat_labels()[stat_idx]
+                        key = aggregate_op.format_item_name(
+                            stat_label, item_names[item_idx]
+                        )
+                    item_data_dict[key] = output.copy()
+
+        # Compute and write derived items from aggregated data
+        if context.derived_items is not None:
+            self._compute_and_write_derived_items(
+                context,
+                item_data_dict,
+                timestep_out=0,
+                time_sec=0.0,
+                use_sequential_write=True,
+            )
 
 
 # ============================================================================
