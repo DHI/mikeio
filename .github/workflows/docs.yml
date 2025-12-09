@@ -1,8 +1,19 @@
 name: Documentation
 
-on: 
-  push:
-    branches: [ main]
+# Documentation is published ONLY when a new release is published on GitHub.
+# This ensures that the published documentation always matches the version
+# available on PyPI, preventing confusion from documenting unreleased features.
+#
+# To publish documentation:
+# 1. Create a new release on GitHub (this will also publish to PyPI via python-publish.yml)
+# 2. This workflow will automatically build and deploy the docs to GitHub Pages
+#
+# To test documentation locally before release:
+#   make docs
+#   open docs/_site/index.html
+on:
+  release:
+    types: [published]
 
 jobs:
   build:

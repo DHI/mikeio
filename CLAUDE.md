@@ -146,6 +146,36 @@ The build process:
 1. `quartodoc build` reads the source code and generates API reference pages in `docs/api/`
 2. `quarto render` processes all `.qmd` files (Quarto markdown) and builds the static site in `docs/_site/`
 
+### Publishing Documentation
+
+**IMPORTANT**: Documentation is published to GitHub Pages (https://dhi.github.io/mikeio/) **ONLY when a GitHub release is published**.
+
+**Publishing workflow:**
+1. Documentation is automatically deployed when you create a new release on GitHub
+2. The `.github/workflows/docs.yml` workflow triggers on release publication
+3. This ensures published docs always match the version available on PyPI
+
+**Why publish on release only?**
+- Prevents version mismatch: users installing from PyPI see docs for the version they installed
+- Avoids documenting unreleased features that users can't access
+- Keeps the published docs stable and predictable
+
+**Testing documentation before release:**
+```bash
+# Build docs locally to verify examples work with current code
+make docs
+
+# View the rendered site
+xdg-open docs/_site/index.html  # WSL2
+# Or on Windows: start docs/_site/index.html
+```
+
+**Release process:**
+1. Update version in `pyproject.toml` (remove `.dev0` suffix)
+2. Commit and push changes
+3. Create a new release on GitHub (this triggers both PyPI publish and docs deploy)
+4. After release, bump version to next `.dev0` version
+
 ### Content Types
 
 1. **User Guide** (`user-guide/*.qmd`): Conceptual documentation and tutorials
@@ -219,3 +249,4 @@ uv run pytest tests/test_dfs0.py::test_specific_function
 ```
 
 Test data is located in `tests/testdata/` organized by file type.
+- When creating a PR, start out in draft state
