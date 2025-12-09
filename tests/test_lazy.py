@@ -101,9 +101,9 @@ def test_scan_dfs_with_items(tmp_path: Path) -> None:
 
 
 def test_scan_dfs_rolling_mean(tmp_path: Path) -> None:
-    """Test rolling mean operation."""
-    infilename = "tests/testdata/random.dfs0"
-    outfile = tmp_path / "rolling.dfs0"
+    """Test rolling mean operation on dfsu file."""
+    infilename = "tests/testdata/HD2D.dfsu"
+    outfile = tmp_path / "rolling.dfsu"
 
     # Apply 3-timestep rolling mean
     scan_dfs(infilename).select([0]).rolling(window=3, stat="mean").to_dfs(outfile)
@@ -115,12 +115,14 @@ def test_scan_dfs_rolling_mean(tmp_path: Path) -> None:
     assert len(result.items) == 1
     # Rolling with window=3 and min_periods=3 (default) starts outputting after 2 timesteps
     assert len(result.time) == len(org.time) - 2
+    # Verify spatial dimensions preserved
+    assert result.geometry.n_elements == org.geometry.n_elements
 
 
 def test_scan_dfs_rolling_custom_function(tmp_path: Path) -> None:
-    """Test rolling with custom function."""
-    infilename = "tests/testdata/random.dfs0"
-    outfile = tmp_path / "rolling_custom.dfs0"
+    """Test rolling with custom function on dfsu file."""
+    infilename = "tests/testdata/HD2D.dfsu"
+    outfile = tmp_path / "rolling_custom.dfsu"
 
     # Apply rolling maximum
     scan_dfs(infilename).select([0]).rolling(window=3, stat=np.nanmax).to_dfs(outfile)
@@ -128,12 +130,14 @@ def test_scan_dfs_rolling_custom_function(tmp_path: Path) -> None:
     # Verify it runs without error
     result = mikeio.read(outfile)
     assert len(result.items) == 1
+    org = mikeio.read(infilename)
+    assert result.geometry.n_elements == org.geometry.n_elements
 
 
 def test_scan_dfs_complete_pipeline(tmp_path: Path) -> None:
-    """Test a complete pipeline with multiple operations."""
-    infilename = "tests/testdata/random.dfs0"
-    outfile = tmp_path / "pipeline.dfs0"
+    """Test a complete pipeline with multiple operations on dfsu file."""
+    infilename = "tests/testdata/HD2D.dfsu"
+    outfile = tmp_path / "pipeline.dfsu"
 
     org = mikeio.read(infilename)
     item_name = org.items[0].name
@@ -142,7 +146,7 @@ def test_scan_dfs_complete_pipeline(tmp_path: Path) -> None:
     (
         scan_dfs(infilename)
         .select([0])
-        .filter(time=slice(0, 10))
+        .filter(time=slice(0, 7))  # HD2D has 9 timesteps
         .rolling(window=3, stat="mean")
         .with_items(**{item_name: lambda x: x + 100.0})
         .to_dfs(outfile)
@@ -151,8 +155,9 @@ def test_scan_dfs_complete_pipeline(tmp_path: Path) -> None:
     # Verify it completes successfully
     result = mikeio.read(outfile)
     assert len(result.items) == 1
-    # Rolling with window=3 removes first 2 timesteps, so 10 -> 8
-    assert len(result.time) == 8
+    # Filter 0:7 gives 7 timesteps, rolling with window=3 removes first 2, so 7 -> 5
+    assert len(result.time) == 5
+    assert result.geometry.n_elements == org.geometry.n_elements
 
 
 def test_scan_dfs_filter_with_datetime_strings(tmp_path: Path) -> None:
@@ -186,9 +191,9 @@ def test_scan_dfs_filter_with_step(tmp_path: Path) -> None:
 
 
 def test_scan_dfs_rolling_with_min_periods(tmp_path: Path) -> None:
-    """Test rolling with custom min_periods."""
-    infilename = "tests/testdata/random.dfs0"
-    outfile = tmp_path / "rolling_min_periods.dfs0"
+    """Test rolling with custom min_periods on dfsu file."""
+    infilename = "tests/testdata/HD2D.dfsu"
+    outfile = tmp_path / "rolling_min_periods.dfsu"
 
     # Rolling window with smaller min_periods
     scan_dfs(infilename).select([0]).rolling(
@@ -200,12 +205,13 @@ def test_scan_dfs_rolling_with_min_periods(tmp_path: Path) -> None:
     result = mikeio.read(outfile)
 
     assert len(result.time) == len(org.time)  # All timesteps included
+    assert result.geometry.n_elements == org.geometry.n_elements
 
 
 def test_scan_dfs_rolling_with_center(tmp_path: Path) -> None:
-    """Test rolling with centered window."""
-    infilename = "tests/testdata/random.dfs0"
-    outfile = tmp_path / "rolling_center.dfs0"
+    """Test rolling with centered window on dfsu file."""
+    infilename = "tests/testdata/HD2D.dfsu"
+    outfile = tmp_path / "rolling_center.dfsu"
 
     # Centered rolling window
     scan_dfs(infilename).select([0]).rolling(window=3, stat="mean", center=True).to_dfs(
@@ -296,6 +302,25 @@ def test_scan_dfs_aggregate_mean(tmp_path: Path) -> None:
     np.testing.assert_array_almost_equal(result[0].to_numpy()[0], expected)
 
 
+def test_scan_dfs_aggregate_chunked_processing(tmp_path: Path) -> None:
+    """Test aggregate with small buffer_size to verify chunked processing works."""
+    infilename = "tests/testdata/wind_north_sea.dfsu"
+
+    # Test with various buffer sizes - all should produce identical results
+    org = mikeio.read(infilename)
+    expected = np.nanmean(org[0].to_numpy(), axis=0)
+
+    for buffer_size in [100, 1000, 10000, int(1e9)]:
+        outfile = tmp_path / f"mean_{buffer_size}.dfsu"
+        scan_dfs(infilename).select([0]).aggregate(stat="mean").to_dfs(
+            outfile, buffer_size=buffer_size
+        )
+
+        result = mikeio.read(outfile)
+        assert len(result.time) == 1
+        np.testing.assert_array_almost_equal(result[0].to_numpy()[0], expected)
+
+
 def test_scan_dfs_aggregate_min_max(tmp_path: Path) -> None:
     """Test aggregate operation with min and max statistics."""
     infilename = "tests/testdata/HD2D.dfsu"
@@ -374,7 +399,7 @@ def test_lazy_explain() -> None:
     lazy = (
         scan_dfs(infilename)
         .select([0])
-        .filter(time=slice("1985-08-06", "1985-08-07"))
+        .filter(time=slice(0, 5))  # Use step indices instead of datetime
         .scale(factor=2.0, offset=10.0)
     )
 
@@ -386,7 +411,8 @@ def test_lazy_explain() -> None:
     assert "scale" in explanation.lower()
     assert "2.0" in explanation  # Factor value
     assert "10.0" in explanation  # Offset value
-    assert "1985-08-06" in explanation  # Start time
+    assert "1985-08-06" in explanation  # File start time
+    assert "validated successfully" in explanation.lower()  # Validation confirmation
 
 
 def test_scan_dfs_diff(tmp_path: Path) -> None:
@@ -422,3 +448,56 @@ def test_scan_dfs_diff_with_scale(tmp_path: Path) -> None:
 
     expected = org[0].to_numpy()  # scaled - original = 2*original - original = original
     np.testing.assert_array_almost_equal(result[0].to_numpy(), expected)
+
+
+def test_validation_invalid_stat_name() -> None:
+    """Test that invalid stat names are caught immediately."""
+    import pytest
+    
+    with pytest.raises(ValueError, match="Unknown stat 'invalid_stat'"):
+        scan_dfs("tests/testdata/HD2D.dfsu").aggregate("invalid_stat")
+    
+    with pytest.raises(ValueError, match="Unknown stat 'bad_rolling'"):
+        scan_dfs("tests/testdata/HD2D.dfsu").rolling(window=3, stat="bad_rolling")
+
+
+def test_validation_invalid_item_selection() -> None:
+    """Test that invalid item selection is caught in explain()."""
+    import pytest
+    
+    lazy = scan_dfs("tests/testdata/HD2D.dfsu").select(["NonexistentItem"])
+    
+    with pytest.raises(ValueError, match="Invalid item selection"):
+        lazy.explain()
+
+
+def test_validation_invalid_time_range() -> None:
+    """Test that invalid time ranges are caught in explain()."""
+    import pytest
+    
+    # End before start
+    lazy = scan_dfs("tests/testdata/HD2D.dfsu").filter(start=10, end=5)
+    
+    with pytest.raises(ValueError, match="Invalid time filter"):
+        lazy.explain()
+
+
+def test_validation_invalid_diff_file() -> None:
+    """Test that missing diff file is caught in explain()."""
+    import pytest
+    
+    lazy = scan_dfs("tests/testdata/HD2D.dfsu").diff("nonexistent_file.dfsu")
+    
+    with pytest.raises(ValueError, match="Diff file not found"):
+        lazy.explain()
+
+
+def test_validation_in_execute(tmp_path: Path) -> None:
+    """Test that validation also happens during to_dfs() execution."""
+    import pytest
+    
+    outfile = tmp_path / "output.dfsu"
+    lazy = scan_dfs("tests/testdata/HD2D.dfsu").select(["InvalidItem"])
+    
+    with pytest.raises(ValueError, match="Invalid item selection"):
+        lazy.to_dfs(outfile)

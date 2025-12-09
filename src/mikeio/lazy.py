@@ -27,6 +27,7 @@ Examples
 
 from __future__ import annotations
 
+import math
 from abc import ABC, abstractmethod
 from collections.abc import Callable, Sequence
 from dataclasses import dataclass
@@ -52,6 +53,7 @@ __all__ = ["scan_dfs", "LazyDfs"]
 class Operation(ABC):
     """Base class for pipeline operations."""
 
+    @property
     @abstractmethod
     def affects_metadata(self) -> bool:
         """Return True if this operation changes file structure (items, time axis)."""
@@ -87,6 +89,12 @@ class ExecutionContext:
     time_info: _TimeInfo | None = None
     time_step: int = 1  # Step size for iteration (e.g., 2 for every other timestep)
     deletevalue: float = np.nan
+    # Operation-specific state
+    transforms: dict[str, Callable[[np.ndarray], np.ndarray]] | None = None
+    scale_params: tuple[float, float] | None = None
+    rolling: "RollingOp | None" = None
+    aggregate: "AggregateOp | None" = None
+    diff_file: Path | None = None
 
 
 # ============================================================================
@@ -100,6 +108,7 @@ class SelectOp(Operation):
     def __init__(self, items: Sequence[int | str]):
         self.items = items
 
+    @property
     def affects_metadata(self) -> bool:
         return True
 
@@ -151,6 +160,7 @@ class FilterOp(Operation):
             self.end = end if end is not None else -1
             self.step = step
 
+    @property
     def affects_metadata(self) -> bool:
         return True
 
@@ -181,6 +191,7 @@ class WithItemsOp(Operation):
     def __init__(self, transforms: dict[str, Callable[[np.ndarray], np.ndarray]]):
         self.transforms = transforms
 
+    @property
     def affects_metadata(self) -> bool:
         return False  # Same items, just transformed values
 
@@ -195,9 +206,9 @@ class WithItemsOp(Operation):
         """Store transforms for later application during data processing."""
         # This will be applied during the data processing loop
         # Store in context for the executor to use
-        if not hasattr(context, "transforms"):
-            context.transforms = {}  # type: ignore
-        context.transforms.update(self.transforms)  # type: ignore
+        if context.transforms is None:
+            context.transforms = {}
+        context.transforms.update(self.transforms)
 
 
 class ScaleOp(Operation):
@@ -207,6 +218,7 @@ class ScaleOp(Operation):
         self.factor = factor
         self.offset = offset
 
+    @property
     def affects_metadata(self) -> bool:
         return False  # Same items, just scaled values
 
@@ -218,9 +230,7 @@ class ScaleOp(Operation):
 
     def apply(self, context: ExecutionContext) -> None:
         """Store scale params for later application during data processing."""
-        if not hasattr(context, "scale_params"):
-            context.scale_params = None  # type: ignore
-        context.scale_params = (self.factor, self.offset)  # type: ignore
+        context.scale_params = (self.factor, self.offset)
 
 
 class RollingOp(Operation):
@@ -234,7 +244,6 @@ class RollingOp(Operation):
         min_periods: int | None = None,
     ):
         self.window = window
-        self.stat = stat
         self.center = center
         self.min_periods = min_periods if min_periods is not None else window
 
@@ -248,6 +257,14 @@ class RollingOp(Operation):
             "std": np.nanstd,
         }
 
+        # Validate stat function
+        if isinstance(stat, str) and stat not in self._stat_functions:
+            raise ValueError(
+                f"Unknown stat '{stat}'. Available: {list(self._stat_functions.keys())}"
+            )
+        self.stat = stat
+
+    @property
     def affects_metadata(self) -> bool:
         return False  # Same structure, different values
 
@@ -276,17 +293,13 @@ class RollingOp(Operation):
     def apply(self, context: ExecutionContext) -> None:
         """Store rolling config for later application during data processing."""
         # This will be applied during the data processing loop
-        if not hasattr(context, "rolling"):
-            context.rolling = None  # type: ignore
-        context.rolling = self  # type: ignore
+        context.rolling = self
 
 
 class AggregateOp(Operation):
     """Operation to aggregate over time dimension."""
 
     def __init__(self, stat: str | Callable[[np.ndarray], np.ndarray]):
-        self.stat = stat
-
         # Map string stats to numpy functions
         self._stat_functions = {
             "mean": np.nanmean,
@@ -297,6 +310,14 @@ class AggregateOp(Operation):
             "std": np.nanstd,
         }
 
+        # Validate stat function
+        if isinstance(stat, str) and stat not in self._stat_functions:
+            raise ValueError(
+                f"Unknown stat '{stat}'. Available: {list(self._stat_functions.keys())}"
+            )
+        self.stat = stat
+
+    @property
     def affects_metadata(self) -> bool:
         return True  # Output has single timestep
 
@@ -320,9 +341,7 @@ class AggregateOp(Operation):
 
     def apply(self, context: ExecutionContext) -> None:
         """Store aggregate config for later application."""
-        if not hasattr(context, "aggregate"):
-            context.aggregate = None  # type: ignore
-        context.aggregate = self  # type: ignore
+        context.aggregate = self
 
 
 class DiffOp(Operation):
@@ -331,6 +350,7 @@ class DiffOp(Operation):
     def __init__(self, other_file: str | Path):
         self.other_file = Path(other_file)
 
+    @property
     def affects_metadata(self) -> bool:
         return False  # Same structure, different values
 
@@ -342,9 +362,7 @@ class DiffOp(Operation):
 
     def apply(self, context: ExecutionContext) -> None:
         """Store diff config for later application."""
-        if not hasattr(context, "diff_file"):
-            context.diff_file = None  # type: ignore
-        context.diff_file = self.other_file  # type: ignore
+        context.diff_file = self.other_file
 
 
 # ============================================================================
@@ -647,13 +665,13 @@ class LazyDfs:
         Examples
         --------
         >>> # Temporal mean
-        >>> df.aggregate(stat="mean")
+        >>> df.aggregate("mean")
 
         >>> # Temporal maximum
-        >>> df.aggregate(stat="max")
+        >>> df.aggregate("max")
 
         >>> # Custom aggregation
-        >>> df.aggregate(stat=lambda x: np.nanpercentile(x, 90, axis=0))
+        >>> df.aggregate(lambda x: np.nanpercentile(x, 90, axis=0))
 
         """
         self._operations.append(AggregateOp(stat=stat))
@@ -695,16 +713,73 @@ class LazyDfs:
         self._operations.append(DiffOp(other))
         return self
 
-    def explain(self) -> str:
-        """Explain the pipeline execution plan.
+    def _validate_operations(self, dfs_in: DfsFile) -> None:
+        """Validate all operations against file metadata.
 
-        Returns a detailed string representation of all operations
-        that will be executed when .to_dfs() is called.
+        Parameters
+        ----------
+        dfs_in : DfsFile
+            Opened DFS file to validate against
+
+        Raises
+        ------
+        ValueError
+            If any operation is invalid for this file
+
+        """
+        file_info = dfs_in.FileInfo
+        item_info = dfs_in.ItemInfo
+        time_axis = file_info.TimeAxis
+
+        for op in self._operations:
+            if isinstance(op, SelectOp):
+                # Validate items exist
+                try:
+                    _valid_item_numbers(item_info, op.items)
+                except (IndexError, KeyError) as e:
+                    available = [item.Name for item in item_info]
+                    raise ValueError(
+                        f"Invalid item selection: {e}. Available items: {available}"
+                    ) from e
+
+            elif isinstance(op, FilterOp):
+                # Validate time range is valid
+                try:
+                    _TimeInfo.parse(time_axis, op.start, op.end, op.step)
+                except ValueError as e:
+                    n_steps = time_axis.NumberOfTimeSteps
+                    raise ValueError(
+                        f"Invalid time filter: {e}. File has {n_steps} timesteps"
+                    ) from e
+
+            elif isinstance(op, DiffOp):
+                # Validate other file exists and can be opened
+                if not op.other_file.exists():
+                    raise ValueError(f"Diff file not found: {op.other_file}")
+                try:
+                    dfs_other = DfsFileFactory.DfsGenericOpen(str(op.other_file))
+                    dfs_other.Close()
+                except Exception as e:
+                    raise ValueError(
+                        f"Cannot open diff file {op.other_file}: {e}"
+                    ) from e
+
+    def explain(self) -> str:
+        """Explain the pipeline execution plan with validation.
+
+        Opens the file, validates all operations, and returns a detailed
+        description of what will be executed. This ensures the pipeline
+        is valid before execution.
 
         Returns
         -------
         str
-            Detailed explanation of the pipeline
+            Detailed explanation of the validated pipeline
+
+        Raises
+        ------
+        ValueError
+            If any operation is invalid for this file
 
         Examples
         --------
@@ -716,21 +791,40 @@ class LazyDfs:
         >>> print(lazy.explain())
 
         """
-        lines = [
-            "Lazy DFS Pipeline",
-            "=" * 50,
-            f"Input: {self.path}",
-            "",
-            "Operations:",
-        ]
+        # Open file to get metadata and validate
+        dfs_in = DfsFileFactory.DfsGenericOpen(str(self.path))
+        try:
+            # Validate all operations
+            self._validate_operations(dfs_in)
 
-        if not self._operations:
-            lines.append("  (no operations - will copy all data)")
-        else:
-            for i, op in enumerate(self._operations, 1):
-                lines.append(f"  {i}. {op.explain()}")
+            # Get file metadata
+            file_info = dfs_in.FileInfo
+            time_axis = file_info.TimeAxis
+            item_names = [item.Name for item in dfs_in.ItemInfo]
 
-        return "\n".join(lines)
+            # Build detailed explanation
+            lines = [
+                "Lazy DFS Pipeline",
+                "=" * 50,
+                f"Input: {self.path}",
+                f"Items ({len(item_names)}): {item_names}",
+                f"Timesteps: {time_axis.NumberOfTimeSteps}",
+                f"Start time: {time_axis.StartDateTime}",
+                "",
+                "Operations:",
+            ]
+
+            if not self._operations:
+                lines.append("  (no operations - will copy all data)")
+            else:
+                for i, op in enumerate(self._operations, 1):
+                    lines.append(f"  {i}. {op.explain()}")
+
+            lines.extend(["", "✓ Pipeline validated successfully"])
+
+            return "\n".join(lines)
+        finally:
+            dfs_in.Close()
 
     def to_dfs(self, path: str | Path, buffer_size: float = 1e9) -> None:
         """Execute pipeline and write to DFS file.
@@ -790,6 +884,11 @@ class PipelineExecutor:
         dfs_in = DfsFileFactory.DfsGenericOpen(str(self.infilename))
 
         try:
+            # Validate all operations before processing
+            lazy_dfs = LazyDfs(self.infilename)
+            lazy_dfs._operations = self.operations
+            lazy_dfs._validate_operations(dfs_in)
+
             # Initialize execution context
             context = ExecutionContext(
                 dfs_in=dfs_in,
@@ -820,13 +919,13 @@ class PipelineExecutor:
     def _apply_metadata_operations(self, context: ExecutionContext) -> None:
         """Apply operations that affect metadata (select, filter)."""
         for op in self.operations:
-            if op.affects_metadata():
+            if op.affects_metadata:
                 op.apply(context)
 
     def _apply_data_operations(self, context: ExecutionContext) -> None:
         """Apply operations that transform data (with_items, rolling)."""
         for op in self.operations:
-            if not op.affects_metadata():
+            if not op.affects_metadata:
                 op.apply(context)
 
     def _create_output_file(self, context: ExecutionContext) -> DfsFile:
@@ -852,17 +951,13 @@ class PipelineExecutor:
     def _process_data(self, context: ExecutionContext) -> None:
         """Process and write data through the pipeline."""
         # Check for aggregate operation
-        aggregate_op = getattr(context, "aggregate", None)
-
-        if aggregate_op is not None:
-            self._process_with_aggregate(context, aggregate_op)
+        if context.aggregate is not None:
+            self._process_with_aggregate(context, context.aggregate)
             return
 
         # Check for rolling operation
-        rolling_op = getattr(context, "rolling", None)
-
-        if rolling_op is not None:
-            self._process_with_rolling(context, rolling_op)
+        if context.rolling is not None:
+            self._process_with_rolling(context, context.rolling)
         else:
             self._process_simple(context)
 
@@ -886,9 +981,9 @@ class PipelineExecutor:
         step = context.time_step
 
         # Get transforms if any
-        transforms = getattr(context, "transforms", {})
-        scale_params = getattr(context, "scale_params", None)
-        diff_file = getattr(context, "diff_file", None)
+        transforms = context.transforms or {}
+        scale_params = context.scale_params
+        diff_file = context.diff_file
 
         # Open diff file if needed
         dfs_diff = None
@@ -1060,7 +1155,11 @@ class PipelineExecutor:
     def _process_with_aggregate(
         self, context: ExecutionContext, aggregate_op: AggregateOp
     ) -> None:
-        """Process data with temporal aggregation."""
+        """Process data with temporal aggregation using chunked processing.
+
+        For large files, data is processed in spatial chunks to limit memory usage.
+        Each chunk contains all timesteps for a subset of spatial elements.
+        """
         stat_func = aggregate_op.get_stat_func()
         time_info = context.time_info
 
@@ -1093,42 +1192,66 @@ class PipelineExecutor:
         if n_items == 0:
             return
 
+        n_timesteps = end_step - start_step
+
         # Get data shape from first item to aggregate
         first_itemdata = context.dfs_in.ReadItemTimeStep(
             item_numbers_to_aggregate[0] + 1, start_step
         )
         n_elements = len(first_itemdata.Data)
-        n_timesteps = end_step - start_step
 
-        # Create buffers: [n_items][n_timesteps, n_elements]
-        buffers = [
-            np.full((n_timesteps, n_elements), np.nan, dtype=np.float32)
-            for _ in range(n_items)
+        # Calculate chunking parameters based on memory constraints
+        # Memory per chunk: n_timesteps * chunk_size * n_items * 4 bytes (float32)
+        mem_total = 4 * n_timesteps * n_elements * n_items
+        n_chunks = max(1, math.ceil(mem_total / self.buffer_size))
+        chunk_size = math.ceil(n_elements / n_chunks)
+
+        # Initialize output arrays (full spatial size)
+        output_arrays = [
+            np.full(n_elements, np.nan, dtype=np.float32) for _ in range(n_items)
         ]
 
-        # Read all data
-        for timestep in range(start_step, end_step):
-            timestep_idx = timestep - start_step
-            for item_idx, item_num in enumerate(item_numbers_to_aggregate):
-                itemdata = context.dfs_in.ReadItemTimeStep(item_num + 1, timestep)
-                data = itemdata.Data.astype(np.float32)
+        # Process data in spatial chunks
+        e1 = 0
+        for _ in range(n_chunks):
+            e2 = min(e1 + chunk_size, n_elements)
+            actual_chunk_size = e2 - e1
 
-                # Replace delete values with NaN
-                data[data == context.deletevalue] = np.nan
+            # Create buffers for this chunk: [n_items][n_timesteps, actual_chunk_size]
+            chunk_buffers = [
+                np.full((n_timesteps, actual_chunk_size), np.nan, dtype=np.float32)
+                for _ in range(n_items)
+            ]
 
-                # Store in buffer
-                buffers[item_idx][timestep_idx, :] = data
+            # Read all timesteps for this chunk of elements
+            for timestep in range(start_step, end_step):
+                timestep_idx = timestep - start_step
+                for item_idx, item_num in enumerate(item_numbers_to_aggregate):
+                    itemdata = context.dfs_in.ReadItemTimeStep(item_num + 1, timestep)
+                    data = itemdata.Data.astype(np.float32)
 
-        # Compute aggregate statistic for each item
+                    # Replace delete values with NaN
+                    data[data == context.deletevalue] = np.nan
+
+                    # Store only the chunk in buffer
+                    chunk_buffers[item_idx][timestep_idx, :] = data[e1:e2]
+
+            # Compute aggregate statistic for this chunk
+            for item_idx in range(n_items):
+                # Apply statistic along time axis (axis=0)
+                result = stat_func(chunk_buffers[item_idx], axis=0)
+
+                # Store in output at correct spatial position
+                output_arrays[item_idx][e1:e2] = result
+
+            e1 = e2  # Move to next chunk
+
+        # Write results (single timestep at time 0.0)
         for item_idx in range(n_items):
-            # Apply statistic along time axis (axis=0)
-            result = stat_func(buffers[item_idx], axis=0)
-
-            # Replace NaN with delete value
-            result[np.isnan(result)] = context.deletevalue
-
-            # Write to output (single timestep at time 0.0)
-            context.dfs_out.WriteItemTimeStepNext(0.0, result)
+            # Replace NaN with delete value before writing
+            output = output_arrays[item_idx]
+            output[np.isnan(output)] = context.deletevalue
+            context.dfs_out.WriteItemTimeStepNext(0.0, output)
 
 
 # ============================================================================
