@@ -62,6 +62,16 @@ class Operation(ABC):
         """Apply the operation in the execution context."""
         pass
 
+    @abstractmethod
+    def name(self) -> str:
+        """Return the name of this operation."""
+        pass
+
+    @abstractmethod
+    def explain(self) -> str:
+        """Return a detailed explanation of what this operation does."""
+        pass
+
 
 @dataclass
 class ExecutionContext:
@@ -75,6 +85,7 @@ class ExecutionContext:
     dfs_out: DfsFile
     item_numbers: list[int]  # Which items from input to process
     time_info: _TimeInfo | None = None
+    time_step: int = 1  # Step size for iteration (e.g., 2 for every other timestep)
     deletevalue: float = np.nan
 
 
@@ -92,10 +103,30 @@ class SelectOp(Operation):
     def affects_metadata(self) -> bool:
         return True
 
+    def name(self) -> str:
+        return "select"
+
+    def explain(self) -> str:
+        items_str = ", ".join(str(item) for item in self.items)
+        return f"SELECT items: [{items_str}]"
+
     def apply(self, context: ExecutionContext) -> None:
         """Select items by updating the context's item_numbers."""
+        # Check if this is a layered dfsu (3d mesh with Z coordinate)
+        is_layered = context.dfs_in.ItemInfo[0].Name == "Z coordinate"
+
         # Use existing utility to validate and get item numbers
-        context.item_numbers = _valid_item_numbers(context.dfs_in.ItemInfo, self.items)
+        # For layered dfsu, ignore the first item (Z coordinate) during selection
+        item_numbers = _valid_item_numbers(
+            context.dfs_in.ItemInfo, self.items, ignore_first=is_layered
+        )
+
+        # For layered dfsu, shift item numbers and add Z coordinate at position 0
+        if is_layered:
+            item_numbers = [it + 1 for it in item_numbers]
+            item_numbers.insert(0, 0)
+
+        context.item_numbers = item_numbers
 
 
 class FilterOp(Operation):
@@ -123,10 +154,25 @@ class FilterOp(Operation):
     def affects_metadata(self) -> bool:
         return True
 
+    def name(self) -> str:
+        return "filter"
+
+    def explain(self) -> str:
+        parts = []
+        if self.start != 0:
+            parts.append(f"start={self.start}")
+        if self.end != -1:
+            parts.append(f"end={self.end}")
+        if self.step != 1:
+            parts.append(f"step={self.step}")
+        filter_str = ", ".join(parts) if parts else "all timesteps"
+        return f"FILTER time: {filter_str}"
+
     def apply(self, context: ExecutionContext) -> None:
         """Parse time filter and store in context."""
         time_axis = context.dfs_in.FileInfo.TimeAxis
         context.time_info = _TimeInfo.parse(time_axis, self.start, self.end, self.step)
+        context.time_step = self.step  # Store step for iteration
 
 
 class WithItemsOp(Operation):
@@ -138,6 +184,13 @@ class WithItemsOp(Operation):
     def affects_metadata(self) -> bool:
         return False  # Same items, just transformed values
 
+    def name(self) -> str:
+        return "with_items"
+
+    def explain(self) -> str:
+        items = ", ".join(self.transforms.keys())
+        return f"TRANSFORM items: {items}"
+
     def apply(self, context: ExecutionContext) -> None:
         """Store transforms for later application during data processing."""
         # This will be applied during the data processing loop
@@ -145,6 +198,29 @@ class WithItemsOp(Operation):
         if not hasattr(context, "transforms"):
             context.transforms = {}  # type: ignore
         context.transforms.update(self.transforms)  # type: ignore
+
+
+class ScaleOp(Operation):
+    """Operation to scale all items with factor and offset."""
+
+    def __init__(self, factor: float = 1.0, offset: float = 0.0):
+        self.factor = factor
+        self.offset = offset
+
+    def affects_metadata(self) -> bool:
+        return False  # Same items, just scaled values
+
+    def name(self) -> str:
+        return "scale"
+
+    def explain(self) -> str:
+        return f"SCALE: data × {self.factor} + {self.offset}"
+
+    def apply(self, context: ExecutionContext) -> None:
+        """Store scale params for later application during data processing."""
+        if not hasattr(context, "scale_params"):
+            context.scale_params = None  # type: ignore
+        context.scale_params = (self.factor, self.offset)  # type: ignore
 
 
 class RollingOp(Operation):
@@ -175,6 +251,17 @@ class RollingOp(Operation):
     def affects_metadata(self) -> bool:
         return False  # Same structure, different values
 
+    def name(self) -> str:
+        return "rolling"
+
+    def explain(self) -> str:
+        parts = [f"window={self.window}", f"stat={self.stat}"]
+        if self.center:
+            parts.append("center=True")
+        if self.min_periods != self.window:
+            parts.append(f"min_periods={self.min_periods}")
+        return f"ROLLING: {', '.join(parts)}"
+
     def get_stat_func(self) -> Callable[..., Any]:
         """Get the statistic function to apply."""
         if isinstance(self.stat, str):
@@ -192,6 +279,72 @@ class RollingOp(Operation):
         if not hasattr(context, "rolling"):
             context.rolling = None  # type: ignore
         context.rolling = self  # type: ignore
+
+
+class AggregateOp(Operation):
+    """Operation to aggregate over time dimension."""
+
+    def __init__(self, stat: str | Callable[[np.ndarray], np.ndarray]):
+        self.stat = stat
+
+        # Map string stats to numpy functions
+        self._stat_functions = {
+            "mean": np.nanmean,
+            "min": np.nanmin,
+            "max": np.nanmax,
+            "median": np.nanmedian,
+            "sum": np.nansum,
+            "std": np.nanstd,
+        }
+
+    def affects_metadata(self) -> bool:
+        return True  # Output has single timestep
+
+    def name(self) -> str:
+        return "aggregate"
+
+    def explain(self) -> str:
+        stat = self.stat if isinstance(self.stat, str) else "<custom function>"
+        return f"AGGREGATE: stat={stat} (→ single timestep)"
+
+    def get_stat_func(self) -> Callable[..., Any]:
+        """Get the statistic function to apply."""
+        if isinstance(self.stat, str):
+            if self.stat not in self._stat_functions:
+                raise ValueError(
+                    f"Unknown stat '{self.stat}'. "
+                    f"Available: {list(self._stat_functions.keys())}"
+                )
+            return cast(Callable[..., Any], self._stat_functions[self.stat])
+        return cast(Callable[..., Any], self.stat)
+
+    def apply(self, context: ExecutionContext) -> None:
+        """Store aggregate config for later application."""
+        if not hasattr(context, "aggregate"):
+            context.aggregate = None  # type: ignore
+        context.aggregate = self  # type: ignore
+
+
+class DiffOp(Operation):
+    """Operation to compute difference with another file."""
+
+    def __init__(self, other_file: str | Path):
+        self.other_file = Path(other_file)
+
+    def affects_metadata(self) -> bool:
+        return False  # Same structure, different values
+
+    def name(self) -> str:
+        return "diff"
+
+    def explain(self) -> str:
+        return f"DIFF: subtract {self.other_file.name}"
+
+    def apply(self, context: ExecutionContext) -> None:
+        """Store diff config for later application."""
+        if not hasattr(context, "diff_file"):
+            context.diff_file = None  # type: ignore
+        context.diff_file = self.other_file  # type: ignore
 
 
 # ============================================================================
@@ -220,6 +373,94 @@ class LazyDfs:
     def __init__(self, path: str | Path):
         self.path = Path(path)
         self._operations: list[Operation] = []
+
+    def __repr__(self) -> str:
+        """Return string representation of the lazy pipeline."""
+        ops_str = " → ".join(op.name() for op in self._operations)
+        if ops_str:
+            return f"<LazyDfs: {self.path.name} | {ops_str}>"
+        return f"<LazyDfs: {self.path.name}>"
+
+    def _repr_html_(self) -> str:
+        """Return HTML representation for Jupyter notebooks."""
+        ops_html = []
+        for i, op in enumerate(self._operations):
+            ops_html.append(
+                f'<div class="lazy-op">'
+                f'<span class="op-number">{i+1}</span>'
+                f'<span class="op-name">{op.name()}</span>'
+                f'<div class="op-details">{op.explain()}</div>'
+                f"</div>"
+            )
+
+        ops_section = (
+            "\n".join(ops_html)
+            if ops_html
+            else '<div class="no-ops">No operations (will copy all data)</div>'
+        )
+
+        return f"""
+        <style>
+        .lazy-pipeline {{
+            font-family: monospace;
+            border: 2px solid #4CAF50;
+            border-radius: 8px;
+            padding: 15px;
+            background: #f5f5f5;
+            max-width: 600px;
+        }}
+        .pipeline-header {{
+            font-size: 16px;
+            font-weight: bold;
+            color: #4CAF50;
+            margin-bottom: 10px;
+        }}
+        .pipeline-input {{
+            background: #e8f5e9;
+            padding: 8px;
+            border-radius: 4px;
+            margin-bottom: 15px;
+        }}
+        .lazy-op {{
+            background: white;
+            margin: 8px 0;
+            padding: 10px;
+            border-left: 4px solid #2196F3;
+            border-radius: 4px;
+            display: flex;
+            align-items: baseline;
+            gap: 10px;
+        }}
+        .op-number {{
+            background: #2196F3;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 50%;
+            font-weight: bold;
+            font-size: 12px;
+        }}
+        .op-name {{
+            font-weight: bold;
+            color: #1976D2;
+        }}
+        .op-details {{
+            color: #666;
+            flex: 1;
+        }}
+        .no-ops {{
+            color: #999;
+            font-style: italic;
+            padding: 10px;
+        }}
+        </style>
+        <div class="lazy-pipeline">
+            <div class="pipeline-header">🔄 Lazy DFS Pipeline</div>
+            <div class="pipeline-input">📁 Input: {self.path}</div>
+            <div class="pipeline-ops">
+                {ops_section}
+            </div>
+        </div>
+        """
 
     def select(self, items: Sequence[int | str]) -> LazyDfs:
         """Select specific items/variables.
@@ -354,6 +595,143 @@ class LazyDfs:
         self._operations.append(WithItemsOp(transforms))
         return self
 
+    def scale(self, factor: float = 1.0, offset: float = 0.0) -> LazyDfs:
+        """Scale all items with a factor and offset.
+
+        Applies the transformation: data * factor + offset
+
+        Parameters
+        ----------
+        factor : float, optional
+            Multiplicative factor, default 1.0
+        offset : float, optional
+            Additive offset, default 0.0
+
+        Returns
+        -------
+        LazyDfs
+            Self for method chaining
+
+        Examples
+        --------
+        >>> # Convert temperature from Celsius to Fahrenheit
+        >>> df.scale(factor=1.8, offset=32.0)
+
+        >>> # Scale by 2 and add 10
+        >>> df.scale(factor=2.0, offset=10.0)
+
+        """
+        self._operations.append(ScaleOp(factor=factor, offset=offset))
+        return self
+
+    def aggregate(
+        self, stat: str | Callable[[np.ndarray], np.ndarray] = "mean"
+    ) -> LazyDfs:
+        """Aggregate over the time dimension.
+
+        Produces a single-timestep output with temporal statistics.
+
+        Parameters
+        ----------
+        stat : str | Callable, optional
+            Either a built-in statistic name ('mean', 'min', 'max', 'median',
+            'sum', 'std') or a custom aggregation function that takes a
+            2D array (time, space) and returns a 1D array (space).
+            Default is 'mean'.
+
+        Returns
+        -------
+        LazyDfs
+            Self for method chaining
+
+        Examples
+        --------
+        >>> # Temporal mean
+        >>> df.aggregate(stat="mean")
+
+        >>> # Temporal maximum
+        >>> df.aggregate(stat="max")
+
+        >>> # Custom aggregation
+        >>> df.aggregate(stat=lambda x: np.nanpercentile(x, 90, axis=0))
+
+        """
+        self._operations.append(AggregateOp(stat=stat))
+        return self
+
+    def diff(self, other: str | Path) -> LazyDfs:
+        """Compute difference with another file (self - other).
+
+        This operation subtracts another file from the current pipeline output,
+        useful for model validation and comparison scenarios.
+
+        Parameters
+        ----------
+        other : str | Path
+            Path to the file to subtract from the current data
+
+        Returns
+        -------
+        LazyDfs
+            Self for method chaining
+
+        Examples
+        --------
+        >>> # Compare model run with observations
+        >>> (scan_dfs("model_results.dfsu")
+        ...     .diff("observations.dfsu")
+        ...     .to_dfs("model_error.dfsu")
+        ... )
+
+        >>> # Compare two model scenarios
+        >>> (scan_dfs("scenario_A.dfsu")
+        ...     .select([0])
+        ...     .diff("scenario_B.dfsu")
+        ...     .aggregate(stat="mean")  # Average difference
+        ...     .to_dfs("scenario_comparison.dfsu")
+        ... )
+
+        """
+        self._operations.append(DiffOp(other))
+        return self
+
+    def explain(self) -> str:
+        """Explain the pipeline execution plan.
+
+        Returns a detailed string representation of all operations
+        that will be executed when .to_dfs() is called.
+
+        Returns
+        -------
+        str
+            Detailed explanation of the pipeline
+
+        Examples
+        --------
+        >>> lazy = (scan_dfs("data.dfsu")
+        ...     .select([0, 1])
+        ...     .filter(time=slice("2020-01-01", "2020-12-31"))
+        ...     .scale(factor=2.0)
+        ... )
+        >>> print(lazy.explain())
+
+        """
+        lines = [
+            "Lazy DFS Pipeline",
+            "=" * 50,
+            f"Input: {self.path}",
+            "",
+            "Operations:",
+        ]
+
+        if not self._operations:
+            lines.append("  (no operations - will copy all data)")
+        else:
+            for i, op in enumerate(self._operations, 1):
+                lines.append(f"  {i}. {op.explain()}")
+
+        return "\n".join(lines)
+
     def to_dfs(self, path: str | Path, buffer_size: float = 1e9) -> None:
         """Execute pipeline and write to DFS file.
 
@@ -473,6 +851,13 @@ class PipelineExecutor:
 
     def _process_data(self, context: ExecutionContext) -> None:
         """Process and write data through the pipeline."""
+        # Check for aggregate operation
+        aggregate_op = getattr(context, "aggregate", None)
+
+        if aggregate_op is not None:
+            self._process_with_aggregate(context, aggregate_op)
+            return
+
         # Check for rolling operation
         rolling_op = getattr(context, "rolling", None)
 
@@ -489,58 +874,102 @@ class PipelineExecutor:
         if time_info is not None:
             start_step = time_info.start_step
             end_step = time_info.end_step
-            step = time_info.timestep if time_info.timestep else 1
             start_sec = time_info.start_sec
             end_sec = time_info.end_sec
         else:
             start_step = 0
             end_step = context.dfs_in.FileInfo.TimeAxis.NumberOfTimeSteps
-            step = 1
             start_sec = -np.inf
             end_sec = np.inf
 
+        # Use the step from context (set by FilterOp)
+        step = context.time_step
+
         # Get transforms if any
         transforms = getattr(context, "transforms", {})
+        scale_params = getattr(context, "scale_params", None)
+        diff_file = getattr(context, "diff_file", None)
 
-        # Get item names for transforms
-        item_names = [context.dfs_in.ItemInfo[i].Name for i in context.item_numbers]
+        # Open diff file if needed
+        dfs_diff = None
+        if diff_file is not None:
+            dfs_diff = DfsFileFactory.DfsGenericOpen(str(diff_file))
 
-        timestep_out = -1
-        for timestep in range(start_step, end_step, int(step)):
-            for item_idx, item_num in enumerate(context.item_numbers):
-                itemdata = context.dfs_in.ReadItemTimeStep(item_num + 1, timestep)
-                time_sec = itemdata.Time
+        try:
+            # Get item names for transforms
+            item_names = [context.dfs_in.ItemInfo[i].Name for i in context.item_numbers]
 
-                # Check time bounds
-                if time_sec > end_sec:
-                    return
-                if time_sec < start_sec:
-                    continue
+            timestep_out = -1
+            for timestep in range(start_step, end_step, int(step)):
+                for item_idx, item_num in enumerate(context.item_numbers):
+                    itemdata = context.dfs_in.ReadItemTimeStep(item_num + 1, timestep)
+                    time_sec = itemdata.Time
 
-                # Track output timestep
-                if item_idx == 0:
-                    timestep_out += 1
+                    # Check time bounds
+                    if time_sec > end_sec:
+                        return
+                    if time_sec < start_sec:
+                        continue
 
-                # Get data
-                data = itemdata.Data
+                    # Track output timestep
+                    if item_idx == 0:
+                        timestep_out += 1
 
-                # Apply transforms if any
-                item_name = item_names[item_idx]
-                if item_name in transforms:
-                    # Convert delete value to NaN before transform
-                    mask = data == context.deletevalue
-                    data[mask] = np.nan
+                    # Get data
+                    data = itemdata.Data
 
-                    # Apply transform
-                    data = transforms[item_name](data)
+                    # Apply scale if present
+                    if scale_params is not None:
+                        factor, offset = scale_params
+                        # Convert delete value to NaN before scaling
+                        mask = data == context.deletevalue
+                        data[mask] = np.nan
 
-                    # Convert NaN back to delete value
-                    data[np.isnan(data)] = context.deletevalue
+                        # Apply scaling
+                        data = data * factor + offset
 
-                # Write to output
-                context.dfs_out.WriteItemTimeStep(
-                    item_idx + 1, timestep_out, time_sec, data
-                )
+                        # Convert NaN back to delete value
+                        data[np.isnan(data)] = context.deletevalue
+
+                    # Apply transforms if any
+                    item_name = item_names[item_idx]
+                    if item_name in transforms:
+                        # Convert delete value to NaN before transform
+                        mask = data == context.deletevalue
+                        data[mask] = np.nan
+
+                        # Apply transform
+                        data = transforms[item_name](data)
+
+                        # Convert NaN back to delete value
+                        data[np.isnan(data)] = context.deletevalue
+
+                    # Apply diff if present
+                    if dfs_diff is not None:
+                        itemdata_diff = dfs_diff.ReadItemTimeStep(
+                            item_num + 1, timestep
+                        )
+                        data_diff = itemdata_diff.Data
+
+                        # Convert delete values to NaN
+                        mask_a = data == context.deletevalue
+                        mask_b = data_diff == context.deletevalue
+                        data[mask_a] = np.nan
+                        data_diff[mask_b] = np.nan
+
+                        # Compute difference
+                        data = data - data_diff
+
+                        # Convert NaN back to delete value
+                        data[np.isnan(data)] = context.deletevalue
+
+                    # Write to output
+                    context.dfs_out.WriteItemTimeStep(
+                        item_idx + 1, timestep_out, time_sec, data
+                    )
+        finally:
+            if dfs_diff is not None:
+                dfs_diff.Close()
 
     def _process_with_rolling(
         self, context: ExecutionContext, rolling_op: RollingOp
@@ -627,6 +1056,79 @@ class PipelineExecutor:
                     context.dfs_out.WriteItemTimeStepNext(itemdata.Time, result)
 
             buffer_idx += 1
+
+    def _process_with_aggregate(
+        self, context: ExecutionContext, aggregate_op: AggregateOp
+    ) -> None:
+        """Process data with temporal aggregation."""
+        stat_func = aggregate_op.get_stat_func()
+        time_info = context.time_info
+
+        # Determine time range
+        if time_info is not None:
+            start_step = time_info.start_step
+            end_step = time_info.end_step
+        else:
+            start_step = 0
+            end_step = context.dfs_in.FileInfo.TimeAxis.NumberOfTimeSteps
+
+        # Check if this is a layered dfsu (Z coordinate at index 0)
+        is_layered = (
+            len(context.item_numbers) > 0
+            and context.dfs_in.ItemInfo[context.item_numbers[0]].Name == "Z coordinate"
+        )
+
+        # Handle Z coordinate for layered dfsu
+        if is_layered:
+            # Write Z coordinate (first item, first timestep, no aggregation)
+            zn_itemdata = context.dfs_in.ReadItemTimeStep(1, start_step)
+            context.dfs_out.WriteItemTimeStepNext(0.0, zn_itemdata.Data)
+            # Process remaining items (skip Z coordinate)
+            item_numbers_to_aggregate = context.item_numbers[1:]
+        else:
+            item_numbers_to_aggregate = context.item_numbers
+
+        n_items = len(item_numbers_to_aggregate)
+
+        if n_items == 0:
+            return
+
+        # Get data shape from first item to aggregate
+        first_itemdata = context.dfs_in.ReadItemTimeStep(
+            item_numbers_to_aggregate[0] + 1, start_step
+        )
+        n_elements = len(first_itemdata.Data)
+        n_timesteps = end_step - start_step
+
+        # Create buffers: [n_items][n_timesteps, n_elements]
+        buffers = [
+            np.full((n_timesteps, n_elements), np.nan, dtype=np.float32)
+            for _ in range(n_items)
+        ]
+
+        # Read all data
+        for timestep in range(start_step, end_step):
+            timestep_idx = timestep - start_step
+            for item_idx, item_num in enumerate(item_numbers_to_aggregate):
+                itemdata = context.dfs_in.ReadItemTimeStep(item_num + 1, timestep)
+                data = itemdata.Data.astype(np.float32)
+
+                # Replace delete values with NaN
+                data[data == context.deletevalue] = np.nan
+
+                # Store in buffer
+                buffers[item_idx][timestep_idx, :] = data
+
+        # Compute aggregate statistic for each item
+        for item_idx in range(n_items):
+            # Apply statistic along time axis (axis=0)
+            result = stat_func(buffers[item_idx], axis=0)
+
+            # Replace NaN with delete value
+            result[np.isnan(result)] = context.deletevalue
+
+            # Write to output (single timestep at time 0.0)
+            context.dfs_out.WriteItemTimeStepNext(0.0, result)
 
 
 # ============================================================================
