@@ -32,7 +32,7 @@ from collections.abc import Callable, Sequence
 from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
-from typing import Any
+from typing import Any, cast
 
 import numpy as np
 from mikecore.DfsFile import DfsFile
@@ -183,8 +183,8 @@ class RollingOp(Operation):
                     f"Unknown stat '{self.stat}'. "
                     f"Available: {list(self._stat_functions.keys())}"
                 )
-            return self._stat_functions[self.stat]
-        return self.stat
+            return cast(Callable[..., Any], self._stat_functions[self.stat])
+        return cast(Callable[..., Any], self.stat)
 
     def apply(self, context: ExecutionContext) -> None:
         """Store rolling config for later application during data processing."""
