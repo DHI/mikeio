@@ -122,6 +122,76 @@ Apply custom transformations to items:
 )
 ```
 
+## {{< fa chart-bar >}} Temporal aggregation
+
+Compute statistics over the entire time dimension to produce a single-timestep output:
+
+```{python}
+# Single statistic (dfsu file)
+(scan_dfs("../data/HD2D.dfsu")
+    .select(["Surface elevation"])
+    .aggregate("max")
+    .to_dfs("max_elevation.dfsu")
+)
+```
+
+### Multiple statistics in one pass
+
+Efficiently compute multiple statistics simultaneously:
+
+```{python}
+# Multiple statistics (dfs2 file)
+(scan_dfs("../data/waves.dfs2")
+    .select(["Sign. Wave Height"])
+    .aggregate(["min", "max", "mean", "std"])
+    .to_dfs("wave_stats.dfs2")
+)
+```
+
+This creates a file with 4 items: "Min.: Sign. Wave Height", "Max.: Sign. Wave Height", "Mean: Sign. Wave Height", and "Std.: Sign. Wave Height".
+
+### Custom labels and formatting
+
+Customize how aggregate items are named:
+
+```{python}
+# Custom labels (dfs0 file)
+(scan_dfs("../data/random.dfs0")
+    .select([0])
+    .aggregate(
+        ["min", "max", "mean"],
+        labels={"mean": "Avg", "max": "Maximum", "min": "Minimum"}
+    )
+    .to_dfs("custom_labels.dfs0")
+)
+```
+
+Use suffix style instead of prefix:
+
+```{python}
+# Suffix format (dfsu file)
+(scan_dfs("../data/HD2D.dfsu")
+    .select(["Surface elevation"])
+    .aggregate(["min", "max"], format="{item} {stat}")
+    .to_dfs("suffix_stats.dfsu")
+)
+```
+
+Combine custom labels and format:
+
+```{python}
+# Both custom labels and format (dfs2 file)
+(scan_dfs("../data/waves.dfs2")
+    .select(["Sign. Wave Height"])
+    .aggregate(
+        ["min", "max", "mean"],
+        labels={"mean": "Avg", "max": "Max", "min": "Min"},
+        format="{item} ({stat})"
+    )
+    .to_dfs("custom_both.dfs2")
+)
+```
+
 ## Complete pipeline
 
 Combine multiple operations:
@@ -162,5 +232,6 @@ The lazy API complements the existing [`generic`](generic.qmd) module.
 * [`.select()`](`mikeio.lazy.LazyDfs.select`) - Select items
 * [`.filter()`](`mikeio.lazy.LazyDfs.filter`) - Filter timesteps
 * [`.rolling()`](`mikeio.lazy.LazyDfs.rolling`) - Rolling statistics
+* [`.aggregate()`](`mikeio.lazy.LazyDfs.aggregate`) - Temporal aggregation
 * [`.with_items()`](`mikeio.lazy.LazyDfs.with_items`) - Transform items
 * [`.to_dfs()`](`mikeio.lazy.LazyDfs.to_dfs`) - Execute and write

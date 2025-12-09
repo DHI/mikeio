@@ -290,7 +290,7 @@ def test_scan_dfs_aggregate_mean(tmp_path: Path) -> None:
     outfile = tmp_path / "mean.dfsu"
 
     # Compute temporal mean
-    scan_dfs(infilename).select([0]).aggregate(stat="mean").to_dfs(outfile)
+    scan_dfs(infilename).select([0]).aggregate("mean").to_dfs(outfile)
 
     # Verify
     org = mikeio.read(infilename)
@@ -298,6 +298,8 @@ def test_scan_dfs_aggregate_mean(tmp_path: Path) -> None:
 
     # Should have single timestep with mean values
     assert len(result.time) == 1
+    assert len(result.items) == 1
+    assert result.items[0].name == f"Mean: {org.items[0].name}"
     expected = np.nanmean(org[0].to_numpy(), axis=0)
     np.testing.assert_array_almost_equal(result[0].to_numpy()[0], expected)
 
@@ -312,35 +314,55 @@ def test_scan_dfs_aggregate_chunked_processing(tmp_path: Path) -> None:
 
     for buffer_size in [100, 1000, 10000, int(1e9)]:
         outfile = tmp_path / f"mean_{buffer_size}.dfsu"
-        scan_dfs(infilename).select([0]).aggregate(stat="mean").to_dfs(
+        scan_dfs(infilename).select([0]).aggregate("mean").to_dfs(
             outfile, buffer_size=buffer_size
         )
 
         result = mikeio.read(outfile)
         assert len(result.time) == 1
+        assert result.items[0].name == f"Mean: {org.items[0].name}"
         np.testing.assert_array_almost_equal(result[0].to_numpy()[0], expected)
 
 
 def test_scan_dfs_aggregate_min_max(tmp_path: Path) -> None:
-    """Test aggregate operation with min and max statistics."""
+    """Test aggregate operation with multiple statistics in single pass."""
     infilename = "tests/testdata/HD2D.dfsu"
-    outfile_min = tmp_path / "min.dfsu"
-    outfile_max = tmp_path / "max.dfsu"
+    outfile = tmp_path / "stats.dfsu"
 
-    # Compute temporal min and max
-    scan_dfs(infilename).select([0]).aggregate(stat="min").to_dfs(outfile_min)
-    scan_dfs(infilename).select([0]).aggregate(stat="max").to_dfs(outfile_max)
+    # Compute multiple statistics in one pass
+    scan_dfs(infilename).select([0]).aggregate(["min", "max", "mean", "std"]).to_dfs(
+        outfile
+    )
 
     # Verify
     org = mikeio.read(infilename)
-    result_min = mikeio.read(outfile_min)
-    result_max = mikeio.read(outfile_max)
+    result = mikeio.read(outfile)
 
+    # Should have single timestep with 4 items (one for each stat)
+    assert len(result.time) == 1
+    assert len(result.items) == 4
+
+    # Check item names follow "Stat: ItemName" convention
+    orig_name = org.items[0].name
+    expected_names = [
+        f"Min.: {orig_name}",
+        f"Max.: {orig_name}",
+        f"Mean: {orig_name}",
+        f"Std.: {orig_name}",
+    ]
+    result_names = [item.name for item in result.items]
+    assert result_names == expected_names
+
+    # Verify values for each statistic
     expected_min = np.nanmin(org[0].to_numpy(), axis=0)
     expected_max = np.nanmax(org[0].to_numpy(), axis=0)
+    expected_mean = np.nanmean(org[0].to_numpy(), axis=0)
+    expected_std = np.nanstd(org[0].to_numpy(), axis=0)
 
-    np.testing.assert_array_almost_equal(result_min[0].to_numpy()[0], expected_min)
-    np.testing.assert_array_almost_equal(result_max[0].to_numpy()[0], expected_max)
+    np.testing.assert_array_almost_equal(result[0].to_numpy()[0], expected_min)
+    np.testing.assert_array_almost_equal(result[1].to_numpy()[0], expected_max)
+    np.testing.assert_array_almost_equal(result[2].to_numpy()[0], expected_mean)
+    np.testing.assert_array_almost_equal(result[3].to_numpy()[0], expected_std)
 
 
 def test_scan_dfs_aggregate_dfsu_3d(tmp_path: Path) -> None:
@@ -349,7 +371,7 @@ def test_scan_dfs_aggregate_dfsu_3d(tmp_path: Path) -> None:
     outfile = tmp_path / "mean_3d.dfsu"
 
     # Compute temporal mean - select first non-Z item (Temperature)
-    scan_dfs(infilename).select([0]).aggregate(stat="mean").to_dfs(outfile)
+    scan_dfs(infilename).select([0]).aggregate("mean").to_dfs(outfile)
 
     # Verify
     org = mikeio.read(infilename)
@@ -359,11 +381,150 @@ def test_scan_dfs_aggregate_dfsu_3d(tmp_path: Path) -> None:
     assert len(result.time) == 1
     # Should have only the selected item (Z coordinate is hidden by mikeio.read)
     assert len(result.items) == 1
-    assert result.items[0].name == "Temperature"
+    assert result.items[0].name == "Mean: Temperature"
 
     # Verify aggregation result
     expected = np.nanmean(org["Temperature"].to_numpy(), axis=0)
-    np.testing.assert_array_almost_equal(result["Temperature"].to_numpy()[0], expected)
+    np.testing.assert_array_almost_equal(result[0].to_numpy()[0], expected)
+
+
+def test_scan_dfs_aggregate_multiple_items_multiple_stats(tmp_path: Path) -> None:
+    """Test aggregate with multiple items and multiple statistics."""
+    infilename = "tests/testdata/wind_north_sea.dfsu"
+    outfile = tmp_path / "multi_stats.dfsu"
+
+    # Compute multiple stats for 2 items
+    scan_dfs(infilename).select([0, 1]).aggregate(["min", "max"]).to_dfs(outfile)
+
+    # Verify
+    org = mikeio.read(infilename)
+    result = mikeio.read(outfile)
+
+    # Should have single timestep with 4 items (2 items × 2 stats)
+    assert len(result.time) == 1
+    assert len(result.items) == 4
+
+    # Check item names: Min./Max. for each item
+    expected_names = [
+        f"Min.: {org.items[0].name}",
+        f"Max.: {org.items[0].name}",
+        f"Min.: {org.items[1].name}",
+        f"Max.: {org.items[1].name}",
+    ]
+    result_names = [item.name for item in result.items]
+    assert result_names == expected_names
+
+    # Verify values
+    expected_min_0 = np.nanmin(org[0].to_numpy(), axis=0)
+    expected_max_0 = np.nanmax(org[0].to_numpy(), axis=0)
+    expected_min_1 = np.nanmin(org[1].to_numpy(), axis=0)
+    expected_max_1 = np.nanmax(org[1].to_numpy(), axis=0)
+
+    np.testing.assert_array_almost_equal(result[0].to_numpy()[0], expected_min_0)
+    np.testing.assert_array_almost_equal(result[1].to_numpy()[0], expected_max_0)
+    np.testing.assert_array_almost_equal(result[2].to_numpy()[0], expected_min_1)
+    np.testing.assert_array_almost_equal(result[3].to_numpy()[0], expected_max_1)
+
+
+def test_scan_dfs_aggregate_custom_labels(tmp_path: Path) -> None:
+    """Test aggregate with custom stat labels."""
+    infilename = "tests/testdata/HD2D.dfsu"
+    outfile = tmp_path / "custom_labels.dfsu"
+
+    # Use custom labels for stats
+    scan_dfs(infilename).select([0]).aggregate(
+        ["min", "max", "mean"], labels={"mean": "Avg", "max": "Maximum", "min": "Minimum"}
+    ).to_dfs(outfile)
+
+    # Verify
+    org = mikeio.read(infilename)
+    result = mikeio.read(outfile)
+
+    # Check custom labels are used
+    orig_name = org.items[0].name
+    expected_names = [
+        f"Minimum: {orig_name}",
+        f"Maximum: {orig_name}",
+        f"Avg: {orig_name}",
+    ]
+    result_names = [item.name for item in result.items]
+    assert result_names == expected_names
+
+    # Verify values are still correct
+    expected_min = np.nanmin(org[0].to_numpy(), axis=0)
+    expected_max = np.nanmax(org[0].to_numpy(), axis=0)
+    expected_mean = np.nanmean(org[0].to_numpy(), axis=0)
+
+    np.testing.assert_array_almost_equal(result[0].to_numpy()[0], expected_min)
+    np.testing.assert_array_almost_equal(result[1].to_numpy()[0], expected_max)
+    np.testing.assert_array_almost_equal(result[2].to_numpy()[0], expected_mean)
+
+
+def test_scan_dfs_aggregate_custom_format(tmp_path: Path) -> None:
+    """Test aggregate with custom format string."""
+    infilename = "tests/testdata/HD2D.dfsu"
+    outfile = tmp_path / "custom_format.dfsu"
+
+    # Use suffix style format
+    scan_dfs(infilename).select([0]).aggregate(
+        ["min", "max"], format="{item} {stat}"
+    ).to_dfs(outfile)
+
+    # Verify
+    org = mikeio.read(infilename)
+    result = mikeio.read(outfile)
+
+    # Check suffix format is used
+    orig_name = org.items[0].name
+    expected_names = [
+        f"{orig_name} Min.",
+        f"{orig_name} Max.",
+    ]
+    result_names = [item.name for item in result.items]
+    assert result_names == expected_names
+
+    # Verify values
+    expected_min = np.nanmin(org[0].to_numpy(), axis=0)
+    expected_max = np.nanmax(org[0].to_numpy(), axis=0)
+
+    np.testing.assert_array_almost_equal(result[0].to_numpy()[0], expected_min)
+    np.testing.assert_array_almost_equal(result[1].to_numpy()[0], expected_max)
+
+
+def test_scan_dfs_aggregate_custom_labels_and_format(tmp_path: Path) -> None:
+    """Test aggregate with both custom labels and format."""
+    infilename = "tests/testdata/HD2D.dfsu"
+    outfile = tmp_path / "custom_both.dfsu"
+
+    # Use custom labels AND format
+    scan_dfs(infilename).select([0]).aggregate(
+        ["min", "max", "mean"],
+        labels={"mean": "Avg", "max": "Max", "min": "Min"},
+        format="{item} ({stat})",
+    ).to_dfs(outfile)
+
+    # Verify
+    org = mikeio.read(infilename)
+    result = mikeio.read(outfile)
+
+    # Check both custom labels and format are used
+    orig_name = org.items[0].name
+    expected_names = [
+        f"{orig_name} (Min)",
+        f"{orig_name} (Max)",
+        f"{orig_name} (Avg)",
+    ]
+    result_names = [item.name for item in result.items]
+    assert result_names == expected_names
+
+    # Verify values
+    expected_min = np.nanmin(org[0].to_numpy(), axis=0)
+    expected_max = np.nanmax(org[0].to_numpy(), axis=0)
+    expected_mean = np.nanmean(org[0].to_numpy(), axis=0)
+
+    np.testing.assert_array_almost_equal(result[0].to_numpy()[0], expected_min)
+    np.testing.assert_array_almost_equal(result[1].to_numpy()[0], expected_max)
+    np.testing.assert_array_almost_equal(result[2].to_numpy()[0], expected_mean)
 
 
 def test_lazy_repr() -> None:

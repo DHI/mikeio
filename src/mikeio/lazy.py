@@ -30,6 +30,7 @@ from __future__ import annotations
 import math
 from abc import ABC, abstractmethod
 from collections.abc import Callable, Sequence
+from copy import deepcopy
 from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
@@ -40,6 +41,7 @@ from mikecore.DfsFile import DfsFile
 from mikecore.DfsFileFactory import DfsFileFactory
 
 # Import utilities from generic module
+from .eum import ItemInfo
 from .generic import _TimeInfo, _clone, _valid_item_numbers
 
 __all__ = ["scan_dfs", "LazyDfs"]
@@ -299,45 +301,111 @@ class RollingOp(Operation):
 class AggregateOp(Operation):
     """Operation to aggregate over time dimension."""
 
-    def __init__(self, stat: str | Callable[[np.ndarray], np.ndarray]):
-        # Map string stats to numpy functions
-        self._stat_functions = {
-            "mean": np.nanmean,
-            "min": np.nanmin,
-            "max": np.nanmax,
-            "median": np.nanmedian,
-            "sum": np.nansum,
-            "std": np.nanstd,
-        }
+    # Map string stats to numpy functions
+    _stat_functions = {
+        "mean": np.nanmean,
+        "min": np.nanmin,
+        "max": np.nanmax,
+        "median": np.nanmedian,
+        "sum": np.nansum,
+        "std": np.nanstd,
+    }
 
-        # Validate stat function
-        if isinstance(stat, str) and stat not in self._stat_functions:
-            raise ValueError(
-                f"Unknown stat '{stat}'. Available: {list(self._stat_functions.keys())}"
-            )
-        self.stat = stat
+    # Map stats to output label prefixes (matching DfsuStatistics.exe convention)
+    _stat_labels = {
+        "mean": "Mean",
+        "min": "Min.",
+        "max": "Max.",
+        "median": "Median",
+        "sum": "Sum",
+        "std": "Std.",
+    }
+
+    def __init__(
+        self,
+        stat: str | list[str] | Callable[[np.ndarray], np.ndarray],
+        labels: dict[str, str] | None = None,
+        format: str = "{stat}: {item}",
+    ):
+        # Normalize to list of stats
+        if isinstance(stat, str):
+            self.stats = [stat]
+        elif isinstance(stat, list):
+            self.stats = stat
+        else:
+            # Custom callable - treat as single stat
+            self.stats = [stat]  # type: ignore
+
+        # Validate all string stats
+        for s in self.stats:
+            if isinstance(s, str) and s not in self._stat_functions:
+                raise ValueError(
+                    f"Unknown stat '{s}'. Available: {list(self._stat_functions.keys())}"
+                )
+
+        # Store custom labels and format
+        self.custom_labels = labels or {}
+        self.format = format
 
     @property
     def affects_metadata(self) -> bool:
-        return True  # Output has single timestep
+        return True  # Output has single timestep and potentially multiple items
 
     def name(self) -> str:
         return "aggregate"
 
     def explain(self) -> str:
-        stat = self.stat if isinstance(self.stat, str) else "<custom function>"
-        return f"AGGREGATE: stat={stat} (→ single timestep)"
+        if len(self.stats) == 1:
+            stat = self.stats[0] if isinstance(self.stats[0], str) else "<custom>"
+            return f"AGGREGATE: stat={stat} (→ single timestep)"
+        else:
+            stats_str = ", ".join(str(s) for s in self.stats)
+            return f"AGGREGATE: stats=[{stats_str}] (→ single timestep, multiple items)"
 
-    def get_stat_func(self) -> Callable[..., Any]:
-        """Get the statistic function to apply."""
-        if isinstance(self.stat, str):
-            if self.stat not in self._stat_functions:
-                raise ValueError(
-                    f"Unknown stat '{self.stat}'. "
-                    f"Available: {list(self._stat_functions.keys())}"
-                )
-            return cast(Callable[..., Any], self._stat_functions[self.stat])
-        return cast(Callable[..., Any], self.stat)
+    def get_stat_funcs(self) -> list[Callable[..., Any]]:
+        """Get the list of statistic functions to apply."""
+        funcs = []
+        for stat in self.stats:
+            if isinstance(stat, str):
+                if stat not in self._stat_functions:
+                    raise ValueError(
+                        f"Unknown stat '{stat}'. "
+                        f"Available: {list(self._stat_functions.keys())}"
+                    )
+                funcs.append(self._stat_functions[stat])
+            else:
+                funcs.append(cast(Callable[..., Any], stat))
+        return funcs
+
+    def get_stat_labels(self) -> list[str]:
+        """Get the list of labels for each statistic."""
+        labels = []
+        for stat in self.stats:
+            if isinstance(stat, str):
+                # Use custom label if provided, otherwise use default
+                label = self.custom_labels.get(stat, self._stat_labels[stat])
+                labels.append(label)
+            else:
+                labels.append("Custom")
+        return labels
+
+    def format_item_name(self, stat_label: str, item_name: str) -> str:
+        """Format the output item name using the format string.
+
+        Parameters
+        ----------
+        stat_label : str
+            The statistic label (e.g., "Max.", "Min.", or custom)
+        item_name : str
+            The original item name (e.g., "Temperature")
+
+        Returns
+        -------
+        str
+            Formatted item name (e.g., "Max.: Temperature" or "Temperature Max")
+
+        """
+        return self.format.format(stat=stat_label, item=item_name)
 
     def apply(self, context: ExecutionContext) -> None:
         """Store aggregate config for later application."""
@@ -643,19 +711,32 @@ class LazyDfs:
         return self
 
     def aggregate(
-        self, stat: str | Callable[[np.ndarray], np.ndarray] = "mean"
+        self,
+        stat: str | list[str] | Callable[[np.ndarray], np.ndarray] = "mean",
+        labels: dict[str, str] | None = None,
+        format: str = "{stat}: {item}",
     ) -> LazyDfs:
         """Aggregate over the time dimension.
 
-        Produces a single-timestep output with temporal statistics.
+        Produces a single-timestep output with temporal statistics. When multiple
+        statistics are provided, all are computed in a single pass through the data
+        and output as separate items.
 
         Parameters
         ----------
-        stat : str | Callable, optional
-            Either a built-in statistic name ('mean', 'min', 'max', 'median',
-            'sum', 'std') or a custom aggregation function that takes a
-            2D array (time, space) and returns a 1D array (space).
+        stat : str | list[str] | Callable, optional
+            Either a single statistic name ('mean', 'min', 'max', 'median', 'sum', 'std'),
+            a list of statistic names for multi-aggregation, or a custom aggregation
+            function that takes a 2D array (time, space) and returns a 1D array (space).
             Default is 'mean'.
+        labels : dict[str, str], optional
+            Custom labels for statistics. Maps stat name to display label.
+            Default labels: {"mean": "Mean", "min": "Min.", "max": "Max.",
+            "median": "Median", "sum": "Sum", "std": "Std."}
+        format : str, optional
+            Format string for output item names. Available placeholders: {stat}, {item}.
+            Default is "{stat}: {item}" (e.g., "Max.: Temperature").
+            Use "{item} {stat}" for suffix style (e.g., "Temperature Max.").
 
         Returns
         -------
@@ -664,17 +745,35 @@ class LazyDfs:
 
         Examples
         --------
-        >>> # Temporal mean
+        >>> # Single statistic with default naming
         >>> df.aggregate("mean")
+        >>> # Output: "Mean: Temperature"
 
-        >>> # Temporal maximum
-        >>> df.aggregate("max")
+        >>> # Multiple statistics in one pass (efficient!)
+        >>> df.aggregate(["min", "max", "mean", "std"])
+        >>> # Output: "Min.: Temperature", "Max.: Temperature", etc.
+
+        >>> # Custom labels
+        >>> df.aggregate(["min", "max", "mean"], labels={"mean": "Avg", "max": "Maximum"})
+        >>> # Output: "Min.: Temperature", "Maximum: Temperature", "Avg: Temperature"
+
+        >>> # Suffix style without colon
+        >>> df.aggregate(["min", "max"], format="{item} {stat}")
+        >>> # Output: "Temperature Min.", "Temperature Max."
+
+        >>> # Custom labels with custom format
+        >>> df.aggregate(
+        ...     ["min", "max", "mean"],
+        ...     labels={"mean": "Avg", "max": "Max", "min": "Min"},
+        ...     format="{item} ({stat})"
+        ... )
+        >>> # Output: "Temperature (Min)", "Temperature (Max)", "Temperature (Avg)"
 
         >>> # Custom aggregation
         >>> df.aggregate(lambda x: np.nanpercentile(x, 90, axis=0))
 
         """
-        self._operations.append(AggregateOp(stat=stat))
+        self._operations.append(AggregateOp(stat=stat, labels=labels, format=format))
         return self
 
     def diff(self, other: str | Path) -> LazyDfs:
@@ -929,7 +1028,11 @@ class PipelineExecutor:
                 op.apply(context)
 
     def _create_output_file(self, context: ExecutionContext) -> DfsFile:
-        """Create output file with appropriate metadata."""
+        """Create output file with appropriate metadata.
+
+        For multi-aggregation, creates items named "Stat: ItemName" for each
+        statistic and input item combination.
+        """
         # Determine output time axis parameters
         start_time = None
         timestep = None
@@ -937,14 +1040,95 @@ class PipelineExecutor:
             start_time = context.time_info.file_start_new
             timestep = context.time_info.timestep
 
-        # Clone file structure with selected items
-        dfs_out = _clone(
-            infilename=str(self.infilename),
-            outfilename=str(self.outfilename),
-            start_time=start_time,
-            timestep=timestep,
-            items=context.item_numbers,
-        )
+        # Check for multi-aggregation
+        if context.aggregate is not None and len(context.aggregate.stats) > 1:
+            # Multi-aggregation: create custom items with "Stat: ItemName" naming
+            stat_labels = context.aggregate.get_stat_labels()
+            items_list = []
+
+            # Get original item info for selected items
+            # Skip Z coordinate for layered dfsu
+            is_layered = (
+                len(context.item_numbers) > 0
+                and context.dfs_in.ItemInfo[context.item_numbers[0]].Name
+                == "Z coordinate"
+            )
+
+            if is_layered:
+                # Add Z coordinate first (unchanged) - use item number to preserve spatial axis
+                items_list.append(context.item_numbers[0])
+                items_to_process = context.item_numbers[1:]
+            else:
+                items_to_process = context.item_numbers
+
+            # Create items for each (item × stat) combination
+            for item_num in items_to_process:
+                orig_item_info = ItemInfo.from_mikecore_dynamic_item_info(
+                    context.dfs_in.ItemInfo[item_num]
+                )
+                for stat_label in stat_labels:
+                    # Clone the item and modify name with custom formatting
+                    new_item = deepcopy(orig_item_info)
+                    new_item.name = context.aggregate.format_item_name(
+                        stat_label, orig_item_info.name
+                    )
+                    items_list.append(new_item)
+
+            dfs_out = _clone(
+                infilename=str(self.infilename),
+                outfilename=str(self.outfilename),
+                start_time=start_time,
+                timestep=timestep,
+                items=items_list,
+            )
+        elif context.aggregate is not None and len(context.aggregate.stats) == 1:
+            # Single aggregation: rename item with "Stat: ItemName"
+            stat_label = context.aggregate.get_stat_labels()[0]
+            items_list = []
+
+            # Get original item info for selected items
+            # Skip Z coordinate for layered dfsu
+            is_layered = (
+                len(context.item_numbers) > 0
+                and context.dfs_in.ItemInfo[context.item_numbers[0]].Name
+                == "Z coordinate"
+            )
+
+            if is_layered:
+                # Add Z coordinate first (unchanged) - use item number to preserve spatial axis
+                items_list.append(context.item_numbers[0])
+                items_to_process = context.item_numbers[1:]
+            else:
+                items_to_process = context.item_numbers
+
+            # Rename items with stat label
+            for item_num in items_to_process:
+                orig_item_info = ItemInfo.from_mikecore_dynamic_item_info(
+                    context.dfs_in.ItemInfo[item_num]
+                )
+                # Clone the item and modify name with custom formatting
+                new_item = deepcopy(orig_item_info)
+                new_item.name = context.aggregate.format_item_name(
+                    stat_label, orig_item_info.name
+                )
+                items_list.append(new_item)
+
+            dfs_out = _clone(
+                infilename=str(self.infilename),
+                outfilename=str(self.outfilename),
+                start_time=start_time,
+                timestep=timestep,
+                items=items_list,
+            )
+        else:
+            # No aggregation or other operations: clone with selected items
+            dfs_out = _clone(
+                infilename=str(self.infilename),
+                outfilename=str(self.outfilename),
+                start_time=start_time,
+                timestep=timestep,
+                items=context.item_numbers,
+            )
 
         return dfs_out
 
@@ -1159,8 +1343,12 @@ class PipelineExecutor:
 
         For large files, data is processed in spatial chunks to limit memory usage.
         Each chunk contains all timesteps for a subset of spatial elements.
+
+        Supports multiple statistics in a single pass - all stats are computed
+        simultaneously for efficiency.
         """
-        stat_func = aggregate_op.get_stat_func()
+        stat_funcs = aggregate_op.get_stat_funcs()
+        n_stats = len(stat_funcs)
         time_info = context.time_info
 
         # Determine time range
@@ -1206,9 +1394,10 @@ class PipelineExecutor:
         n_chunks = max(1, math.ceil(mem_total / self.buffer_size))
         chunk_size = math.ceil(n_elements / n_chunks)
 
-        # Initialize output arrays (full spatial size)
+        # Initialize output arrays: [n_items][n_stats][n_elements]
         output_arrays = [
-            np.full(n_elements, np.nan, dtype=np.float32) for _ in range(n_items)
+            [np.full(n_elements, np.nan, dtype=np.float32) for _ in range(n_stats)]
+            for _ in range(n_items)
         ]
 
         # Process data in spatial chunks
@@ -1236,22 +1425,25 @@ class PipelineExecutor:
                     # Store only the chunk in buffer
                     chunk_buffers[item_idx][timestep_idx, :] = data[e1:e2]
 
-            # Compute aggregate statistic for this chunk
+            # Compute all aggregate statistics for this chunk
             for item_idx in range(n_items):
-                # Apply statistic along time axis (axis=0)
-                result = stat_func(chunk_buffers[item_idx], axis=0)
+                for stat_idx, stat_func in enumerate(stat_funcs):
+                    # Apply statistic along time axis (axis=0)
+                    result = stat_func(chunk_buffers[item_idx], axis=0)
 
-                # Store in output at correct spatial position
-                output_arrays[item_idx][e1:e2] = result
+                    # Store in output at correct spatial position
+                    output_arrays[item_idx][stat_idx][e1:e2] = result
 
             e1 = e2  # Move to next chunk
 
         # Write results (single timestep at time 0.0)
+        # Write order: for each item, write all stats before moving to next item
         for item_idx in range(n_items):
-            # Replace NaN with delete value before writing
-            output = output_arrays[item_idx]
-            output[np.isnan(output)] = context.deletevalue
-            context.dfs_out.WriteItemTimeStepNext(0.0, output)
+            for stat_idx in range(n_stats):
+                # Replace NaN with delete value before writing
+                output = output_arrays[item_idx][stat_idx]
+                output[np.isnan(output)] = context.deletevalue
+                context.dfs_out.WriteItemTimeStepNext(0.0, output)
 
 
 # ============================================================================
