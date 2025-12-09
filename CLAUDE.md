@@ -6,6 +6,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 MIKE IO is a Python package for reading, writing, and manipulating MIKE files (dfs0, dfs1, dfs2, dfs3, dfsu, mesh). It provides a high-level API for common data processing workflows with MIKE files from DHI.
 
+**Domain Context**: MIKE is a suite of modeling software from DHI for simulating water environments - hydrodynamics, water quality, coastal engineering, urban drainage, and groundwater. MIKE IO enables Python-based workflows with MIKE simulation data and input files, integrating them with the scientific Python ecosystem (numpy, pandas, matplotlib).
+
 ## Development Commands
 
 ### Setup
