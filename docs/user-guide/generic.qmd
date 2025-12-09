@@ -10,10 +10,11 @@ The generic module contains functionality that works for all types of dfs (dfs0,
 * [`concat()`](`mikeio.generic.concat`) - Concatenates files along the time axis
 * [`extract()`](`mikeio.generic.extract`) - Extract timesteps and/or items to a new dfs file
 * [`diff()`](`mikeio.generic.diff`) - Calculate difference between two dfs files with identical geometry
-* [`sum()`](`mikeio.generic.sum`) - Calculate the sum of two dfs files
+* [`add()`](`mikeio.generic.add`) - Calculate the sum of two dfs files
 * [`scale()`](`mikeio.generic.scale`) - Apply scaling to any dfs file
 * [`avg_time()`](`mikeio.generic.avg_time`) - Create a temporally averaged dfs file
 * [`quantile()`](`mikeio.generic.quantile`) - Create a dfs file with temporal quantiles
+* [`transform()`](`mikeio.generic.transform`) - Create new derived items from existing items using custom functions
 
 ## When to use the generic module
 
@@ -27,14 +28,217 @@ The generic module contains functionality that works for all types of dfs (dfs0,
 * When the input files data are not dfs files
 * When the end result is not a dfs file
 
-## Example
+## Examples
 
-```python
->>> from mikeio import generic
->>> generic.concat(["fileA.dfs2", "fileB.dfs2"], "new_file.dfs2")
+```{python}
+import numpy as np
+import matplotlib.pyplot as plt
+import mikeio
+import mikeio.generic
 ```
 
-## More examples
+## Concatenation
 
-See the [Generic notebook](../examples/Generic.qmd) for more examples.
+Take a look at these two files with overlapping timesteps.
+
+```{python}
+t1 = mikeio.read("../data/tide1.dfs1")
+t1
+```
+
+```{python}
+t2 = mikeio.read("../data/tide2.dfs1")
+t2
+```
+
+Plot one of the points along the line.
+
+```{python}
+plt.plot(t1.time,t1[0].isel(x=1).values, label="File 1")
+plt.plot(t2.time,t2[0].isel(x=1).values,'k+', label="File 2")
+plt.legend()
+```
+
+```{python}
+mikeio.generic.concat(infilenames=["../data/tide1.dfs1",
+                                   "../data/tide2.dfs1"],
+                     outfilename="concat.dfs1")
+```
+
+```{python}
+c = mikeio.read("concat.dfs1")
+c[0].isel(x=1).plot()
+c
+```
+
+## Difference between two files
+
+Take difference between two dfs files with same structure - e.g. to see the difference in result between two calibration runs
+
+```{python}
+
+fn1 = "../data/oresundHD_run1.dfsu"
+fn2 = "../data/oresundHD_run2.dfsu"
+fn_diff = "oresundHD_difference.dfsu"
+mikeio.generic.diff(fn1, fn2, fn_diff)
+```
+
+```{python}
+_, ax = plt.subplots(1,3, sharey=True, figsize=(12,5))
+da = mikeio.read(fn1, time=-1)[0]
+da.plot(vmin=0.06, vmax=0.27, ax=ax[0], title='run 1')
+da = mikeio.read(fn2, time=-1)[0]
+da.plot(vmin=0.06, vmax=0.27, ax=ax[1], title='run 2')
+da = mikeio.read(fn_diff, time=-1)[0]
+da.plot(vmin=-0.1, vmax=0.1, cmap='coolwarm', ax=ax[2], title='difference');
+```
+
+## Extract time steps or items
+
+The extract() method can extract a part of a file:
+
+* **time slice** by specifying *start* and/or *end*
+* specific **items**
+
+```{python}
+mikeio.generic.extract("../data/tide1.dfs1", "extracted.dfs1", start="2019-01-02")
+```
+
+```{python}
+e = mikeio.read("extracted.dfs1")
+e
+```
+
+```{python}
+mikeio.generic.extract(
+    "../data/oresund_vertical_slice.dfsu", "extracted.dfsu", items="Salinity", end=-2
+)
+```
+
+```{python}
+e = mikeio.read("extracted.dfsu")
+e
+```
+
+## Scaling
+
+Adding a constant e.g to adjust datum
+
+```{python}
+ds = mikeio.read("../data/gebco_sound.dfs2")
+ds.Elevation[0].plot();
+```
+
+```{python}
+ds['Elevation'][0,104,131].to_numpy()
+```
+
+This is the processing step.
+
+```{python}
+mikeio.generic.scale("../data/gebco_sound.dfs2", 
+                     "gebco_sound_local_datum.dfs2",
+                     offset=-2.1
+                     )
+```
+
+```{python}
+ds2 = mikeio.read("gebco_sound_local_datum.dfs2")
+ds2['Elevation'][0].plot()
+```
+
+```{python}
+ds2['Elevation'][0,104,131].to_numpy()
+```
+
+### Spatially varying correction
+
+```{python}
+factor = np.ones_like(ds['Elevation'][0].to_numpy())
+factor.shape
+```
+
+Add some spatially varying factors, exaggerated values for educational purpose.
+
+```{python}
+factor[:,0:100] = 5.3
+factor[0:40,] = 0.1
+factor[150:,150:] = 10.7
+plt.imshow(factor)
+plt.colorbar();
+```
+
+The 2d array must first be flipped upside down and then converted to a 1d vector using [numpy.ndarray.flatten](https://numpy.org/doc/stable/reference/generated/numpy.ndarray.flatten.html) to match how data is stored in dfs files.
+
+```{python}
+factor_ud = np.flipud(factor)
+factor_vec  = factor_ud.flatten()
+mikeio.generic.scale("../data/gebco_sound.dfs2", 
+                     "gebco_sound_spatial.dfs2",
+                     factor=factor_vec
+                     )
+```
+
+```{python}
+ds3 = mikeio.read("gebco_sound_spatial.dfs2")
+ds3.Elevation[0].plot();
+```
+
+## Derived items
+
+Creating derived items from existing items, e.g. current speed from u and v velocities.
+```{python}
+from mikeio.generic import DerivedItem
+
+mikeio.generic.transform(
+    infilename="../data/oresundHD_run1.dfsu",
+    outfilename="oresundHD_speed.dfsu",
+    vars=[
+        DerivedItem(
+            name="Current speed",
+            type=mikeio.EUMType.Current_Speed,
+            unit=mikeio.EUMUnit.knot,
+            func=lambda x: 1.94 * np.sqrt(x["U velocity"] ** 2 + x["V velocity"] ** 2),
+        )
+    ],
+)
+```
+
+
+## Time average
+
+```{python}
+mikeio.generic.avg_time(
+    "../data/NorthSea_HD_and_windspeed.dfsu", "Avg_NorthSea_HD_and_windspeed.dfsu"
+) 
+```
+
+```{python}
+ds = mikeio.read("../data/NorthSea_HD_and_windspeed.dfsu")
+ds.mean(axis=0).describe()  # alternative way of getting the time average
+```
+
+
+## Quantile
+
+Example that calculates the 25%, 50% and 75% percentile for all items in a dfsu file.
+
+```{python}
+fn = "../data/NorthSea_HD_and_windspeed.dfsu"
+fn_q = "Q_NorthSea_HD_and_windspeed.dfsu"
+mikeio.generic.quantile(fn, fn_q, q=[0.25,0.5,0.75])
+```
+
+```{python}
+ds = mikeio.read(fn_q)
+ds
+```
+
+```{python}
+da_q75 = ds["Quantile 0.75, Wind speed"]
+da_q75.plot(title="75th percentile, wind speed", label="m/s")
+```
+
+
+
 
