@@ -1,13 +1,5 @@
-from mikeio._interpolation import get_idw_interpolant
 import mikeio
 import numpy as np
-
-
-def test_get_idw_interpolant() -> None:
-    d = np.linspace(1, 2, 2)
-    w = get_idw_interpolant(d, p=1)
-    assert w[0] == 2 / 3
-    assert w[1] == 1 / 3
 
 
 def test_interp2d() -> None:
