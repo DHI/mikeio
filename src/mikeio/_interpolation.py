@@ -18,6 +18,7 @@ def _get_idw_interpolant(distances: np.ndarray, p: float = 2) -> np.ndarray:
     -------
     np.ndarray
         Weights for interpolation
+
     """
     MIN_DISTANCE = 1e-8
     weights = np.zeros(distances.shape)
