@@ -602,7 +602,7 @@ class GeometryFM2D(_GeometryFM):
         """
         xy = np.atleast_2d(xy)
         ids, dists = self._find_n_nearest_2d_elements(xy, n=n_nearest)
-        weights = np.ones(dists.shape)
+        weights = np.ones_like(dists)
 
         if n_nearest == 1 and not extrapolate:
             weights[~self.contains(xy)] = np.nan
