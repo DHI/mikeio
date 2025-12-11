@@ -1764,19 +1764,19 @@ class Dataset:
 
             case Grid2D():
                 self._validate_extension(filename, ".dfs2")
-                write_dfs2(filename, self)
+                write_dfs2(filename, self, **kwargs)
 
             case Grid3D():
                 self._validate_extension(filename, ".dfs3")
-                write_dfs3(filename, self)
+                write_dfs3(filename, self, **kwargs)
 
             case Grid1D():
                 self._validate_extension(filename, ".dfs1")
-                write_dfs1(filename, self)
+                write_dfs1(filename, self, **kwargs)
 
             case _GeometryFM():
                 self._validate_extension(filename, ".dfsu")
-                write_dfsu(filename, self)
+                write_dfsu(filename, self, **kwargs)
 
             case _:
                 raise NotImplementedError(
