@@ -219,3 +219,4 @@ uv run pytest tests/test_dfs0.py::test_specific_function
 ```
 
 Test data is located in `tests/testdata/` organized by file type.
+- Prefer match/case in favor of if/elif/else
