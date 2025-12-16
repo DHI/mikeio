@@ -74,8 +74,6 @@ class PfsSection(SimpleNamespace, MutableMapping[str, Any]):
 
     def _repr_html_(self) -> str:
         """Rich HTML representation for Jupyter notebooks."""
-        import uuid
-
         css_style = """
         <style>
         .pfs-container {
@@ -141,32 +139,34 @@ class PfsSection(SimpleNamespace, MutableMapping[str, Any]):
                 # Render as collapsible section
                 section_id = f"pfs-{uuid.uuid4()}"
                 checked = "checked" if level < 2 else ""  # Auto-expand first 2 levels
-                lines.append(f"<div class='pfs-item'>")
+                lines.append("<div class='pfs-item'>")
                 lines.append(f"<input type='checkbox' id='{section_id}' {checked}/>")
                 lines.append(
                     f"<label class='pfs-section-toggle' for='{section_id}'>"
                     f"<span class='pfs-section-name'>[{html.escape(str(key))}]</span>"
                     f"</label>"
                 )
-                lines.append(f"<div class='pfs-section-content'>")
+                lines.append("<div class='pfs-section-content'>")
                 lines.append(value._render_pfs_html(level + 1))
-                lines.append(f"</div></div>")
+                lines.append("</div></div>")
             elif isinstance(value, PfsNonUniqueList):
                 # Handle non-unique keys
                 for item in value:
                     if isinstance(item, PfsSection):
                         section_id = f"pfs-{uuid.uuid4()}"
                         checked = "checked" if level < 2 else ""
-                        lines.append(f"<div class='pfs-item'>")
-                        lines.append(f"<input type='checkbox' id='{section_id}' {checked}/>")
+                        lines.append("<div class='pfs-item'>")
+                        lines.append(
+                            f"<input type='checkbox' id='{section_id}' {checked}/>"
+                        )
                         lines.append(
                             f"<label class='pfs-section-toggle' for='{section_id}'>"
                             f"<span class='pfs-section-name'>[{html.escape(str(key))}]</span>"
                             f"</label>"
                         )
-                        lines.append(f"<div class='pfs-section-content'>")
+                        lines.append("<div class='pfs-section-content'>")
                         lines.append(item._render_pfs_html(level + 1))
-                        lines.append(f"</div></div>")
+                        lines.append("</div></div>")
                     else:
                         lines.append(self._format_key_value_html(key, item))
             else:
@@ -194,11 +194,17 @@ class PfsSection(SimpleNamespace, MutableMapping[str, Any]):
                 for item in value:
                     match item:
                         case bool():
-                            formatted_items.append(f"<span class='pfs-bool'>{str(item).lower()}</span>")
+                            formatted_items.append(
+                                f"<span class='pfs-bool'>{str(item).lower()}</span>"
+                            )
                         case int() | float():
-                            formatted_items.append(f"<span class='pfs-number'>{item}</span>")
+                            formatted_items.append(
+                                f"<span class='pfs-number'>{item}</span>"
+                            )
                         case str():
-                            formatted_items.append(f"<span class='pfs-string'>'{html.escape(item)}'</span>")
+                            formatted_items.append(
+                                f"<span class='pfs-string'>'{html.escape(item)}'</span>"
+                            )
                         case _:
                             formatted_items.append(html.escape(str(item)))
                 value_html = ", ".join(formatted_items)
