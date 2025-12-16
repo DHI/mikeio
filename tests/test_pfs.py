@@ -1316,3 +1316,138 @@ EndSect
     pfs.foo["bar/bat"] = {"n": 5, "s": "foo"}
     assert pfs.foo.bar.bat.n == 5
     assert pfs.foo.bar.bat.s == "foo"
+
+
+def test_pfs_html_repr() -> None:
+    """Test HTML representation for Jupyter notebooks."""
+    text = """
+[ENGINE]
+    string_val = 'hello'
+    int_val = 42
+    float_val = 3.14
+    bool_val = true
+    list_val = 1, 2, 3
+    [NESTED]
+        nested_str = 'world'
+        nested_num = 100
+    EndSect  // NESTED
+EndSect  // ENGINE
+"""
+    pfs = mikeio.PfsDocument.from_text(text)
+
+    # Test that _repr_html_ method exists and returns HTML
+    html = pfs.ENGINE._repr_html_()
+    assert isinstance(html, str)
+    assert len(html) > 0
+
+    # Check for CSS styling
+    assert "<style>" in html
+    assert ".pfs-search-box" in html
+    assert ".pfs-collapse-btn" in html
+
+    # Check for proper HTML structure
+    assert "<div id='pfs-" in html
+    assert '<input type="text" class="pfs-search-box"' in html
+    assert '<button class="pfs-collapse-btn">' in html
+
+    # Check that values are present in the output
+    assert "string_val" in html
+    assert "int_val" in html
+    assert "float_val" in html
+    assert "bool_val" in html
+    assert "NESTED" in html
+    assert "nested_str" in html
+
+    # Check for color-coded values
+    assert "pfs-string" in html  # String values should be styled
+    assert "pfs-number" in html  # Numeric values should be styled
+    assert "pfs-bool" in html  # Boolean values should be styled
+    assert "pfs-section-name" in html  # Section names should be styled
+
+    # Check for collapsible sections
+    assert 'type="checkbox"' in html
+    assert "pfs-section-toggle" in html
+
+    # Check for new features
+    assert "pfs-collapse-btn" in html  # Collapse/expand all button
+    assert "Collapse All" in html  # Button text
+    assert "pfs-path-btn" in html  # Path copy buttons
+    assert "data-path=" in html  # Path data attribute
+    assert "prefers-color-scheme: dark" in html  # Dark mode support
+    assert "<script>" in html  # JavaScript for interactivity
+    assert "setupCollapseExpand" in html  # Collapse/expand JavaScript function
+    assert "setupPathCopy" in html  # Path copy JavaScript function
+
+
+def test_pfs_html_repr_nonunique_keys() -> None:
+    """Test HTML repr with non-unique keys."""
+    text = """
+[ROOT]
+    RGB_Color_Value = 128, 0, 128
+    RGB_Color_Value = 85, 0, 171
+EndSect  // ROOT
+"""
+    pfs = mikeio.PfsDocument(StringIO(text), unique_keywords=False)
+    html = pfs.ROOT._repr_html_()
+
+    assert isinstance(html, str)
+    assert "RGB_Color_Value" in html
+    assert "128" in html
+    assert "171" in html
+
+
+def test_pfs_html_repr_filepath() -> None:
+    """Test HTML repr with file path highlighting."""
+    text = """
+[ENGINE]
+    mesh_file = |.\\mesh.mesh|
+    output_dir = '/tmp/output'
+    number = 42
+EndSect  // ENGINE
+"""
+    pfs = mikeio.PfsDocument.from_text(text)
+    html = pfs.ENGINE._repr_html_()
+
+    assert isinstance(html, str)
+    # Check that file paths get special styling
+    assert "pfs-filepath" in html
+    # Check that both file path and regular string are present
+    assert "mesh_file" in html
+    assert "output_dir" in html
+
+
+def test_pfs_html_repr_table_view() -> None:
+    """Test HTML repr with table view for enumerated sections."""
+    text = """
+[OUTPUTS]
+    [OUTPUT_1]
+        file = 'output1.dfsu'
+        type = 1
+        include = true
+    EndSect
+    [OUTPUT_2]
+        file = 'output2.dfs0'
+        type = 2
+        include = false
+    EndSect
+    [OUTPUT_3]
+        file = 'output3.dfsu'
+        type = 1
+        include = true
+    EndSect
+EndSect  // OUTPUTS
+"""
+    pfs = mikeio.PfsDocument.from_text(text)
+    html = pfs.OUTPUTS._repr_html_()
+
+    assert isinstance(html, str)
+    # Check for table view toggle button
+    assert "pfs-table-toggle" in html
+    assert "📊 Table View" in html
+    # Check for table structure
+    assert "pfs-table-view" in html
+    assert "<table>" in html
+    assert "<thead>" in html
+    assert "<tbody>" in html
+    # Check for table toggle JavaScript
+    assert "setupTableToggle" in html
