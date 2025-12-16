@@ -77,6 +77,7 @@ class PfsSection(SimpleNamespace, MutableMapping[str, Any]):
         import uuid
 
         container_id = f"pfs-{uuid.uuid4()}"
+        has_table = self._has_enumerated_subsections()
 
         css_style = f"""
         <style>
@@ -201,6 +202,46 @@ class PfsSection(SimpleNamespace, MutableMapping[str, Any]):
         #{container_id} .pfs-collapse-btn:active {{
             background: #d0d0d0;
         }}
+        #{container_id} .pfs-table-toggle {{
+            padding: 6px 12px;
+            font-size: 11px;
+            color: #333;
+            background: #f0f0f0;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            cursor: pointer;
+            font-family: monospace;
+        }}
+        #{container_id} .pfs-table-toggle:hover {{
+            background: #e0e0e0;
+        }}
+        #{container_id} .pfs-table-toggle:active {{
+            background: #d0d0d0;
+        }}
+        #{container_id} .pfs-table-view {{
+            margin-top: 10px;
+            overflow-x: auto;
+        }}
+        #{container_id} .pfs-table-view table {{
+            border-collapse: collapse;
+            width: 100%;
+            font-size: 12px;
+            font-family: monospace;
+        }}
+        #{container_id} .pfs-table-view th {{
+            background: #f0f0f0;
+            padding: 8px;
+            text-align: left;
+            border: 1px solid #ddd;
+            font-weight: bold;
+        }}
+        #{container_id} .pfs-table-view td {{
+            padding: 6px 8px;
+            border: 1px solid #ddd;
+        }}
+        #{container_id} .pfs-table-view tr:hover {{
+            background: #f5f5f5;
+        }}
         #{container_id} .pfs-highlight {{
             background: #ffff00;
             padding: 1px 2px;
@@ -260,6 +301,24 @@ class PfsSection(SimpleNamespace, MutableMapping[str, Any]):
             #{container_id} .pfs-path-btn:hover {{
                 background: #4c4c4c;
                 color: #ccc;
+            }}
+            #{container_id} .pfs-table-toggle {{
+                background: #3c3c3c;
+                border-color: #555;
+                color: #d4d4d4;
+            }}
+            #{container_id} .pfs-table-toggle:hover {{
+                background: #4c4c4c;
+            }}
+            #{container_id} .pfs-table-view th {{
+                background: #2d2d2d;
+                border-color: #555;
+            }}
+            #{container_id} .pfs-table-view td {{
+                border-color: #555;
+            }}
+            #{container_id} .pfs-table-view tr:hover {{
+                background: #2d2d2d;
             }}
             #{container_id} .pfs-highlight {{
                 background: #4a4a00;
@@ -358,30 +417,75 @@ class PfsSection(SimpleNamespace, MutableMapping[str, Any]):
                 }});
             }}
 
+            function setupTableToggle() {{
+                const container = document.getElementById(containerId);
+                if (!container) return;
+
+                const toggleBtn = container.querySelector('.pfs-table-toggle');
+                if (!toggleBtn) return;
+
+                const treeView = container.querySelector('.pfs-tree-view');
+                const tableView = container.querySelector('.pfs-table-view');
+                if (!treeView || !tableView) return;
+
+                let isTableView = false;
+
+                toggleBtn.addEventListener('click', function() {{
+                    isTableView = !isTableView;
+
+                    if (isTableView) {{
+                        treeView.classList.add('pfs-hidden');
+                        tableView.classList.remove('pfs-hidden');
+                        toggleBtn.textContent = '🌲 Tree View';
+                    }} else {{
+                        treeView.classList.remove('pfs-hidden');
+                        tableView.classList.add('pfs-hidden');
+                        toggleBtn.textContent = '📊 Table View';
+                    }}
+                }});
+            }}
+
             // Initialize when DOM is ready
             if (document.readyState === 'loading') {{
                 document.addEventListener('DOMContentLoaded', function() {{
                     setupSearch();
                     setupCollapseExpand();
                     setupPathCopy();
+                    setupTableToggle();
                 }});
             }} else {{
                 setupSearch();
                 setupCollapseExpand();
                 setupPathCopy();
+                setupTableToggle();
             }}
         }})();
         </script>
         """
 
-        toolbar = """
+        # Build toolbar with conditional table toggle
+        table_toggle = (
+            '<button class="pfs-table-toggle">📊 Table View</button>'
+            if has_table
+            else ""
+        )
+        toolbar = f"""
         <div class='pfs-toolbar'>
             <input type="text" class="pfs-search-box" placeholder="Search keys, values, sections..." style="flex: 1;" />
             <button class="pfs-collapse-btn">▶ Collapse All</button>
+            {table_toggle}
         </div>
         """
-        content = self._render_pfs_html(path="")
-        return f"{css_style}<div id='{container_id}'>{toolbar}<div class='pfs-content'>{content}</div></div>{search_script}"
+
+        # Generate tree view
+        tree_content = self._render_pfs_html(path="")
+
+        # Generate table view if applicable
+        table_content = ""
+        if has_table:
+            table_content = f"<div class='pfs-table-view pfs-hidden'>{self._render_table_html()}</div>"
+
+        return f"{css_style}<div id='{container_id}'>{toolbar}<div class='pfs-tree-view'>{tree_content}</div>{table_content}</div>{search_script}"
 
     def _render_pfs_html(self, level: int = 0, path: str = "") -> str:
         """Recursively render PFS structure to HTML."""
@@ -482,6 +586,67 @@ class PfsSection(SimpleNamespace, MutableMapping[str, Any]):
         if value.startswith("|") and value.endswith("|"):
             return f"<span class='pfs-filepath'>{html.escape(value)}</span>"
         return f"<span class='pfs-string'>'{html.escape(value)}'</span>"
+
+    def _has_enumerated_subsections(self) -> bool:
+        """Check if section has enumerated subsections (e.g., OUTPUT_1, OUTPUT_2)."""
+        if len(self) == 0:
+            return False
+
+        keys = list(self.keys())
+
+        # Check for pattern: keys ending with digits
+        keys_with_digits = [k for k in keys if isinstance(k, str) and k[-1].isdigit()]
+
+        if len(keys_with_digits) < 2:
+            return False
+
+        # Check if they're subsections
+        return any(isinstance(self[k], PfsSection) for k in keys_with_digits)
+
+    def _render_table_html(self) -> str:
+        """Render enumerated subsections as an HTML table."""
+        import html
+
+        try:
+            # Try to convert to dataframe
+            df = self.to_dataframe()
+
+            # Build HTML table
+            lines = ["<table>", "<thead><tr>"]
+
+            # Add header row with index column
+            lines.append("<th>#</th>")
+            for col in df.columns:
+                lines.append(f"<th>{html.escape(str(col))}</th>")
+            lines.append("</tr></thead><tbody>")
+
+            # Add data rows
+            for idx, row in df.iterrows():
+                lines.append("<tr>")
+                lines.append(f"<td>{html.escape(str(idx))}</td>")
+                for col in df.columns:
+                    value = row[col]
+                    # Format value with same styling as tree view
+                    match value:
+                        case bool():
+                            cell_content = (
+                                f"<span class='pfs-bool'>{str(value).lower()}</span>"
+                            )
+                        case int() | float():
+                            cell_content = f"<span class='pfs-number'>{value}</span>"
+                        case str():
+                            cell_content = self._format_string_value(value)
+                        case _:
+                            cell_content = html.escape(str(value))
+                    lines.append(f"<td>{cell_content}</td>")
+                lines.append("</tr>")
+
+            lines.append("</tbody></table>")
+            return "\n".join(lines)
+
+        except (ValueError, AttributeError):
+            # Fallback if to_dataframe fails
+            return "<p>Could not generate table view</p>"
 
     def __len__(self) -> int:
         return len(self.__dict__)

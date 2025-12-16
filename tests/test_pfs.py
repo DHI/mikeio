@@ -1414,3 +1414,40 @@ EndSect  // ENGINE
     # Check that both file path and regular string are present
     assert "mesh_file" in html
     assert "output_dir" in html
+
+
+def test_pfs_html_repr_table_view() -> None:
+    """Test HTML repr with table view for enumerated sections."""
+    text = """
+[OUTPUTS]
+    [OUTPUT_1]
+        file = 'output1.dfsu'
+        type = 1
+        include = true
+    EndSect
+    [OUTPUT_2]
+        file = 'output2.dfs0'
+        type = 2
+        include = false
+    EndSect
+    [OUTPUT_3]
+        file = 'output3.dfsu'
+        type = 1
+        include = true
+    EndSect
+EndSect  // OUTPUTS
+"""
+    pfs = mikeio.PfsDocument.from_text(text)
+    html = pfs.OUTPUTS._repr_html_()
+
+    assert isinstance(html, str)
+    # Check for table view toggle button
+    assert "pfs-table-toggle" in html
+    assert "📊 Table View" in html
+    # Check for table structure
+    assert "pfs-table-view" in html
+    assert "<table>" in html
+    assert "<thead>" in html
+    assert "<tbody>" in html
+    # Check for table toggle JavaScript
+    assert "setupTableToggle" in html
