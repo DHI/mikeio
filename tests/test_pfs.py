@@ -1343,11 +1343,12 @@ EndSect  // ENGINE
     # Check for CSS styling
     assert "<style>" in html
     assert ".pfs-search-box" in html
-    assert ".pfs-copy-btn" in html
+    assert ".pfs-collapse-btn" in html
 
     # Check for proper HTML structure
     assert "<div id='pfs-" in html
-    assert "<input type=\"text\" class=\"pfs-search-box\"" in html
+    assert '<input type="text" class="pfs-search-box"' in html
+    assert '<button class="pfs-collapse-btn">' in html
 
     # Check that values are present in the output
     assert "string_val" in html
@@ -1368,10 +1369,11 @@ EndSect  // ENGINE
     assert "pfs-section-toggle" in html
 
     # Check for new features
-    assert "pfs-copy-btn" in html  # Copy buttons
-    assert "📋" in html  # Copy button icon
+    assert "pfs-collapse-btn" in html  # Collapse/expand all button
+    assert "Collapse All" in html  # Button text
     assert "prefers-color-scheme: dark" in html  # Dark mode support
     assert "<script>" in html  # JavaScript for interactivity
+    assert "setupCollapseExpand" in html  # Collapse/expand JavaScript function
 
 
 def test_pfs_html_repr_nonunique_keys() -> None:

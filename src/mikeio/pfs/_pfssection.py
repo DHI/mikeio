@@ -152,33 +152,30 @@ class PfsSection(SimpleNamespace, MutableMapping[str, Any]):
         }}
         #{container_id} .pfs-item {{
             margin: 2px 0;
-            position: relative;
-        }}
-        #{container_id} .pfs-copy-btn {{
-            display: inline-block;
-            margin-left: 8px;
-            padding: 2px 6px;
-            font-size: 10px;
-            color: #666;
-            background: #f0f0f0;
-            border: 1px solid #ccc;
-            border-radius: 3px;
-            cursor: pointer;
-            opacity: 0;
-            transition: opacity 0.2s;
-        }}
-        #{container_id} .pfs-item:hover .pfs-copy-btn {{
-            opacity: 1;
-        }}
-        #{container_id} .pfs-copy-btn:hover {{
-            background: #e0e0e0;
-            color: #333;
-        }}
-        #{container_id} .pfs-copy-btn:active {{
-            background: #d0d0d0;
         }}
         #{container_id} .pfs-hidden {{
             display: none !important;
+        }}
+        #{container_id} .pfs-toolbar {{
+            margin-bottom: 10px;
+            display: flex;
+            gap: 10px;
+        }}
+        #{container_id} .pfs-collapse-btn {{
+            padding: 6px 12px;
+            font-size: 11px;
+            color: #333;
+            background: #f0f0f0;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            cursor: pointer;
+            font-family: monospace;
+        }}
+        #{container_id} .pfs-collapse-btn:hover {{
+            background: #e0e0e0;
+        }}
+        #{container_id} .pfs-collapse-btn:active {{
+            background: #d0d0d0;
         }}
         #{container_id} .pfs-highlight {{
             background: #ffff00;
@@ -223,14 +220,13 @@ class PfsSection(SimpleNamespace, MutableMapping[str, Any]):
             #{container_id} .pfs-section-name {{
                 color: #4d9fff;
             }}
-            #{container_id} .pfs-copy-btn {{
+            #{container_id} .pfs-collapse-btn {{
                 background: #3c3c3c;
                 border-color: #555;
-                color: #999;
+                color: #d4d4d4;
             }}
-            #{container_id} .pfs-copy-btn:hover {{
+            #{container_id} .pfs-collapse-btn:hover {{
                 background: #4c4c4c;
-                color: #ccc;
             }}
             #{container_id} .pfs-highlight {{
                 background: #4a4a00;
@@ -287,33 +283,24 @@ class PfsSection(SimpleNamespace, MutableMapping[str, Any]):
                 }});
             }}
 
-            function setupCopyButtons() {{
+            function setupCollapseExpand() {{
                 const container = document.getElementById(containerId);
                 if (!container) return;
 
-                container.addEventListener('click', function(e) {{
-                    if (e.target.classList.contains('pfs-copy-btn')) {{
-                        const item = e.target.closest('.pfs-item');
-                        if (!item) return;
+                const collapseBtn = container.querySelector('.pfs-collapse-btn');
+                if (!collapseBtn) return;
 
-                        // Extract the value (everything after '=')
-                        const text = item.textContent;
-                        const eqIndex = text.indexOf('=');
-                        if (eqIndex === -1) return;
+                let isCollapsed = false;
 
-                        let value = text.substring(eqIndex + 1).trim();
-                        // Remove the copy button text
-                        value = value.replace(/📋.*$/, '').trim();
+                collapseBtn.addEventListener('click', function() {{
+                    const checkboxes = container.querySelectorAll('input[type="checkbox"]');
+                    isCollapsed = !isCollapsed;
 
-                        navigator.clipboard.writeText(value).then(() => {{
-                            const btn = e.target;
-                            const originalText = btn.textContent;
-                            btn.textContent = '✓';
-                            setTimeout(() => {{
-                                btn.textContent = originalText;
-                            }}, 1000);
-                        }});
-                    }}
+                    checkboxes.forEach(checkbox => {{
+                        checkbox.checked = !isCollapsed;
+                    }});
+
+                    collapseBtn.textContent = isCollapsed ? '▼ Expand All' : '▶ Collapse All';
                 }});
             }}
 
@@ -321,19 +308,24 @@ class PfsSection(SimpleNamespace, MutableMapping[str, Any]):
             if (document.readyState === 'loading') {{
                 document.addEventListener('DOMContentLoaded', function() {{
                     setupSearch();
-                    setupCopyButtons();
+                    setupCollapseExpand();
                 }});
             }} else {{
                 setupSearch();
-                setupCopyButtons();
+                setupCollapseExpand();
             }}
         }})();
         </script>
         """
 
-        search_box = '<input type="text" class="pfs-search-box" placeholder="Search keys, values, sections..." />'
+        toolbar = """
+        <div class='pfs-toolbar'>
+            <input type="text" class="pfs-search-box" placeholder="Search keys, values, sections..." style="flex: 1;" />
+            <button class="pfs-collapse-btn">▶ Collapse All</button>
+        </div>
+        """
         content = self._render_pfs_html()
-        return f"{css_style}<div id='{container_id}'>{search_box}<div class='pfs-content'>{content}</div></div>{search_script}"
+        return f"{css_style}<div id='{container_id}'>{toolbar}<div class='pfs-content'>{content}</div></div>{search_script}"
 
     def _render_pfs_html(self, level: int = 0) -> str:
         """Recursively render PFS structure to HTML."""
@@ -416,8 +408,7 @@ class PfsSection(SimpleNamespace, MutableMapping[str, Any]):
             case _:
                 value_html = html.escape(str(value))
 
-        copy_btn = "<span class='pfs-copy-btn'>📋</span>"
-        return f"<div class='pfs-item'>{key_html} = {value_html}{copy_btn}</div>"
+        return f"<div class='pfs-item'>{key_html} = {value_html}</div>"
 
     def _format_string_value(self, value: str) -> str:
         """Format a string value, detecting file paths."""
