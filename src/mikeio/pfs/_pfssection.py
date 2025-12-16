@@ -74,59 +74,266 @@ class PfsSection(SimpleNamespace, MutableMapping[str, Any]):
 
     def _repr_html_(self) -> str:
         """Rich HTML representation for Jupyter notebooks."""
-        css_style = """
+        import uuid
+
+        container_id = f"pfs-{uuid.uuid4()}"
+
+        css_style = f"""
         <style>
-        .pfs-container {
+        #{container_id} {{
             font-family: monospace;
             font-size: 12px;
             line-height: 1.5;
-        }
-        .pfs-container input[type="checkbox"] {
+            background: #ffffff;
+            padding: 10px;
+            border-radius: 4px;
+            border: 1px solid #ddd;
+        }}
+        #{container_id} .pfs-search-box {{
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 12px;
+            box-sizing: border-box;
+        }}
+        #{container_id} .pfs-search-box:focus {{
+            outline: none;
+            border-color: #0066cc;
+        }}
+        #{container_id} input[type="checkbox"] {{
             display: none;
-        }
-        .pfs-container .pfs-section-toggle:before {
+        }}
+        #{container_id} .pfs-section-toggle {{
+            cursor: pointer;
+        }}
+        #{container_id} .pfs-section-toggle:before {{
             content: '▶ ';
             font-size: 10px;
             color: #666;
-            cursor: pointer;
             display: inline-block;
             width: 15px;
-        }
-        .pfs-container input:checked + .pfs-section-toggle:before {
+        }}
+        #{container_id} input:checked + .pfs-section-toggle:before {{
             content: '▼ ';
-        }
-        .pfs-container input ~ .pfs-section-content {
+        }}
+        #{container_id} input ~ .pfs-section-content {{
             display: none;
             margin-left: 20px;
-        }
-        .pfs-container input:checked ~ .pfs-section-content {
+        }}
+        #{container_id} input:checked ~ .pfs-section-content {{
             display: block;
-        }
-        .pfs-container .pfs-key {
+        }}
+        #{container_id} .pfs-key {{
             color: #0066cc;
             font-weight: bold;
-        }
-        .pfs-container .pfs-string {
+        }}
+        #{container_id} .pfs-string {{
             color: #008000;
-        }
-        .pfs-container .pfs-number {
+        }}
+        #{container_id} .pfs-number {{
             color: #ff6600;
-        }
-        .pfs-container .pfs-bool {
+        }}
+        #{container_id} .pfs-bool {{
             color: #cc00cc;
-        }
-        .pfs-container .pfs-section-name {
+        }}
+        #{container_id} .pfs-filepath {{
+            color: #9932cc;
+            background: #f5f5f5;
+            padding: 2px 4px;
+            border-radius: 3px;
+            font-style: italic;
+        }}
+        #{container_id} .pfs-section-name {{
             color: #0066cc;
             font-weight: bold;
-        }
-        .pfs-container .pfs-item {
+        }}
+        #{container_id} .pfs-item {{
             margin: 2px 0;
-        }
+            position: relative;
+        }}
+        #{container_id} .pfs-copy-btn {{
+            display: inline-block;
+            margin-left: 8px;
+            padding: 2px 6px;
+            font-size: 10px;
+            color: #666;
+            background: #f0f0f0;
+            border: 1px solid #ccc;
+            border-radius: 3px;
+            cursor: pointer;
+            opacity: 0;
+            transition: opacity 0.2s;
+        }}
+        #{container_id} .pfs-item:hover .pfs-copy-btn {{
+            opacity: 1;
+        }}
+        #{container_id} .pfs-copy-btn:hover {{
+            background: #e0e0e0;
+            color: #333;
+        }}
+        #{container_id} .pfs-copy-btn:active {{
+            background: #d0d0d0;
+        }}
+        #{container_id} .pfs-hidden {{
+            display: none !important;
+        }}
+        #{container_id} .pfs-highlight {{
+            background: #ffff00;
+            padding: 1px 2px;
+            border-radius: 2px;
+        }}
+
+        /* Dark mode support */
+        @media (prefers-color-scheme: dark) {{
+            #{container_id} {{
+                background: #1e1e1e;
+                border-color: #444;
+                color: #d4d4d4;
+            }}
+            #{container_id} .pfs-search-box {{
+                background: #2d2d2d;
+                border-color: #555;
+                color: #d4d4d4;
+            }}
+            #{container_id} .pfs-search-box:focus {{
+                border-color: #4d9fff;
+            }}
+            #{container_id} .pfs-section-toggle:before {{
+                color: #999;
+            }}
+            #{container_id} .pfs-key {{
+                color: #4d9fff;
+            }}
+            #{container_id} .pfs-string {{
+                color: #6aab73;
+            }}
+            #{container_id} .pfs-number {{
+                color: #ff8c42;
+            }}
+            #{container_id} .pfs-bool {{
+                color: #c586c0;
+            }}
+            #{container_id} .pfs-filepath {{
+                color: #b392f0;
+                background: #2d2d2d;
+            }}
+            #{container_id} .pfs-section-name {{
+                color: #4d9fff;
+            }}
+            #{container_id} .pfs-copy-btn {{
+                background: #3c3c3c;
+                border-color: #555;
+                color: #999;
+            }}
+            #{container_id} .pfs-copy-btn:hover {{
+                background: #4c4c4c;
+                color: #ccc;
+            }}
+            #{container_id} .pfs-highlight {{
+                background: #4a4a00;
+            }}
+        }}
         </style>
         """
 
+        search_script = f"""
+        <script>
+        (function() {{
+            const containerId = '{container_id}';
+
+            function setupSearch() {{
+                const container = document.getElementById(containerId);
+                if (!container) return;
+
+                const searchBox = container.querySelector('.pfs-search-box');
+                if (!searchBox) return;
+
+                searchBox.addEventListener('input', function(e) {{
+                    const searchTerm = e.target.value.toLowerCase();
+                    const items = container.querySelectorAll('.pfs-item');
+
+                    items.forEach(item => {{
+                        const text = item.textContent.toLowerCase();
+                        const hasMatch = text.includes(searchTerm);
+
+                        if (searchTerm === '') {{
+                            item.classList.remove('pfs-hidden');
+                            // Remove highlights
+                            const highlights = item.querySelectorAll('.pfs-highlight');
+                            highlights.forEach(h => {{
+                                const text = h.textContent;
+                                h.replaceWith(document.createTextNode(text));
+                            }});
+                        }} else if (hasMatch) {{
+                            item.classList.remove('pfs-hidden');
+                            // Expand parent sections
+                            let parent = item.parentElement;
+                            while (parent && parent.id !== containerId) {{
+                                if (parent.classList.contains('pfs-section-content')) {{
+                                    const checkbox = parent.previousElementSibling?.previousElementSibling;
+                                    if (checkbox && checkbox.type === 'checkbox') {{
+                                        checkbox.checked = true;
+                                    }}
+                                }}
+                                parent = parent.parentElement;
+                            }}
+                        }} else {{
+                            item.classList.add('pfs-hidden');
+                        }}
+                    }});
+                }});
+            }}
+
+            function setupCopyButtons() {{
+                const container = document.getElementById(containerId);
+                if (!container) return;
+
+                container.addEventListener('click', function(e) {{
+                    if (e.target.classList.contains('pfs-copy-btn')) {{
+                        const item = e.target.closest('.pfs-item');
+                        if (!item) return;
+
+                        // Extract the value (everything after '=')
+                        const text = item.textContent;
+                        const eqIndex = text.indexOf('=');
+                        if (eqIndex === -1) return;
+
+                        let value = text.substring(eqIndex + 1).trim();
+                        // Remove the copy button text
+                        value = value.replace(/📋.*$/, '').trim();
+
+                        navigator.clipboard.writeText(value).then(() => {{
+                            const btn = e.target;
+                            const originalText = btn.textContent;
+                            btn.textContent = '✓';
+                            setTimeout(() => {{
+                                btn.textContent = originalText;
+                            }}, 1000);
+                        }});
+                    }}
+                }});
+            }}
+
+            // Initialize when DOM is ready
+            if (document.readyState === 'loading') {{
+                document.addEventListener('DOMContentLoaded', function() {{
+                    setupSearch();
+                    setupCopyButtons();
+                }});
+            }} else {{
+                setupSearch();
+                setupCopyButtons();
+            }}
+        }})();
+        </script>
+        """
+
+        search_box = '<input type="text" class="pfs-search-box" placeholder="Search keys, values, sections..." />'
         content = self._render_pfs_html()
-        return f"{css_style}<div class='pfs-container'>{content}</div>"
+        return f"{css_style}<div id='{container_id}'>{search_box}<div class='pfs-content'>{content}</div></div>{search_script}"
 
     def _render_pfs_html(self, level: int = 0) -> str:
         """Recursively render PFS structure to HTML."""
@@ -187,7 +394,7 @@ class PfsSection(SimpleNamespace, MutableMapping[str, Any]):
             case int() | float():
                 value_html = f"<span class='pfs-number'>{value}</span>"
             case str():
-                value_html = f"<span class='pfs-string'>'{html.escape(value)}'</span>"
+                value_html = self._format_string_value(value)
             case list():
                 # Format lists
                 formatted_items = []
@@ -202,16 +409,24 @@ class PfsSection(SimpleNamespace, MutableMapping[str, Any]):
                                 f"<span class='pfs-number'>{item}</span>"
                             )
                         case str():
-                            formatted_items.append(
-                                f"<span class='pfs-string'>'{html.escape(item)}'</span>"
-                            )
+                            formatted_items.append(self._format_string_value(item))
                         case _:
                             formatted_items.append(html.escape(str(item)))
                 value_html = ", ".join(formatted_items)
             case _:
                 value_html = html.escape(str(value))
 
-        return f"<div class='pfs-item'>{key_html} = {value_html}</div>"
+        copy_btn = "<span class='pfs-copy-btn'>📋</span>"
+        return f"<div class='pfs-item'>{key_html} = {value_html}{copy_btn}</div>"
+
+    def _format_string_value(self, value: str) -> str:
+        """Format a string value, detecting file paths."""
+        import html
+
+        # Detect file paths (|...|) and apply special styling
+        if value.startswith("|") and value.endswith("|"):
+            return f"<span class='pfs-filepath'>{html.escape(value)}</span>"
+        return f"<span class='pfs-string'>'{html.escape(value)}'</span>"
 
     def __len__(self) -> int:
         return len(self.__dict__)

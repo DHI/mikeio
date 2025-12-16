@@ -1342,10 +1342,12 @@ EndSect  // ENGINE
 
     # Check for CSS styling
     assert "<style>" in html
-    assert ".pfs-container" in html
+    assert ".pfs-search-box" in html
+    assert ".pfs-copy-btn" in html
 
     # Check for proper HTML structure
-    assert "<div class='pfs-container'>" in html
+    assert "<div id='pfs-" in html
+    assert "<input type=\"text\" class=\"pfs-search-box\"" in html
 
     # Check that values are present in the output
     assert "string_val" in html
@@ -1365,6 +1367,12 @@ EndSect  // ENGINE
     assert 'type="checkbox"' in html
     assert "pfs-section-toggle" in html
 
+    # Check for new features
+    assert "pfs-copy-btn" in html  # Copy buttons
+    assert "📋" in html  # Copy button icon
+    assert "prefers-color-scheme: dark" in html  # Dark mode support
+    assert "<script>" in html  # JavaScript for interactivity
+
 
 def test_pfs_html_repr_nonunique_keys() -> None:
     """Test HTML repr with non-unique keys."""
@@ -1381,3 +1389,23 @@ EndSect  // ROOT
     assert "RGB_Color_Value" in html
     assert "128" in html
     assert "171" in html
+
+
+def test_pfs_html_repr_filepath() -> None:
+    """Test HTML repr with file path highlighting."""
+    text = """
+[ENGINE]
+    mesh_file = |.\\mesh.mesh|
+    output_dir = '/tmp/output'
+    number = 42
+EndSect  // ENGINE
+"""
+    pfs = mikeio.PfsDocument.from_text(text)
+    html = pfs.ENGINE._repr_html_()
+
+    assert isinstance(html, str)
+    # Check that file paths get special styling
+    assert "pfs-filepath" in html
+    # Check that both file path and regular string are present
+    assert "mesh_file" in html
+    assert "output_dir" in html
