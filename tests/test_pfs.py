@@ -1316,3 +1316,68 @@ EndSect
     pfs.foo["bar/bat"] = {"n": 5, "s": "foo"}
     assert pfs.foo.bar.bat.n == 5
     assert pfs.foo.bar.bat.s == "foo"
+
+
+def test_pfs_html_repr() -> None:
+    """Test HTML representation for Jupyter notebooks."""
+    text = """
+[ENGINE]
+    string_val = 'hello'
+    int_val = 42
+    float_val = 3.14
+    bool_val = true
+    list_val = 1, 2, 3
+    [NESTED]
+        nested_str = 'world'
+        nested_num = 100
+    EndSect  // NESTED
+EndSect  // ENGINE
+"""
+    pfs = mikeio.PfsDocument.from_text(text)
+
+    # Test that _repr_html_ method exists and returns HTML
+    html = pfs.ENGINE._repr_html_()
+    assert isinstance(html, str)
+    assert len(html) > 0
+
+    # Check for CSS styling
+    assert "<style>" in html
+    assert ".pfs-container" in html
+
+    # Check for proper HTML structure
+    assert "<div class='pfs-container'>" in html
+
+    # Check that values are present in the output
+    assert "string_val" in html
+    assert "int_val" in html
+    assert "float_val" in html
+    assert "bool_val" in html
+    assert "NESTED" in html
+    assert "nested_str" in html
+
+    # Check for color-coded values
+    assert "pfs-string" in html  # String values should be styled
+    assert "pfs-number" in html  # Numeric values should be styled
+    assert "pfs-bool" in html  # Boolean values should be styled
+    assert "pfs-section-name" in html  # Section names should be styled
+
+    # Check for collapsible sections
+    assert 'type="checkbox"' in html
+    assert "pfs-section-toggle" in html
+
+
+def test_pfs_html_repr_nonunique_keys() -> None:
+    """Test HTML repr with non-unique keys."""
+    text = """
+[ROOT]
+    RGB_Color_Value = 128, 0, 128
+    RGB_Color_Value = 85, 0, 171
+EndSect  // ROOT
+"""
+    pfs = mikeio.PfsDocument(StringIO(text), unique_keywords=False)
+    html = pfs.ROOT._repr_html_()
+
+    assert isinstance(html, str)
+    assert "RGB_Color_Value" in html
+    assert "128" in html
+    assert "171" in html
