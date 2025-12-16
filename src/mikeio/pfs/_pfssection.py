@@ -181,27 +181,29 @@ class PfsSection(SimpleNamespace, MutableMapping[str, Any]):
 
         key_html = f"<span class='pfs-key'>{html.escape(str(key))}</span>"
 
-        if isinstance(value, bool):
-            value_html = f"<span class='pfs-bool'>{str(value).lower()}</span>"
-        elif isinstance(value, (int, float)):
-            value_html = f"<span class='pfs-number'>{value}</span>"
-        elif isinstance(value, str):
-            value_html = f"<span class='pfs-string'>'{html.escape(value)}'</span>"
-        elif isinstance(value, list):
-            # Format lists
-            formatted_items = []
-            for item in value:
-                if isinstance(item, bool):
-                    formatted_items.append(f"<span class='pfs-bool'>{str(item).lower()}</span>")
-                elif isinstance(item, (int, float)):
-                    formatted_items.append(f"<span class='pfs-number'>{item}</span>")
-                elif isinstance(item, str):
-                    formatted_items.append(f"<span class='pfs-string'>'{html.escape(item)}'</span>")
-                else:
-                    formatted_items.append(html.escape(str(item)))
-            value_html = ", ".join(formatted_items)
-        else:
-            value_html = html.escape(str(value))
+        match value:
+            case bool():
+                value_html = f"<span class='pfs-bool'>{str(value).lower()}</span>"
+            case int() | float():
+                value_html = f"<span class='pfs-number'>{value}</span>"
+            case str():
+                value_html = f"<span class='pfs-string'>'{html.escape(value)}'</span>"
+            case list():
+                # Format lists
+                formatted_items = []
+                for item in value:
+                    match item:
+                        case bool():
+                            formatted_items.append(f"<span class='pfs-bool'>{str(item).lower()}</span>")
+                        case int() | float():
+                            formatted_items.append(f"<span class='pfs-number'>{item}</span>")
+                        case str():
+                            formatted_items.append(f"<span class='pfs-string'>'{html.escape(item)}'</span>")
+                        case _:
+                            formatted_items.append(html.escape(str(item)))
+                value_html = ", ".join(formatted_items)
+            case _:
+                value_html = html.escape(str(value))
 
         return f"<div class='pfs-item'>{key_html} = {value_html}</div>"
 
