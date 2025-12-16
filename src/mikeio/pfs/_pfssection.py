@@ -380,10 +380,10 @@ class PfsSection(SimpleNamespace, MutableMapping[str, Any]):
             <button class="pfs-collapse-btn">▶ Collapse All</button>
         </div>
         """
-        content = self._render_pfs_html(path="pfs")
+        content = self._render_pfs_html(path="")
         return f"{css_style}<div id='{container_id}'>{toolbar}<div class='pfs-content'>{content}</div></div>{search_script}"
 
-    def _render_pfs_html(self, level: int = 0, path: str = "pfs") -> str:
+    def _render_pfs_html(self, level: int = 0, path: str = "") -> str:
         """Recursively render PFS structure to HTML."""
         import uuid
         import html
@@ -394,7 +394,7 @@ class PfsSection(SimpleNamespace, MutableMapping[str, Any]):
                 # Render as collapsible section
                 section_id = f"pfs-{uuid.uuid4()}"
                 checked = "checked" if level < 2 else ""  # Auto-expand first 2 levels
-                child_path = f"{path}.{key}"
+                child_path = f"{path}.{key}" if path else str(key)
                 lines.append("<div class='pfs-item'>")
                 lines.append(f"<input type='checkbox' id='{section_id}' {checked}/>")
                 lines.append(
@@ -411,7 +411,7 @@ class PfsSection(SimpleNamespace, MutableMapping[str, Any]):
                     if isinstance(item, PfsSection):
                         section_id = f"pfs-{uuid.uuid4()}"
                         checked = "checked" if level < 2 else ""
-                        child_path = f"{path}.{key}[{idx}]"
+                        child_path = f"{path}.{key}[{idx}]" if path else f"{key}[{idx}]"
                         lines.append("<div class='pfs-item'>")
                         lines.append(
                             f"<input type='checkbox' id='{section_id}' {checked}/>"
@@ -425,11 +425,11 @@ class PfsSection(SimpleNamespace, MutableMapping[str, Any]):
                         lines.append(item._render_pfs_html(level + 1, child_path))
                         lines.append("</div></div>")
                     else:
-                        item_path = f"{path}.{key}[{idx}]"
+                        item_path = f"{path}.{key}[{idx}]" if path else f"{key}[{idx}]"
                         lines.append(self._format_key_value_html(key, item, item_path))
             else:
                 # Render as key-value pair
-                item_path = f"{path}.{key}"
+                item_path = f"{path}.{key}" if path else str(key)
                 lines.append(self._format_key_value_html(key, value, item_path))
 
         return "\n".join(lines)
