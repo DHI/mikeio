@@ -1371,9 +1371,12 @@ EndSect  // ENGINE
     # Check for new features
     assert "pfs-collapse-btn" in html  # Collapse/expand all button
     assert "Collapse All" in html  # Button text
+    assert "pfs-path-btn" in html  # Path copy buttons
+    assert "data-path=" in html  # Path data attribute
     assert "prefers-color-scheme: dark" in html  # Dark mode support
     assert "<script>" in html  # JavaScript for interactivity
     assert "setupCollapseExpand" in html  # Collapse/expand JavaScript function
+    assert "setupPathCopy" in html  # Path copy JavaScript function
 
 
 def test_pfs_html_repr_nonunique_keys() -> None:

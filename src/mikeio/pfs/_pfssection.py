@@ -152,6 +152,30 @@ class PfsSection(SimpleNamespace, MutableMapping[str, Any]):
         }}
         #{container_id} .pfs-item {{
             margin: 2px 0;
+            position: relative;
+        }}
+        #{container_id} .pfs-path-btn {{
+            display: inline-block;
+            margin-left: 8px;
+            padding: 2px 6px;
+            font-size: 10px;
+            color: #666;
+            background: #f0f0f0;
+            border: 1px solid #ccc;
+            border-radius: 3px;
+            cursor: pointer;
+            opacity: 0;
+            transition: opacity 0.2s;
+        }}
+        #{container_id} .pfs-item:hover .pfs-path-btn {{
+            opacity: 1;
+        }}
+        #{container_id} .pfs-path-btn:hover {{
+            background: #e0e0e0;
+            color: #333;
+        }}
+        #{container_id} .pfs-path-btn:active {{
+            background: #d0d0d0;
         }}
         #{container_id} .pfs-hidden {{
             display: none !important;
@@ -227,6 +251,15 @@ class PfsSection(SimpleNamespace, MutableMapping[str, Any]):
             }}
             #{container_id} .pfs-collapse-btn:hover {{
                 background: #4c4c4c;
+            }}
+            #{container_id} .pfs-path-btn {{
+                background: #3c3c3c;
+                border-color: #555;
+                color: #999;
+            }}
+            #{container_id} .pfs-path-btn:hover {{
+                background: #4c4c4c;
+                color: #ccc;
             }}
             #{container_id} .pfs-highlight {{
                 background: #4a4a00;
@@ -304,15 +337,38 @@ class PfsSection(SimpleNamespace, MutableMapping[str, Any]):
                 }});
             }}
 
+            function setupPathCopy() {{
+                const container = document.getElementById(containerId);
+                if (!container) return;
+
+                container.addEventListener('click', function(e) {{
+                    if (e.target.classList.contains('pfs-path-btn')) {{
+                        const path = e.target.getAttribute('data-path');
+                        if (!path) return;
+
+                        navigator.clipboard.writeText(path).then(() => {{
+                            const btn = e.target;
+                            const originalText = btn.textContent;
+                            btn.textContent = '✓';
+                            setTimeout(() => {{
+                                btn.textContent = originalText;
+                            }}, 1000);
+                        }});
+                    }}
+                }});
+            }}
+
             // Initialize when DOM is ready
             if (document.readyState === 'loading') {{
                 document.addEventListener('DOMContentLoaded', function() {{
                     setupSearch();
                     setupCollapseExpand();
+                    setupPathCopy();
                 }});
             }} else {{
                 setupSearch();
                 setupCollapseExpand();
+                setupPathCopy();
             }}
         }})();
         </script>
@@ -324,10 +380,10 @@ class PfsSection(SimpleNamespace, MutableMapping[str, Any]):
             <button class="pfs-collapse-btn">▶ Collapse All</button>
         </div>
         """
-        content = self._render_pfs_html()
+        content = self._render_pfs_html(path="pfs")
         return f"{css_style}<div id='{container_id}'>{toolbar}<div class='pfs-content'>{content}</div></div>{search_script}"
 
-    def _render_pfs_html(self, level: int = 0) -> str:
+    def _render_pfs_html(self, level: int = 0, path: str = "pfs") -> str:
         """Recursively render PFS structure to HTML."""
         import uuid
         import html
@@ -338,6 +394,7 @@ class PfsSection(SimpleNamespace, MutableMapping[str, Any]):
                 # Render as collapsible section
                 section_id = f"pfs-{uuid.uuid4()}"
                 checked = "checked" if level < 2 else ""  # Auto-expand first 2 levels
+                child_path = f"{path}.{key}"
                 lines.append("<div class='pfs-item'>")
                 lines.append(f"<input type='checkbox' id='{section_id}' {checked}/>")
                 lines.append(
@@ -346,14 +403,15 @@ class PfsSection(SimpleNamespace, MutableMapping[str, Any]):
                     f"</label>"
                 )
                 lines.append("<div class='pfs-section-content'>")
-                lines.append(value._render_pfs_html(level + 1))
+                lines.append(value._render_pfs_html(level + 1, child_path))
                 lines.append("</div></div>")
             elif isinstance(value, PfsNonUniqueList):
                 # Handle non-unique keys
-                for item in value:
+                for idx, item in enumerate(value):
                     if isinstance(item, PfsSection):
                         section_id = f"pfs-{uuid.uuid4()}"
                         checked = "checked" if level < 2 else ""
+                        child_path = f"{path}.{key}[{idx}]"
                         lines.append("<div class='pfs-item'>")
                         lines.append(
                             f"<input type='checkbox' id='{section_id}' {checked}/>"
@@ -364,18 +422,20 @@ class PfsSection(SimpleNamespace, MutableMapping[str, Any]):
                             f"</label>"
                         )
                         lines.append("<div class='pfs-section-content'>")
-                        lines.append(item._render_pfs_html(level + 1))
+                        lines.append(item._render_pfs_html(level + 1, child_path))
                         lines.append("</div></div>")
                     else:
-                        lines.append(self._format_key_value_html(key, item))
+                        item_path = f"{path}.{key}[{idx}]"
+                        lines.append(self._format_key_value_html(key, item, item_path))
             else:
                 # Render as key-value pair
-                lines.append(self._format_key_value_html(key, value))
+                item_path = f"{path}.{key}"
+                lines.append(self._format_key_value_html(key, value, item_path))
 
         return "\n".join(lines)
 
-    def _format_key_value_html(self, key: str, value: Any) -> str:
-        """Format a single key-value pair as HTML."""
+    def _format_key_value_html(self, key: str, value: Any, path: str) -> str:
+        """Format a single key-value pair as HTML with path copy button."""
         import html
 
         key_html = f"<span class='pfs-key'>{html.escape(str(key))}</span>"
@@ -408,7 +468,11 @@ class PfsSection(SimpleNamespace, MutableMapping[str, Any]):
             case _:
                 value_html = html.escape(str(value))
 
-        return f"<div class='pfs-item'>{key_html} = {value_html}</div>"
+        # Add copy path button
+        path_btn = (
+            f"<span class='pfs-path-btn' data-path='{html.escape(path)}'>📋</span>"
+        )
+        return f"<div class='pfs-item'>{key_html} = {value_html}{path_btn}</div>"
 
     def _format_string_value(self, value: str) -> str:
         """Format a string value, detecting file paths."""
