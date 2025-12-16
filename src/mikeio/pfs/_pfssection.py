@@ -72,6 +72,139 @@ class PfsSection(SimpleNamespace, MutableMapping[str, Any]):
     def __repr__(self) -> str:
         return "\n".join(self._to_txt_lines())
 
+    def _repr_html_(self) -> str:
+        """Rich HTML representation for Jupyter notebooks."""
+        import uuid
+
+        css_style = """
+        <style>
+        .pfs-container {
+            font-family: monospace;
+            font-size: 12px;
+            line-height: 1.5;
+        }
+        .pfs-container input[type="checkbox"] {
+            display: none;
+        }
+        .pfs-container .pfs-section-toggle:before {
+            content: '▶ ';
+            font-size: 10px;
+            color: #666;
+            cursor: pointer;
+            display: inline-block;
+            width: 15px;
+        }
+        .pfs-container input:checked + .pfs-section-toggle:before {
+            content: '▼ ';
+        }
+        .pfs-container input ~ .pfs-section-content {
+            display: none;
+            margin-left: 20px;
+        }
+        .pfs-container input:checked ~ .pfs-section-content {
+            display: block;
+        }
+        .pfs-container .pfs-key {
+            color: #0066cc;
+            font-weight: bold;
+        }
+        .pfs-container .pfs-string {
+            color: #008000;
+        }
+        .pfs-container .pfs-number {
+            color: #ff6600;
+        }
+        .pfs-container .pfs-bool {
+            color: #cc00cc;
+        }
+        .pfs-container .pfs-section-name {
+            color: #0066cc;
+            font-weight: bold;
+        }
+        .pfs-container .pfs-item {
+            margin: 2px 0;
+        }
+        </style>
+        """
+
+        content = self._render_pfs_html()
+        return f"{css_style}<div class='pfs-container'>{content}</div>"
+
+    def _render_pfs_html(self, level: int = 0) -> str:
+        """Recursively render PFS structure to HTML."""
+        import uuid
+        import html
+
+        lines = []
+        for key, value in self.items():
+            if isinstance(value, PfsSection):
+                # Render as collapsible section
+                section_id = f"pfs-{uuid.uuid4()}"
+                checked = "checked" if level < 2 else ""  # Auto-expand first 2 levels
+                lines.append(f"<div class='pfs-item'>")
+                lines.append(f"<input type='checkbox' id='{section_id}' {checked}/>")
+                lines.append(
+                    f"<label class='pfs-section-toggle' for='{section_id}'>"
+                    f"<span class='pfs-section-name'>[{html.escape(str(key))}]</span>"
+                    f"</label>"
+                )
+                lines.append(f"<div class='pfs-section-content'>")
+                lines.append(value._render_pfs_html(level + 1))
+                lines.append(f"</div></div>")
+            elif isinstance(value, PfsNonUniqueList):
+                # Handle non-unique keys
+                for item in value:
+                    if isinstance(item, PfsSection):
+                        section_id = f"pfs-{uuid.uuid4()}"
+                        checked = "checked" if level < 2 else ""
+                        lines.append(f"<div class='pfs-item'>")
+                        lines.append(f"<input type='checkbox' id='{section_id}' {checked}/>")
+                        lines.append(
+                            f"<label class='pfs-section-toggle' for='{section_id}'>"
+                            f"<span class='pfs-section-name'>[{html.escape(str(key))}]</span>"
+                            f"</label>"
+                        )
+                        lines.append(f"<div class='pfs-section-content'>")
+                        lines.append(item._render_pfs_html(level + 1))
+                        lines.append(f"</div></div>")
+                    else:
+                        lines.append(self._format_key_value_html(key, item))
+            else:
+                # Render as key-value pair
+                lines.append(self._format_key_value_html(key, value))
+
+        return "\n".join(lines)
+
+    def _format_key_value_html(self, key: str, value: Any) -> str:
+        """Format a single key-value pair as HTML."""
+        import html
+
+        key_html = f"<span class='pfs-key'>{html.escape(str(key))}</span>"
+
+        if isinstance(value, bool):
+            value_html = f"<span class='pfs-bool'>{str(value).lower()}</span>"
+        elif isinstance(value, (int, float)):
+            value_html = f"<span class='pfs-number'>{value}</span>"
+        elif isinstance(value, str):
+            value_html = f"<span class='pfs-string'>'{html.escape(value)}'</span>"
+        elif isinstance(value, list):
+            # Format lists
+            formatted_items = []
+            for item in value:
+                if isinstance(item, bool):
+                    formatted_items.append(f"<span class='pfs-bool'>{str(item).lower()}</span>")
+                elif isinstance(item, (int, float)):
+                    formatted_items.append(f"<span class='pfs-number'>{item}</span>")
+                elif isinstance(item, str):
+                    formatted_items.append(f"<span class='pfs-string'>'{html.escape(item)}'</span>")
+                else:
+                    formatted_items.append(html.escape(str(item)))
+            value_html = ", ".join(formatted_items)
+        else:
+            value_html = html.escape(str(value))
+
+        return f"<div class='pfs-item'>{key_html} = {value_html}</div>"
+
     def __len__(self) -> int:
         return len(self.__dict__)
 
