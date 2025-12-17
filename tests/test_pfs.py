@@ -1316,3 +1316,44 @@ EndSect
     pfs.foo["bar/bat"] = {"n": 5, "s": "foo"}
     assert pfs.foo.bar.bat.n == 5
     assert pfs.foo.bar.bat.s == "foo"
+
+
+def test_multipolygon_quote_handling(tmp_path: Path) -> None:
+    """Test that MULTIPOLYGON strings don't accumulate quotes on read-write cycles.
+
+    Regression test for bug where single-quoted MULTIPOLYGON strings would
+    get an extra layer of quotes on each write-read cycle.
+    """
+    # Read a file with MULTIPOLYGON data
+    pfs1 = mikeio.read_pfs("tests/testdata/pfs/multipolygon.pfs")
+    shape1 = pfs1.CatchmentGroupPfs.Catchment_0.Shape
+
+    # The shape should NOT start with a quote (quotes should be stripped during parsing)
+    assert not shape1.startswith(
+        "'"
+    ), f"Shape should not start with quote, got: {shape1[:30]!r}"
+    assert shape1.startswith(
+        "MULTIPOLYGON"
+    ), f"Shape should start with MULTIPOLYGON, got: {shape1[:30]!r}"
+
+    # Write and read back
+    outfile = tmp_path / "multipolygon_out.pfs"
+    pfs1.write(outfile)
+    pfs2 = mikeio.read_pfs(outfile)
+    shape2 = pfs2.CatchmentGroupPfs.Catchment_0.Shape
+
+    # After write-read cycle, shape should be identical (no extra quotes)
+    assert shape2 == shape1, "Shape should remain identical after write-read cycle"
+    assert not shape2.startswith(
+        "'"
+    ), f"Shape should not start with quote after write-read, got: {shape2[:30]!r}"
+
+    # Write and read again to ensure it doesn't accumulate quotes
+    outfile2 = tmp_path / "multipolygon_out2.pfs"
+    pfs2.write(outfile2)
+    pfs3 = mikeio.read_pfs(outfile2)
+    shape3 = pfs3.CatchmentGroupPfs.Catchment_0.Shape
+
+    assert (
+        shape3 == shape1
+    ), "Shape should remain identical after multiple write-read cycles"
