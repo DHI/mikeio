@@ -1137,7 +1137,7 @@ def _reduce_time(
     dfs_i: DfsFile,
     funcs: Sequence[Callable[[np.ndarray, np.ndarray], np.ndarray]],
     item_numbers: Sequence[int],
-    initial: float | list[float] | None = None,
+    initial: float | list[float | None] | None = None,
     start: int | None = None,
     stop: int | None = None,
     skipna: bool = True,
@@ -1241,7 +1241,7 @@ def reduce(
     | Callable[[np.ndarray, np.ndarray], np.ndarray],
     items: Sequence[int | str] | None = None,
     function_labels: Sequence[str] | None = None,
-    initial: float | list[float] | None = None,
+    initial: float | list[float | None] | None = None,
     skipna: bool = True,
 ) -> None:
     """This function computes multiple temporal reductions (e.g., min, max, sum)
@@ -1259,7 +1259,7 @@ def reduce(
         Process only selected items, by number (0-based) or name, by default: all
     function_labels: Sequence[str] | None, optional
         Labels for the functions, by default None. If None, function names will be used.
-    initial: float | list[float] | None, optional
+    initial: float | list[float | None] | None, optional
         Initial value(s) for the accumulators. Can be:
         - None: Initialize with first timestep data (default)
         - float: Same initial value for all functions
@@ -1328,9 +1328,9 @@ def reduce(
 
 
 def statistics(
-    infilename: str,
-    outfilename: str,
-    items: Sequence[int | str] | None = None,
+    infilename: str | pathlib.Path,
+    outfilename: str | pathlib.Path,
+    items: Sequence[int | str] | int | None = None,
     from_ts: int | None = None,
     to_ts: int | None = None,
 ) -> None:
@@ -1362,10 +1362,16 @@ def statistics(
     if is_layered_dfsu:  # item 0 is Z coordinate in layered dfsu
         item_numbers = [it + 1 for it in item_numbers]
 
-    def count(x, y):
-        return x + 1
+    def _count(acc: np.ndarray, data: np.ndarray) -> np.ndarray:
+        """Count timesteps by incrementing accumulator, ignoring data."""
+        return acc + 1
 
-    funcs = [np.minimum, np.maximum, np.add, count]
+    funcs: list[Callable[[np.ndarray, np.ndarray], np.ndarray]] = [
+        np.minimum,
+        np.maximum,
+        np.add,
+        _count,
+    ]
     inits = [None, None, 0.0, 0.0]
 
     # =========
