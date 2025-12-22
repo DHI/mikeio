@@ -5,9 +5,19 @@ from __future__ import annotations
 import functools
 import inspect
 import warnings
-from typing import Callable, TypeVar
+from typing import Any, Callable, TypeVar, cast, overload
 
-F = TypeVar("F", bound=Callable)
+F = TypeVar("F", bound=Callable[..., Any])
+
+
+@overload
+def _deprecate_positional_args(func: F) -> F: ...
+
+
+@overload
+def _deprecate_positional_args(
+    func: None = None, *, start_after: str | None = None
+) -> Callable[[F], F]: ...
 
 
 def _deprecate_positional_args(
@@ -100,7 +110,7 @@ def _deprecate_positional_args(
         num_positional_allowed = len(positional_params)
 
         @functools.wraps(f)
-        def wrapper(*args, **kwargs):
+        def wrapper(*args: Any, **kwargs: Any) -> Any:
             # Check if too many positional arguments were passed
             num_args_passed = len(args)
 
@@ -131,7 +141,7 @@ def _deprecate_positional_args(
 
             return f(*args, **kwargs)
 
-        return wrapper
+        return cast(F, wrapper)
 
     # Handle both @decorator and @decorator(...) syntax
     if func is None:
