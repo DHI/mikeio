@@ -683,10 +683,6 @@ class _TimeInfo:
         elif isinstance(start, float):
             start_sec = start
         elif isinstance(start, str):
-            parts = start.split(",")
-            start = parts[0]
-            if len(parts) == 2:
-                end = parts[1]
             start = pd.to_datetime(start)
 
         if isinstance(start, datetime):
