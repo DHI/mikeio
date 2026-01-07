@@ -103,6 +103,7 @@ class Dfs0:
 
         dfs = DfsFileFactory.DfsGenericOpen(str(path))
         self._dfs = dfs
+        self._title = dfs.FileInfo.FileTitle
 
         # Read items
         self._items = _get_item_info(dfs.ItemInfo)
@@ -303,6 +304,11 @@ class Dfs0:
             return self.read().time
         else:
             raise ValueError("Time axis type not supported")
+
+    @property
+    def title(self) -> str:
+        """File title."""
+        return self._title
 
     # ======================
     # Deprecated in 2.5.0
