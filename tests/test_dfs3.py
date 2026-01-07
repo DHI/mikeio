@@ -279,3 +279,27 @@ def test_append_dfs3(tmp_path: Path) -> None:
     dfs = mikeio.Dfs3(new_fp)
 
     dfs.append(ds2)
+
+
+def test_read_with_title() -> None:
+    sourcefilename = "tests/testdata/single_layer.dfs3"
+    dfs = mikeio.Dfs3(sourcefilename)
+    assert hasattr(dfs, "title")
+    assert isinstance(dfs.title, str)
+
+
+def test_write_with_title(tmp_path: Path) -> None:
+    sourcefilename = "tests/testdata/single_layer.dfs3"
+    fp = tmp_path / "with_title.dfs3"
+
+    # Read source file
+    dfs = mikeio.Dfs3(sourcefilename)
+    ds = dfs.read(items=[0], keepdims=True)
+
+    # Write with custom title
+    custom_title = "Test DFS3 with Custom Title"
+    ds.to_dfs(fp, title=custom_title)
+
+    # Read back and verify title
+    newdfs = mikeio.Dfs3(fp)
+    assert newdfs.title == custom_title

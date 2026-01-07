@@ -151,6 +151,9 @@ class Dfs2(_Dfs123):
             is_spectral=is_spectral,
             is_vertical=is_vertical,
         )
+
+        self._title = dfs.FileInfo.FileTitle
+
         dfs.Close()
         self._validate_no_orientation_in_geo()
 
@@ -327,3 +330,8 @@ class Dfs2(_Dfs123):
     def ny(self) -> int:
         """Number of values in the y-direction."""
         return self.geometry.ny
+
+    @property
+    def title(self) -> str:
+        """Title of the dfs2 file."""
+        return self._title
