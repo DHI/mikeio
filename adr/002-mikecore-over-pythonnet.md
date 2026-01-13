@@ -5,7 +5,7 @@
 
 ## Context
 
-MIKE IO originally used pythonnet to call .NET DFS libraries. This caused cross-platform issues (Linux/macOS) and delays supporting new Python versions.
+MIKE IO originally used pythonnet to call .NET DFS libraries. This caused cross-platform issues (Linux support) and delays supporting new Python versions.
 
 ## Decision
 
@@ -18,7 +18,7 @@ Create mikecore-python: rewrite the core DFS I/O functionality from .NET to C/C+
 
 ## Consequences
 
-- Cross-platform support (Windows, Linux, macOS)
+- Cross-platform support (Windows, Linux)
 - Faster adoption of new Python versions
 - Simpler installation via pip
 - Significant upfront investment to rewrite core library in C/C++
