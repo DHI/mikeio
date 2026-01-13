@@ -25,4 +25,3 @@ These classes are composed into Dataset/DataArray rather than inherited.
 - Geometry can be shared across multiple datasets
 - Easier to test geometry operations in isolation
 - File readers become simpler (focused on I/O)
-- Enables downstream libraries (e.g., ModelSkill) to work with geometries directly
