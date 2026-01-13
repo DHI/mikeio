@@ -587,7 +587,7 @@ def test_modify_selected_variable() -> None:
 
 def test_flipud() -> None:
     nt = 2
-    d = np.ones((nt, 100, 30))
+    d = np.arange(nt * 100 * 30).reshape((nt, 100, 30)).astype(float)
     time = pd.date_range("2000-1-2", freq="h", periods=nt)
     items = [ItemInfo("Foo")]
     ds = mikeio.Dataset.from_numpy([d], time, items)
