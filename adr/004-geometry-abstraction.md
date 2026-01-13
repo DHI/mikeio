@@ -1,4 +1,4 @@
-# ADR-003: Geometry Abstraction
+# ADR-004: Geometry Abstraction
 
 **Status:** Accepted
 **Date:** 2022 (evolved through v2.0)

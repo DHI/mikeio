@@ -1,4 +1,4 @@
-# ADR-004: Factory Pattern for File Opening
+# ADR-005: Factory Pattern for File Opening
 
 **Status:** Accepted
 **Date:** 2020

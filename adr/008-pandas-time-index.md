@@ -1,4 +1,4 @@
-# ADR-007: Use pandas for Time Handling
+# ADR-008: Use pandas for Time Handling
 
 **Status:** Accepted
 **Date:** 2020

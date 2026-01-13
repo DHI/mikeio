@@ -1,4 +1,4 @@
-# ADR-006: PFS Module
+# ADR-007: PFS Module
 
 **Status:** Accepted
 **Date:** 2020

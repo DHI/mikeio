@@ -1,4 +1,4 @@
-# ADR-005: Matplotlib-Style Plotting API
+# ADR-006: Matplotlib-Style Plotting API
 
 **Status:** Accepted
 **Date:** 2021

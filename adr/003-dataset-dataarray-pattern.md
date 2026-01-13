@@ -1,4 +1,4 @@
-# ADR-002: Dataset and DataArray Pattern
+# ADR-003: Dataset and DataArray Pattern
 
 **Status:** Accepted
 **Date:** 2020-10
