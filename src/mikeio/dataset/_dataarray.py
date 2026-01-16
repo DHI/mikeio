@@ -124,7 +124,7 @@ class _DataArraySpectrumToHm0:
             data=Hm0,
             time=self.da.time,
             item=item,
-            dims=dims,
+            # dims=dims,
             geometry=geometry,
             dt=self.da._dt,
         )

@@ -116,7 +116,6 @@ class Dataset:
         *,
         geometry: Any | None = None,
         zn: NDArray[np.floating] | None = None,
-        dims: tuple[str, ...] | None = None,
         validate: bool = True,
         dt: float = 1.0,
     ) -> Dataset:
@@ -134,8 +133,6 @@ class Dataset:
             Geometry of the DataArrays, by default None
         zn: NDArray[np.floating], optional
             Z-coordinates of the DataArrays, by default None
-        dims: tuple[str, ...], optional
-            Named dimensions of the DataArrays, by default None
         validate: bool, optional
             Validate the DataArrays, by default True
         dt: float, optional
@@ -146,7 +143,7 @@ class Dataset:
 
         data_vars = {
             it.name: DataArray(
-                data=dd, time=time, item=it, geometry=geometry, zn=zn, dims=dims, dt=dt
+                data=dd, time=time, item=it, geometry=geometry, zn=zn, dt=dt
             )
             for dd, it in zip(data, item_infos)
         }
@@ -1280,7 +1277,6 @@ class Dataset:
                 time=self.time,
                 item=item,
                 geometry=self.geometry,
-                dims=self.dims,
                 zn=self._zn,
             )
 
@@ -1384,7 +1380,6 @@ class Dataset:
                     time=self.time,
                     item=item,
                     geometry=self.geometry,
-                    dims=self.dims,
                     zn=self._zn,
                 )
                 return Dataset([da], validate=False)

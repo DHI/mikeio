@@ -236,19 +236,11 @@ class Dfs2(_Dfs123):
 
         time = pd.to_datetime(t_seconds, unit="s", origin=self.start_time)
 
-        dims: tuple[str, ...]
-
-        if single_time_selected and not keepdims:
-            dims = ("y", "x")
-        else:
-            dims = ("time", "y", "x")
-
         return Dataset.from_numpy(
             data_list,
             time=time,
             items=items,
             geometry=geometry,
-            dims=dims,
             validate=False,
         )
 

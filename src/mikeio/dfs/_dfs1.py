@@ -140,12 +140,9 @@ class Dfs1(_Dfs123):
         single_time_selected, time_steps = _valid_timesteps(self._dfs.FileInfo, time)
         nt = len(time_steps) if not single_time_selected else 1
         shape: tuple[int, ...] = (nt, self.nx)
-        dims = self.geometry.dims
 
         if single_time_selected and not keepdims:
             shape = shape[1:]
-        else:
-            dims = ("time", *dims)
 
         data_list: list[np.ndarray] = [
             np.ndarray(shape=shape, dtype=dtype) for _ in range(n_items)
@@ -179,7 +176,6 @@ class Dfs1(_Dfs123):
             data=data_list,
             time=time,
             items=items,
-            dims=tuple(dims),
             geometry=self.geometry,
             validate=False,
             dt=self._timestep,

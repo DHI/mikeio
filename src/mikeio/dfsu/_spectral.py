@@ -400,7 +400,6 @@ class DfsuSpectral:
             time=time,
             items=items,
             geometry=geometry,
-            dims=dims,
             validate=False,
         )
 
