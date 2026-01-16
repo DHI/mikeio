@@ -213,13 +213,13 @@ def test_dataarray_init_2d() -> None:
     assert da.ndim == 2
     assert da.dims == ("y", "x")
 
-    # x, y swapped
-    dims = ("x", "y")
+    # dims are now derived from geometry, not from passed dims parameter
+    # GeometryUndefined guesses ("y", "x") for 2D data
     data2d = np.zeros([nx, ny]) + 0.1
-    da = mikeio.DataArray(data=data2d, time="2018", dims=dims)
+    da = mikeio.DataArray(data=data2d, time="2018")
     assert da.n_timesteps == 1
     assert da.ndim == 2
-    assert da.dims == dims
+    assert da.dims == ("y", "x")
 
 
 def test_dataarray_init_wrong_dim() -> None:
@@ -237,13 +237,8 @@ def test_dataarray_init_wrong_dim() -> None:
     with pytest.raises(ValueError):
         mikeio.DataArray(data=data2d, time=time_long)
 
-    # time must be first dim
-    dims = ("x", "y", "time")
+    # time must be first dim - data shape with time not in first position
     time = pd.date_range(start="2000-01-01", freq="s", periods=nt)
-    with pytest.raises(ValueError):
-        mikeio.DataArray(data=data2d, time=time, dims=dims)
-
-    # time must be first dim
     data2d = np.zeros([ny, nt, nx]) + 0.1
     with pytest.raises(ValueError):
         mikeio.DataArray(data=data2d, time=time)
@@ -1017,7 +1012,7 @@ def test_dataarray_weigthed_average() -> None:
 
     da2 = da.average(weights=area, axis=1)
 
-    assert isinstance(da2.geometry, mikeio.spatial.GeometryUndefined)
+    assert isinstance(da2.geometry, mikeio.spatial.Geometry0D)
     assert da2.dims == ("time",)
 
 
@@ -1131,8 +1126,8 @@ def test_da_quantile_axis0(da2: DataArray) -> None:
 
     daqs = da2.quantile(q=0.345, axis="space")
     assert isinstance(
-        daqs.geometry, mikeio.spatial.GeometryUndefined
-    )  # Aggregating over space doesn't create a well defined geometry
+        daqs.geometry, mikeio.spatial.Geometry0D
+    )  # Aggregating over space returns Geometry0D (time series)
     assert isinstance(da2.geometry, mikeio.Grid1D)  # But this one is intact
     assert len(daqs.time) == 10
     assert daqs.ndim == 1

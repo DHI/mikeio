@@ -36,6 +36,7 @@ if TYPE_CHECKING:
 
 
 from ..spatial import (
+    Geometry0D,
     Grid1D,
     Grid2D,
     Grid3D,
@@ -195,13 +196,21 @@ class DataArray:
         self._dt = dt
 
         geometry = GeometryUndefined() if geometry is None else geometry
-        self.dims = self._parse_dims(dims, geometry)
+
+        if dims is not None:
+            warnings.warn(
+                "dims parameter is deprecated and will be removed in v4.0. "
+                "Dimensions are derived from geometry.",
+                FutureWarning,
+                stacklevel=2,
+            )
+
+        # geometries are very diverse without a common interface
+        self.geometry: Any = geometry
 
         self._check_time_data_length(self.time)
 
         self.item = self._parse_item(item=item, name=name, type=type, unit=unit)
-        # geometries are very diverse without a common interface
-        self.geometry: Any = geometry
         self._zn = self._parse_zn(zn, self.geometry, self.n_timesteps)
         self._set_spectral_attributes(geometry)
         self.plot = self._get_plotter_by_geometry()
@@ -215,46 +224,8 @@ class DataArray:
                 raise ValueError("Data must be convertible to a numpy array")
         return data
 
-    def _parse_dims(
-        self, dims: Sequence[str] | None, geometry: GeometryType
-    ) -> tuple[str, ...]:
-        if dims is None:
-            return self._guess_dims(self.ndim, self.shape, self.n_timesteps, geometry)
-        else:
-            if self.ndim != len(dims):
-                raise ValueError("Number of named dimensions does not equal data ndim")
-            if ("time" in dims) and dims[0] != "time":
-                raise ValueError("time must be first dimension if present!")
-            if (self.n_timesteps > 1) and ("time" not in dims):
-                raise ValueError(
-                    f"time missing from named dimensions {dims}! (number of timesteps: {self.n_timesteps})"
-                )
-            return tuple(dims)
-
-    @staticmethod
-    def _guess_dims(
-        ndim: int, shape: tuple[int, ...], n_timesteps: int, geometry: GeometryType
-    ) -> tuple[str, ...]:
-        # This is not very robust, but is probably a reasonable guess
-        time_is_first = (n_timesteps > 1) or (shape[0] == 1 and n_timesteps == 1)
-        dims = ["time"] if time_is_first else []
-        ndim_no_time = ndim if (len(dims) == 0) else ndim - 1
-
-        if isinstance(geometry, GeometryUndefined):
-            DIMS_MAPPING: Mapping[int, Sequence[Any]] = {
-                0: [],
-                1: ["x"],
-                2: ["y", "x"],
-                3: ["z", "y", "x"],
-            }
-            spdims = DIMS_MAPPING[ndim_no_time]
-        else:
-            spdims = geometry.default_dims
-        dims.extend(spdims)  # type: ignore
-        return tuple(dims)
-
     def _check_time_data_length(self, time: Sized) -> None:
-        if "time" in self.dims and len(time) != self._values.shape[0]:
+        if self._has_time_axis and len(time) != self._values.shape[0]:
             raise ValueError(
                 f"Number of timesteps ({len(time)}) does not fit with data shape {self.values.shape}"
             )
@@ -466,7 +437,34 @@ class DataArray:
 
     @property
     def _has_time_axis(self) -> bool:
-        return self.dims[0][0] == "t"
+        """Check if data has time as first axis based on shape and n_timesteps."""
+        if self.ndim == 0:
+            return False
+        n_timesteps = self.n_timesteps
+        if n_timesteps > 1:
+            return True
+        # For single timestep, check if data has extra dimension beyond spatial
+        if isinstance(self.geometry, GeometryUndefined):
+            # For undefined geometry, follow original convention: time if shape[0] == 1
+            return self.shape[0] == 1
+        n_spatial = len(self.geometry.spatial_dims)
+        return self.ndim > n_spatial
+
+    @property
+    def dims(self) -> tuple[str, ...]:
+        """Dimension names derived from geometry."""
+        dims: list[str] = ["time"] if self._has_time_axis else []
+        ndim_no_time = self.ndim - len(dims)
+
+        if isinstance(self.geometry, GeometryUndefined):
+            # Fallback for deprecated GeometryUndefined - guess dims from shape
+            DIMS_GUESS = {0: (), 1: ("x",), 2: ("y", "x"), 3: ("z", "y", "x")}
+            spatial_dims = DIMS_GUESS.get(ndim_no_time, ())
+        else:
+            spatial_dims = self.geometry.spatial_dims
+
+        dims.extend(spatial_dims)
+        return tuple(dims)
 
     def fillna(self, value: float = 0.0) -> DataArray:
         """Fill NA/NaN value.
@@ -547,11 +545,20 @@ class DataArray:
     def squeeze(self) -> DataArray:
         """Remove axes of length 1.
 
+        .. deprecated:: 3.1
+            squeeze() will be removed in v4.0. Use isel() to select specific indices.
+
         Returns
         -------
         DataArray
 
         """
+        warnings.warn(
+            "squeeze() is deprecated and will be removed in v4.0. "
+            "Use isel() to select specific indices.",
+            FutureWarning,
+            stacklevel=2,
+        )
         data = np.squeeze(self.values)
 
         dims = [d for s, d in zip(self.shape, self.dims) if s != 1]
@@ -1635,12 +1642,24 @@ class DataArray:
             warnings.simplefilter("ignore", category=RuntimeWarning)
             data = func(self.to_numpy(), axis=axis, keepdims=False, **kwargs)
 
-        if axis == 0 and "time" in self.dims:  # time
+        if axis == 0 and "time" in self.dims and len(axes) == 1:
+            # Time-only aggregation - preserve geometry
             geometry = self.geometry
             zn = None if self._zn is None else self._zn[0]
-
         else:
-            geometry = GeometryUndefined()
+            # Spatial aggregation (possibly including time) - reduce geometry
+            reduced_axes = tuple(self.dims[i] for i in axes)
+            # Filter out "time" - geometry.reduce() only handles spatial axes
+            spatial_reduced_axes = tuple(ax for ax in reduced_axes if ax != "time")
+
+            if len(spatial_reduced_axes) == 0:
+                # Only time was reduced, keep geometry
+                geometry = self.geometry
+            elif hasattr(self.geometry, "reduce"):
+                geometry = self.geometry.reduce(spatial_reduced_axes)
+            else:
+                # Fallback for geometries without reduce method
+                geometry = Geometry0D()
             zn = None
 
         return DataArray(
@@ -1744,8 +1763,17 @@ class DataArray:
 
         if np.isscalar(q):
             qdat = func(self.values, q=q, axis=axis, **kwargs)
-            geometry = self.geometry if axis == 0 else GeometryUndefined()
-            zn = self._zn if axis == 0 else None
+            if axis == 0 and "time" in self.dims:
+                geometry = self.geometry
+                zn = self._zn
+            else:
+                # Spatial aggregation - reduce geometry
+                reduced_axis = self.dims[axis]
+                if hasattr(self.geometry, "reduce"):
+                    geometry = self.geometry.reduce(reduced_axis)
+                else:
+                    geometry = Geometry0D()
+                zn = None
 
             dims = tuple([d for i, d in enumerate(self.dims) if i != axis])
             item = deepcopy(self.item)

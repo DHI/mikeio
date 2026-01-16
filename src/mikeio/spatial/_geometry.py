@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+import warnings
 
 from dataclasses import dataclass
 from typing import Any, Sequence
@@ -80,17 +81,62 @@ class _Geometry(ABC):
 
     @property
     @abstractmethod
-    def default_dims(self) -> tuple[str, ...]:
+    def spatial_dims(self) -> tuple[str, ...]:
         pass
 
 
 class GeometryUndefined(_Geometry):
+    """Undefined geometry placeholder.
+
+    .. deprecated:: 3.1
+        GeometryUndefined will be removed in v4.0. Use Geometry0D for time series data.
+    """
+
+    def __init__(self, projection: str = "LONG/LAT") -> None:
+        warnings.warn(
+            "GeometryUndefined is deprecated and will be removed in v4.0. "
+            "Use Geometry0D for time series data.",
+            FutureWarning,
+            stacklevel=2,
+        )
+        super().__init__(projection)
+
     def __repr__(self) -> str:
         return "GeometryUndefined()"
 
     @property
-    def default_dims(self) -> tuple[str, ...]:
+    def spatial_dims(self) -> tuple[str, ...]:
         raise NotImplementedError()
+
+
+class Geometry0D(_Geometry):
+    """Zero-dimensional geometry for time series without spatial location.
+
+    This geometry represents data with no spatial dimensions, typically
+    time series data that will be written to dfs0 format.
+
+    Parameters
+    ----------
+    projection : str, optional
+        Projection string, by default "LONG/LAT"
+
+    Examples
+    --------
+    >>> g = Geometry0D()
+    >>> g.spatial_dims
+    ()
+
+    """
+
+    def __init__(self, projection: str = "LONG/LAT") -> None:
+        super().__init__(projection)
+
+    def __repr__(self) -> str:
+        return "Geometry0D()"
+
+    @property
+    def spatial_dims(self) -> tuple[str, ...]:
+        return ()
 
 
 class GeometryPoint2D(_Geometry):
@@ -100,7 +146,7 @@ class GeometryPoint2D(_Geometry):
         self.y = y
 
     @property
-    def default_dims(self) -> tuple[str, ...]:
+    def spatial_dims(self) -> tuple[str, ...]:
         return ()
 
     def __repr__(self) -> str:
@@ -132,7 +178,7 @@ class GeometryPoint3D(_Geometry):
         return f"GeometryPoint3D(x={self.x}, y={self.y}, z={self.z})"
 
     @property
-    def default_dims(self) -> tuple[str, ...]:
+    def spatial_dims(self) -> tuple[str, ...]:
         return ()
 
     @property

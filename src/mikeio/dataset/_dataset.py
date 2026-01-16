@@ -30,6 +30,7 @@ from ._dataarray import DataArray
 from .._time import _get_time_idx_list, _n_selected_timesteps
 from ..eum import EUMType, EUMUnit, ItemInfo
 from ..spatial import (
+    Geometry0D,
     GeometryFM2D,
     GeometryPoint2D,
     GeometryPoint3D,
@@ -383,11 +384,20 @@ class Dataset:
     def squeeze(self) -> Dataset:
         """Remove axes of length 1.
 
+        .. deprecated:: 3.1
+            squeeze() will be removed in v4.0. Use isel() to select specific indices.
+
         Returns
         -------
         Dataset
 
         """
+        warnings.warn(
+            "squeeze() is deprecated and will be removed in v4.0. "
+            "Use isel() to select specific indices.",
+            FutureWarning,
+            stacklevel=2,
+        )
         res = {name: da.squeeze() for name, da in self._data_vars.items()}
 
         return Dataset(data=res, validate=False)
@@ -1755,7 +1765,12 @@ class Dataset:
         filename = str(filename)
 
         match self.geometry:
-            case GeometryPoint2D() | GeometryPoint3D() | GeometryUndefined():
+            case (
+                Geometry0D()
+                | GeometryPoint2D()
+                | GeometryPoint3D()
+                | GeometryUndefined()
+            ):
                 if self.ndim == 0 or (self.ndim == 1 and self[0]._has_time_axis):
                     self._validate_extension(filename, ".dfs0")
                     write_dfs0(filename, self, **kwargs)

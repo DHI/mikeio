@@ -29,7 +29,7 @@ from ._FM_plot import (
     _set_xy_label_by_projection,  # TODO remove
     _to_polygons,  # TODO remove
 )
-from ._geometry import GeometryPoint2D, _Geometry
+from ._geometry import Geometry0D, GeometryPoint2D, _Geometry
 
 from ._grid_geometry import Grid2D
 from ._distance import xy_to_bbox
@@ -349,7 +349,7 @@ class _GeometryFM(_Geometry):
         self._element_ids = new_element_ids
 
     @property
-    def default_dims(self) -> tuple[str, ...]:
+    def spatial_dims(self) -> tuple[str, ...]:
         return ("element",)
 
     @property
@@ -1151,3 +1151,30 @@ class GeometryFM2D(_GeometryFM):
         builder.SetEumQuantity(quantity)
         newMesh = builder.CreateMesh()
         newMesh.Write(outfilename)
+
+    def reduce(self, axis: str | tuple[str, ...]) -> Geometry0D:
+        """Return reduced geometry after aggregation over axis.
+
+        Parameters
+        ----------
+        axis : str or tuple of str
+            Axis to reduce over. For GeometryFM2D, must be "element".
+
+        Returns
+        -------
+        Geometry0D
+            Zero-dimensional geometry for the aggregated result.
+
+        Examples
+        --------
+        >>> g.reduce("element")
+        Geometry0D()
+
+        """
+        if isinstance(axis, str):
+            axis = (axis,)
+        if set(axis) != {"element"}:
+            raise ValueError(
+                f"Cannot reduce GeometryFM2D over {axis}, only 'element' is valid"
+            )
+        return Geometry0D(projection=self.projection)
