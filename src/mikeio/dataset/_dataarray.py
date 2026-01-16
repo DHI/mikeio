@@ -99,7 +99,6 @@ class _DataArraySpectrumToHm0:
             tail,
         )
         Hm0 = 4 * np.sqrt(m0)
-        dims = tuple([d for d in self.da.dims if d not in ("frequency", "direction")])
         item = ItemInfo(EUMType.Significant_wave_height)
         g = self.da.geometry
         geometry: Any = GeometryUndefined()
