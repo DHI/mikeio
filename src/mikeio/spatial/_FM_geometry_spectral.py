@@ -33,7 +33,7 @@ class GeometryFMPointSpectrum(_Geometry):
         self.y = y
 
     @property
-    def default_dims(self) -> tuple[str, ...]:
+    def spatial_dims(self) -> tuple[str, ...]:
         if self.directions is None:
             return ("frequency",)
         else:
@@ -129,9 +129,22 @@ class _GeometryFMSpectrum(_GeometryFM):
         """Type is spectral dfsu (point, line or area spectrum)."""
         return True
 
+    def _spectral_dims(self, location_dim: str) -> tuple[str, ...]:
+        """Build spectral dims in correct order: location, direction, frequency."""
+        dims: list[str] = [location_dim]
+        if self.directions is not None:
+            dims.append("direction")
+        if self.frequencies is not None:
+            dims.append("frequency")
+        return tuple(dims)
+
 
 class GeometryFMAreaSpectrum(_GeometryFMSpectrum, GeometryFM2D):
     """Flexible mesh area spectrum geometry."""
+
+    @property
+    def spatial_dims(self) -> tuple[str, ...]:
+        return self._spectral_dims("element")
 
     def isel(  # type: ignore
         self, idx: Sequence[int], **kwargs: Any
@@ -185,6 +198,10 @@ class GeometryFMAreaSpectrum(_GeometryFMSpectrum, GeometryFM2D):
 
 class GeometryFMLineSpectrum(_GeometryFMSpectrum):
     """Flexible mesh line spectrum geometry."""
+
+    @property
+    def spatial_dims(self) -> tuple[str, ...]:
+        return self._spectral_dims("node")
 
     @staticmethod
     def create_dummy_coordinates(

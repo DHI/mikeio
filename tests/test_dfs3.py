@@ -87,7 +87,7 @@ def test_dfs3_read_multiple_layers() -> None:
     assert ds.geometry.nz == 4
     assert isinstance(ds.geometry, Grid3D)
 
-    with pytest.warns(UserWarning):
+    with pytest.warns(FutureWarning, match="Non-equidistant"):
         ds = mikeio.read(fn, layers=[1, 5, -3])
     assert isinstance(ds.geometry, GeometryUndefined)
     assert ds.shape == (2, 3, 17, 21)
