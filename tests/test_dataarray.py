@@ -544,11 +544,12 @@ def test_da_isel_empty(da_grid2d: DataArray) -> None:
 def test_da_isel_space_multiple_elements(da_grid2d: DataArray) -> None:
     assert da_grid2d.geometry.nx == 7
     assert da_grid2d.geometry.ny == 14
-    da_sel = da_grid2d.isel(y=(0, 1, 2, 10))
-    assert da_sel.dims == ("time", "y", "x")
-    assert da_sel.shape == (10, 4, 7)
-    assert isinstance(da_sel.geometry, mikeio.spatial.GeometryUndefined)
 
+    # Non-equidistant selection raises ValueError (DFS format requires equidistant grids)
+    with pytest.raises(ValueError, match="Non-equidistant"):
+        da_grid2d.isel(y=(0, 1, 2, 10))
+
+    # Equidistant selection works
     da_sel = da_grid2d.isel(x=slice(None, 3))
     assert da_sel.dims == ("time", "y", "x")
     assert da_sel.shape == (10, 14, 3)

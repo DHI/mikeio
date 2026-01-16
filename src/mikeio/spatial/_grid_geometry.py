@@ -1,7 +1,6 @@
 from __future__ import annotations
 from functools import cached_property
 from pathlib import Path
-import warnings
 from typing import Any, Sequence, TYPE_CHECKING, overload
 from dataclasses import dataclass
 import numpy as np
@@ -905,15 +904,11 @@ class Grid2D(_Geometry):
             assert isinstance(idx, np.ndarray)
             d = np.diff(idx)
             if np.any(d < 1) or not np.allclose(d, d[0]):
-                # non-equidistant grid is not supported by Dfs2
-                warnings.warn(
-                    "Non-equidistant selection is deprecated and will raise "
-                    "ValueError in v4.0. DFS format requires equidistant grids. "
-                    "Use .values for raw numpy array if non-equidistant data is needed.",
-                    FutureWarning,
-                    stacklevel=2,
+                raise ValueError(
+                    "Non-equidistant selection not supported. "
+                    "DFS format requires equidistant grids. "
+                    "Use .values for raw numpy array if non-equidistant data is needed."
                 )
-                return GeometryUndefined()
             else:
                 ii = idx if axis == 1 else None
                 jj = idx if axis == 0 else None
@@ -1322,19 +1317,15 @@ class Grid3D(_Geometry):
             assert isinstance(idx, np.ndarray), "idx must be a numpy array"
             d = np.diff(idx)
             if np.any(d < 1) or not np.allclose(d, d[0]):
-                warnings.warn(
-                    "Non-equidistant selection is deprecated and will raise "
-                    "ValueError in v4.0. DFS format requires equidistant grids. "
-                    "Use .values for raw numpy array if non-equidistant data is needed.",
-                    FutureWarning,
-                    stacklevel=2,
+                raise ValueError(
+                    "Non-equidistant selection not supported. "
+                    "DFS format requires equidistant grids. "
+                    "Use .values for raw numpy array if non-equidistant data is needed."
                 )
-                return GeometryUndefined()
-            else:
-                ii = idx if axis == 2 else None
-                jj = idx if axis == 1 else None
-                kk = idx if axis == 0 else None
-                return self._index_to_Grid3D(ii, jj, kk)
+            ii = idx if axis == 2 else None
+            jj = idx if axis == 1 else None
+            kk = idx if axis == 0 else None
+            return self._index_to_Grid3D(ii, jj, kk)
 
         if axis == 0:
             # z is the first axis! return x-y Grid2D
@@ -1392,46 +1383,43 @@ class Grid3D(_Geometry):
             or (np.any(dj < 1) or not np.allclose(dj, dj[0]))
             or (np.any(dk < 1) or not np.allclose(dk, dk[0]))
         ):
-            warnings.warn(
-                "Non-equidistant selection is deprecated and will raise "
-                "ValueError in v4.0. DFS format requires equidistant grids. "
-                "Use .values for raw numpy array if non-equidistant data is needed.",
-                FutureWarning,
-                stacklevel=2,
+            raise ValueError(
+                "Non-equidistant selection not supported. "
+                "DFS format requires equidistant grids. "
+                "Use .values for raw numpy array if non-equidistant data is needed."
             )
-            return GeometryUndefined()
+
+        dx = self.dx * di[0]
+        dy = self.dy * dj[0]
+        dz = self.dz * dk[0]
+        x0 = self._x0 + (self.x[ii[0]] - self.x[0])
+        y0 = self._y0 + (self.y[jj[0]] - self.y[0])
+        z0 = self._z0 + (self.z[kk[0]] - self.z[0])
+        if self._is_rotated:
+            # rotated => most be projected
+            cart = Cartography.CreateProjOrigin(
+                self.projection, *self.origin, self.orientation
+            )
+            origin = cart.Xy2Proj(ii[0], jj[0])
         else:
-            dx = self.dx * di[0]
-            dy = self.dy * dj[0]
-            dz = self.dz * dk[0]
-            x0 = self._x0 + (self.x[ii[0]] - self.x[0])
-            y0 = self._y0 + (self.y[jj[0]] - self.y[0])
-            z0 = self._z0 + (self.z[kk[0]] - self.z[0])
-            if self._is_rotated:
-                # rotated => most be projected
-                cart = Cartography.CreateProjOrigin(
-                    self.projection, *self.origin, self.orientation
-                )
-                origin = cart.Xy2Proj(ii[0], jj[0])
-            else:
-                origin = (self.origin[0] + x0, self.origin[1] + y0)
+            origin = (self.origin[0] + x0, self.origin[1] + y0)
 
-            x0, y0 = (0.0, 0.0)
+        x0, y0 = (0.0, 0.0)
 
-            return Grid3D(
-                x0=x0,
-                y0=y0,
-                z0=z0,
-                dx=dx,
-                dy=dy,
-                dz=dz,
-                nx=len(ii),
-                ny=len(jj),
-                nz=len(kk),
-                projection=self.projection,
-                orientation=self.orientation,
-                origin=origin,
-            )
+        return Grid3D(
+            x0=x0,
+            y0=y0,
+            z0=z0,
+            dx=dx,
+            dy=dy,
+            dz=dz,
+            nx=len(ii),
+            ny=len(jj),
+            nz=len(kk),
+            projection=self.projection,
+            orientation=self.orientation,
+            origin=origin,
+        )
 
     def __repr__(self) -> str:
         out = ["<mikeio.Grid3D>"]
@@ -1450,7 +1438,7 @@ class Grid3D(_Geometry):
 
     def _geometry_for_layers(
         self, layers: Sequence[int] | None, keepdims: bool = False
-    ) -> Grid2D | Grid3D | GeometryUndefined:
+    ) -> Grid2D | Grid3D:
         if layers is None:
             return self
 
@@ -1472,14 +1460,11 @@ class Grid3D(_Geometry):
         d = np.diff(g.z[layers])
         if len(d) > 0:
             if np.any(d < 1) or not np.allclose(d, d[0]):
-                warnings.warn(
-                    "Non-equidistant layer selection is deprecated and will raise "
-                    "ValueError in v4.0. DFS format requires equidistant grids. "
-                    "Use .values for raw numpy array if non-equidistant data is needed.",
-                    FutureWarning,
-                    stacklevel=2,
+                raise ValueError(
+                    "Non-equidistant layer selection not supported. "
+                    "DFS format requires equidistant grids. "
+                    "Use .values for raw numpy array if non-equidistant data is needed."
                 )
-                return GeometryUndefined()
 
         geometry = Grid3D(
             x0=g._x0,
