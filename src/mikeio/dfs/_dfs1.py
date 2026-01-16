@@ -140,7 +140,7 @@ class Dfs1(_Dfs123):
         single_time_selected, time_steps = _valid_timesteps(self._dfs.FileInfo, time)
         nt = len(time_steps) if not single_time_selected else 1
         shape: tuple[int, ...] = (nt, self.nx)
-        dims = self.geometry.spatial_dims
+        dims = self.geometry.dims
 
         if single_time_selected and not keepdims:
             shape = shape[1:]
