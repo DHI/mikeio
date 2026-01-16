@@ -1,6 +1,4 @@
 from abc import ABC, abstractmethod
-import warnings
-
 from dataclasses import dataclass
 from typing import Any, Sequence
 
@@ -93,12 +91,6 @@ class GeometryUndefined(_Geometry):
     """
 
     def __init__(self, projection: str = "LONG/LAT") -> None:
-        warnings.warn(
-            "GeometryUndefined is deprecated and will be removed in v4.0. "
-            "Use Geometry0D for time series data.",
-            FutureWarning,
-            stacklevel=2,
-        )
         super().__init__(projection)
 
     def __repr__(self) -> str:
