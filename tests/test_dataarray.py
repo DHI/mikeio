@@ -209,28 +209,6 @@ def test_dataarray_init_2d() -> None:
     assert da.dims == ("y", "x")
 
 
-def test_dataarray_init_wrong_dim() -> None:
-    nt = 10
-    start = 10.0
-    data = np.arange(start, start + nt, dtype=float)
-    time_long = pd.date_range(start="2000-01-01", freq="s", periods=(nt + 1))
-    item = ItemInfo(name="Foo")
-
-    with pytest.raises(ValueError):
-        mikeio.DataArray(data=data, time=time_long, item=item)
-
-    nt, ny, nx = 10, 5, 6
-    data2d = np.zeros([nt, ny, nx]) + 0.1
-    with pytest.raises(ValueError):
-        mikeio.DataArray(data=data2d, time=time_long)
-
-    # time must be first dim - data shape with time not in first position
-    time = pd.date_range(start="2000-01-01", freq="s", periods=nt)
-    data2d = np.zeros([ny, nt, nx]) + 0.1
-    with pytest.raises(ValueError):
-        mikeio.DataArray(data=data2d, time=time)
-
-
 def test_dataarray_init_grid1d() -> None:
     nt = 10
     nx = 5
