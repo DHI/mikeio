@@ -422,15 +422,8 @@ class DfsuLayered:
 
         dfs.Close()
 
-        dims: tuple[str, ...] = (
-            ("time", "element")
-            if not (single_time_selected and not keepdims)  # TODO extract variable
-            else ("element",)
-        )
-
         if elements is not None and len(elements) == 1:
             # squeeze point data
-            dims = tuple([d for d in dims if d != "element"])
             data_list = [np.squeeze(d, axis=-1) for d in data_list]
 
         if layered_data:
@@ -440,7 +433,6 @@ class DfsuLayered:
                 items=items,
                 geometry=geometry,
                 zn=data_list[0],
-                dims=dims,
                 validate=False,
                 dt=self.timestep,
             )
@@ -450,7 +442,6 @@ class DfsuLayered:
                 time=time,
                 items=items,
                 geometry=geometry,
-                dims=dims,
                 validate=False,
                 dt=self.timestep,
             )
