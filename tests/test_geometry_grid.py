@@ -5,7 +5,7 @@ import pytest
 from mikeio import Mesh
 from mikeio import Grid2D, Grid1D, Grid3D
 from mikeio.spatial._FM_geometry import GeometryFM2D
-from mikeio.spatial import GeometryUndefined
+from mikeio.spatial import Geometry0D
 from mikeio.exceptions import OutsideModelDomainError
 
 
@@ -45,9 +45,7 @@ def test_grid1d_isel() -> None:
         g.isel([0, 1, 9])
 
     p1 = g.isel(3)
-    assert isinstance(
-        p1, GeometryUndefined
-    )  # the only info we have is how far along a 1d axis we are, not enough to create a 2d point
+    assert isinstance(p1, Geometry0D)
 
 
 def test_grid1d_equality() -> None:

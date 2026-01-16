@@ -36,7 +36,6 @@ if TYPE_CHECKING:
 
 
 from ..spatial import (
-    Geometry0D,
     Grid1D,
     Grid2D,
     Grid3D,
@@ -110,7 +109,6 @@ class _DataArraySpectrumToHm0:
                 nx=g.n_nodes,
                 dx=1.0,
                 node_coordinates=g.node_coordinates,
-                axis_name="node",
             )
         elif isinstance(g, GeometryFMAreaSpectrum):
             geometry = GeometryFM2D(
@@ -447,7 +445,7 @@ class DataArray:
         if isinstance(self.geometry, GeometryUndefined):
             # For undefined geometry, follow original convention: time if shape[0] == 1
             return self.shape[0] == 1
-        n_spatial = len(self.geometry.spatial_dims)
+        n_spatial = len(self.geometry.dims)
         return self.ndim > n_spatial
 
     @property
@@ -461,7 +459,7 @@ class DataArray:
             DIMS_GUESS = {0: (), 1: ("x",), 2: ("y", "x"), 3: ("z", "y", "x")}
             spatial_dims = DIMS_GUESS.get(ndim_no_time, ())
         else:
-            spatial_dims = self.geometry.spatial_dims
+            spatial_dims = self.geometry.dims
 
         dims.extend(spatial_dims)
         return tuple(dims)
@@ -543,16 +541,6 @@ class DataArray:
         return deepcopy(self)
 
     def squeeze(self) -> DataArray:
-        """Remove axes of length 1.
-
-        .. deprecated:: 3.1
-            squeeze() will be removed in v4.0. Use isel() to select specific indices.
-
-        Returns
-        -------
-        DataArray
-
-        """
         warnings.warn(
             "squeeze() is deprecated and will be removed in v4.0. "
             "Use isel() to select specific indices.",
@@ -1655,11 +1643,8 @@ class DataArray:
             if len(spatial_reduced_axes) == 0:
                 # Only time was reduced, keep geometry
                 geometry = self.geometry
-            elif hasattr(self.geometry, "reduce"):
-                geometry = self.geometry.reduce(spatial_reduced_axes)
             else:
-                # Fallback for geometries without reduce method
-                geometry = Geometry0D()
+                geometry = self.geometry.reduce(spatial_reduced_axes)
             zn = None
 
         return DataArray(
@@ -1769,10 +1754,7 @@ class DataArray:
             else:
                 # Spatial aggregation - reduce geometry
                 reduced_axis = self.dims[axis]
-                if hasattr(self.geometry, "reduce"):
-                    geometry = self.geometry.reduce(reduced_axis)
-                else:
-                    geometry = Geometry0D()
+                geometry = self.geometry.reduce(reduced_axis)
                 zn = None
 
             dims = tuple([d for i, d in enumerate(self.dims) if i != axis])

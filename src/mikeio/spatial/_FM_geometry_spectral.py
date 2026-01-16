@@ -33,7 +33,7 @@ class GeometryFMPointSpectrum(_Geometry):
         self.y = y
 
     @property
-    def spatial_dims(self) -> tuple[str, ...]:
+    def dims(self) -> tuple[str, ...]:
         if self.directions is None:
             return ("frequency",)
         else:
@@ -143,7 +143,7 @@ class GeometryFMAreaSpectrum(_GeometryFMSpectrum, GeometryFM2D):
     """Flexible mesh area spectrum geometry."""
 
     @property
-    def spatial_dims(self) -> tuple[str, ...]:
+    def dims(self) -> tuple[str, ...]:
         return self._spectral_dims("element")
 
     def isel(  # type: ignore
@@ -200,7 +200,7 @@ class GeometryFMLineSpectrum(_GeometryFMSpectrum):
     """Flexible mesh line spectrum geometry."""
 
     @property
-    def spatial_dims(self) -> tuple[str, ...]:
+    def dims(self) -> tuple[str, ...]:
         return self._spectral_dims("node")
 
     @staticmethod

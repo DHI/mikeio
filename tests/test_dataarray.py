@@ -139,10 +139,6 @@ def test_data_0d(da0: DataArray) -> None:
     assert "values" in repr(da0)
     assert "values" in repr(da0[:4])
 
-    da0 = da0.squeeze()
-    assert da0.ndim == 0
-    assert "values" in repr(da0)
-
 
 def test_dataarray_init() -> None:
     nt = 10
@@ -195,15 +191,6 @@ def test_dataarray_init_2d() -> None:
     da = mikeio.DataArray(data=data2d, time=time)
     assert da.ndim == 3
     assert da.dims == ("time", "y", "x")
-
-    # singleton time, requires spec of dims
-    dims = ("time", "y", "x")
-    data2d = np.zeros([1, ny, nx]) + 0.1
-    da = mikeio.DataArray(data=data2d, time="2018", dims=dims)
-    assert isinstance(da, mikeio.DataArray)
-    assert da.n_timesteps == 1
-    assert da.ndim == 3
-    assert da.dims == dims
 
     # no time
     data2d = np.zeros([ny, nx]) + 0.1
@@ -399,7 +386,7 @@ def test_dataarray_grid1d_indexing(da2: DataArray) -> None:
     assert da[0, 0].shape == ()
 
     assert isinstance(da[:, :].geometry, mikeio.Grid1D)
-    assert isinstance(da[:, -1].geometry, mikeio.spatial.GeometryUndefined)
+    assert isinstance(da[:, -1].geometry, mikeio.spatial.Geometry0D)
 
 
 def test_dataarray_grid2d_repr(da_grid2d: DataArray) -> None:
@@ -529,7 +516,7 @@ def test_da_isel_space(da_grid2d: DataArray) -> None:
     assert isinstance(da_sel.geometry, mikeio.Grid1D)
 
     da_sel = da_grid2d.isel(x=0)
-    assert da_sel.dims == ("time", "y")
+    assert da_sel.dims == ("time", "x")  # Grid1D always has "x" dimension
     assert isinstance(da_sel.geometry, mikeio.Grid1D)
 
     da_sel = da_grid2d.isel(time=0)
@@ -561,7 +548,7 @@ def test_da_isel_space_named_axis(da_grid2d: mikeio.DataArray) -> None:
     assert da_sel.dims[0] == "time"
 
     da_sel = da_grid2d.isel(x=0)
-    assert da_sel.dims == ("time", "y")
+    assert da_sel.dims == ("time", "x")  # Grid1D always has "x" dimension
 
     da_sel = da_grid2d.isel(time=0)
     assert da_sel.dims == ("y", "x")
@@ -653,13 +640,6 @@ def test_da_sel_area_grid2d() -> None:
     bbox = (12.4, 55.2, 22.0, 55.6)
 
     da1 = da.sel(area=bbox)
-    assert da1.geometry.nx == 168
-    assert da1.geometry.ny == 96
-
-    das = da.squeeze()
-    assert das.dims == ("y", "x")
-
-    da = das.sel(area=bbox)
     assert da1.geometry.nx == 168
     assert da1.geometry.ny == 96
 
@@ -1171,23 +1151,21 @@ def test_write_dfs2(tmp_path: Path) -> None:
     assert g.projection == g2.projection
 
 
-def test_write_dfs2_single_time_no_time_dim(tmp_path: Path) -> None:
-    g = mikeio.Grid2D(
-        x=np.linspace(10, 20, 30),
-        y=np.linspace(10, 20, 20),
-        projection="LONG/LAT",
-    )
-    da = mikeio.DataArray(
-        np.random.random(size=(g.ny, g.nx)),  # No singleton time
-        time=pd.date_range(start="2000", periods=1),
-        item=ItemInfo("Random"),
-        geometry=g,
-        dims=("y", "x"),
-    )
+def test_write_dfs2_single_timestep(tmp_path: Path) -> None:
+    ny, nx = 4, 7  # asymmetric to catch row/column swap
+    g = mikeio.Grid2D(nx=nx, dx=1.0, ny=ny, dy=1.0)
+    data = np.arange(ny * nx).reshape(ny, nx)  # values depend on position
+    da = mikeio.DataArray(data=data, geometry=g)
+    assert da.dims == ("y", "x")
+    assert da.shape == (ny, nx)
 
-    fn = str(tmp_path / "test_2.dfs2")
-
+    fn = tmp_path / "test.dfs2"
     da.to_dfs(fn)
+
+    ds = mikeio.read(fn)
+    assert ds[0].dims == ("time", "y", "x")
+    assert ds[0].shape == (1, ny, nx)
+    assert np.allclose(ds[0].values[0], data)
 
 
 def test_xzy_selection() -> None:

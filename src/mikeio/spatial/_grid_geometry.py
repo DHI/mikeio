@@ -94,8 +94,6 @@ class Grid1D(_Geometry):
         not commonly used
     node_coordinates : array_like
         coordinates of nodes in 2D or 3D space
-    axis_name : str
-        name of axis, by default "x"
 
     Examples
     --------
@@ -128,7 +126,6 @@ class Grid1D(_Geometry):
         origin: tuple[float, float] = (0.0, 0.0),
         orientation: float = 0.0,
         node_coordinates: np.ndarray | None = None,
-        axis_name: str = "x",
     ):
         super().__init__(projection=projection)
         self._origin = (0.0, 0.0) if origin is None else (origin[0], origin[1])
@@ -140,18 +137,13 @@ class Grid1D(_Geometry):
             raise ValueError("Length of node_coordinates must be n")
         self._nc = node_coordinates
 
-        self._axis_name = axis_name
-
     @property
-    def spatial_dims(self) -> tuple[str, ...]:
-        return (self._axis_name,)
+    def dims(self) -> tuple[str, ...]:
+        return ("x",)
 
     def __repr__(self) -> str:
         out = ["<mikeio.Grid1D>", _print_axis_txt("x", self.x, self.dx)]
-        txt = "\n".join(out)
-        if self._axis_name != "x":
-            txt = txt.replace(")", f", axis_name='{self._axis_name}')")
-        return txt
+        return "\n".join(out)
 
     def __str__(self) -> str:
         return f"Grid1D (n={self.nx}, dx={self.dx:.4g})"
@@ -220,7 +212,7 @@ class Grid1D(_Geometry):
 
     def isel(
         self, idx: int | Sequence[int] | np.ndarray | slice, axis: int | None = None
-    ) -> Grid1D | GeometryPoint2D | GeometryPoint3D | GeometryUndefined:
+    ) -> Grid1D | GeometryPoint2D | GeometryPoint3D | Geometry0D:
         """Get a subset geometry from this geometry.
 
         Parameters
@@ -232,8 +224,8 @@ class Grid1D(_Geometry):
 
         Returns
         -------
-        GeometryPoint2D or GeometryPoint3D or GeometryUndefined
-            The geometry of the selected point
+        Grid1D or GeometryPoint2D or GeometryPoint3D or Geometry0D
+            The geometry of the selection
 
         Examples
         --------
@@ -263,7 +255,7 @@ class Grid1D(_Geometry):
             )
 
         if self._nc is None:
-            return GeometryUndefined()
+            return Geometry0D(projection=self.projection)
         else:
             coords = self._nc[idx, :]  # type: ignore
             if len(coords) == 3:
@@ -274,25 +266,7 @@ class Grid1D(_Geometry):
                 return GeometryPoint2D(x=x, y=y, projection=self.projection)
 
     def reduce(self, axis: str | tuple[str, ...]) -> Geometry0D:
-        """Return reduced geometry after aggregation over axis.
-
-        Parameters
-        ----------
-        axis : str or tuple of str
-            Axis or axes to reduce over. For Grid1D, must be "x".
-
-        Returns
-        -------
-        Geometry0D
-            Zero-dimensional geometry for the aggregated result.
-
-        Examples
-        --------
-        >>> g = Grid1D(nx=10, dx=0.1)
-        >>> g.reduce("x")
-        Geometry0D()
-
-        """
+        """Return reduced geometry after spatial aggregation."""
         if isinstance(axis, str):
             axis = (axis,)
         if set(axis) != {"x"}:
@@ -453,8 +427,6 @@ class Grid2D(_Geometry):
         user-defined origin, by default None
     orientation : float, optional
         rotation angle in degrees, by default 0.0
-    axis_names : tuple, optional
-        names of x and y axes, by default ("x", "y")
     is_spectral : bool, optional
         if True, the grid is spectral, by default False
     is_vertical : bool, optional
@@ -498,7 +470,6 @@ class Grid2D(_Geometry):
         projection: str = "LONG/LAT",
         origin: tuple[float, float] | None = None,
         orientation: float = 0.0,
-        axis_names: tuple[str, str] = ("x", "y"),
         is_spectral: bool = False,
         is_vertical: bool = False,
     ):
@@ -509,8 +480,6 @@ class Grid2D(_Geometry):
         self._orientation = orientation
         self.__xx = None
         self.__yy = None
-
-        self._axis_names = axis_names
 
         if bbox is not None:
             if (x0 != 0.0) or (y0 != 0.0):
@@ -527,7 +496,7 @@ class Grid2D(_Geometry):
         self.plot = _Grid2DPlotter(self)
 
     @property
-    def spatial_dims(self) -> tuple[str, ...]:
+    def dims(self) -> tuple[str, ...]:
         return ("y", "x")
 
     @property
@@ -921,9 +890,7 @@ class Grid2D(_Geometry):
             return Grid1D(x=self.x, projection=self.projection, node_coordinates=nc)
         elif axis == 1:
             nc = np.column_stack([self.x[idx] * np.ones_like(self.y), self.y])  # type: ignore
-            return Grid1D(
-                x=self.y, projection=self.projection, node_coordinates=nc, axis_name="y"
-            )
+            return Grid1D(x=self.y, projection=self.projection, node_coordinates=nc)
         else:
             raise ValueError(f"axis must be 0 or 1 (or 'x' or 'y'), not {axis}")
 
@@ -1092,26 +1059,7 @@ class Grid2D(_Geometry):
         g.to_mesh(outfilename=outfilename)
 
     def reduce(self, axis: str | tuple[str, ...]) -> Grid1D | Geometry0D:
-        """Return reduced geometry after aggregation over axis.
-
-        Parameters
-        ----------
-        axis : str or tuple of str
-            Axis or axes to reduce over. Valid axes are "x" and "y".
-
-        Returns
-        -------
-        Grid1D or Geometry0D
-            Reduced geometry. Grid1D if one axis remains, Geometry0D if both reduced.
-
-        Examples
-        --------
-        >>> g = Grid2D(nx=10, ny=5, dx=0.1, dy=0.2)
-        >>> g.reduce("x")  # Returns Grid1D along y-axis
-        >>> g.reduce("y")  # Returns Grid1D along x-axis
-        >>> g.reduce(("x", "y"))  # Returns Geometry0D
-
-        """
+        """Return reduced geometry after spatial aggregation."""
         if isinstance(axis, str):
             axis = (axis,)
 
@@ -1130,8 +1078,7 @@ class Grid2D(_Geometry):
         elif remaining == {"x"}:
             return Grid1D(x=self.x, projection=self.projection)
         elif remaining == {"y"}:
-            # y-axis becomes x in Grid1D (dfs1 only has x dimension)
-            return Grid1D(x=self.y, projection=self.projection, axis_name="y")
+            return Grid1D(x=self.y, projection=self.projection)
         else:
             raise ValueError(f"Cannot reduce Grid2D over {axis}")
 
@@ -1225,7 +1172,7 @@ class Grid3D(_Geometry):
         self._orientation = orientation
 
     @property
-    def spatial_dims(self) -> tuple[str, ...]:
+    def dims(self) -> tuple[str, ...]:
         return ("z", "y", "x")
 
     @property
@@ -1481,27 +1428,7 @@ class Grid3D(_Geometry):
         return geometry
 
     def reduce(self, axis: str | tuple[str, ...]) -> Grid2D | Grid1D | Geometry0D:
-        """Return reduced geometry after aggregation over axis.
-
-        Parameters
-        ----------
-        axis : str or tuple of str
-            Axis or axes to reduce over. Valid axes are "x", "y", and "z".
-
-        Returns
-        -------
-        Grid2D, Grid1D, or Geometry0D
-            Reduced geometry based on remaining axes.
-
-        Examples
-        --------
-        >>> g = Grid3D(nx=10, ny=5, nz=3, dx=0.1, dy=0.2, dz=0.5)
-        >>> g.reduce("z")  # Returns Grid2D (x, y remain)
-        >>> g.reduce("x")  # Returns Grid2D (y, z remain)
-        >>> g.reduce(("x", "y"))  # Returns Grid1D (z remains)
-        >>> g.reduce(("x", "y", "z"))  # Returns Geometry0D
-
-        """
+        """Return reduced geometry after spatial aggregation."""
         if isinstance(axis, str):
             axis = (axis,)
 
@@ -1521,7 +1448,7 @@ class Grid3D(_Geometry):
             # One axis remains -> Grid1D
             ax = remaining.pop()
             coords = getattr(self, ax)
-            return Grid1D(x=coords, projection=self.projection, axis_name=ax)
+            return Grid1D(x=coords, projection=self.projection)
         elif len(remaining) == 2:
             # Two axes remain -> Grid2D
             if remaining == {"x", "y"}:

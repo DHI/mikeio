@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from typing import Any, Sequence
@@ -79,16 +81,16 @@ class _Geometry(ABC):
 
     @property
     @abstractmethod
-    def spatial_dims(self) -> tuple[str, ...]:
+    def dims(self) -> tuple[str, ...]:
         pass
+
+    def reduce(self, axis: str | tuple[str, ...]) -> "Geometry0D":
+        """Return reduced geometry after spatial aggregation."""
+        return Geometry0D(projection=self.projection_string)
 
 
 class GeometryUndefined(_Geometry):
-    """Undefined geometry placeholder.
-
-    .. deprecated:: 3.1
-        GeometryUndefined will be removed in v4.0. Use Geometry0D for time series data.
-    """
+    """Deprecated. Use Geometry0D instead."""
 
     def __init__(self, projection: str = "LONG/LAT") -> None:
         super().__init__(projection)
@@ -97,7 +99,7 @@ class GeometryUndefined(_Geometry):
         return "GeometryUndefined()"
 
     @property
-    def spatial_dims(self) -> tuple[str, ...]:
+    def dims(self) -> tuple[str, ...]:
         raise NotImplementedError()
 
 
@@ -115,7 +117,7 @@ class Geometry0D(_Geometry):
     Examples
     --------
     >>> g = Geometry0D()
-    >>> g.spatial_dims
+    >>> g.dims
     ()
 
     """
@@ -127,7 +129,7 @@ class Geometry0D(_Geometry):
         return "Geometry0D()"
 
     @property
-    def spatial_dims(self) -> tuple[str, ...]:
+    def dims(self) -> tuple[str, ...]:
         return ()
 
 
@@ -138,7 +140,7 @@ class GeometryPoint2D(_Geometry):
         self.y = y
 
     @property
-    def spatial_dims(self) -> tuple[str, ...]:
+    def dims(self) -> tuple[str, ...]:
         return ()
 
     def __repr__(self) -> str:
@@ -170,7 +172,7 @@ class GeometryPoint3D(_Geometry):
         return f"GeometryPoint3D(x={self.x}, y={self.y}, z={self.z})"
 
     @property
-    def spatial_dims(self) -> tuple[str, ...]:
+    def dims(self) -> tuple[str, ...]:
         return ()
 
     @property

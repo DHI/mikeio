@@ -349,7 +349,7 @@ class _GeometryFM(_Geometry):
         self._element_ids = new_element_ids
 
     @property
-    def spatial_dims(self) -> tuple[str, ...]:
+    def dims(self) -> tuple[str, ...]:
         return ("element",)
 
     @property
@@ -1153,24 +1153,7 @@ class GeometryFM2D(_GeometryFM):
         newMesh.Write(outfilename)
 
     def reduce(self, axis: str | tuple[str, ...]) -> Geometry0D:
-        """Return reduced geometry after aggregation over axis.
-
-        Parameters
-        ----------
-        axis : str or tuple of str
-            Axis to reduce over. For GeometryFM2D, must be "element".
-
-        Returns
-        -------
-        Geometry0D
-            Zero-dimensional geometry for the aggregated result.
-
-        Examples
-        --------
-        >>> g.reduce("element")
-        Geometry0D()
-
-        """
+        """Return reduced geometry after spatial aggregation."""
         if isinstance(axis, str):
             axis = (axis,)
         if set(axis) != {"element"}:
