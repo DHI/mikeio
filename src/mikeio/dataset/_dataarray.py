@@ -432,7 +432,7 @@ class DataArray:
         """Values as a np.ndarray (equivalent to values)."""
         return self._values
 
-    @property
+    @cached_property
     def _has_time_axis(self) -> bool:
         """Check if data has time as first axis based on shape and n_timesteps."""
         if self.ndim == 0:
@@ -447,7 +447,7 @@ class DataArray:
         n_spatial = len(self.geometry.dims)
         return self.ndim > n_spatial
 
-    @property
+    @cached_property
     def dims(self) -> tuple[str, ...]:
         """Dimension names derived from geometry."""
         dims: list[str] = ["time"] if self._has_time_axis else []

@@ -1058,8 +1058,7 @@ class Grid2D(_Geometry):
             g.node_coordinates[:, 2] = z
         g.to_mesh(outfilename=outfilename)
 
-    # TODO fix return type
-    def reduce(self, axis: str | tuple[str, ...]) -> Any:  # Grid1D | Geometry0D:
+    def reduce(self, axis: str | tuple[str, ...]) -> Grid1D | Geometry0D:
         """Return reduced geometry after spatial aggregation."""
         if isinstance(axis, str):
             axis = (axis,)
@@ -1428,10 +1427,7 @@ class Grid3D(_Geometry):
         )
         return geometry
 
-    # TODO fix return type
-    def reduce(
-        self, axis: str | tuple[str, ...]
-    ) -> Any:  # Grid2D | Grid1D | Geometry0D:
+    def reduce(self, axis: str | tuple[str, ...]) -> Grid2D | Grid1D | Geometry0D:
         """Return reduced geometry after spatial aggregation."""
         if isinstance(axis, str):
             axis = (axis,)
