@@ -84,7 +84,7 @@ class _Geometry(ABC):
     def dims(self) -> tuple[str, ...]:
         pass
 
-    def reduce(self, axis: str | tuple[str, ...]) -> "Geometry0D":
+    def reduce(self, axis: str | tuple[str, ...]) -> "_Geometry":
         """Return reduced geometry after spatial aggregation."""
         return Geometry0D(projection=self.projection_string)
 
