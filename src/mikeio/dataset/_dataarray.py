@@ -151,7 +151,7 @@ class DataArray:
     zn:
         only relevant for Dfsu3d
     dims:
-        named dimensions
+        (Deprecated) Named dimensions. Will be removed in v4.0. Dimensions are now derived from geometry.
     dt:
         placeholder timestep
 
@@ -548,8 +548,6 @@ class DataArray:
         )
         data = np.squeeze(self.values)
 
-        dims = [d for s, d in zip(self.shape, self.dims) if s != 1]
-
         # TODO: should geometry stay the same?
         return DataArray(
             data=data,
@@ -557,7 +555,6 @@ class DataArray:
             item=self.item,
             geometry=self.geometry,
             zn=self._zn,
-            dims=tuple(dims),
             dt=self._dt,
         )
 
@@ -762,12 +759,6 @@ class DataArray:
                 else:
                     zn = self._zn[node_ids]
 
-        # reduce dims only if singleton idx
-        dims = (
-            tuple([d for i, d in enumerate(self.dims) if i != axis])
-            if single_index
-            else self.dims
-        )
         if single_index:
             idx = int(idx)
         elif idx_slice is not None:
@@ -790,7 +781,6 @@ class DataArray:
             item=deepcopy(self.item),
             geometry=geometry,
             zn=zn,
-            dims=dims,
             dt=self._dt,
         )
 
@@ -1617,8 +1607,6 @@ class DataArray:
         else:
             axes = axis  # type: ignore
 
-        dims = tuple([d for i, d in enumerate(self.dims) if i not in axes])
-
         item = deepcopy(self.item)
         if "name" in kwargs:
             item.name = kwargs.pop("name")
@@ -1651,7 +1639,6 @@ class DataArray:
             time=time,
             item=item,
             geometry=geometry,
-            dims=dims,
             zn=zn,
             dt=self._dt,
         )
@@ -1756,14 +1743,12 @@ class DataArray:
                 geometry = self.geometry.reduce(reduced_axis)
                 zn = None
 
-            dims = tuple([d for i, d in enumerate(self.dims) if i != axis])
             item = deepcopy(self.item)
             return DataArray(
                 data=qdat,
                 time=time,
                 item=item,
                 geometry=geometry,
-                dims=dims,
                 zn=zn,
                 dt=self._dt,
             )
