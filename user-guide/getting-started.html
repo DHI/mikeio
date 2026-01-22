@@ -365,7 +365,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <li>type - an <a href="../api/EUMType.html#mikeio.EUMType">EUMType</a></li>
 <li>unit - an <a href="../api/EUMUnit.html#mikeio.EUMUnit">EUMUnit</a></li>
 </ul>
-<div id="382c25a0" class="cell" data-execution_count="1">
+<div id="6abe6303" class="cell" data-execution_count="1">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> mikeio</span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>mikeio.ItemInfo(<span class="st">"Viken"</span>, mikeio.EUMType.Water_Level)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
@@ -373,7 +373,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <pre><code>Viken &lt;Water Level&gt; (meter)</code></pre>
 </div>
 </div>
-<div id="6c9a4584" class="cell" data-execution_count="2">
+<div id="48ec6754" class="cell" data-execution_count="2">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>mikeio.ItemInfo(mikeio.EUMType.Wind_speed)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-display" data-execution_count="2">
 <pre><code>Wind speed &lt;Wind speed&gt; (meter per sec)</code></pre>
@@ -384,7 +384,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <h2 class="anchored" data-anchor-id="dfs0"><i class="fa-solid fa-chart-line" aria-label="chart-line"></i> Dfs0</h2>
 <p>A dfs0 file is also called a time series file.</p>
 <p>Read Dfs0 to Dataset:</p>
-<div id="b77b30ca" class="cell" data-execution_count="3">
+<div id="eb60c3ad" class="cell" data-execution_count="3">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>ds <span class="op">=</span> mikeio.read(<span class="st">"../data/da_diagnostic.dfs0"</span>)</span>
 <span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>ds</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-display" data-execution_count="3">
@@ -401,7 +401,7 @@ items:
 </div>
 <p>Read more on the <a href="../user-guide/dfs0.html">Dfs0 page</a>.</p>
 <p>Convert the timeseries dataset to a pandas DataFrame:</p>
-<div id="2e9e5249" class="cell" data-execution_count="4">
+<div id="8f26de2f" class="cell" data-execution_count="4">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> ds.to_dataframe()</span>
 <span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>df.head()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-display" data-execution_count="4">
@@ -464,7 +464,7 @@ items:
 <section id="dfs2" class="level2">
 <h2 class="anchored" data-anchor-id="dfs2"><i class="fa-solid fa-map" aria-label="map"></i> Dfs2</h2>
 <p>A dfs2 file is also called a grid series file. Values in a dfs2 file are ‘element based’, i.e.&nbsp;values are defined in the centre of each grid cell.</p>
-<div id="a7a2f82e" class="cell" data-execution_count="5">
+<div id="d4e0d3d7" class="cell" data-execution_count="5">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>ds <span class="op">=</span> mikeio.read(<span class="st">"../data/gebco_sound.dfs2"</span>)</span>
 <span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>ds</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-display" data-execution_count="5">
