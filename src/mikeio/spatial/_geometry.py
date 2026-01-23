@@ -84,6 +84,39 @@ class _Geometry(ABC):
     def dims(self) -> tuple[str, ...]:
         pass
 
+    def get_space_axis(self) -> int | tuple[int, ...] | None:
+        """Get geographic space axis indices within the geometry's dims.
+
+        Returns which of the geometry's dims represent geographic space dimensions,
+        as opposed to spectral or other non-geographic dimensions.
+
+        This is used when axis="space" or axis="spatial" is specified in operations
+        like aggregate, mean, etc.
+
+        Returns
+        -------
+        int | tuple[int, ...] | None
+            Space axis index or tuple of indices (0-indexed within geometry.dims).
+            Returns None if there are no space dimensions (e.g., point geometries,
+            pure spectral geometries).
+
+        Examples
+        --------
+        Grid2D with dims=("y", "x") returns (0, 1) - both are space.
+        GeometryFMAreaSpectrum with dims=("element", "direction", "frequency")
+        returns 0 - only element is space, direction/frequency are spectral.
+        GeometryFMPointSpectrum with dims=("frequency",) returns None - no space.
+
+        """
+        # Default: all dims are space dims
+        n_dims = len(self.dims)
+        if n_dims == 0:
+            return None
+        elif n_dims == 1:
+            return 0
+        else:
+            return tuple(range(n_dims))
+
     def reduce(self, axis: str | tuple[str, ...]) -> "_Geometry":
         """Return reduced geometry after spatial aggregation."""
         return Geometry0D(projection=self.projection_string)
