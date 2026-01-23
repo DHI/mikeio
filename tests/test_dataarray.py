@@ -7,6 +7,7 @@ import pytest
 
 import mikeio
 from mikeio import EUMType, EUMUnit, ItemInfo, Mesh, DataArray
+from mikeio.dfsu import DfsuSpectral
 from mikeio.exceptions import OutsideModelDomainError
 
 
@@ -1403,3 +1404,74 @@ def test_parse_time_decreasing() -> None:
 
 
 # ===============================================================================================================
+
+
+def test_geometry0d_space_axis_raises() -> None:
+    """Test that Geometry0D raises ValueError for axis='space'."""
+    from mikeio.spatial import Geometry0D
+
+    da = mikeio.DataArray(
+        data=np.random.rand(10),
+        time=pd.date_range("2000", periods=10, freq="D"),
+        geometry=Geometry0D(),
+    )
+    with pytest.raises(ValueError, match="space axis cannot be selected"):
+        da.mean(axis="space")
+
+
+def test_point_spectrum_space_axis_raises() -> None:
+    """Test that point spectrum raises ValueError for axis='space'."""
+    dfs = mikeio.open("tests/testdata/spectra/pt_spectra.dfsu")
+    assert isinstance(dfs, DfsuSpectral)
+    ds = dfs.read()
+    da = ds[0]
+    with pytest.raises(ValueError, match="space axis cannot be selected"):
+        da.mean(axis="space")
+
+
+def test_area_spectrum_space_axis() -> None:
+    """Test that area spectrum correctly aggregates over element axis."""
+    dfs = mikeio.open("tests/testdata/spectra/area_spectra.dfsu")
+    assert isinstance(dfs, DfsuSpectral)
+    ds = dfs.read()
+    da = ds[0]
+    # Should aggregate over element axis only
+    result = da.mean(axis="space")
+    # Result should have time, direction, frequency but not element
+    assert "element" not in result.dims
+    assert result.shape == (3, 16, 25)  # time, direction, frequency
+
+
+def test_line_spectrum_space_axis() -> None:
+    """Test that line spectrum correctly aggregates over node axis."""
+    dfs = mikeio.open("tests/testdata/spectra/line_spectra.dfsu")
+    assert isinstance(dfs, DfsuSpectral)
+    ds = dfs.read()
+    da = ds[0]
+    # Should aggregate over node axis only
+    result = da.mean(axis="space")
+    # Result should have time, direction, frequency but not node
+    assert "node" not in result.dims
+    assert result.shape == (4, 16, 25)  # time, direction, frequency
+
+
+def test_parse_axis_none_default() -> None:
+    """Test that axis=None defaults to all axes."""
+    ds = mikeio.read("tests/testdata/waves.dfs2")
+    da = ds[0]
+    # axis=None should aggregate over all axes
+    result = da.mean(axis=None)
+    assert result.ndim == 0  # Scalar result
+
+
+def test_grid2d_space_axis_with_time() -> None:
+    """Test that Grid2D with time correctly handles space axis as tuple."""
+    ds = mikeio.read("tests/testdata/waves.dfs2")
+    da = ds[0]
+    assert da._has_time_axis
+    # Grid2D has dims ("y", "x") so space axis should be (0, 1)
+    assert da.geometry.get_space_axis() == (0, 1)
+    # With time, should aggregate over axes (1, 2) - y and x
+    result = da.mean(axis="space")
+    assert result.shape == (3,)  # Only time dimension left
+    assert result.dims == ("time",)

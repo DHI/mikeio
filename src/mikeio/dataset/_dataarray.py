@@ -39,6 +39,7 @@ from ..spatial import (
     Grid1D,
     Grid2D,
     Grid3D,
+    Geometry0D,
     GeometryPoint2D,
     GeometryPoint3D,
     GeometryUndefined,
@@ -68,6 +69,7 @@ from ._data_plot import (
 )
 
 GeometryType = Union[
+    Geometry0D,
     GeometryUndefined,
     GeometryPoint2D,
     GeometryPoint3D,
@@ -720,13 +722,13 @@ class DataArray:
             else:
                 raise ValueError(f"{dim} is not present in {self.dims}")
 
-        axis = self._parse_axis(self.shape, self.dims, axis)
+        parsed_axis = self._parse_axis(axis)
 
         idx_slice = None
         if isinstance(idx, slice):
             idx_slice = idx
-            assert isinstance(axis, int)
-            idx = list(range(*idx.indices(self.shape[axis])))
+            assert isinstance(parsed_axis, int)
+            idx = list(range(*idx.indices(self.shape[parsed_axis])))
         if idx is None or (not np.isscalar(idx) and len(idx) == 0):  # type: ignore
             raise ValueError(
                 "Empty index is not allowed"
@@ -736,7 +738,7 @@ class DataArray:
         single_index = len(idx) == 1
         idx = idx[0] if single_index else idx
 
-        if axis == 0 and self.dims[0] == "time":
+        if parsed_axis == 0 and self.dims[0] == "time":
             time = self.time[idx]
             geometry = self.geometry
             zn = None if self._zn is None else self._zn[idx]
@@ -745,8 +747,10 @@ class DataArray:
             geometry = GeometryUndefined()
             zn = None
             if hasattr(self.geometry, "isel"):
-                assert isinstance(axis, int)
-                spatial_axis = axis - 1 if self.dims[0] == "time" else axis
+                assert isinstance(parsed_axis, int)
+                spatial_axis = (
+                    parsed_axis - 1 if self.dims[0] == "time" else parsed_axis
+                )
                 geometry = self.geometry.isel(idx, axis=spatial_axis)
 
             if isinstance(geometry, _GeometryFMLayered):
@@ -764,16 +768,17 @@ class DataArray:
         elif idx_slice is not None:
             idx = idx_slice
 
-        if axis == 0:
-            dat = self.values[idx]
-        elif axis == 1:
-            dat = self.values[:, idx]
-        elif axis == 2:
-            dat = self.values[:, :, idx]
-        elif axis == 3:
-            dat = self.values[:, :, :, idx]
-        else:
-            raise ValueError(f"Subsetting with {axis=} is not supported")
+        match parsed_axis:
+            case 0:
+                dat = self.values[idx]
+            case 1:
+                dat = self.values[:, idx]
+            case 2:
+                dat = self.values[:, :, idx]
+            case 3:
+                dat = self.values[:, :, :, idx]
+            case _:
+                raise ValueError(f"Subsetting with {parsed_axis=} is not supported")
 
         return DataArray(
             data=dat,
@@ -1379,7 +1384,7 @@ class DataArray:
         """
         return self.aggregate(axis=axis, func=np.min, **kwargs)
 
-    def mean(self, axis: int | str = 0, **kwargs: Any) -> DataArray:
+    def mean(self, axis: int | str | None = 0, **kwargs: Any) -> DataArray:
         """Mean value along an axis.
 
         Parameters
@@ -1599,13 +1604,13 @@ class DataArray:
             nanmax : Max values with NaN values removed
 
         """
-        axis = self._parse_axis(self.shape, self.dims, axis)
-        time = self._time_by_agg_axis(self.time, axis)
+        parsed_axis = self._parse_axis(axis)
+        time = self._time_by_agg_axis(self.time, parsed_axis)
 
-        if isinstance(axis, int):
-            axes = (axis,)
+        if isinstance(parsed_axis, int):
+            axes = (parsed_axis,)
         else:
-            axes = axis  # type: ignore
+            axes = parsed_axis  # type: ignore
 
         item = deepcopy(self.item)
         if "name" in kwargs:
@@ -1615,9 +1620,9 @@ class DataArray:
             warnings.catch_warnings()
         ):  # there might be all-Nan slices, it is ok, so we ignore them!
             warnings.simplefilter("ignore", category=RuntimeWarning)
-            data = func(self.to_numpy(), axis=axis, keepdims=False, **kwargs)
+            data = func(self.to_numpy(), axis=parsed_axis, keepdims=False, **kwargs)
 
-        if axis == 0 and "time" in self.dims and len(axes) == 1:
+        if parsed_axis == 0 and "time" in self.dims and len(axes) == 1:
             # Time-only aggregation - preserve geometry
             geometry = self.geometry
             zn = None if self._zn is None else self._zn[0]
@@ -1728,18 +1733,18 @@ class DataArray:
     def _quantile(self, q, *, axis: int | str = 0, func=np.quantile, **kwargs: Any):  # type: ignore
         from mikeio import Dataset
 
-        axis = self._parse_axis(self.shape, self.dims, axis)
-        assert isinstance(axis, int)
-        time = self._time_by_agg_axis(self.time, axis)
+        parsed_axis = self._parse_axis(axis)
+        assert isinstance(parsed_axis, int)
+        time = self._time_by_agg_axis(self.time, parsed_axis)
 
         if np.isscalar(q):
-            qdat = func(self.values, q=q, axis=axis, **kwargs)
-            if axis == 0 and "time" in self.dims:
+            qdat = func(self.values, q=q, axis=parsed_axis, **kwargs)
+            if parsed_axis == 0 and "time" in self.dims:
                 geometry = self.geometry
                 zn = self._zn
             else:
                 # Spatial aggregation - reduce geometry
-                reduced_axis = self.dims[axis]
+                reduced_axis = self.dims[parsed_axis]
                 geometry = self.geometry.reduce(reduced_axis)
                 zn = None
 
@@ -2094,34 +2099,42 @@ class DataArray:
             )
         return index
 
-    @staticmethod
     def _parse_axis(
-        data_shape: tuple[int, ...],
-        dims: tuple[str, ...],
+        self,
         axis: int | tuple[int, ...] | str | None,
     ) -> int | tuple[int, ...]:
         # TODO change to return tuple always
-        # axis = 0 if axis == "time" else axis
-        if (axis == "spatial") or (axis == "space"):
-            if len(data_shape) == 1:
-                if dims[0][0] == "t":
-                    raise ValueError(f"space axis cannot be selected from dims {dims}")
-                return 0
-            if "frequency" in dims or "directions" in dims:
-                space_name = "node" if "node" in dims else "element"
-                return dims.index(space_name)
-            else:
-                axis = 1 if (len(data_shape) == 2) else tuple(range(1, len(data_shape)))
-        if axis is None:
-            axis = 0 if (len(data_shape) == 1) else tuple(range(0, len(data_shape)))
+        dims = self.dims
+        data_shape = self.shape
+        has_time = self._has_time_axis
 
+        # Handle "space" keyword - delegate to geometry
+        if axis == "space":
+            space_axis = self.geometry.get_space_axis()
+            if space_axis is None:
+                raise ValueError(f"space axis cannot be selected from dims {dims}")
+            # Add time offset if data has time dimension
+            if has_time:
+                if isinstance(space_axis, int):
+                    return space_axis + 1
+                else:
+                    return tuple(ax + 1 for ax in space_axis)
+            else:
+                return space_axis
+
+        # Handle None (default to all axes)
+        if axis is None:
+            return 0 if (len(data_shape) == 1) else tuple(range(0, len(data_shape)))
+
+        # Handle string dimension names
         if isinstance(axis, str):
-            axis = "time" if axis == "t" else axis
-            if axis in dims:
-                return dims.index(axis)
+            dim_name = "time" if axis == "t" else axis
+            if dim_name in dims:
+                return dims.index(dim_name)
             else:
                 raise ValueError(
                     f"axis argument '{axis}' not supported! Must be None, int, list of int or 'time' or 'space'"
                 )
 
+        # Return numeric axis as-is
         return axis
