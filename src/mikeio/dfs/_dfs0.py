@@ -1,4 +1,8 @@
+"""Read and write DFS0 files (time series data)."""
+
 from __future__ import annotations
+
+__all__ = ["Dfs0", "write_dfs0", "dataframe_to_dfs0", "series_to_dfs0"]
 from functools import cached_property
 from pathlib import Path
 from datetime import datetime, timedelta

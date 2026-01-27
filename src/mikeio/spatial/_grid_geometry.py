@@ -1,4 +1,8 @@
+"""Grid geometry classes for structured grids (Grid1D, Grid2D, Grid3D)."""
+
 from __future__ import annotations
+
+__all__ = ["Grid1D", "Grid2D", "Grid3D"]
 from functools import cached_property
 from pathlib import Path
 import warnings

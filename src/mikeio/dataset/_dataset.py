@@ -1,4 +1,8 @@
+"""Dataset class - container for multiple DataArrays with common geometry and time."""
+
 from __future__ import annotations
+
+__all__ = ["Dataset", "from_pandas", "from_polars"]
 from pathlib import Path
 from datetime import datetime
 from copy import deepcopy
