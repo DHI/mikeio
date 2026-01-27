@@ -746,11 +746,11 @@ class DataArray:
         idx = idx[0] if single_index else idx
 
         if axis == 0 and self.dims[0] == "time":
-            time = self.time[idx]
+            selected_time = self.time[idx]
             geometry = self.geometry
             zn = None if self._zn is None else self._zn[idx]
         else:
-            time = self.time
+            selected_time = self.time
             geometry = GeometryUndefined()
             zn = None
             if hasattr(self.geometry, "isel"):
@@ -792,7 +792,7 @@ class DataArray:
 
         return DataArray(
             data=dat,
-            time=time,
+            time=selected_time,
             item=deepcopy(self.item),
             geometry=geometry,
             zn=zn,
@@ -920,14 +920,15 @@ class DataArray:
 
         # select in time
         if time is not None:
-            if hasattr(time, "time"):
-                if isinstance(time.time, pd.DatetimeIndex):
-                    time = time.time
+            time_selector = time
+            if hasattr(time_selector, "time"):
+                if isinstance(time_selector.time, pd.DatetimeIndex):
+                    time_selector = time_selector.time
 
-            time = _get_time_idx_list(self.time, time)
-            if _n_selected_timesteps(self.time, time) == 0:
+            time_idx = _get_time_idx_list(self.time, time_selector)
+            if _n_selected_timesteps(self.time, time_idx) == 0:
                 raise IndexError("No timesteps found!")
-            da = da.isel(time=time)
+            da = da.isel(time=time_idx)
 
         return da
 
@@ -1615,13 +1616,13 @@ class DataArray:
             nanmax : Max values with NaN values removed
 
         """
-        axis = self._parse_axis(self.shape, self.dims, axis)
-        time = self._time_by_agg_axis(self.time, axis)
+        parsed_axis = self._parse_axis(self.shape, self.dims, axis)
+        time = self._time_by_agg_axis(self.time, parsed_axis)
 
-        if isinstance(axis, int):
-            axes = (axis,)
+        if isinstance(parsed_axis, int):
+            axes = (parsed_axis,)
         else:
-            axes = axis  # type: ignore
+            axes = parsed_axis  # type: ignore
 
         dims = tuple([d for i, d in enumerate(self.dims) if i not in axes])
 
@@ -1633,9 +1634,9 @@ class DataArray:
             warnings.catch_warnings()
         ):  # there might be all-Nan slices, it is ok, so we ignore them!
             warnings.simplefilter("ignore", category=RuntimeWarning)
-            data = func(self.to_numpy(), axis=axis, keepdims=False, **kwargs)
+            data = func(self.to_numpy(), axis=parsed_axis, keepdims=False, **kwargs)
 
-        if axis == 0 and "time" in self.dims:  # time
+        if parsed_axis == 0 and "time" in self.dims:  # time
             geometry = self.geometry
             zn = None if self._zn is None else self._zn[0]
 
@@ -1738,16 +1739,16 @@ class DataArray:
     def _quantile(self, q, *, axis: int | str = 0, func=np.quantile, **kwargs: Any):  # type: ignore
         from mikeio import Dataset
 
-        axis = self._parse_axis(self.shape, self.dims, axis)
-        assert isinstance(axis, int)
-        time = self._time_by_agg_axis(self.time, axis)
+        parsed_axis = self._parse_axis(self.shape, self.dims, axis)
+        assert isinstance(parsed_axis, int)
+        time = self._time_by_agg_axis(self.time, parsed_axis)
 
         if np.isscalar(q):
-            qdat = func(self.values, q=q, axis=axis, **kwargs)
-            geometry = self.geometry if axis == 0 else GeometryUndefined()
-            zn = self._zn if axis == 0 else None
+            qdat = func(self.values, q=q, axis=parsed_axis, **kwargs)
+            geometry = self.geometry if parsed_axis == 0 else GeometryUndefined()
+            zn = self._zn if parsed_axis == 0 else None
 
-            dims = tuple([d for i, d in enumerate(self.dims) if i != axis])
+            dims = tuple([d for i, d in enumerate(self.dims) if i != parsed_axis])
             item = deepcopy(self.item)
             return DataArray(
                 data=qdat,
