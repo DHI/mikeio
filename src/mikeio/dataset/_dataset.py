@@ -27,6 +27,7 @@ if TYPE_CHECKING:
     import polars as pl
 
 from ._dataarray import DataArray
+from .._deprecation import _deprecate_positional_args
 from .._time import _get_time_idx_list, _n_selected_timesteps
 from ..eum import EUMType, EUMUnit, ItemInfo
 from ..spatial import (
@@ -1816,6 +1817,7 @@ class Dataset:
         return str.join("\n", out)
 
 
+@_deprecate_positional_args(start_after="df")
 def from_pandas(
     df: pd.DataFrame | pd.Series,
     items: Mapping[str, ItemInfo] | Sequence[ItemInfo] | ItemInfo | None = None,
@@ -1880,6 +1882,7 @@ def from_pandas(
     return ds
 
 
+@_deprecate_positional_args(start_after="df")
 def from_polars(
     df: pl.DataFrame,
     items: Mapping[str, ItemInfo] | Sequence[ItemInfo] | ItemInfo | None = None,

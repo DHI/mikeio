@@ -33,6 +33,7 @@ from tqdm import tqdm, trange
 import mikeio
 
 from . import __dfs_version__
+from ._deprecation import _deprecate_positional_args
 from .dfs._dfs import _get_item_info, _valid_item_numbers
 from .eum import EUMType, EUMUnit, ItemInfo
 
@@ -155,6 +156,7 @@ def _clone(
     return file
 
 
+@_deprecate_positional_args(start_after="outfilename")
 def scale(
     infilename: str | pathlib.Path,
     outfilename: str | pathlib.Path,
@@ -208,6 +210,7 @@ def scale(
     dfs.Close()
 
 
+@_deprecate_positional_args(start_after="outfilename")
 def fill_corrupt(
     infilename: str | pathlib.Path,
     outfilename: str | pathlib.Path,
@@ -327,6 +330,7 @@ def _process_dfs_files(
 
 
 # TODO sum is conflicting with the built-in sum function, which we could haved used above.
+@_deprecate_positional_args(start_after="infilename_b")
 def sum(
     infilename_a: str | pathlib.Path,
     infilename_b: str | pathlib.Path,
@@ -338,6 +342,7 @@ def sum(
     _process_dfs_files(infilename_a, infilename_b, outfilename, operator.add)
 
 
+@_deprecate_positional_args(start_after="infilename_b")
 def add(
     infilename_a: str | pathlib.Path,
     infilename_b: str | pathlib.Path,
@@ -347,6 +352,7 @@ def add(
     _process_dfs_files(infilename_a, infilename_b, outfilename, operator.add)
 
 
+@_deprecate_positional_args(start_after="infilename_b")
 def diff(
     infilename_a: str | pathlib.Path,
     infilename_b: str | pathlib.Path,
@@ -356,6 +362,7 @@ def diff(
     _process_dfs_files(infilename_a, infilename_b, outfilename, operator.sub)
 
 
+@_deprecate_positional_args(start_after="outfilename")
 def concat(
     infilenames: Sequence[str | pathlib.Path],
     outfilename: str | pathlib.Path,
@@ -528,6 +535,7 @@ def concat(
     dfs_o.Close()
 
 
+@_deprecate_positional_args(start_after="outfilename")
 def extract(
     infilename: str | pathlib.Path,
     outfilename: str | pathlib.Path,
@@ -675,10 +683,6 @@ class _TimeInfo:
         elif isinstance(start, float):
             start_sec = start
         elif isinstance(start, str):
-            parts = start.split(",")
-            start = parts[0]
-            if len(parts) == 2:
-                end = parts[1]
             start = pd.to_datetime(start)
 
         if isinstance(start, datetime):
@@ -751,6 +755,7 @@ class _TimeInfo:
         return timestep
 
 
+@_deprecate_positional_args(start_after="outfilename")
 def avg_time(
     infilename: str | pathlib.Path,
     outfilename: str | pathlib.Path,
@@ -959,6 +964,7 @@ def _get_repeated_items(
     return new_items
 
 
+@_deprecate_positional_args(start_after="outfilename")
 def change_datatype(
     infilename: str | pathlib.Path,
     outfilename: str | pathlib.Path,
@@ -1057,6 +1063,7 @@ class DerivedItem:
         self.func = func
 
 
+@_deprecate_positional_args(start_after="vars")
 def transform(
     infilename: str | pathlib.Path,
     outfilename: str | pathlib.Path,

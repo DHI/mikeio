@@ -96,7 +96,7 @@ def test_diff_itself(tmp_path: Path) -> None:
     infilename_2 = "tests/testdata/gebco_sound.dfs2"
     fp = tmp_path / "diff.dfs2"
 
-    diff(infilename_1, infilename_2, fp)
+    diff(infilename_1, infilename_2, outfilename=fp)
 
     org = mikeio.read(infilename_1)
 
@@ -129,7 +129,7 @@ def test_add_itself(tmp_path: Path) -> None:
     infilename_2 = "tests/testdata/gebco_sound.dfs2"
     fp = tmp_path / "diff.dfs2"
 
-    add(infilename_1, infilename_2, fp)
+    add(infilename_1, infilename_2, outfilename=fp)
 
     mikeio.read(infilename_1)
 
@@ -233,7 +233,7 @@ def test_diff_dfsu(tmp_path: Path) -> None:
     infilename_a = "tests/testdata/HD2D.dfsu"
     infilename_b = "tests/testdata/HD2D.dfsu"
     fp = tmp_path / "diff.dfsu"
-    mikeio.generic.diff(infilename_a, infilename_b, fp)
+    mikeio.generic.diff(infilename_a, infilename_b, outfilename=fp)
 
     mikeio.read(infilename_a)
 
@@ -453,7 +453,7 @@ def test_extract_non_equidistant(tmp_path: Path) -> None:
     with pytest.raises(ValueError):
         extract(infile, fp, start=1800.0, end=237981231.232)
 
-    extract(infile, fp, "2017-10-27,2017-10-28")
+    extract(infile, fp, start="2017-10-27", end="2017-10-28")
     extracted = mikeio.read(fp)
     assert extracted.n_timesteps > 0
 

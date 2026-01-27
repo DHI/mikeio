@@ -13,6 +13,7 @@ from mikecore.DfsFileFactory import DfsFileFactory
 from mikecore.eum import eumQuantity
 
 from .. import __dfs_version__
+from .._deprecation import _deprecate_positional_args
 from ..dataset import Dataset, DataArray
 from ._dfs import _get_item_info, _valid_item_numbers
 from ..eum import EUMType, EUMUnit, ItemInfo, TimeStepUnit, ItemInfoList
@@ -135,6 +136,7 @@ class Dfs0:
 
         return str.join("\n", out)
 
+    @_deprecate_positional_args(start_after="self")
     def read(
         self,
         items: str | int | Sequence[str | int] | None = None,
