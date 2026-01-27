@@ -8,7 +8,9 @@ from matplotlib.axes import Axes
 
 from ..spatial._FM_plot import _plot_map, _plot_vertical_profile
 
-from .._spectral import plot_2dspectrum
+from .._spectral import plot_2dspectrum, calc_m0_from_spectrum
+from ..eum import EUMType, ItemInfo
+from ..spatial import GeometryUndefined, Grid1D, GeometryFM2D
 
 if TYPE_CHECKING:
     from ..dataset import DataArray, Dataset
@@ -734,11 +736,11 @@ class _DataArrayPlotterPointSpectrum(_DataArrayPlotter):
         **kwargs: Any,
     ) -> Axes:
         # ax = self._get_ax(ax, figsize)
-        if self.da.n_frequencies > 0 and self.da.n_directions > 0:
+        if self.da.geometry.n_frequencies > 0 and self.da.geometry.n_directions > 0:
             return self._plot_2dspectrum(figsize=figsize, **kwargs)
-        elif self.da.n_frequencies == 0:
+        elif self.da.geometry.n_frequencies == 0:
             return self._plot_dirspectrum(ax=ax, figsize=figsize, **kwargs)
-        elif self.da.n_directions == 0:
+        elif self.da.geometry.n_directions == 0:
             return self._plot_freqspectrum(ax=ax, figsize=figsize, **kwargs)
         else:
             raise ValueError("Spectrum could not be plotted")
@@ -761,7 +763,7 @@ class _DataArrayPlotterPointSpectrum(_DataArrayPlotter):
         figsize: tuple[float, float] | None = None,
         **kwargs: Any,
     ) -> Axes:
-        ax = self._plot_1dspectrum(self.da.frequencies, ax, figsize, **kwargs)  # type: ignore
+        ax = self._plot_1dspectrum(self.da.geometry.frequencies, ax, figsize, **kwargs)  # type: ignore
         ax.set_xlabel("frequency [Hz]")
         ax.set_ylabel("directionally integrated energy [m*m*s]")
         return ax
@@ -772,10 +774,11 @@ class _DataArrayPlotterPointSpectrum(_DataArrayPlotter):
         figsize: tuple[float, float] | None = None,
         **kwargs: Any,
     ) -> Axes:
-        ax = self._plot_1dspectrum(self.da.directions, ax, figsize, **kwargs)  # type: ignore
+        ax = self._plot_1dspectrum(self.da.geometry.directions, ax, figsize, **kwargs)  # type: ignore
         ax.set_xlabel("directions [degrees]")
         ax.set_ylabel("directional spectral energy [m*m*s]")
-        ax.set_xticks(self.da.directions[::2])  # type: ignore
+        # TODO: consider using matplotlib's default tick locator instead of arbitrary ::2
+        ax.set_xticks(self.da.geometry.directions[::2])  # type: ignore
         return ax
 
     def _plot_1dspectrum(
@@ -827,21 +830,66 @@ class _DataArrayPlotterPointSpectrum(_DataArrayPlotter):
         return txt
 
 
+def _calc_Hm0(da: DataArray) -> DataArray:
+    """Calculate Hm0 from spectral DataArray for plotting."""
+    from ..spatial import GeometryFMLineSpectrum, GeometryFMAreaSpectrum
+
+    m0 = calc_m0_from_spectrum(
+        da.to_numpy(),
+        da.geometry.frequencies,
+        da.geometry.directions,
+        tail=True,
+    )
+    Hm0 = 4 * np.sqrt(m0)
+    dims = tuple([d for d in da.dims if d not in ("frequency", "direction")])
+    item = ItemInfo(EUMType.Significant_wave_height)
+    g = da.geometry
+    geometry: Any = GeometryUndefined()
+
+    if isinstance(g, GeometryFMLineSpectrum):
+        geometry = Grid1D(
+            nx=g.n_nodes,
+            dx=1.0,
+            node_coordinates=g.node_coordinates,
+            axis_name="node",
+        )
+    elif isinstance(g, GeometryFMAreaSpectrum):
+        geometry = GeometryFM2D(
+            node_coordinates=g.node_coordinates,
+            codes=g.codes,
+            node_ids=g.node_ids,
+            projection=g.projection_string,
+            element_table=g.element_table,
+            element_ids=g.element_ids,
+        )
+
+    from . import DataArray as DA
+
+    return DA(
+        data=Hm0,
+        time=da.time,
+        item=item,
+        dims=dims,
+        geometry=geometry,
+        dt=da._dt,
+    )
+
+
 class _DataArrayPlotterLineSpectrum(_DataArrayPlotterGrid1D):
     def __init__(self, da: DataArray) -> None:
         if da.n_timesteps > 1:
-            Hm0 = da[0].to_Hm0()
+            Hm0 = _calc_Hm0(da[0])
         else:
-            Hm0 = da.to_Hm0()
+            Hm0 = _calc_Hm0(da)
         super().__init__(Hm0)
 
 
 class _DataArrayPlotterAreaSpectrum(_DataArrayPlotterFM):
     def __init__(self, da: DataArray) -> None:
         if da.n_timesteps > 1:
-            Hm0 = da[0].to_Hm0()
+            Hm0 = _calc_Hm0(da[0])
         else:
-            Hm0 = da.to_Hm0()
+            Hm0 = _calc_Hm0(da)
         super().__init__(Hm0)
 
 

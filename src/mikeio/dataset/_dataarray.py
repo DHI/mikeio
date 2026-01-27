@@ -54,7 +54,6 @@ from ..spatial import (
 # We need this type to know if we should keep zn
 from ..spatial._FM_geometry_layered import _GeometryFMLayered
 
-from .._spectral import calc_m0_from_spectrum
 from ._data_plot import (
     _DataArrayPlotter,
     _DataArrayPlotterFM,
@@ -84,51 +83,6 @@ GeometryType = Union[
 ]
 
 IndexType = Union[int, slice, Sequence[int], np.ndarray, None]
-
-
-class _DataArraySpectrumToHm0:
-    def __init__(self, da: DataArray) -> None:
-        self.da = da
-
-    def __call__(self, tail: bool = True) -> DataArray:
-        # TODO: if action_density
-        m0 = calc_m0_from_spectrum(
-            self.da.to_numpy(),
-            self.da.frequencies,
-            self.da.directions,
-            tail,
-        )
-        Hm0 = 4 * np.sqrt(m0)
-        dims = tuple([d for d in self.da.dims if d not in ("frequency", "direction")])
-        item = ItemInfo(EUMType.Significant_wave_height)
-        g = self.da.geometry
-        geometry: Any = GeometryUndefined()
-
-        if isinstance(g, GeometryFMLineSpectrum):
-            geometry = Grid1D(
-                nx=g.n_nodes,
-                dx=1.0,
-                node_coordinates=g.node_coordinates,
-                axis_name="node",
-            )
-        elif isinstance(g, GeometryFMAreaSpectrum):
-            geometry = GeometryFM2D(
-                node_coordinates=g.node_coordinates,
-                codes=g.codes,
-                node_ids=g.node_ids,
-                projection=g.projection_string,
-                element_table=g.element_table,
-                element_ids=g.element_ids,
-            )
-
-        return DataArray(
-            data=Hm0,
-            time=self.da.time,
-            item=item,
-            dims=dims,
-            geometry=geometry,
-            dt=self.da._dt,
-        )
 
 
 class DataArray:
@@ -203,7 +157,6 @@ class DataArray:
         # geometries are very diverse without a common interface
         self.geometry: Any = geometry
         self._zn = self._parse_zn(zn, self.geometry, self.n_timesteps)
-        self._set_spectral_attributes(geometry)
         self.plot = self._get_plotter_by_geometry()
 
     @staticmethod
@@ -351,22 +304,6 @@ class DataArray:
 
         plotter = PLOTTER_MAP.get(type(self.geometry), _DataArrayPlotter)
         return plotter(self)
-
-    def _set_spectral_attributes(self, geometry: GeometryType) -> None:
-        if hasattr(geometry, "frequencies") and hasattr(geometry, "directions"):
-            assert isinstance(
-                geometry,
-                (
-                    GeometryFMAreaSpectrum,
-                    GeometryFMLineSpectrum,
-                    GeometryFMPointSpectrum,
-                ),
-            )
-            self.frequencies = geometry.frequencies
-            self.n_frequencies = geometry.n_frequencies
-            self.directions = geometry.directions
-            self.n_directions = geometry.n_directions
-            self.to_Hm0 = _DataArraySpectrumToHm0(self)
 
     # ============= Basic properties/methods ===========
 
