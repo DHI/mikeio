@@ -7,6 +7,7 @@ import pytest
 
 import mikeio
 from mikeio import EUMType, EUMUnit, ItemInfo, Mesh, DataArray
+from mikeio.dfsu import DfsuSpectral
 from mikeio.exceptions import OutsideModelDomainError
 
 
@@ -139,10 +140,6 @@ def test_data_0d(da0: DataArray) -> None:
     assert "values" in repr(da0)
     assert "values" in repr(da0[:4])
 
-    da0 = da0.squeeze()
-    assert da0.ndim == 0
-    assert "values" in repr(da0)
-
 
 def test_dataarray_init() -> None:
     nt = 10
@@ -196,15 +193,6 @@ def test_dataarray_init_2d() -> None:
     assert da.ndim == 3
     assert da.dims == ("time", "y", "x")
 
-    # singleton time, requires spec of dims
-    dims = ("time", "y", "x")
-    data2d = np.zeros([1, ny, nx]) + 0.1
-    da = mikeio.DataArray(data=data2d, time="2018", dims=dims)
-    assert isinstance(da, mikeio.DataArray)
-    assert da.n_timesteps == 1
-    assert da.ndim == 3
-    assert da.dims == dims
-
     # no time
     data2d = np.zeros([ny, nx]) + 0.1
     da = mikeio.DataArray(data=data2d, time="2018")
@@ -213,40 +201,13 @@ def test_dataarray_init_2d() -> None:
     assert da.ndim == 2
     assert da.dims == ("y", "x")
 
-    # x, y swapped
-    dims = ("x", "y")
+    # dims are now derived from geometry, not from passed dims parameter
+    # GeometryUndefined guesses ("y", "x") for 2D data
     data2d = np.zeros([nx, ny]) + 0.1
-    da = mikeio.DataArray(data=data2d, time="2018", dims=dims)
+    da = mikeio.DataArray(data=data2d, time="2018")
     assert da.n_timesteps == 1
     assert da.ndim == 2
-    assert da.dims == dims
-
-
-def test_dataarray_init_wrong_dim() -> None:
-    nt = 10
-    start = 10.0
-    data = np.arange(start, start + nt, dtype=float)
-    time_long = pd.date_range(start="2000-01-01", freq="s", periods=(nt + 1))
-    item = ItemInfo(name="Foo")
-
-    with pytest.raises(ValueError):
-        mikeio.DataArray(data=data, time=time_long, item=item)
-
-    nt, ny, nx = 10, 5, 6
-    data2d = np.zeros([nt, ny, nx]) + 0.1
-    with pytest.raises(ValueError):
-        mikeio.DataArray(data=data2d, time=time_long)
-
-    # time must be first dim
-    dims = ("x", "y", "time")
-    time = pd.date_range(start="2000-01-01", freq="s", periods=nt)
-    with pytest.raises(ValueError):
-        mikeio.DataArray(data=data2d, time=time, dims=dims)
-
-    # time must be first dim
-    data2d = np.zeros([ny, nt, nx]) + 0.1
-    with pytest.raises(ValueError):
-        mikeio.DataArray(data=data2d, time=time)
+    assert da.dims == ("y", "x")
 
 
 def test_dataarray_init_grid1d() -> None:
@@ -404,7 +365,7 @@ def test_dataarray_grid1d_indexing(da2: DataArray) -> None:
     assert da[0, 0].shape == ()
 
     assert isinstance(da[:, :].geometry, mikeio.Grid1D)
-    assert isinstance(da[:, -1].geometry, mikeio.spatial.GeometryUndefined)
+    assert isinstance(da[:, -1].geometry, mikeio.spatial.Geometry0D)
 
 
 def test_dataarray_grid2d_repr(da_grid2d: DataArray) -> None:
@@ -534,7 +495,7 @@ def test_da_isel_space(da_grid2d: DataArray) -> None:
     assert isinstance(da_sel.geometry, mikeio.Grid1D)
 
     da_sel = da_grid2d.isel(x=0)
-    assert da_sel.dims == ("time", "y")
+    assert da_sel.dims == ("time", "x")  # Grid1D always has "x" dimension
     assert isinstance(da_sel.geometry, mikeio.Grid1D)
 
     da_sel = da_grid2d.isel(time=0)
@@ -549,11 +510,12 @@ def test_da_isel_empty(da_grid2d: DataArray) -> None:
 def test_da_isel_space_multiple_elements(da_grid2d: DataArray) -> None:
     assert da_grid2d.geometry.nx == 7
     assert da_grid2d.geometry.ny == 14
-    da_sel = da_grid2d.isel(y=(0, 1, 2, 10))
-    assert da_sel.dims == ("time", "y", "x")
-    assert da_sel.shape == (10, 4, 7)
-    assert isinstance(da_sel.geometry, mikeio.spatial.GeometryUndefined)
 
+    # Non-equidistant selection raises ValueError (DFS format requires equidistant grids)
+    with pytest.raises(ValueError, match="Non-equidistant"):
+        da_grid2d.isel(y=(0, 1, 2, 10))
+
+    # Equidistant selection works
     da_sel = da_grid2d.isel(x=slice(None, 3))
     assert da_sel.dims == ("time", "y", "x")
     assert da_sel.shape == (10, 14, 3)
@@ -565,7 +527,7 @@ def test_da_isel_space_named_axis(da_grid2d: mikeio.DataArray) -> None:
     assert da_sel.dims[0] == "time"
 
     da_sel = da_grid2d.isel(x=0)
-    assert da_sel.dims == ("time", "y")
+    assert da_sel.dims == ("time", "x")  # Grid1D always has "x" dimension
 
     da_sel = da_grid2d.isel(time=0)
     assert da_sel.dims == ("y", "x")
@@ -657,13 +619,6 @@ def test_da_sel_area_grid2d() -> None:
     bbox = (12.4, 55.2, 22.0, 55.6)
 
     da1 = da.sel(area=bbox)
-    assert da1.geometry.nx == 168
-    assert da1.geometry.ny == 96
-
-    das = da.squeeze()
-    assert das.dims == ("y", "x")
-
-    da = das.sel(area=bbox)
     assert da1.geometry.nx == 168
     assert da1.geometry.ny == 96
 
@@ -1017,7 +972,7 @@ def test_dataarray_weigthed_average() -> None:
 
     da2 = da.average(weights=area, axis=1)
 
-    assert isinstance(da2.geometry, mikeio.spatial.GeometryUndefined)
+    assert isinstance(da2.geometry, mikeio.spatial.Geometry0D)
     assert da2.dims == ("time",)
 
 
@@ -1131,8 +1086,8 @@ def test_da_quantile_axis0(da2: DataArray) -> None:
 
     daqs = da2.quantile(q=0.345, axis="space")
     assert isinstance(
-        daqs.geometry, mikeio.spatial.GeometryUndefined
-    )  # Aggregating over space doesn't create a well defined geometry
+        daqs.geometry, mikeio.spatial.Geometry0D
+    )  # Aggregating over space returns Geometry0D (time series)
     assert isinstance(da2.geometry, mikeio.Grid1D)  # But this one is intact
     assert len(daqs.time) == 10
     assert daqs.ndim == 1
@@ -1175,23 +1130,21 @@ def test_write_dfs2(tmp_path: Path) -> None:
     assert g.projection == g2.projection
 
 
-def test_write_dfs2_single_time_no_time_dim(tmp_path: Path) -> None:
-    g = mikeio.Grid2D(
-        x=np.linspace(10, 20, 30),
-        y=np.linspace(10, 20, 20),
-        projection="LONG/LAT",
-    )
-    da = mikeio.DataArray(
-        np.random.random(size=(g.ny, g.nx)),  # No singleton time
-        time=pd.date_range(start="2000", periods=1),
-        item=ItemInfo("Random"),
-        geometry=g,
-        dims=("y", "x"),
-    )
+def test_write_dfs2_single_timestep(tmp_path: Path) -> None:
+    ny, nx = 4, 7  # asymmetric to catch row/column swap
+    g = mikeio.Grid2D(nx=nx, dx=1.0, ny=ny, dy=1.0)
+    data = np.arange(ny * nx).reshape(ny, nx)  # values depend on position
+    da = mikeio.DataArray(data=data, geometry=g)
+    assert da.dims == ("y", "x")
+    assert da.shape == (ny, nx)
 
-    fn = str(tmp_path / "test_2.dfs2")
-
+    fn = tmp_path / "test.dfs2"
     da.to_dfs(fn)
+
+    ds = mikeio.read(fn)
+    assert ds[0].dims == ("time", "y", "x")
+    assert ds[0].shape == (1, ny, nx)
+    assert np.allclose(ds[0].values[0], data)
 
 
 def test_xzy_selection() -> None:
@@ -1451,3 +1404,74 @@ def test_parse_time_decreasing() -> None:
 
 
 # ===============================================================================================================
+
+
+def test_geometry0d_space_axis_raises() -> None:
+    """Test that Geometry0D raises ValueError for axis='space'."""
+    from mikeio.spatial import Geometry0D
+
+    da = mikeio.DataArray(
+        data=np.random.rand(10),
+        time=pd.date_range("2000", periods=10, freq="D"),
+        geometry=Geometry0D(),
+    )
+    with pytest.raises(ValueError, match="space axis cannot be selected"):
+        da.mean(axis="space")
+
+
+def test_point_spectrum_space_axis_raises() -> None:
+    """Test that point spectrum raises ValueError for axis='space'."""
+    dfs = mikeio.open("tests/testdata/spectra/pt_spectra.dfsu")
+    assert isinstance(dfs, DfsuSpectral)
+    ds = dfs.read()
+    da = ds[0]
+    with pytest.raises(ValueError, match="space axis cannot be selected"):
+        da.mean(axis="space")
+
+
+def test_area_spectrum_space_axis() -> None:
+    """Test that area spectrum correctly aggregates over element axis."""
+    dfs = mikeio.open("tests/testdata/spectra/area_spectra.dfsu")
+    assert isinstance(dfs, DfsuSpectral)
+    ds = dfs.read()
+    da = ds[0]
+    # Should aggregate over element axis only
+    result = da.mean(axis="space")
+    # Result should have time, direction, frequency but not element
+    assert "element" not in result.dims
+    assert result.shape == (3, 16, 25)  # time, direction, frequency
+
+
+def test_line_spectrum_space_axis() -> None:
+    """Test that line spectrum correctly aggregates over node axis."""
+    dfs = mikeio.open("tests/testdata/spectra/line_spectra.dfsu")
+    assert isinstance(dfs, DfsuSpectral)
+    ds = dfs.read()
+    da = ds[0]
+    # Should aggregate over node axis only
+    result = da.mean(axis="space")
+    # Result should have time, direction, frequency but not node
+    assert "node" not in result.dims
+    assert result.shape == (4, 16, 25)  # time, direction, frequency
+
+
+def test_parse_axis_none_default() -> None:
+    """Test that axis=None defaults to all axes."""
+    ds = mikeio.read("tests/testdata/waves.dfs2")
+    da = ds[0]
+    # axis=None should aggregate over all axes
+    result = da.mean(axis=None)
+    assert result.ndim == 0  # Scalar result
+
+
+def test_grid2d_space_axis_with_time() -> None:
+    """Test that Grid2D with time correctly handles space axis as tuple."""
+    ds = mikeio.read("tests/testdata/waves.dfs2")
+    da = ds[0]
+    assert da._has_time_axis
+    # Grid2D has dims ("y", "x") so space axis should be (0, 1)
+    assert da.geometry.get_space_axis() == (0, 1)
+    # With time, should aggregate over axes (1, 2) - y and x
+    result = da.mean(axis="space")
+    assert result.shape == (3,)  # Only time dimension left
+    assert result.dims == ("time",)

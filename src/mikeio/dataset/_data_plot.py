@@ -256,7 +256,7 @@ class _DataArrayPlotterGrid1D(_DataArrayPlotter):
             **kwargs,
         )
         _ = fig.colorbar(pos, label=self._label_txt())
-        ax.set_xlabel(self.da.geometry._axis_name)
+        ax.set_xlabel(self.da.geometry.dims[0])
         ax.set_ylabel("time")
         return ax
 
@@ -267,7 +267,7 @@ class _DataArrayPlotterGrid1D(_DataArrayPlotter):
         elif self.da.n_timesteps == 1:
             ax.set_title(f"{self.da.time[0]}")
         ax.plot(self.da.geometry.x, self.da.values.T, **kwargs)
-        ax.set_xlabel(self.da.geometry._axis_name)
+        ax.set_xlabel(self.da.geometry.dims[0])
         ax.set_ylabel(self._label_txt())
         return ax
 

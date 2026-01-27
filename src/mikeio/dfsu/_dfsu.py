@@ -422,14 +422,8 @@ class Dfsu2DH:
 
         dfs.Close()
 
-        dims: tuple[str, ...] = ("time", "element")
-
-        if single_time_selected and not keepdims:
-            dims = ("element",)
-
         if elements is not None and len(elements) == 1:
             # squeeze point data
-            dims = tuple([d for d in dims if d != "element"])
             data_list = [np.squeeze(d, axis=-1) for d in data_list]
 
         time = pd.to_datetime(t_rel, unit="s", origin=self.start_time)
@@ -440,7 +434,6 @@ class Dfsu2DH:
             time=time,
             items=item_infos,
             geometry=geometry,
-            dims=dims,
             validate=False,
             dt=self.timestep,
         )
