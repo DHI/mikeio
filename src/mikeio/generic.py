@@ -52,6 +52,8 @@ __all__ = [
     "scale",
     "sum",
     "change_datatype",
+    "reduce",
+    "statistics",
 ]
 
 
@@ -1129,3 +1131,303 @@ def transform(
 
     dfs_i.Close()
     dfs.Close()
+
+
+def _reduce_time(
+    dfs_i: DfsFile,
+    funcs: Sequence[Callable[[np.ndarray, np.ndarray], np.ndarray]],
+    item_numbers: Sequence[int],
+    initial: float | list[float | None] | None = None,
+    start: int | None = None,
+    stop: int | None = None,
+    skipna: bool = True,
+) -> list[np.ndarray]:
+    """Reduce time dimensions by applying multiple binary functions.
+
+    Parameters
+    ----------
+    dfs_i : DfsFile
+        Opened DFS file to read from
+    funcs : Sequence[Callable]
+        List of binary reduction functions to apply
+    item_numbers : Sequence[int]
+        Item numbers to process (0-based)
+    initial : float | list[float] | None, optional
+        Initial value(s) for the accumulators. Can be:
+        - None: Initialize with first timestep data (default)
+        - float: Same initial value for all functions
+        - list[float]: Different initial value for each function (length must match funcs)
+    start : int | None, optional
+        Start timestep index (0-based), by default None (start of file)
+    stop : int | None, optional
+        Stop timestep index (0-based, exclusive), by default None (end of file)
+    skipna : bool, optional
+        Exclude NaN/delete values when computing the result, default True
+
+    Returns
+    -------
+    accumulators : list[np.ndarray]
+        List of reduced arrays, one per function per item
+        (ordered as [func0-item0, func1-item0, ..., func0-item1, ...])
+
+    """
+    n_funcs = len(funcs)
+    n_time_steps = dfs_i.FileInfo.TimeAxis.NumberOfTimeSteps
+
+    # Validate initial parameter
+    if isinstance(initial, list):
+        if len(initial) != n_funcs:
+            raise ValueError(
+                f"Length of initial ({len(initial)}) must match number of functions ({n_funcs})"
+            )
+        initial_values = initial
+    elif initial is not None:
+        initial_values = [initial] * n_funcs
+    else:
+        initial_values = None
+
+    start_timestep = 0 if start is None else start
+    stop_timestep = n_time_steps if stop is None else stop
+
+    # Initialize accumulators: one per function per item
+    accumulators = []
+    if initial_values is None:
+        # Initialize with first timestep data
+        for item_no in item_numbers:
+            first = _read_item(dfs_i, item_no, start_timestep)
+            for _ in range(n_funcs):
+                accumulators.append(first.copy())
+        start_timestep += 1  # Already processed first timestep
+    else:
+        # Initialize with provided scalar value
+        for item_no in item_numbers:
+            first = _read_item(dfs_i, item_no, start_timestep)  # Get shape
+            for func_idx in range(n_funcs):
+                accumulators.append(
+                    np.full_like(first, initial_values[func_idx], dtype=np.float64)
+                )
+
+    # Apply reduction
+    for timestep in trange(start_timestep, stop_timestep, disable=not show_progress):
+        for item_idx, item_no in enumerate(item_numbers):
+            data = _read_item(dfs_i, item_no, timestep)
+            for func_idx, func in enumerate(funcs):
+                acc_idx = item_idx * n_funcs + func_idx
+                acc = accumulators[acc_idx]
+
+                if skipna:
+                    valid_data = ~np.isnan(data)
+                    nan_acc = np.isnan(acc)
+
+                    # If mask has Nans where data is valid, initialize those
+                    need_init = valid_data & nan_acc
+                    if need_init.any():
+                        acc[need_init] = data[need_init]
+
+                    # Update mask where accumulator and data are both valid
+                    both_valid = valid_data & ~nan_acc
+                    if both_valid.any():
+                        acc[both_valid] = func(acc[both_valid], data[both_valid])
+                else:
+                    # acc = func(acc, data)
+                    accumulators[acc_idx] = func(acc, data)
+    return accumulators
+
+
+def reduce(
+    infilename: str | pathlib.Path,
+    outfilename: str | pathlib.Path,
+    functions: Sequence[Callable[[np.ndarray, np.ndarray], np.ndarray]]
+    | Callable[[np.ndarray, np.ndarray], np.ndarray],
+    items: Sequence[int | str] | None = None,
+    function_labels: Sequence[str] | None = None,
+    initial: float | list[float | None] | None = None,
+    skipna: bool = True,
+) -> None:
+    """This function computes multiple temporal reductions (e.g., min, max, sum)
+    efficiently by processing with a single pass.
+
+    Parameters
+    ----------
+    infilename : str | pathlib.Path
+        input filename
+    outfilename : str | pathlib.Path
+        output filename
+    functions : Sequence[Callable] or Callable
+        List of binary functions to apply cumulatively (e.g., [np.minimum, np.maximum])
+    items : Sequence[int | str] | None, optional
+        Process only selected items, by number (0-based) or name, by default: all
+    function_labels: Sequence[str] | None, optional
+        Labels for the functions, by default None. If None, function names will be used.
+    initial: float | list[float | None] | None, optional
+        Initial value(s) for the accumulators. Can be:
+        - None: Initialize with first timestep data (default)
+        - float: Same initial value for all functions
+        - list[float]: Different initial value for each function (length must match funcs)
+    skipna : bool, optional
+        Exclude NaN/delete values when computing the result, default True
+
+    """
+    # Normalize funcs to a list
+    functions = functions if isinstance(functions, Sequence) else [functions]
+
+    # Validate function labels
+    if function_labels is not None:
+        if len(functions) != len(function_labels):
+            raise ValueError("Length of function_labels must match length of functions")
+        else:
+            function_labels = list(function_labels)
+    else:
+        function_labels = [
+            f.__name__ if hasattr(f, "__name__") else f"Func_{i}"
+            for i, f in enumerate(functions)
+        ]
+
+    # open input file and check for layered dfsu
+    dfs_i = DfsFileFactory.DfsGenericOpen(str(infilename))
+    is_layered_dfsu = dfs_i.ItemInfo[0].Name == "Z coordinate"
+
+    # Get item numbers
+    item_numbers = _valid_item_numbers(
+        dfs_i.ItemInfo, items, ignore_first=is_layered_dfsu
+    )
+    if is_layered_dfsu:  # item 0 is Z coordinate in layered dfsu
+        item_numbers = [it + 1 for it in item_numbers]
+
+    # =========
+    # Perform reduction
+    # =========
+    accumulators = _reduce_time(
+        dfs_i, functions, item_numbers, skipna=skipna, initial=initial
+    )
+
+    deletevalue = dfs_i.FileInfo.DeleteValueFloat
+
+    # Create output items with labels
+    selected_items = [dfs_i.ItemInfo[i] for i in item_numbers]
+    output_items = _get_repeated_items(selected_items, prefixes=function_labels)
+    if is_layered_dfsu:
+        output_items.insert(0, dfs_i.ItemInfo[0])
+
+    # Create output file
+    dfs_o = _clone(infilename, outfilename, items=output_items)
+
+    # Add z layer info if layered dfsu
+    if is_layered_dfsu:
+        znitemdata = dfs_i.ReadItemTimeStep(1, 0)
+        dfs_o.WriteItemTimeStepNext(0.0, znitemdata.Data)
+
+    # add reduced data to output file
+    for acc in accumulators:
+        acc[np.isnan(acc)] = deletevalue
+        darray = acc.astype(np.float32)
+        dfs_o.WriteItemTimeStepNext(0.0, darray)
+
+    dfs_i.Close()
+    dfs_o.Close()
+
+
+def statistics(
+    infilename: str | pathlib.Path,
+    outfilename: str | pathlib.Path,
+    items: Sequence[int | str] | int | None = None,
+    from_ts: int | None = None,
+    to_ts: int | None = None,
+) -> None:
+    """Calculate time statistics on a dfsu file.
+
+    Parameters
+    ----------
+    infilename : str
+        input filename
+    outfilename : str
+        output filename
+    items: Sequence[str] or Sequence[int], optional
+        Process only selected items, by number (0-based)
+        or name, by default: all
+    from_ts : int | None, optional
+        Start timestep index (0-based), by default None (start of file)
+    to_ts : int | None, optional
+        Stop timestep index (0-based, exclusive), by default None (end of file)
+
+    """
+    # open input file and check for layered dfsu
+    dfs_i = DfsFileFactory.DfsGenericOpen(str(infilename))
+    is_layered_dfsu = dfs_i.ItemInfo[0].Name == "Z coordinate"
+
+    # Get item numbers
+    item_numbers = _valid_item_numbers(
+        dfs_i.ItemInfo, items, ignore_first=is_layered_dfsu
+    )
+    if is_layered_dfsu:  # item 0 is Z coordinate in layered dfsu
+        item_numbers = [it + 1 for it in item_numbers]
+
+    def _count(acc: np.ndarray, data: np.ndarray) -> np.ndarray:
+        """Count timesteps by incrementing accumulator, ignoring data."""
+        return acc + 1
+
+    funcs: list[Callable[[np.ndarray, np.ndarray], np.ndarray]] = [
+        np.minimum,
+        np.maximum,
+        np.add,
+        _count,
+    ]
+    inits = [None, None, 0.0, 0.0]
+
+    # =========
+    # Perform reduction
+    # =========
+    accumulators = _reduce_time(
+        dfs_i,
+        funcs,
+        item_numbers,
+        skipna=True,
+        initial=inits,
+        start=from_ts,
+        stop=to_ts,
+    )
+
+    # Reshape accumulators: [min0, max0, sum0, count0, min1, max1, sum1, count1, ...]
+    # Into statistics: [min0, max0, mean0, min1, max1, mean1, ...]
+    n_funcs = len(funcs)
+    n_items = len(item_numbers)
+    statistics = []
+
+    for i_item in range(n_items):
+        base_idx = i_item * n_funcs
+        min_acc = accumulators[base_idx]
+        max_acc = accumulators[base_idx + 1]
+        sum_acc = accumulators[base_idx + 2]
+        count_acc = accumulators[base_idx + 3]
+
+        # Calculate mean
+        mean_acc = np.full_like(sum_acc, np.nan)
+        valid = count_acc > 0
+        mean_acc[valid] = sum_acc[valid] / count_acc[valid]
+
+        statistics.extend([min_acc, max_acc, mean_acc])
+
+    # Create output items with labels
+    labels = ["Min", "Max", "Mean"]
+    selected_items = [dfs_i.ItemInfo[i] for i in item_numbers]
+    output_items = _get_repeated_items(selected_items, prefixes=labels)
+    if is_layered_dfsu:
+        output_items.insert(0, dfs_i.ItemInfo[0])
+
+    # Create output file
+    dfs_o = _clone(infilename, outfilename, items=output_items)
+
+    # Add z layer info if layered dfsu
+    if is_layered_dfsu:
+        znitemdata = dfs_i.ReadItemTimeStep(1, 0)
+        dfs_o.WriteItemTimeStepNext(0.0, znitemdata.Data)
+
+    # add reduced data to output file
+    deletevalue = dfs_i.FileInfo.DeleteValueFloat
+    for acc in statistics:
+        acc[np.isnan(acc)] = deletevalue
+        darray = acc.astype(np.float32)
+        dfs_o.WriteItemTimeStepNext(0.0, darray)
+
+    dfs_i.Close()
+    dfs_o.Close()
