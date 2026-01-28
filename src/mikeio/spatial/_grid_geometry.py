@@ -719,14 +719,6 @@ class Grid2D(_Geometry):
         ycol = yy.reshape(-1, 1)
         return np.column_stack([xcol, ycol])
 
-    @property
-    def _cart(self) -> Cartography:
-        """MIKE Core Cartography object."""
-        factory = (
-            Cartography.CreateGeoOrigin if self.is_geo else Cartography.CreateProjOrigin
-        )
-        return factory(self.projection_string, *self.origin, self.orientation)
-
     def _shift_x0y0_to_origin(self) -> None:
         """Shift spatial axis to start at (0,0) adding the start to origin instead.
 
@@ -734,10 +726,6 @@ class Grid2D(_Geometry):
         """
         if self._is_rotated:
             raise ValueError("Only possible if orientation = 0")
-            # TODO: needs testing
-            # i0, j0 = self._x0/self.dx, self._y0/self.dy
-            # self._x0, self._y0 = 0.0, 0.0
-            # self._origin = self._cart.Xy2Proj(i0, j0)
         elif self.is_spectral:
             raise ValueError("Not possible for spectral Grid2D")
         else:
@@ -913,11 +901,24 @@ class Grid2D(_Geometry):
         x0 = self._x0 + (self.x[ii[0]] - self.x[0])
         y0 = self._y0 + (self.y[jj[0]] - self.y[0])
         origin = None if self._shift_origin_on_write else self.origin
-        # if not self._is_rotated and not self._shift_origin_on_write:
+
         if self._is_rotated:
-            origin = self._cart.Xy2Proj(ii[0], jj[0])
-            # what about the orientation if is_geo??
-            # orientationGeo = proj.Proj2GeoRotation(east, north, orientationProj)
+            if self.is_geo:
+                cart = Cartography.CreateGeoOrigin(
+                    projectionString=self.projection_string,
+                    lonOrigin=self.origin[0],
+                    latOrigin=self.origin[1],
+                    orientation=self.orientation,
+                )
+            else:
+                cart = Cartography.CreateProjOrigin(
+                    projectionString=self.projection_string,
+                    east=self.origin[0],
+                    north=self.origin[1],
+                    orientationProj=self.orientation,
+                )
+
+            origin = cart.Xy2Proj(ii[0], jj[0])
             x0, y0 = (0.0, 0.0)
         elif not self.is_spectral:
             origin = (self.origin[0] + x0, self.origin[1] + y0)
