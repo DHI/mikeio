@@ -1320,7 +1320,10 @@ class Grid3D(_Geometry):
             if self._is_rotated:
                 # rotated => most be projected
                 cart = Cartography.CreateProjOrigin(
-                    self.projection, *self.origin, self.orientation
+                    projectionString=self.projection,
+                    east=self.origin[0],
+                    north=self.origin[1],
+                    orientationProj=self.orientation,
                 )
                 origin = cart.Xy2Proj(ii[0], jj[0])
             else:
