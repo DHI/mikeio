@@ -92,6 +92,11 @@ select = [
     "D417",
 ]
 
+# Enable F822 preview behavior to catch undefined names in __all__ in __init__.py files
+extend-select = ["F822"]
+preview = true
+explicit-preview-rules = true
+
 [tool.ruff.lint.per-file-ignores]
 "tests/*" = ["D"]
 "notebooks/*" = ["D", "E402"]
