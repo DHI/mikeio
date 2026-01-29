@@ -427,7 +427,7 @@ class PfsDocument(PfsSection):
         # Handle pipe-delimited strings with special characters
         # Example: |file\path.dfs|
         if s.count("|") == 2 and "CLOB" not in context:
-            prefix, content, suffix = s.split("|")
+            _prefix, content, _suffix = s.split("|")
             if len(content) > 1 and content.count("'") > 0:
                 # string containing single quotes that needs escaping
                 warnings.warn(
