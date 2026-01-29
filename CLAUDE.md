@@ -68,6 +68,7 @@ make docs
 - **Source code location**: `src/mikeio/` (not `mikeio/` at root level)
 - **Tests location**: `tests/`
 - **Documentation**: `docs/`
+- **Architecture Decision Records**: `adr/` - Documents key architectural decisions and their rationale
 
 ### Core Modules
 
