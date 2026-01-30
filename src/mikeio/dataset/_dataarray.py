@@ -584,21 +584,18 @@ class DataArray:
 
     def _getitem_parse_key(self, key: Any) -> Any:
         if isinstance(key, str):
-            warnings.warn(
-                "Indexing with strings is deprecated. Only integer indexing is allowed. Otherwise use .sel(time=...).",
-                FutureWarning,
+            raise TypeError(
+                "Indexing with strings is not supported. Use .sel(time=...) or .isel(time=...) instead."
             )
         if isinstance(key, slice):
             if isinstance(key.start, str) or isinstance(key.stop, str):
-                warnings.warn(
-                    "Indexing with strings is deprecated. Only integer indexing is allowed. Otherwise use .sel(time=...).",
-                    FutureWarning,
+                raise TypeError(
+                    "Indexing with strings is not supported. Use .sel(time=...) or .isel(time=...) instead."
                 )
         if isinstance(key, Iterable):
-            if any([isinstance(k, str) for k in key]):
-                warnings.warn(
-                    "Indexing with strings is deprecated. Only integer indexing is allowed. Otherwise use .sel(time=...).",
-                    FutureWarning,
+            if any(isinstance(k, str) for k in key):
+                raise TypeError(
+                    "Indexing with strings is not supported. Use .sel(time=...) or .isel(time=...) instead."
                 )
 
         key = key if isinstance(key, tuple) else (key,)

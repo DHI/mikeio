@@ -27,7 +27,6 @@ if TYPE_CHECKING:
     import polars as pl
 
 from ._dataarray import DataArray
-from .._time import _get_time_idx_list, _n_selected_timesteps
 from ..eum import EUMType, EUMUnit, ItemInfo
 from ..spatial import (
     GeometryFM2D,
@@ -540,34 +539,6 @@ class Dataset:
     def __getitem__(self, key: Iterable[Hashable]) -> Dataset: ...
 
     def __getitem__(self, key: Any) -> DataArray | Dataset:
-        # select time steps
-        if (
-            isinstance(key, Sequence) and not isinstance(key, str)
-        ) and self._is_key_time(key[0]):
-            key = pd.DatetimeIndex(key)  # type: ignore
-        if isinstance(key, pd.DatetimeIndex) or self._is_key_time(key):
-            time_steps = _get_time_idx_list(self.time, key)
-            if _n_selected_timesteps(self.time, time_steps) == 0:
-                raise IndexError("No timesteps found!")
-            warnings.warn(
-                "Subsetting in time using indexing is deprecated. Use .sel(time=...) or .isel(time=...) instead.",
-                FutureWarning,
-            )
-            return self.isel(time=time_steps)
-        if isinstance(key, slice):
-            if self._is_slice_time_slice(key):
-                try:
-                    s = self.time.slice_indexer(key.start, key.stop)
-                    time_steps = list(range(s.start, s.stop))
-                except ValueError:
-                    time_steps = list(range(*key.indices(len(self.time))))
-                # deprecated, use sel instead or isel instead
-                warnings.warn(
-                    "Subsetting in time using indexing is deprecated. Use .sel(time=...) or .isel(time=...) instead.",
-                    FutureWarning,
-                )
-                return self.isel(time=time_steps)
-
         # select items
         key = self._key_to_str(key)
 
@@ -593,34 +564,6 @@ class Dataset:
             return Dataset(data=data_vars, validate=False)
 
         raise TypeError(f"indexing with a {type(key)} is not (yet) supported")
-
-    # deprecated
-    def _is_slice_time_slice(self, s: slice) -> bool:
-        if (s.start is None) and (s.stop is None):
-            return False
-        if s.start is not None:
-            if not self._is_key_time(s.start):
-                return False
-        if s.stop is not None:
-            if not self._is_key_time(s.stop):
-                return False
-        return True
-
-    # deprecated
-    def _is_key_time(self, key: Any) -> bool:
-        if isinstance(key, slice):
-            return False
-        if isinstance(key, (int, float)):
-            return False
-        if isinstance(key, str) and key in self.names:
-            return False
-        if isinstance(key, str) and len(key) > 0 and key[0].isnumeric():
-            # TODO: try to parse with pandas
-            return True
-        if isinstance(key, (datetime, np.datetime64, pd.Timestamp)):
-            return True
-
-        return False  # type: ignore
 
     def _key_to_str(self, key: Any) -> Any:
         """Translate item selection key to str (or list[str])."""
