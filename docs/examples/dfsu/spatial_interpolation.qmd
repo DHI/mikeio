@@ -132,13 +132,56 @@ n_nan_elements
 
 ## Interpolate scatter data to mesh
 
-We want to interpolate scatter data onto an existing mesh and create a new dfsu with the interpolated data. 
+We want to interpolate scatter data onto an existing mesh and create a new dfsu with the interpolated data.
 
-**This uses lower level private utility methods not part of the public API**.
+Since MIKE IO doesn't provide scatter-to-mesh interpolation in its public API, we'll implement a simple Inverse Distance Weighting (IDW) function that you can copy and adapt for your needs.
 
 ```{python}
-from mikeio.spatial._distance import dist_in_meters
-from mikeio._interpolation import get_idw_interpolant
+def simple_idw(source_xy, source_values, target_xy, p=2, is_geo=False):
+    """Inverse Distance Weighting interpolation.
+
+    Parameters
+    ----------
+    source_xy : array-like, shape (n_source, 2)
+        Coordinates of source points (x, y)
+    source_values : array-like, shape (n_source,)
+        Values at source points
+    target_xy : array-like, shape (n_target, 2)
+        Coordinates of target points (x, y)
+    p : float, optional
+        Power parameter (default=2)
+    is_geo : bool, optional
+        Use geographic distance calculation (default=False)
+
+    Returns
+    -------
+    np.ndarray, shape (n_target,)
+        Interpolated values at target points
+    """
+    from scipy.spatial.distance import cdist
+
+    # Calculate distances between all target and source points
+    if is_geo:
+        # For geographic coordinates, use haversine-like distance
+        # (simplified, for production use proper geodesic distance)
+        from mikeio.spatial._distance import dist_in_meters
+        distances = np.array([
+            dist_in_meters(source_xy, target_xy[i], is_geo=True)
+            for i in range(len(target_xy))
+        ])
+    else:
+        # Euclidean distance
+        distances = cdist(target_xy, source_xy)
+
+    # Calculate IDW weights
+    MIN_DISTANCE = 1e-8
+    weights = np.where(distances < MIN_DISTANCE, 1.0, 1.0 / distances**p)
+
+    # Normalize weights (rows sum to 1)
+    weights = weights / weights.sum(axis=1, keepdims=True)
+
+    # Interpolate
+    return weights @ source_values
 ```
 
 ```{python}
@@ -151,38 +194,20 @@ dfs.geometry.plot.mesh();
 
 ```{python}
 # scatter data: x,y,value for 4 points
-scatter= np.array([[1,50,1], [4, 52, 3], [8, 55, 2], [-1, 55, 1.5]])
+scatter = np.array([[1,50,1], [4, 52, 3], [8, 55, 2], [-1, 55, 1.5]])
 scatter
 ```
 
-Let's first try the approx for a single element: 
-
-* calc distance to all interpolation points
-* calc IDW interpolatant weights
-* Interpolate
+Now interpolate from scatter points to all mesh elements using our IDW function:
 
 ```{python}
-dist = dist_in_meters(scatter[:,:2], dfs.geometry.element_coordinates[0,:2], is_geo=dfs.geometry.is_geo)
-dist
-```
-
-```{python}
-w = get_idw_interpolant(dist, p=2)
-w
-```
-
-```{python}
-np.dot(scatter[:,2], w) # interpolated value in element 0
-```
-
-Let's do the same for all points in the mesh and plot in the end
-
-```{python}
-dati = np.zeros((1, dfs.geometry.n_elements))
-for j in range(dfs.geometry.n_elements):
-    dist = dist_in_meters(scatter[:, :2], dfs.geometry.element_coordinates[j, :2], is_geo=dfs.geometry.is_geo)
-    w = get_idw_interpolant(dist, p=2)
-    dati[0, j] = np.dot(scatter[:, 2], w)
+dati = simple_idw(
+    source_xy=scatter[:, :2],
+    source_values=scatter[:, 2],
+    target_xy=dfs.geometry.element_coordinates[:, :2],
+    p=2,
+    is_geo=dfs.geometry.is_geo
+).reshape(1, -1)  # reshape to (1, n_elements) for single timestep
 ```
 
 ```{python}
