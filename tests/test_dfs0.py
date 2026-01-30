@@ -72,6 +72,22 @@ def test_write_int_not_possible(tmp_path: Path) -> None:
         da.to_dfs(fp, dtype=np.int32)
 
 
+def test_write_with_title(tmp_path: Path) -> None:
+    fp = tmp_path / "simple_with_title.dfs0"
+
+    nt = 100
+
+    da = mikeio.DataArray(
+        data=np.random.random([nt]).astype(np.float32),
+        time=pd.date_range("2000", periods=nt, freq="h"),
+    )
+
+    da.to_dfs(fp, title="My DFS0 file")
+
+    dfs = mikeio.Dfs0(fp)
+    assert dfs.title == "My DFS0 file"
+
+
 def test_read_units_write_new(tmp_path: Path) -> None:
     fp = tmp_path / "random.dfs0"
 
@@ -98,6 +114,11 @@ def test_read_all_time_steps_without_reading_data() -> None:
     dfs = mikeio.Dfs0("tests/testdata/random.dfs0")
     assert isinstance(dfs.time, pd.DatetimeIndex)
     assert len(dfs.time) == 1000
+
+
+def test_read_with_title() -> None:
+    dfs = mikeio.Dfs0("tests/testdata/da_diagnostic.dfs0")
+    assert dfs.title == "Diagnostic"
 
 
 def test_items_dataframe() -> None:
