@@ -147,36 +147,19 @@ def test_index_with_attribute() -> None:
     )  # This is now modfied, but both methods points to the same object
 
 
-def test_getitem_time(ds3: Dataset) -> None:
+def test_getitem_time_string_not_supported(ds3: Dataset) -> None:
     # time = pd.date_range("2000-1-2", freq="h", periods=100)
 
-    # deprecated use .sel(time=...) or .isel(time=...) instead
-    with pytest.warns(FutureWarning, match="time"):
-        ds_sel = ds3["2000-1-2"]  # type: ignore
-    assert ds_sel.n_timesteps == 24
-    assert ds_sel.is_equidistant
+    # string indexing is not supported, use .sel(time=...) or .isel(time=...) instead
+    with pytest.raises(KeyError):
+        ds3["2000-1-2"]  # type: ignore
 
-    with pytest.warns(FutureWarning, match="time"):
-        ds_sel = ds3["2000-1-2":"2000-1-3 00:00"]  # type: ignore
-    assert ds_sel.n_timesteps == 25
-    assert ds_sel.is_equidistant
+    with pytest.raises(TypeError):
+        ds3["2000-1-2":"2000-1-3 00:00"]  # type: ignore
 
-    with pytest.warns(FutureWarning, match="time"):
-        time = ["2000-1-2 04:00:00", "2000-1-2 08:00:00", "2000-1-2 12:00:00"]
-        ds_sel = ds3[time]  # type: ignore
-    assert ds_sel.n_timesteps == 3
-    assert ds_sel.is_equidistant
-
-    with pytest.warns(FutureWarning, match="time"):
-        time = [ds3.time[0], ds3.time[1], ds3.time[7], ds3.time[23]]
-        ds_sel = ds3[time]  # type: ignore
-    assert ds_sel.n_timesteps == 4
-    assert not ds_sel.is_equidistant
-
-    with pytest.warns(FutureWarning, match="time"):
-        ds_sel = ds3[ds3.time[:10]]  # type: ignore
-    assert ds_sel.n_timesteps == 10
-    assert ds_sel.is_equidistant
+    time = ["2000-1-2 04:00:00", "2000-1-2 08:00:00", "2000-1-2 12:00:00"]
+    with pytest.raises(KeyError):
+        ds3[time]  # type: ignore
 
 
 def test_select_subset_isel() -> None:
@@ -246,8 +229,8 @@ def test_select_temporal_subset_by_idx() -> None:
     assert selds["Foo"].shape == (3, 100, 30)
 
 
-def test_temporal_subset_fancy() -> None:
-    # TODO use .sel(time=...) instead, more explicit
+def test_temporal_subset_fancy_string_not_supported() -> None:
+    # string indexing is not supported, use .sel(time=...) instead
     nt = (24 * 31) + 1
     d1 = np.zeros([nt, 100, 30]) + 1.5
     d2 = np.zeros([nt, 100, 30]) + 2.0
@@ -260,23 +243,17 @@ def test_temporal_subset_fancy() -> None:
     assert ds.time[0].hour == 0
     assert ds.time[-1].hour == 0
 
-    with pytest.warns(FutureWarning, match="time"):
-        selds = ds["2000-01-01 00:00":"2000-01-02 00:00"]  # type: ignore
+    with pytest.raises(TypeError):
+        ds["2000-01-01 00:00":"2000-01-02 00:00"]  # type: ignore
 
-    assert len(selds) == 2
-    assert selds["Foo"].shape == (25, 100, 30)
+    with pytest.raises(TypeError):
+        ds[:"2000-01-02 00:00"]  # type: ignore
 
-    with pytest.warns(FutureWarning, match="time"):
-        selds = ds[:"2000-01-02 00:00"]  # type: ignore
-    assert selds["Foo"].shape == (25, 100, 30)
+    with pytest.raises(TypeError):
+        ds["2000-01-31 00:00":]  # type: ignore
 
-    with pytest.warns(FutureWarning, match="time"):
-        selds = ds["2000-01-31 00:00":]  # type: ignore
-    assert selds["Foo"].shape == (25, 100, 30)
-
-    with pytest.warns(FutureWarning, match="time"):
-        selds = ds["2000-01-30":]  # type: ignore
-    assert selds["Foo"].shape == (49, 100, 30)
+    with pytest.raises(TypeError):
+        ds["2000-01-30":]  # type: ignore
 
 
 def test_select_item_by_name() -> None:
