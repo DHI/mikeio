@@ -1,4 +1,5 @@
 from __future__ import annotations
+import warnings
 from dataclasses import dataclass
 import numpy as np
 
@@ -29,6 +30,38 @@ def _get_idw_interpolant(distances: np.ndarray, p: float = 2) -> np.ndarray:
     weights[~match, :] = 1 / distances[~match, :] ** p
     weights[~match, :] /= weights[~match, :].sum(axis=1, keepdims=True)
 
+    return weights
+
+
+def get_idw_interpolant(distances: np.ndarray, p: float = 2) -> np.ndarray:
+    """DEPRECATED: Calculate IDW weights from distances.
+
+    Parameters
+    ----------
+    distances : np.ndarray
+        Array of distances, 1D or 2D
+    p : float
+        Power parameter for IDW
+
+    Returns
+    -------
+    np.ndarray
+        Weights for interpolation
+
+    """
+    warnings.warn(
+        "get_idw_interpolant is deprecated",
+        FutureWarning,
+        stacklevel=2,
+    )
+    is_1d = distances.ndim == 1
+    if is_1d:
+        distances = np.atleast_2d(distances)
+
+    weights = _get_idw_interpolant(distances, p)
+
+    if is_1d:
+        weights = weights[0]
     return weights
 
 
