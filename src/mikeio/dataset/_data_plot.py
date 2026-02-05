@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import Any, TYPE_CHECKING, Sequence
+from typing import Any, Literal, TYPE_CHECKING, Sequence
 
 from matplotlib.figure import Figure
 import numpy as np
@@ -11,6 +11,8 @@ from ..spatial._FM_plot import _plot_map, _plot_vertical_profile
 from .._spectral import plot_2dspectrum
 
 if TYPE_CHECKING:
+    from matplotlib.colors import Colormap
+
     from ..dataset import DataArray, Dataset
 
 
@@ -439,21 +441,55 @@ class _DataArrayPlotterFM(_DataArrayPlotter):
 
     """
 
-    def __call__(
+    def __call__(  # type: ignore[override]
         self,
         ax: Axes | None = None,
         figsize: tuple[float, float] | None = None,
-        **kwargs: Any,
+        plot_type: Literal[
+            "patch", "mesh_only", "shaded", "contour", "contourf", "outline_only"
+        ] = "patch",
+        title: str | None = None,
+        label: str | None = None,
+        cmap: Colormap | None = None,
+        vmin: float | None = None,
+        vmax: float | None = None,
+        levels: int | Sequence[float] | None = None,
+        n_refinements: int = 0,
+        show_mesh: bool = False,
+        show_outline: bool = True,
+        add_colorbar: bool = True,
     ) -> Axes:
         """Plot data as coloured patches."""
         ax = self._get_ax(ax, figsize)
-        return self._plot_FM_map(ax, **kwargs)
+        return self._plot_FM_map(
+            ax=ax,
+            plot_type=plot_type,
+            title=title,
+            label=label,
+            cmap=cmap,
+            vmin=vmin,
+            vmax=vmax,
+            levels=levels,
+            n_refinements=n_refinements,
+            show_mesh=show_mesh,
+            show_outline=show_outline,
+            add_colorbar=add_colorbar,
+        )
 
     def patch(
         self,
         ax: Axes | None = None,
         figsize: tuple[float, float] | None = None,
-        **kwargs: Any,
+        title: str | None = None,
+        label: str | None = None,
+        cmap: Colormap | None = None,
+        vmin: float | None = None,
+        vmax: float | None = None,
+        levels: int | Sequence[float] | None = None,
+        n_refinements: int = 0,
+        show_mesh: bool = False,
+        show_outline: bool = True,
+        add_colorbar: bool = True,
     ) -> Axes:
         """Plot data as coloured patches.
 
@@ -466,14 +502,35 @@ class _DataArrayPlotterFM(_DataArrayPlotter):
 
         """
         ax = self._get_ax(ax, figsize)
-        kwargs["plot_type"] = "patch"
-        return self._plot_FM_map(ax, **kwargs)
+        return self._plot_FM_map(
+            ax=ax,
+            plot_type="patch",
+            title=title,
+            label=label,
+            cmap=cmap,
+            vmin=vmin,
+            vmax=vmax,
+            levels=levels,
+            n_refinements=n_refinements,
+            show_mesh=show_mesh,
+            show_outline=show_outline,
+            add_colorbar=add_colorbar,
+        )
 
     def contour(
         self,
         ax: Axes | None = None,
         figsize: tuple[float, float] | None = None,
-        **kwargs: Any,
+        title: str | None = None,
+        label: str | None = None,
+        cmap: Colormap | None = None,
+        vmin: float | None = None,
+        vmax: float | None = None,
+        levels: int | Sequence[float] | None = None,
+        n_refinements: int = 0,
+        show_mesh: bool = False,
+        show_outline: bool = True,
+        add_colorbar: bool = True,
     ) -> Axes:
         """Plot data as contour lines.
 
@@ -486,14 +543,35 @@ class _DataArrayPlotterFM(_DataArrayPlotter):
 
         """
         ax = self._get_ax(ax, figsize)
-        kwargs["plot_type"] = "contour"
-        return self._plot_FM_map(ax, **kwargs)
+        return self._plot_FM_map(
+            ax=ax,
+            plot_type="contour",
+            title=title,
+            label=label,
+            cmap=cmap,
+            vmin=vmin,
+            vmax=vmax,
+            levels=levels,
+            n_refinements=n_refinements,
+            show_mesh=show_mesh,
+            show_outline=show_outline,
+            add_colorbar=add_colorbar,
+        )
 
     def contourf(
         self,
         ax: Axes | None = None,
         figsize: tuple[float, float] | None = None,
-        **kwargs: Any,
+        title: str | None = None,
+        label: str | None = None,
+        cmap: Colormap | None = None,
+        vmin: float | None = None,
+        vmax: float | None = None,
+        levels: int | Sequence[float] | None = None,
+        n_refinements: int = 0,
+        show_mesh: bool = False,
+        show_outline: bool = True,
+        add_colorbar: bool = True,
     ) -> Axes:
         """Plot data as filled contours.
 
@@ -506,14 +584,26 @@ class _DataArrayPlotterFM(_DataArrayPlotter):
 
         """
         ax = self._get_ax(ax, figsize)
-        kwargs["plot_type"] = "contourf"
-        return self._plot_FM_map(ax, **kwargs)
+        return self._plot_FM_map(
+            ax=ax,
+            plot_type="contourf",
+            title=title,
+            label=label,
+            cmap=cmap,
+            vmin=vmin,
+            vmax=vmax,
+            levels=levels,
+            n_refinements=n_refinements,
+            show_mesh=show_mesh,
+            show_outline=show_outline,
+            add_colorbar=add_colorbar,
+        )
 
     def mesh(
         self,
         ax: Axes | None = None,
         figsize: tuple[float, float] | None = None,
-        **kwargs: Any,
+        title: str = "Mesh",
     ) -> Axes:
         """Plot mesh only.
 
@@ -525,13 +615,13 @@ class _DataArrayPlotterFM(_DataArrayPlotter):
         ```
 
         """
-        return self.da.geometry.plot.mesh(figsize=figsize, ax=ax, **kwargs)
+        return self.da.geometry.plot.mesh(figsize=figsize, ax=ax, title=title)
 
     def outline(
         self,
         ax: Axes | None = None,
         figsize: tuple[float, float] | None = None,
-        **kwargs: Any,
+        title: str = "Outline",
     ) -> Axes:
         """Plot domain outline.
 
@@ -543,34 +633,50 @@ class _DataArrayPlotterFM(_DataArrayPlotter):
         ```
 
         """
-        return self.da.geometry.plot.outline(figsize=figsize, ax=ax, **kwargs)
+        return self.da.geometry.plot.outline(figsize=figsize, ax=ax, title=title)
 
-    def _plot_FM_map(self, ax: Axes, **kwargs: Any) -> Axes:
+    def _plot_FM_map(
+        self,
+        ax: Axes,
+        plot_type: Literal[
+            "patch", "mesh_only", "shaded", "contour", "contourf", "outline_only"
+        ],
+        title: str | None,
+        label: str | None,
+        cmap: Colormap | None,
+        vmin: float | None,
+        vmax: float | None,
+        levels: int | Sequence[float] | None,
+        n_refinements: int,
+        show_mesh: bool,
+        show_outline: bool,
+        add_colorbar: bool,
+    ) -> Axes:
         values = self._get_first_step_values()
 
-        title = f"{self.da.time[0]}"
+        default_title = f"{self.da.time[0]}"
         if self.da.geometry.is_layered:
-            # select surface as default plotting for 3d files
             values = values[self.da.geometry.top_elements]
             geometry = self.da.geometry.geometry2d
-            title = "Surface, " + title
+            default_title = "Surface, " + default_title
         else:
             geometry = self.da.geometry
 
-        if "label" not in kwargs:
-            kwargs["label"] = self._label_txt()
-        if "title" not in kwargs:
-            kwargs["title"] = title
-
         return _plot_map(
-            node_coordinates=geometry.node_coordinates,
-            element_table=geometry.element_table,
-            element_coordinates=geometry.element_coordinates,
-            boundary_polylines=geometry.boundary_polygons.lines,
-            projection=geometry.projection,
+            geometry=geometry,
             z=values,
+            plot_type=plot_type,
+            title=title if title is not None else default_title,
+            label=label if label is not None else self._label_txt(),
+            cmap=cmap,
+            vmin=vmin,
+            vmax=vmax,
+            levels=levels,
+            n_refinements=n_refinements,
+            show_mesh=show_mesh,
+            show_outline=show_outline,
             ax=ax,
-            **kwargs,
+            add_colorbar=add_colorbar,
         )
 
 

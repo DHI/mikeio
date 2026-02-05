@@ -1,5 +1,7 @@
+from __future__ import annotations
+
 from dataclasses import dataclass
-from typing import Any, Literal, Sequence
+from typing import Any, Literal, Sequence, TYPE_CHECKING
 
 from numpy.typing import NDArray
 from matplotlib.axes import Axes
@@ -12,6 +14,10 @@ import numpy as np
 from scipy.sparse import csr_matrix
 
 from ._distance import relative_cumulative_distance
+
+if TYPE_CHECKING:
+    from ._FM_geometry import GeometryFM2D
+    from ._FM_geometry_layered import GeometryFM3D
 
 
 MESH_COL = "0.95"
@@ -73,11 +79,7 @@ class BoundaryPolygons:
 
 
 def _plot_map(
-    node_coordinates: np.ndarray,
-    element_table: np.ndarray,
-    element_coordinates: np.ndarray,
-    boundary_polylines: list[Polygon],
-    projection: str = "",
+    geometry: GeometryFM2D | GeometryFM3D,
     z: np.ndarray | None = None,
     plot_type: Literal[
         "patch", "mesh_only", "shaded", "contour", "contourf", "outline_only"
@@ -91,72 +93,10 @@ def _plot_map(
     n_refinements: int = 0,
     show_mesh: bool = False,
     show_outline: bool = True,
-    figsize: tuple[float, float] | None = None,
     ax: Axes | None = None,
     add_colorbar: bool = True,
 ) -> Axes:
-    """Plot unstructured data and/or mesh, mesh outline.
-
-    Parameters
-    ----------
-    node_coordinates: np.array
-        node coordinates
-    element_table: np.array
-        element table
-    element_coordinates: np.array
-        element coordinates
-    boundary_polylines: BoundaryPolylines,
-        boundary polylines
-    projection: str, optional
-        projection type, default: ""
-    z: np.array or a Dataset with a single item, optional
-        value for each element to plot, default bathymetry
-    plot_type: str, optional
-        type of plot: 'patch' (default), 'mesh_only', 'shaded',
-        'contour', 'contourf' or 'outline_only'
-    title: str, optional
-        axes title
-    label: str, optional
-        colorbar label (or title if contour plot)
-    cmap: matplotlib.cm.cmap, optional
-        colormap, default viridis
-    vmin: real, optional
-        lower bound of values to be shown on plot, default:None
-    vmax: real, optional
-        upper bound of values to be shown on plot, default:None
-    levels: int, list(float), optional
-        for contour plots: how many levels, default:10
-        or a list of discrete levels e.g. [3.0, 4.5, 6.0]
-    show_mesh: bool, optional
-        should the mesh be shown on the plot? default=True
-    show_outline: bool, optional
-        should domain outline be shown on the plot? default=True
-    n_refinements: int, optional
-        for 'shaded' and 'contour' plots (and if show_mesh=False)
-        do this number of mesh refinements for smoother plotting
-    figsize: (float, float), optional
-        specify size of figure
-    ax: matplotlib.axes, optional
-        Adding to existing axis, instead of creating new fig
-    add_colorbar: bool
-        Add colorbar to plot, default True
-
-    Returns
-    -------
-    <matplotlib.axes>
-
-    Examples
-    --------
-    >>> dfs = Dfsu("HD2D.dfsu")
-    >>> dfs.plot() # bathymetry
-    >>> ds = dfs.read(items="Surface elevation", time=0)
-    >>> ds.shape
-    (1, 884)
-    >>> ds.n_items
-    1
-    >>> dfs.plot(z=ds) # plot surface elevation
-
-    """
+    """Plot unstructured data and/or mesh, mesh outline."""
     import matplotlib.pyplot as plt
     import matplotlib
 
@@ -174,8 +114,10 @@ def _plot_map(
 
     cmap = cmap or matplotlib.colormaps["viridis"]
 
-    nc = node_coordinates
-    ec = element_coordinates
+    nc = geometry.node_coordinates
+    ec = geometry.element_coordinates
+    element_table = geometry.element_table
+    boundary_polylines = geometry.boundary_polygons.lines
 
     if ((vmin is not None) or (vmax is not None)) and (
         levels is not None and not np.isscalar(levels)
@@ -184,13 +126,11 @@ def _plot_map(
             "vmin/vmax cannot be provided together with non-integer levels"
         )
 
-    # plot in existing or new axes?
     if ax is None:
-        _, ax = plt.subplots(figsize=figsize)
+        _, ax = plt.subplots()
 
-    # set aspect ratio
-    __set_aspect_ratio(ax, nc, projection)
-    _set_xy_label_by_projection(ax, projection)
+    __set_aspect_ratio(ax, nc, geometry.projection)
+    _set_xy_label_by_projection(ax, geometry.projection)
 
     if plot_type == "outline_only":
         __plot_outline_only(ax, boundary_polylines)
