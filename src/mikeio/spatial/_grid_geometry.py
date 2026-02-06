@@ -1,7 +1,6 @@
 from __future__ import annotations
 from functools import cached_property
 from pathlib import Path
-import warnings
 from typing import Any, Sequence, TYPE_CHECKING, overload
 from dataclasses import dataclass
 import numpy as np
@@ -12,6 +11,7 @@ from ..exceptions import OutsideModelDomainError
 
 from ._geometry import (
     BoundingBox,
+    Geometry0D,
     GeometryPoint2D,
     GeometryPoint3D,
     GeometryUndefined,
@@ -94,8 +94,6 @@ class Grid1D(_Geometry):
         not commonly used
     node_coordinates : array_like
         coordinates of nodes in 2D or 3D space
-    axis_name : str
-        name of axis, by default "x"
 
     Examples
     --------
@@ -128,7 +126,6 @@ class Grid1D(_Geometry):
         origin: tuple[float, float] = (0.0, 0.0),
         orientation: float = 0.0,
         node_coordinates: np.ndarray | None = None,
-        axis_name: str = "x",
     ):
         super().__init__(projection=projection)
         self._origin = (0.0, 0.0) if origin is None else (origin[0], origin[1])
@@ -140,18 +137,13 @@ class Grid1D(_Geometry):
             raise ValueError("Length of node_coordinates must be n")
         self._nc = node_coordinates
 
-        self._axis_name = axis_name
-
     @property
-    def default_dims(self) -> tuple[str, ...]:
+    def dims(self) -> tuple[str, ...]:
         return ("x",)
 
     def __repr__(self) -> str:
         out = ["<mikeio.Grid1D>", _print_axis_txt("x", self.x, self.dx)]
-        txt = "\n".join(out)
-        if self._axis_name != "x":
-            txt = txt.replace(")", f", axis_name='{self._axis_name}')")
-        return txt
+        return "\n".join(out)
 
     def __str__(self) -> str:
         return f"Grid1D (n={self.nx}, dx={self.dx:.4g})"
@@ -220,7 +212,7 @@ class Grid1D(_Geometry):
 
     def isel(
         self, idx: int | Sequence[int] | np.ndarray | slice, axis: int | None = None
-    ) -> Grid1D | GeometryPoint2D | GeometryPoint3D | GeometryUndefined:
+    ) -> Grid1D | GeometryPoint2D | GeometryPoint3D | Geometry0D:
         """Get a subset geometry from this geometry.
 
         Parameters
@@ -232,8 +224,8 @@ class Grid1D(_Geometry):
 
         Returns
         -------
-        GeometryPoint2D or GeometryPoint3D or GeometryUndefined
-            The geometry of the selected point
+        Grid1D or GeometryPoint2D or GeometryPoint3D or Geometry0D
+            The geometry of the selection
 
         Examples
         --------
@@ -263,7 +255,7 @@ class Grid1D(_Geometry):
             )
 
         if self._nc is None:
-            return GeometryUndefined()
+            return Geometry0D(projection=self.projection)
         else:
             coords = self._nc[idx, :]  # type: ignore
             if len(coords) == 3:
@@ -272,6 +264,14 @@ class Grid1D(_Geometry):
             else:
                 x, y = coords
                 return GeometryPoint2D(x=x, y=y, projection=self.projection)
+
+    def reduce(self, axis: str | tuple[str, ...]) -> Geometry0D:
+        """Return reduced geometry after spatial aggregation."""
+        if isinstance(axis, str):
+            axis = (axis,)
+        if set(axis) != {"x"}:
+            raise ValueError(f"Cannot reduce Grid1D over {axis}, only 'x' is valid")
+        return Geometry0D(projection=self.projection)
 
 
 class _Grid2DPlotter:
@@ -427,8 +427,6 @@ class Grid2D(_Geometry):
         user-defined origin, by default None
     orientation : float, optional
         rotation angle in degrees, by default 0.0
-    axis_names : tuple, optional
-        names of x and y axes, by default ("x", "y")
     is_spectral : bool, optional
         if True, the grid is spectral, by default False
     is_vertical : bool, optional
@@ -472,7 +470,6 @@ class Grid2D(_Geometry):
         projection: str = "LONG/LAT",
         origin: tuple[float, float] | None = None,
         orientation: float = 0.0,
-        axis_names: tuple[str, str] = ("x", "y"),
         is_spectral: bool = False,
         is_vertical: bool = False,
     ):
@@ -483,8 +480,6 @@ class Grid2D(_Geometry):
         self._orientation = orientation
         self.__xx = None
         self.__yy = None
-
-        self._axis_names = axis_names
 
         if bbox is not None:
             if (x0 != 0.0) or (y0 != 0.0):
@@ -501,7 +496,7 @@ class Grid2D(_Geometry):
         self.plot = _Grid2DPlotter(self)
 
     @property
-    def default_dims(self) -> tuple[str, ...]:
+    def dims(self) -> tuple[str, ...]:
         return ("y", "x")
 
     @property
@@ -878,8 +873,11 @@ class Grid2D(_Geometry):
             assert isinstance(idx, np.ndarray)
             d = np.diff(idx)
             if np.any(d < 1) or not np.allclose(d, d[0]):
-                # non-equidistant grid is not supported by Dfs2
-                return GeometryUndefined()
+                raise ValueError(
+                    "Non-equidistant selection not supported. "
+                    "DFS format requires equidistant grids. "
+                    "Use .values for raw numpy array if non-equidistant data is needed."
+                )
             else:
                 ii = idx if axis == 1 else None
                 jj = idx if axis == 0 else None
@@ -892,9 +890,7 @@ class Grid2D(_Geometry):
             return Grid1D(x=self.x, projection=self.projection, node_coordinates=nc)
         elif axis == 1:
             nc = np.column_stack([self.x[idx] * np.ones_like(self.y), self.y])  # type: ignore
-            return Grid1D(
-                x=self.y, projection=self.projection, node_coordinates=nc, axis_name="y"
-            )
+            return Grid1D(x=self.y, projection=self.projection, node_coordinates=nc)
         else:
             raise ValueError(f"axis must be 0 or 1 (or 'x' or 'y'), not {axis}")
 
@@ -1062,6 +1058,30 @@ class Grid2D(_Geometry):
             g.node_coordinates[:, 2] = z
         g.to_mesh(outfilename=outfilename)
 
+    def reduce(self, axis: str | tuple[str, ...]) -> Grid1D | Geometry0D:
+        """Return reduced geometry after spatial aggregation."""
+        if isinstance(axis, str):
+            axis = (axis,)
+
+        axis_set = set(axis)
+        valid_axes = {"x", "y"}
+        if not axis_set.issubset(valid_axes):
+            invalid = axis_set - valid_axes
+            raise ValueError(
+                f"Invalid axes {invalid} for Grid2D. Valid axes: {valid_axes}"
+            )
+
+        remaining = valid_axes - axis_set
+
+        if len(remaining) == 0:
+            return Geometry0D(projection=self.projection)
+        elif remaining == {"x"}:
+            return Grid1D(x=self.x, projection=self.projection)
+        elif remaining == {"y"}:
+            return Grid1D(x=self.y, projection=self.projection)
+        else:
+            raise ValueError(f"Cannot reduce Grid2D over {axis}")
+
 
 @dataclass
 class Grid3D(_Geometry):
@@ -1152,7 +1172,7 @@ class Grid3D(_Geometry):
         self._orientation = orientation
 
     @property
-    def default_dims(self) -> tuple[str, ...]:
+    def dims(self) -> tuple[str, ...]:
         return ("z", "y", "x")
 
     @property
@@ -1244,12 +1264,15 @@ class Grid3D(_Geometry):
             assert isinstance(idx, np.ndarray), "idx must be a numpy array"
             d = np.diff(idx)
             if np.any(d < 1) or not np.allclose(d, d[0]):
-                return GeometryUndefined()
-            else:
-                ii = idx if axis == 2 else None
-                jj = idx if axis == 1 else None
-                kk = idx if axis == 0 else None
-                return self._index_to_Grid3D(ii, jj, kk)
+                raise ValueError(
+                    "Non-equidistant selection not supported. "
+                    "DFS format requires equidistant grids. "
+                    "Use .values for raw numpy array if non-equidistant data is needed."
+                )
+            ii = idx if axis == 2 else None
+            jj = idx if axis == 1 else None
+            kk = idx if axis == 0 else None
+            return self._index_to_Grid3D(ii, jj, kk)
 
         if axis == 0:
             # z is the first axis! return x-y Grid2D
@@ -1307,40 +1330,43 @@ class Grid3D(_Geometry):
             or (np.any(dj < 1) or not np.allclose(dj, dj[0]))
             or (np.any(dk < 1) or not np.allclose(dk, dk[0]))
         ):
-            warnings.warn("Axis not equidistant! Will return GeometryUndefined()")
-            return GeometryUndefined()
-        else:
-            dx = self.dx * di[0]
-            dy = self.dy * dj[0]
-            dz = self.dz * dk[0]
-            x0 = self._x0 + (self.x[ii[0]] - self.x[0])
-            y0 = self._y0 + (self.y[jj[0]] - self.y[0])
-            z0 = self._z0 + (self.z[kk[0]] - self.z[0])
-            if self._is_rotated:
-                # rotated => most be projected
-                cart = Cartography.CreateProjOrigin(
-                    self.projection, *self.origin, self.orientation
-                )
-                origin = cart.Xy2Proj(ii[0], jj[0])
-            else:
-                origin = (self.origin[0] + x0, self.origin[1] + y0)
-
-            x0, y0 = (0.0, 0.0)
-
-            return Grid3D(
-                x0=x0,
-                y0=y0,
-                z0=z0,
-                dx=dx,
-                dy=dy,
-                dz=dz,
-                nx=len(ii),
-                ny=len(jj),
-                nz=len(kk),
-                projection=self.projection,
-                orientation=self.orientation,
-                origin=origin,
+            raise ValueError(
+                "Non-equidistant selection not supported. "
+                "DFS format requires equidistant grids. "
+                "Use .values for raw numpy array if non-equidistant data is needed."
             )
+
+        dx = self.dx * di[0]
+        dy = self.dy * dj[0]
+        dz = self.dz * dk[0]
+        x0 = self._x0 + (self.x[ii[0]] - self.x[0])
+        y0 = self._y0 + (self.y[jj[0]] - self.y[0])
+        z0 = self._z0 + (self.z[kk[0]] - self.z[0])
+        if self._is_rotated:
+            # rotated => most be projected
+            cart = Cartography.CreateProjOrigin(
+                self.projection, *self.origin, self.orientation
+            )
+            origin = cart.Xy2Proj(ii[0], jj[0])
+        else:
+            origin = (self.origin[0] + x0, self.origin[1] + y0)
+
+        x0, y0 = (0.0, 0.0)
+
+        return Grid3D(
+            x0=x0,
+            y0=y0,
+            z0=z0,
+            dx=dx,
+            dy=dy,
+            dz=dz,
+            nx=len(ii),
+            ny=len(jj),
+            nz=len(kk),
+            projection=self.projection,
+            orientation=self.orientation,
+            origin=origin,
+        )
 
     def __repr__(self) -> str:
         out = ["<mikeio.Grid3D>"]
@@ -1359,7 +1385,7 @@ class Grid3D(_Geometry):
 
     def _geometry_for_layers(
         self, layers: Sequence[int] | None, keepdims: bool = False
-    ) -> Grid2D | Grid3D | GeometryUndefined:
+    ) -> Grid2D | Grid3D:
         if layers is None:
             return self
 
@@ -1381,8 +1407,11 @@ class Grid3D(_Geometry):
         d = np.diff(g.z[layers])
         if len(d) > 0:
             if np.any(d < 1) or not np.allclose(d, d[0]):
-                warnings.warn("Extracting non-equidistant layers! Cannot use Grid3D.")
-                return GeometryUndefined()
+                raise ValueError(
+                    "Non-equidistant layer selection not supported. "
+                    "DFS format requires equidistant grids. "
+                    "Use .values for raw numpy array if non-equidistant data is needed."
+                )
 
         geometry = Grid3D(
             x0=g._x0,
@@ -1397,3 +1426,66 @@ class Grid3D(_Geometry):
             orientation=g.orientation,
         )
         return geometry
+
+    def reduce(self, axis: str | tuple[str, ...]) -> Grid2D | Grid1D | Geometry0D:
+        """Return reduced geometry after spatial aggregation."""
+        if isinstance(axis, str):
+            axis = (axis,)
+
+        axis_set = set(axis)
+        valid_axes = {"x", "y", "z"}
+        if not axis_set.issubset(valid_axes):
+            invalid = axis_set - valid_axes
+            raise ValueError(
+                f"Invalid axes {invalid} for Grid3D. Valid axes: {valid_axes}"
+            )
+
+        remaining = valid_axes - axis_set
+
+        if len(remaining) == 0:
+            return Geometry0D(projection=self.projection)
+        elif len(remaining) == 1:
+            # One axis remains -> Grid1D
+            ax = remaining.pop()
+            coords = getattr(self, ax)
+            return Grid1D(x=coords, projection=self.projection)
+        elif len(remaining) == 2:
+            # Two axes remain -> Grid2D
+            if remaining == {"x", "y"}:
+                return Grid2D(
+                    x0=self._x0,
+                    y0=self._y0,
+                    dx=self._dx,
+                    dy=self._dy,
+                    nx=self._nx,
+                    ny=self._ny,
+                    projection=self.projection,
+                    origin=self.origin,
+                    orientation=self.orientation,
+                )
+            elif remaining == {"x", "z"}:
+                # x and z remain, create Grid2D with x as x-axis and z as y-axis
+                return Grid2D(
+                    x0=self._x0,
+                    y0=self.z[0],
+                    dx=self._dx,
+                    dy=self._dz,
+                    nx=self._nx,
+                    ny=self._nz,
+                    projection=self.projection,
+                )
+            elif remaining == {"y", "z"}:
+                # y and z remain, create Grid2D with y as x-axis and z as y-axis
+                return Grid2D(
+                    x0=self._y0,
+                    y0=self.z[0],
+                    dx=self._dy,
+                    dy=self._dz,
+                    nx=self._ny,
+                    ny=self._nz,
+                    projection=self.projection,
+                )
+            else:
+                raise ValueError(f"Unexpected remaining axes: {remaining}")
+        else:
+            raise ValueError(f"Cannot reduce Grid3D over {axis}")

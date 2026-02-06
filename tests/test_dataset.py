@@ -617,9 +617,8 @@ def test_aggregations() -> None:
         ds.nanmax(axis=axis)
 
     assert ds.mean().shape == (264, 216)
-    assert ds.mean(axis="time").shape == (264, 216)
-    assert ds.mean(axis="spatial").shape == (1,)
-    assert ds.mean(axis="space").shape == (1,)
+    assert ds.mean("time").shape == (264, 216)
+    assert ds.mean("space").shape == (1,)
 
     with pytest.raises(ValueError, match="space"):
         ds.mean(axis="spaghetti")

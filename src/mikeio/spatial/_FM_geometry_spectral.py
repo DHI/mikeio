@@ -33,11 +33,15 @@ class GeometryFMPointSpectrum(_Geometry):
         self.y = y
 
     @property
-    def default_dims(self) -> tuple[str, ...]:
+    def dims(self) -> tuple[str, ...]:
         if self.directions is None:
             return ("frequency",)
         else:
             return ("direction", "frequency")
+
+    def get_space_axis(self) -> int | tuple[int, ...] | None:
+        """Point spectrum has no geographic space dimensions."""
+        return None
 
     @property
     def is_layered(self) -> bool:
@@ -129,9 +133,26 @@ class _GeometryFMSpectrum(_GeometryFM):
         """Type is spectral dfsu (point, line or area spectrum)."""
         return True
 
+    def _spectral_dims(self, location_dim: str) -> tuple[str, ...]:
+        """Build spectral dims in correct order: location, direction, frequency."""
+        dims: list[str] = [location_dim]
+        if self.directions is not None:
+            dims.append("direction")
+        if self.frequencies is not None:
+            dims.append("frequency")
+        return tuple(dims)
+
 
 class GeometryFMAreaSpectrum(_GeometryFMSpectrum, GeometryFM2D):
     """Flexible mesh area spectrum geometry."""
+
+    @property
+    def dims(self) -> tuple[str, ...]:
+        return self._spectral_dims("element")
+
+    def get_space_axis(self) -> int | tuple[int, ...] | None:
+        """Area spectrum has element as the geographic space dimension."""
+        return 0  # "element" is always first in dims
 
     def isel(  # type: ignore
         self, idx: Sequence[int], **kwargs: Any
@@ -185,6 +206,14 @@ class GeometryFMAreaSpectrum(_GeometryFMSpectrum, GeometryFM2D):
 
 class GeometryFMLineSpectrum(_GeometryFMSpectrum):
     """Flexible mesh line spectrum geometry."""
+
+    @property
+    def dims(self) -> tuple[str, ...]:
+        return self._spectral_dims("node")
+
+    def get_space_axis(self) -> int | tuple[int, ...] | None:
+        """Line spectrum has node as the geographic space dimension."""
+        return 0  # "node" is always first in dims
 
     @staticmethod
     def create_dummy_coordinates(
