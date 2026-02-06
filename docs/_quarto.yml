@@ -3,7 +3,7 @@ project:
 
 website:
   title: "MIKE IO"
-  page-footer: "© 2025 DHI Group"
+  page-footer: "© 2026 DHI Group"
   favicon: dhi.ico
   repo-url: https://github.com/DHI/mikeio
   repo-actions: [edit]
@@ -162,7 +162,8 @@ quartodoc:
 format:
   html:
     theme: cosmo
+    brand: _brand.yml
     toc: true
-  ipynb: 
+  ipynb:
     theme: cosmo
     toc: true
