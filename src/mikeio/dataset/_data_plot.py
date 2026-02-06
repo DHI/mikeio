@@ -970,12 +970,12 @@ class _DataArrayPlotterPointSpectrum(_DataArrayPlotter):
         marker: str,
     ) -> Axes:
         ax = self._plot_1dspectrum(
-            self.da.frequencies,
+            self.da.frequencies,  # type: ignore[arg-type]
             ax,
             figsize,
             title=title,
             linestyle=linestyle,
-            marker=marker,  # type: ignore
+            marker=marker,
         )
         ax.set_xlabel("frequency [Hz]")
         ax.set_ylabel("directionally integrated energy [m*m*s]")
@@ -990,12 +990,12 @@ class _DataArrayPlotterPointSpectrum(_DataArrayPlotter):
         marker: str,
     ) -> Axes:
         ax = self._plot_1dspectrum(
-            self.da.directions,
+            self.da.directions,  # type: ignore[arg-type]
             ax,
             figsize,
             title=title,
             linestyle=linestyle,
-            marker=marker,  # type: ignore
+            marker=marker,
         )
         ax.set_xlabel("directions [degrees]")
         ax.set_ylabel("directional spectral energy [m*m*s]")
