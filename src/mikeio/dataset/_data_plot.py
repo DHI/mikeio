@@ -1,5 +1,6 @@
 from __future__ import annotations
-from typing import Any, TYPE_CHECKING, Sequence
+import warnings
+from typing import Any, Literal, TYPE_CHECKING, Sequence
 
 from matplotlib.figure import Figure
 import numpy as np
@@ -11,6 +12,8 @@ from ..spatial._FM_plot import _plot_map, _plot_vertical_profile
 from .._spectral import plot_2dspectrum
 
 if TYPE_CHECKING:
+    from matplotlib.colors import Colormap
+
     from ..dataset import DataArray, Dataset
 
 
@@ -47,7 +50,7 @@ class _DataArrayPlotter:
         fig, ax = self._get_fig_ax(ax, figsize)
 
         if self.da.ndim == 1:
-            if self.da._has_time_axis:
+            if "time" in self.da.dims:
                 return self._timeseries(self.da.values, fig, ax, **kwargs)
             else:
                 return self._line_not_timeseries(self.da.values, ax, **kwargs)
@@ -131,7 +134,7 @@ class _DataArrayPlotter:
     ) -> Axes:
         """Plot data as lines (timeseries if time is present)."""
         fig, ax = self._get_fig_ax(ax, figsize)
-        if self.da._has_time_axis:
+        if "time" in self.da.dims:
             return self._timeseries(self.da.values, fig, ax, **kwargs)
         else:
             return self._line_not_timeseries(self.da.values, ax, **kwargs)
@@ -158,12 +161,6 @@ class _DataArrayPlotter:
 
     def _label_txt(self) -> str:
         return f"{self.da.name} [{self.da.unit.short_name}]"
-
-    def _get_first_step_values(self) -> np.ndarray:
-        if self.da.n_timesteps > 1:
-            return self.da.values[0]
-        else:
-            return np.squeeze(self.da.values)
 
 
 class _DataArrayPlotterGrid1D(_DataArrayPlotter):
@@ -224,7 +221,7 @@ class _DataArrayPlotterGrid1D(_DataArrayPlotter):
         **kwargs: Any,
     ) -> Axes:
         """Plot as 2d."""
-        if not self.da._has_time_axis:
+        if "time" not in self.da.dims:
             raise ValueError(
                 "Not possible without time axis. DataArray only has 1 dimension."
             )
@@ -241,7 +238,7 @@ class _DataArrayPlotterGrid1D(_DataArrayPlotter):
         **kwargs: Any,
     ) -> Axes:
         """Plot multiple lines as 2d color plot."""
-        if not self.da._has_time_axis:
+        if "time" not in self.da.dims:
             raise ValueError(
                 "Not possible without time axis. DataArray only has 1 dimension."
             )
@@ -315,9 +312,9 @@ class _DataArrayPlotterGrid2D(_DataArrayPlotter):
         _, ax = self._get_fig_ax(ax, figsize)
 
         x, y = self._get_x_y()
-        values = self._get_first_step_values()
+        da = self.da.isel(time=0) if "time" in self.da.dims else self.da
 
-        pos = ax.contour(x, y, values, **kwargs)
+        pos = ax.contour(x, y, da.values, **kwargs)
         # fig.colorbar(pos, label=self._label_txt())
         ax.clabel(pos, fmt="%1.2f", inline=1, fontsize=9)
         self._set_aspect_and_labels(ax, self.da.geometry, y)
@@ -346,11 +343,11 @@ class _DataArrayPlotterGrid2D(_DataArrayPlotter):
         fig, ax = self._get_fig_ax(ax, figsize)
 
         x, y = self._get_x_y()
-        values = self._get_first_step_values()
+        da = self.da.isel(time=0) if "time" in self.da.dims else self.da
 
         label = label if label is not None else self._label_txt()
 
-        pos = ax.contourf(x, y, values, **kwargs)
+        pos = ax.contourf(x, y, da.values, **kwargs)
         fig.colorbar(pos, label=label, pad=0.01)
         self._set_aspect_and_labels(ax, self.da.geometry, y)
         if title is not None:
@@ -378,11 +375,11 @@ class _DataArrayPlotterGrid2D(_DataArrayPlotter):
         fig, ax = self._get_fig_ax(ax, figsize)
 
         xn, yn = self._get_xn_yn()
-        values = self._get_first_step_values()
+        da = self.da.isel(time=0) if "time" in self.da.dims else self.da
 
         label = label if label is not None else self._label_txt()
 
-        pos = ax.pcolormesh(xn, yn, values, **kwargs)
+        pos = ax.pcolormesh(xn, yn, da.values, **kwargs)
         fig.colorbar(pos, label=label, pad=0.01)
         self._set_aspect_and_labels(ax, self.da.geometry, yn)
         if title is not None:
@@ -439,21 +436,55 @@ class _DataArrayPlotterFM(_DataArrayPlotter):
 
     """
 
-    def __call__(
+    def __call__(  # type: ignore[override]
         self,
         ax: Axes | None = None,
         figsize: tuple[float, float] | None = None,
-        **kwargs: Any,
+        plot_type: Literal[
+            "patch", "mesh_only", "shaded", "contour", "contourf", "outline_only"
+        ] = "patch",
+        title: str | None = None,
+        label: str | None = None,
+        cmap: Colormap | None = None,
+        vmin: float | None = None,
+        vmax: float | None = None,
+        levels: int | Sequence[float] | None = None,
+        n_refinements: int = 0,
+        show_mesh: bool = False,
+        show_outline: bool = True,
+        add_colorbar: bool = True,
     ) -> Axes:
         """Plot data as coloured patches."""
         ax = self._get_ax(ax, figsize)
-        return self._plot_FM_map(ax, **kwargs)
+        return self._plot_FM_map(
+            ax=ax,
+            plot_type=plot_type,
+            title=title,
+            label=label,
+            cmap=cmap,
+            vmin=vmin,
+            vmax=vmax,
+            levels=levels,
+            n_refinements=n_refinements,
+            show_mesh=show_mesh,
+            show_outline=show_outline,
+            add_colorbar=add_colorbar,
+        )
 
     def patch(
         self,
         ax: Axes | None = None,
         figsize: tuple[float, float] | None = None,
-        **kwargs: Any,
+        title: str | None = None,
+        label: str | None = None,
+        cmap: Colormap | None = None,
+        vmin: float | None = None,
+        vmax: float | None = None,
+        levels: int | Sequence[float] | None = None,
+        n_refinements: int = 0,
+        show_mesh: bool = False,
+        show_outline: bool = True,
+        add_colorbar: bool = True,
     ) -> Axes:
         """Plot data as coloured patches.
 
@@ -466,14 +497,35 @@ class _DataArrayPlotterFM(_DataArrayPlotter):
 
         """
         ax = self._get_ax(ax, figsize)
-        kwargs["plot_type"] = "patch"
-        return self._plot_FM_map(ax, **kwargs)
+        return self._plot_FM_map(
+            ax=ax,
+            plot_type="patch",
+            title=title,
+            label=label,
+            cmap=cmap,
+            vmin=vmin,
+            vmax=vmax,
+            levels=levels,
+            n_refinements=n_refinements,
+            show_mesh=show_mesh,
+            show_outline=show_outline,
+            add_colorbar=add_colorbar,
+        )
 
     def contour(
         self,
         ax: Axes | None = None,
         figsize: tuple[float, float] | None = None,
-        **kwargs: Any,
+        title: str | None = None,
+        label: str | None = None,
+        cmap: Colormap | None = None,
+        vmin: float | None = None,
+        vmax: float | None = None,
+        levels: int | Sequence[float] | None = None,
+        n_refinements: int = 0,
+        show_mesh: bool = False,
+        show_outline: bool = True,
+        add_colorbar: bool = True,
     ) -> Axes:
         """Plot data as contour lines.
 
@@ -486,14 +538,35 @@ class _DataArrayPlotterFM(_DataArrayPlotter):
 
         """
         ax = self._get_ax(ax, figsize)
-        kwargs["plot_type"] = "contour"
-        return self._plot_FM_map(ax, **kwargs)
+        return self._plot_FM_map(
+            ax=ax,
+            plot_type="contour",
+            title=title,
+            label=label,
+            cmap=cmap,
+            vmin=vmin,
+            vmax=vmax,
+            levels=levels,
+            n_refinements=n_refinements,
+            show_mesh=show_mesh,
+            show_outline=show_outline,
+            add_colorbar=add_colorbar,
+        )
 
     def contourf(
         self,
         ax: Axes | None = None,
         figsize: tuple[float, float] | None = None,
-        **kwargs: Any,
+        title: str | None = None,
+        label: str | None = None,
+        cmap: Colormap | None = None,
+        vmin: float | None = None,
+        vmax: float | None = None,
+        levels: int | Sequence[float] | None = None,
+        n_refinements: int = 0,
+        show_mesh: bool = False,
+        show_outline: bool = True,
+        add_colorbar: bool = True,
     ) -> Axes:
         """Plot data as filled contours.
 
@@ -506,14 +579,26 @@ class _DataArrayPlotterFM(_DataArrayPlotter):
 
         """
         ax = self._get_ax(ax, figsize)
-        kwargs["plot_type"] = "contourf"
-        return self._plot_FM_map(ax, **kwargs)
+        return self._plot_FM_map(
+            ax=ax,
+            plot_type="contourf",
+            title=title,
+            label=label,
+            cmap=cmap,
+            vmin=vmin,
+            vmax=vmax,
+            levels=levels,
+            n_refinements=n_refinements,
+            show_mesh=show_mesh,
+            show_outline=show_outline,
+            add_colorbar=add_colorbar,
+        )
 
     def mesh(
         self,
         ax: Axes | None = None,
         figsize: tuple[float, float] | None = None,
-        **kwargs: Any,
+        title: str = "Mesh",
     ) -> Axes:
         """Plot mesh only.
 
@@ -525,13 +610,13 @@ class _DataArrayPlotterFM(_DataArrayPlotter):
         ```
 
         """
-        return self.da.geometry.plot.mesh(figsize=figsize, ax=ax, **kwargs)
+        return self.da.geometry.plot.mesh(figsize=figsize, ax=ax, title=title)
 
     def outline(
         self,
         ax: Axes | None = None,
         figsize: tuple[float, float] | None = None,
-        **kwargs: Any,
+        title: str = "Outline",
     ) -> Axes:
         """Plot domain outline.
 
@@ -543,34 +628,57 @@ class _DataArrayPlotterFM(_DataArrayPlotter):
         ```
 
         """
-        return self.da.geometry.plot.outline(figsize=figsize, ax=ax, **kwargs)
+        return self.da.geometry.plot.outline(figsize=figsize, ax=ax, title=title)
 
-    def _plot_FM_map(self, ax: Axes, **kwargs: Any) -> Axes:
-        values = self._get_first_step_values()
+    def _plot_FM_map(
+        self,
+        ax: Axes,
+        plot_type: Literal[
+            "patch", "mesh_only", "shaded", "contour", "contourf", "outline_only"
+        ],
+        title: str | None,
+        label: str | None,
+        cmap: Colormap | None,
+        vmin: float | None,
+        vmax: float | None,
+        levels: int | Sequence[float] | None,
+        n_refinements: int,
+        show_mesh: bool,
+        show_outline: bool,
+        add_colorbar: bool,
+    ) -> Axes:
+        da = self.da.isel(time=0) if "time" in self.da.dims else self.da
 
-        title = f"{self.da.time[0]}"
-        if self.da.geometry.is_layered:
-            # select surface as default plotting for 3d files
-            values = values[self.da.geometry.top_elements]
-            geometry = self.da.geometry.geometry2d
-            title = "Surface, " + title
-        else:
-            geometry = self.da.geometry
+        default_title = f"{self.da.time[0]}"
+        if da.geometry.is_layered:
+            # DEPRECATION: remove implicit layer selection, raise ValueError instead
+            warnings.warn(
+                "Plotting layered data implicitly selects the surface layer. "
+                "This will become an error in a future version. "
+                "Use da.sel(layers='top').plot() instead.",
+                FutureWarning,
+                stacklevel=4,
+            )
+            da = da.sel(layers="top")
+            default_title = "Surface, " + default_title
 
-        if "label" not in kwargs:
-            kwargs["label"] = self._label_txt()
-        if "title" not in kwargs:
-            kwargs["title"] = title
+        geometry = da.geometry
 
         return _plot_map(
-            node_coordinates=geometry.node_coordinates,
-            element_table=geometry.element_table,
-            element_coordinates=geometry.element_coordinates,
-            boundary_polylines=geometry.boundary_polygons.lines,
-            projection=geometry.projection,
-            z=values,
+            geometry=geometry,
+            z=da.values,
+            plot_type=plot_type,
+            title=title if title is not None else default_title,
+            label=label if label is not None else self._label_txt(),
+            cmap=cmap,
+            vmin=vmin,
+            vmax=vmax,
+            levels=levels,
+            n_refinements=n_refinements,
+            show_mesh=show_mesh,
+            show_outline=show_outline,
             ax=ax,
-            **kwargs,
+            add_colorbar=add_colorbar,
         )
 
 
@@ -708,71 +816,187 @@ class _DataArrayPlotterFMVerticalProfile(_DataArrayPlotter):
             kwargs["label"] = self._label_txt()
         if "title" not in kwargs:
             kwargs["title"] = self.da.time[0]
-        assert self.da._zn is not None
-        if self.da.n_timesteps > 1:
-            values = self.da.values[0]
-            zn = self.da._zn[0]
-        else:
-            values = np.squeeze(self.da.values)
-            zn = np.squeeze(self.da._zn)  # type: ignore
-        g = self.da.geometry
+        da = self.da.isel(time=0) if "time" in self.da.dims else self.da
+        assert da._zn is not None
+        g = da.geometry
         return _plot_vertical_profile(
             node_coordinates=g.node_coordinates,
             element_table=g.element_table,
-            values=values,
-            zn=zn,
+            values=da.values,
+            zn=da._zn,
             is_geo=g.is_geo,
             **kwargs,
         )
 
 
 class _DataArrayPlotterPointSpectrum(_DataArrayPlotter):
-    def __call__(
+    def __call__(  # type: ignore[override]
         self,
         ax: Axes | None = None,
         figsize: tuple[float, float] | None = None,
-        **kwargs: Any,
+        title: str | None = None,
+        label: str | None = None,
+        linestyle: str = "-",
+        marker: str = ".",
+        cmap: str = "Reds",
+        vmin: float | None = 1e-5,
+        vmax: float | None = None,
+        r_as_periods: bool = True,
+        rmin: float | None = None,
+        rmax: float | None = None,
+        levels: int | Sequence[float] | None = None,
+        add_colorbar: bool = True,
+        plot_type: str = "contourf",
     ) -> Axes:
-        # ax = self._get_ax(ax, figsize)
         if self.da.n_frequencies > 0 and self.da.n_directions > 0:
-            return self._plot_2dspectrum(figsize=figsize, **kwargs)
+            return self._plot_2dspectrum(
+                figsize=figsize,
+                title=title,
+                label=label,
+                cmap=cmap,
+                vmin=vmin,
+                vmax=vmax,
+                r_as_periods=r_as_periods,
+                rmin=rmin,
+                rmax=rmax,
+                levels=levels,
+                add_colorbar=add_colorbar,
+                plot_type=plot_type,
+            )
         elif self.da.n_frequencies == 0:
-            return self._plot_dirspectrum(ax=ax, figsize=figsize, **kwargs)
+            return self._plot_dirspectrum(
+                ax=ax, figsize=figsize, title=title, linestyle=linestyle, marker=marker
+            )
         elif self.da.n_directions == 0:
-            return self._plot_freqspectrum(ax=ax, figsize=figsize, **kwargs)
+            return self._plot_freqspectrum(
+                ax=ax, figsize=figsize, title=title, linestyle=linestyle, marker=marker
+            )
         else:
             raise ValueError("Spectrum could not be plotted")
 
-    def patch(self, **kwargs: Any) -> Axes:
-        kwargs["plot_type"] = "patch"
-        return self._plot_2dspectrum(**kwargs)
+    def patch(
+        self,
+        figsize: tuple[float, float] | None = None,
+        title: str | None = None,
+        label: str | None = None,
+        cmap: str = "Reds",
+        vmin: float | None = 1e-5,
+        vmax: float | None = None,
+        r_as_periods: bool = True,
+        rmin: float | None = None,
+        rmax: float | None = None,
+        levels: int | Sequence[float] | None = None,
+        add_colorbar: bool = True,
+    ) -> Axes:
+        return self._plot_2dspectrum(
+            plot_type="patch",
+            figsize=figsize,
+            title=title,
+            label=label,
+            cmap=cmap,
+            vmin=vmin,
+            vmax=vmax,
+            r_as_periods=r_as_periods,
+            rmin=rmin,
+            rmax=rmax,
+            levels=levels,
+            add_colorbar=add_colorbar,
+        )
 
-    def contour(self, **kwargs: Any) -> Axes:
-        kwargs["plot_type"] = "contour"
-        return self._plot_2dspectrum(**kwargs)
+    def contour(
+        self,
+        figsize: tuple[float, float] | None = None,
+        title: str | None = None,
+        label: str | None = None,
+        cmap: str = "Reds",
+        vmin: float | None = 1e-5,
+        vmax: float | None = None,
+        r_as_periods: bool = True,
+        rmin: float | None = None,
+        rmax: float | None = None,
+        levels: int | Sequence[float] | None = None,
+        add_colorbar: bool = True,
+    ) -> Axes:
+        return self._plot_2dspectrum(
+            plot_type="contour",
+            figsize=figsize,
+            title=title,
+            label=label,
+            cmap=cmap,
+            vmin=vmin,
+            vmax=vmax,
+            r_as_periods=r_as_periods,
+            rmin=rmin,
+            rmax=rmax,
+            levels=levels,
+            add_colorbar=add_colorbar,
+        )
 
-    def contourf(self, **kwargs: Any) -> Axes:
-        kwargs["plot_type"] = "contourf"
-        return self._plot_2dspectrum(**kwargs)
+    def contourf(
+        self,
+        figsize: tuple[float, float] | None = None,
+        title: str | None = None,
+        label: str | None = None,
+        cmap: str = "Reds",
+        vmin: float | None = 1e-5,
+        vmax: float | None = None,
+        r_as_periods: bool = True,
+        rmin: float | None = None,
+        rmax: float | None = None,
+        levels: int | Sequence[float] | None = None,
+        add_colorbar: bool = True,
+    ) -> Axes:
+        return self._plot_2dspectrum(
+            plot_type="contourf",
+            figsize=figsize,
+            title=title,
+            label=label,
+            cmap=cmap,
+            vmin=vmin,
+            vmax=vmax,
+            r_as_periods=r_as_periods,
+            rmin=rmin,
+            rmax=rmax,
+            levels=levels,
+            add_colorbar=add_colorbar,
+        )
 
     def _plot_freqspectrum(
         self,
-        ax: Axes | None = None,
-        figsize: tuple[float, float] | None = None,
-        **kwargs: Any,
+        ax: Axes | None,
+        figsize: tuple[float, float] | None,
+        title: str | None,
+        linestyle: str,
+        marker: str,
     ) -> Axes:
-        ax = self._plot_1dspectrum(self.da.frequencies, ax, figsize, **kwargs)  # type: ignore
+        ax = self._plot_1dspectrum(
+            self.da.frequencies,  # type: ignore[arg-type]
+            ax,
+            figsize,
+            title=title,
+            linestyle=linestyle,
+            marker=marker,
+        )
         ax.set_xlabel("frequency [Hz]")
         ax.set_ylabel("directionally integrated energy [m*m*s]")
         return ax
 
     def _plot_dirspectrum(
         self,
-        ax: Axes | None = None,
-        figsize: tuple[float, float] | None = None,
-        **kwargs: Any,
+        ax: Axes | None,
+        figsize: tuple[float, float] | None,
+        title: str | None,
+        linestyle: str,
+        marker: str,
     ) -> Axes:
-        ax = self._plot_1dspectrum(self.da.directions, ax, figsize, **kwargs)  # type: ignore
+        ax = self._plot_1dspectrum(
+            self.da.directions,  # type: ignore[arg-type]
+            ax,
+            figsize,
+            title=title,
+            linestyle=linestyle,
+            marker=marker,
+        )
         ax.set_xlabel("directions [degrees]")
         ax.set_ylabel("directional spectral energy [m*m*s]")
         ax.set_xticks(self.da.directions[::2])  # type: ignore
@@ -781,39 +1005,54 @@ class _DataArrayPlotterPointSpectrum(_DataArrayPlotter):
     def _plot_1dspectrum(
         self,
         x_values: np.ndarray,
-        ax: Axes | None = None,
-        figsize: tuple[float, float] | None = None,
-        **kwargs: Any,
+        ax: Axes | None,
+        figsize: tuple[float, float] | None,
+        title: str | None,
+        linestyle: str,
+        marker: str,
     ) -> Axes:
         ax = self._get_ax(ax, figsize)
-        y_values = self._get_first_step_values()
+        da = self.da.isel(time=0) if "time" in self.da.dims else self.da
 
-        if "linestyle" not in kwargs:
-            kwargs["linestyle"] = "-"
-        if "marker" not in kwargs:
-            kwargs["marker"] = "."
-
-        title = kwargs.pop("title") if "title" in kwargs else self._get_title()
+        title = title if title is not None else self._get_title()
         ax.set_title(title)
 
-        ax.plot(x_values, y_values, **kwargs)
+        ax.plot(x_values, da.values, linestyle=linestyle, marker=marker)
         return ax
 
-    def _plot_2dspectrum(self, **kwargs: Any) -> Axes:
-        values = self._get_first_step_values()
-
-        if "figsize" not in kwargs or kwargs["figsize"] is None:
-            kwargs["figsize"] = (7, 7)
-        if "label" not in kwargs:
-            kwargs["label"] = self._label_txt()
-        if "title" not in kwargs:
-            kwargs["title"] = self._get_title()
+    def _plot_2dspectrum(
+        self,
+        plot_type: str,
+        title: str | None,
+        label: str | None,
+        cmap: str,
+        vmin: float | None,
+        vmax: float | None,
+        r_as_periods: bool,
+        rmin: float | None,
+        rmax: float | None,
+        levels: int | Sequence[float] | None,
+        figsize: tuple[float, float] | None,
+        add_colorbar: bool,
+    ) -> Axes:
+        da = self.da.isel(time=0) if "time" in self.da.dims else self.da
 
         return plot_2dspectrum(
-            values,
+            da.values,
             frequencies=self.da.geometry.frequencies,
             directions=self.da.geometry.directions,
-            **kwargs,
+            plot_type=plot_type,
+            title=title if title is not None else self._get_title(),
+            label=label if label is not None else self._label_txt(),
+            cmap=cmap,
+            vmin=vmin,
+            vmax=vmax,
+            r_as_periods=r_as_periods,
+            rmin=rmin,
+            rmax=rmax,
+            levels=levels,
+            figsize=figsize if figsize is not None else (7, 7),
+            add_colorbar=add_colorbar,
         )
 
     def _get_title(self) -> str:

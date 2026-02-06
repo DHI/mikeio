@@ -121,6 +121,8 @@ make docs
 
 **Composition over inheritance**: Dataset contains DataArrays; DataArray contains data, time, geometry, and item metadata. Geometry objects are composed into the data structures rather than inherited.
 
+**Use public API across class boundaries**: Never access private attributes (prefixed with `_`) of another class. Use public methods like `sel`, `isel`, and public properties like `dims` instead. For example, use `"time" in da.dims` rather than `da._has_time_axis`, and `da.isel(time=0)` rather than `da.values[0]`.
+
 ## Documentation Structure
 
 The project uses **Quartodoc** and **Quarto** to build comprehensive documentation with user guides, examples, and API reference.

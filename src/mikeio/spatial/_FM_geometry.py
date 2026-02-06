@@ -38,6 +38,7 @@ from ._distance import xy_to_bbox
 if TYPE_CHECKING:
     from ._FM_geometry_layered import GeometryFM3D
     from matplotlib.axes import Axes
+    from matplotlib.colors import Colormap
     from numpy.typing import ArrayLike
 
 
@@ -63,18 +64,53 @@ class _GeometryFMPlotter:
         self,
         ax: Axes | None = None,
         figsize: tuple[float, float] | None = None,
-        **kwargs: Any,
+        plot_type: Literal[
+            "patch", "mesh_only", "shaded", "contour", "contourf", "outline_only"
+        ]
+        | None = "patch",
+        title: str = "Bathymetry",
+        label: str | None = None,
+        cmap: Colormap | None = None,
+        vmin: float | None = None,
+        vmax: float | None = None,
+        levels: int | Sequence[float] | None = None,
+        n_refinements: int = 0,
+        show_mesh: bool = False,
+        show_outline: bool = True,
+        add_colorbar: bool = True,
     ) -> Axes:
         """Plot bathymetry as coloured patches."""
         ax = self._get_ax(ax, figsize)
-        kwargs["plot_type"] = kwargs.get("plot_type") or "patch"
-        return self._plot_FM_map(ax, **kwargs)
+        return _plot_map(
+            geometry=self.g,
+            plot_type=plot_type or "patch",
+            title=title,
+            label=label,
+            cmap=cmap,
+            vmin=vmin,
+            vmax=vmax,
+            levels=levels,
+            n_refinements=n_refinements,
+            show_mesh=show_mesh,
+            show_outline=show_outline,
+            ax=ax,
+            add_colorbar=add_colorbar,
+        )
 
     def contour(
         self,
         ax: Axes | None = None,
         figsize: tuple[float, float] | None = None,
-        **kwargs: Any,
+        title: str = "Bathymetry",
+        label: str | None = None,
+        cmap: Colormap | None = None,
+        vmin: float | None = None,
+        vmax: float | None = None,
+        levels: int | Sequence[float] | None = None,
+        n_refinements: int = 0,
+        show_mesh: bool = False,
+        show_outline: bool = True,
+        add_colorbar: bool = True,
     ) -> Axes:
         """Plot bathymetry as contour lines.
 
@@ -86,14 +122,36 @@ class _GeometryFMPlotter:
 
         """
         ax = self._get_ax(ax, figsize)
-        kwargs["plot_type"] = "contour"
-        return self._plot_FM_map(ax, **kwargs)
+        return _plot_map(
+            geometry=self.g,
+            plot_type="contour",
+            title=title,
+            label=label,
+            cmap=cmap,
+            vmin=vmin,
+            vmax=vmax,
+            levels=levels,
+            n_refinements=n_refinements,
+            show_mesh=show_mesh,
+            show_outline=show_outline,
+            ax=ax,
+            add_colorbar=add_colorbar,
+        )
 
     def contourf(
         self,
         ax: Axes | None = None,
         figsize: tuple[float, float] | None = None,
-        **kwargs: Any,
+        title: str = "Bathymetry",
+        label: str | None = None,
+        cmap: Colormap | None = None,
+        vmin: float | None = None,
+        vmax: float | None = None,
+        levels: int | Sequence[float] | None = None,
+        n_refinements: int = 0,
+        show_mesh: bool = False,
+        show_outline: bool = True,
+        add_colorbar: bool = True,
     ) -> Axes:
         """Plot bathymetry as filled contours.
 
@@ -105,8 +163,21 @@ class _GeometryFMPlotter:
 
         """
         ax = self._get_ax(ax, figsize)
-        kwargs["plot_type"] = "contourf"
-        return self._plot_FM_map(ax, **kwargs)
+        return _plot_map(
+            geometry=self.g,
+            plot_type="contourf",
+            title=title,
+            label=label,
+            cmap=cmap,
+            vmin=vmin,
+            vmax=vmax,
+            levels=levels,
+            n_refinements=n_refinements,
+            show_mesh=show_mesh,
+            show_outline=show_outline,
+            ax=ax,
+            add_colorbar=add_colorbar,
+        )
 
     @staticmethod
     def _get_ax(
@@ -118,26 +189,6 @@ class _GeometryFMPlotter:
         if ax is None:
             _, ax = plt.subplots(figsize=figsize)
         return ax
-
-    def _plot_FM_map(self, ax: Axes, **kwargs: Any) -> Axes:
-        if "title" not in kwargs:
-            kwargs["title"] = "Bathymetry"
-
-        plot_type = kwargs.pop("plot_type")
-
-        g = self.g
-
-        return _plot_map(
-            node_coordinates=g.node_coordinates,
-            element_table=g.element_table,
-            element_coordinates=g.element_coordinates,
-            boundary_polylines=g.boundary_polygons.lines,
-            plot_type=plot_type,
-            projection=g.projection,
-            z=None,
-            ax=ax,
-            **kwargs,
-        )
 
     def mesh(
         self,
