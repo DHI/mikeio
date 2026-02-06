@@ -428,7 +428,7 @@ def test_read_dfs0_single_item() -> None:
     dfs0file = r"tests/testdata/random.dfs0"
 
     dfs = Dfs0(dfs0file)
-    ds = dfs.read([1])
+    ds = dfs.read(items=[1])
 
     assert len(ds.to_numpy()) == 1
 
