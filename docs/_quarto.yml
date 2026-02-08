@@ -12,7 +12,7 @@ website:
   bread-crumbs: false # I can\'t get this to work properly, disabled for now
   
   navbar:
-    logo: MIKE-IO-Icon-Pos-RGB.png
+    logo: MIKE-IO-Icon-Neg-RGB.svg
     tools:
     - icon: github
       menu:
