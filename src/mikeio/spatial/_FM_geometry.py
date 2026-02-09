@@ -41,7 +41,7 @@ if TYPE_CHECKING:
     from numpy.typing import ArrayLike
 
 
-class _GeometryFMPlotter:
+class GeometryFMPlotter:
     """Plot GeometryFM.
 
     Examples
@@ -456,7 +456,7 @@ class GeometryFM2D(_GeometryFM):
             reindex=reindex,
         )
 
-        self.plot = _GeometryFMPlotter(self)
+        self.plot = GeometryFMPlotter(self)
 
     def __str__(self) -> str:
         return f"{self._type.name} ({self.n_elements} elements, {self.n_nodes} nodes)"

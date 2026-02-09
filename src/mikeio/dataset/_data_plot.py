@@ -14,7 +14,7 @@ if TYPE_CHECKING:
     from ..dataset import DataArray, Dataset
 
 
-class _DataArrayPlotter:
+class DataArrayPlotter:
     """Context aware plotter (sensible plotting according to geometry)."""
 
     def __init__(self, da: DataArray) -> None:
@@ -166,7 +166,7 @@ class _DataArrayPlotter:
             return np.squeeze(self.da.values)
 
 
-class _DataArrayPlotterGrid1D(_DataArrayPlotter):
+class DataArrayPlotterGrid1D(DataArrayPlotter):
     """Plot a DataArray with a Grid1D geometry.
 
     Examples
@@ -272,7 +272,7 @@ class _DataArrayPlotterGrid1D(_DataArrayPlotter):
         return ax
 
 
-class _DataArrayPlotterGrid2D(_DataArrayPlotter):
+class DataArrayPlotterGrid2D(DataArrayPlotter):
     """Plot a DataArray with a Grid2D geometry.
 
     If DataArray has multiple time steps, the first step will be plotted.
@@ -422,7 +422,7 @@ class _DataArrayPlotterGrid2D(_DataArrayPlotter):
             ax.set_aspect("equal")
 
 
-class _DataArrayPlotterFM(_DataArrayPlotter):
+class DataArrayPlotterFM(DataArrayPlotter):
     """Plot a DataArray with a GeometryFM geometry.
 
     If DataArray has multiple time steps, the first step will be plotted.
@@ -574,7 +574,7 @@ class _DataArrayPlotterFM(_DataArrayPlotter):
         )
 
 
-class _DataArrayPlotterFMVerticalColumn(_DataArrayPlotter):
+class DataArrayPlotterFMVerticalColumn(DataArrayPlotter):
     """Plot a DataArray with a GeometryFMVerticalColumn geometry.
 
 
@@ -676,7 +676,7 @@ class _DataArrayPlotterFMVerticalColumn(_DataArrayPlotter):
         return ax
 
 
-class _DataArrayPlotterFMVerticalProfile(_DataArrayPlotter):
+class DataArrayPlotterFMVerticalProfile(DataArrayPlotter):
     """Plot a DataArray with a 2DV GeometryFMVerticalProfile geometry.
 
     If DataArray has multiple time steps, the first step will be plotted.
@@ -726,7 +726,7 @@ class _DataArrayPlotterFMVerticalProfile(_DataArrayPlotter):
         )
 
 
-class _DataArrayPlotterPointSpectrum(_DataArrayPlotter):
+class DataArrayPlotterPointSpectrum(DataArrayPlotter):
     def __call__(
         self,
         ax: Axes | None = None,
@@ -827,7 +827,7 @@ class _DataArrayPlotterPointSpectrum(_DataArrayPlotter):
         return txt
 
 
-class _DataArrayPlotterLineSpectrum(_DataArrayPlotterGrid1D):
+class DataArrayPlotterLineSpectrum(DataArrayPlotterGrid1D):
     def __init__(self, da: DataArray) -> None:
         if da.n_timesteps > 1:
             Hm0 = da[0].to_Hm0()
@@ -836,7 +836,7 @@ class _DataArrayPlotterLineSpectrum(_DataArrayPlotterGrid1D):
         super().__init__(Hm0)
 
 
-class _DataArrayPlotterAreaSpectrum(_DataArrayPlotterFM):
+class DataArrayPlotterAreaSpectrum(DataArrayPlotterFM):
     def __init__(self, da: DataArray) -> None:
         if da.n_timesteps > 1:
             Hm0 = da[0].to_Hm0()
@@ -845,7 +845,7 @@ class _DataArrayPlotterAreaSpectrum(_DataArrayPlotterFM):
         super().__init__(Hm0)
 
 
-class _DatasetPlotter:
+class DatasetPlotter:
     """Class for plotting scatter plots from datasets."""
 
     def __init__(self, ds: Dataset) -> None:
@@ -935,14 +935,14 @@ class _DatasetPlotter:
 
 
 __all__ = [
-    "_DataArrayPlotter",
-    "_DataArrayPlotterGrid1D",
-    "_DataArrayPlotterGrid2D",
-    "_DataArrayPlotterFM",
-    "_DataArrayPlotterFMVerticalColumn",
-    "_DataArrayPlotterFMVerticalProfile",
-    "_DataArrayPlotterPointSpectrum",
-    "_DataArrayPlotterLineSpectrum",
-    "_DataArrayPlotterAreaSpectrum",
-    "_DatasetPlotter",
+    "DataArrayPlotter",
+    "DataArrayPlotterGrid1D",
+    "DataArrayPlotterGrid2D",
+    "DataArrayPlotterFM",
+    "DataArrayPlotterFMVerticalColumn",
+    "DataArrayPlotterFMVerticalProfile",
+    "DataArrayPlotterPointSpectrum",
+    "DataArrayPlotterLineSpectrum",
+    "DataArrayPlotterAreaSpectrum",
+    "DatasetPlotter",
 ]

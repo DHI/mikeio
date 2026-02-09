@@ -111,7 +111,7 @@ quartodoc:
         - spatial.GeometryFM3D
         - spatial.GeometryFMVerticalProfile
         - spatial.GeometryFMVerticalColumn
-        - spatial._FM_geometry._GeometryFMPlotter
+        - spatial._FM_geometry.GeometryFMPlotter
         
     - title: Spectral
       desc: ""
@@ -150,13 +150,13 @@ quartodoc:
     - title: Dataset plotting
       desc: "Plotting functions for Dataset and DataArray objects."
       contents:
-        - dataset._DatasetPlotter
-        - dataset._DataArrayPlotter
-        - dataset._DataArrayPlotterGrid1D
-        - dataset._DataArrayPlotterGrid2D
-        - dataset._DataArrayPlotterFM
-        - dataset._DataArrayPlotterFMVerticalProfile
-        - dataset._DataArrayPlotterFMVerticalColumn
+        - dataset.DatasetPlotter
+        - dataset.DataArrayPlotter
+        - dataset.DataArrayPlotterGrid1D
+        - dataset.DataArrayPlotterGrid2D
+        - dataset.DataArrayPlotterFM
+        - dataset.DataArrayPlotterFMVerticalProfile
+        - dataset.DataArrayPlotterFMVerticalColumn
 
     
 format:
