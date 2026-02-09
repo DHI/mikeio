@@ -1472,7 +1472,7 @@ class ItemInfo:
         if self.data_value_type == DataValueType.Instantaneous:
             return f"{self.name} <{self.type.display_name}> ({self.unit.display_name})"
         else:
-            return f"{self.name} <{self.type.display_name}> ({self.unit.display_name}) - {self.data_value_type}"
+            return f"{self.name} <{self.type.display_name}> ({self.unit.display_name}) - {self.data_value_type.name}"
 
     @property
     def unit(self) -> EUMUnit:
