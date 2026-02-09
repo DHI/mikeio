@@ -43,6 +43,35 @@ ds.to_dfs("mauna_loa_co2.dfs0")
 ```
 
 
+## Accumulated datavalue type
+
+Some dfs0 items use an accumulated data value type rather than the default instantaneous type. This is common for precipitation data and can be specified using the `data_value_type` argument of [](`mikeio.ItemInfo`).
+
+For rainfall amounts (e.g. mm), use `StepAccumulated`:
+
+```{python}
+from mikeio import ItemInfo, EUMType
+
+item = ItemInfo(
+    "Rainfall",
+    EUMType.Rainfall,
+    data_value_type="StepAccumulated",
+)
+item
+```
+
+For precipitation rates (e.g. mm/hour), use `MeanStepBackward`:
+
+```{python}
+item = ItemInfo(
+    "Precipitation",
+    EUMType.Precipitation_Rate,
+    data_value_type="MeanStepBackward",
+)
+item
+```
+
+
 ## Dfs0 example notebooks
 
 * [Dfs0 | Relative time](../examples/dfs0/relative_time.qmd)
