@@ -285,6 +285,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <li><a href="#familiar" id="toc-familiar" class="nav-link" data-scroll-target="#familiar"><i class="fa-brands fa-python" aria-label="python"></i> Familiar</a></li>
   <li><a href="#easy-to-install" id="toc-easy-to-install" class="nav-link" data-scroll-target="#easy-to-install"><i class="fa-solid fa-download" aria-label="download"></i> Easy to install</a></li>
   <li><a href="#easy-to-get-started" id="toc-easy-to-get-started" class="nav-link" data-scroll-target="#easy-to-get-started"><i class="fa-solid fa-book" aria-label="book"></i> Easy to get started</a></li>
+  <li><a href="#abstraction-over-mikecore" id="toc-abstraction-over-mikecore" class="nav-link" data-scroll-target="#abstraction-over-mikecore"><i class="fa-solid fa-layer-group" aria-label="layer-group"></i> Abstraction over mikecore</a></li>
   <li><a href="#open-source" id="toc-open-source" class="nav-link" data-scroll-target="#open-source"><i class="fa-brands fa-osi" aria-label="osi"></i> Open Source​</a></li>
   <li><a href="#easy-to-collaborate" id="toc-easy-to-collaborate" class="nav-link" data-scroll-target="#easy-to-collaborate"><i class="fa-solid fa-comments" aria-label="comments"></i> Easy to collaborate</a></li>
   <li><a href="#reproducible" id="toc-reproducible" class="nav-link" data-scroll-target="#reproducible"><i class="fa-solid fa-list-ol" aria-label="list-ol"></i> Reproducible</a></li>
@@ -322,6 +323,10 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <li><a href="./examples/index.html">Example notebooks</a></li>
 <li><a href="https://github.com/DHI/mikeio/tree/main/tests">Unit tests</a></li>
 </ul>
+</section>
+<section id="abstraction-over-mikecore" class="level2">
+<h2 class="anchored" data-anchor-id="abstraction-over-mikecore"><i class="fa-solid fa-layer-group" aria-label="layer-group"></i> Abstraction over mikecore</h2>
+<p>MIKE IO is built on top of <a href="https://github.com/DHI/mikecore-python">mikecore</a>, the low-level Python bindings to DHI’s DFS and EUM C libraries. MIKE IO provides a high-level, user-friendly API that covers the vast majority of common data processing tasks. However, to keep the API simple and focused, some advanced or niche functionality is not exposed. If you encounter an edge case that MIKE IO doesn’t support, you can use mikecore directly for full low-level access. While mikecore doesn’t have formal documentation, its repository contains many examples to help you get started.</p>
 </section>
 <section id="open-source" class="level2">
 <h2 class="anchored" data-anchor-id="open-source"><i class="fa-brands fa-osi" aria-label="osi"></i> Open Source​</h2>
