@@ -99,7 +99,7 @@ da.plot.contourf()
 da.plot.mesh()
 ```
 
-See details in the [API specification](`mikeio.dataset._data_plot._DataArrayPlotter`) below and in the bottom of the relevant pages e.g. [DataArray Plotter Grid2D API](`mikeio.dataset._data_plot._DataArrayPlotterGrid2D`).
+See the [DataArrayPlotter](`mikeio.dataset.DataArrayPlotter`) API for details.
 
 
 

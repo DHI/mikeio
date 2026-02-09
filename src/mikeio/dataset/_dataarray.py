@@ -56,15 +56,15 @@ from ..spatial._FM_geometry_layered import _GeometryFMLayered
 
 from .._spectral import calc_m0_from_spectrum
 from ._data_plot import (
-    _DataArrayPlotter,
-    _DataArrayPlotterFM,
-    _DataArrayPlotterGrid1D,
-    _DataArrayPlotterGrid2D,
-    _DataArrayPlotterAreaSpectrum,
-    _DataArrayPlotterFMVerticalColumn,
-    _DataArrayPlotterFMVerticalProfile,
-    _DataArrayPlotterPointSpectrum,
-    _DataArrayPlotterLineSpectrum,
+    DataArrayPlotter,
+    DataArrayPlotterFM,
+    DataArrayPlotterGrid1D,
+    DataArrayPlotterGrid2D,
+    DataArrayPlotterAreaSpectrum,
+    DataArrayPlotterFMVerticalColumn,
+    DataArrayPlotterFMVerticalProfile,
+    DataArrayPlotterPointSpectrum,
+    DataArrayPlotterLineSpectrum,
 )
 
 GeometryType = Union[
@@ -338,18 +338,18 @@ class DataArray:
     def _get_plotter_by_geometry(self) -> Any:
         # TODO: this is explicit, but with consistent naming, we could create this mapping automatically
         PLOTTER_MAP: Any = {
-            GeometryFMVerticalProfile: _DataArrayPlotterFMVerticalProfile,
-            GeometryFMVerticalColumn: _DataArrayPlotterFMVerticalColumn,
-            GeometryFMPointSpectrum: _DataArrayPlotterPointSpectrum,
-            GeometryFMLineSpectrum: _DataArrayPlotterLineSpectrum,
-            GeometryFMAreaSpectrum: _DataArrayPlotterAreaSpectrum,
-            GeometryFM2D: _DataArrayPlotterFM,
-            GeometryFM3D: _DataArrayPlotterFM,
-            Grid1D: _DataArrayPlotterGrid1D,
-            Grid2D: _DataArrayPlotterGrid2D,
+            GeometryFMVerticalProfile: DataArrayPlotterFMVerticalProfile,
+            GeometryFMVerticalColumn: DataArrayPlotterFMVerticalColumn,
+            GeometryFMPointSpectrum: DataArrayPlotterPointSpectrum,
+            GeometryFMLineSpectrum: DataArrayPlotterLineSpectrum,
+            GeometryFMAreaSpectrum: DataArrayPlotterAreaSpectrum,
+            GeometryFM2D: DataArrayPlotterFM,
+            GeometryFM3D: DataArrayPlotterFM,
+            Grid1D: DataArrayPlotterGrid1D,
+            Grid2D: DataArrayPlotterGrid2D,
         }
 
-        plotter = PLOTTER_MAP.get(type(self.geometry), _DataArrayPlotter)
+        plotter = PLOTTER_MAP.get(type(self.geometry), DataArrayPlotter)
         return plotter(self)
 
     def _set_spectral_attributes(self, geometry: GeometryType) -> None:

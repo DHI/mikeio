@@ -274,7 +274,7 @@ class Grid1D(_Geometry):
                 return GeometryPoint2D(x=x, y=y, projection=self.projection)
 
 
-class _Grid2DPlotter:
+class Grid2DPlotter:
     """Plot Grid2D.
 
     Examples
@@ -498,7 +498,7 @@ class Grid2D(_Geometry):
         self.is_spectral = is_spectral
         self.is_vertical = is_vertical
 
-        self.plot = _Grid2DPlotter(self)
+        self.plot = Grid2DPlotter(self)
 
     @property
     def default_dims(self) -> tuple[str, ...]:
