@@ -178,7 +178,7 @@ class DataArray:
         self,
         data: ArrayLike,
         *,
-        time: pd.DatetimeIndex | str | None = None,
+        time: pd.DatetimeIndex | pd.TimedeltaIndex | str | None = None,
         name: str | None = None,
         type: EUMType | None = None,
         unit: EUMUnit | None = None,
@@ -191,7 +191,7 @@ class DataArray:
         # TODO consider np.asarray, e.g. self._values = np.asarray(data)
         self._values = self._parse_data(data)
 
-        self.time: pd.DatetimeIndex = self._parse_time(time)
+        self.time: pd.DatetimeIndex | pd.TimedeltaIndex = self._parse_time(time)
         self._dt = dt
 
         geometry = GeometryUndefined() if geometry is None else geometry
@@ -1957,6 +1957,10 @@ class DataArray:
                 coords["x"] = xr.DataArray(data=g.x, dims="x")
             case GeometryFM2D():
                 coords["element"] = xr.DataArray(data=g.element_ids, dims="element")
+                ec = g.element_coordinates
+                coords["x"] = xr.DataArray(data=ec[:, 0], dims="element")
+                coords["y"] = xr.DataArray(data=ec[:, 1], dims="element")
+                coords["z"] = xr.DataArray(data=ec[:, 2], dims="element")
             case GeometryPoint2D():
                 coords["x"] = g.x
                 coords["y"] = g.y
@@ -2076,8 +2080,10 @@ class DataArray:
             data[mask] = value
 
     @staticmethod
-    def _parse_time(time: Any) -> pd.DatetimeIndex:
-        """Allow anything that we can create a DatetimeIndex from."""
+    def _parse_time(time: Any) -> pd.DatetimeIndex | pd.TimedeltaIndex:
+        if isinstance(time, pd.TimedeltaIndex):
+            return time
+
         if time is None:
             time = [pd.Timestamp(2018, 1, 1)]  # TODO is this the correct epoch?
         if isinstance(time, str) or (not isinstance(time, Iterable)):
@@ -2092,7 +2098,6 @@ class DataArray:
             raise ValueError(
                 "Time must be monotonic increasing (only equal or increasing) instances."
             )
-        assert isinstance(index, pd.DatetimeIndex)
         return index
 
     @staticmethod

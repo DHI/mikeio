@@ -467,7 +467,7 @@ def test_interp_time() -> None:
     d[1] = 2.0
     d[3] = 4.0
     data = [d]
-    time = pd.date_range("2000-1-1", freq="d", periods=nt)
+    time = pd.date_range("2000-1-1", freq="D", periods=nt)
     items = [ItemInfo("Foo")]
     ds = mikeio.Dataset.from_numpy(data=data, time=time, items=items)
 
@@ -933,7 +933,7 @@ def test_add_dataset(ds1: Dataset, ds2: Dataset) -> None:
     assert ds4.items[0].type == EUMType.Undefined
     assert ds4.items[0].name == ds1.items[0].name
     ds2c = ds2.copy()
-    tt = ds2c.time.to_numpy()
+    tt = ds2c.time.to_numpy().copy()
     tt[-1] = tt[-1] + np.timedelta64(1, "s")
     ds2c.time = pd.DatetimeIndex(tt)
     with pytest.raises(ValueError):
@@ -1114,12 +1114,6 @@ def test_renamed_dataset_has_updated_attributes(ds1: mikeio.Dataset) -> None:
     assert hasattr(ds2, "Baz")
     assert isinstance(ds2.Baz, mikeio.DataArray)
 
-    # inplace version
-    ds1.rename(dict(Foo="Baz"), inplace=True)
-    assert not hasattr(ds1, "Foo")
-    assert hasattr(ds1, "Baz")
-    assert isinstance(ds1.Baz, mikeio.DataArray)
-
 
 def test_merge_by_item() -> None:
     ds1 = mikeio.read("tests/testdata/tide1.dfs1")
@@ -1127,7 +1121,7 @@ def test_merge_by_item() -> None:
     old_name = ds2[0].name
     new_name = old_name + " v2"
     # ds2[0].name = ds2[0].name + " v2"
-    ds2.rename({old_name: new_name}, inplace=True)
+    ds2 = ds2.rename({old_name: new_name})
     ds3 = mikeio.Dataset.merge([ds1, ds2])
 
     assert isinstance(ds3, mikeio.Dataset)

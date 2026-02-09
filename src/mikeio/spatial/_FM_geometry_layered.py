@@ -180,11 +180,6 @@ class _GeometryFMLayered(_GeometryFM):
                     n_sigma=n_sigma,
                 )
 
-    @cached_property
-    def element_coordinates(self) -> np.ndarray:
-        """Center coordinates of each element."""
-        return self._calc_element_coordinates(maxnodes=8)
-
     def _get_nodes_and_table_for_elements(
         self,
         elements: Sequence[int] | np.ndarray,
@@ -330,9 +325,9 @@ class _GeometryFMLayered(_GeometryFM):
         # fast path if no z-layers
         if self.n_z_layers == 0:
             return np.arange(
-                start=self.n_sigma_layers - 1,
-                stop=self.n_elements,
-                step=self.n_sigma_layers,
+                self.n_sigma_layers - 1,
+                self.n_elements,
+                self.n_sigma_layers,
             )
         else:
             # slow path

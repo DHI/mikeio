@@ -229,7 +229,7 @@ class Dataset:
         return self[0]._dt
 
     @property
-    def time(self) -> pd.DatetimeIndex:
+    def time(self) -> pd.DatetimeIndex | pd.TimedeltaIndex:
         """Time axis."""
         return list(self)[0].time
 
@@ -475,16 +475,13 @@ class Dataset:
         """
         self.__delitem__(key)
 
-    def rename(self, mapper: Mapping[str, str], inplace: bool = False) -> Dataset:
+    def rename(self, mapper: Mapping[str, str], **kwargs: Any) -> Dataset:  # noqa: D417
         """Rename items (DataArrays) in Dataset.
 
         Parameters
         ----------
         mapper : Mapping[str, str]
             dictionary (or similar) mapping from old to new names
-        inplace : bool, optional
-            Should the renaming be done in the original dataset(=True)
-            or return a new(=False)?, by default False
 
         Returns
         -------
@@ -503,6 +500,14 @@ class Dataset:
 
 
         """
+        # deprecated inplace parameter
+        if "inplace" in kwargs:
+            warnings.warn(
+                "'inplace' parameter is deprecated and will be removed in future versions. Use ds = ds.rename(...) instead.",
+                FutureWarning,
+            )
+        inplace = kwargs.get("inplace", False)
+
         if inplace:
             ds = self
         else:
@@ -1726,10 +1731,7 @@ class Dataset:
         df = pd.DataFrame(data, index=self.time)
 
         if round_time:
-            rounded_idx = pd.DatetimeIndex(self.time).round(round_time)  # type: ignore
-            df.index = pd.DatetimeIndex(rounded_idx, freq="infer")
-        else:
-            df.index = pd.DatetimeIndex(self.time, freq="infer")
+            self.time = self.time.round(round_time)  # type: ignore
 
         return df
 

@@ -143,7 +143,6 @@ The Dataset (and DataArray) has several properties:
 
 * n_items - Number of items
 * n_timesteps - Number of timesteps
-* n_elements - Number of elements
 * start_time - First time instance (as datetime)
 * end_time - Last time instance (as datetime)
 * is_equidistant - Is the time series equidistant in time

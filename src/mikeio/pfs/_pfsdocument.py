@@ -7,64 +7,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any, Callable, Sequence, TextIO
 
-import yaml
-
 from ._pfssection import PfsNonUniqueList, PfsSection
-
-
-def parse_yaml_preserving_duplicates(
-    src: Any, unique_keywords: bool = False
-) -> dict[str, Any]:
-    class PreserveDuplicatesLoader(yaml.loader.Loader):
-        pass
-
-    def map_constructor_duplicates(loader: Any, node: Any, deep: bool = False) -> Any:
-        keys = [loader.construct_object(node, deep=deep) for node, _ in node.value]
-        vals = [loader.construct_object(node, deep=deep) for _, node in node.value]
-        key_count = Counter(keys)
-        data = {}
-        for key, val in zip(keys, vals):
-            if key_count[key] > 1:
-                if key not in data:
-                    data[key] = PfsNonUniqueList()
-                data[key].append(val)
-            else:
-                data[key] = val
-        return data
-
-    def map_constructor_duplicate_sections(
-        loader: Any, node: Any, deep: bool = False
-    ) -> Any:
-        keys = [loader.construct_object(node, deep=deep) for node, _ in node.value]
-        vals = [loader.construct_object(node, deep=deep) for _, node in node.value]
-        key_count = Counter(keys)
-        data = {}
-        for key, val in zip(keys, vals):
-            if key_count[key] > 1:
-                if isinstance(val, dict):
-                    if key not in data:
-                        data[key] = PfsNonUniqueList()
-                    data[key].append(val)
-                else:
-                    warnings.warn(
-                        f"Keyword {key} defined multiple times (first will be used). Value: {val}"
-                    )
-                    if key not in data:
-                        data[key] = val
-            else:
-                data[key] = val
-        return data
-
-    constructor = (
-        map_constructor_duplicate_sections
-        if unique_keywords
-        else map_constructor_duplicates
-    )
-    PreserveDuplicatesLoader.add_constructor(
-        yaml.resolver.BaseResolver.DEFAULT_MAPPING_TAG,
-        constructor=constructor,
-    )
-    return yaml.load(src, PreserveDuplicatesLoader)
 
 
 class PfsDocument(PfsSection):
@@ -197,10 +140,7 @@ class PfsDocument(PfsSection):
         unique_keywords: bool = False,
     ) -> tuple[list[str], list[PfsSection]]:
         try:
-            yml = self._pfs2yaml(filename, encoding)
-            target_list = parse_yaml_preserving_duplicates(yml, unique_keywords)
-        except AttributeError:  # This is the error raised if parsing fails, try again with the normal loader
-            target_list = yaml.load(yml, Loader=yaml.CFullLoader)
+            target_list = self._parse_pfs(filename, encoding, unique_keywords)
         except FileNotFoundError as e:
             raise FileNotFoundError(str(e))
         except Exception as e:
@@ -261,9 +201,13 @@ class PfsDocument(PfsSection):
                 setattr(self, alias, target[module])
                 self._ALIAS_LIST.add(alias)
 
-    def _pfs2yaml(
-        self, filename: str | Path | TextIO, encoding: str | None = None
-    ) -> str:
+    def _parse_pfs(
+        self,
+        filename: str | Path | TextIO,
+        encoding: str | None,
+        unique_keywords: bool = False,
+    ) -> list[dict[str, Any]]:
+        """Parse PFS file directly to list of dictionaries."""
         if hasattr(filename, "read"):  # To read in memory strings StringIO
             pfsstring = filename.read()
         else:
@@ -271,18 +215,131 @@ class PfsDocument(PfsSection):
 
         lines = pfsstring.splitlines()
 
-        output = []
-        output.append("---")
+        # Stack to track nested sections: [(section_name, section_dict), ...]
+        stack: list[tuple[str, dict[str, Any]]] = []
+        root_sections: list[dict[str, Any]] = []
 
-        _level = 0
+        # Track multiline string values
+        in_multiline_string = False
+        multiline_key = ""
+        multiline_value_parts: list[str] = []
 
         for line in lines:
-            adj_line, _level = self._parse_line(line, _level)
-            output.append(adj_line)
+            s = line.strip()
+            s = self._strip_comments(s).strip()
 
-        return "\n".join(output)
+            if not s or s.startswith("!"):
+                continue
+
+            # Handle multiline string continuation
+            if in_multiline_string:
+                multiline_value_parts.append(s)
+                # Check if this line ends the multiline string
+                if s.endswith("'"):
+                    # End of multiline string - join with spaces
+                    full_value = " ".join(multiline_value_parts)
+                    value = self._parse_pfs_value(full_value)
+                    if stack:
+                        _, current_dict = stack[-1]
+                        self._add_to_dict(
+                            current_dict, multiline_key, value, unique_keywords
+                        )
+                    in_multiline_string = False
+                    multiline_key = ""
+                    multiline_value_parts = []
+                continue
+
+            # Check for section start
+            if s.startswith("[") and s.endswith("]"):
+                section_name = s[1:-1].strip()
+                new_section: dict[str, Any] = {}
+                stack.append((section_name, new_section))
+
+            # Check for section end
+            elif "EndSect" in s:
+                if stack:
+                    section_name, section_dict = stack.pop()
+
+                    if not stack:
+                        # This is a root section
+                        root_sections.append({section_name: section_dict})
+                    else:
+                        # Add to parent section
+                        _, parent_dict = stack[-1]
+                        self._add_to_dict(
+                            parent_dict, section_name, section_dict, unique_keywords
+                        )
+
+            # Key-value pair
+            elif "=" in s:
+                # Check for malformed brackets in key part only
+                if "]]" in s or "[[" in s:
+                    idx = s.index("=")
+                    key_part = s[:idx]
+                    if "]]" in key_part or "[[" in key_part:
+                        raise ValueError(
+                            f"Malformed PFS file: found ']]' or '[[' in line: {s}"
+                        )
+
+                idx = s.index("=")
+                key = s[:idx].strip()
+                value_str = s[idx + 1 :].strip()
+
+                # Check if this starts a multiline string
+                # A multiline string starts with ' but the ENTIRE value doesn't end with '
+                # (not just checking last character, as that could be part of a list like '', '', "", "")
+                if value_str.startswith("'"):
+                    # Count quotes to see if they're balanced
+                    # Simple heuristic: if there's only one ', it's likely multiline
+                    single_quote_count = value_str.count("'")
+                    if single_quote_count == 1:
+                        in_multiline_string = True
+                        multiline_key = key
+                        multiline_value_parts = [value_str]
+                        continue
+
+                value = self._parse_pfs_value(value_str)
+
+                if stack:
+                    _, current_dict = stack[-1]
+                    self._add_to_dict(current_dict, key, value, unique_keywords)
+
+            # Check for malformed brackets (lines that don't have =)
+            elif "]]" in s or "[[" in s:
+                raise ValueError(f"Malformed PFS file: found ']]' or '[[' in line: {s}")
+
+        return root_sections
+
+    def _add_to_dict(
+        self,
+        target_dict: dict[str, Any],
+        key: str,
+        value: Any,
+        unique_keywords: bool,
+    ) -> None:
+        """Add key-value pair to dictionary, handling duplicates."""
+        if key in target_dict:
+            # Handle duplicates
+            existing = target_dict[key]
+
+            if unique_keywords and not isinstance(value, dict):
+                # Warn about non-section duplicates when unique_keywords is True
+                warnings.warn(
+                    f"Keyword {key} defined multiple times (first will be used). Value: {value}"
+                )
+                # Keep the first value
+                return
+
+            # Convert to PfsNonUniqueList if not already
+            if not isinstance(existing, PfsNonUniqueList):
+                target_dict[key] = PfsNonUniqueList([existing])
+
+            target_dict[key].append(value)
+        else:
+            target_dict[key] = value
 
     def _strip_comments(self, s: str) -> str:
+        """Remove comments from line while preserving quoted strings."""
         pattern = r"(\".*?\"|\'.*?\')|//.*"
 
         def replacer(match):  # type: ignore
@@ -291,78 +348,84 @@ class PfsDocument(PfsSection):
 
         return re.sub(pattern, replacer, s)
 
-    def _parse_line(self, line: str, level: int = 0) -> tuple[str, int]:
-        section_header = False
-        s = line.strip()
-        s = self._strip_comments(s).strip()
+    def _parse_pfs_value(self, value_str: str) -> Any:
+        """Parse a value string into appropriate Python type."""
+        if len(value_str) == 0:
+            return []
 
-        if len(s) > 0:
-            if s[0] == "[":
-                section_header = True
-                s = s.replace("[", "")
+        # Special case: pipe-delimited strings
+        if (
+            value_str.startswith("|")
+            and value_str.endswith("|")
+            and value_str.count("|") == 2
+        ):
+            return self._parse_token(value_str)
 
-                # This could be an option to create always create a list to handle multiple identical root elements
-                if level == 0:
-                    s = f"- {s}"
+        # Special case: MULTIPOLYGON - fast path for large coordinate strings
+        # Avoids expensive parsing but still strips quotes correctly
+        if "MULTIPOLYGON" in value_str:
+            s = value_str.strip()
+            if s.startswith("'") and s.endswith("'"):
+                return s[1:-1]
+            elif s.startswith('"') and s.endswith('"'):
+                return s[1:-1]
+            return s
 
-            if s[-1] == "]":
-                s = s.replace("]", ":")
+        # Special case: values enclosed in double quotes should not be split
+        # (even though they may contain commas)
+        if value_str.startswith('"') and value_str.endswith('"'):
+            # But if there's a comma, it's treated as a list per PFS convention
+            if "," in value_str:
+                tokens = self._split_line_by_comma(value_str)
+                parsed_tokens = [
+                    self._parse_token(t, context=value_str) for t in tokens
+                ]
+                return parsed_tokens
+            else:
+                return self._parse_token(value_str)
 
-        # s = s.replace("//", "")
-        s = s.replace("\t", " ")
-
-        if len(s) > 0 and s[0] != "!":
-            if "=" in s:
-                idx = s.index("=")
-
-                key = s[0:idx]
-                key = key.strip()
-                value = s[(idx + 1) :].strip()
-                value = self._parse_param(value)
-                s = f"{key}: {value}"
-
-        if "EndSect" in line:
-            s = ""
-
-        ws = " " * 2 * level
-        if level > 0:
-            ws = "  " + ws  # TODO
-        adj_line = ws + s
-
-        if section_header:
-            level += 1
-        if "EndSect" in line:
-            level -= 1
-
-        return adj_line, level
-
-    def _parse_param(self, value: str) -> str:
-        if len(value) == 0:
-            return "[]"
-        if value[0] == "|" and value[-1] == "|":
-            if value.count("|") == 2:
-                return self._parse_token(value)
-        if "MULTIPOLYGON" in value:
-            return value
-        if "," in value:
-            tokens = self._split_line_by_comma(value)
-            for j in range(len(tokens)):
-                tokens[j] = self._parse_token(tokens[j], context=value)
-            value = f"[{','.join(tokens)}]" if len(tokens) > 1 else tokens[0]
+        # Check if it's a comma-separated list
+        if "," in value_str:
+            tokens = self._split_line_by_comma(value_str)
+            parsed_tokens = [self._parse_token(t, context=value_str) for t in tokens]
+            # Return as list if multiple values, single value otherwise
+            return parsed_tokens if len(parsed_tokens) > 1 else parsed_tokens[0]
         else:
-            value = self._parse_token(value)
-        return value
-
-    _COMMA_MATCHER = re.compile(r",(?=(?:[^\"']*[\"'][^\"']*[\"'])*[^\"']*$)")
+            return self._parse_token(value_str)
 
     def _split_line_by_comma(self, s: str) -> list[str]:
-        return self._COMMA_MATCHER.split(s)
+        """Split line by commas, respecting quoted strings."""
+        # Manual parsing to respect quotes
+        tokens: list[str] = []
+        current_token: list[str] = []
+        in_single_quote = False
+        in_double_quote = False
 
-    def _parse_token(self, token: str, context: str = "") -> str:
+        for i, char in enumerate(s):
+            if char == "'" and not in_double_quote:
+                in_single_quote = not in_single_quote
+                current_token.append(char)
+            elif char == '"' and not in_single_quote:
+                in_double_quote = not in_double_quote
+                current_token.append(char)
+            elif char == "," and not in_single_quote and not in_double_quote:
+                tokens.append("".join(current_token))
+                current_token = []
+            else:
+                current_token.append(char)
+
+        # Add the last token
+        if current_token:
+            tokens.append("".join(current_token))
+
+        return tokens
+
+    def _parse_token(self, token: str, context: str = "") -> Any:
+        """Parse a single token into appropriate Python type."""
         s = token.strip()
 
-        # Example of complicated string:
-        # '<CLOB:22,1,1,false,1,0,"",0,"",0,"",0,"",0,"",0,"",0,"",0,"",||,false>'
+        # Handle pipe-delimited strings with special characters
+        # Example: |file\path.dfs|
         if s.count("|") == 2 and "CLOB" not in context:
             prefix, content, suffix = s.split("|")
             if len(content) > 1 and content.count("'") > 0:
@@ -371,11 +434,36 @@ class PfsDocument(PfsSection):
                     f"The string {s} contains a single quote character which will be temporarily converted to \U0001f600 . If you write back to a pfs file again it will be converted back."
                 )
                 content = content.replace("'", "\U0001f600")
-            s = f"{prefix}'|{content}|'{suffix}"
+            # Return the pipe-delimited string as-is (will be stored as string)
+            return f"|{content}|"
 
-        if len(s) > 2:  # ignore foo = ''
+        # Replace double single quotes with regular quotes
+        if len(s) > 2:
             s = s.replace("''", '"')
 
+        # Remove surrounding quotes and parse the value
+        if s.startswith("'") and s.endswith("'"):
+            return s[1:-1]
+        elif s.startswith('"') and s.endswith('"'):
+            return s[1:-1]
+
+        # Try to parse as number
+        try:
+            # Try integer first
+            if "." not in s and "e" not in s.lower():
+                return int(s)
+            # Try float
+            return float(s)
+        except ValueError:
+            pass
+
+        # Try to parse as boolean
+        if s.lower() == "true":
+            return True
+        elif s.lower() == "false":
+            return False
+
+        # Return as string
         return s
 
     def write(self, filename: str | Path) -> None:

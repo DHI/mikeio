@@ -4,8 +4,7 @@ jupyter: python3
 ---
 
 
-MIKE IO uses a pandas DatetimeIndex to represent the time dimension in dfs files. If the Dfs file has a relative time axis it will be converted to DatetimeIndex by using 1970-1-1 00:00:00 as start time. 
-
+MIKE IO uses a pandas DatetimeIndex to represent the time dimension in dfs files. If the dfs file has a relative time axis, it will be represented as a pandas TimedeltaIndex.
 
 ```{python}
 import mikeio
@@ -17,18 +16,11 @@ ds
 ```
 
 ```{python}
+ds.time[:5]
+```
+
+```{python}
 df = ds.to_dataframe()
-df.head()
-```
-
-Correcting the dataframe index by subtracting start time to get relative time axis.
-
-```{python}
-df.index = (df.index - df.index[0]).total_seconds()
-df.index.name = "Relative time (s)"
-```
-
-```{python}
 df.head()
 ```
 
