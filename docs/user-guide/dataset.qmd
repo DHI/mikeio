@@ -88,7 +88,7 @@ In most cases, you will *not* plot the Dataset, but rather it's DataArrays. But 
 * dfs0-Dataset : plot all items as timeseries with ds.plot()
 * scatter : compare two items using ds.plot.scatter(x="itemA", y="itemB")
 
-See details in the [Dataset Plotter API](`mikeio.dataset._data_plot._DatasetPlotter`).
+See details in the [Dataset Plotter API](`mikeio.dataset._data_plot.DatasetPlotter`).
 
 
 ## Add a new item
