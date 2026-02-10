@@ -58,7 +58,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </style>
 
 
-<script src="../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.min.js" integrity="sha384-ZvpUoO/+PpLXR1lu4jmpXWu80pZlYUAfxl5NsBMWOEPSjUn/6Z/hRTt8+pR6L4N2" crossorigin="anonymous"></script><script src="../site_libs/quarto-nav/quarto-nav.js"></script>
 <script src="../site_libs/quarto-nav/headroom.min.js"></script>
 <script src="../site_libs/clipboard/clipboard.min.js"></script>
 <script src="../site_libs/quarto-search/autocomplete.umd.js"></script>
@@ -110,6 +110,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     "search-label": "Search"
   }
 }</script>
+<script src="https://cdn.jsdelivr.net/npm/requirejs@2.3.6/require.min.js" integrity="sha384-c9c+LnTbwQ3aujuU7ULEPVvgLs+Fn6fJUvIGTsuu1ZcCf11fiEubah0ttpca4ntM sha384-6V1/AdqZRWk1KAlWbKBlGhN7VG4iE/yAZcO6NZPMF8od0vukrvr0tg4qY6NSrItx" crossorigin="anonymous"></script>
+
+<script type="application/javascript">define('jquery', [],function() {return window.jQuery;})</script>
 
 
 </head>
@@ -178,7 +181,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
         <i class="bi bi-layout-text-sidebar-reverse"></i>
       </button>
         <a class="flex-grow-1 no-decor" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
-          <h1 class="quarto-secondary-nav-title"></h1>
+          <h1 class="quarto-secondary-nav-title">Concatenation</h1>
         </a>     
     </div>
   </nav>
@@ -281,16 +284,40 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <ul class="collapse">
   <li><a href="#when-to-use-the-generic-module" id="toc-when-to-use-the-generic-module" class="nav-link" data-scroll-target="#when-to-use-the-generic-module">When to use the generic module</a></li>
   <li><a href="#when-not-to-use-the-generic-module" id="toc-when-not-to-use-the-generic-module" class="nav-link" data-scroll-target="#when-not-to-use-the-generic-module">When not to use the generic module</a></li>
-  <li><a href="#example" id="toc-example" class="nav-link" data-scroll-target="#example">Example</a></li>
-  <li><a href="#more-examples" id="toc-more-examples" class="nav-link" data-scroll-target="#more-examples">More examples</a></li>
+  <li><a href="#examples" id="toc-examples" class="nav-link" data-scroll-target="#examples">Examples</a></li>
+  <li><a href="#difference-between-two-files" id="toc-difference-between-two-files" class="nav-link" data-scroll-target="#difference-between-two-files">Difference between two files</a></li>
+  <li><a href="#extract-time-steps-or-items" id="toc-extract-time-steps-or-items" class="nav-link" data-scroll-target="#extract-time-steps-or-items">Extract time steps or items</a></li>
+  <li><a href="#scaling" id="toc-scaling" class="nav-link" data-scroll-target="#scaling">Scaling</a>
+  <ul class="collapse">
+  <li><a href="#spatially-varying-correction" id="toc-spatially-varying-correction" class="nav-link" data-scroll-target="#spatially-varying-correction">Spatially varying correction</a></li>
+  </ul></li>
+  <li><a href="#derived-items" id="toc-derived-items" class="nav-link" data-scroll-target="#derived-items">Derived items</a></li>
+  <li><a href="#time-average" id="toc-time-average" class="nav-link" data-scroll-target="#time-average">Time average</a></li>
+  <li><a href="#quantile" id="toc-quantile" class="nav-link" data-scroll-target="#quantile">Quantile</a></li>
   </ul></li>
   </ul>
 <div class="toc-actions"><ul><li><a href="https://github.com/DHI/mikeio/edit/main/docs/user-guide/generic.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li></ul></div><div class="quarto-alternate-formats"><h2>Other Formats</h2><ul><li><a href="generic.ipynb" download="generic.ipynb"><i class="bi bi-journal-code"></i>Jupyter</a></li></ul></div></nav>
     </div>
 <!-- main -->
-<main class="content" id="quarto-document-content"><header id="title-block-header" class="quarto-title-block"></header>
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title d-none d-lg-block">Concatenation</h1>
+</div>
 
 
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
 
 
 <section id="generic" class="level1">
@@ -300,10 +327,11 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <li><a href="../api/generic.html#mikeio.generic.concat"><code>concat()</code></a> - Concatenates files along the time axis</li>
 <li><a href="../api/generic.html#mikeio.generic.extract"><code>extract()</code></a> - Extract timesteps and/or items to a new dfs file</li>
 <li><a href="../api/generic.html#mikeio.generic.diff"><code>diff()</code></a> - Calculate difference between two dfs files with identical geometry</li>
-<li><a href="../api/generic.html#mikeio.generic.sum"><code>sum()</code></a> - Calculate the sum of two dfs files</li>
+<li><a href="../api/generic.html#mikeio.generic.add"><code>add()</code></a> - Calculate the sum of two dfs files</li>
 <li><a href="../api/generic.html#mikeio.generic.scale"><code>scale()</code></a> - Apply scaling to any dfs file</li>
 <li><a href="../api/generic.html#mikeio.generic.avg_time"><code>avg_time()</code></a> - Create a temporally averaged dfs file</li>
 <li><a href="../api/generic.html#mikeio.generic.quantile"><code>quantile()</code></a> - Create a dfs file with temporal quantiles</li>
+<li><a href="../api/generic.html#mikeio.generic.transform"><code>transform()</code></a> - Create new derived items from existing items using custom functions</li>
 </ul>
 <section id="when-to-use-the-generic-module" class="level2">
 <h2 class="anchored" data-anchor-id="when-to-use-the-generic-module">When to use the generic module</h2>
@@ -321,14 +349,375 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <li>When the end result is not a dfs file</li>
 </ul>
 </section>
-<section id="example" class="level2">
-<h2 class="anchored" data-anchor-id="example">Example</h2>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> <span class="im">from</span> mikeio <span class="im">import</span> generic</span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="op">&gt;&gt;&gt;</span> generic.concat([<span class="st">"fileA.dfs2"</span>, <span class="st">"fileB.dfs2"</span>], <span class="st">"new_file.dfs2"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<section id="examples" class="level2">
+<h2 class="anchored" data-anchor-id="examples">Examples</h2>
+<div id="90f47e7b" class="cell" data-execution_count="1">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> mikeio</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> mikeio.generic</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<p>Take a look at these two files with overlapping timesteps.</p>
+<div id="273ee482" class="cell" data-execution_count="2">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>t1 <span class="op">=</span> mikeio.read(<span class="st">"../data/tide1.dfs1"</span>)</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>t1</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display" data-execution_count="2">
+<pre><code>&lt;mikeio.Dataset&gt;
+dims: (time:97, x:10)
+time: 2019-01-01 00:00:00 - 2019-01-03 00:00:00 (97 records)
+geometry: Grid1D (n=10, dx=0.06667)
+items:
+  0:  Level &lt;Water Level&gt; (meter)</code></pre>
+</div>
+</div>
+<div id="8266bc2f" class="cell" data-execution_count="3">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>t2 <span class="op">=</span> mikeio.read(<span class="st">"../data/tide2.dfs1"</span>)</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>t2</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display" data-execution_count="3">
+<pre><code>&lt;mikeio.Dataset&gt;
+dims: (time:97, x:10)
+time: 2019-01-02 00:00:00 - 2019-01-04 00:00:00 (97 records)
+geometry: Grid1D (n=10, dx=0.06667)
+items:
+  0:  Level &lt;Water Level&gt; (meter)</code></pre>
+</div>
+</div>
+<p>Plot one of the points along the line.</p>
+<div id="d3a6277b" class="cell" data-execution_count="4">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>plt.plot(t1.time,t1[<span class="dv">0</span>].isel(x<span class="op">=</span><span class="dv">1</span>).values, label<span class="op">=</span><span class="st">"File 1"</span>)</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>plt.plot(t2.time,t2[<span class="dv">0</span>].isel(x<span class="op">=</span><span class="dv">1</span>).values,<span class="st">'k+'</span>, label<span class="op">=</span><span class="st">"File 2"</span>)</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>plt.legend()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="generic_files/figure-html/cell-5-output-1.png" width="575" height="411" class="figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+<div id="122de2b9" class="cell" data-execution_count="5">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>mikeio.generic.concat(infilenames<span class="op">=</span>[<span class="st">"../data/tide1.dfs1"</span>,</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>                                   <span class="st">"../data/tide2.dfs1"</span>],</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>                     outfilename<span class="op">=</span><span class="st">"concat.dfs1"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>  0%|          | 0/2 [00:00&lt;?, ?it/s]100%|██████████| 2/2 [00:00&lt;00:00, 879.22it/s]</code></pre>
+</div>
+</div>
+<div id="f2bef9ec" class="cell" data-execution_count="6">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>c <span class="op">=</span> mikeio.read(<span class="st">"concat.dfs1"</span>)</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>c[<span class="dv">0</span>].isel(x<span class="op">=</span><span class="dv">1</span>).plot()</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>c</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display" data-execution_count="6">
+<pre><code>&lt;mikeio.Dataset&gt;
+dims: (time:145, x:10)
+time: 2019-01-01 00:00:00 - 2019-01-04 00:00:00 (145 records)
+geometry: Grid1D (n=10, dx=0.06667)
+items:
+  0:  Level &lt;Water Level&gt; (meter)</code></pre>
+</div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="generic_files/figure-html/cell-7-output-2.png" width="587" height="414" class="figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
 </section>
-<section id="more-examples" class="level2">
-<h2 class="anchored" data-anchor-id="more-examples">More examples</h2>
-<p>See the <a href="../examples/Generic.html">Generic notebook</a> for more examples.</p>
+<section id="difference-between-two-files" class="level2">
+<h2 class="anchored" data-anchor-id="difference-between-two-files">Difference between two files</h2>
+<p>Take difference between two dfs files with same structure - e.g.&nbsp;to see the difference in result between two calibration runs</p>
+<div id="239fbdc5" class="cell" data-execution_count="7">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>fn1 <span class="op">=</span> <span class="st">"../data/oresundHD_run1.dfsu"</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>fn2 <span class="op">=</span> <span class="st">"../data/oresundHD_run2.dfsu"</span></span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>fn_diff <span class="op">=</span> <span class="st">"oresundHD_difference.dfsu"</span></span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>mikeio.generic.diff(fn1, fn2, fn_diff)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>  0%|          | 0/5 [00:00&lt;?, ?it/s]100%|██████████| 5/5 [00:00&lt;00:00, 3457.79it/s]</code></pre>
+</div>
+</div>
+<div id="88eac30c" class="cell" data-execution_count="8">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>_, ax <span class="op">=</span> plt.subplots(<span class="dv">1</span>,<span class="dv">3</span>, sharey<span class="op">=</span><span class="va">True</span>, figsize<span class="op">=</span>(<span class="dv">12</span>,<span class="dv">5</span>))</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>da <span class="op">=</span> mikeio.read(fn1, time<span class="op">=-</span><span class="dv">1</span>)[<span class="dv">0</span>]</span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>da.plot(vmin<span class="op">=</span><span class="fl">0.06</span>, vmax<span class="op">=</span><span class="fl">0.27</span>, ax<span class="op">=</span>ax[<span class="dv">0</span>], title<span class="op">=</span><span class="st">'run 1'</span>)</span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>da <span class="op">=</span> mikeio.read(fn2, time<span class="op">=-</span><span class="dv">1</span>)[<span class="dv">0</span>]</span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>da.plot(vmin<span class="op">=</span><span class="fl">0.06</span>, vmax<span class="op">=</span><span class="fl">0.27</span>, ax<span class="op">=</span>ax[<span class="dv">1</span>], title<span class="op">=</span><span class="st">'run 2'</span>)</span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>da <span class="op">=</span> mikeio.read(fn_diff, time<span class="op">=-</span><span class="dv">1</span>)[<span class="dv">0</span>]</span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>da.plot(vmin<span class="op">=-</span><span class="fl">0.1</span>, vmax<span class="op">=</span><span class="fl">0.1</span>, cmap<span class="op">=</span><span class="st">'coolwarm'</span>, ax<span class="op">=</span>ax[<span class="dv">2</span>], title<span class="op">=</span><span class="st">'difference'</span>)<span class="op">;</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="generic_files/figure-html/cell-9-output-1.png" width="1025" height="449" class="figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="extract-time-steps-or-items" class="level2">
+<h2 class="anchored" data-anchor-id="extract-time-steps-or-items">Extract time steps or items</h2>
+<p>The extract() method can extract a part of a file:</p>
+<ul>
+<li><strong>time slice</strong> by specifying <em>start</em> and/or <em>end</em></li>
+<li>specific <strong>items</strong></li>
+</ul>
+<div id="cb9df239" class="cell" data-execution_count="9">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>mikeio.generic.extract(<span class="st">"../data/tide1.dfs1"</span>, <span class="st">"extracted.dfs1"</span>, start<span class="op">=</span><span class="st">"2019-01-02"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div id="2834c584" class="cell" data-execution_count="10">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>e <span class="op">=</span> mikeio.read(<span class="st">"extracted.dfs1"</span>)</span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>e</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display" data-execution_count="10">
+<pre><code>&lt;mikeio.Dataset&gt;
+dims: (time:49, x:10)
+time: 2019-01-02 00:00:00 - 2019-01-03 00:00:00 (49 records)
+geometry: Grid1D (n=10, dx=0.06667)
+items:
+  0:  Level &lt;Water Level&gt; (meter)</code></pre>
+</div>
+</div>
+<div id="64c6ba17" class="cell" data-execution_count="11">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>mikeio.generic.extract(</span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>    <span class="st">"../data/oresund_vertical_slice.dfsu"</span>, <span class="st">"extracted.dfsu"</span>, items<span class="op">=</span><span class="st">"Salinity"</span>, end<span class="op">=-</span><span class="dv">2</span></span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div id="36ddd173" class="cell" data-execution_count="12">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb18"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>e <span class="op">=</span> mikeio.read(<span class="st">"extracted.dfsu"</span>)</span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>e</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display" data-execution_count="12">
+<pre><code>&lt;mikeio.Dataset&gt;
+dims: (time:2, element:441)
+time: 1997-09-15 21:00:00 - 1997-09-16 00:00:00 (2 records)
+geometry: DfsuVerticalProfileSigmaZ (441 elements, 550 nodes)
+items:
+  0:  Salinity &lt;Salinity&gt; (PSU)</code></pre>
+</div>
+</div>
+</section>
+<section id="scaling" class="level2">
+<h2 class="anchored" data-anchor-id="scaling">Scaling</h2>
+<p>Adding a constant e.g to adjust datum</p>
+<div id="4bbe9927" class="cell" data-execution_count="13">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb20"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>ds <span class="op">=</span> mikeio.read(<span class="st">"../data/gebco_sound.dfs2"</span>)</span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>ds.Elevation[<span class="dv">0</span>].plot()<span class="op">;</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="generic_files/figure-html/cell-14-output-1.png" width="326" height="434" class="figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+<div id="feff9f95" class="cell" data-execution_count="14">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb21"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>ds[<span class="st">'Elevation'</span>][<span class="dv">0</span>,<span class="dv">104</span>,<span class="dv">131</span>].to_numpy()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display" data-execution_count="14">
+<pre><code>np.float32(-1.0)</code></pre>
+</div>
+</div>
+<p>This is the processing step.</p>
+<div id="108fedc5" class="cell" data-execution_count="15">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb23"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>mikeio.generic.scale(<span class="st">"../data/gebco_sound.dfs2"</span>, </span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>                     <span class="st">"gebco_sound_local_datum.dfs2"</span>,</span>
+<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a>                     offset<span class="op">=-</span><span class="fl">2.1</span></span>
+<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a>                     )</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>  0%|          | 0/1 [00:00&lt;?, ?it/s]100%|██████████| 1/1 [00:00&lt;00:00, 1387.46it/s]</code></pre>
+</div>
+</div>
+<div id="8ac2be22" class="cell" data-execution_count="16">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb25"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a>ds2 <span class="op">=</span> mikeio.read(<span class="st">"gebco_sound_local_datum.dfs2"</span>)</span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a>ds2[<span class="st">'Elevation'</span>][<span class="dv">0</span>].plot()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="generic_files/figure-html/cell-17-output-1.png" width="326" height="429" class="figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+<div id="50bb622b" class="cell" data-execution_count="17">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb26"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a>ds2[<span class="st">'Elevation'</span>][<span class="dv">0</span>,<span class="dv">104</span>,<span class="dv">131</span>].to_numpy()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display" data-execution_count="17">
+<pre><code>np.float32(-3.1)</code></pre>
+</div>
+</div>
+<section id="spatially-varying-correction" class="level3">
+<h3 class="anchored" data-anchor-id="spatially-varying-correction">Spatially varying correction</h3>
+<div id="b292648d" class="cell" data-execution_count="18">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb28"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a>factor <span class="op">=</span> np.ones_like(ds[<span class="st">'Elevation'</span>][<span class="dv">0</span>].to_numpy())</span>
+<span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a>factor.shape</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display" data-execution_count="18">
+<pre><code>(264, 216)</code></pre>
+</div>
+</div>
+<p>Add some spatially varying factors, exaggerated values for educational purpose.</p>
+<div id="9b129a54" class="cell" data-execution_count="19">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb30"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a>factor[:,<span class="dv">0</span>:<span class="dv">100</span>] <span class="op">=</span> <span class="fl">5.3</span></span>
+<span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a>factor[<span class="dv">0</span>:<span class="dv">40</span>,] <span class="op">=</span> <span class="fl">0.1</span></span>
+<span id="cb30-3"><a href="#cb30-3" aria-hidden="true" tabindex="-1"></a>factor[<span class="dv">150</span>:,<span class="dv">150</span>:] <span class="op">=</span> <span class="fl">10.7</span></span>
+<span id="cb30-4"><a href="#cb30-4" aria-hidden="true" tabindex="-1"></a>plt.imshow(factor)</span>
+<span id="cb30-5"><a href="#cb30-5" aria-hidden="true" tabindex="-1"></a>plt.colorbar()<span class="op">;</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="generic_files/figure-html/cell-20-output-1.png" width="427" height="415" class="figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>The 2d array must first be flipped upside down and then converted to a 1d vector using <a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.flatten.html">numpy.ndarray.flatten</a> to match how data is stored in dfs files.</p>
+<div id="372aba79" class="cell" data-execution_count="20">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb31"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a>factor_ud <span class="op">=</span> np.flipud(factor)</span>
+<span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a>factor_vec  <span class="op">=</span> factor_ud.flatten()</span>
+<span id="cb31-3"><a href="#cb31-3" aria-hidden="true" tabindex="-1"></a>mikeio.generic.scale(<span class="st">"../data/gebco_sound.dfs2"</span>, </span>
+<span id="cb31-4"><a href="#cb31-4" aria-hidden="true" tabindex="-1"></a>                     <span class="st">"gebco_sound_spatial.dfs2"</span>,</span>
+<span id="cb31-5"><a href="#cb31-5" aria-hidden="true" tabindex="-1"></a>                     factor<span class="op">=</span>factor_vec</span>
+<span id="cb31-6"><a href="#cb31-6" aria-hidden="true" tabindex="-1"></a>                     )</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>  0%|          | 0/1 [00:00&lt;?, ?it/s]100%|██████████| 1/1 [00:00&lt;00:00, 1062.93it/s]</code></pre>
+</div>
+</div>
+<div id="e69fa90a" class="cell" data-execution_count="21">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb33"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a>ds3 <span class="op">=</span> mikeio.read(<span class="st">"gebco_sound_spatial.dfs2"</span>)</span>
+<span id="cb33-2"><a href="#cb33-2" aria-hidden="true" tabindex="-1"></a>ds3.Elevation[<span class="dv">0</span>].plot()<span class="op">;</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="generic_files/figure-html/cell-22-output-1.png" width="335" height="434" class="figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+</section>
+<section id="derived-items" class="level2">
+<h2 class="anchored" data-anchor-id="derived-items">Derived items</h2>
+<p>Creating derived items from existing items, e.g.&nbsp;current speed from u and v velocities.</p>
+<div id="407fdf11" class="cell" data-execution_count="22">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb34"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> mikeio.generic <span class="im">import</span> DerivedItem</span>
+<span id="cb34-2"><a href="#cb34-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb34-3"><a href="#cb34-3" aria-hidden="true" tabindex="-1"></a>mikeio.generic.transform(</span>
+<span id="cb34-4"><a href="#cb34-4" aria-hidden="true" tabindex="-1"></a>    infilename<span class="op">=</span><span class="st">"../data/oresundHD_run1.dfsu"</span>,</span>
+<span id="cb34-5"><a href="#cb34-5" aria-hidden="true" tabindex="-1"></a>    outfilename<span class="op">=</span><span class="st">"oresundHD_speed.dfsu"</span>,</span>
+<span id="cb34-6"><a href="#cb34-6" aria-hidden="true" tabindex="-1"></a>    <span class="bu">vars</span><span class="op">=</span>[</span>
+<span id="cb34-7"><a href="#cb34-7" aria-hidden="true" tabindex="-1"></a>        DerivedItem(</span>
+<span id="cb34-8"><a href="#cb34-8" aria-hidden="true" tabindex="-1"></a>            name<span class="op">=</span><span class="st">"Current speed"</span>,</span>
+<span id="cb34-9"><a href="#cb34-9" aria-hidden="true" tabindex="-1"></a>            <span class="bu">type</span><span class="op">=</span>mikeio.EUMType.Current_Speed,</span>
+<span id="cb34-10"><a href="#cb34-10" aria-hidden="true" tabindex="-1"></a>            unit<span class="op">=</span>mikeio.EUMUnit.knot,</span>
+<span id="cb34-11"><a href="#cb34-11" aria-hidden="true" tabindex="-1"></a>            func<span class="op">=</span><span class="kw">lambda</span> x: <span class="fl">1.94</span> <span class="op">*</span> np.sqrt(x[<span class="st">"U velocity"</span>] <span class="op">**</span> <span class="dv">2</span> <span class="op">+</span> x[<span class="st">"V velocity"</span>] <span class="op">**</span> <span class="dv">2</span>),</span>
+<span id="cb34-12"><a href="#cb34-12" aria-hidden="true" tabindex="-1"></a>        )</span>
+<span id="cb34-13"><a href="#cb34-13" aria-hidden="true" tabindex="-1"></a>    ],</span>
+<span id="cb34-14"><a href="#cb34-14" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</section>
+<section id="time-average" class="level2">
+<h2 class="anchored" data-anchor-id="time-average">Time average</h2>
+<div id="5bfedfec" class="cell" data-execution_count="23">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb35"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a>mikeio.generic.avg_time(</span>
+<span id="cb35-2"><a href="#cb35-2" aria-hidden="true" tabindex="-1"></a>    <span class="st">"../data/NorthSea_HD_and_windspeed.dfsu"</span>, <span class="st">"Avg_NorthSea_HD_and_windspeed.dfsu"</span></span>
+<span id="cb35-3"><a href="#cb35-3" aria-hidden="true" tabindex="-1"></a>) </span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>  0%|          | 0/66 [00:00&lt;?, ?it/s]100%|██████████| 66/66 [00:00&lt;00:00, 24646.02it/s]</code></pre>
+</div>
+</div>
+<div id="4215b3bb" class="cell" data-execution_count="24">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb37"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a>ds <span class="op">=</span> mikeio.read(<span class="st">"../data/NorthSea_HD_and_windspeed.dfsu"</span>)</span>
+<span id="cb37-2"><a href="#cb37-2" aria-hidden="true" tabindex="-1"></a>ds.mean(axis<span class="op">=</span><span class="dv">0</span>).describe()  <span class="co"># alternative way of getting the time average</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display" data-execution_count="24">
+<div>
+
+
+<table class="dataframe caption-top table table-sm table-striped small" data-border="1">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th"></th>
+<th data-quarto-table-cell-role="th">Surface elevation</th>
+<th data-quarto-table-cell-role="th">Wind speed</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">count</th>
+<td>958.000000</td>
+<td>958.000000</td>
+</tr>
+<tr class="even">
+<th data-quarto-table-cell-role="th">mean</th>
+<td>0.449857</td>
+<td>12.772706</td>
+</tr>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">std</th>
+<td>0.178127</td>
+<td>2.367667</td>
+</tr>
+<tr class="even">
+<th data-quarto-table-cell-role="th">min</th>
+<td>0.114355</td>
+<td>6.498364</td>
+</tr>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">25%</th>
+<td>0.373691</td>
+<td>11.199439</td>
+</tr>
+<tr class="even">
+<th data-quarto-table-cell-role="th">50%</th>
+<td>0.431747</td>
+<td>12.984060</td>
+</tr>
+<tr class="odd">
+<th data-quarto-table-cell-role="th">75%</th>
+<td>0.479224</td>
+<td>14.658077</td>
+</tr>
+<tr class="even">
+<th data-quarto-table-cell-role="th">max</th>
+<td>1.202888</td>
+<td>16.677952</td>
+</tr>
+</tbody>
+</table>
+
+</div>
+</div>
+</div>
+</section>
+<section id="quantile" class="level2">
+<h2 class="anchored" data-anchor-id="quantile">Quantile</h2>
+<p>Example that calculates the 25%, 50% and 75% percentile for all items in a dfsu file.</p>
+<div id="adc695af" class="cell" data-execution_count="25">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb38"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a>fn <span class="op">=</span> <span class="st">"../data/NorthSea_HD_and_windspeed.dfsu"</span></span>
+<span id="cb38-2"><a href="#cb38-2" aria-hidden="true" tabindex="-1"></a>fn_q <span class="op">=</span> <span class="st">"Q_NorthSea_HD_and_windspeed.dfsu"</span></span>
+<span id="cb38-3"><a href="#cb38-3" aria-hidden="true" tabindex="-1"></a>mikeio.generic.quantile(fn, fn_q, q<span class="op">=</span>[<span class="fl">0.25</span>,<span class="fl">0.5</span>,<span class="fl">0.75</span>])</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div id="1c9e5889" class="cell" data-execution_count="26">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb39"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a>ds <span class="op">=</span> mikeio.read(fn_q)</span>
+<span id="cb39-2"><a href="#cb39-2" aria-hidden="true" tabindex="-1"></a>ds</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display" data-execution_count="26">
+<pre><code>&lt;mikeio.Dataset&gt;
+dims: (time:1, element:958)
+time: 2017-10-27 00:00:00 (time-invariant)
+geometry: Dfsu2D (958 elements, 570 nodes)
+items:
+  0:  Quantile 0.25, Surface elevation &lt;Surface Elevation&gt; (meter)
+  1:  Quantile 0.5, Surface elevation &lt;Surface Elevation&gt; (meter)
+  2:  Quantile 0.75, Surface elevation &lt;Surface Elevation&gt; (meter)
+  3:  Quantile 0.25, Wind speed &lt;Wind speed&gt; (meter per sec)
+  4:  Quantile 0.5, Wind speed &lt;Wind speed&gt; (meter per sec)
+  5:  Quantile 0.75, Wind speed &lt;Wind speed&gt; (meter per sec)</code></pre>
+</div>
+</div>
+<div id="4ea4c7ca" class="cell" data-execution_count="27">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb41"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a>da_q75 <span class="op">=</span> ds[<span class="st">"Quantile 0.75, Wind speed"</span>]</span>
+<span id="cb41-2"><a href="#cb41-2" aria-hidden="true" tabindex="-1"></a>da_q75.plot(title<span class="op">=</span><span class="st">"75th percentile, wind speed"</span>, label<span class="op">=</span><span class="st">"m/s"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="generic_files/figure-html/cell-28-output-1.png" width="560" height="340" class="figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
 
 
 </section>
