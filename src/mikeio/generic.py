@@ -50,7 +50,8 @@ __all__ = [
     "fill_corrupt",
     "quantile",
     "scale",
-    "sum",
+    "add",
+    "transform",
     "change_datatype",
 ]
 
@@ -332,7 +333,6 @@ def sum(
     infilename_b: str | pathlib.Path,
     outfilename: str | pathlib.Path,
 ) -> None:
-    """Sum two dfs files (a+b)."""
     # deprecated
     warnings.warn(FutureWarning("This function is deprecated. Use add instead."))
     _process_dfs_files(infilename_a, infilename_b, outfilename, operator.add)
@@ -352,7 +352,25 @@ def diff(
     infilename_b: str | pathlib.Path,
     outfilename: str | pathlib.Path,
 ) -> None:
-    """Calculate difference between two dfs files (a-b)."""
+    """Calculate difference between two dfs files (a-b).
+
+    Parameters
+    ----------
+    infilename_a: str | pathlib.Path
+        full path to the first input file
+    infilename_b: str | pathlib.Path
+        full path to the second input file
+    outfilename: str | pathlib.Path
+        full path to the output file
+
+    Examples
+    --------
+    ```{python}
+    from mikeio import generic
+    generic.diff("../data/oresundHD_run1.dfsu", "../data/oresundHD_run2.dfsu", "diff.dfsu");
+    ```
+
+    """
     _process_dfs_files(infilename_a, infilename_b, outfilename, operator.sub)
 
 
@@ -1077,6 +1095,25 @@ def transform(
         If True, existing items in the input file will be kept in the output file.
         If False, only the derived items will be written to the output file.
         Default is True.
+
+    Examples
+    --------
+    ```{python}
+    import numpy as np
+    import mikeio
+    from mikeio.generic import DerivedItem, transform
+    item = DerivedItem(
+            name="Current Speed",
+            type=mikeio.EUMType.Current_Speed,
+            func=lambda x: np.sqrt(x["U velocity"] ** 2 + x["V velocity"] ** 2),
+        )
+    transform(
+        infilename="../data/oresundHD_run1.dfsu",
+        outfilename="out.dfsu",
+        vars=[item],
+        keep_existing_items=False,
+    )
+    ```
 
     """
     dfs_i = DfsFileFactory.DfsGenericOpen(str(infilename))
