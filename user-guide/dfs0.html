@@ -318,7 +318,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </ul>
 <section id="read-dfs0-to-dataset" class="level2">
 <h2 class="anchored" data-anchor-id="read-dfs0-to-dataset">Read Dfs0 to Dataset</h2>
-<div id="c7bf95bf" class="cell" data-execution_count="1">
+<div id="3921ed35" class="cell" data-execution_count="1">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> mikeio</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>ds <span class="op">=</span> mikeio.read(<span class="st">"../data/da_diagnostic.dfs0"</span>)</span>
@@ -338,7 +338,7 @@ items:
 </section>
 <section id="from-dfs0-to-pandas-dataframe" class="level2">
 <h2 class="anchored" data-anchor-id="from-dfs0-to-pandas-dataframe">From Dfs0 to pandas DataFrame</h2>
-<div id="e38a5c5f" class="cell" data-execution_count="2">
+<div id="6d8f2cde" class="cell" data-execution_count="2">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> ds.to_dataframe()</span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>df.head()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-display" data-execution_count="2">
@@ -400,7 +400,7 @@ items:
 </section>
 <section id="from-pandas-dataframe-to-dfs0" class="level2">
 <h2 class="anchored" data-anchor-id="from-pandas-dataframe-to-dfs0">From pandas DataFrame to Dfs0</h2>
-<div id="3e3758df" class="cell" data-execution_count="3">
+<div id="737b99fc" class="cell" data-execution_count="3">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
 <span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> pd.read_csv(</span>
@@ -414,7 +414,7 @@ items:
 <h2 class="anchored" data-anchor-id="accumulated-datavalue-type">Accumulated datavalue type</h2>
 <p>Some dfs0 items use an accumulated data value type rather than the default instantaneous type. This is common for precipitation data and can be specified using the <code>data_value_type</code> argument of <a href="../api/ItemInfo.html#mikeio.ItemInfo"><code>mikeio.ItemInfo</code></a>. Refer to the <a href="https://doc.mikepoweredbydhi.help/webhelp/2026/timeserieseditor/TSEdit/TSEdit/TS_Types_graphical_representation.htm">MIKE documentation</a> for guidance on which type to use for your setup.</p>
 <p>Rainfall amounts (e.g.&nbsp;mm) are often configured as <code>StepAccumulated</code>:</p>
-<div id="e24a7168" class="cell" data-execution_count="4">
+<div id="1ea77b5f" class="cell" data-execution_count="4">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> mikeio <span class="im">import</span> ItemInfo, EUMType</span>
 <span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>item <span class="op">=</span> ItemInfo(</span>
@@ -428,7 +428,7 @@ items:
 </div>
 </div>
 <p>Precipitation rates (e.g.&nbsp;mm/hour) are often configured as <code>MeanStepBackward</code>:</p>
-<div id="61ec383c" class="cell" data-execution_count="5">
+<div id="c15add50" class="cell" data-execution_count="5">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>item <span class="op">=</span> ItemInfo(</span>
 <span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Precipitation"</span>,</span>
 <span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>    EUMType.Precipitation_Rate,</span>
