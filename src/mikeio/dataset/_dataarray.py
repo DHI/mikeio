@@ -27,6 +27,7 @@ import pandas as pd
 
 from ..eum import EUMType, EUMUnit, ItemInfo
 from .._time import _get_time_idx_list, _n_selected_timesteps
+from .._track import _extract_track
 
 if TYPE_CHECKING:
     from ._dataset import Dataset
@@ -1118,8 +1119,6 @@ class DataArray:
             The first two items will be x- and y- coordinates of track
 
         """
-        from .._track import _extract_track
-
         assert self.timestep is not None
 
         return _extract_track(
