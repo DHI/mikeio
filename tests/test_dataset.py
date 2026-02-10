@@ -246,6 +246,17 @@ def test_select_temporal_subset_by_idx() -> None:
     assert selds["Foo"].shape == (3, 100, 30)
 
 
+def test_isel_time_every_other_timestep() -> None:
+    nt = 10
+    time = pd.date_range(start=datetime(2000, 1, 1), freq="h", periods=nt)
+    ds = mikeio.Dataset.from_numpy(
+        data=[np.arange(nt, dtype=float)], time=time, items=[ItemInfo("Foo")]
+    )
+
+    assert ds.isel(time=range(0, nt, 2)).n_timesteps == 5
+    assert ds.isel(time=slice(None, None, 2)).n_timesteps == 5
+
+
 def test_temporal_subset_fancy() -> None:
     # TODO use .sel(time=...) instead, more explicit
     nt = (24 * 31) + 1
