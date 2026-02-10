@@ -1,16 +1,18 @@
 from __future__ import annotations
-from pathlib import Path
-from typing import Any, Sequence, TYPE_CHECKING
 
+from pathlib import Path
+from typing import TYPE_CHECKING, Any, Sequence, overload
+
+import numpy as np
+import pandas as pd
 from matplotlib.axes import Axes
 from matplotlib.colors import Colormap
-import numpy as np
-from mikecore.DfsuFile import DfsuFile, DfsuFileType
 from mikecore.DfsFileFactory import DfsFileFactory
-import pandas as pd
+from mikecore.DfsuFile import DfsuFile, DfsuFileType
 from scipy.spatial import cKDTree
 from tqdm import trange
 
+from .._interpolation import Interpolant
 from ..dataset import DataArray, Dataset
 from ..dfs._dfs import (
     _get_item_info,
@@ -19,19 +21,18 @@ from ..dfs._dfs import (
     _valid_timesteps,
 )
 from ..eum import EUMType, ItemInfo
-from .._interpolation import Interpolant
 from ..spatial import (
+    GeometryFM2D,
     GeometryFM3D,
     GeometryFMVerticalProfile,
     GeometryPoint3D,
-    GeometryFM2D,
 )
 from ..spatial._FM_plot import _plot_vertical_profile
 from ._dfsu import (
     _get_dfsu_info,
-    get_nodes_from_source,
-    get_elements_from_source,
     _validate_elements_and_geometry_sel,
+    get_elements_from_source,
+    get_nodes_from_source,
     write_dfsu_data,
 )
 
@@ -198,6 +199,76 @@ class DfsuLayered:
     def n_z_layers(self) -> int:
         """Maximum number of z-layers."""
         return self.n_layers - self.n_sigma_layers
+
+    @overload
+    def read(
+        self,
+        *,
+        items: str | int | Sequence[str | int] | None = None,
+        time: int | str | slice | Sequence[int] | None = None,
+        elements: Sequence[int] | np.ndarray,
+        keepdims: bool = False,
+        dtype: Any = np.float32,
+        error_bad_data: bool = True,
+        fill_bad_data_value: float = np.nan,
+    ) -> Dataset: ...
+
+    @overload
+    def read(
+        self,
+        *,
+        items: str | int | Sequence[str | int] | None = None,
+        time: int | str | slice | Sequence[int] | None = None,
+        area: tuple[float, float, float, float],
+        layers: int | Layer | Sequence[int] | None = None,
+        keepdims: bool = False,
+        dtype: Any = np.float32,
+        error_bad_data: bool = True,
+        fill_bad_data_value: float = np.nan,
+    ) -> Dataset: ...
+
+    @overload
+    def read(
+        self,
+        *,
+        items: str | int | Sequence[str | int] | None = None,
+        time: int | str | slice | Sequence[int] | None = None,
+        x: float,
+        y: float,
+        z: float,
+        keepdims: bool = False,
+        dtype: Any = np.float32,
+        error_bad_data: bool = True,
+        fill_bad_data_value: float = np.nan,
+    ) -> Dataset: ...
+
+    @overload
+    def read(
+        self,
+        *,
+        items: str | int | Sequence[str | int] | None = None,
+        time: int | str | slice | Sequence[int] | None = None,
+        x: float,
+        y: float,
+        layers: int | Layer | Sequence[int] | None = None,
+        keepdims: bool = False,
+        dtype: Any = np.float32,
+        error_bad_data: bool = True,
+        fill_bad_data_value: float = np.nan,
+    ) -> Dataset: ...
+
+    @overload
+    def read(
+        self,
+        *,
+        items: str | int | Sequence[str | int] | None = None,
+        time: int | str | slice | Sequence[int] | None = None,
+        layers: int | Layer | Sequence[int] | None = None,
+        keepdims: bool = False,
+        dtype: Any = np.float32,
+        error_bad_data: bool = True,
+        fill_bad_data_value: float = np.nan,
+    ) -> Dataset: ...
 
     def read(
         self,
