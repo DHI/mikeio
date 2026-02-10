@@ -875,7 +875,8 @@ class Grid2D(_Geometry):
         axis = axis + 2 if axis < 0 else axis
 
         if not np.isscalar(idx):
-            d = np.diff(idx)  # type: ignore
+            assert isinstance(idx, np.ndarray)
+            d = np.diff(idx)
             if np.any(d < 1) or not np.allclose(d, d[0]):
                 # non-equidistant grid is not supported by Dfs2
                 return GeometryUndefined()

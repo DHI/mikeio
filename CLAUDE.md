@@ -68,6 +68,7 @@ make docs
 - **Source code location**: `src/mikeio/` (not `mikeio/` at root level)
 - **Tests location**: `tests/`
 - **Documentation**: `docs/`
+- **Architecture Decision Records**: `adr/` - Documents key architectural decisions and their rationale
 
 ### Core Modules
 
@@ -166,6 +167,35 @@ The build process:
 ### Interlinks
 
 The documentation supports cross-linking to external library documentation (numpy, xarray, pandas, scipy) using the `interlinks` filter configured in `_quarto.yml`.
+
+## DFSU & Mesh File Format
+
+The full specification is in `docs/FM_FileSpecification.pdf`. Key points:
+
+- **Indices in files are 1-based** (Fortran convention); MIKE IO converts to 0-based Python indexing
+- Mesh = node-element structure; element table references nodes by index (not ID), counter-clockwise order
+- Element types: 21=triangle (3 nodes), 25=quadrilateral (4 nodes), 32=prism (6 nodes, 3D), 33=hexahedron (8 nodes, 3D)
+- Boundary codes: 0=internal, 1=land, >1=open boundary
+
+### DFSU Data Types
+| Type | Description |
+|------|-------------|
+| 2001 | Element/cell values (most common) |
+| 2004 | Face values (e.g., discharge) |
+| 2002/2003 | Spectral (nodes/elements) |
+
+### Custom Block ("MIKE_FM")
+For type 2001: [num_nodes, num_elements, dimension, max_layers, sigma_layers]
+- 2D horizontal: dim=2, max_layers=0, sigma=0
+- 3D layered: dim=3, max_layers=N, sigma=N (constant) or sigma<N (varying)
+
+### Static Items (9 core items)
+Node id, X-coord, Y-coord, Z-coord, Code, Element id, Element type, No of nodes, Connectivity
+
+### 3D Layered Files
+- Nodes/elements in same column have consecutive indices, bottom-up
+- Column detection: last half of lower element's node indices = first half of upper element's
+- First dynamic item is always "Z coordinate" (#nodes) for files with vertical dimension
 
 ## Data Flow Pattern
 

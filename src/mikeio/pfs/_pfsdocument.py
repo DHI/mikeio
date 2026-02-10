@@ -361,9 +361,15 @@ class PfsDocument(PfsSection):
         ):
             return self._parse_token(value_str)
 
-        # Special case: MULTIPOLYGON
+        # Special case: MULTIPOLYGON - fast path for large coordinate strings
+        # Avoids expensive parsing but still strips quotes correctly
         if "MULTIPOLYGON" in value_str:
-            return value_str
+            s = value_str.strip()
+            if s.startswith("'") and s.endswith("'"):
+                return s[1:-1]
+            elif s.startswith('"') and s.endswith('"'):
+                return s[1:-1]
+            return s
 
         # Special case: values enclosed in double quotes should not be split
         # (even though they may contain commas)

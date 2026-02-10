@@ -467,7 +467,7 @@ def test_interp_time() -> None:
     d[1] = 2.0
     d[3] = 4.0
     data = [d]
-    time = pd.date_range("2000-1-1", freq="d", periods=nt)
+    time = pd.date_range("2000-1-1", freq="D", periods=nt)
     items = [ItemInfo("Foo")]
     ds = mikeio.Dataset.from_numpy(data=data, time=time, items=items)
 
@@ -497,7 +497,7 @@ def test_interp_time_to_other_dataset() -> None:
     ds1 = mikeio.Dataset.from_numpy(data=data, time=time, items=items)
 
     nt = 12
-    data = [np.ones([nt, 10, 3])]
+    data = [np.ones((nt, 10, 3))]
     time = pd.date_range("2000-1-1", freq="h", periods=nt)
     items = [ItemInfo("Foo")]
     ds2 = mikeio.Dataset.from_numpy(data=data, time=time, items=items)
@@ -587,7 +587,7 @@ def test_modify_selected_variable() -> None:
 
 def test_flipud() -> None:
     nt = 2
-    d = np.random.random([nt, 100, 30])
+    d = np.arange(nt * 100 * 30).reshape((nt, 100, 30)).astype(float)
     time = pd.date_range("2000-1-2", freq="h", periods=nt)
     items = [ItemInfo("Foo")]
     ds = mikeio.Dataset.from_numpy([d], time, items)
@@ -849,7 +849,7 @@ def test_properties_dfsu() -> None:
 
 def test_create_infer_name_from_eum() -> None:
     nt = 100
-    d = np.random.uniform(size=nt)
+    d = np.ones(nt)
 
     ds = mikeio.Dataset.from_numpy(
         data=[d],
@@ -933,7 +933,7 @@ def test_add_dataset(ds1: Dataset, ds2: Dataset) -> None:
     assert ds4.items[0].type == EUMType.Undefined
     assert ds4.items[0].name == ds1.items[0].name
     ds2c = ds2.copy()
-    tt = ds2c.time.to_numpy()
+    tt = ds2c.time.to_numpy().copy()
     tt[-1] = tt[-1] + np.timedelta64(1, "s")
     ds2c.time = pd.DatetimeIndex(tt)
     with pytest.raises(ValueError):
@@ -988,7 +988,7 @@ def test_divide_number_of_items_datasets_must_match() -> None:
 
 def test_non_equidistant() -> None:
     nt = 4
-    d = np.random.uniform(size=nt)
+    d = np.ones(nt)
 
     ds = mikeio.Dataset.from_numpy(
         data=[d],
@@ -1133,14 +1133,14 @@ def test_merge_must_have_same_time() -> None:
     ds1 = mikeio.Dataset(
         {
             "Foo": mikeio.DataArray(
-                data=np.random.rand(10), time=pd.date_range("2000-01-01", periods=10)
+                data=np.ones(10), time=pd.date_range("2000-01-01", periods=10)
             )
         }
     )
     ds2 = mikeio.Dataset(
         {
             "Bar": mikeio.DataArray(
-                data=np.random.rand(10), time=pd.date_range("2100-01-01", periods=10)
+                data=np.ones(10), time=pd.date_range("2100-01-01", periods=10)
             )
         }
     )
@@ -1281,7 +1281,7 @@ def test_time_selection() -> None:
     # select time test
     nt = 100
     data = []
-    d = np.random.rand(nt)
+    d = np.zeros(nt)
     data.append(d)
     time = pd.date_range("2000-1-2", freq="h", periods=nt)
     items = [ItemInfo("Foo")]
@@ -1304,7 +1304,7 @@ def test_create_dataset_with_many_items() -> None:
     das = []
 
     for i in range(n_items):
-        x = np.random.random(nt)
+        x = np.ones(nt)
         da = mikeio.DataArray(data=x, time=time, item=mikeio.ItemInfo(f"Item {i + 1}"))
         das.append(da)
 
