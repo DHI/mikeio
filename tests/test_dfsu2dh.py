@@ -1048,3 +1048,31 @@ def test_dfsu_to_xarray_has_element_coordinates() -> None:
     assert xr_da.x.values[example_quad_element] == approx(example_quad_coordinates[0])
     assert xr_da.y.values[example_quad_element] == approx(example_quad_coordinates[1])
     assert xr_da.z.values[example_quad_element] == approx(example_quad_coordinates[2])
+
+
+def test_write_dfsu_with_title(tmp_path: Path) -> None:
+    """Test writing a dfsu file with a custom title and reading it back."""
+    sourcefilename = "tests/testdata/HD2D.dfsu"
+    fp = tmp_path / "with_title.dfsu"
+
+    # Read source file
+    dfs = mikeio.Dfsu2DH(sourcefilename)
+    ds = dfs.read(items=[0])
+
+    # Write with custom title
+    custom_title = "Test DFSU with Custom Title"
+    ds.to_dfs(fp, title=custom_title)
+
+    # Read back and verify title
+    newdfs = mikeio.Dfsu2DH(fp)
+    assert newdfs.title == custom_title
+
+
+def test_read_dfsu_title(tmp_path: Path) -> None:
+    """Test reading the title from an existing dfsu file."""
+    sourcefilename = "tests/testdata/HD2D.dfsu"
+    dfs = mikeio.Dfsu2DH(sourcefilename)
+
+    # Dfsu files should have a title property
+    assert hasattr(dfs, "title")
+    assert isinstance(dfs.title, str)

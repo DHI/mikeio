@@ -164,6 +164,24 @@ def test_write_without_time(tmp_path: Path) -> None:
     assert ds.shape == (ny, nx)
 
 
+def test_write_with_title(tmp_path: Path) -> None:
+    """Test writing a dfsu file with a custom title and reading it back."""
+    sourcefilename = "tests/testdata/random.dfs2"
+    fp = tmp_path / "with_title.dfs2"
+
+    # Read source file
+    dfs = mikeio.Dfs2(sourcefilename)
+    ds = dfs.read(items=[0])
+
+    # Write with custom title
+    custom_title = "Test DFS2 with Custom Title"
+    ds.to_dfs(fp, title=custom_title)
+
+    # Read back and verify title
+    newdfs = mikeio.Dfs2(fp)
+    assert newdfs.title == custom_title
+
+
 def test_read(dfs2_random: Dfs2) -> None:
     dfs = dfs2_random
     assert isinstance(dfs.geometry, Grid2D)
@@ -172,6 +190,22 @@ def test_read(dfs2_random: Dfs2) -> None:
     assert data[0, 88, 0] == 0
     assert np.isnan(data[0, 89, 0])
     assert data.shape == (3, 100, 2)  # time, y, x
+
+
+def test_read_with_title() -> None:
+    sourcefilename = "tests/testdata/random.dfs2"
+    dfs = mikeio.Dfs2(sourcefilename)
+    assert hasattr(dfs, "title")
+    assert isinstance(dfs.title, str)
+
+
+def test_write_read_with_title(tmp_path: Path) -> None:
+    tmpfile = tmp_path / "tmp_title.dfs2"
+    dfs = mikeio.Dfs2("tests/testdata/random.dfs2")
+    ds = dfs.read()
+    ds.to_dfs(tmpfile)
+    dfs_tmp = mikeio.Dfs2(tmpfile)
+    assert dfs.title == dfs_tmp.title
 
 
 def test_read_bad_item(dfs2_random: Dfs2) -> None:

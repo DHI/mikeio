@@ -52,6 +52,20 @@ def test_read_write_properties(tmp_path: Path) -> None:
     assert ds1.geometry == ds2.geometry
 
 
+def test_read_with_title() -> None:
+    dfs = mikeio.Dfs1("tests/testdata/tide1.dfs1")
+    assert dfs.title == "Predicted tide level"
+
+
+def test_write_read_with_title(tmp_path: Path) -> None:
+    tmpfile = tmp_path / "tmp_title.dfs1"
+    dfs = mikeio.Dfs1("tests/testdata/tide1.dfs1")
+    ds = dfs.read()
+    ds.to_dfs(tmpfile)
+    dfs_tmp = mikeio.Dfs1(tmpfile)
+    assert dfs.title == dfs_tmp.title
+
+
 def test_read() -> None:
     dfs = mikeio.Dfs1("tests/testdata/random.dfs1")
 
@@ -90,6 +104,24 @@ def test_write_some_time_steps_new_file(tmp_path: Path) -> None:
     dsnew = dfsnew.read()
 
     assert dsnew["testing water level"].shape == (6, 3)
+
+
+def test_write_with_title(tmp_path: Path) -> None:
+    """Test writing a dfsu file with a custom title and reading it back."""
+    sourcefilename = "tests/testdata/tide1.dfs1"
+    fp = tmp_path / "with_title.dfs1"
+
+    # Read source file
+    dfs = mikeio.Dfs1(sourcefilename)
+    ds = dfs.read(items=[0])
+
+    # Write with custom title
+    custom_title = "Test DFS1 with Custom Title"
+    ds.to_dfs(fp, title=custom_title)
+
+    # Read back and verify title
+    newdfs = mikeio.Dfs1(fp)
+    assert newdfs.title == custom_title
 
 
 def test_read_item_names_not_in_dataset_fails() -> None:

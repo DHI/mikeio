@@ -93,6 +93,7 @@ class Dataset:
         self,
         data: Mapping[str, DataArray] | Sequence[DataArray],
         validate: bool = True,
+        title: str = "",
     ):
         data_vars = self._dataarrays_as_mapping(data)
 
@@ -107,6 +108,8 @@ class Dataset:
             self._set_name_attr(key, value)
         self.plot = _DatasetPlotter(self)
 
+        self._title = title
+
     @staticmethod
     def from_numpy(
         data: Sequence[NDArray[np.floating]],
@@ -117,6 +120,7 @@ class Dataset:
         zn: NDArray[np.floating] | None = None,
         dims: tuple[str, ...] | None = None,
         validate: bool = True,
+        title: str = "",
         dt: float = 1.0,
     ) -> Dataset:
         """Create a Dataset from numpy arrays.
@@ -137,6 +141,8 @@ class Dataset:
             Named dimensions of the DataArrays, by default None
         validate: bool, optional
             Validate the DataArrays, by default True
+        title: str, optional
+            Title of the dataset, by default ""
         dt: float, optional
             Dummy time step in seconds, by default 1.0
 
@@ -150,7 +156,7 @@ class Dataset:
             for dd, it in zip(data, item_infos)
         }
 
-        return Dataset(data_vars, validate=validate)
+        return Dataset(data_vars, validate=validate, title=title)
 
     @property
     def values(self) -> None:
@@ -222,6 +228,15 @@ class Dataset:
     # ============ end of init =============
 
     # ============= Basic properties/methods ===========
+    @property
+    def title(self) -> str:
+        """Title of the dataset, typically read from the file."""
+        return self._title
+
+    @title.setter
+    def title(self, value: str) -> None:
+        """Set the title of the dataset."""
+        self._title = value
 
     @property
     def _dt(self) -> float:
@@ -1735,13 +1750,19 @@ class Dataset:
 
         return df
 
-    def to_dfs(self, filename: str | Path, **kwargs: Any) -> None:
+    def to_dfs(
+        self, filename: str | Path, title: str | None = None, **kwargs: Any
+    ) -> None:
         """Write dataset to a new dfs file.
 
         Parameters
         ----------
         filename: str
             full path to the new dfs file
+        title: str, optional
+            title for the dfs file. When provided, this overrides the Dataset's
+            own `title` attribute for the current write operation only.
+            If omitted, the value stored in `Dataset.title` is used.
         **kwargs: Any
             additional arguments passed to the writing function, e.g. dtype for dfs0
 
@@ -1753,30 +1774,32 @@ class Dataset:
         from ..dfsu import write_dfsu
 
         filename = str(filename)
+        # Use provided title or fall back to dataset's title
+        file_title = title if title is not None else self._title
 
         match self.geometry:
             case GeometryPoint2D() | GeometryPoint3D() | GeometryUndefined():
                 if self.ndim == 0 or (self.ndim == 1 and self[0]._has_time_axis):
                     self._validate_extension(filename, ".dfs0")
-                    write_dfs0(filename, self, **kwargs)
+                    write_dfs0(filename, self, title=file_title, **kwargs)
                 else:
                     raise ValueError("Cannot write Dataset with no geometry to file!")
 
             case Grid2D():
                 self._validate_extension(filename, ".dfs2")
-                write_dfs2(filename, self)
+                write_dfs2(filename, self, title=file_title, **kwargs)
 
             case Grid3D():
                 self._validate_extension(filename, ".dfs3")
-                write_dfs3(filename, self)
+                write_dfs3(filename, self, title=file_title, **kwargs)
 
             case Grid1D():
                 self._validate_extension(filename, ".dfs1")
-                write_dfs1(filename, self)
+                write_dfs1(filename, self, title=file_title, **kwargs)
 
             case _GeometryFM():
                 self._validate_extension(filename, ".dfsu")
-                write_dfsu(filename, self)
+                write_dfsu(filename, self, title=file_title, **kwargs)
 
             case _:
                 raise NotImplementedError(
