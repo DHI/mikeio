@@ -201,6 +201,15 @@ def test_read_with_title() -> None:
     assert isinstance(dfs.title, str)
 
 
+def test_write_read_with_title(tmp_path: Path) -> None:
+    tmpfile = tmp_path / "tmp_title.dfs2"
+    dfs = mikeio.Dfs2("tests/testdata/random.dfs2")
+    ds = dfs.read()
+    ds.to_dfs(tmpfile)
+    dfs_tmp = mikeio.Dfs2(tmpfile)
+    assert dfs.title == dfs_tmp.title
+
+
 def test_read_bad_item(dfs2_random: Dfs2) -> None:
     dfs = dfs2_random
     with pytest.raises(ItemsError) as ex:

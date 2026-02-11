@@ -66,6 +66,15 @@ def test_dfs3_read_time() -> None:
     assert isinstance(ds.geometry, Grid3D)
 
 
+def test_write_read_with_title(tmp_path: Path) -> None:
+    tmpfile = tmp_path / "tmp_title.dfs3"
+    dfs = mikeio.Dfs3("tests/testdata/test_dfs3.dfs3")
+    ds = dfs.read()
+    ds.to_dfs(tmpfile)
+    dfs_tmp = mikeio.Dfs3(tmpfile)
+    assert dfs.title == dfs_tmp.title
+
+
 def test_dfs3_read_1_layer() -> None:
     fn = "tests/testdata/test_dfs3.dfs3"
     ds = mikeio.read(fn, layers=-1)

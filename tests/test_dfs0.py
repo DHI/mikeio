@@ -121,6 +121,15 @@ def test_read_with_title() -> None:
     assert dfs.title == "Diagnostic"
 
 
+def test_write_read_with_title(tmp_path: Path) -> None:
+    tmpfile = tmp_path / "tmp_title.dfs0"
+    dfs = Dfs0("tests/testdata/da_diagnostic.dfs0")
+    ds = dfs.read()
+    ds.to_dfs(tmpfile)
+    dfs2 = mikeio.Dfs0(tmpfile)
+    assert dfs.title == dfs2.title
+
+
 def test_items_dataframe() -> None:
     dfs = mikeio.Dfs0("tests/testdata/random.dfs0")
     df = dfs.items.to_dataframe()

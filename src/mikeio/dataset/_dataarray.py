@@ -1891,18 +1891,20 @@ class DataArray:
             {self.name: self}
         )  # Single-item Dataset (All info is contained in the DataArray, no need for additional info)
 
-    def to_dfs(self, filename: str | Path, **kwargs: Any) -> None:
+    def to_dfs(self, filename: str | Path, title: str = "", **kwargs: Any) -> None:
         """Write data to a new dfs file.
 
         Parameters
         ----------
         filename: str
             full path to the new dfs file
+        title: str, optional
+            title for the dfs file
         **kwargs: Any
             additional arguments passed to the writing function, e.g. dtype for dfs0
 
         """
-        self._to_dataset().to_dfs(filename, **kwargs)
+        self._to_dataset().to_dfs(filename, title=title, **kwargs)
 
     def to_dataframe(
         self, *, unit_in_name: bool = False, round_time: str | bool = "ms"

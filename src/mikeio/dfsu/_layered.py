@@ -376,6 +376,7 @@ class DfsuLayered:
                 geometry=geometry,
                 zn=data_list[0],
                 dims=dims,
+                title=self.title,
                 validate=False,
                 dt=self.timestep,
             )
@@ -386,6 +387,7 @@ class DfsuLayered:
                 items=items,
                 geometry=geometry,
                 dims=dims,
+                title=self.title,
                 validate=False,
                 dt=self.timestep,
             )
