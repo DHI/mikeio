@@ -274,6 +274,7 @@ class Dfs3(_Dfs123):
             items=items,
             geometry=geometry,
             dims=dims,
+            title=self.title,
             validate=False,
         )
 

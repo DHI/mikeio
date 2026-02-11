@@ -182,6 +182,7 @@ class Dfs1(_Dfs123):
             items=items,
             dims=tuple(dims),
             geometry=self.geometry,
+            title=self.title,
             validate=False,
             dt=self._timestep,
         )
