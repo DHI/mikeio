@@ -130,6 +130,16 @@ def test_write_read_with_title(tmp_path: Path) -> None:
     assert dfs.title == dfs2.title
 
 
+def test_write_read_with_empty_title(tmp_path: Path) -> None:
+    tmpfile = tmp_path / "tmp_empty_title.dfs0"
+    dfs = Dfs0("tests/testdata/da_diagnostic.dfs0")
+    ds = dfs.read()
+    # test that empty string overwrites title
+    ds.to_dfs(tmpfile, title="")
+    dfs3 = mikeio.Dfs0(tmpfile)
+    assert dfs3.title == ""
+
+
 def test_items_dataframe() -> None:
     dfs = mikeio.Dfs0("tests/testdata/random.dfs0")
     df = dfs.items.to_dataframe()
