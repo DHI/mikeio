@@ -57,6 +57,15 @@ def test_read_with_title() -> None:
     assert dfs.title == "Predicted tide level"
 
 
+def test_write_read_with_title(tmp_path: Path) -> None:
+    tmpfile = tmp_path / "tmp_title.dfs1"
+    dfs = mikeio.Dfs1("tests/testdata/tide1.dfs1")
+    ds = dfs.read()
+    ds.to_dfs(tmpfile)
+    dfs_tmp = mikeio.Dfs1(tmpfile)
+    assert dfs.title == dfs_tmp.title
+
+
 def test_read() -> None:
     dfs = mikeio.Dfs1("tests/testdata/random.dfs1")
 
