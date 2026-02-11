@@ -244,6 +244,7 @@ class Dfs2(_Dfs123):
             time=time,
             items=items,
             geometry=geometry,
+            title=self.title,
             validate=False,
         )
 

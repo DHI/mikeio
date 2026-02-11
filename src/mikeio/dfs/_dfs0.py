@@ -191,7 +191,9 @@ class Dfs0:
             item_infos = [self.items[it] for it in item_numbers]
         else:
             item_infos = self.items
-        ds = Dataset.from_numpy(data, time=ftime, items=item_infos, validate=False)
+        ds = Dataset.from_numpy(
+            data, time=ftime, items=item_infos, title=self.title, validate=False
+        )
 
         # select time steps
         if self._timeaxistype == TimeAxisType.CalendarNonEquidistant and isinstance(

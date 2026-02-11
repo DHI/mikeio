@@ -269,6 +269,7 @@ class Dfs3(_Dfs123):
             time=time,
             items=items,
             geometry=geometry,
+            title=self.title,
             validate=False,
         )
 
