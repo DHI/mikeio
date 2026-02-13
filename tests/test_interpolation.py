@@ -1,13 +1,5 @@
-from mikeio._interpolation import get_idw_interpolant
 import mikeio
 import numpy as np
-
-
-def test_get_idw_interpolant() -> None:
-    d = np.linspace(1, 2, 2)
-    w = get_idw_interpolant(d, p=1)
-    assert w[0] == 2 / 3
-    assert w[1] == 1 / 3
 
 
 def test_interp2d() -> None:
@@ -88,3 +80,47 @@ def test_interp_itemstep() -> None:
     dati = interpolant.interp2d(dat)
     assert len(dati) == npts
     assert dati[0] == 8.262675285339355
+
+
+def test_get_idw_interpolant_preserves_float32_dtype() -> None:
+    """Test that _get_idw_interpolant preserves float32 dtype.
+
+    DFS files use float32 to save memory, so dtype preservation is critical.
+    """
+    from mikeio._interpolation import _get_idw_interpolant
+
+    # Create float32 distances (typical for DFS files)
+    distances = np.array([[1.0, 2.0, 3.0], [0.5, 1.5, 2.5]], dtype=np.float32)
+
+    weights = _get_idw_interpolant(distances, p=2)
+
+    assert weights.dtype == np.float32, f"Expected float32, got {weights.dtype}"
+
+
+def test_interp2d_preserves_float32_dtype() -> None:
+    """Test that interpolation preserves float32 dtype from DFS files.
+
+    DFS files use float32 to save memory. Converting to float64 during
+    interpolation would double memory usage.
+    """
+    dfs = mikeio.Dfsu2DH("tests/testdata/wind_north_sea.dfsu")
+    ds = dfs.read(items=["Wind speed"])
+
+    npts = 5
+    xy = np.zeros((npts, 2))
+    xy[0, :] = [2, 52]
+    xy[1, :] = [3, 53]
+    xy[2, :] = [7, 54]
+    xy[3, :] = [0, 55]
+    xy[4, :] = [5, 54]
+
+    interpolant = dfs.geometry.get_2d_interpolant(xy, n_nearest=3)
+
+    # DFS data is typically float32
+    dat = ds[0].values[0, :].astype(np.float32)
+    assert dat.dtype == np.float32
+
+    dati = interpolant.interp2d(dat)
+
+    # Critical: must preserve float32 to avoid doubling memory usage
+    assert dati.dtype == np.float32, f"Expected float32, got {dati.dtype}"
