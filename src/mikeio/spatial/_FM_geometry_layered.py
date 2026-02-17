@@ -54,11 +54,7 @@ class _GeometryFMLayered(_GeometryFM):
         self._n_layers = n_layers
         self._n_sigma = n_sigma if n_sigma is not None else n_layers
 
-        # Lazy properties
         self._bot_elems: np.ndarray | None = None
-        self._e2_e3_table: np.ndarray | None = None
-        self._2d_ids: np.ndarray | None = None
-        self._layer_ids: np.ndarray | None = None
 
     def __str__(self) -> str:
         return f"{self._type.name} ({self.n_elements} elements, {self.n_nodes} nodes)"
@@ -275,15 +271,6 @@ class _GeometryFMLayered(_GeometryFM):
 
         return geom
 
-    @cached_property
-    def n_elements(self) -> int:
-        """Number of 3d elements."""
-        return len(self.element_table)
-
-    @property
-    def n_nodes(self) -> int:
-        return len(self.node_coordinates)
-
     @property
     def is_2d(self) -> bool:
         return False
@@ -293,14 +280,14 @@ class _GeometryFMLayered(_GeometryFM):
         return True
 
     @cached_property
+    def _2d_to_3d_association(self) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
+        """Cached (e2_e3_table, elem2d_ids, layer_ids) tuple."""
+        return self._get_2d_to_3d_association()
+
+    @cached_property
     def layer_ids(self) -> np.ndarray:
         """The layer number (0=bottom, 1, 2, ...) for each 3d element."""
-        if self._layer_ids is None:
-            res = self._get_2d_to_3d_association()
-            self._e2_e3_table = res[0]
-            self._2d_ids = res[1]
-            self._layer_ids = res[2]
-        return self._layer_ids
+        return self._2d_to_3d_association[2]
 
     @property
     def n_layers(self) -> int:
@@ -461,27 +448,15 @@ class _GeometryFMLayered(_GeometryFM):
 
         return self._element_ids[self.layer_ids == layers]
 
-    @property
+    @cached_property
     def e2_e3_table(self) -> np.ndarray:
         """The 2d-to-3d element connectivity table for a 3d object."""
-        # e2_e3, 2d_ids and layer_ids are all set at the same time
+        return self._2d_to_3d_association[0]
 
-        if self._e2_e3_table is None:
-            res = self._get_2d_to_3d_association()
-            self._e2_e3_table = res[0]
-            self._2d_ids = res[1]
-            self._layer_ids = res[2]
-        return self._e2_e3_table
-
-    @property
+    @cached_property
     def elem2d_ids(self) -> np.ndarray:
         """The associated 2d element id for each 3d element."""
-        if self._2d_ids is None:
-            res = self._get_2d_to_3d_association()
-            self._e2_e3_table = res[0]
-            self._2d_ids = res[1]
-            self._layer_ids = res[2]
-        return self._2d_ids
+        return self._2d_to_3d_association[1]
 
     def _get_2d_to_3d_association(self) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
         e2_to_e3 = []  # for each 2d element: the corresponding 3d element ids from bot to top
@@ -540,75 +515,17 @@ class _GeometryFMLayered(_GeometryFM):
             # elem3d[j] = (np.abs(z_col - z_vec[j])).argmin()  # nearest
         return elem3d
 
-    # def _find_3d_from_2d_points(self, elem2d, z=None, layer=None):
-
-    #     was_scalar = np.isscalar(elem2d)
-    #     if was_scalar:
-    #         elem2d = np.array([elem2d])
-    #     else:
-    #         orig_shape = elem2d.shape
-    #         elem2d = np.reshape(elem2d, (elem2d.size,))
-
-    #     if (layer is None) and (z is None):
-    #         # return top element
-    #         idx = self.top_elements[elem2d]  # TODO: return whole column instead
-
-    #     elif layer is None:
-    #         idx = np.zeros_like(elem2d)
-    #         if np.isscalar(z):
-    #             z = z * np.ones_like(elem2d, dtype=float)
-    #         elem3d = self.e2_e3_table[elem2d]
-    #         for j, row in enumerate(elem3d):
-    #             zc = self.element_coordinates[row, 2]
-    #             d3d = np.abs(z[j] - zc)
-    #             idx[j] = row[d3d.argsort()[0]]
-
-    #     elif z is None:
-    #         if 0 <= layer <= self.n_z_layers - 1:
-    #             idx = np.zeros_like(elem2d)
-    #             elem3d = self.e2_e3_table[elem2d]
-    #             for j, row in enumerate(elem3d):
-    #                 try:
-    #                     layer_ids = self.layer_ids[row]
-    #                     id = row[list(layer_ids).index(layer)]
-    #                     idx[j] = id
-    #                 except IndexError:
-    #                     raise IndexError(
-    #                         f"Layer {layer} not present for 2d element {elem2d[j]}"
-    #                     )
-    #         else:
-    #             # sigma layer
-    #             idx = self.get_layer_elements(layer)[elem2d]
-
-    #     else:
-    #         raise ValueError("layer and z cannot both be supplied!")
-
-    #     if was_scalar:
-    #         idx = idx[0]
-    #     else:
-    #         idx = np.reshape(idx, orig_shape)
-
-    #     return idx
-
     @cached_property
     def _dz(self) -> np.ndarray:
         """Height of each 3d element (using static zn information)."""
-        return self._calc_dz()
-
-    def _calc_dz(self) -> np.ndarray:
-        """Height of 3d elements using static or dynamic zn information."""
         element_table = self.element_table
         n_elements = len(element_table)
-
         zn = self.node_coordinates[:, 2]
-        zn_is_2d = len(zn.shape) == 2
-        shape = (zn.shape[0], n_elements) if zn_is_2d else (n_elements,)
-        dz = np.full(shape=shape, fill_value=np.nan)
+        dz = np.full(n_elements, fill_value=np.nan)
 
-        # static zn
         for j in range(n_elements):
             nodes = element_table[j]
-            halfn = int(len(nodes) / 2)
+            halfn = len(nodes) // 2
             z_bot = np.mean(zn[nodes[:halfn]])
             z_top = np.mean(zn[nodes[halfn:]])
             dz[j] = z_top - z_bot
