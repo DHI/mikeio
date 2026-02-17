@@ -199,7 +199,6 @@ __all__ = [
     "EUMType",
     "EUMUnit",
     "ItemInfo",
-    "Pfs",
     "PfsDocument",
     "PfsSection",
     "read_pfs",
