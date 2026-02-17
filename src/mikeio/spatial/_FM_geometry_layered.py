@@ -708,18 +708,26 @@ class GeometryFMVerticalColumn(GeometryFM3D):
             (zf[:, 0].reshape((-1, 1)), ze, zf[:, -1].reshape((-1, 1)))
         )
 
+    @staticmethod
+    def _linear_interp(x: np.ndarray, y: np.ndarray, x_new: np.ndarray) -> np.ndarray:
+        """Linear interpolation with extrapolation.
+
+        Uses make_interp_spline(k=1) which extrapolates beyond boundaries by default.
+        """
+        from scipy.interpolate import make_interp_spline  # type: ignore
+
+        return make_interp_spline(x, y, k=1)(x_new)  # type: ignore
+
     def _interp_values(
         self, zn: np.ndarray, data: np.ndarray, z: np.ndarray
     ) -> np.ndarray:
         """Interpolate to other z values, allow linear extrapolation."""
-        from scipy.interpolate import interp1d  # type: ignore
-
         ze = self.calc_ze(zn)
         if zn.ndim == 1:
-            return interp1d(ze, data, fill_value="extrapolate")(z)
+            return self._linear_interp(ze, data, z)
         dati = np.zeros_like(z)
         for j in range(zn.shape[0]):
-            dati[j, :] = interp1d(ze[j, :], data[j, :], fill_value="extrapolate")(z[j, :])
+            dati[j, :] = self._linear_interp(ze[j, :], data[j, :], z[j, :])
         return dati
 
     @cached_property
