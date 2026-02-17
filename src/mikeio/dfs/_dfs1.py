@@ -1,4 +1,8 @@
+"""Read and write DFS1 files (profile series - 1D grid data)."""
+
 from __future__ import annotations
+
+__all__ = ["Dfs1", "write_dfs1"]
 from pathlib import Path
 from typing import Any, Sequence
 

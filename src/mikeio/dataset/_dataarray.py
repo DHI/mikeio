@@ -1,4 +1,8 @@
+"""DataArray class - data and metadata for a single item from a dfs file."""
+
 from __future__ import annotations
+
+__all__ = ["DataArray"]
 import warnings
 from copy import deepcopy
 from pathlib import Path

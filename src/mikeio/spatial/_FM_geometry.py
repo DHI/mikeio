@@ -1,4 +1,8 @@
+"""Flexible mesh 2D geometry (GeometryFM2D) for unstructured grids."""
+
 from __future__ import annotations
+
+__all__ = ["GeometryFM2D"]
 from functools import cached_property
 from pathlib import Path
 from typing import (

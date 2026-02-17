@@ -1,4 +1,8 @@
+"""Read and write DFSU 2D horizontal files (flexible mesh)."""
+
 from __future__ import annotations
+
+__all__ = ["Dfsu2DH", "write_dfsu"]
 from copy import deepcopy
 from dataclasses import dataclass
 from datetime import datetime

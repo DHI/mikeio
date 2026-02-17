@@ -1,4 +1,8 @@
+"""Read and write DFS2 files (2D grid data)."""
+
 from __future__ import annotations
+
+__all__ = ["Dfs2", "write_dfs2"]
 from copy import deepcopy
 from pathlib import Path
 from typing import Any, Literal

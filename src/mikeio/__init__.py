@@ -29,6 +29,38 @@ from .spatial import (
     GeometryFMVerticalProfile,
 )
 
+__all__ = [
+    "DataArray",
+    "Dataset",
+    "Dfs0",
+    "Dfs1",
+    "Dfs2",
+    "Dfs3",
+    "Dfsu",
+    "Dfsu2DH",
+    "Dfsu2DV",
+    "Dfsu3D",
+    "DfsuSpectral",
+    "Mesh",
+    "EUMType",
+    "EUMUnit",
+    "ItemInfo",
+    "Pfs",
+    "PfsDocument",
+    "PfsSection",
+    "read_pfs",
+    "Grid1D",
+    "Grid2D",
+    "Grid3D",
+    "GeometryFM2D",
+    "GeometryFM3D",
+    "GeometryFMVerticalProfile",
+    "read",
+    "open",
+    "from_pandas",
+    "from_polars",
+]
+
 
 def read(
     filename: str | Path,
@@ -181,36 +213,3 @@ def open(
     reader_klass = READERS[ext]
 
     return reader_klass(filename, **kwargs)
-
-
-__all__ = [
-    "DataArray",
-    "Dataset",
-    "Dfs0",
-    "Dfs1",
-    "Dfs2",
-    "Dfs3",
-    "Dfsu",
-    "Dfsu2DH",
-    "Dfsu2DV",
-    "Dfsu3D",
-    "DfsuSpectral",
-    "Mesh",
-    "EUMType",
-    "EUMUnit",
-    "ItemInfo",
-    "Pfs",
-    "PfsDocument",
-    "PfsSection",
-    "read_pfs",
-    "Grid1D",
-    "Grid2D",
-    "Grid3D",
-    "GeometryFM2D",
-    "GeometryFM3D",
-    "GeometryFMVerticalProfile",
-    "read",
-    "open",
-    "from_pandas",
-    "from_polars",
-]
