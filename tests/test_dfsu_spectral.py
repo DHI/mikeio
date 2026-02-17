@@ -231,16 +231,16 @@ def test_read_area_spectrum_xy(dfsu_area: DfsuSpectral) -> None:
 def test_read_area_spectrum_area(dfsu_area: DfsuSpectral) -> None:
     dfs = dfsu_area
     ds1 = dfs.read()
-    assert ds1[0].n_frequencies == 25
-    assert ds1[0].n_directions == 16
+    assert ds1[0].geometry.n_frequencies == 25
+    assert ds1[0].geometry.n_directions == 16
 
     bbox = (2.5, 51.8, 3.0, 52.2)
     ds2 = dfs.read(area=bbox)
     assert ds2.dims == ds1.dims
     assert ds2.shape == (3, 4, 16, 25)
     assert ds1.geometry._type == ds2.geometry._type
-    assert ds2[0].n_frequencies == 25
-    assert ds2[0].n_directions == 16
+    assert ds2[0].geometry.n_frequencies == 25
+    assert ds2[0].geometry.n_directions == 16
 
 
 def test_read_spectrum_line_elements(dfsu_line: DfsuSpectral) -> None:
