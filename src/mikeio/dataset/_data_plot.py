@@ -1,4 +1,5 @@
 from __future__ import annotations
+import warnings
 from typing import Any, TYPE_CHECKING, Sequence
 
 from matplotlib.figure import Figure
@@ -47,7 +48,7 @@ class _DataArrayPlotter:
         fig, ax = self._get_fig_ax(ax, figsize)
 
         if self.da.ndim == 1:
-            if self.da._has_time_axis:
+            if "time" in self.da.dims:
                 return self._timeseries(self.da.values, fig, ax, **kwargs)
             else:
                 return self._line_not_timeseries(self.da.values, ax, **kwargs)
@@ -131,7 +132,7 @@ class _DataArrayPlotter:
     ) -> Axes:
         """Plot data as lines (timeseries if time is present)."""
         fig, ax = self._get_fig_ax(ax, figsize)
-        if self.da._has_time_axis:
+        if "time" in self.da.dims:
             return self._timeseries(self.da.values, fig, ax, **kwargs)
         else:
             return self._line_not_timeseries(self.da.values, ax, **kwargs)
@@ -158,12 +159,6 @@ class _DataArrayPlotter:
 
     def _label_txt(self) -> str:
         return f"{self.da.name} [{self.da.unit.short_name}]"
-
-    def _get_first_step_values(self) -> np.ndarray:
-        if self.da.n_timesteps > 1:
-            return self.da.values[0]
-        else:
-            return np.squeeze(self.da.values)
 
 
 class _DataArrayPlotterGrid1D(_DataArrayPlotter):
@@ -224,7 +219,7 @@ class _DataArrayPlotterGrid1D(_DataArrayPlotter):
         **kwargs: Any,
     ) -> Axes:
         """Plot as 2d."""
-        if not self.da._has_time_axis:
+        if "time" not in self.da.dims:
             raise ValueError(
                 "Not possible without time axis. DataArray only has 1 dimension."
             )
@@ -241,7 +236,7 @@ class _DataArrayPlotterGrid1D(_DataArrayPlotter):
         **kwargs: Any,
     ) -> Axes:
         """Plot multiple lines as 2d color plot."""
-        if not self.da._has_time_axis:
+        if "time" not in self.da.dims:
             raise ValueError(
                 "Not possible without time axis. DataArray only has 1 dimension."
             )
@@ -315,9 +310,9 @@ class _DataArrayPlotterGrid2D(_DataArrayPlotter):
         _, ax = self._get_fig_ax(ax, figsize)
 
         x, y = self._get_x_y()
-        values = self._get_first_step_values()
+        da = self.da.isel(time=0) if "time" in self.da.dims else self.da
 
-        pos = ax.contour(x, y, values, **kwargs)
+        pos = ax.contour(x, y, da.values, **kwargs)
         # fig.colorbar(pos, label=self._label_txt())
         ax.clabel(pos, fmt="%1.2f", inline=1, fontsize=9)
         self._set_aspect_and_labels(ax, self.da.geometry, y)
@@ -346,11 +341,11 @@ class _DataArrayPlotterGrid2D(_DataArrayPlotter):
         fig, ax = self._get_fig_ax(ax, figsize)
 
         x, y = self._get_x_y()
-        values = self._get_first_step_values()
+        da = self.da.isel(time=0) if "time" in self.da.dims else self.da
 
         label = label if label is not None else self._label_txt()
 
-        pos = ax.contourf(x, y, values, **kwargs)
+        pos = ax.contourf(x, y, da.values, **kwargs)
         fig.colorbar(pos, label=label, pad=0.01)
         self._set_aspect_and_labels(ax, self.da.geometry, y)
         if title is not None:
@@ -378,11 +373,11 @@ class _DataArrayPlotterGrid2D(_DataArrayPlotter):
         fig, ax = self._get_fig_ax(ax, figsize)
 
         xn, yn = self._get_xn_yn()
-        values = self._get_first_step_values()
+        da = self.da.isel(time=0) if "time" in self.da.dims else self.da
 
         label = label if label is not None else self._label_txt()
 
-        pos = ax.pcolormesh(xn, yn, values, **kwargs)
+        pos = ax.pcolormesh(xn, yn, da.values, **kwargs)
         fig.colorbar(pos, label=label, pad=0.01)
         self._set_aspect_and_labels(ax, self.da.geometry, yn)
         if title is not None:
@@ -546,29 +541,28 @@ class _DataArrayPlotterFM(_DataArrayPlotter):
         return self.da.geometry.plot.outline(figsize=figsize, ax=ax, **kwargs)
 
     def _plot_FM_map(self, ax: Axes, **kwargs: Any) -> Axes:
-        values = self._get_first_step_values()
+        da = self.da.isel(time=0) if "time" in self.da.dims else self.da
 
-        title = f"{self.da.time[0]}"
-        if self.da.geometry.is_layered:
-            # select surface as default plotting for 3d files
-            values = values[self.da.geometry.top_elements]
-            geometry = self.da.geometry.geometry2d
-            title = "Surface, " + title
-        else:
-            geometry = self.da.geometry
+        default_title = f"{self.da.time[0]}"
+        if da.geometry.is_layered:
+            warnings.warn(
+                "Plotting layered data implicitly selects the surface layer. "
+                "This will become an error in a future version. "
+                "Use da.sel(layers='top').plot() instead.",
+                FutureWarning,
+                stacklevel=4,
+            )
+            da = da.sel(layers="top")
+            default_title = "Surface, " + default_title
 
         if "label" not in kwargs:
             kwargs["label"] = self._label_txt()
         if "title" not in kwargs:
-            kwargs["title"] = title
+            kwargs["title"] = default_title
 
         return _plot_map(
-            node_coordinates=geometry.node_coordinates,
-            element_table=geometry.element_table,
-            element_coordinates=geometry.element_coordinates,
-            boundary_polylines=geometry.boundary_polygons.lines,
-            projection=geometry.projection,
-            z=values,
+            geometry=da.geometry,
+            z=da.values,
             ax=ax,
             **kwargs,
         )
@@ -708,19 +702,14 @@ class _DataArrayPlotterFMVerticalProfile(_DataArrayPlotter):
             kwargs["label"] = self._label_txt()
         if "title" not in kwargs:
             kwargs["title"] = self.da.time[0]
-        assert self.da._zn is not None
-        if self.da.n_timesteps > 1:
-            values = self.da.values[0]
-            zn = self.da._zn[0]
-        else:
-            values = np.squeeze(self.da.values)
-            zn = np.squeeze(self.da._zn)  # type: ignore
-        g = self.da.geometry
+        da = self.da.isel(time=0) if "time" in self.da.dims else self.da
+        assert da._zn is not None
+        g = da.geometry
         return _plot_vertical_profile(
             node_coordinates=g.node_coordinates,
             element_table=g.element_table,
-            values=values,
-            zn=zn,
+            values=da.values,
+            zn=da._zn,
             is_geo=g.is_geo,
             **kwargs,
         )
@@ -786,7 +775,7 @@ class _DataArrayPlotterPointSpectrum(_DataArrayPlotter):
         **kwargs: Any,
     ) -> Axes:
         ax = self._get_ax(ax, figsize)
-        y_values = self._get_first_step_values()
+        da = self.da.isel(time=0) if "time" in self.da.dims else self.da
 
         if "linestyle" not in kwargs:
             kwargs["linestyle"] = "-"
@@ -796,11 +785,11 @@ class _DataArrayPlotterPointSpectrum(_DataArrayPlotter):
         title = kwargs.pop("title") if "title" in kwargs else self._get_title()
         ax.set_title(title)
 
-        ax.plot(x_values, y_values, **kwargs)
+        ax.plot(x_values, da.values, **kwargs)
         return ax
 
     def _plot_2dspectrum(self, **kwargs: Any) -> Axes:
-        values = self._get_first_step_values()
+        da = self.da.isel(time=0) if "time" in self.da.dims else self.da
 
         if "figsize" not in kwargs or kwargs["figsize"] is None:
             kwargs["figsize"] = (7, 7)
@@ -810,7 +799,7 @@ class _DataArrayPlotterPointSpectrum(_DataArrayPlotter):
             kwargs["title"] = self._get_title()
 
         return plot_2dspectrum(
-            values,
+            da.values,
             frequencies=self.da.geometry.frequencies,
             directions=self.da.geometry.directions,
             **kwargs,
