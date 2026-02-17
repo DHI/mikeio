@@ -42,7 +42,7 @@ from ..spatial import (
 
 from ..spatial._FM_geometry import _GeometryFM
 
-from ._data_plot import _DatasetPlotter
+from ._data_plot import DatasetPlotter
 
 from ._dataarray import IndexType
 
@@ -105,7 +105,7 @@ class Dataset:
 
         for key, value in data_vars.items():
             self._set_name_attr(key, value)
-        self.plot = _DatasetPlotter(self)
+        self.plot = DatasetPlotter(self)
 
     @staticmethod
     def from_numpy(
