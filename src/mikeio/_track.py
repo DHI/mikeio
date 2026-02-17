@@ -1,14 +1,15 @@
 from __future__ import annotations
 from pathlib import Path
 from collections.abc import Sequence
-from typing import Any, Callable
+from typing import Any, Callable, TYPE_CHECKING
 
 import numpy as np
 import pandas as pd
 
-from .dataset import Dataset
-from .dfs import Dfs0
 from .eum import ItemInfo, EUMUnit, EUMType
+
+if TYPE_CHECKING:
+    from .dataset import Dataset
 from .spatial import GeometryFM2D
 
 
@@ -32,6 +33,8 @@ def _extract_track(
         raise NotImplementedError("Only implemented for 2d flexible mesh geometries")
 
     n_items = len(item_numbers)
+
+    from .dataset import Dataset
 
     match track:
         case str():
@@ -158,6 +161,8 @@ def _extract_track(
     for item_info in items:
         items_out.append(item_info)
 
+    from .dataset import Dataset
+
     return Dataset.from_numpy(data=data_list, time=times, items=items_out)
 
 
@@ -186,6 +191,8 @@ def _get_track_data_from_file(track: str) -> tuple[pd.DatetimeIndex, np.ndarray]
     ext = path.suffix.lower()
     match ext:
         case ".dfs0":
+            from .dfs import Dfs0
+
             df = Dfs0(filename).to_dataframe()
         case ".csv":
             df = pd.read_csv(filename, index_col=0, parse_dates=True)

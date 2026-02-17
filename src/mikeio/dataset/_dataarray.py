@@ -27,6 +27,7 @@ import pandas as pd
 
 from ..eum import EUMType, EUMUnit, ItemInfo
 from .._time import _get_time_idx_list, _n_selected_timesteps
+from .._track import _extract_track
 
 if TYPE_CHECKING:
     from ._dataset import Dataset
@@ -55,15 +56,15 @@ from ..spatial import (
 from ..spatial._FM_geometry_layered import _GeometryFMLayered
 
 from ._data_plot import (
-    _DataArrayPlotter,
-    _DataArrayPlotterFM,
-    _DataArrayPlotterGrid1D,
-    _DataArrayPlotterGrid2D,
-    _DataArrayPlotterAreaSpectrum,
-    _DataArrayPlotterFMVerticalColumn,
-    _DataArrayPlotterFMVerticalProfile,
-    _DataArrayPlotterPointSpectrum,
-    _DataArrayPlotterLineSpectrum,
+    DataArrayPlotter,
+    DataArrayPlotterFM,
+    DataArrayPlotterGrid1D,
+    DataArrayPlotterGrid2D,
+    DataArrayPlotterAreaSpectrum,
+    DataArrayPlotterFMVerticalColumn,
+    DataArrayPlotterFMVerticalProfile,
+    DataArrayPlotterPointSpectrum,
+    DataArrayPlotterLineSpectrum,
 )
 
 GeometryType = Union[
@@ -291,18 +292,18 @@ class DataArray:
     def _get_plotter_by_geometry(self) -> Any:
         # TODO: this is explicit, but with consistent naming, we could create this mapping automatically
         PLOTTER_MAP: Any = {
-            GeometryFMVerticalProfile: _DataArrayPlotterFMVerticalProfile,
-            GeometryFMVerticalColumn: _DataArrayPlotterFMVerticalColumn,
-            GeometryFMPointSpectrum: _DataArrayPlotterPointSpectrum,
-            GeometryFMLineSpectrum: _DataArrayPlotterLineSpectrum,
-            GeometryFMAreaSpectrum: _DataArrayPlotterAreaSpectrum,
-            GeometryFM2D: _DataArrayPlotterFM,
-            GeometryFM3D: _DataArrayPlotterFM,
-            Grid1D: _DataArrayPlotterGrid1D,
-            Grid2D: _DataArrayPlotterGrid2D,
+            GeometryFMVerticalProfile: DataArrayPlotterFMVerticalProfile,
+            GeometryFMVerticalColumn: DataArrayPlotterFMVerticalColumn,
+            GeometryFMPointSpectrum: DataArrayPlotterPointSpectrum,
+            GeometryFMLineSpectrum: DataArrayPlotterLineSpectrum,
+            GeometryFMAreaSpectrum: DataArrayPlotterAreaSpectrum,
+            GeometryFM2D: DataArrayPlotterFM,
+            GeometryFM3D: DataArrayPlotterFM,
+            Grid1D: DataArrayPlotterGrid1D,
+            Grid2D: DataArrayPlotterGrid2D,
         }
 
-        plotter = PLOTTER_MAP.get(type(self.geometry), _DataArrayPlotter)
+        plotter = PLOTTER_MAP.get(type(self.geometry), DataArrayPlotter)
         return plotter(self)
 
     # ============= Basic properties/methods ===========
@@ -521,21 +522,18 @@ class DataArray:
 
     def _getitem_parse_key(self, key: Any) -> Any:
         if isinstance(key, str):
-            warnings.warn(
-                "Indexing with strings is deprecated. Only integer indexing is allowed. Otherwise use .sel(time=...).",
-                FutureWarning,
+            raise TypeError(
+                "Indexing with strings is not supported. Use .sel(time=...) or .isel(time=...) instead."
             )
         if isinstance(key, slice):
             if isinstance(key.start, str) or isinstance(key.stop, str):
-                warnings.warn(
-                    "Indexing with strings is deprecated. Only integer indexing is allowed. Otherwise use .sel(time=...).",
-                    FutureWarning,
+                raise TypeError(
+                    "Indexing with strings is not supported. Use .sel(time=...) or .isel(time=...) instead."
                 )
         if isinstance(key, Iterable):
-            if any([isinstance(k, str) for k in key]):
-                warnings.warn(
-                    "Indexing with strings is deprecated. Only integer indexing is allowed. Otherwise use .sel(time=...).",
-                    FutureWarning,
+            if any(isinstance(k, str) for k in key):
+                raise TypeError(
+                    "Indexing with strings is not supported. Use .sel(time=...) or .isel(time=...) instead."
                 )
 
         key = key if isinstance(key, tuple) else (key,)
@@ -1055,8 +1053,6 @@ class DataArray:
             The first two items will be x- and y- coordinates of track
 
         """
-        from .._track import _extract_track
-
         assert self.timestep is not None
 
         return _extract_track(

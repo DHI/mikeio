@@ -4,7 +4,7 @@ from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
 
-from typing import Any, Literal, Sequence
+from typing import Any, Literal, Sequence, overload
 
 import numpy as np
 import pandas as pd
@@ -310,6 +310,58 @@ class Dfsu2DH:
         )
         dfs.Close()
         return geometry
+
+    @overload
+    def read(
+        self,
+        *,
+        items: str | int | Sequence[str | int] | None = None,
+        time: int | str | slice | Sequence[int] | None = None,
+        elements: int | Sequence[int] | np.ndarray,
+        keepdims: bool = False,
+        dtype: Any = np.float32,
+        error_bad_data: bool = True,
+        fill_bad_data_value: float = np.nan,
+    ) -> Dataset: ...
+
+    @overload
+    def read(
+        self,
+        *,
+        items: str | int | Sequence[str | int] | None = None,
+        time: int | str | slice | Sequence[int] | None = None,
+        area: tuple[float, float, float, float] | Sequence[tuple[float, float]],
+        keepdims: bool = False,
+        dtype: Any = np.float32,
+        error_bad_data: bool = True,
+        fill_bad_data_value: float = np.nan,
+    ) -> Dataset: ...
+
+    @overload
+    def read(
+        self,
+        *,
+        items: str | int | Sequence[str | int] | None = None,
+        time: int | str | slice | Sequence[int] | None = None,
+        x: float | Sequence[float],
+        y: float | Sequence[float],
+        keepdims: bool = False,
+        dtype: Any = np.float32,
+        error_bad_data: bool = True,
+        fill_bad_data_value: float = np.nan,
+    ) -> Dataset: ...
+
+    @overload
+    def read(
+        self,
+        *,
+        items: str | int | Sequence[str | int] | None = None,
+        time: int | str | slice | Sequence[int] | None = None,
+        keepdims: bool = False,
+        dtype: Any = np.float32,
+        error_bad_data: bool = True,
+        fill_bad_data_value: float = np.nan,
+    ) -> Dataset: ...
 
     def read(
         self,

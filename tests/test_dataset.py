@@ -147,36 +147,19 @@ def test_index_with_attribute() -> None:
     )  # This is now modfied, but both methods points to the same object
 
 
-def test_getitem_time(ds3: Dataset) -> None:
+def test_getitem_time_string_not_supported(ds3: Dataset) -> None:
     # time = pd.date_range("2000-1-2", freq="h", periods=100)
 
-    # deprecated use .sel(time=...) or .isel(time=...) instead
-    with pytest.warns(FutureWarning, match="time"):
-        ds_sel = ds3["2000-1-2"]  # type: ignore
-    assert ds_sel.n_timesteps == 24
-    assert ds_sel.is_equidistant
+    # string indexing is not supported, use .sel(time=...) or .isel(time=...) instead
+    with pytest.raises(KeyError):
+        ds3["2000-1-2"]  # type: ignore
 
-    with pytest.warns(FutureWarning, match="time"):
-        ds_sel = ds3["2000-1-2":"2000-1-3 00:00"]  # type: ignore
-    assert ds_sel.n_timesteps == 25
-    assert ds_sel.is_equidistant
+    with pytest.raises(TypeError):
+        ds3["2000-1-2":"2000-1-3 00:00"]  # type: ignore
 
-    with pytest.warns(FutureWarning, match="time"):
-        time = ["2000-1-2 04:00:00", "2000-1-2 08:00:00", "2000-1-2 12:00:00"]
-        ds_sel = ds3[time]  # type: ignore
-    assert ds_sel.n_timesteps == 3
-    assert ds_sel.is_equidistant
-
-    with pytest.warns(FutureWarning, match="time"):
-        time = [ds3.time[0], ds3.time[1], ds3.time[7], ds3.time[23]]
-        ds_sel = ds3[time]  # type: ignore
-    assert ds_sel.n_timesteps == 4
-    assert not ds_sel.is_equidistant
-
-    with pytest.warns(FutureWarning, match="time"):
-        ds_sel = ds3[ds3.time[:10]]  # type: ignore
-    assert ds_sel.n_timesteps == 10
-    assert ds_sel.is_equidistant
+    time = ["2000-1-2 04:00:00", "2000-1-2 08:00:00", "2000-1-2 12:00:00"]
+    with pytest.raises(KeyError):
+        ds3[time]  # type: ignore
 
 
 def test_select_subset_isel() -> None:
@@ -246,8 +229,19 @@ def test_select_temporal_subset_by_idx() -> None:
     assert selds["Foo"].shape == (3, 100, 30)
 
 
-def test_temporal_subset_fancy() -> None:
-    # TODO use .sel(time=...) instead, more explicit
+def test_isel_time_every_other_timestep() -> None:
+    nt = 10
+    time = pd.date_range(start=datetime(2000, 1, 1), freq="h", periods=nt)
+    ds = mikeio.Dataset.from_numpy(
+        data=[np.arange(nt, dtype=float)], time=time, items=[ItemInfo("Foo")]
+    )
+
+    assert ds.isel(time=range(0, nt, 2)).n_timesteps == 5
+    assert ds.isel(time=slice(None, None, 2)).n_timesteps == 5
+
+
+def test_temporal_subset_fancy_string_not_supported() -> None:
+    # string indexing is not supported, use .sel(time=...) instead
     nt = (24 * 31) + 1
     d1 = np.zeros([nt, 100, 30]) + 1.5
     d2 = np.zeros([nt, 100, 30]) + 2.0
@@ -260,23 +254,17 @@ def test_temporal_subset_fancy() -> None:
     assert ds.time[0].hour == 0
     assert ds.time[-1].hour == 0
 
-    with pytest.warns(FutureWarning, match="time"):
-        selds = ds["2000-01-01 00:00":"2000-01-02 00:00"]  # type: ignore
+    with pytest.raises(TypeError):
+        ds["2000-01-01 00:00":"2000-01-02 00:00"]  # type: ignore
 
-    assert len(selds) == 2
-    assert selds["Foo"].shape == (25, 100, 30)
+    with pytest.raises(TypeError):
+        ds[:"2000-01-02 00:00"]  # type: ignore
 
-    with pytest.warns(FutureWarning, match="time"):
-        selds = ds[:"2000-01-02 00:00"]  # type: ignore
-    assert selds["Foo"].shape == (25, 100, 30)
+    with pytest.raises(TypeError):
+        ds["2000-01-31 00:00":]  # type: ignore
 
-    with pytest.warns(FutureWarning, match="time"):
-        selds = ds["2000-01-31 00:00":]  # type: ignore
-    assert selds["Foo"].shape == (25, 100, 30)
-
-    with pytest.warns(FutureWarning, match="time"):
-        selds = ds["2000-01-30":]  # type: ignore
-    assert selds["Foo"].shape == (49, 100, 30)
+    with pytest.raises(TypeError):
+        ds["2000-01-30":]  # type: ignore
 
 
 def test_select_item_by_name() -> None:
@@ -467,7 +455,7 @@ def test_interp_time() -> None:
     d[1] = 2.0
     d[3] = 4.0
     data = [d]
-    time = pd.date_range("2000-1-1", freq="d", periods=nt)
+    time = pd.date_range("2000-1-1", freq="D", periods=nt)
     items = [ItemInfo("Foo")]
     ds = mikeio.Dataset.from_numpy(data=data, time=time, items=items)
 
@@ -497,7 +485,7 @@ def test_interp_time_to_other_dataset() -> None:
     ds1 = mikeio.Dataset.from_numpy(data=data, time=time, items=items)
 
     nt = 12
-    data = [np.ones([nt, 10, 3])]
+    data = [np.ones((nt, 10, 3))]
     time = pd.date_range("2000-1-1", freq="h", periods=nt)
     items = [ItemInfo("Foo")]
     ds2 = mikeio.Dataset.from_numpy(data=data, time=time, items=items)
@@ -587,7 +575,7 @@ def test_modify_selected_variable() -> None:
 
 def test_flipud() -> None:
     nt = 2
-    d = np.random.random([nt, 100, 30])
+    d = np.arange(nt * 100 * 30).reshape((nt, 100, 30)).astype(float)
     time = pd.date_range("2000-1-2", freq="h", periods=nt)
     items = [ItemInfo("Foo")]
     ds = mikeio.Dataset.from_numpy([d], time, items)
@@ -849,7 +837,7 @@ def test_properties_dfsu() -> None:
 
 def test_create_infer_name_from_eum() -> None:
     nt = 100
-    d = np.random.uniform(size=nt)
+    d = np.ones(nt)
 
     ds = mikeio.Dataset.from_numpy(
         data=[d],
@@ -933,7 +921,7 @@ def test_add_dataset(ds1: Dataset, ds2: Dataset) -> None:
     assert ds4.items[0].type == EUMType.Undefined
     assert ds4.items[0].name == ds1.items[0].name
     ds2c = ds2.copy()
-    tt = ds2c.time.to_numpy()
+    tt = ds2c.time.to_numpy().copy()
     tt[-1] = tt[-1] + np.timedelta64(1, "s")
     ds2c.time = pd.DatetimeIndex(tt)
     with pytest.raises(ValueError):
@@ -988,7 +976,7 @@ def test_divide_number_of_items_datasets_must_match() -> None:
 
 def test_non_equidistant() -> None:
     nt = 4
-    d = np.random.uniform(size=nt)
+    d = np.ones(nt)
 
     ds = mikeio.Dataset.from_numpy(
         data=[d],
@@ -1133,14 +1121,14 @@ def test_merge_must_have_same_time() -> None:
     ds1 = mikeio.Dataset(
         {
             "Foo": mikeio.DataArray(
-                data=np.random.rand(10), time=pd.date_range("2000-01-01", periods=10)
+                data=np.ones(10), time=pd.date_range("2000-01-01", periods=10)
             )
         }
     )
     ds2 = mikeio.Dataset(
         {
             "Bar": mikeio.DataArray(
-                data=np.random.rand(10), time=pd.date_range("2100-01-01", periods=10)
+                data=np.ones(10), time=pd.date_range("2100-01-01", periods=10)
             )
         }
     )
@@ -1281,7 +1269,7 @@ def test_time_selection() -> None:
     # select time test
     nt = 100
     data = []
-    d = np.random.rand(nt)
+    d = np.zeros(nt)
     data.append(d)
     time = pd.date_range("2000-1-2", freq="h", periods=nt)
     items = [ItemInfo("Foo")]
@@ -1304,7 +1292,7 @@ def test_create_dataset_with_many_items() -> None:
     das = []
 
     for i in range(n_items):
-        x = np.random.random(nt)
+        x = np.ones(nt)
         da = mikeio.DataArray(data=x, time=time, item=mikeio.ItemInfo(f"Item {i + 1}"))
         das.append(da)
 

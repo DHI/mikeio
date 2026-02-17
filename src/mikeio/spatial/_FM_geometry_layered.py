@@ -10,7 +10,7 @@ import numpy as np
 from mikecore.DfsuFile import DfsuFileType
 
 
-from ._FM_geometry import GeometryFM2D, _GeometryFM, _GeometryFMPlotter
+from ._FM_geometry import GeometryFM2D, _GeometryFM, GeometryFMPlotter
 from ._geometry import GeometryPoint3D
 
 from ._FM_plot import _plot_vertical_profile, BoundaryPolygons
@@ -647,7 +647,7 @@ class GeometryFM3D(_GeometryFMLayered):
             validate=validate,
             reindex=reindex,
         )
-        self.plot = _GeometryFMPlotter(self)
+        self.plot = GeometryFMPlotter(self)
 
     @property
     def boundary_polylines(self) -> BoundaryPolygons:
@@ -743,7 +743,7 @@ class GeometryFMVerticalProfile(_GeometryFMLayered):
             validate=validate,
             reindex=reindex,
         )
-        self.plot = _GeometryFMVerticalProfilePlotter(self)
+        self.plot = GeometryFMVerticalProfilePlotter(self)
 
     @cached_property
     def relative_element_distance(self) -> np.ndarray:
@@ -889,7 +889,7 @@ class GeometryFMVerticalColumn(GeometryFM3D):
         return zn[..., idx].mean(axis=-1)
 
 
-class _GeometryFMVerticalProfilePlotter:
+class GeometryFMVerticalProfilePlotter:
     def __init__(self, geometry: GeometryFMVerticalProfile) -> None:
         self.g = geometry
 

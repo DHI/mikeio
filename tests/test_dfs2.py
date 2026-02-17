@@ -71,9 +71,7 @@ def test_write_projected(tmp_path: Path) -> None:
     ny = 2
     nx = 3
 
-    shape = nt, ny, nx
-
-    d = np.random.random(shape)
+    d = np.ones((nt, ny, nx))
     d[10, :, :] = np.nan
     d[11, :, :] = 0
     d[12, :, :] = 1e-10
@@ -150,7 +148,7 @@ def test_write_without_time(tmp_path: Path) -> None:
     nx = 3
     grid = Grid2D(nx=nx, ny=ny, dx=100, dy=100, projection="UTM-33")
 
-    d = np.random.random((ny, nx))
+    d = np.ones((ny, nx))
     time = pd.date_range("2012-1-1", freq="s", periods=1)
     da = mikeio.DataArray(data=d, time=time, geometry=grid)
     da.to_dfs(fp)
@@ -592,7 +590,7 @@ def test_interp_to_x_y() -> None:
 def test_write_accumulated_datatype(tmp_path: Path) -> None:
     fp = tmp_path / "simple.dfs2"
 
-    d = np.random.random([100, 2, 3])
+    d = np.ones((100, 2, 3))
 
     da = mikeio.DataArray(
         data=d,
@@ -615,7 +613,7 @@ def test_write_accumulated_datatype(tmp_path: Path) -> None:
 def test_write_NonEqCalendarAxis(tmp_path: Path) -> None:
     fp = tmp_path / "simple.dfs2"
 
-    d = np.random.random([6, 5, 10])
+    d = np.ones((6, 5, 10))
     d[1, :, :] = np.nan
     d[2, :, :] = 0
     d[3, 3:, :] = 2

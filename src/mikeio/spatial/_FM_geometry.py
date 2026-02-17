@@ -41,7 +41,7 @@ if TYPE_CHECKING:
     from numpy.typing import ArrayLike
 
 
-class _GeometryFMPlotter:
+class GeometryFMPlotter:
     """Plot GeometryFM.
 
     Examples
@@ -125,16 +125,9 @@ class _GeometryFMPlotter:
 
         plot_type = kwargs.pop("plot_type")
 
-        g = self.g
-
         return _plot_map(
-            node_coordinates=g.node_coordinates,
-            element_table=g.element_table,
-            element_coordinates=g.element_coordinates,
-            boundary_polylines=g.boundary_polygons.lines,
+            geometry=self.g,
             plot_type=plot_type,
-            projection=g.projection,
-            z=None,
             ax=ax,
             **kwargs,
         )
@@ -456,7 +449,7 @@ class GeometryFM2D(_GeometryFM):
             reindex=reindex,
         )
 
-        self.plot = _GeometryFMPlotter(self)
+        self.plot = GeometryFMPlotter(self)
 
     def __str__(self) -> str:
         return f"{self._type.name} ({self.n_elements} elements, {self.n_nodes} nodes)"

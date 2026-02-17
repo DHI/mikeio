@@ -475,28 +475,25 @@ def test_dataarray_grid3d_indexing() -> None:
     # assert isinstance(da[:, 1, -3, 4:].geometry, mikeio.Grid2D)
 
 
+def test_dataarray_getitem_time_string_not_supported(da_grid2d: DataArray) -> None:
+    da = da_grid2d
+    # time=pd.date_range("2000-01-01", freq="h", periods=10)
+    # string indexing is not supported, use .sel(time=...) or .isel(time=...) instead
+    with pytest.raises(TypeError, match="not supported"):
+        da["2000-1-1"]
+
+    with pytest.raises(TypeError, match="not supported"):
+        da["2000-1-1 02:00":"2000-1-1 05:00"]  # type: ignore
+
+    time = ["2000-1-1 02:00", "2000-1-1 04:00", "2000-1-1 06:00"]
+    with pytest.raises(TypeError, match="not supported"):
+        da[time]
+
+
 def test_dataarray_getitem_time(da_grid2d: DataArray) -> None:
     da = da_grid2d
     # time=pd.date_range("2000-01-01", freq="h", periods=10)
-    # deprecated use .sel(time=...) or .isel(time=...) instead
-    with pytest.warns(FutureWarning, match="string"):
-        da_sel = da["2000-1-1"]
-    assert da_sel.n_timesteps == da.n_timesteps
-    assert da_sel.is_equidistant
-
-    with pytest.warns(FutureWarning, match="string"):
-        da_sel = da["2000-1-1 02:00":"2000-1-1 05:00"]  # type: ignore
-    assert da_sel.n_timesteps == 4
-    assert da_sel.is_equidistant
-
-    time = ["2000-1-1 02:00", "2000-1-1 04:00", "2000-1-1 06:00"]
-    with pytest.warns(FutureWarning, match="string"):
-        da_sel = da[time]
-    assert da_sel.n_timesteps == 3
-    assert da_sel.is_equidistant
-
     time = [da.time[0], da.time[1], da.time[3], da.time[7]]
-    # TODO should this type of indexing be allowed?
     da_sel = da[time]
     assert da_sel.n_timesteps == 4
     assert not da_sel.is_equidistant
@@ -1157,7 +1154,7 @@ def test_write_dfs2(tmp_path: Path) -> None:
     )
     assert g.origin == (0, 0)
     da = mikeio.DataArray(
-        np.random.random(size=(nt, g.ny, g.nx)),
+        np.ones((nt, g.ny, g.nx)),
         time=pd.date_range(start="2000", freq="h", periods=nt),
         item=ItemInfo("Random"),
         geometry=g,
@@ -1182,7 +1179,7 @@ def test_write_dfs2_single_time_no_time_dim(tmp_path: Path) -> None:
         projection="LONG/LAT",
     )
     da = mikeio.DataArray(
-        np.random.random(size=(g.ny, g.nx)),  # No singleton time
+        np.ones((g.ny, g.nx)),  # No singleton time
         time=pd.date_range(start="2000", periods=1),
         item=ItemInfo("Random"),
         geometry=g,
@@ -1240,7 +1237,7 @@ def test_time_selection() -> None:
     # select time test
     nt = 100
     data = []
-    d = np.random.rand(nt)
+    d = np.ones(nt)
     data.append(d)
     time = pd.date_range("2000-1-2", freq="h", periods=nt)
     items = [ItemInfo("Foo")]
