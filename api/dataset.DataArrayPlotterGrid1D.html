@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>dataset._dataarrayplotterfmverticalcolumn – MIKE IO</title>
+<title>dataset.dataarrayplottergrid1d – MIKE IO</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -183,19 +183,21 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <li><a href="#examples" id="toc-examples" class="nav-link active" data-scroll-target="#examples">Examples</a></li>
   <li><a href="#methods" id="toc-methods" class="nav-link" data-scroll-target="#methods">Methods</a>
   <ul class="collapse">
-  <li><a href="#mikeio.dataset._DataArrayPlotterFMVerticalColumn.hist" id="toc-mikeio.dataset._DataArrayPlotterFMVerticalColumn.hist" class="nav-link" data-scroll-target="#mikeio.dataset._DataArrayPlotterFMVerticalColumn.hist">hist</a></li>
-  <li><a href="#mikeio.dataset._DataArrayPlotterFMVerticalColumn.line" id="toc-mikeio.dataset._DataArrayPlotterFMVerticalColumn.line" class="nav-link" data-scroll-target="#mikeio.dataset._DataArrayPlotterFMVerticalColumn.line">line</a></li>
-  <li><a href="#mikeio.dataset._DataArrayPlotterFMVerticalColumn.pcolormesh" id="toc-mikeio.dataset._DataArrayPlotterFMVerticalColumn.pcolormesh" class="nav-link" data-scroll-target="#mikeio.dataset._DataArrayPlotterFMVerticalColumn.pcolormesh">pcolormesh</a></li>
+  <li><a href="#mikeio.dataset.DataArrayPlotterGrid1D.hist" id="toc-mikeio.dataset.DataArrayPlotterGrid1D.hist" class="nav-link" data-scroll-target="#mikeio.dataset.DataArrayPlotterGrid1D.hist">hist</a></li>
+  <li><a href="#mikeio.dataset.DataArrayPlotterGrid1D.imshow" id="toc-mikeio.dataset.DataArrayPlotterGrid1D.imshow" class="nav-link" data-scroll-target="#mikeio.dataset.DataArrayPlotterGrid1D.imshow">imshow</a></li>
+  <li><a href="#mikeio.dataset.DataArrayPlotterGrid1D.line" id="toc-mikeio.dataset.DataArrayPlotterGrid1D.line" class="nav-link" data-scroll-target="#mikeio.dataset.DataArrayPlotterGrid1D.line">line</a></li>
+  <li><a href="#mikeio.dataset.DataArrayPlotterGrid1D.pcolormesh" id="toc-mikeio.dataset.DataArrayPlotterGrid1D.pcolormesh" class="nav-link" data-scroll-target="#mikeio.dataset.DataArrayPlotterGrid1D.pcolormesh">pcolormesh</a></li>
+  <li><a href="#mikeio.dataset.DataArrayPlotterGrid1D.timeseries" id="toc-mikeio.dataset.DataArrayPlotterGrid1D.timeseries" class="nav-link" data-scroll-target="#mikeio.dataset.DataArrayPlotterGrid1D.timeseries">timeseries</a></li>
   </ul></li>
   </ul>
-<div class="quarto-alternate-formats"><h2>Other Formats</h2><ul><li><a href="dataset._DataArrayPlotterFMVerticalColumn.ipynb" download="dataset._DataArrayPlotterFMVerticalColumn.ipynb"><i class="bi bi-journal-code"></i>Jupyter</a></li></ul></div></nav>
+<div class="quarto-alternate-formats"><h2>Other Formats</h2><ul><li><a href="dataset.DataArrayPlotterGrid1D.ipynb" download="dataset.DataArrayPlotterGrid1D.ipynb"><i class="bi bi-journal-code"></i>Jupyter</a></li></ul></div></nav>
     </div>
 <!-- main -->
 <main class="content" id="quarto-document-content">
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<h1 class="title">dataset._DataArrayPlotterFMVerticalColumn</h1>
+<h1 class="title">dataset.DataArrayPlotterGrid1D</h1>
 </div>
 
 
@@ -212,40 +214,28 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </header>
 
 
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>dataset._DataArrayPlotterFMVerticalColumn(<span class="va">self</span>, da)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<p>Plot a DataArray with a GeometryFMVerticalColumn geometry.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>dataset.DataArrayPlotterGrid1D(<span class="va">self</span>, da)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Plot a DataArray with a Grid1D geometry.</p>
 <section id="examples" class="level2 doc-section doc-section-examples">
 <h2 class="doc-section doc-section-examples anchored" data-anchor-id="examples">Examples</h2>
-<div id="f61085d6" class="cell" data-execution_count="1">
+<div id="d63524ba" class="cell" data-execution_count="1">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> mikeio</span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>ds <span class="op">=</span> mikeio.read(<span class="st">"../data/oresund_sigma_z.dfsu"</span>)</span>
-<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>dsp <span class="op">=</span> ds.sel(x<span class="op">=</span><span class="fl">333934.1</span>, y<span class="op">=</span><span class="fl">6158101.5</span>)</span>
-<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>da <span class="op">=</span> dsp[<span class="st">"Temperature"</span>]</span>
-<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>da.plot()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>da <span class="op">=</span> mikeio.read(<span class="st">"../data/tide1.dfs1"</span>)[<span class="st">"Level"</span>]</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>da.plot()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="dataset._DataArrayPlotterFMVerticalColumn_files/figure-html/cell-2-output-1.png" width="587" height="429" class="figure-img"></p>
+<p><img src="dataset.DataArrayPlotterGrid1D_files/figure-html/cell-2-output-1.png" width="615" height="433" class="figure-img"></p>
 </figure>
 </div>
 </div>
 </div>
-<div id="2879c624" class="cell" data-execution_count="2">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>da.plot(extrapolate<span class="op">=</span><span class="va">False</span>, marker<span class="op">=</span><span class="st">'o'</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div id="b4c8a582" class="cell" data-execution_count="2">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>da.plot.timeseries()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="dataset._DataArrayPlotterFMVerticalColumn_files/figure-html/cell-3-output-1.png" width="587" height="429" class="figure-img"></p>
-</figure>
-</div>
-</div>
-</div>
-<div id="613cdb7e" class="cell" data-execution_count="3">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>da.plot.pcolormesh()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output cell-output-display">
-<div>
-<figure class="figure">
-<p><img src="dataset._DataArrayPlotterFMVerticalColumn_files/figure-html/cell-4-output-1.png" width="583" height="419" class="figure-img"></p>
+<p><img src="dataset.DataArrayPlotterGrid1D_files/figure-html/cell-3-output-1.png" width="587" height="414" class="figure-img"></p>
 </figure>
 </div>
 </div>
@@ -262,28 +252,36 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </thead>
 <tbody>
 <tr class="odd">
-<td><a href="#mikeio.dataset._DataArrayPlotterFMVerticalColumn.hist">hist</a></td>
+<td><a href="#mikeio.dataset.DataArrayPlotterGrid1D.hist">hist</a></td>
 <td>Plot DataArray as histogram (using ax.hist).</td>
 </tr>
 <tr class="even">
-<td><a href="#mikeio.dataset._DataArrayPlotterFMVerticalColumn.line">line</a></td>
-<td>Plot data as vertical lines.</td>
+<td><a href="#mikeio.dataset.DataArrayPlotterGrid1D.imshow">imshow</a></td>
+<td>Plot as 2d.</td>
 </tr>
 <tr class="odd">
-<td><a href="#mikeio.dataset._DataArrayPlotterFMVerticalColumn.pcolormesh">pcolormesh</a></td>
-<td>Plot data as coloured patches.</td>
+<td><a href="#mikeio.dataset.DataArrayPlotterGrid1D.line">line</a></td>
+<td>Plot as spatial lines.</td>
+</tr>
+<tr class="even">
+<td><a href="#mikeio.dataset.DataArrayPlotterGrid1D.pcolormesh">pcolormesh</a></td>
+<td>Plot multiple lines as 2d color plot.</td>
+</tr>
+<tr class="odd">
+<td><a href="#mikeio.dataset.DataArrayPlotterGrid1D.timeseries">timeseries</a></td>
+<td>Plot as timeseries.</td>
 </tr>
 </tbody>
 </table>
-<section id="mikeio.dataset._DataArrayPlotterFMVerticalColumn.hist" class="level3">
-<h3 class="anchored" data-anchor-id="mikeio.dataset._DataArrayPlotterFMVerticalColumn.hist">hist</h3>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>dataset._DataArrayPlotterFMVerticalColumn.hist(</span>
-<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>    bins<span class="op">=</span><span class="va">None</span>,</span>
-<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>    ax<span class="op">=</span><span class="va">None</span>,</span>
-<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>    figsize<span class="op">=</span><span class="va">None</span>,</span>
-<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>    title<span class="op">=</span><span class="va">None</span>,</span>
-<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>    <span class="op">**</span>kwargs,</span>
-<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<section id="mikeio.dataset.DataArrayPlotterGrid1D.hist" class="level3">
+<h3 class="anchored" data-anchor-id="mikeio.dataset.DataArrayPlotterGrid1D.hist">hist</h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>dataset.DataArrayPlotterGrid1D.hist(</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>    bins<span class="op">=</span><span class="va">None</span>,</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>    ax<span class="op">=</span><span class="va">None</span>,</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>    figsize<span class="op">=</span><span class="va">None</span>,</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>    title<span class="op">=</span><span class="va">None</span>,</span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>    <span class="op">**</span>kwargs,</span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>Plot DataArray as histogram (using ax.hist).</p>
 <section id="parameters" class="level4 doc-section doc-section-parameters">
 <h4 class="doc-section doc-section-parameters anchored" data-anchor-id="parameters">Parameters</h4>
@@ -360,25 +358,30 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </table>
 </section>
 </section>
-<section id="mikeio.dataset._DataArrayPlotterFMVerticalColumn.line" class="level3">
-<h3 class="anchored" data-anchor-id="mikeio.dataset._DataArrayPlotterFMVerticalColumn.line">line</h3>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>dataset._DataArrayPlotterFMVerticalColumn.line(</span>
-<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>    ax<span class="op">=</span><span class="va">None</span>,</span>
-<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>    figsize<span class="op">=</span><span class="va">None</span>,</span>
-<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>    extrapolate<span class="op">=</span><span class="va">True</span>,</span>
-<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>    <span class="op">**</span>kwargs,</span>
-<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<p>Plot data as vertical lines.</p>
+<section id="mikeio.dataset.DataArrayPlotterGrid1D.imshow" class="level3">
+<h3 class="anchored" data-anchor-id="mikeio.dataset.DataArrayPlotterGrid1D.imshow">imshow</h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>dataset.DataArrayPlotterGrid1D.imshow(ax<span class="op">=</span><span class="va">None</span>, figsize<span class="op">=</span><span class="va">None</span>, <span class="op">**</span>kwargs)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Plot as 2d.</p>
 </section>
-<section id="mikeio.dataset._DataArrayPlotterFMVerticalColumn.pcolormesh" class="level3">
-<h3 class="anchored" data-anchor-id="mikeio.dataset._DataArrayPlotterFMVerticalColumn.pcolormesh">pcolormesh</h3>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>dataset._DataArrayPlotterFMVerticalColumn.pcolormesh(</span>
+<section id="mikeio.dataset.DataArrayPlotterGrid1D.line" class="level3">
+<h3 class="anchored" data-anchor-id="mikeio.dataset.DataArrayPlotterGrid1D.line">line</h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>dataset.DataArrayPlotterGrid1D.line(ax<span class="op">=</span><span class="va">None</span>, figsize<span class="op">=</span><span class="va">None</span>, <span class="op">**</span>kwargs)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Plot as spatial lines.</p>
+</section>
+<section id="mikeio.dataset.DataArrayPlotterGrid1D.pcolormesh" class="level3">
+<h3 class="anchored" data-anchor-id="mikeio.dataset.DataArrayPlotterGrid1D.pcolormesh">pcolormesh</h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>dataset.DataArrayPlotterGrid1D.pcolormesh(</span>
 <span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>    ax<span class="op">=</span><span class="va">None</span>,</span>
 <span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>    figsize<span class="op">=</span><span class="va">None</span>,</span>
 <span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>    title<span class="op">=</span><span class="va">None</span>,</span>
 <span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>    <span class="op">**</span>kwargs,</span>
 <span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<p>Plot data as coloured patches.</p>
+<p>Plot multiple lines as 2d color plot.</p>
+</section>
+<section id="mikeio.dataset.DataArrayPlotterGrid1D.timeseries" class="level3">
+<h3 class="anchored" data-anchor-id="mikeio.dataset.DataArrayPlotterGrid1D.timeseries">timeseries</h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>dataset.DataArrayPlotterGrid1D.timeseries(ax<span class="op">=</span><span class="va">None</span>, figsize<span class="op">=</span><span class="va">None</span>, <span class="op">**</span>kwargs)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Plot as timeseries.</p>
 
 
 </section>

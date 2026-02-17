@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>dataset._dataarrayplotter – MIKE IO</title>
+<title>dataset.dataarrayplotterfmverticalprofile – MIKE IO</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -180,27 +180,72 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     <h2 id="toc-title">On this page</h2>
    
   <ul>
-  <li><a href="#mikeio.dataset._DataArrayPlotter" id="toc-mikeio.dataset._DataArrayPlotter" class="nav-link active" data-scroll-target="#mikeio.dataset._DataArrayPlotter">dataset._DataArrayPlotter</a>
-  <ul class="collapse">
+  <li><a href="#examples" id="toc-examples" class="nav-link active" data-scroll-target="#examples">Examples</a></li>
   <li><a href="#methods" id="toc-methods" class="nav-link" data-scroll-target="#methods">Methods</a>
   <ul class="collapse">
-  <li><a href="#mikeio.dataset._DataArrayPlotter.hist" id="toc-mikeio.dataset._DataArrayPlotter.hist" class="nav-link" data-scroll-target="#mikeio.dataset._DataArrayPlotter.hist">hist</a></li>
-  <li><a href="#mikeio.dataset._DataArrayPlotter.line" id="toc-mikeio.dataset._DataArrayPlotter.line" class="nav-link" data-scroll-target="#mikeio.dataset._DataArrayPlotter.line">line</a></li>
-  </ul></li>
+  <li><a href="#mikeio.dataset.DataArrayPlotterFMVerticalProfile.hist" id="toc-mikeio.dataset.DataArrayPlotterFMVerticalProfile.hist" class="nav-link" data-scroll-target="#mikeio.dataset.DataArrayPlotterFMVerticalProfile.hist">hist</a></li>
+  <li><a href="#mikeio.dataset.DataArrayPlotterFMVerticalProfile.line" id="toc-mikeio.dataset.DataArrayPlotterFMVerticalProfile.line" class="nav-link" data-scroll-target="#mikeio.dataset.DataArrayPlotterFMVerticalProfile.line">line</a></li>
   </ul></li>
   </ul>
-<div class="quarto-alternate-formats"><h2>Other Formats</h2><ul><li><a href="dataset._DataArrayPlotter.ipynb" download="dataset._DataArrayPlotter.ipynb"><i class="bi bi-journal-code"></i>Jupyter</a></li></ul></div></nav>
+<div class="quarto-alternate-formats"><h2>Other Formats</h2><ul><li><a href="dataset.DataArrayPlotterFMVerticalProfile.ipynb" download="dataset.DataArrayPlotterFMVerticalProfile.ipynb"><i class="bi bi-journal-code"></i>Jupyter</a></li></ul></div></nav>
     </div>
 <!-- main -->
-<main class="content" id="quarto-document-content"><header id="title-block-header" class="quarto-title-block"></header>
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">dataset.DataArrayPlotterFMVerticalProfile</h1>
+</div>
 
 
 
+<div class="quarto-title-meta">
 
-<section id="mikeio.dataset._DataArrayPlotter" class="level1">
-<h1>dataset._DataArrayPlotter</h1>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>dataset._DataArrayPlotter(<span class="va">self</span>, da)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<p>Context aware plotter (sensible plotting according to geometry).</p>
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>dataset.DataArrayPlotterFMVerticalProfile(<span class="va">self</span>, da)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Plot a DataArray with a 2DV GeometryFMVerticalProfile geometry.</p>
+<p>If DataArray has multiple time steps, the first step will be plotted.</p>
+<section id="examples" class="level2 doc-section doc-section-examples">
+<h2 class="doc-section doc-section-examples anchored" data-anchor-id="examples">Examples</h2>
+<div id="675dcda7" class="cell" data-execution_count="1">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> mikeio</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>da <span class="op">=</span> mikeio.read(<span class="st">"../data/oresund_vertical_slice.dfsu"</span>)[<span class="st">"Temperature"</span>]</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>da.plot()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="dataset.DataArrayPlotterFMVerticalProfile_files/figure-html/cell-2-output-1.png" width="593" height="449" class="figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+<div id="d0ecc2bb" class="cell" data-execution_count="2">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>da.plot.hist()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display" data-execution_count="2">
+<pre><code>(array([  1.,   2.,  19.,  70., 202., 384., 336., 167., 127.,  15.]),
+ array([15.45340729, 15.63446045, 15.81551361, 15.99656582, 16.17761993,
+        16.3586731 , 16.53972435, 16.72077751, 16.90183067, 17.08288383,
+        17.263937  ]),
+ &lt;BarContainer object of 10 artists&gt;)</code></pre>
+</div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="dataset.DataArrayPlotterFMVerticalProfile_files/figure-html/cell-3-output-2.png" width="575" height="432" class="figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
 <section id="methods" class="level2">
 <h2 class="anchored" data-anchor-id="methods">Methods</h2>
 <table class="caption-top table">
@@ -212,24 +257,24 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </thead>
 <tbody>
 <tr class="odd">
-<td><a href="#mikeio.dataset._DataArrayPlotter.hist">hist</a></td>
+<td><a href="#mikeio.dataset.DataArrayPlotterFMVerticalProfile.hist">hist</a></td>
 <td>Plot DataArray as histogram (using ax.hist).</td>
 </tr>
 <tr class="even">
-<td><a href="#mikeio.dataset._DataArrayPlotter.line">line</a></td>
+<td><a href="#mikeio.dataset.DataArrayPlotterFMVerticalProfile.line">line</a></td>
 <td>Plot data as lines (timeseries if time is present).</td>
 </tr>
 </tbody>
 </table>
-<section id="mikeio.dataset._DataArrayPlotter.hist" class="level3">
-<h3 class="anchored" data-anchor-id="mikeio.dataset._DataArrayPlotter.hist">hist</h3>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>dataset._DataArrayPlotter.hist(</span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>    bins<span class="op">=</span><span class="va">None</span>,</span>
-<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>    ax<span class="op">=</span><span class="va">None</span>,</span>
-<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>    figsize<span class="op">=</span><span class="va">None</span>,</span>
-<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>    title<span class="op">=</span><span class="va">None</span>,</span>
-<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>    <span class="op">**</span>kwargs,</span>
-<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<section id="mikeio.dataset.DataArrayPlotterFMVerticalProfile.hist" class="level3">
+<h3 class="anchored" data-anchor-id="mikeio.dataset.DataArrayPlotterFMVerticalProfile.hist">hist</h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>dataset.DataArrayPlotterFMVerticalProfile.hist(</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>    bins<span class="op">=</span><span class="va">None</span>,</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>    ax<span class="op">=</span><span class="va">None</span>,</span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>    figsize<span class="op">=</span><span class="va">None</span>,</span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>    title<span class="op">=</span><span class="va">None</span>,</span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>    <span class="op">**</span>kwargs,</span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>Plot DataArray as histogram (using ax.hist).</p>
 <section id="parameters" class="level4 doc-section doc-section-parameters">
 <h4 class="doc-section doc-section-parameters anchored" data-anchor-id="parameters">Parameters</h4>
@@ -306,13 +351,12 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </table>
 </section>
 </section>
-<section id="mikeio.dataset._DataArrayPlotter.line" class="level3">
-<h3 class="anchored" data-anchor-id="mikeio.dataset._DataArrayPlotter.line">line</h3>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>dataset._DataArrayPlotter.line(ax<span class="op">=</span><span class="va">None</span>, figsize<span class="op">=</span><span class="va">None</span>, <span class="op">**</span>kwargs)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<section id="mikeio.dataset.DataArrayPlotterFMVerticalProfile.line" class="level3">
+<h3 class="anchored" data-anchor-id="mikeio.dataset.DataArrayPlotterFMVerticalProfile.line">line</h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>dataset.DataArrayPlotterFMVerticalProfile.line(ax<span class="op">=</span><span class="va">None</span>, figsize<span class="op">=</span><span class="va">None</span>, <span class="op">**</span>kwargs)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>Plot data as lines (timeseries if time is present).</p>
 
 
-</section>
 </section>
 </section>
 
