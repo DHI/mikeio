@@ -475,28 +475,25 @@ def test_dataarray_grid3d_indexing() -> None:
     # assert isinstance(da[:, 1, -3, 4:].geometry, mikeio.Grid2D)
 
 
+def test_dataarray_getitem_time_string_not_supported(da_grid2d: DataArray) -> None:
+    da = da_grid2d
+    # time=pd.date_range("2000-01-01", freq="h", periods=10)
+    # string indexing is not supported, use .sel(time=...) or .isel(time=...) instead
+    with pytest.raises(TypeError, match="not supported"):
+        da["2000-1-1"]
+
+    with pytest.raises(TypeError, match="not supported"):
+        da["2000-1-1 02:00":"2000-1-1 05:00"]  # type: ignore
+
+    time = ["2000-1-1 02:00", "2000-1-1 04:00", "2000-1-1 06:00"]
+    with pytest.raises(TypeError, match="not supported"):
+        da[time]
+
+
 def test_dataarray_getitem_time(da_grid2d: DataArray) -> None:
     da = da_grid2d
     # time=pd.date_range("2000-01-01", freq="h", periods=10)
-    # deprecated use .sel(time=...) or .isel(time=...) instead
-    with pytest.warns(FutureWarning, match="string"):
-        da_sel = da["2000-1-1"]
-    assert da_sel.n_timesteps == da.n_timesteps
-    assert da_sel.is_equidistant
-
-    with pytest.warns(FutureWarning, match="string"):
-        da_sel = da["2000-1-1 02:00":"2000-1-1 05:00"]  # type: ignore
-    assert da_sel.n_timesteps == 4
-    assert da_sel.is_equidistant
-
-    time = ["2000-1-1 02:00", "2000-1-1 04:00", "2000-1-1 06:00"]
-    with pytest.warns(FutureWarning, match="string"):
-        da_sel = da[time]
-    assert da_sel.n_timesteps == 3
-    assert da_sel.is_equidistant
-
     time = [da.time[0], da.time[1], da.time[3], da.time[7]]
-    # TODO should this type of indexing be allowed?
     da_sel = da[time]
     assert da_sel.n_timesteps == 4
     assert not da_sel.is_equidistant
