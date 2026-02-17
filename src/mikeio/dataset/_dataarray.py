@@ -2044,6 +2044,14 @@ class DataArray:
         has_time = self._has_time_axis
 
         # Handle "space" keyword - delegate to geometry
+        if axis == "spatial":
+            warnings.warn(
+                "axis='spatial' is deprecated, use axis='space' instead.",
+                FutureWarning,
+                stacklevel=3,
+            )
+            axis = "space"
+
         if axis == "space":
             space_axis = self.geometry.get_space_axis()
             if space_axis is None:

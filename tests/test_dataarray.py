@@ -1408,7 +1408,7 @@ def test_geometry0d_space_axis_raises() -> None:
     from mikeio.spatial import Geometry0D
 
     da = mikeio.DataArray(
-        data=np.random.rand(10),
+        data=np.arange(10, dtype=float),
         time=pd.date_range("2000", periods=10, freq="D"),
         geometry=Geometry0D(),
     )
@@ -1471,4 +1471,14 @@ def test_grid2d_space_axis_with_time() -> None:
     # With time, should aggregate over axes (1, 2) - y and x
     result = da.mean(axis="space")
     assert result.shape == (3,)  # Only time dimension left
+    assert result.dims == ("time",)
+
+
+def test_axis_spatial_deprecated() -> None:
+    """Test that axis='spatial' emits FutureWarning and works like 'space'."""
+    ds = mikeio.read("tests/testdata/waves.dfs2")
+    da = ds[0]
+    with pytest.warns(FutureWarning, match="axis='spatial' is deprecated"):
+        result = da.mean(axis="spatial")
+    assert result.shape == (3,)
     assert result.dims == ("time",)
