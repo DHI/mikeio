@@ -29,7 +29,7 @@ uv pip install mikeio
 :::
 
 ## {{< fa database >}} Dataset
-The [Dataset](dataset.qmd) is the common MIKE IO data structure for data read from dfs files. 
+The [Dataset](dataset.qmd) is the common MIKE IO data structure for data read from dfs files.
 The  [](`mikeio.read`) method returns a Dataset with a [DataArray](dataarray.qmd) for each item.
 
 Each DataArray have the following properties:
@@ -44,8 +44,8 @@ Each DataArray have the following properties:
 The dfs items in MIKE IO are represented by the [ItemInfo class](`mikeio.ItemInfo`).
 An ItemInfo consists of:
 
-* name - a user-defined string 
-* type - an [EUMType](`mikeio.EUMType`) 
+* name - a user-defined string
+* type - an [EUMType](`mikeio.EUMType`)
 * unit - an [EUMUnit](`mikeio.EUMUnit`)
 
 ```{python}
@@ -59,7 +59,7 @@ mikeio.ItemInfo(mikeio.EUMType.Wind_speed)
 ```
 
 ## {{< fa chart-line >}} Dfs0
-A dfs0 file is also called a time series file. 
+A dfs0 file is also called a time series file.
 
 Read Dfs0 to Dataset:
 
@@ -80,7 +80,7 @@ df.head()
 
 ## {{< fa map >}} Dfs2
 
-A dfs2 file is also called a grid series file. Values in a dfs2 file are ‘element based’, i.e. values are defined in the centre of each grid cell. 
+A dfs2 file is also called a grid series file. Values in a dfs2 file are ‘element based’, i.e. values are defined in the centre of each grid cell.
 
 ```{python}
 ds = mikeio.read("../data/gebco_sound.dfs2")
@@ -91,12 +91,12 @@ Read more on the [Dfs2 page](dfs2.qmd).
 
 
 ## {{< fa toolbox >}} Generic dfs
-MIKE IO has [`generic`](generic.qmd) functionality that works for all dfs files: 
+MIKE IO has [`generic`](generic.qmd) functionality that works for all dfs files:
 
 * [`concat()`](`mikeio.generic.concat`) - Concatenates files along the time axis
 * [`extract()`](`mikeio.generic.extract`) - Extract timesteps and/or items to a new dfs file
 * [`diff()`](`mikeio.generic.diff`) - Calculate difference between two dfs files with identical geometry
-* [`sum()`](`mikeio.generic.sum`) - Calculate the sum of two dfs files
+* [`add()`](`mikeio.generic.add`) - Calculate the sum of two dfs files
 * [`scale()`](`mikeio.generic.scale`) - Apply scaling to any dfs file
 * [`avg_time()`](`mikeio.generic.avg_time`) - Create a temporally averaged dfs file
 * [`quantile()`](`mikeio.generic.quantile`) - Create a dfs file with temporal quantiles

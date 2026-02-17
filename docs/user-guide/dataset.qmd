@@ -51,25 +51,35 @@ Note that this behavior is similar to pandas and xarray.
 
 ## {{< fa calendar >}} Temporal selection
 
-A time slice of a Dataset can be selected in several different ways. 
+A time slice of a Dataset can be selected with `sel` (by label/value) or `isel` (by integer index), similar to [xarray](https://docs.xarray.dev/en/stable/user-guide/indexing.html).
+
+Select a single timestep by value:
 
 ```{python}
 ds.sel(time="1985-08-06 12:00")
 ```
 
+Select a range of timesteps by value:
+
 ```{python}
 ds.sel(time=slice("1985-08-06 12:00", "1985-08-06 17:00"))
 ```
+
+Select a single timestep by index:
 
 ```{python}
 ds.isel(time=2)
 ```
 
+Select every other timestep using a slice:
+
 ```{python}
-ds.isel(time=range(2, ds.n_timesteps, 2))
+ds.isel(time=slice(None, None, 2))
 ```
 
-
+::: {.callout-tip}
+To extract every n'th timestep directly to a new file without loading all data into memory, use [`mikeio.generic.extract`](`mikeio.generic.extract`) with the `step` parameter.
+:::
 
 
 ## {{< fa map >}} Spatial selection
@@ -83,7 +93,7 @@ ds.sel(x=607002, y=6906734)
 
 ## {{< fa chart-line >}} Plotting
 
-In most cases, you will *not* plot the Dataset, but rather it's DataArrays. But there are two exceptions: 
+In most cases, you will *not* plot the Dataset, but rather its DataArrays. But there are two exceptions: 
 
 * dfs0-Dataset : plot all items as timeseries with ds.plot()
 * scatter : compare two items using ds.plot.scatter(x="itemA", y="itemB")
@@ -186,7 +196,7 @@ and between two Datasets (if number of items and shapes conform):
 
 Other methods that also return a Dataset:
 
-* [`interp_like`](`mikeio.Dataset.interp_like`) - Spatio (temporal) interpolation (see [Dfsu interpolation notebook](../examples/dfsu/spatial_interpolation.qmd)
+* [`interp_like`](`mikeio.Dataset.interp_like`) - Spatio (temporal) interpolation (see [Dfsu interpolation notebook](../examples/dfsu/spatial_interpolation.qmd))
 * [`interp_time()`](`mikeio.Dataset.interp_time`) - Temporal interpolation (see [Time interpolation notebook](../examples/Time-interpolation.qmd))
 * [`dropna()`](`mikeio.Dataset.dropna`) - Remove time steps where all items are NaN
 * [`fillna()`](`mikeio.Dataset.fillna`) - Fill missing values with a constant value

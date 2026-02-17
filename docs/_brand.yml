@@ -1,0 +1,28 @@
+meta:
+  name: DHI
+
+color:
+  palette:
+    blue: "#2146A4"
+    dark-blue: "#1C3A86"
+    light-blue: "#456FD9"
+    coral: "#FD6341"
+    near-black: "#1B1B22"
+    off-white: "#F4F4F6"
+  foreground: near-black
+  background: "#FFFFFF"
+  primary: blue
+  secondary: coral
+  light: off-white
+  dark: near-black
+
+typography:
+  headings:
+    weight: 600
+    color: near-black
+
+defaults:
+  bootstrap:
+    defaults:
+      navbar-bg: "#2146A4"
+      navbar-fg: "#FFFFFF"

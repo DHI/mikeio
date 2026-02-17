@@ -125,16 +125,9 @@ class _GeometryFMPlotter:
 
         plot_type = kwargs.pop("plot_type")
 
-        g = self.g
-
         return _plot_map(
-            node_coordinates=g.node_coordinates,
-            element_table=g.element_table,
-            element_coordinates=g.element_coordinates,
-            boundary_polylines=g.boundary_polygons.lines,
+            geometry=self.g,
             plot_type=plot_type,
-            projection=g.projection,
-            z=None,
             ax=ax,
             **kwargs,
         )
