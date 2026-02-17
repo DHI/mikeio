@@ -300,6 +300,20 @@ def test_read_column_select_single_time_plot() -> None:
     sal_prof.plot.line()
 
 
+def test_plot_column_selected_from_dataset() -> None:
+    import matplotlib.pyplot as plt
+
+    ds = mikeio.read("tests/testdata/oresund_sigma_z.dfsu")
+    dsp = ds.sel(x=333934.1, y=6158101.5)
+    assert isinstance(dsp.geometry, GeometryFMVerticalColumn)
+
+    da = dsp["Temperature"]
+    da.plot()
+    da.plot(extrapolate=False, marker="o")
+
+    plt.close("all")
+
+
 def test_read_column_interp_time_and_select_time() -> None:
     filename = "tests/testdata/oresund_sigma_z.dfsu"
     dfs = mikeio.Dfsu3D(filename)

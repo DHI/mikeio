@@ -10,7 +10,7 @@ import numpy as np
 from mikecore.DfsuFile import DfsuFileType
 
 
-from ._FM_geometry import GeometryFM2D, _GeometryFM, GeometryFMPlotter
+from ._FM_geometry import GeometryFM2D, _GeometryFM
 from ._geometry import GeometryPoint3D
 
 from ._FM_plot import _plot_vertical_profile, BoundaryPolygons
@@ -53,8 +53,6 @@ class _GeometryFMLayered(_GeometryFM):
 
         self._n_layers = n_layers
         self._n_sigma = n_sigma if n_sigma is not None else n_layers
-
-        self._bot_elems: np.ndarray | None = None
 
     def __str__(self) -> str:
         return f"{self._type.name} ({self.n_elements} elements, {self.n_nodes} nodes)"
@@ -536,9 +534,12 @@ class _GeometryFMLayered(_GeometryFM):
 class GeometryFM3D(_GeometryFMLayered):
     """Flexible 3d mesh geometry."""
 
-    @cached_property
-    def plot(self) -> GeometryFMPlotter:
-        return GeometryFMPlotter(self)
+    @property
+    def plot(self) -> None:
+        raise AttributeError(
+            "GeometryFM3D does not support plotting directly. "
+            "Use .to_2d_geometry().plot instead."
+        )
 
     @property
     def boundary_polylines(self) -> BoundaryPolygons:
@@ -689,28 +690,23 @@ class GeometryFMVerticalProfile(_GeometryFMLayered):
 class GeometryFMVerticalColumn(GeometryFM3D):
     "A 3d geometry with consisting of a single vertical column."
 
-    # TODO: add plotter
-
     def calc_ze(self, zn: np.ndarray | None = None) -> np.ndarray:
-        if zn is None:
-            zn = self.node_coordinates[:, 2]
-        return self._calc_z_using_idx(zn, self._idx_e)
+        """Z-coordinates at element centers."""
+        return self._calc_z(zn, self._idx_e)
 
     def calc_zf(self, zn: np.ndarray | None = None) -> np.ndarray:
-        if zn is None:
-            zn = self.node_coordinates[:, 2]
-        return self._calc_z_using_idx(zn, self._idx_f)
+        """Z-coordinates at layer faces (horizontal interfaces between layers)."""
+        return self._calc_z(zn, self._idx_f)
 
     def _calc_zee(self, zn: np.ndarray | None = None) -> np.ndarray:
+        """Element center z-coords extended with bottom and top face for extrapolation."""
         ze = self.calc_ze(zn)
         zf = self.calc_zf(zn)
         if ze.ndim == 1:
-            zee = np.insert(ze, 0, zf[0])
-            return np.append(zee, zf[-1])
-        else:
-            return np.hstack(
-                (zf[:, 0].reshape((-1, 1)), ze, zf[:, -1].reshape((-1, 1)))
-            )
+            return np.append(np.insert(ze, 0, zf[0]), zf[-1])
+        return np.hstack(
+            (zf[:, 0].reshape((-1, 1)), ze, zf[:, -1].reshape((-1, 1)))
+        )
 
     def _interp_values(
         self, zn: np.ndarray, data: np.ndarray, z: np.ndarray
@@ -718,40 +714,34 @@ class GeometryFMVerticalColumn(GeometryFM3D):
         """Interpolate to other z values, allow linear extrapolation."""
         from scipy.interpolate import interp1d  # type: ignore
 
-        opt = {"kind": "linear", "bounds_error": False, "fill_value": "extrapolate"}
-
         ze = self.calc_ze(zn)
-        dati = np.zeros_like(z)
         if zn.ndim == 1:
-            dati = interp1d(ze, data, **opt)(z)
-        elif zn.ndim == 2:
-            for j in range(zn.shape[0]):
-                dati[j, :] = interp1d(ze[j, :], data[j, :], **opt)(z[j, :])
+            return interp1d(ze, data, fill_value="extrapolate")(z)
+        dati = np.zeros_like(z)
+        for j in range(zn.shape[0]):
+            dati[j, :] = interp1d(ze[j, :], data[j, :], fill_value="extrapolate")(z[j, :])
         return dati
 
-    @property
+    @cached_property
+    def _idx_e(self) -> np.ndarray:
+        """Node indices per element as a 2D array."""
+        return np.stack(self.element_table)
+
+    @cached_property
     def _idx_f(self) -> np.ndarray:
-        nnodes_half = int(len(self.element_table[0]) / 2)
-        n_vfaces = self.n_elements + 1
-        idx_f = np.zeros((n_vfaces, nnodes_half), dtype=int)
+        """Node indices per layer face (n_elements + 1 faces)."""
+        nnodes_half = len(self.element_table[0]) // 2
         idx_e = self._idx_e
+        idx_f = np.zeros((self.n_elements + 1, nnodes_half), dtype=int)
+        # Bottom nodes of each element define the lower faces
         idx_f[: self.n_elements, :] = idx_e[:, :nnodes_half]
+        # Top nodes of the last element define the top face
         idx_f[self.n_elements, :] = idx_e[-1, nnodes_half:]
         return idx_f
 
-    @property
-    def _idx_e(self) -> np.ndarray:
-        nnodes_per_elem = len(self.element_table[0])
-        idx_e = np.zeros((self.n_elements, nnodes_per_elem), dtype=int)
-
-        for j in range(self.n_elements):
-            nodes = self.element_table[j]
-            for i in range(nnodes_per_elem):
-                idx_e[j, i] = nodes[i]
-
-        return idx_e
-
-    def _calc_z_using_idx(self, zn: np.ndarray, idx: np.ndarray) -> np.ndarray:
+    def _calc_z(self, zn: np.ndarray | None, idx: np.ndarray) -> np.ndarray:
+        if zn is None:
+            zn = self.node_coordinates[:, 2]
         return zn[..., idx].mean(axis=-1)
 
 
