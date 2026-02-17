@@ -619,35 +619,9 @@ class _GeometryFMLayered(_GeometryFM):
 class GeometryFM3D(_GeometryFMLayered):
     """Flexible 3d mesh geometry."""
 
-    def __init__(
-        self,
-        *,
-        node_coordinates: ArrayLike,
-        element_table: ArrayLike,
-        codes: np.ndarray | None = None,
-        projection: str = "LONG/LAT",
-        dfsu_type: DfsuFileType = DfsuFileType.Dfsu3DSigma,
-        element_ids: np.ndarray | None = None,
-        node_ids: np.ndarray | None = None,
-        n_layers: int = 1,  # at least 1 layer
-        n_sigma: int | None = None,
-        validate: bool = True,
-        reindex: bool = False,
-    ) -> None:
-        super().__init__(
-            node_coordinates=node_coordinates,
-            element_table=element_table,
-            codes=codes,
-            projection=projection,
-            dfsu_type=dfsu_type,
-            element_ids=element_ids,
-            node_ids=node_ids,
-            n_layers=n_layers,
-            n_sigma=n_sigma,
-            validate=validate,
-            reindex=reindex,
-        )
-        self.plot = GeometryFMPlotter(self)
+    @cached_property
+    def plot(self) -> GeometryFMPlotter:
+        return GeometryFMPlotter(self)
 
     @property
     def boundary_polylines(self) -> BoundaryPolygons:
@@ -716,34 +690,9 @@ class GeometryFM3D(_GeometryFMLayered):
 class GeometryFMVerticalProfile(_GeometryFMLayered):
     """Flexible mesh 2d vertical profile geometry."""
 
-    def __init__(
-        self,
-        node_coordinates: np.ndarray,
-        element_table: np.ndarray | list[Sequence[int]] | list[np.ndarray],
-        codes: np.ndarray | None = None,
-        projection: str = "LONG/LAT",
-        dfsu_type: DfsuFileType = DfsuFileType.Dfsu3DSigma,
-        element_ids: np.ndarray | None = None,
-        node_ids: np.ndarray | None = None,
-        n_layers: int = 1,  # at least 1 layer
-        n_sigma: int | None = None,
-        validate: bool = True,
-        reindex: bool = False,
-    ) -> None:
-        super().__init__(
-            node_coordinates=node_coordinates,
-            element_table=element_table,
-            codes=codes,
-            projection=projection,
-            dfsu_type=dfsu_type,
-            element_ids=element_ids,
-            node_ids=node_ids,
-            n_layers=n_layers,
-            n_sigma=n_sigma,
-            validate=validate,
-            reindex=reindex,
-        )
-        self.plot = GeometryFMVerticalProfilePlotter(self)
+    @cached_property
+    def plot(self) -> GeometryFMVerticalProfilePlotter:
+        return GeometryFMVerticalProfilePlotter(self)
 
     @cached_property
     def relative_element_distance(self) -> np.ndarray:
