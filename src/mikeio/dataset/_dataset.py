@@ -28,6 +28,7 @@ if TYPE_CHECKING:
 
 from ._dataarray import DataArray
 from .._time import _get_time_idx_list, _n_selected_timesteps
+from .._track import _extract_track
 from ..eum import EUMType, EUMUnit, ItemInfo
 from ..spatial import (
     GeometryFM2D,
@@ -932,8 +933,6 @@ class Dataset:
             The first two items will be x- and y- coordinates of track
 
         """
-        from .._track import _extract_track
-
         item_numbers = list(range(self.n_items))
         time_steps = list(range(self.n_timesteps))
 
