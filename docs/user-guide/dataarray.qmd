@@ -8,7 +8,7 @@ The [DataArray](`mikeio.DataArray`) is the common MIKE IO data structure
 for *item* data from dfs files. 
 The [](`mikeio.read`) methods returns a Dataset as a container of DataArrays (Dfs items)
 
-Each DataArray have the following properties:
+Each DataArray has the following properties:
 
 * **item** - an  [](`mikeio.ItemInfo`) with name, type and unit
 * **time** - a [](`pandas.DatetimeIndex`) with the time instances of the data
@@ -29,24 +29,35 @@ da
 
 ## {{< fa calendar >}} Temporal selection
 
-A time slice of a DataArray can be selected in several different ways. 
+A time slice of a DataArray can be selected with `sel` (by label/value) or `isel` (by integer index), similar to [xarray](https://docs.xarray.dev/en/stable/user-guide/indexing.html).
+
+Select a single timestep by value:
 
 ```{python}
 da.sel(time="1985-08-06 12:00")
 ```
 
+Select a range of timesteps by value:
+
 ```{python}
 da.sel(time=slice("1985-08-06 12:00", "1985-08-06 17:00"))
 ```
+
+Select a single timestep by index:
 
 ```{python}
 da.isel(time=2)
 ```
 
+Select every other timestep using a slice:
+
 ```{python}
-da.isel(time=range(2, ds.n_timesteps, 2))
+da.isel(time=slice(None, None, 2))
 ```
 
+::: {.callout-tip}
+To extract every n'th timestep directly to a new file without loading all data into memory, use [`mikeio.generic.extract`](`mikeio.generic.extract`) with the `step` parameter.
+:::
 
 ## {{< fa map >}} Spatial selection
              
@@ -137,14 +148,14 @@ including different ways of *selecting* data:
 * [`quantile()`](`mikeio.DataArray.quantile`) - Quantiles along an axis
 
 ## {{< fa calculator >}} Mathematical operations
-* ds + value
-* ds - value
-* ds * value
+* da + value
+* da - value
+* da * value
 
 and + and - between two DataArrays (if number of items and shapes conform):
 
-* ds1 + ds2
-* ds1 - ds2
+* da1 + da2
+* da1 - da2
 
 ## Multiply or add scalar
 
@@ -169,7 +180,7 @@ da1_C.values.mean(), da1_D.values.mean()
 
 ## Difference between two DataArrays
 
-Assume that we have two calibration runs and we wan't to find the difference...
+Assume that we have two calibration runs and we want to find the difference...
 
 ```{python}
 da_diff = da1-da2
@@ -189,7 +200,7 @@ Multiplication and divison of two physical quantities would normally change the 
 
 Other methods that also return a DataArray:
 
-* [`interp_like`](`mikeio.DataArray.interp_like`) - Spatio (temporal) interpolation (see example [Dfsu interpolation](../examples/dfsu/spatial_interpolation.qmd)
+* [`interp_like`](`mikeio.DataArray.interp_like`) - Spatio (temporal) interpolation (see example [Dfsu interpolation](../examples/dfsu/spatial_interpolation.qmd))
 * [`interp_time()`](`mikeio.DataArray.interp_time`) - Temporal interpolation (see example [Time interpolation](../examples/Time-interpolation.qmd))
 * [`dropna()`](`mikeio.DataArray.dropna`) - Remove time steps where all items are NaN
 * [`fillna()`](`mikeio.DataArray.fillna`) - Fill missing values with a constant value

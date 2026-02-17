@@ -8,7 +8,7 @@ def test_write_read_long_dfs0(tmp_path: Path) -> None:
     filename = tmp_path / "big.dfs0"
 
     nt = 10_000_000
-    data = np.random.random([nt])
+    data = np.ones(nt)
     da = mikeio.DataArray(
         data=data, time=pd.date_range(start="2001-01-01", freq="s", periods=nt)
     )
@@ -29,7 +29,7 @@ def test_write_read_many_items_dataset_pandas(tmp_path: Path) -> None:
     time = pd.date_range("2000", freq="s", periods=nt)
     das = [
         mikeio.DataArray(
-            data=np.random.random([nt]), time=time, item=mikeio.ItemInfo(f"Item {i+1}")
+            data=np.ones(nt), time=time, item=mikeio.ItemInfo(f"Item {i+1}")
         )
         for i in range(n_items)
     ]

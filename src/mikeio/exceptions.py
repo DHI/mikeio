@@ -4,17 +4,6 @@ from __future__ import annotations
 from typing import Any
 
 
-class DataDimensionMismatch(ValueError):
-    """Raised when data matrices in the x dimension do not all match in the data list."""
-
-    def __init__(self) -> None:
-        self.message = (
-            "Data matrices in the x dimension do not all match in the data list."
-            "Data is a list of matrices [t, x]."
-        )
-        super().__init__(self.message)
-
-
 class ItemsError(ValueError):
     """Raised when items are not integers or strings."""
 
@@ -23,15 +12,6 @@ class ItemsError(ValueError):
         super().__init__(
             f"'items' must be (a list of) integers between 0 and {n_items_file-1} or str."
         )
-
-
-class InvalidGeometry(ValueError):
-    """Raised when an invalid geometry is used."""
-
-    def __init__(
-        self, message: str = "Invalid operation for this type of geometry"
-    ) -> None:
-        super().__init__(message)
 
 
 class InvalidDataValueType(ValueError):

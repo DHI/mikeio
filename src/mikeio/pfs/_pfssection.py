@@ -8,6 +8,7 @@ from typing import (
     Mapping,
     MutableMapping,
     Sequence,
+    overload,
 )
 
 import pandas as pd
@@ -170,6 +171,24 @@ class PfsSection(SimpleNamespace, MutableMapping[str, Any]):
     def items(self) -> ItemsView[str, Any]:
         """Return a new view of the PfsSection's items ((key, value) pairs)."""
         return self.__dict__.items()
+
+    @overload
+    def search(
+        self,
+        text: str,
+        *,
+        case: bool = False,
+    ) -> PfsSection: ...
+
+    @overload
+    def search(
+        self,
+        *,
+        key: str | None = None,
+        section: str | None = None,
+        param: str | bool | int | float | None = None,
+        case: bool = False,
+    ) -> PfsSection: ...
 
     def search(
         self,
