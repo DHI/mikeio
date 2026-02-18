@@ -270,10 +270,6 @@ class _GeometryFMLayered(_GeometryFM):
         return geom
 
     @property
-    def is_2d(self) -> bool:
-        return False
-
-    @property
     def is_layered(self) -> bool:
         return True
 
@@ -704,9 +700,7 @@ class GeometryFMVerticalColumn(GeometryFM3D):
         zf = self.calc_zf(zn)
         if ze.ndim == 1:
             return np.append(np.insert(ze, 0, zf[0]), zf[-1])
-        return np.hstack(
-            (zf[:, 0].reshape((-1, 1)), ze, zf[:, -1].reshape((-1, 1)))
-        )
+        return np.hstack((zf[:, 0].reshape((-1, 1)), ze, zf[:, -1].reshape((-1, 1))))
 
     @staticmethod
     def _linear_interp(x: np.ndarray, y: np.ndarray, x_new: np.ndarray) -> np.ndarray:

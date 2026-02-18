@@ -1,15 +1,17 @@
 from pathlib import Path
+
 import numpy as np
 import pandas as pd
 import pytest
+
 import mikeio
 from mikeio import Mesh
 from mikeio.spatial import (
     GeometryFM2D,
     GeometryFM3D,
     GeometryFMVerticalColumn,
+    GeometryPoint3D,
 )
-from mikeio.spatial import GeometryPoint3D
 
 
 def test_repr() -> None:
@@ -534,8 +536,7 @@ def test_extract_top_layer_to_2d(tmp_path: Path) -> None:
     ds.to_dfs(fp)
 
     newdfs = mikeio.Dfsu2DH(fp)
-
-    assert newdfs.geometry.is_2d
+    assert isinstance(newdfs.geometry, GeometryFM2D)
 
 
 def test_modify_values_in_layer(tmp_path: Path) -> None:

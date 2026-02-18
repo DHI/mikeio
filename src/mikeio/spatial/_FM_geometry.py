@@ -480,15 +480,6 @@ class GeometryFM2D(_GeometryFM):
         return self
 
     @property
-    def is_2d(self) -> bool:
-        """Type is either mesh or Dfsu2D (2 horizontal dimensions)."""
-        return self._type in (
-            DfsuFileType.Dfsu2D,
-            DfsuFileType.DfsuSpectral2D,
-            None,
-        )
-
-    @property
     def is_layered(self) -> bool:
         """Type is layered dfsu (3d, vertical profile or vertical column)."""
         return False
