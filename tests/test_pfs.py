@@ -276,18 +276,6 @@ def test_pfssection_write(d1, tmp_path: Path) -> None:
     assert pfs2.root.key1 == sct.key1
 
 
-def test_str_is_scientific_float(d1) -> None:
-    sect = mikeio.PfsSection(d1)  # dummy
-    func = sect._str_is_scientific_float
-    assert func("-1.0e2")
-    assert func("1E-4")
-    assert func("-0.123213e-23")
-    assert not func("-0.1E+0.5")
-    assert not func("E12")
-    assert not func("E-4")
-    assert not func("-1.0e2e")
-    assert not func("e-1.0e2")
-
 
 def test_basic() -> None:
     pfs = mikeio.PfsDocument("tests/testdata/pfs/simple.pfs")
@@ -879,14 +867,14 @@ def test_floatlike_strings(tmp_path: Path) -> None:
     EndSect  // WELLNO_424
 """
     pfs = mikeio.PfsDocument.from_text(text)
-    # assert pfs.WELLNO_424.ID_A == "1E-3"  # not possible to distinguish
+    assert pfs.WELLNO_424.ID_A == "1E-3"
     assert pfs.WELLNO_424.ID_B == "1-E"
     assert pfs.WELLNO_424.ID_C == "1-E3"
 
     filename = tmp_path / "float_like_strings.pfs"
     pfs.write(filename)
     pfs = mikeio.read_pfs(filename)
-    # assert pfs.WELLNO_424.ID_A == "1E-3"  # not possible to distinguish
+    assert pfs.WELLNO_424.ID_A == "1E-3"
     assert pfs.WELLNO_424.ID_B == "1-E"
     assert pfs.WELLNO_424.ID_C == "1-E3"
 
