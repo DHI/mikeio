@@ -123,26 +123,10 @@ class PfsSection(SimpleNamespace, MutableMapping[str, Any]):
                             d = v.copy() if copy else v
                             sections.append(PfsSection(d))
                         case _:
-                            sections.append(self._parse_value(v))
+                            sections.append(v)
                 self.__setattr__(key, sections)
             case _:
-                self.__setattr__(key, self._parse_value(value))
-
-    def _parse_value(self, v: Any) -> Any:
-        if isinstance(v, str) and self._str_is_scientific_float(v):
-            return float(v)
-        return v
-
-    @staticmethod
-    def _str_is_scientific_float(s: str) -> bool:
-        """True: -1.0e2, 1E-4, -0.1E+0.5; False: E12, E-4."""
-        if len(s) < 3 or s.lower().startswith("e"):
-            return False
-        try:
-            float(s)
-            return "e" in s.lower()
-        except ValueError:
-            return False
+                self.__setattr__(key, value)
 
     def pop(self, key: Any, default: Any = None) -> Any:
         """If key is in the dictionary, remove it and return its
