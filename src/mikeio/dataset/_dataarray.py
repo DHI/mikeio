@@ -879,15 +879,14 @@ class DataArray:
                     if v.stop is not None
                     else None
                 )
-                pos = 0
-                if isinstance(idx_start, tuple):
-                    if k == "x":
-                        pos = 0
-                    if k == "y":
-                        pos = 1
-
-                start = idx_start[pos][0] if idx_start is not None else None
-                stop = idx_stop[pos][0] if idx_stop is not None else None
+                ref = idx_start if idx_start is not None else idx_stop
+                if isinstance(ref, tuple):
+                    pos = {"x": 0, "y": 1}[k]
+                    start = idx_start[pos][0] if idx_start is not None else None
+                    stop = idx_stop[pos][0] if idx_stop is not None else None
+                else:
+                    start = idx_start[0] if idx_start is not None else None
+                    stop = idx_stop[0] if idx_stop is not None else None
 
                 idx = slice(start, stop)
 
