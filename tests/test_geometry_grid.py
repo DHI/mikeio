@@ -419,3 +419,87 @@ def test_bad_projection_raises_error() -> None:
 def test_grid3d_repr() -> None:
     g = Grid3D(nx=2, ny=2, nz=2, dx=1, dy=1, dz=1, projection="UTM-33")
     assert "Grid3D" in repr(g)
+
+
+def test_grid3d_bbox() -> None:
+    g = Grid3D(nx=5, ny=10, nz=3, dx=100.0, dy=100.0, dz=1.0)
+    bb = g.bbox
+    assert bb.left == 0.0
+    assert bb.bottom == 0.0
+    assert bb.right == 500.0
+    assert bb.top == 1000.0
+
+
+def test_grid3d_contains() -> None:
+    g = Grid3D(nx=5, ny=10, nz=3, dx=100.0, dy=100.0, dz=1.0)
+    assert g.contains([250, 500])
+    assert not g.contains([600, 500])
+
+
+def test_grid3d_find_index_x_only() -> None:
+    g = Grid3D(nx=5, ny=10, nz=3, dx=100.0, dy=100.0, dz=1.0)
+    ii, jj, kk = g.find_index(x=150.0)
+    assert ii == 1
+    assert jj is None
+    assert kk is None
+
+
+def test_grid3d_find_index_y_only() -> None:
+    g = Grid3D(nx=5, ny=10, nz=3, dx=100.0, dy=100.0, dz=1.0)
+    ii, jj, kk = g.find_index(y=350.0)
+    assert ii is None
+    assert jj == 3
+    assert kk is None
+
+
+def test_grid3d_find_index_z_only() -> None:
+    g = Grid3D(nx=5, ny=10, nz=3, dx=100.0, dy=100.0, dz=1.0)
+    ii, jj, kk = g.find_index(z=1.5)
+    assert ii is None
+    assert jj is None
+    assert kk == 1
+
+
+def test_grid3d_find_index_xy() -> None:
+    g = Grid3D(nx=5, ny=10, nz=3, dx=100.0, dy=100.0, dz=1.0)
+    ii, jj, kk = g.find_index(x=150.0, y=350.0)
+    assert ii == 1
+    assert jj == 3
+    assert kk is None
+
+
+def test_grid3d_find_index_xyz() -> None:
+    g = Grid3D(nx=5, ny=10, nz=3, dx=100.0, dy=100.0, dz=1.0)
+    ii, jj, kk = g.find_index(x=150.0, y=350.0, z=1.5)
+    assert ii == 1
+    assert jj == 3
+    assert kk == 1
+
+
+def test_grid3d_find_index_coords() -> None:
+    g = Grid3D(nx=5, ny=10, nz=3, dx=100.0, dy=100.0, dz=1.0)
+    xy = np.array([[150.0, 350.0], [250.0, 550.0]])
+    ii, jj, kk = g.find_index(coords=xy)
+    assert ii[0] == 1
+    assert jj[0] == 3
+    assert ii[1] == 2
+    assert jj[1] == 5
+    assert kk is None
+
+
+def test_grid3d_find_index_area() -> None:
+    g = Grid3D(nx=5, ny=10, nz=3, dx=100.0, dy=100.0, dz=1.0)
+    ii, jj, kk = g.find_index(area=(100, 200, 300, 600))
+    assert isinstance(ii, range)
+    assert isinstance(jj, range)
+    assert kk is None
+
+
+def test_grid3d_find_index_outside() -> None:
+    g = Grid3D(nx=5, ny=10, nz=3, dx=100.0, dy=100.0, dz=1.0)
+    with pytest.raises(OutsideModelDomainError):
+        g.find_index(x=-100.0)
+    with pytest.raises(OutsideModelDomainError):
+        g.find_index(y=2000.0)
+    with pytest.raises(OutsideModelDomainError):
+        g.find_index(z=100.0)

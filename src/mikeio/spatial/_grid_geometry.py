@@ -1223,16 +1223,152 @@ class Grid3D(_Geometry):
         """Grid orientation."""
         return self._orientation
 
+    @property
+    def bbox(self) -> BoundingBox:
+        """Bounding box (left, bottom, right, top).
+
+        Note: not the same as the cell center values (x0,y0,x1,y1)!
+        """
+        if self._is_rotated:
+            raise NotImplementedError("Only available if orientation = 0")
+        left = self.x[0] - self.dx / 2
+        bottom = self.y[0] - self.dy / 2
+        right = self.x[-1] + self.dx / 2
+        top = self.y[-1] + self.dy / 2
+        return BoundingBox(left, bottom, right, top)
+
+    def contains(self, coords: ArrayLike) -> Any:
+        """Test if a list of xy-points are inside grid.
+
+        Parameters
+        ----------
+        coords : array(float)
+            xy-coordinate of points given as n-by-2 array
+
+        Returns
+        -------
+        bool array
+            True for points inside, False otherwise
+
+        """
+        coords = np.atleast_2d(coords)
+        x = coords[:, 0]
+        y = coords[:, 1]
+        xinside = (self.bbox.left <= x) & (x <= self.bbox.right)
+        yinside = (self.bbox.bottom <= y) & (y <= self.bbox.top)
+        return xinside & yinside
+
+    def __contains__(self, pt: Any) -> Any:
+        return self.contains(pt)
+
+    def _xy_to_index(self, xy: ArrayLike) -> tuple[np.ndarray, np.ndarray]:
+        """Find nearest (i, j) indices for xy points."""
+        xy = np.atleast_2d(xy)
+        x = xy[:, 0]
+        y = xy[:, 1]
+
+        inside = self.contains(xy)
+        if np.any(~inside):
+            raise OutsideModelDomainError(x=x[~inside], y=y[~inside])
+
+        ii = np.floor((x - (self.x[0] - self.dx / 2)) / self.dx).astype(int)
+        jj = np.floor((y - (self.y[0] - self.dy / 2)) / self.dy).astype(int)
+        return ii, jj
+
+    def _bbox_to_index(self, bbox: BoundingBox) -> tuple[range, range]:
+        """Find subarea within this geometry."""
+        if not bbox.overlaps(self.bbox):
+            raise ValueError("area is outside grid")
+
+        mask = (self.x >= bbox.left) & (self.x <= bbox.right)
+        ii = np.where(mask)[0]
+        mask = (self.y >= bbox.bottom) & (self.y <= bbox.top)
+        jj = np.where(mask)[0]
+
+        i = range(ii[0], ii[-1] + 1)
+        j = range(jj[0], jj[-1] + 1)
+        return i, j
+
     def find_index(
-        self, coords: Any = None, layers: Any = None, area: Any = None
-    ) -> Any:
+        self,
+        x: float | None = None,
+        y: float | None = None,
+        z: float | None = None,
+        coords: ArrayLike | None = None,
+        area: tuple[float, float, float, float] | None = None,
+        layers: Any = None,
+    ) -> tuple[Any, Any, Any]:
+        """Find nearest index (i, j, k) of point(s).
+
+        Parameters
+        ----------
+        x : float, optional
+            x-coordinate of point
+        y : float, optional
+            y-coordinate of point
+        z : float, optional
+            z-coordinate of point
+        coords : array(float), optional
+            xy-coordinates of points given as n-by-2 array
+        area : tuple(float), optional
+            xy-coordinates of bounding box (left, bottom, right, top)
+        layers : Any, optional
+            Not yet implemented
+
+        Returns
+        -------
+        tuple
+            (i, j, k) indices — any component may be None if not specified
+
+        """
         if layers is not None:
             raise NotImplementedError(
                 f"Layer slicing is not yet implemented. Use the mikeio.read('file.dfs3', layers='{layers}')"
             )
-        raise NotImplementedError(
-            "Not yet implemented for Grid3D. Please use mikeio.read('file.dfs3') and its arguments instead."
-        )
+
+        if x is not None and not np.isscalar(x):
+            raise ValueError(
+                f"{x=} is not a scalar value, use the coords argument instead"
+            )
+        if y is not None and not np.isscalar(y):
+            raise ValueError(
+                f"{y=} is not a scalar value, use the coords argument instead"
+            )
+
+        kk: Any = None
+        if z is not None:
+            if z < self.z[0] or z > self.z[-1]:
+                raise OutsideModelDomainError(x=None, y=None, z=z)
+            kk = np.atleast_1d(np.argmin(np.abs(self.z - z)))
+
+        if x is not None and y is not None:
+            if coords is not None:
+                raise ValueError("x,y and coords cannot be given at the same time!")
+            coords = np.column_stack([np.atleast_1d(x), np.atleast_1d(y)])
+
+        if x is not None and y is None and coords is None:
+            if x < self.x[0] or x > self.x[-1]:
+                raise OutsideModelDomainError(x=x, y=None)
+            return np.atleast_1d(np.argmin(np.abs(self.x - x))), None, kk
+
+        if y is not None and x is None and coords is None:
+            if y < self.y[0] or y > self.y[-1]:
+                raise OutsideModelDomainError(x=None, y=y)
+            return None, np.atleast_1d(np.argmin(np.abs(self.y - y))), kk
+
+        if coords is not None:
+            ii, jj = self._xy_to_index(coords)
+            return ii, jj, kk
+
+        if area is not None:
+            bbox = BoundingBox.parse(area)
+            i, j = self._bbox_to_index(bbox)
+            return i, j, kk
+
+        if z is not None:
+            return None, None, kk
+
+        raise ValueError("Provide x, y, z, coords, or area")
 
     def isel(
         self, idx: int | np.ndarray, axis: int
