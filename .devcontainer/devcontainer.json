@@ -4,7 +4,7 @@
     "features": {
         "ghcr.io/rocker-org/devcontainer-features/quarto-cli:1": {}
     },
-    "postCreateCommand": "uv sync --all-groups",
+    "postCreateCommand": "curl -LsSf https://astral.sh/uv/install.sh | sh && uv sync --all-groups",
     "customizations": {
         "vscode": {
             "extensions": [
