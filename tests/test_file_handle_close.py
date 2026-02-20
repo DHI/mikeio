@@ -36,9 +36,11 @@ def test_count_open_fds_sanity_check() -> None:
     baseline = _count_open_fds()
 
     dfs = DfsFileFactory.DfsGenericOpen("tests/testdata/random.dfs1")
-    assert _count_open_fds() > baseline, "opening a file must increase FD count"
+    try:
+        assert _count_open_fds() > baseline, "opening a file must increase FD count"
+    finally:
+        dfs.Close()
 
-    dfs.Close()
     gc.collect()
     assert _count_open_fds() == baseline, "closing a file must restore FD count"
 
