@@ -572,6 +572,7 @@ class Dfsu2DH:
     ) -> tuple[np.ndarray, pd.Timestamp]:
         dfs = DfsuFile.Open(self._filename)
         itemdata = dfs.ReadItemTimeStep(item + 1, step)
+        dfs.Close()
 
         return itemdata.Data, itemdata.Time
 

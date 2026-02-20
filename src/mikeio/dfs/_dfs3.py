@@ -138,21 +138,20 @@ class Dfs3(_Dfs123):
         )
 
     def _read_dfs3_header(self, read_x0y0z0: bool = False) -> None:
-        self._dfs = DfsFileFactory.Dfs3FileOpen(self._filename)
-
-        self._source = self._dfs
+        dfs = DfsFileFactory.Dfs3FileOpen(self._filename)
 
         if read_x0y0z0:
-            self._x0 = self._dfs.SpatialAxis.X0
-            self._y0 = self._dfs.SpatialAxis.Y0
-            self._z0 = self._dfs.SpatialAxis.Z0
+            self._x0 = dfs.SpatialAxis.X0
+            self._y0 = dfs.SpatialAxis.Y0
+            self._z0 = dfs.SpatialAxis.Z0
 
-        self._dx = self._dfs.SpatialAxis.Dx
-        self._dy = self._dfs.SpatialAxis.Dy
-        self._dz = self._dfs.SpatialAxis.Dz
-        self._nx = self._dfs.SpatialAxis.XCount
-        self._ny = self._dfs.SpatialAxis.YCount
-        self._nz = self._dfs.SpatialAxis.ZCount
+        self._dx = dfs.SpatialAxis.Dx
+        self._dy = dfs.SpatialAxis.Dy
+        self._dz = dfs.SpatialAxis.Dz
+        self._nx = dfs.SpatialAxis.XCount
+        self._ny = dfs.SpatialAxis.YCount
+        self._nz = dfs.SpatialAxis.ZCount
+        dfs.Close()
 
     def read(
         self,
