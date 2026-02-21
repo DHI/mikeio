@@ -115,13 +115,13 @@ def read(
     ext = Path(filename).suffix.lower()
 
     if "dfs" not in ext:
-        raise ValueError(
-            "mikeio.read() is only supported for dfs files. Use mikeio.open for mesh files."
-        )
+        msg = "mikeio.read() is only supported for dfs files. Use mikeio.open for mesh files."
+        raise ValueError(msg)
 
     dfs = open(filename)
     if isinstance(dfs, Mesh):
-        raise ValueError("mikeio.read() is not supported for Mesh files")
+        msg = "mikeio.read() is not supported for Mesh files"
+        raise ValueError(msg)
 
     return dfs.read(items=items, time=time, keepdims=keepdims, **kwargs)
 
@@ -174,9 +174,8 @@ def open(
 
     if ext not in READERS:
         valid_formats = ", ".join(READERS.keys())
-        raise Exception(
-            f"{ext} is not a supported format for mikeio.open. Valid formats are {valid_formats}"
-        )
+        msg = f"{ext} is not a supported format for mikeio.open. Valid formats are {valid_formats}"
+        raise Exception(msg)
 
     reader_klass = READERS[ext]
 

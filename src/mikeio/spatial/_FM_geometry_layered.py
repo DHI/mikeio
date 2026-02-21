@@ -238,9 +238,8 @@ class _GeometryFMLayered(_GeometryFM):
             case DfsuFileType.Dfsu3DSigma:
                 elem_ids = self.bottom_elements
             case _:
-                raise NotImplementedError(
-                    f"Conversion to 2D not implemented for {self._type}"
-                )
+                msg = f"Conversion to 2D not implemented for {self._type}"
+                raise NotImplementedError(msg)
 
         node_ids, elem_tbl = self._get_nodes_and_table_for_elements(
             elem_ids, node_layers="bottom"
@@ -435,9 +434,8 @@ class _GeometryFMLayered(_GeometryFM):
             elif layers == "bottom":
                 return self.bottom_elements
             else:
-                raise ValueError(
-                    f"layers '{layers}' not recognized ('top', 'bottom' or integer)"
-                )
+                msg = f"layers '{layers}' not recognized ('top', 'bottom' or integer)"
+                raise ValueError(msg)
 
         if not np.isscalar(layers):
             assert isinstance(layers, Iterable)
@@ -452,9 +450,8 @@ class _GeometryFMLayered(_GeometryFM):
 
         assert isinstance(layers, int)
         if layers < (-n_lay) or layers >= n_lay:
-            raise Exception(
-                f"Layer {layers!r} not allowed; must be between -{n_lay} and {n_lay - 1}"
-            )
+            msg = f"Layer {layers!r} not allowed; must be between -{n_lay} and {n_lay - 1}"
+            raise Exception(msg)
 
         if layers < 0:
             layers = layers + n_lay
@@ -515,9 +512,8 @@ class _GeometryFMLayered(_GeometryFM):
         z_face = np.append(z_col - dz / 2, z_col[-1] + dz[-1] / 2)
         if z < z_face[0] or z > z_face[-1]:
             xy = tuple(self.element_coordinates[e3_col[0], :2])
-            raise ValueError(
-                f"z value '{z}' is outside water column [{z_face[0]},{z_face[-1]}] in point x,y={xy}"
-            )
+            msg = f"z value '{z}' is outside water column [{z_face[0]},{z_face[-1]}] in point x,y={xy}"
+            raise ValueError(msg)
         idx = np.searchsorted(z_face, z) - 1
         return idx
 
@@ -687,9 +683,8 @@ class GeometryFM3D(_GeometryFMLayered):
             or (z is not None)
         ):
             if area is not None:
-                raise ValueError(
-                    "Coordinates and area cannot be provided at the same time!"
-                )
+                msg = "Coordinates and area cannot be provided at the same time!"
+                raise ValueError(msg)
             if coords is not None:
                 coords = np.atleast_2d(coords)
                 xy = coords[:, :2]  # type: ignore
@@ -707,9 +702,8 @@ class GeometryFM3D(_GeometryFMLayered):
             idx_area = self._elements_in_area(area)
             idx = np.intersect1d(idx, idx_area)
         elif layers is None:
-            raise ValueError(
-                "At least one selection argument (x,y,z,coords,area,layers) needs to be provided!"
-            )
+            msg = "At least one selection argument (x,y,z,coords,area,layers) needs to be provided!"
+            raise ValueError(msg)
         return idx
 
 

@@ -133,9 +133,8 @@ class DfsuSpectral:
                 freq=f"{int(self.timestep)}s",
             )
         else:
-            raise NotImplementedError(
-                "Non-equidistant time axis. Read the data to get time."
-            )
+            msg = "Non-equidistant time axis. Read the data to get time."
+            raise NotImplementedError(msg)
 
     @staticmethod
     def _read_geometry(
@@ -202,7 +201,8 @@ class DfsuSpectral:
         finally:
             source.Close()
 
-        raise ValueError("Direction static item not found in the file.")
+        msg = "Direction static item not found in the file."
+        raise ValueError(msg)
 
     @property
     def n_frequencies(self) -> int | None:
@@ -334,7 +334,8 @@ class DfsuSpectral:
 
         """
         if dtype not in [np.float32, np.float64]:
-            raise ValueError("Invalid data type. Choose np.float32 or np.float64")
+            msg = "Invalid data type. Choose np.float32 or np.float64"
+            raise ValueError(msg)
 
         # Open the dfs file for reading
         # self._read_dfsu_header(self._filename)
@@ -349,9 +350,8 @@ class DfsuSpectral:
         else:
             # TODO move to _parse_geometry_sel
             if (area is not None) or (x is not None) or (y is not None):
-                raise ValueError(
-                    f"Arguments area/x/y are not supported for {self._type}"
-                )
+                msg = f"Arguments area/x/y are not supported for {self._type}"
+                raise ValueError(msg)
 
         geometry, pts = self._parse_elements_nodes(elements, nodes)
 
@@ -449,7 +449,8 @@ class DfsuSpectral:
         if (x is not None) or (y is not None) or (area is not None):
             # selection was attempted
             if (elements is None) or len(elements) == 0:
-                raise ValueError("No elements in selection!")
+                msg = "No elements in selection!"
+                raise ValueError(msg)
 
         return elements
 
@@ -460,17 +461,15 @@ class DfsuSpectral:
     ) -> tuple[Any, Any]:
         if self._type == DfsuFileType.DfsuSpectral0D:
             if elements is not None or nodes is not None:
-                raise ValueError(
-                    "Reading specific elements/nodes is not supported for DfsuSpectral0D"
-                )
+                msg = "Reading specific elements/nodes is not supported for DfsuSpectral0D"
+                raise ValueError(msg)
             geometry = self.geometry
             return geometry, None
 
         elif self._type == DfsuFileType.DfsuSpectral1D:
             if elements is not None:
-                raise ValueError(
-                    "Reading specific elements is not supported for DfsuSpectral1D"
-                )
+                msg = "Reading specific elements is not supported for DfsuSpectral1D"
+                raise ValueError(msg)
             if nodes is None:
                 geometry = self.geometry
             else:
@@ -480,9 +479,8 @@ class DfsuSpectral:
 
         elif self._type == DfsuFileType.DfsuSpectral2D:
             if nodes is not None:
-                raise ValueError(
-                    "Reading specific nodes is only supported for DfsuSpectral1D"
-                )
+                msg = "Reading specific nodes is only supported for DfsuSpectral1D"
+                raise ValueError(msg)
             if elements is None:
                 geometry = self.geometry
             else:
@@ -492,7 +490,8 @@ class DfsuSpectral:
                 geometry = self.geometry.elements_to_geometry(elements)  # type: ignore
             return geometry, elements  # type: ignore
 
-        raise NotImplementedError(f"Not valid for type:{self._type}")
+        msg = f"Not valid for type:{self._type}"
+        raise NotImplementedError(msg)
 
     def calc_Hm0_from_spectrum(
         self, spectrum: np.ndarray | DataArray, tail: bool = True

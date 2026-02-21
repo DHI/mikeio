@@ -167,9 +167,8 @@ class PfsDocument(PfsSection):
         names, sections = PfsDocument._unravel_items(input.items)
         for sec in sections:
             if not isinstance(sec, Mapping):
-                raise ValueError(
-                    "all targets must be PfsSections/dict (no key-value pairs allowed in the root)"
-                )
+                msg = "all targets must be PfsSections/dict (no key-value pairs allowed in the root)"
+                raise ValueError(msg)
         return names, sections
 
     @property
@@ -277,9 +276,8 @@ class PfsDocument(PfsSection):
                     idx = s.index("=")
                     key_part = s[:idx]
                     if "]]" in key_part or "[[" in key_part:
-                        raise ValueError(
-                            f"Malformed PFS file: found ']]' or '[[' in line: {s}"
-                        )
+                        msg = f"Malformed PFS file: found ']]' or '[[' in line: {s}"
+                        raise ValueError(msg)
 
                 idx = s.index("=")
                 key = s[:idx].strip()
@@ -306,7 +304,8 @@ class PfsDocument(PfsSection):
 
             # Check for malformed brackets (lines that don't have =)
             elif "]]" in s or "[[" in s:
-                raise ValueError(f"Malformed PFS file: found ']]' or '[[' in line: {s}")
+                msg = f"Malformed PFS file: found ']]' or '[[' in line: {s}"
+                raise ValueError(msg)
 
         return root_sections
 

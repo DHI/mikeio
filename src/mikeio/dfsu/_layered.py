@@ -134,9 +134,8 @@ class DfsuLayered:
                 freq=f"{int(self.timestep)}s",
             )
         else:
-            raise NotImplementedError(
-                "Non-equidistant time axis. Read the data to get time."
-            )
+            msg = "Non-equidistant time axis. Read the data to get time."
+            raise NotImplementedError(msg)
 
     @property
     def geometry(self) -> GeometryFM3D | GeometryFMVerticalProfile:
@@ -326,7 +325,8 @@ class DfsuLayered:
 
         """
         if dtype not in [np.float32, np.float64]:
-            raise ValueError("Invalid data type. Choose np.float32 or np.float64")
+            msg = "Invalid data type. Choose np.float32 or np.float64"
+            raise ValueError(msg)
 
         dfs = DfsuFile.Open(self._filename)
 
@@ -346,7 +346,8 @@ class DfsuLayered:
                     x=x, y=y, z=z, area=area, layers=layers
                 )
                 if len(elements) == 0:  # type: ignore
-                    raise ValueError("No elements in selection!")
+                    msg = "No elements in selection!"
+                    raise ValueError(msg)
 
         geometry = (
             self.geometry
@@ -468,13 +469,13 @@ class DfsuLayered:
         """
         if validate:
             if self.geometry != ds.geometry:
-                raise ValueError("The geometry of the dataset to append does not match")
+                msg = "The geometry of the dataset to append does not match"
+                raise ValueError(msg)
 
             for item_s, item_o in zip(ds.items, self.items):
                 if item_s != item_o:
-                    raise ValueError(
-                        f"Item in dataset {item_s.name} does not match {item_o.name}"
-                    )
+                    msg = f"Item in dataset {item_s.name} does not match {item_o.name}"
+                    raise ValueError(msg)
 
         dfs = DfsFileFactory.DfsuFileOpenAppend(str(self._filename), parameters=None)
         write_dfsu_data(dfs=dfs, ds=ds, is_layered=ds.geometry.is_layered)

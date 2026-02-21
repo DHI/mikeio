@@ -426,7 +426,8 @@ def concat(
         if i > 0 and start_time > current_time + timedelta(seconds=dt):
             dfs_o.Close()
             os.remove(outfilename)
-            raise Exception("Gap in time axis detected - not supported")
+            msg = "Gap in time axis detected - not supported"
+            raise Exception(msg)
 
         current_time = start_time
 
@@ -682,7 +683,8 @@ class _TimeInfo:
         elif time_axis.TimeAxisType == 4:
             timespan = time_axis.TimeSpan
         else:
-            raise ValueError("TimeAxisType not supported")
+            msg = "TimeAxisType not supported"
+            raise ValueError(msg)
 
         file_end_sec = start_sec + timespan
         end_sec = file_end_sec
@@ -716,27 +718,24 @@ class _TimeInfo:
             end_sec = (end - file_start_datetime).total_seconds()
 
         if start_step < 0:
-            raise ValueError(
-                f"start cannot be before start of file. start={start_step} is invalid"
-            )
+            msg = f"start cannot be before start of file. start={start_step} is invalid"
+            raise ValueError(msg)
 
         if start_sec < file_start_sec:
-            raise ValueError(
-                f"start cannot be before start of file start={start_step} is invalid"
-            )
+            msg = f"start cannot be before start of file start={start_step} is invalid"
+            raise ValueError(msg)
 
         if (end_sec < start_sec) or (end_step < start_step):
-            raise ValueError("end must be after start")
+            msg = "end must be after start"
+            raise ValueError(msg)
 
         if end_step > n_time_steps:
-            raise ValueError(
-                f"end cannot be after end of file. end={end_step} is invalid."
-            )
+            msg = f"end cannot be after end of file. end={end_step} is invalid."
+            raise ValueError(msg)
 
         if end_sec > file_end_sec:
-            raise ValueError(
-                f"end cannot be after end of file. end={end_sec} is invalid."
-            )
+            msg = f"end cannot be after end of file. end={end_sec} is invalid."
+            raise ValueError(msg)
 
         file_start_new = None
         if time_axis.TimeAxisType == TimeAxisType.CalendarEquidistant:
@@ -765,7 +764,8 @@ class _TimeInfo:
         elif time_axis.TimeAxisType == TimeAxisType.CalendarNonEquidistant:
             timestep = None
         else:
-            raise ValueError("TimeAxisType not supported")
+            msg = "TimeAxisType not supported"
+            raise ValueError(msg)
         return timestep
 
 
@@ -1159,9 +1159,8 @@ def transform(
                     keys = ", ".join(data.keys())
                     dfs.Close()
                     pathlib.Path(outfilename).unlink()
-                    raise KeyError(
-                        f"Item '{missing_key}' is not available in the file. Available items: {keys}"
-                    )
+                    msg = f"Item '{missing_key}' is not available in the file. Available items: {keys}"
+                    raise KeyError(msg)
             dfs.WriteItemTimeStepNext(0.0, darray)
 
     dfs_i.Close()

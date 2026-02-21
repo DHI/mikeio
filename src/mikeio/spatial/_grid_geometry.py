@@ -29,7 +29,8 @@ if TYPE_CHECKING:
 def _check_equidistant(x: np.ndarray) -> None:
     d = np.diff(x)
     if len(d) > 0 and not np.allclose(d, d[0]):
-        raise NotImplementedError("values must be equidistant")
+        msg = "values must be equidistant"
+        raise NotImplementedError(msg)
 
 
 def _parse_grid_axis(
@@ -43,17 +44,21 @@ def _parse_grid_axis(
         x = np.asarray(x)
         _check_equidistant(x)
         if len(x) > 1 and x[0] > x[-1]:
-            raise ValueError(f"{name} values must be increasing")
+            msg = f"{name} values must be increasing"
+            raise ValueError(msg)
         x0 = x[0]
         dx = x[1] - x[0] if len(x) > 1 else 1.0
         nx = len(x)
     else:
         if nx is None:
-            raise ValueError(f"n{name} must be provided")
+            msg = f"n{name} must be provided"
+            raise ValueError(msg)
         if dx is None:
-            raise ValueError(f"d{name} must be provided")
+            msg = f"d{name} must be provided"
+            raise ValueError(msg)
         if dx <= 0:
-            raise ValueError(f"d{name} must be positive")
+            msg = f"d{name} must be positive"
+            raise ValueError(msg)
     return x0, dx, nx
 
 
@@ -137,7 +142,8 @@ class Grid1D(_Geometry):
         self._x0, self._dx, self._nx = _parse_grid_axis("x", x, x0, dx, nx)
 
         if node_coordinates is not None and len(node_coordinates) != self.nx:
-            raise ValueError("Length of node_coordinates must be n")
+            msg = "Length of node_coordinates must be n"
+            raise ValueError(msg)
         self._nc = node_coordinates
 
         self._axis_name = axis_name
@@ -488,7 +494,8 @@ class Grid2D(_Geometry):
 
         if bbox is not None:
             if (x0 != 0.0) or (y0 != 0.0):
-                raise ValueError("x0,y0 cannot be provided together with bbox")
+                msg = "x0,y0 cannot be provided together with bbox"
+                raise ValueError(msg)
             self._create_in_bbox(bbox, dx=dx, dy=dy, nx=nx, ny=ny)
         else:
             self._x0, self._dx, self._nx = _parse_grid_axis("x", x, x0, dx, nx)
@@ -583,7 +590,8 @@ class Grid2D(_Geometry):
         elif nx is not None:
             dx = xr / nx
         else:
-            raise ValueError(f"Provide either d{axname} or n{axname}")
+            msg = f"Provide either d{axname} or n{axname}"
+            raise ValueError(msg)
         x0 = left + dx / 2
         return x0, dx, nx
 
@@ -702,9 +710,11 @@ class Grid2D(_Geometry):
         Note: not the same as the cell center values (x0,y0,x1,y1)!
         """
         if self._is_rotated:
-            raise NotImplementedError("Only available if orientation = 0")
+            msg = "Only available if orientation = 0"
+            raise NotImplementedError(msg)
         if self.is_spectral:
-            raise NotImplementedError("Not available for spectral Grid2D")
+            msg = "Not available for spectral Grid2D"
+            raise NotImplementedError(msg)
         left = self.x[0] - self.dx / 2
         bottom = self.y[0] - self.dy / 2
         right = self.x[-1] + self.dx / 2
@@ -725,9 +735,11 @@ class Grid2D(_Geometry):
         Note: this will not change the x or y properties.
         """
         if self._is_rotated:
-            raise ValueError("Only possible if orientation = 0")
+            msg = "Only possible if orientation = 0"
+            raise ValueError(msg)
         elif self.is_spectral:
-            raise ValueError("Not possible for spectral Grid2D")
+            msg = "Not possible for spectral Grid2D"
+            raise ValueError(msg)
         else:
             x0, y0 = self._x0, self._y0
             self._x0, self._y0 = 0.0, 0.0
@@ -785,18 +797,17 @@ class Grid2D(_Geometry):
 
         """
         if x is None and y is not None and not np.isscalar(y):
-            raise ValueError(
-                f"{y=} is not a scalar value, use the coords argument instead"
-            )
+            msg = f"{y=} is not a scalar value, use the coords argument instead"
+            raise ValueError(msg)
 
         if y is None and x is not None and not np.isscalar(x):
-            raise ValueError(
-                f"{x=} is not a scalar value, use the coords argument instead"
-            )
+            msg = f"{x=} is not a scalar value, use the coords argument instead"
+            raise ValueError(msg)
 
         if x is not None and y is not None:
             if coords is not None:
-                raise ValueError("x,y and coords cannot be given at the same time!")
+                msg = "x,y and coords cannot be given at the same time!"
+                raise ValueError(msg)
             coords = np.column_stack([np.atleast_1d(x), np.atleast_1d(y)])
         elif x is not None:
             if x < self.x[0] or x > self.x[-1]:
@@ -813,7 +824,8 @@ class Grid2D(_Geometry):
             bbox = BoundingBox.parse(area)
             return self._bbox_to_index(bbox)
         else:
-            raise ValueError("Provide x,y or coords")
+            msg = "Provide x,y or coords"
+            raise ValueError(msg)
 
     def _xy_to_index(self, xy: ArrayLike) -> tuple[np.ndarray, np.ndarray]:
         """Find specific points in this geometry."""
@@ -837,7 +849,8 @@ class Grid2D(_Geometry):
     def _bbox_to_index(self, bbox: BoundingBox) -> tuple[range, range]:
         """Find subarea within this geometry."""
         if not bbox.overlaps(self.bbox):
-            raise ValueError("area is outside grid")
+            msg = "area is outside grid"
+            raise ValueError(msg)
 
         mask = (self.x >= bbox.left) & (self.x <= bbox.right)
         ii = np.where(mask)[0]
@@ -884,7 +897,8 @@ class Grid2D(_Geometry):
                 x=self.y, projection=self.projection, node_coordinates=nc, axis_name="y"
             )
         else:
-            raise ValueError(f"axis must be 0 or 1 (or 'x' or 'y'), not {axis}")
+            msg = f"axis must be 0 or 1 (or 'x' or 'y'), not {axis}"
+            raise ValueError(msg)
 
     def _index_to_Grid2D(
         self, ii: range | None = None, jj: range | None = None
@@ -1057,9 +1071,8 @@ class Grid2D(_Geometry):
             if not np.isscalar(z):
                 assert isinstance(z, np.ndarray), "z must be a numpy array"
                 if len(z) != g.n_nodes:
-                    raise ValueError(
-                        "z must either be scalar or have length of nodes ((nx+1)*(ny+1))"
-                    )
+                    msg = "z must either be scalar or have length of nodes ((nx+1)*(ny+1))"
+                    raise ValueError(msg)
             g.node_coordinates[:, 2] = z
         g.to_mesh(outfilename=outfilename)
 
@@ -1227,12 +1240,10 @@ class Grid3D(_Geometry):
         self, coords: Any = None, layers: Any = None, area: Any = None
     ) -> Any:
         if layers is not None:
-            raise NotImplementedError(
-                f"Layer slicing is not yet implemented. Use the mikeio.read('file.dfs3', layers='{layers}')"
-            )
-        raise NotImplementedError(
-            "Not yet implemented for Grid3D. Please use mikeio.read('file.dfs3') and its arguments instead."
-        )
+            msg = f"Layer slicing is not yet implemented. Use the mikeio.read('file.dfs3', layers='{layers}')"
+            raise NotImplementedError(msg)
+        msg = "Not yet implemented for Grid3D. Please use mikeio.read('file.dfs3') and its arguments instead."
+        raise NotImplementedError(msg)
 
     def isel(
         self, idx: int | np.ndarray, axis: int
@@ -1283,7 +1294,8 @@ class Grid3D(_Geometry):
                 # projection=self._projection,
             )
         else:
-            raise ValueError(f"axis must be 0, 1 or 2 (or 'x', 'y' or 'z'), not {axis}")
+            msg = f"axis must be 0, 1 or 2 (or 'x', 'y' or 'z'), not {axis}"
+            raise ValueError(msg)
 
     def _index_to_Grid3D(
         self,

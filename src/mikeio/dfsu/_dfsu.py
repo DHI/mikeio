@@ -145,10 +145,12 @@ def _validate_elements_and_geometry_sel(elements: Any, **kwargs: Any) -> None:
     used_kwargs = [key for key, val in kwargs.items() if val is not None]
 
     if elements is not None and len(used_kwargs) > 0:
-        raise ValueError(f"Cannot select both {used_kwargs} and elements!")
+        msg = f"Cannot select both {used_kwargs} and elements!"
+        raise ValueError(msg)
 
     if "area" in used_kwargs and ("x" in used_kwargs or "y" in used_kwargs):
-        raise ValueError("Cannot select both x,y and area!")
+        msg = "Cannot select both x,y and area!"
+        raise ValueError(msg)
 
 
 @dataclass
@@ -167,7 +169,8 @@ def _get_dfsu_info(filename: str | Path) -> _DfsuInfo:
     filename = str(filename)
     path = Path(filename)
     if not path.exists():
-        raise FileNotFoundError(f"file {path} does not exist!")
+        msg = f"file {path} does not exist!"
+        raise FileNotFoundError(msg)
     dfs = DfsuFile.Open(filename)
     type = DfsuFileType(dfs.DfsuFileType)
     deletevalue = dfs.DeleteValueFloat
@@ -286,9 +289,8 @@ class Dfsu2DH:
                 freq=f"{int(self.timestep)}s",
             )
         else:
-            raise NotImplementedError(
-                "Non-equidistant time axis. Read the data to get time."
-            )
+            msg = "Non-equidistant time axis. Read the data to get time."
+            raise NotImplementedError(msg)
 
     @staticmethod
     def _read_geometry(filename: str) -> GeometryFM2D:
@@ -414,7 +416,8 @@ class Dfsu2DH:
 
         """
         if dtype not in [np.float32, np.float64]:
-            raise ValueError("Invalid data type. Choose np.float32 or np.float64")
+            msg = "Invalid data type. Choose np.float32 or np.float64"
+            raise ValueError(msg)
         dfs = DfsuFile.Open(self._filename)
 
         single_time_selected, time_steps = _valid_timesteps(dfs, time)
@@ -510,13 +513,13 @@ class Dfsu2DH:
         """
         if validate:
             if ds.geometry != self.geometry:
-                raise ValueError("The geometry of the dataset to append does not match")
+                msg = "The geometry of the dataset to append does not match"
+                raise ValueError(msg)
 
             for item_s, item_o in zip(ds.items, self.items):
                 if item_s != item_o:
-                    raise ValueError(
-                        f"Item in dataset {item_s.name} does not match {item_o.name}"
-                    )
+                    msg = f"Item in dataset {item_s.name} does not match {item_o.name}"
+                    raise ValueError(msg)
 
         dfs = DfsFileFactory.DfsuFileOpenAppend(str(self._filename), parameters=None)
         write_dfsu_data(dfs=dfs, ds=ds, is_layered=False)

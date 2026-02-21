@@ -221,9 +221,8 @@ class GeometryFMPlotter:
 
         if boundary_names is not None:
             if len(boundary_codes) != len(boundary_names):
-                raise Exception(
-                    f"Number of boundary names ({len(boundary_names)}) inconsistent with number of boundaries ({len(boundary_codes)})"
-                )
+                msg = f"Number of boundary names ({len(boundary_names)}) inconsistent with number of boundaries ({len(boundary_codes)})"
+                raise Exception(msg)
             user_defined_labels = dict(zip(boundary_codes, boundary_names))
 
         for code in boundary_codes:
@@ -316,9 +315,8 @@ class _GeometryFM(_Geometry):
 
                 # NOTE: this check "e.max()" takes the most of the time when constructing a new FM_geometry
                 if e.max() > max_node_id:
-                    raise ValueError(
-                        f"Element table has node # {e.max()}. Max node id: {max_node_id}"
-                    )
+                    msg = f"Element table has node # {e.max()}. Max node id: {max_node_id}"
+                    raise ValueError(msg)
 
         if element_ids is None:
             element_ids = np.arange(len(element_table))
@@ -390,7 +388,8 @@ class _GeometryFM(_Geometry):
     @codes.setter
     def codes(self, v: np.ndarray) -> None:
         if len(v) != self.n_nodes:
-            raise ValueError(f"codes must have length of nodes ({self.n_nodes})")
+            msg = f"codes must have length of nodes ({self.n_nodes})"
+            raise ValueError(msg)
         self._codes = np.array(v, dtype=np.int32)
 
     @property
@@ -617,9 +616,8 @@ class GeometryFM2D(_GeometryFM):
         # TODO return arguments in the same order than cKDTree.query?
 
         if n > self.n_elements:
-            raise ValueError(
-                f"Cannot find {n} nearest! Number of elements: {self.n_elements}"
-            )
+            msg = f"Cannot find {n} nearest! Number of elements: {self.n_elements}"
+            raise ValueError(msg)
 
         if y is None:
             p = x
@@ -976,9 +974,8 @@ class GeometryFM2D(_GeometryFM):
         """
         if (coords is not None) or (x is not None) or (y is not None):
             if area is not None:
-                raise ValueError(
-                    "Coordinates and area cannot be provided at the same time!"
-                )
+                msg = "Coordinates and area cannot be provided at the same time!"
+                raise ValueError(msg)
             if coords is not None:
                 coords = np.atleast_2d(coords)
                 xy = coords[:, :2]  # type: ignore
@@ -989,7 +986,8 @@ class GeometryFM2D(_GeometryFM):
         elif area is not None:
             return self._elements_in_area(area)
         else:
-            raise ValueError("Provide either coordinates or area")
+            msg = "Provide either coordinates or area"
+            raise ValueError(msg)
 
     @staticmethod
     def _inside_polygon(polygon: np.ndarray, xy: np.ndarray) -> np.ndarray:
@@ -1013,10 +1011,12 @@ class GeometryFM2D(_GeometryFM):
             xy = self.element_coordinates[:, :2]
             mask = self._inside_polygon(polygon, xy)
         else:
-            raise ValueError("'area' must be bbox [x0,y0,x1,y1] or polygon")
+            msg = "'area' must be bbox [x0,y0,x1,y1] or polygon"
+            raise ValueError(msg)
         elements = np.where(mask)[0]
         if len(elements) == 0:
-            raise ValueError("No elements in selection!")
+            msg = "No elements in selection!"
+            raise ValueError(msg)
         return elements
 
     def elements_to_geometry(

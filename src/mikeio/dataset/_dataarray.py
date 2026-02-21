@@ -166,7 +166,8 @@ class DataArray:
             try:
                 data = np.array(data, dtype=float)
             except ValueError:
-                raise ValueError("Data must be convertible to a numpy array")
+                msg = "Data must be convertible to a numpy array"
+                raise ValueError(msg)
         return data
 
     def _parse_dims(
@@ -176,13 +177,14 @@ class DataArray:
             return self._guess_dims(self.ndim, self.shape, self.n_timesteps, geometry)
         else:
             if self.ndim != len(dims):
-                raise ValueError("Number of named dimensions does not equal data ndim")
+                msg = "Number of named dimensions does not equal data ndim"
+                raise ValueError(msg)
             if ("time" in dims) and dims[0] != "time":
-                raise ValueError("time must be first dimension if present!")
+                msg = "time must be first dimension if present!"
+                raise ValueError(msg)
             if (self.n_timesteps > 1) and ("time" not in dims):
-                raise ValueError(
-                    f"time missing from named dimensions {dims}! (number of timesteps: {self.n_timesteps})"
-                )
+                msg = f"time missing from named dimensions {dims}! (number of timesteps: {self.n_timesteps})"
+                raise ValueError(msg)
             return tuple(dims)
 
     @staticmethod
@@ -209,9 +211,8 @@ class DataArray:
 
     def _check_time_data_length(self, time: Sized) -> None:
         if "time" in self.dims and len(time) != self._values.shape[0]:
-            raise ValueError(
-                f"Number of timesteps ({len(time)}) does not fit with data shape {self.values.shape}"
-            )
+            msg = f"Number of timesteps ({len(time)}) does not fit with data shape {self.values.shape}"
+            raise ValueError(msg)
 
     @staticmethod
     def _parse_item(
@@ -222,7 +223,8 @@ class DataArray:
     ) -> ItemInfo:
         if isinstance(item, ItemInfo):
             if name is not None:
-                raise ValueError("Can not pass both item and name")
+                msg = "Can not pass both item and name"
+                raise ValueError(msg)
             return item
 
         if item is None:
@@ -234,7 +236,8 @@ class DataArray:
         if isinstance(item, (str, EUMType, EUMUnit)):
             return ItemInfo(item)
 
-        raise ValueError("item must be str, EUMType or EUMUnit")
+        msg = "item must be str, EUMType or EUMUnit"
+        raise ValueError(msg)
 
     @staticmethod
     def _parse_zn(
@@ -244,15 +247,14 @@ class DataArray:
             if isinstance(geometry, _GeometryFMLayered):
                 # TODO: np.squeeze(zn) if n_timesteps=1 ?
                 if (n_timesteps > 1) and (zn.shape[0] != n_timesteps):
-                    raise ValueError(
-                        f"zn has wrong shape ({zn.shape}). First dimension should be of size n_timesteps ({n_timesteps})"
-                    )
+                    msg = f"zn has wrong shape ({zn.shape}). First dimension should be of size n_timesteps ({n_timesteps})"
+                    raise ValueError(msg)
                 if zn.shape[-1] != geometry.n_nodes:
-                    raise ValueError(
-                        f"zn has wrong shape ({zn.shape}). Last dimension should be of size n_nodes ({geometry.n_nodes})"
-                    )
+                    msg = f"zn has wrong shape ({zn.shape}). Last dimension should be of size n_nodes ({geometry.n_nodes})"
+                    raise ValueError(msg)
             else:
-                raise ValueError("zn can only be provided for layered dfsu data")
+                msg = "zn can only be provided for layered dfsu data"
+                raise ValueError(msg)
         return zn
 
     def _is_compatible(self, other: DataArray) -> bool:
@@ -392,9 +394,11 @@ class DataArray:
     def values(self, value: np.ndarray | float) -> None:
         if np.isscalar(self._values):
             if not np.isscalar(value):
-                raise ValueError("Shape of new data is wrong (should be scalar)")
+                msg = "Shape of new data is wrong (should be scalar)"
+                raise ValueError(msg)
         elif value.shape != self._values.shape:  # type: ignore
-            raise ValueError("Shape of new data is wrong")
+            msg = "Shape of new data is wrong"
+            raise ValueError(msg)
 
         self._values = value  # type: ignore
 
@@ -437,7 +441,8 @@ class DataArray:
     def dropna(self) -> DataArray:
         """Remove time steps where values are NaN."""
         if not self._has_time_axis:
-            raise ValueError("Not available if no time axis!")
+            msg = "Not available if no time axis!"
+            raise ValueError(msg)
 
         x = self.to_numpy()
 
@@ -516,31 +521,28 @@ class DataArray:
                     # getitem accepts fancy indexing only for time
                     k = _get_time_idx_list(self.time, k)
                     if _n_selected_timesteps(self.time, k) == 0:
-                        raise IndexError("No timesteps found!")
+                        msg = "No timesteps found!"
+                        raise IndexError(msg)
                 da = da.isel(**{dims[j]: k})
         return da
 
     def _getitem_parse_key(self, key: Any) -> Any:
         if isinstance(key, str):
-            raise TypeError(
-                "Indexing with strings is not supported. Use .sel(time=...) or .isel(time=...) instead."
-            )
+            msg = "Indexing with strings is not supported. Use .sel(time=...) or .isel(time=...) instead."
+            raise TypeError(msg)
         if isinstance(key, slice):
             if isinstance(key.start, str) or isinstance(key.stop, str):
-                raise TypeError(
-                    "Indexing with strings is not supported. Use .sel(time=...) or .isel(time=...) instead."
-                )
+                msg = "Indexing with strings is not supported. Use .sel(time=...) or .isel(time=...) instead."
+                raise TypeError(msg)
         if isinstance(key, Iterable):
             if any(isinstance(k, str) for k in key):
-                raise TypeError(
-                    "Indexing with strings is not supported. Use .sel(time=...) or .isel(time=...) instead."
-                )
+                msg = "Indexing with strings is not supported. Use .sel(time=...) or .isel(time=...) instead."
+                raise TypeError(msg)
 
         key = key if isinstance(key, tuple) else (key,)
         if len(key) > len(self.dims):
-            raise IndexError(
-                f"Key has more dimensions ({len(key)}) than DataArray ({len(self.dims)})!"
-            )
+            msg = f"Key has more dimensions ({len(key)}) than DataArray ({len(self.dims)})!"
+            raise IndexError(msg)
         return key
 
     def __setitem__(self, key: Any, value: np.ndarray) -> None:
@@ -657,12 +659,12 @@ class DataArray:
             if dim in self.dims:
                 axis = dim
                 if idx is not None:
-                    raise NotImplementedError(
-                        "Selecting on multiple dimensions in the same call, not yet implemented"
-                    )
+                    msg = "Selecting on multiple dimensions in the same call, not yet implemented"
+                    raise NotImplementedError(msg)
                 idx = kwargs[dim]
             else:
-                raise ValueError(f"{dim} is not present in {self.dims}")
+                msg = f"{dim} is not present in {self.dims}"
+                raise ValueError(msg)
 
         axis = self._parse_axis(self.shape, self.dims, axis)
 
@@ -672,9 +674,8 @@ class DataArray:
             assert isinstance(axis, int)
             idx = list(range(*idx.indices(self.shape[axis])))
         if idx is None or (not np.isscalar(idx) and len(idx) == 0):  # type: ignore
-            raise ValueError(
-                "Empty index is not allowed"
-            )  # TODO other option would be to have a NullDataArray
+            msg = "Empty index is not allowed"
+            raise ValueError(msg)  # TODO other option would be to have a NullDataArray
 
         idx = np.atleast_1d(idx)
         single_index = len(idx) == 1
@@ -723,7 +724,8 @@ class DataArray:
         elif axis == 3:
             dat = self.values[:, :, :, idx]
         else:
-            raise ValueError(f"Subsetting with {axis=} is not supported")
+            msg = f"Subsetting with {axis=} is not supported"
+            raise ValueError(msg)
 
         return DataArray(
             data=dat,
@@ -861,7 +863,8 @@ class DataArray:
 
             time = _get_time_idx_list(self.time, time)
             if _n_selected_timesteps(self.time, time) == 0:
-                raise IndexError("No timesteps found!")
+                msg = "No timesteps found!"
+                raise IndexError(msg)
             da = da.isel(time=time)
 
         return da
@@ -971,7 +974,8 @@ class DataArray:
             match g:
                 case Grid2D():
                     if x is None or y is None:
-                        raise ValueError("both x and y must be specified")
+                        msg = "both x and y must be specified"
+                        raise ValueError(msg)
 
                     xr_da = self.to_xarray()
                     dai = xr_da.interp(x=x, y=y).values
@@ -986,7 +990,8 @@ class DataArray:
 
                 case GeometryFM2D():
                     if x is None or y is None:
-                        raise ValueError("both x and y must be specified")
+                        msg = "both x and y must be specified"
+                        raise ValueError(msg)
 
                     if interpolant is None:
                         interpolant = g.get_2d_interpolant(
@@ -997,9 +1002,8 @@ class DataArray:
                     geometry = GeometryPoint2D(x=x, y=y, projection=g.projection)
 
                 case _:
-                    raise NotImplementedError(
-                        f"Interpolation in {g} is not yet implemented"
-                    )
+                    msg = f"Interpolation in {g} is not yet implemented"
+                    raise NotImplementedError(msg)
 
             da = DataArray(
                 data=dai,
@@ -1192,7 +1196,8 @@ class DataArray:
         from ._dataset import Dataset
 
         if not isinstance(self.geometry, GeometryFM2D):
-            raise NotImplementedError("Currently only supports 2d flexible mesh data!")
+            msg = "Currently only supports 2d flexible mesh data!"
+            raise NotImplementedError(msg)
 
         match other:
             case pd.DatetimeIndex():
@@ -1212,9 +1217,8 @@ class DataArray:
             case GeometryFM2D():
                 xy = geom.element_coordinates[:, :2]
             case _:
-                raise NotImplementedError(
-                    "Interpolation to other geometry not yet supported"
-                )
+                msg = "Interpolation to other geometry not yet supported"
+                raise NotImplementedError(msg)
 
         if interpolant is None:
             interpolant = self.geometry.get_2d_interpolant(xy, **kwargs)
@@ -1747,7 +1751,8 @@ class DataArray:
             data = func(self.values)
 
         except TypeError:
-            raise TypeError("Math operation could not be applied to DataArray")
+            msg = "Math operation could not be applied to DataArray"
+            raise TypeError(msg)
 
         new_da = self.copy()
         new_da.values = data
@@ -1763,7 +1768,8 @@ class DataArray:
             other_values = other.values if hasattr(other, "values") else other
             data = func(self.values, other_values)
         except TypeError:
-            raise TypeError("Math operation could not be applied to DataArray")
+            msg = "Math operation could not be applied to DataArray"
+            raise TypeError(msg)
 
         new_da = self.copy()  # TODO: alternatively: create new dataset (will validate)
         new_da.values = data
@@ -2028,9 +2034,8 @@ class DataArray:
             index = time
 
         if not index.is_monotonic_increasing:
-            raise ValueError(
-                "Time must be monotonic increasing (only equal or increasing) instances."
-            )
+            msg = "Time must be monotonic increasing (only equal or increasing) instances."
+            raise ValueError(msg)
         return index
 
     @staticmethod
@@ -2044,7 +2049,8 @@ class DataArray:
         if (axis == "spatial") or (axis == "space"):
             if len(data_shape) == 1:
                 if dims[0][0] == "t":
-                    raise ValueError(f"space axis cannot be selected from dims {dims}")
+                    msg = f"space axis cannot be selected from dims {dims}"
+                    raise ValueError(msg)
                 return 0
             if "frequency" in dims or "directions" in dims:
                 space_name = "node" if "node" in dims else "element"
@@ -2059,8 +2065,7 @@ class DataArray:
             if axis in dims:
                 return dims.index(axis)
             else:
-                raise ValueError(
-                    f"axis argument '{axis}' not supported! Must be None, int, list of int or 'time' or 'space'"
-                )
+                msg = f"axis argument '{axis}' not supported! Must be None, int, list of int or 'time' or 'space'"
+                raise ValueError(msg)
 
         return axis

@@ -70,7 +70,8 @@ def plot_2dspectrum(
     if (frequencies is None or len(frequencies) <= 1) and (
         directions is None or len(directions) <= 1
     ):
-        raise ValueError("plot_2dspectrum() is only supported for full spectral data")
+        msg = "plot_2dspectrum() is only supported for full spectral data"
+        raise ValueError(msg)
 
     dirs = np.radians(directions)
     freq = frequencies
@@ -150,9 +151,10 @@ def plot_2dspectrum(
         )
         ax.grid("on")  # type: ignore
     else:
-        raise ValueError(
+        msg = (
             f"plot_type '{plot_type}' not supported (contour, contourf, patch, shaded)"
         )
+        raise ValueError(msg)
 
     # TODO: optional
     ax.set_thetagrids(  # type: ignore

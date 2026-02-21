@@ -17,14 +17,12 @@ class BoundingBox:
 
     def __post_init__(self) -> None:
         if self.left > self.right:
-            raise ValueError(
-                f"Invalid x axis, left: {self.left} must be smaller than right: {self.right}"
-            )
+            msg = f"Invalid x axis, left: {self.left} must be smaller than right: {self.right}"
+            raise ValueError(msg)
 
         if self.bottom > self.top:
-            raise ValueError(
-                f"Invalid y axis, bottom: {self.bottom} must be smaller than top: {self.top}"
-            )
+            msg = f"Invalid y axis, bottom: {self.bottom} must be smaller than top: {self.top}"
+            raise ValueError(msg)
 
     def overlaps(self, other: "BoundingBox") -> bool:
         """Check if two bounding boxes overlap."""
@@ -45,16 +43,16 @@ class BoundingBox:
             case left, bottom, right, top:
                 bbox = BoundingBox(left, bottom, right, top)
             case _:
-                raise ValueError(
-                    "values must be a bounding box of coordinates e.g. (-10.0, 10.0 20.0, 30.0)"
-                )
+                msg = "values must be a bounding box of coordinates e.g. (-10.0, 10.0 20.0, 30.0)"
+                raise ValueError(msg)
         return bbox
 
 
 class _Geometry(ABC):
     def __init__(self, projection: str = "LONG/LAT") -> None:
         if not MapProjection.IsValid(projection):
-            raise ValueError(f"{projection=} is not a valid projection string")
+            msg = f"{projection=} is not a valid projection string"
+            raise ValueError(msg)
 
         self._projstr = projection
 

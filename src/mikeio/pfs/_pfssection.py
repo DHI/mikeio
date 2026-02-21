@@ -104,7 +104,8 @@ class PfsSection(SimpleNamespace, MutableMapping[str, Any]):
         if key in self.keys():
             self.__delattr__(key)
         else:
-            raise IndexError("Key not found")
+            msg = "Key not found"
+            raise IndexError(msg)
 
     def __set_key_value(self, key: str, value: Any, copy: bool = False) -> None:
         if value is None:
@@ -210,9 +211,10 @@ class PfsSection(SimpleNamespace, MutableMapping[str, Any]):
         if text is not None:
             # text searches across all fields
             if key is not None or section is not None or param is not None:
-                raise ValueError(
+                msg = (
                     "When 'text' is provided, 'key', 'section' and 'param' must be None"
                 )
+                raise ValueError(msg)
             key = section = param = text
 
         key = key.lower() if (key is not None and not case) else key
@@ -411,7 +413,8 @@ class PfsSection(SimpleNamespace, MutableMapping[str, Any]):
 
         if len(sections) == 0:
             prefix_txt = "" if prefix is None else f"(starting with '{prefix}') "
-            raise ValueError(f"No enumerated subsections {prefix_txt}found")
+            msg = f"No enumerated subsections {prefix_txt}found"
+            raise ValueError(msg)
 
         prefix = sections[0][:-1]
         res = []

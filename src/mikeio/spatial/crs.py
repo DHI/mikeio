@@ -144,16 +144,16 @@ class CRS:
         """
         epsg_code = self.to_pyproj().to_epsg(min_confidence=min_confidence)
         if epsg_code is None:
-            raise CRSConversionError(
-                f"cannot convert '{self.projection_string}' to EPSG"
-            )
+            msg = f"cannot convert '{self.projection_string}' to EPSG"
+            raise CRSConversionError(msg)
         elif isinstance(epsg_code, int):
             return epsg_code
         else:
-            raise RuntimeError(
+            msg = (
                 f"pyproj.to_epsg returned '{type(epsg_code).__name__}', "
                 f"expected None or int"
             )
+            raise RuntimeError(msg)
 
     @classmethod
     def from_epsg(cls, epsg: int) -> "CRS":

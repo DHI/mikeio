@@ -189,7 +189,8 @@ class Dfs3(_Dfs123):
 
         """
         if area is not None:
-            raise NotImplementedError("area subsetting is not yet implemented for Dfs3")
+            msg = "area subsetting is not yet implemented for Dfs3"
+            raise NotImplementedError(msg)
         # NOTE:
         # if keepdims is not False:
         #    return NotImplementedError("keepdims is not yet implemented for Dfs3")
@@ -293,13 +294,13 @@ class Dfs3(_Dfs123):
         """
         if validate:
             if self.geometry != ds.geometry:
-                raise ValueError("The geometry of the dataset to append does not match")
+                msg = "The geometry of the dataset to append does not match"
+                raise ValueError(msg)
 
             for item_s, item_o in zip(ds.items, self.items):
                 if item_s != item_o:
-                    raise ValueError(
-                        f"Item in dataset {item_s.name} does not match {item_o.name}"
-                    )
+                    msg = f"Item in dataset {item_s.name} does not match {item_o.name}"
+                    raise ValueError(msg)
 
         dfs = DfsFileFactory.Dfs3FileOpenAppend(str(self._filename))
         write_dfs_data(dfs=dfs, ds=ds, n_spatial_dims=3)

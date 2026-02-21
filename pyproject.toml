@@ -91,6 +91,7 @@ select = [
     "D415",
     "D417",
     "NPY",  # Numpy related
+    "EM",   # Error messages
 ]
 
 # Enable F822 preview behavior to catch undefined names in __all__ in __init__.py files

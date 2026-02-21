@@ -210,7 +210,8 @@ class DataArrayPlotterGrid1D(DataArrayPlotter):
     ) -> Axes:
         """Plot as timeseries."""
         if self.da.n_timesteps == 1:
-            raise ValueError("Not possible with single timestep DataArray")
+            msg = "Not possible with single timestep DataArray"
+            raise ValueError(msg)
         fig, ax = self._get_fig_ax(ax, figsize)
         return super()._timeseries(self.da.values, fig, ax, **kwargs)
 
@@ -222,9 +223,8 @@ class DataArrayPlotterGrid1D(DataArrayPlotter):
     ) -> Axes:
         """Plot as 2d."""
         if "time" not in self.da.dims:
-            raise ValueError(
-                "Not possible without time axis. DataArray only has 1 dimension."
-            )
+            msg = "Not possible without time axis. DataArray only has 1 dimension."
+            raise ValueError(msg)
         fig, ax = self._get_fig_ax(ax, figsize)
         pos = ax.imshow(self.da.values, **kwargs)
         fig.colorbar(pos, ax=ax, label=self._label_txt())
@@ -239,9 +239,8 @@ class DataArrayPlotterGrid1D(DataArrayPlotter):
     ) -> Axes:
         """Plot multiple lines as 2d color plot."""
         if "time" not in self.da.dims:
-            raise ValueError(
-                "Not possible without time axis. DataArray only has 1 dimension."
-            )
+            msg = "Not possible without time axis. DataArray only has 1 dimension."
+            raise ValueError(msg)
         fig, ax = self._get_fig_ax(ax, figsize)
         if title is not None:
             ax.set_title(title)
@@ -732,7 +731,8 @@ class DataArrayPlotterPointSpectrum(DataArrayPlotter):
         elif self.da.geometry.n_directions == 0:
             return self._plot_freqspectrum(ax=ax, figsize=figsize, **kwargs)
         else:
-            raise ValueError("Spectrum could not be plotted")
+            msg = "Spectrum could not be plotted"
+            raise ValueError(msg)
 
     def patch(self, **kwargs: Any) -> Axes:
         kwargs["plot_type"] = "patch"
@@ -896,9 +896,10 @@ class DatasetPlotter:
             df = self.ds.to_dataframe()
             return df.plot(figsize=figsize, **kwargs)
         else:
-            raise ValueError(
+            msg = (
                 "Could not plot Dataset. Try plotting one of its DataArrays instead..."
             )
+            raise ValueError(msg)
 
     @staticmethod
     def _get_fig_ax(

@@ -270,13 +270,13 @@ class Dfs2(_Dfs123):
         """
         if validate:
             if self.geometry != ds.geometry:
-                raise ValueError("The geometry of the dataset to append does not match")
+                msg = "The geometry of the dataset to append does not match"
+                raise ValueError(msg)
 
             for item_s, item_o in zip(ds.items, self.items):
                 if item_s != item_o:
-                    raise ValueError(
-                        f"Item in dataset {item_s.name} does not match {item_o.name}"
-                    )
+                    msg = f"Item in dataset {item_s.name} does not match {item_o.name}"
+                    raise ValueError(msg)
 
         dfs = DfsFileFactory.Dfs2FileOpenAppend(str(self._filename))
         write_dfs_data(dfs=dfs, ds=ds, n_spatial_dims=2)

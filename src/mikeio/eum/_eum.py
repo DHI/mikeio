@@ -1425,9 +1425,8 @@ class ItemInfo:
                 itemtype = EUMType(itemtype)
 
             if not isinstance(itemtype, EUMType):
-                raise ValueError(
-                    "Invalid type. Type should be supplied as EUMType, e.g. ItemInfo('WL',EUMType.Water_Level, EUMUnit.meter)"
-                )
+                msg = "Invalid type. Type should be supplied as EUMType, e.g. ItemInfo('WL',EUMType.Water_Level, EUMUnit.meter)"
+                raise ValueError(msg)
             self.type = itemtype
 
             if name is None:
@@ -1440,9 +1439,8 @@ class ItemInfo:
                 unit = EUMUnit(unit)
 
             if not isinstance(unit, EUMUnit):
-                raise ValueError(
-                    "Invalid unit. Unit should be supplied as EUMUnit, e.g. ItemInfo('WL',EUMType.Water_Level, EUMUnit.meter)"
-                )
+                msg = "Invalid unit. Unit should be supplied as EUMUnit, e.g. ItemInfo('WL',EUMType.Water_Level, EUMUnit.meter)"
+                raise ValueError(msg)
             self._unit = unit
         else:
             if self.type == EUMType.Undefined:
@@ -1453,7 +1451,8 @@ class ItemInfo:
         self.data_value_type = to_datatype(data_value_type)
 
         if not isinstance(name, str):
-            raise ValueError("Invalid name, name should be a string")
+            msg = "Invalid name, name should be a string"
+            raise ValueError(msg)
         self.name: str = name
 
     def __eq__(self, other: Any) -> bool:
@@ -1483,9 +1482,10 @@ class ItemInfo:
     def unit(self, value: EUMUnit) -> None:
         "Set unit."
         if value not in self.type.units:
-            raise ValueError(
+            msg = (
                 f"{value} is not a correct unit for {self.type}. Use {self.type.units}"
             )
+            raise ValueError(msg)
         self._unit = value
 
     @staticmethod
@@ -1540,6 +1540,7 @@ def to_datatype(datatype: str | int | DataValueType) -> DataValueType:
         return string_datatype_mapping[datatype]
 
     if not isinstance(datatype, DataValueType):
-        raise ValueError("Data value type not supported")
+        msg = "Data value type not supported"
+        raise ValueError(msg)
 
     return datatype

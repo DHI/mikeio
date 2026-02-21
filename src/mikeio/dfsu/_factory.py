@@ -31,7 +31,8 @@ def dfsu(filename: str | Path) -> Any:
     klass = DFSU_MAPPING.get(type)
 
     if klass is None:
-        raise ValueError(f"Unsupported dfsu type: {type}")
+        msg = f"Unsupported dfsu type: {type}"
+        raise ValueError(msg)
 
     return klass(filename)
 

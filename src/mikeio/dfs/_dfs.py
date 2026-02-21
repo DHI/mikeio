@@ -53,7 +53,8 @@ def _read_item_time_step(
         d[d == deletevalue] = np.nan
     else:
         if error_bad_data:
-            raise ValueError(f"Error reading: {time[it]}")
+            msg = f"Error reading: {time[it]}"
+            raise ValueError(msg)
         else:
             warnings.warn(f"Error reading: {time[it]}")
             d = np.zeros(shape[1])
@@ -73,7 +74,8 @@ def _fuzzy_item_search(
         i - start_idx for i, name in enumerate(names) if fnmatch.fnmatch(name, search)
     ]
     if len(item_numbers) == 0:
-        raise KeyError(f"No items like: {search} found. Valid names are {names}")
+        msg = f"No items like: {search} found. Valid names are {names}"
+        raise KeyError(msg)
     return item_numbers
 
 
@@ -118,7 +120,8 @@ def _valid_item_numbers(
         item_numbers.append(item_number)
 
     if len(set(item_numbers)) != len(item_numbers):
-        raise ValueError("'items' must be unique")
+        msg = "'items' must be unique"
+        raise ValueError(msg)
 
     return item_numbers
 
@@ -148,9 +151,8 @@ def _valid_timesteps(
 
         if time_step_file <= 0:
             if nt > 1:
-                raise ValueError(
-                    f"Time step must be a positive number. Time step in the file is {time_step_file} seconds."
-                )
+                msg = f"Time step must be a positive number. Time step in the file is {time_step_file} seconds."
+                raise ValueError(msg)
 
             warnings.warn(
                 f"Time step is {time_step_file} seconds. This must be a positive number. Setting to 1 second."
@@ -170,16 +172,15 @@ def _valid_timesteps(
         if isinstance(time_steps, Iterable):
             # check that all elements are integers and are in the range of nt
             if not all(isinstance(i, int) for i in time_steps):
-                raise ValueError("All elements in time_steps must be integers.")
+                msg = "All elements in time_steps must be integers."
+                raise ValueError(msg)
             if not all(0 <= i < nt for i in time_steps):  # type: ignore
-                raise ValueError(
-                    f"All elements in time_steps must be in the range of 0 to {nt-1}."
-                )
+                msg = f"All elements in time_steps must be in the range of 0 to {nt-1}."
+                raise ValueError(msg)
             return False, list(time_steps)  # type: ignore
 
-        raise TypeError(
-            f"Temporal selection with type: {type(time_steps)} is not supported"
-        )
+        msg = f"Temporal selection with type: {type(time_steps)} is not supported"
+        raise TypeError(msg)
 
     dts = DateTimeSelector(time)
 
@@ -227,7 +228,8 @@ def _item_numbers_by_name(
     try:
         item_numbers = [item_lookup[x] for x in item_names]
     except KeyError:
-        raise KeyError(f"Selected item name not found. Valid names are {names}")
+        msg = f"Selected item name not found. Valid names are {names}"
+        raise KeyError(msg)
 
     return item_numbers
 
@@ -364,7 +366,8 @@ class _Dfs123:
         return str.join("\n", out)
 
     def _open(self) -> None:
-        raise NotImplementedError("Should be implemented by subclass")
+        msg = "Should be implemented by subclass"
+        raise NotImplementedError(msg)
 
     def _get_item_info(self, item_numbers: Sequence[int]) -> list[ItemInfo]:
         """Read DFS ItemInfo.
@@ -461,7 +464,8 @@ class _Dfs123:
 
     def _validate_no_orientation_in_geo(self) -> None:
         if self.is_geo and abs(self._orientation) > 1e-6:
-            raise ValueError("Orientation is not supported for LONG/LAT coordinates")
+            msg = "Orientation is not supported for LONG/LAT coordinates"
+            raise ValueError(msg)
 
     def _origin_and_orientation_in_CRS(self) -> tuple[Any, float]:
         """Project origin and orientation to projected CRS (if not LONG/LAT)."""

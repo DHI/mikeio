@@ -29,14 +29,16 @@ def assert_txt_files_match(f1, f2, comment="//") -> None:
 
     # Check lengths match after filtering
     if len(content1) != len(content2):
+        msg = f"Files have different number of non-comment lines: {len(content1)} vs {len(content2)}"
         raise AssertionError(
-            f"Files have different number of non-comment lines: {len(content1)} vs {len(content2)}"
+            msg
         )
 
     # Compare remaining lines
     for i, (line1, line2) in enumerate(zip(content1, content2)):
         if line1 != line2:
-            raise AssertionError(f"Line {i} differs:\n{line1}\nvs\n{line2}")
+            msg = f"Line {i} differs:\n{line1}\nvs\n{line2}"
+            raise AssertionError(msg)
 
 
 @pytest.fixture

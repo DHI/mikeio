@@ -160,7 +160,8 @@ class Dfs0:
         """
         path = Path(self._filename)
         if not path.exists():
-            raise FileNotFoundError(f"File {path} not found")
+            msg = f"File {path} not found"
+            raise FileNotFoundError(msg)
 
         # read data from file
         dfs = DfsFileFactory.DfsGenericOpen(self._filename)
@@ -222,7 +223,8 @@ class Dfs0:
         if dtype in {np.float32, DfsSimpleType.Float}:
             return DfsSimpleType.Float
 
-        raise TypeError("Dfs files only support float or double")
+        msg = "Dfs files only support float or double"
+        raise TypeError(msg)
 
     def to_dataframe(self, unit_in_name: bool = False) -> pd.DataFrame:
         """Read data from the dfs0 file and return a Pandas DataFrame.
@@ -286,7 +288,8 @@ class Dfs0:
         if self._timeaxistype == TimeAxisType.CalendarEquidistant:
             return self._dfs.FileInfo.TimeAxis.TimeStep  # type: ignore
         else:
-            raise ValueError("Time axis type not supported")
+            msg = "Time axis type not supported"
+            raise ValueError(msg)
 
     @property
     def time(self) -> pd.DatetimeIndex:
@@ -302,7 +305,8 @@ class Dfs0:
         elif self._timeaxistype == TimeAxisType.CalendarNonEquidistant:
             return self.read().time
         else:
-            raise ValueError("Time axis type not supported")
+            msg = "Time axis type not supported"
+            raise ValueError(msg)
 
     # ======================
     # Deprecated in 2.5.0
@@ -346,9 +350,8 @@ def dataframe_to_dfs0(
         FutureWarning,
     )
     if not isinstance(self.index, pd.DatetimeIndex):
-        raise ValueError(
-            "Dataframe index must be a DatetimeIndex. Hint: pd.read_csv(..., parse_dates=True)"
-        )
+        msg = "Dataframe index must be a DatetimeIndex. Hint: pd.read_csv(..., parse_dates=True)"
+        raise ValueError(msg)
 
     ncol = self.values.shape[1]
     data = [self.values[:, i] for i in range(ncol)]

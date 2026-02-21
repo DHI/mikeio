@@ -154,9 +154,8 @@ class Dataset:
 
     @property
     def values(self) -> None:
-        raise AttributeError(
-            "Dataset has no property 'values' - use to_numpy() instead or maybe you were looking for DataArray.values?"
-        )
+        msg = "Dataset has no property 'values' - use to_numpy() instead or maybe you were looking for DataArray.values?"
+        raise AttributeError(msg)
 
     @staticmethod
     def _modify_list(lst: Iterable[str]) -> list[str]:
@@ -185,16 +184,16 @@ class Dataset:
             item_infos = [ItemInfo(f"Item_{j + 1}") for j in range(n_items_data)]
         else:
             if len(items) != n_items_data:
-                raise ValueError(
-                    f"Number of items ({len(items)}) must match len of data ({n_items_data})"
-                )
+                msg = f"Number of items ({len(items)}) must match len of data ({n_items_data})"
+                raise ValueError(msg)
 
             item_infos = []
             for item in items:
                 if isinstance(item, str):
                     item = ItemInfo(item)
                 elif not isinstance(item, ItemInfo):
-                    raise TypeError(f"items of type: {type(item)} is not supported")
+                    msg = f"items of type: {type(item)} is not supported"
+                    raise TypeError(msg)
                 item_infos.append(item)
 
             item_names = [it.name for it in item_infos]
@@ -357,7 +356,8 @@ class Dataset:
     def dropna(self) -> Dataset:
         """Remove time steps where all items are NaN."""
         if not self[0]._has_time_axis:  # type: ignore
-            raise ValueError("Not available if no time axis!")
+            msg = "Not available if no time axis!"
+            raise ValueError(msg)
 
         all_index: list[int] = []
         for i in range(self.n_items):
@@ -429,9 +429,8 @@ class Dataset:
         if isinstance(key, int):
             if insert:
                 if item_name in self.names:
-                    raise ValueError(
-                        f"Item name {item_name} already in Dataset ({self.names})"
-                    )
+                    msg = f"Item name {item_name} already in Dataset ({self.names})"
+                    raise ValueError(msg)
                 keys = list(self._data_vars.keys())
                 keys.insert(key, item_name)
                 values = list(self._data_vars.values())
@@ -558,13 +557,15 @@ class Dataset:
                 return Dataset(data=data_vars, validate=False)
             else:
                 item_names = ",".join(self._data_vars.keys())
-                raise KeyError(f"No item named: {key}. Valid items: {item_names}")
+                msg = f"No item named: {key}. Valid items: {item_names}"
+                raise KeyError(msg)
 
         if isinstance(key, Iterable):
             data_vars = {v: self._data_vars[v] for v in key}
             return Dataset(data=data_vars, validate=False)
 
-        raise TypeError(f"indexing with a {type(key)} is not (yet) supported")
+        msg = f"indexing with a {type(key)} is not (yet) supported"
+        raise TypeError(msg)
 
     def _key_to_str(self, key: Any) -> Any:
         """Translate item selection key to str (or list[str])."""
@@ -577,7 +578,8 @@ class Dataset:
             return self._key_to_str(list(range(start, stop, step)))
         if isinstance(key, Iterable):
             return [self._key_to_str(k) for k in key]
-        raise TypeError(f"indexing with type {type(key)} is not supported")
+        msg = f"indexing with type {type(key)} is not supported"
+        raise TypeError(msg)
 
     def __delitem__(self, key: Hashable | int) -> None:
         key = self._key_to_str(key)
@@ -951,7 +953,8 @@ class Dataset:
             dt = pd.to_timedelta(freq).total_seconds()
         else:
             if dt is None:
-                raise ValueError("You must specify either dt or freq")
+                msg = "You must specify either dt or freq"
+                raise ValueError(msg)
 
         das = [
             da.interp_time(
@@ -1004,9 +1007,8 @@ class Dataset:
 
         """
         if not (isinstance(self.geometry, GeometryFM2D) and self.geometry.is_2d):
-            raise NotImplementedError(
-                "Currently only supports interpolating from 2d flexible mesh data!"
-            )
+            msg = "Currently only supports interpolating from 2d flexible mesh data!"
+            raise NotImplementedError(msg)
 
         match other:
             case pd.DatetimeIndex():
@@ -1026,9 +1028,8 @@ class Dataset:
             case GeometryFM2D():
                 xy = geom.element_coordinates[:, :2]
             case _:
-                raise NotImplementedError(
-                    "Interpolation to other geometry not yet supported"
-                )
+                msg = "Interpolation to other geometry not yet supported"
+                raise NotImplementedError(msg)
 
         interpolant = self.geometry.get_2d_interpolant(xy, **kwargs)
         das = [da.interp_like(geom, interpolant=interpolant) for da in self]
@@ -1100,10 +1101,12 @@ class Dataset:
 
             overlap = other_names.intersection(item_names)
             if len(overlap) != 0:
-                raise ValueError("Can not append items, names are not unique")
+                msg = "Can not append items, names are not unique"
+                raise ValueError(msg)
 
             if not np.all(ds.time == other.time):
-                raise ValueError("All timesteps must match")
+                msg = "All timesteps must match"
+                raise ValueError(msg)
 
             for key, value in other._data_vars.items():
                 if key != "Z coordinate":
@@ -1124,13 +1127,13 @@ class Dataset:
             self.shape[start_dim:] == other.shape[int("time" in other.dims) :]
         ):
             # if not np.all(self.shape[1:] == other.shape[1:]):
-            raise ValueError("Shape of the datasets must match (except time dimension)")
+            msg = "Shape of the datasets must match (except time dimension)"
+            raise ValueError(msg)
         if hasattr(self, "time"):  # using attribute instead of dim checking. Works
             ds = self.copy() if copy else self
         else:
-            raise ValueError(
-                "Datasets cannot be concatenated as they have no time attribute!"
-            )
+            msg = "Datasets cannot be concatenated as they have no time attribute!"
+            raise ValueError(msg)
 
         s1 = pd.Series(np.arange(len(ds.time)), index=ds.time, name="idx1")
         s2 = pd.Series(np.arange(len(other.time)), index=other.time, name="idx2")
@@ -1166,17 +1169,18 @@ class Dataset:
 
     def _check_n_items(self, other: Dataset) -> None:
         if self.n_items != other.n_items:
-            raise ValueError(
-                f"Number of items must match ({self.n_items} and {other.n_items})"
-            )
+            msg = f"Number of items must match ({self.n_items} and {other.n_items})"
+            raise ValueError(msg)
 
     def _check_datasets_match(self, other: Dataset) -> None:
         self._check_n_items(other)
 
         if not np.all(self.time == other.time):
-            raise ValueError("All timesteps must match")
+            msg = "All timesteps must match"
+            raise ValueError(msg)
         if self.shape != other.shape:
-            raise ValueError("shape must match")
+            msg = "shape must match"
+            raise ValueError(msg)
 
     # ============ aggregate =============
 
@@ -1616,7 +1620,8 @@ class Dataset:
             case "/":
                 data = [x / y for x, y in zip(self, other)]
             case _:
-                raise ValueError(f"Unsupported operator: {operator}")
+                msg = f"Unsupported operator: {operator}"
+                raise ValueError(msg)
         return Dataset(data)
 
     def _scalar_op(self, value: float, operator: str) -> Dataset:
@@ -1630,7 +1635,8 @@ class Dataset:
             case "/":
                 data = [x / value for x in self]
             case _:
-                raise ValueError(f"Unsupported operator: {operator}")
+                msg = f"Unsupported operator: {operator}"
+                raise ValueError(msg)
         return Dataset(data)
 
     # ===============================================
@@ -1662,9 +1668,8 @@ class Dataset:
 
         """
         if self.ndim > 1:
-            raise ValueError(
-                "Only data with a single dimension can be converted to a dataframe. Hint: use `squeeze` to remove singleton dimensions or `isel` to create a subset."
-            )
+            msg = "Only data with a single dimension can be converted to a dataframe. Hint: use `squeeze` to remove singleton dimensions or `isel` to create a subset."
+            raise ValueError(msg)
 
         if unit_in_name:
             data = {f"{item.name} ({item.unit.name})": item.to_numpy() for item in self}
@@ -1702,7 +1707,8 @@ class Dataset:
                     self._validate_extension(filename, ".dfs0")
                     write_dfs0(filename, self, **kwargs)
                 else:
-                    raise ValueError("Cannot write Dataset with no geometry to file!")
+                    msg = "Cannot write Dataset with no geometry to file!"
+                    raise ValueError(msg)
 
             case Grid2D():
                 self._validate_extension(filename, ".dfs2")
@@ -1721,16 +1727,16 @@ class Dataset:
                 write_dfsu(filename, self)
 
             case _:
-                raise NotImplementedError(
-                    "Writing this type of dataset is not yet implemented"
-                )
+                msg = "Writing this type of dataset is not yet implemented"
+                raise NotImplementedError(msg)
 
     @staticmethod
     def _validate_extension(filename: str | Path, valid_extension: str) -> None:
         path = Path(filename)
         ext = path.suffix.lower()
         if ext != valid_extension:
-            raise ValueError(f"File extension must be {valid_extension}")
+            msg = f"File extension must be {valid_extension}"
+            raise ValueError(msg)
 
     def to_xarray(self) -> xarray.Dataset:
         """Export to xarray.Dataset."""
@@ -1805,9 +1811,10 @@ def from_pandas(
                 df = df.drop(columns=col)
                 break
         if not isinstance(df.index, pd.DatetimeIndex):
-            raise ValueError(
+            msg = (
                 "Dataframe index must be a DatetimeIndex or contain a datetime column."
             )
+            raise ValueError(msg)
 
     ncol = df.values.shape[1]
     data = [df.values[:, i] for i in range(ncol)]
@@ -1878,7 +1885,8 @@ def from_polars(
                 break
 
     if datetime_col is None:
-        raise ValueError("Datetime column not found. Please specify datetime_col.")
+        msg = "Datetime column not found. Please specify datetime_col."
+        raise ValueError(msg)
 
     time = pd.DatetimeIndex(df[datetime_col])
     df = df.drop(datetime_col)
@@ -1925,6 +1933,7 @@ def _parse_items_for_columns(
             for col, item in zip(column_names, items)
         ]
     else:
-        raise TypeError("items must be a mapping, sequence or ItemInfo")
+        msg = "items must be a mapping, sequence or ItemInfo"
+        raise TypeError(msg)
 
     return item_list

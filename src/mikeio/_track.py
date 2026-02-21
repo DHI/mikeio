@@ -30,7 +30,8 @@ def _extract_track(
     data_read_func: Callable[[int, int], tuple[np.ndarray, float]],
 ) -> Dataset:
     if not isinstance(geometry, GeometryFM2D):
-        raise NotImplementedError("Only implemented for 2d flexible mesh geometries")
+        msg = "Only implemented for 2d flexible mesh geometries"
+        raise NotImplementedError(msg)
 
     n_items = len(item_numbers)
 
@@ -46,9 +47,8 @@ def _extract_track(
         case pd.DataFrame():
             times, coords = _get_track_data_from_dataframe(track)
         case _:
-            raise ValueError(
-                "track must be a file name, a Dataset or a pandas DataFrame"
-            )
+            msg = "track must be a file name, a Dataset or a pandas DataFrame"
+            raise ValueError(msg)
 
     assert isinstance(
         times, pd.DatetimeIndex
@@ -73,14 +73,16 @@ def _extract_track(
     # largest idx for which (times - self.end_time)<=0
     tmp = np.where(t_rel <= 0)[0]
     if len(tmp) == 0:
-        raise ValueError("No time overlap!")
+        msg = "No time overlap!"
+        raise ValueError(msg)
     i_end = tmp[-1]
 
     # track time relative to start
     t_rel = (times - start_time).total_seconds()
     tmp = np.where(t_rel >= 0)[0]
     if len(tmp) == 0:
-        raise ValueError("No time overlap!")
+        msg = "No time overlap!"
+        raise ValueError(msg)
     i_start = tmp[0]  # smallest idx for which t_rel>=0
 
     dfsu_step = int(np.floor(t_rel[i_start] / timestep))  # first step
@@ -186,7 +188,8 @@ def _get_track_data_from_file(track: str) -> tuple[pd.DatetimeIndex, np.ndarray]
     filename = track
     path = Path(filename)
     if not path.exists():
-        raise FileNotFoundError(f"{filename} does not exist")
+        msg = f"{filename} does not exist"
+        raise FileNotFoundError(msg)
 
     ext = path.suffix.lower()
     match ext:
@@ -198,7 +201,8 @@ def _get_track_data_from_file(track: str) -> tuple[pd.DatetimeIndex, np.ndarray]
             df = pd.read_csv(filename, index_col=0, parse_dates=True)
             df.index = pd.DatetimeIndex(df.index)
         case _:
-            raise ValueError(f"{ext} files not supported (dfs0, csv)")
+            msg = f"{ext} files not supported (dfs0, csv)"
+            raise ValueError(msg)
 
     times = df.index
     coords = df.iloc[:, 0:2].to_numpy(copy=True)

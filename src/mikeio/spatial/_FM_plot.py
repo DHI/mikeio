@@ -111,7 +111,8 @@ def _plot_map(
     )
     if plot_type not in VALID_PLOT_TYPES:
         ok_list = ", ".join(VALID_PLOT_TYPES)
-        raise Exception(f"plot_type {plot_type} unknown! ({ok_list})")
+        msg = f"plot_type {plot_type} unknown! ({ok_list})"
+        raise Exception(msg)
 
     cmap = cmap or matplotlib.colormaps["viridis"]
 
@@ -123,9 +124,8 @@ def _plot_map(
     if ((vmin is not None) or (vmax is not None)) and (
         levels is not None and not np.isscalar(levels)
     ):
-        raise ValueError(
-            "vmin/vmax cannot be provided together with non-integer levels"
-        )
+        msg = "vmin/vmax cannot be provided together with non-integer levels"
+        raise ValueError(msg)
 
     if ax is None:
         _, ax = plt.subplots(figsize=figsize)
