@@ -1,9 +1,14 @@
 from pathlib import Path
+import gc
+import os
+import platform
+
 import numpy as np
 import pytest
 import pandas as pd
 
 import mikeio
+from mikecore.DfsFileFactory import DfsFileFactory
 
 
 def test_filenotexist() -> None:
@@ -171,3 +176,47 @@ def test_interp_onepoint_dfs1() -> None:
 
     with pytest.raises(AssertionError, match="not possible for Grid1D with one point"):
         ds[0].interp(x=0)
+
+
+def _count_open_fds() -> int:
+    """Count open file descriptors on Linux via /proc/self/fd."""
+    return len(os.listdir("/proc/self/fd"))
+
+
+@pytest.mark.skipif(
+    platform.system() != "Linux",
+    reason="File descriptor counting via /proc only works on Linux",
+)
+def test_count_open_fds_sanity_check() -> None:
+    """Verify _count_open_fds detects mikecore file handles."""
+    gc.collect()
+    baseline = _count_open_fds()
+
+    dfs = DfsFileFactory.DfsGenericOpen("tests/testdata/random.dfs1")
+    try:
+        assert _count_open_fds() > baseline, "opening a file must increase FD count"
+    finally:
+        dfs.Close()
+
+    gc.collect()
+    assert _count_open_fds() == baseline, "closing a file must restore FD count"
+
+
+@pytest.mark.skipif(
+    platform.system() != "Linux",
+    reason="File descriptor counting via /proc only works on Linux",
+)
+def test_dfs1_init_closes_file_handle() -> None:
+    """Dfs1.__init__ must not leak a file handle.
+
+    Before the fix, Dfs1.__init__ stored the open handle in self._dfs
+    without closing it, so each live instance held one file descriptor.
+    """
+    gc.collect()
+    baseline = _count_open_fds()
+
+    instances = []
+    for _ in range(50):
+        instances.append(mikeio.Dfs1("tests/testdata/random.dfs1"))
+
+    assert _count_open_fds() - baseline == 0

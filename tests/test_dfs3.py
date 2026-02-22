@@ -1,4 +1,8 @@
 from pathlib import Path
+import gc
+import os
+import platform
+
 import pytest
 import numpy as np
 
@@ -279,3 +283,28 @@ def test_append_dfs3(tmp_path: Path) -> None:
     dfs = mikeio.Dfs3(new_fp)
 
     dfs.append(ds2)
+
+
+def _count_open_fds() -> int:
+    """Count open file descriptors on Linux via /proc/self/fd."""
+    return len(os.listdir("/proc/self/fd"))
+
+
+@pytest.mark.skipif(
+    platform.system() != "Linux",
+    reason="File descriptor counting via /proc only works on Linux",
+)
+def test_dfs3_init_closes_file_handle() -> None:
+    """Dfs3._read_dfs3_header must not leak a file handle.
+
+    Before the fix, _read_dfs3_header stored the open handle in
+    self._dfs without closing it.
+    """
+    gc.collect()
+    baseline = _count_open_fds()
+
+    instances = []
+    for _ in range(50):
+        instances.append(mikeio.Dfs3("tests/testdata/Grid1.dfs3"))
+
+    assert _count_open_fds() - baseline == 0
