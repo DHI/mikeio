@@ -180,6 +180,7 @@ def test_read_dfsu3d_column() -> None:
     assert np.all(dscol1.to_numpy() == dscol2.to_numpy())
     assert dscol2._zn is not None
     assert dscol2._zn.shape == (ds.n_timesteps, 5 * 3)
+    assert np.all(dscol1._zn == dscol2._zn)
 
 
 def test_flip_column_upside_down() -> None:
