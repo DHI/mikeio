@@ -163,6 +163,7 @@ format:
     theme: cosmo
     brand: _brand.yml
     toc: true
+    include-in-header: _llms-head.html
   ipynb:
     theme: cosmo
     toc: true
