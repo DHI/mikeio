@@ -43,6 +43,15 @@ def test_read_simple_2dv() -> None:
     assert ds.items[2].name == "W velocity"
 
 
+def test_write_read_with_title(tmp_path: Path) -> None:
+    tmpfile = tmp_path / "tmp_title.dfsu"
+    dfs = mikeio.Dfsu3D("tests/testdata/oresund_sigma_z.dfsu")
+    ds = dfs.read()
+    ds.to_dfs(tmpfile)
+    dfs_tmp = mikeio.Dfsu3D(tmpfile)
+    assert dfs.title == dfs_tmp.title
+
+
 def test_read_returns_correct_items_sigma_z() -> None:
     filename = "tests/testdata/oresund_sigma_z.dfsu"
     dfs = mikeio.Dfsu3D(filename)

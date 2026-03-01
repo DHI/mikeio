@@ -91,6 +91,7 @@ class Dfs1(_Dfs123):
         self._x0: float = self._dfs.SpatialAxis.X0
         self._dx: float = self._dfs.SpatialAxis.Dx
         self._nx: int = self._dfs.SpatialAxis.XCount
+        self._title: str = self._dfs.FileInfo.FileTitle
 
         origin = self._longitude, self._latitude
         self._geometry = Grid1D(
@@ -181,6 +182,7 @@ class Dfs1(_Dfs123):
             items=items,
             dims=tuple(dims),
             geometry=self.geometry,
+            title=self.title,
             validate=False,
             dt=self._timestep,
         )
@@ -204,3 +206,8 @@ class Dfs1(_Dfs123):
     def nx(self) -> int:
         """Number of node values."""
         return self._nx
+
+    @property
+    def title(self) -> str:
+        """Title of the dfs1 file."""
+        return self._title
