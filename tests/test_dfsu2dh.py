@@ -1,4 +1,7 @@
 from pathlib import Path
+import gc
+import os
+import platform
 import shutil
 
 import numpy as np
@@ -1048,3 +1051,28 @@ def test_dfsu_to_xarray_has_element_coordinates() -> None:
     assert xr_da.x.values[example_quad_element] == approx(example_quad_coordinates[0])
     assert xr_da.y.values[example_quad_element] == approx(example_quad_coordinates[1])
     assert xr_da.z.values[example_quad_element] == approx(example_quad_coordinates[2])
+
+
+def _count_open_fds() -> int:
+    """Count open file descriptors on Linux via /proc/self/fd."""
+    return len(os.listdir("/proc/self/fd"))
+
+
+@pytest.mark.skipif(
+    platform.system() != "Linux",
+    reason="File descriptor counting via /proc only works on Linux",
+)
+def test_dfsu_read_closes_file_handle() -> None:
+    """Dfsu read must not leak file handles.
+
+    Each read() opens a DfsuFile; it must be closed before returning.
+    """
+    gc.collect()
+    baseline = _count_open_fds()
+
+    results = []
+    for _ in range(50):
+        dfs = mikeio.open("tests/testdata/HD2D.dfsu")
+        results.append(dfs.read())
+
+    assert _count_open_fds() - baseline == 0
