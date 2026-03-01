@@ -841,15 +841,21 @@ class DataArray:
         if len(kwargs) > 0:
             idx = self.geometry.find_index(**kwargs)
 
-            # TODO this seems fragile
             if isinstance(idx, tuple):
-                # TODO: support for dfs3
-                assert len(idx) == 2
-                ii, jj = idx
-                if jj is not None:
-                    da = da.isel(y=jj)
-                if ii is not None:
-                    da = da.isel(x=ii)
+                if len(idx) == 3:
+                    ii, jj, kk = idx
+                    if kk is not None:
+                        da = da.isel(z=kk)
+                    if jj is not None:
+                        da = da.isel(y=jj)
+                    if ii is not None:
+                        da = da.isel(x=ii)
+                elif len(idx) == 2:
+                    ii, jj = idx
+                    if jj is not None:
+                        da = da.isel(y=jj)
+                    if ii is not None:
+                        da = da.isel(x=ii)
             else:
                 da = da.isel(idx, axis="space")
 
@@ -885,6 +891,8 @@ class DataArray:
                         pos = 0
                     if k == "y":
                         pos = 1
+                    if k == "z":
+                        pos = 2
 
                 start = idx_start[pos][0] if idx_start is not None else None
                 stop = idx_stop[pos][0] if idx_stop is not None else None

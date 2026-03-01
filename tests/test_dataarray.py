@@ -472,6 +472,48 @@ def test_dataarray_grid3d_indexing() -> None:
 
     # TODO: wait for merge of https://github.com/DHI/mikeio/pull/311
     # assert isinstance(da[:, 1, ::3, :].geometry, mikeio.Grid2D)
+
+
+def test_da_sel_xyz_grid3d() -> None:
+    da = mikeio.read("tests/testdata/test_dfs3.dfs3")[0]
+    x0, y0 = da.geometry.x[2], da.geometry.y[3]
+    z0 = da.geometry.z[1]
+    da2 = da.sel(x=x0, y=y0, z=z0)
+    assert da2.shape == (da.n_timesteps,)
+
+
+def test_da_sel_x_grid3d() -> None:
+    da = mikeio.read("tests/testdata/test_dfs3.dfs3")[0]
+    x0 = da.geometry.x[2]
+    da2 = da.sel(x=x0)
+    # selecting x reduces x dim, keeps z and y
+    assert da2.shape == (da.n_timesteps, da.geometry.nz, da.geometry.ny)
+
+
+def test_da_sel_z_grid3d() -> None:
+    da = mikeio.read("tests/testdata/test_dfs3.dfs3")[0]
+    z0 = da.geometry.z[1]
+    da2 = da.sel(z=z0)
+    # selecting z reduces z dim, keeps x and y => Grid2D
+    assert isinstance(da2.geometry, mikeio.Grid2D)
+    assert da2.shape == (da.n_timesteps, da.geometry.ny, da.geometry.nx)
+
+
+def test_da_sel_area_grid3d() -> None:
+    da = mikeio.read("tests/testdata/test_dfs3.dfs3")[0]
+    x = da.geometry.x
+    y = da.geometry.y
+    area = (x[1], y[1], x[4], y[4])
+    da2 = da.sel(area=area)
+    assert isinstance(da2.geometry, mikeio.Grid3D)
+
+
+def test_da_sel_slice_grid3d() -> None:
+    da = mikeio.read("tests/testdata/test_dfs3.dfs3")[0]
+    x = da.geometry.x
+    z = da.geometry.z
+    da2 = da.sel(x=slice(x[1], x[4]), z=slice(z[0], z[2]))
+    assert isinstance(da2.geometry, mikeio.Grid3D)
     # assert isinstance(da[:, 1, -3, 4:].geometry, mikeio.Grid2D)
 
 
