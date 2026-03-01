@@ -10,7 +10,7 @@ import numpy as np
 from mikecore.DfsuFile import DfsuFileType
 
 
-from ._FM_geometry import GeometryFM2D, _GeometryFM, GeometryFMPlotter
+from ._FM_geometry import GeometryFM2D, _GeometryFM
 from ._geometry import GeometryPoint3D
 
 from ._FM_plot import _plot_vertical_profile, BoundaryPolygons
@@ -53,12 +53,6 @@ class _GeometryFMLayered(_GeometryFM):
 
         self._n_layers = n_layers
         self._n_sigma = n_sigma if n_sigma is not None else n_layers
-
-        # Lazy properties
-        self._bot_elems: np.ndarray | None = None
-        self._e2_e3_table: np.ndarray | None = None
-        self._2d_ids: np.ndarray | None = None
-        self._layer_ids: np.ndarray | None = None
 
     def __str__(self) -> str:
         return f"{self._type.name} ({self.n_elements} elements, {self.n_nodes} nodes)"
@@ -275,32 +269,19 @@ class _GeometryFMLayered(_GeometryFM):
 
         return geom
 
-    @cached_property
-    def n_elements(self) -> int:
-        """Number of 3d elements."""
-        return len(self.element_table)
-
-    @property
-    def n_nodes(self) -> int:
-        return len(self.node_coordinates)
-
-    @property
-    def is_2d(self) -> bool:
-        return False
-
     @property
     def is_layered(self) -> bool:
         return True
 
     @cached_property
+    def _2d_to_3d_association(self) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
+        """Cached (e2_e3_table, elem2d_ids, layer_ids) tuple."""
+        return self._get_2d_to_3d_association()
+
+    @cached_property
     def layer_ids(self) -> np.ndarray:
         """The layer number (0=bottom, 1, 2, ...) for each 3d element."""
-        if self._layer_ids is None:
-            res = self._get_2d_to_3d_association()
-            self._e2_e3_table = res[0]
-            self._2d_ids = res[1]
-            self._layer_ids = res[2]
-        return self._layer_ids
+        return self._2d_to_3d_association[2]
 
     @property
     def n_layers(self) -> int:
@@ -461,27 +442,15 @@ class _GeometryFMLayered(_GeometryFM):
 
         return self._element_ids[self.layer_ids == layers]
 
-    @property
+    @cached_property
     def e2_e3_table(self) -> np.ndarray:
         """The 2d-to-3d element connectivity table for a 3d object."""
-        # e2_e3, 2d_ids and layer_ids are all set at the same time
+        return self._2d_to_3d_association[0]
 
-        if self._e2_e3_table is None:
-            res = self._get_2d_to_3d_association()
-            self._e2_e3_table = res[0]
-            self._2d_ids = res[1]
-            self._layer_ids = res[2]
-        return self._e2_e3_table
-
-    @property
+    @cached_property
     def elem2d_ids(self) -> np.ndarray:
         """The associated 2d element id for each 3d element."""
-        if self._2d_ids is None:
-            res = self._get_2d_to_3d_association()
-            self._e2_e3_table = res[0]
-            self._2d_ids = res[1]
-            self._layer_ids = res[2]
-        return self._2d_ids
+        return self._2d_to_3d_association[1]
 
     def _get_2d_to_3d_association(self) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
         e2_to_e3 = []  # for each 2d element: the corresponding 3d element ids from bot to top
@@ -540,75 +509,17 @@ class _GeometryFMLayered(_GeometryFM):
             # elem3d[j] = (np.abs(z_col - z_vec[j])).argmin()  # nearest
         return elem3d
 
-    # def _find_3d_from_2d_points(self, elem2d, z=None, layer=None):
-
-    #     was_scalar = np.isscalar(elem2d)
-    #     if was_scalar:
-    #         elem2d = np.array([elem2d])
-    #     else:
-    #         orig_shape = elem2d.shape
-    #         elem2d = np.reshape(elem2d, (elem2d.size,))
-
-    #     if (layer is None) and (z is None):
-    #         # return top element
-    #         idx = self.top_elements[elem2d]  # TODO: return whole column instead
-
-    #     elif layer is None:
-    #         idx = np.zeros_like(elem2d)
-    #         if np.isscalar(z):
-    #             z = z * np.ones_like(elem2d, dtype=float)
-    #         elem3d = self.e2_e3_table[elem2d]
-    #         for j, row in enumerate(elem3d):
-    #             zc = self.element_coordinates[row, 2]
-    #             d3d = np.abs(z[j] - zc)
-    #             idx[j] = row[d3d.argsort()[0]]
-
-    #     elif z is None:
-    #         if 0 <= layer <= self.n_z_layers - 1:
-    #             idx = np.zeros_like(elem2d)
-    #             elem3d = self.e2_e3_table[elem2d]
-    #             for j, row in enumerate(elem3d):
-    #                 try:
-    #                     layer_ids = self.layer_ids[row]
-    #                     id = row[list(layer_ids).index(layer)]
-    #                     idx[j] = id
-    #                 except IndexError:
-    #                     raise IndexError(
-    #                         f"Layer {layer} not present for 2d element {elem2d[j]}"
-    #                     )
-    #         else:
-    #             # sigma layer
-    #             idx = self.get_layer_elements(layer)[elem2d]
-
-    #     else:
-    #         raise ValueError("layer and z cannot both be supplied!")
-
-    #     if was_scalar:
-    #         idx = idx[0]
-    #     else:
-    #         idx = np.reshape(idx, orig_shape)
-
-    #     return idx
-
     @cached_property
     def _dz(self) -> np.ndarray:
         """Height of each 3d element (using static zn information)."""
-        return self._calc_dz()
-
-    def _calc_dz(self) -> np.ndarray:
-        """Height of 3d elements using static or dynamic zn information."""
         element_table = self.element_table
         n_elements = len(element_table)
-
         zn = self.node_coordinates[:, 2]
-        zn_is_2d = len(zn.shape) == 2
-        shape = (zn.shape[0], n_elements) if zn_is_2d else (n_elements,)
-        dz = np.full(shape=shape, fill_value=np.nan)
+        dz = np.full(n_elements, fill_value=np.nan)
 
-        # static zn
         for j in range(n_elements):
             nodes = element_table[j]
-            halfn = int(len(nodes) / 2)
+            halfn = len(nodes) // 2
             z_bot = np.mean(zn[nodes[:halfn]])
             z_top = np.mean(zn[nodes[halfn:]])
             dz[j] = z_top - z_bot
@@ -619,35 +530,12 @@ class _GeometryFMLayered(_GeometryFM):
 class GeometryFM3D(_GeometryFMLayered):
     """Flexible 3d mesh geometry."""
 
-    def __init__(
-        self,
-        *,
-        node_coordinates: ArrayLike,
-        element_table: ArrayLike,
-        codes: np.ndarray | None = None,
-        projection: str = "LONG/LAT",
-        dfsu_type: DfsuFileType = DfsuFileType.Dfsu3DSigma,
-        element_ids: np.ndarray | None = None,
-        node_ids: np.ndarray | None = None,
-        n_layers: int = 1,  # at least 1 layer
-        n_sigma: int | None = None,
-        validate: bool = True,
-        reindex: bool = False,
-    ) -> None:
-        super().__init__(
-            node_coordinates=node_coordinates,
-            element_table=element_table,
-            codes=codes,
-            projection=projection,
-            dfsu_type=dfsu_type,
-            element_ids=element_ids,
-            node_ids=node_ids,
-            n_layers=n_layers,
-            n_sigma=n_sigma,
-            validate=validate,
-            reindex=reindex,
+    @property
+    def plot(self) -> None:
+        raise AttributeError(
+            "GeometryFM3D does not support plotting directly. "
+            "Use .to_2d_geometry().plot instead."
         )
-        self.plot = GeometryFMPlotter(self)
 
     @property
     def boundary_polylines(self) -> BoundaryPolygons:
@@ -716,34 +604,9 @@ class GeometryFM3D(_GeometryFMLayered):
 class GeometryFMVerticalProfile(_GeometryFMLayered):
     """Flexible mesh 2d vertical profile geometry."""
 
-    def __init__(
-        self,
-        node_coordinates: np.ndarray,
-        element_table: np.ndarray | list[Sequence[int]] | list[np.ndarray],
-        codes: np.ndarray | None = None,
-        projection: str = "LONG/LAT",
-        dfsu_type: DfsuFileType = DfsuFileType.Dfsu3DSigma,
-        element_ids: np.ndarray | None = None,
-        node_ids: np.ndarray | None = None,
-        n_layers: int = 1,  # at least 1 layer
-        n_sigma: int | None = None,
-        validate: bool = True,
-        reindex: bool = False,
-    ) -> None:
-        super().__init__(
-            node_coordinates=node_coordinates,
-            element_table=element_table,
-            codes=codes,
-            projection=projection,
-            dfsu_type=dfsu_type,
-            element_ids=element_ids,
-            node_ids=node_ids,
-            n_layers=n_layers,
-            n_sigma=n_sigma,
-            validate=validate,
-            reindex=reindex,
-        )
-        self.plot = GeometryFMVerticalProfilePlotter(self)
+    @cached_property
+    def plot(self) -> GeometryFMVerticalProfilePlotter:
+        return GeometryFMVerticalProfilePlotter(self)
 
     @cached_property
     def relative_element_distance(self) -> np.ndarray:
@@ -823,69 +686,64 @@ class GeometryFMVerticalProfile(_GeometryFMLayered):
 class GeometryFMVerticalColumn(GeometryFM3D):
     "A 3d geometry with consisting of a single vertical column."
 
-    # TODO: add plotter
-
     def calc_ze(self, zn: np.ndarray | None = None) -> np.ndarray:
-        if zn is None:
-            zn = self.node_coordinates[:, 2]
-        return self._calc_z_using_idx(zn, self._idx_e)
+        """Z-coordinates at element centers."""
+        return self._calc_z(zn, self._idx_e)
 
     def calc_zf(self, zn: np.ndarray | None = None) -> np.ndarray:
-        if zn is None:
-            zn = self.node_coordinates[:, 2]
-        return self._calc_z_using_idx(zn, self._idx_f)
+        """Z-coordinates at layer faces (horizontal interfaces between layers)."""
+        return self._calc_z(zn, self._idx_f)
 
     def _calc_zee(self, zn: np.ndarray | None = None) -> np.ndarray:
+        """Element center z-coords extended with bottom and top face for extrapolation."""
         ze = self.calc_ze(zn)
         zf = self.calc_zf(zn)
         if ze.ndim == 1:
-            zee = np.insert(ze, 0, zf[0])
-            return np.append(zee, zf[-1])
-        else:
-            return np.hstack(
-                (zf[:, 0].reshape((-1, 1)), ze, zf[:, -1].reshape((-1, 1)))
-            )
+            return np.append(np.insert(ze, 0, zf[0]), zf[-1])
+        return np.hstack((zf[:, 0].reshape((-1, 1)), ze, zf[:, -1].reshape((-1, 1))))
+
+    @staticmethod
+    def _linear_interp(x: np.ndarray, y: np.ndarray, x_new: np.ndarray) -> np.ndarray:
+        """Linear interpolation with extrapolation.
+
+        Uses make_interp_spline(k=1) which extrapolates beyond boundaries by default.
+        """
+        from scipy.interpolate import make_interp_spline  # type: ignore
+
+        return make_interp_spline(x, y, k=1)(x_new)  # type: ignore
 
     def _interp_values(
         self, zn: np.ndarray, data: np.ndarray, z: np.ndarray
     ) -> np.ndarray:
         """Interpolate to other z values, allow linear extrapolation."""
-        from scipy.interpolate import interp1d  # type: ignore
-
-        opt = {"kind": "linear", "bounds_error": False, "fill_value": "extrapolate"}
-
         ze = self.calc_ze(zn)
-        dati = np.zeros_like(z)
         if zn.ndim == 1:
-            dati = interp1d(ze, data, **opt)(z)
-        elif zn.ndim == 2:
-            for j in range(zn.shape[0]):
-                dati[j, :] = interp1d(ze[j, :], data[j, :], **opt)(z[j, :])
+            return self._linear_interp(ze, data, z)
+        dati = np.zeros_like(z)
+        for j in range(zn.shape[0]):
+            dati[j, :] = self._linear_interp(ze[j, :], data[j, :], z[j, :])
         return dati
 
-    @property
+    @cached_property
+    def _idx_e(self) -> np.ndarray:
+        """Node indices per element as a 2D array."""
+        return np.stack(self.element_table)
+
+    @cached_property
     def _idx_f(self) -> np.ndarray:
-        nnodes_half = int(len(self.element_table[0]) / 2)
-        n_vfaces = self.n_elements + 1
-        idx_f = np.zeros((n_vfaces, nnodes_half), dtype=int)
+        """Node indices per layer face (n_elements + 1 faces)."""
+        nnodes_half = len(self.element_table[0]) // 2
         idx_e = self._idx_e
+        idx_f = np.zeros((self.n_elements + 1, nnodes_half), dtype=int)
+        # Bottom nodes of each element define the lower faces
         idx_f[: self.n_elements, :] = idx_e[:, :nnodes_half]
+        # Top nodes of the last element define the top face
         idx_f[self.n_elements, :] = idx_e[-1, nnodes_half:]
         return idx_f
 
-    @property
-    def _idx_e(self) -> np.ndarray:
-        nnodes_per_elem = len(self.element_table[0])
-        idx_e = np.zeros((self.n_elements, nnodes_per_elem), dtype=int)
-
-        for j in range(self.n_elements):
-            nodes = self.element_table[j]
-            for i in range(nnodes_per_elem):
-                idx_e[j, i] = nodes[i]
-
-        return idx_e
-
-    def _calc_z_using_idx(self, zn: np.ndarray, idx: np.ndarray) -> np.ndarray:
+    def _calc_z(self, zn: np.ndarray | None, idx: np.ndarray) -> np.ndarray:
+        if zn is None:
+            zn = self.node_coordinates[:, 2]
         return zn[..., idx].mean(axis=-1)
 
 

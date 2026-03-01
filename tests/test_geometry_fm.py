@@ -1,7 +1,7 @@
 import pytest
-from mikeio.spatial import GeometryFM2D, GeometryFM3D
+
 from mikeio.exceptions import OutsideModelDomainError
-from mikeio.spatial import GeometryPoint2D
+from mikeio.spatial import GeometryFM2D, GeometryFM3D, GeometryPoint2D
 
 
 @pytest.fixture
@@ -58,7 +58,6 @@ def test_basic() -> None:
     g = GeometryFM2D(nc, el)
     assert g.n_elements == 1
     assert g.n_nodes == 3
-    assert g.is_2d
     assert g.is_geo
     assert g.is_tri_only
     assert g.projection == "LONG/LAT"
@@ -223,7 +222,6 @@ def test_layered(simple_3d_geom: GeometryFM3D) -> None:
 
     assert g.n_elements == 2
     assert g.n_layers == 2
-    assert not g.is_2d
 
     assert len(g.top_elements) == 1
 

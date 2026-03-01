@@ -24,7 +24,6 @@ class GeometryFMPointSpectrum(_Geometry):
         super().__init__()
         self.n_nodes = 0
         self.n_elements = 0
-        self.is_2d = False
         self.is_spectral = True
 
         self._frequencies = frequencies
