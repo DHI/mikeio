@@ -746,3 +746,102 @@ def test_transform_func_with_missing_item_reports_existing_items(
         transform(infilename, outfilename, items)
     assert "U velocity" in str(excinfo.value)
     assert not outfilename.exists()
+
+
+def test_statistics(tmp_path: Path) -> None:
+    file_dfsu_sigma = "tests/testdata/oresund_sigma_z.dfsu"
+    outfile = tmp_path / "stats.dfsu"
+    generic.statistics(file_dfsu_sigma, outfile)
+
+    # compare with manual calculations
+    ds = mikeio.read(file_dfsu_sigma)
+    ds_stat = mikeio.read(outfile)
+
+    stat_min = np.nanmin(ds_stat[0].sel(layers=1).to_numpy())
+    read_min = ds[0].sel(layers=1).describe().loc["min"].values[0]
+    stat_max = np.nanmax(ds_stat[1].sel(layers=1).to_numpy())
+    read_max = ds[0].sel(layers=1).describe().loc["max"].values[0]
+    stat_mean = np.nanmean(ds_stat[2].sel(layers=1).to_numpy())
+    read_mean = ds[0].sel(layers=1).describe().loc["mean"].values[0]
+
+    assert read_min == stat_min
+    assert read_max == stat_max
+    assert read_mean == pytest.approx(stat_mean)
+
+
+def test_statistics_from_to(tmp_path: Path) -> None:
+    file_dfsu_sigma = "tests/testdata/oresund_sigma_z.dfsu"
+    outfile = tmp_path / "stats.dfsu"
+
+    ds_full = mikeio.read(file_dfsu_sigma)
+    from_to = ([1, 2], [1, 3])  # , [None,2])
+    for from_ts, to_ts in from_to:
+        generic.statistics(file_dfsu_sigma, outfile, from_ts=from_ts, to_ts=to_ts)
+        # compare with manual calculations
+        ds_stat = mikeio.read(outfile)
+
+        ds = ds_full.isel(time=slice(from_ts, to_ts))
+        stat_min = np.nanmin(ds_stat[0].sel(layers=1).to_numpy())
+        read_min = ds[0].sel(layers=1).describe().loc["min"].values[0]
+        stat_max = np.nanmax(ds_stat[1].sel(layers=1).to_numpy())
+        read_max = ds[0].sel(layers=1).describe().loc["max"].values[0]
+        stat_mean = np.nanmean(ds_stat[2].sel(layers=1).to_numpy())
+        read_mean = ds[0].sel(layers=1).describe().loc["mean"].values[0]
+
+        assert read_min == stat_min
+        assert read_max == stat_max
+        assert read_mean == pytest.approx(stat_mean)
+
+
+def test_statistics_item(tmp_path: Path) -> None:
+    file_dfsu_sigma = "tests/testdata/oresund_sigma_z.dfsu"
+    outfile = tmp_path / "stats.dfsu"
+    generic.statistics(file_dfsu_sigma, outfile, items=1)
+
+    # compare with manual calculations
+    ds = mikeio.read(file_dfsu_sigma)
+    ds_stat = mikeio.read(outfile)
+
+    stat_min = np.nanmin(ds_stat[0].sel(layers=1).to_numpy())
+    read_min = ds[1].sel(layers=1).describe().loc["min"].values[0]
+    stat_max = np.nanmax(ds_stat[1].sel(layers=1).to_numpy())
+    read_max = ds[1].sel(layers=1).describe().loc["max"].values[0]
+    stat_mean = np.nanmean(ds_stat[2].sel(layers=1).to_numpy())
+    read_mean = ds[1].sel(layers=1).describe().loc["mean"].values[0]
+
+    assert ds_stat.n_items == 3  # min, max, mean
+    assert read_min == stat_min
+    assert read_max == stat_max
+    assert read_mean == pytest.approx(stat_mean)
+
+
+def test_reduce(tmp_path: Path) -> None:
+    in_dfs0 = "tests/testdata/da_diagnostic.dfs0"
+    outfile = tmp_path / "reduced.dfs0"
+
+    f_count = lambda x, y: x + 1
+    generic.reduce(in_dfs0, outfile, functions=f_count, skipna=True, initial=0)
+    # compare with manual calculations
+    ds = mikeio.read(in_dfs0)
+    ds_reduced = mikeio.read(outfile)
+
+    assert ds[0].describe().loc["count"].values[0] == ds_reduced[0].values[0]
+    assert ds[1].describe().loc["count"].values[0] == ds_reduced[1].values[0]
+    assert ds[2].describe().loc["count"].values[0] == ds_reduced[2].values[0]
+    assert ds[3].describe().loc["count"].values[0] == ds_reduced[3].values[0]
+    generic.reduce(in_dfs0, outfile, functions=f_count, skipna=True, initial=1)
+    ds_reduced = mikeio.read(outfile)
+    assert ds[0].describe().loc["count"].values[0] == ds_reduced[0].values[0] - 1
+
+
+def test_reduce_initial(tmp_path: Path) -> None:
+    in_dfs0 = "tests/testdata/da_diagnostic.dfs0"
+    outfile = tmp_path / "reduced.dfs0"
+
+    f_count = lambda x, y: x + 1
+    generic.reduce(in_dfs0, outfile, functions=f_count, skipna=True, initial=1)
+
+    # compare with manual calculations
+    ds = mikeio.read(in_dfs0)
+    ds_reduced = mikeio.read(outfile)
+    assert ds[0].describe().loc["count"].values[0] == ds_reduced[0].values[0] - 1
