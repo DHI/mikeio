@@ -4,7 +4,7 @@ import pytest
 
 import mikeio
 from mikeio import DataArray
-from mikeio.spatial import GeometryUndefined
+from mikeio.spatial import GeometryUndefined, Geometry0D
 import mikeio.generic
 
 
@@ -44,7 +44,7 @@ def test_dfs1_isel_x() -> None:
 
     ds1 = ds.isel(x=8)
     assert ds1.dims == ("time",)
-    assert isinstance(ds1.geometry, GeometryUndefined)
+    assert isinstance(ds1.geometry, Geometry0D)
     assert ds1[0].isel(time=0).values == pytest.approx(0.203246)
 
 
@@ -62,13 +62,13 @@ def test_dfs1_sel_x() -> None:
 
     ds1 = ds.sel(x=7.8)
     assert ds1.dims == ("time",)
-    assert isinstance(ds1.geometry, GeometryUndefined)
+    assert isinstance(ds1.geometry, Geometry0D)
     assert ds1[0].isel(time=0).values == pytest.approx(0.203246)
 
     da: DataArray = ds[0]
     da1 = da.sel(x=7.8)
     assert da1.dims == ("time",)
-    assert isinstance(ds1.geometry, GeometryUndefined)
+    assert isinstance(ds1.geometry, Geometry0D)
     assert da1.isel(time=0).values == pytest.approx(0.203246)
 
 

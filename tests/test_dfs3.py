@@ -3,7 +3,6 @@ import pytest
 import numpy as np
 
 import mikeio
-from mikeio.spatial import GeometryUndefined
 from mikeio.spatial import Grid2D, Grid3D
 
 
@@ -87,10 +86,8 @@ def test_dfs3_read_multiple_layers() -> None:
     assert ds.geometry.nz == 4
     assert isinstance(ds.geometry, Grid3D)
 
-    with pytest.warns(UserWarning):
-        ds = mikeio.read(fn, layers=[1, 5, -3])
-    assert isinstance(ds.geometry, GeometryUndefined)
-    assert ds.shape == (2, 3, 17, 21)
+    with pytest.raises(ValueError, match="Non-equidistant"):
+        mikeio.read(fn, layers=[1, 5, -3])
 
 
 def test_read_rotated_grid() -> None:
