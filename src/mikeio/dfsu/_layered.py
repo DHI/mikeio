@@ -9,7 +9,7 @@ from matplotlib.axes import Axes
 from matplotlib.colors import Colormap
 from mikecore.DfsFileFactory import DfsFileFactory
 from mikecore.DfsuFile import DfsuFile, DfsuFileType
-from scipy.spatial import cKDTree
+from scipy.spatial import KDTree
 from tqdm import trange
 
 from .._interpolation import Interpolant
@@ -584,7 +584,7 @@ class Dfsu3D(DfsuLayered):
         geom = self.geometry.elements_to_geometry(top_el, node_layers="top")
         xye = geom.element_coordinates[:, 0:2]  # type: ignore
         xyn = geom.node_coordinates[:, 0:2]  # type: ignore
-        tree2d = cKDTree(xyn)
+        tree2d = KDTree(xyn)
         dist, node_ids = tree2d.query(xye, k=n_nearest)
         weights = Interpolant.from_distances(dist)
 
