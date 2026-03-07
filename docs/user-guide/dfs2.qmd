@@ -61,8 +61,88 @@ Grid2D's primary properties and methods are:
 See [API specification](`mikeio.Grid2D`) for details.
 
 
+## Extract data at a point
+
+Use `interp()` to extract values at a specific coordinate:
+
+```{python}
+da = ds["Elevation"]
+da_point = da.interp(x=12.74792, y=55.865)
+da_point.values
+```
+
+## Creating a dfs2 file
+
+To create a dfs2 file from scratch:
+
+1. Create a [`Grid2D`](`mikeio.Grid2D`) geometry
+2. Create a NumPy array with the correct shape
+3. Wrap it in a [`DataArray`](`mikeio.DataArray`)
+4. Write to file
+
+::: {.callout-important}
+Data arrays must have shape `(n_timesteps, ny, nx)` for time-varying data or `(ny, nx)` for static data. The y-axis must increase south-to-north and the x-axis west-to-east, matching the [CF conventions](http://cfconventions.org/cf-conventions/cf-conventions.html#dimensions).
+:::
+
+### Geographic coordinates
+
+```{python}
+import numpy as np
+import pandas as pd
+
+grid = mikeio.Grid2D(
+    x0=12.0, dx=1.0, nx=3,
+    y0=55.0, dy=1.0, ny=4,
+    projection="LONG/LAT",
+)
+grid
+```
+
+```{python}
+data = np.arange(24, dtype=float).reshape(2, 4, 3)  # (time, y, x)
+data.shape
+```
+
+```{python}
+da = mikeio.DataArray(
+    data=data,
+    geometry=grid,
+    time=pd.date_range("2020", periods=2, freq="D"),
+    item=mikeio.ItemInfo("Elevation", mikeio.EUMType.Elevation),
+)
+da
+```
+
+```{python}
+da.to_dfs("example_geo.dfs2")
+```
+
+### Projected coordinates
+
+```{python}
+pgrid = mikeio.Grid2D(
+    x0=337100.0, dx=10000.0, nx=3,
+    y0=6122900.0, dy=10000.0, ny=4,
+    projection="UTM-32",
+)
+
+pda = mikeio.DataArray(
+    data=data,
+    geometry=pgrid,
+    time=pd.date_range("2020", periods=2, freq="D"),
+    item=mikeio.ItemInfo("Elevation", mikeio.EUMType.Elevation),
+)
+pda.plot();
+```
+
+Cleanup:
+
+```{python}
+import os
+os.remove("example_geo.dfs2")
+```
+
 ## Dfs2 resources
 
-* [Dfs2 | getting-started-with-mikeio](https://dhi.github.io/getting-started-with-mikeio/dfs2.html)
-* [Dfs2-Bathymetry](../examples/dfs2/bathy.qmd) - GEBCO NetCDF/xarray to dfs2 
+* [Dfs2-Bathymetry](../examples/dfs2/bathy.qmd) - GEBCO NetCDF/xarray to dfs2
 * [Dfs2-GFS](../examples/dfs2/gfs.qmd) - GFS NetCDF/xarray to dfs2

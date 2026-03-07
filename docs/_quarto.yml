@@ -47,6 +47,7 @@ website:
         - user-guide/dfsu.qmd
         - user-guide/mesh.qmd
         - user-guide/eum.qmd
+        - user-guide/statistics.qmd
         - user-guide/generic.qmd
         - user-guide/pfs.qmd
 

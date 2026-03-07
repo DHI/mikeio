@@ -123,3 +123,64 @@ da.plot(cmap='plasma');
 ax = da.plot.contour(show_mesh=True, cmap="tab20")
 ax.set_ylim(6135000, 6160000);
 ```
+
+### Subplots
+
+Pass a matplotlib axes to create side-by-side comparisons:
+
+```{python}
+import matplotlib.pyplot as plt
+
+fig, (ax1, ax2) = plt.subplots(ncols=2, figsize=(12, 7))
+
+ds["Surface elevation"].isel(time=-1).plot.contourf(ax=ax1, title="Surface elevation")
+ds["V velocity"].isel(time=-1).plot.contourf(
+    ax=ax2, title="V velocity", label="Northward velocity [m/s]"
+);
+```
+
+## Working with data
+
+### Subsetting by element properties
+
+Elements can be selected based on their coordinates, e.g. by depth:
+
+```{python}
+import numpy as np
+
+ze = dfs.geometry.element_coordinates[:, 2]
+deep_elems = np.where(ze < -20)[0]
+
+ds_deep = dfs.read(items=0, time=-1, elements=deep_elems)
+ax = ds_deep[0].plot()
+dfs.geometry.plot.mesh(ax=ax);
+```
+
+### Boolean masking
+
+Instead of reading a subset, you can mask values directly on a DataArray:
+
+```{python}
+da_last = ds["Surface elevation"].isel(time=-1).copy()
+da_last[ze >= -20] = np.nan
+da_last.plot(show_mesh=True);
+```
+
+## Creating a dfsu from a mesh
+
+```{python}
+import pandas as pd
+
+msh = mikeio.open("../data/odense_rough.mesh")
+data = 36.5 * np.ones(msh.geometry.n_elements)
+time = pd.date_range("2020-1-1", periods=1)
+item = mikeio.ItemInfo(mikeio.EUMType.Chezy_No)
+
+da = mikeio.DataArray(data, time=time, item=item, geometry=msh.geometry)
+da.to_dfs("chezy_map.dfsu")
+```
+
+```{python}
+import os
+os.remove("chezy_map.dfsu")
+```
