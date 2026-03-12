@@ -4,7 +4,7 @@ aliases:
   - ../dfs1.html
 ---
 
-A dfs1 file contains node-based line series data. Dfs1 files do not contain enough metadata to determine their geographical position, but have a relative distance from the origo. 
+A dfs1 file contains node-based line series data. Dfs1 files do not contain enough metadata to determine their geographical position, but have a relative distance from the origo. A common use case for dfs1 files is boundary conditions in MIKE 21 that vary along the boundary. Note that the MIKE FM engine treats the values as equidistant along the boundary regardless of the `dx` specified in the file.
 
 
 ```{python}
