@@ -358,7 +358,7 @@ Note
 <h2 class="anchored" data-anchor-id="mike-io-flexible-mesh-geometry">MIKE IO Flexible Mesh Geometry</h2>
 <p>MIKE IO has Flexible Mesh Geometry classes, e.g.&nbsp;<a href="../api/spatial.GeometryFM2D.html#mikeio.spatial.GeometryFM2D"><code>GeometryFM2D</code></a>, containing the list of node coordinates and the element table which defines the mesh, as well as a number of derived properties (e.g.&nbsp;element coordinates) and methods making it convenient to work with the mesh.</p>
 <p>If a .dfsu file is <em>read</em> with <a href="../api/read.html#mikeio.read"><code>mikeio.read</code></a>, the returned Dataset ds will contain a Flexible Mesh Geometry <code>geometry</code>. If a .dfsu or a .mesh file is <em>opened</em> with <a href="../api/open.html#mikeio.open"><code>mikeio.open</code></a>, the returned object will also contain a Flexible Mesh Geometry <code>geometry</code>.</p>
-<div id="30b51551" class="cell" data-execution_count="1">
+<div id="ee48e29e" class="cell" data-execution_count="1">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> mikeio</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>ds <span class="op">=</span> mikeio.read(<span class="st">"../data/oresundHD_run1.dfsu"</span>)</span>
@@ -370,7 +370,7 @@ number of elements: 3612
 projection: UTM-33</code></pre>
 </div>
 </div>
-<div id="0636d77f" class="cell" data-execution_count="2">
+<div id="6cba6f06" class="cell" data-execution_count="2">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>dfs <span class="op">=</span> mikeio.<span class="bu">open</span>(<span class="st">"../data/oresundHD_run1.dfsu"</span>)</span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>dfs.geometry</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-display" data-execution_count="2">
@@ -409,7 +409,7 @@ projection: UTM-33</code></pre>
 <section id="geometry" class="level3">
 <h3 class="anchored" data-anchor-id="geometry">Geometry</h3>
 <p>The geometry (bathymetry) can be visualized in various ways.</p>
-<div id="264a1aa8" class="cell" data-execution_count="3">
+<div id="bc253cdf" class="cell" data-execution_count="3">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>geom  <span class="op">=</span> dfs.geometry</span>
 <span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>geom.plot()<span class="op">;</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-display">
@@ -420,7 +420,7 @@ projection: UTM-33</code></pre>
 </div>
 </div>
 </div>
-<div id="9f380720" class="cell" data-execution_count="4">
+<div id="d9fad68c" class="cell" data-execution_count="4">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>geom.plot.mesh()<span class="op">;</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-display">
 <div>
@@ -430,7 +430,7 @@ projection: UTM-33</code></pre>
 </div>
 </div>
 </div>
-<div id="daa9969a" class="cell" data-execution_count="5">
+<div id="f743e28b" class="cell" data-execution_count="5">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>geom.plot(vmin<span class="op">=-</span><span class="dv">20</span>)<span class="op">;</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-display">
 <div>
@@ -440,7 +440,7 @@ projection: UTM-33</code></pre>
 </div>
 </div>
 </div>
-<div id="fec254a7" class="cell" data-execution_count="6">
+<div id="753d73df" class="cell" data-execution_count="6">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>geom.plot.contour(levels<span class="op">=</span>[<span class="op">-</span><span class="dv">20</span>,<span class="op">-</span><span class="dv">10</span>], cmap<span class="op">=</span><span class="st">'tab10'</span>)<span class="op">;</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-display">
 <div>
@@ -450,7 +450,7 @@ projection: UTM-33</code></pre>
 </div>
 </div>
 </div>
-<div id="2e2ce501" class="cell" data-execution_count="7">
+<div id="6c8b71ff" class="cell" data-execution_count="7">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>geom.plot.contourf(levels<span class="op">=</span><span class="dv">6</span>, vmin<span class="op">=-</span><span class="dv">30</span>)<span class="op">;</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-display">
 <div>
@@ -464,7 +464,7 @@ projection: UTM-33</code></pre>
 <section id="data" class="level3">
 <h3 class="anchored" data-anchor-id="data">Data</h3>
 <p>The data can be visualized in a similar way.</p>
-<div id="25f5f7cb" class="cell" data-execution_count="8">
+<div id="f0ce4377" class="cell" data-execution_count="8">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>da <span class="op">=</span> ds[<span class="st">"Surface elevation"</span>]</span>
 <span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>da.plot(cmap<span class="op">=</span><span class="st">'plasma'</span>)<span class="op">;</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-display">
@@ -475,7 +475,7 @@ projection: UTM-33</code></pre>
 </div>
 </div>
 </div>
-<div id="93854aad" class="cell" data-execution_count="9">
+<div id="e9c80df9" class="cell" data-execution_count="9">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>ax <span class="op">=</span> da.plot.contour(show_mesh<span class="op">=</span><span class="va">True</span>, cmap<span class="op">=</span><span class="st">"tab20"</span>)</span>
 <span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>ax.set_ylim(<span class="dv">6135000</span>, <span class="dv">6160000</span>)<span class="op">;</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-display">
@@ -490,7 +490,7 @@ projection: UTM-33</code></pre>
 <section id="subplots" class="level3">
 <h3 class="anchored" data-anchor-id="subplots">Subplots</h3>
 <p>Pass a matplotlib axes to create side-by-side comparisons:</p>
-<div id="e9b93ed6" class="cell" data-execution_count="10">
+<div id="772a1e7d" class="cell" data-execution_count="10">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
 <span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>fig, (ax1, ax2) <span class="op">=</span> plt.subplots(ncols<span class="op">=</span><span class="dv">2</span>, figsize<span class="op">=</span>(<span class="dv">12</span>, <span class="dv">7</span>))</span>
@@ -514,7 +514,7 @@ projection: UTM-33</code></pre>
 <section id="subsetting-by-element-properties" class="level3">
 <h3 class="anchored" data-anchor-id="subsetting-by-element-properties">Subsetting by element properties</h3>
 <p>Elements can be selected based on their coordinates, e.g.&nbsp;by depth:</p>
-<div id="b4490505" class="cell" data-execution_count="11">
+<div id="fdeccfe0" class="cell" data-execution_count="11">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
 <span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>ze <span class="op">=</span> dfs.geometry.element_coordinates[:, <span class="dv">2</span>]</span>
@@ -535,7 +535,7 @@ projection: UTM-33</code></pre>
 <section id="boolean-masking" class="level3">
 <h3 class="anchored" data-anchor-id="boolean-masking">Boolean masking</h3>
 <p>Instead of reading a subset, you can mask values directly on a DataArray:</p>
-<div id="b3061cad" class="cell" data-execution_count="12">
+<div id="3dd179f5" class="cell" data-execution_count="12">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>da_last <span class="op">=</span> ds[<span class="st">"Surface elevation"</span>].isel(time<span class="op">=-</span><span class="dv">1</span>).copy()</span>
 <span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>da_last[ze <span class="op">&gt;=</span> <span class="op">-</span><span class="dv">20</span>] <span class="op">=</span> np.nan</span>
 <span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>da_last.plot(show_mesh<span class="op">=</span><span class="va">True</span>)<span class="op">;</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
@@ -551,7 +551,7 @@ projection: UTM-33</code></pre>
 </section>
 <section id="creating-a-dfsu-from-a-mesh" class="level2">
 <h2 class="anchored" data-anchor-id="creating-a-dfsu-from-a-mesh">Creating a dfsu from a mesh</h2>
-<div id="525559f9" class="cell" data-execution_count="13">
+<div id="24d13fe3" class="cell" data-execution_count="13">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
 <span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>msh <span class="op">=</span> mikeio.<span class="bu">open</span>(<span class="st">"../data/odense_rough.mesh"</span>)</span>
@@ -562,7 +562,7 @@ projection: UTM-33</code></pre>
 <span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a>da <span class="op">=</span> mikeio.DataArray(data, time<span class="op">=</span>time, item<span class="op">=</span>item, geometry<span class="op">=</span>msh.geometry)</span>
 <span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a>da.to_dfs(<span class="st">"chezy_map.dfsu"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
-<div id="fb78d76d" class="cell" data-execution_count="14">
+<div id="cc7cdda8" class="cell" data-execution_count="14">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb16"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> os</span>
 <span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>os.remove(<span class="st">"chezy_map.dfsu"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
