@@ -215,17 +215,14 @@ class Dfs3(_Dfs123):
             layers = -1
         layers = None if layers is None else np.atleast_1d(layers)
 
-        dims: tuple[str, ...]
         shape: tuple[int, ...]
 
         nzl = nz if layers is None else len(layers)
         if nzl == 1 and (not keepdims):
             geometry = self.geometry._geometry_for_layers([0])
-            dims = ("time", "y", "x")
             shape = (nt, ny, nx)
         else:
             geometry = self.geometry._geometry_for_layers(layers, keepdims)  # type: ignore
-            dims = ("time", "z", "y", "x")
             shape = (nt, nzl, ny, nx)
 
         for item in range(n_items):
@@ -234,7 +231,6 @@ class Dfs3(_Dfs123):
 
         if single_time_selected and not keepdims:
             shape = shape[1:]
-            dims = tuple([d for d in dims if d != "time"])
 
         t_seconds = np.zeros(nt, dtype=float)
 
@@ -272,7 +268,6 @@ class Dfs3(_Dfs123):
             time=time,
             items=items,
             geometry=geometry,
-            dims=dims,
             validate=False,
         )
 
