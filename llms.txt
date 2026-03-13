@@ -1,0 +1,73 @@
+# MIKE IO
+
+> Python package for reading, writing, and manipulating MIKE files (dfs0, dfs1, dfs2, dfs3, dfsu, mesh) from DHI.
+
+## User Guide
+
+- [Getting started](https://dhi.github.io/mikeio/user-guide/getting-started.html)
+- [Design philosophy](https://dhi.github.io/mikeio/design.html)
+- [Data Structures](https://dhi.github.io/mikeio/user-guide/data-structures.html)
+- [DataArray](https://dhi.github.io/mikeio/user-guide/dataarray.html)
+- [Dataset](https://dhi.github.io/mikeio/user-guide/dataset.html)
+- [Dfs0](https://dhi.github.io/mikeio/user-guide/dfs0.html)
+- [Dfs1](https://dhi.github.io/mikeio/user-guide/dfs1.html)
+- [Dfs2](https://dhi.github.io/mikeio/user-guide/dfs2.html)
+- [Dfsu](https://dhi.github.io/mikeio/user-guide/dfsu.html)
+- [Mesh](https://dhi.github.io/mikeio/user-guide/mesh.html)
+- [EUM](https://dhi.github.io/mikeio/user-guide/eum.html)
+- [Statistics](https://dhi.github.io/mikeio/user-guide/statistics.html)
+- [Generic](https://dhi.github.io/mikeio/user-guide/generic.html)
+- [PFS](https://dhi.github.io/mikeio/user-guide/pfs.html): A configuration file format used in MIKE software
+
+## Examples
+
+- [Examples](https://dhi.github.io/mikeio/examples/index.html)
+- [Dfs0 examples](https://dhi.github.io/mikeio/examples/dfs0/index.html)
+- [Dfs2 examples](https://dhi.github.io/mikeio/examples/dfs2/index.html)
+- [Dfsu examples](https://dhi.github.io/mikeio/examples/dfsu/index.html)
+- [Time interpolation](https://dhi.github.io/mikeio/examples/Time-interpolation.html): Interpolate data to a specific time axis
+
+## API Reference
+
+- [open](https://dhi.github.io/mikeio/api/open.html)
+- [read](https://dhi.github.io/mikeio/api/read.html)
+- [read_pfs](https://dhi.github.io/mikeio/api/read_pfs.html)
+- [from_pandas](https://dhi.github.io/mikeio/api/from_pandas.html)
+- [from_polars](https://dhi.github.io/mikeio/api/from_polars.html)
+- [DataArray](https://dhi.github.io/mikeio/api/DataArray.html)
+- [Dataset](https://dhi.github.io/mikeio/api/Dataset.html)
+- [Grid1D](https://dhi.github.io/mikeio/api/Grid1D.html)
+- [Grid2D](https://dhi.github.io/mikeio/api/Grid2D.html)
+- [Grid3D](https://dhi.github.io/mikeio/api/Grid3D.html)
+- [Mesh](https://dhi.github.io/mikeio/api/Mesh.html)
+- [spatial.GeometryFM2D](https://dhi.github.io/mikeio/api/spatial.GeometryFM2D.html)
+- [spatial.GeometryFM3D](https://dhi.github.io/mikeio/api/spatial.GeometryFM3D.html)
+- [spatial.GeometryFMVerticalProfile](https://dhi.github.io/mikeio/api/spatial.GeometryFMVerticalProfile.html)
+- [spatial.GeometryFMVerticalColumn](https://dhi.github.io/mikeio/api/spatial.GeometryFMVerticalColumn.html)
+- [spatial._FM_geometry.GeometryFMPlotter](https://dhi.github.io/mikeio/api/spatial._FM_geometry.GeometryFMPlotter.html)
+- [dfsu.DfsuSpectral](https://dhi.github.io/mikeio/api/dfsu.DfsuSpectral.html)
+- [spatial.GeometryFMPointSpectrum](https://dhi.github.io/mikeio/api/spatial.GeometryFMPointSpectrum.html)
+- [spatial.GeometryFMLineSpectrum](https://dhi.github.io/mikeio/api/spatial.GeometryFMLineSpectrum.html)
+- [spatial.GeometryFMAreaSpectrum](https://dhi.github.io/mikeio/api/spatial.GeometryFMAreaSpectrum.html)
+- [ItemInfo](https://dhi.github.io/mikeio/api/ItemInfo.html)
+- [EUMType](https://dhi.github.io/mikeio/api/EUMType.html)
+- [EUMUnit](https://dhi.github.io/mikeio/api/EUMUnit.html)
+- [Dfs0](https://dhi.github.io/mikeio/api/Dfs0.html)
+- [Dfs1](https://dhi.github.io/mikeio/api/Dfs1.html)
+- [Dfs2](https://dhi.github.io/mikeio/api/Dfs2.html)
+- [Dfs3](https://dhi.github.io/mikeio/api/Dfs3.html)
+- [Dfsu](https://dhi.github.io/mikeio/api/Dfsu.html)
+- [dfsu.Dfsu2DH](https://dhi.github.io/mikeio/api/dfsu.Dfsu2DH.html)
+- [dfsu.Dfsu2DV](https://dhi.github.io/mikeio/api/dfsu.Dfsu2DV.html)
+- [dfsu.Dfsu3D](https://dhi.github.io/mikeio/api/dfsu.Dfsu3D.html)
+- [generic](https://dhi.github.io/mikeio/api/generic.html)
+- [PfsDocument](https://dhi.github.io/mikeio/api/PfsDocument.html)
+- [PfsSection](https://dhi.github.io/mikeio/api/PfsSection.html)
+- [dataset.DatasetPlotter](https://dhi.github.io/mikeio/api/dataset.DatasetPlotter.html)
+- [dataset.DataArrayPlotter](https://dhi.github.io/mikeio/api/dataset.DataArrayPlotter.html)
+- [dataset.DataArrayPlotterGrid1D](https://dhi.github.io/mikeio/api/dataset.DataArrayPlotterGrid1D.html)
+- [dataset.DataArrayPlotterGrid2D](https://dhi.github.io/mikeio/api/dataset.DataArrayPlotterGrid2D.html)
+- [dataset.DataArrayPlotterFM](https://dhi.github.io/mikeio/api/dataset.DataArrayPlotterFM.html)
+- [dataset.DataArrayPlotterFMVerticalProfile](https://dhi.github.io/mikeio/api/dataset.DataArrayPlotterFMVerticalProfile.html)
+- [dataset.DataArrayPlotterFMVerticalColumn](https://dhi.github.io/mikeio/api/dataset.DataArrayPlotterFMVerticalColumn.html)
+
