@@ -16,7 +16,7 @@ from numpy.typing import NDArray
 from mikecore.DfsuFile import DfsuFileType
 from mikecore.eum import eumQuantity
 from mikecore.MeshBuilder import MeshBuilder
-from scipy.spatial import cKDTree
+from scipy.spatial import KDTree
 
 from ..eum import EUMType, EUMUnit
 from ..exceptions import OutsideModelDomainError
@@ -508,9 +508,9 @@ class GeometryFM2D(_GeometryFM):
         return self.max_nodes_per_element == 3 or self.max_nodes_per_element == 6
 
     @cached_property
-    def _tree2d(self) -> cKDTree:
+    def _tree2d(self) -> KDTree:
         xy = self.element_coordinates[:, :2]
-        return cKDTree(xy)
+        return KDTree(xy)
 
     def find_nearest_elements(
         self,
@@ -614,7 +614,7 @@ class GeometryFM2D(_GeometryFM):
     def _find_n_nearest_2d_elements(
         self, x: float | np.ndarray, y: float | np.ndarray | None = None, n: int = 1
     ) -> tuple[Any, Any]:
-        # TODO return arguments in the same order than cKDTree.query?
+        # TODO return arguments in the same order than KDTree.query?
 
         if n > self.n_elements:
             raise ValueError(
