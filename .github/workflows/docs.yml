@@ -1,8 +1,11 @@
 name: Documentation
 
-on: 
+on:
   push:
     branches: [ main]
+    paths:
+      - 'docs/**'
+      - 'src/mikeio/**'
 
 jobs:
   build:

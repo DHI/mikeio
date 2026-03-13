@@ -354,13 +354,18 @@ class DfsuLayered:
             else self.geometry.elements_to_geometry(elements)
         )
 
+        selected_node_ids: np.ndarray | None = None
+        if elements is not None and getattr(geometry, "is_layered", False):
+            selected_node_ids, _ = self.geometry._get_nodes_and_table_for_elements(
+                elements, node_layers="all"
+            )
+
         if isinstance(geometry, GeometryPoint3D):
             n_elems = 1
             n_nodes = 1
         else:
             n_elems = geometry.n_elements
             n_nodes = geometry.n_nodes
-            node_ids = geometry.node_ids
 
         item_numbers = _valid_item_numbers(
             dfs.ItemInfo, items, ignore_first=self.geometry.is_layered
@@ -409,7 +414,11 @@ class DfsuLayered:
 
                 if elements is not None:
                     if item == 0 and item0_is_node_based:
-                        d = d[node_ids]
+                        if selected_node_ids is None:
+                            raise ValueError(
+                                "Could not determine node ids for layered selection"
+                            )
+                        d = d[selected_node_ids]
                     else:
                         d = d[elements]  # type: ignore
 
