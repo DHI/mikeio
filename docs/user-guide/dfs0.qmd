@@ -22,6 +22,40 @@ ds = mikeio.read("../data/da_diagnostic.dfs0")
 ds
 ```
 
+### Selecting items
+
+Items can be selected by name, index, or wildcard:
+
+```{python}
+ds = mikeio.read("../data/da_diagnostic.dfs0", items=[0, 2])
+ds
+```
+
+```{python}
+ds = mikeio.read("../data/da_diagnostic.dfs0", items="*State*")
+ds
+```
+
+### Subsetting in time
+
+Use `sel` for label-based or `isel` for positional indexing:
+
+```{python}
+ds = mikeio.read("../data/da_diagnostic.dfs0")
+ds.sel(time=slice("2017-10-27 01:00", "2017-10-27 02:00"))
+```
+
+```{python}
+ds.isel(time=slice(0, 5))
+```
+
+### Plotting
+
+```{python}
+ds.plot();
+```
+
+
 ## From Dfs0 to pandas DataFrame
 
 ```{python}
@@ -40,6 +74,21 @@ df = pd.read_csv(
 )
 ds = mikeio.from_pandas(df)
 ds.to_dfs("mauna_loa_co2.dfs0")
+```
+
+### Specifying EUM types and units
+
+By default, items created from a DataFrame have undefined EUM types. You can specify them explicitly:
+
+```{python}
+from mikeio import ItemInfo, EUMType, EUMUnit
+
+df_co2 = df[["Average"]].dropna()
+ds_typed = mikeio.from_pandas(
+    df_co2,
+    items=[ItemInfo("CO2", EUMType.Concentration_1)],
+)
+ds_typed
 ```
 
 
@@ -72,8 +121,15 @@ item
 ```
 
 
+Cleanup:
+
+```{python}
+import os
+os.remove("mauna_loa_co2.dfs0")
+```
+
+
 ## Dfs0 example notebooks
 
 * [Dfs0 | Relative time](../examples/dfs0/relative_time.qmd)
-* [Dfs0 | getting-started-with-mikeio](https://dhi.github.io/getting-started-with-mikeio/dfs0.html) - Course literature
 
