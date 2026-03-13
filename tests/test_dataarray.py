@@ -760,6 +760,11 @@ def test_get_2d_slice_with_sel(da_grid2d: DataArray) -> None:
     assert da6.shape == (10, 8, 3)
 
 
+def test_get_2d_slice_open_start(da_grid2d: DataArray) -> None:
+    da2 = da_grid2d.sel(y=slice(None, 0.0))
+    assert da2.shape == (10, 10, 7)
+
+
 def test_get_2d_outside_domain_raises_error(da_grid2d: DataArray) -> None:
     with pytest.raises(OutsideModelDomainError):
         da_grid2d.sel(x=0.0)
