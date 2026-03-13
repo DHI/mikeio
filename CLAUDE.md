@@ -232,6 +232,19 @@ Alternative: `ds = mikeio.read("file.dfs2")` combines open and read.
 ### Code Style
 - Uses ruff for linting and formatting
 - Docstrings required for public modules, classes, methods, functions (D100-D103)
+- **Docstring formatting (D413)**: Always include a blank line after the last section's content before the closing `"""`
+  ```python
+  # Correct format:
+  def foo():
+      """Summary.
+
+      Returns
+      -------
+      np.ndarray
+          Description
+
+      """
+  ```
 - Line length limit is ignored (E501)
 - Single letter variable names are allowed for common patterns (E741)
 
