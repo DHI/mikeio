@@ -661,6 +661,14 @@ class DataArray:
 
         parsed_axis = self._parse_axis(axis)
 
+        # isel operates on a single axis; unwrap single-element tuples
+        if isinstance(parsed_axis, tuple):
+            if len(parsed_axis) != 1:
+                raise ValueError(
+                    f"isel requires a single axis, got {len(parsed_axis)} axes"
+                )
+            parsed_axis = parsed_axis[0]
+
         idx_slice = None
         if isinstance(idx, slice):
             idx_slice = idx
@@ -1669,7 +1677,12 @@ class DataArray:
         from mikeio import Dataset
 
         parsed_axis = self._parse_axis(axis)
-        assert isinstance(parsed_axis, int)
+        if isinstance(parsed_axis, tuple):
+            if len(parsed_axis) != 1:
+                raise ValueError(
+                    f"quantile requires a single axis, got {len(parsed_axis)} axes"
+                )
+            parsed_axis = parsed_axis[0]
         time = self._time_by_agg_axis(self.time, parsed_axis)
 
         if np.isscalar(q):
@@ -2054,14 +2067,10 @@ class DataArray:
 
         if axis == "space":
             space_axis = self.geometry.get_space_axis()
-            if space_axis is None:
+            if len(space_axis) == 0:
                 raise ValueError(f"space axis cannot be selected from dims {dims}")
-            # Add time offset if data has time dimension
             if has_time:
-                if isinstance(space_axis, int):
-                    return space_axis + 1
-                else:
-                    return tuple(ax + 1 for ax in space_axis)
+                return tuple(ax + 1 for ax in space_axis)
             else:
                 return space_axis
 
