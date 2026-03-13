@@ -19,30 +19,22 @@ MIKE IO facilitates common data processing workflows for [MIKE files](https://ww
 
 
 ## Requirements
+
 * Windows or Linux operating system
 * Python x64 3.10 - 3.14
 * (Windows) [VC++ redistributables](https://aka.ms/vs/17/release/vc_redist.x64.exe) (already installed if you have MIKE)
 
 ## Installation
 
-From PyPI: 
-
 `pip install mikeio`
 
-Or development version:
-
-`pip install https://github.com/DHI/mikeio/archive/main.zip`
-
 :warning: **Don't use conda to install MIKE IO!**, the version on conda is outdated.
-
-## Getting started
-
-The material from the last Academy by DHI course is available here: [Getting started with Dfs files in Python using MIKE IO](https://dhi.github.io/getting-started-with-mikeio/intro.html)
 
 ## Where can I get help?
 * Documentation - [https://dhi.github.io/mikeio/](https://dhi.github.io/mikeio/)
 * General help, new ideas and feature requests - [GitHub Discussions](http://github.com/DHI/mikeio/discussions) 
-* Bugs - [GitHub Issues](http://github.com/DHI/mikeio/issues) 
+* Bugs - [GitHub Issues](http://github.com/DHI/mikeio/issues)
+* Course material: [Getting started with Dfs files in Python using MIKE IO](https://dhi.github.io/getting-started-with-mikeio/intro.html)
 
 
 ## Tested
@@ -99,13 +91,3 @@ mikeio/spatial/crs.py                        51      5    90%
 -------------------------------------------------------------
 TOTAL                                      8331    442    95%
 </pre>
-
-## Cloud enabled
-
-It is possible to run MIKE IO in your favorite cloud notebook environment e.g. [Deepnote](https://deepnote.com/), [Google Colab](https://colab.research.google.com/), etc...
-
-![DeepNote](https://raw.githubusercontent.com/DHI/mikeio/main/images/deepnote.png)
-
-![Colab](https://raw.githubusercontent.com/DHI/mikeio/main/images/colab.png)
-
-
