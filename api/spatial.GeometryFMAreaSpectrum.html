@@ -193,6 +193,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <li><a href="#mikeio.spatial.GeometryFMAreaSpectrum.get_element_area" id="toc-mikeio.spatial.GeometryFMAreaSpectrum.get_element_area" class="nav-link" data-scroll-target="#mikeio.spatial.GeometryFMAreaSpectrum.get_element_area">get_element_area</a></li>
   <li><a href="#mikeio.spatial.GeometryFMAreaSpectrum.get_node_centered_data" id="toc-mikeio.spatial.GeometryFMAreaSpectrum.get_node_centered_data" class="nav-link" data-scroll-target="#mikeio.spatial.GeometryFMAreaSpectrum.get_node_centered_data">get_node_centered_data</a></li>
   <li><a href="#mikeio.spatial.GeometryFMAreaSpectrum.get_overset_grid" id="toc-mikeio.spatial.GeometryFMAreaSpectrum.get_overset_grid" class="nav-link" data-scroll-target="#mikeio.spatial.GeometryFMAreaSpectrum.get_overset_grid">get_overset_grid</a></li>
+  <li><a href="#mikeio.spatial.GeometryFMAreaSpectrum.get_space_axis" id="toc-mikeio.spatial.GeometryFMAreaSpectrum.get_space_axis" class="nav-link" data-scroll-target="#mikeio.spatial.GeometryFMAreaSpectrum.get_space_axis">get_space_axis</a></li>
+  <li><a href="#mikeio.spatial.GeometryFMAreaSpectrum.reduce" id="toc-mikeio.spatial.GeometryFMAreaSpectrum.reduce" class="nav-link" data-scroll-target="#mikeio.spatial.GeometryFMAreaSpectrum.reduce">reduce</a></li>
   <li><a href="#mikeio.spatial.GeometryFMAreaSpectrum.to_mesh" id="toc-mikeio.spatial.GeometryFMAreaSpectrum.to_mesh" class="nav-link" data-scroll-target="#mikeio.spatial.GeometryFMAreaSpectrum.to_mesh">to_mesh</a></li>
   <li><a href="#mikeio.spatial.GeometryFMAreaSpectrum.to_shapely" id="toc-mikeio.spatial.GeometryFMAreaSpectrum.to_shapely" class="nav-link" data-scroll-target="#mikeio.spatial.GeometryFMAreaSpectrum.to_shapely">to_shapely</a></li>
   </ul></li>
@@ -349,6 +351,14 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <tr class="even">
 <td><a href="#mikeio.spatial.GeometryFMAreaSpectrum.get_overset_grid">get_overset_grid</a></td>
 <td>Get a 2d grid that covers the domain by specifying spacing or shape.</td>
+</tr>
+<tr class="odd">
+<td><a href="#mikeio.spatial.GeometryFMAreaSpectrum.get_space_axis">get_space_axis</a></td>
+<td>Area spectrum has element as the geographic space dimension.</td>
+</tr>
+<tr class="even">
+<td><a href="#mikeio.spatial.GeometryFMAreaSpectrum.reduce">reduce</a></td>
+<td>Return reduced geometry after spatial aggregation.</td>
 </tr>
 <tr class="odd">
 <td><a href="#mikeio.spatial.GeometryFMAreaSpectrum.to_mesh">to_mesh</a></td>
@@ -884,9 +894,19 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </table>
 </section>
 </section>
+<section id="mikeio.spatial.GeometryFMAreaSpectrum.get_space_axis" class="level3">
+<h3 class="anchored" data-anchor-id="mikeio.spatial.GeometryFMAreaSpectrum.get_space_axis">get_space_axis</h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>spatial.GeometryFMAreaSpectrum.get_space_axis()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Area spectrum has element as the geographic space dimension.</p>
+</section>
+<section id="mikeio.spatial.GeometryFMAreaSpectrum.reduce" class="level3">
+<h3 class="anchored" data-anchor-id="mikeio.spatial.GeometryFMAreaSpectrum.reduce">reduce</h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>spatial.GeometryFMAreaSpectrum.<span class="bu">reduce</span>(axis)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Return reduced geometry after spatial aggregation.</p>
+</section>
 <section id="mikeio.spatial.GeometryFMAreaSpectrum.to_mesh" class="level3">
 <h3 class="anchored" data-anchor-id="mikeio.spatial.GeometryFMAreaSpectrum.to_mesh">to_mesh</h3>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>spatial.GeometryFMAreaSpectrum.to_mesh(outfilename)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>spatial.GeometryFMAreaSpectrum.to_mesh(outfilename)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>Export geometry to new mesh file.</p>
 <section id="parameters-6" class="level4 doc-section doc-section-parameters">
 <h4 class="doc-section doc-section-parameters anchored" data-anchor-id="parameters-6">Parameters</h4>
@@ -912,7 +932,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </section>
 <section id="mikeio.spatial.GeometryFMAreaSpectrum.to_shapely" class="level3">
 <h3 class="anchored" data-anchor-id="mikeio.spatial.GeometryFMAreaSpectrum.to_shapely">to_shapely</h3>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>spatial.GeometryFMAreaSpectrum.to_shapely()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>spatial.GeometryFMAreaSpectrum.to_shapely()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>Export mesh as shapely MultiPolygon.</p>
 <section id="returns-8" class="level4 doc-section doc-section-returns">
 <h4 class="doc-section doc-section-returns anchored" data-anchor-id="returns-8">Returns</h4>

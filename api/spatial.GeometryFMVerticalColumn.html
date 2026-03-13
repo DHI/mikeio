@@ -186,6 +186,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <li><a href="#methods" id="toc-methods" class="nav-link" data-scroll-target="#methods">Methods</a>
   <ul class="collapse">
   <li><a href="#mikeio.spatial.GeometryFMVerticalColumn.get_layer_elements" id="toc-mikeio.spatial.GeometryFMVerticalColumn.get_layer_elements" class="nav-link" data-scroll-target="#mikeio.spatial.GeometryFMVerticalColumn.get_layer_elements">get_layer_elements</a></li>
+  <li><a href="#mikeio.spatial.GeometryFMVerticalColumn.get_space_axis" id="toc-mikeio.spatial.GeometryFMVerticalColumn.get_space_axis" class="nav-link" data-scroll-target="#mikeio.spatial.GeometryFMVerticalColumn.get_space_axis">get_space_axis</a></li>
+  <li><a href="#mikeio.spatial.GeometryFMVerticalColumn.reduce" id="toc-mikeio.spatial.GeometryFMVerticalColumn.reduce" class="nav-link" data-scroll-target="#mikeio.spatial.GeometryFMVerticalColumn.reduce">reduce</a></li>
   <li><a href="#mikeio.spatial.GeometryFMVerticalColumn.to_2d_geometry" id="toc-mikeio.spatial.GeometryFMVerticalColumn.to_2d_geometry" class="nav-link" data-scroll-target="#mikeio.spatial.GeometryFMVerticalColumn.to_2d_geometry">to_2d_geometry</a></li>
   </ul></li>
   </ul></li>
@@ -316,6 +318,14 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <td>3d element ids for one (or more) specific layer(s).</td>
 </tr>
 <tr class="even">
+<td><a href="#mikeio.spatial.GeometryFMVerticalColumn.get_space_axis">get_space_axis</a></td>
+<td>Get geographic space axis indices within the geometry’s dims.</td>
+</tr>
+<tr class="odd">
+<td><a href="#mikeio.spatial.GeometryFMVerticalColumn.reduce">reduce</a></td>
+<td>Return reduced geometry after spatial aggregation.</td>
+</tr>
+<tr class="even">
 <td><a href="#mikeio.spatial.GeometryFMVerticalColumn.to_2d_geometry">to_2d_geometry</a></td>
 <td>extract 2d geometry from 3d geometry.</td>
 </tr>
@@ -372,12 +382,52 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </table>
 </section>
 </section>
-<section id="mikeio.spatial.GeometryFMVerticalColumn.to_2d_geometry" class="level3">
-<h3 class="anchored" data-anchor-id="mikeio.spatial.GeometryFMVerticalColumn.to_2d_geometry">to_2d_geometry</h3>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>spatial.GeometryFMVerticalColumn.to_2d_geometry()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<p>extract 2d geometry from 3d geometry.</p>
+<section id="mikeio.spatial.GeometryFMVerticalColumn.get_space_axis" class="level3">
+<h3 class="anchored" data-anchor-id="mikeio.spatial.GeometryFMVerticalColumn.get_space_axis">get_space_axis</h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>spatial.GeometryFMVerticalColumn.get_space_axis()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Get geographic space axis indices within the geometry’s dims.</p>
+<p>Returns which of the geometry’s dims represent geographic space dimensions, as opposed to spectral or other non-geographic dimensions.</p>
+<p>This is used when axis=“space” or axis=“spatial” is specified in operations like aggregate, mean, etc.</p>
 <section id="returns-1" class="level4 doc-section doc-section-returns">
 <h4 class="doc-section doc-section-returns anchored" data-anchor-id="returns-1">Returns</h4>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 4%">
+<col style="width: 10%">
+<col style="width: 85%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Name</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td></td>
+<td>tuple[int, …]</td>
+<td>Space axis indices (0-indexed within geometry.dims). Returns empty tuple if there are no space dimensions (e.g., point geometries, pure spectral geometries).</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="examples" class="level4 doc-section doc-section-examples">
+<h4 class="doc-section doc-section-examples anchored" data-anchor-id="examples">Examples</h4>
+<p>Grid2D with dims=(“y”, “x”) returns (0, 1) - both are space. GeometryFMAreaSpectrum with dims=(“element”, “direction”, “frequency”) returns (0,) - only element is space, direction/frequency are spectral. GeometryFMPointSpectrum with dims=(“frequency”,) returns () - no space.</p>
+</section>
+</section>
+<section id="mikeio.spatial.GeometryFMVerticalColumn.reduce" class="level3">
+<h3 class="anchored" data-anchor-id="mikeio.spatial.GeometryFMVerticalColumn.reduce">reduce</h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>spatial.GeometryFMVerticalColumn.<span class="bu">reduce</span>(axis)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Return reduced geometry after spatial aggregation.</p>
+</section>
+<section id="mikeio.spatial.GeometryFMVerticalColumn.to_2d_geometry" class="level3">
+<h3 class="anchored" data-anchor-id="mikeio.spatial.GeometryFMVerticalColumn.to_2d_geometry">to_2d_geometry</h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>spatial.GeometryFMVerticalColumn.to_2d_geometry()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>extract 2d geometry from 3d geometry.</p>
+<section id="returns-2" class="level4 doc-section doc-section-returns">
+<h4 class="doc-section doc-section-returns anchored" data-anchor-id="returns-2">Returns</h4>
 <table class="caption-top table">
 <thead>
 <tr class="header">

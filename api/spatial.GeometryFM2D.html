@@ -192,7 +192,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <li><a href="#mikeio.spatial.GeometryFM2D.get_element_area" id="toc-mikeio.spatial.GeometryFM2D.get_element_area" class="nav-link" data-scroll-target="#mikeio.spatial.GeometryFM2D.get_element_area">get_element_area</a></li>
   <li><a href="#mikeio.spatial.GeometryFM2D.get_node_centered_data" id="toc-mikeio.spatial.GeometryFM2D.get_node_centered_data" class="nav-link" data-scroll-target="#mikeio.spatial.GeometryFM2D.get_node_centered_data">get_node_centered_data</a></li>
   <li><a href="#mikeio.spatial.GeometryFM2D.get_overset_grid" id="toc-mikeio.spatial.GeometryFM2D.get_overset_grid" class="nav-link" data-scroll-target="#mikeio.spatial.GeometryFM2D.get_overset_grid">get_overset_grid</a></li>
+  <li><a href="#mikeio.spatial.GeometryFM2D.get_space_axis" id="toc-mikeio.spatial.GeometryFM2D.get_space_axis" class="nav-link" data-scroll-target="#mikeio.spatial.GeometryFM2D.get_space_axis">get_space_axis</a></li>
   <li><a href="#mikeio.spatial.GeometryFM2D.isel" id="toc-mikeio.spatial.GeometryFM2D.isel" class="nav-link" data-scroll-target="#mikeio.spatial.GeometryFM2D.isel">isel</a></li>
+  <li><a href="#mikeio.spatial.GeometryFM2D.reduce" id="toc-mikeio.spatial.GeometryFM2D.reduce" class="nav-link" data-scroll-target="#mikeio.spatial.GeometryFM2D.reduce">reduce</a></li>
   <li><a href="#mikeio.spatial.GeometryFM2D.to_mesh" id="toc-mikeio.spatial.GeometryFM2D.to_mesh" class="nav-link" data-scroll-target="#mikeio.spatial.GeometryFM2D.to_mesh">to_mesh</a></li>
   <li><a href="#mikeio.spatial.GeometryFM2D.to_shapely" id="toc-mikeio.spatial.GeometryFM2D.to_shapely" class="nav-link" data-scroll-target="#mikeio.spatial.GeometryFM2D.to_shapely">to_shapely</a></li>
   </ul></li>
@@ -333,8 +335,16 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <td>Get a 2d grid that covers the domain by specifying spacing or shape.</td>
 </tr>
 <tr class="even">
+<td><a href="#mikeio.spatial.GeometryFM2D.get_space_axis">get_space_axis</a></td>
+<td>Get geographic space axis indices within the geometry’s dims.</td>
+</tr>
+<tr class="odd">
 <td><a href="#mikeio.spatial.GeometryFM2D.isel">isel</a></td>
 <td>Export a selection of elements to a new geometry.</td>
+</tr>
+<tr class="even">
+<td><a href="#mikeio.spatial.GeometryFM2D.reduce">reduce</a></td>
+<td>Return reduced geometry after spatial aggregation.</td>
 </tr>
 <tr class="odd">
 <td><a href="#mikeio.spatial.GeometryFM2D.to_mesh">to_mesh</a></td>
@@ -832,9 +842,44 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </table>
 </section>
 </section>
+<section id="mikeio.spatial.GeometryFM2D.get_space_axis" class="level3">
+<h3 class="anchored" data-anchor-id="mikeio.spatial.GeometryFM2D.get_space_axis">get_space_axis</h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>spatial.GeometryFM2D.get_space_axis()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Get geographic space axis indices within the geometry’s dims.</p>
+<p>Returns which of the geometry’s dims represent geographic space dimensions, as opposed to spectral or other non-geographic dimensions.</p>
+<p>This is used when axis=“space” or axis=“spatial” is specified in operations like aggregate, mean, etc.</p>
+<section id="returns-7" class="level4 doc-section doc-section-returns">
+<h4 class="doc-section doc-section-returns anchored" data-anchor-id="returns-7">Returns</h4>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 4%">
+<col style="width: 10%">
+<col style="width: 85%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Name</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td></td>
+<td>tuple[int, …]</td>
+<td>Space axis indices (0-indexed within geometry.dims). Returns empty tuple if there are no space dimensions (e.g., point geometries, pure spectral geometries).</td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="examples-2" class="level4 doc-section doc-section-examples">
+<h4 class="doc-section doc-section-examples anchored" data-anchor-id="examples-2">Examples</h4>
+<p>Grid2D with dims=(“y”, “x”) returns (0, 1) - both are space. GeometryFMAreaSpectrum with dims=(“element”, “direction”, “frequency”) returns (0,) - only element is space, direction/frequency are spectral. GeometryFMPointSpectrum with dims=(“frequency”,) returns () - no space.</p>
+</section>
+</section>
 <section id="mikeio.spatial.GeometryFM2D.isel" class="level3">
 <h3 class="anchored" data-anchor-id="mikeio.spatial.GeometryFM2D.isel">isel</h3>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>spatial.GeometryFM2D.isel(idx, keepdims<span class="op">=</span><span class="va">False</span>, <span class="op">**</span>kwargs)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>spatial.GeometryFM2D.isel(idx, keepdims<span class="op">=</span><span class="va">False</span>, <span class="op">**</span>kwargs)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>Export a selection of elements to a new geometry.</p>
 <p>Typically not called directly, but by Dataset/DataArray’s isel() or sel() methods.</p>
 <section id="parameters-6" class="level4 doc-section doc-section-parameters">
@@ -876,8 +921,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </tbody>
 </table>
 </section>
-<section id="returns-7" class="level4 doc-section doc-section-returns">
-<h4 class="doc-section doc-section-returns anchored" data-anchor-id="returns-7">Returns</h4>
+<section id="returns-8" class="level4 doc-section doc-section-returns">
+<h4 class="doc-section doc-section-returns anchored" data-anchor-id="returns-8">Returns</h4>
 <table class="caption-top table">
 <thead>
 <tr class="header">
@@ -900,9 +945,14 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <p>find_index : find element indicies for points or an area</p>
 </section>
 </section>
+<section id="mikeio.spatial.GeometryFM2D.reduce" class="level3">
+<h3 class="anchored" data-anchor-id="mikeio.spatial.GeometryFM2D.reduce">reduce</h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>spatial.GeometryFM2D.<span class="bu">reduce</span>(axis)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Return reduced geometry after spatial aggregation.</p>
+</section>
 <section id="mikeio.spatial.GeometryFM2D.to_mesh" class="level3">
 <h3 class="anchored" data-anchor-id="mikeio.spatial.GeometryFM2D.to_mesh">to_mesh</h3>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>spatial.GeometryFM2D.to_mesh(outfilename)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>spatial.GeometryFM2D.to_mesh(outfilename)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>Export geometry to new mesh file.</p>
 <section id="parameters-7" class="level4 doc-section doc-section-parameters">
 <h4 class="doc-section doc-section-parameters anchored" data-anchor-id="parameters-7">Parameters</h4>
@@ -928,10 +978,10 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </section>
 <section id="mikeio.spatial.GeometryFM2D.to_shapely" class="level3">
 <h3 class="anchored" data-anchor-id="mikeio.spatial.GeometryFM2D.to_shapely">to_shapely</h3>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>spatial.GeometryFM2D.to_shapely()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>spatial.GeometryFM2D.to_shapely()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>Export mesh as shapely MultiPolygon.</p>
-<section id="returns-8" class="level4 doc-section doc-section-returns">
-<h4 class="doc-section doc-section-returns anchored" data-anchor-id="returns-8">Returns</h4>
+<section id="returns-9" class="level4 doc-section doc-section-returns">
+<h4 class="doc-section doc-section-returns anchored" data-anchor-id="returns-9">Returns</h4>
 <table class="caption-top table">
 <thead>
 <tr class="header">
