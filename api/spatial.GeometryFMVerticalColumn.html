@@ -185,6 +185,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <li><a href="#attributes" id="toc-attributes" class="nav-link" data-scroll-target="#attributes">Attributes</a></li>
   <li><a href="#methods" id="toc-methods" class="nav-link" data-scroll-target="#methods">Methods</a>
   <ul class="collapse">
+  <li><a href="#mikeio.spatial.GeometryFMVerticalColumn.calc_ze" id="toc-mikeio.spatial.GeometryFMVerticalColumn.calc_ze" class="nav-link" data-scroll-target="#mikeio.spatial.GeometryFMVerticalColumn.calc_ze">calc_ze</a></li>
+  <li><a href="#mikeio.spatial.GeometryFMVerticalColumn.calc_zf" id="toc-mikeio.spatial.GeometryFMVerticalColumn.calc_zf" class="nav-link" data-scroll-target="#mikeio.spatial.GeometryFMVerticalColumn.calc_zf">calc_zf</a></li>
   <li><a href="#mikeio.spatial.GeometryFMVerticalColumn.get_layer_elements" id="toc-mikeio.spatial.GeometryFMVerticalColumn.get_layer_elements" class="nav-link" data-scroll-target="#mikeio.spatial.GeometryFMVerticalColumn.get_layer_elements">get_layer_elements</a></li>
   <li><a href="#mikeio.spatial.GeometryFMVerticalColumn.get_space_axis" id="toc-mikeio.spatial.GeometryFMVerticalColumn.get_space_axis" class="nav-link" data-scroll-target="#mikeio.spatial.GeometryFMVerticalColumn.get_space_axis">get_space_axis</a></li>
   <li><a href="#mikeio.spatial.GeometryFMVerticalColumn.reduce" id="toc-mikeio.spatial.GeometryFMVerticalColumn.reduce" class="nav-link" data-scroll-target="#mikeio.spatial.GeometryFMVerticalColumn.reduce">reduce</a></li>
@@ -270,7 +272,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </tr>
 <tr class="odd">
 <td><a href="#mikeio.spatial.GeometryFMVerticalColumn.n_elements">n_elements</a></td>
-<td>Number of 3d elements.</td>
+<td>Number of elements.</td>
 </tr>
 <tr class="even">
 <td><a href="#mikeio.spatial.GeometryFMVerticalColumn.n_layers">n_layers</a></td>
@@ -281,22 +283,26 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <td>List of number of layers for each column.</td>
 </tr>
 <tr class="even">
+<td><a href="#mikeio.spatial.GeometryFMVerticalColumn.n_nodes">n_nodes</a></td>
+<td>Number of nodes.</td>
+</tr>
+<tr class="odd">
 <td><a href="#mikeio.spatial.GeometryFMVerticalColumn.n_sigma_layers">n_sigma_layers</a></td>
 <td>Number of sigma layers.</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td><a href="#mikeio.spatial.GeometryFMVerticalColumn.n_z_layers">n_z_layers</a></td>
 <td>Maximum number of z-layers.</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td><a href="#mikeio.spatial.GeometryFMVerticalColumn.projection">projection</a></td>
 <td>The projection.</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td><a href="#mikeio.spatial.GeometryFMVerticalColumn.projection_string">projection_string</a></td>
 <td>The projection string.</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td><a href="#mikeio.spatial.GeometryFMVerticalColumn.top_elements">top_elements</a></td>
 <td>List of 3d element ids of surface layer.</td>
 </tr>
@@ -313,6 +319,14 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </tr>
 </thead>
 <tbody>
+<tr class="odd">
+<td><a href="#mikeio.spatial.GeometryFMVerticalColumn.calc_ze">calc_ze</a></td>
+<td>Z-coordinates at element centers.</td>
+</tr>
+<tr class="even">
+<td><a href="#mikeio.spatial.GeometryFMVerticalColumn.calc_zf">calc_zf</a></td>
+<td>Z-coordinates at layer faces (horizontal interfaces between layers).</td>
+</tr>
 <tr class="odd">
 <td><a href="#mikeio.spatial.GeometryFMVerticalColumn.get_layer_elements">get_layer_elements</a></td>
 <td>3d element ids for one (or more) specific layer(s).</td>
@@ -331,9 +345,19 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </tr>
 </tbody>
 </table>
+<section id="mikeio.spatial.GeometryFMVerticalColumn.calc_ze" class="level3">
+<h3 class="anchored" data-anchor-id="mikeio.spatial.GeometryFMVerticalColumn.calc_ze">calc_ze</h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>spatial.GeometryFMVerticalColumn.calc_ze(zn<span class="op">=</span><span class="va">None</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Z-coordinates at element centers.</p>
+</section>
+<section id="mikeio.spatial.GeometryFMVerticalColumn.calc_zf" class="level3">
+<h3 class="anchored" data-anchor-id="mikeio.spatial.GeometryFMVerticalColumn.calc_zf">calc_zf</h3>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>spatial.GeometryFMVerticalColumn.calc_zf(zn<span class="op">=</span><span class="va">None</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Z-coordinates at layer faces (horizontal interfaces between layers).</p>
+</section>
 <section id="mikeio.spatial.GeometryFMVerticalColumn.get_layer_elements" class="level3">
 <h3 class="anchored" data-anchor-id="mikeio.spatial.GeometryFMVerticalColumn.get_layer_elements">get_layer_elements</h3>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>spatial.GeometryFMVerticalColumn.get_layer_elements(layers)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>spatial.GeometryFMVerticalColumn.get_layer_elements(layers)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>3d element ids for one (or more) specific layer(s).</p>
 <section id="parameters" class="level4 doc-section doc-section-parameters">
 <h4 class="doc-section doc-section-parameters anchored" data-anchor-id="parameters">Parameters</h4>
@@ -384,7 +408,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </section>
 <section id="mikeio.spatial.GeometryFMVerticalColumn.get_space_axis" class="level3">
 <h3 class="anchored" data-anchor-id="mikeio.spatial.GeometryFMVerticalColumn.get_space_axis">get_space_axis</h3>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>spatial.GeometryFMVerticalColumn.get_space_axis()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>spatial.GeometryFMVerticalColumn.get_space_axis()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>Get geographic space axis indices within the geometry’s dims.</p>
 <p>Returns which of the geometry’s dims represent geographic space dimensions, as opposed to spectral or other non-geographic dimensions.</p>
 <p>This is used when axis=“space” or axis=“spatial” is specified in operations like aggregate, mean, etc.</p>
@@ -419,12 +443,12 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </section>
 <section id="mikeio.spatial.GeometryFMVerticalColumn.reduce" class="level3">
 <h3 class="anchored" data-anchor-id="mikeio.spatial.GeometryFMVerticalColumn.reduce">reduce</h3>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>spatial.GeometryFMVerticalColumn.<span class="bu">reduce</span>(axis)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>spatial.GeometryFMVerticalColumn.<span class="bu">reduce</span>(axis)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>Return reduced geometry after spatial aggregation.</p>
 </section>
 <section id="mikeio.spatial.GeometryFMVerticalColumn.to_2d_geometry" class="level3">
 <h3 class="anchored" data-anchor-id="mikeio.spatial.GeometryFMVerticalColumn.to_2d_geometry">to_2d_geometry</h3>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>spatial.GeometryFMVerticalColumn.to_2d_geometry()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>spatial.GeometryFMVerticalColumn.to_2d_geometry()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <p>extract 2d geometry from 3d geometry.</p>
 <section id="returns-2" class="level4 doc-section doc-section-returns">
 <h4 class="doc-section doc-section-returns anchored" data-anchor-id="returns-2">Returns</h4>
