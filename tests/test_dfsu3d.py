@@ -1,15 +1,17 @@
 from pathlib import Path
+
 import numpy as np
 import pandas as pd
 import pytest
+
 import mikeio
 from mikeio import Mesh
 from mikeio.spatial import (
     GeometryFM2D,
     GeometryFM3D,
     GeometryFMVerticalColumn,
+    GeometryPoint3D,
 )
-from mikeio.spatial import GeometryPoint3D
 
 
 def test_repr() -> None:
@@ -301,6 +303,20 @@ def test_read_column_select_single_time_plot() -> None:
     sal_prof.plot.line()
 
 
+def test_plot_column_selected_from_dataset() -> None:
+    import matplotlib.pyplot as plt
+
+    ds = mikeio.read("tests/testdata/oresund_sigma_z.dfsu")
+    dsp = ds.sel(x=333934.1, y=6158101.5)
+    assert isinstance(dsp.geometry, GeometryFMVerticalColumn)
+
+    da = dsp["Temperature"]
+    da.plot()
+    da.plot(extrapolate=False, marker="o")
+
+    plt.close("all")
+
+
 def test_read_column_interp_time_and_select_time() -> None:
     filename = "tests/testdata/oresund_sigma_z.dfsu"
     dfs = mikeio.Dfsu3D(filename)
@@ -521,8 +537,7 @@ def test_extract_top_layer_to_2d(tmp_path: Path) -> None:
     ds.to_dfs(fp)
 
     newdfs = mikeio.Dfsu2DH(fp)
-
-    assert newdfs.geometry.is_2d
+    assert isinstance(newdfs.geometry, GeometryFM2D)
 
 
 def test_modify_values_in_layer(tmp_path: Path) -> None:

@@ -522,7 +522,10 @@ class DataArrayPlotterFM(DataArrayPlotter):
         ```
 
         """
-        return self.da.geometry.plot.mesh(figsize=figsize, ax=ax, **kwargs)
+        geom = self.da.geometry
+        if geom.is_layered:
+            geom = geom.to_2d_geometry()
+        return geom.plot.mesh(figsize=figsize, ax=ax, **kwargs)
 
     def outline(
         self,
@@ -540,7 +543,10 @@ class DataArrayPlotterFM(DataArrayPlotter):
         ```
 
         """
-        return self.da.geometry.plot.outline(figsize=figsize, ax=ax, **kwargs)
+        geom = self.da.geometry
+        if geom.is_layered:
+            geom = geom.to_2d_geometry()
+        return geom.plot.outline(figsize=figsize, ax=ax, **kwargs)
 
     def _plot_FM_map(self, ax: Axes, **kwargs: Any) -> Axes:
         da = self.da.isel(time=0) if "time" in self.da.dims else self.da

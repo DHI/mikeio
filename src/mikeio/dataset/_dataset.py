@@ -1010,7 +1010,7 @@ class Dataset:
             Interpolated Dataset
 
         """
-        if not (isinstance(self.geometry, GeometryFM2D) and self.geometry.is_2d):
+        if not (isinstance(self.geometry, GeometryFM2D)):
             raise NotImplementedError(
                 "Currently only supports interpolating from 2d flexible mesh data!"
             )
