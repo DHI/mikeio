@@ -34,6 +34,7 @@ docs: FORCE
         echo "Error: index.html not found. Quarto render failed."; \
         exit 1; \
     fi; \
+    uv run python generate_llms_txt.py; \
     cd -
 
 
