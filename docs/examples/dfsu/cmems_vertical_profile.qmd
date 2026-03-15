@@ -14,7 +14,6 @@ The dfsu vertical profile preserves the original irregular depth levels from CME
 import numpy as np
 import xarray as xr
 import matplotlib.pyplot as plt
-from scipy.interpolate import RegularGridInterpolator
 
 import mikeio
 from mikeio.spatial import GeometryFMVerticalProfile
@@ -29,22 +28,15 @@ This example uses a small Baltic Sea subset downloaded with the [Copernicus Mari
 copernicusmarine subset \
   --dataset-id cmems_mod_bal_phy_anfc_P1D-m \
   --variable thetao --variable so \
-  --minimum-longitude 22.8 --maximum-longitude 23.8 \
-  --minimum-latitude 59.0 --maximum-latitude 60.1 \
-  --start-datetime 2026-03-01 --end-datetime 2026-03-02 \
+  --minimum-longitude 23.2 --maximum-longitude 23.7 \
+  --minimum-latitude 59.0 --maximum-latitude 60.0 \
+  --start-datetime 2026-03-01 --end-datetime 2026-03-03 \
   --output-filename cmems_mod_bal_phy_anfc_P1D.nc
 ```
 
 ```{python}
 ds_cmems = xr.open_dataset("../../data/cmems_mod_bal_phy_anfc_P1D.nc")
 ds_cmems
-```
-
-```{python}
-lon = ds_cmems.longitude.values
-lat = ds_cmems.latitude.values
-depth = ds_cmems.depth.values
-time = ds_cmems.time.values
 ```
 
 ### Regional model differences
@@ -68,21 +60,21 @@ The approach below works the same regardless of which regional model you use —
 
 ## Define a transect
 
-Define waypoints across the Gulf of Finland and interpolate to evenly-spaced points.
+Define a transect as evenly-spaced points between two endpoints, using the native grid resolution.
 
 ```{python}
-waypoints = [(23.0, 59.2), (23.3, 59.6), (23.6, 59.9)]
-wp = np.array(waypoints)
+lon_start, lat_start = 23.3, 59.3
+lon_end, lat_end = 23.6, 59.6
 
-# Parametric interpolation along waypoints
-seg_dist = np.sqrt(np.diff(wp[:, 0]) ** 2 + np.diff(wp[:, 1]) ** 2)
-cum_dist = np.concatenate([[0], np.cumsum(seg_dist)])
-total_dist = cum_dist[-1]
+# Use native grid spacing to determine number of points
+dlat = float(ds_cmems.latitude.diff("latitude").median())
+dlon = float(ds_cmems.longitude.diff("longitude").median())
+dx = np.sqrt((lon_end - lon_start) ** 2 + (lat_end - lat_start) ** 2)
+n_points = max(int(dx / min(dlat, dlon)), 2)
 
-n_points = 30
-t_interp = np.linspace(0, total_dist, n_points)
-transect_lon = np.interp(t_interp, cum_dist, wp[:, 0])
-transect_lat = np.interp(t_interp, cum_dist, wp[:, 1])
+transect_lon = np.linspace(lon_start, lon_end, n_points)
+transect_lat = np.linspace(lat_start, lat_end, n_points)
+print(f"{n_points} points along transect (grid spacing ~{dlon:.3f}° x {dlat:.3f}°)")
 ```
 
 ```{python}
@@ -96,60 +88,43 @@ ax.set_title("Surface temperature with transect");
 
 ## Extract data along the transect
 
-Interpolate horizontally from the CMEMS grid to the transect points at each depth level.
-NaN values (land/seafloor) are handled with nearest-neighbor extrapolation.
+Select the nearest grid point for each transect position using xarray.
 
 ```{python}
+# Select nearest grid points along the transect
+ds_transect = ds_cmems.sel(
+    latitude=xr.DataArray(transect_lat, dims="points"),
+    longitude=xr.DataArray(transect_lon, dims="points"),
+    method="nearest",
+)
+ds_transect
+```
+
+```{python}
+depth = ds_cmems.depth.values
+time = ds_cmems.time.values
 n_times = len(time)
 n_depths = len(depth)
 
-temp_transect = np.full((n_times, n_depths, n_points), np.nan)
-sal_transect = np.full((n_times, n_depths, n_points), np.nan)
+temp_transect = ds_transect["thetao"].values  # (time, depth, points)
+sal_transect = ds_transect["so"].values
 
-points = np.column_stack([transect_lat, transect_lon])
-
-for ti in range(n_times):
-    for di in range(n_depths):
-        for var, out in [("thetao", temp_transect), ("so", sal_transect)]:
-            field = ds_cmems[var].values[ti, di]
-            if np.all(np.isnan(field)):
-                continue
-            interp = RegularGridInterpolator(
-                (lat, lon),
-                field,
-                method="linear",
-                bounds_error=False,
-                fill_value=np.nan,
-            )
-            result = interp(points)
-            # Fill NaN with nearest valid value along transect
-            if np.any(np.isnan(result)):
-                valid = ~np.isnan(result)
-                if valid.any():
-                    result = np.interp(
-                        np.arange(len(result)),
-                        np.where(valid)[0],
-                        result[valid],
-                    )
-            out[ti, di] = result
+print(f"Transect shape: {temp_transect.shape}  (time, depth, points)")
 ```
 
-Not all depth levels have valid data at every transect point. Find the deepest usable level and trim.
+Drop depth levels where most values are NaN (below the seafloor) and fill remaining gaps.
 
 ```{python}
-# Keep depth levels where at least 50% of points have data
-valid_depths = [
-    di
-    for di in range(n_depths)
-    if np.mean(~np.isnan(temp_transect[:, di, :])) > 0.5
-]
+# Keep depth levels where at least 50% of values are valid
+valid_frac = np.mean(~np.isnan(temp_transect), axis=(0, 2))
+valid_depths = valid_frac > 0.5
 
 depth = depth[valid_depths]
 temp_transect = temp_transect[:, valid_depths, :]
 sal_transect = sal_transect[:, valid_depths, :]
 n_depths = len(depth)
 
-# Fill any remaining NaN by extending from nearest valid depth
+# Fill remaining NaN by extending from nearest valid depth
 for ti in range(n_times):
     for pi in range(n_points):
         for arr in [temp_transect, sal_transect]:
@@ -160,8 +135,7 @@ for ti in range(n_times):
                     np.arange(n_depths), np.where(~nans)[0], col[~nans]
                 )
 
-print(f"Transect shape: {temp_transect.shape}  (time, depth, points)")
-print(f"Depth range: {depth[0]:.1f} - {depth[-1]:.1f} m")
+print(f"Depth range: {depth[0]:.1f} - {depth[-1]:.1f} m ({n_depths} levels)")
 ```
 
 ## Build the vertical profile mesh
