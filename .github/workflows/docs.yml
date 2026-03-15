@@ -6,6 +6,14 @@ on:
     paths:
       - 'docs/**'
       - 'src/mikeio/**'
+  pull_request:
+    paths:
+      - 'docs/**'
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
 
 jobs:
   build:
@@ -13,7 +21,7 @@ jobs:
 
     steps:
     - uses: actions/checkout@v4
-    
+
     - name: Set up uv
       uses: astral-sh/setup-uv@v6
       with:
@@ -21,14 +29,26 @@ jobs:
 
     - name: Install dependencies
       run: uv sync --dev
-    
+
     - name: Build documentation
       run: |
         make docs
 
-    - name: Publish to GitHub Pages
-      uses: peaceiris/actions-gh-pages@v3.6.1
+    - name: Upload Pages artifact
+      if: github.event_name == 'push'
+      uses: actions/upload-pages-artifact@v3
       with:
-        github_token: ${{ secrets.GITHUB_TOKEN }}
-        publish_dir: docs/_site/
-      
+        path: docs/_site/
+
+  deploy:
+    if: github.event_name == 'push'
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
+    - name: Deploy to GitHub Pages
+      id: deployment
+      uses: actions/deploy-pages@v4
