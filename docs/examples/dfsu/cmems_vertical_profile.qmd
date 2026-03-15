@@ -108,8 +108,8 @@ node_coords = np.column_stack([
 Each CMEMS cell maps to one element. Skip cells with NaN (below seafloor).
 
 ```{python}
-# Use first variable to determine seafloor mask (all variables share the same mask)
-mask = ds_transect[list(ds_transect.data_vars)[0]].isel(time=0).values
+# Use salinity variable to determine seafloor mask (all variables share the same mask)
+mask = ds_transect["so"].isel(time=0).values
 
 # Build full grid of (point, layer) indices, then mask out seafloor
 pi_all = np.repeat(np.arange(n_points), n_depths)
@@ -124,8 +124,6 @@ element_table = [
     np.array([b, b + n_nodes_per_col, b + n_nodes_per_col + 1, b + 1])
     for b in bl
 ]
-
-print(f"Elements: {len(element_table)} (skipped {n_points * n_depths - len(element_table)} below seafloor)")
 ```
 
 ### Geometry
@@ -156,16 +154,13 @@ variables = {
     "so": mikeio.ItemInfo("Salinity", mikeio.EUMType.Salinity),
 }
 
-data_arrays = []
-for var_name, item in variables.items():
-    transect_data = ds_transect[var_name].values  # (time, depth, points)
-    elem_data = transect_data[:, di_valid, pi_valid]
-    da = mikeio.DataArray(
-        data=elem_data, time=time, geometry=geometry, item=item, zn=zn,
+ds_dfsu = mikeio.Dataset([
+    mikeio.DataArray(
+        data=ds_transect[name].values[:, di_valid, pi_valid],
+        time=time, geometry=geometry, item=item, zn=zn,
     )
-    data_arrays.append(da)
-
-ds_dfsu = mikeio.Dataset(data_arrays)
+    for name, item in variables.items()
+])
 ds_dfsu.to_dfs("transect.dfsu")
 ```
 
