@@ -164,28 +164,17 @@ ds_dfsu = mikeio.Dataset([
 ds_dfsu.to_dfs("transect.dfsu")
 ```
 
-## Verify the result
+## Result
 
 ```{python}
-dfs = mikeio.open("transect.dfsu")
-dfs
-```
-
-```{python}
-ds_back = dfs.read()
+ds_back = mikeio.read("transect.dfsu")
 ds_back
 ```
 
 ```{python}
-fig, axes = plt.subplots(1, 2, figsize=(12, 4))
-ds_back["Temperature"].isel(time=0).plot(ax=axes[0], cmap="RdYlBu_r")
-axes[0].set_title("Temperature")
-ds_back["Salinity"].isel(time=0).plot(ax=axes[1], cmap="YlGnBu")
-axes[1].set_title("Salinity");
+ds_back["Temperature"].isel(time=0).plot();
 ```
 
 ```{python}
-fig, ax = plt.subplots(figsize=(12, 4))
-dfs.geometry.plot.mesh(ax=ax)
-ax.set_title("Vertical profile mesh");
+ds_back.geometry.plot.mesh();
 ```
