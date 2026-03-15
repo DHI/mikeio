@@ -2,6 +2,7 @@
   {
     "listing": "/examples/index.html",
     "items": [
+      "/examples/dfsu/cmems_vertical_profile.html",
       "/examples/dfs0/cmems_insitu.html",
       "/examples/dfs0/relative_time.html",
       "/examples/dfs0/index.html",
