@@ -22,15 +22,6 @@ from mikecore.DfsuFile import DfsuFileType
 
 This example uses a small Baltic Sea subset downloaded with the [Copernicus Marine Toolbox](https://help.marine.copernicus.eu/en/collections/9080063-copernicus-marine-toolbox):
 
-```
-copernicusmarine subset \
-  --dataset-id cmems_mod_bal_phy_anfc_P1D-m \
-  --variable thetao --variable so \
-  --minimum-longitude 23.2 --maximum-longitude 23.7 \
-  --minimum-latitude 59.0 --maximum-latitude 60.0 \
-  --start-datetime 2026-03-01 --end-datetime 2026-03-03 \
-  --output-filename cmems_mod_bal_phy_anfc_P1D.nc
-```
 
 ```{python}
 ds_cmems = xr.open_dataset("../../data/cmems_mod_bal_phy_anfc_P1D.nc")
@@ -52,7 +43,7 @@ transect_lat = np.linspace(lat_start, lat_end, n_points)
 
 ```{python}
 fig, ax = plt.subplots()
-ds_cmems["thetao"].isel(time=0, depth=0).plot(ax=ax, cmap="RdYlBu_r")
+ds_cmems["thetao"].isel(time=0, depth=0).plot(ax=ax)
 ax.plot(transect_lon, transect_lat, "k-o", markersize=3, label="Transect")
 ax.legend()
 ax.set_title("Surface temperature with transect");
@@ -74,7 +65,7 @@ time = ds_cmems.time.values
 n_times = len(time)
 n_depths = len(depth)
 
-print(f"Transect shape: {ds_transect['thetao'].shape}  (time, depth, points)")
+ds_transect
 ```
 
 ## Build the vertical profile mesh
@@ -110,7 +101,6 @@ node_coords = np.column_stack([
     np.repeat(lat_interfaces, n_nodes_per_col),
     np.tile(-z_interfaces[::-1], n_points + 1),
 ])
-print(f"Nodes: {len(node_coords)}  ({n_points + 1} columns x {n_nodes_per_col} per column)")
 ```
 
 ### Elements
@@ -119,7 +109,7 @@ Each CMEMS cell maps to one element. Skip cells with NaN (below seafloor).
 
 ```{python}
 # Use first variable to determine seafloor mask (all variables share the same mask)
-mask = ds_transect[list(ds_transect.data_vars)[0]].values[0]  # (depth, points)
+mask = ds_transect[list(ds_transect.data_vars)[0]].isel(time=0).values
 
 # Build full grid of (point, layer) indices, then mask out seafloor
 pi_all = np.repeat(np.arange(n_points), n_depths)
