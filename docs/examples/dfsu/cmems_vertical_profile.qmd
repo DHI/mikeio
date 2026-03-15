@@ -93,23 +93,24 @@ z_interfaces = np.concatenate(
 )
 
 # Horizontal interfaces: half-cell before first, midpoints, half-cell after last
-lon_mid = (transect_lon[:-1] + transect_lon[1:]) / 2
-lat_mid = (transect_lat[:-1] + transect_lat[1:]) / 2
-dlon = transect_lon[1] - transect_lon[0]
-dlat = transect_lat[1] - transect_lat[0]
-lon_interfaces = np.concatenate([[transect_lon[0] - dlon / 2], lon_mid, [transect_lon[-1] + dlon / 2]])
-lat_interfaces = np.concatenate([[transect_lat[0] - dlat / 2], lat_mid, [transect_lat[-1] + dlat / 2]])
+half_dlon = (transect_lon[1] - transect_lon[0]) / 2
+half_dlat = (transect_lat[1] - transect_lat[0]) / 2
+lon_interfaces = np.concatenate(
+    [[transect_lon[0] - half_dlon], (transect_lon[:-1] + transect_lon[1:]) / 2, [transect_lon[-1] + half_dlon]]
+)
+lat_interfaces = np.concatenate(
+    [[transect_lat[0] - half_dlat], (transect_lat[:-1] + transect_lat[1:]) / 2, [transect_lat[-1] + half_dlat]]
+)
 
 n_nodes_per_col = n_depths + 1
 
 # Build node coordinates: column-major, bottom-to-top
-# Each column repeats the same (lon, lat), z goes from deepest to surface
-node_x = np.repeat(lon_interfaces, n_nodes_per_col)
-node_y = np.repeat(lat_interfaces, n_nodes_per_col)
-node_z = np.tile(-z_interfaces[::-1], n_points + 1)
-
-node_coords = np.column_stack([node_x, node_y, node_z])
-print(f"Nodes: {len(node_x)}  ({n_points + 1} columns x {n_nodes_per_col} per column)")
+node_coords = np.column_stack([
+    np.repeat(lon_interfaces, n_nodes_per_col),
+    np.repeat(lat_interfaces, n_nodes_per_col),
+    np.tile(-z_interfaces[::-1], n_points + 1),
+])
+print(f"Nodes: {len(node_coords)}  ({n_points + 1} columns x {n_nodes_per_col} per column)")
 ```
 
 ### Elements
@@ -120,17 +121,11 @@ Each CMEMS cell maps to one element. Skip cells with NaN (below seafloor).
 # Use first variable to determine seafloor mask (all variables share the same mask)
 mask = ds_transect[list(ds_transect.data_vars)[0]].values[0]  # (depth, points)
 
-# Build all candidate elements on the full grid
-pi_grid, li_grid = np.meshgrid(np.arange(n_points), np.arange(n_depths), indexing="ij")
-pi_all = pi_grid.ravel()
-li_all = li_grid.ravel()
+# Build full grid of (point, layer) indices, then mask out seafloor
+pi_all, li_all = [a.ravel() for a in np.meshgrid(np.arange(n_points), np.arange(n_depths), indexing="ij")]
 di_all = n_depths - 1 - li_all  # depth index (deepest first in mesh)
-
-# Keep only elements above the seafloor
 valid = ~np.isnan(mask[di_all, pi_all])
-pi_valid = pi_all[valid]
-li_valid = li_all[valid]
-di_valid = di_all[valid]
+pi_valid, li_valid, di_valid = pi_all[valid], li_all[valid], di_all[valid]
 
 # Node indices for each quad element: [bottom-left, bottom-right, top-right, top-left]
 bl = pi_valid * n_nodes_per_col + li_valid
@@ -139,14 +134,13 @@ element_table = [
     for b in bl
 ]
 
-n_elements = len(element_table)
-print(f"Elements: {n_elements} (skipped {n_points * n_depths - n_elements} below seafloor)")
+print(f"Elements: {len(element_table)} (skipped {n_points * n_depths - len(element_table)} below seafloor)")
 ```
 
 ### Geometry
 
 ```{python}
-codes = np.zeros(len(node_x), dtype=int)
+codes = np.zeros(len(node_coords), dtype=int)
 codes[:n_nodes_per_col] = 1
 codes[-n_nodes_per_col:] = 1
 
