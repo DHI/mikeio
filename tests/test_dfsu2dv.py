@@ -222,14 +222,9 @@ def test_create_from_scratch(tmp_path: Path) -> None:
             tr = (pi + 1) * nodes_per_col + li + 1
             element_table.append(np.array([bl, br, tr, tl]))
 
-    codes = np.zeros(len(node_x), dtype=int)
-    codes[:nodes_per_col] = 1
-    codes[-nodes_per_col:] = 1
-
     geometry = GeometryFMVerticalProfile(
         node_coordinates=node_coords,
         element_table=element_table,
-        codes=codes,
         projection="LONG/LAT",
         dfsu_type=DfsuFileType.DfsuVerticalProfileSigma,
         n_layers=n_layers,

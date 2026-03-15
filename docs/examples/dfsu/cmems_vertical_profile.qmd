@@ -141,14 +141,9 @@ print(f"Elements: {len(element_table)} (skipped {n_points * n_depths - len(eleme
 ### Geometry
 
 ```{python}
-codes = np.zeros(len(node_coords), dtype=int)
-codes[:n_nodes_per_col] = 1
-codes[-n_nodes_per_col:] = 1
-
 geometry = GeometryFMVerticalProfile(
     node_coordinates=node_coords,
     element_table=element_table,
-    codes=codes,
     projection="LONG/LAT",
     dfsu_type=DfsuFileType.DfsuVerticalProfileSigmaZ,
     n_layers=n_depths,
