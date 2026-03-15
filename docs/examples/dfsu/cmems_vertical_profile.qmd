@@ -108,7 +108,7 @@ node_coords = np.column_stack([
 Each CMEMS cell maps to one element. Skip cells with NaN (below seafloor).
 
 ```{python}
-# Use salinity variable to determine seafloor mask (all variables share the same mask)
+# Seafloor mask: NaN marks cells below the seabed (any variable works, all share the same mask)
 mask = ds_transect["so"].isel(time=0).values
 
 # Build full grid of (point, layer) indices, then mask out seafloor
