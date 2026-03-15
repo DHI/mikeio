@@ -37,42 +37,17 @@ ds_cmems = xr.open_dataset("../../data/cmems_mod_bal_phy_anfc_P1D.nc")
 ds_cmems
 ```
 
-### Regional model differences
-
-CMEMS regional models share the same coordinate naming convention (`time`, `depth`, `latitude`, `longitude`) but differ in resolution and depth coverage.
-Compare the Baltic model above with the Mediterranean model:
-
-```{python}
-ds_med = xr.open_dataset(
-    "../../data/cmems_mod_med_phy-sal_anfc_4.2km_P1D.nc"
-)
-ds_med
-```
-
-```{python}
-print(f"Baltic:        {len(ds_cmems.depth)} depth levels, max {ds_cmems.depth.values[-1]:.0f} m")
-print(f"Mediterranean: {len(ds_med.depth)} depth levels, max {ds_med.depth.values[-1]:.0f} m")
-```
-
-The approach below works the same regardless of which regional model you use — just adjust the endpoints and variable names.
-
 ## Define a transect
 
 Define a transect as evenly-spaced points between two endpoints, using the native grid resolution.
 
 ```{python}
-lon_start, lat_start = 23.3, 59.3
+lon_start, lat_start = 23.6, 59.3
 lon_end, lat_end = 23.6, 59.6
-
-# Use native grid spacing to determine number of points
-dlat = float(ds_cmems.latitude.diff("latitude").median())
-dlon = float(ds_cmems.longitude.diff("longitude").median())
-dx = np.sqrt((lon_end - lon_start) ** 2 + (lat_end - lat_start) ** 2)
-n_points = max(int(dx / min(dlat, dlon)), 2)
+n_points = 20
 
 transect_lon = np.linspace(lon_start, lon_end, n_points)
 transect_lat = np.linspace(lat_start, lat_end, n_points)
-print(f"{n_points} points along transect (grid spacing ~{dlon:.3f}° x {dlat:.3f}°)")
 ```
 
 ```{python}
@@ -112,35 +87,26 @@ The nodes sit at the boundaries between cells.
 Compute node positions at the interfaces between depth levels and between horizontal points.
 
 ```{python}
-# Vertical interfaces between depth levels
-z_interfaces = np.zeros(n_depths + 1)
-z_interfaces[0] = 0  # surface
-for i in range(n_depths - 1):
-    z_interfaces[i + 1] = (depth[i] + depth[i + 1]) / 2
-z_interfaces[-1] = depth[-1] + (depth[-1] - depth[-2]) / 2  # bottom
+# Vertical interfaces: surface, midpoints between levels, bottom
+z_interfaces = np.concatenate(
+    [[0], (depth[:-1] + depth[1:]) / 2, [depth[-1] + (depth[-1] - depth[-2]) / 2]]
+)
 
-# Horizontal interfaces between transect points
-lon_interfaces = np.zeros(n_points + 1)
-lat_interfaces = np.zeros(n_points + 1)
-lon_interfaces[0] = transect_lon[0] - (transect_lon[1] - transect_lon[0]) / 2
-lat_interfaces[0] = transect_lat[0] - (transect_lat[1] - transect_lat[0]) / 2
-for i in range(n_points - 1):
-    lon_interfaces[i + 1] = (transect_lon[i] + transect_lon[i + 1]) / 2
-    lat_interfaces[i + 1] = (transect_lat[i] + transect_lat[i + 1]) / 2
-lon_interfaces[-1] = transect_lon[-1] + (transect_lon[-1] - transect_lon[-2]) / 2
-lat_interfaces[-1] = transect_lat[-1] + (transect_lat[-1] - transect_lat[-2]) / 2
+# Horizontal interfaces: half-cell before first, midpoints, half-cell after last
+lon_mid = (transect_lon[:-1] + transect_lon[1:]) / 2
+lat_mid = (transect_lat[:-1] + transect_lat[1:]) / 2
+dlon = transect_lon[1] - transect_lon[0]
+dlat = transect_lat[1] - transect_lat[0]
+lon_interfaces = np.concatenate([[transect_lon[0] - dlon / 2], lon_mid, [transect_lon[-1] + dlon / 2]])
+lat_interfaces = np.concatenate([[transect_lat[0] - dlat / 2], lat_mid, [transect_lat[-1] + dlat / 2]])
 
 n_nodes_per_col = n_depths + 1
 
-node_x = []
-node_y = []
-node_z = []
-
-for pi in range(n_points + 1):
-    for di in range(n_depths, -1, -1):  # bottom to top
-        node_x.append(lon_interfaces[pi])
-        node_y.append(lat_interfaces[pi])
-        node_z.append(-z_interfaces[di])
+# Build node coordinates: column-major, bottom-to-top
+# Each column repeats the same (lon, lat), z goes from deepest to surface
+node_x = np.repeat(lon_interfaces, n_nodes_per_col)
+node_y = np.repeat(lat_interfaces, n_nodes_per_col)
+node_z = np.tile(-z_interfaces[::-1], n_points + 1)
 
 node_coords = np.column_stack([node_x, node_y, node_z])
 print(f"Nodes: {len(node_x)}  ({n_points + 1} columns x {n_nodes_per_col} per column)")
@@ -151,25 +117,27 @@ print(f"Nodes: {len(node_x)}  ({n_points + 1} columns x {n_nodes_per_col} per co
 Each CMEMS cell maps to one element. Skip cells with NaN (below seafloor).
 
 ```{python}
-element_table = []
-elem_indices = []  # (di, pi) for each element — maps directly to CMEMS data
-
 # Use first variable to determine seafloor mask (all variables share the same mask)
 mask = ds_transect[list(ds_transect.data_vars)[0]].values[0]  # (depth, points)
 
-for pi in range(n_points):
-    for li in range(n_depths):
-        di = n_depths - 1 - li  # depth index (deepest first in mesh)
+# Build all candidate elements on the full grid
+pi_grid, li_grid = np.meshgrid(np.arange(n_points), np.arange(n_depths), indexing="ij")
+pi_all = pi_grid.ravel()
+li_all = li_grid.ravel()
+di_all = n_depths - 1 - li_all  # depth index (deepest first in mesh)
 
-        if np.isnan(mask[di, pi]):
-            continue
+# Keep only elements above the seafloor
+valid = ~np.isnan(mask[di_all, pi_all])
+pi_valid = pi_all[valid]
+li_valid = li_all[valid]
+di_valid = di_all[valid]
 
-        bl = pi * n_nodes_per_col + li
-        tl = pi * n_nodes_per_col + li + 1
-        br = (pi + 1) * n_nodes_per_col + li
-        tr = (pi + 1) * n_nodes_per_col + li + 1
-        element_table.append(np.array([bl, br, tr, tl]))
-        elem_indices.append((di, pi))
+# Node indices for each quad element: [bottom-left, bottom-right, top-right, top-left]
+bl = pi_valid * n_nodes_per_col + li_valid
+element_table = [
+    np.array([b, b + n_nodes_per_col, b + n_nodes_per_col + 1, b + 1])
+    for b in bl
+]
 
 n_elements = len(element_table)
 print(f"Elements: {n_elements} (skipped {n_points * n_depths - n_elements} below seafloor)")
@@ -209,9 +177,7 @@ variables = {
 data_arrays = []
 for var_name, item in variables.items():
     transect_data = ds_transect[var_name].values  # (time, depth, points)
-    elem_data = np.column_stack(
-        [transect_data[:, di, pi] for di, pi in elem_indices]
-    )
+    elem_data = transect_data[:, di_valid, pi_valid]
     da = mikeio.DataArray(
         data=elem_data, time=time, geometry=geometry, item=item, zn=zn,
     )
