@@ -6,8 +6,6 @@ description: Convert Copernicus Marine (CMEMS) gridded data to a MIKE dfsu verti
 
 This example shows how to extract a vertical transect from a Copernicus Marine (CMEMS) NetCDF file and save it as a **dfsu vertical profile** — an unstructured mesh format commonly used as boundary conditions in MIKE hydrodynamic models.
 
-The dfsu vertical profile preserves the original irregular depth levels from CMEMS without requiring interpolation to a regular grid.
-
 ## Setup
 
 ```{python}
@@ -56,7 +54,7 @@ print(f"Baltic:        {len(ds_cmems.depth)} depth levels, max {ds_cmems.depth.v
 print(f"Mediterranean: {len(ds_med.depth)} depth levels, max {ds_med.depth.values[-1]:.0f} m")
 ```
 
-The approach below works the same regardless of which regional model you use — just adjust the waypoints and variable names.
+The approach below works the same regardless of which regional model you use — just adjust the endpoints and variable names.
 
 ## Define a transect
 
@@ -81,7 +79,6 @@ print(f"{n_points} points along transect (grid spacing ~{dlon:.3f}° x {dlat:.3f
 fig, ax = plt.subplots()
 ds_cmems["thetao"].isel(time=0, depth=0).plot(ax=ax, cmap="RdYlBu_r")
 ax.plot(transect_lon, transect_lat, "k-o", markersize=3, label="Transect")
-ax.plot(wp[:, 0], wp[:, 1], "rs", markersize=8, label="Waypoints")
 ax.legend()
 ax.set_title("Surface temperature with transect");
 ```
@@ -91,16 +88,12 @@ ax.set_title("Surface temperature with transect");
 Select the nearest grid point for each transect position using xarray.
 
 ```{python}
-# Select nearest grid points along the transect
 ds_transect = ds_cmems.sel(
     latitude=xr.DataArray(transect_lat, dims="points"),
     longitude=xr.DataArray(transect_lon, dims="points"),
     method="nearest",
 )
-ds_transect
-```
 
-```{python}
 depth = ds_cmems.depth.values
 time = ds_cmems.time.values
 n_times = len(time)
@@ -112,40 +105,15 @@ sal_transect = ds_transect["so"].values
 print(f"Transect shape: {temp_transect.shape}  (time, depth, points)")
 ```
 
-Drop depth levels where most values are NaN (below the seafloor) and fill remaining gaps.
-
-```{python}
-# Keep depth levels where at least 50% of values are valid
-valid_frac = np.mean(~np.isnan(temp_transect), axis=(0, 2))
-valid_depths = valid_frac > 0.5
-
-depth = depth[valid_depths]
-temp_transect = temp_transect[:, valid_depths, :]
-sal_transect = sal_transect[:, valid_depths, :]
-n_depths = len(depth)
-
-# Fill remaining NaN by extending from nearest valid depth
-for ti in range(n_times):
-    for pi in range(n_points):
-        for arr in [temp_transect, sal_transect]:
-            col = arr[ti, :, pi]
-            nans = np.isnan(col)
-            if nans.any() and (~nans).any():
-                arr[ti, :, pi] = np.interp(
-                    np.arange(n_depths), np.where(~nans)[0], col[~nans]
-                )
-
-print(f"Depth range: {depth[0]:.1f} - {depth[-1]:.1f} m ({n_depths} levels)")
-```
-
 ## Build the vertical profile mesh
+
+Build nodes on the full CMEMS depth grid, then only create elements where data is valid.
+This makes the mesh follow the bottom profile naturally.
 
 ### Nodes
 
-Nodes are ordered column-by-column (one column per transect point), bottom-to-top within each column.
-
 ```{python}
-n_layers = n_depths - 1
+nodes_per_col = n_depths
 
 node_x = []
 node_y = []
@@ -155,7 +123,7 @@ for pi in range(n_points):
     for di in range(n_depths - 1, -1, -1):  # bottom to top
         node_x.append(transect_lon[pi])
         node_y.append(transect_lat[pi])
-        node_z.append(-depth[di])  # negative = below surface
+        node_z.append(-depth[di])
 
 node_coords = np.column_stack([node_x, node_y, node_z])
 print(f"Nodes: {len(node_x)}")
@@ -163,22 +131,67 @@ print(f"Nodes: {len(node_x)}")
 
 ### Elements
 
-Each quadrilateral element connects four nodes: bottom-left, bottom-right, top-right, top-left.
+Only create elements where all four corner nodes have valid data.
+Elements below the seafloor are skipped, so the mesh follows the bathymetry.
 
 ```{python}
 element_table = []
-nodes_per_col = n_depths
+elem_temp = []  # element data collected alongside
+elem_sal = []
 
 for pi in range(n_points - 1):
-    for li in range(n_layers):
+    for li in range(n_depths - 1):
+        di_bot = n_depths - 1 - li
+        di_top = n_depths - 1 - (li + 1)
+
+        # Check if all four corners have valid data (use first timestep)
+        corners = [
+            temp_transect[0, di_bot, pi],
+            temp_transect[0, di_top, pi],
+            temp_transect[0, di_bot, pi + 1],
+            temp_transect[0, di_top, pi + 1],
+        ]
+        if any(np.isnan(c) for c in corners):
+            continue
+
         bl = pi * nodes_per_col + li
         tl = pi * nodes_per_col + li + 1
         br = (pi + 1) * nodes_per_col + li
         tr = (pi + 1) * nodes_per_col + li + 1
         element_table.append(np.array([bl, br, tr, tl]))
 
+        # Collect element data for all timesteps
+        t_vals = []
+        s_vals = []
+        for ti in range(n_times):
+            t_vals.append(
+                np.mean(
+                    [
+                        temp_transect[ti, di_bot, pi],
+                        temp_transect[ti, di_top, pi],
+                        temp_transect[ti, di_bot, pi + 1],
+                        temp_transect[ti, di_top, pi + 1],
+                    ]
+                )
+            )
+            s_vals.append(
+                np.mean(
+                    [
+                        sal_transect[ti, di_bot, pi],
+                        sal_transect[ti, di_top, pi],
+                        sal_transect[ti, di_bot, pi + 1],
+                        sal_transect[ti, di_top, pi + 1],
+                    ]
+                )
+            )
+        elem_temp.append(t_vals)
+        elem_sal.append(s_vals)
+
 n_elements = len(element_table)
-print(f"Elements: {n_elements}  ({n_points - 1} columns x {n_layers} layers)")
+temp_elements = np.array(elem_temp).T  # (n_times, n_elements)
+sal_elements = np.array(elem_sal).T
+
+print(f"Elements: {n_elements} (skipped {(n_points - 1) * (n_depths - 1) - n_elements} below seafloor)")
 ```
 
 ### Geometry
@@ -188,53 +201,23 @@ codes = np.zeros(len(node_x), dtype=int)
 codes[:nodes_per_col] = 1
 codes[-nodes_per_col:] = 1
 
+n_layers = n_depths - 1
+
 geometry = GeometryFMVerticalProfile(
     node_coordinates=node_coords,
     element_table=element_table,
     codes=codes,
     projection="LONG/LAT",
-    dfsu_type=DfsuFileType.DfsuVerticalProfileSigma,
+    dfsu_type=DfsuFileType.DfsuVerticalProfileSigmaZ,
     n_layers=n_layers,
-    n_sigma=n_layers,
+    n_sigma=1,
 )
 geometry
 ```
 
-## Map data to elements and write
-
-Element values are the average of the four corner node values.
+## Write
 
 ```{python}
-temp_elements = np.empty((n_times, n_elements))
-sal_elements = np.empty((n_times, n_elements))
-
-for ti in range(n_times):
-    ei = 0
-    for pi in range(n_points - 1):
-        for li in range(n_layers):
-            di_bot = n_depths - 1 - li
-            di_top = n_depths - 1 - (li + 1)
-            temp_elements[ti, ei] = np.mean(
-                [
-                    temp_transect[ti, di_bot, pi],
-                    temp_transect[ti, di_top, pi],
-                    temp_transect[ti, di_bot, pi + 1],
-                    temp_transect[ti, di_top, pi + 1],
-                ]
-            )
-            sal_elements[ti, ei] = np.mean(
-                [
-                    sal_transect[ti, di_bot, pi],
-                    sal_transect[ti, di_top, pi],
-                    sal_transect[ti, di_bot, pi + 1],
-                    sal_transect[ti, di_top, pi + 1],
-                ]
-            )
-            ei += 1
-```
-
-```{python}
-# zn: node z-coordinates for each timestep
 zn = np.tile(node_coords[:, 2], (n_times, 1)).astype(np.float32)
 
 da_temp = mikeio.DataArray(
