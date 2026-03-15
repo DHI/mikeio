@@ -145,8 +145,12 @@ geometry = GeometryFMVerticalProfile(
     node_coordinates=node_coords,
     element_table=element_table,
     projection="LONG/LAT",
+    # SigmaZ allows variable number of layers per column (bottom-following)
     dfsu_type=DfsuFileType.DfsuVerticalProfileSigmaZ,
+    # n_layers is the max number of layers in any column
     n_layers=n_depths,
+    # n_sigma=1 means only the top layer is guaranteed everywhere;
+    # deeper layers are z-layers that can be absent in shallow columns
     n_sigma=1,
 )
 geometry
