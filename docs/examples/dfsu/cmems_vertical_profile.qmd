@@ -99,101 +99,88 @@ time = ds_cmems.time.values
 n_times = len(time)
 n_depths = len(depth)
 
-temp_transect = ds_transect["thetao"].values  # (time, depth, points)
-sal_transect = ds_transect["so"].values
-
-print(f"Transect shape: {temp_transect.shape}  (time, depth, points)")
+print(f"Transect shape: {ds_transect['thetao'].shape}  (time, depth, points)")
 ```
 
 ## Build the vertical profile mesh
 
-Build nodes on the full CMEMS depth grid, then only create elements where data is valid.
-This makes the mesh follow the bottom profile naturally.
+CMEMS data values are cell-centered — each `(depth, point)` is an element value.
+The nodes sit at the boundaries between cells.
 
 ### Nodes
 
+Compute node positions at the interfaces between depth levels and between horizontal points.
+
 ```{python}
-nodes_per_col = n_depths
+# Vertical interfaces between depth levels
+z_interfaces = np.zeros(n_depths + 1)
+z_interfaces[0] = 0  # surface
+for i in range(n_depths - 1):
+    z_interfaces[i + 1] = (depth[i] + depth[i + 1]) / 2
+z_interfaces[-1] = depth[-1] + (depth[-1] - depth[-2]) / 2  # bottom
+
+# Horizontal interfaces between transect points
+lon_interfaces = np.zeros(n_points + 1)
+lat_interfaces = np.zeros(n_points + 1)
+lon_interfaces[0] = transect_lon[0] - (transect_lon[1] - transect_lon[0]) / 2
+lat_interfaces[0] = transect_lat[0] - (transect_lat[1] - transect_lat[0]) / 2
+for i in range(n_points - 1):
+    lon_interfaces[i + 1] = (transect_lon[i] + transect_lon[i + 1]) / 2
+    lat_interfaces[i + 1] = (transect_lat[i] + transect_lat[i + 1]) / 2
+lon_interfaces[-1] = transect_lon[-1] + (transect_lon[-1] - transect_lon[-2]) / 2
+lat_interfaces[-1] = transect_lat[-1] + (transect_lat[-1] - transect_lat[-2]) / 2
+
+n_nodes_per_col = n_depths + 1
 
 node_x = []
 node_y = []
 node_z = []
 
-for pi in range(n_points):
-    for di in range(n_depths - 1, -1, -1):  # bottom to top
-        node_x.append(transect_lon[pi])
-        node_y.append(transect_lat[pi])
-        node_z.append(-depth[di])
+for pi in range(n_points + 1):
+    for di in range(n_depths, -1, -1):  # bottom to top
+        node_x.append(lon_interfaces[pi])
+        node_y.append(lat_interfaces[pi])
+        node_z.append(-z_interfaces[di])
 
 node_coords = np.column_stack([node_x, node_y, node_z])
-print(f"Nodes: {len(node_x)}")
+print(f"Nodes: {len(node_x)}  ({n_points + 1} columns x {n_nodes_per_col} per column)")
 ```
 
 ### Elements
 
-Only create elements where all four corner nodes have valid data.
-Elements below the seafloor are skipped, so the mesh follows the bathymetry.
+Each CMEMS cell maps to one element. Skip cells with NaN (below seafloor).
 
 ```{python}
 element_table = []
-# Store corner indices for each element to map data later
-elem_corners = []  # list of (di_bot, di_top, pi) tuples
+elem_indices = []  # (di, pi) for each element — maps directly to CMEMS data
 
 # Use first variable to determine seafloor mask (all variables share the same mask)
 mask = ds_transect[list(ds_transect.data_vars)[0]].values[0]  # (depth, points)
 
-for pi in range(n_points - 1):
-    for li in range(n_depths - 1):
-        di_bot = n_depths - 1 - li
-        di_top = n_depths - 1 - (li + 1)
+for pi in range(n_points):
+    for li in range(n_depths):
+        di = n_depths - 1 - li  # depth index (deepest first in mesh)
 
-        # Skip elements below the seafloor
-        if any(
-            np.isnan(mask[di, pi + k])
-            for di in (di_bot, di_top)
-            for k in (0, 1)
-        ):
+        if np.isnan(mask[di, pi]):
             continue
 
-        bl = pi * nodes_per_col + li
-        tl = pi * nodes_per_col + li + 1
-        br = (pi + 1) * nodes_per_col + li
-        tr = (pi + 1) * nodes_per_col + li + 1
+        bl = pi * n_nodes_per_col + li
+        tl = pi * n_nodes_per_col + li + 1
+        br = (pi + 1) * n_nodes_per_col + li
+        tr = (pi + 1) * n_nodes_per_col + li + 1
         element_table.append(np.array([bl, br, tr, tl]))
-        elem_corners.append((di_bot, di_top, pi))
+        elem_indices.append((di, pi))
 
 n_elements = len(element_table)
-print(f"Elements: {n_elements} (skipped {(n_points - 1) * (n_depths - 1) - n_elements} below seafloor)")
-```
-
-### Map data to elements
-
-Average the four corner node values for each element. This works for any variable.
-
-```{python}
-def to_element_data(transect_data, elem_corners):
-    """Map (time, depth, points) node data to (time, elements) by averaging corners."""
-    n_times = transect_data.shape[0]
-    out = np.empty((n_times, len(elem_corners)))
-    for ei, (di_bot, di_top, pi) in enumerate(elem_corners):
-        out[:, ei] = np.mean(
-            [
-                transect_data[:, di_bot, pi],
-                transect_data[:, di_top, pi],
-                transect_data[:, di_bot, pi + 1],
-                transect_data[:, di_top, pi + 1],
-            ],
-            axis=0,
-        )
-    return out
+print(f"Elements: {n_elements} (skipped {n_points * n_depths - n_elements} below seafloor)")
 ```
 
 ### Geometry
 
 ```{python}
 codes = np.zeros(len(node_x), dtype=int)
-codes[:nodes_per_col] = 1
-codes[-nodes_per_col:] = 1
+codes[:n_nodes_per_col] = 1
+codes[-n_nodes_per_col:] = 1
 
 geometry = GeometryFMVerticalProfile(
     node_coordinates=node_coords,
@@ -201,7 +188,7 @@ geometry = GeometryFMVerticalProfile(
     codes=codes,
     projection="LONG/LAT",
     dfsu_type=DfsuFileType.DfsuVerticalProfileSigmaZ,
-    n_layers=n_depths - 1,
+    n_layers=n_depths,
     n_sigma=1,
 )
 geometry
@@ -209,10 +196,11 @@ geometry
 
 ## Write
 
+Each CMEMS value maps directly to one element — no averaging needed.
+
 ```{python}
 zn = np.tile(node_coords[:, 2], (n_times, 1)).astype(np.float32)
 
-# Map each variable to elements and create DataArrays
 variables = {
     "thetao": mikeio.ItemInfo("Temperature", mikeio.EUMType.Temperature),
     "so": mikeio.ItemInfo("Salinity", mikeio.EUMType.Salinity),
@@ -220,7 +208,10 @@ variables = {
 
 data_arrays = []
 for var_name, item in variables.items():
-    elem_data = to_element_data(ds_transect[var_name].values, elem_corners)
+    transect_data = ds_transect[var_name].values  # (time, depth, points)
+    elem_data = np.column_stack(
+        [transect_data[:, di, pi] for di, pi in elem_indices]
+    )
     da = mikeio.DataArray(
         data=elem_data, time=time, geometry=geometry, item=item, zn=zn,
     )
