@@ -1,5 +1,6 @@
 from datetime import datetime
 from pathlib import Path
+import warnings
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -957,10 +958,10 @@ def test_daarray_aggregation_dfs2() -> None:
 
     assert da.shape == (1, 264, 216)
 
-    dam = da.nanmean(axis=None)
+    dam = da.nanmean(None)
     assert np.isscalar(dam.values)  # TODO is this what we want
 
-    dasm = da.nanmean(axis="space")
+    dasm = da.nanmean("space")
     assert dasm.shape == (1,)
 
 
@@ -972,7 +973,7 @@ def test_dataarray_weigthed_average() -> None:
 
     area = da.geometry.get_element_area()
 
-    da2 = da.average(weights=area, axis=1)
+    da2 = da.average(weights=area, dim=1)
 
     assert isinstance(da2.geometry, mikeio.spatial.Geometry0D)
     assert da2.dims == ("time",)
@@ -1010,7 +1011,8 @@ def test_daarray_aggregation() -> None:
     assert pytest.approx(da_mean.values[0]) == 0.04334851
     assert pytest.approx(da_mean.values[778]) == 0.452692
 
-    da_std = da.std(name="standard deviation")
+    da_std = da.std()
+    da_std.name = "standard deviation"
     assert isinstance(da_std, mikeio.DataArray)
     assert da_std.name == "standard deviation"
     assert da_std.geometry == da.geometry
@@ -1018,7 +1020,8 @@ def test_daarray_aggregation() -> None:
     assert len(da_std.time) == 1
     assert pytest.approx(da_std.values[0]) == 0.015291579
 
-    da_ptp = da.ptp(name="peak to peak (max - min)")
+    da_ptp = da.ptp()
+    da_ptp.name = "peak to peak (max - min)"
     assert isinstance(da_std, mikeio.DataArray)
     assert da_ptp.geometry == da.geometry
     assert da_ptp.start_time == da.start_time
@@ -1076,7 +1079,7 @@ def test_daarray_aggregation_nan_versions() -> None:
 def test_da_quantile_axis0(da2: DataArray) -> None:
     assert da2.geometry.nx == 7
     assert len(da2.time) == 10
-    daq = da2.quantile(q=0.345, axis="time")
+    daq = da2.quantile(q=0.345, dim="time")
     assert daq.geometry.nx == 7
     assert len(da2.time) == 10  # this should not change
     assert len(daq.time) == 1  # aggregated
@@ -1086,7 +1089,7 @@ def test_da_quantile_axis0(da2: DataArray) -> None:
     assert daq.dims[0] == "x"
     assert daq.n_timesteps == 1
 
-    daqs = da2.quantile(q=0.345, axis="space")
+    daqs = da2.quantile(q=0.345, dim="space")
     assert isinstance(
         daqs.geometry, mikeio.spatial.Geometry0D
     )  # Aggregating over space returns Geometry0D (time series)
@@ -1096,7 +1099,7 @@ def test_da_quantile_axis0(da2: DataArray) -> None:
     assert daqs.dims[0][0] == "t"  # Because it's a mikeio.Grid1D, remember!
 
     # q as list
-    daq = da2.quantile(q=[0.25, 0.75], axis=0)
+    daq = da2.quantile(q=[0.25, 0.75], dim=0)
     assert isinstance(daq, mikeio.Dataset)
     assert daq.n_items == 2
     assert daq[0].to_numpy()[0] == 0.1
@@ -1409,7 +1412,7 @@ def test_parse_time_decreasing() -> None:
 
 
 def test_geometry0d_space_axis_raises() -> None:
-    """Test that Geometry0D raises ValueError for axis='space'."""
+    """Test that Geometry0D raises ValueError for dim='space'."""
     from mikeio.spatial import Geometry0D
 
     da = mikeio.DataArray(
@@ -1418,17 +1421,17 @@ def test_geometry0d_space_axis_raises() -> None:
         geometry=Geometry0D(),
     )
     with pytest.raises(ValueError, match="space axis cannot be selected"):
-        da.mean(axis="space")
+        da.mean("space")
 
 
 def test_point_spectrum_space_axis_raises() -> None:
-    """Test that point spectrum raises ValueError for axis='space'."""
+    """Test that point spectrum raises ValueError for dim='space'."""
     dfs = mikeio.open("tests/testdata/spectra/pt_spectra.dfsu")
     assert isinstance(dfs, DfsuSpectral)
     ds = dfs.read()
     da = ds[0]
     with pytest.raises(ValueError, match="space axis cannot be selected"):
-        da.mean(axis="space")
+        da.mean("space")
 
 
 def test_area_spectrum_space_axis() -> None:
@@ -1438,7 +1441,7 @@ def test_area_spectrum_space_axis() -> None:
     ds = dfs.read()
     da = ds[0]
     # Should aggregate over element axis only
-    result = da.mean(axis="space")
+    result = da.mean("space")
     # Result should have time, direction, frequency but not element
     assert "element" not in result.dims
     assert result.shape == (3, 16, 25)  # time, direction, frequency
@@ -1451,18 +1454,18 @@ def test_line_spectrum_space_axis() -> None:
     ds = dfs.read()
     da = ds[0]
     # Should aggregate over node axis only
-    result = da.mean(axis="space")
+    result = da.mean("space")
     # Result should have time, direction, frequency but not node
     assert "node" not in result.dims
     assert result.shape == (4, 16, 25)  # time, direction, frequency
 
 
 def test_parse_axis_none_default() -> None:
-    """Test that axis=None defaults to all axes."""
+    """Test that dim=None defaults to all axes."""
     ds = mikeio.read("tests/testdata/waves.dfs2")
     da = ds[0]
-    # axis=None should aggregate over all axes
-    result = da.mean(axis=None)
+    # dim=None should aggregate over all axes
+    result = da.mean(None)
     assert result.ndim == 0  # Scalar result
 
 
@@ -1474,16 +1477,84 @@ def test_grid2d_space_axis_with_time() -> None:
     # Grid2D has dims ("y", "x") so space axis should be (0, 1)
     assert da.geometry.get_space_axis() == (0, 1)
     # With time, should aggregate over axes (1, 2) - y and x
-    result = da.mean(axis="space")
+    result = da.mean("space")
     assert result.shape == (3,)  # Only time dimension left
     assert result.dims == ("time",)
 
 
 def test_axis_spatial_deprecated() -> None:
-    """Test that axis='spatial' emits FutureWarning and works like 'space'."""
+    """Test that dim='spatial' emits FutureWarning and works like 'space'."""
     ds = mikeio.read("tests/testdata/waves.dfs2")
     da = ds[0]
     with pytest.warns(FutureWarning, match="axis='spatial' is deprecated"):
-        result = da.mean(axis="spatial")
+        result = da.mean("spatial")
     assert result.shape == (3,)
     assert result.dims == ("time",)
+
+
+def test_dim_keyword_mean(da2: mikeio.DataArray) -> None:
+    result = da2.mean(dim="time")
+    assert result.n_timesteps == 1
+    assert result.geometry.nx == 7
+
+    result_space = da2.mean(dim="space")
+    assert len(result_space.time) == 10
+
+
+def test_dim_keyword_max_min(da2: mikeio.DataArray) -> None:
+    assert da2.max(dim="time").n_timesteps == 1
+    assert da2.min(dim="space").ndim == 1
+
+
+def test_dim_keyword_std(da2: mikeio.DataArray) -> None:
+    result = da2.std(dim="time")
+    assert result.n_timesteps == 1
+
+
+def test_dim_keyword_nanmean(da2: mikeio.DataArray) -> None:
+    result = da2.nanmean(dim="time")
+    assert result.n_timesteps == 1
+
+
+def test_dim_keyword_nanmax_nanmin(da2: mikeio.DataArray) -> None:
+    assert da2.nanmax(dim="time").n_timesteps == 1
+    assert da2.nanmin(dim="space").ndim == 1
+
+
+def test_dim_keyword_nanstd(da2: mikeio.DataArray) -> None:
+    result = da2.nanstd(dim="time")
+    assert result.n_timesteps == 1
+
+
+def test_dim_keyword_quantile(da2: mikeio.DataArray) -> None:
+    result = da2.quantile(q=0.5, dim="time")
+    assert result.n_timesteps == 1
+
+    result_space = da2.nanquantile(q=0.5, dim="space")
+    assert len(result_space.time) == 10
+
+
+def test_dim_keyword_aggregate(da2: mikeio.DataArray) -> None:
+    result = da2.aggregate(dim="time")
+    assert result.n_timesteps == 1
+
+
+def test_dim_keyword_ptp(da2: mikeio.DataArray) -> None:
+    result = da2.ptp(dim="time")
+    assert result.n_timesteps == 1
+
+
+def test_axis_keyword_deprecation_warning(da2: mikeio.DataArray) -> None:
+    with pytest.warns(FutureWarning, match="'axis' keyword is deprecated"):
+        da2.mean(axis="time")
+
+
+def test_axis_keyword_int_deprecation_warning(da2: mikeio.DataArray) -> None:
+    with pytest.warns(FutureWarning, match="'axis' keyword is deprecated"):
+        da2.mean(axis=0)
+
+
+def test_positional_string_no_warning(da2: mikeio.DataArray) -> None:
+    with warnings.catch_warnings():
+        warnings.simplefilter("error", FutureWarning)
+        da2.mean("space")  # positional string should not warn

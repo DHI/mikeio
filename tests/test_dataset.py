@@ -1,5 +1,6 @@
 from pathlib import Path
 from datetime import datetime
+import warnings
 import numpy as np
 import pandas as pd
 import pytest
@@ -598,20 +599,20 @@ def test_aggregation_dataset_no_time() -> None:
 def test_aggregations() -> None:
     ds = mikeio.read("tests/testdata/gebco_sound.dfs2")
 
-    for axis in [0, 1, 2]:
-        ds.mean(axis=axis)
-        ds.nanmean(axis=axis)
-        ds.nanmin(axis=axis)
-        ds.nanmax(axis=axis)
+    for dim in [0, 1, 2]:
+        ds.mean(dim)
+        ds.nanmean(dim)
+        ds.nanmin(dim)
+        ds.nanmax(dim)
 
     assert ds.mean().shape == (264, 216)
     assert ds.mean("time").shape == (264, 216)
     assert ds.mean("space").shape == (1,)
 
     with pytest.raises(ValueError, match="space"):
-        ds.mean(axis="spaghetti")
+        ds.mean("spaghetti")
 
-    dsm = ds.mean(axis="time")
+    dsm = ds.mean("time")
     assert dsm.geometry is not None
 
 
@@ -628,7 +629,7 @@ def test_to_dfs_extension_validation(tmp_path: Path) -> None:
 
 
 def test_quantile_axis1(ds1: Dataset) -> None:
-    dsq = ds1.quantile(q=0.345, axis=1)
+    dsq = ds1.quantile(q=0.345, dim=1)
     assert dsq[0].to_numpy()[0] == 0.1
     assert dsq[1].to_numpy()[0] == 0.2
 
@@ -636,7 +637,7 @@ def test_quantile_axis1(ds1: Dataset) -> None:
     assert dsq.n_timesteps == ds1.n_timesteps
 
     # q as list
-    dsq = ds1.quantile(q=[0.25, 0.75], axis=1)
+    dsq = ds1.quantile(q=[0.25, 0.75], dim=1)
     assert dsq.n_items == 2 * ds1.n_items
     assert "Quantile 0.75, " in dsq.items[1].name
     assert "Quantile 0.25, " in dsq.items[2].name
@@ -652,7 +653,7 @@ def test_quantile_axis0(ds1: Dataset) -> None:
     assert dsq.shape[-1] == ds1.shape[-1]
 
     # q as list
-    dsq = ds1.quantile(q=[0.25, 0.75], axis=0)
+    dsq = ds1.quantile(q=[0.25, 0.75], dim=0)
     assert dsq.n_items == 2 * ds1.n_items
     assert dsq[0].to_numpy()[0] == 0.1
     assert dsq[1].to_numpy()[0] == 0.1
@@ -685,13 +686,13 @@ def test_nanquantile() -> None:
 def test_aggregate_across_items() -> None:
     ds = mikeio.read("tests/testdata/State_wlbc_north_err.dfs1")
 
-    dsm = ds.mean(axis="items")
+    dsm = ds.mean("items")
 
     assert isinstance(dsm, mikeio.Dataset)
     assert dsm.geometry == ds.geometry
     assert dsm.dims == ds.dims
 
-    dsq = ds.quantile(q=[0.1, 0.5, 0.9], axis="items")
+    dsq = ds.quantile(q=[0.1, 0.5, 0.9], dim="items")
     assert isinstance(dsq, mikeio.Dataset)
     assert dsq[0].name == "Quantile 0.1"
     assert dsq[1].name == "Quantile 0.5"
@@ -705,8 +706,9 @@ def test_aggregate_selected_items_dfsu_save_to_new_file(tmp_path: Path) -> None:
 
     assert ds.n_items == 5
 
-    dsm = ds.max(axis="items", name="Max Water Level")  # add a nice name
+    dsm = ds.max(dim="items")
     assert len(dsm) == 1
+    dsm[0].name = "Max Water Level"
     assert dsm[0].name == "Max Water Level"
     assert dsm.geometry == ds.geometry
     assert dsm.dims == ds.dims
@@ -772,7 +774,7 @@ def test_dfsu3d_dataset() -> None:
 
     assert len(ds) == 2  # Salinity, Temperature
 
-    dsagg = ds.nanmean(axis=0)  # Time averaged
+    dsagg = ds.nanmean(0)  # Time averaged
 
     assert len(dsagg) == 2  # Salinity, Temperature
 
@@ -1427,3 +1429,76 @@ def test_safe_name() -> None:
     bad_name = "MSLP., 1:st level\n 2nd chain"
     safe_name = "MSLP_1_st_level_2nd_chain"
     assert _to_safe_name(bad_name) == safe_name
+
+
+def test_dim_keyword_mean(ds1: Dataset) -> None:
+    result = ds1.mean(dim="time")
+    assert result.n_timesteps == 1
+    assert result.n_items == 2
+
+    result_space = ds1.mean(dim="space")
+    assert len(result_space.time) == 10
+
+
+def test_dim_keyword_max_min(ds1: Dataset) -> None:
+    assert ds1.max(dim="time").n_timesteps == 1
+    assert ds1.min(dim="space")[0].ndim == 1
+
+
+def test_dim_keyword_std(ds1: Dataset) -> None:
+    result = ds1.std(dim="time")
+    assert result.n_timesteps == 1
+
+
+def test_dim_keyword_nanmean(ds1: Dataset) -> None:
+    result = ds1.nanmean(dim="time")
+    assert result.n_timesteps == 1
+
+
+def test_dim_keyword_nanmax_nanmin(ds1: Dataset) -> None:
+    assert ds1.nanmax(dim="time").n_timesteps == 1
+    assert ds1.nanmin(dim="space")[0].ndim == 1
+
+
+def test_dim_keyword_nanstd(ds1: Dataset) -> None:
+    result = ds1.nanstd(dim="time")
+    assert result.n_timesteps == 1
+
+
+def test_dim_keyword_quantile(ds1: Dataset) -> None:
+    result = ds1.quantile(q=0.5, dim="time")
+    assert result.n_timesteps == 1
+
+    result_space = ds1.nanquantile(q=0.5, dim="space")
+    assert len(result_space.time) == 10
+
+
+def test_dim_keyword_aggregate(ds1: Dataset) -> None:
+    result = ds1.aggregate(dim="time")
+    assert result.n_timesteps == 1
+
+
+def test_dim_keyword_items(ds1: Dataset) -> None:
+    result = ds1.mean(dim="items")
+    assert result.n_items == 1
+
+
+def test_dim_keyword_ptp(ds1: Dataset) -> None:
+    result = ds1.ptp(dim="time")
+    assert result.n_timesteps == 1
+
+
+def test_axis_keyword_deprecation_warning_dataset(ds1: Dataset) -> None:
+    with pytest.warns(FutureWarning, match="'axis' keyword is deprecated"):
+        ds1.mean(axis="time")
+
+
+def test_axis_keyword_int_deprecation_warning_dataset(ds1: Dataset) -> None:
+    with pytest.warns(FutureWarning, match="'axis' keyword is deprecated"):
+        ds1.mean(axis=0)
+
+
+def test_positional_string_no_warning_dataset(ds1: Dataset) -> None:
+    with warnings.catch_warnings():
+        warnings.simplefilter("error", FutureWarning)
+        ds1.mean("space")  # positional string should not warn
