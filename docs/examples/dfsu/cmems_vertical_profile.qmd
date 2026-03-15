@@ -136,8 +136,8 @@ Elements below the seafloor are skipped, so the mesh follows the bathymetry.
 
 ```{python}
 element_table = []
-elem_temp = []  # element data collected alongside
-elem_sal = []
+# Store corner indices for each element to map data later
+elem_corners = []  # list of (di_bot, di_top, pi) tuples
 
 for pi in range(n_points - 1):
     for li in range(n_depths - 1):
@@ -146,10 +146,10 @@ for pi in range(n_points - 1):
 
         # Check if all four corners have valid data (use first timestep)
         corners = [
-            temp_transect[0, di_bot, pi],
-            temp_transect[0, di_top, pi],
-            temp_transect[0, di_bot, pi + 1],
-            temp_transect[0, di_top, pi + 1],
+            ds_transect["thetao"].values[0, di_bot, pi],
+            ds_transect["thetao"].values[0, di_top, pi],
+            ds_transect["thetao"].values[0, di_bot, pi + 1],
+            ds_transect["thetao"].values[0, di_top, pi + 1],
         ]
         if any(np.isnan(c) for c in corners):
             continue
@@ -159,39 +159,32 @@ for pi in range(n_points - 1):
         br = (pi + 1) * nodes_per_col + li
         tr = (pi + 1) * nodes_per_col + li + 1
         element_table.append(np.array([bl, br, tr, tl]))
-
-        # Collect element data for all timesteps
-        t_vals = []
-        s_vals = []
-        for ti in range(n_times):
-            t_vals.append(
-                np.mean(
-                    [
-                        temp_transect[ti, di_bot, pi],
-                        temp_transect[ti, di_top, pi],
-                        temp_transect[ti, di_bot, pi + 1],
-                        temp_transect[ti, di_top, pi + 1],
-                    ]
-                )
-            )
-            s_vals.append(
-                np.mean(
-                    [
-                        sal_transect[ti, di_bot, pi],
-                        sal_transect[ti, di_top, pi],
-                        sal_transect[ti, di_bot, pi + 1],
-                        sal_transect[ti, di_top, pi + 1],
-                    ]
-                )
-            )
-        elem_temp.append(t_vals)
-        elem_sal.append(s_vals)
+        elem_corners.append((di_bot, di_top, pi))
 
 n_elements = len(element_table)
-temp_elements = np.array(elem_temp).T  # (n_times, n_elements)
-sal_elements = np.array(elem_sal).T
-
 print(f"Elements: {n_elements} (skipped {(n_points - 1) * (n_depths - 1) - n_elements} below seafloor)")
+```
+
+### Map data to elements
+
+Average the four corner node values for each element. This works for any variable.
+
+```{python}
+def to_element_data(transect_data, elem_corners):
+    """Map (time, depth, points) node data to (time, elements) by averaging corners."""
+    n_times = transect_data.shape[0]
+    out = np.empty((n_times, len(elem_corners)))
+    for ei, (di_bot, di_top, pi) in enumerate(elem_corners):
+        out[:, ei] = np.mean(
+            [
+                transect_data[:, di_bot, pi],
+                transect_data[:, di_top, pi],
+                transect_data[:, di_bot, pi + 1],
+                transect_data[:, di_top, pi + 1],
+            ],
+            axis=0,
+        )
+    return out
 ```
 
 ### Geometry
@@ -201,15 +194,13 @@ codes = np.zeros(len(node_x), dtype=int)
 codes[:nodes_per_col] = 1
 codes[-nodes_per_col:] = 1
 
-n_layers = n_depths - 1
-
 geometry = GeometryFMVerticalProfile(
     node_coordinates=node_coords,
     element_table=element_table,
     codes=codes,
     projection="LONG/LAT",
     dfsu_type=DfsuFileType.DfsuVerticalProfileSigmaZ,
-    n_layers=n_layers,
+    n_layers=n_depths - 1,
     n_sigma=1,
 )
 geometry
@@ -220,22 +211,21 @@ geometry
 ```{python}
 zn = np.tile(node_coords[:, 2], (n_times, 1)).astype(np.float32)
 
-da_temp = mikeio.DataArray(
-    data=temp_elements,
-    time=time,
-    geometry=geometry,
-    item=mikeio.ItemInfo("Temperature", mikeio.EUMType.Temperature),
-    zn=zn,
-)
-da_sal = mikeio.DataArray(
-    data=sal_elements,
-    time=time,
-    geometry=geometry,
-    item=mikeio.ItemInfo("Salinity", mikeio.EUMType.Salinity),
-    zn=zn,
-)
+# Map each variable to elements and create DataArrays
+variables = {
+    "thetao": mikeio.ItemInfo("Temperature", mikeio.EUMType.Temperature),
+    "so": mikeio.ItemInfo("Salinity", mikeio.EUMType.Salinity),
+}
 
-ds_dfsu = mikeio.Dataset([da_temp, da_sal])
+data_arrays = []
+for var_name, item in variables.items():
+    elem_data = to_element_data(ds_transect[var_name].values, elem_corners)
+    da = mikeio.DataArray(
+        data=elem_data, time=time, geometry=geometry, item=item, zn=zn,
+    )
+    data_arrays.append(da)
+
+ds_dfsu = mikeio.Dataset(data_arrays)
 ds_dfsu.to_dfs("transect.dfsu")
 ```
 
