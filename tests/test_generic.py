@@ -543,7 +543,7 @@ def test_time_average(tmp_path: Path) -> None:
     assert org.time[0] == averaged.time[0]
     assert org.shape[1] == averaged.shape[1]
     assert averaged.shape[0] == 1
-    assert np.allclose(org.mean(axis=0)[0].to_numpy(), averaged[0].to_numpy())
+    assert np.allclose(org.mean(0)[0].to_numpy(), averaged[0].to_numpy())
 
 
 def test_time_average_dfsu_3d(tmp_path: Path) -> None:
@@ -581,7 +581,7 @@ def test_quantile_dfsu(tmp_path: Path) -> None:
     fp = tmp_path / "oresund_q10.dfsu"
     generic.quantile(infilename, fp, q=0.1, items=["Surface elevation"])
 
-    org = mikeio.read(infilename).quantile(q=0.1, axis=0)
+    org = mikeio.read(infilename).quantile(q=0.1, dim=0)
     q10 = mikeio.read(fp)
 
     assert np.allclose(org[0].to_numpy(), q10[0].to_numpy())
@@ -592,7 +592,7 @@ def test_quantile_dfsu_buffer_size(tmp_path: Path) -> None:
     fp = tmp_path / "oresund_q10.dfsu"
     generic.quantile(infilename, fp, q=0.1, buffer_size=1e5, items=0)
 
-    org = mikeio.read(infilename).quantile(q=0.1, axis=0)
+    org = mikeio.read(infilename).quantile(q=0.1, dim=0)
     q10 = mikeio.read(fp)
 
     assert np.allclose(org[0].to_numpy(), q10[0].to_numpy())
@@ -603,7 +603,7 @@ def test_quantile_dfs2(tmp_path: Path) -> None:
     fp = tmp_path / "eq_q90.dfs2"
     generic.quantile(infilename, fp, q=0.9)
 
-    org = mikeio.read(infilename).quantile(q=0.9, axis=0)
+    org = mikeio.read(infilename).quantile(q=0.9, dim=0)
     q90 = mikeio.read(fp)
 
     assert np.allclose(org[0].to_numpy(), q90[0].to_numpy())
@@ -614,7 +614,7 @@ def test_quantile_dfs0(tmp_path: Path) -> None:
     fp = tmp_path / "da_q001_q05.dfs0"
     generic.quantile(infilename, fp, q=[0.01, 0.5])
 
-    org = mikeio.read(infilename).quantile(q=[0.01, 0.5], axis=0)
+    org = mikeio.read(infilename).quantile(q=[0.01, 0.5], dim=0)
     qnt = mikeio.read(fp)
 
     assert np.allclose(org[0].to_numpy(), qnt[0].to_numpy())

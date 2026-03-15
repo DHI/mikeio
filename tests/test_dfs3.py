@@ -124,8 +124,8 @@ def test_read_top_layer() -> None:
     dssel = dsall.isel(z=-1)
     assert dssel.geometry == ds.geometry
     dsdiff = dssel - ds
-    assert dsdiff.nanmax(axis=None).to_numpy()[0] == 0.0
-    assert dsdiff.nanmin(axis=None).to_numpy()[0] == 0.0
+    assert dsdiff.nanmax(None).to_numpy()[0] == 0.0
+    assert dsdiff.nanmin(None).to_numpy()[0] == 0.0
 
 
 def test_read_bottom_layer() -> None:

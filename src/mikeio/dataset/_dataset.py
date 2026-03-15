@@ -26,7 +26,7 @@ if TYPE_CHECKING:
     import xarray
     import polars as pl
 
-from ._dataarray import DataArray
+from ._dataarray import DataArray, _resolve_deprecated_axis
 from .._track import _extract_track
 from ..eum import EUMType, EUMUnit, ItemInfo
 from ..spatial import (
@@ -969,10 +969,17 @@ class Dataset:
 
         return Dataset(das)
 
-    def interp_na(self, axis: str = "time", **kwargs: Any) -> Dataset:
+    def interp_na(
+        self,
+        dim: str = "time",
+        *,
+        axis: str | None = None,
+        **kwargs: Any,
+    ) -> Dataset:
+        resolved = _resolve_deprecated_axis(dim, axis)
         ds = self.copy()
         for da in ds:
-            da.values = da.interp_na(axis=axis, **kwargs).values
+            da.values = da.interp_na(dim=resolved, **kwargs).values
 
         return ds
 
@@ -1188,18 +1195,22 @@ class Dataset:
     # ============ aggregate =============
 
     def aggregate(
-        self, axis: int | str | None = 0, func: Callable = np.nanmean, **kwargs: Any
+        self,
+        dim: int | str | None = 0,
+        func: Callable = np.nanmean,
+        *,
+        axis: int | str | None = None,
     ) -> Dataset:
-        """Aggregate along an axis.
+        """Aggregate along a dimension.
 
         Parameters
         ----------
-        axis: (int, str, None), optional
-            axis number or "time", "space" or "items", by default 0
+        dim: int or str, optional
+            dimension to aggregate over, 0 (time) by default
         func: function, optional
             default np.nanmean
-        **kwargs: Any
-            additional arguments passed to the function
+        axis: int or str, optional
+            deprecated, use dim instead
 
         Returns
         -------
@@ -1207,13 +1218,13 @@ class Dataset:
             dataset with aggregated values
 
         """
-        if axis == "items":
+        dim = _resolve_deprecated_axis(dim, axis)
+        if dim == "items":
             if self.n_items <= 1:
                 return self
 
-            name = kwargs.pop("name", func.__name__)
-            data = func(self.to_numpy(), axis=0, **kwargs)
-            item = self._agg_item_from_items(self.items, name)
+            data = func(self.to_numpy(), axis=0)
+            item = self._agg_item_from_items(self.items, func.__name__)
             da = DataArray(
                 data=data,
                 time=self.time,
@@ -1225,7 +1236,7 @@ class Dataset:
             return Dataset([da], validate=False)
         else:
             res = {
-                name: da.aggregate(axis=axis, func=func, **kwargs)
+                name: da.aggregate(dim=dim, func=func)
                 for name, da in self._data_vars.items()
             }
             return Dataset(data=res, validate=False)
@@ -1245,9 +1256,14 @@ class Dataset:
         return ItemInfo(name, it_type, it_unit)
 
     def quantile(
-        self, q: float | Sequence[float], *, axis: int | str = 0, **kwargs: Any
+        self,
+        q: float | Sequence[float],
+        *,
+        dim: int | str = 0,
+        axis: int | str | None = None,
+        **kwargs: Any,
     ) -> Dataset:
-        """Compute the q-th quantile of the data along the specified axis.
+        """Compute the q-th quantile of the data along the specified dimension.
 
         Wrapping np.quantile
 
@@ -1256,8 +1272,10 @@ class Dataset:
         q: array_like of float
             Quantile or sequence of quantiles to compute,
             which must be between 0 and 1 inclusive.
-        axis: (int, str, None), optional
-            axis number or "time", "space" or "items", by default 0
+        dim: int or str, optional
+            dimension, by default 0 (time)
+        axis: int or str, optional
+            deprecated, use dim
         **kwargs: Any
             additional arguments passed to the function
 
@@ -1270,19 +1288,25 @@ class Dataset:
         --------
         >>> ds.quantile(q=[0.25,0.75])
         >>> ds.quantile(q=0.5)
-        >>> ds.quantile(q=[0.01,0.5,0.99], axis="space")
+        >>> ds.quantile(q=[0.01,0.5,0.99], dim="space")
 
         See Also
         --------
         nanquantile : quantile with NaN values ignored
 
         """
-        return self._quantile(q, axis=axis, func=np.quantile, **kwargs)
+        resolved = _resolve_deprecated_axis(dim, axis)
+        return self._quantile(q, axis=resolved, func=np.quantile, **kwargs)
 
     def nanquantile(
-        self, q: float | Sequence[float], *, axis: int | str = 0, **kwargs: Any
+        self,
+        q: float | Sequence[float],
+        *,
+        dim: int | str = 0,
+        axis: int | str | None = None,
+        **kwargs: Any,
     ) -> Dataset:
-        """Compute the q-th quantile of the data along the specified axis, while ignoring nan values.
+        """Compute the q-th quantile of the data along the specified dimension, ignoring NaN values.
 
         Wrapping np.nanquantile
 
@@ -1291,8 +1315,10 @@ class Dataset:
         q: array_like of float
             Quantile or sequence of quantiles to compute,
             which must be between 0 and 1 inclusive.
-        axis: (int, str, None), optional
-            axis number or "time", "space" or "items", by default 0
+        dim: int or str, optional
+            dimension, by default 0 (time)
+        axis: int or str, optional
+            deprecated, use dim
         **kwargs: Any
             additional arguments passed to the function
 
@@ -1300,7 +1326,7 @@ class Dataset:
         --------
         >>> ds.nanquantile(q=[0.25,0.75])
         >>> ds.nanquantile(q=0.5)
-        >>> ds.nanquantile(q=[0.01,0.5,0.99], axis="space")
+        >>> ds.nanquantile(q=[0.01,0.5,0.99], dim="space")
 
         Returns
         -------
@@ -1308,7 +1334,8 @@ class Dataset:
             dataset with quantile values
 
         """
-        return self._quantile(q, axis=axis, func=np.nanquantile, **kwargs)
+        resolved = _resolve_deprecated_axis(dim, axis)
+        return self._quantile(q, axis=resolved, func=np.nanquantile, **kwargs)
 
     def _quantile(self, q, *, axis=0, func=np.quantile, **kwargs) -> Dataset:  # type: ignore
         if axis == "items":
@@ -1348,15 +1375,15 @@ class Dataset:
 
             return Dataset(data=res, validate=False)
 
-    def max(self, axis: int | str = 0, **kwargs: Any) -> Dataset:
-        """Max value along an axis.
+    def max(self, dim: int | str = 0, *, axis: int | str | None = None) -> Dataset:
+        """Max value along a dimension.
 
         Parameters
         ----------
-        axis: (int, str, None), optional
-            axis number or "time", "space" or "items", by default 0
-        **kwargs: Any
-            additional arguments passed to the function
+        dim: int or str, optional
+            dimension, by default 0 (time)
+        axis: int or str, optional
+            deprecated, use dim
 
         Returns
         -------
@@ -1368,17 +1395,17 @@ class Dataset:
             nanmax : Max values with NaN values removed
 
         """
-        return self.aggregate(axis=axis, func=np.max, **kwargs)
+        return self.aggregate(dim=dim, axis=axis, func=np.max)
 
-    def min(self, axis: int | str = 0, **kwargs: Any) -> Dataset:
-        """Min value along an axis.
+    def min(self, dim: int | str = 0, *, axis: int | str | None = None) -> Dataset:
+        """Min value along a dimension.
 
         Parameters
         ----------
-        axis: (int, str, None), optional
-            axis number or "time", "space" or "items", by default 0
-        **kwargs: Any
-            additional arguments passed to the function
+        dim: int or str, optional
+            dimension, by default 0 (time)
+        axis: int or str, optional
+            deprecated, use dim
 
         Returns
         -------
@@ -1390,17 +1417,17 @@ class Dataset:
             nanmin : Min values with NaN values removed
 
         """
-        return self.aggregate(axis=axis, func=np.min, **kwargs)
+        return self.aggregate(dim=dim, axis=axis, func=np.min)
 
-    def mean(self, axis: int | str = 0, **kwargs: Any) -> Dataset:
-        """Mean value along an axis.
+    def mean(self, dim: int | str = 0, *, axis: int | str | None = None) -> Dataset:
+        """Mean value along a dimension.
 
         Parameters
         ----------
-        axis: (int, str, None), optional
-            axis number or "time", "space" or "items", by default 0
-        **kwargs: Any
-            additional arguments passed to the function
+        dim: int or str, optional
+            dimension, by default 0 (time)
+        axis: int or str, optional
+            deprecated, use dim
 
         Returns
         -------
@@ -1413,17 +1440,17 @@ class Dataset:
             average : Weighted average
 
         """
-        return self.aggregate(axis=axis, func=np.mean, **kwargs)
+        return self.aggregate(dim=dim, axis=axis, func=np.mean)
 
-    def std(self, axis: int | str = 0, **kwargs: Any) -> Dataset:
-        """Standard deviation along an axis.
+    def std(self, dim: int | str = 0, *, axis: int | str | None = None) -> Dataset:
+        """Standard deviation along a dimension.
 
         Parameters
         ----------
-        axis: (int, str, None), optional
-            axis number or "time", "space" or "items", by default 0
-        **kwargs: Any
-            additional arguments passed to the function
+        dim: int or str, optional
+            dimension, by default 0 (time)
+        axis: int or str, optional
+            deprecated, use dim
 
         Returns
         -------
@@ -1435,14 +1462,17 @@ class Dataset:
             nanstd : Standard deviation with NaN values removed
 
         """
-        return self.aggregate(axis=axis, func=np.std, **kwargs)
+        return self.aggregate(dim=dim, axis=axis, func=np.std)
 
-    def ptp(self, axis: int | str = 0, **kwargs: Any) -> Dataset:
-        """Range (max - min) a.k.a Peak to Peak along an axis
-        Parameters.
+    def ptp(self, dim: int | str = 0, *, axis: int | str | None = None) -> Dataset:
+        """Range (max - min) a.k.a Peak to Peak along a dimension.
+
+        Parameters
         ----------
-        axis: (int, str, None), optional
-            axis number or "time", "space" or "items", by default 0
+        dim: int or str, optional
+            dimension, by default 0 (time)
+        axis: int or str, optional
+            deprecated, use dim
 
         Returns
         -------
@@ -1450,10 +1480,12 @@ class Dataset:
             dataset with peak to peak values
 
         """
-        return self.aggregate(axis=axis, func=np.ptp, **kwargs)
+        return self.aggregate(dim=dim, axis=axis, func=np.ptp)
 
-    def average(self, *, weights, axis=0, **kwargs) -> Dataset:  # type: ignore
-        """Compute the weighted average along the specified axis.
+    def average(
+        self, *, weights: Any, dim: int | str = 0, axis: int | str | None = None
+    ) -> Dataset:
+        """Compute the weighted average along the specified dimension.
 
         Wraps [](`numpy.average`)
 
@@ -1461,10 +1493,10 @@ class Dataset:
         ----------
         weights: array_like
             weights to average over
-        axis: (int, str, None), optional
-            axis number or "time", "space" or "items", by default 0
-        **kwargs: Any
-            additional arguments passed to the function
+        dim: int or str, optional
+            dimension, by default 0 (time)
+        axis: int or str, optional
+            deprecated, use dim
 
         Returns
         -------
@@ -1481,7 +1513,7 @@ class Dataset:
         >>> dfs = Dfsu("HD2D.dfsu")
         >>> ds = dfs.read(["Current speed"])
         >>> area = dfs.get_element_area()
-        >>> ds2 = ds.average(axis="space", weights=area)
+        >>> ds2 = ds.average(dim="space", weights=area)
 
         """
 
@@ -1491,21 +1523,23 @@ class Dataset:
 
             return np.average(x, weights=weights, axis=axis)
 
-        return self.aggregate(axis=axis, func=func, **kwargs)
+        return self.aggregate(dim=dim, axis=axis, func=func)
 
-    def nanmax(self, axis: int | str | None = 0, **kwargs: Any) -> Dataset:
-        """Max value along an axis (NaN removed).
+    def nanmax(
+        self, dim: int | str | None = 0, *, axis: int | str | None = None
+    ) -> Dataset:
+        """Max value along a dimension (NaN removed).
 
         Parameters
         ----------
-        axis: (int, str, None), optional
-            axis number or "time", "space" or "items", by default 0
-        **kwargs: Any
-            additional arguments passed to the function
+        dim: int, str or None, optional
+            dimension, by default 0 (time)
+        axis: int or str, optional
+            deprecated, use dim
 
         See Also
         --------
-            max : Mean values
+            max : Max values
 
         Returns
         -------
@@ -1513,17 +1547,19 @@ class Dataset:
             dataset with max values
 
         """
-        return self.aggregate(axis=axis, func=np.nanmax, **kwargs)
+        return self.aggregate(dim=dim, axis=axis, func=np.nanmax)
 
-    def nanmin(self, axis: int | str | None = 0, **kwargs: Any) -> Dataset:
-        """Min value along an axis (NaN removed).
+    def nanmin(
+        self, dim: int | str | None = 0, *, axis: int | str | None = None
+    ) -> Dataset:
+        """Min value along a dimension (NaN removed).
 
         Parameters
         ----------
-        axis: (int, str, None), optional
-            axis number or "time", "space" or "items", by default 0
-        **kwargs: Any
-            additional arguments passed to the function
+        dim: int, str or None, optional
+            dimension, by default 0 (time)
+        axis: int or str, optional
+            deprecated, use dim
 
         Returns
         -------
@@ -1531,17 +1567,17 @@ class Dataset:
             dataset with min values
 
         """
-        return self.aggregate(axis=axis, func=np.nanmin, **kwargs)
+        return self.aggregate(dim=dim, axis=axis, func=np.nanmin)
 
-    def nanmean(self, axis: int | str = 0, **kwargs: Any) -> Dataset:
-        """Mean value along an axis (NaN removed).
+    def nanmean(self, dim: int | str = 0, *, axis: int | str | None = None) -> Dataset:
+        """Mean value along a dimension (NaN removed).
 
         Parameters
         ----------
-        axis: (int, str, None), optional
-            axis number or "time", "space" or "items", by default 0
-        **kwargs: Any
-            additional arguments passed to the function
+        dim: int or str, optional
+            dimension, by default 0 (time)
+        axis: int or str, optional
+            deprecated, use dim
 
         Returns
         -------
@@ -1549,17 +1585,17 @@ class Dataset:
             dataset with mean values
 
         """
-        return self.aggregate(axis=axis, func=np.nanmean, **kwargs)
+        return self.aggregate(dim=dim, axis=axis, func=np.nanmean)
 
-    def nanstd(self, axis: int | str = 0, **kwargs: Any) -> Dataset:
-        """Standard deviation along an axis (NaN removed).
+    def nanstd(self, dim: int | str = 0, *, axis: int | str | None = None) -> Dataset:
+        """Standard deviation along a dimension (NaN removed).
 
         Parameters
         ----------
-        axis: (int, str, None), optional
-            axis number or "time", "space" or "items", by default 0
-        **kwargs: Any
-            additional arguments passed to the function
+        dim: int or str, optional
+            dimension, by default 0 (time)
+        axis: int or str, optional
+            deprecated, use dim
 
         Returns
         -------
@@ -1571,7 +1607,7 @@ class Dataset:
             std : Standard deviation
 
         """
-        return self.aggregate(axis=axis, func=np.nanstd, **kwargs)
+        return self.aggregate(dim=dim, axis=axis, func=np.nanstd)
 
     # ============ arithmetic/Math =============
 

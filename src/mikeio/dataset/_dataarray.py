@@ -68,6 +68,22 @@ from ._data_plot import (
     DataArrayPlotterLineSpectrum,
 )
 
+
+def _resolve_deprecated_axis(
+    dim: int | str | None,
+    axis: int | str | None,
+) -> int | str | None:
+    """If axis= keyword was used, warn and return it. Otherwise return dim."""
+    if axis is not None:
+        warnings.warn(
+            "The 'axis' keyword is deprecated. Pass the dimension directly as the first argument.",
+            FutureWarning,
+            stacklevel=3,
+        )
+        return axis
+    return dim
+
+
 GeometryType = Union[
     Geometry0D,
     GeometryUndefined,
@@ -1134,10 +1150,25 @@ class DataArray:
             dt=self._dt,
         )
 
-    def interp_na(self, axis: str = "time", **kwargs: Any) -> DataArray:
+    def interp_na(
+        self,
+        dim: str = "time",
+        *,
+        axis: str | None = None,
+        **kwargs: Any,
+    ) -> DataArray:
         """Fill in NaNs by interpolating according to different methods.
 
         Wrapper of [](`xarray.DataArray.interpolate_na`)
+
+        Parameters
+        ----------
+        dim: str, optional
+            dimension to interpolate along, by default "time"
+        axis: str, optional
+            deprecated, use dim
+        **kwargs: Any
+            Additional keyword arguments passed to xarray interpolate_na
 
         Examples
         --------
@@ -1155,7 +1186,9 @@ class DataArray:
         ```
 
         """
-        xr_da = self.to_xarray().interpolate_na(dim=axis, **kwargs)
+        resolved = _resolve_deprecated_axis(dim, axis)
+        assert isinstance(resolved, str)
+        xr_da = self.to_xarray().interpolate_na(dim=resolved, **kwargs)
         self.values = xr_da.values
         return self
 
@@ -1282,15 +1315,15 @@ class DataArray:
 
     # ============= Aggregation methods ===========
 
-    def max(self, axis: int | str = 0, **kwargs: Any) -> DataArray:
-        """Max value along an axis.
+    def max(self, dim: int | str = 0, *, axis: int | str | None = None) -> DataArray:
+        """Max value along a dimension.
 
         Parameters
         ----------
-        axis: (int, str, None), optional
-            axis number or "time" or "space", by default 0
-        **kwargs: Any
-            Additional keyword arguments
+        dim: int or str, optional
+            dimension, by default 0 (time)
+        axis: int or str, optional
+            deprecated, use dim
 
         Returns
         -------
@@ -1302,17 +1335,17 @@ class DataArray:
             nanmax : Max values with NaN values removed
 
         """
-        return self.aggregate(axis=axis, func=np.max, **kwargs)
+        return self.aggregate(dim=dim, axis=axis, func=np.max)
 
-    def min(self, axis: int | str = 0, **kwargs: Any) -> DataArray:
-        """Min value along an axis.
+    def min(self, dim: int | str = 0, *, axis: int | str | None = None) -> DataArray:
+        """Min value along a dimension.
 
         Parameters
         ----------
-        axis: (int, str, None), optional
-            axis number or "time" or "space", by default 0
-        **kwargs: Any
-            Additional keyword arguments
+        dim: int or str, optional
+            dimension, by default 0 (time)
+        axis: int or str, optional
+            deprecated, use dim
 
         Returns
         -------
@@ -1324,17 +1357,19 @@ class DataArray:
             nanmin : Min values with NaN values removed
 
         """
-        return self.aggregate(axis=axis, func=np.min, **kwargs)
+        return self.aggregate(dim=dim, axis=axis, func=np.min)
 
-    def mean(self, axis: int | str | None = 0, **kwargs: Any) -> DataArray:
-        """Mean value along an axis.
+    def mean(
+        self, dim: int | str | None = 0, *, axis: int | str | None = None
+    ) -> DataArray:
+        """Mean value along a dimension.
 
         Parameters
         ----------
-        axis: (int, str, None), optional
-            axis number or "time" or "space", by default 0
-        **kwargs: Any
-            Additional keyword arguments
+        dim: int, str or None, optional
+            dimension, by default 0 (time)
+        axis: int or str, optional
+            deprecated, use dim
 
         Returns
         -------
@@ -1346,17 +1381,17 @@ class DataArray:
             nanmean : Mean values with NaN values removed
 
         """
-        return self.aggregate(axis=axis, func=np.mean, **kwargs)
+        return self.aggregate(dim=dim, axis=axis, func=np.mean)
 
-    def std(self, axis: int | str = 0, **kwargs: Any) -> DataArray:
-        """Standard deviation values along an axis.
+    def std(self, dim: int | str = 0, *, axis: int | str | None = None) -> DataArray:
+        """Standard deviation along a dimension.
 
         Parameters
         ----------
-        axis: (int, str, None), optional
-            axis number or "time" or "space", by default 0
-        **kwargs: Any
-            Additional keyword arguments
+        dim: int or str, optional
+            dimension, by default 0 (time)
+        axis: int or str, optional
+            deprecated, use dim
 
         Returns
         -------
@@ -1368,17 +1403,17 @@ class DataArray:
             nanstd : Standard deviation values with NaN values removed
 
         """
-        return self.aggregate(axis=axis, func=np.std, **kwargs)
+        return self.aggregate(dim=dim, axis=axis, func=np.std)
 
-    def ptp(self, axis: int | str = 0, **kwargs: Any) -> DataArray:
-        """Range (max - min) a.k.a Peak to Peak along an axis.
+    def ptp(self, dim: int | str = 0, *, axis: int | str | None = None) -> DataArray:
+        """Range (max - min) a.k.a Peak to Peak along a dimension.
 
         Parameters
         ----------
-        axis: (int, str, None), optional
-            axis number or "time" or "space", by default 0
-        **kwargs: Any
-            Additional keyword arguments
+        dim: int or str, optional
+            dimension, by default 0 (time)
+        axis: int or str, optional
+            deprecated, use dim
 
         Returns
         -------
@@ -1386,21 +1421,25 @@ class DataArray:
             array with peak to peak values
 
         """
-        return self.aggregate(axis=axis, func=np.ptp, **kwargs)
+        return self.aggregate(dim=dim, axis=axis, func=np.ptp)
 
     def average(
-        self, weights: np.ndarray, axis: int | str = 0, **kwargs: Any
+        self,
+        weights: np.ndarray,
+        dim: int | str = 0,
+        *,
+        axis: int | str | None = None,
     ) -> DataArray:
-        """Compute the weighted average along the specified axis.
+        """Compute the weighted average along the specified dimension.
 
         Parameters
         ----------
-        axis: (int, str, None), optional
-            axis number or "time" or "space", by default
         weights: np.ndarray
             weights to apply to the values
-        **kwargs: Any
-            Additional keyword arguments
+        dim: int or str, optional
+            dimension, by default 0 (time)
+        axis: int or str, optional
+            deprecated, use dim
 
         Returns
         -------
@@ -1417,7 +1456,7 @@ class DataArray:
         import mikeio
         da= mikeio.read("../data/HD2D.dfsu")["Current speed"]
         area = da.geometry.get_element_area()
-        da.average(axis="space", weights=area)
+        da.average("space", weights=area)
         ```
 
         """
@@ -1428,17 +1467,17 @@ class DataArray:
 
             return np.average(x, weights=weights, axis=axis)
 
-        return self.aggregate(axis=axis, func=func, **kwargs)
+        return self.aggregate(dim=dim, axis=axis, func=func)
 
-    def nanmax(self, axis: int | str = 0, **kwargs: Any) -> DataArray:
-        """Max value along an axis (NaN removed).
+    def nanmax(self, dim: int | str = 0, *, axis: int | str | None = None) -> DataArray:
+        """Max value along a dimension (NaN removed).
 
         Parameters
         ----------
-        axis: (int, str, None), optional
-            axis number or "time" or "space", by default 0
-        **kwargs: Any
-            Additional keyword arguments
+        dim: int or str, optional
+            dimension, by default 0 (time)
+        axis: int or str, optional
+            deprecated, use dim
 
         Returns
         -------
@@ -1450,17 +1489,17 @@ class DataArray:
             nanmax : Max values with NaN values removed
 
         """
-        return self.aggregate(axis=axis, func=np.nanmax, **kwargs)
+        return self.aggregate(dim=dim, axis=axis, func=np.nanmax)
 
-    def nanmin(self, axis: int | str = 0, **kwargs: Any) -> DataArray:
-        """Min value along an axis (NaN removed).
+    def nanmin(self, dim: int | str = 0, *, axis: int | str | None = None) -> DataArray:
+        """Min value along a dimension (NaN removed).
 
         Parameters
         ----------
-        axis: (int, str, None), optional
-            axis number or "time" or "space", by default 0
-        **kwargs: Any
-            Additional keyword arguments
+        dim: int or str, optional
+            dimension, by default 0 (time)
+        axis: int or str, optional
+            deprecated, use dim
 
         Returns
         -------
@@ -1472,17 +1511,19 @@ class DataArray:
             nanmin : Min values with NaN values removed
 
         """
-        return self.aggregate(axis=axis, func=np.nanmin, **kwargs)
+        return self.aggregate(dim=dim, axis=axis, func=np.nanmin)
 
-    def nanmean(self, axis: int | str | None = 0, **kwargs: Any) -> DataArray:
-        """Mean value along an axis (NaN removed).
+    def nanmean(
+        self, dim: int | str | None = 0, *, axis: int | str | None = None
+    ) -> DataArray:
+        """Mean value along a dimension (NaN removed).
 
         Parameters
         ----------
-        axis: (int, str, None), optional
-            axis number or "time" or "space", by default 0
-        **kwargs: Any
-            Additional keyword arguments
+        dim: int, str or None, optional
+            dimension, by default 0 (time)
+        axis: int or str, optional
+            deprecated, use dim
 
         Returns
         -------
@@ -1494,17 +1535,17 @@ class DataArray:
             mean : Mean values
 
         """
-        return self.aggregate(axis=axis, func=np.nanmean, **kwargs)
+        return self.aggregate(dim=dim, axis=axis, func=np.nanmean)
 
-    def nanstd(self, axis: int | str = 0, **kwargs: Any) -> DataArray:
-        """Standard deviation value along an axis (NaN removed).
+    def nanstd(self, dim: int | str = 0, *, axis: int | str | None = None) -> DataArray:
+        """Standard deviation along a dimension (NaN removed).
 
         Parameters
         ----------
-        axis: (int, str, None), optional
-            axis number or "time" or "space", by default 0
-        **kwargs: Any
-            Additional keyword arguments
+        dim: int or str, optional
+            dimension, by default 0 (time)
+        axis: int or str, optional
+            deprecated, use dim
 
         Returns
         -------
@@ -1516,24 +1557,25 @@ class DataArray:
             std : Standard deviation
 
         """
-        return self.aggregate(axis=axis, func=np.nanstd, **kwargs)
+        return self.aggregate(dim=dim, axis=axis, func=np.nanstd)
 
     def aggregate(
         self,
-        axis: int | str | None = 0,
+        dim: int | str | None = 0,
         func: Callable[..., Any] = np.nanmean,
-        **kwargs: Any,
+        *,
+        axis: int | str | None = None,
     ) -> DataArray:
         """Aggregate along an axis.
 
         Parameters
         ----------
-        axis: (int, str, None), optional
-            axis number or "time" or "space", by default 0
+        dim: int or str, optional
+            dimension to aggregate over, 0 (time) by default
         func: function, optional
             default np.nanmean
-        **kwargs: Any
-            Additional keyword arguments
+        axis: int or str, optional
+            deprecated, use dim instead
 
         Returns
         -------
@@ -1546,7 +1588,8 @@ class DataArray:
             nanmax : Max values with NaN values removed
 
         """
-        parsed_axis = self._parse_axis(axis)
+        dim = _resolve_deprecated_axis(dim, axis)
+        parsed_axis = self._parse_axis(dim)
         time = self._time_by_agg_axis(self.time, parsed_axis)
 
         if isinstance(parsed_axis, int):
@@ -1555,14 +1598,12 @@ class DataArray:
             axes = parsed_axis  # type: ignore
 
         item = deepcopy(self.item)
-        if "name" in kwargs:
-            item.name = kwargs.pop("name")
 
         with (
             warnings.catch_warnings()
         ):  # there might be all-Nan slices, it is ok, so we ignore them!
             warnings.simplefilter("ignore", category=RuntimeWarning)
-            data = func(self.to_numpy(), axis=parsed_axis, keepdims=False, **kwargs)
+            data = func(self.to_numpy(), axis=parsed_axis, keepdims=False)
 
         if parsed_axis == 0 and "time" in self.dims and len(axes) == 1:
             # Time-only aggregation - preserve geometry
@@ -1597,9 +1638,14 @@ class DataArray:
     def quantile(self, q: Sequence[float], **kwargs: Any) -> Dataset: ...
 
     def quantile(
-        self, q: float | Sequence[float], *, axis: int | str = 0, **kwargs: Any
+        self,
+        q: float | Sequence[float],
+        *,
+        dim: int | str = 0,
+        axis: int | str | None = None,
+        **kwargs: Any,
     ) -> DataArray | Dataset:
-        """Compute the q-th quantile of the data along the specified axis.
+        """Compute the q-th quantile of the data along the specified dimension.
 
         Wrapping np.quantile
 
@@ -1608,8 +1654,10 @@ class DataArray:
         q: array_like of float
             Quantile or sequence of quantiles to compute,
             which must be between 0 and 1 inclusive.
-        axis: (int, str, None), optional
-            axis number or "time" or "space", by default 0
+        dim: int or str, optional
+            dimension, by default 0 (time)
+        axis: int or str, optional
+            deprecated, use dim
         **kwargs: Any
             Additional keyword arguments
 
@@ -1622,14 +1670,15 @@ class DataArray:
         --------
         >>> da.quantile(q=[0.25,0.75])
         >>> da.quantile(q=0.5)
-        >>> da.quantile(q=[0.01,0.5,0.99], axis="space")
+        >>> da.quantile(q=[0.01,0.5,0.99], dim="space")
 
         See Also
         --------
         nanquantile : quantile with NaN values ignored
 
         """
-        return self._quantile(q, axis=axis, func=np.quantile, **kwargs)
+        resolved = _resolve_deprecated_axis(dim, axis)
+        return self._quantile(q, axis=resolved, func=np.quantile, **kwargs)
 
     @overload
     def nanquantile(self, q: float, **kwargs: Any) -> DataArray: ...
@@ -1638,9 +1687,14 @@ class DataArray:
     def nanquantile(self, q: Sequence[float], **kwargs: Any) -> Dataset: ...
 
     def nanquantile(
-        self, q: float | Sequence[float], *, axis: int | str = 0, **kwargs: Any
+        self,
+        q: float | Sequence[float],
+        *,
+        dim: int | str = 0,
+        axis: int | str | None = None,
+        **kwargs: Any,
     ) -> DataArray | Dataset:
-        """Compute the q-th quantile of the data along the specified axis, while ignoring nan values.
+        """Compute the q-th quantile of the data along the specified dimension, ignoring NaN values.
 
         Wrapping np.nanquantile
 
@@ -1649,8 +1703,10 @@ class DataArray:
         q: array_like of float
             Quantile or sequence of quantiles to compute,
             which must be between 0 and 1 inclusive.
-        axis: (int, str, None), optional
-            axis number or "time" or "space", by default 0
+        dim: int or str, optional
+            dimension, by default 0 (time)
+        axis: int or str, optional
+            deprecated, use dim
         **kwargs: Any
             Additional keyword arguments
 
@@ -1663,14 +1719,15 @@ class DataArray:
         --------
         >>> da.nanquantile(q=[0.25,0.75])
         >>> da.nanquantile(q=0.5)
-        >>> da.nanquantile(q=[0.01,0.5,0.99], axis="space")
+        >>> da.nanquantile(q=[0.01,0.5,0.99], dim="space")
 
         See Also
         --------
         quantile : Quantile with NaN values
 
         """
-        return self._quantile(q, axis=axis, func=np.nanquantile, **kwargs)
+        resolved = _resolve_deprecated_axis(dim, axis)
+        return self._quantile(q, axis=resolved, func=np.nanquantile, **kwargs)
 
     def _quantile(self, q, *, axis: int | str = 0, func=np.quantile, **kwargs: Any):  # type: ignore
         from mikeio import Dataset
