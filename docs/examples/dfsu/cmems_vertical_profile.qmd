@@ -139,19 +139,20 @@ element_table = []
 # Store corner indices for each element to map data later
 elem_corners = []  # list of (di_bot, di_top, pi) tuples
 
+# Use first variable to determine seafloor mask (all variables share the same mask)
+mask = ds_transect[list(ds_transect.data_vars)[0]].values[0]  # (depth, points)
+
 for pi in range(n_points - 1):
     for li in range(n_depths - 1):
         di_bot = n_depths - 1 - li
         di_top = n_depths - 1 - (li + 1)
 
-        # Check if all four corners have valid data (use first timestep)
-        corners = [
-            ds_transect["thetao"].values[0, di_bot, pi],
-            ds_transect["thetao"].values[0, di_top, pi],
-            ds_transect["thetao"].values[0, di_bot, pi + 1],
-            ds_transect["thetao"].values[0, di_top, pi + 1],
-        ]
-        if any(np.isnan(c) for c in corners):
+        # Skip elements below the seafloor
+        if any(
+            np.isnan(mask[di, pi + k])
+            for di in (di_bot, di_top)
+            for k in (0, 1)
+        ):
             continue
 
         bl = pi * nodes_per_col + li
