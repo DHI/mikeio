@@ -122,7 +122,8 @@ Each CMEMS cell maps to one element. Skip cells with NaN (below seafloor).
 mask = ds_transect[list(ds_transect.data_vars)[0]].values[0]  # (depth, points)
 
 # Build full grid of (point, layer) indices, then mask out seafloor
-pi_all, li_all = [a.ravel() for a in np.meshgrid(np.arange(n_points), np.arange(n_depths), indexing="ij")]
+pi_all = np.repeat(np.arange(n_points), n_depths)
+li_all = np.tile(np.arange(n_depths), n_points)
 di_all = n_depths - 1 - li_all  # depth index (deepest first in mesh)
 valid = ~np.isnan(mask[di_all, pi_all])
 pi_valid, li_valid, di_valid = pi_all[valid], li_all[valid], di_all[valid]
