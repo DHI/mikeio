@@ -154,8 +154,6 @@ geometry
 
 ## Write
 
-Each CMEMS value maps directly to one element — no averaging needed.
-
 ```{python}
 zn = np.tile(node_coords[:, 2], (n_times, 1)).astype(np.float32)
 
