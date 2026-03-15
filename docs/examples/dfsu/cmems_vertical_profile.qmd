@@ -281,13 +281,3 @@ fig, ax = plt.subplots(figsize=(12, 4))
 dfs.geometry.plot.mesh(ax=ax)
 ax.set_title("Vertical profile mesh");
 ```
-
-## Clean up
-
-```{python}
-import os
-
-for f in ["transect.dfsu"]:
-    if os.path.exists(f):
-        os.remove(f)
-```
