@@ -36,7 +36,7 @@ copernicusmarine subset \
 ```
 
 ```{python}
-ds_cmems = xr.open_dataset("../../../tests/testdata/cmems_mod_bal_phy_anfc_P1D.nc")
+ds_cmems = xr.open_dataset("../../data/cmems_mod_bal_phy_anfc_P1D.nc")
 ds_cmems
 ```
 
@@ -46,6 +46,25 @@ lat = ds_cmems.latitude.values
 depth = ds_cmems.depth.values
 time = ds_cmems.time.values
 ```
+
+### Regional model differences
+
+CMEMS regional models share the same coordinate naming convention (`time`, `depth`, `latitude`, `longitude`) but differ in resolution and depth coverage.
+Compare the Baltic model above with the Mediterranean model:
+
+```{python}
+ds_med = xr.open_dataset(
+    "../../data/cmems_mod_med_phy-sal_anfc_4.2km_P1D.nc"
+)
+ds_med
+```
+
+```{python}
+print(f"Baltic:        {len(ds_cmems.depth)} depth levels, max {ds_cmems.depth.values[-1]:.0f} m")
+print(f"Mediterranean: {len(ds_med.depth)} depth levels, max {ds_med.depth.values[-1]:.0f} m")
+```
+
+The approach below works the same regardless of which regional model you use — just adjust the waypoints and variable names.
 
 ## Define a transect
 
