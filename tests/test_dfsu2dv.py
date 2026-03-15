@@ -1,7 +1,11 @@
+from pathlib import Path
+
 import numpy as np
+import pandas as pd
 import pytest
 import matplotlib.pyplot as plt
 
+import mikeio
 from mikeio import Dfsu2DV
 from mikeio.spatial import (
     GeometryFMVerticalColumn,
@@ -170,3 +174,100 @@ def test_transect_plot_geometry(vslice: Dfsu2DV) -> None:
     g.plot.mesh()
 
     plt.close("all")
+
+
+def test_write_roundtrip(vslice: Dfsu2DV, tmp_path: Path) -> None:
+    ds = vslice.read()
+    fp = tmp_path / "vslice_roundtrip.dfsu"
+    ds.to_dfs(fp)
+
+    ds2 = mikeio.read(fp)
+    assert type(ds2.geometry) is GeometryFMVerticalProfile
+    assert ds2.geometry.n_elements == ds.geometry.n_elements
+    assert ds2.geometry.n_nodes == ds.geometry.n_nodes
+    assert ds2.geometry.n_sigma_layers == ds.geometry.n_sigma_layers
+    assert ds2.n_timesteps == ds.n_timesteps
+    assert ds2.n_items == ds.n_items
+    np.testing.assert_allclose(ds2[0].to_numpy(), ds[0].to_numpy(), atol=1e-5)
+
+
+def test_create_from_scratch(tmp_path: Path) -> None:
+    """Create a vertical profile dfsu from scratch and verify roundtrip."""
+    n_points = 5
+    depth = np.array([0.0, 10.0, 50.0, 100.0])
+    n_depths = len(depth)
+    n_layers = n_depths - 1
+    time = pd.date_range("2024-01-01", periods=2, freq="D")
+
+    lon = np.linspace(3.5, 5.5, n_points)
+    lat = np.linspace(40.5, 41.5, n_points)
+
+    # Build nodes: column-major, bottom-up
+    node_x, node_y, node_z = [], [], []
+    for pi in range(n_points):
+        for di in range(n_depths - 1, -1, -1):
+            node_x.append(lon[pi])
+            node_y.append(lat[pi])
+            node_z.append(-depth[di])
+    node_coords = np.column_stack([node_x, node_y, node_z])
+
+    # Build quadrilateral elements
+    element_table = []
+    nodes_per_col = n_depths
+    for pi in range(n_points - 1):
+        for li in range(n_layers):
+            bl = pi * nodes_per_col + li
+            tl = pi * nodes_per_col + li + 1
+            br = (pi + 1) * nodes_per_col + li
+            tr = (pi + 1) * nodes_per_col + li + 1
+            element_table.append(np.array([bl, br, tr, tl]))
+
+    codes = np.zeros(len(node_x), dtype=int)
+    codes[:nodes_per_col] = 1
+    codes[-nodes_per_col:] = 1
+
+    geometry = GeometryFMVerticalProfile(
+        node_coordinates=node_coords,
+        element_table=element_table,
+        codes=codes,
+        projection="LONG/LAT",
+        dfsu_type=DfsuFileType.DfsuVerticalProfileSigma,
+        n_layers=n_layers,
+        n_sigma=n_layers,
+    )
+
+    assert geometry.n_elements == (n_points - 1) * n_layers
+    assert geometry.n_nodes == n_points * n_depths
+    assert geometry.n_layers == n_layers
+    assert geometry.n_sigma_layers == n_layers
+
+    # Create data and write
+    n_elements = geometry.n_elements
+    rng = np.random.default_rng(42)
+    data = rng.random((len(time), n_elements)).astype(np.float32)
+    zn = np.tile(node_coords[:, 2], (len(time), 1)).astype(np.float32)
+
+    da = mikeio.DataArray(
+        data=data,
+        time=time,
+        geometry=geometry,
+        item=mikeio.ItemInfo("Temperature", mikeio.EUMType.Temperature),
+        zn=zn,
+    )
+    ds = mikeio.Dataset([da])
+
+    fp = tmp_path / "created_vprofile.dfsu"
+    ds.to_dfs(fp)
+
+    # Read back and verify
+    dfs = mikeio.open(fp)
+    assert type(dfs) is Dfsu2DV
+    assert dfs._type == DfsuFileType.DfsuVerticalProfileSigma
+
+    ds2 = dfs.read()
+    assert type(ds2.geometry) is GeometryFMVerticalProfile
+    assert ds2.geometry.n_elements == n_elements
+    assert ds2.geometry.n_layers == n_layers
+    assert ds2.geometry.n_sigma_layers == n_layers
+    assert ds2.n_timesteps == len(time)
+    np.testing.assert_allclose(ds2[0].to_numpy(), data, atol=1e-5)
