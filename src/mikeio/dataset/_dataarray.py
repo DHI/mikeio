@@ -69,6 +69,27 @@ from ._data_plot import (
 )
 
 
+@overload
+def _resolve_deprecated_axis(
+    dim: str,
+    axis: str | None,
+) -> str: ...
+
+
+@overload
+def _resolve_deprecated_axis(
+    dim: int | str,
+    axis: int | str | None,
+) -> int | str: ...
+
+
+@overload
+def _resolve_deprecated_axis(
+    dim: int | str | None,
+    axis: int | str | None,
+) -> int | str | None: ...
+
+
 def _resolve_deprecated_axis(
     dim: int | str | None,
     axis: int | str | None,
