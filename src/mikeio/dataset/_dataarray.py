@@ -1331,8 +1331,8 @@ class DataArray:
 
         Note: on unstructured meshes with variable element sizes,
         ``mean(axis="space")`` treats all elements equally regardless
-        of area. For an area-weighted spatial mean, use
-        :meth:`average` with ``weights=geometry.get_element_area()``.
+        of area. For an area-weighted spatial mean, use ``average()``
+        with ``weights=geometry.get_element_area()``.
 
         Parameters
         ----------
@@ -1486,7 +1486,7 @@ class DataArray:
         Note: on unstructured meshes with variable element sizes,
         ``nanmean(axis="space")`` treats all elements equally regardless
         of area. For an area-weighted spatial mean, use
-        :meth:`average` with ``weights=geometry.get_element_area()``.
+        ``average()`` with ``weights=geometry.get_element_area()``.
 
         Parameters
         ----------
