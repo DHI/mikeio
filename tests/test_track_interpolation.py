@@ -4,11 +4,12 @@ import pandas as pd
 import pytest
 
 import mikeio
+from mikeio.dfsu import Dfsu2DH
 
 
 def test_track_at_exact_timestep() -> None:
     """Track point at exact dfsu timestep should return exact values."""
-    dfs = mikeio.open("tests/testdata/HD2D.dfsu")
+    dfs = Dfsu2DH("tests/testdata/HD2D.dfsu")
     ds = mikeio.read("tests/testdata/HD2D.dfsu", items=[3])
     da = ds[0]
 
@@ -27,7 +28,7 @@ def test_track_at_exact_timestep() -> None:
 
 def test_track_between_timesteps() -> None:
     """Track point halfway between timesteps should get linear interpolation."""
-    dfs = mikeio.open("tests/testdata/HD2D.dfsu")
+    dfs = Dfsu2DH("tests/testdata/HD2D.dfsu")
     ds = mikeio.read("tests/testdata/HD2D.dfsu", items=[3])
     da = ds[0]
 
