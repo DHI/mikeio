@@ -2,7 +2,6 @@
 
 import numpy as np
 
-import mikeio
 from mikeio.spatial._FM_geometry import GeometryFM2D
 
 
@@ -51,7 +50,10 @@ def test_point_in_quadrilateral() -> None:
 
 def test_find_element_at_centroid() -> None:
     """find_index at element centroid should return that element."""
-    g = mikeio.open("tests/testdata/HD2D.dfsu").geometry
+    from mikeio.dfsu import Dfsu2DH
+
+    dfs = Dfsu2DH("tests/testdata/HD2D.dfsu")
+    g = dfs.geometry
     nc = g.element_coordinates
 
     for elem_idx in [0, 100, 500, g.n_elements - 1]:
@@ -62,7 +64,10 @@ def test_find_element_at_centroid() -> None:
 
 def test_find_element_all_elements_found() -> None:
     """Every element centroid should be findable (no false negatives)."""
-    g = mikeio.open("tests/testdata/FakeLake.dfsu").geometry
+    from mikeio.dfsu import Dfsu2DH
+
+    dfs = Dfsu2DH("tests/testdata/FakeLake.dfsu")
+    g = dfs.geometry
     nc = g.element_coordinates
 
     not_found = []
