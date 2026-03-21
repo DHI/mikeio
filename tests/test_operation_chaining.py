@@ -20,7 +20,7 @@ def test_isel_time_then_mean_space() -> None:
 def test_sel_area_then_nanmax_time() -> None:
     """sel(area=bbox).nanmax(axis=0) → shape matches reduced geometry."""
     da = mikeio.read("tests/testdata/HD2D.dfsu", items=[3])[0]
-    bbox = [606000, 6903000, 607000, 6905000]
+    bbox = (606000.0, 6903000.0, 607000.0, 6905000.0)
 
     subset = da.sel(area=bbox)
     result = subset.nanmax(axis=0)
@@ -69,7 +69,7 @@ def test_sel_time_then_sel_area() -> None:
     """Two sequential sel calls must match a single combined selection."""
     da = mikeio.read("tests/testdata/HD2D.dfsu", items=[3])[0]
     t0 = da.time[0]
-    bbox = [606000, 6903000, 607000, 6905000]
+    bbox = (606000.0, 6903000.0, 607000.0, 6905000.0)
 
     result_chained = da.sel(time=t0).sel(area=bbox)
     result_combined = da.sel(time=t0, area=bbox)
