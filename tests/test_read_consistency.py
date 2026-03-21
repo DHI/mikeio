@@ -11,7 +11,7 @@ import mikeio
 
 def test_dfsu_read_area_vs_sel_area() -> None:
     """read(area=bbox) must match read().sel(area=bbox) for dfsu."""
-    bbox = [-0.3, 0.0, 0.3, 0.3]
+    bbox = (-0.3, 0.0, 0.3, 0.3)
 
     ds_direct = mikeio.read("tests/testdata/FakeLake.dfsu", area=bbox)
     ds_sel = mikeio.read("tests/testdata/FakeLake.dfsu").sel(area=bbox)
@@ -24,7 +24,7 @@ def test_dfsu_read_area_vs_sel_area() -> None:
 
 def test_dfs2_read_area_vs_sel_area() -> None:
     """read(area=bbox) must match read().sel(area=bbox) for dfs2."""
-    bbox = [5.0, 3.0, 15.0, 8.0]
+    bbox = (5.0, 3.0, 15.0, 8.0)
 
     ds_direct = mikeio.read("tests/testdata/eq.dfs2", area=bbox)
     ds_sel = mikeio.read("tests/testdata/eq.dfs2").sel(area=bbox)
