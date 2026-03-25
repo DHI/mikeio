@@ -1,0 +1,184 @@
+---
+title: Type Checking
+---
+
+MIKE IO has type annotations throughout the codebase, and passes mypy in strict mode. However, two central APIs return broad types that require explicit narrowing to get full IDE autocompletion and type checker support: `mikeio.open()` and `.geometry`.
+
+This page explains why, and shows practical patterns for working with them.
+
+
+## Why are some types broad?
+
+MIKE IO was created before type hints were mainstream in the Python ecosystem. Two design decisions made at that time have typing consequences:
+
+**`mikeio.open()`** is a factory function that returns different classes depending on the file extension. Since the filename is a runtime value, the type checker can only see the full union of possible return types:
+
+```
+Dfs0 | Dfs1 | Dfs2 | Dfs3 | Dfsu2DH | Dfsu2DV | Dfsu3D | DfsuSpectral | Mesh
+```
+
+**`DataArray.geometry`** is typed as `Any`. The geometry classes are diverse — ranging from `Grid2D` (a structured grid with `nx`, `ny`, `dx`, `dy`) to `GeometryFM2D` (an unstructured mesh with `node_coordinates` and `element_table`) — and don't share a common interface beyond an abstract base class. Typing it as the full union would force users to narrow in every single access, which would be worse than `Any` in practice.
+
+
+## Example: before and after
+
+Consider this script that opens a dfs2 file, inspects its metadata, and reads the data:
+
+```python
+# process_grid.py — without type narrowing
+import mikeio
+
+dfs = mikeio.open("tide.dfs2")
+
+print(dfs.items)
+print(dfs.n_timesteps)
+
+ds = dfs.read()
+print(ds.geometry.nxx)  # typo! should be nx
+```
+
+This script works at runtime (aside from the typo on the last line). But running `mypy process_grid.py` produces:
+
+```
+error: Item "Mesh" of "Dfs0 | Dfs1 | ... | Mesh" has no attribute "items"
+error: Item "Mesh" of "Dfs0 | Dfs1 | ... | Mesh" has no attribute "n_timesteps"
+error: Item "Mesh" of "Dfs0 | Dfs1 | ... | Mesh" has no attribute "read"
+```
+
+Three false positives (`.items`, `.n_timesteps`, and `.read()` exist on all Dfs types, but `Mesh` is in the union and doesn't have them). And the real bug — `.nxx` — goes undetected because `geometry` is typed as `Any`.
+
+Here is the same script with type narrowing:
+
+```python
+# process_grid.py — with type narrowing
+from mikeio import Dfs2, Grid2D
+
+dfs = Dfs2("tide.dfs2")
+
+print(dfs.items)
+print(dfs.n_timesteps)
+
+ds = dfs.read()
+assert isinstance(ds.geometry, Grid2D)
+print(ds.geometry.nxx)  # typo! should be nx
+```
+
+Now `mypy process_grid.py` produces:
+
+```
+error: "Grid2D" has no attribute "nxx"; maybe "nx"?
+```
+
+The false positives are gone, and the real bug is caught — mypy even suggests the correct name.
+
+
+## Patterns for type narrowing
+
+### Construct the class directly (recommended)
+
+If you know the file type, skip `open()` and use the class directly. This gives you the exact type with full autocompletion:
+
+```python
+from mikeio import Dfs2
+
+dfs = Dfs2("tide.dfs2")
+# type checker sees: Dfs2
+```
+
+```python
+from mikeio import Dfsu2DH
+
+dfs = Dfsu2DH("HD2D.dfsu")
+# type checker sees: Dfsu2DH
+```
+
+### `assert isinstance`
+
+When you've received the object from other code or want to narrow geometry:
+
+```python
+import mikeio
+from mikeio import Dfs2
+
+dfs = mikeio.open("tide.dfs2")
+assert isinstance(dfs, Dfs2)
+# type checker now sees: Dfs2
+```
+
+### `isinstance` check
+
+For code that handles multiple file types:
+
+```python
+import mikeio
+from mikeio import Dfs0, Dfs2
+
+dfs = mikeio.open(filename)
+
+if isinstance(dfs, Dfs0):
+    print(f"Time series with {dfs.n_items} items")
+elif isinstance(dfs, Dfs2):
+    print(f"Grid: {dfs.shape}")
+```
+
+### Narrowing geometry
+
+`DataArray.geometry` and `Dataset.geometry` are typed as `Any`, so the type checker won't flag incorrect attribute access — but you also won't get autocompletion. Narrow with `assert isinstance`:
+
+```python
+from mikeio import Dfs2, Grid2D
+
+dfs = Dfs2("tide.dfs2")
+ds = dfs.read()
+assert isinstance(ds.geometry, Grid2D)
+ds.geometry.nx  # autocompletion works
+```
+
+```python
+from mikeio import Dfsu2DH, GeometryFM2D
+
+dfs = Dfsu2DH("HD2D.dfsu")
+ds = dfs.read()
+assert isinstance(ds.geometry, GeometryFM2D)
+ds.geometry.node_coordinates  # autocompletion works
+```
+
+
+## File type → class → geometry mapping
+
+Use this table to know which classes to import for type narrowing:
+
+| File extension | Dfs class | Geometry class |
+|---|---|---|
+| `.dfs0` | `Dfs0` | `Geometry0D` |
+| `.dfs1` | `Dfs1` | `Grid1D` |
+| `.dfs2` | `Dfs2` | `Grid2D` |
+| `.dfs3` | `Dfs3` | `Grid3D` |
+| `.dfsu` (2D horizontal) | `Dfsu2DH` | `GeometryFM2D` |
+| `.dfsu` (3D) | `Dfsu3D` | `GeometryFM3D` |
+| `.dfsu` (2D vertical) | `Dfsu2DV` | `GeometryFMVerticalProfile` |
+| `.dfsu` (spectral) | `DfsuSpectral` | `GeometryFMPointSpectrum` / `GeometryFMLineSpectrum` / `GeometryFMAreaSpectrum` |
+| `.mesh` | `Mesh` | `GeometryFM2D` |
+
+All classes above can be imported directly from `mikeio`:
+
+```python
+from mikeio import Dfs2, Dfsu2DH, Grid2D, GeometryFM2D, Geometry0D
+```
+
+
+## Running a type checker on your scripts
+
+MIKE IO ships with a `py.typed` marker and inline type annotations, so type checkers work out of the box:
+
+```bash
+# mypy
+$ mypy my_script.py
+
+# pyright (used by VS Code / Pylance)
+$ pyright my_script.py
+```
+
+::: {.callout-tip}
+If you use VS Code with the Pylance extension, type narrowing with `assert isinstance(...)` will immediately give you full autocompletion — no configuration needed.
+:::
