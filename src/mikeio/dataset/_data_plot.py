@@ -7,7 +7,6 @@ import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.axes import Axes
 
-from ..spatial._FM_geometry import _GeometryFM
 from ..spatial._FM_plot import _plot_map, _plot_vertical_profile
 
 from .._spectral import plot_2dspectrum, calc_m0_from_spectrum
@@ -18,6 +17,7 @@ from ..spatial import (
     Grid1D,
     Grid2D,
     GeometryFM2D,
+    GeometryFM3D,
     GeometryFMVerticalColumn,
     GeometryFMVerticalProfile,
     GeometryFMPointSpectrum,
@@ -457,8 +457,8 @@ class DataArrayPlotterFM(DataArrayPlotter):
     """
 
     @property
-    def geometry(self) -> _GeometryFM:
-        assert isinstance(self.da.geometry, _GeometryFM)
+    def geometry(self) -> GeometryFM2D | GeometryFM3D:
+        assert isinstance(self.da.geometry, (GeometryFM2D, GeometryFM3D))
         return self.da.geometry
 
     def __call__(
@@ -547,10 +547,10 @@ class DataArrayPlotterFM(DataArrayPlotter):
         ```
 
         """
-        geom: _GeometryFM = self.geometry
-        if hasattr(geom, "to_2d_geometry"):
-            geom = geom.to_2d_geometry()  # type: ignore[union-attr]
-        return geom.plot.mesh(figsize=figsize, ax=ax, **kwargs)  # type: ignore[attr-defined]
+        geom = self.geometry
+        if isinstance(geom, GeometryFM3D):
+            geom = geom.to_2d_geometry()
+        return geom.plot.mesh(figsize=figsize, ax=ax, **kwargs)
 
     def outline(
         self,
@@ -568,10 +568,10 @@ class DataArrayPlotterFM(DataArrayPlotter):
         ```
 
         """
-        geom: _GeometryFM = self.geometry
-        if hasattr(geom, "to_2d_geometry"):
-            geom = geom.to_2d_geometry()  # type: ignore[union-attr]
-        return geom.plot.outline(figsize=figsize, ax=ax, **kwargs)  # type: ignore[attr-defined]
+        geom = self.geometry
+        if isinstance(geom, GeometryFM3D):
+            geom = geom.to_2d_geometry()
+        return geom.plot.outline(figsize=figsize, ax=ax, **kwargs)
 
     def _plot_FM_map(self, ax: Axes, **kwargs: Any) -> Axes:
         da = self.da.isel(time=0) if "time" in self.da.dims else self.da
