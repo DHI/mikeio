@@ -111,15 +111,6 @@ exclude = [
     "test_consistency",
     "conftest",
     "test_pfs",
-    "test_dataarray",
-    "test_dataset",
-    "test_dfs1",
-    "test_dfs2",
-    "test_dfs3",
-    "test_dfsu2dh",
-    "test_dfsu2dv",
-    "test_dfsu3d",
-    "test_dfsu_spectral",
     "docs",
 ]
 python_version = "3.10"

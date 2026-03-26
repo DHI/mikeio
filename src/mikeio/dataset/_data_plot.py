@@ -577,7 +577,7 @@ class DataArrayPlotterFM(DataArrayPlotter):
         da = self.da.isel(time=0) if "time" in self.da.dims else self.da
 
         default_title = f"{self.da.time[0]}"
-        if isinstance(da.geometry, GeometryFM2D) and da.geometry.is_layered:
+        if isinstance(self.geometry, GeometryFM3D):
             warnings.warn(
                 "Plotting layered data implicitly selects the surface layer. "
                 "This will become an error in a future version. "

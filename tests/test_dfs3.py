@@ -3,7 +3,7 @@ import pytest
 import numpy as np
 
 import mikeio
-from mikeio.spatial import Grid2D, Grid3D
+from mikeio import Grid2D, Grid3D
 
 
 def test_dfs3_repr() -> None:
@@ -83,8 +83,8 @@ def test_dfs3_read_1_layer() -> None:
 def test_dfs3_read_multiple_layers() -> None:
     fn = "tests/testdata/test_dfs3.dfs3"
     ds = mikeio.read(fn, layers=(0, 1, 2, 3))
-    assert ds.geometry.nz == 4
     assert isinstance(ds.geometry, Grid3D)
+    assert ds.geometry.nz == 4
 
     with pytest.raises(ValueError, match="Non-equidistant"):
         mikeio.read(fn, layers=[1, 5, -3])
@@ -190,12 +190,14 @@ def test_MIKE_SHE_dfs3_output() -> None:
     assert ds.n_timesteps == 6
     assert ds.n_items == 1
     g = ds.geometry
+    assert isinstance(g, Grid3D)
     assert g.x[0] == 494329.0
     assert g.y[0] == pytest.approx(6220250.0)
     assert g.origin == pytest.approx((494329.0, 6220250.0))
 
     ds2 = ds.isel(x=range(30, 45))
     g2 = ds2.geometry
+    assert isinstance(g2, Grid3D)
     assert g2.x[0] == g.x[0] + 30 * g.dx
     assert g2.y[0] == g.y[0]  # + 35 * g.dy
     assert g2.origin == pytest.approx((g2.x[0], g2.y[0]))
@@ -205,9 +207,11 @@ def test_local_coordinates_read_single_layer_dfs3() -> None:
     fn = "tests/testdata/local_coordinates.dfs3"
 
     ds = mikeio.read(fn)
+    assert isinstance(ds.geometry, Grid3D)
     assert ds.geometry.x[0] == pytest.approx(0.25)
 
     ds1 = mikeio.read(fn, layers=1)
+    assert isinstance(ds1.geometry, Grid2D)
     assert ds1.geometry.x[0] == pytest.approx(0.25)
 
 
@@ -215,6 +219,7 @@ def test_local_coordinates_read_subset_layer_dfs3() -> None:
     fn = "tests/testdata/local_coordinates.dfs3"
 
     ds = mikeio.read(fn, layers=[0, 1])
+    assert isinstance(ds.geometry, Grid3D)
     assert ds.geometry.x[0] == pytest.approx(0.25)
 
 
@@ -243,6 +248,7 @@ def test_to_xarray() -> None:
             nx=3, ny=2, nz=2, dy=0.5, dz=1, dx=0.5, projection="LONG/LAT"
         ),
     )
+    assert isinstance(dag.geometry, Grid3D)
     assert dag.geometry.x[0] == pytest.approx(0.0)
     assert dag.geometry.y[0] == pytest.approx(0.0)
     xr_dag = dag.to_xarray()
@@ -257,6 +263,7 @@ def test_to_xarray() -> None:
         ),
     )
     # local coordinates (=NON-UTM) have a different convention, geometry.x still refers to element centers
+    assert isinstance(da.geometry, Grid3D)
     assert da.geometry.x[0] == pytest.approx(0.25)
     assert da.geometry.y[0] == pytest.approx(0.25)
 

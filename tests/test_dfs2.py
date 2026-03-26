@@ -9,9 +9,8 @@ import xarray
 
 import mikeio
 
-from mikeio import EUMType, ItemInfo, EUMUnit, Dfs2
+from mikeio import EUMType, ItemInfo, EUMUnit, Dfs2, GeometryPoint2D, Grid2D
 from mikeio.exceptions import ItemsError
-from mikeio.spatial import GeometryPoint2D, Grid2D
 
 
 @pytest.fixture
@@ -93,6 +92,7 @@ def test_write_projected(tmp_path: Path) -> None:
     da.to_dfs(fp)
 
     ds = mikeio.read(fp)
+    assert isinstance(ds.geometry, Grid2D)
     assert ds.geometry.dx == 100
     assert ds.geometry.dy == 100
     # shifted x0y0 to origin as not provided in construction of Grid2D
@@ -117,6 +117,7 @@ def test_write_projected(tmp_path: Path) -> None:
     da.to_dfs(fp)
 
     ds2 = mikeio.read(fp)
+    assert isinstance(ds2.geometry, Grid2D)
     assert ds2.geometry.dx == 100
     assert ds2.geometry.dy == 100
     # CHANGED: NOT shifted x0y0 to origin as origin was explicitly set to (0,0)
@@ -132,6 +133,7 @@ def test_write_projected(tmp_path: Path) -> None:
     da.to_dfs(fp)
 
     ds3 = mikeio.read(fp)
+    assert isinstance(ds3.geometry, Grid2D)
     assert ds3.geometry.dx == 100
     assert ds3.geometry.dy == 100
     # shifted x0y0 to origin as not provided in construction of Grid2D
@@ -154,11 +156,13 @@ def test_write_without_time(tmp_path: Path) -> None:
     da.to_dfs(fp)
 
     ds = mikeio.read(fp)
+    assert isinstance(ds.geometry, Grid2D)
     assert ds.geometry.ny == ny
     assert ds.geometry.nx == nx
     assert ds.shape == (1, ny, nx)
 
     ds = mikeio.read(fp, time=0)
+    assert isinstance(ds.geometry, Grid2D)
     assert ds.geometry.ny == ny
     assert ds.geometry.nx == nx
     assert ds.shape == (ny, nx)
@@ -204,6 +208,7 @@ def test_read_area_subset_geo() -> None:
     dssel = dsall.sel(area=bbox)  # selects all pixels with element center in the bbox
     ds = mikeio.read(filename, area=bbox)
     assert ds.geometry == dssel.geometry
+    assert isinstance(ds.geometry, Grid2D)
     assert ds.geometry.bbox.left < bbox[0]  #
     assert ds.geometry.x[0] == pytest.approx(bbox[0])
     assert ds.geometry.x[-1] == pytest.approx(bbox[2])
@@ -213,6 +218,7 @@ def test_read_area_subset_geo() -> None:
 
 def test_subset_bbox() -> None:
     ds = mikeio.read("tests/testdata/europe_wind_long_lat.dfs2")
+    assert isinstance(ds.geometry, Grid2D)
     dssel = ds.sel(area=ds.geometry.bbox)  # this is the entire area
     assert ds.geometry == dssel.geometry
 
@@ -229,9 +235,9 @@ def test_read_area_subset() -> None:
     assert ds.geometry == dssel.geometry
 
     g = ds.geometry
+    assert isinstance(g, Grid2D)
     assert g.ny == 4
     assert g.nx == 3
-    assert isinstance(g, Grid2D)
 
     ds1 = mikeio.read(filename)
     ds2 = ds1.sel(area=bbox)
@@ -277,9 +283,11 @@ def test_properties_vertical_nonutm(dfs2_vertical_nonutm: Dfs2) -> None:
 
 def test_isel_vertical_nonutm(dfs2_vertical_nonutm: Dfs2) -> None:
     ds = dfs2_vertical_nonutm.read()
+    assert isinstance(ds.geometry, Grid2D)
     assert ds.geometry.is_vertical
     dssel = ds.isel(y=slice(45, None))
     g = dssel.geometry
+    assert isinstance(g, Grid2D)
     assert g.is_vertical
     assert g._x0 == 0
     assert g._y0 == 0  # TODO: should this be 45?
@@ -375,6 +383,7 @@ def test_dir_wave_spectra_relative_time_axis() -> None:
         "tests/testdata/spectra/dir_wave_analysis_spectra.dfs2", type="spectral"
     ).read()
     assert ds.n_items == 1
+    assert isinstance(ds.geometry, Grid2D)
     assert ds.geometry.nx == 128
     assert ds.geometry.ny == 37
     assert ds.n_timesteps == 1
@@ -409,10 +418,12 @@ def test_properties_rotated_UTM() -> None:
 def test_select_area_rotated_UTM(tmp_path: Path) -> None:
     filepath = Path("tests/testdata/BW_Ronne_Layout1998_rotated.dfs2")
     ds = mikeio.read(filepath)
+    assert isinstance(ds.geometry, Grid2D)
     assert ds.geometry.origin == pytest.approx((479670, 6104860))
     assert ds.geometry.orientation == pytest.approx(-22.2387902)
 
     dssel = ds.isel(x=range(10, 20), y=range(15, 45))
+    assert isinstance(dssel.geometry, Grid2D)
     assert dssel.geometry.orientation == ds.geometry.orientation
     assert dssel.geometry.origin == pytest.approx((479673.579, 6104877.669))
 
@@ -438,11 +449,13 @@ def test_select_area_rotated_UTM_2() -> None:
     ds = mikeio.read(fn)
     dssel = ds.isel(x=range(50, 61), y=range(75, 106))
     g1 = dssel.geometry
+    assert isinstance(g1, Grid2D)
 
     # compare to file that has been cropped in MIKE Zero
     fn = Path("tests/testdata/BW_Ronne_Layout1998_rotated_crop.dfs2")
     ds2 = mikeio.read(fn)
     g2 = ds2.geometry
+    assert isinstance(g2, Grid2D)
 
     assert g1.origin == pytest.approx(g2.origin)
     assert g1.dx == g2.dx
@@ -583,6 +596,7 @@ def test_interp_to_x_y() -> None:
     dai = ds["Elevation"].interp(x=x, y=y)
     assert dai.values[0] == pytest.approx(-42.69764538978391)
 
+    assert isinstance(dai.geometry, GeometryPoint2D)
     assert dai.geometry.x == x
     assert dai.geometry.y == y
 
@@ -713,6 +727,7 @@ def test_da_plot() -> None:
 def test_grid2d_plot() -> None:
     ds = mikeio.read("tests/testdata/gebco_sound.dfs2")
     g = ds[0].geometry
+    assert isinstance(g, Grid2D)
     g.plot(color="0.2", linewidth=2, title="grid plot")
     g.plot.outline(title="outline plot")
 
@@ -813,12 +828,14 @@ def test_MIKE_SHE_output() -> None:
     assert ds.n_timesteps == 6
     assert ds.n_items == 2
     g = ds.geometry
+    assert isinstance(g, Grid2D)
     assert g.x[0] == 494329.0
     assert g.y[0] == pytest.approx(6220250.0)
     assert g.origin == pytest.approx((494329.0, 6220250.0))
 
     ds2 = ds.isel(x=range(30, 45), y=range(35, 42))
     g2 = ds2.geometry
+    assert isinstance(g2, Grid2D)
     assert g2.x[0] == g.x[0] + 30 * g.dx
     assert g2.y[0] == g.y[0] + 35 * g.dy
     assert g2.origin == pytest.approx((g2.x[0], g2.y[0]))
@@ -858,6 +875,7 @@ def test_to_xarray() -> None:
         data=data,
         geometry=mikeio.Grid2D(nx=3, ny=2, dx=0.5, projection="LONG/LAT"),
     )
+    assert isinstance(dag.geometry, Grid2D)
     assert dag.geometry.x[0] == pytest.approx(0.0)
     assert dag.geometry.y[0] == pytest.approx(0.0)
     xr_dag = dag.to_xarray()
@@ -870,6 +888,7 @@ def test_to_xarray() -> None:
         geometry=mikeio.Grid2D(nx=3, ny=2, dx=0.5, projection="NON-UTM"),
     )
     # local coordinates (=NON-UTM) have a different convention, geometry.x still refers to element centers
+    assert isinstance(da.geometry, Grid2D)
     assert da.geometry.x[0] == pytest.approx(0.25)
     assert da.geometry.y[0] == pytest.approx(0.25)
 

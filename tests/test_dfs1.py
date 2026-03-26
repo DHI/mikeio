@@ -146,6 +146,7 @@ def test_interp_dfs1() -> None:
     ds = mikeio.read("tests/testdata/waterlevel_north.dfs1")
 
     da = ds["North WL"]
+    assert isinstance(da.geometry, mikeio.Grid1D)
 
     assert da.geometry.x[-1] == 8800
 
@@ -167,6 +168,7 @@ def test_interp_dfs1() -> None:
 
 def test_interp_onepoint_dfs1() -> None:
     ds = mikeio.read("tests/testdata/nx1.dfs1")
+    assert isinstance(ds.geometry, mikeio.Grid1D)
     assert ds.geometry.nx == 1
 
     with pytest.raises(AssertionError, match="not possible for Grid1D with one point"):
