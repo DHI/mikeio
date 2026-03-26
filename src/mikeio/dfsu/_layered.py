@@ -477,6 +477,7 @@ class DfsuLayered:
                     )
 
         dfs = DfsFileFactory.DfsuFileOpenAppend(str(self._filename), parameters=None)
+        assert isinstance(ds.geometry, (GeometryFM2D, GeometryFM3D))
         write_dfsu_data(dfs=dfs, ds=ds, is_layered=ds.geometry.is_layered)
         info = _get_dfsu_info(self._filename)
         self._n_timesteps = info.n_timesteps

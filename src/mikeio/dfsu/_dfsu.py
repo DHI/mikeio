@@ -29,6 +29,7 @@ from ..dfs._dfs import (
 from ..spatial import (
     GeometryFM2D,
 )
+from ..spatial._FM_geometry import _GeometryFM
 from ..spatial import Grid2D
 from .._track import _extract_track
 from ._topology import get_elements_from_source, get_nodes_from_source
@@ -49,6 +50,7 @@ def write_dfsu(filename: str | Path, data: Dataset) -> None:
     filename = str(filename)
 
     geometry = data.geometry
+    assert isinstance(geometry, _GeometryFM)
     dfsu_filetype = DfsuFileType.Dfsu2D
 
     if geometry.is_layered or geometry.is_spectral:
@@ -68,16 +70,16 @@ def write_dfsu(filename: str | Path, data: Dataset) -> None:
         DfsuFileType.DfsuVerticalProfileSigma,
         DfsuFileType.DfsuVerticalProfileSigmaZ,
     ):
-        builder.SetNumberOfSigmaLayers(geometry.n_sigma_layers)
+        builder.SetNumberOfSigmaLayers(geometry.n_sigma_layers)  # type: ignore[union-attr]
 
     if dfsu_filetype in (
         DfsuFileType.DfsuSpectral0D,
         DfsuFileType.DfsuSpectral1D,
         DfsuFileType.DfsuSpectral2D,
     ):
-        builder.SetFrequencies(geometry.frequencies)
+        builder.SetFrequencies(geometry.frequencies)  # type: ignore[union-attr]
         # TODO should directions always be converted to radians
-        builder.SetDirections(np.deg2rad(geometry.directions))
+        builder.SetDirections(np.deg2rad(geometry.directions))  # type: ignore[union-attr, arg-type]
 
     builder.SetNodes(xn, yn, zn, geometry.codes)
     builder.SetElements(elem_table)

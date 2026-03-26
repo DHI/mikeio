@@ -7,11 +7,21 @@ import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.axes import Axes
 
+from ..spatial._FM_geometry import _GeometryFM
 from ..spatial._FM_plot import _plot_map, _plot_vertical_profile
 
 from .._spectral import plot_2dspectrum, calc_m0_from_spectrum
 from ..eum import EUMType, ItemInfo
-from ..spatial import GeometryUndefined, Grid1D, GeometryFM2D
+from ..spatial import (
+    GeometryType,
+    GeometryUndefined,
+    Grid1D,
+    Grid2D,
+    GeometryFM2D,
+    GeometryFMVerticalColumn,
+    GeometryFMVerticalProfile,
+    GeometryFMPointSpectrum,
+)
 
 if TYPE_CHECKING:
     from ..dataset import DataArray, Dataset
@@ -180,6 +190,11 @@ class DataArrayPlotterGrid1D(DataArrayPlotter):
 
     """
 
+    @property
+    def geometry(self) -> Grid1D:
+        assert isinstance(self.da.geometry, Grid1D)
+        return self.da.geometry
+
     def __call__(
         self,
         ax: Axes | None = None,
@@ -246,14 +261,14 @@ class DataArrayPlotterGrid1D(DataArrayPlotter):
         if title is not None:
             ax.set_title(title)
         pos = ax.pcolormesh(
-            self.da.geometry.x,
+            self.geometry.x,
             self.da.time,
             self.da.values,
             shading="nearest",
             **kwargs,
         )
         _ = fig.colorbar(pos, label=self._label_txt())
-        ax.set_xlabel(self.da.geometry.dims[0])
+        ax.set_xlabel(self.geometry.dims[0])
         ax.set_ylabel("time")
         return ax
 
@@ -263,8 +278,8 @@ class DataArrayPlotterGrid1D(DataArrayPlotter):
             ax.set_title(title)
         elif self.da.n_timesteps == 1:
             ax.set_title(f"{self.da.time[0]}")
-        ax.plot(self.da.geometry.x, self.da.values.T, **kwargs)
-        ax.set_xlabel(self.da.geometry.dims[0])
+        ax.plot(self.geometry.x, self.da.values.T, **kwargs)
+        ax.set_xlabel(self.geometry.dims[0])
         ax.set_ylabel(self._label_txt())
         return ax
 
@@ -283,6 +298,11 @@ class DataArrayPlotterGrid2D(DataArrayPlotter):
     ```
 
     """
+
+    @property
+    def geometry(self) -> Grid2D:
+        assert isinstance(self.da.geometry, Grid2D)
+        return self.da.geometry
 
     def __call__(
         self,
@@ -317,7 +337,7 @@ class DataArrayPlotterGrid2D(DataArrayPlotter):
         pos = ax.contour(x, y, da.values, **kwargs)
         # fig.colorbar(pos, label=self._label_txt())
         ax.clabel(pos, fmt="%1.2f", inline=1, fontsize=9)
-        self._set_aspect_and_labels(ax, self.da.geometry, y)
+        self._set_aspect_and_labels(ax, self.geometry, y)
         if title is not None:
             ax.set_title(title)
         return ax
@@ -349,7 +369,7 @@ class DataArrayPlotterGrid2D(DataArrayPlotter):
 
         pos = ax.contourf(x, y, da.values, **kwargs)
         fig.colorbar(pos, label=label, pad=0.01)
-        self._set_aspect_and_labels(ax, self.da.geometry, y)
+        self._set_aspect_and_labels(ax, self.geometry, y)
         if title is not None:
             ax.set_title(title)
         return ax
@@ -381,23 +401,23 @@ class DataArrayPlotterGrid2D(DataArrayPlotter):
 
         pos = ax.pcolormesh(xn, yn, da.values, **kwargs)
         fig.colorbar(pos, label=label, pad=0.01)
-        self._set_aspect_and_labels(ax, self.da.geometry, yn)
+        self._set_aspect_and_labels(ax, self.geometry, yn)
         if title is not None:
             ax.set_title(title)
         return ax
 
     def _get_x_y(self) -> tuple[np.ndarray, np.ndarray]:
-        x = self.da.geometry.x
-        y = self.da.geometry.y
+        x = self.geometry.x
+        y = self.geometry.y
         return x, y
 
     def _get_xn_yn(self) -> tuple[np.ndarray, np.ndarray]:
-        xn = self.da.geometry._centers_to_nodes(self.da.geometry.x)
-        yn = self.da.geometry._centers_to_nodes(self.da.geometry.y)
+        xn = self.geometry._centers_to_nodes(self.geometry.x)
+        yn = self.geometry._centers_to_nodes(self.geometry.y)
         return xn, yn
 
     @staticmethod
-    def _set_aspect_and_labels(ax: Axes, geometry: Any, y: np.ndarray) -> None:
+    def _set_aspect_and_labels(ax: Axes, geometry: Grid2D, y: np.ndarray) -> None:
         if geometry.is_spectral:
             ax.set_xlabel("Frequency [Hz]")
             ax.set_ylabel("Directions [degree]")
@@ -435,6 +455,11 @@ class DataArrayPlotterFM(DataArrayPlotter):
     ```
 
     """
+
+    @property
+    def geometry(self) -> _GeometryFM:
+        assert isinstance(self.da.geometry, _GeometryFM)
+        return self.da.geometry
 
     def __call__(
         self,
@@ -522,10 +547,10 @@ class DataArrayPlotterFM(DataArrayPlotter):
         ```
 
         """
-        geom = self.da.geometry
-        if geom.is_layered:
-            geom = geom.to_2d_geometry()
-        return geom.plot.mesh(figsize=figsize, ax=ax, **kwargs)
+        geom: _GeometryFM = self.geometry
+        if hasattr(geom, "to_2d_geometry"):
+            geom = geom.to_2d_geometry()  # type: ignore[union-attr]
+        return geom.plot.mesh(figsize=figsize, ax=ax, **kwargs)  # type: ignore[attr-defined]
 
     def outline(
         self,
@@ -543,16 +568,16 @@ class DataArrayPlotterFM(DataArrayPlotter):
         ```
 
         """
-        geom = self.da.geometry
-        if geom.is_layered:
-            geom = geom.to_2d_geometry()
-        return geom.plot.outline(figsize=figsize, ax=ax, **kwargs)
+        geom: _GeometryFM = self.geometry
+        if hasattr(geom, "to_2d_geometry"):
+            geom = geom.to_2d_geometry()  # type: ignore[union-attr]
+        return geom.plot.outline(figsize=figsize, ax=ax, **kwargs)  # type: ignore[attr-defined]
 
     def _plot_FM_map(self, ax: Axes, **kwargs: Any) -> Axes:
         da = self.da.isel(time=0) if "time" in self.da.dims else self.da
 
         default_title = f"{self.da.time[0]}"
-        if da.geometry.is_layered:
+        if isinstance(da.geometry, GeometryFM2D) and da.geometry.is_layered:
             warnings.warn(
                 "Plotting layered data implicitly selects the surface layer. "
                 "This will become an error in a future version. "
@@ -569,7 +594,7 @@ class DataArrayPlotterFM(DataArrayPlotter):
             kwargs["title"] = default_title
 
         return _plot_map(
-            geometry=da.geometry,
+            geometry=da.geometry,  # type: ignore[arg-type]
             z=da.values,
             ax=ax,
             **kwargs,
@@ -597,6 +622,11 @@ class DataArrayPlotterFMVerticalColumn(DataArrayPlotter):
     ```
 
     """
+
+    @property
+    def geometry(self) -> GeometryFMVerticalColumn:
+        assert isinstance(self.da.geometry, GeometryFMVerticalColumn)
+        return self.da.geometry
 
     def __call__(
         self,
@@ -636,11 +666,12 @@ class DataArrayPlotterFMVerticalColumn(DataArrayPlotter):
 
         values = self.da.to_numpy()
         zn = self.da._zn
+        assert zn is not None
         if extrapolate:
-            ze = self.da.geometry._calc_zee(zn)
-            values = self.da.geometry._interp_values(zn, values, ze)
+            ze = self.geometry._calc_zee(zn)
+            values = self.geometry._interp_values(zn, values, ze)
         else:
-            ze = self.da.geometry.calc_ze(zn)
+            ze = self.geometry.calc_ze(zn)
 
         ax.plot(values.T, ze.T, label=self.da.time, **kwargs)
 
@@ -661,7 +692,7 @@ class DataArrayPlotterFMVerticalColumn(DataArrayPlotter):
     ) -> Axes:
         """Plot data as coloured patches."""
         fig, ax = self._get_fig_ax(ax, figsize)
-        ze = self.da.geometry.calc_ze()
+        ze = self.geometry.calc_ze()
         pos = ax.pcolormesh(
             self.da.time,
             ze,
@@ -696,6 +727,11 @@ class DataArrayPlotterFMVerticalProfile(DataArrayPlotter):
 
     """
 
+    @property
+    def geometry(self) -> GeometryFMVerticalProfile:
+        assert isinstance(self.da.geometry, GeometryFMVerticalProfile)
+        return self.da.geometry
+
     def __call__(
         self,
         ax: Axes | None = None,
@@ -713,6 +749,7 @@ class DataArrayPlotterFMVerticalProfile(DataArrayPlotter):
         da = self.da.isel(time=0) if "time" in self.da.dims else self.da
         assert da._zn is not None
         g = da.geometry
+        assert isinstance(g, GeometryFMVerticalProfile)
         return _plot_vertical_profile(
             node_coordinates=g.node_coordinates,
             element_table=g.element_table,
@@ -724,6 +761,11 @@ class DataArrayPlotterFMVerticalProfile(DataArrayPlotter):
 
 
 class DataArrayPlotterPointSpectrum(DataArrayPlotter):
+    @property
+    def geometry(self) -> GeometryFMPointSpectrum:
+        assert isinstance(self.da.geometry, GeometryFMPointSpectrum)
+        return self.da.geometry
+
     def __call__(
         self,
         ax: Axes | None = None,
@@ -731,11 +773,11 @@ class DataArrayPlotterPointSpectrum(DataArrayPlotter):
         **kwargs: Any,
     ) -> Axes:
         # ax = self._get_ax(ax, figsize)
-        if self.da.geometry.n_frequencies > 0 and self.da.geometry.n_directions > 0:
+        if self.geometry.n_frequencies > 0 and self.geometry.n_directions > 0:
             return self._plot_2dspectrum(figsize=figsize, **kwargs)
-        elif self.da.geometry.n_frequencies == 0:
+        elif self.geometry.n_frequencies == 0:
             return self._plot_dirspectrum(ax=ax, figsize=figsize, **kwargs)
-        elif self.da.geometry.n_directions == 0:
+        elif self.geometry.n_directions == 0:
             return self._plot_freqspectrum(ax=ax, figsize=figsize, **kwargs)
         else:
             raise ValueError("Spectrum could not be plotted")
@@ -758,7 +800,8 @@ class DataArrayPlotterPointSpectrum(DataArrayPlotter):
         figsize: tuple[float, float] | None = None,
         **kwargs: Any,
     ) -> Axes:
-        ax = self._plot_1dspectrum(self.da.geometry.frequencies, ax, figsize, **kwargs)  # type: ignore
+        assert self.geometry.frequencies is not None
+        ax = self._plot_1dspectrum(self.geometry.frequencies, ax, figsize, **kwargs)
         ax.set_xlabel("frequency [Hz]")
         ax.set_ylabel("directionally integrated energy [m*m*s]")
         return ax
@@ -769,11 +812,12 @@ class DataArrayPlotterPointSpectrum(DataArrayPlotter):
         figsize: tuple[float, float] | None = None,
         **kwargs: Any,
     ) -> Axes:
-        ax = self._plot_1dspectrum(self.da.geometry.directions, ax, figsize, **kwargs)  # type: ignore
+        assert self.geometry.directions is not None
+        ax = self._plot_1dspectrum(self.geometry.directions, ax, figsize, **kwargs)
         ax.set_xlabel("directions [degrees]")
         ax.set_ylabel("directional spectral energy [m*m*s]")
         # TODO: consider using matplotlib's default tick locator instead of arbitrary ::2
-        ax.set_xticks(self.da.geometry.directions[::2])  # type: ignore
+        ax.set_xticks(self.geometry.directions[::2])
         return ax
 
     def _plot_1dspectrum(
@@ -807,16 +851,18 @@ class DataArrayPlotterPointSpectrum(DataArrayPlotter):
         if "title" not in kwargs:
             kwargs["title"] = self._get_title()
 
+        assert self.geometry.frequencies is not None
+        assert self.geometry.directions is not None
         return plot_2dspectrum(
             da.values,
-            frequencies=self.da.geometry.frequencies,
-            directions=self.da.geometry.directions,
+            frequencies=self.geometry.frequencies,
+            directions=self.geometry.directions,
             **kwargs,
         )
 
     def _get_title(self) -> str:
         txt = f"{self.da.time[0]}"
-        x, y = self.da.geometry.x, self.da.geometry.y
+        x, y = self.geometry.x, self.geometry.y
         if x is not None and y is not None:
             if np.abs(x) < 400 and np.abs(y) < 90:
                 txt = txt + f", (x, y) = ({x:.5f}, {y:.5f})"
@@ -829,16 +875,19 @@ def _calc_Hm0(da: DataArray) -> DataArray:
     """Calculate Hm0 from spectral DataArray for plotting."""
     from ..spatial import GeometryFMLineSpectrum, GeometryFMAreaSpectrum
 
+    g = da.geometry
+    assert isinstance(
+        g, (GeometryFMPointSpectrum, GeometryFMLineSpectrum, GeometryFMAreaSpectrum)
+    )
     m0 = calc_m0_from_spectrum(
         da.to_numpy(),
-        da.geometry.frequencies,
-        da.geometry.directions,
+        g.frequencies,
+        g.directions,
         tail=True,
     )
     Hm0 = 4 * np.sqrt(m0)
     item = ItemInfo(EUMType.Significant_wave_height)
-    g = da.geometry
-    geometry: Any = GeometryUndefined()
+    geometry: GeometryType = GeometryUndefined()
 
     if isinstance(g, GeometryFMLineSpectrum):
         geometry = Grid1D(
