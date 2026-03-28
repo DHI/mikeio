@@ -21,7 +21,6 @@
 
 ## Examples
 
-- [Examples](https://dhi.github.io/mikeio/examples/index.html)
 - [Dfs0 examples](https://dhi.github.io/mikeio/examples/dfs0/index.html)
 - [Dfs2 examples](https://dhi.github.io/mikeio/examples/dfs2/index.html)
 - [Dfsu examples](https://dhi.github.io/mikeio/examples/dfsu/index.html)

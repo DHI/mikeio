@@ -2,13 +2,16 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.8.27">
+<meta name="generator" content="quarto-1.9.36">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
 <title>design – MIKE IO</title>
 <style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
 div.columns{display: flex; gap: min(4vw, 1.5em);}
@@ -70,19 +73,18 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <link href="./dhi.ico" rel="icon">
 <script src="site_libs/quarto-html/quarto.js" type="module"></script>
 <script src="site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
-<script src="site_libs/quarto-html/axe/axe-check.js" type="module"></script>
 <script src="site_libs/quarto-html/popper.min.js"></script>
 <script src="site_libs/quarto-html/tippy.umd.min.js"></script>
 <script src="site_libs/quarto-html/anchor.min.js"></script>
 <link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="site_libs/quarto-html/quarto-syntax-highlighting-ed96de9b727972fe78a7b5d16c58bf87.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
-<link href="site_libs/quarto-html/quarto-syntax-highlighting-dark-4d9afe2b8d18ee9fa5d0d57b5ed4214d.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
-<link href="site_libs/quarto-html/quarto-syntax-highlighting-ed96de9b727972fe78a7b5d16c58bf87.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-845c23b38eaddc0f92fda52bfe77a8c8.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-dark-f418161beb48e0141c760e455f12af2c.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-845c23b38eaddc0f92fda52bfe77a8c8.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
 <script src="site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="site_libs/bootstrap/bootstrap-c019c988e1add0e03c7ef6b2156ef9f6.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
-<link href="site_libs/bootstrap/bootstrap-dark-c019c988e1add0e03c7ef6b2156ef9f6.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="light">
-<link href="site_libs/bootstrap/bootstrap-c019c988e1add0e03c7ef6b2156ef9f6.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
+<link href="site_libs/bootstrap/bootstrap-5f18961ebd509d8ea1641c91a138ddae.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="site_libs/bootstrap/bootstrap-dark-5f18961ebd509d8ea1641c91a138ddae.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="light">
+<link href="site_libs/bootstrap/bootstrap-5f18961ebd509d8ea1641c91a138ddae.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
 <link href="site_libs/quarto-contrib/fontawesome6-0.1.0/all.css" rel="stylesheet">
 <link href="site_libs/quarto-contrib/fontawesome6-0.1.0/latex-fontsize.css" rel="stylesheet">
 <script id="quarto-search-options" type="application/json">{
@@ -288,15 +290,15 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <ul>
   <li><a href="#design-philosophy" id="toc-design-philosophy" class="nav-link active" data-scroll-target="#design-philosophy">Design philosophy</a>
   <ul class="collapse">
-  <li><a href="#easy-to-use" id="toc-easy-to-use" class="nav-link" data-scroll-target="#easy-to-use"><i class="fa-solid fa-code" aria-label="code"></i> Easy to use</a></li>
-  <li><a href="#familiar" id="toc-familiar" class="nav-link" data-scroll-target="#familiar"><i class="fa-brands fa-python" aria-label="python"></i> Familiar</a></li>
-  <li><a href="#easy-to-install" id="toc-easy-to-install" class="nav-link" data-scroll-target="#easy-to-install"><i class="fa-solid fa-download" aria-label="download"></i> Easy to install</a></li>
-  <li><a href="#easy-to-get-started" id="toc-easy-to-get-started" class="nav-link" data-scroll-target="#easy-to-get-started"><i class="fa-solid fa-book" aria-label="book"></i> Easy to get started</a></li>
-  <li><a href="#abstraction-over-mikecore" id="toc-abstraction-over-mikecore" class="nav-link" data-scroll-target="#abstraction-over-mikecore"><i class="fa-solid fa-layer-group" aria-label="layer-group"></i> Abstraction over mikecore</a></li>
-  <li><a href="#open-source" id="toc-open-source" class="nav-link" data-scroll-target="#open-source"><i class="fa-brands fa-osi" aria-label="osi"></i> Open Source​</a></li>
-  <li><a href="#easy-to-collaborate" id="toc-easy-to-collaborate" class="nav-link" data-scroll-target="#easy-to-collaborate"><i class="fa-solid fa-comments" aria-label="comments"></i> Easy to collaborate</a></li>
-  <li><a href="#reproducible" id="toc-reproducible" class="nav-link" data-scroll-target="#reproducible"><i class="fa-solid fa-list-ol" aria-label="list-ol"></i> Reproducible</a></li>
-  <li><a href="#easy-access-to-new-features" id="toc-easy-access-to-new-features" class="nav-link" data-scroll-target="#easy-access-to-new-features"><i class="fa-brands fa-github" aria-label="github"></i> Easy access to new features</a></li>
+  <li><a href="#b58fc729-690b-4000-b19f-365a4093b2ff7b7b3c20666120636f6465203e7d7d-easy-to-use" id="toc-b58fc729-690b-4000-b19f-365a4093b2ff7b7b3c20666120636f6465203e7d7d-easy-to-use" class="nav-link" data-scroll-target="#b58fc729-690b-4000-b19f-365a4093b2ff7b7b3c20666120636f6465203e7d7d-easy-to-use"><i class="fa-solid fa-code" aria-label="code"></i> Easy to use</a></li>
+  <li><a href="#b58fc729-690b-4000-b19f-365a4093b2ff7b7b3c206661206272616e647320707974686f6e203e7d7d-familiar" id="toc-b58fc729-690b-4000-b19f-365a4093b2ff7b7b3c206661206272616e647320707974686f6e203e7d7d-familiar" class="nav-link" data-scroll-target="#b58fc729-690b-4000-b19f-365a4093b2ff7b7b3c206661206272616e647320707974686f6e203e7d7d-familiar"><i class="fa-brands fa-python" aria-label="python"></i> Familiar</a></li>
+  <li><a href="#b58fc729-690b-4000-b19f-365a4093b2ff7b7b3c20666120646f776e6c6f6164203e7d7d-easy-to-install" id="toc-b58fc729-690b-4000-b19f-365a4093b2ff7b7b3c20666120646f776e6c6f6164203e7d7d-easy-to-install" class="nav-link" data-scroll-target="#b58fc729-690b-4000-b19f-365a4093b2ff7b7b3c20666120646f776e6c6f6164203e7d7d-easy-to-install"><i class="fa-solid fa-download" aria-label="download"></i> Easy to install</a></li>
+  <li><a href="#b58fc729-690b-4000-b19f-365a4093b2ff7b7b3c20666120626f6f6b203e7d7d-easy-to-get-started" id="toc-b58fc729-690b-4000-b19f-365a4093b2ff7b7b3c20666120626f6f6b203e7d7d-easy-to-get-started" class="nav-link" data-scroll-target="#b58fc729-690b-4000-b19f-365a4093b2ff7b7b3c20666120626f6f6b203e7d7d-easy-to-get-started"><i class="fa-solid fa-book" aria-label="book"></i> Easy to get started</a></li>
+  <li><a href="#b58fc729-690b-4000-b19f-365a4093b2ff7b7b3c206661206c617965722d67726f7570203e7d7d-abstraction-over-mikecore" id="toc-b58fc729-690b-4000-b19f-365a4093b2ff7b7b3c206661206c617965722d67726f7570203e7d7d-abstraction-over-mikecore" class="nav-link" data-scroll-target="#b58fc729-690b-4000-b19f-365a4093b2ff7b7b3c206661206c617965722d67726f7570203e7d7d-abstraction-over-mikecore"><i class="fa-solid fa-layer-group" aria-label="layer-group"></i> Abstraction over mikecore</a></li>
+  <li><a href="#b58fc729-690b-4000-b19f-365a4093b2ff7b7b3c206661206272616e6473206f7369203e7d7d-open-source" id="toc-b58fc729-690b-4000-b19f-365a4093b2ff7b7b3c206661206272616e6473206f7369203e7d7d-open-source" class="nav-link" data-scroll-target="#b58fc729-690b-4000-b19f-365a4093b2ff7b7b3c206661206272616e6473206f7369203e7d7d-open-source"><i class="fa-brands fa-osi" aria-label="osi"></i> Open Source​</a></li>
+  <li><a href="#b58fc729-690b-4000-b19f-365a4093b2ff7b7b3c20666120636f6d6d656e7473203e7d7d-easy-to-collaborate" id="toc-b58fc729-690b-4000-b19f-365a4093b2ff7b7b3c20666120636f6d6d656e7473203e7d7d-easy-to-collaborate" class="nav-link" data-scroll-target="#b58fc729-690b-4000-b19f-365a4093b2ff7b7b3c20666120636f6d6d656e7473203e7d7d-easy-to-collaborate"><i class="fa-solid fa-comments" aria-label="comments"></i> Easy to collaborate</a></li>
+  <li><a href="#b58fc729-690b-4000-b19f-365a4093b2ff7b7b3c206661206c6973742d6f6c203e7d7d-reproducible" id="toc-b58fc729-690b-4000-b19f-365a4093b2ff7b7b3c206661206c6973742d6f6c203e7d7d-reproducible" class="nav-link" data-scroll-target="#b58fc729-690b-4000-b19f-365a4093b2ff7b7b3c206661206c6973742d6f6c203e7d7d-reproducible"><i class="fa-solid fa-list-ol" aria-label="list-ol"></i> Reproducible</a></li>
+  <li><a href="#b58fc729-690b-4000-b19f-365a4093b2ff7b7b3c206661206272616e647320676974687562203e7d7d-easy-access-to-new-features" id="toc-b58fc729-690b-4000-b19f-365a4093b2ff7b7b3c206661206272616e647320676974687562203e7d7d-easy-access-to-new-features" class="nav-link" data-scroll-target="#b58fc729-690b-4000-b19f-365a4093b2ff7b7b3c206661206272616e647320676974687562203e7d7d-easy-access-to-new-features"><i class="fa-brands fa-github" aria-label="github"></i> Easy access to new features</a></li>
   </ul></li>
   </ul>
 <div class="toc-actions"><ul><li><a href="https://github.com/DHI/mikeio/edit/main/docs/design.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li></ul></div><div class="quarto-alternate-formats"><h2>Other Formats</h2><ul><li><a href="design.ipynb" download="design.ipynb"><i class="bi bi-journal-code"></i>Jupyter</a></li></ul></div></nav>
@@ -309,21 +311,21 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 <section id="design-philosophy" class="level1">
 <h1>Design philosophy</h1>
-<section id="easy-to-use" class="level2">
-<h2 class="anchored" data-anchor-id="easy-to-use"><i class="fa-solid fa-code" aria-label="code"></i> Easy to use</h2>
+<section id="b58fc729-690b-4000-b19f-365a4093b2ff7b7b3c20666120636f6465203e7d7d-easy-to-use" class="level2">
+<h2 class="anchored" data-anchor-id="b58fc729-690b-4000-b19f-365a4093b2ff7b7b3c20666120636f6465203e7d7d-easy-to-use"><i class="fa-solid fa-code" aria-label="code"></i> Easy to use</h2>
 <p>Common operations such as reading a file should only need a few lines of code.</p>
 <p>Make extensive use of existing standard libraries for scientific computing such as numpy, matplotlib and pandas.</p>
 </section>
-<section id="familiar" class="level2">
-<h2 class="anchored" data-anchor-id="familiar"><i class="fa-brands fa-python" aria-label="python"></i> Familiar</h2>
+<section id="b58fc729-690b-4000-b19f-365a4093b2ff7b7b3c206661206272616e647320707974686f6e203e7d7d-familiar" class="level2">
+<h2 class="anchored" data-anchor-id="b58fc729-690b-4000-b19f-365a4093b2ff7b7b3c206661206272616e647320707974686f6e203e7d7d-familiar"><i class="fa-brands fa-python" aria-label="python"></i> Familiar</h2>
 <p>MIKE IO aims to use a syntax familiar to users of scientific computing libraries such as NumPy, Pandas and xarray.</p>
 </section>
-<section id="easy-to-install" class="level2">
-<h2 class="anchored" data-anchor-id="easy-to-install"><i class="fa-solid fa-download" aria-label="download"></i> Easy to install</h2>
+<section id="b58fc729-690b-4000-b19f-365a4093b2ff7b7b3c20666120646f776e6c6f6164203e7d7d-easy-to-install" class="level2">
+<h2 class="anchored" data-anchor-id="b58fc729-690b-4000-b19f-365a4093b2ff7b7b3c20666120646f776e6c6f6164203e7d7d-easy-to-install"><i class="fa-solid fa-download" aria-label="download"></i> Easy to install</h2>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="ex">$</span> pip install mikeio</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </section>
-<section id="easy-to-get-started" class="level2">
-<h2 class="anchored" data-anchor-id="easy-to-get-started"><i class="fa-solid fa-book" aria-label="book"></i> Easy to get started</h2>
+<section id="b58fc729-690b-4000-b19f-365a4093b2ff7b7b3c20666120626f6f6b203e7d7d-easy-to-get-started" class="level2">
+<h2 class="anchored" data-anchor-id="b58fc729-690b-4000-b19f-365a4093b2ff7b7b3c20666120626f6f6b203e7d7d-easy-to-get-started"><i class="fa-solid fa-book" aria-label="book"></i> Easy to get started</h2>
 <p>By providing many examples to cut/paste from.</p>
 <p>Examples are available in two forms:</p>
 <ul>
@@ -331,27 +333,27 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <li><a href="https://github.com/DHI/mikeio/tree/main/tests">Unit tests</a></li>
 </ul>
 </section>
-<section id="abstraction-over-mikecore" class="level2">
-<h2 class="anchored" data-anchor-id="abstraction-over-mikecore"><i class="fa-solid fa-layer-group" aria-label="layer-group"></i> Abstraction over mikecore</h2>
+<section id="b58fc729-690b-4000-b19f-365a4093b2ff7b7b3c206661206c617965722d67726f7570203e7d7d-abstraction-over-mikecore" class="level2">
+<h2 class="anchored" data-anchor-id="b58fc729-690b-4000-b19f-365a4093b2ff7b7b3c206661206c617965722d67726f7570203e7d7d-abstraction-over-mikecore"><i class="fa-solid fa-layer-group" aria-label="layer-group"></i> Abstraction over mikecore</h2>
 <p>MIKE IO is built on top of <a href="https://github.com/DHI/mikecore-python">mikecore</a>, the low-level Python bindings to DHI’s DFS and EUM C libraries. MIKE IO provides a high-level, user-friendly API that covers the vast majority of common data processing tasks. However, to keep the API simple and focused, some advanced or niche functionality is not exposed. If you encounter an edge case that MIKE IO doesn’t support, you can use mikecore directly for full low-level access. While mikecore doesn’t have formal documentation, its repository contains many examples to help you get started.</p>
 </section>
-<section id="open-source" class="level2">
-<h2 class="anchored" data-anchor-id="open-source"><i class="fa-brands fa-osi" aria-label="osi"></i> Open Source​</h2>
+<section id="b58fc729-690b-4000-b19f-365a4093b2ff7b7b3c206661206272616e6473206f7369203e7d7d-open-source" class="level2">
+<h2 class="anchored" data-anchor-id="b58fc729-690b-4000-b19f-365a4093b2ff7b7b3c206661206272616e6473206f7369203e7d7d-open-source"><i class="fa-brands fa-osi" aria-label="osi"></i> Open Source​</h2>
 <p>MIKE IO is an open source project licensed under the <a href="./license.html">BSD-3 license</a>. The software is provided free of charge with the source code available for inspection and modification.</p>
 <p>Contributions are welcome!</p>
 </section>
-<section id="easy-to-collaborate" class="level2">
-<h2 class="anchored" data-anchor-id="easy-to-collaborate"><i class="fa-solid fa-comments" aria-label="comments"></i> Easy to collaborate</h2>
+<section id="b58fc729-690b-4000-b19f-365a4093b2ff7b7b3c20666120636f6d6d656e7473203e7d7d-easy-to-collaborate" class="level2">
+<h2 class="anchored" data-anchor-id="b58fc729-690b-4000-b19f-365a4093b2ff7b7b3c20666120636f6d6d656e7473203e7d7d-easy-to-collaborate"><i class="fa-solid fa-comments" aria-label="comments"></i> Easy to collaborate</h2>
 <p>By developing MIKE IO on GitHub along with a completely open discussion, we believe that the collaboration between developers and end-users results in a useful library.</p>
 </section>
-<section id="reproducible" class="level2">
-<h2 class="anchored" data-anchor-id="reproducible"><i class="fa-solid fa-list-ol" aria-label="list-ol"></i> Reproducible</h2>
+<section id="b58fc729-690b-4000-b19f-365a4093b2ff7b7b3c206661206c6973742d6f6c203e7d7d-reproducible" class="level2">
+<h2 class="anchored" data-anchor-id="b58fc729-690b-4000-b19f-365a4093b2ff7b7b3c206661206c6973742d6f6c203e7d7d-reproducible"><i class="fa-solid fa-list-ol" aria-label="list-ol"></i> Reproducible</h2>
 <p>By providing the historical versions of MIKE IO on PyPI it is possible to reproduce the behaviour of an older existing system, based on an older version.</p>
 <p><strong>Install specific version</strong></p>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="ex">pip</span> install mikeio==1.4.0</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </section>
-<section id="easy-access-to-new-features" class="level2">
-<h2 class="anchored" data-anchor-id="easy-access-to-new-features"><i class="fa-brands fa-github" aria-label="github"></i> Easy access to new features</h2>
+<section id="b58fc729-690b-4000-b19f-365a4093b2ff7b7b3c206661206272616e647320676974687562203e7d7d-easy-access-to-new-features" class="level2">
+<h2 class="anchored" data-anchor-id="b58fc729-690b-4000-b19f-365a4093b2ff7b7b3c206661206272616e647320676974687562203e7d7d-easy-access-to-new-features"><i class="fa-brands fa-github" aria-label="github"></i> Easy access to new features</h2>
 <p>Features are being added all the time, by developers at DHI in offices all around the globe as well as external contributors using MIKE IO in their work. These new features are always available from the <a href="https://github.com/DHI/mikeio">main branch on GitHub</a> and thanks to automated testing, it is always possible to verify that the tests passes before downloading a new development version.</p>
 <p><strong>Install development version</strong></p>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3"><pre class="sourceCode bash code-with-copy"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="ex">$</span> pip install https://github.com/DHI/mikeio/archive/main.zip</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>

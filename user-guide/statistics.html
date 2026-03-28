@@ -2,13 +2,16 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.8.27">
+<meta name="generator" content="quarto-1.9.36">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
 <title>Statistics – MIKE IO</title>
 <style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
 div.columns{display: flex; gap: min(4vw, 1.5em);}
@@ -70,19 +73,18 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <link href="../dhi.ico" rel="icon">
 <script src="../site_libs/quarto-html/quarto.js" type="module"></script>
 <script src="../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
-<script src="../site_libs/quarto-html/axe/axe-check.js" type="module"></script>
 <script src="../site_libs/quarto-html/popper.min.js"></script>
 <script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
 <script src="../site_libs/quarto-html/anchor.min.js"></script>
 <link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="../site_libs/quarto-html/quarto-syntax-highlighting-ed96de9b727972fe78a7b5d16c58bf87.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
-<link href="../site_libs/quarto-html/quarto-syntax-highlighting-dark-4d9afe2b8d18ee9fa5d0d57b5ed4214d.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
-<link href="../site_libs/quarto-html/quarto-syntax-highlighting-ed96de9b727972fe78a7b5d16c58bf87.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-845c23b38eaddc0f92fda52bfe77a8c8.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-dark-f418161beb48e0141c760e455f12af2c.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-845c23b38eaddc0f92fda52bfe77a8c8.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
 <script src="../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="../site_libs/bootstrap/bootstrap-c019c988e1add0e03c7ef6b2156ef9f6.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
-<link href="../site_libs/bootstrap/bootstrap-dark-c019c988e1add0e03c7ef6b2156ef9f6.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="light">
-<link href="../site_libs/bootstrap/bootstrap-c019c988e1add0e03c7ef6b2156ef9f6.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
+<link href="../site_libs/bootstrap/bootstrap-5f18961ebd509d8ea1641c91a138ddae.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="../site_libs/bootstrap/bootstrap-dark-5f18961ebd509d8ea1641c91a138ddae.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="light">
+<link href="../site_libs/bootstrap/bootstrap-5f18961ebd509d8ea1641c91a138ddae.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -345,13 +347,13 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <li><a href="../user-guide/generic.html"><code>mikeio.generic</code></a> — temporal aggregations on any dfs file, out-of-core for large files</li>
 <li>Custom code with NumPy</li>
 </ul>
-<div id="0efdd84f" class="cell" data-execution_count="1">
+<div id="eacfa0e7" class="cell" data-execution_count="1">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> mikeio</span>
 <span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> mikeio.generic</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
-<div id="5657b60e" class="cell" data-execution_count="2">
+<div id="712db83b" class="cell" data-execution_count="2">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>ds <span class="op">=</span> mikeio.read(<span class="st">"../data/NorthSea_HD_and_windspeed.dfsu"</span>)</span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>ds</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-display" data-execution_count="2">
@@ -369,7 +371,7 @@ items:
 <p>The default aggregation axis is time — the output is a spatial map.</p>
 <section id="mean" class="level3">
 <h3 class="anchored" data-anchor-id="mean">Mean</h3>
-<div id="5f642b2a" class="cell" data-execution_count="3">
+<div id="6cdbc1ab" class="cell" data-execution_count="3">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>ds_mean <span class="op">=</span> ds.mean()</span>
 <span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>ds_mean[<span class="st">"Wind speed"</span>].plot(title<span class="op">=</span><span class="st">"Mean wind speed"</span>)<span class="op">;</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-display">
@@ -383,7 +385,7 @@ items:
 </section>
 <section id="max" class="level3">
 <h3 class="anchored" data-anchor-id="max">Max</h3>
-<div id="9467c513" class="cell" data-execution_count="4">
+<div id="fc614d85" class="cell" data-execution_count="4">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>ds.<span class="bu">max</span>()[<span class="st">"Wind speed"</span>].plot(title<span class="op">=</span><span class="st">"Max wind speed"</span>)<span class="op">;</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-display">
 <div>
@@ -396,7 +398,7 @@ items:
 </section>
 <section id="quantiles" class="level3">
 <h3 class="anchored" data-anchor-id="quantiles">Quantiles</h3>
-<div id="b17117dd" class="cell" data-execution_count="5">
+<div id="c89d70ff" class="cell" data-execution_count="5">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>ds_q <span class="op">=</span> ds.quantile(q<span class="op">=</span>[<span class="fl">0.1</span>, <span class="fl">0.5</span>, <span class="fl">0.9</span>])</span>
 <span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>ds_q</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-display" data-execution_count="5">
@@ -414,14 +416,14 @@ items:
 </div>
 </div>
 <p>The quantile results can be written to a new dfsu file:</p>
-<div id="996e7de8" class="cell" data-execution_count="6">
+<div id="68440c3e" class="cell" data-execution_count="6">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>ds_q.to_dfs(<span class="st">"NorthSea_quantiles.dfsu"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </section>
 <section id="custom-aggregations" class="level3">
 <h3 class="anchored" data-anchor-id="custom-aggregations">Custom aggregations</h3>
 <p>Use <code>aggregate()</code> with any function that reduces along an axis:</p>
-<div id="6c92c2c0" class="cell" data-execution_count="7">
+<div id="5b92953f" class="cell" data-execution_count="7">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>ds_std <span class="op">=</span> ds.aggregate(func<span class="op">=</span>np.std)</span>
 <span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>ds_std[<span class="st">"Wind speed"</span>].plot(title<span class="op">=</span><span class="st">"Std of wind speed [m/s]"</span>)<span class="op">;</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-display">
@@ -437,7 +439,7 @@ items:
 <section id="spatial-aggregations" class="level2">
 <h2 class="anchored" data-anchor-id="spatial-aggregations">Spatial aggregations</h2>
 <p>Pass <code>axis="space"</code> to aggregate all elements into a time series.</p>
-<div id="785d8e4e" class="cell" data-execution_count="8">
+<div id="a6f59665" class="cell" data-execution_count="8">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>ds.mean(axis<span class="op">=</span><span class="st">"space"</span>).plot()<span class="op">;</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-display">
 <div>
@@ -447,7 +449,7 @@ items:
 </div>
 </div>
 </div>
-<div id="b13858f2" class="cell" data-execution_count="9">
+<div id="8e6a94cc" class="cell" data-execution_count="9">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>ds.Wind_speed.quantile(q<span class="op">=</span>[<span class="fl">0.1</span>, <span class="fl">0.5</span>, <span class="fl">0.9</span>], axis<span class="op">=</span><span class="st">"space"</span>).plot()<span class="op">;</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-display">
 <div>
@@ -472,7 +474,7 @@ Warning
 </div>
 <section id="weighted-spatial-average" class="level3">
 <h3 class="anchored" data-anchor-id="weighted-spatial-average">Weighted spatial average</h3>
-<div id="f87bb836" class="cell" data-execution_count="10">
+<div id="049f29fc" class="cell" data-execution_count="10">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>area <span class="op">=</span> ds.geometry.get_element_area()</span>
 <span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>df_compare <span class="op">=</span> (</span>
@@ -501,7 +503,7 @@ Warning
 <section id="total-aggregations" class="level2">
 <h2 class="anchored" data-anchor-id="total-aggregations">Total aggregations</h2>
 <p>Aggregate over both time and space.</p>
-<div id="101c849a" class="cell" data-execution_count="11">
+<div id="5f17d845" class="cell" data-execution_count="11">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>ds.describe()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-display" data-execution_count="11">
 <div>
@@ -562,7 +564,7 @@ Warning
 </div>
 </div>
 </div>
-<div id="ec95d81f" class="cell" data-execution_count="12">
+<div id="0296043f" class="cell" data-execution_count="12">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>ds.<span class="bu">min</span>(axis<span class="op">=</span><span class="va">None</span>).to_dataframe()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-display" data-execution_count="12">
 <div>
@@ -592,16 +594,18 @@ Warning
 <section id="out-of-core-statistics-generic" class="level2">
 <h2 class="anchored" data-anchor-id="out-of-core-statistics-generic">Out-of-core statistics (generic)</h2>
 <p>For large files that don’t fit in memory, use <a href="../user-guide/generic.html"><code>mikeio.generic</code></a> to compute temporal statistics directly on disk:</p>
-<div id="deb49184" class="cell" data-execution_count="13">
+<div id="5b8cd895" class="cell" data-execution_count="13">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>mikeio.generic.avg_time(</span>
 <span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>    <span class="st">"../data/NorthSea_HD_and_windspeed.dfsu"</span>,</span>
 <span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>    <span class="st">"NorthSea_avg.dfsu"</span>,</span>
 <span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stderr">
-<pre><code>  0%|          | 0/66 [00:00&lt;?, ?it/s]100%|██████████| 66/66 [00:00&lt;00:00, 23874.43it/s]</code></pre>
+<pre><code>
+  0%|          | 0/66 [00:00&lt;?, ?it/s]
+100%|██████████| 66/66 [00:00&lt;00:00, 23948.79it/s]</code></pre>
 </div>
 </div>
-<div id="647b5dd4" class="cell" data-execution_count="14">
+<div id="421b11f4" class="cell" data-execution_count="14">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>mikeio.read(<span class="st">"NorthSea_avg.dfsu"</span>, items<span class="op">=</span><span class="st">"Wind speed"</span>)[<span class="st">"Wind speed"</span>].plot(</span>
 <span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>    title<span class="op">=</span><span class="st">"Mean wind speed (generic)"</span></span>
 <span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>)<span class="op">;</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
@@ -613,7 +617,7 @@ Warning
 </div>
 </div>
 </div>
-<div id="92020565" class="cell" data-execution_count="15">
+<div id="92c644d4" class="cell" data-execution_count="15">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb18"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>mikeio.generic.quantile(</span>
 <span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>    <span class="st">"../data/NorthSea_HD_and_windspeed.dfsu"</span>,</span>
 <span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>    <span class="st">"NorthSea_quantiles_generic.dfsu"</span>,</span>
@@ -624,7 +628,7 @@ Warning
 <section id="exceedance-probability" class="level2">
 <h2 class="anchored" data-anchor-id="exceedance-probability">Exceedance probability</h2>
 <p>Calculate the fraction of time a threshold is exceeded at each location.</p>
-<div id="575864a7" class="cell" data-execution_count="16">
+<div id="590836e6" class="cell" data-execution_count="16">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb19"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>threshold <span class="op">=</span> <span class="dv">12</span>  <span class="co"># m/s</span></span>
 <span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>wind <span class="op">=</span> ds[<span class="st">"Wind speed"</span>].values  <span class="co"># shape: (time, element)</span></span>
 <span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>n_exceed <span class="op">=</span> np.<span class="bu">sum</span>(wind <span class="op">&gt;</span> threshold, axis<span class="op">=</span><span class="dv">0</span>)</span>
@@ -651,7 +655,7 @@ Warning
 </div>
 </div>
 <p>Cleanup temporary files:</p>
-<div id="cb549d43" class="cell" data-execution_count="17">
+<div id="37521673" class="cell" data-execution_count="17">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb20"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> os</span>
 <span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> f <span class="kw">in</span> [</span>

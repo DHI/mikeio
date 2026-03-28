@@ -2,13 +2,16 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.8.27">
+<meta name="generator" content="quarto-1.9.36">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
 <title>Dataset – MIKE IO</title>
 <style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
 div.columns{display: flex; gap: min(4vw, 1.5em);}
@@ -70,19 +73,18 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <link href="../dhi.ico" rel="icon">
 <script src="../site_libs/quarto-html/quarto.js" type="module"></script>
 <script src="../site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
-<script src="../site_libs/quarto-html/axe/axe-check.js" type="module"></script>
 <script src="../site_libs/quarto-html/popper.min.js"></script>
 <script src="../site_libs/quarto-html/tippy.umd.min.js"></script>
 <script src="../site_libs/quarto-html/anchor.min.js"></script>
 <link href="../site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="../site_libs/quarto-html/quarto-syntax-highlighting-ed96de9b727972fe78a7b5d16c58bf87.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
-<link href="../site_libs/quarto-html/quarto-syntax-highlighting-dark-4d9afe2b8d18ee9fa5d0d57b5ed4214d.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
-<link href="../site_libs/quarto-html/quarto-syntax-highlighting-ed96de9b727972fe78a7b5d16c58bf87.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-845c23b38eaddc0f92fda52bfe77a8c8.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-dark-f418161beb48e0141c760e455f12af2c.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
+<link href="../site_libs/quarto-html/quarto-syntax-highlighting-845c23b38eaddc0f92fda52bfe77a8c8.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
 <script src="../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="../site_libs/bootstrap/bootstrap-c019c988e1add0e03c7ef6b2156ef9f6.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
-<link href="../site_libs/bootstrap/bootstrap-dark-c019c988e1add0e03c7ef6b2156ef9f6.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="light">
-<link href="../site_libs/bootstrap/bootstrap-c019c988e1add0e03c7ef6b2156ef9f6.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
+<link href="../site_libs/bootstrap/bootstrap-5f18961ebd509d8ea1641c91a138ddae.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="../site_libs/bootstrap/bootstrap-dark-5f18961ebd509d8ea1641c91a138ddae.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="light">
+<link href="../site_libs/bootstrap/bootstrap-5f18961ebd509d8ea1641c91a138ddae.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
 <link href="../site_libs/quarto-contrib/fontawesome6-0.1.0/all.css" rel="stylesheet">
 <link href="../site_libs/quarto-contrib/fontawesome6-0.1.0/latex-fontsize.css" rel="stylesheet">
 <script id="quarto-search-options" type="application/json">{
@@ -286,15 +288,15 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     <h2 id="toc-title">On this page</h2>
    
   <ul>
-  <li><a href="#selecting-items" id="toc-selecting-items" class="nav-link active" data-scroll-target="#selecting-items"><i class="fa-solid fa-filter" aria-label="filter"></i> Selecting items</a></li>
-  <li><a href="#temporal-selection" id="toc-temporal-selection" class="nav-link" data-scroll-target="#temporal-selection"><i class="fa-solid fa-calendar" aria-label="calendar"></i> Temporal selection</a></li>
-  <li><a href="#spatial-selection" id="toc-spatial-selection" class="nav-link" data-scroll-target="#spatial-selection"><i class="fa-solid fa-map" aria-label="map"></i> Spatial selection</a></li>
-  <li><a href="#plotting" id="toc-plotting" class="nav-link" data-scroll-target="#plotting"><i class="fa-solid fa-chart-line" aria-label="chart-line"></i> Plotting</a></li>
+  <li><a href="#b58fc729-690b-4000-b19f-365a4093b2ff7b7b3c2066612066696c746572203e7d7d-selecting-items" id="toc-b58fc729-690b-4000-b19f-365a4093b2ff7b7b3c2066612066696c746572203e7d7d-selecting-items" class="nav-link active" data-scroll-target="#b58fc729-690b-4000-b19f-365a4093b2ff7b7b3c2066612066696c746572203e7d7d-selecting-items"><i class="fa-solid fa-filter" aria-label="filter"></i> Selecting items</a></li>
+  <li><a href="#b58fc729-690b-4000-b19f-365a4093b2ff7b7b3c2066612063616c656e646172203e7d7d-temporal-selection" id="toc-b58fc729-690b-4000-b19f-365a4093b2ff7b7b3c2066612063616c656e646172203e7d7d-temporal-selection" class="nav-link" data-scroll-target="#b58fc729-690b-4000-b19f-365a4093b2ff7b7b3c2066612063616c656e646172203e7d7d-temporal-selection"><i class="fa-solid fa-calendar" aria-label="calendar"></i> Temporal selection</a></li>
+  <li><a href="#b58fc729-690b-4000-b19f-365a4093b2ff7b7b3c206661206d6170203e7d7d-spatial-selection" id="toc-b58fc729-690b-4000-b19f-365a4093b2ff7b7b3c206661206d6170203e7d7d-spatial-selection" class="nav-link" data-scroll-target="#b58fc729-690b-4000-b19f-365a4093b2ff7b7b3c206661206d6170203e7d7d-spatial-selection"><i class="fa-solid fa-map" aria-label="map"></i> Spatial selection</a></li>
+  <li><a href="#b58fc729-690b-4000-b19f-365a4093b2ff7b7b3c2066612063686172742d6c696e65203e7d7d-plotting" id="toc-b58fc729-690b-4000-b19f-365a4093b2ff7b7b3c2066612063686172742d6c696e65203e7d7d-plotting" class="nav-link" data-scroll-target="#b58fc729-690b-4000-b19f-365a4093b2ff7b7b3c2066612063686172742d6c696e65203e7d7d-plotting"><i class="fa-solid fa-chart-line" aria-label="chart-line"></i> Plotting</a></li>
   <li><a href="#add-a-new-item" id="toc-add-a-new-item" class="nav-link" data-scroll-target="#add-a-new-item">Add a new item</a></li>
   <li><a href="#properties" id="toc-properties" class="nav-link" data-scroll-target="#properties">Properties</a></li>
   <li><a href="#methods" id="toc-methods" class="nav-link" data-scroll-target="#methods">Methods</a>
   <ul class="collapse">
-  <li><a href="#mathematical-operations" id="toc-mathematical-operations" class="nav-link" data-scroll-target="#mathematical-operations"><i class="fa-solid fa-calculator" aria-label="calculator"></i> Mathematical operations</a></li>
+  <li><a href="#b58fc729-690b-4000-b19f-365a4093b2ff7b7b3c2066612063616c63756c61746f72203e7d7d-mathematical-operations" id="toc-b58fc729-690b-4000-b19f-365a4093b2ff7b7b3c2066612063616c63756c61746f72203e7d7d-mathematical-operations" class="nav-link" data-scroll-target="#b58fc729-690b-4000-b19f-365a4093b2ff7b7b3c2066612063616c63756c61746f72203e7d7d-mathematical-operations"><i class="fa-solid fa-calculator" aria-label="calculator"></i> Mathematical operations</a></li>
   <li><a href="#conversion" id="toc-conversion" class="nav-link" data-scroll-target="#conversion">Conversion:</a></li>
   </ul></li>
   </ul>
@@ -330,7 +332,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <li><strong>geometry</strong> - a Geometry object with the spatial description of the data</li>
 </ul>
 <p>Use Dataset’s string representation to get an overview of the Dataset</p>
-<div id="81e3b3b6" class="cell" data-execution_count="1">
+<div id="78ed9e3c" class="cell" data-execution_count="1">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> mikeio</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>ds <span class="op">=</span> mikeio.read(<span class="st">"../data/HD2D.dfsu"</span>)</span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>ds</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
@@ -346,8 +348,8 @@ items:
   3:  Current speed &lt;Current Speed&gt; (meter per sec)</code></pre>
 </div>
 </div>
-<section id="selecting-items" class="level2">
-<h2 class="anchored" data-anchor-id="selecting-items"><i class="fa-solid fa-filter" aria-label="filter"></i> Selecting items</h2>
+<section id="b58fc729-690b-4000-b19f-365a4093b2ff7b7b3c2066612066696c746572203e7d7d-selecting-items" class="level2">
+<h2 class="anchored" data-anchor-id="b58fc729-690b-4000-b19f-365a4093b2ff7b7b3c2066612066696c746572203e7d7d-selecting-items"><i class="fa-solid fa-filter" aria-label="filter"></i> Selecting items</h2>
 <p>Selecting a specific item “itemA” (at position 0) from a Dataset ds can be done with:</p>
 <ul>
 <li><code>ds[["itemA"]]</code> - returns a new Dataset with “itemA”</li>
@@ -357,7 +359,7 @@ items:
 <li><code>ds.itemA</code> - returns “itemA” DataArray</li>
 </ul>
 <p>We recommend to use <em>named</em> items for readability.</p>
-<div id="d34677da" class="cell" data-execution_count="2">
+<div id="8449a763" class="cell" data-execution_count="2">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>ds.Surface_elevation</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-display" data-execution_count="2">
 <pre><code>&lt;mikeio.DataArray&gt;
@@ -374,11 +376,11 @@ geometry: Dfsu2D (884 elements, 529 nodes)</code></pre>
 </ul>
 <p>Note that this behavior is similar to pandas and xarray.</p>
 </section>
-<section id="temporal-selection" class="level2">
-<h2 class="anchored" data-anchor-id="temporal-selection"><i class="fa-solid fa-calendar" aria-label="calendar"></i> Temporal selection</h2>
+<section id="b58fc729-690b-4000-b19f-365a4093b2ff7b7b3c2066612063616c656e646172203e7d7d-temporal-selection" class="level2">
+<h2 class="anchored" data-anchor-id="b58fc729-690b-4000-b19f-365a4093b2ff7b7b3c2066612063616c656e646172203e7d7d-temporal-selection"><i class="fa-solid fa-calendar" aria-label="calendar"></i> Temporal selection</h2>
 <p>A time slice of a Dataset can be selected with <code>sel</code> (by label/value) or <code>isel</code> (by integer index), similar to <a href="https://docs.xarray.dev/en/stable/user-guide/indexing.html">xarray</a>.</p>
 <p>Select a single timestep by value:</p>
-<div id="b3766cb3" class="cell" data-execution_count="3">
+<div id="2aed4af5" class="cell" data-execution_count="3">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>ds.sel(time<span class="op">=</span><span class="st">"1985-08-06 12:00"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-display" data-execution_count="3">
 <pre><code>&lt;mikeio.Dataset&gt;
@@ -393,7 +395,7 @@ items:
 </div>
 </div>
 <p>Select a range of timesteps by value:</p>
-<div id="743c178b" class="cell" data-execution_count="4">
+<div id="3ba3341e" class="cell" data-execution_count="4">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>ds.sel(time<span class="op">=</span><span class="bu">slice</span>(<span class="st">"1985-08-06 12:00"</span>, <span class="st">"1985-08-06 17:00"</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-display" data-execution_count="4">
 <pre><code>&lt;mikeio.Dataset&gt;
@@ -408,7 +410,7 @@ items:
 </div>
 </div>
 <p>Select a single timestep by index:</p>
-<div id="47e2e84a" class="cell" data-execution_count="5">
+<div id="c8980ae6" class="cell" data-execution_count="5">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>ds.isel(time<span class="op">=</span><span class="dv">2</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-display" data-execution_count="5">
 <pre><code>&lt;mikeio.Dataset&gt;
@@ -423,7 +425,7 @@ items:
 </div>
 </div>
 <p>Select every other timestep using a slice:</p>
-<div id="b42c9652" class="cell" data-execution_count="6">
+<div id="e7a96594" class="cell" data-execution_count="6">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>ds.isel(time<span class="op">=</span><span class="bu">slice</span>(<span class="va">None</span>, <span class="va">None</span>, <span class="dv">2</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-display" data-execution_count="6">
 <pre><code>&lt;mikeio.Dataset&gt;
@@ -451,10 +453,10 @@ Tip
 </div>
 </div>
 </section>
-<section id="spatial-selection" class="level2">
-<h2 class="anchored" data-anchor-id="spatial-selection"><i class="fa-solid fa-map" aria-label="map"></i> Spatial selection</h2>
+<section id="b58fc729-690b-4000-b19f-365a4093b2ff7b7b3c206661206d6170203e7d7d-spatial-selection" class="level2">
+<h2 class="anchored" data-anchor-id="b58fc729-690b-4000-b19f-365a4093b2ff7b7b3c206661206d6170203e7d7d-spatial-selection"><i class="fa-solid fa-map" aria-label="map"></i> Spatial selection</h2>
 <p>The <code>sel</code> method finds a single element.</p>
-<div id="62c66d46" class="cell" data-execution_count="7">
+<div id="ef80d3d0" class="cell" data-execution_count="7">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>ds.sel(x<span class="op">=</span><span class="dv">607002</span>, y<span class="op">=</span><span class="dv">6906734</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-display" data-execution_count="7">
 <pre><code>&lt;mikeio.Dataset&gt;
@@ -469,8 +471,8 @@ items:
 </div>
 </div>
 </section>
-<section id="plotting" class="level2">
-<h2 class="anchored" data-anchor-id="plotting"><i class="fa-solid fa-chart-line" aria-label="chart-line"></i> Plotting</h2>
+<section id="b58fc729-690b-4000-b19f-365a4093b2ff7b7b3c2066612063686172742d6c696e65203e7d7d-plotting" class="level2">
+<h2 class="anchored" data-anchor-id="b58fc729-690b-4000-b19f-365a4093b2ff7b7b3c2066612063686172742d6c696e65203e7d7d-plotting"><i class="fa-solid fa-chart-line" aria-label="chart-line"></i> Plotting</h2>
 <p>In most cases, you will <em>not</em> plot the Dataset, but rather its DataArrays. But there are two exceptions:</p>
 <ul>
 <li>dfs0-Dataset : plot all items as timeseries with ds.plot()</li>
@@ -482,7 +484,7 @@ items:
 <h2 class="anchored" data-anchor-id="add-a-new-item">Add a new item</h2>
 <p>A common workflow is to create a new item based on existing items in a dataset.</p>
 <p>This can be in done in several ways. Let’s try one of the options.</p>
-<div id="871001fb" class="cell" data-execution_count="8">
+<div id="93de2726" class="cell" data-execution_count="8">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>ds <span class="op">=</span> mikeio.read(<span class="st">"../data/NorthSea_HD_and_windspeed.dfsu"</span>)</span>
 <span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>ds</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-display" data-execution_count="8">
@@ -498,7 +500,7 @@ items:
 <ol type="1">
 <li>Create a copy of the DataArray</li>
 </ol>
-<div id="ce84108f" class="cell" data-execution_count="9">
+<div id="48892f6b" class="cell" data-execution_count="9">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>ws2 <span class="op">=</span> ds.Wind_speed.copy()</span>
 <span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>ws2.plot.hist()<span class="op">;</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-display">
@@ -512,7 +514,7 @@ items:
 <ol start="2" type="1">
 <li>Make the modifications, in this case we will clip the values to the interval 1-18 m/s.</li>
 </ol>
-<div id="cc3b5e9f" class="cell" data-execution_count="10">
+<div id="97a8db08" class="cell" data-execution_count="10">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb18"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
 <span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>ws2.values <span class="op">=</span> np.clip(ws2.to_numpy(), <span class="dv">1</span>,<span class="dv">18</span>)</span>
 <span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>ws2.plot.hist()<span class="op">;</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
@@ -527,7 +529,7 @@ items:
 <ol start="3" type="1">
 <li>Assign it to a new name in the dataset</li>
 </ol>
-<div id="0ad4ab1d" class="cell" data-execution_count="11">
+<div id="ce88d58c" class="cell" data-execution_count="11">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb19"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>ds[<span class="st">"Wind_speed_clipped"</span>] <span class="op">=</span> ws2</span>
 <span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>ds</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-display" data-execution_count="11">
@@ -544,7 +546,7 @@ items:
 <ol start="4" type="1">
 <li>Reorder items if necessary (See <a href="#selecting-items">selecting items</a> above)</li>
 </ol>
-<div id="d0f6d873" class="cell" data-execution_count="12">
+<div id="5daf1e54" class="cell" data-execution_count="12">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb21"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>ds2 <span class="op">=</span> ds[[<span class="st">"Wind_speed_clipped"</span>, <span class="st">"Surface elevation"</span>, <span class="st">"Wind speed"</span>]]</span>
 <span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>ds2</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-display" data-execution_count="12">
@@ -561,7 +563,7 @@ items:
 <ol start="5" type="1">
 <li>Write the new dataset to a new file</li>
 </ol>
-<div id="38229702" class="cell" data-execution_count="13">
+<div id="22e0d496" class="cell" data-execution_count="13">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb23"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>ds2.to_dfs(<span class="st">"modified.dfsu"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </section>
@@ -599,8 +601,8 @@ items:
 <li><a href="../api/Dataset.html#mikeio.Dataset.quantile"><code>quantile()</code></a> - Quantiles along an axis</li>
 <li><a href="../api/Dataset.html#mikeio.Dataset.nanquantile"><code>nanquantile()</code></a> - Quantiles along an axis (NaN ignored)</li>
 </ul>
-<section id="mathematical-operations" class="level3">
-<h3 class="anchored" data-anchor-id="mathematical-operations"><i class="fa-solid fa-calculator" aria-label="calculator"></i> Mathematical operations</h3>
+<section id="b58fc729-690b-4000-b19f-365a4093b2ff7b7b3c2066612063616c63756c61746f72203e7d7d-mathematical-operations" class="level3">
+<h3 class="anchored" data-anchor-id="b58fc729-690b-4000-b19f-365a4093b2ff7b7b3c2066612063616c63756c61746f72203e7d7d-mathematical-operations"><i class="fa-solid fa-calculator" aria-label="calculator"></i> Mathematical operations</h3>
 <ul>
 <li><p>ds + value</p></li>
 <li><p>ds - value</p></li>
