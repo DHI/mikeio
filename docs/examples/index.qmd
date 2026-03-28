@@ -1,9 +1,5 @@
 ---
 title: Examples
-listing:
-  type: table
-  fields: ['title', 'description']
-  categories: true
 ---
 
 ::: {.callout-tip title="Example data" collapse="true"}
@@ -24,17 +20,37 @@ tests/testdata
 ├── HD2D.dfsu
 ├── NorthSea_HD_and_windspeed.dfsu
 ├── consistency
-│   ├── oresundHD.dfs2
-│   └── oresundHD.dfsu
+│   ├── oresundHD.dfs2
+│   └── oresundHD.dfsu
 ├── gebco_2020_n56.3_s55.2_w12.2_e13.1.nc
 ├── gfs_wind.nc
 ├── odense_rough.mesh
 ├── oresund_sigma_z.dfsu
 ├── pfs
-│   ├── concat.mzt
-│   └── t1_t0.mzt
+│   ├── concat.mzt
+│   └── t1_t0.mzt
 ├── tide1.dfs1
 ├── tide2.dfs1
 ```
 
 :::
+
+## Dfs0
+
+* [CMEMS *In-situ* data](dfs0/cmems_insitu.qmd)
+* [Relative time](dfs0/relative_time.qmd)
+
+## Dfs2
+
+* [Bathymetry](dfs2/bathy.qmd)
+* [Meteo data](dfs2/gfs.qmd)
+
+## Dfsu
+
+* [2D spatial interpolation](dfsu/spatial_interpolation.qmd)
+* [CMEMS to vertical profile](dfsu/cmems_vertical_profile.qmd)
+* [Merging subdomain dfsu files](dfsu/merge_subdomains.qmd)
+
+## Other
+
+* [Time interpolation](Time-interpolation.qmd)
