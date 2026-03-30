@@ -112,7 +112,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     "search-label": "Search"
   }
 }</script>
-<link rel="alternate" type="text/markdown" href="../mikeio/llms.txt" title="LLM-friendly documentation">
+<link rel="alternate" type="text/markdown" href="https://dhi.github.io/mikeio/llms.txt" title="LLM-friendly documentation">
 
 
 </head>
@@ -320,7 +320,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 
 <p>A dfs2 file is also called a grid series file. Values in a dfs2 file are ‘element based’, i.e.&nbsp;values are defined in the centre of each grid cell.</p>
-<div id="7c864ce8" class="cell" data-execution_count="1">
+<div id="9cc3766a" class="cell" data-execution_count="1">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> mikeio</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>ds <span class="op">=</span> mikeio.read(<span class="st">"../data/gebco_sound.dfs2"</span>)</span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>ds</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
@@ -336,7 +336,7 @@ items:
 <section id="subset-in-space" class="level2">
 <h2 class="anchored" data-anchor-id="subset-in-space">Subset in space</h2>
 <p>The most convenient way to subset in space is to use the <code>sel</code> method, which returns a new (smaller) dataset, which can be further processed or written to disk using the <code>to_dfs</code> method.</p>
-<div id="b4623195" class="cell" data-execution_count="2">
+<div id="bd3d1954" class="cell" data-execution_count="2">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>ds.geometry</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-display" data-execution_count="2">
 <pre><code>&lt;mikeio.Grid2D&gt;
@@ -345,7 +345,7 @@ y: [55.2, 55.21, ..., 56.3] (ny=264, dy=0.004167)
 projection: LONG/LAT</code></pre>
 </div>
 </div>
-<div id="bab21909" class="cell" data-execution_count="3">
+<div id="3e24764c" class="cell" data-execution_count="3">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>ds_aoi <span class="op">=</span> ds.sel(x<span class="op">=</span><span class="bu">slice</span>(<span class="fl">12.5</span>, <span class="fl">13.0</span>), y<span class="op">=</span><span class="bu">slice</span>(<span class="fl">55.5</span>, <span class="fl">56.0</span>))</span>
 <span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>ds_aoi.geometry</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-display" data-execution_count="3">
@@ -356,7 +356,7 @@ projection: LONG/LAT</code></pre>
 </div>
 </div>
 <p>In order to specify an open-ended subset (i.e.&nbsp;where the end of the subset is the end of the domain), use <code>None</code> as the end of the slice.</p>
-<div id="f00a0d04" class="cell" data-execution_count="4">
+<div id="6942ef48" class="cell" data-execution_count="4">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>ds.sel(x<span class="op">=</span><span class="bu">slice</span>(<span class="va">None</span>, <span class="fl">13.0</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-display" data-execution_count="4">
 <pre><code>&lt;mikeio.Dataset&gt;
@@ -371,7 +371,7 @@ items:
 <section id="grid2d" class="level2">
 <h2 class="anchored" data-anchor-id="grid2d">Grid2D</h2>
 <p>The spatial information is available in the <code>geometry</code> attribute (accessible from Dfs2, Dataset, and DataArray), which in the case of a dfs2 file is a <a href="../api/Grid2D.html#mikeio.Grid2D"><code>Grid2D</code></a> geometry.</p>
-<div id="59f5ab9d" class="cell" data-execution_count="5">
+<div id="ae803f32" class="cell" data-execution_count="5">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>ds.geometry</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-display" data-execution_count="5">
 <pre><code>&lt;mikeio.Grid2D&gt;
@@ -402,7 +402,7 @@ projection: LONG/LAT</code></pre>
 <section id="extract-data-at-a-point" class="level2">
 <h2 class="anchored" data-anchor-id="extract-data-at-a-point">Extract data at a point</h2>
 <p>Use <code>interp()</code> to extract values at a specific coordinate:</p>
-<div id="cc79510a" class="cell" data-execution_count="6">
+<div id="e9ed33f5" class="cell" data-execution_count="6">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>da <span class="op">=</span> ds[<span class="st">"Elevation"</span>]</span>
 <span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>da_point <span class="op">=</span> da.interp(x<span class="op">=</span><span class="fl">12.74792</span>, y<span class="op">=</span><span class="fl">55.865</span>)</span>
 <span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>da_point.values</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
@@ -436,7 +436,7 @@ Important
 <p>For complete examples of converting external data to dfs2, see <a href="../examples/dfs2/bathy.html">Dfs2-Bathymetry</a> (NetCDF → static dfs2) and <a href="../examples/dfs2/gfs.html">Dfs2-GFS</a> (NetCDF → multi-item time-varying dfs2).</p>
 <section id="geographic-coordinates" class="level3">
 <h3 class="anchored" data-anchor-id="geographic-coordinates">Geographic coordinates</h3>
-<div id="11f321c6" class="cell" data-execution_count="7">
+<div id="58e05562" class="cell" data-execution_count="7">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> numpy <span class="im">as</span> np</span>
 <span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
 <span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a></span>
@@ -453,14 +453,14 @@ y: [55, 56, ..., 58] (ny=4, dy=1)
 projection: LONG/LAT</code></pre>
 </div>
 </div>
-<div id="15463270" class="cell" data-execution_count="8">
+<div id="51a1153e" class="cell" data-execution_count="8">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb15"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>data <span class="op">=</span> np.arange(<span class="dv">24</span>, dtype<span class="op">=</span><span class="bu">float</span>).reshape(<span class="dv">2</span>, <span class="dv">4</span>, <span class="dv">3</span>)  <span class="co"># (time, y, x)</span></span>
 <span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>data.shape</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-display" data-execution_count="8">
 <pre><code>(2, 4, 3)</code></pre>
 </div>
 </div>
-<div id="cd854177" class="cell" data-execution_count="9">
+<div id="6ee3141a" class="cell" data-execution_count="9">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>da <span class="op">=</span> mikeio.DataArray(</span>
 <span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>    data<span class="op">=</span>data,</span>
 <span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>    geometry<span class="op">=</span>grid,</span>
@@ -476,13 +476,13 @@ time: 2020-01-01 00:00:00 - 2020-01-02 00:00:00 (2 records)
 geometry: Grid2D (ny=4, nx=3)</code></pre>
 </div>
 </div>
-<div id="ab068aaf" class="cell" data-execution_count="10">
+<div id="910b11ca" class="cell" data-execution_count="10">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb19"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>da.to_dfs(<span class="st">"example_geo.dfs2"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </section>
 <section id="projected-coordinates" class="level3">
 <h3 class="anchored" data-anchor-id="projected-coordinates">Projected coordinates</h3>
-<div id="1e149565" class="cell" data-execution_count="11">
+<div id="b6569d45" class="cell" data-execution_count="11">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb20"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>pgrid <span class="op">=</span> mikeio.Grid2D(</span>
 <span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>    x0<span class="op">=</span><span class="fl">337100.0</span>, dx<span class="op">=</span><span class="fl">10000.0</span>, nx<span class="op">=</span><span class="dv">3</span>,</span>
 <span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>    y0<span class="op">=</span><span class="fl">6122900.0</span>, dy<span class="op">=</span><span class="fl">10000.0</span>, ny<span class="op">=</span><span class="dv">4</span>,</span>
@@ -505,7 +505,7 @@ geometry: Grid2D (ny=4, nx=3)</code></pre>
 </div>
 </div>
 <p>Cleanup:</p>
-<div id="948964d7" class="cell" data-execution_count="12">
+<div id="973e745a" class="cell" data-execution_count="12">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb21"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> os</span>
 <span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>os.remove(<span class="st">"example_geo.dfs2"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
