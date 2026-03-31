@@ -118,11 +118,10 @@ def write_dfsu_data(dfs: DfsuFile, ds: Dataset, is_layered: bool) -> None:
 
     for i in range(n_time_steps):
         if is_layered:
-            if "time" in data.dims:
-                assert data._zn is not None
-                zn = data._zn[i]
+            if data._zn is not None:
+                zn = data._zn[i] if "time" in data.dims else data._zn
             else:
-                zn = data._zn
+                zn = data.geometry.node_coordinates[:, 2]
             dfs.WriteItemTimeStepNext(t_rel[i], zn.astype(np.float32))
         for da in data:
             if "time" in data.dims:

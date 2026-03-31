@@ -1,0 +1,206 @@
+---
+title: Create 3D initial conditions from CTD profiles
+jupyter: python3
+description: Build a 3D mesh from a 2D mesh and vertical discretization, interpolate CTD profiles to create temperature and salinity initial conditions.
+---
+
+This example shows how to create initial condition fields for a MIKE 3 FM model from CTD profile observations. The workflow:
+
+1. Read a 2D mesh and define the vertical discretization
+2. Build a 3D geometry using `GeometryFM3D.from_2d_geometry()`
+3. Interpolate two fictive CTD profiles onto every 3D element
+4. Write the result as a dfsu file
+
+## Setup
+
+```{python}
+import numpy as np
+import matplotlib.pyplot as plt
+
+import mikeio
+from mikeio.spatial import GeometryFM3D
+```
+
+## Read vertical discretization from m3fm
+
+The vertical discretization of a MIKE 3 FM model is defined in the `.m3fm` setup file. We read it as a PFS document and extract the relevant parameters from the `[DOMAIN]` section.
+
+```{python}
+pfs = mikeio.PfsDocument("../../data/pfs/oresund.m3fm")
+domain = pfs.FemEngineHD.DOMAIN
+
+n_sigma = domain.number_of_layers
+layer_fractions = domain.layer_thickness
+```
+
+```{python}
+n_sigma
+```
+
+```{python}
+layer_fractions
+```
+
+## Read mesh and build 3D geometry
+
+Read the 2D mesh — the z-coordinates represent the bathymetry. Here we use `odense_rough.mesh` as a stand-in for the mesh referenced in the m3fm.
+
+```{python}
+mesh = mikeio.open("../../data/odense_rough.mesh")
+g2d = mesh.geometry
+g2d
+```
+
+Build the 3D geometry by extruding the 2D mesh with the vertical discretization from the m3fm.
+
+```{python}
+g3d = GeometryFM3D.from_2d_geometry(
+    g2d,
+    n_sigma=n_sigma,
+    layer_fractions=layer_fractions,
+)
+g3d
+```
+
+```{python}
+elem_coords = g3d.element_coordinates
+```
+
+## Define CTD profiles
+
+Two fictive CTD stations at different locations in the estuary — one near the inlet (saltier, cooler) and one upstream (fresher, warmer).
+
+```{python}
+# Station positions (UTM-33)
+ctd_x = np.array([213000, 222000])
+ctd_y = np.array([6155500, 6162000])
+
+# Depth levels (positive downward)
+ctd_depth = np.array([0, 2, 4, 6, 8, 10])
+
+# Temperature profiles (°C) — warmer upstream, cooler near inlet
+ctd_temp = np.array([
+    [14.0, 13.5, 12.0, 10.5, 9.0, 8.0],   # station 0 (inlet)
+    [18.0, 17.5, 16.0, 14.0, 12.0, 11.0],  # station 1 (upstream)
+])
+
+# Salinity profiles (PSU) — saltier near inlet, fresher upstream
+ctd_sal = np.array([
+    [25.0, 26.0, 28.0, 30.0, 31.0, 31.5],  # station 0 (inlet)
+    [ 5.0,  6.0,  8.0, 12.0, 15.0, 16.0],  # station 1 (upstream)
+])
+```
+
+```{python}
+fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(8, 4), sharey=True)
+for i, label in enumerate(["Inlet", "Upstream"]):
+    ax1.plot(ctd_temp[i], -ctd_depth, "o-", label=label)
+    ax2.plot(ctd_sal[i], -ctd_depth, "o-", label=label)
+ax1.set(xlabel="Temperature (°C)", ylabel="Depth (m)", title="Temperature")
+ax2.set(xlabel="Salinity (PSU)", title="Salinity")
+ax1.legend()
+fig.tight_layout();
+```
+
+## Interpolate onto 3D mesh
+
+For each element, interpolate the CTD profiles vertically to the element depth, then blend horizontally using inverse distance weighting.
+
+```{python}
+def interpolate_ctd(
+    elem_coords: np.ndarray,
+    ctd_x: np.ndarray,
+    ctd_y: np.ndarray,
+    ctd_depth: np.ndarray,
+    ctd_values: np.ndarray,
+) -> np.ndarray:
+    """Interpolate CTD profiles to 3D element centers.
+
+    Parameters
+    ----------
+    elem_coords : (n_elements, 3) array of x, y, z
+    ctd_x, ctd_y : (n_stations,) station positions
+    ctd_depth : (n_depths,) depth levels (positive down)
+    ctd_values : (n_stations, n_depths) profile values
+
+    Returns
+    -------
+    (n_elements,) interpolated values
+    """
+    n_stations = len(ctd_x)
+    elem_depth = -elem_coords[:, 2]  # positive downward
+
+    # Vertical interpolation: one profile per station → value at each element depth
+    vert_interp = np.column_stack([
+        np.interp(elem_depth, ctd_depth, ctd_values[i])
+        for i in range(n_stations)
+    ])  # shape: (n_elements, n_stations)
+
+    # Horizontal: inverse distance weighting
+    dist = np.column_stack([
+        np.sqrt((elem_coords[:, 0] - ctd_x[i])**2 +
+                (elem_coords[:, 1] - ctd_y[i])**2)
+        for i in range(n_stations)
+    ])  # shape: (n_elements, n_stations)
+
+    weights = 1.0 / dist**2
+    weights /= weights.sum(axis=1, keepdims=True)
+
+    return (vert_interp * weights).sum(axis=1)
+```
+
+```{python}
+temp = interpolate_ctd(elem_coords, ctd_x, ctd_y, ctd_depth, ctd_temp)
+sal = interpolate_ctd(elem_coords, ctd_x, ctd_y, ctd_depth, ctd_sal)
+```
+
+## Create dataset and write
+
+```{python}
+import pandas as pd
+
+time = pd.Timestamp("2020-01-01")
+
+ds = mikeio.Dataset(
+    [
+        mikeio.DataArray(
+            data=temp[np.newaxis, :].astype(np.float32),
+            time=[time],
+            geometry=g3d,
+            item=mikeio.ItemInfo("Temperature", mikeio.EUMType.Temperature),
+        ),
+        mikeio.DataArray(
+            data=sal[np.newaxis, :].astype(np.float32),
+            time=[time],
+            geometry=g3d,
+            item=mikeio.ItemInfo("Salinity", mikeio.EUMType.Salinity),
+        ),
+    ]
+)
+ds
+```
+
+```{python}
+ds.to_dfs("initial_conditions_3d.dfsu")
+```
+
+## Verify
+
+Read back and inspect the result.
+
+```{python}
+ds_back = mikeio.read("initial_conditions_3d.dfsu")
+ds_back
+```
+
+```{python}
+fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(10, 4))
+ds_back["Temperature"].isel(time=0).sel(layers="top").plot(ax=ax1, title="Surface temperature")
+ds_back["Salinity"].isel(time=0).sel(layers="top").plot(ax=ax2, title="Surface salinity");
+```
+
+```{python}
+fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(10, 4))
+ds_back["Temperature"].isel(time=0).sel(layers="bottom").plot(ax=ax1, title="Bottom temperature")
+ds_back["Salinity"].isel(time=0).sel(layers="bottom").plot(ax=ax2, title="Bottom salinity");
+```
