@@ -587,7 +587,7 @@ class GeometryFM3D(_GeometryFMLayered):
             cum_sigma = np.zeros(n_sigma + 1)
             cum_sigma[1:] = np.cumsum(layer_fractions)
         else:
-            cum_sigma = np.linspace(0, 1, n_sigma + 1)
+            cum_sigma = np.linspace(0.0, 1.0, n_sigma + 1)  # type: ignore[assignment]
 
         if sigma_depth is None:
             return _build_sigma_geometry(geometry2d, n_sigma, cum_sigma, cls)
