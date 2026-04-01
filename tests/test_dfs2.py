@@ -468,12 +468,12 @@ def test_sel_point_rotated_grid() -> None:
         north=g.origin[1],
         orientationProj=g.orientation,
     )
-    # grid-local center of cell (10, 20): x=10*5+2.5=52.5, y=20*5+2.5=102.5
-    east, north = cart.Xy2Proj(52.5, 102.5)
+    # grid-local center of cell (116, 2): x=116*5=580, y=2*5=10
+    east, north = cart.Xy2Proj(580.0, 10.0)
 
     da = ds[0]
     da_sel = da.sel(x=east, y=north)
-    expected = da.values[:, 20, 10]
+    expected = da.values[:, 2, 116]
     assert da_sel.values == pytest.approx(expected)
 
 
