@@ -477,6 +477,18 @@ def test_sel_point_rotated_grid() -> None:
     assert da_sel.values == pytest.approx(expected)
 
 
+def test_sel_single_axis_rotated_grid_raises() -> None:
+    filepath = Path("tests/testdata/BW_Ronne_Layout1998_rotated.dfs2")
+    ds = mikeio.read(filepath)
+    da = ds[0]
+
+    with pytest.raises(ValueError, match="rotated"):
+        da.sel(x=0.0)
+
+    with pytest.raises(ValueError, match="rotated"):
+        da.sel(y=0.0)
+
+
 def test_write_selected_item_to_new_file(
     dfs2_random_2items: Dfs2, tmp_path: Path
 ) -> None:
