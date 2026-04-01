@@ -810,18 +810,46 @@ class Grid2D(_Geometry):
         else:
             raise ValueError("Provide x,y or coords")
 
+    def _proj_to_local(
+        self, x: np.ndarray, y: np.ndarray
+    ) -> tuple[np.ndarray, np.ndarray]:
+        """Convert projected (world) coordinates to grid-local coordinates."""
+        cart = Cartography.CreateProjOrigin(
+            projectionString=self.projection_string,
+            east=self.origin[0],
+            north=self.origin[1],
+            orientationProj=self.orientation,
+        )
+        x_local = np.empty_like(x, dtype=float)
+        y_local = np.empty_like(y, dtype=float)
+        for k in range(len(x)):
+            x_local[k], y_local[k] = cart.Proj2Xy(x[k], y[k])
+        return x_local, y_local
+
     def _xy_to_index(self, xy: ArrayLike) -> tuple[np.ndarray, np.ndarray]:
         """Find specific points in this geometry."""
         xy = np.atleast_2d(xy)
         y = xy[:, 1]
         x = xy[:, 0]
 
+        if self._is_rotated:
+            x, y = self._proj_to_local(x, y)
+
         ii = (-999999999) * np.ones_like(x, dtype=int)
         jj = (-999999999) * np.ones_like(y, dtype=int)
 
-        inside = self.contains(xy)
+        inside = (
+            self.contains(xy)
+            if not self._is_rotated
+            else (
+                (x >= self.x[0] - self.dx / 2)
+                & (x <= self.x[-1] + self.dx / 2)
+                & (y >= self.y[0] - self.dy / 2)
+                & (y <= self.y[-1] + self.dy / 2)
+            )
+        )
         if np.any(~inside):
-            raise OutsideModelDomainError(x=x[~inside], y=y[~inside])
+            raise OutsideModelDomainError(x=xy[~inside, 0], y=xy[~inside, 1])
 
         # get index in x, and y for points inside based on the grid spacing and origin
         ii = np.floor((x - (self.x[0] - self.dx / 2)) / self.dx).astype(int)

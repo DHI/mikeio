@@ -453,6 +453,30 @@ def test_select_area_rotated_UTM_2() -> None:
     assert g1.projection_string == g2.projection_string
 
 
+def test_sel_point_rotated_grid() -> None:
+    filepath = Path("tests/testdata/BW_Ronne_Layout1998_rotated.dfs2")
+    ds = mikeio.read(filepath)
+    g = ds.geometry
+    assert g._is_rotated
+
+    # pick a grid cell and get its world coordinates
+    from mikecore.Projections import Cartography
+
+    cart = Cartography.CreateProjOrigin(
+        projectionString=g.projection_string,
+        east=g.origin[0],
+        north=g.origin[1],
+        orientationProj=g.orientation,
+    )
+    # grid-local center of cell (10, 20): x=10*5+2.5=52.5, y=20*5+2.5=102.5
+    east, north = cart.Xy2Proj(52.5, 102.5)
+
+    da = ds[0]
+    da_sel = da.sel(x=east, y=north)
+    expected = da.values[:, 20, 10]
+    assert da_sel.values == pytest.approx(expected)
+
+
 def test_write_selected_item_to_new_file(
     dfs2_random_2items: Dfs2, tmp_path: Path
 ) -> None:
