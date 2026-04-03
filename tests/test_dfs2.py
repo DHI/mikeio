@@ -677,7 +677,7 @@ def test_spatial_aggregation_dfs2_to_dfs0(tmp_path: Path) -> None:
     outfilename = tmp_path / "waves_max.dfs0"
 
     ds = mikeio.read("tests/testdata/waves.dfs2")
-    ds_max = ds.nanmax(axis="space")
+    ds_max = ds.nanmax("space")
     ds_max.to_dfs(outfilename)
 
     dsnew = mikeio.read(outfilename)
