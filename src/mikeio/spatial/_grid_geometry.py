@@ -822,16 +822,26 @@ class Grid2D(_Geometry):
         self, x: np.ndarray, y: np.ndarray
     ) -> tuple[np.ndarray, np.ndarray]:
         """Convert projected (world) coordinates to grid-local coordinates."""
-        cart = Cartography.CreateProjOrigin(
-            projectionString=self.projection_string,
-            east=self.origin[0],
-            north=self.origin[1],
-            orientationProj=self.orientation,
-        )
+        if self.is_geo:
+            cart = Cartography.CreateGeoOrigin(
+                projectionString=self.projection_string,
+                lonOrigin=self.origin[0],
+                latOrigin=self.origin[1],
+                orientation=self.orientation,
+            )
+            transform = cart.Geo2Xy
+        else:
+            cart = Cartography.CreateProjOrigin(
+                projectionString=self.projection_string,
+                east=self.origin[0],
+                north=self.origin[1],
+                orientationProj=self.orientation,
+            )
+            transform = cart.Proj2Xy
         x_local = np.empty_like(x, dtype=float)
         y_local = np.empty_like(y, dtype=float)
         for k in range(len(x)):
-            x_local[k], y_local[k] = cart.Proj2Xy(x[k], y[k])
+            x_local[k], y_local[k] = transform(x[k], y[k])
         return x_local, y_local
 
     def _xy_to_index(self, xy: ArrayLike) -> tuple[np.ndarray, np.ndarray]:
