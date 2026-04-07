@@ -141,9 +141,8 @@ class Dataset:
         zn: NDArray[np.floating], optional
             Z-coordinates of the DataArrays, by default None
         validate: bool
-            .. deprecated::
-                The validate parameter is deprecated and will be removed
-                in a future version. Dataset always validates.
+            Deprecated. Dataset always validates consistency.
+            Will be removed in a future version.
         dt: float, optional
             Dummy time step in seconds, by default 1.0
 
