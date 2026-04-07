@@ -171,7 +171,6 @@ class DfsuSpectral:
                     dfsu_type=dfsu_type,
                     element_ids=el_table.ids,
                     node_ids=node_table.ids,
-                    validate=False,
                     frequencies=frequencies,
                     directions=directions,
                 )
@@ -184,7 +183,6 @@ class DfsuSpectral:
                     dfsu_type=dfsu_type,
                     element_ids=el_table.ids,
                     node_ids=node_table.ids,
-                    validate=False,
                     frequencies=frequencies,
                     directions=directions,
                 )
@@ -392,7 +390,6 @@ class DfsuSpectral:
             time=time,
             items=items,
             geometry=geometry,
-            validate=False,
         )
 
     def _parse_geometry_sel(

@@ -241,7 +241,6 @@ class Dfs2(_Dfs123):
             time=time,
             items=items,
             geometry=geometry,
-            validate=False,
         )
 
     def append(self, ds: Dataset, validate: bool = True) -> None:

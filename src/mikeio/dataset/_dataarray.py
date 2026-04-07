@@ -227,24 +227,19 @@ class DataArray:
                 raise ValueError("zn can only be provided for layered dfsu data")
         return zn
 
-    def _is_compatible(self, other: DataArray) -> bool:
-        """check if other DataArray has equivalent dimensions, time and geometry."""
+    def _is_compatible(self, other: DataArray) -> None:
+        """Check that other DataArray has equivalent dimensions, time and geometry."""
         problems = []
-        assert isinstance(other, DataArray)
         if self.shape != other.shape:
             problems.append("shape of data must be the same")
-        if self.n_timesteps != other.n_timesteps:
-            problems.append("Number of timesteps must be the same")
-        if self.start_time != other.start_time:
+        if self.time[0] != other.time[0]:
             problems.append("start_time must be the same")
-        if not isinstance(self.geometry, other.geometry.__class__):
+        if not isinstance(other.geometry, self.geometry.__class__):
             problems.append("The type of geometry must be the same")
-        if hasattr(self.geometry, "__eq__"):
-            if not (self.geometry == self.geometry):
+        elif type(self.geometry).__eq__ is not object.__eq__:
+            if self.geometry != other.geometry:
                 problems.append("The geometries must be the same")
         if self._zn is not None:
-            # it can be expensive to check equality of zn
-            # so we test only size, first and last element
             if (
                 other._zn is None
                 or self._zn.shape != other._zn.shape
@@ -252,14 +247,11 @@ class DataArray:
                 or self._zn.ravel()[-1] != other._zn.ravel()[-1]
             ):
                 problems.append("zn must be the same")
-
         if self.dims != other.dims:
-            problems.append("Dimension names (dims) must be the same")
+            problems.append("dims must be the same")
 
-        if len(problems) > 0:
+        if problems:
             raise ValueError(", ".join(problems))
-
-        return len(problems) == 0
 
     def _get_plotter_by_geometry(self) -> Any:
         # TODO: this is explicit, but with consistent naming, we could create this mapping automatically
@@ -1712,7 +1704,7 @@ class DataArray:
                 qd.name = newname
                 res.append(qd)
 
-            return Dataset(data=res, validate=False)
+            return Dataset(data=res)
 
     # ============= MATH operations ===========
 

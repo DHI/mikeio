@@ -95,12 +95,19 @@ class Dataset:
         data: Mapping[str, DataArray] | Sequence[DataArray],
         validate: bool = True,
     ):
+        if not validate:
+            warnings.warn(
+                "validate=False is deprecated and will be removed in a future version. "
+                "Dataset always validates consistency of its DataArrays.",
+                FutureWarning,
+                stacklevel=2,
+            )
+
         data_vars = self._dataarrays_as_mapping(data)
 
-        if validate:
-            first, *rest = data_vars.values()
-            for da in rest:
-                first._is_compatible(da)
+        first, *rest = data_vars.values()
+        for da in rest:
+            first._is_compatible(da)
 
         self._data_vars = data_vars
 
@@ -133,12 +140,22 @@ class Dataset:
             Geometry of the DataArrays, by default None
         zn: NDArray[np.floating], optional
             Z-coordinates of the DataArrays, by default None
-        validate: bool, optional
-            Validate the DataArrays, by default True
+        validate: bool
+            .. deprecated::
+                The validate parameter is deprecated and will be removed
+                in a future version. Dataset always validates.
         dt: float, optional
             Dummy time step in seconds, by default 1.0
 
         """
+        if not validate:
+            warnings.warn(
+                "validate=False is deprecated and will be removed in a future version. "
+                "Dataset always validates consistency of its DataArrays.",
+                FutureWarning,
+                stacklevel=2,
+            )
+
         item_infos = Dataset._parse_items(items, len(data))
 
         data_vars = {
@@ -148,7 +165,7 @@ class Dataset:
             for dd, it in zip(data, item_infos)
         }
 
-        return Dataset(data_vars, validate=validate)
+        return Dataset(data_vars)
 
     @property
     def values(self) -> None:
@@ -350,7 +367,7 @@ class Dataset:
         """
         res = {name: da.fillna(value=value) for name, da in self._data_vars.items()}
 
-        return Dataset(data=res, validate=False)
+        return Dataset(data=res)
 
     def dropna(self) -> Dataset:
         """Remove time steps where all items are NaN."""
@@ -397,7 +414,7 @@ class Dataset:
         )
         res = {name: da.squeeze() for name, da in self._data_vars.items()}
 
-        return Dataset(data=res, validate=False)
+        return Dataset(data=res)
 
     def create_data_array(
         self,
@@ -562,14 +579,14 @@ class Dataset:
                     for k, da in self._data_vars.items()
                     if fnmatch.fnmatch(k, key)
                 }
-                return Dataset(data=data_vars, validate=False)
+                return Dataset(data=data_vars)
             else:
                 item_names = ",".join(self._data_vars.keys())
                 raise KeyError(f"No item named: {key}. Valid items: {item_names}")
 
         if isinstance(key, Iterable):
             data_vars = {v: self._data_vars[v] for v in key}
-            return Dataset(data=data_vars, validate=False)
+            return Dataset(data=data_vars)
 
         raise TypeError(f"indexing with a {type(key)} is not (yet) supported")
 
@@ -677,7 +694,7 @@ class Dataset:
             )
             for da in self
         ]
-        return Dataset(data=res, validate=False)
+        return Dataset(data=res)
 
     def sel(
         self,
@@ -758,7 +775,7 @@ class Dataset:
             da.sel(time=time, x=x, y=y, z=z, coords=coords, area=area, layers=layers)
             for da in self
         ]
-        return Dataset(data=res, validate=False)
+        return Dataset(data=res)
 
     def interp(
         self,
@@ -838,9 +855,9 @@ class Dataset:
                 das = [da.interp(x=x, y=y, interpolant=interpolant) for da in self]
             else:
                 das = [da.interp(x=x, y=y) for da in self]
-            ds = Dataset(das, validate=False)
+            ds = Dataset(das)
         else:
-            ds = Dataset([da for da in self], validate=False)
+            ds = Dataset([da for da in self])
 
         # interp in time
         if isinstance(time, (pd.DatetimeIndex, DataArray)):
@@ -1039,7 +1056,7 @@ class Dataset:
 
         interpolant = self.geometry.get_2d_interpolant(xy, **kwargs)
         das = [da.interp_like(geom, interpolant=interpolant) for da in self]
-        ds = Dataset(das, validate=False)
+        ds = Dataset(das)
 
         if time is not None:
             ds = ds.interp_time(time)
@@ -1222,13 +1239,13 @@ class Dataset:
                 zn=self._zn,
             )
 
-            return Dataset([da], validate=False)
+            return Dataset([da])
         else:
             res = {
                 name: da.aggregate(axis=axis, func=func, **kwargs)
                 for name, da in self._data_vars.items()
             }
-            return Dataset(data=res, validate=False)
+            return Dataset(data=res)
 
     @staticmethod
     def _agg_item_from_items(items: Sequence[ItemInfo], name: str) -> ItemInfo:
@@ -1324,14 +1341,14 @@ class Dataset:
                     geometry=self.geometry,
                     zn=self._zn,
                 )
-                return Dataset([da], validate=False)
+                return Dataset([da])
             else:
                 res: list[DataArray] = []
                 for quantile in q:
                     qd = self._quantile(q=quantile, axis=axis, func=func, **kwargs)[0]
                     assert isinstance(qd, DataArray)
                     res.append(qd)
-                return Dataset(data=res, validate=False)
+                return Dataset(data=res)
         else:
             if np.isscalar(q):
                 res = [da._quantile(q=q, axis=axis, func=func) for da in self]
@@ -1346,7 +1363,7 @@ class Dataset:
                         qd.name = newname
                         res.append(qd)
 
-            return Dataset(data=res, validate=False)
+            return Dataset(data=res)
 
     def max(self, axis: int | str = 0, **kwargs: Any) -> Dataset:
         """Max value along an axis.
