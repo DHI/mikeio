@@ -109,7 +109,7 @@ class Dataset:
             self._set_name_attr(key, value)
         self.plot = DatasetPlotter(self)
 
-        self._title = title
+        self.title = title
 
     @staticmethod
     def from_numpy(
@@ -226,15 +226,6 @@ class Dataset:
     # ============ end of init =============
 
     # ============= Basic properties/methods ===========
-    @property
-    def title(self) -> str:
-        """Title of the dataset, typically read from the file."""
-        return self._title
-
-    @title.setter
-    def title(self, value: str) -> None:
-        """Set the title of the dataset."""
-        self._title = value
 
     @property
     def _dt(self) -> float:
@@ -365,7 +356,7 @@ class Dataset:
         """
         res = {name: da.fillna(value=value) for name, da in self._data_vars.items()}
 
-        return Dataset(data=res, validate=False)
+        return Dataset(data=res, validate=False, title=self.title)
 
     def dropna(self) -> Dataset:
         """Remove time steps where all items are NaN."""
@@ -412,7 +403,7 @@ class Dataset:
         )
         res = {name: da.squeeze() for name, da in self._data_vars.items()}
 
-        return Dataset(data=res, validate=False)
+        return Dataset(data=res, validate=False, title=self.title)
 
     def create_data_array(
         self,
@@ -577,14 +568,14 @@ class Dataset:
                     for k, da in self._data_vars.items()
                     if fnmatch.fnmatch(k, key)
                 }
-                return Dataset(data=data_vars, validate=False)
+                return Dataset(data=data_vars, validate=False, title=self.title)
             else:
                 item_names = ",".join(self._data_vars.keys())
                 raise KeyError(f"No item named: {key}. Valid items: {item_names}")
 
         if isinstance(key, Iterable):
             data_vars = {v: self._data_vars[v] for v in key}
-            return Dataset(data=data_vars, validate=False)
+            return Dataset(data=data_vars, validate=False, title=self.title)
 
         raise TypeError(f"indexing with a {type(key)} is not (yet) supported")
 
@@ -692,7 +683,7 @@ class Dataset:
             )
             for da in self
         ]
-        return Dataset(data=res, validate=False)
+        return Dataset(data=res, validate=False, title=self.title)
 
     def sel(
         self,
@@ -773,7 +764,7 @@ class Dataset:
             da.sel(time=time, x=x, y=y, z=z, coords=coords, area=area, layers=layers)
             for da in self
         ]
-        return Dataset(data=res, validate=False)
+        return Dataset(data=res, validate=False, title=self.title)
 
     def interp(
         self,
@@ -853,9 +844,9 @@ class Dataset:
                 das = [da.interp(x=x, y=y, interpolant=interpolant) for da in self]
             else:
                 das = [da.interp(x=x, y=y) for da in self]
-            ds = Dataset(das, validate=False)
+            ds = Dataset(das, validate=False, title=self.title)
         else:
-            ds = Dataset([da for da in self], validate=False)
+            ds = Dataset([da for da in self], validate=False, title=self.title)
 
         # interp in time
         if isinstance(time, (pd.DatetimeIndex, DataArray)):
@@ -982,7 +973,7 @@ class Dataset:
             for da in self
         ]
 
-        return Dataset(das)
+        return Dataset(das, title=self.title)
 
     def interp_na(self, axis: str = "time", **kwargs: Any) -> Dataset:
         ds = self.copy()
@@ -1183,7 +1174,12 @@ class Dataset:
                 zn[idx1, :] = self._zn
 
         return Dataset.from_numpy(
-            newdata, time=newtime, items=ds.items, geometry=ds.geometry, zn=zn
+            newdata,
+            time=newtime,
+            items=ds.items,
+            geometry=ds.geometry,
+            zn=zn,
+            title=ds.title,
         )
 
     def _check_n_items(self, other: Dataset) -> None:
@@ -1237,13 +1233,13 @@ class Dataset:
                 zn=self._zn,
             )
 
-            return Dataset([da], validate=False)
+            return Dataset([da], validate=False, title=self.title)
         else:
             res = {
                 name: da.aggregate(axis=axis, func=func, **kwargs)
                 for name, da in self._data_vars.items()
             }
-            return Dataset(data=res, validate=False)
+            return Dataset(data=res, validate=False, title=self.title)
 
     @staticmethod
     def _agg_item_from_items(items: Sequence[ItemInfo], name: str) -> ItemInfo:
@@ -1339,14 +1335,14 @@ class Dataset:
                     geometry=self.geometry,
                     zn=self._zn,
                 )
-                return Dataset([da], validate=False)
+                return Dataset([da], validate=False, title=self.title)
             else:
                 res: list[DataArray] = []
                 for quantile in q:
                     qd = self._quantile(q=quantile, axis=axis, func=func, **kwargs)[0]
                     assert isinstance(qd, DataArray)
                     res.append(qd)
-                return Dataset(data=res, validate=False)
+                return Dataset(data=res, validate=False, title=self.title)
         else:
             if np.isscalar(q):
                 res = [da._quantile(q=q, axis=axis, func=func) for da in self]
@@ -1361,7 +1357,7 @@ class Dataset:
                         qd.name = newname
                         res.append(qd)
 
-            return Dataset(data=res, validate=False)
+            return Dataset(data=res, validate=False, title=self.title)
 
     def max(self, axis: int | str = 0, **kwargs: Any) -> Dataset:
         """Max value along an axis.
@@ -1637,7 +1633,7 @@ class Dataset:
                 data = [x / y for x, y in zip(self, other)]
             case _:
                 raise ValueError(f"Unsupported operator: {operator}")
-        return Dataset(data)
+        return Dataset(data, title=self.title)
 
     def _scalar_op(self, value: float, operator: str) -> Dataset:
         match operator:
@@ -1651,7 +1647,7 @@ class Dataset:
                 data = [x / value for x in self]
             case _:
                 raise ValueError(f"Unsupported operator: {operator}")
-        return Dataset(data)
+        return Dataset(data, title=self.title)
 
     # ===============================================
 
@@ -1722,7 +1718,7 @@ class Dataset:
 
         filename = str(filename)
         # Use provided title or fall back to dataset's title
-        file_title = title if title is not None else self._title
+        file_title = title if title is not None else self.title
 
         match self.geometry:
             case (
@@ -1778,7 +1774,10 @@ class Dataset:
         if len(self) == 0:
             return "Empty <mikeio.Dataset>"
         da = self[0]
-        out = ["<mikeio.Dataset>", da._dims_txt(), da._time_txt(), da._geometry_txt()]  # type: ignore
+        out = ["<mikeio.Dataset>"]
+        if self.title:
+            out.append(f"title: {self.title}")
+        out.extend([da._dims_txt(), da._time_txt(), da._geometry_txt()])  # type: ignore
         out = [x for x in out if x is not None]
 
         if self.n_items > 10:
