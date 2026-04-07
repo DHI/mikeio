@@ -1693,19 +1693,13 @@ class Dataset:
 
         return df
 
-    def to_dfs(
-        self, filename: str | Path, title: str | None = None, **kwargs: Any
-    ) -> None:
+    def to_dfs(self, filename: str | Path, **kwargs: Any) -> None:
         """Write dataset to a new dfs file.
 
         Parameters
         ----------
         filename: str
             full path to the new dfs file
-        title: str, optional
-            title for the dfs file. When provided, this overrides the Dataset's
-            own `title` attribute for the current write operation only.
-            If omitted, the value stored in `Dataset.title` is used.
         **kwargs: Any
             additional arguments passed to the writing function, e.g. dtype for dfs0
 
@@ -1717,8 +1711,6 @@ class Dataset:
         from ..dfsu import write_dfsu
 
         filename = str(filename)
-        # Use provided title or fall back to dataset's title
-        file_title = title if title is not None else self.title
 
         match self.geometry:
             case (
@@ -1729,25 +1721,25 @@ class Dataset:
             ):
                 if self.ndim == 0 or (self.ndim == 1 and self[0]._has_time_axis):
                     self._validate_extension(filename, ".dfs0")
-                    write_dfs0(filename, self, title=file_title, **kwargs)
+                    write_dfs0(filename, self, title=self.title, **kwargs)
                 else:
                     raise ValueError("Cannot write Dataset with no geometry to file!")
 
             case Grid2D():
                 self._validate_extension(filename, ".dfs2")
-                write_dfs2(filename, self, title=file_title, **kwargs)
+                write_dfs2(filename, self, title=self.title, **kwargs)
 
             case Grid3D():
                 self._validate_extension(filename, ".dfs3")
-                write_dfs3(filename, self, title=file_title, **kwargs)
+                write_dfs3(filename, self, title=self.title, **kwargs)
 
             case Grid1D():
                 self._validate_extension(filename, ".dfs1")
-                write_dfs1(filename, self, title=file_title, **kwargs)
+                write_dfs1(filename, self, title=self.title, **kwargs)
 
             case _GeometryFM():
                 self._validate_extension(filename, ".dfsu")
-                write_dfsu(filename, self, title=file_title, **kwargs)
+                write_dfsu(filename, self, title=self.title, **kwargs)
 
             case _:
                 raise NotImplementedError(
@@ -1766,7 +1758,10 @@ class Dataset:
         import xarray
 
         data = {da.name: da.to_xarray() for da in self}
-        return xarray.Dataset(data)
+        attrs = {}
+        if self.title:
+            attrs["title"] = self.title
+        return xarray.Dataset(data, attrs=attrs)
 
     # ===============================================
 

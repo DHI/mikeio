@@ -82,7 +82,9 @@ def test_write_with_title(tmp_path: Path) -> None:
         time=pd.date_range("2000", periods=nt, freq="h"),
     )
 
-    da.to_dfs(fp, title="My DFS0 file")
+    ds = da._to_dataset()
+    ds.title = "My DFS0 file"
+    ds.to_dfs(fp)
 
     dfs = mikeio.Dfs0(fp)
     assert dfs.title == "My DFS0 file"
@@ -135,7 +137,8 @@ def test_write_read_with_empty_title(tmp_path: Path) -> None:
     dfs = Dfs0("tests/testdata/da_diagnostic.dfs0")
     ds = dfs.read()
     # test that empty string overwrites title
-    ds.to_dfs(tmpfile, title="")
+    ds.title = ""
+    ds.to_dfs(tmpfile)
     dfs3 = mikeio.Dfs0(tmpfile)
     assert dfs3.title == ""
 

@@ -117,7 +117,8 @@ def test_write_with_title(tmp_path: Path) -> None:
 
     # Write with custom title
     custom_title = "Test DFS1 with Custom Title"
-    ds.to_dfs(fp, title=custom_title)
+    ds.title = custom_title
+    ds.to_dfs(fp)
 
     # Read back and verify title
     newdfs = mikeio.Dfs1(fp)

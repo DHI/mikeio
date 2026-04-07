@@ -398,6 +398,7 @@ class DfsuSpectral:
             time=time,
             items=items,
             geometry=geometry,
+            title=self.title,
             validate=False,
         )
 

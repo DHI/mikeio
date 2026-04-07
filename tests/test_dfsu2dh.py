@@ -1042,15 +1042,13 @@ def test_write_dfsu_with_title(tmp_path: Path) -> None:
     sourcefilename = "tests/testdata/HD2D.dfsu"
     fp = tmp_path / "with_title.dfsu"
 
-    # Read source file
     dfs = mikeio.Dfsu2DH(sourcefilename)
     ds = dfs.read(items=[0])
 
-    # Write with custom title
     custom_title = "Test DFSU with Custom Title"
-    ds.to_dfs(fp, title=custom_title)
+    ds.title = custom_title
+    ds.to_dfs(fp)
 
-    # Read back and verify title
     newdfs = mikeio.Dfsu2DH(fp)
     assert newdfs.title == custom_title
 
