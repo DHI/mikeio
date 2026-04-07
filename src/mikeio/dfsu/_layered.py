@@ -180,7 +180,6 @@ class DfsuLayered:
             node_ids=node_table.ids,
             n_layers=dfs.NumberOfLayers,
             n_sigma=min(dfs.NumberOfSigmaLayers, dfs.NumberOfLayers),
-            validate=False,
         )
         dfs.Close()
         return geometry
@@ -442,7 +441,6 @@ class DfsuLayered:
                 items=items,
                 geometry=geometry,
                 zn=data_list[0],
-                validate=False,
                 dt=self.timestep,
             )
         else:
@@ -451,7 +449,6 @@ class DfsuLayered:
                 time=time,
                 items=items,
                 geometry=geometry,
-                validate=False,
                 dt=self.timestep,
             )
 

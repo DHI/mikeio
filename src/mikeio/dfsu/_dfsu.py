@@ -306,7 +306,6 @@ class Dfsu2DH:
             dfsu_type=dfsu_type,
             element_ids=el_table.ids,
             node_ids=node_table.ids,
-            validate=False,
         )
         dfs.Close()
         return geometry
@@ -486,7 +485,6 @@ class Dfsu2DH:
             time=time,
             items=item_infos,
             geometry=geometry,
-            validate=False,
             dt=self.timestep,
         )
 

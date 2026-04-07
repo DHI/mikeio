@@ -58,7 +58,6 @@ class Mesh:
             projection=msh.ProjectionString,
             element_ids=el_table.ids,
             node_ids=node_table.ids,
-            validate=False,
         )
 
         return geom

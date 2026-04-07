@@ -249,7 +249,6 @@ class _GeometryFMLayered(_GeometryFM):
             projection=self.projection_string,
             element_table=elem_tbl,
             element_ids=elem_ids,
-            validate=False,
             dfsu_type=DfsuFileType.Dfsu2D,
             reindex=True,
         )

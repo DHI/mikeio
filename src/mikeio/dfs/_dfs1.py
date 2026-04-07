@@ -177,7 +177,6 @@ class Dfs1(_Dfs123):
             time=time,
             items=items,
             geometry=self.geometry,
-            validate=False,
             dt=self._timestep,
         )
 
