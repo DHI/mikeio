@@ -35,6 +35,7 @@ from ..spatial import (
     GeometryPoint2D,
     GeometryPoint3D,
     GeometryUndefined,
+    GeometryType,
     Grid1D,
     Grid2D,
     Grid3D,
@@ -323,7 +324,7 @@ class Dataset:
         return self[0].deletevalue
 
     @property
-    def geometry(self) -> Any:
+    def geometry(self) -> GeometryType:
         """Geometry of each DataArray."""
         return self[0].geometry
 
@@ -901,7 +902,7 @@ class Dataset:
             start_time=self.start_time,
             end_time=self.end_time,
             timestep=self.timestep,
-            geometry=self.geometry,
+            geometry=self.geometry,  # type: ignore[arg-type]
             n_elements=self.shape[1],  # TODO is there a better way to find out this?
             track=track,
             items=deepcopy(self.items),

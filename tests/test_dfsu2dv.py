@@ -6,12 +6,7 @@ import pytest
 import matplotlib.pyplot as plt
 
 import mikeio
-from mikeio import Dfsu2DV
-from mikeio.spatial import (
-    GeometryFMVerticalColumn,
-    GeometryFMVerticalProfile,
-)
-from mikeio.spatial import GeometryPoint3D
+from mikeio import Dfsu2DV, GeometryFMVerticalColumn, GeometryFMVerticalProfile, GeometryPoint3D
 from mikecore.DfsuFile import DfsuFileType
 
 
@@ -66,6 +61,7 @@ def test_transect_geometry_properties_geo(vslice_geo: Dfsu2DV) -> None:
 
 def test_transect_read(vslice: Dfsu2DV) -> None:
     ds = vslice.read()
+    assert isinstance(ds.geometry, GeometryFMVerticalProfile)
     assert ds.geometry._type == DfsuFileType.DfsuVerticalProfileSigmaZ
     assert type(ds.geometry) is GeometryFMVerticalProfile
     assert ds.n_items == 2
@@ -82,6 +78,7 @@ def test_transect_getitem_element(vslice: Dfsu2DV) -> None:
     da = vslice.read()["Salinity"]
     idx = 5
     da2 = da[:, idx]
+    assert isinstance(da.geometry, GeometryFMVerticalProfile)
     assert type(da2.geometry) is GeometryPoint3D
     assert da2.geometry.x == da.geometry.element_coordinates[idx, 0]
     assert da2.geometry.y == da.geometry.element_coordinates[idx, 1]
@@ -94,6 +91,7 @@ def test_transect_isel(vslice: Dfsu2DV) -> None:
     da = vslice.read()["Salinity"]
     idx = 5
     da2 = da.isel(element=idx)
+    assert isinstance(da.geometry, GeometryFMVerticalProfile)
     assert type(da2.geometry) is GeometryPoint3D
     assert da2.geometry.x == da.geometry.element_coordinates[idx, 0]
     assert da2.geometry.y == da.geometry.element_coordinates[idx, 1]
@@ -104,10 +102,12 @@ def test_transect_isel(vslice: Dfsu2DV) -> None:
 
 def test_transect_isel_multiple(vslice_geo: Dfsu2DV) -> None:
     ds = vslice_geo.read()
+    assert isinstance(ds.geometry, GeometryFMVerticalProfile)
     rd = ds.geometry.relative_element_distance
     idx = np.where(np.logical_and(10000 < rd, rd < 25000))[0]
 
     ds2 = ds.isel(element=idx)
+    assert isinstance(ds2.geometry, GeometryFMVerticalProfile)
     assert ds2.geometry.n_elements == 579
     assert type(ds2.geometry) is GeometryFMVerticalProfile
     rd2 = ds2.geometry.relative_element_distance
@@ -144,6 +144,7 @@ def test_transect_sel_layers(vslice_geo: Dfsu2DV) -> None:
 def test_transect_sel_xy(vslice_geo: Dfsu2DV) -> None:
     da = vslice_geo.read()["Temperature"]
     da2 = da.sel(x=10.8, y=55.6)
+    assert isinstance(da2.geometry, GeometryFMVerticalColumn)
     assert type(da2.geometry) is GeometryFMVerticalColumn
     gx, gy, _ = da2.geometry.element_coordinates.mean(axis=0)
     assert gx == pytest.approx(10.802878)
@@ -182,6 +183,8 @@ def test_write_roundtrip(vslice: Dfsu2DV, tmp_path: Path) -> None:
     ds.to_dfs(fp)
 
     ds2 = mikeio.read(fp)
+    assert isinstance(ds.geometry, GeometryFMVerticalProfile)
+    assert isinstance(ds2.geometry, GeometryFMVerticalProfile)
     assert type(ds2.geometry) is GeometryFMVerticalProfile
     assert ds2.geometry.n_elements == ds.geometry.n_elements
     assert ds2.geometry.n_nodes == ds.geometry.n_nodes

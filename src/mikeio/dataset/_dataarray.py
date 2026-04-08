@@ -40,7 +40,6 @@ from ..spatial import (
     Grid1D,
     Grid2D,
     Grid3D,
-    Geometry0D,
     GeometryPoint2D,
     GeometryPoint3D,
     GeometryUndefined,
@@ -51,6 +50,7 @@ from ..spatial import (
     GeometryFMPointSpectrum,
     GeometryFMVerticalColumn,
     GeometryFMVerticalProfile,
+    GeometryType,
 )
 
 # We need this type to know if we should keep zn
@@ -67,23 +67,6 @@ from ._data_plot import (
     DataArrayPlotterPointSpectrum,
     DataArrayPlotterLineSpectrum,
 )
-
-GeometryType = Union[
-    Geometry0D,
-    GeometryUndefined,
-    GeometryPoint2D,
-    GeometryPoint3D,
-    GeometryFM2D,
-    GeometryFM3D,
-    GeometryFMAreaSpectrum,
-    GeometryFMLineSpectrum,
-    GeometryFMPointSpectrum,
-    GeometryFMVerticalColumn,
-    GeometryFMVerticalProfile,
-    Grid1D,
-    Grid2D,
-    Grid3D,
-]
 
 IndexType = Union[int, slice, Sequence[int], np.ndarray, None]
 
@@ -161,8 +144,7 @@ class DataArray:
                 stacklevel=2,
             )
 
-        # geometries are very diverse without a common interface
-        self.geometry: Any = geometry
+        self.geometry: GeometryType = geometry
 
         self._check_time_data_length(self.time)
 
@@ -696,9 +678,10 @@ class DataArray:
                 spatial_axis = (
                     parsed_axis - 1 if self.dims[0] == "time" else parsed_axis
                 )
-                geometry = self.geometry.isel(idx, axis=spatial_axis)
+                geometry = self.geometry.isel(idx, axis=spatial_axis)  # type: ignore[union-attr, arg-type]
 
             if isinstance(geometry, _GeometryFMLayered):
+                assert isinstance(self.geometry, _GeometryFMLayered)
                 node_ids, _ = self.geometry._get_nodes_and_table_for_elements(
                     idx, node_layers="all"
                 )
@@ -838,7 +821,7 @@ class DataArray:
 
         # select in space
         if len(kwargs) > 0:
-            idx = self.geometry.find_index(**kwargs)
+            idx = self.geometry.find_index(**kwargs)  # type: ignore[union-attr, arg-type]
 
             # TODO this seems fragile
             if isinstance(idx, tuple):
@@ -869,23 +852,23 @@ class DataArray:
         for k, v in kwargs.items():
             if isinstance(v, slice):
                 idx_start = (
-                    self.geometry.find_index(**{k: v.start})
+                    self.geometry.find_index(**{k: v.start})  # type: ignore[union-attr]
                     if v.start is not None
                     else None
                 )
                 idx_stop = (
-                    self.geometry.find_index(**{k: v.stop})
+                    self.geometry.find_index(**{k: v.stop})  # type: ignore[union-attr]
                     if v.stop is not None
                     else None
                 )
                 ref = idx_start if idx_start is not None else idx_stop
                 if isinstance(ref, tuple):
                     pos = {"x": 0, "y": 1}[k]
-                    start = idx_start[pos][0] if idx_start is not None else None
-                    stop = idx_stop[pos][0] if idx_stop is not None else None
+                    start = idx_start[pos][0] if idx_start is not None else None  # type: ignore[index]
+                    stop = idx_stop[pos][0] if idx_stop is not None else None  # type: ignore[index]
                 else:
-                    start = idx_start[0] if idx_start is not None else None
-                    stop = idx_stop[0] if idx_stop is not None else None
+                    start = idx_start[0] if idx_start is not None else None  # type: ignore[index]
+                    stop = idx_stop[0] if idx_stop is not None else None  # type: ignore[index]
 
                 idx = slice(start, stop)
 
@@ -1058,7 +1041,7 @@ class DataArray:
             start_time=self.start_time,
             end_time=self.end_time,
             timestep=self.timestep,
-            geometry=self.geometry,
+            geometry=self.geometry,  # type: ignore[arg-type]
             n_elements=self.shape[1],  # TODO is there a better way to find out this?
             track=track,
             items=deepcopy([self.item]),
@@ -1578,7 +1561,7 @@ class DataArray:
                 # Only time was reduced, keep geometry
                 geometry = self.geometry
             else:
-                geometry = self.geometry.reduce(spatial_reduced_axes)
+                geometry = self.geometry.reduce(spatial_reduced_axes)  # type: ignore[assignment]
             zn = None
 
         return DataArray(
@@ -1692,7 +1675,7 @@ class DataArray:
             else:
                 # Spatial aggregation - reduce geometry
                 reduced_axis = self.dims[parsed_axis]
-                geometry = self.geometry.reduce(reduced_axis)
+                geometry = self.geometry.reduce(reduced_axis)  # type: ignore[assignment]
                 zn = None
 
             item = deepcopy(self.item)
