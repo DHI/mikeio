@@ -548,7 +548,7 @@ def test_read_point_rotated_grid() -> None:
 
     from mikecore.Projections import Cartography
 
-    g = mikeio.open(filepath).geometry
+    g = Dfs2(filepath).geometry
     cart = Cartography.CreateProjOrigin(
         projectionString=g.projection_string,
         east=g.origin[0],
