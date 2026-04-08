@@ -1018,6 +1018,22 @@ def test_concat_dataarray_keep_first() -> None:
     assert da3.to_numpy()[2] == 3.0
 
 
+def test_concat_duplicate_timestamps_raises() -> None:
+    # DA diagnostic output can have duplicate timestamps at correction times
+    time = pd.DatetimeIndex(["2000-01-01", "2000-01-01", "2000-01-02"])
+    ds1 = mikeio.Dataset.from_numpy(data=[np.zeros(3)], time=time)
+    ds2 = mikeio.Dataset.from_numpy(data=[np.ones(2)], time=pd.date_range("2000-01-03", periods=2))
+    with pytest.raises(ValueError, match="duplicate timestamps"):
+        mikeio.Dataset.concat([ds1, ds2])
+
+
+def test_concat_invalid_keep_raises() -> None:
+    ds1 = mikeio.read("tests/testdata/tide1.dfs1", time=[0, 1])
+    ds2 = mikeio.read("tests/testdata/tide1.dfs1", time=[2, 3])
+    with pytest.raises(ValueError, match="Invalid keep"):
+        mikeio.Dataset.concat([ds1, ds2], keep="lasst")  # type: ignore
+
+
 def test_concat_by_time() -> None:
     ds1 = mikeio.read("tests/testdata/tide1.dfs1")
     ds2 = mikeio.read("tests/testdata/tide2.dfs1") + 0.5  # add offset

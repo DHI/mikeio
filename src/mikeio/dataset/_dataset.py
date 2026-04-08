@@ -1079,6 +1079,14 @@ class Dataset:
         4
 
         """
+        for i, ds in enumerate(datasets):
+            if ds.time.has_duplicates:
+                raise ValueError(
+                    f"Dataset {i} has duplicate timestamps, "
+                    "e.g. from DA diagnostic output. "
+                    "Remove duplicates before concatenating."
+                )
+
         ds = datasets[0].copy()
         for dsj in datasets[1:]:
             ds = ds._concat_time(dsj, copy=False, keep=keep)
@@ -1125,19 +1133,12 @@ class Dataset:
         keep: Literal["last", "first"] = "last",
     ) -> Dataset:
         self._check_n_items(other)
-        # assuming time is always first dimension we can skip / keep it by bool
         start_dim = int("time" in self.dims)
         if not np.all(
             self.shape[start_dim:] == other.shape[int("time" in other.dims) :]
         ):
-            # if not np.all(self.shape[1:] == other.shape[1:]):
             raise ValueError("Shape of the datasets must match (except time dimension)")
-        if hasattr(self, "time"):  # using attribute instead of dim checking. Works
-            ds = self.copy() if copy else self
-        else:
-            raise ValueError(
-                "Datasets cannot be concatenated as they have no time attribute!"
-            )
+        ds = self.copy() if copy else self
 
         s1 = pd.Series(np.arange(len(ds.time)), index=ds.time, name="idx1")
         s2 = pd.Series(np.arange(len(other.time)), index=other.time, name="idx2")
@@ -1149,23 +1150,27 @@ class Dataset:
         idx1 = np.where(~df12["idx1"].isna())
         idx2 = np.where(~df12["idx2"].isna())
         for j in range(ds.n_items):
-            if keep == "last":
-                newdata[j][idx1] = ds[j].to_numpy()
-                newdata[j][idx2] = other[j].to_numpy()
-            else:
-                newdata[j][idx2] = other[j].to_numpy()
-                newdata[j][idx1] = ds[j].to_numpy()
+            match keep:
+                case "last":
+                    newdata[j][idx1] = ds[j].to_numpy()
+                    newdata[j][idx2] = other[j].to_numpy()
+                case "first":
+                    newdata[j][idx2] = other[j].to_numpy()
+                    newdata[j][idx1] = ds[j].to_numpy()
+                case _:
+                    raise ValueError(f"Invalid keep value: {keep!r}, expected 'first' or 'last'")
 
         zn = None
         if self._zn is not None and other._zn is not None:
             zshape = (len(newtime), self._zn.shape[start_dim])
             zn = np.zeros(shape=zshape, dtype=self._zn.dtype)
-            if keep == "last":
-                zn[idx1, :] = self._zn
-                zn[idx2, :] = other._zn
-            else:
-                zn[idx2, :] = other._zn
-                zn[idx1, :] = self._zn
+            match keep:
+                case "last":
+                    zn[idx1, :] = self._zn
+                    zn[idx2, :] = other._zn
+                case "first":
+                    zn[idx2, :] = other._zn
+                    zn[idx1, :] = self._zn
 
         return Dataset.from_numpy(
             newdata, time=newtime, items=ds.items, geometry=ds.geometry, zn=zn
