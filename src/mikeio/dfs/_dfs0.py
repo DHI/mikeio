@@ -103,6 +103,7 @@ class Dfs0:
 
         dfs = DfsFileFactory.DfsGenericOpen(str(path))
         self._dfs = dfs
+        self._title = dfs.FileInfo.FileTitle
 
         # Read items
         self._items = _get_item_info(dfs.ItemInfo)
@@ -190,7 +191,9 @@ class Dfs0:
             item_infos = [self.items[it] for it in item_numbers]
         else:
             item_infos = self.items
-        ds = Dataset.from_numpy(data, time=ftime, items=item_infos, validate=False)
+        ds = Dataset.from_numpy(
+            data, time=ftime, items=item_infos, title=self.title, validate=False
+        )
 
         # select time steps
         if self._timeaxistype == TimeAxisType.CalendarNonEquidistant and isinstance(
@@ -303,6 +306,11 @@ class Dfs0:
             return self.read().time
         else:
             raise ValueError("Time axis type not supported")
+
+    @property
+    def title(self) -> str:
+        """File title."""
+        return self._title
 
     # ======================
     # Deprecated in 2.5.0

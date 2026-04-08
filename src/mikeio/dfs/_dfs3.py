@@ -153,6 +153,7 @@ class Dfs3(_Dfs123):
         self._nx = self._dfs.SpatialAxis.XCount
         self._ny = self._dfs.SpatialAxis.YCount
         self._nz = self._dfs.SpatialAxis.ZCount
+        self._title = self._dfs.FileInfo.FileTitle
 
     def read(
         self,
@@ -268,6 +269,7 @@ class Dfs3(_Dfs123):
             time=time,
             items=items,
             geometry=geometry,
+            title=self.title,
             validate=False,
         )
 
@@ -334,3 +336,8 @@ class Dfs3(_Dfs123):
     @property
     def shape(self) -> tuple[int, int, int, int]:
         return (self._n_timesteps, self._nz, self._ny, self._nx)
+
+    @property
+    def title(self) -> str:
+        """Title of the dfs3 file."""
+        return self._title
