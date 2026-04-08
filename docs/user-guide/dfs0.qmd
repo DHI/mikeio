@@ -92,6 +92,17 @@ ds_typed
 ```
 
 
+## File title
+
+DFS files have a title field shown e.g. in MIKE Zero. The title is read from the file and preserved through processing. You can set it before writing:
+
+```{python}
+ds = mikeio.read("mauna_loa_co2.dfs0")
+ds.title = "Mauna Loa CO2"
+ds.to_dfs("mauna_loa_co2.dfs0")
+```
+
+
 ## Accumulated datavalue type
 
 Some dfs0 items use an accumulated data value type rather than the default instantaneous type. This is common for precipitation data and can be specified using the `data_value_type` argument of [](`mikeio.ItemInfo`). Refer to the [MIKE documentation](https://doc.mikepoweredbydhi.help/webhelp/2026/timeserieseditor/TSEdit/TSEdit/TS_Types_graphical_representation.htm) for guidance on which type to use for your setup.

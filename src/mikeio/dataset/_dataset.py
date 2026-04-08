@@ -94,6 +94,7 @@ class Dataset:
         self,
         data: Mapping[str, DataArray] | Sequence[DataArray],
         validate: bool = True,
+        title: str = "",
     ):
         data_vars = self._dataarrays_as_mapping(data)
 
@@ -108,6 +109,8 @@ class Dataset:
             self._set_name_attr(key, value)
         self.plot = DatasetPlotter(self)
 
+        self.title = title
+
     @staticmethod
     def from_numpy(
         data: Sequence[NDArray[np.floating]],
@@ -117,6 +120,7 @@ class Dataset:
         geometry: Any | None = None,
         zn: NDArray[np.floating] | None = None,
         validate: bool = True,
+        title: str = "",
         dt: float = 1.0,
     ) -> Dataset:
         """Create a Dataset from numpy arrays.
@@ -135,6 +139,8 @@ class Dataset:
             Z-coordinates of the DataArrays, by default None
         validate: bool, optional
             Validate the DataArrays, by default True
+        title: str, optional
+            Title of the dataset, by default ""
         dt: float, optional
             Dummy time step in seconds, by default 1.0
 
@@ -148,7 +154,7 @@ class Dataset:
             for dd, it in zip(data, item_infos)
         }
 
-        return Dataset(data_vars, validate=validate)
+        return Dataset(data_vars, validate=validate, title=title)
 
     @property
     def values(self) -> None:
@@ -350,7 +356,7 @@ class Dataset:
         """
         res = {name: da.fillna(value=value) for name, da in self._data_vars.items()}
 
-        return Dataset(data=res, validate=False)
+        return Dataset(data=res, validate=False, title=self.title)
 
     def dropna(self) -> Dataset:
         """Remove time steps where all items are NaN."""
@@ -397,7 +403,7 @@ class Dataset:
         )
         res = {name: da.squeeze() for name, da in self._data_vars.items()}
 
-        return Dataset(data=res, validate=False)
+        return Dataset(data=res, validate=False, title=self.title)
 
     def create_data_array(
         self,
@@ -562,14 +568,14 @@ class Dataset:
                     for k, da in self._data_vars.items()
                     if fnmatch.fnmatch(k, key)
                 }
-                return Dataset(data=data_vars, validate=False)
+                return Dataset(data=data_vars, validate=False, title=self.title)
             else:
                 item_names = ",".join(self._data_vars.keys())
                 raise KeyError(f"No item named: {key}. Valid items: {item_names}")
 
         if isinstance(key, Iterable):
             data_vars = {v: self._data_vars[v] for v in key}
-            return Dataset(data=data_vars, validate=False)
+            return Dataset(data=data_vars, validate=False, title=self.title)
 
         raise TypeError(f"indexing with a {type(key)} is not (yet) supported")
 
@@ -677,7 +683,7 @@ class Dataset:
             )
             for da in self
         ]
-        return Dataset(data=res, validate=False)
+        return Dataset(data=res, validate=False, title=self.title)
 
     def sel(
         self,
@@ -758,7 +764,7 @@ class Dataset:
             da.sel(time=time, x=x, y=y, z=z, coords=coords, area=area, layers=layers)
             for da in self
         ]
-        return Dataset(data=res, validate=False)
+        return Dataset(data=res, validate=False, title=self.title)
 
     def interp(
         self,
@@ -838,9 +844,9 @@ class Dataset:
                 das = [da.interp(x=x, y=y, interpolant=interpolant) for da in self]
             else:
                 das = [da.interp(x=x, y=y) for da in self]
-            ds = Dataset(das, validate=False)
+            ds = Dataset(das, validate=False, title=self.title)
         else:
-            ds = Dataset([da for da in self], validate=False)
+            ds = Dataset([da for da in self], validate=False, title=self.title)
 
         # interp in time
         if isinstance(time, (pd.DatetimeIndex, DataArray)):
@@ -967,7 +973,7 @@ class Dataset:
             for da in self
         ]
 
-        return Dataset(das)
+        return Dataset(das, title=self.title)
 
     def interp_na(self, axis: str = "time", **kwargs: Any) -> Dataset:
         ds = self.copy()
@@ -1173,7 +1179,12 @@ class Dataset:
                     zn[idx1, :] = self._zn
 
         return Dataset.from_numpy(
-            newdata, time=newtime, items=ds.items, geometry=ds.geometry, zn=zn
+            newdata,
+            time=newtime,
+            items=ds.items,
+            geometry=ds.geometry,
+            zn=zn,
+            title=ds.title,
         )
 
     def _check_n_items(self, other: Dataset) -> None:
@@ -1227,13 +1238,13 @@ class Dataset:
                 zn=self._zn,
             )
 
-            return Dataset([da], validate=False)
+            return Dataset([da], validate=False, title=self.title)
         else:
             res = {
                 name: da.aggregate(axis=axis, func=func, **kwargs)
                 for name, da in self._data_vars.items()
             }
-            return Dataset(data=res, validate=False)
+            return Dataset(data=res, validate=False, title=self.title)
 
     @staticmethod
     def _agg_item_from_items(items: Sequence[ItemInfo], name: str) -> ItemInfo:
@@ -1329,14 +1340,14 @@ class Dataset:
                     geometry=self.geometry,
                     zn=self._zn,
                 )
-                return Dataset([da], validate=False)
+                return Dataset([da], validate=False, title=self.title)
             else:
                 res: list[DataArray] = []
                 for quantile in q:
                     qd = self._quantile(q=quantile, axis=axis, func=func, **kwargs)[0]
                     assert isinstance(qd, DataArray)
                     res.append(qd)
-                return Dataset(data=res, validate=False)
+                return Dataset(data=res, validate=False, title=self.title)
         else:
             if np.isscalar(q):
                 res = [da._quantile(q=q, axis=axis, func=func) for da in self]
@@ -1351,7 +1362,7 @@ class Dataset:
                         qd.name = newname
                         res.append(qd)
 
-            return Dataset(data=res, validate=False)
+            return Dataset(data=res, validate=False, title=self.title)
 
     def max(self, axis: int | str = 0, **kwargs: Any) -> Dataset:
         """Max value along an axis.
@@ -1627,7 +1638,7 @@ class Dataset:
                 data = [x / y for x, y in zip(self, other)]
             case _:
                 raise ValueError(f"Unsupported operator: {operator}")
-        return Dataset(data)
+        return Dataset(data, title=self.title)
 
     def _scalar_op(self, value: float, operator: str) -> Dataset:
         match operator:
@@ -1641,7 +1652,7 @@ class Dataset:
                 data = [x / value for x in self]
             case _:
                 raise ValueError(f"Unsupported operator: {operator}")
-        return Dataset(data)
+        return Dataset(data, title=self.title)
 
     # ===============================================
 
@@ -1715,25 +1726,25 @@ class Dataset:
             ):
                 if self.ndim == 0 or (self.ndim == 1 and self[0]._has_time_axis):
                     self._validate_extension(filename, ".dfs0")
-                    write_dfs0(filename, self, **kwargs)
+                    write_dfs0(filename, self, title=self.title, **kwargs)
                 else:
                     raise ValueError("Cannot write Dataset with no geometry to file!")
 
             case Grid2D():
                 self._validate_extension(filename, ".dfs2")
-                write_dfs2(filename, self)
+                write_dfs2(filename, self, title=self.title, **kwargs)
 
             case Grid3D():
                 self._validate_extension(filename, ".dfs3")
-                write_dfs3(filename, self)
+                write_dfs3(filename, self, title=self.title, **kwargs)
 
             case Grid1D():
                 self._validate_extension(filename, ".dfs1")
-                write_dfs1(filename, self)
+                write_dfs1(filename, self, title=self.title, **kwargs)
 
             case _GeometryFM():
                 self._validate_extension(filename, ".dfsu")
-                write_dfsu(filename, self)
+                write_dfsu(filename, self, title=self.title, **kwargs)
 
             case _:
                 raise NotImplementedError(
@@ -1752,7 +1763,10 @@ class Dataset:
         import xarray
 
         data = {da.name: da.to_xarray() for da in self}
-        return xarray.Dataset(data)
+        attrs = {}
+        if self.title:
+            attrs["title"] = self.title
+        return xarray.Dataset(data, attrs=attrs)
 
     # ===============================================
 
@@ -1760,7 +1774,10 @@ class Dataset:
         if len(self) == 0:
             return "Empty <mikeio.Dataset>"
         da = self[0]
-        out = ["<mikeio.Dataset>", da._dims_txt(), da._time_txt(), da._geometry_txt()]  # type: ignore
+        out = ["<mikeio.Dataset>"]
+        if self.title:
+            out.append(f"title: {self.title}")
+        out.extend([da._dims_txt(), da._time_txt(), da._geometry_txt()])  # type: ignore
         out = [x for x in out if x is not None]
 
         if self.n_items > 10:

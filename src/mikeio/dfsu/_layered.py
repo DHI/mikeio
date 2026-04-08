@@ -52,6 +52,7 @@ class DfsuLayered:
         self._start_time = info.start_time
         self._timestep = info.timestep
         self._n_timesteps = info.n_timesteps
+        self._title = info.title
         self._geometry = self._read_geometry(self._filename)
         # 3d files have a zn item
         self._items = self._read_items(self._filename)
@@ -137,6 +138,11 @@ class DfsuLayered:
             raise NotImplementedError(
                 "Non-equidistant time axis. Read the data to get time."
             )
+
+    @property
+    def title(self) -> str:
+        """File title."""
+        return self._title
 
     @property
     def geometry(self) -> GeometryFM3D | GeometryFMVerticalProfile:
@@ -442,6 +448,7 @@ class DfsuLayered:
                 items=items,
                 geometry=geometry,
                 zn=data_list[0],
+                title=self.title,
                 validate=False,
                 dt=self.timestep,
             )
@@ -451,6 +458,7 @@ class DfsuLayered:
                 time=time,
                 items=items,
                 geometry=geometry,
+                title=self.title,
                 validate=False,
                 dt=self.timestep,
             )
