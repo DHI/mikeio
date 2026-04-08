@@ -492,7 +492,7 @@ def test_sel_point_rotated_grid() -> None:
     filepath = Path("tests/testdata/BW_Ronne_Layout1998_rotated.dfs2")
     ds = mikeio.read(filepath)
     g = ds.geometry
-    assert g._is_rotated
+    assert g.orientation != 0
 
     # pick a grid cell and get its world coordinates
     from mikecore.Projections import Cartography
@@ -510,6 +510,57 @@ def test_sel_point_rotated_grid() -> None:
     da_sel = da.sel(x=east, y=north)
     expected = da.values[:, 2, 116]
     assert da_sel.values == pytest.approx(expected)
+
+
+def test_contains_rotated_grid() -> None:
+    filepath = Path("tests/testdata/BW_Ronne_Layout1998_rotated.dfs2")
+    g = mikeio.read(filepath).geometry
+
+    from mikecore.Projections import Cartography
+
+    cart = Cartography.CreateProjOrigin(
+        projectionString=g.projection_string,
+        east=g.origin[0],
+        north=g.origin[1],
+        orientationProj=g.orientation,
+    )
+    # a point inside the grid
+    east_in, north_in = cart.Xy2Proj(580.0, 10.0)
+    assert g.contains([[east_in, north_in]])[0]
+
+    # a point far outside the grid
+    assert not g.contains([[east_in + 1e6, north_in]])[0]
+
+
+def test_read_point() -> None:
+    filename = "tests/testdata/eq.dfs2"
+    ds_full = mikeio.read(filename)
+    g = ds_full.geometry
+    x = g.x[3]
+    y = g.y[2]
+    ds_point = mikeio.read(filename, x=x, y=y)
+    expected = ds_full[0].values[:, 2, 3]
+    assert ds_point[0].to_numpy().ravel() == pytest.approx(expected)
+
+
+def test_read_point_rotated_grid() -> None:
+    filepath = Path("tests/testdata/BW_Ronne_Layout1998_rotated.dfs2")
+
+    from mikecore.Projections import Cartography
+
+    g = mikeio.open(filepath).geometry
+    cart = Cartography.CreateProjOrigin(
+        projectionString=g.projection_string,
+        east=g.origin[0],
+        north=g.origin[1],
+        orientationProj=g.orientation,
+    )
+    east, north = cart.Xy2Proj(580.0, 10.0)
+
+    ds_point = mikeio.read(filepath, x=east, y=north)
+    ds_full = mikeio.read(filepath)
+    expected = ds_full[0].values[:, 2, 116]
+    assert ds_point[0].to_numpy().ravel() == pytest.approx(expected)
 
 
 def test_sel_single_axis_rotated_grid_raises() -> None:

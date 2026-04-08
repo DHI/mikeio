@@ -743,12 +743,22 @@ class Grid2D(_Geometry):
 
         """
         coords = np.atleast_2d(coords)
-        y = coords[:, 1]
         x = coords[:, 0]
+        y = coords[:, 1]
 
-        xinside = (self.bbox.left <= x) & (x <= self.bbox.right)
-        yinside = (self.bbox.bottom <= y) & (y <= self.bbox.top)
-        return xinside & yinside
+        if self._is_rotated:
+            x, y = self._proj_to_local(x, y)
+            x_min = self.x[0] - self.dx / 2
+            x_max = self.x[-1] + self.dx / 2
+            y_min = self.y[0] - self.dy / 2
+            y_max = self.y[-1] + self.dy / 2
+        else:
+            x_min = self.bbox.left
+            x_max = self.bbox.right
+            y_min = self.bbox.bottom
+            y_max = self.bbox.top
+
+        return (x >= x_min) & (x <= x_max) & (y >= y_min) & (y <= y_max)
 
     def __contains__(self, pt: Any) -> Any:
         return self.contains(pt)
@@ -846,16 +856,7 @@ class Grid2D(_Geometry):
         ii = (-999999999) * np.ones_like(x, dtype=int)
         jj = (-999999999) * np.ones_like(y, dtype=int)
 
-        inside = (
-            self.contains(xy)
-            if not self._is_rotated
-            else (
-                (x >= self.x[0] - self.dx / 2)
-                & (x <= self.x[-1] + self.dx / 2)
-                & (y >= self.y[0] - self.dy / 2)
-                & (y <= self.y[-1] + self.dy / 2)
-            )
-        )
+        inside = self.contains(xy)
         if np.any(~inside):
             raise OutsideModelDomainError(x=xy[~inside, 0], y=xy[~inside, 1])
 
@@ -923,6 +924,8 @@ class Grid2D(_Geometry):
     ) -> Grid2D | GeometryUndefined:
         ii = range(self.nx) if ii is None else ii
         jj = range(self.ny) if jj is None else jj
+        if len(ii) == 1 and len(jj) == 1:
+            return GeometryUndefined()
         assert len(ii) > 1 and len(jj) > 1, "Index must be at least len 2"
         assert ii[-1] < self.nx and jj[-1] < self.ny, "Index out of bounds"
         di = np.diff(ii)
