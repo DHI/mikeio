@@ -530,6 +530,76 @@ class _GeometryFMLayered(_GeometryFM):
 class GeometryFM3D(_GeometryFMLayered):
     """Flexible 3d mesh geometry."""
 
+    @classmethod
+    def from_2d_geometry(
+        cls,
+        geometry2d: GeometryFM2D,
+        n_sigma: int,
+        *,
+        layer_fractions: Sequence[float] | None = None,
+        sigma_depth: float | None = None,
+        z_layer_thickness: float | Sequence[float] | None = None,
+    ) -> GeometryFM3D:
+        """Create a 3D geometry by extruding a 2D mesh vertically.
+
+        Parameters
+        ----------
+        geometry2d : GeometryFM2D
+            2D mesh where z-coordinates represent bathymetry (bottom).
+            Surface is at z=0.
+        n_sigma : int
+            Number of sigma layers.
+        layer_fractions : Sequence[float] | None
+            Relative sigma layer thicknesses (bottom to top), must sum
+            to 1.0 and have length == n_sigma. If None, equidistant.
+        sigma_depth : float | None
+            Z-coordinate where sigma domain ends and z-layers begin.
+            Required (and only used) together with z_layer_thickness.
+        z_layer_thickness : float | Sequence[float] | None
+            Thickness of z-layers below sigma_depth. If a float,
+            equidistant layers of that thickness are created as deep
+            as the bathymetry requires. If a sequence, specifies
+            individual layer thicknesses from bottom to top.
+            Required together with sigma_depth.
+
+        Returns
+        -------
+        GeometryFM3D
+
+        """
+        if n_sigma < 1:
+            raise ValueError("n_sigma must be >= 1")
+        if layer_fractions is not None:
+            if len(layer_fractions) != n_sigma:
+                raise ValueError(
+                    f"layer_fractions length ({len(layer_fractions)}) "
+                    f"must equal n_sigma ({n_sigma})"
+                )
+            if abs(sum(layer_fractions) - 1.0) > 1e-6:
+                raise ValueError("layer_fractions must sum to 1.0")
+        if (sigma_depth is None) != (z_layer_thickness is None):
+            raise ValueError(
+                "sigma_depth and z_layer_thickness must be specified together"
+            )
+
+        # Compute cumulative sigma fractions
+        if layer_fractions is not None:
+            cum_sigma = np.zeros(n_sigma + 1)
+            cum_sigma[1:] = np.cumsum(layer_fractions)
+        else:
+            cum_sigma = np.linspace(0.0, 1.0, n_sigma + 1)  # type: ignore[assignment]
+
+        if sigma_depth is None:
+            return _build_sigma_geometry(geometry2d, n_sigma, cum_sigma, cls)
+        else:
+            assert z_layer_thickness is not None
+            z_levels = _z_levels_from_thickness(
+                sigma_depth, z_layer_thickness, geometry2d
+            )
+            return _build_sigma_z_geometry(
+                geometry2d, n_sigma, cum_sigma, z_levels, cls
+            )
+
     @property
     def plot(self) -> None:
         raise AttributeError(
@@ -780,3 +850,186 @@ class GeometryFMVerticalProfilePlotter:
             cmax=1.0,
             **kwargs,
         )
+
+
+# --- Builder functions for GeometryFM3D.from_2d_geometry ---
+
+
+def _z_levels_from_thickness(
+    sigma_depth: float,
+    z_layer_thickness: float | Sequence[float],
+    geometry2d: GeometryFM2D,
+) -> list[float]:
+    """Compute z-level interfaces from sigma depth and layer thicknesses.
+
+    Returns ascending list of z-coordinates. The last value is sigma_depth.
+    The number of z-levels equals the max number of z-layers. The bottom
+    z-layer extends from bathymetry down to z_levels[0].
+    """
+    if isinstance(z_layer_thickness, (int, float)):
+        # Equidistant: step down from sigma_depth, stop before going
+        # at or below the deepest bathymetry
+        dz = float(z_layer_thickness)
+        min_bathy = float(geometry2d.node_coordinates[:, 2].min())
+        levels: list[float] = []
+        z = sigma_depth
+        while True:
+            z -= dz
+            if z <= min_bathy:
+                break
+            levels.insert(0, z)
+        levels.append(sigma_depth)
+    else:
+        # Variable: thicknesses from bottom to top define interfaces
+        # below sigma_depth. Exclude the bottommost boundary (bathymetry
+        # provides it).
+        levels = [sigma_depth]
+        z = sigma_depth
+        for dz in reversed(z_layer_thickness):
+            z -= dz
+            levels.insert(0, z)
+        levels.pop(0)  # remove deepest boundary; bathymetry handles it
+    return levels
+
+
+def _build_sigma_geometry(
+    geometry2d: GeometryFM2D,
+    n_sigma: int,
+    cum_sigma: np.ndarray,
+    cls: type[GeometryFM3D],
+) -> GeometryFM3D:
+    """Build pure sigma 3D geometry from 2D mesh."""
+    n2d_elems = geometry2d.n_elements
+    npl = n_sigma + 1  # node levels per column
+
+    # --- Nodes ---
+    xy_2d = geometry2d.node_coordinates[:, :2]
+    z_bot = geometry2d.node_coordinates[:, 2]
+
+    # z_3d[i, k] = z_bot[i] + cum_sigma[k] * (0 - z_bot[i]) = z_bot[i] * (1 - cum_sigma[k])
+    z_3d = z_bot[:, np.newaxis] * (1.0 - cum_sigma[np.newaxis, :])
+    xy_rep = np.repeat(xy_2d, npl, axis=0)
+    node_coords = np.column_stack([xy_rep, z_3d.ravel()])
+
+    # --- Codes ---
+    codes = np.repeat(geometry2d.codes, npl)
+
+    # --- Elements ---
+    elem_table: list[np.ndarray] = []
+    for j in range(n2d_elems):
+        nodes_2d = geometry2d.element_table[j]
+        base = np.asarray(nodes_2d, dtype=np.int32) * npl
+        for k in range(n_sigma):
+            bot = base + k
+            top = base + (k + 1)
+            elem_table.append(np.concatenate([bot, top]))
+
+    return cls(
+        node_coordinates=node_coords,
+        element_table=elem_table,
+        codes=codes,
+        projection=geometry2d.projection_string,
+        dfsu_type=DfsuFileType.Dfsu3DSigma,
+        n_layers=n_sigma,
+        n_sigma=n_sigma,
+        validate=False,
+    )
+
+
+def _build_sigma_z_geometry(
+    geometry2d: GeometryFM2D,
+    n_sigma: int,
+    cum_sigma: np.ndarray,
+    z_levels: list[float],
+    cls: type[GeometryFM3D],
+) -> GeometryFM3D:
+    """Build sigma-z 3D geometry from 2D mesh."""
+    n2d_nodes = geometry2d.n_nodes
+    n2d_elems = geometry2d.n_elements
+    z_levels_arr = np.array(z_levels, dtype=np.float64)
+    sigma_depth = z_levels_arr[-1]
+    n_z_max = len(z_levels)
+    n_layers_max = n_sigma + n_z_max
+
+    xy_2d = geometry2d.node_coordinates[:, :2]
+    z_bot = geometry2d.node_coordinates[:, 2]
+
+    # --- Per-node: determine z-coordinates for each column ---
+    # For each node, find active z-levels (those strictly above z_bot)
+    node_z_lists: list[np.ndarray] = []
+    node_offset = np.zeros(n2d_nodes + 1, dtype=np.int32)
+
+    for i in range(n2d_nodes):
+        zb = z_bot[i]
+        # Active z-levels: those strictly above bathymetry
+        active_z = z_levels_arr[z_levels_arr > zb]
+
+        if len(active_z) == 0:
+            # All z-levels at or below bathymetry → pure sigma for this node
+            sigma_top = 0.0
+            sigma_bot = zb
+        else:
+            sigma_top = 0.0
+            sigma_bot = sigma_depth  # sigma domain: sigma_depth to 0
+
+        # Sigma node levels
+        sigma_z = sigma_bot + cum_sigma * (sigma_top - sigma_bot)
+
+        if len(active_z) == 0:
+            # No z-layers, just sigma
+            z_col = sigma_z
+        else:
+            # Z-layer levels: [z_bot, active_z_levels below sigma_depth...]
+            z_below_sigma = (
+                active_z[active_z < sigma_depth] if sigma_depth > zb else np.array([])
+            )
+            z_layer_nodes = np.concatenate([[zb], z_below_sigma])
+            # Combine z-layer nodes + sigma nodes (sigma starts at sigma_depth)
+            z_col = np.concatenate([z_layer_nodes, sigma_z])
+
+        node_z_lists.append(z_col)
+        node_offset[i + 1] = node_offset[i] + len(z_col)
+
+    # Build node coordinates
+    total_nodes = node_offset[-1]
+    node_coords = np.zeros((total_nodes, 3), dtype=np.float64)
+    codes = np.zeros(total_nodes, dtype=np.int32)
+
+    for i in range(n2d_nodes):
+        start = node_offset[i]
+        end = node_offset[i + 1]
+        node_coords[start:end, 0] = xy_2d[i, 0]
+        node_coords[start:end, 1] = xy_2d[i, 1]
+        node_coords[start:end, 2] = node_z_lists[i]
+        codes[start:end] = geometry2d.codes[i]
+
+    # --- Per-element: determine layers and build element table ---
+    elem_table: list[np.ndarray] = []
+
+    for j in range(n2d_elems):
+        nodes_2d = np.asarray(geometry2d.element_table[j], dtype=np.int32)
+
+        # Number of z-layers for this column = min active z-levels across nodes
+        min_active_z = min(int(np.sum(z_levels_arr > z_bot[ni])) for ni in nodes_2d)
+        n_z_col = min_active_z
+        n_layers_col = n_z_col + n_sigma
+
+        for k in range(n_layers_col):
+            bot_nodes = np.array(
+                [node_offset[ni] + k for ni in nodes_2d], dtype=np.int32
+            )
+            top_nodes = np.array(
+                [node_offset[ni] + k + 1 for ni in nodes_2d], dtype=np.int32
+            )
+            elem_table.append(np.concatenate([bot_nodes, top_nodes]))
+
+    return cls(
+        node_coordinates=node_coords,
+        element_table=elem_table,
+        codes=codes,
+        projection=geometry2d.projection_string,
+        dfsu_type=DfsuFileType.Dfsu3DSigmaZ,
+        n_layers=n_layers_max,
+        n_sigma=n_sigma,
+        validate=False,
+    )
