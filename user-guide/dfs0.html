@@ -82,9 +82,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <link href="../site_libs/quarto-html/quarto-syntax-highlighting-845c23b38eaddc0f92fda52bfe77a8c8.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
 <script src="../site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="../site_libs/bootstrap/bootstrap-83aa9051cd2cd525d47af6cd7dbbf2d2.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
-<link href="../site_libs/bootstrap/bootstrap-dark-83aa9051cd2cd525d47af6cd7dbbf2d2.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="light">
-<link href="../site_libs/bootstrap/bootstrap-83aa9051cd2cd525d47af6cd7dbbf2d2.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
+<link href="../site_libs/bootstrap/bootstrap-5f18961ebd509d8ea1641c91a138ddae.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="../site_libs/bootstrap/bootstrap-dark-5f18961ebd509d8ea1641c91a138ddae.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="light">
+<link href="../site_libs/bootstrap/bootstrap-5f18961ebd509d8ea1641c91a138ddae.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -300,6 +300,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <ul class="collapse">
   <li><a href="#specifying-eum-types-and-units" id="toc-specifying-eum-types-and-units" class="nav-link" data-scroll-target="#specifying-eum-types-and-units">Specifying EUM types and units</a></li>
   </ul></li>
+  <li><a href="#file-title" id="toc-file-title" class="nav-link" data-scroll-target="#file-title">File title</a></li>
   <li><a href="#accumulated-datavalue-type" id="toc-accumulated-datavalue-type" class="nav-link" data-scroll-target="#accumulated-datavalue-type">Accumulated datavalue type</a></li>
   <li><a href="#dfs0-example-notebooks" id="toc-dfs0-example-notebooks" class="nav-link" data-scroll-target="#dfs0-example-notebooks">Dfs0 example notebooks</a></li>
   </ul>
@@ -335,13 +336,14 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </ul>
 <section id="read-dfs0-to-dataset" class="level2">
 <h2 class="anchored" data-anchor-id="read-dfs0-to-dataset">Read Dfs0 to Dataset</h2>
-<div id="a5a843a2" class="cell" data-execution_count="1">
+<div id="eae3c079" class="cell" data-execution_count="1">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> mikeio</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>ds <span class="op">=</span> mikeio.read(<span class="st">"../data/da_diagnostic.dfs0"</span>)</span>
 <span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>ds</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-display" data-execution_count="1">
 <pre><code>&lt;mikeio.Dataset&gt;
+title: Diagnostic
 dims: (time:744)
 time: 2017-10-27 00:00:00 - 2017-10-29 18:00:00 (744 non-equidistant records)
 geometry: GeometryUndefined()
@@ -355,11 +357,12 @@ items:
 <section id="selecting-items" class="level3">
 <h3 class="anchored" data-anchor-id="selecting-items">Selecting items</h3>
 <p>Items can be selected by name, index, or wildcard:</p>
-<div id="b1308224" class="cell" data-execution_count="2">
+<div id="d86f7a2a" class="cell" data-execution_count="2">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>ds <span class="op">=</span> mikeio.read(<span class="st">"../data/da_diagnostic.dfs0"</span>, items<span class="op">=</span>[<span class="dv">0</span>, <span class="dv">2</span>])</span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>ds</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-display" data-execution_count="2">
 <pre><code>&lt;mikeio.Dataset&gt;
+title: Diagnostic
 dims: (time:744)
 time: 2017-10-27 00:00:00 - 2017-10-29 18:00:00 (744 non-equidistant records)
 geometry: GeometryUndefined()
@@ -368,11 +371,12 @@ items:
   1:  Mean StateSign. Wave Height &lt;Significant wave height&gt; (meter)</code></pre>
 </div>
 </div>
-<div id="8ada205f" class="cell" data-execution_count="3">
+<div id="1c77e4b9" class="cell" data-execution_count="3">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>ds <span class="op">=</span> mikeio.read(<span class="st">"../data/da_diagnostic.dfs0"</span>, items<span class="op">=</span><span class="st">"*State*"</span>)</span>
 <span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>ds</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-display" data-execution_count="3">
 <pre><code>&lt;mikeio.Dataset&gt;
+title: Diagnostic
 dims: (time:744)
 time: 2017-10-27 00:00:00 - 2017-10-29 18:00:00 (744 non-equidistant records)
 geometry: GeometryUndefined()
@@ -386,11 +390,12 @@ items:
 <section id="subsetting-in-time" class="level3">
 <h3 class="anchored" data-anchor-id="subsetting-in-time">Subsetting in time</h3>
 <p>Use <code>sel</code> for label-based or <code>isel</code> for positional indexing:</p>
-<div id="2c311f08" class="cell" data-execution_count="4">
+<div id="a3c69f2b" class="cell" data-execution_count="4">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>ds <span class="op">=</span> mikeio.read(<span class="st">"../data/da_diagnostic.dfs0"</span>)</span>
 <span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>ds.sel(time<span class="op">=</span><span class="bu">slice</span>(<span class="st">"2017-10-27 01:00"</span>, <span class="st">"2017-10-27 02:00"</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-display" data-execution_count="4">
 <pre><code>&lt;mikeio.Dataset&gt;
+title: Diagnostic
 dims: (time:7)
 time: 2017-10-27 01:00:00 - 2017-10-27 02:00:00 (7 records)
 geometry: GeometryUndefined()
@@ -401,10 +406,11 @@ items:
   3:  MeasurementSign. Wave Height &lt;Significant wave height&gt; (meter)</code></pre>
 </div>
 </div>
-<div id="d8982e90" class="cell" data-execution_count="5">
+<div id="d9f764e2" class="cell" data-execution_count="5">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>ds.isel(time<span class="op">=</span><span class="bu">slice</span>(<span class="dv">0</span>, <span class="dv">5</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-display" data-execution_count="5">
 <pre><code>&lt;mikeio.Dataset&gt;
+title: Diagnostic
 dims: (time:5)
 time: 2017-10-27 00:00:00 - 2017-10-27 00:40:00 (5 records)
 geometry: GeometryUndefined()
@@ -418,7 +424,7 @@ items:
 </section>
 <section id="plotting" class="level3">
 <h3 class="anchored" data-anchor-id="plotting">Plotting</h3>
-<div id="ba85ff5a" class="cell" data-execution_count="6">
+<div id="9fb7fd10" class="cell" data-execution_count="6">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>ds.plot()<span class="op">;</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-display">
 <div>
@@ -432,7 +438,7 @@ items:
 </section>
 <section id="from-dfs0-to-pandas-dataframe" class="level2">
 <h2 class="anchored" data-anchor-id="from-dfs0-to-pandas-dataframe">From Dfs0 to pandas DataFrame</h2>
-<div id="5cbbb558" class="cell" data-execution_count="7">
+<div id="06e0643b" class="cell" data-execution_count="7">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> ds.to_dataframe()</span>
 <span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>df.head()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-display" data-execution_count="7">
@@ -494,7 +500,7 @@ items:
 </section>
 <section id="from-pandas-dataframe-to-dfs0" class="level2">
 <h2 class="anchored" data-anchor-id="from-pandas-dataframe-to-dfs0">From pandas DataFrame to Dfs0</h2>
-<div id="5c424449" class="cell" data-execution_count="8">
+<div id="cb553189" class="cell" data-execution_count="8">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> pandas <span class="im">as</span> pd</span>
 <span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> pd.read_csv(</span>
@@ -506,7 +512,7 @@ items:
 <section id="specifying-eum-types-and-units" class="level3">
 <h3 class="anchored" data-anchor-id="specifying-eum-types-and-units">Specifying EUM types and units</h3>
 <p>By default, items created from a DataFrame have undefined EUM types. You can specify them explicitly:</p>
-<div id="e17f306d" class="cell" data-execution_count="9">
+<div id="c64da647" class="cell" data-execution_count="9">
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> mikeio <span class="im">import</span> ItemInfo, EUMType, EUMUnit</span>
 <span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>df_co2 <span class="op">=</span> df[[<span class="st">"Average"</span>]].dropna()</span>
@@ -526,39 +532,48 @@ items:
 </div>
 </section>
 </section>
+<section id="file-title" class="level2">
+<h2 class="anchored" data-anchor-id="file-title">File title</h2>
+<p>DFS files have a title field shown e.g.&nbsp;in MIKE Zero. The title is read from the file and preserved through processing. You can set it before writing:</p>
+<div id="9eb50725" class="cell" data-execution_count="10">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb16"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>ds <span class="op">=</span> mikeio.read(<span class="st">"mauna_loa_co2.dfs0"</span>)</span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>ds.title <span class="op">=</span> <span class="st">"Mauna Loa CO2"</span></span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>ds.to_dfs(<span class="st">"mauna_loa_co2.dfs0"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</section>
 <section id="accumulated-datavalue-type" class="level2">
 <h2 class="anchored" data-anchor-id="accumulated-datavalue-type">Accumulated datavalue type</h2>
 <p>Some dfs0 items use an accumulated data value type rather than the default instantaneous type. This is common for precipitation data and can be specified using the <code>data_value_type</code> argument of <a href="../api/ItemInfo.html#mikeio.ItemInfo"><code>mikeio.ItemInfo</code></a>. Refer to the <a href="https://doc.mikepoweredbydhi.help/webhelp/2026/timeserieseditor/TSEdit/TSEdit/TS_Types_graphical_representation.htm">MIKE documentation</a> for guidance on which type to use for your setup.</p>
 <p>Rainfall amounts (e.g.&nbsp;mm) are often configured as <code>StepAccumulated</code>:</p>
-<div id="71e7df09" class="cell" data-execution_count="10">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb16"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> mikeio <span class="im">import</span> ItemInfo, EUMType</span>
-<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>item <span class="op">=</span> ItemInfo(</span>
-<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Rainfall"</span>,</span>
-<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a>    EUMType.Rainfall,</span>
-<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a>    data_value_type<span class="op">=</span><span class="st">"StepAccumulated"</span>,</span>
-<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb16-8"><a href="#cb16-8" aria-hidden="true" tabindex="-1"></a>item</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output cell-output-display" data-execution_count="10">
+<div id="6ed48c8b" class="cell" data-execution_count="11">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> mikeio <span class="im">import</span> ItemInfo, EUMType</span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>item <span class="op">=</span> ItemInfo(</span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Rainfall"</span>,</span>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a>    EUMType.Rainfall,</span>
+<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a>    data_value_type<span class="op">=</span><span class="st">"StepAccumulated"</span>,</span>
+<span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb17-8"><a href="#cb17-8" aria-hidden="true" tabindex="-1"></a>item</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display" data-execution_count="11">
 <pre><code>Rainfall &lt;Rainfall&gt; (millimeter) - StepAccumulated</code></pre>
 </div>
 </div>
 <p>Precipitation rates (e.g.&nbsp;mm/hour) are often configured as <code>MeanStepBackward</code>:</p>
-<div id="deb22bf3" class="cell" data-execution_count="11">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb18"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>item <span class="op">=</span> ItemInfo(</span>
-<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Precipitation"</span>,</span>
-<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>    EUMType.Precipitation_Rate,</span>
-<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a>    data_value_type<span class="op">=</span><span class="st">"MeanStepBackward"</span>,</span>
-<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb18-6"><a href="#cb18-6" aria-hidden="true" tabindex="-1"></a>item</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<div class="cell-output cell-output-display" data-execution_count="11">
+<div id="0934adfb" class="cell" data-execution_count="12">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb19"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>item <span class="op">=</span> ItemInfo(</span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>    <span class="st">"Precipitation"</span>,</span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>    EUMType.Precipitation_Rate,</span>
+<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a>    data_value_type<span class="op">=</span><span class="st">"MeanStepBackward"</span>,</span>
+<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb19-6"><a href="#cb19-6" aria-hidden="true" tabindex="-1"></a>item</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-display" data-execution_count="12">
 <pre><code>Precipitation &lt;Precipitation Rate&gt; (mm per day) - MeanStepBackward</code></pre>
 </div>
 </div>
 <p>Cleanup:</p>
-<div id="10aabebf" class="cell" data-execution_count="12">
-<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb20"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> os</span>
-<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>os.remove(<span class="st">"mauna_loa_co2.dfs0"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div id="39711594" class="cell" data-execution_count="13">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb21"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> os</span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>os.remove(<span class="st">"mauna_loa_co2.dfs0"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </section>
 <section id="dfs0-example-notebooks" class="level2">
