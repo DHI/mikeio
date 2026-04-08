@@ -35,7 +35,7 @@ Define a transect as evenly-spaced points between two endpoints, using the nativ
 ```{python}
 lon_start, lat_start = 23.6, 59.3
 lon_end, lat_end = 23.6, 59.6
-n_points = 20
+n_points = 20  # tip: infer from grid resolution, e.g. int(transect_length / grid_res) + 1
 
 transect_lon = np.linspace(lon_start, lon_end, n_points)
 transect_lat = np.linspace(lat_start, lat_end, n_points)
@@ -152,6 +152,9 @@ zn = np.tile(node_coords[:, 2], (n_times, 1)).astype(np.float32)
 variables = {
     "thetao": mikeio.ItemInfo("Temperature", mikeio.EUMType.Temperature),
     "so": mikeio.ItemInfo("Salinity", mikeio.EUMType.Salinity),
+    # To include current velocity, add uo/vo from the CMEMS download:
+    # "uo": mikeio.ItemInfo("U velocity", mikeio.EUMType.u_velocity_component),
+    # "vo": mikeio.ItemInfo("V velocity", mikeio.EUMType.v_velocity_component),
 }
 
 ds_dfsu = mikeio.Dataset([
