@@ -30,7 +30,7 @@ ds_cmems
 
 ## Define a transect
 
-Define a transect as evenly-spaced points between two endpoints, using the native grid resolution.
+Define a transect as evenly-spaced points between two endpoints.
 
 ```{python}
 lon_start, lat_start = 23.6, 59.3
