@@ -1327,7 +1327,12 @@ class DataArray:
         return self.aggregate(axis=axis, func=np.min, **kwargs)
 
     def mean(self, axis: int | str | None = 0, **kwargs: Any) -> DataArray:
-        """Mean value along an axis.
+        """Unweighted mean value along an axis.
+
+        Note: on unstructured meshes with variable element sizes,
+        ``mean(axis="space")`` treats all elements equally regardless
+        of area. For an area-weighted spatial mean, use ``average()``
+        with ``weights=geometry.get_element_area()``.
 
         Parameters
         ----------
@@ -1344,6 +1349,7 @@ class DataArray:
         See Also
         --------
             nanmean : Mean values with NaN values removed
+            average : Weighted average along an axis
 
         """
         return self.aggregate(axis=axis, func=np.mean, **kwargs)
@@ -1475,7 +1481,12 @@ class DataArray:
         return self.aggregate(axis=axis, func=np.nanmin, **kwargs)
 
     def nanmean(self, axis: int | str | None = 0, **kwargs: Any) -> DataArray:
-        """Mean value along an axis (NaN removed).
+        """Unweighted mean value along an axis (NaN removed).
+
+        Note: on unstructured meshes with variable element sizes,
+        ``nanmean(axis="space")`` treats all elements equally regardless
+        of area. For an area-weighted spatial mean, use
+        ``average()`` with ``weights=geometry.get_element_area()``.
 
         Parameters
         ----------
@@ -1492,6 +1503,7 @@ class DataArray:
         See Also
         --------
             mean : Mean values
+            average : Weighted average along an axis
 
         """
         return self.aggregate(axis=axis, func=np.nanmean, **kwargs)
