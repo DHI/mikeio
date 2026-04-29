@@ -44,7 +44,7 @@ just check
 uv run ruff check .
 
 # Format code (required before committing)
-uv run ruff format mikeio/
+uv run ruff format .
 
 # Type checking
 uv run mypy .

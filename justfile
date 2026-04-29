@@ -11,7 +11,7 @@ lint:
 
 # Auto-fix formatting
 format:
-    uv run ruff format mikeio/
+    uv run ruff format .
 
 # Run tests
 test:
