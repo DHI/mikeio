@@ -16,7 +16,9 @@ jobs:
 
     steps:
     - uses: actions/checkout@v4
-    
+
+    - uses: extractions/setup-just@v3
+
     - name: Set up uv
       uses: astral-sh/setup-uv@v6
       with:
@@ -24,10 +26,9 @@ jobs:
 
     - name: Install dependencies
       run: uv sync --dev
-    
+
     - name: Build documentation
-      run: |
-        make docs
+      run: just docs
 
     - name: Publish to GitHub Pages
       if: github.event_name == 'push'
