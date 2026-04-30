@@ -7,10 +7,8 @@ import pytest
 from pytest import approx
 
 import mikeio
-from mikeio import DataArray, Dataset, Mesh
+from mikeio import DataArray, Dataset, Mesh, GeometryPoint2D, Grid2D, GeometryFM2D
 from mikeio.exceptions import OutsideModelDomainError
-from mikeio.spatial import GeometryPoint2D, Grid2D
-from mikeio.spatial._FM_geometry import GeometryFM2D
 
 
 def test_repr() -> None:
@@ -213,6 +211,7 @@ def test_read_area_polygon() -> None:
 
     ds = dfs.read(area=polygon)
 
+    assert isinstance(ds.geometry, GeometryFM2D)
     assert p1 not in ds.geometry
 
     assert ds.geometry.n_elements < dfs.geometry.n_elements
@@ -225,10 +224,12 @@ def test_read_area_polygon() -> None:
 
 def test_read_elements() -> None:
     ds = mikeio.read(filename="tests/testdata/wind_north_sea.dfsu", elements=[0, 10])
+    assert isinstance(ds.geometry, GeometryFM2D)
     assert ds.geometry.element_coordinates[0][0] == pytest.approx(1.4931853081272184)
     assert ds["Wind speed"].to_numpy()[0, 0] == pytest.approx(9.530759811401367)
 
     ds2 = mikeio.read(filename="tests/testdata/wind_north_sea.dfsu", elements=[10, 0])
+    assert isinstance(ds2.geometry, GeometryFM2D)
     assert ds2.geometry.element_coordinates[1][0] == pytest.approx(1.4931853081272184)
     assert ds2["Wind speed"].to_numpy()[0, 1] == pytest.approx(9.530759811401367)
 
@@ -846,6 +847,7 @@ def test_dataset_interp() -> None:
     assert isinstance(dai, DataArray)
     assert dai.shape == (ds.n_timesteps,)
     assert dai.name == da.name
+    assert isinstance(dai.geometry, GeometryPoint2D)
     assert dai.geometry.x == x
     assert dai.geometry.y == y
     assert dai.geometry.projection == ds.geometry.projection
@@ -873,6 +875,7 @@ def test_interp_like_grid() -> None:
     with pytest.raises(OutsideModelDomainError):
         assert ws.sel(x=6, y=51)
     assert ws.values.dtype == np.float32
+    assert isinstance(ds.geometry, GeometryFM2D)
     grid = ds.geometry.get_overset_grid(dx=0.1)
     ws_grid = ws.interp_like(grid, n_nearest=1)
     # outside the domain, but inside the grid
@@ -887,6 +890,7 @@ def test_interp_like_grid() -> None:
 def test_interp_like_grid_time_invariant() -> None:
     ds = mikeio.read("tests/testdata/wind_north_sea.dfsu", time=-1)
     assert "time" not in ds.dims
+    assert isinstance(ds.geometry, GeometryFM2D)
     grid = ds.geometry.get_overset_grid(dx=0.1)
     ds_grid = ds.interp_like(grid)
     assert ds_grid.n_timesteps == ds.n_timesteps
@@ -896,6 +900,7 @@ def test_interp_like_grid_time_invariant() -> None:
     ds = mikeio.read("tests/testdata/wind_north_sea.dfsu", time=-1)
     assert "time" not in ds.dims
     ws = ds[0]
+    assert isinstance(ds.geometry, GeometryFM2D)
     grid = ds.geometry.get_overset_grid(dx=0.1)
     ws_grid = ws.interp_like(grid)
     assert ws_grid.n_timesteps == ds.n_timesteps
@@ -1021,6 +1026,7 @@ def test_dfsu_to_xarray_has_element_coordinates() -> None:
     xr_da = da.to_xarray()
 
     # coordinate existence and dimension checks
+    assert isinstance(da.geometry, GeometryFM2D)
     for coord in ["x", "y", "z"]:
         assert coord in xr_da.coords
         assert xr_da.coords[coord].dims == ("element",)

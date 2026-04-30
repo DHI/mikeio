@@ -1,0 +1,72 @@
+---
+title: Type Checking
+---
+
+MIKE IO has type annotations throughout the codebase and passes mypy in strict mode. This page covers the two places where type narrowing helps: `mikeio.open()` and `.geometry`.
+
+
+## `mikeio.open()` returns a broad union
+
+`mikeio.open()` is a factory function that returns different classes depending on the file extension. Since the filename is a runtime value, the type checker sees the full union:
+
+```
+Dfs0 | Dfs1 | Dfs2 | Dfs3 | Dfsu2DH | Dfsu2DV | Dfsu3D | DfsuSpectral | Mesh
+```
+
+If you know the file type, skip `open()` and construct the class directly:
+
+```python
+from mikeio import Dfs2
+
+dfs = Dfs2("tide.dfs2")
+# type checker sees: Dfs2 — full autocompletion
+```
+
+If you receive the object from other code, narrow with `isinstance`:
+
+```python
+import mikeio
+from mikeio import Dfs2
+
+dfs = mikeio.open("tide.dfs2")
+assert isinstance(dfs, Dfs2)
+```
+
+
+## Narrowing geometry
+
+`DataArray.geometry` and `Dataset.geometry` are typed as `GeometryType` — a union of all geometry classes. The type checker will catch typos like `.nxx`, but to get full autocompletion and precise error messages, narrow to the specific geometry:
+
+```python
+from mikeio import Dfs2, Grid2D
+
+dfs = Dfs2("tide.dfs2")
+ds = dfs.read()
+assert isinstance(ds.geometry, Grid2D)
+ds.geometry.nx  # autocompletion works, mypy suggests "nx" if you typo "nxx"
+```
+
+
+## File type → class → geometry mapping
+
+| File extension | Dfs class | Geometry class |
+|---|---|---|
+| `.dfs0` | `Dfs0` | `Geometry0D` |
+| `.dfs1` | `Dfs1` | `Grid1D` |
+| `.dfs2` | `Dfs2` | `Grid2D` |
+| `.dfs3` | `Dfs3` | `Grid3D` |
+| `.dfsu` (2D horizontal) | `Dfsu2DH` | `GeometryFM2D` |
+| `.dfsu` (3D) | `Dfsu3D` | `GeometryFM3D` |
+| `.dfsu` (2D vertical) | `Dfsu2DV` | `GeometryFMVerticalProfile` |
+| `.dfsu` (spectral) | `DfsuSpectral` | `GeometryFMPointSpectrum` / `GeometryFMLineSpectrum` / `GeometryFMAreaSpectrum` |
+| `.mesh` | `Mesh` | `GeometryFM2D` |
+
+All classes above can be imported directly from `mikeio`:
+
+```python
+from mikeio import Dfs2, Dfsu2DH, Grid2D, GeometryFM2D, Geometry0D
+```
+
+::: {.callout-tip}
+If you use VS Code with the Pylance extension, `assert isinstance(...)` will immediately give you full autocompletion — no configuration needed.
+:::

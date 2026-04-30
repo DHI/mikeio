@@ -4,10 +4,8 @@ import matplotlib.pyplot as plt
 import mikeio
 from mikecore.DfsuFile import DfsuFileType
 
-from mikeio import DfsuSpectral
-from mikeio.spatial import GeometryFMPointSpectrum, GeometryFMAreaSpectrum
+from mikeio import DfsuSpectral, GeometryFMPointSpectrum, GeometryFMAreaSpectrum, GeometryFMLineSpectrum
 import mikeio._spectral as _spectral
-from mikeio.spatial._FM_geometry_spectral import GeometryFMLineSpectrum
 
 
 @pytest.fixture
@@ -204,12 +202,14 @@ def test_read_area_spectrum_elements(dfsu_area: DfsuSpectral) -> None:
     ds2 = dfs.read(elements=elems)
     assert ds2.shape[1] == len(elems)
     assert np.all(ds1[0].to_numpy()[:, elems, ...] == ds2[0].to_numpy())
+    assert isinstance(ds2.geometry, GeometryFMAreaSpectrum)
     assert ds2.geometry.element_coordinates[0, 0] == pytest.approx(2.651450863095597)
     assert ds2["Energy density"].isel(time=-1).isel(frequency=0).isel(
         direction=0
     ).to_numpy()[0] == pytest.approx(1.770e-12)
 
     ds3 = dfs.read(elements=[4, 3])
+    assert isinstance(ds3.geometry, GeometryFMAreaSpectrum)
     assert ds3.geometry.element_coordinates[1, 0] == pytest.approx(2.651450863095597)
     assert ds3["Energy density"].isel(time=-1).isel(frequency=0).isel(
         direction=0
@@ -231,6 +231,7 @@ def test_read_area_spectrum_xy(dfsu_area: DfsuSpectral) -> None:
 def test_read_area_spectrum_area(dfsu_area: DfsuSpectral) -> None:
     dfs = dfsu_area
     ds1 = dfs.read()
+    assert isinstance(ds1[0].geometry, GeometryFMAreaSpectrum)
     assert ds1[0].geometry.n_frequencies == 25
     assert ds1[0].geometry.n_directions == 16
 
@@ -238,7 +239,10 @@ def test_read_area_spectrum_area(dfsu_area: DfsuSpectral) -> None:
     ds2 = dfs.read(area=bbox)
     assert ds2.dims == ds1.dims
     assert ds2.shape == (3, 4, 16, 25)
+    assert isinstance(ds1.geometry, GeometryFMAreaSpectrum)
+    assert isinstance(ds2.geometry, GeometryFMAreaSpectrum)
     assert ds1.geometry._type == ds2.geometry._type
+    assert isinstance(ds2[0].geometry, GeometryFMAreaSpectrum)
     assert ds2[0].geometry.n_frequencies == 25
     assert ds2[0].geometry.n_directions == 16
 
@@ -325,17 +329,19 @@ def test_spectrum_area_sel_xy(dfsu_area: DfsuSpectral) -> None:
     ds1 = dfsu_area.read()
     assert ds1.dims == ("time", "element", "direction", "frequency")
 
+    assert isinstance(ds1.geometry, GeometryFMAreaSpectrum)
     element = 7
     xy = ds1.geometry.element_coordinates[element, :2]
     x, y = xy
 
     ds2 = dfsu_area.read(elements=element)  # reference
+    assert isinstance(ds2.geometry, GeometryFMPointSpectrum)
     assert ds2.geometry.x == x
     assert ds2.geometry.y == y
-    assert isinstance(ds2.geometry, GeometryFMPointSpectrum)
 
     ds3 = ds1.sel(x=x, y=y)
     assert ds3.shape == ds2.shape
+    assert isinstance(ds3.geometry, GeometryFMPointSpectrum)
     assert ds3.geometry.x == x
     assert ds3.geometry.y == y
     assert np.all(ds3.to_numpy().ravel() == ds2.to_numpy().ravel())
@@ -353,6 +359,7 @@ def test_spectrum_area_sel_area(dfsu_area: DfsuSpectral) -> None:
 
     ds3 = ds1.sel(area=bbox)
     assert ds3.shape == ds2.shape
+    assert isinstance(ds3.geometry, GeometryFMAreaSpectrum)
     assert ds3.geometry.n_elements == 6
     assert np.all(ds3.to_numpy().ravel() == ds2.to_numpy().ravel())
     assert isinstance(ds3.geometry, GeometryFMAreaSpectrum)
@@ -387,6 +394,7 @@ def test_calc_frequency_bin_sizes(dfsu_line: DfsuSpectral) -> None:
 
 def test_calc_Hm0_from_spectrum_line(dfsu_line: DfsuSpectral) -> None:
     dfs = dfsu_line
+    assert isinstance(dfs.geometry, GeometryFMLineSpectrum)
     assert dfs.geometry.n_elements == 9
     assert dfs.geometry.n_nodes == 10
     ds = dfs.read()
