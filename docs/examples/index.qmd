@@ -44,6 +44,7 @@ tests/testdata
 
 * [Bathymetry](dfs2/bathy.qmd)
 * [Meteo data](dfs2/gfs.qmd)
+* [Snow cover comparison](dfs2/snow.qmd)
 
 ## Dfsu
 
