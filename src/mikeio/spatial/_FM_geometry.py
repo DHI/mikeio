@@ -462,8 +462,9 @@ class GeometryFM2D(_GeometryFM):
                 yp - yn[j]
             ) > 0:
                 return False
-            if (yn[0] - yn[-1]) * (xp - xn[-1]) + (-xn[0] + xn[-1]) * (yp - yn[-1]) > 0:
-                return False
+        # Check closing edge (last vertex → first vertex)
+        if (yn[0] - yn[-1]) * (xp - xn[-1]) + (-xn[0] + xn[-1]) * (yp - yn[-1]) > 0:
+            return False
         return True
 
     @staticmethod
