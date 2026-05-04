@@ -38,13 +38,13 @@ uv run pytest tests/performance/ --durations=0
 ### Code Quality
 ```bash
 # Run all checks (lint, typecheck, test)
-make check
+just check
 
 # Lint code
 uv run ruff check .
 
 # Format code (required before committing)
-uv run ruff format mikeio/
+uv run ruff format .
 
 # Type checking
 uv run mypy .
@@ -53,13 +53,13 @@ uv run mypy .
 ### Building
 ```bash
 # Build package (includes typecheck and test)
-make build
+just build
 ```
 
 ### Documentation
 ```bash
 # Build and render documentation
-make docs
+just docs
 ```
 
 ## Code Architecture
@@ -135,7 +135,7 @@ The project uses **Quartodoc** and **Quarto** to build comprehensive documentati
 
 ```bash
 # Build and render documentation (from project root)
-make docs
+just docs
 
 # Manual build (from docs/ directory)
 cd docs
