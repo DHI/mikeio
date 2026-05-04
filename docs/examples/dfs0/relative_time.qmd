@@ -4,62 +4,36 @@ jupyter: python3
 ---
 
 
-MIKE IO uses a pandas DatetimeIndex to represent the time dimension in dfs files. If the dfs file has a relative time axis, it will be represented as a pandas TimedeltaIndex.
+A dfs0 file can have either:
+
+* **absolute time** (`pandas.DatetimeIndex`) - calendar timestamps
+* **relative time** (`pandas.TimedeltaIndex`) - elapsed time from the start of the series
 
 ```{python}
+import pandas as pd
 import mikeio
 ```
 
 ```{python}
-ds = mikeio.read("../../data/eq_relative.dfs0")
-ds
+ds_rel = mikeio.read("../../data/eq_relative.dfs0")
+type(ds_rel.time), ds_rel.time[:5]
 ```
 
 ```{python}
-ds.time[:5]
+ds_abs = mikeio.read("../../data/da_diagnostic.dfs0")
+type(ds_abs.time), ds_abs.time[:5]
 ```
+
+Converting a relative axis to absolute timestamps is explicit: choose a reference start time and add the timedeltas.
 
 ```{python}
-df = ds.to_dataframe()
-df.head()
+t0 = pd.Timestamp("2017-10-27 00:00:00")
+t0 + ds_rel.time[:5]
 ```
+
+The index type is preserved when converting to pandas:
 
 ```{python}
-df['Item 5'].plot();
+df_rel = ds_rel.to_dataframe()
+type(df_rel.index), df_rel.head()
 ```
-
-## mikecore
-
-An alternative is to use the underlying library [`mikecore`](https://github.com/DHI/mikecore-python) to read the file.
-
-```{python}
-from mikecore.DfsFileFactory import DfsFileFactory
-
-dfs = DfsFileFactory.DfsGenericOpen("../../data/eq_relative.dfs0")
-```
-
-Using the `ReadDfs0DataDouble` method you get the data as a numpy array, with the time axis or other type of as the first column,
-
-```{python}
-data = dfs.ReadDfs0DataDouble()
-
-type(data)
-```
-
-which can be converted to a pandas dataframe. First we extract the name of items (which in this example hapeens to be not very creative).
-
-```{python}
-index_name = "time"
-items = [i.Name for i in dfs.ItemInfo]
-items = [index_name] + items
-items
-```
-
-```{python}
-import pandas as df
-
-df = df.DataFrame(data, columns=items).set_index(index_name)
-df.head()
-```
-
-
