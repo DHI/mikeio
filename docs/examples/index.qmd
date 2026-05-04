@@ -38,7 +38,6 @@ tests/testdata
 ## Dfs0
 
 * [CMEMS *In-situ* data](dfs0/cmems_insitu.qmd)
-* [Relative time](dfs0/relative_time.qmd)
 
 ## Dfs2
 

@@ -49,6 +49,27 @@ ds.sel(time=slice("2017-10-27 01:00", "2017-10-27 02:00"))
 ds.isel(time=slice(0, 5))
 ```
 
+### Absolute vs relative time axis
+
+Absolute-time dfs0 files use calendar timestamps (`pandas.DatetimeIndex`), while relative-time dfs0 files use elapsed time (`pandas.TimedeltaIndex`).
+
+```{python}
+import pandas as pd
+
+ds_abs = mikeio.read("../data/da_diagnostic.dfs0")
+type(ds_abs.time), ds_abs.time[:3]
+
+ds_rel = mikeio.read("../data/eq_relative.dfs0")
+type(ds_rel.time), ds_rel.time[:3]
+```
+
+To convert relative times to calendar timestamps, choose a reference start time and add the timedeltas:
+
+```{python}
+t0 = pd.Timestamp("2017-10-27 00:00:00")
+t0 + ds_rel.time[:3]
+```
+
 ### Plotting
 
 ```{python}
@@ -138,9 +159,3 @@ Cleanup:
 import os
 os.remove("mauna_loa_co2.dfs0")
 ```
-
-
-## Dfs0 example notebooks
-
-* [Dfs0 | Relative time](../examples/dfs0/relative_time.qmd)
-
