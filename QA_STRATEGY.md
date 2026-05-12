@@ -1,11 +1,10 @@
 # MIKE IO QA Strategy
 
-**Audience:** MIKE IO developers and DHI Head of Product QA.
 **Scope:** Current practice. This document codifies what we do today, not what we aspire to do.
 
 ## Context
 
-MIKE IO began as a research project and has only been on stable funding for around two years (since 2024). The practices below reflect a deliberate maturation from research-grade towards production-grade, but the project is not yet uniformly Level 3 across the [Northstar Quality Maturity Framework](#) dimensions. We describe the current state honestly; gaps are named rather than hidden.
+MIKE IO began as a research project and has only been on stable funding for around two years (since 2024). The practices below reflect a deliberate maturation from research-grade towards production-grade. We describe the current state honestly; gaps are named rather than hidden.
 
 ## What MIKE IO is, for QA purposes
 
