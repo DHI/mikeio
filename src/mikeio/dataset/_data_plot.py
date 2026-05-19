@@ -635,7 +635,7 @@ class DataArrayPlotterFMVerticalColumn(DataArrayPlotter):
             show_legend = len(self.da.time) < 10
 
         values = self.da.to_numpy()
-        zn = self.da._zn
+        zn = self.da.z.nodes
         if extrapolate:
             ze = self.da.geometry._calc_zee(zn)
             values = self.da.geometry._interp_values(zn, values, ze)
@@ -711,13 +711,12 @@ class DataArrayPlotterFMVerticalProfile(DataArrayPlotter):
         if "title" not in kwargs:
             kwargs["title"] = self.da.time[0]
         da = self.da.isel(time=0) if "time" in self.da.dims else self.da
-        assert da._zn is not None
         g = da.geometry
         return _plot_vertical_profile(
             node_coordinates=g.node_coordinates,
             element_table=g.element_table,
             values=da.values,
-            zn=da._zn,
+            zn=da.z.nodes,
             is_geo=g.is_geo,
             **kwargs,
         )

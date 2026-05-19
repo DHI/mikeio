@@ -56,6 +56,7 @@ from ..spatial import (
 # We need this type to know if we should keep zn
 from ..spatial._FM_geometry_layered import _GeometryFMLayered
 
+from ._z_accessor import NullZAccessor, ZAccessor
 from ._data_plot import (
     DataArrayPlotter,
     DataArrayPlotterFM,
@@ -169,6 +170,7 @@ class DataArray:
         self.item = self._parse_item(item=item, name=name, type=type, unit=unit)
         self._zn = self._parse_zn(zn, self.geometry, self.n_timesteps)
         self.plot = self._get_plotter_by_geometry()
+        self.z: ZAccessor | NullZAccessor = self._get_z_accessor_by_geometry()
 
     @staticmethod
     def _parse_data(data: ArrayLike) -> Any:  # np.ndarray | float:
@@ -277,6 +279,17 @@ class DataArray:
 
         plotter = PLOTTER_MAP.get(type(self.geometry), DataArrayPlotter)
         return plotter(self)
+
+    def _get_z_accessor_by_geometry(self) -> ZAccessor | NullZAccessor:
+        # Mirrors _get_plotter_by_geometry: dispatch on geometry type.
+        # _GeometryFMLayered is the common parent of GeometryFM3D,
+        # GeometryFMVerticalProfile, and GeometryFMVerticalColumn — the
+        # geometries where _zn is populated. The _zn check guards the rare
+        # path where a layered DataArray is constructed without zn (e.g. some
+        # isel paths) so .z.nodes raises a clean AttributeError, not assert.
+        if isinstance(self.geometry, _GeometryFMLayered) and self._zn is not None:
+            return ZAccessor(self)
+        return NullZAccessor(self)
 
     # ============= Basic properties/methods ===========
 

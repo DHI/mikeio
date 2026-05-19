@@ -592,8 +592,7 @@ class Dfsu3D(DfsuLayered):
         node_ids_surf, _ = self.geometry._get_nodes_and_table_for_elements(
             top_el, node_layers="top"
         )
-        assert isinstance(ds[0]._zn, np.ndarray)
-        zn_surf = ds[0]._zn[:, node_ids_surf]  # surface
+        zn_surf = ds[0].z.nodes[:, node_ids_surf]  # surface
         interpolant = Interpolant(node_ids, weights)
         surf2d = interpolant.interp2d(zn_surf)
         surf_da = DataArray(
