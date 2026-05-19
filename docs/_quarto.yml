@@ -53,7 +53,6 @@ website:
 
     - title: Examples
       contents:
-        - examples/index.qmd
         - examples/dfs0/index.qmd
         - examples/dfs2/index.qmd
         - examples/dfsu/index.qmd

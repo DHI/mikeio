@@ -47,9 +47,3 @@ MIKE IO is licensed under BSD-3-Clause license and available on [GitHub](https:/
 :::
 
 :::
-
-## Text Formats
-
-The docs are also available in `llms.txt` format:
-
-- [`llms.txt`](llms.txt): a sitemap listing all documentation pages

@@ -19,6 +19,9 @@ jobs:
 
     steps:
     - uses: actions/checkout@v4
+
+    - uses: extractions/setup-just@v3
+
     - name: Set up uv
       uses: astral-sh/setup-uv@v6
       with:
@@ -28,4 +31,4 @@ jobs:
       run: uv sync --group test --no-dev
 
     - name: Test
-      run: make test
+      run: just test

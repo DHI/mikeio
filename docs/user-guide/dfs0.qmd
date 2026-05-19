@@ -49,6 +49,27 @@ ds.sel(time=slice("2017-10-27 01:00", "2017-10-27 02:00"))
 ds.isel(time=slice(0, 5))
 ```
 
+### Absolute vs relative time axis
+
+Absolute-time dfs0 files use calendar timestamps (`pandas.DatetimeIndex`), while relative-time dfs0 files use elapsed time (`pandas.TimedeltaIndex`).
+
+```{python}
+import pandas as pd
+
+ds_abs = mikeio.read("../data/da_diagnostic.dfs0")
+type(ds_abs.time), ds_abs.time[:3]
+
+ds_rel = mikeio.read("../data/eq_relative.dfs0")
+type(ds_rel.time), ds_rel.time[:3]
+```
+
+To convert relative times to calendar timestamps, choose a reference start time and add the timedeltas:
+
+```{python}
+t0 = pd.Timestamp("2017-10-27 00:00:00")
+t0 + ds_rel.time[:3]
+```
+
 ### Plotting
 
 ```{python}
@@ -92,6 +113,17 @@ ds_typed
 ```
 
 
+## File title
+
+DFS files have a title field shown e.g. in MIKE Zero. The title is read from the file and preserved through processing. You can set it before writing:
+
+```{python}
+ds = mikeio.read("mauna_loa_co2.dfs0")
+ds.title = "Mauna Loa CO2"
+ds.to_dfs("mauna_loa_co2.dfs0")
+```
+
+
 ## Accumulated datavalue type
 
 Some dfs0 items use an accumulated data value type rather than the default instantaneous type. This is common for precipitation data and can be specified using the `data_value_type` argument of [](`mikeio.ItemInfo`). Refer to the [MIKE documentation](https://doc.mikepoweredbydhi.help/webhelp/2026/timeserieseditor/TSEdit/TSEdit/TS_Types_graphical_representation.htm) for guidance on which type to use for your setup.
@@ -127,9 +159,3 @@ Cleanup:
 import os
 os.remove("mauna_loa_co2.dfs0")
 ```
-
-
-## Dfs0 example notebooks
-
-* [Dfs0 | Relative time](../examples/dfs0/relative_time.qmd)
-

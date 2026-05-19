@@ -1018,6 +1018,22 @@ def test_concat_dataarray_keep_first() -> None:
     assert da3.to_numpy()[2] == 3.0
 
 
+def test_concat_duplicate_timestamps_raises() -> None:
+    # DA diagnostic output can have duplicate timestamps at correction times
+    time = pd.DatetimeIndex(["2000-01-01", "2000-01-01", "2000-01-02"])
+    ds1 = mikeio.Dataset.from_numpy(data=[np.zeros(3)], time=time)
+    ds2 = mikeio.Dataset.from_numpy(data=[np.ones(2)], time=pd.date_range("2000-01-03", periods=2))
+    with pytest.raises(ValueError, match="duplicate timestamps"):
+        mikeio.Dataset.concat([ds1, ds2])
+
+
+def test_concat_invalid_keep_raises() -> None:
+    ds1 = mikeio.read("tests/testdata/tide1.dfs1", time=[0, 1])
+    ds2 = mikeio.read("tests/testdata/tide1.dfs1", time=[2, 3])
+    with pytest.raises(ValueError, match="Invalid keep"):
+        mikeio.Dataset.concat([ds1, ds2], keep="lasst")  # type: ignore
+
+
 def test_concat_by_time() -> None:
     ds1 = mikeio.read("tests/testdata/tide1.dfs1")
     ds2 = mikeio.read("tests/testdata/tide2.dfs1") + 0.5  # add offset
@@ -1427,3 +1443,114 @@ def test_safe_name() -> None:
     bad_name = "MSLP., 1:st level\n 2nd chain"
     safe_name = "MSLP_1_st_level_2nd_chain"
     assert _to_safe_name(bad_name) == safe_name
+
+
+# === Title propagation tests ===
+
+
+@pytest.fixture
+def titled_ds() -> Dataset:
+    nt = 10
+    ne = 7
+    d1 = np.zeros([nt, ne]) + 0.1
+    d2 = np.zeros([nt, ne]) + 0.2
+    data = [d1, d2]
+    time = pd.date_range(start=datetime(2000, 1, 1), freq="s", periods=nt)
+    items = [ItemInfo("Foo"), ItemInfo("Bar")]
+    return Dataset.from_numpy(
+        data=data,
+        time=time,
+        items=items,
+        geometry=mikeio.Grid1D(nx=7, dx=1),
+        title="Test Title",
+    )
+
+
+def test_title_default_empty() -> None:
+    ds = Dataset.from_numpy(
+        data=[np.zeros(5)],
+        time=pd.date_range("2000", periods=5, freq="s"),
+        items=[ItemInfo("X")],
+    )
+    assert ds.title == ""
+
+
+def test_title_property(titled_ds: Dataset) -> None:
+    assert titled_ds.title == "Test Title"
+    titled_ds.title = "New Title"
+    assert titled_ds.title == "New Title"
+
+
+def test_title_preserved_isel(titled_ds: Dataset) -> None:
+    assert titled_ds.isel(time=0).title == "Test Title"
+    assert titled_ds.isel(time=slice(0, 3)).title == "Test Title"
+    assert titled_ds.isel(x=0).title == "Test Title"
+
+
+def test_title_preserved_sel(titled_ds: Dataset) -> None:
+    assert titled_ds.sel(time=titled_ds.time[0]).title == "Test Title"
+
+
+def test_title_preserved_squeeze(titled_ds: Dataset) -> None:
+    ds = titled_ds.isel(x=0)
+    assert ds.squeeze().title == "Test Title"
+
+
+def test_title_preserved_fillna(titled_ds: Dataset) -> None:
+    assert titled_ds.fillna(0.0).title == "Test Title"
+
+
+def test_title_preserved_dropna(titled_ds: Dataset) -> None:
+    assert titled_ds.dropna().title == "Test Title"
+
+
+def test_title_preserved_interp_time(titled_ds: Dataset) -> None:
+    assert titled_ds.interp_time(dt=2).title == "Test Title"
+
+
+def test_title_preserved_aggregate(titled_ds: Dataset) -> None:
+    assert titled_ds.aggregate(axis="time").title == "Test Title"
+    assert titled_ds.aggregate(axis="items").title == "Test Title"
+
+
+def test_title_preserved_concat(titled_ds: Dataset) -> None:
+    ds2 = titled_ds.copy()
+    ds2.time = pd.date_range(start=datetime(2000, 1, 2), freq="s", periods=10)
+    result = Dataset.concat([titled_ds, ds2])
+    assert result.title == "Test Title"
+
+
+def test_title_preserved_merge(titled_ds: Dataset) -> None:
+    ds_a = titled_ds[["Foo"]]
+    ds_b = titled_ds[["Bar"]]
+    result = Dataset.merge([ds_a, ds_b])
+    assert result.title == "Test Title"
+
+
+def test_title_preserved_arithmetic(titled_ds: Dataset) -> None:
+    assert (titled_ds + 1).title == "Test Title"
+    assert (titled_ds * 2).title == "Test Title"
+    assert (titled_ds - titled_ds).title == "Test Title"
+
+
+def test_title_preserved_getitem(titled_ds: Dataset) -> None:
+    assert titled_ds[["Foo"]].title == "Test Title"
+    assert titled_ds[["Foo", "Bar"]].title == "Test Title"
+
+
+def test_title_preserved_copy(titled_ds: Dataset) -> None:
+    assert titled_ds.copy().title == "Test Title"
+
+
+def test_title_in_repr(titled_ds: Dataset) -> None:
+    r = repr(titled_ds)
+    assert "title: Test Title" in r
+
+
+def test_title_not_in_repr_when_empty() -> None:
+    ds = Dataset.from_numpy(
+        data=[np.zeros(5)],
+        time=pd.date_range("2000", periods=5, freq="s"),
+        items=[ItemInfo("X")],
+    )
+    assert "title:" not in repr(ds)

@@ -21,6 +21,8 @@ jobs:
           version: 0.6.2
           src: src
 
+      - uses: extractions/setup-just@v3
+
       - name: Set up uv
         uses: astral-sh/setup-uv@v6
         with:
@@ -31,7 +33,7 @@ jobs:
         run: uv sync --group test --no-dev
 
       - name: Type check
-        run: make typecheck
+        run: just typecheck
 
       - name: Test
-        run: make test
+        run: just test

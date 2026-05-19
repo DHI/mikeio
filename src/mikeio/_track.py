@@ -101,7 +101,10 @@ def _extract_track(
     step = time_steps[dfsu_step]
     for i, item in enumerate(item_numbers):
         d, t2 = data_read_func(item, step)
-        t2 = t2 - 1e-10  # TODO what is this operation doing?
+        # Nudge t2 slightly back so that a track point at exactly
+        # this timestep triggers reading the next step.  The resulting
+        # interpolation weight ≈ 1.0 still gives the correct value.
+        t2 = t2 - 1e-10
         d[d == deletevalue] = np.nan
         d2[i, :] = d
 
