@@ -432,10 +432,8 @@ class GeometryFM2D(_GeometryFM):
     ----------
     node_coordinates : np.ndarray
         N-by-3 array of node (x, y, z) coordinates.
-    element_table : np.ndarray
-        For each element, the 0-based indices of its nodes (counter-clockwise).
-        Length of the inner array determines the element type
-        (3=triangle, 4=quadrilateral).
+    element_table
+        For each element, the 0-based indices of its nodes.
     projection_string : str
         Projection string (e.g. "LONG/LAT" or a WKT/UTM string).
     plot : GeometryFMPlotter
