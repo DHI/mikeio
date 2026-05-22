@@ -70,6 +70,12 @@ class Dataset:
     validate:
         Optional validation of consistency of data arrays.
 
+    Attributes
+    ----------
+    plot : DatasetPlotter
+        Plotting accessor (e.g. ds.plot.scatter for dfs0, ds.plot() for timeseries).
+    title : str
+        Title of the dataset (empty string by default).
 
     Notes
     ---------------
@@ -1164,7 +1170,9 @@ class Dataset:
                     newdata[j][idx2] = other[j].to_numpy()
                     newdata[j][idx1] = ds[j].to_numpy()
                 case _:
-                    raise ValueError(f"Invalid keep value: {keep!r}, expected 'first' or 'last'")
+                    raise ValueError(
+                        f"Invalid keep value: {keep!r}, expected 'first' or 'last'"
+                    )
 
         zn = None
         if self._zn is not None and other._zn is not None:

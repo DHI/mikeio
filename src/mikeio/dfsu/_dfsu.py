@@ -242,6 +242,7 @@ class Dfsu2DH:
     # TODO change to GeometryFM2D
     @property
     def geometry(self) -> Any:
+        """Flexible Mesh Geometry of the file (e.g. [](`mikeio.spatial.GeometryFM2D`))."""
         return self._geometry
 
     @property
@@ -286,6 +287,7 @@ class Dfsu2DH:
 
     @property
     def time(self) -> pd.DatetimeIndex:
+        """File time axis (only available for equidistant files; otherwise read the data)."""
         if self._equidistant:
             return pd.date_range(
                 start=self.start_time,

@@ -343,6 +343,7 @@ class _GeometryFM(_Geometry):
 
     @property
     def dims(self) -> tuple[str, ...]:
+        """Named array dimensions of data on this geometry."""
         return ("element",)
 
     @property
@@ -356,6 +357,7 @@ class _GeometryFM(_Geometry):
 
     @property
     def node_ids(self) -> np.ndarray:
+        """Node ids (0-based)."""
         return self._node_ids
 
     @property
@@ -365,6 +367,7 @@ class _GeometryFM(_Geometry):
 
     @property
     def element_ids(self) -> np.ndarray:
+        """Element ids (0-based)."""
         return self._element_ids
 
     @cached_property
@@ -423,7 +426,22 @@ class _GeometryFM(_Geometry):
 
 
 class GeometryFM2D(_GeometryFM):
-    """Flexible 2d mesh geometry."""
+    """Flexible 2d mesh geometry.
+
+    Attributes
+    ----------
+    node_coordinates : np.ndarray
+        N-by-3 array of node (x, y, z) coordinates.
+    element_table : np.ndarray
+        For each element, the 0-based indices of its nodes (counter-clockwise).
+        Length of the inner array determines the element type
+        (3=triangle, 4=quadrilateral).
+    projection_string : str
+        Projection string (e.g. "LONG/LAT" or a WKT/UTM string).
+    plot : GeometryFMPlotter
+        Plotting accessor for the geometry (bathymetry, mesh, outline, ...).
+
+    """
 
     def __init__(
         self,
@@ -477,6 +495,7 @@ class GeometryFM2D(_GeometryFM):
 
     @property
     def geometry2d(self) -> GeometryFM2D:
+        """The 2d horizontal geometry (returns self for 2d geometries)."""
         return self
 
     @property

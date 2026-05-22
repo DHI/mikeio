@@ -139,6 +139,7 @@ class Grid1D(_Geometry):
 
     @property
     def dims(self) -> tuple[str, ...]:
+        """Named array dimensions of data on this grid."""
         return ("x",)
 
     def __repr__(self) -> str:
@@ -204,10 +205,12 @@ class Grid1D(_Geometry):
 
     @property
     def origin(self) -> tuple[float, float]:
+        """Coordinates of grid origo (in projection)."""
         return self._origin
 
     @property
     def orientation(self) -> float:
+        """Grid orientation (in degrees)."""
         return self._orientation
 
     def isel(
@@ -497,6 +500,7 @@ class Grid2D(_Geometry):
 
     @property
     def dims(self) -> tuple[str, ...]:
+        """Named array dimensions of data on this grid."""
         return ("y", "x")
 
     @property
@@ -1174,6 +1178,7 @@ class Grid3D(_Geometry):
 
     @property
     def dims(self) -> tuple[str, ...]:
+        """Named array dimensions of data on this grid."""
         return ("z", "y", "x")
 
     @property

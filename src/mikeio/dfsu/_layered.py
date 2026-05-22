@@ -128,6 +128,7 @@ class DfsuLayered:
 
     @property
     def time(self) -> pd.DatetimeIndex:
+        """File time axis (only available for equidistant files; otherwise read the data)."""
         if self._equidistant:
             return pd.date_range(
                 start=self.start_time,
@@ -146,6 +147,7 @@ class DfsuLayered:
 
     @property
     def geometry(self) -> GeometryFM3D | GeometryFMVerticalProfile:
+        """Flexible Mesh Geometry of the file (3d or vertical profile)."""
         return self._geometry
 
     @staticmethod
@@ -502,6 +504,7 @@ class Dfsu2DV(DfsuLayered):
 
     @property
     def geometry(self) -> GeometryFMVerticalProfile:
+        """Flexible Mesh Geometry of the 2d vertical profile."""
         assert isinstance(self._geometry, GeometryFMVerticalProfile)
         return self._geometry
 

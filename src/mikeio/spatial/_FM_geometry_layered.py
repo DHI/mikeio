@@ -271,6 +271,7 @@ class _GeometryFMLayered(_GeometryFM):
 
     @property
     def is_layered(self) -> bool:
+        """Type is layered dfsu (3d, vertical profile or vertical column)."""
         return True
 
     @cached_property
