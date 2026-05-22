@@ -267,6 +267,7 @@ class Dfs0:
 
     @cached_property
     def end_time(self) -> datetime | None:
+        """File end time."""
         if self.start_time is None:
             return None
         if self._dfs.FileInfo.TimeAxis.IsEquidistant():
