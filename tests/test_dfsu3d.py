@@ -5,13 +5,7 @@ import pandas as pd
 import pytest
 
 import mikeio
-from mikeio import Mesh
-from mikeio.spatial import (
-    GeometryFM2D,
-    GeometryFM3D,
-    GeometryFMVerticalColumn,
-    GeometryPoint3D,
-)
+from mikeio import Mesh, GeometryFM2D, GeometryFM3D, GeometryFMVerticalColumn, GeometryPoint3D
 
 
 def test_repr() -> None:
@@ -71,12 +65,13 @@ def test_read_top_layer() -> None:
 
     ds = dfs.read()  # all data in file
     dstop1 = ds.sel(layers="top")
+    assert isinstance(dstop1.geometry, GeometryFM2D)
     assert dstop1.geometry.max_nodes_per_element <= 4
 
     dstop2 = dfs.read(layers="top")
+    assert isinstance(dstop2.geometry, GeometryFM2D)
     assert dstop1.shape == dstop2.shape
     assert dstop1.dims == dstop2.dims
-    assert isinstance(dstop1.geometry, GeometryFM2D)
     assert dstop1.geometry._type == dstop2.geometry._type
     assert np.all(dstop1.to_numpy() == dstop2.to_numpy())
 
@@ -89,6 +84,7 @@ def test_read_bottom_layer() -> None:
     dsbot1 = ds.sel(layers="bottom")
 
     dsbot2 = dfs.read(layers="bottom")
+    assert isinstance(dsbot2.geometry, GeometryFM2D)
     assert dsbot1.shape == dsbot2.shape
     assert dsbot1.dims == dsbot2.dims
     assert isinstance(dsbot1.geometry, GeometryFM2D)
@@ -113,6 +109,7 @@ def test_read_multiple_layers() -> None:
     dstop1 = ds.sel(layers=[-3, -2, -1])
 
     dstop2 = dfs.read(layers=[-3, -2, -1])
+    assert isinstance(dstop2.geometry, GeometryFM3D)
     assert dstop1.shape == dstop2.shape
     assert dstop1.dims == dstop2.dims
     assert isinstance(dstop1.geometry, GeometryFM3D)
@@ -128,13 +125,16 @@ def test_read_dfsu3d_area() -> None:
     bbox = (350000, 6192000, 380000, 6198000)
 
     ds = dfs.read()  # all data in file
+    assert isinstance(ds.geometry, GeometryFM3D)
     assert ds.geometry.contains((350000, 6192000))
 
     dsa1 = ds.sel(area=bbox)
+    assert isinstance(dsa1.geometry, GeometryFM3D)
     assert not dsa1.geometry.contains((350000, 6192000))
     assert dsa1.geometry.n_layers > 1
 
     dsa2 = dfs.read(area=bbox)
+    assert isinstance(dsa2.geometry, GeometryFM3D)
     assert dsa1.shape == dsa2.shape
     assert dsa1.dims == dsa2.dims
     assert dsa1.geometry._type == dsa2.geometry._type
@@ -147,6 +147,7 @@ def test_read_dfsu3d_area_single_element() -> None:
 
     bbox = (356000, 6144000, 357000, 6144500)
     ds = dfs.read(area=bbox)
+    assert isinstance(ds.geometry, GeometryFM3D)
     assert ds.geometry.geometry2d.n_elements == 1
     assert ds.geometry.n_elements == 4
 
@@ -202,13 +203,14 @@ def test_flip_column_upside_down() -> None:
 
     ds = dfs.read()  # all data in file
     dscol = ds.sel(x=x, y=y)
+    assert isinstance(dscol.geometry, GeometryFMVerticalColumn)
     assert dscol.geometry.element_coordinates[0, 2] == pytest.approx(-7.0)
     assert dscol.isel(time=-1)["Temperature"].values[0] == pytest.approx(17.460058)
 
     idx = list(reversed(range(dscol.geometry.n_elements)))
 
     dscol_ud = dscol.isel(element=idx)
-
+    assert isinstance(dscol_ud.geometry, GeometryFMVerticalColumn)
     assert dscol_ud.geometry.element_coordinates[-1, 2] == pytest.approx(-7.0)
     assert dscol_ud.isel(time=-1)["Temperature"].values[-1] == pytest.approx(17.460058)
 
@@ -256,6 +258,7 @@ def test_read_dfsu3d_columns_sigma_only_save(tmp_path: Path) -> None:
     assert dfs.geometry.n_sigma_layers == 10
     assert dfs.geometry.n_z_layers == 0
     dscol = dfs.read(x=500, y=50)
+    assert isinstance(dscol.geometry, GeometryFMVerticalColumn)
     assert dscol.geometry.n_sigma_layers == 10
     assert dscol.geometry.n_z_layers == 0
     fp = tmp_path / "new_column.dfsu"
@@ -551,6 +554,7 @@ def test_extract_top_layer_to_2d(tmp_path: Path) -> None:
 
 def test_modify_values_in_layer(tmp_path: Path) -> None:
     ds = mikeio.read("tests/testdata/oresund_sigma_z.dfsu")
+    assert isinstance(ds.geometry, GeometryFM3D)
     selected_layer = 6  # Zero-based indexing!
     layer_elem_ids = ds.geometry.get_layer_elements(selected_layer)
 
@@ -586,7 +590,7 @@ def test_extract_surface_elevation_from_3d() -> None:
     n_top1 = len(dfs.geometry.top_elements)
 
     da = dfs.extract_surface_elevation_from_3d()
-
+    assert isinstance(da.geometry, GeometryFM2D)
     assert da.geometry.n_elements == n_top1
 
 
@@ -609,6 +613,7 @@ def test_dataset_write_dfsu3d_max(tmp_path: Path) -> None:
 
     ds2 = mikeio.read(fp)
     assert ds2.n_timesteps == 1
+    assert isinstance(ds2.geometry, GeometryFM3D)
     assert ds2.geometry.is_layered
 
 
@@ -642,10 +647,12 @@ def test_append_dfsu_3d(tmp_path: Path) -> None:
 
 def test_read_elements_3d() -> None:
     ds = mikeio.read("tests/testdata/oresund_sigma_z.dfsu", elements=[0, 10])
+    assert isinstance(ds.geometry, GeometryFM3D)
     assert ds.geometry.element_coordinates[0][0] == pytest.approx(354020.46382194717)
     assert ds["Salinity"].to_numpy()[0, 0] == pytest.approx(23.18906021118164)
 
     ds2 = mikeio.read("tests/testdata/oresund_sigma_z.dfsu", elements=[10, 0])
+    assert isinstance(ds2.geometry, GeometryFM3D)
     assert ds2.geometry.element_coordinates[1][0] == pytest.approx(354020.46382194717)
     assert ds2["Salinity"].to_numpy()[0, 1] == pytest.approx(23.18906021118164)
 
@@ -680,9 +687,11 @@ def test_write_3d_non_equidistant(tmp_path: Path) -> None:
 def test_isel_3d_single_time() -> None:
     ds = mikeio.Dfsu3D("tests/testdata/basin_3d.dfsu").read()
     ds1 = ds.isel(element=[0, 1])
+    assert isinstance(ds1.geometry, GeometryFM3D)
     assert ds1.geometry.n_elements == 2
 
     ds2 = ds.isel(time=-1)
     assert "time" not in ds2.dims
     ds3 = ds2.isel(element=[0, 1])
+    assert isinstance(ds3.geometry, GeometryFM3D)
     assert ds3.geometry.n_elements == 2

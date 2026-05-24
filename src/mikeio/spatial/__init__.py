@@ -17,6 +17,25 @@ from ._FM_geometry_layered import (
 
 from ._grid_geometry import Grid1D, Grid2D, Grid3D
 
+from typing import Union
+
+GeometryType = Union[
+    Geometry0D,
+    GeometryUndefined,
+    GeometryPoint2D,
+    GeometryPoint3D,
+    GeometryFM2D,
+    GeometryFM3D,
+    GeometryFMAreaSpectrum,
+    GeometryFMLineSpectrum,
+    GeometryFMPointSpectrum,
+    GeometryFMVerticalColumn,
+    GeometryFMVerticalProfile,
+    Grid1D,
+    Grid2D,
+    Grid3D,
+]
+
 
 __all__ = [
     "Geometry0D",
@@ -33,4 +52,5 @@ __all__ = [
     "Grid1D",
     "Grid2D",
     "Grid3D",
+    "GeometryType",
 ]

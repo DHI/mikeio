@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 import pytest
 
 import mikeio
-from mikeio import EUMType, EUMUnit, ItemInfo, Mesh, DataArray
+from mikeio import EUMType, EUMUnit, ItemInfo, Mesh, DataArray, Grid1D, Grid2D, GeometryFM2D, GeometryFM3D, GeometryFMVerticalProfile
 from mikeio.dfsu import DfsuSpectral
 from mikeio.exceptions import OutsideModelDomainError
 
@@ -485,6 +485,7 @@ def test_dropna(da2: DataArray) -> None:
 
 
 def test_da_isel_space(da_grid2d: DataArray) -> None:
+    assert isinstance(da_grid2d.geometry, Grid2D)
     assert da_grid2d.geometry.nx == 7
     assert da_grid2d.geometry.ny == 14
     da_sel = da_grid2d.isel(y=0)
@@ -505,6 +506,7 @@ def test_da_isel_empty(da_grid2d: DataArray) -> None:
 
 
 def test_da_isel_space_multiple_elements(da_grid2d: DataArray) -> None:
+    assert isinstance(da_grid2d.geometry, Grid2D)
     assert da_grid2d.geometry.nx == 7
     assert da_grid2d.geometry.ny == 14
 
@@ -539,18 +541,22 @@ def test_da_isel_space_named_missing_axis(da_grid2d: mikeio.DataArray) -> None:
 def test_da_sel_layer() -> None:
     filename = "tests/testdata/oresund_sigma_z.dfsu"
     da = mikeio.read(filename, items=0)[0]
+    assert isinstance(da.geometry, GeometryFM3D)
     assert da.geometry.n_elements == 17118
     assert da.geometry.is_layered
 
     da1 = da.sel(layers=-1)
+    assert isinstance(da1.geometry, GeometryFM2D)
     assert da1.geometry.n_elements == 3700
     assert not da1.geometry.is_layered
 
     da2 = da.sel(layers="top")
+    assert isinstance(da2.geometry, GeometryFM2D)
     assert da2.geometry.n_elements == 3700
     # assert
 
     da3 = da.sel(layers="bottom")
+    assert isinstance(da3.geometry, GeometryFM2D)
     assert da3.geometry.n_elements == 3700
 
 
@@ -580,10 +586,12 @@ def test_da_sel_area_dfsu2d() -> None:
 
     area = (-0.1, 0.15, 0.0, 0.2)
     da1 = da.sel(area=area)
+    assert isinstance(da1.geometry, GeometryFM2D)
     assert da1.geometry.n_elements == 14
 
     area = (-0.1, 0.15, 0.0, 0.2)
     da1 = da.sel(area=area)
+    assert isinstance(da1.geometry, GeometryFM2D)
     assert da1.geometry.n_elements == 14
 
 
@@ -594,16 +602,19 @@ def test_da_isel_order_is_important_dfsu2d() -> None:
     # select elements sorted
     da1 = da.isel(element=[0, 1])
     assert da1.values[0] == pytest.approx(-3.2252840995788574)
+    assert isinstance(da1.geometry, GeometryFM2D)
     assert da1.geometry.element_coordinates[0, 0] == pytest.approx(-0.61049269425)
 
     # select elements in arbitrary order
     da2 = da.isel(element=[1, 0])
     assert da2.values[1] == pytest.approx(-3.2252840995788574)
+    assert isinstance(da2.geometry, GeometryFM2D)
     assert da2.geometry.element_coordinates[1, 0] == pytest.approx(-0.61049269425)
 
     # select same elements multiple times, not sure why, but consistent with NumPy, xarray
     da3 = da.isel(element=[1, 0, 1])
     assert da3.values[1] == pytest.approx(-3.2252840995788574)
+    assert isinstance(da3.geometry, GeometryFM2D)
     assert da3.geometry.element_coordinates[1, 0] == pytest.approx(-0.61049269425)
     assert len(da3.geometry.element_coordinates) == 3
 
@@ -616,6 +627,7 @@ def test_da_sel_area_grid2d() -> None:
     bbox = (12.4, 55.2, 22.0, 55.6)
 
     da1 = da.sel(area=bbox)
+    assert isinstance(da1.geometry, Grid2D)
     assert da1.geometry.nx == 168
     assert da1.geometry.ny == 96
 
@@ -633,11 +645,13 @@ def test_da_sel_area_and_xy_not_ok() -> None:
 def test_da_sel_area_3d() -> None:
     filename = "tests/testdata/oresund_sigma_z.dfsu"
     da = mikeio.read(filename, items=0)[0]
+    assert isinstance(da.geometry, GeometryFM3D)
     assert da.geometry.n_elements == 17118
     assert da.geometry.n_layers == 9
 
     area = (340000, 6140000, 360000, 6170000)
     da1 = da.sel(area=area)
+    assert isinstance(da1.geometry, GeometryFM3D)
     assert da1.geometry.n_elements == 4567
     assert da1.geometry.n_layers == 6
 
@@ -645,6 +659,7 @@ def test_da_sel_area_3d() -> None:
 def test_da_sel_area_2dv() -> None:
     filename = "tests/testdata/basin_2dv.dfsu"
     da = mikeio.read(filename, items=0)[0]
+    assert isinstance(da.geometry, GeometryFMVerticalProfile)
     assert da.geometry.is_layered
 
     # TODO
@@ -969,6 +984,7 @@ def test_dataarray_weigthed_average() -> None:
     ds = mikeio.read(filename, items=["Surface elevation"])
 
     da = ds["Surface elevation"]
+    assert isinstance(da.geometry, GeometryFM2D)
 
     area = da.geometry.get_element_area()
 
@@ -1074,9 +1090,11 @@ def test_daarray_aggregation_nan_versions() -> None:
 
 
 def test_da_quantile_axis0(da2: DataArray) -> None:
+    assert isinstance(da2.geometry, Grid1D)
     assert da2.geometry.nx == 7
     assert len(da2.time) == 10
     daq = da2.quantile(q=0.345, axis="time")
+    assert isinstance(daq.geometry, Grid1D)
     assert daq.geometry.nx == 7
     assert len(da2.time) == 10  # this should not change
     assert len(daq.time) == 1  # aggregated
@@ -1125,6 +1143,7 @@ def test_write_dfs2(tmp_path: Path) -> None:
 
     ds = mikeio.read(fn)
     g2 = ds.geometry
+    assert isinstance(g2, Grid2D)
     assert g != g2
     assert np.allclose(g.x, g2.x)
     assert np.allclose(g.y, g2.y)
@@ -1161,13 +1180,14 @@ def test_xzy_selection() -> None:
     assert das_xzy.values[0] == pytest.approx(17.381)
 
     # do the same but go one level deeper, but finding the index first
+    assert isinstance(ds.geometry, GeometryFM3D)
     idx = ds.geometry.find_index(x=348946, y=6173673, z=0)
     das_idx = ds.Temperature.isel(element=idx)  # type: ignore
     assert das_idx.values[0] == pytest.approx(17.381)
 
     # let's try find the same point multiple times
     das_idxs = ds.geometry.find_index(
-        x=[348946, 348946], y=[6173673, 6173673], z=[0, 0]
+        x=[348946, 348946], y=[6173673, 6173673], z=[0, 0]  # type: ignore[arg-type]
     )
     assert len(das_idxs) == 1  # only one point
 

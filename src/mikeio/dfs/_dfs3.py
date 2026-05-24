@@ -35,6 +35,7 @@ def _write_dfs3_header(filename: str | Path, ds: Dataset, title: str) -> DfsFile
     builder = DfsBuilder.Create(title, "mikeio", __dfs_version__)
     builder.SetDataType(0)
 
+    assert isinstance(ds.geometry, Grid3D)
     geometry: Grid3D = ds.geometry
 
     factory = DfsFactory()

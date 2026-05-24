@@ -36,6 +36,7 @@ def _write_dfs2_header(filename: str | Path, ds: Dataset, title: str = "") -> Df
     builder = DfsBuilder.Create(title, "mikeio", __dfs_version__)
     builder.SetDataType(0)
 
+    assert isinstance(ds.geometry, Grid2D)
     geometry: Grid2D = ds.geometry
 
     if (
@@ -43,7 +44,7 @@ def _write_dfs2_header(filename: str | Path, ds: Dataset, title: str = "") -> Df
         and not geometry._is_rotated
         and not geometry.is_spectral
     ):
-        geometry = deepcopy(ds.geometry)
+        geometry = deepcopy(geometry)
         geometry._shift_x0y0_to_origin()
 
     factory = DfsFactory()

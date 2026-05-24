@@ -83,6 +83,7 @@ def test_properties(ds1: Dataset) -> None:
 
     assert ds1.shape == (nt, ne)
     assert ds1.dims == ("time", "x")
+    assert isinstance(ds1.geometry, mikeio.Grid1D)
     assert ds1.geometry.nx == 7
     assert ds1._zn is None
 

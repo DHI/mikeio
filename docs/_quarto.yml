@@ -50,6 +50,7 @@ website:
         - user-guide/statistics.qmd
         - user-guide/generic.qmd
         - user-guide/pfs.qmd
+        - user-guide/typing.qmd
 
     - title: Examples
       contents:

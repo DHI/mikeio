@@ -32,14 +32,15 @@ def _write_dfs1_header(filename: str | Path, ds: Dataset, title: str) -> DfsFile
     builder = DfsBuilder.Create(title, "mikeio", __dfs_version__)
     builder.SetDataType(0)
 
+    assert isinstance(ds.geometry, Grid1D)
     geometry: Grid1D = ds.geometry
 
     factory = DfsFactory()
     proj = factory.CreateProjectionGeoOrigin(
-        ds.geometry.projection_string,
-        ds.geometry.origin[0],
-        ds.geometry.origin[1],
-        ds.geometry.orientation,
+        geometry.projection_string,
+        geometry.origin[0],
+        geometry.origin[1],
+        geometry.orientation,
     )
     builder.SetGeographicalProjection(proj)
     builder.SetSpatialAxis(
