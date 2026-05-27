@@ -84,7 +84,8 @@ def test_properties(ds1: Dataset) -> None:
     assert ds1.shape == (nt, ne)
     assert ds1.dims == ("time", "x")
     assert ds1.geometry.nx == 7
-    assert ds1._zn is None
+    with pytest.raises(AttributeError, match="has no z-coordinates"):
+        _ = ds1.z.nodes
 
     assert isinstance(ds1.items[0], ItemInfo)
 
@@ -1022,7 +1023,9 @@ def test_concat_duplicate_timestamps_raises() -> None:
     # DA diagnostic output can have duplicate timestamps at correction times
     time = pd.DatetimeIndex(["2000-01-01", "2000-01-01", "2000-01-02"])
     ds1 = mikeio.Dataset.from_numpy(data=[np.zeros(3)], time=time)
-    ds2 = mikeio.Dataset.from_numpy(data=[np.ones(2)], time=pd.date_range("2000-01-03", periods=2))
+    ds2 = mikeio.Dataset.from_numpy(
+        data=[np.ones(2)], time=pd.date_range("2000-01-03", periods=2)
+    )
     with pytest.raises(ValueError, match="duplicate timestamps"):
         mikeio.Dataset.concat([ds1, ds2])
 
@@ -1201,8 +1204,8 @@ def test_concat_dfsu3d() -> None:
     assert isinstance(ds1.geometry, mikeio.spatial.GeometryFM3D)
     assert isinstance(ds3.geometry, mikeio.spatial.GeometryFM3D)
     assert ds3.geometry.n_elements == ds1.geometry.n_elements
-    assert ds3._zn.shape == ds._zn.shape  # type: ignore
-    assert np.all(ds3._zn == ds._zn)
+    assert ds3.z.nodes.shape == ds.z.nodes.shape
+    assert np.all(ds3.z.nodes == ds.z.nodes)
 
 
 def test_concat_dfsu3d_single_timesteps() -> None:

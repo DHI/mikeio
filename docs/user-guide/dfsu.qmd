@@ -166,6 +166,57 @@ da_last[ze >= -20] = np.nan
 da_last.plot(show_mesh=True);
 ```
 
+## 3D layered files: z-coordinates
+
+Layered 3D dfsu files (and the vertical-profile / vertical-column slices derived
+from them) carry a time-varying vertical coordinate at every mesh node. MIKE IO
+exposes this through the `.z` accessor on a `DataArray` (or `Dataset`):
+
+```{python}
+ds3d = mikeio.read("../data/oresund_sigma_z.dfsu")
+da3d = ds3d["Temperature"]
+da3d.z.nodes.shape       # (n_time, n_nodes) — z at every mesh node, every timestep
+```
+
+```{python}
+da3d.z.elements.shape    # (n_time, n_elements) — mean of each element's node z's
+```
+
+`da.z.nodes` returns the raw node z-coordinates exactly as stored in the file;
+`da.z.elements` is derived as the per-element mean of the column-node z's and is
+cached on first access. The same accessor is available on Datasets
+(`ds.z.nodes`, `ds.z.elements`) and is delegated to the first item.
+
+### Worked example: dz-weighted column-mean
+
+Element-center z-coordinates are useful for vertical integration. The cell
+height `dz` between layer interfaces can be approximated from successive
+element-center z-values within a column; for a clean dz, take a vertical column
+slice first:
+
+```{python}
+column = ds3d.sel(x=333934.1, y=6158101.5)
+ze = column["Temperature"].z.elements   # (n_time, n_layers)
+dz = np.diff(ze, axis=-1)
+dz = np.concatenate([dz[:, :1], dz], axis=-1)   # pad to match n_layers
+
+T = column["Temperature"].to_numpy()
+T_mean = (T * dz).sum(axis=-1) / dz.sum(axis=-1)
+T_mean.shape   # depth-weighted temperature per timestep
+```
+
+### Non-layered DataArrays
+
+For any DataArray whose geometry is not layered (dfs2, 2D dfsu, spectral, …),
+accessing `.z` returns a placeholder that raises `AttributeError` to make the
+geometry constraint discoverable:
+
+```{python}
+#| error: true
+ds2 = mikeio.read("../data/random.dfs2")
+ds2[0].z.nodes
+```
+
 ## Creating a dfsu from a mesh
 
 ```{python}

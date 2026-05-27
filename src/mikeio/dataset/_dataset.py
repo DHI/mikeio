@@ -44,6 +44,7 @@ from ..spatial import (
 from ..spatial._FM_geometry import _GeometryFM
 
 from ._data_plot import DatasetPlotter
+from ._z_accessor import NullZAccessor, ZAccessor
 
 from ._dataarray import IndexType
 
@@ -336,6 +337,16 @@ class Dataset:
     @property
     def _zn(self) -> np.ndarray | None:
         return self[0]._zn
+
+    @property
+    def z(self) -> ZAccessor | NullZAccessor:
+        """Z-coordinate accessor for layered dfsu Datasets.
+
+        Returns the accessor from the first DataArray; mirrors the ``_zn``
+        delegation. Use ``ds.z.nodes`` for per-timestep node z-coordinates
+        and ``ds.z.elements`` for element-center z-coordinates.
+        """
+        return self[0].z
 
     def describe(self, **kwargs: Any) -> pd.DataFrame:
         """Generate descriptive statistics.
