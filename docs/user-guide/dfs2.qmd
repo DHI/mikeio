@@ -81,7 +81,7 @@ To create a dfs2 file from scratch:
 4. Write to file
 
 ::: {.callout-important}
-Data arrays must have shape `(n_timesteps, ny, nx)` for time-varying data or `(ny, nx)` for static data. The y-axis must increase south-to-north and the x-axis west-to-east, matching the [CF conventions](http://cfconventions.org/cf-conventions/cf-conventions.html#dimensions).
+Data arrays must have shape `(n_timesteps, ny, nx)` for time-varying data or `(ny, nx)` for static data. The y-axis must increase south-to-north and the x-axis west-to-east, matching the [CF conventions](https://cf-convention.github.io/cf-conventions/cf-conventions.html#dimensions).
 :::
 
 For complete examples of converting external data to dfs2, see [Dfs2-Bathymetry](../examples/dfs2/bathy.qmd) (NetCDF → static dfs2) and [Dfs2-GFS](../examples/dfs2/gfs.qmd) (NetCDF → multi-item time-varying dfs2).

@@ -65,6 +65,15 @@ def test_dfs3_read_time() -> None:
     assert isinstance(ds.geometry, Grid3D)
 
 
+def test_write_read_with_title(tmp_path: Path) -> None:
+    tmpfile = tmp_path / "tmp_title.dfs3"
+    dfs = mikeio.Dfs3("tests/testdata/test_dfs3.dfs3")
+    ds = dfs.read()
+    ds.to_dfs(tmpfile)
+    dfs_tmp = mikeio.Dfs3(tmpfile)
+    assert dfs.title == dfs_tmp.title
+
+
 def test_dfs3_read_1_layer() -> None:
     fn = "tests/testdata/test_dfs3.dfs3"
     ds = mikeio.read(fn, layers=-1)
@@ -276,3 +285,28 @@ def test_append_dfs3(tmp_path: Path) -> None:
     dfs = mikeio.Dfs3(new_fp)
 
     dfs.append(ds2)
+
+
+def test_read_with_title() -> None:
+    sourcefilename = "tests/testdata/single_layer.dfs3"
+    dfs = mikeio.Dfs3(sourcefilename)
+    assert hasattr(dfs, "title")
+    assert isinstance(dfs.title, str)
+
+
+def test_write_with_title(tmp_path: Path) -> None:
+    sourcefilename = "tests/testdata/single_layer.dfs3"
+    fp = tmp_path / "with_title.dfs3"
+
+    # Read source file
+    dfs = mikeio.Dfs3(sourcefilename)
+    ds = dfs.read(items=[0], keepdims=True)
+
+    # Write with custom title
+    custom_title = "Test DFS3 with Custom Title"
+    ds.title = custom_title
+    ds.to_dfs(fp)
+
+    # Read back and verify title
+    newdfs = mikeio.Dfs3(fp)
+    assert newdfs.title == custom_title

@@ -10,13 +10,20 @@ on:
     paths:
       - 'docs/**'
 
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
 jobs:
   build:
     runs-on: ubuntu-latest
 
     steps:
     - uses: actions/checkout@v4
-    
+
+    - uses: extractions/setup-just@f8a3cce218d9f83db3a2ecd90e41ac3de6cdfd9b # v3
+
     - name: Set up uv
       uses: astral-sh/setup-uv@v6
       with:
@@ -24,15 +31,25 @@ jobs:
 
     - name: Install dependencies
       run: uv sync --dev
-    
-    - name: Build documentation
-      run: |
-        make docs
 
-    - name: Publish to GitHub Pages
+    - name: Build documentation
+      run: just docs
+
+    - name: Upload Pages artifact
       if: github.event_name == 'push'
-      uses: peaceiris/actions-gh-pages@v3.6.1
+      uses: actions/upload-pages-artifact@v3
       with:
-        github_token: ${{ secrets.GITHUB_TOKEN }}
-        publish_dir: docs/_site/
-      
+        path: docs/_site/
+
+  deploy:
+    if: github.event_name == 'push'
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
+    - name: Deploy to GitHub Pages
+      id: deployment
+      uses: actions/deploy-pages@v4

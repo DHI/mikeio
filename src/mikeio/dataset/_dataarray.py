@@ -114,6 +114,18 @@ class DataArray:
     dt:
         placeholder timestep
 
+    Attributes
+    ----------
+    item : ItemInfo
+        ItemInfo with name, type and unit.
+    time : pandas.DatetimeIndex
+        Time instances of the data.
+    geometry
+        Geometry of the data (e.g. Grid2D, GeometryFM2D).
+    plot
+        Plotting accessor (chosen by geometry type).
+    deletevalue : float
+        Default delete value used to mark missing values (1.0e-35).
 
     Examples
     --------

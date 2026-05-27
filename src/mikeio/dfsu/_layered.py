@@ -52,6 +52,7 @@ class DfsuLayered:
         self._start_time = info.start_time
         self._timestep = info.timestep
         self._n_timesteps = info.n_timesteps
+        self._title = info.title
         self._geometry = self._read_geometry(self._filename)
         # 3d files have a zn item
         self._items = self._read_items(self._filename)
@@ -127,6 +128,7 @@ class DfsuLayered:
 
     @property
     def time(self) -> pd.DatetimeIndex:
+        """File time axis (only available for equidistant files; otherwise read the data)."""
         if self._equidistant:
             return pd.date_range(
                 start=self.start_time,
@@ -139,7 +141,13 @@ class DfsuLayered:
             )
 
     @property
+    def title(self) -> str:
+        """File title."""
+        return self._title
+
+    @property
     def geometry(self) -> GeometryFM3D | GeometryFMVerticalProfile:
+        """Flexible Mesh Geometry of the file (3d or vertical profile)."""
         return self._geometry
 
     @staticmethod
@@ -442,6 +450,7 @@ class DfsuLayered:
                 items=items,
                 geometry=geometry,
                 zn=data_list[0],
+                title=self.title,
                 validate=False,
                 dt=self.timestep,
             )
@@ -451,6 +460,7 @@ class DfsuLayered:
                 time=time,
                 items=items,
                 geometry=geometry,
+                title=self.title,
                 validate=False,
                 dt=self.timestep,
             )
@@ -494,6 +504,7 @@ class Dfsu2DV(DfsuLayered):
 
     @property
     def geometry(self) -> GeometryFMVerticalProfile:
+        """Flexible Mesh Geometry of the 2d vertical profile."""
         assert isinstance(self._geometry, GeometryFMVerticalProfile)
         return self._geometry
 
