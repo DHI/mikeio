@@ -79,11 +79,11 @@ class ZAccessor:
             n_time = zn.shape[0]
             ze = np.empty((n_time, n_elements), dtype=zn.dtype)
             for j, nodes in enumerate(element_table):
-                ze[:, j] = zn[:, np.asarray(nodes, dtype=int)].mean(axis=1)
+                ze[:, j] = zn[:, nodes].mean(axis=1)
         else:
             ze = np.empty(n_elements, dtype=zn.dtype)
             for j, nodes in enumerate(element_table):
-                ze[j] = zn[np.asarray(nodes, dtype=int)].mean()
+                ze[j] = zn[nodes].mean()
         return ze
 
 
