@@ -1,0 +1,117 @@
+---
+title: PFS - Spectral wave nesting
+description: Add spectral output along a boundary line for a nested model
+jupyter: python3
+---
+
+A common task in spectral wave modelling is setting up a nested model. The regional model needs to output spectral data along the boundary of the nested domain. This example shows how to programmatically add a spectral line output to a [MIKE 21 Spectral Waves](https://www.dhigroup.com/technologies/mikepoweredbydhi/mike-21-spectral-waves) setup file.
+
+```{python}
+import mikeio
+```
+
+## The regional model
+
+Read the mesh to see the model domain.
+
+```{python}
+msh = mikeio.Mesh("../../data/north_sea_2.mesh")
+msh.plot();
+```
+
+Read the setup file and inspect the existing outputs.
+
+```{python}
+pfs = mikeio.read_pfs("../../data/NorthSea.sw")
+sw = pfs.FemEngineSW.SPECTRAL_WAVE_MODULE
+outputs = sw.OUTPUTS
+
+df = outputs.to_dataframe(prefix="OUTPUT_")
+df[["title", "file_name", "type", "include"]]
+```
+
+The setup has 10 outputs, but none of them are spectral (`type=4`) line outputs suitable for nesting.
+
+## Add a spectral boundary output
+
+We'll add a spectral output along a line across the Thames Estuary, to provide boundary conditions for a nested local model.
+
+Start by copying an existing line output as a template.
+
+```{python}
+new_output = outputs.OUTPUT_9.copy()
+```
+
+Change the output type from integral wave parameters (`type=1`) to spectral (`type=4`), and update the metadata.
+
+```{python}
+new_output.title = "Thames Estuary BC"
+new_output.file_name = "ThamesEstuary_spectral.dfsu"
+new_output.type = 4
+new_output.format = 0
+new_output.include = 1
+```
+
+Define the boundary line across the Thames Estuary — a slanted line from the Essex coast (Foulness Point) to the Kent coast (near Margate).
+
+```{python}
+new_output.LINE.x_first = 0.8
+new_output.LINE.y_first = 51.65
+new_output.LINE.x_last = 1.4
+new_output.LINE.y_last = 51.3
+new_output.LINE.npoints = 20
+```
+
+Visualize the line on the mesh.
+
+```{python}
+ax = msh.plot()
+line = new_output.LINE
+ax.plot(
+    [line.x_first, line.x_last],
+    [line.y_first, line.y_last],
+    "r-",
+    linewidth=2,
+    label="Nesting boundary",
+)
+ax.legend();
+```
+
+## Update the setup
+
+Add the new output and update the counts.
+
+```{python}
+outputs["OUTPUT_11"] = new_output
+outputs.number_of_outputs = 11
+outputs.MzSEPfsListItemCount = 11
+```
+
+Verify by inspecting the updated outputs.
+
+```{python}
+df = outputs.to_dataframe(prefix="OUTPUT_")
+df[["title", "file_name", "type", "include"]]
+```
+
+Write the modified setup to a new file.
+
+```{python}
+pfs.write("NorthSea_nested.sw")
+```
+
+Verify the round-trip by re-reading.
+
+```{python}
+pfs2 = mikeio.read_pfs("NorthSea_nested.sw")
+df2 = pfs2.FemEngineSW.SPECTRAL_WAVE_MODULE.OUTPUTS.to_dataframe(prefix="OUTPUT_")
+df2[["title", "file_name", "type", "include"]]
+```
+
+## Clean up
+
+```{python}
+import os
+
+os.remove("NorthSea_nested.sw")
+```
