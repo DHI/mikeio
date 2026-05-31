@@ -216,3 +216,10 @@ class GeometryPoint3D(_Geometry):
         from shapely.geometry import Point
 
         return Point(self.x, self.y, self.z)
+
+
+# Public alias for the geometry base class. Use this for type hints rather
+# than the private `_Geometry` import (the private name remains available
+# for backwards compatibility and is the actual class identity).
+# See https://github.com/DHI/mikeio/issues/967
+Geometry = _Geometry
