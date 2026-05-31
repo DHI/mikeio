@@ -21,6 +21,7 @@ from .eum import EUMType, EUMUnit, ItemInfo
 from .pfs import PfsDocument, PfsSection, read_pfs
 
 from .spatial import (
+    Geometry,
     Grid1D,
     Grid2D,
     Grid3D,
@@ -202,6 +203,7 @@ __all__ = [
     "PfsDocument",
     "PfsSection",
     "read_pfs",
+    "Geometry",
     "Grid1D",
     "Grid2D",
     "Grid3D",
