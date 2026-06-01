@@ -561,6 +561,9 @@ class Dataset:
         # item attribute — e.g. an item named "z" must not clobber the read-only
         # z-coordinate accessor, nor "geometry"/"time"/"mean"/etc. The item stays
         # accessible via ds[name]; only the convenience ds.<name> is reserved.
+        # This is silent (not a warning) because mikeio routinely manufactures
+        # such names itself — aggregate(axis="items") names the result after the
+        # aggregation function (e.g. "mean", "nanmean", "max").
         if hasattr(type(self), name):
             return
         setattr(self, name, value)
