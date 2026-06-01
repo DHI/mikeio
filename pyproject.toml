@@ -23,14 +23,13 @@ authors = [
 description = "A package that uses the DHI dfs libraries to create, write and read dfs and mesh files."
 license = "BSD-3-Clause"
 readme = "README.md"
-requires-python = ">=3.10"
+requires-python = ">=3.11"
 classifiers = [
     "License :: OSI Approved :: BSD License",
     "Development Status :: 5 - Production/Stable",
     "Intended Audience :: Science/Research",
     "Programming Language :: Python",
     "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",
@@ -113,7 +112,7 @@ exclude = [
     "test_pfs",
     "docs",
 ]
-python_version = "3.10"
+python_version = "3.11"
 warn_return_any = false
 allow_redefinition = true
 warn_unreachable = true
