@@ -148,6 +148,44 @@ def test_index_with_attribute() -> None:
     )  # This is now modfied, but both methods points to the same object
 
 
+def test_item_named_like_reserved_property(tmp_path: Path) -> None:
+    # An item whose safe-name matches a read-only Dataset property (e.g. the
+    # z-coordinate accessor) must not crash construction by shadowing it.
+    # Regression for the read-only `z` property added in #977: dfs0 files can
+    # carry a vertical-coordinate item literally named "z".
+    time = pd.date_range(start=datetime(2000, 1, 1), freq="s", periods=3)
+    da_z = mikeio.DataArray(name="z", data=np.zeros(3), time=time)
+    da_foo = mikeio.DataArray(name="Foo", data=np.ones(3), time=time)
+
+    ds = mikeio.Dataset([da_z, da_foo])
+
+    # item is reachable via indexing
+    assert ds["z"].name == "z"
+    # the reserved attribute still resolves to the z-accessor, not the item
+    assert ds.z is not ds["z"]
+
+    # survives a dfs0 round-trip (the exact modelskill failure path)
+    fp = tmp_path / "z_item.dfs0"
+    ds.to_dfs(fp)
+    ds2 = mikeio.read(fp)
+    assert ds2["z"].name == "z"
+
+
+def test_item_named_like_reserved_method() -> None:
+    # An item whose safe-name matches a Dataset method (e.g. "mean") must not
+    # shadow the method on the instance; the method stays callable and the item
+    # is reachable via indexing.
+    time = pd.date_range(start=datetime(2000, 1, 1), freq="s", periods=3)
+    da_mean = mikeio.DataArray(name="mean", data=np.arange(3.0), time=time)
+
+    ds = mikeio.Dataset([da_mean])
+
+    assert ds["mean"].name == "mean"
+    # ds.mean is the aggregation method, not the item
+    reduced = ds.mean(axis="time")
+    assert isinstance(reduced, Dataset)
+
+
 def test_getitem_time_string_not_supported(ds3: Dataset) -> None:
     # time = pd.date_range("2000-1-2", freq="h", periods=100)
 

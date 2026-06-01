@@ -345,6 +345,9 @@ class Dataset:
         Returns the accessor from the first DataArray; mirrors the ``_zn``
         delegation. Use ``ds.z.nodes`` for per-timestep node z-coordinates
         and ``ds.z.elements`` for element-center z-coordinates.
+
+        Like ``time`` and ``geometry``, ``z`` is a reserved attribute: a data
+        item literally named ``z`` is reached via ``ds["z"]``, not ``ds.z``.
         """
         return self[0].z
 
@@ -554,10 +557,18 @@ class Dataset:
 
     def _set_name_attr(self, name: str, value: DataArray) -> None:
         name = _to_safe_name(name)
+        # Don't shadow a real class member (property or method) with a dynamic
+        # item attribute — e.g. an item named "z" must not clobber the read-only
+        # z-coordinate accessor, nor "geometry"/"time"/"mean"/etc. The item stays
+        # accessible via ds[name]; only the convenience ds.<name> is reserved.
+        if hasattr(type(self), name):
+            return
         setattr(self, name, value)
 
     def _del_name_attr(self, name: str) -> None:
         name = _to_safe_name(name)
+        if hasattr(type(self), name):
+            return
         delattr(self, name)
 
     @overload
