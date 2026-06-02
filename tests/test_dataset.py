@@ -186,6 +186,54 @@ def test_item_named_like_reserved_method() -> None:
     assert isinstance(reduced, Dataset)
 
 
+def test_item_named_like_instance_attr() -> None:
+    # The collision guard must also cover instance attributes set in __init__
+    # (plot, title, _data_vars), not just class members — an item named "plot"
+    # would otherwise clobber the DatasetPlotter and break ds.plot.scatter(...).
+    time = pd.date_range(start=datetime(2000, 1, 1), freq="s", periods=3)
+    da = mikeio.DataArray(name="Foo", data=np.ones(3), time=time)
+
+    ds = mikeio.Dataset([da])
+    # add an item named "plot" after construction (routes through _set_name_attr)
+    ds["plot"] = mikeio.DataArray(name="plot", data=np.zeros(3), time=time)
+
+    # the item is reachable via indexing
+    assert ds["plot"].name == "plot"
+    # ds.plot is still the plotter, not the item
+    assert ds.plot is not ds["plot"]
+
+
+def test_aggregate_over_items_produces_method_named_item() -> None:
+    # aggregate(axis="items") names the result after the aggregation function
+    # ("nanmean"), which collides with Dataset.nanmean. This is the documented
+    # operation the ADR cites as the reason the collision skip is silent.
+    time = pd.date_range(start=datetime(2000, 1, 1), freq="s", periods=3)
+    ds = mikeio.Dataset(
+        [
+            mikeio.DataArray(name="A", data=np.ones(3), time=time),
+            mikeio.DataArray(name="B", data=np.zeros(3), time=time),
+        ]
+    )
+
+    agg = ds.aggregate(axis="items")
+
+    assert "nanmean" in agg.names
+    assert agg["nanmean"].name == "nanmean"  # item reachable by key
+    assert callable(agg.nanmean)  # method not shadowed by the item
+
+
+def test_rename_item_into_reserved_name() -> None:
+    # rename routes through _del_name_attr (old name) and _set_name_attr (new
+    # name); renaming an item to a method-like name must not shadow the method.
+    time = pd.date_range(start=datetime(2000, 1, 1), freq="s", periods=3)
+    ds = mikeio.Dataset([mikeio.DataArray(name="Foo", data=np.ones(3), time=time)])
+
+    ds2 = ds.rename({"Foo": "mean"})
+
+    assert ds2["mean"].name == "mean"  # item reachable by key
+    assert callable(ds2.mean)  # method not shadowed by the renamed item
+
+
 def test_getitem_time_string_not_supported(ds3: Dataset) -> None:
     # time = pd.date_range("2000-1-2", freq="h", periods=100)
 

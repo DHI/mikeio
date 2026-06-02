@@ -555,6 +555,15 @@ class Dataset:
 
         return ds
 
+    # Instance attributes assigned in __init__: not class members, so
+    # hasattr(type(self), ...) misses them. An item named like one of these
+    # would clobber internal state (e.g. "plot" destroys the DatasetPlotter,
+    # "_data_vars" corrupts the item dict), so reserve them explicitly.
+    _RESERVED_INSTANCE_ATTRS = frozenset({"plot", "title", "_data_vars"})
+
+    def _is_reserved_attr(self, name: str) -> bool:
+        return name in self._RESERVED_INSTANCE_ATTRS or hasattr(type(self), name)
+
     def _set_name_attr(self, name: str, value: DataArray) -> None:
         name = _to_safe_name(name)
         # Don't shadow a real class member (property or method) with a dynamic
@@ -564,13 +573,13 @@ class Dataset:
         # This is silent (not a warning) because mikeio routinely manufactures
         # such names itself — aggregate(axis="items") names the result after the
         # aggregation function (e.g. "mean", "nanmean", "max").
-        if hasattr(type(self), name):
+        if self._is_reserved_attr(name):
             return
         setattr(self, name, value)
 
     def _del_name_attr(self, name: str) -> None:
         name = _to_safe_name(name)
-        if hasattr(type(self), name):
+        if self._is_reserved_attr(name):
             return
         delattr(self, name)
 
