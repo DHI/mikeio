@@ -1330,7 +1330,7 @@ class DataArray:
 
         """
         if axis == "z":
-            return self._extremum_z(func=np.nanmax)
+            return self._extremum_z(func=np.nanmax, **kwargs)
         return self.aggregate(axis=axis, func=np.max, **kwargs)
 
     def min(self, axis: int | str = 0, **kwargs: Any) -> DataArray:
@@ -1356,7 +1356,7 @@ class DataArray:
 
         """
         if axis == "z":
-            return self._extremum_z(func=np.nanmin)
+            return self._extremum_z(func=np.nanmin, **kwargs)
         return self.aggregate(axis=axis, func=np.min, **kwargs)
 
     def mean(self, axis: int | str | None = 0, **kwargs: Any) -> DataArray:
@@ -1382,10 +1382,10 @@ class DataArray:
 
         """
         if axis == "z":
-            return self._mean_z()
+            return self._mean_z(**kwargs)
         return self.aggregate(axis=axis, func=np.mean, **kwargs)
 
-    def _mean_z(self) -> DataArray:
+    def _mean_z(self, **kwargs: Any) -> DataArray:
         """Thickness-weighted vertical mean, collapsing to 2D geometry."""
         if not isinstance(self.geometry, _GeometryFMLayered):
             raise ValueError(
@@ -1447,6 +1447,8 @@ class DataArray:
                 result[col_idx] = weighted_sum / total_dz if total_dz > 0 else np.nan
 
         item = deepcopy(self.item)
+        if "name" in kwargs:
+            item.name = kwargs["name"]
         time = self.time
 
         return DataArray(
@@ -1458,7 +1460,7 @@ class DataArray:
             dt=self._dt,
         )
 
-    def _extremum_z(self, func: Callable[..., Any]) -> DataArray:
+    def _extremum_z(self, func: Callable[..., Any], **kwargs: Any) -> DataArray:
         """Vertical min or max, collapsing to 2D geometry.
 
         Parameters
@@ -1500,6 +1502,8 @@ class DataArray:
                     result[col_idx] = func(col_data)
 
         item = deepcopy(self.item)
+        if "name" in kwargs:
+            item.name = kwargs["name"]
         time = self.time
 
         return DataArray(
