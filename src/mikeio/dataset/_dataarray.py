@@ -1484,17 +1484,19 @@ class DataArray:
         else:
             result = np.full(n_cols, np.nan, dtype=data.dtype)
 
-        for col_idx in range(n_cols):
-            col_elements = np.asarray(e2_e3[col_idx], dtype=int)
-            if len(col_elements) == 0:
-                continue
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore", category=RuntimeWarning)
+            for col_idx in range(n_cols):
+                col_elements = np.asarray(e2_e3[col_idx], dtype=int)
+                if len(col_elements) == 0:
+                    continue
 
-            if has_time:
-                col_data = data[:, col_elements]  # (n_time, n_layers_in_col)
-                result[:, col_idx] = func(col_data, axis=1)
-            else:
-                col_data = data[col_elements]
-                result[col_idx] = func(col_data)
+                if has_time:
+                    col_data = data[:, col_elements]  # (n_time, n_layers_in_col)
+                    result[:, col_idx] = func(col_data, axis=1)
+                else:
+                    col_data = data[col_elements]
+                    result[col_idx] = func(col_data)
 
         item = deepcopy(self.item)
         time = self.time
