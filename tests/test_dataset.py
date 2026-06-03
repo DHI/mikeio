@@ -1598,7 +1598,7 @@ def test_min_max_mean_z_dataset_nan() -> None:
     assert np.isclose(ds_max[1].to_numpy()[0, 0], 10.0)
     assert np.isclose(ds_max[1].to_numpy()[0, 1], 100.0)
 
-    # mean(axis="z") test first timestep without sigma streching
+    # mean(axis="z") test first timestep without sigma stretching
     ds_mean = ds2.mean(axis="z")
     assert len(ds_mean) == 2
     # Item 0: Col 0 mean=3.0 (uniform dz), Col 1 mean=35.0 (NaN excluded, [20,30,40,50])
