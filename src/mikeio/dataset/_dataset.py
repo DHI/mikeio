@@ -562,6 +562,8 @@ class Dataset:
     _RESERVED_INSTANCE_ATTRS = frozenset({"plot", "title", "_data_vars"})
 
     def _is_reserved_attr(self, name: str) -> bool:
+        # Probe the CLASS, not the instance: hasattr(self, ...) would invoke the
+        # z/geometry property getters on a partially-constructed Dataset.
         return name in self._RESERVED_INSTANCE_ATTRS or hasattr(type(self), name)
 
     def _set_name_attr(self, name: str, value: DataArray) -> None:

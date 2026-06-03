@@ -234,6 +234,27 @@ def test_rename_item_into_reserved_name() -> None:
     assert callable(ds2.mean)  # method not shadowed by the renamed item
 
 
+def test_init_instance_attrs_are_collision_protected() -> None:
+    # Drift guard: every non-item attribute __init__ sets on the instance (plot,
+    # title, ...) must be protected from being clobbered by an item of the same
+    # name. The reservation list is maintained by hand; if a new instance
+    # attribute is added to __init__ without reserving it, this test fails.
+    time = pd.date_range(start=datetime(2000, 1, 1), freq="s", periods=3)
+    base = mikeio.Dataset([mikeio.DataArray(name="Foo", data=np.ones(3), time=time)])
+    # instance attributes that are not the item dict and not items themselves
+    instance_attrs = set(vars(base)) - set(base.names) - {"_data_vars"}
+    assert instance_attrs  # sanity: there is something to protect (plot, title)
+
+    for attr in instance_attrs:
+        original_type = type(getattr(base, attr))
+        ds = mikeio.Dataset([mikeio.DataArray(name="Foo", data=np.ones(3), time=time)])
+        ds[attr] = mikeio.DataArray(name=attr, data=np.zeros(3), time=time)
+        # the real instance attribute is preserved, not replaced by the item
+        assert type(getattr(ds, attr)) is original_type
+        # and the item is still reachable by key
+        assert ds[attr].name == attr
+
+
 def test_getitem_time_string_not_supported(ds3: Dataset) -> None:
     # time = pd.date_range("2000-1-2", freq="h", periods=100)
 
