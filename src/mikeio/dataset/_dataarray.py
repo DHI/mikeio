@@ -1506,6 +1506,7 @@ class DataArray:
             item=item,
             geometry=geom2d,
             zn=None,
+            dt=self._dt,
         )
 
     @staticmethod
