@@ -550,7 +550,6 @@ class GeometryFM3D(_GeometryFMLayered):
             Reduced geometry.
 
         """
-
         if isinstance(axis, str):
             axis = (axis,)
         if set(axis) == {"z"}:
