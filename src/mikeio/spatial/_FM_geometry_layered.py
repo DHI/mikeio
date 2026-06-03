@@ -11,7 +11,7 @@ from mikecore.DfsuFile import DfsuFileType
 
 
 from ._FM_geometry import GeometryFM2D, _GeometryFM
-from ._geometry import GeometryPoint3D
+from ._geometry import GeometryPoint3D, Geometry0D
 
 from ._FM_plot import _plot_vertical_profile, BoundaryPolygons
 
@@ -530,6 +530,36 @@ class _GeometryFMLayered(_GeometryFM):
 
 class GeometryFM3D(_GeometryFMLayered):
     """Flexible 3d mesh geometry."""
+
+    @property
+    def dims(self) -> tuple[str, ...]:
+        return ("element",)
+
+    def reduce(self, axis: str | tuple[str, ...]) -> GeometryFM2D | Geometry0D:
+        """Return reduced geometry after spatial aggregation.
+
+        Parameters
+        ----------
+        axis : str or tuple of str
+            Axis/axes to reduce. "z" collapses layers to 2D.
+            ("z", "element") or ("element",) collapses to a point.
+
+        Returns
+        -------
+        GeometryFM2D or Geometry0D
+            Reduced geometry.
+
+        """
+
+        if isinstance(axis, str):
+            axis = (axis,)
+        if set(axis) == {"z"}:
+            return self.to_2d_geometry()
+        if set(axis) == {"element"} or set(axis) == {"z", "element"}:
+            return Geometry0D(projection=self.projection)
+        raise ValueError(
+            f"Cannot reduce GeometryFM3D over {axis}, valid options: 'z', 'element', or both"
+        )
 
     @property
     def plot(self) -> None:
