@@ -1383,7 +1383,9 @@ class Dataset:
         Parameters
         ----------
         axis: (int, str, None), optional
-            axis number or "time", "space" or "items", by default 0
+            axis number or "time", "space", "items" or "z", by default 0.
+            When axis="z" on a layered 3D geometry, the vertical maximum
+            across layers is computed, collapsing the result to 2D.
         **kwargs: Any
             additional arguments passed to the function
 
@@ -1397,6 +1399,12 @@ class Dataset:
             nanmax : Max values with NaN values removed
 
         """
+        if axis == "z":
+            res = {
+                name: da.max(axis="z", **kwargs)
+                for name, da in self._data_vars.items()
+            }
+            return Dataset(data=res, validate=False, title=self.title)
         return self.aggregate(axis=axis, func=np.max, **kwargs)
 
     def min(self, axis: int | str = 0, **kwargs: Any) -> Dataset:
@@ -1405,7 +1413,9 @@ class Dataset:
         Parameters
         ----------
         axis: (int, str, None), optional
-            axis number or "time", "space" or "items", by default 0
+            axis number or "time", "space", "items" or "z", by default 0.
+            When axis="z" on a layered 3D geometry, the vertical minimum
+            across layers is computed, collapsing the result to 2D.
         **kwargs: Any
             additional arguments passed to the function
 
@@ -1419,6 +1429,12 @@ class Dataset:
             nanmin : Min values with NaN values removed
 
         """
+        if axis == "z":
+            res = {
+                name: da.min(axis="z", **kwargs)
+                for name, da in self._data_vars.items()
+            }
+            return Dataset(data=res, validate=False, title=self.title)
         return self.aggregate(axis=axis, func=np.min, **kwargs)
 
     def mean(self, axis: int | str = 0, **kwargs: Any) -> Dataset:
@@ -1427,7 +1443,9 @@ class Dataset:
         Parameters
         ----------
         axis: (int, str, None), optional
-            axis number or "time", "space" or "items", by default 0
+            axis number or "time", "space", "items" or "z", by default 0.
+            When axis="z" on a layered 3D geometry, a thickness-weighted
+            vertical average is computed, collapsing the result to 2D.
         **kwargs: Any
             additional arguments passed to the function
 
@@ -1442,6 +1460,12 @@ class Dataset:
             average : Weighted average
 
         """
+        if axis == "z":
+            res = {
+                name: da.mean(axis="z", **kwargs)
+                for name, da in self._data_vars.items()
+            }
+            return Dataset(data=res, validate=False, title=self.title)
         return self.aggregate(axis=axis, func=np.mean, **kwargs)
 
     def std(self, axis: int | str = 0, **kwargs: Any) -> Dataset:
