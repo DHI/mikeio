@@ -1455,6 +1455,7 @@ class DataArray:
             item=item,
             geometry=geom2d,
             zn=None,
+            dt=self._dt,
         )
 
     def _extremum_z(self, func: Callable[..., Any]) -> DataArray:
