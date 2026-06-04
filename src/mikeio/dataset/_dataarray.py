@@ -1467,6 +1467,8 @@ class DataArray:
         ----------
         func : callable
             np.nanmin or np.nanmax
+        **kwargs: Any
+            Only used to pass name for the resulting item, e.g. name="vertical max"
 
         """
         if not isinstance(self.geometry, _GeometryFMLayered):
