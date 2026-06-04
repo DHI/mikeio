@@ -1330,7 +1330,7 @@ class DataArray:
 
         """
         if axis == "z":
-            return self._extremum_z(func=np.nanmax, **kwargs)
+            return self._extremum_z(func=np.fmax, **kwargs)
         return self.aggregate(axis=axis, func=np.max, **kwargs)
 
     def min(self, axis: int | str = 0, **kwargs: Any) -> DataArray:
@@ -1356,7 +1356,7 @@ class DataArray:
 
         """
         if axis == "z":
-            return self._extremum_z(func=np.nanmin, **kwargs)
+            return self._extremum_z(func=np.fmin, **kwargs)
         return self.aggregate(axis=axis, func=np.min, **kwargs)
 
     def mean(self, axis: int | str | None = 0, **kwargs: Any) -> DataArray:
@@ -1488,13 +1488,13 @@ class DataArray:
 
         return dz_all
 
-    def _extremum_z(self, func: Callable[..., Any], **kwargs: Any) -> DataArray:
+    def _extremum_z(self, func: np.ufunc, **kwargs: Any) -> DataArray:
         """Vertical min or max, collapsing to 2D geometry.
 
         Parameters
         ----------
-        func : callable
-            np.nanmin or np.nanmax
+        func : np.ufunc
+            np.fmin (NaN-ignoring min) or np.fmax (NaN-ignoring max)
         **kwargs: Any
             Only used to pass name for the resulting item, e.g. name="vertical max"
 
@@ -1506,39 +1506,23 @@ class DataArray:
 
         geom3d = self.geometry
         geom2d = geom3d.to_2d_geometry()
-        e2_e3 = geom3d.e2_e3_table
-        n_cols = len(e2_e3)
 
         data = self.to_numpy()
         has_time = self._has_time_axis
+        col_starts = geom3d.bottom_elements
 
         if has_time:
-            result = np.full((data.shape[0], n_cols), np.nan, dtype=data.dtype)
+            result = func.reduceat(data, col_starts, axis=1)
         else:
-            result = np.full(n_cols, np.nan, dtype=data.dtype)
-
-        with warnings.catch_warnings():
-            warnings.simplefilter("ignore", category=RuntimeWarning)
-            for col_idx in range(n_cols):
-                col_elements = np.asarray(e2_e3[col_idx], dtype=int)
-                if len(col_elements) == 0:
-                    continue
-
-                if has_time:
-                    col_data = data[:, col_elements]  # (n_time, n_layers_in_col)
-                    result[:, col_idx] = func(col_data, axis=1)
-                else:
-                    col_data = data[col_elements]
-                    result[col_idx] = func(col_data)
+            result = func.reduceat(data, col_starts)
 
         item = deepcopy(self.item)
         if "name" in kwargs:
             item.name = kwargs["name"]
-        time = self.time
 
         return DataArray(
             data=result,
-            time=time,
+            time=self.time,
             item=item,
             geometry=geom2d,
             zn=None,
