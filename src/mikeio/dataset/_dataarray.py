@@ -1406,12 +1406,12 @@ class DataArray:
             result = np.full(n_cols, np.nan, dtype=data.dtype)
 
         zn = self._zn
-        use_dynamic_dz = has_time and zn is not None and zn.ndim == 2
-        dz_all = (
-            self._compute_dynamic_dz(zn, geom3d, data.dtype)
-            if use_dynamic_dz
-            else geom3d._dz
-        )
+        if has_time and zn is not None and zn.ndim == 2:
+            dz_all: np.ndarray = self._compute_dynamic_dz(zn, geom3d, data.dtype)
+            use_dynamic_dz = True
+        else:
+            dz_all = geom3d._dz
+            use_dynamic_dz = False
 
         with np.errstate(invalid="ignore", divide="ignore"):
             for col_idx in range(n_cols):
