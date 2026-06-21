@@ -162,6 +162,8 @@ class Dfs2(_Dfs123):
         *,
         items: str | int | Sequence[str | int] | None = None,
         time: int | str | slice | Sequence[int] | None = None,
+        x: float | None = None,
+        y: float | None = None,
         area: tuple[float, float, float, float] | None = None,
         keepdims: bool = False,
         dtype: Any = np.float32,
@@ -174,12 +176,16 @@ class Dfs2(_Dfs123):
             Read only selected items, by number (0-based), or by name
         time: int, str, datetime, pd.TimeStamp, sequence, slice or pd.DatetimeIndex, optional
             Read only selected time steps, by default None (=all)
-        keepdims: bool, optional
-            When reading a single time step only, should the time-dimension be kept
-            in the returned Dataset? by default: False
+        x: float, optional
+            x-coordinate of point to extract
+        y: float, optional
+            y-coordinate of point to extract
         area: array[float], optional
             Read only data inside (horizontal) area given as a
             bounding box (tuple with left, lower, right, upper) coordinates
+        keepdims: bool, optional
+            When reading a single time step only, should the time-dimension be kept
+            in the returned Dataset? by default: False
         dtype: data-type, optional
             Define the dtype of the returned dataset (default = np.float32)
         Returns
@@ -187,6 +193,9 @@ class Dfs2(_Dfs123):
         Dataset
 
         """
+        if x is not None and area is not None:
+            raise ValueError("x/y and area cannot be given at the same time!")
+
         self._open()
 
         item_numbers = _valid_item_numbers(self._dfs.ItemInfo, items)
@@ -198,7 +207,14 @@ class Dfs2(_Dfs123):
 
         shape: tuple[int, ...]
 
-        if area is not None:
+        if x is not None and y is not None:
+            take_subset = True
+            ii, jj = self.geometry.find_index(x=x, y=y)
+            shape = (nt, len(jj), len(ii))
+            geometry = self.geometry._index_to_Grid2D(ii, jj)
+        elif x is not None or y is not None:
+            raise ValueError("Both x and y must be provided for point selection")
+        elif area is not None:
             take_subset = True
             ii, jj = self.geometry.find_index(area=area)  # type: ignore
             shape = (nt, len(jj), len(ii))
