@@ -1,22 +1,64 @@
 from __future__ import annotations
+import warnings
 from dataclasses import dataclass
 import numpy as np
 
 
-def get_idw_interpolant(distances: np.ndarray, p: float = 2) -> np.ndarray:
-    is_1d = distances.ndim == 1
-    if is_1d:
-        distances = np.atleast_2d(distances)
+def _get_idw_interpolant(distances: np.ndarray, p: float = 2) -> np.ndarray:
+    """Calculate IDW weights from distances.
 
+    Parameters
+    ----------
+    distances : np.ndarray
+        2D array of shape (n_points, n_neighbors)
+        Must be sorted by distance (closest first)
+    p : float
+        Power parameter for IDW
+
+    Returns
+    -------
+    np.ndarray
+        Weights for interpolation
+
+    """
     MIN_DISTANCE = 1e-8
-    weights = np.zeros(distances.shape)
+    weights = np.zeros_like(distances)
 
     match = distances[:, 0] < MIN_DISTANCE
     weights[match, 0] = 1
 
     weights[~match, :] = 1 / distances[~match, :] ** p
-    denom = weights[~match, :].sum(axis=1).reshape(-1, 1)  # *np.ones((1,n_nearest))
-    weights[~match, :] = weights[~match, :] / denom
+    weights[~match, :] /= weights[~match, :].sum(axis=1, keepdims=True)
+
+    return weights
+
+
+def get_idw_interpolant(distances: np.ndarray, p: float = 2) -> np.ndarray:
+    """DEPRECATED: Calculate IDW weights from distances.
+
+    Parameters
+    ----------
+    distances : np.ndarray
+        Array of distances, 1D or 2D
+    p : float
+        Power parameter for IDW
+
+    Returns
+    -------
+    np.ndarray
+        Weights for interpolation
+
+    """
+    warnings.warn(
+        "get_idw_interpolant is deprecated",
+        FutureWarning,
+        stacklevel=2,
+    )
+    is_1d = distances.ndim == 1
+    if is_1d:
+        distances = np.atleast_2d(distances)
+
+    weights = _get_idw_interpolant(distances, p)
 
     if is_1d:
         weights = weights[0]
@@ -47,7 +89,7 @@ class Interpolant:
             weights
 
         """
-        return get_idw_interpolant(distances, p)
+        return _get_idw_interpolant(distances, p)
 
     def interp1d(self, data: np.ndarray) -> np.ndarray:
         ids = self.ids
