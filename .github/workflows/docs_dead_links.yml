@@ -1,20 +1,42 @@
 name: Check docs for broken links
-on: 
+on:
   workflow_dispatch: # allow manual trigger
   schedule:
-    # run daily at 4 am
-    - cron:  '0 4 * * 1'
+    # run weekly, Monday 04:00 UTC
+    - cron: '0 4 * * 1'
+
+permissions:
+  contents: read
+
 jobs:
-  crawl_for_broken_links:
+  check_links:
     runs-on: ubuntu-latest
-    name: Broken-Links-Crawler
+    name: Check links
     steps:
-    - name: Checking links
-      uses: ScholliYT/Broken-Links-Crawler-Action@v3
-      with:
-        website_url: 'https://dhi.github.io/mikeio/'
-        exclude_url_prefix: 'https://github.com/DHI/mikeio/edit/main/docs/api/,https://docs.mikepoweredbydhi.com/'
-        verbose: true
-        max_retry_time: 60
-        max_retries: 5
-        max_depth: -1
+      - uses: actions/checkout@v4
+
+      - uses: extractions/setup-just@f8a3cce218d9f83db3a2ecd90e41ac3de6cdfd9b # v3
+
+      - name: Set up uv
+        uses: astral-sh/setup-uv@d0cc045d04ccac9d8b7881df0226f9e82c39688e # v6
+        with:
+          enable-cache: true
+
+      - name: Install dependencies
+        run: uv sync --dev
+
+      - name: Build documentation
+        run: just docs
+
+      # lychee cannot recursively crawl a live site, so we check the built
+      # HTML. --accept-timeouts keeps slow servers from failing the run, and
+      # 403/429 are tolerated as rate-limiting; genuine 404/410 still fail.
+      - name: Check links
+        uses: lycheeverse/lychee-action@8646ba30535128ac92d33dfc9133794bfdd9b411 # v2.8.0
+        with:
+          args: >-
+            --accept-timeouts
+            --accept 200..=299,403,429
+            --no-progress
+            'docs/_site/**/*.html'
+          fail: true
