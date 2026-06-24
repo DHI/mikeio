@@ -585,11 +585,15 @@ class Dataset:
             return
         delattr(self, name)
 
+    # `slice` must precede `Hashable | int`: since Python 3.12 slice objects are
+    # hashable, so the broader `Hashable` overload would otherwise shadow this one
+    # and slicing would be mistyped as `DataArray`. The overlap is disambiguated at
+    # runtime by isinstance checks in `_key_to_str`.
     @overload
-    def __getitem__(self, key: Hashable | int) -> DataArray: ...
+    def __getitem__(self, key: slice) -> Dataset: ...  # type: ignore[overload-overlap]
 
     @overload
-    def __getitem__(self, key: slice) -> Dataset: ...
+    def __getitem__(self, key: Hashable | int) -> DataArray: ...
 
     @overload
     def __getitem__(self, key: Iterable[Hashable]) -> Dataset: ...
