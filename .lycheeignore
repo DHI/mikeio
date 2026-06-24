@@ -1,0 +1,5 @@
+# "Edit this page" links to GitHub — not real content links, and GitHub rate-limits them
+github\.com/DHI/mikeio/edit/
+# MIKE Powered by DHI doc/help portals throttle/reject automated crawlers
+# (connection-reset / 403), so they can't be link-checked reliably
+mikepoweredbydhi\.
