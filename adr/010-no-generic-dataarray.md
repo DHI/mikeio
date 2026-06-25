@@ -1,4 +1,4 @@
-# ADR-009: No Generic DataArray/Dataset Over Geometry Type
+# ADR-010: No Generic DataArray/Dataset Over Geometry Type
 
 **Status:** Accepted
 **Date:** 2025-03
