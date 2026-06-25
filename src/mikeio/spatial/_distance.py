@@ -48,7 +48,7 @@ def dist_in_meters(
 
 def _get_dist_geo(
     lon: float | np.ndarray, lat: float | np.ndarray, lon1: float, lat1: float
-) -> float:
+) -> np.ndarray:
     # assuming input in degrees!
     R = 6371e3  # Earth radius in metres
     dlon = np.deg2rad(lon1 - lon)

@@ -44,6 +44,7 @@ from ..spatial import (
 from ..spatial._FM_geometry import _GeometryFM
 
 from ._data_plot import DatasetPlotter
+from ._z_accessor import NullZAccessor, ZAccessor
 
 from ._dataarray import IndexType
 
@@ -337,6 +338,19 @@ class Dataset:
     def _zn(self) -> np.ndarray | None:
         return self[0]._zn
 
+    @property
+    def z(self) -> ZAccessor | NullZAccessor:
+        """Z-coordinate accessor for layered dfsu Datasets.
+
+        Returns the accessor from the first DataArray; mirrors the ``_zn``
+        delegation. Use ``ds.z.nodes`` for per-timestep node z-coordinates
+        and ``ds.z.elements`` for element-center z-coordinates.
+
+        Like ``time`` and ``geometry``, ``z`` is a reserved attribute: a data
+        item literally named ``z`` is reached via ``ds["z"]``, not ``ds.z``.
+        """
+        return self[0].z
+
     def describe(self, **kwargs: Any) -> pd.DataFrame:
         """Generate descriptive statistics.
 
@@ -541,19 +555,45 @@ class Dataset:
 
         return ds
 
+    # Instance attributes assigned in __init__: not class members, so
+    # hasattr(type(self), ...) misses them. An item named like one of these
+    # would clobber internal state (e.g. "plot" destroys the DatasetPlotter,
+    # "_data_vars" corrupts the item dict), so reserve them explicitly.
+    _RESERVED_INSTANCE_ATTRS = frozenset({"plot", "title", "_data_vars"})
+
+    def _is_reserved_attr(self, name: str) -> bool:
+        # Probe the CLASS, not the instance: hasattr(self, ...) would invoke the
+        # z/geometry property getters on a partially-constructed Dataset.
+        return name in self._RESERVED_INSTANCE_ATTRS or hasattr(type(self), name)
+
     def _set_name_attr(self, name: str, value: DataArray) -> None:
         name = _to_safe_name(name)
+        # Don't shadow a real class member (property or method) with a dynamic
+        # item attribute — e.g. an item named "z" must not clobber the read-only
+        # z-coordinate accessor, nor "geometry"/"time"/"mean"/etc. The item stays
+        # accessible via ds[name]; only the convenience ds.<name> is reserved.
+        # This is silent (not a warning) because mikeio routinely manufactures
+        # such names itself — aggregate(axis="items") names the result after the
+        # aggregation function (e.g. "mean", "nanmean", "max").
+        if self._is_reserved_attr(name):
+            return
         setattr(self, name, value)
 
     def _del_name_attr(self, name: str) -> None:
         name = _to_safe_name(name)
+        if self._is_reserved_attr(name):
+            return
         delattr(self, name)
+
+    # `slice` must precede `Hashable | int`: since Python 3.12 slice objects are
+    # hashable, so the broader `Hashable` overload would otherwise shadow this one
+    # and slicing would be mistyped as `DataArray`. The overlap is disambiguated at
+    # runtime by isinstance checks in `_key_to_str`.
+    @overload
+    def __getitem__(self, key: slice) -> Dataset: ...  # type: ignore[overload-overlap]
 
     @overload
     def __getitem__(self, key: Hashable | int) -> DataArray: ...
-
-    @overload
-    def __getitem__(self, key: slice) -> Dataset: ...
 
     @overload
     def __getitem__(self, key: Iterable[Hashable]) -> Dataset: ...

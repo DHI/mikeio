@@ -84,7 +84,8 @@ def test_properties(ds1: Dataset) -> None:
     assert ds1.shape == (nt, ne)
     assert ds1.dims == ("time", "x")
     assert ds1.geometry.nx == 7
-    assert ds1._zn is None
+    with pytest.raises(AttributeError, match="has no z-coordinates"):
+        _ = ds1.z.nodes
 
     assert isinstance(ds1.items[0], ItemInfo)
 
@@ -145,6 +146,113 @@ def test_index_with_attribute() -> None:
     assert (
         ds["Foo"] is ds.Foo  # type: ignore
     )  # This is now modfied, but both methods points to the same object
+
+
+def test_item_named_like_reserved_property(tmp_path: Path) -> None:
+    # An item whose safe-name matches a read-only Dataset property (e.g. the
+    # z-coordinate accessor) must not crash construction by shadowing it.
+    # Regression for the read-only `z` property added in #977: dfs0 files can
+    # carry a vertical-coordinate item literally named "z".
+    time = pd.date_range(start=datetime(2000, 1, 1), freq="s", periods=3)
+    da_z = mikeio.DataArray(name="z", data=np.zeros(3), time=time)
+    da_foo = mikeio.DataArray(name="Foo", data=np.ones(3), time=time)
+
+    ds = mikeio.Dataset([da_z, da_foo])
+
+    # item is reachable via indexing
+    assert ds["z"].name == "z"
+    # the reserved attribute still resolves to the z-accessor, not the item
+    assert ds.z is not ds["z"]
+
+    # survives a dfs0 round-trip (the exact modelskill failure path)
+    fp = tmp_path / "z_item.dfs0"
+    ds.to_dfs(fp)
+    ds2 = mikeio.read(fp)
+    assert ds2["z"].name == "z"
+
+
+def test_item_named_like_reserved_method() -> None:
+    # An item whose safe-name matches a Dataset method (e.g. "mean") must not
+    # shadow the method on the instance; the method stays callable and the item
+    # is reachable via indexing.
+    time = pd.date_range(start=datetime(2000, 1, 1), freq="s", periods=3)
+    da_mean = mikeio.DataArray(name="mean", data=np.arange(3.0), time=time)
+
+    ds = mikeio.Dataset([da_mean])
+
+    assert ds["mean"].name == "mean"
+    # ds.mean is the aggregation method, not the item
+    reduced = ds.mean(axis="time")
+    assert isinstance(reduced, Dataset)
+
+
+def test_item_named_like_instance_attr() -> None:
+    # The collision guard must also cover instance attributes set in __init__
+    # (plot, title, _data_vars), not just class members — an item named "plot"
+    # would otherwise clobber the DatasetPlotter and break ds.plot.scatter(...).
+    time = pd.date_range(start=datetime(2000, 1, 1), freq="s", periods=3)
+    da = mikeio.DataArray(name="Foo", data=np.ones(3), time=time)
+
+    ds = mikeio.Dataset([da])
+    # add an item named "plot" after construction (routes through _set_name_attr)
+    ds["plot"] = mikeio.DataArray(name="plot", data=np.zeros(3), time=time)
+
+    # the item is reachable via indexing
+    assert ds["plot"].name == "plot"
+    # ds.plot is still the plotter, not the item
+    assert ds.plot is not ds["plot"]
+
+
+def test_aggregate_over_items_produces_method_named_item() -> None:
+    # aggregate(axis="items") names the result after the aggregation function
+    # ("nanmean"), which collides with Dataset.nanmean. This is the documented
+    # operation the ADR cites as the reason the collision skip is silent.
+    time = pd.date_range(start=datetime(2000, 1, 1), freq="s", periods=3)
+    ds = mikeio.Dataset(
+        [
+            mikeio.DataArray(name="A", data=np.ones(3), time=time),
+            mikeio.DataArray(name="B", data=np.zeros(3), time=time),
+        ]
+    )
+
+    agg = ds.aggregate(axis="items")
+
+    assert "nanmean" in agg.names
+    assert agg["nanmean"].name == "nanmean"  # item reachable by key
+    assert callable(agg.nanmean)  # method not shadowed by the item
+
+
+def test_rename_item_into_reserved_name() -> None:
+    # rename routes through _del_name_attr (old name) and _set_name_attr (new
+    # name); renaming an item to a method-like name must not shadow the method.
+    time = pd.date_range(start=datetime(2000, 1, 1), freq="s", periods=3)
+    ds = mikeio.Dataset([mikeio.DataArray(name="Foo", data=np.ones(3), time=time)])
+
+    ds2 = ds.rename({"Foo": "mean"})
+
+    assert ds2["mean"].name == "mean"  # item reachable by key
+    assert callable(ds2.mean)  # method not shadowed by the renamed item
+
+
+def test_init_instance_attrs_are_collision_protected() -> None:
+    # Drift guard: every non-item attribute __init__ sets on the instance (plot,
+    # title, ...) must be protected from being clobbered by an item of the same
+    # name. The reservation list is maintained by hand; if a new instance
+    # attribute is added to __init__ without reserving it, this test fails.
+    time = pd.date_range(start=datetime(2000, 1, 1), freq="s", periods=3)
+    base = mikeio.Dataset([mikeio.DataArray(name="Foo", data=np.ones(3), time=time)])
+    # instance attributes that are not the item dict and not items themselves
+    instance_attrs = set(vars(base)) - set(base.names) - {"_data_vars"}
+    assert instance_attrs  # sanity: there is something to protect (plot, title)
+
+    for attr in instance_attrs:
+        original_type = type(getattr(base, attr))
+        ds = mikeio.Dataset([mikeio.DataArray(name="Foo", data=np.ones(3), time=time)])
+        ds[attr] = mikeio.DataArray(name=attr, data=np.zeros(3), time=time)
+        # the real instance attribute is preserved, not replaced by the item
+        assert type(getattr(ds, attr)) is original_type
+        # and the item is still reachable by key
+        assert ds[attr].name == attr
 
 
 def test_getitem_time_string_not_supported(ds3: Dataset) -> None:
@@ -1022,7 +1130,9 @@ def test_concat_duplicate_timestamps_raises() -> None:
     # DA diagnostic output can have duplicate timestamps at correction times
     time = pd.DatetimeIndex(["2000-01-01", "2000-01-01", "2000-01-02"])
     ds1 = mikeio.Dataset.from_numpy(data=[np.zeros(3)], time=time)
-    ds2 = mikeio.Dataset.from_numpy(data=[np.ones(2)], time=pd.date_range("2000-01-03", periods=2))
+    ds2 = mikeio.Dataset.from_numpy(
+        data=[np.ones(2)], time=pd.date_range("2000-01-03", periods=2)
+    )
     with pytest.raises(ValueError, match="duplicate timestamps"):
         mikeio.Dataset.concat([ds1, ds2])
 
@@ -1201,8 +1311,8 @@ def test_concat_dfsu3d() -> None:
     assert isinstance(ds1.geometry, mikeio.spatial.GeometryFM3D)
     assert isinstance(ds3.geometry, mikeio.spatial.GeometryFM3D)
     assert ds3.geometry.n_elements == ds1.geometry.n_elements
-    assert ds3._zn.shape == ds._zn.shape  # type: ignore
-    assert np.all(ds3._zn == ds._zn)
+    assert ds3.z.nodes.shape == ds.z.nodes.shape
+    assert np.all(ds3.z.nodes == ds.z.nodes)
 
 
 def test_concat_dfsu3d_single_timesteps() -> None:
