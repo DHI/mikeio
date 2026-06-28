@@ -128,6 +128,7 @@ class DfsuLayered:
 
     @property
     def time(self) -> pd.DatetimeIndex:
+        """File time axis (only available for equidistant files; otherwise read the data)."""
         if self._equidistant:
             return pd.date_range(
                 start=self.start_time,
@@ -146,6 +147,7 @@ class DfsuLayered:
 
     @property
     def geometry(self) -> GeometryFM3D | GeometryFMVerticalProfile:
+        """Flexible Mesh Geometry of the file (3d or vertical profile)."""
         return self._geometry
 
     @staticmethod
@@ -502,6 +504,7 @@ class Dfsu2DV(DfsuLayered):
 
     @property
     def geometry(self) -> GeometryFMVerticalProfile:
+        """Flexible Mesh Geometry of the 2d vertical profile."""
         assert isinstance(self._geometry, GeometryFMVerticalProfile)
         return self._geometry
 
@@ -592,8 +595,7 @@ class Dfsu3D(DfsuLayered):
         node_ids_surf, _ = self.geometry._get_nodes_and_table_for_elements(
             top_el, node_layers="top"
         )
-        assert isinstance(ds[0]._zn, np.ndarray)
-        zn_surf = ds[0]._zn[:, node_ids_surf]  # surface
+        zn_surf = ds[0].z.nodes[:, node_ids_surf]  # surface
         interpolant = Interpolant(node_ids, weights)
         surf2d = interpolant.interp2d(zn_surf)
         surf_da = DataArray(

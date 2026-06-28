@@ -121,11 +121,11 @@ def write_dfsu_data(dfs: DfsuFile, ds: Dataset, is_layered: bool) -> None:
 
     for i in range(n_time_steps):
         if is_layered:
+            zn_all = data.z.nodes
             if "time" in data.dims:
-                assert data._zn is not None
-                zn = data._zn[i]
+                zn = zn_all[i]
             else:
-                zn = data._zn
+                zn = zn_all
             dfs.WriteItemTimeStepNext(t_rel[i], zn.astype(np.float32))
         for da in data:
             if "time" in data.dims:
@@ -242,6 +242,7 @@ class Dfsu2DH:
     # TODO change to GeometryFM2D
     @property
     def geometry(self) -> Any:
+        """Flexible Mesh Geometry of the file (e.g. [](`mikeio.spatial.GeometryFM2D`))."""
         return self._geometry
 
     @property
@@ -286,6 +287,7 @@ class Dfsu2DH:
 
     @property
     def time(self) -> pd.DatetimeIndex:
+        """File time axis (only available for equidistant files; otherwise read the data)."""
         if self._equidistant:
             return pd.date_range(
                 start=self.start_time,
