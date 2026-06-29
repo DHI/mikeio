@@ -1,7 +1,7 @@
 from __future__ import annotations
 from functools import cached_property
 from pathlib import Path
-from typing import Any, Sequence, TYPE_CHECKING, overload
+from typing import Any, Literal, Sequence, TYPE_CHECKING, overload
 from dataclasses import dataclass
 import numpy as np
 
@@ -16,6 +16,7 @@ from ._geometry import (
     GeometryPoint3D,
     GeometryUndefined,
     _Geometry,
+    _geographic_aspect,
 )
 
 from .._interpolation import Interpolant
@@ -375,26 +376,12 @@ class Grid2DPlotter:
         return ax
 
     def _set_aspect_and_labels(self, ax: Axes) -> None:
-        g = self.g
-        if g.is_spectral:
-            ax.set_xlabel("Frequency [Hz]")
-            ax.set_ylabel("Directions [degree]")
-        elif g._is_rotated:
-            ax.set_xlabel("[m]")
-            ax.set_ylabel("[m]")
-        elif g.projection == "NON-UTM":
-            ax.set_xlabel("[m]")
-            ax.set_ylabel("[m]")
-        elif g.is_geo:
-            ax.set_xlabel("Longitude [degrees]")
-            ax.set_ylabel("Latitude [degrees]")
-            mean_lat = np.mean(g.y)
-            aspect_ratio = 1.0 / np.cos(np.pi * mean_lat / 180)
-            ax.set_aspect(aspect_ratio)
-        else:
-            ax.set_xlabel("Easting [m]")
-            ax.set_ylabel("Northing [m]")
-            ax.set_aspect("equal")
+        xlabel, ylabel = self.g._axis_labels
+        ax.set_xlabel(xlabel)
+        ax.set_ylabel(ylabel)
+        aspect = self.g._plot_aspect
+        if aspect is not None:
+            ax.set_aspect(aspect)
 
 
 @dataclass
@@ -506,6 +493,22 @@ class Grid2D(_Geometry):
     @property
     def _is_rotated(self) -> Any:
         return np.abs(self._orientation) > 1e-5
+
+    @property
+    def _axis_labels(self) -> tuple[str, str]:
+        if self.is_spectral:
+            return "Frequency [Hz]", "Directions [degree]"
+        if self._is_rotated:
+            return "[m]", "[m]"
+        return super()._axis_labels
+
+    @property
+    def _plot_aspect(self) -> Literal["equal"] | float | None:
+        if self.is_spectral or self._is_rotated or self.is_local_coordinates:
+            return None
+        if self.is_geo:
+            return _geographic_aspect(self.y)
+        return "equal"
 
     def _create_in_bbox(
         self,

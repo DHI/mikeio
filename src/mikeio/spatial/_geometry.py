@@ -4,7 +4,14 @@ from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from typing import Any, Sequence
 
+import numpy as np
 from mikecore.Projections import MapProjection
+
+
+def _geographic_aspect(latitudes: np.ndarray) -> float:
+    """Aspect ratio correcting for longitude compression at a given latitude."""
+    mean_lat = float(np.mean(latitudes))
+    return 1.0 / np.cos(np.pi * mean_lat / 180)
 
 
 @dataclass
@@ -78,6 +85,15 @@ class _Geometry(ABC):
     def is_local_coordinates(self) -> bool:
         """Are coordinates relative (NON-UTM)?"""
         return self._projstr == "NON-UTM"
+
+    @property
+    def _axis_labels(self) -> tuple[str, str]:
+        """(x, y) axis labels for plotting, derived from the projection."""
+        if self.is_geo:
+            return "Longitude [degrees]", "Latitude [degrees]"
+        if self.is_local_coordinates:  # NON-UTM
+            return "x [m]", "y [m]"
+        return "Easting [m]", "Northing [m]"
 
     @property
     @abstractmethod
