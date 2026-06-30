@@ -378,24 +378,40 @@ class Dataset:
 
         return Dataset(data=res, validate=False, title=self.title)
 
-    def dropna(self) -> Dataset:
-        """Remove time steps where all items are NaN."""
+    def dropna(self, how: str = "any") -> Dataset:
+        """Remove time steps where an item's entire field is NaN.
+
+        An item is considered missing at a time step only when its whole
+        (non-time) field is NaN; scattered NaNs (e.g. land/dry cells) do not
+        count as missing.
+
+        Parameters
+        ----------
+        how : {"any", "all"}, default "any"
+            "any" -> drop a time step if *any* item is missing there.
+            "all" -> drop a time step only if *all* items are missing there.
+
+        Returns
+        -------
+        Dataset
+            Dataset with the offending time steps removed.
+
+        """
+        if how not in ("any", "all"):
+            raise ValueError(f"how must be 'any' or 'all', got {how!r}")
         if not self[0]._has_time_axis:  # type: ignore
             raise ValueError("Not available if no time axis!")
 
-        all_index: list[int] = []
+        n_time = self[0].to_numpy().shape[0]
+        missing = np.zeros((self.n_items, n_time), dtype=bool)
         for i in range(self.n_items):
             x = self[i].to_numpy()
+            axes = tuple(range(1, x.ndim))  # all non-time axes
+            missing[i] = np.isnan(x).all(axis=axes)
 
-            # this seems overly complicated...
-            axes = tuple(range(1, x.ndim))
-            idx: Any = list(np.where(~np.isnan(x).all(axis=axes))[0])
-            if i == 0:
-                all_index = idx
-            else:
-                all_index = list(np.intersect1d(all_index, idx))
-
-        return self.isel(time=all_index)
+        drop = missing.any(axis=0) if how == "any" else missing.all(axis=0)
+        keep: Any = list(np.where(~drop)[0])
+        return self.isel(time=keep)
 
     def flipud(self) -> Dataset:
         """Flip data upside down (on first non-time axis)."""
