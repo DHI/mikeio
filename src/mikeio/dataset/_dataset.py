@@ -28,6 +28,7 @@ if TYPE_CHECKING:
 
 from ._dataarray import DataArray
 from .._track import _extract_track
+from .._vertical_transect import _extract_vertical
 from ..eum import EUMType, EUMUnit, ItemInfo
 from ..spatial import (
     Geometry0D,
@@ -957,6 +958,95 @@ class Dataset:
             dtype=dtype,
             data_read_func=self.__dataset_read_item_time_func,
         )
+
+    def extract_vertical(
+        self,
+        *,
+        xs: Sequence[float],
+        ys: Sequence[float],
+        mode: Literal["interpolate", "discrete"] = "interpolate",
+        layer_min: int | None = None,
+        layer_max: int | None = None,
+        n_horizontal: int = 50,
+        n_vertical: int = 30,
+        z_min: float | None = None,
+        z_max: float | None = None,
+    ) -> "Dataset":
+        """Extract a vertical cross-section (transect) from 3D layered data.
+
+        The data is sampled along the horizontal polyline given by ``xs``, ``ys``
+        (in the mesh coordinate system) to produce a 2D vertical section for
+        every item in the dataset.
+
+        Parameters
+        ----------
+        xs : Sequence[float]
+            x-coordinates of the transect polyline vertices.
+        ys : Sequence[float]
+            y-coordinates of the transect polyline vertices.
+        mode : {"interpolate", "discrete"}, optional
+            "interpolate": sample onto a regular distance-by-elevation grid
+            (returns a vertical [](`mikeio.Grid2D`) geometry). "discrete":
+            follow the model layers, mapping each output element to a source 3D
+            element (returns a [](`mikeio.spatial.GeometryFMVerticalProfile`)).
+            Default "interpolate".
+        layer_min : int, optional
+            Lowest layer (1 = bed) to include, required for mode="discrete".
+        layer_max : int, optional
+            Highest layer (n_layers = surface) to include, required for
+            mode="discrete".
+        n_horizontal : int, optional
+            Number of horizontal grid points, used for mode="interpolate".
+            Default 50.
+        n_vertical : int, optional
+            Number of vertical grid points, used for mode="interpolate".
+            Default 30.
+        z_min : float, optional
+            Minimum elevation of the grid, used for mode="interpolate".
+            Defaults to the minimum mesh node z.
+        z_max : float, optional
+            Maximum elevation of the grid, used for mode="interpolate".
+            Defaults to the maximum mesh node z.
+
+        Returns
+        -------
+        Dataset
+            The extracted vertical section. Its geometry is a vertical
+            [](`mikeio.Grid2D`) for mode="interpolate" and a
+            [](`mikeio.spatial.GeometryFMVerticalProfile`) for mode="discrete".
+
+        Examples
+        --------
+        >>> ds = mikeio.read("oresund_sigma_z.dfsu")
+        >>> section = ds.extract_vertical(xs=[350000, 360000], ys=[6150000, 6160000])
+
+        """
+        zn = self[0]._zn
+        geometry, zn_out, values = _extract_vertical(
+            geometry=self.geometry,
+            zn=zn,
+            values=[da.to_numpy() for da in self],
+            mode=mode,
+            xs=xs,
+            ys=ys,
+            layer_min=layer_min,
+            layer_max=layer_max,
+            n_horizontal=n_horizontal,
+            n_vertical=n_vertical,
+            z_min=z_min,
+            z_max=z_max,
+        )
+        das = [
+            DataArray(
+                data=values[i],
+                time=self.time,
+                geometry=geometry,
+                item=deepcopy(da.item),
+                zn=zn_out,
+            )
+            for i, da in enumerate(self)
+        ]
+        return Dataset(das)
 
     def interp_time(
         self,
