@@ -148,6 +148,113 @@ def test_index_with_attribute() -> None:
     )  # This is now modfied, but both methods points to the same object
 
 
+def test_item_named_like_reserved_property(tmp_path: Path) -> None:
+    # An item whose safe-name matches a read-only Dataset property (e.g. the
+    # z-coordinate accessor) must not crash construction by shadowing it.
+    # Regression for the read-only `z` property added in #977: dfs0 files can
+    # carry a vertical-coordinate item literally named "z".
+    time = pd.date_range(start=datetime(2000, 1, 1), freq="s", periods=3)
+    da_z = mikeio.DataArray(name="z", data=np.zeros(3), time=time)
+    da_foo = mikeio.DataArray(name="Foo", data=np.ones(3), time=time)
+
+    ds = mikeio.Dataset([da_z, da_foo])
+
+    # item is reachable via indexing
+    assert ds["z"].name == "z"
+    # the reserved attribute still resolves to the z-accessor, not the item
+    assert ds.z is not ds["z"]
+
+    # survives a dfs0 round-trip (the exact modelskill failure path)
+    fp = tmp_path / "z_item.dfs0"
+    ds.to_dfs(fp)
+    ds2 = mikeio.read(fp)
+    assert ds2["z"].name == "z"
+
+
+def test_item_named_like_reserved_method() -> None:
+    # An item whose safe-name matches a Dataset method (e.g. "mean") must not
+    # shadow the method on the instance; the method stays callable and the item
+    # is reachable via indexing.
+    time = pd.date_range(start=datetime(2000, 1, 1), freq="s", periods=3)
+    da_mean = mikeio.DataArray(name="mean", data=np.arange(3.0), time=time)
+
+    ds = mikeio.Dataset([da_mean])
+
+    assert ds["mean"].name == "mean"
+    # ds.mean is the aggregation method, not the item
+    reduced = ds.mean(axis="time")
+    assert isinstance(reduced, Dataset)
+
+
+def test_item_named_like_instance_attr() -> None:
+    # The collision guard must also cover instance attributes set in __init__
+    # (plot, title, _data_vars), not just class members — an item named "plot"
+    # would otherwise clobber the DatasetPlotter and break ds.plot.scatter(...).
+    time = pd.date_range(start=datetime(2000, 1, 1), freq="s", periods=3)
+    da = mikeio.DataArray(name="Foo", data=np.ones(3), time=time)
+
+    ds = mikeio.Dataset([da])
+    # add an item named "plot" after construction (routes through _set_name_attr)
+    ds["plot"] = mikeio.DataArray(name="plot", data=np.zeros(3), time=time)
+
+    # the item is reachable via indexing
+    assert ds["plot"].name == "plot"
+    # ds.plot is still the plotter, not the item
+    assert ds.plot is not ds["plot"]
+
+
+def test_aggregate_over_items_produces_method_named_item() -> None:
+    # aggregate(axis="items") names the result after the aggregation function
+    # ("nanmean"), which collides with Dataset.nanmean. This is the documented
+    # operation the ADR cites as the reason the collision skip is silent.
+    time = pd.date_range(start=datetime(2000, 1, 1), freq="s", periods=3)
+    ds = mikeio.Dataset(
+        [
+            mikeio.DataArray(name="A", data=np.ones(3), time=time),
+            mikeio.DataArray(name="B", data=np.zeros(3), time=time),
+        ]
+    )
+
+    agg = ds.aggregate(axis="items")
+
+    assert "nanmean" in agg.names
+    assert agg["nanmean"].name == "nanmean"  # item reachable by key
+    assert callable(agg.nanmean)  # method not shadowed by the item
+
+
+def test_rename_item_into_reserved_name() -> None:
+    # rename routes through _del_name_attr (old name) and _set_name_attr (new
+    # name); renaming an item to a method-like name must not shadow the method.
+    time = pd.date_range(start=datetime(2000, 1, 1), freq="s", periods=3)
+    ds = mikeio.Dataset([mikeio.DataArray(name="Foo", data=np.ones(3), time=time)])
+
+    ds2 = ds.rename({"Foo": "mean"})
+
+    assert ds2["mean"].name == "mean"  # item reachable by key
+    assert callable(ds2.mean)  # method not shadowed by the renamed item
+
+
+def test_init_instance_attrs_are_collision_protected() -> None:
+    # Drift guard: every non-item attribute __init__ sets on the instance (plot,
+    # title, ...) must be protected from being clobbered by an item of the same
+    # name. The reservation list is maintained by hand; if a new instance
+    # attribute is added to __init__ without reserving it, this test fails.
+    time = pd.date_range(start=datetime(2000, 1, 1), freq="s", periods=3)
+    base = mikeio.Dataset([mikeio.DataArray(name="Foo", data=np.ones(3), time=time)])
+    # instance attributes that are not the item dict and not items themselves
+    instance_attrs = set(vars(base)) - set(base.names) - {"_data_vars"}
+    assert instance_attrs  # sanity: there is something to protect (plot, title)
+
+    for attr in instance_attrs:
+        original_type = type(getattr(base, attr))
+        ds = mikeio.Dataset([mikeio.DataArray(name="Foo", data=np.ones(3), time=time)])
+        ds[attr] = mikeio.DataArray(name=attr, data=np.zeros(3), time=time)
+        # the real instance attribute is preserved, not replaced by the item
+        assert type(getattr(ds, attr)) is original_type
+        # and the item is still reachable by key
+        assert ds[attr].name == attr
+
+
 def test_getitem_time_string_not_supported(ds3: Dataset) -> None:
     # time = pd.date_range("2000-1-2", freq="h", periods=100)
 
