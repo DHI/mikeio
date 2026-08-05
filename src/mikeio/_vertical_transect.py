@@ -6,6 +6,7 @@ import numpy as np
 from mikecore.DfsuFile import DfsuFileType
 
 from .spatial import (
+    GeometryFM2D,
     GeometryFM3D,
     GeometryFMVerticalProfile,
     Grid2D,
