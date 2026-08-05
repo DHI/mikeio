@@ -6,7 +6,6 @@ import numpy as np
 from mikecore.DfsuFile import DfsuFileType
 
 from .spatial import (
-    GeometryFM2D,
     GeometryFM3D,
     GeometryFMVerticalProfile,
     Grid2D,
@@ -147,7 +146,7 @@ def _segment_intersection(
     return None
 
 
-def _mesh_edges(geometry2d: GeometryFM3D) -> np.ndarray:
+def _mesh_edges(geometry2d: GeometryFM2D) -> np.ndarray:
     edges = set()
     for el in geometry2d.element_table:
         n = len(el)
@@ -157,7 +156,7 @@ def _mesh_edges(geometry2d: GeometryFM3D) -> np.ndarray:
     return np.array(sorted(edges), dtype=np.int64)
 
 
-def _find_col(geometry2d: GeometryFM3D, x: float, y: float) -> int:
+def _find_col(geometry2d: GeometryFM2D, x: float, y: float) -> int:
     try:
         return int(np.atleast_1d(geometry2d.find_index(x=x, y=y))[0])
     except Exception:
@@ -165,7 +164,7 @@ def _find_col(geometry2d: GeometryFM3D, x: float, y: float) -> int:
 
 
 def _transect_crossings(
-    pts: np.ndarray, geometry2d: GeometryFM3D
+    pts: np.ndarray, geometry2d: GeometryFM2D
 ) -> tuple[np.ndarray, np.ndarray]:
     """Split the transect at every 2D face crossing so each segment lies inside
     one 2D column.
@@ -178,7 +177,7 @@ def _transect_crossings(
     ea, eb = nodes[edges[:, 0]], nodes[edges[:, 1]]
     emin = np.minimum(ea, eb)
     emax = np.maximum(ea, eb)
-
+    
     rows: list[tuple[float, float, float]] = []
     base = 0.0
     for i in range(len(pts) - 1):
@@ -201,7 +200,7 @@ def _transect_crossings(
                 rows.append((base + np.hypot(*(ip - p1)), ip[0], ip[1]))
         base += np.hypot(*(p2 - p1))
     rows.append((base, pts[-1][0], pts[-1][1]))
-
+    
     arr = np.array(rows)
     arr = arr[np.argsort(arr[:, 0])]
     keep = [0]
@@ -209,7 +208,7 @@ def _transect_crossings(
         if arr[k, 0] - arr[keep[-1], 0] > 1e-9 * max(base, 1.0):
             keep.append(k)
     stations = arr[keep, 1:3]
-
+    
     seg_col = np.array(
         [
             _find_col(geometry2d, *(0.5 * (stations[c] + stations[c + 1])))
