@@ -90,6 +90,20 @@ independent of each other unless stated.
 
 Work on a branch and open a PR — never commit to `main`.
 
+| # | Item | Issue |
+|---|---|---|
+| 1 | Close the docs-CI gap for source-only changes | [#996](https://github.com/DHI/mikeio/issues/996) |
+| 2 | Add frontmatter descriptions to every documentation page | [#997](https://github.com/DHI/mikeio/issues/997) |
+| 3 | Build the agent-eval harness | [#998](https://github.com/DHI/mikeio/issues/998) |
+| 4 | Run and commit the baseline | [#999](https://github.com/DHI/mikeio/issues/999) |
+| 5 | Write `src/mikeio/AGENTS.md` | [#1000](https://github.com/DHI/mikeio/issues/1000) |
+| 6 | Decide the length budget and the test-data index, by measurement | [#1001](https://github.com/DHI/mikeio/issues/1001) |
+| 7 | Make the recipes executable and CI-enforced | [#1002](https://github.com/DHI/mikeio/issues/1002) |
+| 8 | Ship `AGENTS.md` in the wheel and point to it from the package | [#1003](https://github.com/DHI/mikeio/issues/1003) |
+| 9 | Serve the same content from the docs site | [#1004](https://github.com/DHI/mikeio/issues/1004) |
+| 10 | Re-run the eval and publish the delta | [#1005](https://github.com/DHI/mikeio/issues/1005) |
+| 11 | Institutionalise it | [#1006](https://github.com/DHI/mikeio/issues/1006) |
+
 ## Phase 0 — Foundations
 
 These are independent of the eval, cheap, and useful on their own. Do them first.
