@@ -5,6 +5,7 @@ from typing import Any, Literal
 from collections.abc import Sequence
 
 import numpy as np
+from numpy.typing import NDArray
 import pandas as pd
 from tqdm import tqdm
 
@@ -21,6 +22,7 @@ from ._dfs import (
     _get_item_info,
     _valid_item_numbers,
     _valid_timesteps,
+    _write_custom_blocks,
     write_dfs_data,
 )
 from ..eum import TimeStepUnit
@@ -82,6 +84,8 @@ def _write_dfs2_header(filename: str | Path, ds: Dataset, title: str = "") -> Df
             DfsSimpleType.Float,
             item.data_value_type,
         )
+
+    _write_custom_blocks(builder, ds)
 
     try:
         builder.CreateFile(str(filename))
@@ -245,6 +249,7 @@ class Dfs2(_Dfs123):
             items=items,
             geometry=geometry,
             title=self.title,
+            custom_blocks=self._custom_blocks,
             validate=False,
         )
 
@@ -328,3 +333,22 @@ class Dfs2(_Dfs123):
     def title(self) -> str:
         """Title of the dfs2 file."""
         return self._title
+
+    @property
+    def custom_blocks(self) -> dict[str, NDArray[Any]]:
+        """Custom blocks of the dfs2 file header, as name -> 1-D array.
+
+        Read from the header only, so the land value of a large bathymetry can be
+        inspected without reading its data. See
+        [](`mikeio.Dataset.custom_blocks`) for the meaning of the values and for
+        how to change them.
+
+        Examples
+        --------
+        ```{python}
+        import mikeio
+        mikeio.Dfs2("../data/waves.dfs2").custom_blocks
+        ```
+
+        """
+        return self._custom_blocks

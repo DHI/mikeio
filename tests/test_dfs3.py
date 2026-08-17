@@ -310,3 +310,21 @@ def test_write_with_title(tmp_path: Path) -> None:
     # Read back and verify title
     newdfs = mikeio.Dfs3(fp)
     assert newdfs.title == custom_title
+
+
+def test_dfs3_dataset_has_no_custom_blocks() -> None:
+    """Grid1.dfs3 carries an M21_Misc block, but only dfs2 exposes them."""
+    ds = mikeio.read("tests/testdata/Grid1.dfs3")
+
+    assert ds.custom_blocks == {}
+
+
+def test_write_dfs3_warns_and_drops_custom_blocks(tmp_path: Path) -> None:
+    ds = mikeio.read("tests/testdata/Grid1.dfs3")
+    ds.custom_blocks["Mine"] = np.array([1.0], dtype=np.float32)
+
+    fp = tmp_path / "with_blocks.dfs3"
+    with pytest.warns(UserWarning, match="only written for dfs2, not dfs3"):
+        ds.to_dfs(fp)
+
+    assert mikeio.Dfs3(fp)._custom_blocks == {}

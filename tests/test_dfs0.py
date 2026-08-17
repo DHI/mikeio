@@ -749,3 +749,21 @@ def test_temporal_selection_neq_time() -> None:
     assert dfs.n_timesteps == 22
     with pytest.raises(IndexError):
         ds1 = dfs.read(time=[0, 23])
+
+
+def test_dfs0_dataset_has_no_custom_blocks() -> None:
+    """sw_points.dfs0 carries an M21_Misc block, but only dfs2 exposes them."""
+    ds = mikeio.read("tests/testdata/sw_points.dfs0")
+
+    assert ds.custom_blocks == {}
+
+
+def test_write_dfs0_warns_and_drops_custom_blocks(tmp_path: Path) -> None:
+    ds = mikeio.read("tests/testdata/random.dfs0")
+    ds.custom_blocks["Mine"] = np.array([1.0], dtype=np.float32)
+
+    fp = tmp_path / "with_blocks.dfs0"
+    with pytest.warns(UserWarning, match="only written for dfs2, not dfs0"):
+        ds.to_dfs(fp)
+
+    assert mikeio.read(fp).n_items == ds.n_items

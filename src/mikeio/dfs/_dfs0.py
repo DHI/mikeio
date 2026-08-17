@@ -14,7 +14,11 @@ from mikecore.eum import eumQuantity
 
 from .. import __dfs_version__
 from ..dataset import Dataset, DataArray
-from ._dfs import _get_item_info, _valid_item_numbers
+from ._dfs import (
+    _get_item_info,
+    _valid_item_numbers,
+    _warn_custom_blocks_not_written,
+)
 from ..eum import EUMType, EUMUnit, ItemInfo, TimeStepUnit, ItemInfoList
 from .._time import DateTimeSelector
 
@@ -26,6 +30,8 @@ def write_dfs0(
     dtype: DfsSimpleType | np.float32 | np.float64 = DfsSimpleType.Float,
 ) -> None:
     filename = str(filename)
+
+    _warn_custom_blocks_not_written(dataset, "dfs0")
 
     factory = DfsFactory()
     builder = DfsBuilder.Create(title, "mikeio", __dfs_version__)

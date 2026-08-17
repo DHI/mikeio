@@ -1,5 +1,6 @@
 from pathlib import Path
 import datetime
+import warnings
 from matplotlib import pyplot as plt
 import numpy as np
 import pandas as pd
@@ -789,6 +790,11 @@ def is_header_unchanged_on_read_write(tmp_path: Path, filename: str) -> None:
     )
     assert b.items == a.items
 
+    assert b.custom_blocks.keys() == a.custom_blocks.keys()
+    for name, values in a.custom_blocks.items():
+        np.testing.assert_array_equal(b.custom_blocks[name], values)
+        assert b.custom_blocks[name].dtype == values.dtype
+
 
 def test_read_write_header_unchanged_utm_not_rotated(tmp_path: Path) -> None:
     is_header_unchanged_on_read_write(tmp_path, "utm_not_rotated_neurope_temp.dfs2")
@@ -939,3 +945,321 @@ def test_append_mismatch_geometry(tmp_path: Path) -> None:
     dfs = mikeio.Dfs2(new_filename)
     with pytest.raises(ValueError, match="geometry"):
         dfs.append(ds2)
+
+
+# === Custom blocks ===
+#
+# tests/testdata inventory used below:
+#   BW_Ronne_Layout1998_rotated.dfs2  M21_Misc float32[7], land value 5.0
+#   hd_vertical_slice.dfs2            M21_Misc float32[7], land value 10.0
+#   gebco_sound.dfs2                  no custom blocks
+
+M21_MISC = "M21_Misc"
+ROTATED = "tests/testdata/BW_Ronne_Layout1998_rotated.dfs2"
+NO_BLOCKS = "tests/testdata/gebco_sound.dfs2"
+
+
+def test_read_custom_blocks_from_file_object() -> None:
+    dfs = mikeio.Dfs2(ROTATED)
+
+    assert list(dfs.custom_blocks) == [M21_MISC]
+    block = dfs.custom_blocks[M21_MISC]
+    assert block.dtype == np.float32
+    assert block.size == 7
+    assert block[0] == pytest.approx(-22.5)  # orientation
+    assert block[2] == pytest.approx(-900.0)  # geographic flag
+    assert block[3] == pytest.approx(5.0)  # land value
+
+
+def test_read_custom_blocks_on_dataset() -> None:
+    ds = mikeio.read(ROTATED)
+
+    assert ds.custom_blocks.keys() == mikeio.Dfs2(ROTATED).custom_blocks.keys()
+    assert ds.custom_blocks[M21_MISC][3] == pytest.approx(5.0)
+
+
+def test_custom_blocks_empty_when_file_has_none() -> None:
+    assert mikeio.read(NO_BLOCKS).custom_blocks == {}
+    assert mikeio.Dfs2(NO_BLOCKS).custom_blocks == {}
+
+
+def test_custom_block_values_usable_after_file_is_closed() -> None:
+    """mikecore returns views over memory the dfs library frees on Close()."""
+    ds = mikeio.read(ROTATED)
+    block = ds.custom_blocks[M21_MISC]
+
+    assert block.flags.owndata
+    # Writing into a stale view would corrupt freed memory rather than raise, so
+    # the real assertion is that the source file is untouched afterwards.
+    block[3] = 1234.0
+    assert mikeio.Dfs2(ROTATED).custom_blocks[M21_MISC][3] == pytest.approx(5.0)
+
+
+def test_set_land_value_and_write(tmp_path: Path) -> None:
+    """The use case of issue #283: set the MIKE 21 land value of a dfs2."""
+    ds = mikeio.read(ROTATED)
+    ds.custom_blocks[M21_MISC][3] = -12.5
+
+    fp = tmp_path / "land_value.dfs2"
+    ds.to_dfs(fp)
+
+    assert mikeio.Dfs2(fp).custom_blocks[M21_MISC][3] == pytest.approx(-12.5)
+
+
+def test_add_custom_block_to_file_without_one(tmp_path: Path) -> None:
+    ds = mikeio.read(NO_BLOCKS)
+    values = np.array([327, 0.2, -900, 10, 0, 0, 0], dtype=np.float32)
+    ds.custom_blocks[M21_MISC] = values
+
+    fp = tmp_path / "gebco_with_block.dfs2"
+    ds.to_dfs(fp)
+
+    back = mikeio.Dfs2(fp).custom_blocks
+    assert list(back) == [M21_MISC]
+    np.testing.assert_array_equal(back[M21_MISC], values)
+    assert back[M21_MISC].dtype == np.float32
+
+
+def test_write_multiple_custom_blocks_preserves_order(tmp_path: Path) -> None:
+    ds = mikeio.read(NO_BLOCKS)
+    ds.custom_blocks = {
+        "PADDLE PROPERTIES": np.array([0.5, 0.0], dtype=np.float32),
+        "MODEL SCALE": np.array([1.0], dtype=np.float32),
+        "COUNTS": np.array([1, 2, 3], dtype=np.int32),
+    }
+
+    fp = tmp_path / "multi.dfs2"
+    ds.to_dfs(fp)
+
+    back = mikeio.Dfs2(fp).custom_blocks
+    assert list(back) == ["PADDLE PROPERTIES", "MODEL SCALE", "COUNTS"]
+    assert back["COUNTS"].dtype == np.int32
+
+
+@pytest.mark.parametrize(
+    "dtype", [np.float32, np.float64, np.int8, np.uint16, np.int32, np.uint32]
+)
+def test_custom_block_dtype_roundtrip(tmp_path: Path, dtype: type) -> None:
+    ds = mikeio.read(NO_BLOCKS)
+    values: np.ndarray = np.array([1, 2, 3], dtype=dtype)
+    ds.custom_blocks["B"] = values
+
+    fp = tmp_path / f"dtype_{np.dtype(dtype).name}.dfs2"
+    ds.to_dfs(fp)
+
+    back = mikeio.Dfs2(fp).custom_blocks["B"]
+    assert back.dtype == np.dtype(dtype)
+    np.testing.assert_array_equal(back, values)
+
+
+def test_int16_custom_block_reads_back_as_uint16(tmp_path: Path) -> None:
+    """Documents a known mikecore bug: Short is read as c_uint16.
+
+    Writing is correct; the read path picks the wrong ctype, so negative values
+    wrap. int16 is accepted rather than rejected because the dfs format supports
+    it - the docstring of Dataset.custom_blocks tells users to prefer int32.
+    """
+    ds = mikeio.read(NO_BLOCKS)
+    ds.custom_blocks["B"] = np.array([-2, -1, 0, 1], dtype=np.int16)
+
+    fp = tmp_path / "int16.dfs2"
+    ds.to_dfs(fp)
+
+    back = mikeio.Dfs2(fp).custom_blocks["B"]
+    assert back.dtype == np.uint16
+    np.testing.assert_array_equal(back, [65534, 65535, 0, 1])
+
+
+@pytest.mark.parametrize(
+    "values,expected",
+    [
+        pytest.param(
+            np.arange(10, dtype=np.float32)[::2], [0, 2, 4, 6, 8], id="non_contiguous"
+        ),
+        pytest.param(np.array([1, 2, 3], dtype=">f4"), [1, 2, 3], id="byteswapped"),
+    ],
+)
+def test_write_awkwardly_laid_out_custom_block(
+    tmp_path: Path, values: np.ndarray, expected: list[float]
+) -> None:
+    """The dfs C library takes the raw data pointer, ignoring strides and order."""
+    ds = mikeio.read(NO_BLOCKS)
+
+    # via the property setter: normalized immediately
+    ds.custom_blocks = {"S": values}
+    assert ds.custom_blocks["S"].flags.c_contiguous
+    assert ds.custom_blocks["S"].dtype.isnative
+
+    fp = tmp_path / "normalized_by_setter.dfs2"
+    ds.to_dfs(fp)
+    np.testing.assert_array_equal(mikeio.Dfs2(fp).custom_blocks["S"], expected)
+
+    # via the dict itself, which bypasses the setter: normalized on write
+    ds._custom_blocks["S"] = values
+    fp2 = tmp_path / "normalized_by_writer.dfs2"
+    ds.to_dfs(fp2)
+    np.testing.assert_array_equal(mikeio.Dfs2(fp2).custom_blocks["S"], expected)
+
+
+@pytest.mark.parametrize(
+    "values,match",
+    [
+        pytest.param(np.zeros(3, dtype=np.int64), "unsupported dtype", id="dtype"),
+        pytest.param(np.zeros((2, 2), dtype=np.float32), "1-dimensional", id="2d"),
+        pytest.param(np.array([], dtype=np.float32), "must not be empty", id="empty"),
+    ],
+)
+def test_invalid_custom_block_in_dict_raises_on_write(
+    tmp_path: Path, values: np.ndarray, match: str
+) -> None:
+    """Assigning into the dict skips the setter, so the writer must re-validate."""
+    ds = mikeio.read(NO_BLOCKS)
+    ds.custom_blocks["B"] = values
+
+    with pytest.raises(ValueError, match=match):
+        ds.to_dfs(tmp_path / "invalid.dfs2")
+
+
+def test_custom_block_mutated_to_invalid_state_raises_on_write(
+    tmp_path: Path,
+) -> None:
+    ds = mikeio.read(NO_BLOCKS)
+    ds.custom_blocks = {"B": np.array([1.0, 2.0], dtype=np.float32)}
+    ds.custom_blocks["B"] = ds.custom_blocks["B"].reshape(2, 1)
+
+    with pytest.raises(ValueError, match="1-dimensional"):
+        ds.to_dfs(tmp_path / "invalid.dfs2")
+
+
+def test_custom_blocks_dropped_when_geometry_type_changes(tmp_path: Path) -> None:
+    ds = mikeio.read(ROTATED)
+    assert ds.custom_blocks
+
+    assert ds.isel(y=0).custom_blocks == {}  # Grid2D -> Grid1D
+    assert ds.isel(y=0).isel(x=0).custom_blocks == {}  # Grid1D -> Geometry0D
+    assert ds.mean(axis="space").custom_blocks == {}
+
+    fp = tmp_path / "no_stale_block.dfs1"
+    with warnings.catch_warnings():
+        warnings.simplefilter("error")  # nothing to warn about: already dropped
+        ds.isel(y=0).to_dfs(fp)
+    assert mikeio.Dfs1(fp)._custom_blocks == {}
+
+
+def test_custom_blocks_kept_when_geometry_type_preserved() -> None:
+    ds = mikeio.read(ROTATED)
+    expected = ds.custom_blocks[M21_MISC]
+
+    for derived in (
+        ds.isel(time=0),
+        ds.isel(x=slice(0, 3)),
+        ds.sel(time=ds.time[0]),
+        ds.fillna(0.0),
+        ds.dropna(),
+        ds * 2,
+        ds + ds,
+        ds[[0]],
+        ds.copy(),
+        ds.max(axis="time"),
+    ):
+        np.testing.assert_array_equal(derived.custom_blocks[M21_MISC], expected)
+
+
+def test_derived_dataset_gets_an_independent_copy() -> None:
+    ds = mikeio.read(ROTATED)
+    sub = ds.isel(time=0)
+
+    sub.custom_blocks[M21_MISC][3] = 999.0
+
+    assert ds.custom_blocks[M21_MISC][3] == pytest.approx(5.0)
+
+
+def test_read_area_subset_keeps_custom_blocks() -> None:
+    """None of the M21_Misc fields depends on the grid extent."""
+    dfs = mikeio.Dfs2("tests/testdata/waves.dfs2")
+    ds = dfs.read(area=(0.0, 0.0, 500.0, 500.0))
+
+    assert ds.geometry.nx < dfs.geometry.nx
+    np.testing.assert_array_equal(
+        ds.custom_blocks[M21_MISC], dfs.custom_blocks[M21_MISC]
+    )
+
+
+def test_append_does_not_touch_custom_blocks(tmp_path: Path) -> None:
+    ds = mikeio.read(ROTATED)
+    fp = tmp_path / "appended.dfs2"
+    ds.to_dfs(fp)
+
+    dfs = mikeio.Dfs2(fp)
+    dfs.append(ds)
+
+    np.testing.assert_array_equal(
+        mikeio.Dfs2(fp).custom_blocks[M21_MISC], ds.custom_blocks[M21_MISC]
+    )
+
+
+def test_dataarray_to_dfs_writes_no_custom_blocks(tmp_path: Path) -> None:
+    """DataArray has no dataset-level metadata, so nothing to write."""
+    da = mikeio.read(ROTATED)[0]
+    fp = tmp_path / "from_dataarray.dfs2"
+    da.to_dfs(fp)
+
+    assert mikeio.Dfs2(fp).custom_blocks == {}
+
+
+class _FakeBlock:
+    """Stand-in for mikecore.DfsCustomBlock."""
+
+    def __init__(self, name: str, values: np.ndarray) -> None:
+        self.Name = name
+        self.Values = values
+
+
+class _FakeFileInfo:
+    def __init__(self, blocks: list[_FakeBlock]) -> None:
+        self.CustomBlocks = blocks
+
+
+def test_reading_custom_blocks_is_lenient() -> None:
+    """A foreign writer's odd block must not make the whole file unreadable."""
+    from mikeio.dfs._dfs import _read_custom_blocks
+
+    good = np.array([1.0, 2.0], dtype=np.float32)
+    file_info = _FakeFileInfo(
+        [
+            _FakeBlock("Good", good),
+            _FakeBlock("Empty", np.array([], dtype=np.float32)),
+            _FakeBlock("", np.array([1.0], dtype=np.float32)),
+            _FakeBlock("Wide", np.zeros((2, 2), dtype=np.float32)),
+            _FakeBlock("Good", np.array([9.0], dtype=np.float32)),
+        ]
+    )
+
+    with pytest.warns(UserWarning) as record:
+        blocks = _read_custom_blocks(file_info)  # type: ignore[arg-type]
+
+    assert list(blocks) == ["Good"]
+    np.testing.assert_array_equal(blocks["Good"], good)  # first occurrence wins
+    assert len(record) == 4
+
+
+def test_read_custom_blocks_copies_the_values() -> None:
+    """mikecore's values are views over memory the dfs library frees on Close()."""
+    from mikeio.dfs._dfs import _read_custom_blocks
+
+    values = np.array([1.0, 2.0], dtype=np.float32)
+    blocks = _read_custom_blocks(_FakeFileInfo([_FakeBlock("B", values)]))  # type: ignore[arg-type]
+
+    assert blocks["B"] is not values
+    assert blocks["B"].flags.owndata
+
+
+def test_dataarray_to_dataset_then_set_custom_blocks(tmp_path: Path) -> None:
+    da = mikeio.read(NO_BLOCKS)[0]
+    ds = da.to_dataset()
+    ds.custom_blocks[M21_MISC] = np.array([0, 0, -900, -10, 0, 0, 0], dtype=np.float32)
+
+    fp = tmp_path / "from_dataarray_ds.dfs2"
+    ds.to_dfs(fp)
+
+    assert mikeio.Dfs2(fp).custom_blocks[M21_MISC][3] == pytest.approx(-10.0)

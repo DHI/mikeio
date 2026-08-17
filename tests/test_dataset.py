@@ -1,5 +1,6 @@
 from pathlib import Path
 from datetime import datetime
+from typing import Any
 import numpy as np
 import pandas as pd
 import pytest
@@ -1664,3 +1665,238 @@ def test_title_not_in_repr_when_empty() -> None:
         items=[ItemInfo("X")],
     )
     assert "title:" not in repr(ds)
+
+
+# === Custom block tests ===
+
+
+def _tiny_ds(**kwargs: Any) -> Dataset:
+    return Dataset.from_numpy(
+        data=[np.zeros(5)],
+        time=pd.date_range("2000", periods=5, freq="s"),
+        items=[ItemInfo("X")],
+        **kwargs,
+    )
+
+
+@pytest.fixture
+def blocks_ds() -> Dataset:
+    """Grid2D dataset with a custom block, so isel(y=0) changes the geometry type."""
+    nt, ny, nx = 6, 3, 4
+    data = [np.zeros([nt, ny, nx]) + 0.1, np.zeros([nt, ny, nx]) + 0.2]
+    return Dataset.from_numpy(
+        data=data,
+        time=pd.date_range(start=datetime(2000, 1, 1), freq="s", periods=nt),
+        items=[ItemInfo("Foo"), ItemInfo("Bar")],
+        geometry=mikeio.Grid2D(nx=nx, dx=1.0, ny=ny, dy=1.0, projection="UTM-33"),
+        title="Test Title",
+        custom_blocks={
+            "M21_Misc": np.array([0, 0, -900, 10, 0, 0, 0], dtype=np.float32)
+        },
+    )
+
+
+def test_custom_blocks_default_empty() -> None:
+    assert _tiny_ds().custom_blocks == {}
+
+
+def test_custom_blocks_setter_replaces_all(blocks_ds: Dataset) -> None:
+    blocks_ds.custom_blocks = {"Other": np.array([1.0], dtype=np.float32)}
+    assert list(blocks_ds.custom_blocks) == ["Other"]
+
+    blocks_ds.custom_blocks = {}
+    assert blocks_ds.custom_blocks == {}
+
+
+def test_custom_blocks_setter_copies_the_input_array() -> None:
+    values = np.array([1.0, 2.0], dtype=np.float32)
+    ds = _tiny_ds(custom_blocks={"B": values})
+
+    values[0] = 99.0
+
+    assert ds.custom_blocks["B"][0] == pytest.approx(1.0)
+
+
+def test_custom_blocks_setter_coerces_sequence() -> None:
+    ds = _tiny_ds()
+    ds.custom_blocks = {"B": [1.0, 2.0]}
+
+    assert isinstance(ds.custom_blocks["B"], np.ndarray)
+    assert ds.custom_blocks["B"].dtype == np.float64
+
+
+@pytest.mark.parametrize(
+    "values,match",
+    [
+        pytest.param(np.zeros(3, dtype=np.int64), "unsupported dtype", id="int64"),
+        pytest.param(np.zeros(3, dtype=np.uint64), "unsupported dtype", id="uint64"),
+        pytest.param(np.zeros(3, dtype=np.float16), "unsupported dtype", id="float16"),
+        pytest.param(np.zeros(3, dtype=bool), "unsupported dtype", id="bool"),
+        pytest.param(
+            np.zeros(3, dtype=np.complex64), "unsupported dtype", id="complex64"
+        ),
+        pytest.param([1, 2, 3], "unsupported dtype", id="int_list_becomes_int64"),
+        pytest.param(["a", "b"], "unsupported dtype", id="str_list"),
+        pytest.param(np.zeros((2, 2), dtype=np.float32), "1-dimensional", id="2d"),
+        pytest.param(np.float32(1.0), "1-dimensional", id="scalar"),
+        pytest.param(np.array([], dtype=np.float32), "must not be empty", id="empty"),
+    ],
+)
+def test_custom_blocks_setter_rejects_bad_values(
+    blocks_ds: Dataset, values: Any, match: str
+) -> None:
+    with pytest.raises(ValueError, match=match):
+        blocks_ds.custom_blocks = {"B": values}
+
+
+@pytest.mark.parametrize(
+    "name,match",
+    [
+        pytest.param("", "must not be empty", id="empty"),
+        pytest.param("Ærø", "must be ASCII", id="non_ascii"),
+        pytest.param("a\x00b", "must not contain NUL", id="nul"),
+    ],
+)
+def test_custom_blocks_setter_rejects_bad_names(
+    blocks_ds: Dataset, name: str, match: str
+) -> None:
+    with pytest.raises(ValueError, match=match):
+        blocks_ds.custom_blocks = {name: np.array([1.0], dtype=np.float32)}
+
+
+def test_custom_blocks_setter_rejects_non_str_name(blocks_ds: Dataset) -> None:
+    with pytest.raises(TypeError, match="must be a str"):
+        blocks_ds.custom_blocks = {1: np.array([1.0], dtype=np.float32)}  # type: ignore[dict-item]
+
+
+def test_custom_blocks_long_name_is_allowed(blocks_ds: Dataset) -> None:
+    """The dfs library imposes no name length limit, so neither does MIKE IO."""
+    name = "N" * 300
+    blocks_ds.custom_blocks = {name: np.array([1.0], dtype=np.float32)}
+
+    assert list(blocks_ds.custom_blocks) == [name]
+
+
+def test_custom_blocks_editable_in_place(blocks_ds: Dataset) -> None:
+    blocks_ds.custom_blocks["M21_Misc"][3] = -5.0
+    assert blocks_ds.custom_blocks["M21_Misc"][3] == pytest.approx(-5.0)
+
+    blocks_ds.custom_blocks["New"] = np.array([1.0], dtype=np.float32)
+    assert sorted(blocks_ds.custom_blocks) == ["M21_Misc", "New"]
+
+    del blocks_ds.custom_blocks["M21_Misc"]
+    assert list(blocks_ds.custom_blocks) == ["New"]
+
+
+def test_custom_blocks_preserved_isel_time(blocks_ds: Dataset) -> None:
+    assert blocks_ds.isel(time=0).custom_blocks.keys() == {"M21_Misc"}
+    assert blocks_ds.isel(time=slice(0, 3)).custom_blocks.keys() == {"M21_Misc"}
+
+
+def test_custom_blocks_preserved_isel_slice(blocks_ds: Dataset) -> None:
+    assert blocks_ds.isel(x=slice(0, 2)).custom_blocks.keys() == {"M21_Misc"}
+
+
+def test_custom_blocks_preserved_sel(blocks_ds: Dataset) -> None:
+    assert blocks_ds.sel(time=blocks_ds.time[0]).custom_blocks.keys() == {"M21_Misc"}
+
+
+def test_custom_blocks_preserved_fillna(blocks_ds: Dataset) -> None:
+    assert blocks_ds.fillna(0.0).custom_blocks.keys() == {"M21_Misc"}
+
+
+def test_custom_blocks_preserved_dropna(blocks_ds: Dataset) -> None:
+    assert blocks_ds.dropna().custom_blocks.keys() == {"M21_Misc"}
+
+
+def test_custom_blocks_preserved_interp_time(blocks_ds: Dataset) -> None:
+    assert blocks_ds.interp_time(dt=2).custom_blocks.keys() == {"M21_Misc"}
+
+
+def test_custom_blocks_preserved_aggregate_over_time(blocks_ds: Dataset) -> None:
+    assert blocks_ds.aggregate(axis="time").custom_blocks.keys() == {"M21_Misc"}
+    assert blocks_ds.aggregate(axis="items").custom_blocks.keys() == {"M21_Misc"}
+
+
+def test_custom_blocks_preserved_quantile(blocks_ds: Dataset) -> None:
+    assert blocks_ds.quantile(q=0.5, axis="time").custom_blocks.keys() == {"M21_Misc"}
+    assert blocks_ds.quantile(q=[0.25, 0.75]).custom_blocks.keys() == {"M21_Misc"}
+
+
+def test_custom_blocks_preserved_concat(blocks_ds: Dataset) -> None:
+    ds2 = blocks_ds.copy()
+    ds2.time = pd.date_range(start=datetime(2000, 1, 2), freq="s", periods=6)
+    assert Dataset.concat([blocks_ds, ds2]).custom_blocks.keys() == {"M21_Misc"}
+
+
+def test_custom_blocks_preserved_merge(blocks_ds: Dataset) -> None:
+    merged = Dataset.merge([blocks_ds[["Foo"]], blocks_ds[["Bar"]]])
+    assert merged.custom_blocks.keys() == {"M21_Misc"}
+
+
+def test_custom_blocks_preserved_arithmetic(blocks_ds: Dataset) -> None:
+    assert (blocks_ds + 1).custom_blocks.keys() == {"M21_Misc"}
+    assert (blocks_ds * 2).custom_blocks.keys() == {"M21_Misc"}
+    assert (blocks_ds - blocks_ds).custom_blocks.keys() == {"M21_Misc"}
+
+
+def test_custom_blocks_preserved_getitem(blocks_ds: Dataset) -> None:
+    assert blocks_ds[["Foo"]].custom_blocks.keys() == {"M21_Misc"}
+
+    # a wildcard key returns a Dataset at runtime, though it is typed as DataArray
+    matched: Any = blocks_ds["F*"]
+    assert matched.custom_blocks.keys() == {"M21_Misc"}
+
+
+def test_custom_blocks_preserved_rename(blocks_ds: Dataset) -> None:
+    assert blocks_ds.rename({"Foo": "Baz"}).custom_blocks.keys() == {"M21_Misc"}
+
+
+def test_custom_blocks_preserved_copy(blocks_ds: Dataset) -> None:
+    assert blocks_ds.copy().custom_blocks.keys() == {"M21_Misc"}
+
+
+def test_custom_blocks_dropped_when_geometry_type_changes(blocks_ds: Dataset) -> None:
+    assert blocks_ds.isel(y=0).custom_blocks == {}  # Grid2D -> Grid1D
+    assert blocks_ds.mean(axis="space").custom_blocks == {}  # -> Geometry0D
+    assert blocks_ds.interp(x=1.0, y=1.0).custom_blocks == {}
+
+
+def test_custom_blocks_of_derived_dataset_are_independent(blocks_ds: Dataset) -> None:
+    for derived in (blocks_ds.copy(), blocks_ds.isel(time=0), blocks_ds * 2):
+        derived.custom_blocks["M21_Misc"][3] = 999.0
+        assert blocks_ds.custom_blocks["M21_Misc"][3] == pytest.approx(10.0)
+
+        derived.custom_blocks["Extra"] = np.array([1.0], dtype=np.float32)
+        assert "Extra" not in blocks_ds.custom_blocks
+
+
+def test_custom_blocks_not_in_repr(blocks_ds: Dataset) -> None:
+    """Deliberately not shown: most MIKE 21 dfs2 files carry an M21_Misc block."""
+    assert "custom" not in repr(blocks_ds).lower()
+
+
+def test_item_named_custom_blocks_does_not_clobber_property() -> None:
+    ds = Dataset.from_numpy(
+        data=[np.zeros(5)],
+        time=pd.date_range("2000", periods=5, freq="s"),
+        items=[ItemInfo("custom blocks")],
+        custom_blocks={"B": np.array([1.0], dtype=np.float32)},
+    )
+
+    assert isinstance(ds.custom_blocks, dict)
+    assert ds.custom_blocks.keys() == {"B"}
+    assert isinstance(ds["custom blocks"], mikeio.DataArray)
+
+
+def test_item_named_like_the_backing_store_does_not_clobber_it() -> None:
+    """_to_safe_name(" custom blocks") is "_custom_blocks"."""
+    ds = Dataset.from_numpy(
+        data=[np.zeros(5)],
+        time=pd.date_range("2000", periods=5, freq="s"),
+        items=[ItemInfo(" custom blocks")],
+        custom_blocks={"B": np.array([1.0], dtype=np.float32)},
+    )
+
+    assert ds.custom_blocks.keys() == {"B"}
+    assert isinstance(ds[" custom blocks"], mikeio.DataArray)

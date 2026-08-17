@@ -159,6 +159,7 @@ The Dataset (and DataArray) has several properties:
 * timestep - Time step in seconds (if is_equidistant)
 * shape - Shape of each item
 * deletevalue - File delete value (NaN value)
+* custom_blocks - Custom blocks of the dfs2 file header, e.g. the MIKE 21 land value (see [Dfs2](dfs2.qmd#custom-blocks))
 
 ## Methods
 

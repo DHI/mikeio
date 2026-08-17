@@ -17,6 +17,7 @@ from ._dfs import (
     _get_item_info,
     _valid_item_numbers,
     _valid_timesteps,
+    _warn_custom_blocks_not_written,
     write_dfs_data,
 )
 from ..eum import TimeStepUnit
@@ -29,6 +30,8 @@ def write_dfs1(filename: str | Path, ds: Dataset, title: str = "") -> None:
 
 
 def _write_dfs1_header(filename: str | Path, ds: Dataset, title: str) -> DfsFile:
+    _warn_custom_blocks_not_written(ds, "dfs1")
+
     builder = DfsBuilder.Create(title, "mikeio", __dfs_version__)
     builder.SetDataType(0)
 

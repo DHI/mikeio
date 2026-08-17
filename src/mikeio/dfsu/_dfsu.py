@@ -25,6 +25,7 @@ from ..dfs._dfs import (
     _read_item_time_step,
     _valid_item_numbers,
     _valid_timesteps,
+    _warn_custom_blocks_not_written,
 )
 from ..spatial import (
     GeometryFM2D,
@@ -47,8 +48,17 @@ def write_dfsu(filename: str | Path, data: Dataset, title: str = "") -> None:
     title: str, optional
         Title of the dfsu file (default: "")
 
+    Notes
+    -----
+    Custom blocks cannot be written to a dfsu file: mikecore's DfsuBuilder
+    generates the only dfsu block, "MIKE_FM", from the geometry itself and offers
+    no way to add others. A non-empty *data.custom_blocks* is dropped with a
+    warning.
+
     """
     filename = str(filename)
+
+    _warn_custom_blocks_not_written(data, "dfsu")
 
     geometry = data.geometry
     dfsu_filetype = DfsuFileType.Dfsu2D
