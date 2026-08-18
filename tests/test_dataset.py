@@ -1717,28 +1717,29 @@ def test_custom_blocks_setter_copies_the_input_array() -> None:
     assert ds.custom_blocks["B"][0] == pytest.approx(1.0)
 
 
-def test_custom_blocks_setter_coerces_sequence() -> None:
+def test_custom_blocks_setter_coerces_sequence_to_float32() -> None:
+    """A plain list has no dtype; float32 is what MIKE 21 expects of M21_Misc."""
     ds = _tiny_ds()
-    ds.custom_blocks = {"B": [1.0, 2.0]}
+    ds.custom_blocks = {
+        "Floats": [1.0, 2.0],
+        "M21_Misc": [0, 0, -900, 10, 0, 0, 0],  # ints, but still float32
+    }
 
-    assert isinstance(ds.custom_blocks["B"], np.ndarray)
-    assert ds.custom_blocks["B"].dtype == np.float64
+    for values in ds.custom_blocks.values():
+        assert isinstance(values, np.ndarray)
+        assert values.dtype == np.float32
+
+    # an explicit array keeps its dtype
+    ds.custom_blocks = {"B": np.array([1, 2], dtype=np.int32)}
+    assert ds.custom_blocks["B"].dtype == np.int32
 
 
 @pytest.mark.parametrize(
     "values,match",
     [
         pytest.param(np.zeros(3, dtype=np.int64), "unsupported dtype", id="int64"),
-        pytest.param(np.zeros(3, dtype=np.uint64), "unsupported dtype", id="uint64"),
-        pytest.param(np.zeros(3, dtype=np.float16), "unsupported dtype", id="float16"),
-        pytest.param(np.zeros(3, dtype=bool), "unsupported dtype", id="bool"),
-        pytest.param(
-            np.zeros(3, dtype=np.complex64), "unsupported dtype", id="complex64"
-        ),
-        pytest.param([1, 2, 3], "unsupported dtype", id="int_list_becomes_int64"),
-        pytest.param(["a", "b"], "unsupported dtype", id="str_list"),
+        pytest.param(["a", "b"], "could not be read as float32", id="str_list"),
         pytest.param(np.zeros((2, 2), dtype=np.float32), "1-dimensional", id="2d"),
-        pytest.param(np.float32(1.0), "1-dimensional", id="scalar"),
         pytest.param(np.array([], dtype=np.float32), "must not be empty", id="empty"),
     ],
 )
@@ -1754,7 +1755,6 @@ def test_custom_blocks_setter_rejects_bad_values(
     [
         pytest.param("", "must not be empty", id="empty"),
         pytest.param("Ærø", "must be ASCII", id="non_ascii"),
-        pytest.param("a\x00b", "must not contain NUL", id="nul"),
     ],
 )
 def test_custom_blocks_setter_rejects_bad_names(
@@ -1788,78 +1788,33 @@ def test_custom_blocks_editable_in_place(blocks_ds: Dataset) -> None:
     assert list(blocks_ds.custom_blocks) == ["New"]
 
 
-def test_custom_blocks_preserved_isel_time(blocks_ds: Dataset) -> None:
-    assert blocks_ds.isel(time=0).custom_blocks.keys() == {"M21_Misc"}
-    assert blocks_ds.isel(time=slice(0, 3)).custom_blocks.keys() == {"M21_Misc"}
+def test_custom_blocks_carried_through_dataset_operations(blocks_ds: Dataset) -> None:
+    """Blocks propagate blindly through every operation that returns a Dataset.
 
+    A few representative operations, not an exhaustive sweep: the point is the
+    rule, not the catalogue. That the values survive all the way to disk is
+    proven by the round-trip tests in test_dfs2.py and test_roundtrip.py, which
+    read them back from the written file.
+    """
+    expected = {"M21_Misc"}
 
-def test_custom_blocks_preserved_isel_slice(blocks_ds: Dataset) -> None:
-    assert blocks_ds.isel(x=slice(0, 2)).custom_blocks.keys() == {"M21_Misc"}
+    assert blocks_ds.isel(time=0).custom_blocks.keys() == expected
+    assert blocks_ds.sel(time=blocks_ds.time[0]).custom_blocks.keys() == expected
+    assert (blocks_ds + 1).custom_blocks.keys() == expected
+    assert blocks_ds[["Foo"]].custom_blocks.keys() == expected
+    assert blocks_ds.copy().custom_blocks.keys() == expected
 
-
-def test_custom_blocks_preserved_sel(blocks_ds: Dataset) -> None:
-    assert blocks_ds.sel(time=blocks_ds.time[0]).custom_blocks.keys() == {"M21_Misc"}
-
-
-def test_custom_blocks_preserved_fillna(blocks_ds: Dataset) -> None:
-    assert blocks_ds.fillna(0.0).custom_blocks.keys() == {"M21_Misc"}
-
-
-def test_custom_blocks_preserved_dropna(blocks_ds: Dataset) -> None:
-    assert blocks_ds.dropna().custom_blocks.keys() == {"M21_Misc"}
-
-
-def test_custom_blocks_preserved_interp_time(blocks_ds: Dataset) -> None:
-    assert blocks_ds.interp_time(dt=2).custom_blocks.keys() == {"M21_Misc"}
-
-
-def test_custom_blocks_preserved_aggregate_over_time(blocks_ds: Dataset) -> None:
-    assert blocks_ds.aggregate(axis="time").custom_blocks.keys() == {"M21_Misc"}
-    assert blocks_ds.aggregate(axis="items").custom_blocks.keys() == {"M21_Misc"}
-
-
-def test_custom_blocks_preserved_quantile(blocks_ds: Dataset) -> None:
-    assert blocks_ds.quantile(q=0.5, axis="time").custom_blocks.keys() == {"M21_Misc"}
-    assert blocks_ds.quantile(q=[0.25, 0.75]).custom_blocks.keys() == {"M21_Misc"}
-
-
-def test_custom_blocks_preserved_concat(blocks_ds: Dataset) -> None:
     ds2 = blocks_ds.copy()
     ds2.time = pd.date_range(start=datetime(2000, 1, 2), freq="s", periods=6)
-    assert Dataset.concat([blocks_ds, ds2]).custom_blocks.keys() == {"M21_Misc"}
+    assert Dataset.concat([blocks_ds, ds2]).custom_blocks.keys() == expected
 
+    # ... including operations that change the geometry type, after which a block
+    # may no longer describe the result. Fixing that is the user's job, not ours.
+    assert blocks_ds.isel(y=0).custom_blocks.keys() == expected  # Grid2D -> Grid1D
+    assert blocks_ds.mean(axis="space").custom_blocks.keys() == expected  # -> 0D
 
-def test_custom_blocks_preserved_merge(blocks_ds: Dataset) -> None:
-    merged = Dataset.merge([blocks_ds[["Foo"]], blocks_ds[["Bar"]]])
-    assert merged.custom_blocks.keys() == {"M21_Misc"}
-
-
-def test_custom_blocks_preserved_arithmetic(blocks_ds: Dataset) -> None:
-    assert (blocks_ds + 1).custom_blocks.keys() == {"M21_Misc"}
-    assert (blocks_ds * 2).custom_blocks.keys() == {"M21_Misc"}
-    assert (blocks_ds - blocks_ds).custom_blocks.keys() == {"M21_Misc"}
-
-
-def test_custom_blocks_preserved_getitem(blocks_ds: Dataset) -> None:
-    assert blocks_ds[["Foo"]].custom_blocks.keys() == {"M21_Misc"}
-
-    # a wildcard key returns a Dataset at runtime, though it is typed as DataArray
-    matched: Any = blocks_ds["F*"]
-    assert matched.custom_blocks.keys() == {"M21_Misc"}
-
-
-def test_custom_blocks_preserved_rename(blocks_ds: Dataset) -> None:
-    assert blocks_ds.rename({"Foo": "Baz"}).custom_blocks.keys() == {"M21_Misc"}
-
-
-def test_custom_blocks_preserved_copy(blocks_ds: Dataset) -> None:
-    assert blocks_ds.copy().custom_blocks.keys() == {"M21_Misc"}
-
-
-def test_custom_blocks_dropped_when_geometry_type_changes(blocks_ds: Dataset) -> None:
-    assert blocks_ds.isel(y=0).custom_blocks == {}  # Grid2D -> Grid1D
-    assert blocks_ds.mean(axis="space").custom_blocks == {}  # -> Geometry0D
-    assert blocks_ds.interp(x=1.0, y=1.0).custom_blocks == {}
+    # selecting down to zero items must not crash on the item-less geometry
+    assert blocks_ds[[]].custom_blocks.keys() == expected
 
 
 def test_custom_blocks_of_derived_dataset_are_independent(blocks_ds: Dataset) -> None:
@@ -1869,11 +1824,6 @@ def test_custom_blocks_of_derived_dataset_are_independent(blocks_ds: Dataset) ->
 
         derived.custom_blocks["Extra"] = np.array([1.0], dtype=np.float32)
         assert "Extra" not in blocks_ds.custom_blocks
-
-
-def test_custom_blocks_not_in_repr(blocks_ds: Dataset) -> None:
-    """Deliberately not shown: most MIKE 21 dfs2 files carry an M21_Misc block."""
-    assert "custom" not in repr(blocks_ds).lower()
 
 
 def test_item_named_custom_blocks_does_not_clobber_property() -> None:

@@ -77,12 +77,16 @@ def _as_custom_block_array(name: str, values: Any) -> NDArray[Any]:
     is therefore rejected here, at assignment time, rather than deep inside
     mikecore when the file is created.
 
+    An ndarray keeps its dtype; anything else is read as float32, which is what
+    MIKE 21 expects of the one block most users will ever write.
+
     Parameters
     ----------
     name:
         Name of the custom block, used in error messages.
     values:
-        Values of the custom block.
+        Values of the custom block. An ndarray of a supported dtype, or any
+        sequence that can be read as float32.
 
     Returns
     -------
@@ -102,7 +106,22 @@ def _as_custom_block_array(name: str, values: Any) -> NDArray[Any]:
     if "\x00" in name:
         raise ValueError(f"Custom block name must not contain NUL, got {name!r}")
 
-    arr = np.asarray(values)
+    if isinstance(values, np.ndarray):
+        arr = values
+    else:
+        # A plain sequence carries no dtype, and numpy's default (float64, or int64
+        # for an integer literal) is wrong for the block MIKE 21 actually writes:
+        # M21_Misc is seven float32 values. Coerce rather than reject, so that
+        # ds.custom_blocks["M21_Misc"] = [0, 0, -900, 10, 0, 0, 0] just works.
+        try:
+            arr = np.asarray(values, dtype=np.float32)
+        except (TypeError, ValueError) as e:
+            raise ValueError(
+                f"Custom block {name!r} could not be read as float32 values: {e}. "
+                "Pass an explicit array for another dtype, "
+                "e.g. np.array([...], dtype=np.int32)"
+            ) from e
+
     if arr.dtype.name not in _CUSTOM_BLOCK_DTYPES:
         raise ValueError(
             f"Custom block {name!r} has unsupported dtype '{arr.dtype}'. "
@@ -411,57 +430,36 @@ class Dataset:
 
     @property
     def custom_blocks(self) -> dict[str, NDArray[Any]]:
-        """Custom blocks of the dfs2 file header, as name -> 1-D array.
+        """Custom blocks of the dfs file header, as name -> 1-D array.
 
-        Custom blocks are named arrays that MIKE products store verbatim in the
-        dfs file header. The best-known one is "M21_Misc", written by MIKE 21
-        into dfs2 bathymetries as seven float32 values:
-
-        | index | meaning                                             |
-        |-------|-----------------------------------------------------|
-        | 0     | grid orientation (degrees)                          |
-        | 1     | drying depth                                        |
-        | 2     | -900 if the file holds geographic coordinates       |
-        | 3     | **land value**                                      |
-        | 4-6   | unused                                              |
-
-        Populated when reading a dfs2 file and written back by *to_dfs*. The
-        arrays are ordinary numpy arrays and may be edited in place. MIKE IO
-        stores them verbatim and never interprets or updates their contents, so
-        if you change the geometry, values inside a block - such as the
-        orientation - are yours to keep consistent.
-
-        The dtype of each array decides the type it is stored as on disk and is
-        preserved on round-trip. Supported dtypes are float32, float64, int8,
-        int16, uint16, int32 and uint32; anything else is rejected rather than
-        silently converted. MIKE 21 expects "M21_Misc" as float32, so build it
-        with an explicit dtype: `np.array([...], dtype=np.float32)`.
-
-        Notes
-        -----
-        Custom blocks describe the file header rather than the data, so they are
-        only carried through operations that keep the geometry type. `isel(time=0)`
-        keeps them; `isel(y=0)` turns a Grid2D Dataset into a Grid1D one that
-        would be written as dfs1, where a dfs2 "M21_Misc" is stale, so they are
-        dropped. Re-attach them explicitly if you know better:
-        `ds2.custom_blocks = ds.custom_blocks`.
-
-        Only dfs2 is supported. Datasets read from dfs0, dfs1, dfs3 and dfsu
-        report no custom blocks, and writing them to those file types drops them
-        with a warning. For dfsu it cannot be otherwise: its only block,
-        "MIKE_FM", is generated from the geometry by mikecore, which offers no way
-        to add others. Use [](`mikeio.generic`) if you need to keep the blocks of
-        a non-dfs2 file - those functions copy the whole header, custom blocks
-        included.
-
-        An int16 block reads back as uint16 because of a bug in mikecore's read
-        path, which corrupts negative values. Prefer int32.
+        Read from and written back to dfs0, dfs1, dfs2 and dfs3 files; dfsu
+        cannot hold them. The arrays are ordinary numpy arrays and may be edited
+        in place; MIKE IO stores them verbatim and carries them through every
+        Dataset operation without checking that they still apply. Supported
+        dtypes are float32, float64, int8, int16, uint16, int32 and uint32; a
+        plain sequence carries no dtype and is stored as float32. See the
+        [dfs2 user guide](../user-guide/dfs2.qmd#custom-blocks) for MIKE 21's
+        "M21_Misc" block and the caveats.
 
         Examples
         --------
         ```{python}
         import mikeio
         ds = mikeio.read("../data/waves.dfs2")
+        ds.custom_blocks
+        ```
+
+        Set the MIKE 21 land value, index 3 of "M21_Misc":
+
+        ```{python}
+        ds.custom_blocks["M21_Misc"][3] = -10.0
+        ```
+
+        Add a new block, with a dtype other than float32:
+
+        ```{python}
+        import numpy as np
+        ds.custom_blocks["Counts"] = np.array([1, 2, 3], dtype=np.int32)
         ds.custom_blocks
         ```
 
@@ -477,12 +475,10 @@ class Dataset:
     def _inherit_custom_blocks(self, ds: Dataset) -> Dataset:
         """Carry custom blocks over to a Dataset derived from this one.
 
-        Blocks are only valid while the geometry type is unchanged: a change of
-        geometry type is a change of target dfs file type, where the block would
-        be stale (a Grid2D "M21_Misc" means nothing in the dfs1 that
-        `isel(y=0)` writes). The drop is silent, for the same reason
-        `_set_name_attr` collisions are silent - it happens on routine, correct
-        code, and `Dataset.custom_blocks` documents the rule.
+        Copied unconditionally, mirroring `generic._clone`, which copies a dfs
+        file's custom blocks verbatim regardless of what else changes. A block
+        can end up describing a geometry it no longer matches; MIKE IO does not
+        detect or fix that, and `Dataset.custom_blocks` documents the rule.
 
         Parameters
         ----------
@@ -495,9 +491,7 @@ class Dataset:
             The same *ds*, for use as a return value at the call site.
 
         """
-        # The empty check short-circuits the common case and avoids touching the
-        # geometry property, which would raise on an item-less Dataset.
-        if self._custom_blocks and type(ds.geometry) is type(self.geometry):
+        if self._custom_blocks:
             ds._custom_blocks = {k: v.copy() for k, v in self._custom_blocks.items()}
         return ds
 
@@ -1285,7 +1279,7 @@ class Dataset:
 
         interpolant = self.geometry.get_2d_interpolant(xy, **kwargs)
         das = [da.interp_like(geom, interpolant=interpolant) for da in self]
-        ds = Dataset(das, validate=False)
+        ds = self._inherit_custom_blocks(Dataset(das, validate=False))
 
         if time is not None:
             ds = ds.interp_time(time)
@@ -1964,9 +1958,9 @@ class Dataset:
 
         Notes
         -----
-        Custom blocks (see the *custom_blocks* property) are written for dfs2 only.
-        For every other file type a non-empty *custom_blocks* is dropped with a
-        warning.
+        Custom blocks (see the *custom_blocks* property) are written for dfs0,
+        dfs1, dfs2 and dfs3. dfsu cannot hold them; a non-empty *custom_blocks*
+        is dropped with a warning when writing a dfsu file.
 
         """
         from ..dfs._dfs0 import write_dfs0

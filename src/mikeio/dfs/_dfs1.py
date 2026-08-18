@@ -7,6 +7,7 @@ from mikecore.DfsFile import DfsFile, DfsSimpleType
 from mikecore.DfsFileFactory import DfsFileFactory
 from mikecore.eum import eumQuantity, eumUnit
 import numpy as np
+from numpy.typing import NDArray
 import pandas as pd
 from tqdm import tqdm
 
@@ -17,7 +18,7 @@ from ._dfs import (
     _get_item_info,
     _valid_item_numbers,
     _valid_timesteps,
-    _warn_custom_blocks_not_written,
+    _write_custom_blocks,
     write_dfs_data,
 )
 from ..eum import TimeStepUnit
@@ -30,8 +31,6 @@ def write_dfs1(filename: str | Path, ds: Dataset, title: str = "") -> None:
 
 
 def _write_dfs1_header(filename: str | Path, ds: Dataset, title: str) -> DfsFile:
-    _warn_custom_blocks_not_written(ds, "dfs1")
-
     builder = DfsBuilder.Create(title, "mikeio", __dfs_version__)
     builder.SetDataType(0)
 
@@ -66,6 +65,8 @@ def _write_dfs1_header(filename: str | Path, ds: Dataset, title: str) -> DfsFile
             DfsSimpleType.Float,
             item.data_value_type,
         )
+
+    _write_custom_blocks(builder, ds)
 
     try:
         builder.CreateFile(str(filename))
@@ -182,6 +183,7 @@ class Dfs1(_Dfs123):
             items=items,
             geometry=self.geometry,
             title=self.title,
+            custom_blocks=self._custom_blocks,
             validate=False,
             dt=self._timestep,
         )
@@ -210,3 +212,14 @@ class Dfs1(_Dfs123):
     def title(self) -> str:
         """Title of the dfs1 file."""
         return self._title
+
+    @property
+    def custom_blocks(self) -> dict[str, NDArray[Any]]:
+        """Custom blocks of the dfs1 file header, as name -> 1-D array.
+
+        Read from the header only. Returns a fresh copy on every access, so
+        mutating the result has no effect on this object or on a later
+        *read()*. See [](`mikeio.Dataset.custom_blocks`) for the meaning of the
+        values and for how to change them.
+        """
+        return {k: v.copy() for k, v in self._custom_blocks.items()}

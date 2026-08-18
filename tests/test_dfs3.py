@@ -1,4 +1,5 @@
 from pathlib import Path
+import warnings
 import pytest
 import numpy as np
 
@@ -312,19 +313,21 @@ def test_write_with_title(tmp_path: Path) -> None:
     assert newdfs.title == custom_title
 
 
-def test_dfs3_dataset_has_no_custom_blocks() -> None:
-    """Grid1.dfs3 carries an M21_Misc block, but only dfs2 exposes them."""
+def test_dfs3_custom_blocks_roundtrip(tmp_path: Path) -> None:
+    """Grid1.dfs3 carries an M21_Misc block, which survives a round-trip."""
     ds = mikeio.read("tests/testdata/Grid1.dfs3")
 
-    assert ds.custom_blocks == {}
+    assert list(ds.custom_blocks) == ["M21_Misc"]
+    assert mikeio.Dfs3("tests/testdata/Grid1.dfs3").custom_blocks.keys() == {"M21_Misc"}
 
-
-def test_write_dfs3_warns_and_drops_custom_blocks(tmp_path: Path) -> None:
-    ds = mikeio.read("tests/testdata/Grid1.dfs3")
     ds.custom_blocks["Mine"] = np.array([1.0], dtype=np.float32)
 
     fp = tmp_path / "with_blocks.dfs3"
-    with pytest.warns(UserWarning, match="only written for dfs2, not dfs3"):
+    with warnings.catch_warnings():
+        warnings.simplefilter("error")
         ds.to_dfs(fp)
 
-    assert mikeio.Dfs3(fp)._custom_blocks == {}
+    back = mikeio.Dfs3(fp).custom_blocks
+    assert back.keys() == ds.custom_blocks.keys()
+    for name, values in ds.custom_blocks.items():
+        np.testing.assert_array_equal(back[name], values)

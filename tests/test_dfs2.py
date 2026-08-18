@@ -1020,6 +1020,38 @@ def test_add_custom_block_to_file_without_one(tmp_path: Path) -> None:
     assert back[M21_MISC].dtype == np.float32
 
 
+def test_add_custom_block_from_a_plain_list(tmp_path: Path) -> None:
+    """The documented way to set a land value: a list, stored as float32.
+
+    MIKE 21 wants M21_Misc as float32, and a list carries no dtype, so numpy's
+    int64/float64 default would be wrong. The setter converts on assignment;
+    assigning into the dict bypasses it, and the conversion happens on write
+    instead - either way MIKE 21 gets its float32.
+    """
+    expected = [0, 0, -900, -10, 0, 0, 0]
+
+    ds = mikeio.read(NO_BLOCKS)
+    ds.custom_blocks = {M21_MISC: expected}
+    assert ds.custom_blocks[M21_MISC].dtype == np.float32
+
+    fp = tmp_path / "gebco_from_list.dfs2"
+    ds.to_dfs(fp)
+    back = mikeio.Dfs2(fp).custom_blocks[M21_MISC]
+    assert back.dtype == np.float32
+    np.testing.assert_array_equal(back, expected)
+
+    # the dict is typed as name -> array, so this needs an ignore, but a list
+    # reaching the writer is still normalized rather than written as garbage
+    ds2 = mikeio.read(NO_BLOCKS)
+    ds2.custom_blocks[M21_MISC] = expected  # type: ignore[assignment]
+
+    fp2 = tmp_path / "gebco_from_list_via_dict.dfs2"
+    ds2.to_dfs(fp2)
+    back2 = mikeio.Dfs2(fp2).custom_blocks[M21_MISC]
+    assert back2.dtype == np.float32
+    np.testing.assert_array_equal(back2, expected)
+
+
 def test_write_multiple_custom_blocks_preserves_order(tmp_path: Path) -> None:
     ds = mikeio.read(NO_BLOCKS)
     ds.custom_blocks = {
@@ -1057,7 +1089,7 @@ def test_int16_custom_block_reads_back_as_uint16(tmp_path: Path) -> None:
 
     Writing is correct; the read path picks the wrong ctype, so negative values
     wrap. int16 is accepted rather than rejected because the dfs format supports
-    it - the docstring of Dataset.custom_blocks tells users to prefer int32.
+    it - the dfs2 user guide tells users to prefer int32.
     """
     ds = mikeio.read(NO_BLOCKS)
     ds.custom_blocks["B"] = np.array([-2, -1, 0, 1], dtype=np.int16)
@@ -1131,38 +1163,29 @@ def test_custom_block_mutated_to_invalid_state_raises_on_write(
         ds.to_dfs(tmp_path / "invalid.dfs2")
 
 
-def test_custom_blocks_dropped_when_geometry_type_changes(tmp_path: Path) -> None:
-    ds = mikeio.read(ROTATED)
-    assert ds.custom_blocks
+def test_custom_blocks_carried_to_disk_even_when_geometry_type_changes(
+    tmp_path: Path,
+) -> None:
+    """Blocks propagate blindly, values intact, even once they no longer match.
 
-    assert ds.isel(y=0).custom_blocks == {}  # Grid2D -> Grid1D
-    assert ds.isel(y=0).isel(x=0).custom_blocks == {}  # Grid1D -> Geometry0D
-    assert ds.mean(axis="space").custom_blocks == {}
-
-    fp = tmp_path / "no_stale_block.dfs1"
-    with warnings.catch_warnings():
-        warnings.simplefilter("error")  # nothing to warn about: already dropped
-        ds.isel(y=0).to_dfs(fp)
-    assert mikeio.Dfs1(fp)._custom_blocks == {}
-
-
-def test_custom_blocks_kept_when_geometry_type_preserved() -> None:
+    The write at the end is the point: a Grid2D M21_Misc lands verbatim in the
+    dfs1 that isel(y=0) produces. Whether that block still means anything there
+    is the user's call, not MIKE IO's.
+    """
     ds = mikeio.read(ROTATED)
     expected = ds.custom_blocks[M21_MISC]
 
-    for derived in (
-        ds.isel(time=0),
-        ds.isel(x=slice(0, 3)),
-        ds.sel(time=ds.time[0]),
-        ds.fillna(0.0),
-        ds.dropna(),
-        ds * 2,
-        ds + ds,
-        ds[[0]],
-        ds.copy(),
-        ds.max(axis="time"),
-    ):
+    for derived in (ds.isel(time=0), ds * 2, ds.copy()):  # geometry type kept
         np.testing.assert_array_equal(derived.custom_blocks[M21_MISC], expected)
+
+    for derived in (ds.isel(y=0), ds.mean(axis="space")):  # and changed
+        np.testing.assert_array_equal(derived.custom_blocks[M21_MISC], expected)
+
+    fp = tmp_path / "stale_block.dfs1"
+    with warnings.catch_warnings():
+        warnings.simplefilter("error")  # dfs1 writes it like any other file type
+        ds.isel(y=0).to_dfs(fp)
+    np.testing.assert_array_equal(mikeio.Dfs1(fp).custom_blocks[M21_MISC], expected)
 
 
 def test_derived_dataset_gets_an_independent_copy() -> None:

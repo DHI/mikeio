@@ -176,7 +176,7 @@ def _valid_timesteps(
                 raise ValueError("All elements in time_steps must be integers.")
             if not all(0 <= i < nt for i in time_steps):  # type: ignore
                 raise ValueError(
-                    f"All elements in time_steps must be in the range of 0 to {nt-1}."
+                    f"All elements in time_steps must be in the range of 0 to {nt - 1}."
                 )
             return False, list(time_steps)  # type: ignore
 
@@ -309,32 +309,6 @@ def _read_custom_blocks(file_info: DfsFileInfo) -> dict[str, NDArray[Any]]:
     return blocks
 
 
-def _warn_custom_blocks_not_written(ds: Dataset, file_type: str) -> None:
-    """Warn that a Dataset's custom blocks are dropped by this writer.
-
-    Only dfs2 writes custom blocks. A Dataset read from any other file type has
-    none, so this only fires when they were set deliberately - in which case
-    dropping them silently would be the very failure mode this feature exists to
-    remove.
-
-    Parameters
-    ----------
-    ds:
-        Dataset about to be written.
-    file_type:
-        File type being written, used in the warning message, e.g. "dfs1".
-
-    """
-    if ds.custom_blocks:
-        warnings.warn(
-            f"Custom blocks are only written for dfs2, not {file_type}, and will "
-            f"be dropped: {sorted(ds.custom_blocks)}. Use ds.custom_blocks.clear() "
-            "to silence this warning.",
-            UserWarning,
-            stacklevel=3,
-        )
-
-
 def _write_custom_blocks(builder: DfsBuilder, ds: Dataset) -> None:
     """Add a Dataset's custom blocks to the header of a dfs file being created.
 
@@ -435,10 +409,8 @@ class _Dfs123:
         self._orientation: float = dfs.FileInfo.Projection.Orientation
         self._deletevalue: float = dfs.FileInfo.DeleteValueFloat
         # Must happen before Close(): mikecore's block values are views over memory
-        # owned by the dfs library. Captured here for dfs1/dfs2/dfs3 alike because
-        # this is where the generic handle is closed, but only Dfs2 exposes them -
-        # dfs2 is the only file type for which they are read into and written from a
-        # Dataset (see Dataset.custom_blocks).
+        # owned by the dfs library. Captured here for dfs1/dfs2/dfs3 alike, since
+        # this is where the generic handle is closed (see Dataset.custom_blocks).
         self._custom_blocks: dict[str, NDArray[Any]] = _read_custom_blocks(dfs.FileInfo)
 
         dfs.Close()

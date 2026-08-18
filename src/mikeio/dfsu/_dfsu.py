@@ -1,4 +1,5 @@
 from __future__ import annotations
+import warnings
 from copy import deepcopy
 from dataclasses import dataclass
 from datetime import datetime
@@ -25,7 +26,6 @@ from ..dfs._dfs import (
     _read_item_time_step,
     _valid_item_numbers,
     _valid_timesteps,
-    _warn_custom_blocks_not_written,
 )
 from ..spatial import (
     GeometryFM2D,
@@ -52,13 +52,20 @@ def write_dfsu(filename: str | Path, data: Dataset, title: str = "") -> None:
     -----
     Custom blocks cannot be written to a dfsu file: mikecore's DfsuBuilder
     generates the only dfsu block, "MIKE_FM", from the geometry itself and offers
-    no way to add others. A non-empty *data.custom_blocks* is dropped with a
-    warning.
+    no way to add others. That block is MIKE's to write and not the user's to
+    modify. A non-empty *data.custom_blocks* is dropped with a warning.
 
     """
     filename = str(filename)
 
-    _warn_custom_blocks_not_written(data, "dfsu")
+    if data.custom_blocks:
+        warnings.warn(
+            "Custom blocks cannot be written to a dfsu file and will be dropped: "
+            f"{sorted(data.custom_blocks)}. Use ds.custom_blocks.clear() to "
+            "silence this warning.",
+            UserWarning,
+            stacklevel=3,  # the caller of Dataset.to_dfs
+        )
 
     geometry = data.geometry
     dfsu_filetype = DfsuFileType.Dfsu2D

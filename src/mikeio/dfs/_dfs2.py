@@ -339,9 +339,10 @@ class Dfs2(_Dfs123):
         """Custom blocks of the dfs2 file header, as name -> 1-D array.
 
         Read from the header only, so the land value of a large bathymetry can be
-        inspected without reading its data. See
-        [](`mikeio.Dataset.custom_blocks`) for the meaning of the values and for
-        how to change them.
+        inspected without reading its data. Returns a fresh copy on every access,
+        so mutating the result has no effect on this object or on a later
+        *read()*. See [](`mikeio.Dataset.custom_blocks`) for the meaning of the
+        values and for how to change them.
 
         Examples
         --------
@@ -351,4 +352,4 @@ class Dfs2(_Dfs123):
         ```
 
         """
-        return self._custom_blocks
+        return {k: v.copy() for k, v in self._custom_blocks.items()}
