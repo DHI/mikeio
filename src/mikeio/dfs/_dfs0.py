@@ -17,10 +17,9 @@ from .. import __dfs_version__
 from ..dataset import Dataset, DataArray
 from ._dfs import (
     _get_item_info,
-    _read_custom_blocks,
     _valid_item_numbers,
-    _write_custom_blocks,
 )
+from ._custom_blocks import read_custom_blocks, write_custom_blocks
 from ..eum import EUMType, EUMUnit, ItemInfo, TimeStepUnit, ItemInfoList
 from .._time import DateTimeSelector
 
@@ -67,7 +66,7 @@ def write_dfs0(
         newitem.SetAxis(factory.CreateAxisEqD0())
         builder.AddDynamicItem(newitem.GetDynamicItemInfo())
 
-    _write_custom_blocks(builder, dataset)
+    write_custom_blocks(builder, dataset.custom_blocks)
 
     builder.CreateFile(filename)
 
@@ -131,7 +130,7 @@ class Dfs0:
 
         # Must happen before Close(): mikecore's block values are views over
         # memory owned by the dfs library (see Dataset.custom_blocks).
-        self._custom_blocks: dict[str, NDArray[Any]] = _read_custom_blocks(dfs.FileInfo)
+        self._custom_blocks: dict[str, NDArray[Any]] = read_custom_blocks(dfs.FileInfo)
 
         dfs.Close()
 
@@ -208,7 +207,7 @@ class Dfs0:
             time=ftime,
             items=item_infos,
             title=self.title,
-            custom_blocks=self._custom_blocks,
+            custom_blocks=self.custom_blocks,  # a fresh copy, not this object's
             validate=False,
         )
 

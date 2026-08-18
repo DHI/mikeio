@@ -905,9 +905,8 @@ def test_interp_like_grid_time_invariant() -> None:
 
 
 def test_custom_blocks_preserved_through_interp_like() -> None:
-    """Dataset.interp_like constructs its result directly and used to skip
-    _inherit_custom_blocks entirely, unlike every other geometry-preserving
-    method."""
+    """Dataset.interp_like constructs its result directly and used to drop the
+    custom blocks entirely, unlike every other geometry-preserving method."""
     ds = mikeio.read("tests/testdata/wind_north_sea.dfsu", time=-1)
     ds.custom_blocks["Mine"] = np.array([1.0], dtype=np.float32)
     grid = ds.geometry.get_overset_grid(dx=0.1)

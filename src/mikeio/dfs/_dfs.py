@@ -9,7 +9,6 @@ import numpy as np
 from numpy.typing import NDArray
 import pandas as pd
 
-from mikecore.DfsBuilder import DfsBuilder
 from mikecore.DfsFile import (
     DfsDynamicItemInfo,
     DfsFile,
@@ -20,7 +19,7 @@ from mikecore.DfsFileFactory import DfsFileFactory
 from mikecore.Projections import Cartography
 
 from ..dataset import Dataset
-from ..dataset._dataset import _as_custom_block_array
+from ._custom_blocks import read_custom_blocks
 from ..eum import ItemInfo, ItemInfoList
 from ..exceptions import ItemsError
 from .._time import DateTimeSelector
@@ -267,71 +266,6 @@ def _get_item_info(
     return ItemInfoList(items)
 
 
-def _read_custom_blocks(file_info: DfsFileInfo) -> dict[str, NDArray[Any]]:
-    """Read the custom blocks from the header of an *open* dfs file.
-
-    Parameters
-    ----------
-    file_info:
-        FileInfo of a dfs file that has not been closed yet.
-
-    Returns
-    -------
-    dict[str, numpy.ndarray]
-        Block name -> values. The arrays are copies, safe to keep and to modify
-        after the file is closed.
-
-    Notes
-    -----
-    mikecore returns each block's values as a numpy view over memory owned by the
-    dfs C library, which is freed by DfsFile.Close(); _as_custom_block_array copies,
-    which is what makes the result safe to keep.
-
-    Reading is deliberately more permissive than writing: a file must not become
-    unreadable because it holds a block MIKE IO would refuse to write - a foreign
-    writer may well produce one. Anything that cannot be represented (a duplicate
-    name, or a block the writer would reject) is skipped with a warning instead of
-    raising.
-
-    """
-    blocks: dict[str, NDArray[Any]] = {}
-    for block in file_info.CustomBlocks:
-        if block.Name in blocks:
-            warnings.warn(
-                f"Duplicate custom block name {block.Name!r} in file; "
-                "keeping the first occurrence."
-            )
-            continue
-        try:
-            blocks[block.Name] = _as_custom_block_array(block.Name, block.Values)
-        except (TypeError, ValueError) as e:
-            warnings.warn(f"Skipping unsupported custom block in file: {e}")
-    return blocks
-
-
-def _write_custom_blocks(builder: DfsBuilder, ds: Dataset) -> None:
-    """Add a Dataset's custom blocks to the header of a dfs file being created.
-
-    Parameters
-    ----------
-    builder:
-        Builder that has not yet created the file - AddCreateCustomBlock is only
-        valid before CreateFile.
-    ds:
-        Dataset whose *custom_blocks* are written.
-
-    """
-    for name, values in ds.custom_blocks.items():
-        # The values were normalized when they were assigned, but the dict and its
-        # arrays are mutable, so re-normalize: a non-contiguous or multi-dimensional
-        # array is written as silent garbage by the dfs C library.
-        values = _as_custom_block_array(name, values)
-        # AddCreateCustomBlock derives the dfs SimpleType from the dtype and raises a
-        # clear error for an unsupported one; DfsFactory.CreateCustomBlock has no
-        # else-branch and fails with UnboundLocalError instead.
-        builder.AddCreateCustomBlock(name, values)
-
-
 def write_dfs_data(*, dfs: DfsFile, ds: Dataset, n_spatial_dims: int) -> None:
     deletevalue = dfs.FileInfo.DeleteValueFloat  # ds.deletevalue
     has_no_time = "time" not in ds.dims
@@ -411,7 +345,7 @@ class _Dfs123:
         # Must happen before Close(): mikecore's block values are views over memory
         # owned by the dfs library. Captured here for dfs1/dfs2/dfs3 alike, since
         # this is where the generic handle is closed (see Dataset.custom_blocks).
-        self._custom_blocks: dict[str, NDArray[Any]] = _read_custom_blocks(dfs.FileInfo)
+        self._custom_blocks: dict[str, NDArray[Any]] = read_custom_blocks(dfs.FileInfo)
 
         dfs.Close()
 

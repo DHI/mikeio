@@ -978,6 +978,16 @@ def test_read_custom_blocks_on_dataset() -> None:
     assert ds.custom_blocks[M21_MISC][3] == pytest.approx(5.0)
 
 
+def test_dataset_custom_blocks_do_not_alias_the_file_object() -> None:
+    dfs = mikeio.Dfs2(ROTATED)
+    ds = dfs.read()
+
+    ds.custom_blocks[M21_MISC][3] = 1234.0
+
+    assert dfs.custom_blocks[M21_MISC][3] == pytest.approx(5.0)
+    assert dfs.read().custom_blocks[M21_MISC][3] == pytest.approx(5.0)
+
+
 def test_custom_blocks_empty_when_file_has_none() -> None:
     assert mikeio.read(NO_BLOCKS).custom_blocks == {}
     assert mikeio.Dfs2(NO_BLOCKS).custom_blocks == {}
@@ -1133,6 +1143,16 @@ def test_write_awkwardly_laid_out_custom_block(
     np.testing.assert_array_equal(mikeio.Dfs2(fp2).custom_blocks["S"], expected)
 
 
+def test_custom_block_needing_no_conversion_is_stored_as_given() -> None:
+    """An array fit to be written is not replaced by a copy or a view of itself."""
+    ds = mikeio.read(NO_BLOCKS)
+    values = np.array([1.0, 2.0], dtype=np.float32)
+
+    ds.custom_blocks = {"S": values}
+
+    assert ds.custom_blocks["S"] is values
+
+
 @pytest.mark.parametrize(
     "values,match",
     [
@@ -1188,15 +1208,6 @@ def test_custom_blocks_carried_to_disk_even_when_geometry_type_changes(
     np.testing.assert_array_equal(mikeio.Dfs1(fp).custom_blocks[M21_MISC], expected)
 
 
-def test_derived_dataset_gets_an_independent_copy() -> None:
-    ds = mikeio.read(ROTATED)
-    sub = ds.isel(time=0)
-
-    sub.custom_blocks[M21_MISC][3] = 999.0
-
-    assert ds.custom_blocks[M21_MISC][3] == pytest.approx(5.0)
-
-
 def test_read_area_subset_keeps_custom_blocks() -> None:
     """None of the M21_Misc fields depends on the grid extent."""
     dfs = mikeio.Dfs2("tests/testdata/waves.dfs2")
@@ -1245,7 +1256,7 @@ class _FakeFileInfo:
 
 def test_reading_custom_blocks_is_lenient() -> None:
     """A foreign writer's odd block must not make the whole file unreadable."""
-    from mikeio.dfs._dfs import _read_custom_blocks
+    from mikeio.dfs._custom_blocks import read_custom_blocks
 
     good = np.array([1.0, 2.0], dtype=np.float32)
     file_info = _FakeFileInfo(
@@ -1259,7 +1270,7 @@ def test_reading_custom_blocks_is_lenient() -> None:
     )
 
     with pytest.warns(UserWarning) as record:
-        blocks = _read_custom_blocks(file_info)  # type: ignore[arg-type]
+        blocks = read_custom_blocks(file_info)  # type: ignore[arg-type]
 
     assert list(blocks) == ["Good"]
     np.testing.assert_array_equal(blocks["Good"], good)  # first occurrence wins
@@ -1268,10 +1279,10 @@ def test_reading_custom_blocks_is_lenient() -> None:
 
 def test_read_custom_blocks_copies_the_values() -> None:
     """mikecore's values are views over memory the dfs library frees on Close()."""
-    from mikeio.dfs._dfs import _read_custom_blocks
+    from mikeio.dfs._custom_blocks import read_custom_blocks
 
     values = np.array([1.0, 2.0], dtype=np.float32)
-    blocks = _read_custom_blocks(_FakeFileInfo([_FakeBlock("B", values)]))  # type: ignore[arg-type]
+    blocks = read_custom_blocks(_FakeFileInfo([_FakeBlock("B", values)]))  # type: ignore[arg-type]
 
     assert blocks["B"] is not values
     assert blocks["B"].flags.owndata

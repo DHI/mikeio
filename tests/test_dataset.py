@@ -1708,13 +1708,16 @@ def test_custom_blocks_setter_replaces_all(blocks_ds: Dataset) -> None:
     assert blocks_ds.custom_blocks == {}
 
 
-def test_custom_blocks_setter_copies_the_input_array() -> None:
+def test_custom_blocks_setter_keeps_the_input_array() -> None:
+    """A writable 1-D array of a supported dtype needs no conversion, so it is
+    stored as it is."""
     values = np.array([1.0, 2.0], dtype=np.float32)
     ds = _tiny_ds(custom_blocks={"B": values})
 
-    values[0] = 99.0
+    assert ds.custom_blocks["B"] is values
 
-    assert ds.custom_blocks["B"][0] == pytest.approx(1.0)
+    values[0] = 99.0
+    assert ds.custom_blocks["B"][0] == pytest.approx(99.0)
 
 
 def test_custom_blocks_setter_coerces_sequence_to_float32() -> None:
@@ -1817,13 +1820,18 @@ def test_custom_blocks_carried_through_dataset_operations(blocks_ds: Dataset) ->
     assert blocks_ds[[]].custom_blocks.keys() == expected
 
 
-def test_custom_blocks_of_derived_dataset_are_independent(blocks_ds: Dataset) -> None:
-    for derived in (blocks_ds.copy(), blocks_ds.isel(time=0), blocks_ds * 2):
-        derived.custom_blocks["M21_Misc"][3] = 999.0
-        assert blocks_ds.custom_blocks["M21_Misc"][3] == pytest.approx(10.0)
+def test_custom_blocks_of_derived_dataset_are_not_copied(blocks_ds: Dataset) -> None:
+    """A derived Dataset is handed the blocks as they are, just like the DataArrays."""
+    for derived in (blocks_ds.isel(time=0), blocks_ds * 2, blocks_ds[["Foo"]]):
+        assert derived.custom_blocks["M21_Misc"] is blocks_ds.custom_blocks["M21_Misc"]
 
+        # the dict is a new one, so adding a block does not add it to the source
         derived.custom_blocks["Extra"] = np.array([1.0], dtype=np.float32)
         assert "Extra" not in blocks_ds.custom_blocks
+
+    detached = blocks_ds.copy()  # a deep copy, unlike the operations above
+    detached.custom_blocks["M21_Misc"][3] = 999.0
+    assert blocks_ds.custom_blocks["M21_Misc"][3] == pytest.approx(10.0)
 
 
 def test_item_named_custom_blocks_does_not_clobber_property() -> None:

@@ -54,93 +54,6 @@ def _to_safe_name(name: str) -> str:
     return re.sub("_+", "_", tmp)  # Collapse multiple underscores
 
 
-# The dfs header can only store these element types (mikecore.DfsSimpleType). The
-# mapping dtype <-> SimpleType is one-to-one, so the array's dtype alone determines
-# the on-disk type and back - which is why the SimpleType is never stored separately.
-_CUSTOM_BLOCK_DTYPES = (
-    "float32",
-    "float64",
-    "int8",
-    "int16",
-    "uint16",
-    "int32",
-    "uint32",
-)
-
-
-def _as_custom_block_array(name: str, values: Any) -> NDArray[Any]:
-    """Validate a custom block and normalize it for the dfs writer.
-
-    mikecore hands the raw data pointer to the dfs C library and ignores both the
-    array's strides and its number of dimensions, so anything that is not 1-D and
-    C-contiguous is written as silent garbage. Everything that cannot be written
-    is therefore rejected here, at assignment time, rather than deep inside
-    mikecore when the file is created.
-
-    An ndarray keeps its dtype; anything else is read as float32, which is what
-    MIKE 21 expects of the one block most users will ever write.
-
-    Parameters
-    ----------
-    name:
-        Name of the custom block, used in error messages.
-    values:
-        Values of the custom block. An ndarray of a supported dtype, or any
-        sequence that can be read as float32.
-
-    Returns
-    -------
-    numpy.ndarray
-        A 1-D, C-contiguous array of native byte order.
-
-    """
-    if not isinstance(name, str):
-        raise TypeError(f"Custom block name must be a str, not {type(name).__name__}")
-    if not name:
-        raise ValueError("Custom block name must not be empty")
-    if not name.isascii():
-        raise ValueError(
-            f"Custom block name must be ASCII, got {name!r} "
-            "(the dfs library stores block names as ASCII)"
-        )
-    if "\x00" in name:
-        raise ValueError(f"Custom block name must not contain NUL, got {name!r}")
-
-    if isinstance(values, np.ndarray):
-        arr = values
-    else:
-        # A plain sequence carries no dtype, and numpy's default (float64, or int64
-        # for an integer literal) is wrong for the block MIKE 21 actually writes:
-        # M21_Misc is seven float32 values. Coerce rather than reject, so that
-        # ds.custom_blocks["M21_Misc"] = [0, 0, -900, 10, 0, 0, 0] just works.
-        try:
-            arr = np.asarray(values, dtype=np.float32)
-        except (TypeError, ValueError) as e:
-            raise ValueError(
-                f"Custom block {name!r} could not be read as float32 values: {e}. "
-                "Pass an explicit array for another dtype, "
-                "e.g. np.array([...], dtype=np.int32)"
-            ) from e
-
-    if arr.dtype.name not in _CUSTOM_BLOCK_DTYPES:
-        raise ValueError(
-            f"Custom block {name!r} has unsupported dtype '{arr.dtype}'. "
-            f"dfs supports: {', '.join(_CUSTOM_BLOCK_DTYPES)}. "
-            "Hint: np.array([...], dtype=np.float32)"
-        )
-    if arr.ndim != 1:
-        raise ValueError(
-            f"Custom block {name!r} must be 1-dimensional, got shape {arr.shape}"
-        )
-    if arr.size == 0:
-        raise ValueError(f"Custom block {name!r} must not be empty")
-
-    # np.ascontiguousarray alone would keep a non-native byte order; going through
-    # dtype.name ('float32' even for '>f4') normalizes that too. copy=True because
-    # the array is stored and may be mutated in place by the user.
-    return np.array(arr, dtype=arr.dtype.name, order="C", copy=True)
-
-
 class Dataset:
     """Dataset containing one or more DataArrays with common geometry and time.
 
@@ -434,10 +347,13 @@ class Dataset:
 
         Read from and written back to dfs0, dfs1, dfs2 and dfs3 files; dfsu
         cannot hold them. The arrays are ordinary numpy arrays and may be edited
-        in place; MIKE IO stores them verbatim and carries them through every
-        Dataset operation without checking that they still apply. Supported
-        dtypes are float32, float64, int8, int16, uint16, int32 and uint32; a
-        plain sequence carries no dtype and is stored as float32. See the
+        in place; an array you assign is stored as given, unless its dtype or
+        memory layout has to be converted first. MIKE IO stores the blocks
+        verbatim and carries them through every Dataset operation without
+        checking that they still apply - a derived Dataset shares them, as it
+        shares its data; *copy()* detaches both. Supported dtypes are float32, float64,
+        int8, int16, uint16, int32 and uint32; a plain sequence carries no dtype
+        and is stored as float32. See the
         [dfs2 user guide](../user-guide/dfs2.qmd#custom-blocks) for MIKE 21's
         "M21_Misc" block and the caveats.
 
@@ -468,32 +384,12 @@ class Dataset:
 
     @custom_blocks.setter
     def custom_blocks(self, value: Mapping[str, Any]) -> None:
-        self._custom_blocks = {
-            name: _as_custom_block_array(name, values) for name, values in value.items()
-        }
+        # Imported here, not at module level: what a custom block may hold is a
+        # property of the dfs header, so the code lives in mikeio.dfs - which
+        # imports Dataset, and is imported after mikeio.dataset by mikeio/__init__.
+        from ..dfs._custom_blocks import normalize_custom_blocks
 
-    def _inherit_custom_blocks(self, ds: Dataset) -> Dataset:
-        """Carry custom blocks over to a Dataset derived from this one.
-
-        Copied unconditionally, mirroring `generic._clone`, which copies a dfs
-        file's custom blocks verbatim regardless of what else changes. A block
-        can end up describing a geometry it no longer matches; MIKE IO does not
-        detect or fix that, and `Dataset.custom_blocks` documents the rule.
-
-        Parameters
-        ----------
-        ds:
-            The derived Dataset, modified in place and returned.
-
-        Returns
-        -------
-        Dataset
-            The same *ds*, for use as a return value at the call site.
-
-        """
-        if self._custom_blocks:
-            ds._custom_blocks = {k: v.copy() for k, v in self._custom_blocks.items()}
-        return ds
+        self._custom_blocks = normalize_custom_blocks(value)
 
     @property
     def geometry(self) -> Any:
@@ -542,8 +438,11 @@ class Dataset:
         """
         res = {name: da.fillna(value=value) for name, da in self._data_vars.items()}
 
-        return self._inherit_custom_blocks(
-            Dataset(data=res, validate=False, title=self.title)
+        return Dataset(
+            data=res,
+            validate=False,
+            title=self.title,
+            custom_blocks=self.custom_blocks,
         )
 
     def dropna(self) -> Dataset:
@@ -591,8 +490,11 @@ class Dataset:
         )
         res = {name: da.squeeze() for name, da in self._data_vars.items()}
 
-        return self._inherit_custom_blocks(
-            Dataset(data=res, validate=False, title=self.title)
+        return Dataset(
+            data=res,
+            validate=False,
+            title=self.title,
+            custom_blocks=self.custom_blocks,
         )
 
     def create_data_array(
@@ -790,8 +692,11 @@ class Dataset:
                     for k, da in self._data_vars.items()
                     if fnmatch.fnmatch(k, key)
                 }
-                return self._inherit_custom_blocks(
-                    Dataset(data=data_vars, validate=False, title=self.title)
+                return Dataset(
+                    data=data_vars,
+                    validate=False,
+                    title=self.title,
+                    custom_blocks=self.custom_blocks,
                 )
             else:
                 item_names = ",".join(self._data_vars.keys())
@@ -799,8 +704,11 @@ class Dataset:
 
         if isinstance(key, Iterable):
             data_vars = {v: self._data_vars[v] for v in key}
-            return self._inherit_custom_blocks(
-                Dataset(data=data_vars, validate=False, title=self.title)
+            return Dataset(
+                data=data_vars,
+                validate=False,
+                title=self.title,
+                custom_blocks=self.custom_blocks,
             )
 
         raise TypeError(f"indexing with a {type(key)} is not (yet) supported")
@@ -909,8 +817,11 @@ class Dataset:
             )
             for da in self
         ]
-        return self._inherit_custom_blocks(
-            Dataset(data=res, validate=False, title=self.title)
+        return Dataset(
+            data=res,
+            validate=False,
+            title=self.title,
+            custom_blocks=self.custom_blocks,
         )
 
     def sel(
@@ -992,8 +903,11 @@ class Dataset:
             da.sel(time=time, x=x, y=y, z=z, coords=coords, area=area, layers=layers)
             for da in self
         ]
-        return self._inherit_custom_blocks(
-            Dataset(data=res, validate=False, title=self.title)
+        return Dataset(
+            data=res,
+            validate=False,
+            title=self.title,
+            custom_blocks=self.custom_blocks,
         )
 
     def interp(
@@ -1074,12 +988,18 @@ class Dataset:
                 das = [da.interp(x=x, y=y, interpolant=interpolant) for da in self]
             else:
                 das = [da.interp(x=x, y=y) for da in self]
-            ds = self._inherit_custom_blocks(
-                Dataset(das, validate=False, title=self.title)
+            ds = Dataset(
+                das,
+                validate=False,
+                title=self.title,
+                custom_blocks=self.custom_blocks,
             )
         else:
-            ds = self._inherit_custom_blocks(
-                Dataset([da for da in self], validate=False, title=self.title)
+            ds = Dataset(
+                [da for da in self],
+                validate=False,
+                title=self.title,
+                custom_blocks=self.custom_blocks,
             )
 
         # interp in time
@@ -1207,7 +1127,7 @@ class Dataset:
             for da in self
         ]
 
-        return self._inherit_custom_blocks(Dataset(das, title=self.title))
+        return Dataset(das, title=self.title, custom_blocks=self.custom_blocks)
 
     def interp_na(self, axis: str = "time", **kwargs: Any) -> Dataset:
         ds = self.copy()
@@ -1279,7 +1199,7 @@ class Dataset:
 
         interpolant = self.geometry.get_2d_interpolant(xy, **kwargs)
         das = [da.interp_like(geom, interpolant=interpolant) for da in self]
-        ds = self._inherit_custom_blocks(Dataset(das, validate=False))
+        ds = Dataset(das, validate=False, custom_blocks=self.custom_blocks)
 
         if time is not None:
             ds = ds.interp_time(time)
@@ -1414,15 +1334,14 @@ class Dataset:
                     zn[idx2, :] = other._zn
                     zn[idx1, :] = self._zn
 
-        return ds._inherit_custom_blocks(
-            Dataset.from_numpy(
-                newdata,
-                time=newtime,
-                items=ds.items,
-                geometry=ds.geometry,
-                zn=zn,
-                title=ds.title,
-            )
+        return Dataset.from_numpy(
+            newdata,
+            time=newtime,
+            items=ds.items,
+            geometry=ds.geometry,
+            zn=zn,
+            title=ds.title,
+            custom_blocks=ds.custom_blocks,
         )
 
     def _check_n_items(self, other: Dataset) -> None:
@@ -1476,16 +1395,22 @@ class Dataset:
                 zn=self._zn,
             )
 
-            return self._inherit_custom_blocks(
-                Dataset([da], validate=False, title=self.title)
+            return Dataset(
+                [da],
+                validate=False,
+                title=self.title,
+                custom_blocks=self.custom_blocks,
             )
         else:
             res = {
                 name: da.aggregate(axis=axis, func=func, **kwargs)
                 for name, da in self._data_vars.items()
             }
-            return self._inherit_custom_blocks(
-                Dataset(data=res, validate=False, title=self.title)
+            return Dataset(
+                data=res,
+                validate=False,
+                title=self.title,
+                custom_blocks=self.custom_blocks,
             )
 
     @staticmethod
@@ -1582,8 +1507,11 @@ class Dataset:
                     geometry=self.geometry,
                     zn=self._zn,
                 )
-                return self._inherit_custom_blocks(
-                    Dataset([da], validate=False, title=self.title)
+                return Dataset(
+                    [da],
+                    validate=False,
+                    title=self.title,
+                    custom_blocks=self.custom_blocks,
                 )
             else:
                 res: list[DataArray] = []
@@ -1591,8 +1519,11 @@ class Dataset:
                     qd = self._quantile(q=quantile, axis=axis, func=func, **kwargs)[0]
                     assert isinstance(qd, DataArray)
                     res.append(qd)
-                return self._inherit_custom_blocks(
-                    Dataset(data=res, validate=False, title=self.title)
+                return Dataset(
+                    data=res,
+                    validate=False,
+                    title=self.title,
+                    custom_blocks=self.custom_blocks,
                 )
         else:
             if np.isscalar(q):
@@ -1608,8 +1539,11 @@ class Dataset:
                         qd.name = newname
                         res.append(qd)
 
-            return self._inherit_custom_blocks(
-                Dataset(data=res, validate=False, title=self.title)
+            return Dataset(
+                data=res,
+                validate=False,
+                title=self.title,
+                custom_blocks=self.custom_blocks,
             )
 
     def max(self, axis: int | str = 0, **kwargs: Any) -> Dataset:
@@ -1886,7 +1820,7 @@ class Dataset:
                 data = [x / y for x, y in zip(self, other)]
             case _:
                 raise ValueError(f"Unsupported operator: {operator}")
-        return self._inherit_custom_blocks(Dataset(data, title=self.title))
+        return Dataset(data, title=self.title, custom_blocks=self.custom_blocks)
 
     def _scalar_op(self, value: float, operator: str) -> Dataset:
         match operator:
@@ -1900,7 +1834,7 @@ class Dataset:
                 data = [x / value for x in self]
             case _:
                 raise ValueError(f"Unsupported operator: {operator}")
-        return self._inherit_custom_blocks(Dataset(data, title=self.title))
+        return Dataset(data, title=self.title, custom_blocks=self.custom_blocks)
 
     # ===============================================
 

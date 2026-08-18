@@ -18,9 +18,9 @@ from ._dfs import (
     _get_item_info,
     _valid_item_numbers,
     _valid_timesteps,
-    _write_custom_blocks,
     write_dfs_data,
 )
+from ._custom_blocks import write_custom_blocks
 from ..eum import TimeStepUnit
 from ..spatial import Grid1D
 
@@ -66,7 +66,7 @@ def _write_dfs1_header(filename: str | Path, ds: Dataset, title: str) -> DfsFile
             item.data_value_type,
         )
 
-    _write_custom_blocks(builder, ds)
+    write_custom_blocks(builder, ds.custom_blocks)
 
     try:
         builder.CreateFile(str(filename))
@@ -183,7 +183,7 @@ class Dfs1(_Dfs123):
             items=items,
             geometry=self.geometry,
             title=self.title,
-            custom_blocks=self._custom_blocks,
+            custom_blocks=self.custom_blocks,  # a fresh copy, not this object's
             validate=False,
             dt=self._timestep,
         )
