@@ -1,6 +1,5 @@
 from datetime import datetime
 from pathlib import Path
-import warnings
 import numpy as np
 import pandas as pd
 import mikeio
@@ -750,26 +749,3 @@ def test_temporal_selection_neq_time() -> None:
     assert dfs.n_timesteps == 22
     with pytest.raises(IndexError):
         ds1 = dfs.read(time=[0, 23])
-
-
-def test_dfs0_custom_blocks_roundtrip(tmp_path: Path) -> None:
-    """sw_points.dfs0 carries an M21_Misc block, which survives a round-trip."""
-    ds = mikeio.read("tests/testdata/sw_points.dfs0")
-
-    assert list(ds.custom_blocks) == ["M21_Misc"]
-    assert mikeio.Dfs0("tests/testdata/sw_points.dfs0").custom_blocks.keys() == {
-        "M21_Misc"
-    }
-
-    ds.custom_blocks["Mine"] = np.array([1.0], dtype=np.float32)
-
-    fp = tmp_path / "with_blocks.dfs0"
-    with warnings.catch_warnings():
-        warnings.simplefilter("error")
-        ds.to_dfs(fp)
-
-    assert mikeio.read(fp).n_items == ds.n_items
-    back = mikeio.Dfs0(fp).custom_blocks
-    assert back.keys() == ds.custom_blocks.keys()
-    for name, values in ds.custom_blocks.items():
-        np.testing.assert_array_equal(back[name], values)

@@ -1,5 +1,4 @@
 import shutil
-import warnings
 from pathlib import Path
 
 import numpy as np
@@ -1074,38 +1073,3 @@ def test_read_dfsu_title(tmp_path: Path) -> None:
     # Dfsu files should have a title property
     assert hasattr(dfs, "title")
     assert isinstance(dfs.title, str)
-
-
-def test_dfsu_dataset_has_no_custom_blocks() -> None:
-    """A dfsu's only block, MIKE_FM, is geometry-derived and stays internal.
-
-    Confirmed: mikecore's DfsuBuilder creates it from the geometry on every write,
-    so it is MIKE's to write and not the user's to modify. Exposing it would
-    invite edits that are silently discarded, on a block that is wrong after any
-    spatial subset anyway.
-    """
-    ds = mikeio.read("tests/testdata/HD2D.dfsu")
-
-    assert ds.custom_blocks == {}
-
-
-def test_write_dfsu_warns_and_drops_custom_blocks(tmp_path: Path) -> None:
-    ds = mikeio.read("tests/testdata/HD2D.dfsu")
-    ds.custom_blocks["Mine"] = np.array([1, 2], dtype=np.int32)
-
-    fp = tmp_path / "with_blocks.dfsu"
-    with pytest.warns(UserWarning, match="cannot be written to a dfsu file"):
-        ds.to_dfs(fp)
-
-    # the written file must still be a valid dfsu, i.e. exactly one MIKE_FM block
-    assert mikeio.Dfsu2DH(fp).n_items == ds.n_items
-    assert mikeio.read(fp).custom_blocks == {}
-
-
-def test_write_dfsu_without_custom_blocks_does_not_warn(tmp_path: Path) -> None:
-    ds = mikeio.read("tests/testdata/HD2D.dfsu")
-    fp = tmp_path / "no_blocks.dfsu"
-
-    with warnings.catch_warnings():
-        warnings.simplefilter("error", UserWarning)
-        ds.to_dfs(fp)

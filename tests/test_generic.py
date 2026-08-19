@@ -849,31 +849,20 @@ def test_scale_preserves_custom_blocks(tmp_path: Path) -> None:
     """generic._clone has always copied the whole header; lock that in.
 
     Closing the gap between this path and Dataset.to_dfs is the reason
-    Dataset.custom_blocks exists, so a regression here would be easy to miss.
+    Dataset.custom_blocks exists, so a regression here would be easy to miss -
+    hence also the check that the two write paths agree.
     """
     infilename = "tests/testdata/waves.dfs2"
-    outfilename = tmp_path / "scaled.dfs2"
-
-    generic.scale(infilename, outfilename, offset=1.0)
-
-    orig = mikeio.Dfs2(infilename).custom_blocks
-    scaled = mikeio.Dfs2(outfilename).custom_blocks
-    assert scaled.keys() == orig.keys() == {"M21_Misc"}
-    np.testing.assert_array_equal(scaled["M21_Misc"], orig["M21_Misc"])
-
-
-def test_generic_and_dataset_write_paths_agree_on_custom_blocks(
-    tmp_path: Path,
-) -> None:
-    infilename = "tests/testdata/waves.dfs2"
-
-    via_generic = tmp_path / "via_generic.dfs2"
-    generic.scale(infilename, via_generic, offset=0.0)
-
+    via_generic = tmp_path / "scaled.dfs2"
     via_dataset = tmp_path / "via_dataset.dfs2"
+
+    generic.scale(infilename, via_generic, offset=1.0)
     mikeio.read(infilename).to_dfs(via_dataset)
 
+    orig = mikeio.Dfs2(infilename).custom_blocks
+    scaled = mikeio.Dfs2(via_generic).custom_blocks
+    assert scaled.keys() == orig.keys() == {"M21_Misc"}
+    np.testing.assert_array_equal(scaled["M21_Misc"], orig["M21_Misc"])
     np.testing.assert_array_equal(
-        mikeio.Dfs2(via_dataset).custom_blocks["M21_Misc"],
-        mikeio.Dfs2(via_generic).custom_blocks["M21_Misc"],
+        mikeio.Dfs2(via_dataset).custom_blocks["M21_Misc"], orig["M21_Misc"]
     )

@@ -1889,8 +1889,9 @@ class Dataset:
         Notes
         -----
         Custom blocks (see the *custom_blocks* property) are written for dfs0,
-        dfs1, dfs2 and dfs3. dfsu cannot hold them; a non-empty *custom_blocks*
-        is dropped with a warning when writing a dfsu file.
+        dfs1, dfs2 and dfs3. A dfsu file has no room for them - its one block,
+        "MIKE_FM", is derived from the geometry on every write - so a non-empty
+        *custom_blocks* is ignored when writing a dfsu file.
 
         """
         from ..dfs._dfs0 import write_dfs0

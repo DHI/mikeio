@@ -1,5 +1,4 @@
 from pathlib import Path
-import warnings
 import numpy as np
 import pytest
 import pandas as pd
@@ -205,24 +204,3 @@ def test_interp_onepoint_dfs1() -> None:
 
     with pytest.raises(AssertionError, match="not possible for Grid1D with one point"):
         ds[0].interp(x=0)
-
-
-def test_dfs1_custom_blocks_roundtrip(tmp_path: Path) -> None:
-    """tide1.dfs1 carries an M21_Misc block, which survives a round-trip."""
-    ds = mikeio.read("tests/testdata/tide1.dfs1")
-
-    assert list(ds.custom_blocks) == ["M21_Misc"]
-    assert mikeio.Dfs1("tests/testdata/tide1.dfs1").custom_blocks.keys() == {"M21_Misc"}
-
-    ds.custom_blocks["Mine"] = np.array([1.0], dtype=np.float32)
-
-    fp = tmp_path / "with_blocks.dfs1"
-    with warnings.catch_warnings():
-        warnings.simplefilter("error")
-        ds.to_dfs(fp)
-
-    back = mikeio.Dfs1(fp).custom_blocks
-    assert back.keys() == ds.custom_blocks.keys()
-    for name, values in ds.custom_blocks.items():
-        np.testing.assert_array_equal(back[name], values)
-    assert mikeio.read(fp).n_items == ds.n_items

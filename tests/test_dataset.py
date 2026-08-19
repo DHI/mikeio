@@ -1752,32 +1752,36 @@ def test_custom_blocks_editable_in_place(blocks_ds: Dataset) -> None:
 
 
 def test_custom_blocks_carried_through_dataset_operations(blocks_ds: Dataset) -> None:
-    """Blocks propagate blindly through every operation that returns a Dataset.
+    """Blocks propagate blindly, values intact, through operations returning a Dataset.
 
     A few representative operations, not an exhaustive sweep: the point is the
     rule, not the catalogue. That the values survive all the way to disk is
-    proven by the round-trip tests in test_dfs2.py and test_roundtrip.py, which
-    read them back from the written file.
+    proven by the round-trip tests in test_custom_blocks.py, which read them back
+    from the written file.
     """
-    expected = {"M21_Misc"}
-
-    assert blocks_ds.isel(time=0).custom_blocks.keys() == expected
-    assert blocks_ds.sel(time=blocks_ds.time[0]).custom_blocks.keys() == expected
-    assert (blocks_ds + 1).custom_blocks.keys() == expected
-    assert blocks_ds[["Foo"]].custom_blocks.keys() == expected
-    assert blocks_ds.copy().custom_blocks.keys() == expected
+    expected = blocks_ds.custom_blocks["M21_Misc"].copy()
 
     ds2 = blocks_ds.copy()
     ds2.time = pd.date_range(start=datetime(2000, 1, 2), freq="s", periods=6)
-    assert Dataset.concat([blocks_ds, ds2]).custom_blocks.keys() == expected
 
-    # ... including operations that change the geometry type, after which a block
-    # may no longer describe the result. Fixing that is the user's job, not ours.
-    assert blocks_ds.isel(y=0).custom_blocks.keys() == expected  # Grid2D -> Grid1D
-    assert blocks_ds.mean(axis="space").custom_blocks.keys() == expected  # -> 0D
+    derived = [
+        blocks_ds.isel(time=0),
+        blocks_ds.sel(time=blocks_ds.time[0]),
+        blocks_ds + 1,
+        blocks_ds[["Foo"]],
+        blocks_ds.copy(),
+        Dataset.concat([blocks_ds, ds2]),
+        # ... including operations that change the geometry type, after which a
+        # block may no longer describe the result. Fixing that is the user's job.
+        blocks_ds.isel(y=0),  # Grid2D -> Grid1D
+        blocks_ds.mean(axis="space"),  # -> 0D
+        # selecting down to zero items must not crash on the item-less geometry
+        blocks_ds[[]],
+    ]
 
-    # selecting down to zero items must not crash on the item-less geometry
-    assert blocks_ds[[]].custom_blocks.keys() == expected
+    for ds in derived:
+        assert ds.custom_blocks.keys() == {"M21_Misc"}
+        np.testing.assert_array_equal(ds.custom_blocks["M21_Misc"], expected)
 
 
 def test_custom_blocks_of_derived_dataset_are_copies(blocks_ds: Dataset) -> None:
@@ -1793,29 +1797,3 @@ def test_custom_blocks_of_derived_dataset_are_copies(blocks_ds: Dataset) -> None
         # the dict is a new one too, so adding a block does not add it to the source
         derived.custom_blocks["Extra"] = np.array([1.0], dtype=np.float32)
         assert "Extra" not in blocks_ds.custom_blocks
-
-
-def test_item_named_custom_blocks_does_not_clobber_property() -> None:
-    ds = Dataset.from_numpy(
-        data=[np.zeros(5)],
-        time=pd.date_range("2000", periods=5, freq="s"),
-        items=[ItemInfo("custom blocks")],
-        custom_blocks={"B": np.array([1.0], dtype=np.float32)},
-    )
-
-    assert isinstance(ds.custom_blocks, dict)
-    assert ds.custom_blocks.keys() == {"B"}
-    assert isinstance(ds["custom blocks"], mikeio.DataArray)
-
-
-def test_item_named_like_the_backing_store_does_not_clobber_it() -> None:
-    """_to_safe_name(" custom blocks") is "_custom_blocks"."""
-    ds = Dataset.from_numpy(
-        data=[np.zeros(5)],
-        time=pd.date_range("2000", periods=5, freq="s"),
-        items=[ItemInfo(" custom blocks")],
-        custom_blocks={"B": np.array([1.0], dtype=np.float32)},
-    )
-
-    assert ds.custom_blocks.keys() == {"B"}
-    assert isinstance(ds[" custom blocks"], mikeio.DataArray)

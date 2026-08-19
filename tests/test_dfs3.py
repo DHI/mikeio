@@ -1,5 +1,4 @@
 from pathlib import Path
-import warnings
 import pytest
 import numpy as np
 
@@ -311,23 +310,3 @@ def test_write_with_title(tmp_path: Path) -> None:
     # Read back and verify title
     newdfs = mikeio.Dfs3(fp)
     assert newdfs.title == custom_title
-
-
-def test_dfs3_custom_blocks_roundtrip(tmp_path: Path) -> None:
-    """Grid1.dfs3 carries an M21_Misc block, which survives a round-trip."""
-    ds = mikeio.read("tests/testdata/Grid1.dfs3")
-
-    assert list(ds.custom_blocks) == ["M21_Misc"]
-    assert mikeio.Dfs3("tests/testdata/Grid1.dfs3").custom_blocks.keys() == {"M21_Misc"}
-
-    ds.custom_blocks["Mine"] = np.array([1.0], dtype=np.float32)
-
-    fp = tmp_path / "with_blocks.dfs3"
-    with warnings.catch_warnings():
-        warnings.simplefilter("error")
-        ds.to_dfs(fp)
-
-    back = mikeio.Dfs3(fp).custom_blocks
-    assert back.keys() == ds.custom_blocks.keys()
-    for name, values in ds.custom_blocks.items():
-        np.testing.assert_array_equal(back[name], values)

@@ -68,46 +68,6 @@ def test_roundtrip_dfs2_data(tmp_path: Path) -> None:
         )
 
 
-@pytest.mark.parametrize(
-    "filename",
-    [
-        "BW_Ronne_Layout1998_rotated.dfs2",  # rotated UTM, land value 5.0
-        "hd_vertical_slice.dfs2",  # vertical dfs2, land value 10.0
-        "M3WFM_sponge_local_coordinates.dfs2",  # local coordinates
-        "waves.dfs2",  # non-rotated
-        "single_time_dt_zero.dfs2",  # single, time-invariant step
-        "spectra/pt_spectra.dfs2",  # spectral dfs2, all-zero block
-    ],
-)
-def test_roundtrip_dfs2_custom_blocks(tmp_path: Path, filename: str) -> None:
-    """Custom blocks, including the M21_Misc land value, survive a dfs2 roundtrip.
-
-    Values must be bit-identical, not merely close: they are opaque metadata that
-    MIKE tools read literally.
-    """
-    ds_orig = mikeio.read("tests/testdata/" + filename)
-    assert ds_orig.custom_blocks, f"test setup: {filename} must carry a custom block"
-
-    fp = tmp_path / Path(filename).name
-    ds_orig.to_dfs(fp)
-    ds_back = mikeio.read(fp)
-
-    assert ds_back.custom_blocks.keys() == ds_orig.custom_blocks.keys()
-    for name, values in ds_orig.custom_blocks.items():
-        np.testing.assert_array_equal(ds_back.custom_blocks[name], values)
-        assert ds_back.custom_blocks[name].dtype == values.dtype
-
-
-def test_roundtrip_dfs2_without_custom_blocks_adds_none(tmp_path: Path) -> None:
-    ds_orig = mikeio.read("tests/testdata/gebco_sound.dfs2")
-    assert ds_orig.custom_blocks == {}
-
-    fp = tmp_path / "no_blocks.dfs2"
-    ds_orig.to_dfs(fp)
-
-    assert mikeio.Dfs2(fp).custom_blocks == {}
-
-
 def test_roundtrip_dfsu_data(tmp_path: Path) -> None:
     """Data, element/node counts survive dfsu roundtrip."""
     ds_orig = mikeio.read("tests/testdata/HD2D.dfsu")
