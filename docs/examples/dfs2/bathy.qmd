@@ -98,7 +98,7 @@ ds.Elevation.plot()
 
 ## Setting the land value
 
-To use the bathymetry as the domain of a MIKE 21 setup, the file needs a land value. It lives in the `M21_Misc` custom block, which is metadata for the whole file rather than for a single item, so it belongs on a `Dataset` — promote the `DataArray` with `to_dataset()` first.
+To use the bathymetry as a MIKE 21 domain, the file needs a land value, stored in the `M21_Misc` custom block. Custom blocks belong to the file, not to an item, so they live on a `Dataset`; promote the `DataArray` with `to_dataset()`.
 
 ```{python}
 import numpy as np
@@ -116,7 +116,7 @@ ds.to_dfs("gebco.dfs2")
 mikeio.Dfs2("gebco.dfs2").custom_blocks
 ```
 
-See [the Dfs2 user guide](../../user-guide/dfs2.qmd#custom-blocks) for the full layout of `M21_Misc`.
+See the [Dfs2 user guide](../../user-guide/dfs2.qmd#custom-blocks) for more on custom blocks.
 
 # Clean up
 
