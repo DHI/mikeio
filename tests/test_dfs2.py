@@ -1,4 +1,5 @@
 from pathlib import Path
+from typing import Any
 import datetime
 import warnings
 from matplotlib import pyplot as plt
@@ -971,6 +972,38 @@ def test_read_custom_blocks_from_file_object() -> None:
     assert block[3] == pytest.approx(5.0)  # land value
 
 
+@pytest.mark.parametrize(
+    "cls,path",
+    [
+        pytest.param(mikeio.Dfs0, "tests/testdata/sw_points.dfs0", id="dfs0"),
+        pytest.param(mikeio.Dfs1, "tests/testdata/tide1.dfs1", id="dfs1"),
+        pytest.param(mikeio.Dfs2, ROTATED, id="dfs2"),
+        pytest.param(mikeio.Dfs3, "tests/testdata/Grid1.dfs3", id="dfs3"),
+    ],
+)
+def test_file_object_custom_blocks_are_read_only(cls: Any, path: str) -> None:
+    """A file object cannot write a header, so an edit through one must raise.
+
+    Handing out plain copies would let the edit look like it worked, so both the
+    mapping and its arrays refuse it.
+    """
+    dfs = cls(path)
+    blocks = dfs.custom_blocks
+    name = next(iter(blocks))
+
+    with pytest.raises(TypeError):
+        blocks["New"] = np.array([1.0], dtype=np.float32)
+    with pytest.raises(ValueError, match="read-only"):
+        blocks[name][0] = 0.0
+
+    # the values are copies as well, so even unfreezing one cannot reach the file
+    original = blocks[name][0]
+    escaped = dfs.custom_blocks[name]
+    escaped.setflags(write=True)
+    escaped[0] = -12345.0
+    assert dfs.custom_blocks[name][0] == pytest.approx(original)
+
+
 def test_read_custom_blocks_on_dataset() -> None:
     ds = mikeio.read(ROTATED)
 
@@ -1031,18 +1064,18 @@ def test_add_custom_block_to_file_without_one(tmp_path: Path) -> None:
 
 
 def test_add_custom_block_from_a_plain_list(tmp_path: Path) -> None:
-    """The documented way to set a land value: a list, stored as float32.
+    """The documented way to set a land value: a list, written as float32.
 
     MIKE 21 wants M21_Misc as float32, and a list carries no dtype, so numpy's
-    int64/float64 default would be wrong. The setter converts on assignment;
-    assigning into the dict bypasses it, and the conversion happens on write
-    instead - either way MIKE 21 gets its float32.
+    int64/float64 default would be wrong. The Dataset keeps the list as it is and
+    the writer reads it as float32, whether it was assigned to the property or
+    into the dict.
     """
     expected = [0, 0, -900, -10, 0, 0, 0]
 
     ds = mikeio.read(NO_BLOCKS)
     ds.custom_blocks = {M21_MISC: expected}
-    assert ds.custom_blocks[M21_MISC].dtype == np.float32
+    assert ds.custom_blocks[M21_MISC] == expected  # still a list
 
     fp = tmp_path / "gebco_from_list.dfs2"
     ds.to_dfs(fp)
@@ -1050,10 +1083,8 @@ def test_add_custom_block_from_a_plain_list(tmp_path: Path) -> None:
     assert back.dtype == np.float32
     np.testing.assert_array_equal(back, expected)
 
-    # the dict is typed as name -> array, so this needs an ignore, but a list
-    # reaching the writer is still normalized rather than written as garbage
     ds2 = mikeio.read(NO_BLOCKS)
-    ds2.custom_blocks[M21_MISC] = expected  # type: ignore[assignment]
+    ds2.custom_blocks[M21_MISC] = expected
 
     fp2 = tmp_path / "gebco_from_list_via_dict.dfs2"
     ds2.to_dfs(fp2)
@@ -1112,64 +1143,101 @@ def test_int16_custom_block_reads_back_as_uint16(tmp_path: Path) -> None:
     np.testing.assert_array_equal(back, [65534, 65535, 0, 1])
 
 
-@pytest.mark.parametrize(
-    "values,expected",
-    [
-        pytest.param(
-            np.arange(10, dtype=np.float32)[::2], [0, 2, 4, 6, 8], id="non_contiguous"
-        ),
-        pytest.param(np.array([1, 2, 3], dtype=">f4"), [1, 2, 3], id="byteswapped"),
-    ],
-)
-def test_write_awkwardly_laid_out_custom_block(
-    tmp_path: Path, values: np.ndarray, expected: list[float]
-) -> None:
-    """The dfs C library takes the raw data pointer, ignoring strides and order."""
+def test_write_non_contiguous_custom_block(tmp_path: Path) -> None:
+    """The dfs C library takes the raw data pointer, ignoring strides."""
     ds = mikeio.read(NO_BLOCKS)
+    values = np.arange(10, dtype=np.float32)[::2]
 
-    # via the property setter: normalized immediately
+    # assigning into the dict keeps the strides, so the writer has to compact it
+    ds.custom_blocks["S"] = values
+    assert not ds.custom_blocks["S"].flags.c_contiguous
+
+    fp = tmp_path / "made_contiguous_on_write.dfs2"
+    ds.to_dfs(fp)
+    np.testing.assert_array_equal(mikeio.Dfs2(fp).custom_blocks["S"], [0, 2, 4, 6, 8])
+
+    # the property setter deep-copies, which compacts it on the way in
     ds.custom_blocks = {"S": values}
     assert ds.custom_blocks["S"].flags.c_contiguous
-    assert ds.custom_blocks["S"].dtype.isnative
 
-    fp = tmp_path / "normalized_by_setter.dfs2"
-    ds.to_dfs(fp)
-    np.testing.assert_array_equal(mikeio.Dfs2(fp).custom_blocks["S"], expected)
-
-    # via the dict itself, which bypasses the setter: normalized on write
-    ds._custom_blocks["S"] = values
-    fp2 = tmp_path / "normalized_by_writer.dfs2"
+    fp2 = tmp_path / "compacted_by_the_setter.dfs2"
     ds.to_dfs(fp2)
-    np.testing.assert_array_equal(mikeio.Dfs2(fp2).custom_blocks["S"], expected)
+    np.testing.assert_array_equal(mikeio.Dfs2(fp2).custom_blocks["S"], [0, 2, 4, 6, 8])
 
 
-def test_custom_block_needing_no_conversion_is_stored_as_given() -> None:
-    """An array fit to be written is not replaced by a copy or a view of itself."""
+def test_byteswapped_custom_block_is_rejected_on_write(tmp_path: Path) -> None:
+    """Byte order is left as given; mikecore rejects the dtype when writing.
+
+    Deliberately not converted: mikecore names the offending dtype, and it does
+    so before the file is created, so nothing lands on disk as garbage.
+    """
     ds = mikeio.read(NO_BLOCKS)
-    values = np.array([1.0, 2.0], dtype=np.float32)
+    ds.custom_blocks = {"S": np.array([1, 2, 3], dtype=">f4")}
+    assert not ds.custom_blocks["S"].dtype.isnative
 
-    ds.custom_blocks = {"S": values}
+    fp = tmp_path / "byteswapped.dfs2"
+    with pytest.raises(Exception, match="Data type not supported: >f4"):
+        ds.to_dfs(fp)
 
-    assert ds.custom_blocks["S"] is values
+    assert not fp.exists()
 
 
 @pytest.mark.parametrize(
     "values,match",
     [
         pytest.param(np.zeros(3, dtype=np.int64), "unsupported dtype", id="dtype"),
+        pytest.param(["a", "b"], "could not be read as float32", id="str_list"),
         pytest.param(np.zeros((2, 2), dtype=np.float32), "1-dimensional", id="2d"),
         pytest.param(np.array([], dtype=np.float32), "must not be empty", id="empty"),
     ],
 )
-def test_invalid_custom_block_in_dict_raises_on_write(
-    tmp_path: Path, values: np.ndarray, match: str
+def test_invalid_custom_block_values_raise_on_write(
+    tmp_path: Path, values: Any, match: str
 ) -> None:
-    """Assigning into the dict skips the setter, so the writer must re-validate."""
+    """A Dataset takes any value; writing one is where the dfs rules apply."""
     ds = mikeio.read(NO_BLOCKS)
     ds.custom_blocks["B"] = values
 
     with pytest.raises(ValueError, match=match):
         ds.to_dfs(tmp_path / "invalid.dfs2")
+
+
+@pytest.mark.parametrize(
+    "name,match",
+    [
+        pytest.param("", "must not be empty", id="empty"),
+        pytest.param("Ærø", "must be ASCII", id="non_ascii"),
+        pytest.param("with\x00nul", "must not contain NUL", id="nul"),
+    ],
+)
+def test_invalid_custom_block_names_raise_on_write(
+    tmp_path: Path, name: str, match: str
+) -> None:
+    ds = mikeio.read(NO_BLOCKS)
+    ds.custom_blocks[name] = np.array([1.0], dtype=np.float32)
+
+    with pytest.raises(ValueError, match=match):
+        ds.to_dfs(tmp_path / "invalid.dfs2")
+
+
+def test_non_str_custom_block_name_raises_on_write(tmp_path: Path) -> None:
+    ds = mikeio.read(NO_BLOCKS)
+    ds.custom_blocks[1] = np.array([1.0], dtype=np.float32)  # type: ignore[index]
+
+    with pytest.raises(TypeError, match="must be a str"):
+        ds.to_dfs(tmp_path / "invalid.dfs2")
+
+
+def test_long_custom_block_name_survives_a_write(tmp_path: Path) -> None:
+    """The dfs library imposes no name length limit, so neither does MIKE IO."""
+    name = "N" * 300
+    ds = mikeio.read(NO_BLOCKS)
+    ds.custom_blocks[name] = np.array([1.0], dtype=np.float32)
+
+    fp = tmp_path / "long_name.dfs2"
+    ds.to_dfs(fp)
+
+    assert list(mikeio.Dfs2(fp).custom_blocks) == [name]
 
 
 def test_custom_block_mutated_to_invalid_state_raises_on_write(

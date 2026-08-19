@@ -20,7 +20,6 @@ The generic module contains functionality that works for all types of dfs (dfs0,
 
 * The processing is not tied to the spatial dimension of the data
 * When the files are large and you want to avoid reading the entire file into memory
-* When the full file header must be preserved: the generic functions copy it verbatim from the input file, including data type, delete values and [custom blocks](dfs2.qmd#custom-blocks) of any file type
 
 ## When not to use the generic module
 

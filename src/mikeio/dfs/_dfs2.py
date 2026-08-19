@@ -1,7 +1,7 @@
 from __future__ import annotations
 from copy import deepcopy
 from pathlib import Path
-from typing import Any, Literal
+from typing import Any, Literal, Mapping
 from collections.abc import Sequence
 
 import numpy as np
@@ -24,7 +24,7 @@ from ._dfs import (
     _valid_timesteps,
     write_dfs_data,
 )
-from ._custom_blocks import write_custom_blocks
+from ._custom_blocks import readonly_custom_blocks, write_custom_blocks
 from ..eum import TimeStepUnit
 from ..spatial import Grid2D
 
@@ -249,7 +249,7 @@ class Dfs2(_Dfs123):
             items=items,
             geometry=geometry,
             title=self.title,
-            custom_blocks=self.custom_blocks,  # a fresh copy, not this object's
+            custom_blocks=self.custom_blocks,
             validate=False,
         )
 
@@ -335,14 +335,15 @@ class Dfs2(_Dfs123):
         return self._title
 
     @property
-    def custom_blocks(self) -> dict[str, NDArray[Any]]:
+    def custom_blocks(self) -> Mapping[str, NDArray[Any]]:
         """Custom blocks of the dfs2 file header, as name -> 1-D array.
 
         Read from the header only, so the land value of a large bathymetry can be
-        inspected without reading its data. Returns a fresh copy on every access,
-        so mutating the result has no effect on this object or on a later
-        *read()*. See [](`mikeio.Dataset.custom_blocks`) for the meaning of the
-        values and for how to change them.
+        inspected without reading its data. Read-only, too: a dfs header is
+        written when the file is created, so neither the mapping nor its arrays
+        accept an edit here. Change them on a Dataset and write a new file - see
+        [](`mikeio.Dataset.custom_blocks`) for the meaning of the values and for
+        how to change them.
 
         Examples
         --------
@@ -352,4 +353,4 @@ class Dfs2(_Dfs123):
         ```
 
         """
-        return {k: v.copy() for k, v in self._custom_blocks.items()}
+        return readonly_custom_blocks(self._custom_blocks)

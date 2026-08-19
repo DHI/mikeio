@@ -2,7 +2,7 @@ from __future__ import annotations
 from functools import cached_property
 from pathlib import Path
 from datetime import datetime, timedelta
-from typing import Any, Sequence
+from typing import Any, Mapping, Sequence
 import warnings
 
 import numpy as np
@@ -19,7 +19,11 @@ from ._dfs import (
     _get_item_info,
     _valid_item_numbers,
 )
-from ._custom_blocks import read_custom_blocks, write_custom_blocks
+from ._custom_blocks import (
+    read_custom_blocks,
+    readonly_custom_blocks,
+    write_custom_blocks,
+)
 from ..eum import EUMType, EUMUnit, ItemInfo, TimeStepUnit, ItemInfoList
 from .._time import DateTimeSelector
 
@@ -207,7 +211,7 @@ class Dfs0:
             time=ftime,
             items=item_infos,
             title=self.title,
-            custom_blocks=self.custom_blocks,  # a fresh copy, not this object's
+            custom_blocks=self.custom_blocks,
             validate=False,
         )
 
@@ -330,15 +334,15 @@ class Dfs0:
         return self._title
 
     @property
-    def custom_blocks(self) -> dict[str, NDArray[Any]]:
+    def custom_blocks(self) -> Mapping[str, NDArray[Any]]:
         """Custom blocks of the dfs0 file header, as name -> 1-D array.
 
-        Read from the header only. Returns a fresh copy on every access, so
-        mutating the result has no effect on this object or on a later
-        *read()*. See [](`mikeio.Dataset.custom_blocks`) for the meaning of the
-        values and for how to change them.
+        Read-only: a dfs header is written when the file is created, so neither
+        the mapping nor its arrays accept an edit here. Change them on a Dataset
+        and write a new file - see [](`mikeio.Dataset.custom_blocks`) for the
+        meaning of the values and for how to change them.
         """
-        return {k: v.copy() for k, v in self._custom_blocks.items()}
+        return readonly_custom_blocks(self._custom_blocks)
 
     # ======================
     # Deprecated in 2.5.0

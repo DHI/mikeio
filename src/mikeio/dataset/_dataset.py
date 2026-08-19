@@ -156,8 +156,9 @@ class Dataset:
             Validate the DataArrays, by default True
         title: str, optional
             Title of the dataset, by default ""
-        custom_blocks: Mapping[str, numpy.ndarray], optional
-            Custom blocks of the dfs file header, by default None (=no custom blocks)
+        custom_blocks: Mapping[str, Any], optional
+            Custom blocks of the dfs file header, by default None (=no custom blocks).
+            See the *custom_blocks* property.
         dt: float, optional
             Dummy time step in seconds, by default 1.0
 
@@ -342,18 +343,14 @@ class Dataset:
         return self[0].deletevalue
 
     @property
-    def custom_blocks(self) -> dict[str, NDArray[Any]]:
+    def custom_blocks(self) -> dict[str, Any]:
         """Custom blocks of the dfs file header, as name -> 1-D array.
 
-        Read from and written back to dfs0, dfs1, dfs2 and dfs3 files; dfsu
-        cannot hold them. The arrays are ordinary numpy arrays and may be edited
-        in place; an array you assign is stored as given, unless its dtype or
-        memory layout has to be converted first. MIKE IO stores the blocks
-        verbatim and carries them through every Dataset operation without
-        checking that they still apply - a derived Dataset shares them, as it
-        shares its data; *copy()* detaches both. Supported dtypes are float32, float64,
-        int8, int16, uint16, int32 and uint32; a plain sequence carries no dtype
-        and is stored as float32. See the
+        Values are stored as given and may be edited in place, which is how a
+        block is changed; what a block may hold is a property of the dfs header
+        and is checked when the file is written. Every Dataset owns its blocks: an
+        assigned value is copied, and MIKE IO carries the blocks through each
+        operation without checking that they still apply. See the
         [dfs2 user guide](../user-guide/dfs2.qmd#custom-blocks) for MIKE 21's
         "M21_Misc" block and the caveats.
 
@@ -384,12 +381,11 @@ class Dataset:
 
     @custom_blocks.setter
     def custom_blocks(self, value: Mapping[str, Any]) -> None:
-        # Imported here, not at module level: what a custom block may hold is a
-        # property of the dfs header, so the code lives in mikeio.dfs - which
-        # imports Dataset, and is imported after mikeio.dataset by mikeio/__init__.
-        from ..dfs._custom_blocks import normalize_custom_blocks
-
-        self._custom_blocks = normalize_custom_blocks(value)
+        # Stored as given: what a custom block may hold is a property of the dfs
+        # header, so mikeio.dfs checks and converts them when it writes a file.
+        # Deep-copied all the same, so that a Dataset owns its blocks and neither
+        # the caller's values nor a derived Dataset's are shared with it.
+        self._custom_blocks = {name: deepcopy(values) for name, values in value.items()}
 
     @property
     def geometry(self) -> Any:

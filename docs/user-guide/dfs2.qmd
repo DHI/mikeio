@@ -83,7 +83,7 @@ MIKE products store product-specific metadata in *custom blocks*: named arrays i
 | 3     | **land value** |
 | 4-6   | `0` (unused, written as zero) |
 
-Custom blocks are available as a dict-like attribute on the Dataset — and on the `Dfs2` object, if you only want to inspect the header of a large file:
+Custom blocks are available as a dict-like attribute on the Dataset — and on the `Dfs2` object, if you only want to inspect the header of a large file. The one on the file object is read-only, since a dfs header is written when the file is created:
 
 ```{python}
 ds_waves = mikeio.read("../data/waves.dfs2")
@@ -98,7 +98,7 @@ ds_waves.to_dfs("with_land_value.dfs2")
 mikeio.read("with_land_value.dfs2").custom_blocks["M21_Misc"][3]
 ```
 
-For a file that has no block yet, set one. A plain list carries no dtype, so MIKE IO stores it as `float32` — which is what MIKE 21 expects of `M21_Misc`:
+For a file that has no block yet, set one. A plain list carries no dtype, so MIKE IO writes it as `float32` — which is what MIKE 21 expects of `M21_Misc`:
 
 ```{python}
 ds.custom_blocks = {"M21_Misc": [0, 0, -900, -10, 0, 0, 0]}
@@ -106,7 +106,7 @@ ds.to_dfs("bathy_with_land_value.dfs2")
 mikeio.Dfs2("bathy_with_land_value.dfs2").custom_blocks
 ```
 
-Assigning `ds.custom_blocks = ...` replaces every block. To add one alongside the others, assign into the dict — which expects an array, and is also how you choose a dtype other than `float32`. dfs supports `float32`, `float64`, `int8`, `int16`, `uint16`, `int32` and `uint32`; anything else is rejected rather than silently converted.
+Assigning `ds.custom_blocks = ...` replaces every block. To add one alongside the others, assign into the dict — which is also how you choose a dtype other than `float32`, by passing an array. dfs supports `float32`, `float64`, `int8`, `int16`, `uint16`, `int32` and `uint32`; anything else is rejected rather than silently converted, when the file is written. A Dataset keeps a block exactly as you assigned it — a copy of it, so a block is changed by editing it in place, as above, rather than by editing the array you passed.
 
 ```{python}
 import numpy as np
@@ -117,7 +117,7 @@ ds.custom_blocks["Counts"] = np.array([1, 2, 3], dtype=np.int32)
 Prefer `int32` over `int16`: an `int16` block is written correctly but reads back as `uint16` because of a bug in `mikecore`'s read path, which corrupts negative values.
 
 ::: {.callout-note}
-MIKE IO stores custom blocks verbatim and never interprets them, and carries them through every Dataset operation unconditionally — even one that changes the geometry type, such as `ds.isel(y=0)` turning a dfs2 Dataset into a dfs1 one. A block computed for the original geometry may no longer apply to the result; fixing or clearing it is your responsibility, e.g. `ds.custom_blocks.clear()`. If you change the geometry, values *inside* a block — such as the orientation at index 0 — are yours to keep consistent.
+MIKE IO stores custom blocks verbatim and never interprets them, and carries them through every Dataset operation unconditionally — even one that changes the geometry type, such as `ds.isel(y=0)` turning a dfs2 Dataset into a dfs1 one. Each Dataset owns its blocks, so fixing the one on the result leaves the original alone. A block computed for the original geometry may no longer apply to the result; fixing or clearing it is your responsibility, e.g. `ds.custom_blocks.clear()`. If you change the geometry, values *inside* a block — such as the orientation at index 0 — are yours to keep consistent.
 :::
 
 ::: {.callout-important}
