@@ -1,6 +1,4 @@
 from pathlib import Path
-import gc
-import os
 import platform
 import shutil
 
@@ -1053,11 +1051,6 @@ def test_dfsu_to_xarray_has_element_coordinates() -> None:
     assert xr_da.z.values[example_quad_element] == approx(example_quad_coordinates[2])
 
 
-def _count_open_fds() -> int:
-    """Count open file descriptors on Linux via /proc/self/fd."""
-    return len(os.listdir("/proc/self/fd"))
-
-
 @pytest.mark.skipif(
     platform.system() != "Linux",
     reason="File descriptor counting via /proc only works on Linux",
@@ -1067,12 +1060,12 @@ def test_dfsu_read_closes_file_handle() -> None:
 
     Each read() opens a DfsuFile; it must be closed before returning.
     """
-    gc.collect()
-    baseline = _count_open_fds()
+    from conftest import _count_fds_for_file
 
+    filename = "tests/testdata/HD2D.dfsu"
     results = []
     for _ in range(50):
-        dfs = mikeio.open("tests/testdata/HD2D.dfsu")
+        dfs = mikeio.open(filename)
         results.append(dfs.read())
 
-    assert _count_open_fds() - baseline == 0
+    assert _count_fds_for_file(filename) == 0

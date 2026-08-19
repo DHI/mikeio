@@ -1,6 +1,4 @@
 from pathlib import Path
-import gc
-import os
 import platform
 
 import numpy as np
@@ -178,28 +176,24 @@ def test_interp_onepoint_dfs1() -> None:
         ds[0].interp(x=0)
 
 
-def _count_open_fds() -> int:
-    """Count open file descriptors on Linux via /proc/self/fd."""
-    return len(os.listdir("/proc/self/fd"))
-
-
 @pytest.mark.skipif(
     platform.system() != "Linux",
     reason="File descriptor counting via /proc only works on Linux",
 )
 def test_count_open_fds_sanity_check() -> None:
-    """Verify _count_open_fds detects mikecore file handles."""
-    gc.collect()
-    baseline = _count_open_fds()
+    """Verify _count_fds_for_file detects mikecore file handles."""
+    from conftest import _count_fds_for_file
 
-    dfs = DfsFileFactory.DfsGenericOpen("tests/testdata/random.dfs1")
+    filename = "tests/testdata/random.dfs1"
+    assert _count_fds_for_file(filename) == 0
+
+    dfs = DfsFileFactory.DfsGenericOpen(filename)
     try:
-        assert _count_open_fds() > baseline, "opening a file must increase FD count"
+        assert _count_fds_for_file(filename) >= 1, "opening a file must increase FD count"
     finally:
         dfs.Close()
 
-    gc.collect()
-    assert _count_open_fds() == baseline, "closing a file must restore FD count"
+    assert _count_fds_for_file(filename) == 0, "closing a file must restore FD count"
 
 
 @pytest.mark.skipif(
@@ -212,11 +206,11 @@ def test_dfs1_init_closes_file_handle() -> None:
     Before the fix, Dfs1.__init__ stored the open handle in self._dfs
     without closing it, so each live instance held one file descriptor.
     """
-    gc.collect()
-    baseline = _count_open_fds()
+    from conftest import _count_fds_for_file
 
+    filename = "tests/testdata/random.dfs1"
     instances = []
     for _ in range(50):
-        instances.append(mikeio.Dfs1("tests/testdata/random.dfs1"))
+        instances.append(mikeio.Dfs1(filename))
 
-    assert _count_open_fds() - baseline == 0
+    assert _count_fds_for_file(filename) == 0

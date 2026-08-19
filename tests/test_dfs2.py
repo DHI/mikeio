@@ -1,7 +1,5 @@
 from pathlib import Path
 import datetime
-import gc
-import os
 import platform
 from typing import Any
 from matplotlib import pyplot as plt
@@ -923,11 +921,6 @@ def test_append_mismatch_geometry(tmp_path: Path) -> None:
         dfs.append(ds2)
 
 
-def _count_open_fds() -> int:
-    """Count open file descriptors on Linux via /proc/self/fd."""
-    return len(os.listdir("/proc/self/fd"))
-
-
 @pytest.mark.skipif(
     platform.system() != "Linux",
     reason="File descriptor counting via /proc only works on Linux",
@@ -938,14 +931,14 @@ def test_dfs2_init_closes_file_handle() -> None:
     Dfs2.__init__ opens a Dfs2FileOpen handle to read spatial axis info
     and must close it before returning.
     """
-    gc.collect()
-    baseline = _count_open_fds()
+    from conftest import _count_fds_for_file
 
+    filename = "tests/testdata/eq.dfs2"
     instances = []
     for _ in range(50):
-        instances.append(mikeio.Dfs2("tests/testdata/eq.dfs2"))
+        instances.append(mikeio.Dfs2(filename))
 
-    assert _count_open_fds() - baseline == 0
+    assert _count_fds_for_file(filename) == 0
 
 
 @pytest.mark.skipif(
@@ -958,12 +951,12 @@ def test_dfs2_read_closes_file_handle() -> None:
     Each read() opens a Dfs2FileOpen handle via _open();
     it must be closed before returning.
     """
-    gc.collect()
-    baseline = _count_open_fds()
+    from conftest import _count_fds_for_file
 
+    filename = "tests/testdata/eq.dfs2"
     results = []
     for _ in range(50):
-        dfs = mikeio.Dfs2("tests/testdata/eq.dfs2")
+        dfs = mikeio.Dfs2(filename)
         results.append(dfs.read())
 
-    assert _count_open_fds() - baseline == 0
+    assert _count_fds_for_file(filename) == 0
