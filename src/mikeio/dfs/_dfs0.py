@@ -36,7 +36,8 @@ def write_dfs0(
 
     if dataset.is_equidistant:
         if len(dataset.time) == 1:
-            dt = 1.0  # TODO
+            # a single timestep has no timestep to derive; 1 s is written as placeholder
+            dt = 1.0
         else:
             dt = (dataset.time[1] - dataset.time[0]).total_seconds()
 
@@ -183,7 +184,7 @@ class Dfs0:
             # relative time use timedelta
             ftime = pd.to_timedelta(t_seconds, unit="s")
 
-        # TODO common for all dfs files , extract
+        # TODO common for all dfs files , extract (see gh-1029)
         # select items
         item_numbers = _valid_item_numbers(dfs.ItemInfo, items)
         if items is not None:

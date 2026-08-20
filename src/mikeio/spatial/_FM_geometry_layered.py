@@ -254,20 +254,25 @@ class _GeometryFMLayered(_GeometryFM):
             reindex=True,
         )
 
-        # TODO do this before creating the geometry
-
-        # TODO extract method
-        # Fix z-coordinate for sigma-z:
+        # TODO do this before creating the geometry (see gh-1015)
         if self._type == DfsuFileType.Dfsu3DSigmaZ:
-            zn = geom.node_coordinates[:, 2].copy()
-            for j, elem_nodes in enumerate(geom.element_table):
-                elem_nodes3d = self.element_table[self.bottom_elements[j]]
-                for jn in range(len(elem_nodes)):
-                    znj_3d = self.node_coordinates[elem_nodes3d[jn], 2]
-                    zn[elem_nodes[jn]] = min(zn[elem_nodes[jn]], znj_3d)
-            geom.node_coordinates[:, 2] = zn
+            geom.node_coordinates[:, 2] = self._sigma_z_bottom_node_z(geom)
 
         return geom
+
+    def _sigma_z_bottom_node_z(self, geom: GeometryFM2D) -> np.ndarray:
+        """Deepest z-coordinate per node of the 2d geometry derived from a sigma-z mesh.
+
+        The bottom nodes of the top elements sit at the top of the z-layers, so the
+        z-coordinate is lowered to the corresponding bottom element's node z.
+        """
+        zn = geom.node_coordinates[:, 2].copy()
+        for j, elem_nodes in enumerate(geom.element_table):
+            elem_nodes3d = self.element_table[self.bottom_elements[j]]
+            for jn in range(len(elem_nodes)):
+                znj_3d = self.node_coordinates[elem_nodes3d[jn], 2]
+                zn[elem_nodes[jn]] = min(zn[elem_nodes[jn]], znj_3d)
+        return zn
 
     @property
     def is_layered(self) -> bool:
@@ -495,7 +500,7 @@ class _GeometryFMLayered(_GeometryFM):
         self, elem2d: int | np.ndarray, z: np.ndarray | float
     ) -> np.ndarray:
         """Find 3d element ids from 2d element ids and z-values."""
-        # TODO: coordinate with _find_3d_from_2d_points()
+        # TODO: coordinate with _find_3d_from_2d_points() (see gh-1016)
 
         elem2d = [elem2d] if np.isscalar(elem2d) else elem2d
         elem2d = np.asarray(elem2d)

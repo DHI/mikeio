@@ -1124,7 +1124,7 @@ class Grid3D(_Geometry):
         z0: float = 0.0,
         dz: float | None = None,
         nz: int | None = None,
-        projection: str = "NON-UTM",  # TODO LONG/LAT
+        projection: str = "NON-UTM",  # TODO LONG/LAT (see gh-1011)
         origin: tuple[float, float] = (0.0, 0.0),
         orientation: float = 0.0,
     ) -> None:
@@ -1172,7 +1172,7 @@ class Grid3D(_Geometry):
         self._y0, self._dy, self._ny = _parse_grid_axis("y", y, y0, dy, ny)
         self._z0, self._dz, self._nz = _parse_grid_axis("z", z, z0, dz, nz)
 
-        self._projstr = projection  # TODO handle other types than string
+        self._projstr = projection  # TODO handle other types than string (see gh-1011)
         self._origin = origin
         self._orientation = orientation
 
@@ -1282,7 +1282,7 @@ class Grid3D(_Geometry):
 
         if axis == 0:
             # z is the first axis! return x-y Grid2D
-            # TODO: origin, how to pass self.z[idx]?
+            # TODO: origin, how to pass self.z[idx]? (see gh-1010)
             return Grid2D(
                 x0=self._x0,
                 y0=self._y0,
@@ -1296,7 +1296,7 @@ class Grid3D(_Geometry):
             )
         elif axis == 1:
             # y is the second axis! return x-z Grid2D
-            # TODO: origin, how to pass self.y[idx]?
+            # TODO: origin, how to pass self.y[idx]? (see gh-1010)
             return Grid2D(
                 x=self.x,
                 y=self.z,
@@ -1304,7 +1304,7 @@ class Grid3D(_Geometry):
             )
         elif axis == 2:
             # x is the last axis! return y-z Grid2D
-            # TODO: origin, how to pass self.x[idx]?
+            # TODO: origin, how to pass self.x[idx]? (see gh-1010)
             return Grid2D(
                 x=self.y,
                 y=self.z,

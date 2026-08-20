@@ -154,7 +154,7 @@ def plot_2dspectrum(
             f"plot_type '{plot_type}' not supported (contour, contourf, patch, shaded)"
         )
 
-    # TODO: optional
+    # TODO: optional (see gh-1024)
     ax.set_thetagrids(  # type: ignore
         [0.0, 45, 90.0, 135, 180.0, 225, 270.0, 315],
         labels=["N", "N-E", "E", "S-E", "S", "S-W", "W", "N-W"],

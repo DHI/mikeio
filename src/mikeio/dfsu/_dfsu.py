@@ -78,7 +78,7 @@ def write_dfsu(filename: str | Path, data: Dataset, title: str = "") -> None:
         DfsuFileType.DfsuSpectral2D,
     ):
         builder.SetFrequencies(geometry.frequencies)
-        # TODO should directions always be converted to radians
+        # TODO should directions always be converted to radians (see gh-1027)
         builder.SetDirections(np.deg2rad(geometry.directions))
 
     builder.SetNodes(xn, yn, zn, geometry.codes)
@@ -239,7 +239,7 @@ class Dfsu2DH:
             )
         return str.join("\n", out)
 
-    # TODO change to GeometryFM2D
+    # TODO change to GeometryFM2D (see gh-1028)
     @property
     def geometry(self) -> Any:
         """Flexible Mesh Geometry of the file (e.g. [](`mikeio.spatial.GeometryFM2D`))."""
@@ -636,7 +636,6 @@ class Dfsu2DH:
             end_time=self.end_time,
             timestep=self.timestep,
             geometry=self.geometry,
-            n_elements=self.geometry.n_elements,
             track=track,
             items=deepcopy(items),
             time_steps=time_steps,

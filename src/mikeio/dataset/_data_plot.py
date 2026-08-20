@@ -771,7 +771,7 @@ class DataArrayPlotterPointSpectrum(DataArrayPlotter):
         ax = self._plot_1dspectrum(self.da.geometry.directions, ax, figsize, **kwargs)  # type: ignore
         ax.set_xlabel("directions [degrees]")
         ax.set_ylabel("directional spectral energy [m*m*s]")
-        # TODO: consider using matplotlib's default tick locator instead of arbitrary ::2
+        # TODO: consider using matplotlib's default tick locator instead of arbitrary ::2 (see gh-1025)
         ax.set_xticks(self.da.geometry.directions[::2])  # type: ignore
         return ax
 

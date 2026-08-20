@@ -29,8 +29,12 @@ def _merge_dict(a: dict[str, Any], b: Mapping[str, Any]) -> dict[str, Any]:
 
 
 class PfsNonUniqueList(list):
-    # TODO do we really need this, regular lists are not unique
-    pass
+    """List of values belonging to repeated keywords or sections with the same name.
+
+    A distinct type is needed because a plain list is also a valid *single* pfs
+    value (e.g. `x = 1, 2, 3`); this marker tells the writer to emit one entry
+    per element instead of a single comma-separated value.
+    """
 
 
 class PfsSection(SimpleNamespace, MutableMapping[str, Any]):
@@ -400,7 +404,7 @@ class PfsSection(SimpleNamespace, MutableMapping[str, Any]):
             n_sections = len(sections)
         else:
             n_sections = -1
-            # TODO: check that value is a PfsSection
+            # TODO: check that value is a PfsSection (see gh-1030)
             sections = [k for k in self.keys() if k[-1].isdigit()]
             for k in self.keys():
                 if isinstance(k, str) and k.startswith("number_of_"):
