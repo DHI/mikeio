@@ -71,11 +71,11 @@ geometry
 ```
 
 ```{python}
-da = mikeio.DataArray(data=el,
-               item=mikeio.ItemInfo("Elevation", mikeio.EUMType.Total_Water_Depth),
-               geometry=geometry,
-               dims=("y","x") # No time dimension
-               )
+da = mikeio.DataArray(
+    data=el,
+    item=mikeio.ItemInfo("Elevation", mikeio.EUMType.Total_Water_Depth),
+    geometry=geometry,
+)
 da
 ```
 

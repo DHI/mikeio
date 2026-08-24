@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: ["3.10", "3.14"]
+        python-version: ["3.12", "3.14"]
 
     steps:
       - uses: actions/checkout@v4
@@ -20,6 +20,8 @@ jobs:
         with:
           version: 0.6.2
           src: src
+
+      - uses: extractions/setup-just@v3
 
       - name: Set up uv
         uses: astral-sh/setup-uv@v6
@@ -31,7 +33,7 @@ jobs:
         run: uv sync --group test --no-dev
 
       - name: Type check
-        run: make typecheck
+        run: just typecheck
 
       - name: Test
-        run: make test
+        run: just test

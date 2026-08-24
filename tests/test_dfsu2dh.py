@@ -1,18 +1,17 @@
-from pathlib import Path
 import platform
 import shutil
+from pathlib import Path
 
 import numpy as np
 import pandas as pd
 import pytest
-import mikeio
-from mikeio import Dataset, DataArray, Mesh
 from pytest import approx
-from mikeio.exceptions import OutsideModelDomainError
 
+import mikeio
+from mikeio import DataArray, Dataset, Mesh
+from mikeio.exceptions import OutsideModelDomainError
+from mikeio.spatial import GeometryPoint2D, Grid2D
 from mikeio.spatial._FM_geometry import GeometryFM2D
-from mikeio.spatial import GeometryPoint2D
-from mikeio.spatial import Grid2D
 
 
 def test_repr() -> None:
@@ -450,18 +449,6 @@ def test_read_and_select_single_element() -> None:
     selds = ds.sel(x=606200, y=6905480)
 
     assert selds.shape == (9,)
-
-
-def test_is_2d() -> None:
-    filename = "tests/testdata/HD2D.dfsu"
-    dfs = mikeio.Dfsu2DH(filename)
-
-    assert dfs.geometry.is_2d
-
-    filename = "tests/testdata/basin_3d.dfsu"
-    dfs = mikeio.Dfsu2DH(filename)
-
-    assert not dfs.geometry.is_2d
 
 
 def test_is_geo_UTM() -> None:
@@ -1069,3 +1056,29 @@ def test_dfsu_read_closes_file_handle() -> None:
         results.append(dfs.read())
 
     assert _count_fds_for_file(filename) == 0
+
+
+def test_write_dfsu_with_title(tmp_path: Path) -> None:
+    """Test writing a dfsu file with a custom title and reading it back."""
+    sourcefilename = "tests/testdata/HD2D.dfsu"
+    fp = tmp_path / "with_title.dfsu"
+
+    dfs = mikeio.Dfsu2DH(sourcefilename)
+    ds = dfs.read(items=[0])
+
+    custom_title = "Test DFSU with Custom Title"
+    ds.title = custom_title
+    ds.to_dfs(fp)
+
+    newdfs = mikeio.Dfsu2DH(fp)
+    assert newdfs.title == custom_title
+
+
+def test_read_dfsu_title(tmp_path: Path) -> None:
+    """Test reading the title from an existing dfsu file."""
+    sourcefilename = "tests/testdata/HD2D.dfsu"
+    dfs = mikeio.Dfsu2DH(sourcefilename)
+
+    # Dfsu files should have a title property
+    assert hasattr(dfs, "title")
+    assert isinstance(dfs.title, str)

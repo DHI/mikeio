@@ -165,6 +165,25 @@ def test_write_without_time(tmp_path: Path) -> None:
     assert ds.shape == (ny, nx)
 
 
+def test_write_with_title(tmp_path: Path) -> None:
+    """Test writing a dfsu file with a custom title and reading it back."""
+    sourcefilename = "tests/testdata/random.dfs2"
+    fp = tmp_path / "with_title.dfs2"
+
+    # Read source file
+    dfs = mikeio.Dfs2(sourcefilename)
+    ds = dfs.read(items=[0])
+
+    # Write with custom title
+    custom_title = "Test DFS2 with Custom Title"
+    ds.title = custom_title
+    ds.to_dfs(fp)
+
+    # Read back and verify title
+    newdfs = mikeio.Dfs2(fp)
+    assert newdfs.title == custom_title
+
+
 def test_read(dfs2_random: Dfs2) -> None:
     dfs = dfs2_random
     assert isinstance(dfs.geometry, Grid2D)
@@ -173,6 +192,22 @@ def test_read(dfs2_random: Dfs2) -> None:
     assert data[0, 88, 0] == 0
     assert np.isnan(data[0, 89, 0])
     assert data.shape == (3, 100, 2)  # time, y, x
+
+
+def test_read_with_title() -> None:
+    sourcefilename = "tests/testdata/random.dfs2"
+    dfs = mikeio.Dfs2(sourcefilename)
+    assert hasattr(dfs, "title")
+    assert isinstance(dfs.title, str)
+
+
+def test_write_read_with_title(tmp_path: Path) -> None:
+    tmpfile = tmp_path / "tmp_title.dfs2"
+    dfs = mikeio.Dfs2("tests/testdata/random.dfs2")
+    ds = dfs.read()
+    ds.to_dfs(tmpfile)
+    dfs_tmp = mikeio.Dfs2(tmpfile)
+    assert dfs.title == dfs_tmp.title
 
 
 def test_read_bad_item(dfs2_random: Dfs2) -> None:
@@ -727,47 +762,34 @@ def test_read_single_precision() -> None:
     assert ds[0].dtype == np.float32
 
 
-def dfs2_props_to_list(d: Dfs2) -> list[Any]:
-    lon = d._dfs.FileInfo.Projection.Longitude
-    lat = d._dfs.FileInfo.Projection.Latitude
-    rot = d._dfs.FileInfo.Projection.Orientation
-    res = [
-        d.x0,
-        d.y0,
-        d.dx,
-        d.dy,
-        d.nx,
-        d.ny,
-        d._projstr,
-        lon,
-        lat,
-        rot,
-        d._n_timesteps,
-        d._start_time,
-        d._dfs.FileInfo.TimeAxis.TimeAxisType,
-        d.n_items,
-        # d._deletevalue,
-    ]
-
-    for item in d.items:
-        res.append(item.type)
-        res.append(item.unit)
-        res.append(item.name)
-
-    return res
-
-
 def is_header_unchanged_on_read_write(tmp_path: Path, filename: str) -> None:
-    dfsA = mikeio.Dfs2("tests/testdata/" + filename)
-    props_A = dfs2_props_to_list(dfsA)
-
-    ds = dfsA.read()
+    a = mikeio.Dfs2("tests/testdata/" + filename)
+    ds = a.read()
     filename_out = tmp_path / filename
     ds.to_dfs(filename_out)
-    dfsB = mikeio.Dfs2(filename_out)
-    props_B = dfs2_props_to_list(dfsB)
-    for pA, pB in zip(props_A, props_B):
-        assert pytest.approx(pA) == pB
+    b = mikeio.Dfs2(filename_out)
+
+    # float fields can pick up tiny round-trip error, so compare with a tolerance
+    assert b.x0 == pytest.approx(a.x0)
+    assert b.y0 == pytest.approx(a.y0)
+    assert b.dx == pytest.approx(a.dx)
+    assert b.dy == pytest.approx(a.dy)
+
+    pa, pb = a._dfs.FileInfo.Projection, b._dfs.FileInfo.Projection
+    assert pb.Longitude == pytest.approx(pa.Longitude)
+    assert pb.Latitude == pytest.approx(pa.Latitude)
+    assert pb.Orientation == pytest.approx(pa.Orientation)
+
+    # everything else must round-trip exactly
+    assert b.nx == a.nx
+    assert b.ny == a.ny
+    assert b._projstr == a._projstr
+    assert b._n_timesteps == a._n_timesteps
+    assert b._start_time == a._start_time
+    assert (
+        b._dfs.FileInfo.TimeAxis.TimeAxisType == a._dfs.FileInfo.TimeAxis.TimeAxisType
+    )
+    assert b.items == a.items
 
 
 def test_read_write_header_unchanged_utm_not_rotated(tmp_path: Path) -> None:

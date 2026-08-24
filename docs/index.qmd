@@ -47,5 +47,3 @@ MIKE IO is licensed under BSD-3-Clause license and available on [GitHub](https:/
 :::
 
 :::
-
-

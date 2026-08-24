@@ -1,0 +1,21 @@
+# MIKE IO Product Roadmap
+
+This roadmap outlines the current and future direction of MIKE IO — a Python package for reading, writing, and manipulating MIKE files (dfs0, dfs1, dfs2, dfs3, dfsu, mesh).
+
+For questions or feature requests, please open a [GitHub Discussion](https://github.com/DHI/mikeio/discussions).
+
+---
+{% for status in statuses %}
+{%- if features_by_status[status] %}
+
+## {{ status }}
+
+{% if status == "Not Planned" -%}
+See [features considered out of scope](features/{{ features_by_status[status][0].filename }}).
+{%- else -%}
+{% for f in features_by_status[status] %}
+- **[{{ f.title }}](features/{{ f.filename }})** — {{ f.summary }}
+{%- endfor %}
+{%- endif %}
+{%- endif %}
+{%- endfor %}

@@ -253,7 +253,7 @@ class DataArrayPlotterGrid1D(DataArrayPlotter):
             **kwargs,
         )
         _ = fig.colorbar(pos, label=self._label_txt())
-        ax.set_xlabel(self.da.geometry._axis_name)
+        ax.set_xlabel(self.da.geometry.dims[0])
         ax.set_ylabel("time")
         return ax
 
@@ -264,7 +264,7 @@ class DataArrayPlotterGrid1D(DataArrayPlotter):
         elif self.da.n_timesteps == 1:
             ax.set_title(f"{self.da.time[0]}")
         ax.plot(self.da.geometry.x, self.da.values.T, **kwargs)
-        ax.set_xlabel(self.da.geometry._axis_name)
+        ax.set_xlabel(self.da.geometry.dims[0])
         ax.set_ylabel(self._label_txt())
         return ax
 
@@ -522,7 +522,10 @@ class DataArrayPlotterFM(DataArrayPlotter):
         ```
 
         """
-        return self.da.geometry.plot.mesh(figsize=figsize, ax=ax, **kwargs)
+        geom = self.da.geometry
+        if geom.is_layered:
+            geom = geom.to_2d_geometry()
+        return geom.plot.mesh(figsize=figsize, ax=ax, **kwargs)
 
     def outline(
         self,
@@ -540,7 +543,10 @@ class DataArrayPlotterFM(DataArrayPlotter):
         ```
 
         """
-        return self.da.geometry.plot.outline(figsize=figsize, ax=ax, **kwargs)
+        geom = self.da.geometry
+        if geom.is_layered:
+            geom = geom.to_2d_geometry()
+        return geom.plot.outline(figsize=figsize, ax=ax, **kwargs)
 
     def _plot_FM_map(self, ax: Axes, **kwargs: Any) -> Axes:
         da = self.da.isel(time=0) if "time" in self.da.dims else self.da
@@ -629,7 +635,7 @@ class DataArrayPlotterFMVerticalColumn(DataArrayPlotter):
             show_legend = len(self.da.time) < 10
 
         values = self.da.to_numpy()
-        zn = self.da._zn
+        zn = self.da.z.nodes
         if extrapolate:
             ze = self.da.geometry._calc_zee(zn)
             values = self.da.geometry._interp_values(zn, values, ze)
@@ -705,13 +711,12 @@ class DataArrayPlotterFMVerticalProfile(DataArrayPlotter):
         if "title" not in kwargs:
             kwargs["title"] = self.da.time[0]
         da = self.da.isel(time=0) if "time" in self.da.dims else self.da
-        assert da._zn is not None
         g = da.geometry
         return _plot_vertical_profile(
             node_coordinates=g.node_coordinates,
             element_table=g.element_table,
             values=da.values,
-            zn=da._zn,
+            zn=da.z.nodes,
             is_geo=g.is_geo,
             **kwargs,
         )
@@ -830,7 +835,6 @@ def _calc_Hm0(da: DataArray) -> DataArray:
         tail=True,
     )
     Hm0 = 4 * np.sqrt(m0)
-    dims = tuple([d for d in da.dims if d not in ("frequency", "direction")])
     item = ItemInfo(EUMType.Significant_wave_height)
     g = da.geometry
     geometry: Any = GeometryUndefined()
@@ -840,7 +844,6 @@ def _calc_Hm0(da: DataArray) -> DataArray:
             nx=g.n_nodes,
             dx=1.0,
             node_coordinates=g.node_coordinates,
-            axis_name="node",
         )
     elif isinstance(g, GeometryFMAreaSpectrum):
         geometry = GeometryFM2D(
@@ -858,7 +861,6 @@ def _calc_Hm0(da: DataArray) -> DataArray:
         data=Hm0,
         time=da.time,
         item=item,
-        dims=dims,
         geometry=geometry,
         dt=da._dt,
     )

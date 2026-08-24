@@ -1,15 +1,17 @@
 from pathlib import Path
+
 import numpy as np
 import pandas as pd
 import pytest
+
 import mikeio
 from mikeio import Mesh
 from mikeio.spatial import (
     GeometryFM2D,
     GeometryFM3D,
     GeometryFMVerticalColumn,
+    GeometryPoint3D,
 )
-from mikeio.spatial import GeometryPoint3D
 
 
 def test_repr() -> None:
@@ -41,6 +43,15 @@ def test_read_simple_2dv() -> None:
 
     assert ds.items[0].name != "Z coordinate"
     assert ds.items[2].name == "W velocity"
+
+
+def test_write_read_with_title(tmp_path: Path) -> None:
+    tmpfile = tmp_path / "tmp_title.dfsu"
+    dfs = mikeio.Dfsu3D("tests/testdata/oresund_sigma_z.dfsu")
+    ds = dfs.read()
+    ds.to_dfs(tmpfile)
+    dfs_tmp = mikeio.Dfsu3D(tmpfile)
+    assert dfs.title == dfs_tmp.title
 
 
 def test_read_returns_correct_items_sigma_z() -> None:
@@ -169,8 +180,7 @@ def test_read_dfsu3d_column() -> None:
     assert dscol1.geometry.n_layers == 4
     assert dscol1.geometry.n_elements == 4
     assert dscol1.geometry.n_nodes == 5 * 3
-    assert dscol1._zn is not None
-    assert dscol1._zn.shape == (ds.n_timesteps, 5 * 3)
+    assert dscol1.z.nodes.shape == (ds.n_timesteps, 5 * 3)
 
     dscol2 = dfs.read(x=x, y=y)
     assert isinstance(dscol2.geometry, GeometryFMVerticalColumn)
@@ -178,8 +188,8 @@ def test_read_dfsu3d_column() -> None:
     assert dscol1.dims == dscol2.dims
     assert dscol1.geometry._type == dscol2.geometry._type
     assert np.all(dscol1.to_numpy() == dscol2.to_numpy())
-    assert dscol2._zn is not None
-    assert dscol2._zn.shape == (ds.n_timesteps, 5 * 3)
+    assert dscol2.z.nodes.shape == (ds.n_timesteps, 5 * 3)
+    assert np.all(dscol1.z.nodes == dscol2.z.nodes)
 
 
 def test_flip_column_upside_down() -> None:
@@ -298,6 +308,20 @@ def test_read_column_select_single_time_plot() -> None:
     sal_prof = dsp["Salinity"].isel(time=0)
     sal_prof.plot()
     sal_prof.plot.line()
+
+
+def test_plot_column_selected_from_dataset() -> None:
+    import matplotlib.pyplot as plt
+
+    ds = mikeio.read("tests/testdata/oresund_sigma_z.dfsu")
+    dsp = ds.sel(x=333934.1, y=6158101.5)
+    assert isinstance(dsp.geometry, GeometryFMVerticalColumn)
+
+    da = dsp["Temperature"]
+    da.plot()
+    da.plot(extrapolate=False, marker="o")
+
+    plt.close("all")
 
 
 def test_read_column_interp_time_and_select_time() -> None:
@@ -520,8 +544,7 @@ def test_extract_top_layer_to_2d(tmp_path: Path) -> None:
     ds.to_dfs(fp)
 
     newdfs = mikeio.Dfsu2DH(fp)
-
-    assert newdfs.geometry.is_2d
+    assert isinstance(newdfs.geometry, GeometryFM2D)
 
 
 def test_modify_values_in_layer(tmp_path: Path) -> None:
@@ -577,9 +600,9 @@ def test_dataset_write_dfsu3d(tmp_path: Path) -> None:
 def test_dataset_write_dfsu3d_max(tmp_path: Path) -> None:
     fp = tmp_path / "oresund_sigma_z.dfsu"
     ds = mikeio.read("tests/testdata/oresund_sigma_z.dfsu")
-    assert ds._zn is not None
+    assert ds.z.nodes is not None
     ds_max = ds.max("time")
-    assert ds_max._zn is not None
+    assert ds_max.z.nodes is not None
     ds_max.to_dfs(fp)
 
     ds2 = mikeio.read(fp)
@@ -661,3 +684,57 @@ def test_isel_3d_single_time() -> None:
     assert "time" not in ds2.dims
     ds3 = ds2.isel(element=[0, 1])
     assert ds3.geometry.n_elements == 2
+
+
+def test_z_accessor_nodes_matches_legacy_zn() -> None:
+    """S01: da.z.nodes equals the legacy _zn on 3D layered DataArrays."""
+    ds = mikeio.read("tests/testdata/oresund_sigma_z.dfsu")
+    da = ds[0]
+    assert da.z.nodes.shape == (da.n_timesteps, da.geometry.n_nodes)
+    assert da.z.nodes.dtype == np.float32 or da.z.nodes.dtype == np.float64
+    assert np.isfinite(da.z.nodes).all()
+
+
+def test_z_accessor_elements_is_node_mean_and_cached() -> None:
+    """S02: da.z.elements equals the per-element node-mean and is cached."""
+    ds = mikeio.read("tests/testdata/oresund_sigma_z.dfsu")
+    da = ds[0]
+    ze = da.z.elements
+    assert ze.shape == (da.n_timesteps, da.geometry.n_elements)
+
+    zn = da.z.nodes
+    expected = np.empty_like(ze)
+    for j, nodes in enumerate(da.geometry.element_table):
+        expected[:, j] = zn[:, np.asarray(nodes, dtype=int)].mean(axis=1)
+    assert np.allclose(ze, expected)
+
+    # Second access returns the same cached array (no recomputation)
+    assert da.z.elements is ze
+
+
+def test_z_accessor_on_vertical_column_slice() -> None:
+    """S03: vertical-column slice DataArray retains the z accessor."""
+    ds = mikeio.read("tests/testdata/oresund_sigma_z.dfsu")
+    dscol = ds.sel(x=333934.1, y=6158101.5)
+    da = dscol[0]
+    assert isinstance(da.geometry, GeometryFMVerticalColumn)
+    assert da.z.nodes.shape[-1] == da.geometry.n_nodes
+    assert da.z.nodes.dtype == np.float32 or da.z.nodes.dtype == np.float64
+    assert np.isfinite(da.z.nodes).all()
+
+
+def test_z_accessor_non_layered_raises_attribute_error() -> None:
+    """S04: non-layered DataArray raises AttributeError naming the geometry."""
+    ds = mikeio.read("tests/testdata/random.dfs2")
+    da = ds[0]
+    with pytest.raises(AttributeError, match="Grid2D"):
+        _ = da.z.nodes
+    with pytest.raises(AttributeError, match="has no z-coordinates"):
+        _ = da.z.elements
+
+
+def test_dataset_z_mirrors_first_dataarray() -> None:
+    """S05: ds.z.nodes equals ds[0].z.nodes (shared array)."""
+    ds = mikeio.read("tests/testdata/oresund_sigma_z.dfsu")
+    assert ds.z.nodes is ds[0].z.nodes
+    assert np.array_equal(ds.z.elements, ds[0].z.elements)

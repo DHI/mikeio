@@ -91,6 +91,7 @@ class Dfs1(_Dfs123):
         self._x0: float = dfs.SpatialAxis.X0
         self._dx: float = dfs.SpatialAxis.Dx
         self._nx: int = dfs.SpatialAxis.XCount
+        self._title: str = dfs.FileInfo.FileTitle
         dfs.Close()
 
         origin = self._longitude, self._latitude
@@ -141,12 +142,9 @@ class Dfs1(_Dfs123):
         single_time_selected, time_steps = _valid_timesteps(self._dfs.FileInfo, time)
         nt = len(time_steps) if not single_time_selected else 1
         shape: tuple[int, ...] = (nt, self.nx)
-        dims = self.geometry.default_dims
 
         if single_time_selected and not keepdims:
             shape = shape[1:]
-        else:
-            dims = ("time", *dims)
 
         data_list: list[np.ndarray] = [
             np.ndarray(shape=shape, dtype=dtype) for _ in range(n_items)
@@ -180,8 +178,8 @@ class Dfs1(_Dfs123):
             data=data_list,
             time=time,
             items=items,
-            dims=tuple(dims),
             geometry=self.geometry,
+            title=self.title,
             validate=False,
             dt=self._timestep,
         )
@@ -205,3 +203,8 @@ class Dfs1(_Dfs123):
     def nx(self) -> int:
         """Number of node values."""
         return self._nx
+
+    @property
+    def title(self) -> str:
+        """Title of the dfs1 file."""
+        return self._title

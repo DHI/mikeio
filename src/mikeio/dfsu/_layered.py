@@ -9,7 +9,7 @@ from matplotlib.axes import Axes
 from matplotlib.colors import Colormap
 from mikecore.DfsFileFactory import DfsFileFactory
 from mikecore.DfsuFile import DfsuFile, DfsuFileType
-from scipy.spatial import cKDTree
+from scipy.spatial import KDTree
 from tqdm import trange
 
 from .._interpolation import Interpolant
@@ -52,6 +52,7 @@ class DfsuLayered:
         self._start_time = info.start_time
         self._timestep = info.timestep
         self._n_timesteps = info.n_timesteps
+        self._title = info.title
         self._geometry = self._read_geometry(self._filename)
         # 3d files have a zn item
         self._items = self._read_items(self._filename)
@@ -127,6 +128,7 @@ class DfsuLayered:
 
     @property
     def time(self) -> pd.DatetimeIndex:
+        """File time axis (only available for equidistant files; otherwise read the data)."""
         if self._equidistant:
             return pd.date_range(
                 start=self.start_time,
@@ -139,7 +141,13 @@ class DfsuLayered:
             )
 
     @property
+    def title(self) -> str:
+        """File title."""
+        return self._title
+
+    @property
     def geometry(self) -> GeometryFM3D | GeometryFMVerticalProfile:
+        """Flexible Mesh Geometry of the file (3d or vertical profile)."""
         return self._geometry
 
     @staticmethod
@@ -354,13 +362,18 @@ class DfsuLayered:
             else self.geometry.elements_to_geometry(elements)
         )
 
+        selected_node_ids: np.ndarray | None = None
+        if elements is not None and getattr(geometry, "is_layered", False):
+            selected_node_ids, _ = self.geometry._get_nodes_and_table_for_elements(
+                elements, node_layers="all"
+            )
+
         if isinstance(geometry, GeometryPoint3D):
             n_elems = 1
             n_nodes = 1
         else:
             n_elems = geometry.n_elements
             n_nodes = geometry.n_nodes
-            node_ids = geometry.node_ids
 
         item_numbers = _valid_item_numbers(
             dfs.ItemInfo, items, ignore_first=self.geometry.is_layered
@@ -409,7 +422,11 @@ class DfsuLayered:
 
                 if elements is not None:
                     if item == 0 and item0_is_node_based:
-                        d = d[node_ids]
+                        if selected_node_ids is None:
+                            raise ValueError(
+                                "Could not determine node ids for layered selection"
+                            )
+                        d = d[selected_node_ids]
                     else:
                         d = d[elements]  # type: ignore
 
@@ -422,15 +439,8 @@ class DfsuLayered:
 
         dfs.Close()
 
-        dims: tuple[str, ...] = (
-            ("time", "element")
-            if not (single_time_selected and not keepdims)  # TODO extract variable
-            else ("element",)
-        )
-
         if elements is not None and len(elements) == 1:
             # squeeze point data
-            dims = tuple([d for d in dims if d != "element"])
             data_list = [np.squeeze(d, axis=-1) for d in data_list]
 
         if layered_data:
@@ -440,7 +450,7 @@ class DfsuLayered:
                 items=items,
                 geometry=geometry,
                 zn=data_list[0],
-                dims=dims,
+                title=self.title,
                 validate=False,
                 dt=self.timestep,
             )
@@ -450,7 +460,7 @@ class DfsuLayered:
                 time=time,
                 items=items,
                 geometry=geometry,
-                dims=dims,
+                title=self.title,
                 validate=False,
                 dt=self.timestep,
             )
@@ -494,6 +504,7 @@ class Dfsu2DV(DfsuLayered):
 
     @property
     def geometry(self) -> GeometryFMVerticalProfile:
+        """Flexible Mesh Geometry of the 2d vertical profile."""
         assert isinstance(self._geometry, GeometryFMVerticalProfile)
         return self._geometry
 
@@ -575,7 +586,7 @@ class Dfsu3D(DfsuLayered):
         geom = self.geometry.elements_to_geometry(top_el, node_layers="top")
         xye = geom.element_coordinates[:, 0:2]  # type: ignore
         xyn = geom.node_coordinates[:, 0:2]  # type: ignore
-        tree2d = cKDTree(xyn)
+        tree2d = KDTree(xyn)
         dist, node_ids = tree2d.query(xye, k=n_nearest)
         weights = Interpolant.from_distances(dist)
 
@@ -584,8 +595,7 @@ class Dfsu3D(DfsuLayered):
         node_ids_surf, _ = self.geometry._get_nodes_and_table_for_elements(
             top_el, node_layers="top"
         )
-        assert isinstance(ds[0]._zn, np.ndarray)
-        zn_surf = ds[0]._zn[:, node_ids_surf]  # surface
+        zn_surf = ds[0].z.nodes[:, node_ids_surf]  # surface
         interpolant = Interpolant(node_ids, weights)
         surf2d = interpolant.interp2d(zn_surf)
         surf_da = DataArray(

@@ -151,6 +151,9 @@ class Dfs2(_Dfs123):
             is_spectral=is_spectral,
             is_vertical=is_vertical,
         )
+
+        self._title = dfs.FileInfo.FileTitle
+
         dfs.Close()
         self._validate_no_orientation_in_geo()
 
@@ -236,19 +239,12 @@ class Dfs2(_Dfs123):
 
         time = pd.to_datetime(t_seconds, unit="s", origin=self.start_time)
 
-        dims: tuple[str, ...]
-
-        if single_time_selected and not keepdims:
-            dims = ("y", "x")
-        else:
-            dims = ("time", "y", "x")
-
         return Dataset.from_numpy(
             data_list,
             time=time,
             items=items,
             geometry=geometry,
-            dims=dims,
+            title=self.title,
             validate=False,
         )
 
@@ -327,3 +323,8 @@ class Dfs2(_Dfs123):
     def ny(self) -> int:
         """Number of values in the y-direction."""
         return self.geometry.ny
+
+    @property
+    def title(self) -> str:
+        """Title of the dfs2 file."""
+        return self._title

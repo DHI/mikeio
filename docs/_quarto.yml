@@ -47,12 +47,12 @@ website:
         - user-guide/dfsu.qmd
         - user-guide/mesh.qmd
         - user-guide/eum.qmd
+        - user-guide/statistics.qmd
         - user-guide/generic.qmd
         - user-guide/pfs.qmd
 
     - title: Examples
       contents:
-        - examples/index.qmd
         - examples/dfs0/index.qmd
         - examples/dfs2/index.qmd
         - examples/dfsu/index.qmd
@@ -163,6 +163,7 @@ format:
     theme: cosmo
     brand: _brand.yml
     toc: true
+    include-in-header: _llms-head.html
   ipynb:
     theme: cosmo
     toc: true

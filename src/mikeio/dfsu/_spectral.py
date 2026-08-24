@@ -46,6 +46,7 @@ class DfsuSpectral:
         self._start_time = info.start_time
         self._timestep = info.timestep
         self._n_timesteps = info.n_timesteps
+        self._title = info.title
         self._items = info.items
         self._geometry = self._read_geometry(self._filename)
 
@@ -136,6 +137,11 @@ class DfsuSpectral:
             raise NotImplementedError(
                 "Non-equidistant time axis. Read the data to get time."
             )
+
+    @property
+    def title(self) -> str:
+        """File title."""
+        return self._title
 
     @staticmethod
     def _read_geometry(
@@ -230,8 +236,7 @@ class DfsuSpectral:
         elements: Sized | None,
         dfsu_type: DfsuFileType,
         keepdims: bool,
-    ) -> tuple[tuple[int, ...], tuple[int, ...], tuple[str, ...]]:
-        dims = [] if (n_steps == 1 and not keepdims) else ["time"]
+    ) -> tuple[tuple[int, ...], tuple[int, ...]]:
         n_freq = self.geometry.n_frequencies
         n_dir = self.geometry.n_directions
         shape: tuple[int, ...] = (n_dir, n_freq)
@@ -249,7 +254,6 @@ class DfsuSpectral:
                 if n_nodes == 1:
                     read_shape = (n_steps, *shape)
                 else:
-                    dims.append("node")
                     read_shape = (n_steps, n_nodes, *shape)
                 shape = (*shape, self.geometry.n_nodes)
 
@@ -260,16 +264,10 @@ class DfsuSpectral:
                 if n_elems == 1:
                     read_shape = (n_steps, *shape)
                 else:
-                    dims.append("element")
                     read_shape = (n_steps, n_elems, *shape)
                 shape = (*shape, self.geometry.n_elements)
 
-        if n_dir > 1:
-            dims.append("direction")
-        if n_freq > 1:
-            dims.append("frequency")
-
-        return read_shape, shape, tuple(dims)
+        return read_shape, shape
 
     def read(
         self,
@@ -362,7 +360,7 @@ class DfsuSpectral:
         deletevalue = self.deletevalue
 
         n_steps = len(time_steps)
-        read_shape, shape, dims = self._get_spectral_data_shape(
+        read_shape, shape = self._get_spectral_data_shape(
             n_steps, pts, self._type, keepdims
         )
         data_list: list[np.ndarray] = [
@@ -400,7 +398,7 @@ class DfsuSpectral:
             time=time,
             items=items,
             geometry=geometry,
-            dims=dims,
+            title=self.title,
             validate=False,
         )
 

@@ -80,6 +80,41 @@ ax.legend();
 ```
 
 
+## Spatial queries
+
+### Find element containing a point
+
+Use `find_index()` to find the element that contains a given point:
+
+```{python}
+g = msh.geometry
+idx = g.find_index(coords=[216000, 6162000])
+idx
+```
+
+### Find nearest elements
+
+Use `find_nearest_elements()` to find the closest element centers:
+
+```{python}
+g.find_nearest_elements([216000, 6162000], return_distances=True)
+```
+
+```{python}
+g.find_nearest_elements([216000, 6162000], n_nearest=3)
+```
+
+### Boundary polygons
+
+Extract the mesh boundary as polygons:
+
+```{python}
+bnd = g.boundary_polygons
+exterior = bnd.exteriors[0]
+exterior.xy.shape
+```
+
+
 ## Change z values and boundary code
 Assume that we want to have a minimum depth of 2 meters and change the open boundary (code 2) to a closed one (code 1). 
 

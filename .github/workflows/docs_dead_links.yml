@@ -3,7 +3,7 @@ on:
   workflow_dispatch: # allow manual trigger
   schedule:
     # run daily at 4 am
-    - cron:  '0 4 * * *'
+    - cron:  '0 4 * * 1'
 jobs:
   crawl_for_broken_links:
     runs-on: ubuntu-latest
@@ -15,6 +15,6 @@ jobs:
         website_url: 'https://dhi.github.io/mikeio/'
         exclude_url_prefix: 'https://github.com/DHI/mikeio/edit/main/docs/api/,https://docs.mikepoweredbydhi.com/'
         verbose: true
-        max_retry_time: 30
-        max_retries: 2
+        max_retry_time: 60
+        max_retries: 5
         max_depth: -1

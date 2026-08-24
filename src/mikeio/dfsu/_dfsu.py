@@ -35,7 +35,7 @@ from ._topology import get_elements_from_source, get_nodes_from_source
 from ..eum import ItemInfo, TimeStepUnit
 
 
-def write_dfsu(filename: str | Path, data: Dataset) -> None:
+def write_dfsu(filename: str | Path, data: Dataset, title: str = "") -> None:
     """Write a dfsu file.
 
     Parameters
@@ -44,6 +44,8 @@ def write_dfsu(filename: str | Path, data: Dataset) -> None:
         dfsu filename
     data: Dataset
         Dataset to be written
+    title: str, optional
+        Title of the dfsu file (default: "")
 
     """
     filename = str(filename)
@@ -100,6 +102,7 @@ def write_dfsu(filename: str | Path, data: Dataset) -> None:
     for item in data.items:
         builder.AddDynamicItem(item.name, eumQuantity.Create(item.type, item.unit))
 
+    builder.FileTitle = title
     builder.ApplicationTitle = "mikeio"
     builder.ApplicationVersion = __dfs_version__
     dfs = builder.CreateFile(filename)
@@ -118,11 +121,11 @@ def write_dfsu_data(dfs: DfsuFile, ds: Dataset, is_layered: bool) -> None:
 
     for i in range(n_time_steps):
         if is_layered:
+            zn_all = data.z.nodes
             if "time" in data.dims:
-                assert data._zn is not None
-                zn = data._zn[i]
+                zn = zn_all[i]
             else:
-                zn = data._zn
+                zn = zn_all
             dfs.WriteItemTimeStepNext(t_rel[i], zn.astype(np.float32))
         for da in data:
             if "time" in data.dims:
@@ -161,6 +164,7 @@ class _DfsuInfo:
     n_timesteps: int
     items: list[ItemInfo]
     deletevalue: float
+    title: str
 
 
 def _get_dfsu_info(filename: str | Path) -> _DfsuInfo:
@@ -175,6 +179,7 @@ def _get_dfsu_info(filename: str | Path) -> _DfsuInfo:
     timestep = dfs.TimeStepInSeconds
     items = _get_item_info(dfs.ItemInfo)
     equidistant = dfs.FileInfo.TimeAxis.TimeAxisType == TimeAxisType.CalendarEquidistant
+    title = dfs.FileInfo.FileTitle
     dfs.Close()
     return _DfsuInfo(
         filename=filename,
@@ -185,6 +190,7 @@ def _get_dfsu_info(filename: str | Path) -> _DfsuInfo:
         items=items,
         start_time=dfs.FileInfo.TimeAxis.StartDateTime,
         deletevalue=deletevalue,
+        title=title,
     )
 
 
@@ -210,6 +216,7 @@ class Dfsu2DH:
         self._timestep = info.timestep
         self._n_timesteps = info.n_timesteps
         self._items = info.items
+        self._title = info.title
         self._geometry = self._read_geometry(self._filename)
 
     def __repr__(self) -> str:
@@ -235,6 +242,7 @@ class Dfsu2DH:
     # TODO change to GeometryFM2D
     @property
     def geometry(self) -> Any:
+        """Flexible Mesh Geometry of the file (e.g. [](`mikeio.spatial.GeometryFM2D`))."""
         return self._geometry
 
     @property
@@ -279,6 +287,7 @@ class Dfsu2DH:
 
     @property
     def time(self) -> pd.DatetimeIndex:
+        """File time axis (only available for equidistant files; otherwise read the data)."""
         if self._equidistant:
             return pd.date_range(
                 start=self.start_time,
@@ -289,6 +298,11 @@ class Dfsu2DH:
             raise NotImplementedError(
                 "Non-equidistant time axis. Read the data to get time."
             )
+
+    @property
+    def title(self) -> str:
+        """File title."""
+        return self._title
 
     @staticmethod
     def _read_geometry(filename: str) -> GeometryFM2D:
@@ -474,14 +488,8 @@ class Dfsu2DH:
 
         dfs.Close()
 
-        dims: tuple[str, ...] = ("time", "element")
-
-        if single_time_selected and not keepdims:
-            dims = ("element",)
-
         if elements is not None and len(elements) == 1:
             # squeeze point data
-            dims = tuple([d for d in dims if d != "element"])
             data_list = [np.squeeze(d, axis=-1) for d in data_list]
 
         time = pd.to_datetime(t_rel, unit="s", origin=self.start_time)
@@ -492,7 +500,7 @@ class Dfsu2DH:
             time=time,
             items=item_infos,
             geometry=geometry,
-            dims=dims,
+            title=self.title,
             validate=False,
             dt=self.timestep,
         )

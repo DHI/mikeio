@@ -1390,6 +1390,15 @@ class ItemInfo:
         One of the following strings: 'Instantaneous', 'Accumulated', 'StepAccumulated', 'MeanStepBackward',
         'MeanStepForward'. Default: 'Instantaneous'
 
+    Attributes
+    ----------
+    name : str
+        User defined name of the item.
+    type : EUMType
+        EUM type of the item.
+    data_value_type : DataValueType
+        How values relate to time (Instantaneous, Accumulated, ...).
+
     Examples
     --------
     ```{python}

@@ -16,7 +16,7 @@ from numpy.typing import NDArray
 from mikecore.DfsuFile import DfsuFileType
 from mikecore.eum import eumQuantity
 from mikecore.MeshBuilder import MeshBuilder
-from scipy.spatial import cKDTree
+from scipy.spatial import KDTree
 
 from ..eum import EUMType, EUMUnit
 from ..exceptions import OutsideModelDomainError
@@ -29,7 +29,7 @@ from ._FM_plot import (
     _set_xy_label_by_projection,  # TODO remove
     _to_polygons,  # TODO remove
 )
-from ._geometry import GeometryPoint2D, _Geometry
+from ._geometry import Geometry0D, GeometryPoint2D, _Geometry
 
 from ._grid_geometry import Grid2D
 from ._distance import xy_to_bbox
@@ -342,7 +342,8 @@ class _GeometryFM(_Geometry):
         self._element_ids = new_element_ids
 
     @property
-    def default_dims(self) -> tuple[str, ...]:
+    def dims(self) -> tuple[str, ...]:
+        """Named array dimensions of data on this geometry."""
         return ("element",)
 
     @property
@@ -356,6 +357,7 @@ class _GeometryFM(_Geometry):
 
     @property
     def node_ids(self) -> np.ndarray:
+        """Node ids (0-based)."""
         return self._node_ids
 
     @property
@@ -365,6 +367,7 @@ class _GeometryFM(_Geometry):
 
     @property
     def element_ids(self) -> np.ndarray:
+        """Element ids (0-based)."""
         return self._element_ids
 
     @cached_property
@@ -423,7 +426,20 @@ class _GeometryFM(_Geometry):
 
 
 class GeometryFM2D(_GeometryFM):
-    """Flexible 2d mesh geometry."""
+    """Flexible 2d mesh geometry.
+
+    Attributes
+    ----------
+    node_coordinates : np.ndarray
+        N-by-3 array of node (x, y, z) coordinates.
+    element_table
+        For each element, the 0-based indices of its nodes.
+    projection_string : str
+        Projection string (e.g. "LONG/LAT" or a WKT/UTM string).
+    plot : GeometryFMPlotter
+        Plotting accessor for the geometry (bathymetry, mesh, outline, ...).
+
+    """
 
     def __init__(
         self,
@@ -477,16 +493,8 @@ class GeometryFM2D(_GeometryFM):
 
     @property
     def geometry2d(self) -> GeometryFM2D:
+        """The 2d horizontal geometry (returns self for 2d geometries)."""
         return self
-
-    @property
-    def is_2d(self) -> bool:
-        """Type is either mesh or Dfsu2D (2 horizontal dimensions)."""
-        return self._type in (
-            DfsuFileType.Dfsu2D,
-            DfsuFileType.DfsuSpectral2D,
-            None,
-        )
 
     @property
     def is_layered(self) -> bool:
@@ -508,9 +516,9 @@ class GeometryFM2D(_GeometryFM):
         return self.max_nodes_per_element == 3 or self.max_nodes_per_element == 6
 
     @cached_property
-    def _tree2d(self) -> cKDTree:
+    def _tree2d(self) -> KDTree:
         xy = self.element_coordinates[:, :2]
-        return cKDTree(xy)
+        return KDTree(xy)
 
     def find_nearest_elements(
         self,
@@ -614,7 +622,7 @@ class GeometryFM2D(_GeometryFM):
     def _find_n_nearest_2d_elements(
         self, x: float | np.ndarray, y: float | np.ndarray | None = None, n: int = 1
     ) -> tuple[Any, Any]:
-        # TODO return arguments in the same order than cKDTree.query?
+        # TODO return arguments in the same order than KDTree.query?
 
         if n > self.n_elements:
             raise ValueError(
@@ -1144,3 +1152,13 @@ class GeometryFM2D(_GeometryFM):
         builder.SetEumQuantity(quantity)
         newMesh = builder.CreateMesh()
         newMesh.Write(outfilename)
+
+    def reduce(self, axis: str | tuple[str, ...]) -> Geometry0D:
+        """Return reduced geometry after spatial aggregation."""
+        if isinstance(axis, str):
+            axis = (axis,)
+        if set(axis) != {"element"}:
+            raise ValueError(
+                f"Cannot reduce GeometryFM2D over {axis}, only 'element' is valid"
+            )
+        return Geometry0D(projection=self.projection)

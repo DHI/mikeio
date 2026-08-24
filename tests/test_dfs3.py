@@ -5,7 +5,6 @@ import pytest
 import numpy as np
 
 import mikeio
-from mikeio.spatial import GeometryUndefined
 from mikeio.spatial import Grid2D, Grid3D
 
 
@@ -68,6 +67,15 @@ def test_dfs3_read_time() -> None:
     assert isinstance(ds.geometry, Grid3D)
 
 
+def test_write_read_with_title(tmp_path: Path) -> None:
+    tmpfile = tmp_path / "tmp_title.dfs3"
+    dfs = mikeio.Dfs3("tests/testdata/test_dfs3.dfs3")
+    ds = dfs.read()
+    ds.to_dfs(tmpfile)
+    dfs_tmp = mikeio.Dfs3(tmpfile)
+    assert dfs.title == dfs_tmp.title
+
+
 def test_dfs3_read_1_layer() -> None:
     fn = "tests/testdata/test_dfs3.dfs3"
     ds = mikeio.read(fn, layers=-1)
@@ -89,10 +97,8 @@ def test_dfs3_read_multiple_layers() -> None:
     assert ds.geometry.nz == 4
     assert isinstance(ds.geometry, Grid3D)
 
-    with pytest.warns(UserWarning):
-        ds = mikeio.read(fn, layers=[1, 5, -3])
-    assert isinstance(ds.geometry, GeometryUndefined)
-    assert ds.shape == (2, 3, 17, 21)
+    with pytest.raises(ValueError, match="Non-equidistant"):
+        mikeio.read(fn, layers=[1, 5, -3])
 
 
 def test_read_rotated_grid() -> None:
@@ -301,3 +307,28 @@ def test_dfs3_init_closes_file_handle() -> None:
         instances.append(mikeio.Dfs3(filename))
 
     assert _count_fds_for_file(filename) == 0
+
+
+def test_read_with_title() -> None:
+    sourcefilename = "tests/testdata/single_layer.dfs3"
+    dfs = mikeio.Dfs3(sourcefilename)
+    assert hasattr(dfs, "title")
+    assert isinstance(dfs.title, str)
+
+
+def test_write_with_title(tmp_path: Path) -> None:
+    sourcefilename = "tests/testdata/single_layer.dfs3"
+    fp = tmp_path / "with_title.dfs3"
+
+    # Read source file
+    dfs = mikeio.Dfs3(sourcefilename)
+    ds = dfs.read(items=[0], keepdims=True)
+
+    # Write with custom title
+    custom_title = "Test DFS3 with Custom Title"
+    ds.title = custom_title
+    ds.to_dfs(fp)
+
+    # Read back and verify title
+    newdfs = mikeio.Dfs3(fp)
+    assert newdfs.title == custom_title
