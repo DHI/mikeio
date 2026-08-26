@@ -33,6 +33,7 @@ from ..spatial import Grid2D
 from .._track import _extract_track
 from ._topology import get_elements_from_source, get_nodes_from_source
 from ..eum import ItemInfo, TimeStepUnit
+from .._path import normalize_path
 
 
 def write_dfsu(filename: str | Path, data: Dataset, title: str = "") -> None:
@@ -48,7 +49,7 @@ def write_dfsu(filename: str | Path, data: Dataset, title: str = "") -> None:
         Title of the dfsu file (default: "")
 
     """
-    filename = str(filename)
+    filename = normalize_path(filename)
 
     geometry = data.geometry
     dfsu_filetype = DfsuFileType.Dfsu2D
@@ -168,7 +169,7 @@ class _DfsuInfo:
 
 
 def _get_dfsu_info(filename: str | Path) -> _DfsuInfo:
-    filename = str(filename)
+    filename = normalize_path(filename)
     path = Path(filename)
     if not path.exists():
         raise FileNotFoundError(f"file {path} does not exist!")

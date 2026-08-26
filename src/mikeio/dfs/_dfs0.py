@@ -17,6 +17,7 @@ from ..dataset import Dataset, DataArray
 from ._dfs import _get_item_info, _valid_item_numbers
 from ..eum import EUMType, EUMUnit, ItemInfo, TimeStepUnit, ItemInfoList
 from .._time import DateTimeSelector
+from .._path import normalize_path
 
 
 def write_dfs0(
@@ -25,7 +26,7 @@ def write_dfs0(
     title: str = "",
     dtype: DfsSimpleType | np.float32 | np.float64 = DfsSimpleType.Float,
 ) -> None:
-    filename = str(filename)
+    filename = normalize_path(filename)
 
     factory = DfsFactory()
     builder = DfsBuilder.Create(title, "mikeio", __dfs_version__)
@@ -95,9 +96,9 @@ class Dfs0:
             File name including full path to the dfs0 file.
 
         """
-        self._filename = str(filename)
+        self._filename = normalize_path(filename)
 
-        path = Path(filename)
+        path = Path(self._filename)
         if not path.exists():
             raise FileNotFoundError(path)
 
