@@ -4,6 +4,9 @@ on:
   schedule:
     # run daily at 4 am
     - cron:  '0 4 * * 1'
+permissions:
+  contents: read
+
 jobs:
   crawl_for_broken_links:
     runs-on: ubuntu-latest
