@@ -34,6 +34,7 @@ def parse_frontmatter(path: Path) -> dict:
 
 
 def main():
+    """Render roadmap/README.md from the feature frontmatter."""
     features = []
     for path in sorted(FEATURES_DIR.glob("*.md")):
         features.append(parse_frontmatter(path))

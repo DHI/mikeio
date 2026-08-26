@@ -8,6 +8,9 @@ on:
     types: [review_requested, ready_for_review]
   workflow_dispatch:
 
+permissions:
+  contents: read
+
 jobs:
   build:
 
