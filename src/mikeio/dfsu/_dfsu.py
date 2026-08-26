@@ -239,10 +239,9 @@ class Dfsu2DH:
             )
         return str.join("\n", out)
 
-    # TODO change to GeometryFM2D
     @property
-    def geometry(self) -> Any:
-        """Flexible Mesh Geometry of the file (e.g. [](`mikeio.spatial.GeometryFM2D`))."""
+    def geometry(self) -> GeometryFM2D:
+        """Flexible Mesh Geometry of the file ([](`mikeio.spatial.GeometryFM2D`))."""
         return self._geometry
 
     @property

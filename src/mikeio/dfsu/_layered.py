@@ -560,6 +560,12 @@ class Dfsu3D(DfsuLayered):
     """
 
     @property
+    def geometry(self) -> GeometryFM3D:
+        """Flexible Mesh Geometry of the file ([](`mikeio.spatial.GeometryFM3D`))."""
+        assert isinstance(self._geometry, GeometryFM3D)
+        return self._geometry
+
+    @property
     def geometry2d(self) -> GeometryFM2D:
         """The 2d geometry for a 3d object."""
         return self.geometry.geometry2d
