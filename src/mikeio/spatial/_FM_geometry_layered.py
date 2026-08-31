@@ -5,7 +5,6 @@ from pathlib import Path
 from typing import TYPE_CHECKING, Any, Iterable, Literal, Sequence
 import warnings
 
-from matplotlib.axes import Axes
 import numpy as np
 from mikecore.DfsuFile import DfsuFileType
 
@@ -18,6 +17,7 @@ from ._FM_plot import _plot_vertical_profile, BoundaryPolygons
 from ._distance import relative_cumulative_distance
 
 if TYPE_CHECKING:
+    from matplotlib.axes import Axes
     from numpy.typing import ArrayLike
 
 Layer = Literal["all", "bottom", "top"]
@@ -758,7 +758,9 @@ class GeometryFMVerticalProfilePlotter:
         figsize: tuple[float, float] | None = None,
         **kwargs: Any,
     ) -> Axes:
-        import matplotlib.pyplot as plt
+        from .._optional import import_optional
+
+        plt = import_optional("matplotlib.pyplot", "plot")
 
         if ax is None:
             _, ax = plt.subplots(figsize=figsize)

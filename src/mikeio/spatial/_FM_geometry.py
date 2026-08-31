@@ -16,7 +16,6 @@ from numpy.typing import NDArray
 from mikecore.DfsuFile import DfsuFileType
 from mikecore.eum import eumQuantity
 from mikecore.MeshBuilder import MeshBuilder
-from scipy.spatial import KDTree
 
 from ..eum import EUMType, EUMUnit
 from ..exceptions import OutsideModelDomainError
@@ -36,6 +35,7 @@ from ._distance import xy_to_bbox
 
 
 if TYPE_CHECKING:
+    from scipy.spatial import KDTree
     from ._FM_geometry_layered import GeometryFM3D
     from matplotlib.axes import Axes
     from numpy.typing import ArrayLike
@@ -113,7 +113,9 @@ class GeometryFMPlotter:
         ax: Axes | None = None,
         figsize: tuple[float, float] | None = None,
     ) -> Axes:
-        import matplotlib.pyplot as plt
+        from .._optional import import_optional
+
+        plt = import_optional("matplotlib.pyplot", "plot")
 
         if ax is None:
             _, ax = plt.subplots(figsize=figsize)
@@ -209,7 +211,9 @@ class GeometryFMPlotter:
         ```
 
         """
-        import matplotlib.pyplot as plt
+        from .._optional import import_optional
+
+        plt = import_optional("matplotlib.pyplot", "plot")
 
         ax = self._get_ax(ax=ax, figsize=figsize)
         ax.set_aspect(self._plot_aspect())
@@ -517,6 +521,10 @@ class GeometryFM2D(_GeometryFM):
 
     @cached_property
     def _tree2d(self) -> KDTree:
+        from .._optional import import_optional
+
+        KDTree = import_optional("scipy.spatial", "interp").KDTree
+
         xy = self.element_coordinates[:, :2]
         return KDTree(xy)
 
@@ -1001,7 +1009,9 @@ class GeometryFM2D(_GeometryFM):
 
     @staticmethod
     def _inside_polygon(polygon: np.ndarray, xy: np.ndarray) -> np.ndarray:
-        import matplotlib.path as mp
+        from .._optional import import_optional
+
+        mp = import_optional("matplotlib.path", "plot")
 
         if polygon.ndim == 1:
             polygon = np.column_stack((polygon[0::2], polygon[1::2]))

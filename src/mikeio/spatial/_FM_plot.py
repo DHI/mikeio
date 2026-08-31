@@ -4,18 +4,18 @@ from dataclasses import dataclass
 from typing import Any, Literal, Sequence, TYPE_CHECKING
 
 from numpy.typing import NDArray
-from matplotlib.axes import Axes
-from matplotlib.cm import ScalarMappable
-from matplotlib.collections import PatchCollection
-from matplotlib.colors import Colormap, Normalize
-from matplotlib.figure import Figure
-from matplotlib.tri import Triangulation
 import numpy as np
-from scipy.sparse import csr_matrix
 
 from ._distance import relative_cumulative_distance
 
 if TYPE_CHECKING:
+    from matplotlib.axes import Axes
+    from matplotlib.cm import ScalarMappable
+    from matplotlib.collections import PatchCollection
+    from matplotlib.colors import Colormap, Normalize
+    from matplotlib.figure import Figure
+    from matplotlib.tri import Triangulation
+    from scipy.sparse import csr_matrix
     from ._FM_geometry import GeometryFM2D
     from ._FM_geometry_layered import GeometryFM3D
 
@@ -59,7 +59,9 @@ class BoundaryPolygons:
             True for points inside, False otherwise
 
         """
-        import matplotlib.path as mp  # type: ignore
+        from .._optional import import_optional
+
+        mp = import_optional("matplotlib.path", "plot")
 
         exterior = self.exteriors[0]
         cnts = mp.Path(exterior.xy).contains_points(points)
@@ -98,8 +100,10 @@ def _plot_map(
     add_colorbar: bool = True,
 ) -> Axes:
     """Plot unstructured data and/or mesh, mesh outline."""
-    import matplotlib.pyplot as plt
-    import matplotlib
+    from .._optional import import_optional
+
+    plt = import_optional("matplotlib.pyplot", "plot")
+    matplotlib = import_optional("matplotlib", "plot")
 
     VALID_PLOT_TYPES = (
         "mesh_only",
@@ -232,9 +236,11 @@ def _set_colormap_levels(
     levels: int | Sequence[float] | np.ndarray | None,
     z: np.ndarray,
 ) -> tuple[float, float, Colormap, Normalize, ScalarMappable, np.ndarray]:
-    import matplotlib
-    import matplotlib.cm as cm
-    import matplotlib.colors as mplc
+    from .._optional import import_optional
+
+    matplotlib = import_optional("matplotlib", "plot")
+    cm = import_optional("matplotlib.cm", "plot")
+    mplc = import_optional("matplotlib.colors", "plot")
 
     vmin = vmin or np.nanmin(z)
     vmax = vmax or np.nanmax(z)
@@ -256,10 +262,12 @@ def _set_colormap_levels(
 
         levels = np.array(levels)
 
-        if isinstance(cmap, str):
-            cmap = matplotlib.colormaps[cmap]
-        cmap_norm = mplc.BoundaryNorm(levels, cmap.N)
-        cmap_ScMappable = cm.ScalarMappable(cmap=cmap, norm=cmap_norm)
+        cmap_obj: Colormap = (
+            matplotlib.colormaps[cmap] if isinstance(cmap, str) else cmap
+        )
+        cmap = cmap_obj
+        cmap_norm = mplc.BoundaryNorm(levels, cmap_obj.N)
+        cmap_ScMappable = cm.ScalarMappable(cmap=cmap_obj, norm=cmap_norm)
 
     if levels is None:
         levels = np.linspace(vmin, vmax, 10)
@@ -277,7 +285,9 @@ def _set_plot_limits(ax: Axes, nc: np.ndarray) -> None:
 
 
 def _plot_mesh_only(ax: Axes, nc: np.ndarray, element_table: np.ndarray) -> None:
-    from matplotlib.collections import PatchCollection
+    from .._optional import import_optional
+
+    PatchCollection = import_optional("matplotlib.collections", "plot").PatchCollection
 
     patches = _to_polygons(nc, element_table)
     fig_obj = PatchCollection(
@@ -302,6 +312,10 @@ def _plot_patch(
     vmin: float,
     vmax: float,
 ) -> PatchCollection:
+    from .._optional import import_optional
+
+    PatchCollection = import_optional("matplotlib.collections", "plot").PatchCollection
+
     patches = _to_polygons(nc, element_table)
 
     if show_mesh:
@@ -333,7 +347,9 @@ def _get_tris(
     z: np.ndarray,
     n_refinements: int,
 ) -> tuple[Triangulation, np.ndarray]:
-    import matplotlib.tri as tri
+    from .._optional import import_optional
+
+    tri = import_optional("matplotlib.tri", "plot")
 
     elem_table, ec, z = _create_tri_only_element_table(nc, element_table, ec, data=z)
     triang = tri.Triangulation(nc[:, 0], nc[:, 1], elem_table)
@@ -356,8 +372,12 @@ def _add_colorbar(
     levels: np.ndarray,
     cbar_extend: str,
 ) -> None:
-    from mpl_toolkits.axes_grid1 import make_axes_locatable  # type: ignore
-    import matplotlib.pyplot as plt
+    from .._optional import import_optional
+
+    make_axes_locatable = import_optional(
+        "mpl_toolkits.axes_grid1", "plot"
+    ).make_axes_locatable
+    plt = import_optional("matplotlib.pyplot", "plot")
 
     cax = make_axes_locatable(ax).append_axes("right", size="5%", pad=0.05)
     cmap_sm = cmap_ScMappable if cmap_ScMappable else fig_obj
@@ -385,7 +405,9 @@ def _add_non_tri_mesh(
     ax: Axes, nc: np.ndarray, element_table: np.ndarray, plot_type: str
 ) -> None:
     # if mesh is not tri only, we need to add it manually on top
-    from matplotlib.collections import PatchCollection
+    from .._optional import import_optional
+
+    PatchCollection = import_optional("matplotlib.collections", "plot").PatchCollection
 
     patches = _to_polygons(nc, element_table)
     mesh_linewidth = 0.4
@@ -424,7 +446,9 @@ def _is_tri_only(element_table: np.ndarray) -> bool:
 
 
 def _to_polygons(node_coordinates: np.ndarray, element_table: np.ndarray) -> list[Any]:
-    from matplotlib.patches import Polygon
+    from .._optional import import_optional
+
+    Polygon = import_optional("matplotlib.patches", "plot").Polygon
 
     polygons = []
 
@@ -443,6 +467,10 @@ def _to_polygons(node_coordinates: np.ndarray, element_table: np.ndarray) -> lis
 def _create_node_element_matrix(
     element_table: np.ndarray, num_nodes: int
 ) -> csr_matrix:
+    from .._optional import import_optional
+
+    csr_matrix = import_optional("scipy.sparse", "interp").csr_matrix
+
     row_ind = element_table.ravel()
     col_ind = np.repeat(np.arange(element_table.shape[0]), element_table.shape[1])
     data = np.ones(len(row_ind), dtype=int)
@@ -563,8 +591,10 @@ def _plot_vertical_profile(
     figsize: tuple[float, float] | None = None,
     **kwargs: Any,
 ) -> Axes:
-    import matplotlib.pyplot as plt
-    from matplotlib.collections import PolyCollection
+    from .._optional import import_optional
+
+    plt = import_optional("matplotlib.pyplot", "plot")
+    PolyCollection = import_optional("matplotlib.collections", "plot").PolyCollection
 
     nc = node_coordinates
     s_coordinate = relative_cumulative_distance(nc, is_geo=is_geo)

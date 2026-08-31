@@ -2,10 +2,7 @@ from __future__ import annotations
 import warnings
 from typing import Any, TYPE_CHECKING, Sequence
 
-from matplotlib.figure import Figure
 import numpy as np
-import matplotlib.pyplot as plt
-from matplotlib.axes import Axes
 
 from ..spatial._FM_plot import _plot_map, _plot_vertical_profile
 
@@ -14,6 +11,8 @@ from ..eum import EUMType, ItemInfo
 from ..spatial import GeometryUndefined, Grid1D, GeometryFM2D
 
 if TYPE_CHECKING:
+    from matplotlib.axes import Axes
+    from matplotlib.figure import Figure
     from ..dataset import DataArray, Dataset
 
 
@@ -65,6 +64,10 @@ class DataArrayPlotter:
     def _get_ax(
         ax: Axes | None = None, figsize: tuple[float, float] | None = None
     ) -> Axes:
+        from .._optional import import_optional
+
+        plt = import_optional("matplotlib.pyplot", "plot")
+
         if ax is None:
             _, ax = plt.subplots(figsize=figsize)
         return ax
@@ -73,6 +76,10 @@ class DataArrayPlotter:
     def _get_fig_ax(
         ax: Axes | None = None, figsize: tuple[float, float] | None = None
     ) -> tuple[Figure, Axes]:
+        from .._optional import import_optional
+
+        plt = import_optional("matplotlib.pyplot", "plot")
+
         if ax is None:
             fig, ax = plt.subplots(figsize=figsize)
         else:
@@ -625,7 +632,9 @@ class DataArrayPlotterFMVerticalColumn(DataArrayPlotter):
         extrapolate: bool = True,
         **kwargs: Any,
     ) -> Axes:
-        import matplotlib.pyplot as plt
+        from .._optional import import_optional
+
+        plt = import_optional("matplotlib.pyplot", "plot")
 
         if "title" in kwargs:
             title = kwargs.pop("title")
@@ -906,7 +915,9 @@ class DatasetPlotter:
     def _get_fig_ax(
         ax: Axes | None = None, figsize: tuple[float, float] | None = None
     ) -> tuple[Figure, Axes]:
-        import matplotlib.pyplot as plt
+        from .._optional import import_optional
+
+        plt = import_optional("matplotlib.pyplot", "plot")
 
         if ax is None:
             fig, ax = plt.subplots(figsize=figsize)

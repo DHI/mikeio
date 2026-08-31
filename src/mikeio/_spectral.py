@@ -1,9 +1,10 @@
 from __future__ import annotations
 from collections.abc import Sequence
-from typing import Literal
+from typing import Literal, TYPE_CHECKING
 import numpy as np
-from matplotlib.axes import Axes
-from matplotlib.projections.polar import PolarAxes
+
+if TYPE_CHECKING:
+    from matplotlib.axes import Axes
 
 
 def plot_2dspectrum(
@@ -65,7 +66,10 @@ def plot_2dspectrum(
     <matplotlib.axes>
 
     """
-    import matplotlib.pyplot as plt
+    from ._optional import import_optional
+
+    plt = import_optional("matplotlib.pyplot", "plot")
+    PolarAxes = import_optional("matplotlib.projections.polar", "plot").PolarAxes
 
     if (frequencies is None or len(frequencies) <= 1) and (
         directions is None or len(directions) <= 1
