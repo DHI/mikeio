@@ -400,8 +400,10 @@ def test_properties_pt_spectrum_linearf(dfs2_pt_spectrum_linearf: Dfs2) -> None:
     assert g.dy == 10
     assert g.orientation == 0
 
-    g.is_spectral = True
-    assert g.x[-1] == 0.5  # still linear
+    g_spectral = mikeio.Grid2D(
+        x0=g.x[0], dx=g.dx, nx=g.nx, y0=g.y[0], dy=g.dy, ny=g.ny, is_spectral=True
+    )
+    assert g_spectral.x[-1] == 0.5  # still linear
 
 
 def test_dir_wave_spectra_relative_time_axis() -> None:

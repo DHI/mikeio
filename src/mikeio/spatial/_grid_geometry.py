@@ -453,7 +453,6 @@ class Grid2D(_Geometry):
     _projstr: str
     _origin: tuple[float, float]
     _orientation: float
-    is_spectral: bool
 
     def __init__(
         self,
@@ -493,8 +492,9 @@ class Grid2D(_Geometry):
             dy = self._dx if dy is None else dy
             self._y0, self._dy, self._ny = _parse_grid_axis("y", y, y0, dy, ny)
 
-        self.is_spectral = is_spectral
-        self.is_vertical = is_vertical
+        # read-only: both change how the grid is interpreted and written to file
+        self._is_spectral = is_spectral
+        self._is_vertical = is_vertical
 
         self.plot = Grid2DPlotter(self)
 
@@ -502,6 +502,16 @@ class Grid2D(_Geometry):
     def dims(self) -> tuple[str, ...]:
         """Named array dimensions of data on this grid."""
         return ("y", "x")
+
+    @property
+    def is_spectral(self) -> bool:
+        """Is this a spectral grid (directions and frequencies)?"""
+        return self._is_spectral
+
+    @property
+    def is_vertical(self) -> bool:
+        """Is this a vertical grid (a vertical slice)?"""
+        return self._is_vertical
 
     @property
     def _is_rotated(self) -> Any:
@@ -1060,7 +1070,9 @@ class Grid2D(_Geometry):
                     raise ValueError(
                         "z must either be scalar or have length of nodes ((nx+1)*(ny+1))"
                     )
-            g.node_coordinates[:, 2] = z
+            nc = g.node_coordinates.copy()
+            nc[:, 2] = z
+            g.node_coordinates = nc
         g.to_mesh(outfilename=outfilename)
 
     def reduce(self, axis: str | tuple[str, ...]) -> Grid1D | Geometry0D:

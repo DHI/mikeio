@@ -259,13 +259,14 @@ class _GeometryFMLayered(_GeometryFM):
         # TODO extract method
         # Fix z-coordinate for sigma-z:
         if self._type == DfsuFileType.Dfsu3DSigmaZ:
-            zn = geom.node_coordinates[:, 2].copy()
+            nc = geom.node_coordinates.copy()
+            zn = nc[:, 2]
             for j, elem_nodes in enumerate(geom.element_table):
                 elem_nodes3d = self.element_table[self.bottom_elements[j]]
                 for jn in range(len(elem_nodes)):
                     znj_3d = self.node_coordinates[elem_nodes3d[jn], 2]
                     zn[elem_nodes[jn]] = min(zn[elem_nodes[jn]], znj_3d)
-            geom.node_coordinates[:, 2] = zn
+            geom.node_coordinates = nc
 
         return geom
 
@@ -728,7 +729,7 @@ class GeometryFMVerticalColumn(GeometryFM3D):
     @cached_property
     def _idx_e(self) -> np.ndarray:
         """Node indices per element as a 2D array."""
-        return np.stack(self.element_table)
+        return np.stack(list(self.element_table))
 
     @cached_property
     def _idx_f(self) -> np.ndarray:

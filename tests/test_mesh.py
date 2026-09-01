@@ -80,12 +80,25 @@ def test_get_land_node_coordinates(tri_mesh: Mesh) -> None:
 
 def test_set_z(tri_mesh: Mesh) -> None:
     msh = tri_mesh
-    zn = msh.node_coordinates[:, 2]
-    zn[zn < -3] = -3
+    nc = msh.node_coordinates.copy()
+    nc[nc[:, 2] < -3, 2] = -3
 
-    msh.node_coordinates[:, 2] = zn
-    zn = msh.node_coordinates[:, 2]
-    assert zn.min() == -3
+    msh.node_coordinates = nc
+    assert msh.node_coordinates[:, 2].min() == -3
+
+
+def test_node_coordinates_are_read_only(tri_mesh: Mesh) -> None:
+    # in-place edits would leave derived values (e.g. element_coordinates) stale
+    with pytest.raises(ValueError, match="read-only"):
+        tri_mesh.node_coordinates[:, 2] = -3
+
+
+def test_set_z_updates_element_coordinates(tri_mesh: Mesh) -> None:
+    msh = tri_mesh
+    assert msh.element_coordinates[:, 2].min() < -3
+
+    msh.zn = np.zeros_like(msh.zn)
+    assert msh.element_coordinates[:, 2].max() == 0.0
 
 
 def test_set_codes(tri_mesh: Mesh) -> None:

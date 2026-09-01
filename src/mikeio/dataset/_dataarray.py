@@ -25,6 +25,7 @@ import numpy as np
 import pandas as pd
 
 
+from .._cache import clear_cached_properties
 from ..eum import EUMType, EUMUnit, ItemInfo
 from .._time import _get_time_idx_list, _n_selected_timesteps
 from .._track import _extract_track
@@ -161,7 +162,7 @@ class DataArray:
         # TODO consider np.asarray, e.g. self._values = np.asarray(data)
         self._values = self._parse_data(data)
 
-        self.time: pd.DatetimeIndex | pd.TimedeltaIndex = self._parse_time(time)
+        self._time = self._parse_time(time)
         self._dt = dt
 
         geometry = GeometryUndefined() if geometry is None else geometry
@@ -175,13 +176,13 @@ class DataArray:
             )
 
         # geometries are very diverse without a common interface
-        self.geometry: Any = geometry
+        self._geometry: Any = geometry
 
         self._check_time_data_length(self.time)
 
         self.item = self._parse_item(item=item, name=name, type=type, unit=unit)
         self._zn = self._parse_zn(zn, self.geometry, self.n_timesteps)
-        self.plot = self._get_plotter_by_geometry()
+        self.plot: Any = self._get_plotter_by_geometry()
         self.z: ZAccessor | NullZAccessor = self._get_z_accessor_by_geometry()
 
     @staticmethod
@@ -306,6 +307,31 @@ class DataArray:
     # ============= Basic properties/methods ===========
 
     @property
+    def time(self) -> pd.DatetimeIndex | pd.TimedeltaIndex:
+        """Time axis."""
+        return self._time
+
+    @time.setter
+    def time(self, value: pd.DatetimeIndex | pd.TimedeltaIndex | str) -> None:
+        time = self._parse_time(value)
+        self._check_time_data_length(time)
+        self._time = time
+        clear_cached_properties(self)  # dims and is_equidistant are derived from time
+
+    @property
+    def geometry(self) -> Any:
+        """Geometry of the data (e.g. Grid2D, GeometryFM2D)."""
+        return self._geometry
+
+    @geometry.setter
+    def geometry(self, value: GeometryType) -> None:
+        self._geometry = value
+        clear_cached_properties(self)  # dims is derived from geometry
+        # plot and z are chosen by geometry type, so a new geometry needs new ones
+        self.plot = self._get_plotter_by_geometry()
+        self.z = self._get_z_accessor_by_geometry()
+
+    @property
     def name(self) -> str:
         """Name of this DataArray (=da.item.name)."""
         assert isinstance(self.item.name, str)
@@ -319,6 +345,10 @@ class DataArray:
     def type(self) -> EUMType:
         """EUMType."""
         return self.item.type
+
+    @type.setter
+    def type(self, value: EUMType) -> None:
+        self.item.type = value
 
     @property
     def unit(self) -> EUMUnit:

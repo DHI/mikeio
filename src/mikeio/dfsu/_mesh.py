@@ -42,8 +42,19 @@ class Mesh:
     """
 
     def __init__(self, filename: str | Path) -> None:
-        self.geometry: GeometryFM2D = self._read_header(filename)
+        self._geometry = self._read_header(filename)
         self.plot = self.geometry.plot
+
+    @property
+    def geometry(self) -> GeometryFM2D:
+        """Flexible Mesh geometry."""
+        return self._geometry
+
+    @geometry.setter
+    def geometry(self, value: GeometryFM2D) -> None:
+        self._geometry = value
+        # plot belongs to the geometry, a new geometry needs a new plotter
+        self.plot = value.plot
 
     def _read_header(self, filename: str | Path) -> GeometryFM2D:
         msh = MeshFile.ReadMesh(filename)
@@ -85,8 +96,12 @@ class Mesh:
 
     @property
     def node_coordinates(self) -> np.ndarray:
-        """Coordinates of nodes."""
+        """Coordinates of nodes (read-only, see GeometryFM2D.node_coordinates)."""
         return self.geometry.node_coordinates
+
+    @node_coordinates.setter
+    def node_coordinates(self, value: np.ndarray) -> None:
+        self.geometry.node_coordinates = value
 
     @property
     def n_nodes(self) -> int:
@@ -112,7 +127,9 @@ class Mesh:
     def zn(self, v: np.ndarray) -> None:
         if len(v) != self.n_nodes:
             raise ValueError(f"zn must have length of nodes ({self.n_nodes})")
-        self.geometry.node_coordinates[:, 2] = v
+        nc = self.geometry.node_coordinates.copy()
+        nc[:, 2] = v
+        self.geometry.node_coordinates = nc
 
     def write(
         self,
