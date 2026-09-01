@@ -475,7 +475,18 @@ class GeometryFM2D(_GeometryFM):
 
     @staticmethod
     def _point_in_polygon(xn: np.ndarray, yn: np.ndarray, xp: float, yp: float) -> bool:
-        """Check for each side in the polygon that the point is on the correct side."""
+        """Check for each side in the polygon that the point is on the correct side.
+
+        A second, independent point-in-polygon test also exists in this
+        package: points_in_polygon (spatial/_distance.py), a general
+        ray-casting test used by GeometryFM2D._inside_polygon /
+        BoundaryPolygons.contains. This one is a half-plane test that only
+        works for convex polygons (mesh elements always are), called once
+        per candidate element for a single point, whereas points_in_polygon
+        is vectorized over many points against one polygon -- different
+        enough call patterns that consolidating them needs care, but they
+        are candidates for future consolidation.
+        """
         for j in range(len(xn) - 1):
             if (yn[j + 1] - yn[j]) * (xp - xn[j]) + (-xn[j + 1] + xn[j]) * (
                 yp - yn[j]

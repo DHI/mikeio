@@ -64,6 +64,17 @@ def _get_dist_geo(
 def points_in_polygon(polygon: np.ndarray, points: np.ndarray) -> np.ndarray:
     """Test if points are inside a polygon (ray casting), no plotting deps required.
 
+    Points exactly on a polygon edge or vertex are a measure-zero edge case
+    whose classification is convention-dependent (it depends on vertex
+    winding order) for any ray-casting/crossing-number algorithm, including
+    the matplotlib.path.Path implementation this replaces -- so no attempt is
+    made to match matplotlib's boundary behaviour exactly.
+
+    A second, independent point-in-polygon test also exists in this package:
+    GeometryFM2D._point_in_polygon (spatial/_FM_geometry.py), used by
+    _find_element_2d. The two are candidates for future consolidation onto a
+    single implementation.
+
     Parameters
     ----------
     polygon : n-by-2 array
