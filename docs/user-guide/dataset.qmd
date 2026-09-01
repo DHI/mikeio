@@ -24,6 +24,42 @@ ds = mikeio.read("../data/HD2D.dfsu")
 ds
 ```
 
+## {{< fa eye >}} Display options
+
+Long item lists are truncated in the string representation:
+
+```{python}
+ds_sw = mikeio.read("../data/sw_points.dfs0")
+ds_sw
+```
+
+The cutoff is a global option, which can be raised (or removed with `None`) with [](`mikeio.set_options`):
+
+```{python}
+mikeio.set_options(display_max_items=15)
+ds_sw
+```
+
+Use `display_max_items=None` to list all items.
+
+`set_options` also works as a context manager, which restores the previous value on exit, similar to [xarray.set_options](https://docs.xarray.dev/en/stable/generated/xarray.set_options.html):
+
+```{python}
+with mikeio.set_options(display_max_items=3):
+    print(ds_sw)
+```
+
+```{python}
+mikeio.get_options()
+```
+
+The option applies to all MIKE IO objects with items, including the file objects returned by [](`mikeio.open`).
+
+```{python}
+#| echo: false
+mikeio.set_options(display_max_items=10)
+```
+
 ## {{< fa filter >}} Selecting items
 
 Selecting a specific item "itemA" (at position 0) from a Dataset ds can be done with:

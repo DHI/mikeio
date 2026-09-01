@@ -61,9 +61,8 @@ class set_options:
     Examples
     --------
     >>> import mikeio
-    >>> mikeio.set_options(display_max_items=100)  # for the rest of the session
+    >>> mikeio.set_options(display_max_items=100)  # doctest: +SKIP
     >>> ds = mikeio.read("sw_points.dfs0")  # doctest: +SKIP
-
     >>> with mikeio.set_options(display_max_items=None):  # doctest: +SKIP
     ...     print(ds)
 
