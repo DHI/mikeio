@@ -898,6 +898,8 @@ class DatasetPlotter:
         self, figsize: tuple[float, float] | None = None, **kwargs: Any
     ) -> Axes:
         """Plot multiple DataArrays as time series (only possible dfs0-type data)."""
+        import_optional("matplotlib.pyplot", "plot")
+
         if self.ds.dims == ("time",):
             df = self.ds.to_dataframe()
             return df.plot(figsize=figsize, **kwargs)

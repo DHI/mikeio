@@ -150,7 +150,9 @@ class GeometryFMPlotter:
         """
         # TODO this must be a duplicate, delegate
 
-        PatchCollection = import_optional("matplotlib.collections", "plot").PatchCollection
+        PatchCollection = import_optional(
+            "matplotlib.collections", "plot"
+        ).PatchCollection
 
         ax = self._get_ax(ax=ax, figsize=figsize)
         ax.set_aspect(self._plot_aspect())

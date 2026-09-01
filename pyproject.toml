@@ -58,7 +58,7 @@ notebooks = [
     "netcdf4",
     "rasterio",
     "geopandas",
-    "matplotlib",
+    "mikeio[plot,interp]",
     "folium",
     "mapclassify",
 ]

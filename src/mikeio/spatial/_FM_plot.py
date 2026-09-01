@@ -16,7 +16,6 @@ if TYPE_CHECKING:
     from matplotlib.colors import Colormap, Normalize
     from matplotlib.figure import Figure
     from matplotlib.tri import Triangulation
-    from scipy.sparse import csr_matrix
     from ._FM_geometry import GeometryFM2D
     from ._FM_geometry_layered import GeometryFM3D
 
@@ -443,18 +442,16 @@ def _to_polygons(node_coordinates: np.ndarray, element_table: np.ndarray) -> lis
     return polygons
 
 
-def _create_node_element_matrix(
-    element_table: np.ndarray, num_nodes: int
-) -> csr_matrix:
-    csr_matrix = import_optional("scipy.sparse", "interp").csr_matrix
-
-    row_ind = element_table.ravel()
-    col_ind = np.repeat(np.arange(element_table.shape[0]), element_table.shape[1])
-    data = np.ones(len(row_ind), dtype=int)
-    connectivity_matrix = csr_matrix(
-        (data, (row_ind, col_ind)), shape=(num_nodes, element_table.shape[0])
-    )
-    return connectivity_matrix
+def _node_to_element_ids(element_table: np.ndarray, num_nodes: int) -> list[np.ndarray]:
+    """For each node, the ids of the elements it belongs to (no scipy required)."""
+    node_ind = element_table.ravel()
+    elem_ind = np.repeat(np.arange(element_table.shape[0]), element_table.shape[1])
+    order = np.argsort(node_ind, kind="stable")
+    elem_ind_sorted = elem_ind[order]
+    boundaries = np.searchsorted(node_ind[order], np.arange(num_nodes + 1))
+    return [
+        elem_ind_sorted[boundaries[n] : boundaries[n + 1]] for n in range(num_nodes)
+    ]
 
 
 def _get_node_centered_data(
@@ -469,11 +466,11 @@ def _get_node_centered_data(
     elem_table, ec, data = _create_tri_only_element_table(
         nc, element_table, element_coordinates, data
     )
-    connectivity_matrix = _create_node_element_matrix(elem_table, nc.shape[0])
+    node_to_element_ids = _node_to_element_ids(elem_table, nc.shape[0])
 
     node_centered_data = np.zeros(shape=nc.shape[0])
-    for n in range(connectivity_matrix.shape[0]):
-        item = connectivity_matrix.getrow(n).indices
+    for n in range(len(node_to_element_ids)):
+        item = node_to_element_ids[n]
         I = ec[item][:, :2] - nc[n][:2]
         I2 = (I**2).sum(axis=0)
         Ixy = (I[:, 0] * I[:, 1]).sum(axis=0)
