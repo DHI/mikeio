@@ -21,6 +21,7 @@ from ..dataset import Dataset
 from ..eum import ItemInfo, ItemInfoList
 from ..exceptions import ItemsError
 from .._time import DateTimeSelector
+from .._options import _item_txt
 
 
 @dataclass
@@ -348,12 +349,7 @@ class _Dfs123:
         out = [f"<mikeio.{name}>"]
 
         out.append(f"geometry: {self.geometry}")
-        if self.n_items < 10:
-            out.append("items:")
-            for i, item in enumerate(self.items):
-                out.append(f"  {i}:  {item}")
-        else:
-            out.append(f"number of items: {self.n_items}")
+        out.extend(_item_txt(self.items))
 
         if self._n_timesteps == 1:
             out.append("time: time-invariant file (1 step)")

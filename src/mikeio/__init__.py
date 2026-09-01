@@ -19,6 +19,7 @@ from .dfs import Dfs0, Dfs1, Dfs2, Dfs3
 from .dfsu import Dfsu, Mesh, Dfsu2DH, Dfsu2DV, Dfsu3D, DfsuSpectral
 from .eum import EUMType, EUMUnit, ItemInfo
 from .pfs import PfsDocument, PfsSection, read_pfs
+from ._options import get_options, set_options
 
 from .spatial import (
     Grid1D,
@@ -212,4 +213,6 @@ __all__ = [
     "open",
     "from_pandas",
     "from_polars",
+    "get_options",
+    "set_options",
 ]

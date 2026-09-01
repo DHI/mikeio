@@ -33,6 +33,7 @@ from ..spatial import Grid2D
 from .._track import _extract_track
 from ._topology import get_elements_from_source, get_nodes_from_source
 from ..eum import ItemInfo, TimeStepUnit
+from .._options import _item_txt
 
 
 def write_dfsu(filename: str | Path, data: Dataset, title: str = "") -> None:
@@ -225,12 +226,7 @@ class Dfsu2DH:
         out.append(f"number of elements: {self.geometry.n_elements}")
         out.append(f"number of nodes: {self.geometry.n_nodes}")
         out.append(f"projection: {self.geometry.projection_string}")
-        if self.n_items < 10:
-            out.append("items:")
-            for i, item in enumerate(self.items):
-                out.append(f"  {i}:  {item}")
-        else:
-            out.append(f"number of items: {self.n_items}")
+        out.extend(_item_txt(self.items))
         if self.n_timesteps == 1:
             out.append(f"time: time-invariant file (1 step) at {self.time[0]}")
         else:
