@@ -31,7 +31,7 @@ from ._FM_plot import (
 from ._geometry import Geometry0D, GeometryPoint2D, _Geometry
 
 from ._grid_geometry import Grid2D
-from ._distance import xy_to_bbox
+from ._distance import points_in_polygon, xy_to_bbox
 
 
 if TYPE_CHECKING:
@@ -151,7 +151,9 @@ class GeometryFMPlotter:
         """
         # TODO this must be a duplicate, delegate
 
-        from matplotlib.collections import PatchCollection  # type: ignore
+        from .._optional import import_optional
+
+        PatchCollection = import_optional("matplotlib.collections", "plot").PatchCollection
 
         ax = self._get_ax(ax=ax, figsize=figsize)
         ax.set_aspect(self._plot_aspect())
@@ -1009,13 +1011,9 @@ class GeometryFM2D(_GeometryFM):
 
     @staticmethod
     def _inside_polygon(polygon: np.ndarray, xy: np.ndarray) -> np.ndarray:
-        from .._optional import import_optional
-
-        mp = import_optional("matplotlib.path", "plot")
-
         if polygon.ndim == 1:
             polygon = np.column_stack((polygon[0::2], polygon[1::2]))
-        return mp.Path(polygon).contains_points(xy)
+        return points_in_polygon(polygon, xy)
 
     def _elements_in_area(
         self, area: Sequence[float] | Sequence[tuple[float, float]]

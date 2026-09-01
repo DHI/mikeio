@@ -709,7 +709,11 @@ class GeometryFMVerticalColumn(GeometryFM3D):
 
         Uses make_interp_spline(k=1) which extrapolates beyond boundaries by default.
         """
-        from scipy.interpolate import make_interp_spline  # type: ignore
+        from .._optional import import_optional
+
+        make_interp_spline = import_optional(
+            "scipy.interpolate", "interp"
+        ).make_interp_spline
 
         return make_interp_spline(x, y, k=1)(x_new)  # type: ignore
 

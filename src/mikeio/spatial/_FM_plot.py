@@ -6,7 +6,7 @@ from typing import Any, Literal, Sequence, TYPE_CHECKING
 from numpy.typing import NDArray
 import numpy as np
 
-from ._distance import relative_cumulative_distance
+from ._distance import points_in_polygon, relative_cumulative_distance
 
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
@@ -59,22 +59,18 @@ class BoundaryPolygons:
             True for points inside, False otherwise
 
         """
-        from .._optional import import_optional
-
-        mp = import_optional("matplotlib.path", "plot")
-
         exterior = self.exteriors[0]
-        cnts = mp.Path(exterior.xy).contains_points(points)
+        cnts = points_in_polygon(exterior.xy, points)
 
         if len(self.exteriors) > 1:
             # in case of several dis-joint outer domains
             for exterior in self.exteriors[1:]:
-                in_domain = mp.Path(exterior.xy).contains_points(points)
+                in_domain = points_in_polygon(exterior.xy, points)
                 cnts = np.logical_or(cnts, in_domain)
 
         # subtract any holes
         for interior in self.interiors:
-            in_hole = mp.Path(interior.xy).contains_points(points)
+            in_hole = points_in_polygon(interior.xy, points)
             cnts = np.logical_and(cnts, ~in_hole)
 
         return cnts

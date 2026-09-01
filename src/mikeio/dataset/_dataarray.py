@@ -1122,7 +1122,9 @@ class DataArray:
         DataArray
 
         """
-        from scipy.interpolate import interp1d  # type: ignore
+        from .._optional import import_optional
+
+        interp1d = import_optional("scipy.interpolate", "interp").interp1d
 
         t_out_index = self._parse_interp_time(self.time, dt)
         t_in = self.time.values.astype(float)

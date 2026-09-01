@@ -61,6 +61,39 @@ def _get_dist_geo(
     return d  # type: ignore
 
 
+def points_in_polygon(polygon: np.ndarray, points: np.ndarray) -> np.ndarray:
+    """Test if points are inside a polygon (ray casting), no plotting deps required.
+
+    Parameters
+    ----------
+    polygon : n-by-2 array
+        x, y coordinates of polygon vertices
+    points : m-by-2 array
+        x, y coordinates of points to test
+
+    Returns
+    -------
+    bool array of length m
+        True for points inside the polygon, False otherwise
+
+    """
+    x = points[:, 0]
+    y = points[:, 1]
+    px = polygon[:, 0]
+    py = polygon[:, 1]
+    n = len(polygon)
+
+    inside = np.zeros(len(points), dtype=bool)
+    j = n - 1
+    with np.errstate(divide="ignore", invalid="ignore"):
+        for i in range(n):
+            crosses = (py[i] > y) != (py[j] > y)
+            xints = (px[j] - px[i]) * (y - py[i]) / (py[j] - py[i]) + px[i]
+            inside ^= crosses & (x < xints)
+            j = i
+    return inside
+
+
 def relative_cumulative_distance(
     coords: np.ndarray, reference: np.ndarray | None = None, is_geo: bool = False
 ) -> np.ndarray:
