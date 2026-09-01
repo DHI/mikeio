@@ -1313,7 +1313,9 @@ class DataArray:
         Parameters
         ----------
         axis: (int, str, None), optional
-            axis number or "time" or "space", by default 0
+            axis number or "time", "space" or "z", by default 0.
+            When axis="z" on a layered 3D geometry, the vertical maximum
+            across layers is computed, collapsing the result to 2D.
         **kwargs: Any
             Additional keyword arguments
 
@@ -1327,6 +1329,8 @@ class DataArray:
             nanmax : Max values with NaN values removed
 
         """
+        if axis == "z":
+            return self._extremum_z(func=np.fmax, **kwargs)
         return self.aggregate(axis=axis, func=np.max, **kwargs)
 
     def min(self, axis: int | str = 0, **kwargs: Any) -> DataArray:
@@ -1335,7 +1339,9 @@ class DataArray:
         Parameters
         ----------
         axis: (int, str, None), optional
-            axis number or "time" or "space", by default 0
+            axis number or "time", "space" or "z", by default 0.
+            When axis="z" on a layered 3D geometry, the vertical minimum
+            across layers is computed, collapsing the result to 2D.
         **kwargs: Any
             Additional keyword arguments
 
@@ -1349,6 +1355,8 @@ class DataArray:
             nanmin : Min values with NaN values removed
 
         """
+        if axis == "z":
+            return self._extremum_z(func=np.fmin, **kwargs)
         return self.aggregate(axis=axis, func=np.min, **kwargs)
 
     def mean(self, axis: int | str | None = 0, **kwargs: Any) -> DataArray:
@@ -1357,7 +1365,9 @@ class DataArray:
         Parameters
         ----------
         axis: (int, str, None), optional
-            axis number or "time" or "space", by default 0
+            axis number or "time", "space" or "z", by default 0.
+            When axis="z" on a layered 3D geometry, a thickness-weighted
+            vertical average is computed, collapsing the result to 2D.
         **kwargs: Any
             Additional keyword arguments
 
@@ -1371,7 +1381,153 @@ class DataArray:
             nanmean : Mean values with NaN values removed
 
         """
+        if axis == "z":
+            return self._mean_z(**kwargs)
         return self.aggregate(axis=axis, func=np.mean, **kwargs)
+
+    def _mean_z(self, **kwargs: Any) -> DataArray:
+        """Thickness-weighted vertical mean, collapsing to 2D geometry."""
+        if not isinstance(self.geometry, _GeometryFMLayered):
+            raise ValueError(
+                "axis='z' is only supported for layered 3D geometries (GeometryFM3D)"
+            )
+
+        geom3d = self.geometry
+        geom2d = geom3d.to_2d_geometry()
+        e2_e3 = geom3d.e2_e3_table
+        n_cols = len(e2_e3)
+
+        data = self.to_numpy()
+        has_time = self._has_time_axis
+
+        if has_time:
+            result = np.full((data.shape[0], n_cols), np.nan, dtype=data.dtype)
+        else:
+            result = np.full(n_cols, np.nan, dtype=data.dtype)
+
+        zn = self._zn
+        if has_time and zn is not None and zn.ndim == 2:
+            dz_all: np.ndarray = self._compute_dynamic_dz(zn, geom3d, data.dtype)
+            use_dynamic_dz = True
+        else:
+            dz_all = geom3d._dz
+            use_dynamic_dz = False
+
+        with np.errstate(invalid="ignore", divide="ignore"):
+            for col_idx in range(n_cols):
+                col_elements = np.asarray(e2_e3[col_idx], dtype=int)
+                if len(col_elements) == 0:
+                    continue
+
+                if has_time:
+                    col_data = data[:, col_elements]
+                    dz = dz_all[:, col_elements] if use_dynamic_dz else dz_all[col_elements]
+                    valid = ~np.isnan(col_data)
+                    dz_masked = np.where(valid, dz, 0.0)
+                    weighted_sum = np.nansum(col_data * dz_masked, axis=1)
+                    total_dz = np.sum(dz_masked, axis=1)
+                    result[:, col_idx] = np.where(
+                        total_dz > 0, weighted_sum / total_dz, np.nan
+                    )
+                else:
+                    col_data = data[col_elements]
+                    dz = dz_all[col_elements]
+                    valid = ~np.isnan(col_data)
+                    dz_masked = np.where(valid, dz, 0.0)
+                    weighted_sum = np.nansum(col_data * dz_masked)
+                    total_dz = np.sum(dz_masked)
+                    result[col_idx] = weighted_sum / total_dz if total_dz > 0 else np.nan
+
+        item = deepcopy(self.item)
+        if "name" in kwargs:
+            item.name = kwargs["name"]
+
+        return DataArray(
+            data=result,
+            time=self.time,
+            item=item,
+            geometry=geom2d,
+            zn=None,
+            dt=self._dt,
+        )
+
+    @staticmethod
+    def _compute_dynamic_dz(
+        zn: np.ndarray, geom3d: Any, dtype: np.dtype
+    ) -> np.ndarray:
+        """Compute time-varying layer thickness for all elements.
+
+        Processes in timestep chunks to limit memory usage.
+        """
+        element_table = geom3d.element_table
+        n_elems = geom3d.n_elements
+        n_time = zn.shape[0]
+
+        # Group elements by node count (handles mixed prisms/hexahedra)
+        elem_sizes = np.array([len(element_table[i]) for i in range(n_elems)])
+        unique_sizes = np.unique(elem_sizes)
+
+        groups = []
+        for sz in unique_sizes:
+            halfn = sz // 2
+            idxs = np.where(elem_sizes == sz)[0]
+            elem_arr = np.array([element_table[i] for i in idxs], dtype=int)
+            groups.append((halfn, idxs, elem_arr[:, :halfn], elem_arr[:, halfn:]))
+
+        dz_all = np.empty((n_time, n_elems), dtype=dtype)
+        chunk_size = min(100, n_time)
+
+        for t0 in range(0, n_time, chunk_size):
+            t1 = min(t0 + chunk_size, n_time)
+            zn_chunk = zn[t0:t1]
+            for halfn, idxs, bot_nodes, top_nodes in groups:
+                dz_chunk = zn_chunk[:, top_nodes[:, 0]] - zn_chunk[:, bot_nodes[:, 0]]
+                for k in range(1, halfn):
+                    dz_chunk += zn_chunk[:, top_nodes[:, k]] - zn_chunk[:, bot_nodes[:, k]]
+                dz_all[t0:t1, idxs] = dz_chunk * (1.0 / halfn)
+
+        return dz_all
+
+    def _extremum_z(self, func: np.ufunc, **kwargs: Any) -> DataArray:
+        """Vertical min or max, collapsing to 2D geometry.
+
+        Parameters
+        ----------
+        func : np.ufunc
+            np.fmin (NaN-ignoring min) or np.fmax (NaN-ignoring max)
+        **kwargs: Any
+            Only used to pass name for the resulting item, e.g. name="vertical max"
+
+        """
+        if not isinstance(self.geometry, _GeometryFMLayered):
+            raise ValueError(
+                "axis='z' is only supported for layered 3D geometries (GeometryFM3D)"
+            )
+
+        geom3d = self.geometry
+        geom2d = geom3d.to_2d_geometry()
+
+        data = self.to_numpy()
+        has_time = self._has_time_axis
+        col_starts = geom3d.bottom_elements
+
+        if has_time:
+            result = func.reduceat(data, col_starts, axis=1)
+        else:
+            result = func.reduceat(data, col_starts)
+
+        item = deepcopy(self.item)
+        if "name" in kwargs:
+            item.name = kwargs["name"]
+
+        return DataArray(
+            data=result,
+            time=self.time,
+            item=item,
+            geometry=geom2d,
+            zn=None,
+            dt=self._dt,
+        )
 
     def std(self, axis: int | str = 0, **kwargs: Any) -> DataArray:
         """Standard deviation values along an axis.

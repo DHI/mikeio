@@ -1487,3 +1487,225 @@ def test_axis_spatial_deprecated() -> None:
         result = da.mean(axis="spatial")
     assert result.shape == (3,)
     assert result.dims == ("time",)
+
+
+def test_mean_z_sigma_z_dynamic() -> None:
+    """Test thickness-weighted vertical mean with sigma-z layers and dynamic zn.
+
+    The test file has 2 connected triangles (shared edge), 5 layers
+    (2 z-layers + 3 sigma), flat bottom at -5m, 2 timesteps.
+    At t=1, sea level rises: node 0=0m, shared nodes=0.5m, node 3=1m.
+    Sigma layers stretch, changing the thickness-weighted mean.
+    """
+    ds = mikeio.read("tests/testdata/sigma_z_2elem_5layers.dfsu")
+    da = ds[0]
+
+    assert da._zn is not None
+    assert da._zn.ndim == 2  # dynamic zn: (n_time, n_nodes)
+
+    da_mean = da.mean(axis="z")
+
+    result = da_mean.to_numpy()
+    assert result.shape == (2, 2)  # (n_time, n_2d_elements)
+
+    # t=0: all layers 1m thick, values [1,2,3,4,5] for both elements
+    #   weighted sum = 1*1 + 2*1 + 3*1 + 4*1 + 5*1 = 15
+    #   total thickness = 5
+    #   mean = 15/5 = 3.0
+    assert np.allclose(result[0], [3.0, 3.0])
+
+    # t=1: sigma layers stretch due to sea level rise
+    # Layer values (bottom to top): [1, 2, 3, 4, 5]
+    # Layers 1-2 are z-layers (fixed dz=1), layers 3-5 are sigma (stretch)
+    #
+    # Elem 0 (nodes 0,1,2): mean surface = (0+0.5+0.5)/3 = 1/3
+    #   sigma zone: from -3 to 1/3, thickness = 1/3 - (-3) = 10/3
+    #   sigma_dz = (10/3) / 3 = 10/9
+    #   layer thicknesses: [1, 1, 10/9, 10/9, 10/9]
+    #   total thickness = 1 + 1 + 10/9 + 10/9 + 10/9 = 18/9 + 30/9 = 48/9 = 16/3
+    #   weighted sum = 1*1 + 2*1 + 3*(10/9) + 4*(10/9) + 5*(10/9)
+    #                = 1 + 2 + 30/9 + 40/9 + 50/9 = 27/9 + 120/9 = 147/9 = 49/3
+    #   weighted mean = (49/3) / (16/3) = 49/16
+    #
+    # Elem 1 (nodes 1,3,2): mean surface = (0.5+1.0+0.5)/3 = 2/3
+    #   sigma zone: from -3 to 2/3, thickness = 2/3 - (-3) = 11/3
+    #   sigma_dz = (11/3) / 3 = 11/9
+    #   layer thicknesses: [1, 1, 11/9, 11/9, 11/9]
+    #   total thickness = 1 + 1 + 11/9 + 11/9 + 11/9 = 18/9 + 33/9 = 51/9 = 17/3
+    #   weighted sum = 1*1 + 2*1 + 3*(11/9) + 4*(11/9) + 5*(11/9)
+    #                = 1 + 2 + 33/9 + 44/9 + 55/9 = 27/9 + 132/9 = 159/9 = 53/3
+    #   weighted mean = (53/3) / (17/3) = 53/17
+    expected_t1 = np.array([49.0 / 16.0, 53.0 / 17.0])
+    assert np.allclose(result[1], expected_t1)
+
+
+def test_mean_z_sigma_z_nan_and_different_data() -> None:
+    """Test mean(axis='z') with inactive layer (NaN) and different data per column.
+
+    Column 0: values [1,2,3,4,5], all active
+    Column 1: values [NaN,20,30,40,50], bottom z-layer inactive
+    Tests NaN masking and correct column-to-element mapping.
+    """
+    ds = mikeio.read("tests/testdata/sigma_z_2elem_5layers_nan.dfsu")
+    da = ds[0]
+
+    da_mean = da.mean(axis="z")
+    result = da_mean.to_numpy()
+    assert result.shape == (2, 2)
+
+    # Column 0, t=0: all layers 1m thick, vals [1,2,3,4,5]
+    #   weighted sum = 1*1 + 2*1 + 3*1 + 4*1 + 5*1 = 15
+    #   total thickness = 5
+    #   mean = 15/5 = 3.0
+    assert np.isclose(result[0, 0], 3.0)
+
+    # Column 1, t=0: NaN in bottom z-layer, active vals [20,30,40,50], dz=[1,1,1,1]
+    #   weighted sum = 20*1 + 30*1 + 40*1 + 50*1 = 140
+    #   total thickness = 4
+    #   mean = 140/4 = 35.0
+    assert np.isclose(result[0, 1], 35.0)
+
+    # Columns have different means (catches column-swap bugs)
+    assert not np.isclose(result[0, 0], result[0, 1])
+
+    # t=1: sigma layers stretch due to sea level rise
+    # Col 0 (nodes 0,1,2): mean surface = (0+0.5+0.5)/3 = 1/3
+    #   sigma zone: from -3 to 1/3, thickness = 1/3 - (-3) = 10/3
+    #   sigma_dz = (10/3) / 3 = 10/9
+    #   layer thicknesses: [1, 1, 10/9, 10/9, 10/9]
+    #   total thickness = 1 + 1 + 10/9 + 10/9 + 10/9 = 18/9 + 30/9 = 48/9 = 16/3
+    #   weighted sum = 1*1 + 2*1 + 3*(10/9) + 4*(10/9) + 5*(10/9)
+    #                = 1 + 2 + 30/9 + 40/9 + 50/9 = 27/9 + 120/9 = 147/9 = 49/3
+    #   mean = (49/3) / (16/3) = 49/16
+    assert np.isclose(result[1, 0], 49.0 / 16.0)
+
+    # Col 1 (nodes 1,3,2): mean surface = (0.5+1.0+0.5)/3 = 2/3
+    #   NaN in bottom z-layer excluded → active layers 2-5, vals=[20,30,40,50]
+    #   sigma zone: from -3 to 2/3, thickness = 2/3 - (-3) = 11/3
+    #   sigma_dz = (11/3) / 3 = 11/9
+    #   active layer thicknesses: [1, 11/9, 11/9, 11/9]  (z-layer 2 + 3 sigma)
+    #   total thickness = 1 + 11/9 + 11/9 + 11/9 = 9/9 + 33/9 = 42/9 = 14/3
+    #   weighted sum = 20*1 + 30*(11/9) + 40*(11/9) + 50*(11/9)
+    #                = 20 + 330/9 + 440/9 + 550/9 = 180/9 + 1320/9 = 1500/9 = 500/3
+    #   mean = (500/3) / (14/3) = 500/14 = 250/7
+    assert np.isclose(result[1, 1], 250.0 / 7.0)
+
+
+def test_mean_z_sigma_z_top_layer() -> None:
+    """Test selecting top layer from sigma-z file.
+
+    The test file has 2 elements, 5 layers, values [1,2,3,4,5] bottom to top.
+    Top layer (layer index -1 or "top") should have value 5 for both elements.
+    """
+    ds = mikeio.read("tests/testdata/sigma_z_2elem_5layers.dfsu")
+    da = ds[0]
+
+    da_top = da.sel(layers="top")
+
+    assert not da_top.geometry.is_layered
+    assert da_top.geometry.n_elements == 2
+
+    result = da_top.to_numpy()
+    # Top layer value is 5 for both elements, both timesteps
+    assert result.shape == (2, 2)  # (n_time, n_2d_elements)
+    assert np.allclose(result[0], [5.0, 5.0])
+    assert np.allclose(result[1], [5.0, 5.0])
+
+
+def test_mean_z_sigma_z_bottom_layer() -> None:
+    """Test mean(axis='z') on bottom two layers selected from sigma-z file.
+
+    The test file has 2 elements, 5 layers, values [1,2,3,4,5] bottom to top.
+    Selecting layers=[0, 1] gives a 2-layer subset (both z-layers, each 1m thick).
+    Mean of [1, 2] with equal thickness = 1.5 for both columns, both timesteps.
+    The z-layers are fixed (not sigma) so sea level rise at t=1 doesn't affect them.
+    """
+    ds = mikeio.read("tests/testdata/sigma_z_2elem_5layers.dfsu")
+    da = ds[0]
+
+    da_bot2 = da.sel(layers=[0, 1])
+
+    assert da_bot2.geometry.is_layered
+    assert da_bot2.geometry.n_elements == 4  # 2 columns × 2 layers
+
+    # Compute mean over the 2 z-layers
+    da_mean = da_bot2.mean(axis="z")
+    result = da_mean.to_numpy()
+
+    # Both z-layers are 1m thick, values [1, 2] → mean = 1.5
+    # Unaffected by sea level rise (z-layers are fixed)
+    assert result.shape == (2, 2)  # (n_time, n_2d_elements)
+    assert np.allclose(result[0], [1.5, 1.5])
+    assert np.allclose(result[1], [1.5, 1.5])
+
+
+def test_mean_z_sigma_z_bottom_layer_nan() -> None:
+    """Test mean(axis='z') on bottom two layers when one column has NaN.
+
+    Column 0: values [1,2,3,4,5] → bottom 2 layers = [1, 2], mean = 1.5
+    Column 1: values [NaN,20,30,40,50] → bottom 2 layers = [NaN, 20]
+              NaN excluded, mean = 20.0 (only layer 1 contributes)
+    """
+    ds = mikeio.read("tests/testdata/sigma_z_2elem_5layers_nan.dfsu")
+    da = ds[0]
+
+    da_bot2 = da.sel(layers=[0, 1])
+    da_mean = da_bot2.mean(axis="z")
+    result = da_mean.to_numpy()
+
+    assert result.shape == (2, 2)  # (n_time, n_2d_elements)
+
+    # Column 0: mean of [1, 2] with equal dz → 1.5
+    assert np.isclose(result[0, 0], 1.5)
+
+    # Column 1: NaN in layer 0 excluded, only layer 1 (value=20, dz=1) → 20.0
+    assert np.isclose(result[0, 1], 20.0)
+
+
+def test_min_z_sigma_z_nan() -> None:
+    """Test min(axis='z') with NaN values.
+
+    Column 0: values [1,2,3,4,5], all active → min = 1.0
+    Column 1: values [NaN,20,30,40,50], bottom z-layer inactive → min = 20.0
+    """
+    ds = mikeio.read("tests/testdata/sigma_z_2elem_5layers_nan.dfsu")
+    da = ds[0]
+
+    da_min = da.min(axis="z")
+    result = da_min.to_numpy()
+    assert result.shape == (2, 2)
+
+    # t=0: Column 0 min=1, Column 1 min=20 (NaN excluded)
+    assert np.isclose(result[0, 0], 1.0)
+    assert np.isclose(result[0, 1], 20.0)
+
+
+def test_max_z_sigma_z_nan() -> None:
+    """Test max(axis='z') with NaN values.
+
+    Column 0: values [1,2,3,4,5], all active → max = 5.0
+    Column 1: values [NaN,20,30,40,50], bottom z-layer inactive → max = 50.0
+    """
+    ds = mikeio.read("tests/testdata/sigma_z_2elem_5layers_nan.dfsu")
+    da = ds[0]
+
+    da_max = da.max(axis="z")
+    result = da_max.to_numpy()
+    assert result.shape == (2, 2)
+
+    # t=0: Column 0 max=5, Column 1 max=50 (NaN excluded)
+    assert np.isclose(result[0, 0], 5.0)
+    assert np.isclose(result[0, 1], 50.0)
+
+
+def test_min_max_mean_z_raises_on_2d() -> None:
+    """Test that min/max/mean(axis='z') raises ValueError on 2D geometry."""
+    ds = mikeio.read("tests/testdata/waves.dfs2")
+    da = ds[0]
+
+    with pytest.raises(ValueError, match="layered 3D"):
+        da.min(axis="z")
+    with pytest.raises(ValueError, match="layered 3D"):
+        da.max(axis="z")
+    with pytest.raises(ValueError, match="layered 3D"):
+        da.mean(axis="z")
