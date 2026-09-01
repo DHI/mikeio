@@ -10,7 +10,7 @@ from mikecore.DfsuFile import DfsuFile, DfsuFileType
 from tqdm import trange
 
 from .._interpolation import Interpolant
-from .._optional import import_optional
+from .._optional import require_scipy
 from ..dataset import DataArray, Dataset
 from ..dfs._dfs import (
     _get_item_info,
@@ -581,7 +581,7 @@ class Dfsu3D(DfsuLayered):
         )
         assert n_nearest > 0
 
-        KDTree = import_optional("scipy.spatial", "interp").KDTree
+        KDTree = require_scipy("scipy.spatial").KDTree
 
         # make 2d nodes-to-elements interpolator
         top_el = self.geometry.top_elements

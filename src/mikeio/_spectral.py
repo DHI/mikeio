@@ -3,7 +3,7 @@ from collections.abc import Sequence
 from typing import Literal, TYPE_CHECKING
 import numpy as np
 
-from ._optional import import_optional
+from ._optional import require_matplotlib
 
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
@@ -68,8 +68,8 @@ def plot_2dspectrum(
     <matplotlib.axes>
 
     """
-    plt = import_optional("matplotlib.pyplot", "plot")
-    PolarAxes = import_optional("matplotlib.projections.polar", "plot").PolarAxes
+    plt = require_matplotlib()
+    PolarAxes = require_matplotlib("matplotlib.projections.polar").PolarAxes
 
     if (frequencies is None or len(frequencies) <= 1) and (
         directions is None or len(directions) <= 1

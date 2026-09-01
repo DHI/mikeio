@@ -32,7 +32,7 @@ from ._geometry import Geometry0D, GeometryPoint2D, _Geometry
 
 from ._grid_geometry import Grid2D
 from ._distance import points_in_polygon, xy_to_bbox
-from .._optional import import_optional
+from .._optional import require_matplotlib, require_scipy
 
 
 if TYPE_CHECKING:
@@ -114,7 +114,7 @@ class GeometryFMPlotter:
         ax: Axes | None = None,
         figsize: tuple[float, float] | None = None,
     ) -> Axes:
-        plt = import_optional("matplotlib.pyplot", "plot")
+        plt = require_matplotlib()
 
         if ax is None:
             _, ax = plt.subplots(figsize=figsize)
@@ -150,9 +150,7 @@ class GeometryFMPlotter:
         """
         # TODO this must be a duplicate, delegate
 
-        PatchCollection = import_optional(
-            "matplotlib.collections", "plot"
-        ).PatchCollection
+        PatchCollection = require_matplotlib("matplotlib.collections").PatchCollection
 
         ax = self._get_ax(ax=ax, figsize=figsize)
         ax.set_aspect(self._plot_aspect())
@@ -212,7 +210,7 @@ class GeometryFMPlotter:
         ```
 
         """
-        plt = import_optional("matplotlib.pyplot", "plot")
+        plt = require_matplotlib()
 
         ax = self._get_ax(ax=ax, figsize=figsize)
         ax.set_aspect(self._plot_aspect())
@@ -531,7 +529,7 @@ class GeometryFM2D(_GeometryFM):
 
     @cached_property
     def _tree2d(self) -> KDTree:
-        KDTree = import_optional("scipy.spatial", "interp").KDTree
+        KDTree = require_scipy("scipy.spatial").KDTree
 
         xy = self.element_coordinates[:, :2]
         return KDTree(xy)

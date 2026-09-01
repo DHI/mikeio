@@ -7,7 +7,7 @@ from numpy.typing import NDArray
 import numpy as np
 
 from ._distance import points_in_polygon, relative_cumulative_distance
-from .._optional import import_optional
+from .._optional import require_matplotlib
 
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
@@ -96,8 +96,7 @@ def _plot_map(
     add_colorbar: bool = True,
 ) -> Axes:
     """Plot unstructured data and/or mesh, mesh outline."""
-    plt = import_optional("matplotlib.pyplot", "plot")
-    matplotlib = import_optional("matplotlib", "plot")
+    plt = require_matplotlib()
 
     VALID_PLOT_TYPES = (
         "mesh_only",
@@ -111,7 +110,7 @@ def _plot_map(
         ok_list = ", ".join(VALID_PLOT_TYPES)
         raise Exception(f"plot_type {plot_type} unknown! ({ok_list})")
 
-    cmap = cmap or matplotlib.colormaps["viridis"]
+    cmap = cmap or plt.colormaps["viridis"]
 
     nc = geometry.node_coordinates
     ec = geometry.element_coordinates
@@ -230,9 +229,9 @@ def _set_colormap_levels(
     levels: int | Sequence[float] | np.ndarray | None,
     z: np.ndarray,
 ) -> tuple[float, float, Colormap, Normalize, ScalarMappable, np.ndarray]:
-    matplotlib = import_optional("matplotlib", "plot")
-    cm = import_optional("matplotlib.cm", "plot")
-    mplc = import_optional("matplotlib.colors", "plot")
+    matplotlib = require_matplotlib("matplotlib")
+    cm = require_matplotlib("matplotlib.cm")
+    mplc = require_matplotlib("matplotlib.colors")
 
     vmin = vmin or np.nanmin(z)
     vmax = vmax or np.nanmax(z)
@@ -275,7 +274,7 @@ def _set_plot_limits(ax: Axes, nc: np.ndarray) -> None:
 
 
 def _plot_mesh_only(ax: Axes, nc: np.ndarray, element_table: np.ndarray) -> None:
-    PatchCollection = import_optional("matplotlib.collections", "plot").PatchCollection
+    PatchCollection = require_matplotlib("matplotlib.collections").PatchCollection
 
     patches = _to_polygons(nc, element_table)
     fig_obj = PatchCollection(
@@ -300,7 +299,7 @@ def _plot_patch(
     vmin: float,
     vmax: float,
 ) -> PatchCollection:
-    PatchCollection = import_optional("matplotlib.collections", "plot").PatchCollection
+    PatchCollection = require_matplotlib("matplotlib.collections").PatchCollection
 
     patches = _to_polygons(nc, element_table)
 
@@ -333,7 +332,7 @@ def _get_tris(
     z: np.ndarray,
     n_refinements: int,
 ) -> tuple[Triangulation, np.ndarray]:
-    tri = import_optional("matplotlib.tri", "plot")
+    tri = require_matplotlib("matplotlib.tri")
 
     elem_table, ec, z = _create_tri_only_element_table(nc, element_table, ec, data=z)
     triang = tri.Triangulation(nc[:, 0], nc[:, 1], elem_table)
@@ -356,10 +355,10 @@ def _add_colorbar(
     levels: np.ndarray,
     cbar_extend: str,
 ) -> None:
-    make_axes_locatable = import_optional(
-        "mpl_toolkits.axes_grid1", "plot"
+    make_axes_locatable = require_matplotlib(
+        "mpl_toolkits.axes_grid1"
     ).make_axes_locatable
-    plt = import_optional("matplotlib.pyplot", "plot")
+    plt = require_matplotlib()
 
     cax = make_axes_locatable(ax).append_axes("right", size="5%", pad=0.05)
     cmap_sm = cmap_ScMappable if cmap_ScMappable else fig_obj
@@ -387,7 +386,7 @@ def _add_non_tri_mesh(
     ax: Axes, nc: np.ndarray, element_table: np.ndarray, plot_type: str
 ) -> None:
     # if mesh is not tri only, we need to add it manually on top
-    PatchCollection = import_optional("matplotlib.collections", "plot").PatchCollection
+    PatchCollection = require_matplotlib("matplotlib.collections").PatchCollection
 
     patches = _to_polygons(nc, element_table)
     mesh_linewidth = 0.4
@@ -426,7 +425,7 @@ def _is_tri_only(element_table: np.ndarray) -> bool:
 
 
 def _to_polygons(node_coordinates: np.ndarray, element_table: np.ndarray) -> list[Any]:
-    Polygon = import_optional("matplotlib.patches", "plot").Polygon
+    Polygon = require_matplotlib("matplotlib.patches").Polygon
 
     polygons = []
 
@@ -454,8 +453,8 @@ def _node_to_element_ids(element_table: np.ndarray, num_nodes: int) -> list[np.n
     elem_ind = np.repeat(np.arange(element_table.shape[0]), element_table.shape[1])
     pairs = np.unique(np.column_stack([node_ind, elem_ind]), axis=0)
     node_ind, elem_ind = pairs[:, 0], pairs[:, 1]
-    boundaries = np.searchsorted(node_ind, np.arange(num_nodes + 1))
-    return [elem_ind[boundaries[n] : boundaries[n + 1]] for n in range(num_nodes)]
+    split_points = np.searchsorted(node_ind, np.arange(1, num_nodes))
+    return np.split(elem_ind, split_points)
 
 
 def _get_node_centered_data(
@@ -569,8 +568,8 @@ def _plot_vertical_profile(
     figsize: tuple[float, float] | None = None,
     **kwargs: Any,
 ) -> Axes:
-    plt = import_optional("matplotlib.pyplot", "plot")
-    PolyCollection = import_optional("matplotlib.collections", "plot").PolyCollection
+    plt = require_matplotlib()
+    PolyCollection = require_matplotlib("matplotlib.collections").PolyCollection
 
     nc = node_coordinates
     s_coordinate = relative_cumulative_distance(nc, is_geo=is_geo)

@@ -9,7 +9,7 @@ from ..spatial._FM_plot import _plot_map, _plot_vertical_profile
 from .._spectral import plot_2dspectrum, calc_m0_from_spectrum
 from ..eum import EUMType, ItemInfo
 from ..spatial import GeometryUndefined, Grid1D, GeometryFM2D
-from .._optional import import_optional
+from .._optional import require_matplotlib
 
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
@@ -65,7 +65,7 @@ class DataArrayPlotter:
     def _get_ax(
         ax: Axes | None = None, figsize: tuple[float, float] | None = None
     ) -> Axes:
-        plt = import_optional("matplotlib.pyplot", "plot")
+        plt = require_matplotlib()
 
         if ax is None:
             _, ax = plt.subplots(figsize=figsize)
@@ -75,7 +75,7 @@ class DataArrayPlotter:
     def _get_fig_ax(
         ax: Axes | None = None, figsize: tuple[float, float] | None = None
     ) -> tuple[Figure, Axes]:
-        plt = import_optional("matplotlib.pyplot", "plot")
+        plt = require_matplotlib()
 
         if ax is None:
             fig, ax = plt.subplots(figsize=figsize)
@@ -629,7 +629,7 @@ class DataArrayPlotterFMVerticalColumn(DataArrayPlotter):
         extrapolate: bool = True,
         **kwargs: Any,
     ) -> Axes:
-        plt = import_optional("matplotlib.pyplot", "plot")
+        plt = require_matplotlib()
 
         if "title" in kwargs:
             title = kwargs.pop("title")
@@ -898,7 +898,8 @@ class DatasetPlotter:
         self, figsize: tuple[float, float] | None = None, **kwargs: Any
     ) -> Axes:
         """Plot multiple DataArrays as time series (only possible dfs0-type data)."""
-        import_optional("matplotlib.pyplot", "plot")
+        # raise mikeio's friendly error before pandas' own less helpful one
+        require_matplotlib()
 
         if self.ds.dims == ("time",):
             df = self.ds.to_dataframe()
@@ -912,7 +913,7 @@ class DatasetPlotter:
     def _get_fig_ax(
         ax: Axes | None = None, figsize: tuple[float, float] | None = None
     ) -> tuple[Figure, Axes]:
-        plt = import_optional("matplotlib.pyplot", "plot")
+        plt = require_matplotlib()
 
         if ax is None:
             fig, ax = plt.subplots(figsize=figsize)
