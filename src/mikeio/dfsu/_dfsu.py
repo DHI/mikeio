@@ -33,7 +33,7 @@ from ..spatial import Grid2D
 from .._track import _extract_track
 from ._topology import get_elements_from_source, get_nodes_from_source
 from ..eum import ItemInfo, TimeStepUnit
-from .._options import _item_txt
+from .._options import _item_txt, _show_progress
 
 
 def write_dfsu(filename: str | Path, data: Dataset, title: str = "") -> None:
@@ -204,8 +204,6 @@ class Dfsu2DH:
         Path to dfsu file
 
     """
-
-    show_progress = False
 
     def __init__(self, filename: str | Path) -> None:
         info = _get_dfsu_info(filename)
@@ -459,7 +457,7 @@ class Dfsu2DH:
             np.ndarray(shape=shape, dtype=dtype) for _ in range(n_items)
         ]
 
-        for i in trange(n_steps, disable=not self.show_progress):
+        for i in trange(n_steps, disable=not _show_progress()):
             for item in range(n_items):
                 dfs, d, t_rel[i] = _read_item_time_step(
                     dfs=dfs,

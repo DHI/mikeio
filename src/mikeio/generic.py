@@ -33,14 +33,13 @@ from tqdm import tqdm, trange
 import mikeio
 
 from . import __dfs_version__
+from ._options import _show_progress
 from .dfs._dfs import _get_item_info, _valid_item_numbers
 from .eum import EUMType, EUMUnit, ItemInfo
 
 TimeAxis = Union[
     DfsEqTimeAxis, DfsNonEqTimeAxis, DfsEqCalendarAxis, DfsNonEqCalendarAxis
 ]
-
-show_progress = True
 
 __all__ = [
     "avg_time",
@@ -192,7 +191,7 @@ def scale(
 
     deletevalue = dfs.FileInfo.DeleteValueFloat
 
-    for timestep in trange(n_time_steps, disable=not show_progress):
+    for timestep in trange(n_time_steps, disable=not _show_progress()):
         for item in range(n_items):
             itemdata = dfs.ReadItemTimeStep(item_numbers[item] + 1, timestep)
             time = itemdata.Time
@@ -245,7 +244,7 @@ def fill_corrupt(
 
     deletevalue = dfs.FileInfo.DeleteValueFloat
 
-    for timestep in trange(n_time_steps, disable=not show_progress):
+    for timestep in trange(n_time_steps, disable=not _show_progress()):
         for item in range(n_items):
             itemdata = dfs_i.ReadItemTimeStep(item_numbers[item] + 1, timestep)
             if itemdata is not None:
@@ -305,7 +304,7 @@ def _process_dfs_files(
     n_items = len(dfs_i_a.ItemInfo)
     # TODO Add checks to verify identical structure of file a and b
 
-    for timestep in trange(n_time_steps):
+    for timestep in trange(n_time_steps, disable=not _show_progress()):
         for item in range(n_items):
             itemdata_a = dfs_i_a.ReadItemTimeStep(item + 1, timestep)
             d_a = itemdata_a.Data
@@ -416,7 +415,7 @@ def concat(
 
     current_time = datetime(1, 1, 1)  # beginning of time...
 
-    for i, infilename in enumerate(tqdm(infilenames, disable=not show_progress)):
+    for i, infilename in enumerate(tqdm(infilenames, disable=not _show_progress())):
         dfs_i = DfsFileFactory.DfsGenericOpen(str(infilename))
         t_axis = dfs_i.FileInfo.TimeAxis
         n_time_steps = t_axis.NumberOfTimeSteps
@@ -810,7 +809,7 @@ def avg_time(
         step0[has_value] = 1
         steps_list.append(step0)
 
-    for timestep in trange(1, n_time_steps, disable=not show_progress):
+    for timestep in trange(1, n_time_steps, disable=not _show_progress()):
         for item in range(n_items):
             itemdata = dfs_i.ReadItemTimeStep(item_numbers[item] + 1, timestep)
             d = itemdata.Data

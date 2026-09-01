@@ -12,7 +12,7 @@ from ..dataset import DataArray, Dataset
 from ..eum import ItemInfo, EUMUnit
 from ..dfs._dfs import _get_item_info, _valid_item_numbers, _valid_timesteps
 from .._spectral import calc_m0_from_spectrum
-from .._options import _item_txt
+from .._options import _item_txt, _show_progress
 from ._dfsu import (
     _get_dfsu_info,
     get_elements_from_source,
@@ -35,8 +35,6 @@ class DfsuSpectral:
         Path to dfsu file
 
     """
-
-    show_progress = False
 
     def __init__(self, filename: str | Path) -> None:
         info = _get_dfsu_info(filename)
@@ -365,7 +363,7 @@ class DfsuSpectral:
 
         t_seconds = np.zeros(n_steps, dtype=float)
 
-        for i in trange(n_steps, disable=not self.show_progress):
+        for i in trange(n_steps, disable=not _show_progress()):
             it = time_steps[i]
             for item in range(n_items):
                 itemdata = dfs.ReadItemTimeStep(item_numbers[item] + 1, it)

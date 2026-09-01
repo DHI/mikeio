@@ -1,8 +1,10 @@
 from collections.abc import Iterator
+from pathlib import Path
 
 import pytest
 
 import mikeio
+from mikeio import generic
 
 
 @pytest.fixture(autouse=True)
@@ -106,3 +108,40 @@ def test_dataset_and_file_handle_agree_at_the_limit() -> None:
         assert "  0:  Buoy 2: Sign. Wave Height" in repr(ds)
         assert "more items" not in repr(dfs)
         assert "more items" not in repr(ds)
+
+
+def test_default_show_progress_is_off() -> None:
+    assert mikeio.get_options()["show_progress"] is False
+
+
+@pytest.mark.parametrize("value", [1, "yes", None])
+def test_invalid_show_progress_raises(value: object) -> None:
+    with pytest.raises(ValueError, match="show_progress"):
+        mikeio.set_options(show_progress=value)  # type: ignore[arg-type]
+
+
+def test_read_shows_no_progress_bar_by_default(
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    mikeio.read("tests/testdata/oresundHD_run1.dfsu")
+    assert capsys.readouterr().err == ""
+
+
+def test_read_shows_progress_bar_when_enabled(
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    with mikeio.set_options(show_progress=True):
+        mikeio.read("tests/testdata/oresundHD_run1.dfsu")
+    assert "it/s" in capsys.readouterr().err
+
+
+def test_generic_respects_show_progress(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    outfilename = tmp_path / "scaled.dfsu"
+    generic.scale("tests/testdata/oresundHD_run1.dfsu", outfilename, factor=2.0)
+    assert capsys.readouterr().err == ""
+
+    with mikeio.set_options(show_progress=True):
+        generic.scale("tests/testdata/oresundHD_run1.dfsu", outfilename, factor=2.0)
+    assert "it/s" in capsys.readouterr().err

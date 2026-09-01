@@ -293,8 +293,6 @@ def write_dfs_data(*, dfs: DfsFile, ds: Dataset, n_spatial_dims: int) -> None:
 class _Dfs123:
     _ndim: int
 
-    show_progress = False
-
     def __init__(self, filename: str | Path) -> None:
         path = Path(filename)
         if not path.exists():

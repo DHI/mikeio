@@ -141,7 +141,7 @@ quartodoc:
       contents:
         - generic
     - title: Options
-      desc: "Global options controlling how MIKE IO objects are displayed."
+      desc: "Global options controlling display and progress reporting."
       contents:
         - set_options
         - get_options
