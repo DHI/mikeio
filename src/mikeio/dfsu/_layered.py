@@ -10,6 +10,7 @@ from mikecore.DfsuFile import DfsuFile, DfsuFileType
 from tqdm import trange
 
 from .._interpolation import Interpolant
+from .._optional import import_optional
 from ..dataset import DataArray, Dataset
 from ..dfs._dfs import (
     _get_item_info,
@@ -579,8 +580,6 @@ class Dfsu3D(DfsuLayered):
             or self._type == DfsuFileType.Dfsu3DSigmaZ
         )
         assert n_nearest > 0
-
-        from .._optional import import_optional
 
         KDTree = import_optional("scipy.spatial", "interp").KDTree
 

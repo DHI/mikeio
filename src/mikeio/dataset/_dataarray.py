@@ -28,6 +28,7 @@ import pandas as pd
 from ..eum import EUMType, EUMUnit, ItemInfo
 from .._time import _get_time_idx_list, _n_selected_timesteps
 from .._track import _extract_track
+from .._optional import import_optional
 
 if TYPE_CHECKING:
     from ._dataset import Dataset
@@ -1122,8 +1123,6 @@ class DataArray:
         DataArray
 
         """
-        from .._optional import import_optional
-
         interp1d = import_optional("scipy.interpolate", "interp").interp1d
 
         t_out_index = self._parse_interp_time(self.time, dt)

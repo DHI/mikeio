@@ -3,6 +3,8 @@ from collections.abc import Sequence
 from typing import Literal, TYPE_CHECKING
 import numpy as np
 
+from ._optional import import_optional
+
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
 
@@ -66,8 +68,6 @@ def plot_2dspectrum(
     <matplotlib.axes>
 
     """
-    from ._optional import import_optional
-
     plt = import_optional("matplotlib.pyplot", "plot")
     PolarAxes = import_optional("matplotlib.projections.polar", "plot").PolarAxes
 

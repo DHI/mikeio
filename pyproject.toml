@@ -40,7 +40,7 @@ interp = ["scipy>=1.0"]
 all = ["mikeio[plot,interp]"]
 
 [dependency-groups]
-test = ["pytest", "pytest-cov", "mypy==1.19.1", "shapely", "pyproj", "polars", "matplotlib>=3.6.0", "scipy>=1.0"]
+test = ["pytest", "pytest-cov", "mypy==1.19.1", "shapely", "pyproj", "polars", "mikeio[plot,interp]"]
 
 dev = [
     {include-group = "test"},

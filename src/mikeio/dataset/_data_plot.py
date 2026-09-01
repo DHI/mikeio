@@ -9,6 +9,7 @@ from ..spatial._FM_plot import _plot_map, _plot_vertical_profile
 from .._spectral import plot_2dspectrum, calc_m0_from_spectrum
 from ..eum import EUMType, ItemInfo
 from ..spatial import GeometryUndefined, Grid1D, GeometryFM2D
+from .._optional import import_optional
 
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
@@ -64,8 +65,6 @@ class DataArrayPlotter:
     def _get_ax(
         ax: Axes | None = None, figsize: tuple[float, float] | None = None
     ) -> Axes:
-        from .._optional import import_optional
-
         plt = import_optional("matplotlib.pyplot", "plot")
 
         if ax is None:
@@ -76,8 +75,6 @@ class DataArrayPlotter:
     def _get_fig_ax(
         ax: Axes | None = None, figsize: tuple[float, float] | None = None
     ) -> tuple[Figure, Axes]:
-        from .._optional import import_optional
-
         plt = import_optional("matplotlib.pyplot", "plot")
 
         if ax is None:
@@ -632,8 +629,6 @@ class DataArrayPlotterFMVerticalColumn(DataArrayPlotter):
         extrapolate: bool = True,
         **kwargs: Any,
     ) -> Axes:
-        from .._optional import import_optional
-
         plt = import_optional("matplotlib.pyplot", "plot")
 
         if "title" in kwargs:
@@ -915,8 +910,6 @@ class DatasetPlotter:
     def _get_fig_ax(
         ax: Axes | None = None, figsize: tuple[float, float] | None = None
     ) -> tuple[Figure, Axes]:
-        from .._optional import import_optional
-
         plt = import_optional("matplotlib.pyplot", "plot")
 
         if ax is None:

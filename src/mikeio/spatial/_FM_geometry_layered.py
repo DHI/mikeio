@@ -15,6 +15,7 @@ from ._geometry import GeometryPoint3D
 from ._FM_plot import _plot_vertical_profile, BoundaryPolygons
 
 from ._distance import relative_cumulative_distance
+from .._optional import import_optional
 
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
@@ -709,8 +710,6 @@ class GeometryFMVerticalColumn(GeometryFM3D):
 
         Uses make_interp_spline(k=1) which extrapolates beyond boundaries by default.
         """
-        from .._optional import import_optional
-
         make_interp_spline = import_optional(
             "scipy.interpolate", "interp"
         ).make_interp_spline
@@ -762,8 +761,6 @@ class GeometryFMVerticalProfilePlotter:
         figsize: tuple[float, float] | None = None,
         **kwargs: Any,
     ) -> Axes:
-        from .._optional import import_optional
-
         plt = import_optional("matplotlib.pyplot", "plot")
 
         if ax is None:

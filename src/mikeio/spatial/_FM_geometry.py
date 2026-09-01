@@ -32,6 +32,7 @@ from ._geometry import Geometry0D, GeometryPoint2D, _Geometry
 
 from ._grid_geometry import Grid2D
 from ._distance import points_in_polygon, xy_to_bbox
+from .._optional import import_optional
 
 
 if TYPE_CHECKING:
@@ -113,8 +114,6 @@ class GeometryFMPlotter:
         ax: Axes | None = None,
         figsize: tuple[float, float] | None = None,
     ) -> Axes:
-        from .._optional import import_optional
-
         plt = import_optional("matplotlib.pyplot", "plot")
 
         if ax is None:
@@ -150,8 +149,6 @@ class GeometryFMPlotter:
 
         """
         # TODO this must be a duplicate, delegate
-
-        from .._optional import import_optional
 
         PatchCollection = import_optional("matplotlib.collections", "plot").PatchCollection
 
@@ -213,8 +210,6 @@ class GeometryFMPlotter:
         ```
 
         """
-        from .._optional import import_optional
-
         plt = import_optional("matplotlib.pyplot", "plot")
 
         ax = self._get_ax(ax=ax, figsize=figsize)
@@ -523,8 +518,6 @@ class GeometryFM2D(_GeometryFM):
 
     @cached_property
     def _tree2d(self) -> KDTree:
-        from .._optional import import_optional
-
         KDTree = import_optional("scipy.spatial", "interp").KDTree
 
         xy = self.element_coordinates[:, :2]

@@ -19,6 +19,7 @@ from ._geometry import (
 )
 
 from .._interpolation import Interpolant
+from .._optional import import_optional
 
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
@@ -307,8 +308,6 @@ class Grid2DPlotter:
     def _get_ax(
         ax: Axes | None = None, figsize: tuple[float, float] | None = None
     ) -> Axes:
-        from .._optional import import_optional
-
         plt = import_optional("matplotlib.pyplot", "plot")
 
         if ax is None:
