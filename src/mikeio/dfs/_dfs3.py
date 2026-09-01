@@ -5,6 +5,7 @@ from typing import Any
 
 import numpy as np
 import pandas as pd
+from tqdm import tqdm
 
 from mikecore.DfsBuilder import DfsBuilder
 from mikecore.DfsFactory import DfsFactory
@@ -24,6 +25,7 @@ from ._dfs import (
 )
 from ..eum import TimeStepUnit
 from ..spatial import Grid3D
+from .._options import _show_progress
 
 
 def write_dfs3(filename: str | Path, ds: Dataset, title: str = "") -> None:
@@ -235,7 +237,7 @@ class Dfs3(_Dfs123):
 
         t_seconds = np.zeros(nt, dtype=float)
 
-        for i, it in enumerate(time_steps):
+        for i, it in enumerate(tqdm(time_steps, disable=not _show_progress())):
             for item in range(n_items):
                 itemdata = dfs.ReadItemTimeStep(item_numbers[item] + 1, int(it))
                 d = itemdata.Data

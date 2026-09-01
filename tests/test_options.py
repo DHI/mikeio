@@ -135,6 +135,14 @@ def test_read_shows_progress_bar_when_enabled(
     assert "it/s" in capsys.readouterr().err
 
 
+def test_dfs3_read_shows_progress_bar_when_enabled(
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    with mikeio.set_options(show_progress=True):
+        mikeio.read("tests/testdata/test_dfs3.dfs3")
+    assert "it/s" in capsys.readouterr().err
+
+
 def test_generic_respects_show_progress(
     tmp_path: Path, capsys: pytest.CaptureFixture[str]
 ) -> None:
