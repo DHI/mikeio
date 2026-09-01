@@ -67,6 +67,11 @@ Source = "https://github.com/DHI/mikeio"
 Issues = "https://github.com/DHI/mikeio/issues"
 
 
+[tool.ruff.format]
+
+# keep line endings uniform; the default "auto" preserves whatever a file has
+line-ending = "lf"
+
 [tool.ruff.lint]
 
 # ignore long lines

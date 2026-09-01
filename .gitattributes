@@ -1,3 +1,5 @@
+*.py text eol=lf
+
 *.ipynb linguist-language=Python
 docs/* linguist-documentation
 docsrc/* linguist-documentation
