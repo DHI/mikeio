@@ -443,15 +443,19 @@ def _to_polygons(node_coordinates: np.ndarray, element_table: np.ndarray) -> lis
 
 
 def _node_to_element_ids(element_table: np.ndarray, num_nodes: int) -> list[np.ndarray]:
-    """For each node, the ids of the elements it belongs to (no scipy required)."""
+    """For each node, the ids of the elements it belongs to (no scipy required).
+
+    Deduplicates repeated (node, element) pairs, matching the behaviour of the
+    scipy.sparse.csr_matrix construction this replaces (COO->CSR merges
+    duplicate entries), so a degenerate element referencing the same node more
+    than once is only counted for that node once.
+    """
     node_ind = element_table.ravel()
     elem_ind = np.repeat(np.arange(element_table.shape[0]), element_table.shape[1])
-    order = np.argsort(node_ind, kind="stable")
-    elem_ind_sorted = elem_ind[order]
-    boundaries = np.searchsorted(node_ind[order], np.arange(num_nodes + 1))
-    return [
-        elem_ind_sorted[boundaries[n] : boundaries[n + 1]] for n in range(num_nodes)
-    ]
+    pairs = np.unique(np.column_stack([node_ind, elem_ind]), axis=0)
+    node_ind, elem_ind = pairs[:, 0], pairs[:, 1]
+    boundaries = np.searchsorted(node_ind, np.arange(num_nodes + 1))
+    return [elem_ind[boundaries[n] : boundaries[n + 1]] for n in range(num_nodes)]
 
 
 def _get_node_centered_data(
