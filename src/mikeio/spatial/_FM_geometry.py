@@ -256,6 +256,13 @@ class GeometryFMPlotter:
             return "equal"
 
 
+def _read_only(values: np.ndarray) -> np.ndarray:
+    """A view of values that cannot be modified in place."""
+    view = values.view()
+    view.flags.writeable = False
+    return view
+
+
 class _GeometryFM(_Geometry):
     def __init__(
         self,
@@ -400,9 +407,7 @@ class _GeometryFM(_Geometry):
         geometry.node_coordinates = nc
         ```
         """
-        view = self._node_coordinates.view()
-        view.flags.writeable = False
-        return view
+        return _read_only(self._node_coordinates)
 
     @node_coordinates.setter
     def node_coordinates(self, value: ArrayLike) -> None:
@@ -426,8 +431,11 @@ class _GeometryFM(_Geometry):
 
     @property
     def codes(self) -> np.ndarray:
-        """Node codes of all nodes (0=water, 1=land, 2...=open boundaries)."""
-        return self._codes
+        """Node codes of all nodes (0=water, 1=land, 2...=open boundaries).
+
+        Read-only (as node_coordinates); assign a new array to change them.
+        """
+        return _read_only(self._codes)
 
     @codes.setter
     def codes(self, v: np.ndarray) -> None:

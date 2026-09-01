@@ -1493,8 +1493,8 @@ class ItemInfo:
         "Set type; the current unit must remain valid for the new type."
         if self._unit not in value.units:
             raise ValueError(
-                f"{self._unit} is not a correct unit for {value}. "
-                f"Create a new ItemInfo instead, e.g. ItemInfo(name, {value}, {value.units[0]})"
+                f"{self._unit.display_name} is not a correct unit for {value.display_name}. "
+                f"Create a new ItemInfo instead, e.g. ItemInfo(name, EUMType.{value.name}, EUMUnit.{value.units[0].name})"
             )
         self._type = value
 
@@ -1518,7 +1518,8 @@ class ItemInfo:
         "Set unit."
         if value not in self.type.units:
             raise ValueError(
-                f"{value} is not a correct unit for {self.type}. Use {self.type.units}"
+                f"{value.display_name} is not a correct unit for {self.type.display_name}. "
+                f"Use one of {[u.display_name for u in self.type.units]}"
             )
         self._unit = value
 

@@ -110,10 +110,7 @@ class Dataset:
             for da in rest:
                 first._is_compatible(da)
 
-        self._data_vars = data_vars
-
-        for key, value in data_vars.items():
-            self._set_name_attr(key, value)
+        self._das = list(data_vars.values())
         self.plot = DatasetPlotter(self)
 
         self.title = title
@@ -162,6 +159,15 @@ class Dataset:
         }
 
         return Dataset(data_vars, validate=validate, title=title)
+
+    @property
+    def _data_vars(self) -> dict[str, DataArray]:
+        """The DataArrays by name.
+
+        Derived from the DataArrays rather than stored, so that renaming one
+        (da.name = "...") cannot leave the Dataset looking it up by the old name.
+        """
+        return {da.name: da for da in self._das}
 
     @property
     def values(self) -> None:
@@ -299,7 +305,7 @@ class Dataset:
     @property
     def n_items(self) -> int:
         """Number of items/DataArrays, equivalent to len()."""
-        return len(self._data_vars)
+        return len(self._das)
 
     @property
     def names(self) -> list[str]:
@@ -399,9 +405,7 @@ class Dataset:
 
     def flipud(self) -> Dataset:
         """Flip data upside down (on first non-time axis)."""
-        self._data_vars = {
-            key: value.flipud() for (key, value) in self._data_vars.items()
-        }
+        self._das = [da.flipud() for da in self._das]
         return self
 
     def squeeze(self) -> Dataset:
@@ -444,10 +448,10 @@ class Dataset:
     # ============= Dataset is (almost) a MutableMapping ===========
 
     def __len__(self) -> int:
-        return len(self._data_vars)
+        return len(self._das)
 
     def __iter__(self) -> Iterator[DataArray]:
-        yield from self._data_vars.values()
+        yield from self._das
 
     def __setitem__(self, key: int | str, value: DataArray) -> None:
         self.__set_or_insert_item(key, value, insert=False)
@@ -465,19 +469,16 @@ class Dataset:
                     raise ValueError(
                         f"Item name {item_name} already in Dataset ({self.names})"
                     )
-                keys = list(self._data_vars.keys())
-                keys.insert(key, item_name)
-                values = list(self._data_vars.values())
-                values.insert(key, value)
-                self._data_vars = dict(zip(keys, values))
+                self._das.insert(key, value)
             else:
-                key_str = self.names[key]
-                self._data_vars[key_str] = value
-                self._set_name_attr(item_name, value)
+                self._das[key] = value
         else:
             value.name = key
-            self._data_vars[key] = value
-            self._set_name_attr(key, value)
+            names = self.names
+            if key in names:
+                self._das[names.index(key)] = value
+            else:
+                self._das.append(value)
 
     def insert(self, key: int, value: DataArray) -> None:
         """Insert DataArray in a specific position.
@@ -547,43 +548,29 @@ class Dataset:
             ds = self.copy()
 
         for old_name, new_name in mapper.items():
-            da = ds._data_vars.pop(old_name)
-            da.name = new_name
-            ds._data_vars[new_name] = da
-            ds._del_name_attr(old_name)
-            ds._set_name_attr(new_name, da)
+            ds[old_name].name = new_name
 
         return ds
 
-    # Instance attributes assigned in __init__: not class members, so
-    # hasattr(type(self), ...) misses them. An item named like one of these
-    # would clobber internal state (e.g. "plot" destroys the DatasetPlotter,
-    # "_data_vars" corrupts the item dict), so reserve them explicitly.
-    _RESERVED_INSTANCE_ATTRS = frozenset({"plot", "title", "_data_vars"})
+    def __getattr__(self, name: str) -> DataArray:
+        # Python only calls __getattr__ when normal lookup fails, so a real
+        # attribute, property or method always wins over an item of the same
+        # name: an item called "z" cannot clobber the z-coordinate accessor,
+        # nor "plot"/"geometry"/"mean"/etc. Such an item is still available as
+        # ds["z"]; only the convenience ds.z is reserved. mikeio itself
+        # manufactures such names, e.g. aggregate(axis="items") names the
+        # result after the aggregation function ("mean", "max", ...).
+        if name.startswith("_"):
+            # never look up internals as items (also stops recursion on _das)
+            raise AttributeError(name)
+        for da in self._das:
+            if _to_safe_name(da.name) == name:
+                return da
+        raise AttributeError(f"Dataset has no attribute or item named {name!r}")
 
-    def _is_reserved_attr(self, name: str) -> bool:
-        # Probe the CLASS, not the instance: hasattr(self, ...) would invoke the
-        # z/geometry property getters on a partially-constructed Dataset.
-        return name in self._RESERVED_INSTANCE_ATTRS or hasattr(type(self), name)
-
-    def _set_name_attr(self, name: str, value: DataArray) -> None:
-        name = _to_safe_name(name)
-        # Don't shadow a real class member (property or method) with a dynamic
-        # item attribute — e.g. an item named "z" must not clobber the read-only
-        # z-coordinate accessor, nor "geometry"/"time"/"mean"/etc. The item stays
-        # accessible via ds[name]; only the convenience ds.<name> is reserved.
-        # This is silent (not a warning) because mikeio routinely manufactures
-        # such names itself — aggregate(axis="items") names the result after the
-        # aggregation function (e.g. "mean", "nanmean", "max").
-        if self._is_reserved_attr(name):
-            return
-        setattr(self, name, value)
-
-    def _del_name_attr(self, name: str) -> None:
-        name = _to_safe_name(name)
-        if self._is_reserved_attr(name):
-            return
-        delattr(self, name)
+    def __dir__(self) -> list[str]:
+        # tab completion: real members plus the item names
+        return [*super().__dir__(), *(_to_safe_name(da.name) for da in self._das)]
 
     # `slice` must precede `Hashable | int`: since Python 3.12 slice objects are
     # hashable, so the broader `Hashable` overload would otherwise shadow this one
@@ -630,7 +617,7 @@ class Dataset:
         if isinstance(key, str):
             return key
         if isinstance(key, int):
-            return list(self._data_vars.keys())[key]
+            return self._das[key].name
         if isinstance(key, slice):
             start, stop, step = key.indices(len(self))
             return self._key_to_str(list(range(start, stop, step)))
@@ -640,8 +627,10 @@ class Dataset:
 
     def __delitem__(self, key: Hashable | int) -> None:
         key = self._key_to_str(key)
-        self._data_vars.__delitem__(key)
-        self._del_name_attr(key)
+        names = self.names
+        if key not in names:
+            raise KeyError(f"No item named: {key}. Valid items: {','.join(names)}")
+        del self._das[names.index(key)]
 
     # ============ select/interp =============
 

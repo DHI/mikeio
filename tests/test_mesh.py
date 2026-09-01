@@ -103,21 +103,23 @@ def test_set_z_updates_element_coordinates(tri_mesh: Mesh) -> None:
 
 def test_set_codes(tri_mesh: Mesh) -> None:
     msh = tri_mesh
-    codes = msh.geometry.codes
     assert msh.geometry.codes[2] == 2
-    codes[codes == 2] = 7  # work directly on reference
-
-    assert msh.geometry.codes[2] == 7
 
     new_codes = msh.geometry.codes.copy()
-    new_codes[new_codes == 7] = 9
+    new_codes[new_codes == 2] = 9
     msh.geometry.codes = new_codes  # assign from copy
 
     assert msh.geometry.codes[2] == 9
 
+
+def test_codes_are_read_only(tri_mesh: Mesh) -> None:
+    # in-place edits would leave derived values (e.g. boundary_polygons) stale
+    with pytest.raises(ValueError, match="read-only"):
+        tri_mesh.geometry.codes[2] = 7
+
     with pytest.raises(ValueError):
         # not same length
-        msh.geometry.codes = codes[0:4]
+        tri_mesh.geometry.codes = tri_mesh.geometry.codes[0:4]
 
 
 def test_write(tri_mesh: Mesh, tmp_path: Path) -> None:
