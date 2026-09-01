@@ -87,11 +87,12 @@ class Dfs1(_Dfs123):
     def __init__(self, filename: str | Path) -> None:
         super().__init__(filename)
 
-        self._dfs = DfsFileFactory.Dfs1FileOpen(str(filename))
-        self._x0: float = self._dfs.SpatialAxis.X0
-        self._dx: float = self._dfs.SpatialAxis.Dx
-        self._nx: int = self._dfs.SpatialAxis.XCount
-        self._title: str = self._dfs.FileInfo.FileTitle
+        dfs = DfsFileFactory.Dfs1FileOpen(str(filename))
+        self._x0: float = dfs.SpatialAxis.X0
+        self._dx: float = dfs.SpatialAxis.Dx
+        self._nx: int = dfs.SpatialAxis.XCount
+        self._title: str = dfs.FileInfo.FileTitle
+        dfs.Close()
 
         origin = self._longitude, self._latitude
         self._geometry = Grid1D(

@@ -1,3 +1,4 @@
+import platform
 import shutil
 from pathlib import Path
 
@@ -1035,6 +1036,26 @@ def test_dfsu_to_xarray_has_element_coordinates() -> None:
     assert xr_da.x.values[example_quad_element] == approx(example_quad_coordinates[0])
     assert xr_da.y.values[example_quad_element] == approx(example_quad_coordinates[1])
     assert xr_da.z.values[example_quad_element] == approx(example_quad_coordinates[2])
+
+
+@pytest.mark.skipif(
+    platform.system() != "Linux",
+    reason="File descriptor counting via /proc only works on Linux",
+)
+def test_dfsu_read_closes_file_handle() -> None:
+    """Dfsu read must not leak file handles.
+
+    Each read() opens a DfsuFile; it must be closed before returning.
+    """
+    from conftest import _count_fds_for_file
+
+    filename = "tests/testdata/HD2D.dfsu"
+    results = []
+    for _ in range(50):
+        dfs = mikeio.open(filename)
+        results.append(dfs.read())
+
+    assert _count_fds_for_file(filename) == 0
 
 
 def test_write_dfsu_with_title(tmp_path: Path) -> None:

@@ -1,5 +1,7 @@
 from pathlib import Path
 import datetime
+import platform
+from typing import Any
 from matplotlib import pyplot as plt
 import numpy as np
 import pandas as pd
@@ -939,3 +941,44 @@ def test_append_mismatch_geometry(tmp_path: Path) -> None:
     dfs = mikeio.Dfs2(new_filename)
     with pytest.raises(ValueError, match="geometry"):
         dfs.append(ds2)
+
+
+@pytest.mark.skipif(
+    platform.system() != "Linux",
+    reason="File descriptor counting via /proc only works on Linux",
+)
+def test_dfs2_init_closes_file_handle() -> None:
+    """Dfs2.__init__ must not leak a file handle.
+
+    Dfs2.__init__ opens a Dfs2FileOpen handle to read spatial axis info
+    and must close it before returning.
+    """
+    from conftest import _count_fds_for_file
+
+    filename = "tests/testdata/eq.dfs2"
+    instances = []
+    for _ in range(50):
+        instances.append(mikeio.Dfs2(filename))
+
+    assert _count_fds_for_file(filename) == 0
+
+
+@pytest.mark.skipif(
+    platform.system() != "Linux",
+    reason="File descriptor counting via /proc only works on Linux",
+)
+def test_dfs2_read_closes_file_handle() -> None:
+    """Dfs2.read() must not leak file handles.
+
+    Each read() opens a Dfs2FileOpen handle via _open();
+    it must be closed before returning.
+    """
+    from conftest import _count_fds_for_file
+
+    filename = "tests/testdata/eq.dfs2"
+    results = []
+    for _ in range(50):
+        dfs = mikeio.Dfs2(filename)
+        results.append(dfs.read())
+
+    assert _count_fds_for_file(filename) == 0

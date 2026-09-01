@@ -819,6 +819,8 @@ def avg_time(
             outdatalist[item][has_value] += d[has_value]
             steps_list[item][has_value] += 1
 
+    dfs_i.Close()
+
     for item in range(n_items):
         darray = np.zeros_like(outdatalist[item], dtype=np.float32)
         if skipna:
@@ -944,6 +946,8 @@ def quantile(
         znitemdata = dfs_i.ReadItemTimeStep(1, 0)
         # TODO should this be static Z coordinates instead?
         dfs_o.WriteItemTimeStepNext(0.0, znitemdata.Data)
+
+    dfs_i.Close()
 
     for item in range(n_items_out):
         darray = outdatalist[item].astype(np.float32)
