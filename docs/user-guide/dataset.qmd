@@ -56,7 +56,7 @@ mikeio.get_options()
 The option applies to all MIKE IO objects with items, including the file objects returned by [](`mikeio.open`).
 
 ```{python}
-#| echo: false
+#| include: false
 mikeio.set_options(display_max_items=10)
 ```
 

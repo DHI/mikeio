@@ -24,9 +24,15 @@ def _validate_display_max_items(value: int | None) -> None:
         )
 
 
-# marker for "argument not given"; None is a meaningful value.
+class _Unchanged:
+    """Marker for "argument not given"; None is a meaningful value."""
+
+    def __repr__(self) -> str:
+        return "<unchanged>"
+
+
 # Typed Any so the signature shows the real type: int | None
-_unchanged: Any = object()
+_unchanged: Any = _Unchanged()
 
 
 def get_options() -> dict[str, Any]:
@@ -57,14 +63,14 @@ class set_options:
     display_max_items: int or None, optional
         Maximum number of items listed when printing a Dataset or a dfs file,
         by default 10. Remaining items are summarized on a single line.
-        Use None to list all items.
+        Use None to list all items, or 0 to print only the number of items.
 
     Examples
     --------
     >>> import mikeio
-    >>> mikeio.set_options(display_max_items=100)  # doctest: +SKIP
-    >>> ds = mikeio.read("sw_points.dfs0")  # doctest: +SKIP
-    >>> with mikeio.set_options(display_max_items=None):  # doctest: +SKIP
+    >>> mikeio.set_options(display_max_items=100)  # for the rest of the session
+    >>> ds = mikeio.read("sw_points.dfs0")
+    >>> with mikeio.set_options(display_max_items=None):
     ...     print(ds)
 
     See Also
