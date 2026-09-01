@@ -41,14 +41,14 @@ def test_set_options_restores_after_exception() -> None:
 
 
 def test_unknown_option_raises() -> None:
-    with pytest.raises(ValueError, match="not a valid option"):
-        mikeio.set_options(display_max_rows=3)
+    with pytest.raises(TypeError, match="display_max_rows"):
+        mikeio.set_options(display_max_rows=3)  # type: ignore[call-arg]
 
 
 @pytest.mark.parametrize("value", [-1, 1.5, "10", True])
 def test_invalid_value_raises(value: object) -> None:
     with pytest.raises(ValueError, match="display_max_items"):
-        mikeio.set_options(display_max_items=value)
+        mikeio.set_options(display_max_items=value)  # type: ignore[arg-type]
 
 
 def test_invalid_value_leaves_option_unchanged() -> None:

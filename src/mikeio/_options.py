@@ -15,7 +15,7 @@ OPTIONS: dict[str, Any] = {
 }
 
 
-def _validate_display_max_items(value: Any) -> None:
+def _validate_display_max_items(value: int | None) -> None:
     if value is None:
         return
     if not isinstance(value, int) or isinstance(value, bool) or value < 0:
@@ -24,9 +24,9 @@ def _validate_display_max_items(value: Any) -> None:
         )
 
 
-_VALIDATORS = {
-    DISPLAY_MAX_ITEMS: _validate_display_max_items,
-}
+# marker for "argument not given"; None is a meaningful value.
+# Typed Any so the signature shows the real type: int | None
+_unchanged: Any = object()
 
 
 def get_options() -> dict[str, Any]:
@@ -35,7 +35,8 @@ def get_options() -> dict[str, Any]:
     Returns
     -------
     dict
-        Copy of the current options.
+        Copy of the current options, e.g. to restore them later with
+        `set_options(**old)`.
 
     See Also
     --------
@@ -53,7 +54,7 @@ class set_options:
 
     Parameters
     ----------
-    display_max_items: int or None
+    display_max_items: int or None, optional
         Maximum number of items listed when printing a Dataset or a dfs file,
         by default 10. Remaining items are summarized on a single line.
         Use None to list all items.
@@ -72,16 +73,12 @@ class set_options:
 
     """
 
-    def __init__(self, **kwargs: Any) -> None:
+    def __init__(self, *, display_max_items: int | None = _unchanged) -> None:
         self._old: dict[str, Any] = {}
-        for key, value in kwargs.items():
-            if key not in OPTIONS:
-                raise ValueError(
-                    f"{key!r} is not a valid option, valid options are: {list(OPTIONS)}"
-                )
-            _VALIDATORS[key](value)
-            self._old[key] = OPTIONS[key]
-        OPTIONS.update(kwargs)
+        if display_max_items is not _unchanged:
+            _validate_display_max_items(display_max_items)
+            self._old[DISPLAY_MAX_ITEMS] = OPTIONS[DISPLAY_MAX_ITEMS]
+            OPTIONS[DISPLAY_MAX_ITEMS] = display_max_items
 
     def __enter__(self) -> set_options:
         return self
