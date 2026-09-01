@@ -34,10 +34,12 @@ Operations on large files can take a while. Set the `show_progress` option to fo
 
 ```python
 with mikeio.set_options(show_progress=True):
-    mikeio.generic.quantile("large.dfsu", "quantiles.dfsu", q=[0.25, 0.75])
+    mikeio.generic.scale("large.dfsu", "scaled.dfsu", factor=1.1)
 ```
 
 The option applies to reading and writing large files as well, e.g. [](`mikeio.read`), and can be set once for the rest of the session with [](`mikeio.set_options`).
+
+![Reading a 2.2 GB dfs2 with `show_progress=True`](../images/show_progress.gif)
 
 ## Examples
 
