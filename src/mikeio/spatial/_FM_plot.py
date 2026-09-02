@@ -1,21 +1,21 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Any, Literal, Sequence, TYPE_CHECKING
+from typing import Any, Literal, Sequence, TYPE_CHECKING, cast
 
 from numpy.typing import NDArray
-from matplotlib.axes import Axes
-from matplotlib.cm import ScalarMappable
-from matplotlib.collections import PatchCollection
-from matplotlib.colors import Colormap, Normalize
-from matplotlib.figure import Figure
-from matplotlib.tri import Triangulation
 import numpy as np
-from scipy.sparse import csr_matrix
 
-from ._distance import relative_cumulative_distance
+from ._distance import points_in_polygon, relative_cumulative_distance
+from .._optional import require_matplotlib
 
 if TYPE_CHECKING:
+    from matplotlib.axes import Axes
+    from matplotlib.cm import ScalarMappable
+    from matplotlib.collections import PatchCollection
+    from matplotlib.colors import Colormap, Normalize
+    from matplotlib.figure import Figure
+    from matplotlib.tri import Triangulation
     from ._FM_geometry import GeometryFM2D
     from ._FM_geometry_layered import GeometryFM3D
 
@@ -59,20 +59,18 @@ class BoundaryPolygons:
             True for points inside, False otherwise
 
         """
-        import matplotlib.path as mp  # type: ignore
-
         exterior = self.exteriors[0]
-        cnts = mp.Path(exterior.xy).contains_points(points)
+        cnts = points_in_polygon(exterior.xy, points)
 
         if len(self.exteriors) > 1:
             # in case of several dis-joint outer domains
             for exterior in self.exteriors[1:]:
-                in_domain = mp.Path(exterior.xy).contains_points(points)
+                in_domain = points_in_polygon(exterior.xy, points)
                 cnts = np.logical_or(cnts, in_domain)
 
         # subtract any holes
         for interior in self.interiors:
-            in_hole = mp.Path(interior.xy).contains_points(points)
+            in_hole = points_in_polygon(interior.xy, points)
             cnts = np.logical_and(cnts, ~in_hole)
 
         return cnts
@@ -98,8 +96,7 @@ def _plot_map(
     add_colorbar: bool = True,
 ) -> Axes:
     """Plot unstructured data and/or mesh, mesh outline."""
-    import matplotlib.pyplot as plt
-    import matplotlib
+    plt = require_matplotlib()
 
     VALID_PLOT_TYPES = (
         "mesh_only",
@@ -113,7 +110,7 @@ def _plot_map(
         ok_list = ", ".join(VALID_PLOT_TYPES)
         raise Exception(f"plot_type {plot_type} unknown! ({ok_list})")
 
-    cmap = cmap or matplotlib.colormaps["viridis"]
+    cmap = cmap or plt.colormaps["viridis"]
 
     nc = geometry.node_coordinates
     ec = geometry.element_coordinates
@@ -232,9 +229,9 @@ def _set_colormap_levels(
     levels: int | Sequence[float] | np.ndarray | None,
     z: np.ndarray,
 ) -> tuple[float, float, Colormap, Normalize, ScalarMappable, np.ndarray]:
-    import matplotlib
-    import matplotlib.cm as cm
-    import matplotlib.colors as mplc
+    matplotlib = require_matplotlib("matplotlib")
+    cm = require_matplotlib("matplotlib.cm")
+    mplc = require_matplotlib("matplotlib.colors")
 
     vmin = vmin or np.nanmin(z)
     vmax = vmax or np.nanmax(z)
@@ -257,7 +254,7 @@ def _set_colormap_levels(
         levels = np.array(levels)
 
         if isinstance(cmap, str):
-            cmap = matplotlib.colormaps[cmap]
+            cmap = cast("Colormap", matplotlib.colormaps[cmap])
         cmap_norm = mplc.BoundaryNorm(levels, cmap.N)
         cmap_ScMappable = cm.ScalarMappable(cmap=cmap, norm=cmap_norm)
 
@@ -277,7 +274,7 @@ def _set_plot_limits(ax: Axes, nc: np.ndarray) -> None:
 
 
 def _plot_mesh_only(ax: Axes, nc: np.ndarray, element_table: np.ndarray) -> None:
-    from matplotlib.collections import PatchCollection
+    PatchCollection = require_matplotlib("matplotlib.collections").PatchCollection
 
     patches = _to_polygons(nc, element_table)
     fig_obj = PatchCollection(
@@ -302,6 +299,8 @@ def _plot_patch(
     vmin: float,
     vmax: float,
 ) -> PatchCollection:
+    PatchCollection = require_matplotlib("matplotlib.collections").PatchCollection
+
     patches = _to_polygons(nc, element_table)
 
     if show_mesh:
@@ -333,7 +332,7 @@ def _get_tris(
     z: np.ndarray,
     n_refinements: int,
 ) -> tuple[Triangulation, np.ndarray]:
-    import matplotlib.tri as tri
+    tri = require_matplotlib("matplotlib.tri")
 
     elem_table, ec, z = _create_tri_only_element_table(nc, element_table, ec, data=z)
     triang = tri.Triangulation(nc[:, 0], nc[:, 1], elem_table)
@@ -356,8 +355,10 @@ def _add_colorbar(
     levels: np.ndarray,
     cbar_extend: str,
 ) -> None:
-    from mpl_toolkits.axes_grid1 import make_axes_locatable  # type: ignore
-    import matplotlib.pyplot as plt
+    make_axes_locatable = require_matplotlib(
+        "mpl_toolkits.axes_grid1"
+    ).make_axes_locatable
+    plt = require_matplotlib()
 
     cax = make_axes_locatable(ax).append_axes("right", size="5%", pad=0.05)
     cmap_sm = cmap_ScMappable if cmap_ScMappable else fig_obj
@@ -385,7 +386,7 @@ def _add_non_tri_mesh(
     ax: Axes, nc: np.ndarray, element_table: np.ndarray, plot_type: str
 ) -> None:
     # if mesh is not tri only, we need to add it manually on top
-    from matplotlib.collections import PatchCollection
+    PatchCollection = require_matplotlib("matplotlib.collections").PatchCollection
 
     patches = _to_polygons(nc, element_table)
     mesh_linewidth = 0.4
@@ -424,7 +425,7 @@ def _is_tri_only(element_table: np.ndarray) -> bool:
 
 
 def _to_polygons(node_coordinates: np.ndarray, element_table: np.ndarray) -> list[Any]:
-    from matplotlib.patches import Polygon
+    Polygon = require_matplotlib("matplotlib.patches").Polygon
 
     polygons = []
 
@@ -440,16 +441,20 @@ def _to_polygons(node_coordinates: np.ndarray, element_table: np.ndarray) -> lis
     return polygons
 
 
-def _create_node_element_matrix(
-    element_table: np.ndarray, num_nodes: int
-) -> csr_matrix:
-    row_ind = element_table.ravel()
-    col_ind = np.repeat(np.arange(element_table.shape[0]), element_table.shape[1])
-    data = np.ones(len(row_ind), dtype=int)
-    connectivity_matrix = csr_matrix(
-        (data, (row_ind, col_ind)), shape=(num_nodes, element_table.shape[0])
-    )
-    return connectivity_matrix
+def _node_to_element_ids(element_table: np.ndarray, num_nodes: int) -> list[np.ndarray]:
+    """For each node, the ids of the elements it belongs to (no scipy required).
+
+    Deduplicates repeated (node, element) pairs, matching the behaviour of the
+    scipy.sparse.csr_matrix construction this replaces (COO->CSR merges
+    duplicate entries), so a degenerate element referencing the same node more
+    than once is only counted for that node once.
+    """
+    node_ind = element_table.ravel()
+    elem_ind = np.repeat(np.arange(element_table.shape[0]), element_table.shape[1])
+    pairs = np.unique(np.column_stack([node_ind, elem_ind]), axis=0)
+    node_ind, elem_ind = pairs[:, 0], pairs[:, 1]
+    split_points = np.searchsorted(node_ind, np.arange(1, num_nodes))
+    return np.split(elem_ind, split_points)
 
 
 def _get_node_centered_data(
@@ -464,11 +469,11 @@ def _get_node_centered_data(
     elem_table, ec, data = _create_tri_only_element_table(
         nc, element_table, element_coordinates, data
     )
-    connectivity_matrix = _create_node_element_matrix(elem_table, nc.shape[0])
+    node_to_element_ids = _node_to_element_ids(elem_table, nc.shape[0])
 
     node_centered_data = np.zeros(shape=nc.shape[0])
-    for n in range(connectivity_matrix.shape[0]):
-        item = connectivity_matrix.getrow(n).indices
+    for n in range(len(node_to_element_ids)):
+        item = node_to_element_ids[n]
         I = ec[item][:, :2] - nc[n][:2]
         I2 = (I**2).sum(axis=0)
         Ixy = (I[:, 0] * I[:, 1]).sum(axis=0)
@@ -563,8 +568,8 @@ def _plot_vertical_profile(
     figsize: tuple[float, float] | None = None,
     **kwargs: Any,
 ) -> Axes:
-    import matplotlib.pyplot as plt
-    from matplotlib.collections import PolyCollection
+    plt = require_matplotlib()
+    PolyCollection = require_matplotlib("matplotlib.collections").PolyCollection
 
     nc = node_coordinates
     s_coordinate = relative_cumulative_distance(nc, is_geo=is_geo)

@@ -5,7 +5,6 @@ from pathlib import Path
 from typing import TYPE_CHECKING, Any, Iterable, Literal, Sequence
 import warnings
 
-from matplotlib.axes import Axes
 import numpy as np
 from mikecore.DfsuFile import DfsuFileType
 
@@ -16,8 +15,10 @@ from ._geometry import GeometryPoint3D
 from ._FM_plot import _plot_vertical_profile, BoundaryPolygons
 
 from ._distance import relative_cumulative_distance
+from .._optional import require_matplotlib, require_scipy
 
 if TYPE_CHECKING:
+    from matplotlib.axes import Axes
     from numpy.typing import ArrayLike
 
 Layer = Literal["all", "bottom", "top"]
@@ -709,7 +710,7 @@ class GeometryFMVerticalColumn(GeometryFM3D):
 
         Uses make_interp_spline(k=1) which extrapolates beyond boundaries by default.
         """
-        from scipy.interpolate import make_interp_spline  # type: ignore
+        make_interp_spline = require_scipy("scipy.interpolate").make_interp_spline
 
         return make_interp_spline(x, y, k=1)(x_new)  # type: ignore
 
@@ -758,7 +759,7 @@ class GeometryFMVerticalProfilePlotter:
         figsize: tuple[float, float] | None = None,
         **kwargs: Any,
     ) -> Axes:
-        import matplotlib.pyplot as plt
+        plt = require_matplotlib()
 
         if ax is None:
             _, ax = plt.subplots(figsize=figsize)

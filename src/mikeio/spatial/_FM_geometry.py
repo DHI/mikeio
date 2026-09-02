@@ -16,7 +16,6 @@ from numpy.typing import NDArray
 from mikecore.DfsuFile import DfsuFileType
 from mikecore.eum import eumQuantity
 from mikecore.MeshBuilder import MeshBuilder
-from scipy.spatial import KDTree
 
 from ..eum import EUMType, EUMUnit
 from ..exceptions import OutsideModelDomainError
@@ -32,10 +31,12 @@ from ._FM_plot import (
 from ._geometry import Geometry0D, GeometryPoint2D, _Geometry
 
 from ._grid_geometry import Grid2D
-from ._distance import xy_to_bbox
+from ._distance import points_in_polygon, xy_to_bbox
+from .._optional import require_matplotlib, require_scipy
 
 
 if TYPE_CHECKING:
+    from scipy.spatial import KDTree
     from ._FM_geometry_layered import GeometryFM3D
     from matplotlib.axes import Axes
     from numpy.typing import ArrayLike
@@ -113,7 +114,7 @@ class GeometryFMPlotter:
         ax: Axes | None = None,
         figsize: tuple[float, float] | None = None,
     ) -> Axes:
-        import matplotlib.pyplot as plt
+        plt = require_matplotlib()
 
         if ax is None:
             _, ax = plt.subplots(figsize=figsize)
@@ -149,7 +150,7 @@ class GeometryFMPlotter:
         """
         # TODO this must be a duplicate, delegate
 
-        from matplotlib.collections import PatchCollection  # type: ignore
+        PatchCollection = require_matplotlib("matplotlib.collections").PatchCollection
 
         ax = self._get_ax(ax=ax, figsize=figsize)
         ax.set_aspect(self._plot_aspect())
@@ -209,7 +210,7 @@ class GeometryFMPlotter:
         ```
 
         """
-        import matplotlib.pyplot as plt
+        plt = require_matplotlib()
 
         ax = self._get_ax(ax=ax, figsize=figsize)
         ax.set_aspect(self._plot_aspect())
@@ -472,7 +473,18 @@ class GeometryFM2D(_GeometryFM):
 
     @staticmethod
     def _point_in_polygon(xn: np.ndarray, yn: np.ndarray, xp: float, yp: float) -> bool:
-        """Check for each side in the polygon that the point is on the correct side."""
+        """Check for each side in the polygon that the point is on the correct side.
+
+        A second, independent point-in-polygon test also exists in this
+        package: points_in_polygon (spatial/_distance.py), a general
+        ray-casting test used by GeometryFM2D._inside_polygon /
+        BoundaryPolygons.contains. This one is a half-plane test that only
+        works for convex polygons (mesh elements always are), called once
+        per candidate element for a single point, whereas points_in_polygon
+        is vectorized over many points against one polygon -- different
+        enough call patterns that consolidating them needs care, but they
+        are candidates for future consolidation.
+        """
         for j in range(len(xn) - 1):
             if (yn[j + 1] - yn[j]) * (xp - xn[j]) + (-xn[j + 1] + xn[j]) * (
                 yp - yn[j]
@@ -517,6 +529,8 @@ class GeometryFM2D(_GeometryFM):
 
     @cached_property
     def _tree2d(self) -> KDTree:
+        KDTree = require_scipy("scipy.spatial").KDTree
+
         xy = self.element_coordinates[:, :2]
         return KDTree(xy)
 
@@ -1001,11 +1015,9 @@ class GeometryFM2D(_GeometryFM):
 
     @staticmethod
     def _inside_polygon(polygon: np.ndarray, xy: np.ndarray) -> np.ndarray:
-        import matplotlib.path as mp
-
         if polygon.ndim == 1:
             polygon = np.column_stack((polygon[0::2], polygon[1::2]))
-        return mp.Path(polygon).contains_points(xy)
+        return points_in_polygon(polygon, xy)
 
     def _elements_in_area(
         self, area: Sequence[float] | Sequence[tuple[float, float]]

@@ -1,8 +1,13 @@
 from __future__ import annotations
 
+from typing import TYPE_CHECKING
+
 import numpy as np
 
 from ._geometry import BoundingBox
+
+if TYPE_CHECKING:
+    from numpy.typing import ArrayLike
 
 
 def xy_to_bbox(xy: np.ndarray, buffer: float = 0.0) -> BoundingBox:
@@ -59,6 +64,53 @@ def _get_dist_geo(
     y = dlat
     d = R * np.sqrt(np.square(x) + np.square(y))
     return d  # type: ignore
+
+
+def points_in_polygon(polygon: ArrayLike, points: ArrayLike) -> np.ndarray:
+    """Test if points are inside a polygon (ray casting), no plotting deps required.
+
+    Points exactly on a polygon edge or vertex are a measure-zero edge case
+    whose classification is convention-dependent (it depends on vertex
+    winding order) for any ray-casting/crossing-number algorithm, including
+    the matplotlib.path.Path implementation this replaces -- so no attempt is
+    made to match matplotlib's boundary behaviour exactly.
+
+    A second, independent point-in-polygon test also exists in this package:
+    GeometryFM2D._point_in_polygon (spatial/_FM_geometry.py), used by
+    _find_element_2d. The two are candidates for future consolidation onto a
+    single implementation.
+
+    Parameters
+    ----------
+    polygon : array-like, n-by-2
+        x, y coordinates of polygon vertices
+    points : array-like, m-by-2 (or a single (x, y) pair)
+        x, y coordinates of points to test
+
+    Returns
+    -------
+    bool array of length m
+        True for points inside the polygon, False otherwise
+
+    """
+    points = np.atleast_2d(np.asarray(points))
+    polygon = np.asarray(polygon)
+
+    x = points[:, 0]
+    y = points[:, 1]
+    px = polygon[:, 0]
+    py = polygon[:, 1]
+    n = polygon.shape[0]
+
+    inside = np.zeros(len(points), dtype=bool)
+    j = n - 1
+    with np.errstate(divide="ignore", invalid="ignore"):
+        for i in range(n):
+            crosses = (py[i] > y) != (py[j] > y)
+            xints = (px[j] - px[i]) * (y - py[i]) / (py[j] - py[i]) + px[i]
+            inside ^= crosses & (x < xints)
+            j = i
+    return inside
 
 
 def relative_cumulative_distance(

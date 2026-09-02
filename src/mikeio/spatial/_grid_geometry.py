@@ -19,6 +19,7 @@ from ._geometry import (
 )
 
 from .._interpolation import Interpolant
+from .._optional import require_matplotlib
 
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
@@ -307,7 +308,7 @@ class Grid2DPlotter:
     def _get_ax(
         ax: Axes | None = None, figsize: tuple[float, float] | None = None
     ) -> Axes:
-        import matplotlib.pyplot as plt
+        plt = require_matplotlib()
 
         if ax is None:
             _, ax = plt.subplots(figsize=figsize)

@@ -5,14 +5,12 @@ from typing import TYPE_CHECKING, Any, Sequence, overload
 
 import numpy as np
 import pandas as pd
-from matplotlib.axes import Axes
-from matplotlib.colors import Colormap
 from mikecore.DfsFileFactory import DfsFileFactory
 from mikecore.DfsuFile import DfsuFile, DfsuFileType
-from scipy.spatial import KDTree
 from tqdm import trange
 
 from .._interpolation import Interpolant
+from .._optional import require_scipy
 from ..dataset import DataArray, Dataset
 from ..dfs._dfs import (
     _get_item_info,
@@ -37,6 +35,8 @@ from ._dfsu import (
 )
 
 if TYPE_CHECKING:
+    from matplotlib.axes import Axes
+    from matplotlib.colors import Colormap
     from ..spatial._FM_geometry_layered import Layer
 
 
@@ -580,6 +580,8 @@ class Dfsu3D(DfsuLayered):
             or self._type == DfsuFileType.Dfsu3DSigmaZ
         )
         assert n_nearest > 0
+
+        KDTree = require_scipy("scipy.spatial").KDTree
 
         # make 2d nodes-to-elements interpolator
         top_el = self.geometry.top_elements
