@@ -44,6 +44,7 @@ website:
         - user-guide/dfs0.qmd
         - user-guide/dfs1.qmd
         - user-guide/dfs2.qmd
+        - user-guide/dfs3.qmd
         - user-guide/dfsu.qmd
         - user-guide/mesh.qmd
         - user-guide/eum.qmd

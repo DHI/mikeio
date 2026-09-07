@@ -1,0 +1,105 @@
+---
+title: Dfs3
+---
+
+A dfs3 file stores gridded data with three spatial dimensions. Like dfs2, values are 'element based', i.e. defined in the centre of each grid cell. The layers are ordered from the bottom up, so the last layer is the top one.
+
+```{python}
+import mikeio
+
+ds = mikeio.read("../data/dissolved_oxygen.dfs3")
+ds
+```
+
+## Grid3D
+
+The spatial information is available in the `geometry` attribute (accessible from Dfs3, Dataset, and DataArray), which for a dfs3 file is a [`Grid3D`](`mikeio.Grid3D`) geometry.
+
+```{python}
+ds.geometry
+```
+
+Grid3D's primary properties and methods are:
+
+* `x`
+* `nx`
+* `dx`
+* `y`
+* `ny`
+* `dy`
+* `z`
+* `nz`
+* `dz`
+* `origin`
+* `projection`
+* `isel()`
+
+## Selecting layers while reading
+
+A dfs3 file covering many layers and time steps can be large, and often only one layer is of interest. The `layers` argument selects layers during reading, so the rest of the file is never loaded into memory. It accepts `"top"`, `"bottom"`, or layer indices.
+
+```{python}
+dst = mikeio.read("../data/dissolved_oxygen.dfs3", layers="top")
+dst
+```
+
+Note that the result is a two-dimensional dataset: selecting a single layer drops the z dimension and the geometry becomes a [`Grid2D`](`mikeio.Grid2D`), which can be plotted and written to a dfs2 file.
+
+```{python}
+dst[0].plot();
+```
+
+Reading the bottom layer instead shows a different picture, since oxygen is consumed near the bed.
+
+```{python}
+dsb = mikeio.read("../data/dissolved_oxygen.dfs3", layers="bottom")
+dsb[0].plot();
+```
+
+## Selecting layers after reading
+
+If the whole file is already in memory, use `isel` along the `z` dimension. Layer `-1` is the top layer and `0` the bottom one.
+
+```{python}
+do = ds["Diss. oxygen (mg/l)"]
+do.isel(z=-1)
+```
+
+Selecting along `x` instead gives a vertical slice through the domain. Note that spatial selection on a Grid3D is by index rather than by coordinate: unlike dfs2, `sel(x=..., y=...)` is not available for three-dimensional grids, and `isel` takes one dimension at a time.
+
+```{python}
+do.isel(x=56)
+```
+
+## Local coordinates
+
+Local coordinates (*"NON-UTM"*) follow a different convention to projected ones: the origin sits at the bottom-left corner of the grid rather than at the centre of the first element. This applies to the x and y coordinates.
+
+```{python}
+import numpy as np
+
+data = np.array([[[1.0, 2, 3], [4, 5, 6]], [[7, 8, 9], [10, 11, 12]]])
+da = mikeio.DataArray(
+    data,
+    geometry=mikeio.Grid3D(nx=3, ny=2, nz=2, dx=0.5, dy=0.5, dz=1, projection="NON-UTM"),
+)
+da.geometry
+```
+
+The origin is `(0, 0)`, and the first cell centre is therefore half a cell width away from it:
+
+```{python}
+da.geometry.x
+```
+
+```{python}
+da.isel(z=0).plot();
+```
+
+## Converting to xarray
+
+A dfs3 DataArray converts to an [xarray](https://docs.xarray.dev/) DataArray, which is convenient for writing NetCDF or for combining with other gridded data.
+
+```{python}
+da.to_xarray()
+```
