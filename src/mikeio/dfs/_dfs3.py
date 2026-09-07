@@ -24,6 +24,7 @@ from ._dfs import (
 )
 from ..eum import TimeStepUnit
 from ..spatial import Grid3D
+from .._path import normalize_path
 
 
 def write_dfs3(filename: str | Path, ds: Dataset, title: str = "") -> None:
@@ -91,7 +92,7 @@ def _write_dfs3_header(filename: str | Path, ds: Dataset, title: str) -> DfsFile
         )
 
     try:
-        builder.CreateFile(str(filename))
+        builder.CreateFile(normalize_path(filename))
     except OSError:
         print("cannot create dfs file: ", filename)
 
@@ -111,7 +112,7 @@ class Dfs3(_Dfs123):
     _ndim = 3
 
     def __init__(self, filename: str | Path):
-        super().__init__(str(filename))
+        super().__init__(normalize_path(filename))
 
         # TODO
         self._x0 = 0.0

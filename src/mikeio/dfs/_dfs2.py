@@ -25,6 +25,7 @@ from ._dfs import (
 )
 from ..eum import TimeStepUnit
 from ..spatial import Grid2D
+from .._path import normalize_path
 
 
 def write_dfs2(filename: str | Path, ds: Dataset, title: str = "") -> None:
@@ -84,7 +85,7 @@ def _write_dfs2_header(filename: str | Path, ds: Dataset, title: str = "") -> Df
         )
 
     try:
-        builder.CreateFile(str(filename))
+        builder.CreateFile(normalize_path(filename))
     except OSError:
         print("cannot create dfs file: ", filename)
 
@@ -126,12 +127,12 @@ class Dfs2(_Dfs123):
         filename: str | Path,
         type: Literal["horizontal", "spectral", "vertical"] = "horizontal",
     ):
-        filename = str(filename)
+        filename = normalize_path(filename)
         super().__init__(filename)
 
         is_spectral = type == "spectral"
         is_vertical = type == "vertical"
-        dfs = DfsFileFactory.Dfs2FileOpen(str(filename))
+        dfs = DfsFileFactory.Dfs2FileOpen(filename)
 
         x0 = dfs.SpatialAxis.X0 if is_spectral else 0.0
         y0 = dfs.SpatialAxis.Y0 if is_spectral else 0.0

@@ -21,6 +21,7 @@ from ..dataset import Dataset
 from ..eum import ItemInfo, ItemInfoList
 from ..exceptions import ItemsError
 from .._time import DateTimeSelector
+from .._path import normalize_path
 
 
 @dataclass
@@ -295,10 +296,11 @@ class _Dfs123:
     show_progress = False
 
     def __init__(self, filename: str | Path) -> None:
+        filename = normalize_path(filename)
         path = Path(filename)
         if not path.exists():
             raise FileNotFoundError(path)
-        self._filename = str(filename) if filename else None
+        self._filename = filename if filename else None
         self._end_time = None
         self._is_equidistant = True
         dfs = DfsFileFactory.DfsGenericOpen(self._filename)

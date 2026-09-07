@@ -51,7 +51,8 @@ def read(
     Parameters
     ----------
     filename
-        full path and file name to the dfs file.
+        Full path and file name to the dfs file.
+        A leading ``~`` is expanded to the user's home directory.
     items: int, str, list[int] or list[str], optional
         Read only selected items, by number (0-based), or by name,
         by default None (=all)
@@ -141,10 +142,8 @@ def open(
     Parameters
     ----------
     filename
-        full path and file name to the dfs file.
-    type : str, optional
-        Dfs2 only. Additional information about the file, e.g.
-        "spectral" for spectral dfs2 files. By default: None.
+        Full path and file name to the dfs file.
+        A leading ``~`` is expanded to the user's home directory.
     **kwargs: Any
         Additional keyword arguments, e.g. *type="spectral"*
 
