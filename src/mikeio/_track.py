@@ -11,6 +11,7 @@ from .eum import ItemInfo, EUMUnit, EUMType
 if TYPE_CHECKING:
     from .dataset import Dataset
 from .spatial import GeometryFM2D
+from ._path import normalize_path
 
 
 def _extract_track(
@@ -37,10 +38,8 @@ def _extract_track(
     from .dataset import Dataset
 
     match track:
-        case str():
-            times, coords = _get_track_data_from_file(track)
-        case Path():
-            times, coords = _get_track_data_from_file(str(track))
+        case str() | Path():
+            times, coords = _get_track_data_from_file(normalize_path(track))
         case Dataset():
             times, coords = _get_track_data_from_dataset(track)
         case pd.DataFrame():

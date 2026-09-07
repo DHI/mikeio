@@ -48,6 +48,7 @@ from ._data_plot import DatasetPlotter
 from ._z_accessor import NullZAccessor, ZAccessor
 
 from ._dataarray import IndexType
+from .._path import normalize_path
 
 
 def _to_safe_name(name: str) -> str:
@@ -1764,7 +1765,7 @@ class Dataset:
         from ..dfs._dfs3 import write_dfs3
         from ..dfsu import write_dfsu
 
-        filename = str(filename)
+        filename = normalize_path(filename)
 
         match self.geometry:
             case (

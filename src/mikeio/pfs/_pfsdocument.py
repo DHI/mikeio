@@ -8,6 +8,7 @@ from pathlib import Path
 from typing import Any, Callable, Sequence, TextIO
 
 from ._pfssection import PfsNonUniqueList, PfsSection
+from .._path import normalize_path
 
 
 class PfsDocument(PfsSection):
@@ -211,7 +212,7 @@ class PfsDocument(PfsSection):
         if hasattr(filename, "read"):  # To read in memory strings StringIO
             pfsstring = filename.read()
         else:
-            pfsstring = Path(filename).read_text(encoding=encoding)
+            pfsstring = Path(normalize_path(filename)).read_text(encoding=encoding)
 
         lines = pfsstring.splitlines()
 
@@ -489,4 +490,4 @@ class PfsDocument(PfsSection):
 """
         txt = header + "\n".join(self._to_txt_lines())
 
-        Path(filename).write_text(txt)
+        Path(normalize_path(filename)).write_text(txt)

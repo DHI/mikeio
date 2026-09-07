@@ -22,6 +22,7 @@ from ._dfs import (
 from ..eum import TimeStepUnit
 from ..spatial import Grid1D
 from .._options import _show_progress
+from .._path import normalize_path
 
 
 def write_dfs1(filename: str | Path, ds: Dataset, title: str = "") -> None:
@@ -66,7 +67,7 @@ def _write_dfs1_header(filename: str | Path, ds: Dataset, title: str) -> DfsFile
         )
 
     try:
-        builder.CreateFile(str(filename))
+        builder.CreateFile(normalize_path(filename))
     except OSError:
         print("cannot create dfs file: ", filename)
 
@@ -88,7 +89,7 @@ class Dfs1(_Dfs123):
     def __init__(self, filename: str | Path) -> None:
         super().__init__(filename)
 
-        self._dfs = DfsFileFactory.Dfs1FileOpen(str(filename))
+        self._dfs = DfsFileFactory.Dfs1FileOpen(self._filename)
         self._x0: float = self._dfs.SpatialAxis.X0
         self._dx: float = self._dfs.SpatialAxis.Dx
         self._nx: int = self._dfs.SpatialAxis.XCount

@@ -10,6 +10,7 @@ from mikecore.MeshFile import MeshFile
 
 
 from ..spatial import GeometryFM2D
+from .._path import normalize_path
 from ._topology import (
     get_elements_from_source,
     get_nodes_from_source,
@@ -46,7 +47,7 @@ class Mesh:
         self.plot = self.geometry.plot
 
     def _read_header(self, filename: str | Path) -> GeometryFM2D:
-        msh = MeshFile.ReadMesh(filename)
+        msh = MeshFile.ReadMesh(normalize_path(filename))
 
         node_table = get_nodes_from_source(msh)
         el_table = get_elements_from_source(msh)
