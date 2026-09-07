@@ -46,6 +46,7 @@ website:
         - user-guide/dfs2.qmd
         - user-guide/dfs3.qmd
         - user-guide/dfsu.qmd
+        - user-guide/dfsu-spectral.qmd
         - user-guide/mesh.qmd
         - user-guide/eum.qmd
         - user-guide/statistics.qmd
