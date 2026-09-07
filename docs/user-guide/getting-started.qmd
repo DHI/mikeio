@@ -111,5 +111,4 @@ generic.concat(["fileA.dfs2", "fileB.dfs2"], "new_file.dfs2")
 ## {{< fa book >}} Additional resources
 
 * Online book: [Getting started with Dfs files in Python using MIKE IO](https://dhi.github.io/getting-started-with-mikeio)
-* Online book: [Python for marine modelers using MIKE IO and ModellSkill](https://dhi.github.io/book-learn-mikeio-modelskill)
 * [DFS file system specification](https://docs.mikepoweredbydhi.com/core_libraries/dfs/dfs-file-system)
