@@ -341,7 +341,7 @@ def _get_tris(
     zn = _get_node_centered_data(nc, elem_table, ec, z)
 
     if n_refinements > 0:
-        # TODO: refinements doesn't seem to work for 3d files?
+        # TODO: refinements doesn't seem to work for 3d files? (see gh-1017)
         refiner = tri.UniformTriRefiner(triang)
         triang, zn = refiner.refine_field(zn, subdiv=n_refinements)
 

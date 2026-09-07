@@ -712,7 +712,7 @@ class Dataset:
         ```
 
         """
-        # TODO deprecate idx, axis to prefer x= instead
+        # TODO deprecate idx, axis to prefer x= instead (see gh-1022)
 
         res = [
             da.isel(
@@ -883,7 +883,7 @@ class Dataset:
 
             if isinstance(
                 self.geometry, GeometryFM2D
-            ):  # TODO remove this when all geometries implements the same method
+            ):  # TODO remove this when all geometries implements the same method (see gh-1023)
                 interpolant = self.geometry.get_2d_interpolant(
                     xy,  # type: ignore
                     **kwargs,  # type: ignore
@@ -949,7 +949,6 @@ class Dataset:
             end_time=self.end_time,
             timestep=self.timestep,
             geometry=self.geometry,
-            n_elements=self.shape[1],  # TODO is there a better way to find out this?
             track=track,
             items=deepcopy(self.items),
             time_steps=time_steps,

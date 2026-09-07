@@ -179,10 +179,6 @@ class GeometryPoint2D(_Geometry):
     def __repr__(self) -> str:
         return f"GeometryPoint2D(x={self.x}, y={self.y})"
 
-    # TODO should we use wkt here
-    # def __str__(self) -> str:
-    #    return self.wkt
-
     @property
     def wkt(self) -> str:
         return f"POINT ({self.x} {self.y})"

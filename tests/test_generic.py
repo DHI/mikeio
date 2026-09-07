@@ -843,3 +843,22 @@ def test_transform_func_with_missing_item_reports_existing_items(
         transform(infilename, outfilename, items)
     assert "U velocity" in str(excinfo.value)
     assert not outfilename.exists()
+
+
+def test_diff_mismatching_grid_raises(tmp_path: Path) -> None:
+    # same item type, different number of elements
+    infilename_a = "tests/testdata/gebco_sound.dfs2"
+    infilename_b = "tests/testdata/gebco_sound_crop_rotate.dfs2"
+    fp = tmp_path / "diff.dfs2"
+
+    with pytest.raises(ValueError, match="same number of elements"):
+        diff(infilename_a, infilename_b, fp)
+
+
+def test_diff_mismatching_items_raises(tmp_path: Path) -> None:
+    infilename_a = "tests/testdata/gebco_sound.dfs2"
+    infilename_b = "tests/testdata/eq.dfs2"
+    fp = tmp_path / "diff.dfs2"
+
+    with pytest.raises(ValueError):
+        diff(infilename_a, infilename_b, fp)

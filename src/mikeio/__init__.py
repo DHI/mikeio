@@ -127,7 +127,7 @@ def read(
     return dfs.read(items=items, time=time, keepdims=keepdims, **kwargs)
 
 
-# TODO Mesh doesn't comply with the interface of dfs files
+# TODO Mesh doesn't comply with the interface of dfs files (see gh-1008)
 def open(
     filename: str | Path, **kwargs: Any
 ) -> Dfs0 | Dfs1 | Dfs2 | Dfs3 | Dfsu2DH | Dfsu2DV | Dfsu3D | DfsuSpectral | Mesh:

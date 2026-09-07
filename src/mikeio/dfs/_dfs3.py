@@ -114,7 +114,6 @@ class Dfs3(_Dfs123):
     def __init__(self, filename: str | Path):
         super().__init__(normalize_path(filename))
 
-        # TODO
         self._x0 = 0.0
         self._y0 = 0.0
         self._z0 = 0.0

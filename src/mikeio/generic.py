@@ -308,7 +308,26 @@ def _process_dfs_files(
 
     n_time_steps = dfs_i_a.FileInfo.TimeAxis.NumberOfTimeSteps
     n_items = len(dfs_i_a.ItemInfo)
-    # TODO Add checks to verify identical structure of file a and b
+
+    n_time_steps_b = dfs_i_b.FileInfo.TimeAxis.NumberOfTimeSteps
+    n_items_b = len(dfs_i_b.ItemInfo)
+    if n_items != n_items_b:
+        raise ValueError(
+            f"Number of items must match ({infilename_a}: {n_items}, {infilename_b}: {n_items_b})"
+        )
+    if n_time_steps != n_time_steps_b:
+        raise ValueError(
+            f"Number of timesteps must match ({infilename_a}: {n_time_steps}, {infilename_b}: {n_time_steps_b})"
+        )
+    for item, (ia, ib) in enumerate(zip(dfs_i_a.ItemInfo, dfs_i_b.ItemInfo)):
+        if ia.Quantity.Item != ib.Quantity.Item:
+            raise ValueError(
+                f"Item {item} must have the same type ({infilename_a}: {ia.Name}, {infilename_b}: {ib.Name})"
+            )
+        if ia.ElementCount != ib.ElementCount:
+            raise ValueError(
+                f"Item {item} ({ia.Name}) must have the same number of elements ({ia.ElementCount} != {ib.ElementCount})"
+            )
 
     for timestep in trange(n_time_steps):
         for item in range(n_items):
@@ -332,7 +351,6 @@ def _process_dfs_files(
     dfs_o.Close()
 
 
-# TODO sum is conflicting with the built-in sum function, which we could haved used above.
 def sum(
     infilename_a: str | pathlib.Path,
     infilename_b: str | pathlib.Path,
@@ -900,7 +918,7 @@ def quantile(
 
     n_time_steps = dfs_i.FileInfo.TimeAxis.NumberOfTimeSteps
 
-    # TODO: better handling of different item sizes (zn...)
+    # TODO: better handling of different item sizes (zn...) (see gh-1009)
 
     ci = _ChunkInfo.from_dfs(dfs_i, item_numbers, buffer_size)
 
@@ -955,7 +973,7 @@ def quantile(
 
     if is_dfsu_3d:
         znitemdata = dfs_i.ReadItemTimeStep(1, 0)
-        # TODO should this be static Z coordinates instead?
+        # TODO should this be static Z coordinates instead? (see gh-1009)
         dfs_o.WriteItemTimeStepNext(0.0, znitemdata.Data)
 
     for item in range(n_items_out):

@@ -23,6 +23,10 @@ from ..exceptions import ItemsError
 from .._time import DateTimeSelector
 from .._path import normalize_path
 
+# dfs files with a relative time axis carry no start date; the Unix epoch is used
+# as an arbitrary but stable reference so that times can be represented as datetimes.
+RELATIVE_TIME_EPOCH = datetime(1970, 1, 1)
+
 
 @dataclass
 class DfsHeader:
@@ -136,8 +140,7 @@ def _valid_timesteps(
     nt = time_axis.NumberOfTimeSteps
 
     if time_axis.TimeAxisType != TimeAxisType.CalendarEquidistant:
-        # TODO is this the proper epoch, should this magic number be somewhere else?
-        start_time_file = datetime(1970, 1, 1)
+        start_time_file = RELATIVE_TIME_EPOCH
     else:
         start_time_file = time_axis.StartDateTime
 
@@ -314,9 +317,7 @@ class _Dfs123:
         }:
             self._start_time = dfs.FileInfo.TimeAxis.StartDateTime
         else:  # relative time axis
-            self._start_time = datetime(
-                1970, 1, 1
-            )  # TODO is this the proper epoch, should this magic number be somewhere else?
+            self._start_time = RELATIVE_TIME_EPOCH
 
         if hasattr(dfs.FileInfo.TimeAxis, "TimeStep"):
             self._timestep = (
@@ -324,7 +325,7 @@ class _Dfs123:
                 dfs.FileInfo.TimeAxis.TimeStepInSeconds()
                 if dfs.FileInfo.TimeAxis.TimeStepInSeconds() > 0
                 else 1
-            )  # TODO handle other timeunits
+            )
 
             freq = pd.Timedelta(seconds=self._timestep)
             self._time = pd.date_range(

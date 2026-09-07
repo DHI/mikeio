@@ -26,8 +26,8 @@ from ._FM_plot import (
     _plot_map,
     BoundaryPolygons,
     Polygon,
-    _set_xy_label_by_projection,  # TODO remove
-    _to_polygons,  # TODO remove
+    _set_xy_label_by_projection,  # TODO remove (see gh-1013)
+    _to_polygons,  # TODO remove (see gh-1013)
 )
 from ._geometry import Geometry0D, GeometryPoint2D, _Geometry
 
@@ -148,7 +148,7 @@ class GeometryFMPlotter:
         ```
 
         """
-        # TODO this must be a duplicate, delegate
+        # TODO this must be a duplicate, delegate (see gh-1013)
 
         from matplotlib.collections import PatchCollection  # type: ignore
 
@@ -310,7 +310,7 @@ class _GeometryFM(_Geometry):
         if validate:
             max_node_id = self._node_ids.max()
             for i, e in enumerate(element_table):
-                # TODO: avoid looping through all elements (could be +1e6)!
+                # TODO: avoid looping through all elements (could be +1e6)! (see gh-1012)
                 if not isinstance(e, np.ndarray):
                     e = np.asarray(e)
                     element_table[i] = e
@@ -325,7 +325,6 @@ class _GeometryFM(_Geometry):
             element_ids = np.arange(len(element_table))
         element_ids = np.asarray(element_ids)
 
-        # TODO make sure return type is np.ndarray
         return element_table, element_ids
 
     def _reindex(self) -> None:
@@ -623,8 +622,6 @@ class GeometryFM2D(_GeometryFM):
     def _find_n_nearest_2d_elements(
         self, x: float | np.ndarray, y: float | np.ndarray | None = None, n: int = 1
     ) -> tuple[Any, Any]:
-        # TODO return arguments in the same order than KDTree.query?
-
         if n > self.n_elements:
             raise ValueError(
                 f"Cannot find {n} nearest! Number of elements: {self.n_elements}"
@@ -671,7 +668,7 @@ class GeometryFM2D(_GeometryFM):
             if not element_found and self.n_elements > 1:
                 many_nearest, _ = self._find_n_nearest_2d_elements(
                     coords[k, :],
-                    n=min(self.n_elements, 10),  # TODO is 10 enough?
+                    n=min(self.n_elements, 10),  # TODO is 10 enough? (see gh-1014)
                 )
                 for p in many_nearest[2:]:  # we have already tried the two first above
                     nodes = self.element_table[p]

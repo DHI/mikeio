@@ -345,7 +345,7 @@ class DfsuSpectral:
             if elements is None:
                 elements = self._parse_geometry_sel(area=area, x=x, y=y)
         else:
-            # TODO move to _parse_geometry_sel
+            # TODO move to _parse_geometry_sel (see gh-1026)
             if (area is not None) or (x is not None) or (y is not None):
                 raise ValueError(
                     f"Arguments area/x/y are not supported for {self._type}"
@@ -486,7 +486,7 @@ class DfsuSpectral:
             else:
                 elements = (
                     [elements] if np.isscalar(elements) else list(elements)  # type: ignore
-                )  # TODO check this
+                )
                 geometry = self.geometry.elements_to_geometry(elements)  # type: ignore
             return geometry, elements  # type: ignore
 

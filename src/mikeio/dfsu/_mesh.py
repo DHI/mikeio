@@ -73,7 +73,7 @@ class Mesh:
         ]
         return str.join("\n", out)
 
-    # TODO re-consider if all of these properties are needed, since they all are available in the geometry
+    # TODO re-consider if all of these properties are needed, since they all are available in the geometry (see gh-1008)
     @property
     def n_elements(self) -> int:
         """Number of elements."""

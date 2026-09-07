@@ -1,9 +1,10 @@
 from __future__ import annotations
 from pathlib import Path
 from collections.abc import Sequence
-from typing import Any, Callable, TYPE_CHECKING
+from typing import Callable, TYPE_CHECKING
 
 import numpy as np
+from numpy.typing import DTypeLike
 import pandas as pd
 
 from .eum import ItemInfo, EUMUnit, EUMType
@@ -25,13 +26,14 @@ def _extract_track(
     items: Sequence[ItemInfo],
     item_numbers: Sequence[int],
     time_steps: Sequence[int],
-    n_elements: int,
     method: str,
-    dtype: Any,  # TODO DTypeLike?
+    dtype: DTypeLike,
     data_read_func: Callable[[int, int], tuple[np.ndarray, float]],
 ) -> Dataset:
     if not isinstance(geometry, GeometryFM2D):
         raise NotImplementedError("Only implemented for 2d flexible mesh geometries")
+
+    n_elements = geometry.n_elements
 
     n_items = len(item_numbers)
 
@@ -138,7 +140,6 @@ def _extract_track(
         w = (t_rel[t] - t1) / timestep  # time-weight
         eid = interpolant.ids[i_interp]
         weights = interpolant.weights
-        # TODO move to interpolation module?
         if np.any(eid > 0):
             dati = (1 - w) * np.dot(d1[:, eid], weights[i_interp])
             dati = dati + w * np.dot(d2[:, eid], weights[i_interp])

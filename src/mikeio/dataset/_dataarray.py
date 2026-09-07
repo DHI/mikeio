@@ -158,7 +158,6 @@ class DataArray:
         dims: Sequence[str] | None = None,
         dt: float = 1.0,
     ) -> None:
-        # TODO consider np.asarray, e.g. self._values = np.asarray(data)
         self._values = self._parse_data(data)
 
         self.time: pd.DatetimeIndex | pd.TimedeltaIndex = self._parse_time(time)
@@ -228,7 +227,6 @@ class DataArray:
     ) -> np.ndarray | None:
         if zn is not None:
             if isinstance(geometry, _GeometryFMLayered):
-                # TODO: np.squeeze(zn) if n_timesteps=1 ?
                 if (n_timesteps > 1) and (zn.shape[0] != n_timesteps):
                     raise ValueError(
                         f"zn has wrong shape ({zn.shape}). First dimension should be of size n_timesteps ({n_timesteps})"
@@ -276,7 +274,6 @@ class DataArray:
         return len(problems) == 0
 
     def _get_plotter_by_geometry(self) -> Any:
-        # TODO: this is explicit, but with consistent naming, we could create this mapping automatically
         PLOTTER_MAP: Any = {
             GeometryFMVerticalProfile: DataArrayPlotterFMVerticalProfile,
             GeometryFMVerticalColumn: DataArrayPlotterFMVerticalColumn,
@@ -337,7 +334,7 @@ class DataArray:
     @property
     def end_time(self) -> datetime:
         """Last time instance (as datetime)."""
-        # TODO: use pd.Timestamp instead
+        # TODO: use pd.Timestamp instead (see gh-1020)
         return self.time[-1].to_pydatetime()
 
     @cached_property
@@ -515,7 +512,6 @@ class DataArray:
         )
         data = np.squeeze(self.values)
 
-        # TODO: should geometry stay the same?
         return DataArray(
             data=data,
             time=self.time,
@@ -700,9 +696,7 @@ class DataArray:
             assert isinstance(parsed_axis, int)
             idx = list(range(*idx.indices(self.shape[parsed_axis])))
         if idx is None or (not np.isscalar(idx) and len(idx) == 0):  # type: ignore
-            raise ValueError(
-                "Empty index is not allowed"
-            )  # TODO other option would be to have a NullDataArray
+            raise ValueError("Empty index is not allowed")
 
         idx = np.atleast_1d(idx)
         single_index = len(idx) == 1
@@ -865,9 +859,9 @@ class DataArray:
         if len(kwargs) > 0:
             idx = self.geometry.find_index(**kwargs)
 
-            # TODO this seems fragile
+            # TODO this seems fragile (see gh-1018)
             if isinstance(idx, tuple):
-                # TODO: support for dfs3
+                # TODO: support for dfs3 (see gh-1018)
                 assert len(idx) == 2
                 ii, jj = idx
                 if jj is not None:
@@ -919,9 +913,9 @@ class DataArray:
         return self
 
     def interp(
-        # TODO find out optimal syntax to allow interpolation to single point, new time, grid, mesh...
+        # TODO find out optimal syntax to allow interpolation to single point, new time, grid, mesh... (see gh-1019)
         self,
-        # *, # TODO: make this a keyword-only argument in the future
+        # *, # TODO: make this a keyword-only argument in the future (see gh-1019)
         time: pd.DatetimeIndex | DataArray | Dataset | int | float | None = None,
         x: float | None = None,
         y: float | None = None,
@@ -1084,7 +1078,6 @@ class DataArray:
             end_time=self.end_time,
             timestep=self.timestep,
             geometry=self.geometry,
-            n_elements=self.shape[1],  # TODO is there a better way to find out this?
             track=track,
             items=deepcopy([self.item]),
             time_steps=list(range(self.n_timesteps)),
@@ -1803,7 +1796,7 @@ class DataArray:
         except TypeError:
             raise TypeError("Math operation could not be applied to DataArray")
 
-        new_da = self.copy()  # TODO: alternatively: create new dataset (will validate)
+        new_da = self.copy()
         new_da.values = data
 
         return new_da
@@ -2056,7 +2049,9 @@ class DataArray:
             return time
 
         if time is None:
-            time = [pd.Timestamp(2018, 1, 1)]  # TODO is this the correct epoch?
+            time = [
+                pd.Timestamp(2018, 1, 1)
+            ]  # TODO is this the correct epoch? (see gh-1021)
         if isinstance(time, str) or (not isinstance(time, Iterable)):
             time = [time]
 
@@ -2075,7 +2070,6 @@ class DataArray:
         self,
         axis: int | tuple[int, ...] | str | None,
     ) -> int | tuple[int, ...]:
-        # TODO change to return tuple always
         dims = self.dims
         data_shape = self.shape
         has_time = self._has_time_axis
