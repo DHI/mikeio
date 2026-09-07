@@ -21,6 +21,5 @@ tests/testdata/pfs/** -text
 *.jpg binary
 *.pdf binary
 
-*.ipynb linguist-language=Python
 docs/* linguist-documentation
 docsrc/* linguist-documentation

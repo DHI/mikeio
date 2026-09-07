@@ -31,7 +31,7 @@ jobs:
       run: uv sync --group test --no-dev
     - name: Test with pytest
       run: |
-        uv run pytest --ignore tests/performance/ --ignore tests/notebooks/ --disable-warnings
+        uv run pytest --ignore tests/performance/ --disable-warnings
 
   deploy:
     needs: test
