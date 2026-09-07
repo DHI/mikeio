@@ -23,7 +23,7 @@ By providing many examples to cut/paste from.
 
 Examples are available in two forms:
 
-* [Example notebooks](examples/index.qmd)
+* [Examples](examples/index.qmd)
 * [Unit tests](https://github.com/DHI/mikeio/tree/main/tests)
 
 

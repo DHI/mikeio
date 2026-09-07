@@ -13,13 +13,13 @@ MIKE IO is a Python package for reading, writing, and manipulating MIKE files (d
 # Install package in editable mode with dev dependencies
 uv sync --group dev
 
-# Or install all dependency groups (dev, test, notebooks)
+# Or install all dependency groups (dev, test)
 uv sync --all-groups
 ```
 
 ### Testing
 ```bash
-# Run all tests (excludes performance and notebook tests by default)
+# Run all tests (excludes performance tests by default)
 uv run pytest
 
 # Run tests with coverage
@@ -156,7 +156,7 @@ The build process:
 
 2. **Examples** (`examples/*.qmd`): Real-world usage examples
    - Organized by file type (dfs0, dfs2, dfsu)
-   - Each example is a complete, executable Quarto notebook
+   - Each example is a complete, executable Quarto document
    - Uses symlinked test data from `tests/testdata/`
 
 3. **API Reference** (`api/*.qmd`): Auto-generated from docstrings
@@ -221,7 +221,6 @@ Alternative: `ds = mikeio.read("file.dfs2")` combines open and read.
 - Project uses **uv** for dependency management with `dependency-groups` in pyproject.toml
   - `dev`: Development tools (pytest, quartodoc, ruff, mypy, etc.)
   - `test`: Testing dependencies only
-  - `notebooks`: Jupyter notebook dependencies
 
 ### Testing
 - Uses pytest with type hints (all test functions must be typed)
