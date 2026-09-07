@@ -19,20 +19,9 @@ The spatial information is available in the `geometry` attribute (accessible fro
 ds.geometry
 ```
 
-Grid3D's primary properties and methods are:
+The horizontal axes behave as they do for dfs2. The vertical one is described by `z`, `nz` and `dz`, and is numbered from the bottom up, so the last layer is the top one. See the [API reference](`mikeio.Grid3D`) for the full set of properties and methods.
 
-* `x`
-* `nx`
-* `dx`
-* `y`
-* `ny`
-* `dy`
-* `z`
-* `nz`
-* `dz`
-* `origin`
-* `projection`
-* `isel()`
+A dfs3 file with only one layer is read as a [`Grid2D`](`mikeio.Grid2D`) rather than a `Grid3D`, since there is no vertical dimension left to describe.
 
 ## Selecting layers while reading
 
@@ -55,6 +44,22 @@ Reading the bottom layer instead shows a different picture, since oxygen is cons
 dsb = mikeio.read("../data/dissolved_oxygen.dfs3", layers="bottom")
 dsb[0].plot();
 ```
+
+Note that `"top"` and `"bottom"` are not fixed layer numbers. A dfs3 covering a domain with varying depth has cells that hold no data, and the two keywords select the highest and lowest cell that *does* hold data in each column. The layer they come from therefore differs from one horizontal position to the next, which is why `layers="bottom"` is not the same as `layers=[0]`:
+
+```{python}
+import numpy as np
+
+nz = ds.geometry.nz
+bottom = mikeio.read("../data/dissolved_oxygen.dfs3", layers="bottom")[0].to_numpy()
+layer0 = mikeio.read("../data/dissolved_oxygen.dfs3", layers=[0])[0].to_numpy()
+top = mikeio.read("../data/dissolved_oxygen.dfs3", layers="top")[0].to_numpy()
+last = mikeio.read("../data/dissolved_oxygen.dfs3", layers=[nz - 1])[0].to_numpy()
+
+np.allclose(bottom, layer0, equal_nan=True), np.allclose(top, last, equal_nan=True)
+```
+
+The top layer happens to coincide with the last one in this file, because its surface layer is wet everywhere.
 
 ## Selecting layers after reading
 
