@@ -67,6 +67,11 @@ Source = "https://github.com/DHI/mikeio"
 Issues = "https://github.com/DHI/mikeio/issues"
 
 
+[tool.ruff.format]
+
+# Match .gitattributes: LF regardless of platform.
+line-ending = "lf"
+
 [tool.ruff.lint]
 
 # ignore long lines
