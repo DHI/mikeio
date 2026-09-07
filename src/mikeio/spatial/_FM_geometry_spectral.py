@@ -1,14 +1,12 @@
 from __future__ import annotations
-from typing import Any, Sequence
 
+from typing import Any, Sequence
 
 import numpy as np
 from mikecore.DfsuFile import DfsuFileType
 
-
+from ._FM_geometry import GeometryFM2D, _GeometryFM
 from ._geometry import _Geometry
-
-from ._FM_geometry import _GeometryFM, GeometryFM2D
 
 
 class GeometryFMPointSpectrum(_Geometry):

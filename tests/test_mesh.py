@@ -1,9 +1,10 @@
 from pathlib import Path
+
 import numpy as np
 import pytest
+
 import mikeio
-from mikeio import Mesh
-from mikeio import GeometryFM2D
+from mikeio import GeometryFM2D, Mesh
 
 
 @pytest.fixture

@@ -1,24 +1,26 @@
 from __future__ import annotations
+
 from copy import deepcopy
 from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
-
 from typing import Any, Literal, Sequence, overload
 
 import numpy as np
 import pandas as pd
-from mikecore.DfsFile import TimeAxisType
 from mikecore.DfsFactory import DfsFactory
+from mikecore.DfsFile import TimeAxisType
+from mikecore.DfsFileFactory import DfsFileFactory
 from mikecore.DfsuBuilder import DfsuBuilder
 from mikecore.DfsuFile import DfsuFile, DfsuFileType
-from mikecore.DfsFileFactory import DfsFileFactory
 from mikecore.eum import eumQuantity, eumUnit
 from tqdm import trange
 
 from mikeio.spatial._distance import xy_to_bbox
 
 from .. import __dfs_version__
+from .._path import normalize_path
+from .._track import _extract_track
 from ..dataset import Dataset
 from ..dfs._dfs import (
     _get_item_info,
@@ -26,14 +28,12 @@ from ..dfs._dfs import (
     _valid_item_numbers,
     _valid_timesteps,
 )
+from ..eum import ItemInfo, TimeStepUnit
 from ..spatial import (
     GeometryFM2D,
+    Grid2D,
 )
-from ..spatial import Grid2D
-from .._track import _extract_track
 from ._topology import get_elements_from_source, get_nodes_from_source
-from ..eum import ItemInfo, TimeStepUnit
-from .._path import normalize_path
 
 
 def write_dfsu(filename: str | Path, data: Dataset, title: str = "") -> None:

@@ -1,13 +1,14 @@
 from __future__ import annotations
+
 from pathlib import Path
 from typing import Any
+
 from mikecore.DfsuFile import DfsuFile, DfsuFileType
 
+from .._path import normalize_path
 from ._dfsu import Dfsu2DH
 from ._layered import Dfsu2DV, Dfsu3D
 from ._spectral import DfsuSpectral
-from .._path import normalize_path
-
 
 DFSU_MAPPING = {
     # DfsuFileType.Dfsu1D: None,

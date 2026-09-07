@@ -1,49 +1,44 @@
 from __future__ import annotations
+
 import warnings
-from copy import deepcopy
-from pathlib import Path
-from datetime import datetime
-from functools import cached_property
 from collections.abc import (
     Iterable,
-    Sized,
-    Sequence,
     Mapping,
     MutableMapping,
+    Sequence,
+    Sized,
 )
+from copy import deepcopy
+from datetime import datetime
+from functools import cached_property
+from pathlib import Path
 from typing import (
-    Any,
-    Union,
-    Literal,
     TYPE_CHECKING,
-    overload,
+    Any,
     Callable,
+    Literal,
+    Union,
+    overload,
 )
-
 
 import numpy as np
 import pandas as pd
 
-
-from ..eum import EUMType, EUMUnit, ItemInfo
 from .._time import _get_time_idx_list, _n_selected_timesteps
 from .._track import _extract_track
+from ..eum import EUMType, EUMUnit, ItemInfo
 
 if TYPE_CHECKING:
-    from ._dataset import Dataset
     import xarray
     from numpy.typing import ArrayLike
+
     from mikeio._interpolation import Interpolant
+
+    from ._dataset import Dataset
 
 
 from ..spatial import (
-    Grid1D,
-    Grid2D,
-    Grid3D,
     Geometry0D,
-    GeometryPoint2D,
-    GeometryPoint3D,
-    GeometryUndefined,
     GeometryFM2D,
     GeometryFM3D,
     GeometryFMAreaSpectrum,
@@ -51,23 +46,28 @@ from ..spatial import (
     GeometryFMPointSpectrum,
     GeometryFMVerticalColumn,
     GeometryFMVerticalProfile,
+    GeometryPoint2D,
+    GeometryPoint3D,
+    GeometryUndefined,
+    Grid1D,
+    Grid2D,
+    Grid3D,
 )
 
 # We need this type to know if we should keep zn
 from ..spatial._FM_geometry_layered import _GeometryFMLayered
-
-from ._z_accessor import NullZAccessor, ZAccessor
 from ._data_plot import (
     DataArrayPlotter,
-    DataArrayPlotterFM,
-    DataArrayPlotterGrid1D,
-    DataArrayPlotterGrid2D,
     DataArrayPlotterAreaSpectrum,
+    DataArrayPlotterFM,
     DataArrayPlotterFMVerticalColumn,
     DataArrayPlotterFMVerticalProfile,
-    DataArrayPlotterPointSpectrum,
+    DataArrayPlotterGrid1D,
+    DataArrayPlotterGrid2D,
     DataArrayPlotterLineSpectrum,
+    DataArrayPlotterPointSpectrum,
 )
+from ._z_accessor import NullZAccessor, ZAccessor
 
 GeometryType = Union[
     Geometry0D,

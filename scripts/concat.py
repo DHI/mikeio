@@ -7,6 +7,7 @@
 
 import argparse
 import glob
+
 from mikeio.generic import concat as cat
 
 

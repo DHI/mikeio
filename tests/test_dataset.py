@@ -1,11 +1,12 @@
-from pathlib import Path
 from datetime import datetime
+from pathlib import Path
+
 import numpy as np
 import pandas as pd
 import pytest
 
 import mikeio
-from mikeio import EUMType, ItemInfo, Dataset
+from mikeio import Dataset, EUMType, ItemInfo
 from mikeio.exceptions import OutsideModelDomainError
 
 

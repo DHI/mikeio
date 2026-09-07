@@ -1,6 +1,7 @@
 """Custom exceptions for mikeio."""
 
 from __future__ import annotations
+
 from typing import Any
 
 

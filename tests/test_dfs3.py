@@ -1,6 +1,7 @@
 from pathlib import Path
-import pytest
+
 import numpy as np
+import pytest
 
 import mikeio
 from mikeio.spatial import Grid2D, Grid3D

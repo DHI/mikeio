@@ -1,27 +1,28 @@
 from __future__ import annotations
-from typing import Sequence, Sized, Any
+
 from pathlib import Path
+from typing import Any, Sequence, Sized
 
 import numpy as np
 import pandas as pd
-from mikecore.DfsuFile import DfsuFile, DfsuFileType
 from mikecore.DfsFileFactory import DfsFileFactory
+from mikecore.DfsuFile import DfsuFile, DfsuFileType
 from tqdm import trange
 
-from ..dataset import DataArray, Dataset
-from ..eum import ItemInfo, EUMUnit
-from ..dfs._dfs import _get_item_info, _valid_item_numbers, _valid_timesteps
 from .._spectral import calc_m0_from_spectrum
-from ._dfsu import (
-    _get_dfsu_info,
-    get_elements_from_source,
-    get_nodes_from_source,
-    _validate_elements_and_geometry_sel,
-)
+from ..dataset import DataArray, Dataset
+from ..dfs._dfs import _get_item_info, _valid_item_numbers, _valid_timesteps
+from ..eum import EUMUnit, ItemInfo
 from ..spatial import (
     GeometryFMAreaSpectrum,
     GeometryFMLineSpectrum,
     GeometryFMPointSpectrum,
+)
+from ._dfsu import (
+    _get_dfsu_info,
+    _validate_elements_and_geometry_sel,
+    get_elements_from_source,
+    get_nodes_from_source,
 )
 
 

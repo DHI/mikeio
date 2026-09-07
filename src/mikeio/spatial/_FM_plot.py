@@ -1,16 +1,16 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Any, Literal, Sequence, TYPE_CHECKING
+from typing import TYPE_CHECKING, Any, Literal, Sequence
 
-from numpy.typing import NDArray
+import numpy as np
 from matplotlib.axes import Axes
 from matplotlib.cm import ScalarMappable
 from matplotlib.collections import PatchCollection
 from matplotlib.colors import Colormap, Normalize
 from matplotlib.figure import Figure
 from matplotlib.tri import Triangulation
-import numpy as np
+from numpy.typing import NDArray
 from scipy.sparse import csr_matrix
 
 from ._distance import relative_cumulative_distance
@@ -98,8 +98,8 @@ def _plot_map(
     add_colorbar: bool = True,
 ) -> Axes:
     """Plot unstructured data and/or mesh, mesh outline."""
-    import matplotlib.pyplot as plt
     import matplotlib
+    import matplotlib.pyplot as plt
 
     VALID_PLOT_TYPES = (
         "mesh_only",
@@ -356,8 +356,8 @@ def _add_colorbar(
     levels: np.ndarray,
     cbar_extend: str,
 ) -> None:
-    from mpl_toolkits.axes_grid1 import make_axes_locatable  # type: ignore
     import matplotlib.pyplot as plt
+    from mpl_toolkits.axes_grid1 import make_axes_locatable  # type: ignore
 
     cax = make_axes_locatable(ax).append_axes("right", size="5%", pad=0.05)
     cmap_sm = cmap_ScMappable if cmap_ScMappable else fig_obj

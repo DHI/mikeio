@@ -1,32 +1,32 @@
 from __future__ import annotations
-from pathlib import Path
-from datetime import datetime
-from copy import deepcopy
+
 import re
+import warnings
+from copy import deepcopy
+from datetime import datetime
+from pathlib import Path
 from typing import (
+    TYPE_CHECKING,
+    Any,
+    Callable,
+    Hashable,
     Iterable,
     Iterator,
     Literal,
     Mapping,
     Sequence,
-    Any,
     overload,
-    Hashable,
-    TYPE_CHECKING,
-    Callable,
 )
-import warnings
-
 
 import numpy as np
-from numpy.typing import NDArray
 import pandas as pd
+from numpy.typing import NDArray
 
 if TYPE_CHECKING:
-    import xarray
     import polars as pl
+    import xarray
 
-from ._dataarray import DataArray
+from .._path import normalize_path
 from .._track import _extract_track
 from ..eum import EUMType, EUMUnit, ItemInfo
 from ..spatial import (
@@ -39,15 +39,10 @@ from ..spatial import (
     Grid2D,
     Grid3D,
 )
-
-
 from ..spatial._FM_geometry import _GeometryFM
-
 from ._data_plot import DatasetPlotter
+from ._dataarray import DataArray, IndexType
 from ._z_accessor import NullZAccessor, ZAccessor
-
-from ._dataarray import IndexType
-from .._path import normalize_path
 
 
 def _to_safe_name(name: str) -> str:

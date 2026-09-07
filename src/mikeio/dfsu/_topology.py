@@ -1,10 +1,9 @@
 from dataclasses import dataclass
 
 import numpy as np
-from numpy.typing import NDArray
-
 from mikecore.DfsuFile import DfsuFile
 from mikecore.MeshFile import MeshFile
+from numpy.typing import NDArray
 
 
 @dataclass

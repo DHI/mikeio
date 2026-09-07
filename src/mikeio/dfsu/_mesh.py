@@ -1,16 +1,13 @@
 from __future__ import annotations
+
 from pathlib import Path
 from typing import TYPE_CHECKING
 
-
 import numpy as np
-
-
 from mikecore.MeshFile import MeshFile
 
-
-from ..spatial import GeometryFM2D
 from .._path import normalize_path
+from ..spatial import GeometryFM2D
 from ._topology import (
     get_elements_from_source,
     get_nodes_from_source,

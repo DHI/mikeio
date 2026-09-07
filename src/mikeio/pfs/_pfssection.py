@@ -1,4 +1,5 @@
 from __future__ import annotations
+
 from collections.abc import KeysView, ValuesView
 from datetime import datetime
 from types import SimpleNamespace

@@ -1,4 +1,5 @@
 from __future__ import annotations
+
 import re
 import warnings
 from collections import Counter
@@ -7,8 +8,8 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any, Callable, Sequence, TextIO
 
-from ._pfssection import PfsNonUniqueList, PfsSection
 from .._path import normalize_path
+from ._pfssection import PfsNonUniqueList, PfsSection
 
 
 class PfsDocument(PfsSection):

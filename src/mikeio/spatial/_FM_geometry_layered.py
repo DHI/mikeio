@@ -1,21 +1,18 @@
 from __future__ import annotations
+
+import warnings
 from functools import cached_property
 from pathlib import Path
-
 from typing import TYPE_CHECKING, Any, Iterable, Literal, Sequence
-import warnings
 
-from matplotlib.axes import Axes
 import numpy as np
+from matplotlib.axes import Axes
 from mikecore.DfsuFile import DfsuFileType
 
-
-from ._FM_geometry import GeometryFM2D, _GeometryFM
-from ._geometry import GeometryPoint3D
-
-from ._FM_plot import _plot_vertical_profile, BoundaryPolygons
-
 from ._distance import relative_cumulative_distance
+from ._FM_geometry import GeometryFM2D, _GeometryFM
+from ._FM_plot import BoundaryPolygons, _plot_vertical_profile
+from ._geometry import GeometryPoint3D
 
 if TYPE_CHECKING:
     from numpy.typing import ArrayLike

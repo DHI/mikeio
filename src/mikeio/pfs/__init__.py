@@ -1,5 +1,7 @@
 from __future__ import annotations
+
 from pathlib import Path
+
 from ._pfsdocument import PfsDocument
 from ._pfssection import PfsNonUniqueList, PfsSection
 
