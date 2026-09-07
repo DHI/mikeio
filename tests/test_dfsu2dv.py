@@ -1,18 +1,18 @@
 from pathlib import Path
 
+import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import pytest
-import matplotlib.pyplot as plt
+from mikecore.DfsuFile import DfsuFileType
 
 import mikeio
 from mikeio import Dfsu2DV
 from mikeio.spatial import (
     GeometryFMVerticalColumn,
     GeometryFMVerticalProfile,
+    GeometryPoint3D,
 )
-from mikeio.spatial import GeometryPoint3D
-from mikecore.DfsuFile import DfsuFileType
 
 
 @pytest.fixture

@@ -33,9 +33,9 @@ from tqdm import tqdm, trange
 import mikeio
 
 from . import __dfs_version__
+from ._path import normalize_path
 from .dfs._dfs import _get_item_info, _valid_item_numbers
 from .eum import EUMType, EUMUnit, ItemInfo
-from ._path import normalize_path
 
 TimeAxis = Union[
     DfsEqTimeAxis, DfsNonEqTimeAxis, DfsEqCalendarAxis, DfsNonEqCalendarAxis

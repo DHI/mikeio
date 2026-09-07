@@ -1,45 +1,44 @@
 from __future__ import annotations
+
+import warnings
 from functools import cached_property
 from pathlib import Path
 from typing import (
+    TYPE_CHECKING,
     Any,
     Literal,
     Sequence,
     Sized,
-    TYPE_CHECKING,
 )
-import warnings
-
 
 import numpy as np
-from numpy.typing import NDArray
 from mikecore.DfsuFile import DfsuFileType
 from mikecore.eum import eumQuantity
 from mikecore.MeshBuilder import MeshBuilder
+from numpy.typing import NDArray
 from scipy.spatial import KDTree
 
+from .._interpolation import Interpolant
+from .._path import normalize_path
 from ..eum import EUMType, EUMUnit
 from ..exceptions import OutsideModelDomainError
-from .._interpolation import Interpolant
+from ._distance import xy_to_bbox
 from ._FM_plot import (
-    _get_node_centered_data,
-    _plot_map,
     BoundaryPolygons,
     Polygon,
+    _get_node_centered_data,
+    _plot_map,
     _set_xy_label_by_projection,  # TODO remove
     _to_polygons,  # TODO remove
 )
 from ._geometry import Geometry0D, GeometryPoint2D, _Geometry
-
 from ._grid_geometry import Grid2D
-from ._distance import xy_to_bbox
-from .._path import normalize_path
-
 
 if TYPE_CHECKING:
-    from ._FM_geometry_layered import GeometryFM3D
     from matplotlib.axes import Axes
     from numpy.typing import ArrayLike
+
+    from ._FM_geometry_layered import GeometryFM3D
 
 
 class GeometryFMPlotter:

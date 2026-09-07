@@ -1,14 +1,15 @@
 from __future__ import annotations
+
+from dataclasses import dataclass
 from functools import cached_property
 from pathlib import Path
-from typing import Any, Sequence, TYPE_CHECKING, overload
-from dataclasses import dataclass
-import numpy as np
+from typing import TYPE_CHECKING, Any, Sequence, overload
 
+import numpy as np
 from mikecore.Projections import Cartography
 
+from .._interpolation import Interpolant
 from ..exceptions import OutsideModelDomainError
-
 from ._geometry import (
     BoundingBox,
     Geometry0D,
@@ -18,12 +19,11 @@ from ._geometry import (
     _Geometry,
 )
 
-from .._interpolation import Interpolant
-
 if TYPE_CHECKING:
     from matplotlib.axes import Axes
-    from ..spatial import GeometryFM2D
     from numpy.typing import ArrayLike
+
+    from ..spatial import GeometryFM2D
 
 
 def _check_equidistant(x: np.ndarray) -> None:

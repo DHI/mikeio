@@ -1,8 +1,8 @@
 import pytest
+from mikecore.eum import eumItem, eumUnit
+
 from mikeio import EUMType, EUMUnit, ItemInfo
 from mikeio.eum import ItemInfoList
-
-from mikecore.eum import eumItem, eumUnit
 
 
 def test_item_is_equivalent_to_int() -> None:

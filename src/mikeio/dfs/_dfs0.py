@@ -1,9 +1,10 @@
 from __future__ import annotations
+
+import warnings
+from datetime import datetime, timedelta
 from functools import cached_property
 from pathlib import Path
-from datetime import datetime, timedelta
 from typing import Any, Sequence
-import warnings
 
 import numpy as np
 import pandas as pd
@@ -13,11 +14,11 @@ from mikecore.DfsFileFactory import DfsFileFactory
 from mikecore.eum import eumQuantity
 
 from .. import __dfs_version__
-from ..dataset import Dataset, DataArray
-from ._dfs import _get_item_info, _valid_item_numbers
-from ..eum import EUMType, EUMUnit, ItemInfo, TimeStepUnit, ItemInfoList
-from .._time import DateTimeSelector
 from .._path import normalize_path
+from .._time import DateTimeSelector
+from ..dataset import DataArray, Dataset
+from ..eum import EUMType, EUMUnit, ItemInfo, ItemInfoList, TimeStepUnit
+from ._dfs import _get_item_info, _valid_item_numbers
 
 
 def write_dfs0(

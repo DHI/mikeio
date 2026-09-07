@@ -1,9 +1,7 @@
 from pathlib import Path
 
-
 import nbformat
-from nbconvert.preprocessors import ExecutePreprocessor
-from nbconvert.preprocessors import CellExecutionError
+from nbconvert.preprocessors import CellExecutionError, ExecutePreprocessor
 
 
 def _process_notebook(fp: Path):

@@ -1,17 +1,17 @@
 from __future__ import annotations
+
 import warnings
-from typing import Any, TYPE_CHECKING, Sequence
+from typing import TYPE_CHECKING, Any, Sequence
 
-from matplotlib.figure import Figure
-import numpy as np
 import matplotlib.pyplot as plt
+import numpy as np
 from matplotlib.axes import Axes
+from matplotlib.figure import Figure
 
-from ..spatial._FM_plot import _plot_map, _plot_vertical_profile
-
-from .._spectral import plot_2dspectrum, calc_m0_from_spectrum
+from .._spectral import calc_m0_from_spectrum, plot_2dspectrum
 from ..eum import EUMType, ItemInfo
-from ..spatial import GeometryUndefined, Grid1D, GeometryFM2D
+from ..spatial import GeometryFM2D, GeometryUndefined, Grid1D
+from ..spatial._FM_plot import _plot_map, _plot_vertical_profile
 
 if TYPE_CHECKING:
     from ..dataset import DataArray, Dataset
@@ -826,7 +826,7 @@ class DataArrayPlotterPointSpectrum(DataArrayPlotter):
 
 def _calc_Hm0(da: DataArray) -> DataArray:
     """Calculate Hm0 from spectral DataArray for plotting."""
-    from ..spatial import GeometryFMLineSpectrum, GeometryFMAreaSpectrum
+    from ..spatial import GeometryFMAreaSpectrum, GeometryFMLineSpectrum
 
     m0 = calc_m0_from_spectrum(
         da.to_numpy(),

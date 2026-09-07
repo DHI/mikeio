@@ -2,11 +2,11 @@ from pathlib import Path
 
 import numpy as np
 import pytest
-from mikeio import Mesh
-from mikeio import Grid2D, Grid1D, Grid3D
-from mikeio.spatial._FM_geometry import GeometryFM2D
-from mikeio.spatial import Geometry0D
+
+from mikeio import Grid1D, Grid2D, Grid3D, Mesh
 from mikeio.exceptions import OutsideModelDomainError
+from mikeio.spatial import Geometry0D
+from mikeio.spatial._FM_geometry import GeometryFM2D
 
 
 def test_create_nx_ny() -> None:

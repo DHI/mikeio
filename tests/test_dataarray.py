@@ -1,12 +1,13 @@
 from datetime import datetime
 from pathlib import Path
+
+import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-import matplotlib.pyplot as plt
 import pytest
 
 import mikeio
-from mikeio import EUMType, EUMUnit, ItemInfo, Mesh, DataArray
+from mikeio import DataArray, EUMType, EUMUnit, ItemInfo, Mesh
 from mikeio.dfsu import DfsuSpectral
 from mikeio.exceptions import OutsideModelDomainError
 

@@ -1,7 +1,8 @@
 from __future__ import annotations
+
+from collections.abc import Sequence
 from importlib.metadata import PackageNotFoundError, version
 from pathlib import Path
-from collections.abc import Sequence
 from typing import Any
 
 try:
@@ -16,17 +17,16 @@ __dfs_version__: int = 220
 
 from .dataset import DataArray, Dataset, from_pandas, from_polars
 from .dfs import Dfs0, Dfs1, Dfs2, Dfs3
-from .dfsu import Dfsu, Mesh, Dfsu2DH, Dfsu2DV, Dfsu3D, DfsuSpectral
+from .dfsu import Dfsu, Dfsu2DH, Dfsu2DV, Dfsu3D, DfsuSpectral, Mesh
 from .eum import EUMType, EUMUnit, ItemInfo
 from .pfs import PfsDocument, PfsSection, read_pfs
-
 from .spatial import (
-    Grid1D,
-    Grid2D,
-    Grid3D,
     GeometryFM2D,
     GeometryFM3D,
     GeometryFMVerticalProfile,
+    Grid1D,
+    Grid2D,
+    Grid3D,
 )
 
 

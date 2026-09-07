@@ -1,13 +1,13 @@
 from datetime import datetime
 from pathlib import Path
+
 import numpy as np
 import pandas as pd
-import mikeio
-from mikeio import Dfs0, EUMType, EUMUnit, ItemInfo
+import pytest
 from mikecore.DfsFile import DataValueType
 
-
-import pytest
+import mikeio
+from mikeio import Dfs0, EUMType, EUMUnit, ItemInfo
 
 
 def test_repr() -> None:

@@ -1,6 +1,7 @@
-from mikeio._interpolation import get_idw_interpolant
-import mikeio
 import numpy as np
+
+import mikeio
+from mikeio._interpolation import get_idw_interpolant
 
 
 def test_get_idw_interpolant() -> None:

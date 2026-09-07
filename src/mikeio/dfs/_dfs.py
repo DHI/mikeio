@@ -1,13 +1,14 @@
 from __future__ import annotations
-from collections.abc import Iterable
-from pathlib import Path
+
 import warnings
+from collections.abc import Iterable
 from dataclasses import dataclass
 from datetime import datetime
+from pathlib import Path
 from typing import Any, Sequence
+
 import numpy as np
 import pandas as pd
-
 from mikecore.DfsFile import (
     DfsDynamicItemInfo,
     DfsFile,
@@ -17,11 +18,11 @@ from mikecore.DfsFile import (
 from mikecore.DfsFileFactory import DfsFileFactory
 from mikecore.Projections import Cartography
 
+from .._path import normalize_path
+from .._time import DateTimeSelector
 from ..dataset import Dataset
 from ..eum import ItemInfo, ItemInfoList
 from ..exceptions import ItemsError
-from .._time import DateTimeSelector
-from .._path import normalize_path
 
 
 @dataclass

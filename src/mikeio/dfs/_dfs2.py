@@ -1,21 +1,24 @@
 from __future__ import annotations
+
+from collections.abc import Sequence
 from copy import deepcopy
 from pathlib import Path
 from typing import Any, Literal
-from collections.abc import Sequence
 
 import numpy as np
 import pandas as pd
-from tqdm import tqdm
-
 from mikecore.DfsFactory import DfsBuilder, DfsFactory
 from mikecore.DfsFile import DfsFile, DfsSimpleType
 from mikecore.DfsFileFactory import DfsFileFactory
 from mikecore.eum import eumQuantity, eumUnit
 from mikecore.Projections import Cartography
+from tqdm import tqdm
 
 from .. import __dfs_version__
+from .._path import normalize_path
 from ..dataset import Dataset
+from ..eum import TimeStepUnit
+from ..spatial import Grid2D
 from ._dfs import (
     _Dfs123,
     _get_item_info,
@@ -23,9 +26,6 @@ from ._dfs import (
     _valid_timesteps,
     write_dfs_data,
 )
-from ..eum import TimeStepUnit
-from ..spatial import Grid2D
-from .._path import normalize_path
 
 
 def write_dfs2(filename: str | Path, ds: Dataset, title: str = "") -> None:

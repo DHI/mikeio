@@ -94,6 +94,7 @@ select = [
     "D415",
     "D417",
     "NPY",  # Numpy related
+    "I",  # import sorting (isort)
 ]
 
 # Enable F822 preview behavior to catch undefined names in __all__ in __init__.py files
@@ -103,6 +104,9 @@ explicit-preview-rules = true
 
 [tool.ruff.lint.per-file-ignores]
 "tests/*" = ["D"]
+# Sorting imports in a notebook rewrites its JSON for no benefit, and notebooks
+# routinely import in the order the narrative introduces things.
+"*.ipynb" = ["I"]
 "notebooks/*" = ["D", "E402"]
 "conftest.py" = ["D"]
 

@@ -1,14 +1,14 @@
-from pathlib import Path
 import datetime
-from matplotlib import pyplot as plt
+from pathlib import Path
+
 import numpy as np
 import pandas as pd
 import pytest
 import xarray
+from matplotlib import pyplot as plt
 
 import mikeio
-
-from mikeio import EUMType, ItemInfo, EUMUnit, Dfs2
+from mikeio import Dfs2, EUMType, EUMUnit, ItemInfo
 from mikeio.exceptions import ItemsError
 from mikeio.spatial import GeometryPoint2D, Grid2D
 

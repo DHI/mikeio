@@ -1,17 +1,17 @@
-from ._dataarray import DataArray
-from ._dataset import Dataset, from_pandas, from_polars
 from ._data_plot import (
     DataArrayPlotter,
-    DataArrayPlotterGrid1D,
-    DataArrayPlotterGrid2D,
+    DataArrayPlotterAreaSpectrum,
     DataArrayPlotterFM,
     DataArrayPlotterFMVerticalColumn,
     DataArrayPlotterFMVerticalProfile,
-    DataArrayPlotterPointSpectrum,
+    DataArrayPlotterGrid1D,
+    DataArrayPlotterGrid2D,
     DataArrayPlotterLineSpectrum,
-    DataArrayPlotterAreaSpectrum,
+    DataArrayPlotterPointSpectrum,
     DatasetPlotter,
 )
+from ._dataarray import DataArray
+from ._dataset import Dataset, from_pandas, from_polars
 
 __all__ = [
     "DataArray",

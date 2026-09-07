@@ -1,11 +1,12 @@
-import pandas as pd
 from datetime import datetime
+
+import pandas as pd
 import pytest
 
 import mikeio
-from mikeio import DataArray
-from mikeio.spatial import GeometryUndefined, Geometry0D
 import mikeio.generic
+from mikeio import DataArray
+from mikeio.spatial import Geometry0D, GeometryUndefined
 
 
 def test_read_dfs0() -> None:

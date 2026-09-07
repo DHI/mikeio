@@ -1,6 +1,7 @@
+from datetime import datetime
+
 import pandas as pd
 import pytest
-from datetime import datetime
 
 from mikeio._time import DateTimeSelector
 

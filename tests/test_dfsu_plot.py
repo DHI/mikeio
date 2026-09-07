@@ -1,9 +1,9 @@
+import matplotlib as mpl
 import numpy as np
 import pytest
-import matplotlib as mpl
 
-from mikeio import Mesh
 import mikeio
+from mikeio import Mesh
 
 mpl.use("Agg")
 mpl.rcParams.update({"figure.max_open_warning": 100})

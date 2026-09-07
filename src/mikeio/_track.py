@@ -1,17 +1,18 @@
 from __future__ import annotations
-from pathlib import Path
+
 from collections.abc import Sequence
-from typing import Any, Callable, TYPE_CHECKING
+from pathlib import Path
+from typing import TYPE_CHECKING, Any, Callable
 
 import numpy as np
 import pandas as pd
 
-from .eum import ItemInfo, EUMUnit, EUMType
+from .eum import EUMType, EUMUnit, ItemInfo
 
 if TYPE_CHECKING:
     from .dataset import Dataset
-from .spatial import GeometryFM2D
 from ._path import normalize_path
+from .spatial import GeometryFM2D
 
 
 def _extract_track(

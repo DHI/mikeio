@@ -1,7 +1,8 @@
 # content of conftest.py
-import pytest
 import numpy
 import pandas
+import pytest
+
 import mikeio
 
 

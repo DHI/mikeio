@@ -2,7 +2,6 @@ import pytest
 
 from mikeio.spatial import GeometryFM2D
 
-
 ##################################################
 # these tests will not run if shapely is not installed
 ##################################################

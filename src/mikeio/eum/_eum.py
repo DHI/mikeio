@@ -18,12 +18,13 @@ degree Celsius
 """
 
 from __future__ import annotations
+
 from enum import IntEnum
-from typing import Any, Sequence, Literal
+from typing import Any, Literal, Sequence
 
 import pandas as pd
 from mikecore.DfsFile import DataValueType, DfsDynamicItemInfo
-from mikecore.eum import eumUnit, eumItem, eumWrapper
+from mikecore.eum import eumItem, eumUnit, eumWrapper
 
 from ..exceptions import InvalidDataValueType
 

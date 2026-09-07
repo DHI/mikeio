@@ -1,12 +1,12 @@
-import pytest
-import numpy as np
 import matplotlib.pyplot as plt
-import mikeio
+import numpy as np
+import pytest
 from mikecore.DfsuFile import DfsuFileType
 
-from mikeio import DfsuSpectral
-from mikeio.spatial import GeometryFMPointSpectrum, GeometryFMAreaSpectrum
+import mikeio
 import mikeio._spectral as _spectral
+from mikeio import DfsuSpectral
+from mikeio.spatial import GeometryFMAreaSpectrum, GeometryFMPointSpectrum
 from mikeio.spatial._FM_geometry_spectral import GeometryFMLineSpectrum
 
 
