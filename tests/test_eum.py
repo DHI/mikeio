@@ -1,5 +1,7 @@
 import pytest
 from mikeio import EUMType, EUMUnit, ItemInfo
+from mikeio.eum._eum import DataValueType
+from mikeio.exceptions import InvalidDataValueType
 from mikeio.eum import ItemInfoList
 
 from mikecore.eum import eumItem, eumUnit
@@ -147,3 +149,25 @@ def test_default_name_from_type() -> None:
 def test_iteminfo_string_type_should_fail_with_helpful_message() -> None:
     with pytest.raises(ValueError):
         ItemInfo("Water level", "Water level")  # type: ignore
+
+
+def test_changing_type_keeps_unit_valid() -> None:
+    item = ItemInfo("WL", EUMType.Water_Level, EUMUnit.meter)
+
+    with pytest.raises(ValueError, match="not a correct unit"):
+        item.type = EUMType.Wind_speed  # meter is not a wind speed unit
+
+    assert item.type == EUMType.Water_Level
+    assert item.unit == EUMUnit.meter
+
+    item.type = EUMType.Bathymetry  # meter is fine here
+    assert item.type == EUMType.Bathymetry
+
+
+def test_data_value_type_can_be_set_as_string() -> None:
+    item = ItemInfo("WL", EUMType.Water_Level)
+    item.data_value_type = "Accumulated"
+    assert item.data_value_type == DataValueType.Accumulated
+
+    with pytest.raises(InvalidDataValueType):
+        item.data_value_type = "Cumulative"

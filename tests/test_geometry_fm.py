@@ -277,3 +277,32 @@ def test_equality_shifted_coords() -> None:
 
     g2 = GeometryFM2D(node_coordinates=nc2, element_table=el, projection="LONG/LAT")
     assert g != g2
+
+
+def test_node_coordinates_are_read_only() -> None:
+    g = GeometryFM2D(
+        node_coordinates=[(0.0, 0.0, 0.0), (1.0, 0.0, 0.0), (1.0, 1.0, 0.0)],
+        element_table=[(0, 1, 2)],
+        projection="LONG/LAT",
+    )
+    # in-place edits would leave element_coordinates and friends stale
+    with pytest.raises(ValueError, match="read-only"):
+        g.node_coordinates[:, 2] = -3.0
+
+
+def test_setting_node_coordinates_updates_element_coordinates() -> None:
+    g = GeometryFM2D(
+        node_coordinates=[(0.0, 0.0, 0.0), (1.0, 0.0, 0.0), (1.0, 1.0, 0.0)],
+        element_table=[(0, 1, 2)],
+        projection="LONG/LAT",
+    )
+    assert g.element_coordinates[0, 2] == 0.0
+
+    nc = g.node_coordinates.copy()
+    nc[:, 2] = -3.0
+    g.node_coordinates = nc
+
+    assert g.element_coordinates[0, 2] == -3.0
+
+    with pytest.raises(ValueError, match="length of nodes"):
+        g.node_coordinates = nc[:2]

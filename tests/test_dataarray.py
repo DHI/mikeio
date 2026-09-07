@@ -7,6 +7,7 @@ import pytest
 
 import mikeio
 from mikeio import EUMType, EUMUnit, ItemInfo, Mesh, DataArray
+from mikeio.dataset._data_plot import DataArrayPlotterGrid2D
 from mikeio.dfsu import DfsuSpectral
 from mikeio.exceptions import OutsideModelDomainError
 
@@ -1487,3 +1488,39 @@ def test_axis_spatial_deprecated() -> None:
         result = da.mean(axis="spatial")
     assert result.shape == (3,)
     assert result.dims == ("time",)
+
+
+def test_setting_time_of_wrong_length_is_rejected() -> None:
+    da = mikeio.DataArray(
+        data=np.zeros((3, 2)),
+        time=pd.date_range("2000-01-01", periods=3, freq="h"),
+        geometry=mikeio.Grid1D(nx=2, dx=1.0),
+    )
+    with pytest.raises(ValueError, match="Number of timesteps"):
+        da.time = pd.date_range("2000-01-01", periods=2, freq="h")
+
+    assert da.n_timesteps == 3
+
+
+def test_setting_time_updates_derived_values() -> None:
+    da = mikeio.DataArray(
+        data=np.zeros(3),
+        time=pd.DatetimeIndex(["2000-01-01", "2000-01-02", "2000-01-04"]),
+    )
+    assert da.timestep == 1.0  # not equidistant, so the dummy dt is returned
+
+    da.time = pd.date_range("2000-01-01", periods=3, freq="D")
+
+    # is_equidistant is cached; the setter must have dropped the cached answer
+    assert da.timestep == 24 * 3600
+    assert da.start_time == datetime(2000, 1, 1)
+
+
+def test_setting_geometry_updates_dims_and_plotter() -> None:
+    da = mikeio.read("tests/testdata/HD2D.dfsu")[0]
+    assert da.dims == ("time", "element")
+
+    da.geometry = mikeio.Grid2D(nx=884, ny=9, dx=1.0)
+
+    assert da.dims == ("time", "y", "x")
+    assert isinstance(da.plot, DataArrayPlotterGrid2D)

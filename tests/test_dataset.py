@@ -223,8 +223,7 @@ def test_aggregate_over_items_produces_method_named_item() -> None:
 
 
 def test_rename_item_into_reserved_name() -> None:
-    # rename routes through _del_name_attr (old name) and _set_name_attr (new
-    # name); renaming an item to a method-like name must not shadow the method.
+    # renaming an item to a method-like name must not shadow the method
     time = pd.date_range(start=datetime(2000, 1, 1), freq="s", periods=3)
     ds = mikeio.Dataset([mikeio.DataArray(name="Foo", data=np.ones(3), time=time)])
 
@@ -236,9 +235,7 @@ def test_rename_item_into_reserved_name() -> None:
 
 def test_init_instance_attrs_are_collision_protected() -> None:
     # Drift guard: every non-item attribute __init__ sets on the instance (plot,
-    # title, ...) must be protected from being clobbered by an item of the same
-    # name. The reservation list is maintained by hand; if a new instance
-    # attribute is added to __init__ without reserving it, this test fails.
+    # title, ...) must be reachable, not clobbered by an item of the same name.
     time = pd.date_range(start=datetime(2000, 1, 1), freq="s", periods=3)
     base = mikeio.Dataset([mikeio.DataArray(name="Foo", data=np.ones(3), time=time)])
     # instance attributes that are not the item dict and not items themselves
@@ -1664,3 +1661,18 @@ def test_title_not_in_repr_when_empty() -> None:
         items=[ItemInfo("X")],
     )
     assert "title:" not in repr(ds)
+
+
+def test_renaming_a_dataarray_keeps_the_dataset_consistent() -> None:
+    # the Dataset looks item names up in the DataArrays, so a rename cannot
+    # leave it indexing by the old name
+    ds = mikeio.read("tests/testdata/HD2D.dfsu")
+    old_name = ds[0].name
+
+    ds[0].name = "Elevation"
+
+    assert ds.names[0] == "Elevation"
+    assert ds["Elevation"] is ds[0]
+    assert ds.Elevation is ds[0]
+    with pytest.raises(KeyError):
+        ds[old_name]

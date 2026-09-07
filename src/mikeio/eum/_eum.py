@@ -1437,12 +1437,12 @@ class ItemInfo:
                 raise ValueError(
                     "Invalid type. Type should be supplied as EUMType, e.g. ItemInfo('WL',EUMType.Water_Level, EUMUnit.meter)"
                 )
-            self.type = itemtype
+            self._type = itemtype
 
             if name is None:
                 name = itemtype.display_name
         else:
-            self.type = EUMType.Undefined
+            self._type = EUMType.Undefined
 
         if unit is not None:
             if isinstance(unit, int):
@@ -1459,7 +1459,7 @@ class ItemInfo:
             else:
                 self._unit = self.type.units[0]
 
-        self.data_value_type = to_datatype(data_value_type)
+        self._data_value_type = to_datatype(data_value_type)
 
         if not isinstance(name, str):
             raise ValueError("Invalid name, name should be a string")
@@ -1484,6 +1484,31 @@ class ItemInfo:
             return f"{self.name} <{self.type.display_name}> ({self.unit.display_name}) - {self.data_value_type.name}"
 
     @property
+    def type(self) -> EUMType:
+        "Item type."
+        return self._type
+
+    @type.setter
+    def type(self, value: EUMType) -> None:
+        "Set type; the current unit must remain valid for the new type."
+        if self._unit not in value.units:
+            raise ValueError(
+                f"{self._unit.display_name} is not a correct unit for {value.display_name}. "
+                f"Create a new ItemInfo instead, e.g. ItemInfo(name, EUMType.{value.name}, EUMUnit.{value.units[0].name})"
+            )
+        self._type = value
+
+    @property
+    def data_value_type(self) -> DataValueType:
+        "How values relate to time (Instantaneous, Accumulated, ...)."
+        return self._data_value_type
+
+    @data_value_type.setter
+    def data_value_type(self, value: str | int | DataValueType) -> None:
+        "Set data value type."
+        self._data_value_type = to_datatype(value)
+
+    @property
     def unit(self) -> EUMUnit:
         "Item unit."
         return self._unit
@@ -1493,7 +1518,8 @@ class ItemInfo:
         "Set unit."
         if value not in self.type.units:
             raise ValueError(
-                f"{value} is not a correct unit for {self.type}. Use {self.type.units}"
+                f"{value.display_name} is not a correct unit for {self.type.display_name}. "
+                f"Use one of {[u.display_name for u in self.type.units]}"
             )
         self._unit = value
 

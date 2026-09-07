@@ -1060,7 +1060,9 @@ class Grid2D(_Geometry):
                     raise ValueError(
                         "z must either be scalar or have length of nodes ((nx+1)*(ny+1))"
                     )
-            g.node_coordinates[:, 2] = z
+            nc = g.node_coordinates.copy()
+            nc[:, 2] = z
+            g.node_coordinates = nc
         g.to_mesh(outfilename=outfilename)
 
     def reduce(self, axis: str | tuple[str, ...]) -> Grid1D | Geometry0D:

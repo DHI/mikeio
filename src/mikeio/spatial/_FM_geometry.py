@@ -29,6 +29,7 @@ from ._FM_plot import (
     _set_xy_label_by_projection,  # TODO remove
     _to_polygons,  # TODO remove
 )
+from .._cache import clear_cached_properties
 from ._geometry import Geometry0D, GeometryPoint2D, _Geometry
 
 from ._grid_geometry import Grid2D
@@ -256,6 +257,13 @@ class GeometryFMPlotter:
             return "equal"
 
 
+def _read_only(values: np.ndarray) -> np.ndarray:
+    """A view of values that cannot be modified in place."""
+    view = values.view()
+    view.flags.writeable = False
+    return view
+
+
 class _GeometryFM(_Geometry):
     def __init__(
         self,
@@ -271,9 +279,9 @@ class _GeometryFM(_Geometry):
         reindex: bool = False,
     ) -> None:
         super().__init__(projection=projection)
-        self.node_coordinates = np.asarray(node_coordinates)
+        self._node_coordinates = np.asarray(node_coordinates)
 
-        n_nodes = len(self.node_coordinates)
+        n_nodes = len(self._node_coordinates)
         self._codes = (
             np.zeros((n_nodes,), dtype=int) if codes is None else np.asarray(codes)
         )
@@ -284,7 +292,7 @@ class _GeometryFM(_Geometry):
 
         self._type = dfsu_type
 
-        self.element_table, self._element_ids = self._check_elements(
+        self._element_table, self._element_ids = self._check_elements(
             element_table=element_table,  # type: ignore
             element_ids=element_ids,
             validate=validate,
@@ -337,7 +345,7 @@ class _GeometryFM(_Geometry):
             new_elem_nodes = np.zeros_like(elem_nodes)
             for jn, idx in enumerate(elem_nodes):
                 new_elem_nodes[jn] = node_dict[idx]
-            self.element_table[eid] = new_elem_nodes
+            self._element_table[eid] = new_elem_nodes
 
         self._node_ids = new_node_ids
         self._element_ids = new_element_ids
@@ -387,15 +395,55 @@ class _GeometryFM(_Geometry):
         return maxnodes
 
     @property
+    def node_coordinates(self) -> np.ndarray:
+        """N-by-3 array of node (x,y,z) coordinates.
+
+        The returned array is read-only, because element_coordinates and other
+        values are derived from it and cached. To change the coordinates,
+        assign a whole new array:
+
+        ```python
+        nc = geometry.node_coordinates.copy()
+        nc[:, 2] = new_bathymetry
+        geometry.node_coordinates = nc
+        ```
+        """
+        return _read_only(self._node_coordinates)
+
+    @node_coordinates.setter
+    def node_coordinates(self, value: ArrayLike) -> None:
+        nc = np.asarray(value)
+        if len(nc) != self.n_nodes:
+            raise ValueError(
+                f"node_coordinates must have length of nodes ({self.n_nodes})"
+            )
+        self._node_coordinates = nc
+        clear_cached_properties(self)
+
+    @property
+    def element_table(self) -> np.ndarray:
+        """For each element: the 0-based indices of its nodes."""
+        return self._element_table
+
+    @element_table.setter
+    def element_table(self, value: np.ndarray) -> None:
+        self._element_table, self._element_ids = self._check_elements(value)
+        clear_cached_properties(self)
+
+    @property
     def codes(self) -> np.ndarray:
-        """Node codes of all nodes (0=water, 1=land, 2...=open boundaries)."""
-        return self._codes
+        """Node codes of all nodes (0=water, 1=land, 2...=open boundaries).
+
+        Read-only (as node_coordinates); assign a new array to change them.
+        """
+        return _read_only(self._codes)
 
     @codes.setter
     def codes(self, v: np.ndarray) -> None:
         if len(v) != self.n_nodes:
             raise ValueError(f"codes must have length of nodes ({self.n_nodes})")
         self._codes = np.array(v, dtype=np.int32)
+        clear_cached_properties(self)
 
     @property
     def boundary_codes(self) -> list[int]:
@@ -659,8 +707,7 @@ class GeometryFM2D(_GeometryFM):
 
             # step 2: if not, then try second nearest point
             if not element_found and self.n_elements > 1:
-                candidate = few_nearest[k, 1]
-                assert np.isscalar(candidate)
+                candidate = int(few_nearest[k, 1])  # a single element id
                 nodes = self.element_table[candidate]
                 element_found = self._point_in_polygon(
                     nc[nodes, 0], nc[nodes, 1], coords[k, 0], coords[k, 1]

@@ -121,15 +121,16 @@ Assume that we want to have a minimum depth of 2 meters and change the open boun
 ```{python}
 g = msh.geometry
 print(f'max z before: {g.node_coordinates[:,2].max()}')
-zc = g.node_coordinates[:,2]
-zc[zc>-2] = -2
-g.node_coordinates[:,2] = zc
+nc = g.node_coordinates.copy()
+nc[nc[:,2]>-2, 2] = -2
+g.node_coordinates = nc
 print(f'max z after: {g.node_coordinates[:,2].max()}')
 ```
 
+Note that `node_coordinates` and `codes` are read-only: modify a copy and assign it back, as above. Otherwise values derived from them (e.g. `element_coordinates`) would be left unchanged.
 
 ```{python}
-c = g.codes
+c = g.codes.copy()
 c[c==2] = 1
 g.codes = c
 ```
