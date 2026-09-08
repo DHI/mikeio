@@ -71,7 +71,7 @@ class Dataset:
     data:
         DataArray, list of DataArrays or dict of DataArrays
     validate:
-        Deprecated. Dataset always validates consistency.
+        Deprecated and ignored. Dataset always validates consistency.
         Will be removed in a future version.
     title:
         Title of the dataset, by default "".
@@ -108,13 +108,13 @@ class Dataset:
     def __init__(
         self,
         data: Mapping[str, DataArray] | Sequence[DataArray],
-        validate: bool = True,
+        validate: bool | None = None,
         title: str = "",
         custom_blocks: Mapping[str, Any] | None = None,
     ):
-        if not validate:
+        if validate is not None:
             warnings.warn(
-                "validate=False is deprecated and will be removed in a future version. "
+                "The validate argument is deprecated and will be removed in a future version. "
                 "Dataset always validates consistency of its DataArrays.",
                 FutureWarning,
                 stacklevel=2,
@@ -144,7 +144,7 @@ class Dataset:
         *,
         geometry: Any | None = None,
         zn: NDArray[np.floating] | None = None,
-        validate: bool = True,
+        validate: bool | None = None,
         title: str = "",
         custom_blocks: Mapping[str, Any] | None = None,
         dt: float = 1.0,
@@ -163,8 +163,8 @@ class Dataset:
             Geometry of the DataArrays, by default None
         zn: NDArray[np.floating], optional
             Z-coordinates of the DataArrays, by default None
-        validate: bool
-            Deprecated. Dataset always validates consistency.
+        validate: bool, optional
+            Deprecated and ignored. Dataset always validates consistency.
             Will be removed in a future version.
         title: str, optional
             Title of the dataset, by default ""
@@ -175,9 +175,9 @@ class Dataset:
             Dummy time step in seconds, by default 1.0
 
         """
-        if not validate:
+        if validate is not None:
             warnings.warn(
-                "validate=False is deprecated and will be removed in a future version. "
+                "The validate argument is deprecated and will be removed in a future version. "
                 "Dataset always validates consistency of its DataArrays.",
                 FutureWarning,
                 stacklevel=2,

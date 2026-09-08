@@ -184,6 +184,7 @@ class DfsuLayered:
             node_ids=node_table.ids,
             n_layers=dfs.NumberOfLayers,
             n_sigma=min(dfs.NumberOfSigmaLayers, dfs.NumberOfLayers),
+            validate=False,
         )
         dfs.Close()
         return geometry

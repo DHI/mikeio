@@ -1799,18 +1799,19 @@ def test_custom_blocks_of_derived_dataset_are_copies(blocks_ds: Dataset) -> None
         assert "Extra" not in blocks_ds.custom_blocks
 
 
-def test_validate_false_is_deprecated(ds1: Dataset) -> None:
+@pytest.mark.parametrize("validate", [True, False])
+def test_validate_argument_is_deprecated(ds1: Dataset, validate: bool) -> None:
     das = list(ds1)
 
-    with pytest.warns(FutureWarning, match="validate=False is deprecated"):
-        Dataset(das, validate=False)
+    with pytest.warns(FutureWarning, match="validate argument is deprecated"):
+        Dataset(das, validate=validate)
 
 
 def test_validate_false_still_validates() -> None:
     da1 = mikeio.read("tests/testdata/HD2D.dfsu")[0]
     da2 = mikeio.read("tests/testdata/oresundHD_run1.dfsu")[1]
 
-    with pytest.warns(FutureWarning, match="validate=False is deprecated"):
+    with pytest.warns(FutureWarning, match="validate argument is deprecated"):
         with pytest.raises(ValueError, match="shape"):
             Dataset([da1, da2], validate=False)
 
@@ -1818,7 +1819,7 @@ def test_validate_false_still_validates() -> None:
 def test_from_numpy_validate_false_is_deprecated() -> None:
     time = pd.date_range(start=datetime(2000, 1, 1), freq="s", periods=3)
 
-    with pytest.warns(FutureWarning, match="validate=False is deprecated"):
+    with pytest.warns(FutureWarning, match="validate argument is deprecated"):
         Dataset.from_numpy(
             data=[np.zeros((3, 7))], time=time, items=[ItemInfo("Foo")], validate=False
         )
