@@ -1,0 +1,7 @@
+---
+title: PFS examples
+---
+
+A collection of specific examples of working with PFS files. For a general introduction see the [user guide](../../user-guide/pfs.qmd) and the [API reference](../../api/#pfs).
+
+* [Spectral wave nesting](sw_nesting.qmd)
