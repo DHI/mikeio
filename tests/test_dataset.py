@@ -1,5 +1,6 @@
 from pathlib import Path
 from datetime import datetime
+from typing import Any
 import numpy as np
 import pandas as pd
 import pytest
@@ -1664,3 +1665,135 @@ def test_title_not_in_repr_when_empty() -> None:
         items=[ItemInfo("X")],
     )
     assert "title:" not in repr(ds)
+
+
+# === Custom block tests ===
+
+
+def _tiny_ds(**kwargs: Any) -> Dataset:
+    return Dataset.from_numpy(
+        data=[np.zeros(5)],
+        time=pd.date_range("2000", periods=5, freq="s"),
+        items=[ItemInfo("X")],
+        **kwargs,
+    )
+
+
+@pytest.fixture
+def blocks_ds() -> Dataset:
+    """Grid2D dataset with a custom block, so isel(y=0) changes the geometry type."""
+    nt, ny, nx = 6, 3, 4
+    data = [np.zeros([nt, ny, nx]) + 0.1, np.zeros([nt, ny, nx]) + 0.2]
+    return Dataset.from_numpy(
+        data=data,
+        time=pd.date_range(start=datetime(2000, 1, 1), freq="s", periods=nt),
+        items=[ItemInfo("Foo"), ItemInfo("Bar")],
+        geometry=mikeio.Grid2D(nx=nx, dx=1.0, ny=ny, dy=1.0, projection="UTM-33"),
+        title="Test Title",
+        custom_blocks={
+            "M21_Misc": np.array([0, 0, -900, 10, 0, 0, 0], dtype=np.float32)
+        },
+    )
+
+
+def test_custom_blocks_default_empty() -> None:
+    assert _tiny_ds().custom_blocks == {}
+
+
+def test_custom_blocks_setter_replaces_all(blocks_ds: Dataset) -> None:
+    blocks_ds.custom_blocks = {"Other": np.array([1.0], dtype=np.float32)}
+    assert list(blocks_ds.custom_blocks) == ["Other"]
+
+    blocks_ds.custom_blocks = {}
+    assert blocks_ds.custom_blocks == {}
+
+
+def test_custom_blocks_setter_copies_the_input_value() -> None:
+    """A Dataset owns its blocks, so an assigned value is copied."""
+    values = np.array([1.0, 2.0], dtype=np.float32)
+    ds = _tiny_ds(custom_blocks={"B": values})
+
+    assert ds.custom_blocks["B"] is not values
+    assert not np.shares_memory(ds.custom_blocks["B"], values)
+
+    values[0] = 99.0  # editing the caller's array does not reach the Dataset
+    assert ds.custom_blocks["B"][0] == pytest.approx(1.0)
+
+
+def test_custom_blocks_setter_stores_values_as_given(blocks_ds: Dataset) -> None:
+    """What a block may hold is a dfs matter, checked when a file is written.
+
+    A Dataset therefore keeps whatever it was handed - unconverted, and unchecked
+    even when it could never be written. The write-time tests in test_dfs2.py are
+    where the rules live.
+    """
+    blocks_ds.custom_blocks = {
+        "List": [0, 0, -900, 10, 0, 0, 0],  # no dtype until it is written
+        "Ints": np.array([1, 2], dtype=np.int64),  # a dtype dfs cannot store
+        "2D": np.zeros((2, 2), dtype=np.float32),
+        "": np.array([1.0], dtype=np.float32),  # not even a usable name
+    }
+
+    assert blocks_ds.custom_blocks["List"] == [0, 0, -900, 10, 0, 0, 0]
+    assert blocks_ds.custom_blocks["Ints"].dtype == np.int64
+    assert blocks_ds.custom_blocks["2D"].shape == (2, 2)
+    assert list(blocks_ds.custom_blocks) == ["List", "Ints", "2D", ""]
+
+
+def test_custom_blocks_editable_in_place(blocks_ds: Dataset) -> None:
+    blocks_ds.custom_blocks["M21_Misc"][3] = -5.0
+    assert blocks_ds.custom_blocks["M21_Misc"][3] == pytest.approx(-5.0)
+
+    blocks_ds.custom_blocks["New"] = np.array([1.0], dtype=np.float32)
+    assert sorted(blocks_ds.custom_blocks) == ["M21_Misc", "New"]
+
+    del blocks_ds.custom_blocks["M21_Misc"]
+    assert list(blocks_ds.custom_blocks) == ["New"]
+
+
+def test_custom_blocks_carried_through_dataset_operations(blocks_ds: Dataset) -> None:
+    """Blocks propagate blindly, values intact, through operations returning a Dataset.
+
+    A few representative operations, not an exhaustive sweep: the point is the
+    rule, not the catalogue. That the values survive all the way to disk is
+    proven by the round-trip tests in test_custom_blocks.py, which read them back
+    from the written file.
+    """
+    expected = blocks_ds.custom_blocks["M21_Misc"].copy()
+
+    ds2 = blocks_ds.copy()
+    ds2.time = pd.date_range(start=datetime(2000, 1, 2), freq="s", periods=6)
+
+    derived = [
+        blocks_ds.isel(time=0),
+        blocks_ds.sel(time=blocks_ds.time[0]),
+        blocks_ds + 1,
+        blocks_ds[["Foo"]],
+        blocks_ds.copy(),
+        Dataset.concat([blocks_ds, ds2]),
+        # ... including operations that change the geometry type, after which a
+        # block may no longer describe the result. Fixing that is the user's job.
+        blocks_ds.isel(y=0),  # Grid2D -> Grid1D
+        blocks_ds.mean(axis="space"),  # -> 0D
+        # selecting down to zero items must not crash on the item-less geometry
+        blocks_ds[[]],
+    ]
+
+    for ds in derived:
+        assert ds.custom_blocks.keys() == {"M21_Misc"}
+        np.testing.assert_array_equal(ds.custom_blocks["M21_Misc"], expected)
+
+
+def test_custom_blocks_of_derived_dataset_are_copies(blocks_ds: Dataset) -> None:
+    """Every Dataset owns its blocks, so editing a derived one leaves the source alone."""
+    for derived in (blocks_ds.isel(time=0), blocks_ds * 2, blocks_ds[["Foo"]]):
+        block = derived.custom_blocks["M21_Misc"]
+        assert block is not blocks_ds.custom_blocks["M21_Misc"]
+        np.testing.assert_array_equal(block, blocks_ds.custom_blocks["M21_Misc"])
+
+        block[3] = 999.0
+        assert blocks_ds.custom_blocks["M21_Misc"][3] == pytest.approx(10.0)
+
+        # the dict is a new one too, so adding a block does not add it to the source
+        derived.custom_blocks["Extra"] = np.array([1.0], dtype=np.float32)
+        assert "Extra" not in blocks_ds.custom_blocks

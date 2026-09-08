@@ -1,9 +1,10 @@
 from __future__ import annotations
 from pathlib import Path
 from collections.abc import Sequence
-from typing import Any
+from typing import Any, Mapping
 
 import numpy as np
+from numpy.typing import NDArray
 import pandas as pd
 
 from mikecore.DfsBuilder import DfsBuilder
@@ -22,6 +23,7 @@ from ._dfs import (
     _valid_timesteps,
     write_dfs_data,
 )
+from ._custom_blocks import readonly_custom_blocks, write_custom_blocks
 from ..eum import TimeStepUnit
 from ..spatial import Grid3D
 from .._path import normalize_path
@@ -90,6 +92,8 @@ def _write_dfs3_header(filename: str | Path, ds: Dataset, title: str) -> DfsFile
             DfsSimpleType.Float,
             item.data_value_type,
         )
+
+    write_custom_blocks(builder, ds.custom_blocks)
 
     try:
         builder.CreateFile(normalize_path(filename))
@@ -271,6 +275,7 @@ class Dfs3(_Dfs123):
             items=items,
             geometry=geometry,
             title=self.title,
+            custom_blocks=self.custom_blocks,
             validate=False,
         )
 
@@ -342,3 +347,14 @@ class Dfs3(_Dfs123):
     def title(self) -> str:
         """Title of the dfs3 file."""
         return self._title
+
+    @property
+    def custom_blocks(self) -> Mapping[str, NDArray[Any]]:
+        """Custom blocks of the dfs3 file header, as name -> 1-D array.
+
+        Read-only: a dfs header is written when the file is created, so neither
+        the mapping nor its arrays accept an edit here. Change them on a Dataset
+        and write a new file - see [](`mikeio.Dataset.custom_blocks`) for the
+        meaning of the values and for how to change them.
+        """
+        return readonly_custom_blocks(self._custom_blocks)

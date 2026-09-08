@@ -2,10 +2,11 @@ from __future__ import annotations
 from functools import cached_property
 from pathlib import Path
 from datetime import datetime, timedelta
-from typing import Any, Sequence
+from typing import Any, Mapping, Sequence
 import warnings
 
 import numpy as np
+from numpy.typing import NDArray
 import pandas as pd
 from mikecore.DfsFactory import DfsBuilder, DfsFactory
 from mikecore.DfsFile import DfsSimpleType, StatType, TimeAxisType
@@ -14,7 +15,15 @@ from mikecore.eum import eumQuantity
 
 from .. import __dfs_version__
 from ..dataset import Dataset, DataArray
-from ._dfs import _get_item_info, _valid_item_numbers
+from ._dfs import (
+    _get_item_info,
+    _valid_item_numbers,
+)
+from ._custom_blocks import (
+    read_custom_blocks,
+    readonly_custom_blocks,
+    write_custom_blocks,
+)
 from ..eum import EUMType, EUMUnit, ItemInfo, TimeStepUnit, ItemInfoList
 from .._time import DateTimeSelector
 from .._path import normalize_path
@@ -61,6 +70,8 @@ def write_dfs0(
         newitem.SetValueType(da.item.data_value_type)
         newitem.SetAxis(factory.CreateAxisEqD0())
         builder.AddDynamicItem(newitem.GetDynamicItemInfo())
+
+    write_custom_blocks(builder, dataset.custom_blocks)
 
     builder.CreateFile(filename)
 
@@ -121,6 +132,10 @@ class Dfs0:
 
         # time
         self._n_timesteps: int = dfs.FileInfo.TimeAxis.NumberOfTimeSteps
+
+        # Must happen before Close(): mikecore's block values are views over
+        # memory owned by the dfs library (see Dataset.custom_blocks).
+        self._custom_blocks: dict[str, NDArray[Any]] = read_custom_blocks(dfs.FileInfo)
 
         dfs.Close()
 
@@ -193,7 +208,12 @@ class Dfs0:
         else:
             item_infos = self.items
         ds = Dataset.from_numpy(
-            data, time=ftime, items=item_infos, title=self.title, validate=False
+            data,
+            time=ftime,
+            items=item_infos,
+            title=self.title,
+            custom_blocks=self.custom_blocks,
+            validate=False,
         )
 
         # select time steps
@@ -313,6 +333,17 @@ class Dfs0:
     def title(self) -> str:
         """File title."""
         return self._title
+
+    @property
+    def custom_blocks(self) -> Mapping[str, NDArray[Any]]:
+        """Custom blocks of the dfs0 file header, as name -> 1-D array.
+
+        Read-only: a dfs header is written when the file is created, so neither
+        the mapping nor its arrays accept an edit here. Change them on a Dataset
+        and write a new file - see [](`mikeio.Dataset.custom_blocks`) for the
+        meaning of the values and for how to change them.
+        """
+        return readonly_custom_blocks(self._custom_blocks)
 
     # ======================
     # Deprecated in 2.5.0
