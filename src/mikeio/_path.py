@@ -7,12 +7,12 @@ from pathlib import Path
 
 
 def normalize_path(filename: str | Path) -> str:
-    """Convert a path-like object to a string, expanding a leading ``~``.
+    """Convert a path-like object to a string, expanding a leading `~`.
 
-    MIKE IO accepts both strings and :class:`pathlib.Path` objects, but the
+    MIKE IO accepts both strings and `pathlib.Path` objects, but the
     underlying *mikecore* library only understands strings and does not expand
-    ``~`` to the user's home directory. Normalizing paths at the public API
-    boundary makes MIKE IO behave like pandas and xarray, which expand ``~``
+    `~` to the user's home directory. Normalizing paths at the public API
+    boundary makes MIKE IO behave like pandas and xarray, which expand `~`
     for both reading and writing.
 
     Parameters
@@ -23,7 +23,7 @@ def normalize_path(filename: str | Path) -> str:
     Returns
     -------
     str
-        The path as a string, with a leading ``~`` expanded.
+        The path as a string, with a leading `~` expanded.
 
     Examples
     --------

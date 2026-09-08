@@ -180,6 +180,7 @@ class Dataset:
 
     @property
     def values(self) -> None:
+        """Not available for Dataset, use to_numpy() or DataArray.values."""
         raise AttributeError(
             "Dataset has no property 'values' - use to_numpy() instead or maybe you were looking for DataArray.values?"
         )
@@ -472,8 +473,8 @@ class Dataset:
     def squeeze(self) -> Dataset:
         """Remove axes of length 1.
 
-        .. deprecated:: 3.1
-            squeeze() will be removed in v4.0. Use isel() to select specific indices.
+        Deprecated since v3.1: squeeze() will be removed in v4.0,
+        use isel() to select specific indices instead.
 
         Returns
         -------
@@ -1128,6 +1129,23 @@ class Dataset:
         return Dataset(das, title=self.title, custom_blocks=self.custom_blocks)
 
     def interp_na(self, axis: str = "time", **kwargs: Any) -> Dataset:
+        """Fill in NaNs by interpolating according to different methods.
+
+        Wrapper of [](`xarray.DataArray.interpolate_na`)
+
+        Parameters
+        ----------
+        axis : str
+            Dimension to interpolate along, by default "time"
+        **kwargs : Any
+            Additional arguments passed on to
+            [](`xarray.DataArray.interpolate_na`)
+
+        Returns
+        -------
+        Dataset
+
+        """
         ds = self.copy()
         for da in ds:
             da.values = da.interp_na(axis=axis, **kwargs).values

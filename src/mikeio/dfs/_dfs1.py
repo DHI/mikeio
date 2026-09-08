@@ -189,6 +189,7 @@ class Dfs1(_Dfs123):
 
     @property
     def geometry(self) -> Grid1D:
+        """Spatial information."""
         assert isinstance(self._geometry, Grid1D)
         return self._geometry
 

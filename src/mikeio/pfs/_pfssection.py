@@ -29,8 +29,9 @@ def _merge_dict(a: dict[str, Any], b: Mapping[str, Any]) -> dict[str, Any]:
 
 
 class PfsNonUniqueList(list):
+    """List of the values of PFS keywords that appear more than once."""
+
     # TODO do we really need this, regular lists are not unique
-    pass
 
 
 class PfsSection(SimpleNamespace, MutableMapping[str, Any]):

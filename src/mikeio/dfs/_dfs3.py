@@ -321,6 +321,7 @@ class Dfs3(_Dfs123):
 
     @property
     def geometry(self) -> Grid3D:
+        """Spatial information."""
         return self._geometry
 
     @property
@@ -340,6 +341,7 @@ class Dfs3(_Dfs123):
 
     @property
     def shape(self) -> tuple[int, int, int, int]:
+        """Tuple with number of values in the t-, z-, y-, x-direction."""
         return (self._n_timesteps, self._nz, self._ny, self._nx)
 
     @property

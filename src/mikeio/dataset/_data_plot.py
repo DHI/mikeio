@@ -723,6 +723,8 @@ class DataArrayPlotterFMVerticalProfile(DataArrayPlotter):
 
 
 class DataArrayPlotterPointSpectrum(DataArrayPlotter):
+    """Plot a point spectrum, e.g. da.plot() on a spectral DataArray."""
+
     def __call__(
         self,
         ax: Axes | None = None,
@@ -740,14 +742,17 @@ class DataArrayPlotterPointSpectrum(DataArrayPlotter):
             raise ValueError("Spectrum could not be plotted")
 
     def patch(self, **kwargs: Any) -> Axes:
+        """Plot the 2d spectrum as colored patches."""
         kwargs["plot_type"] = "patch"
         return self._plot_2dspectrum(**kwargs)
 
     def contour(self, **kwargs: Any) -> Axes:
+        """Plot the 2d spectrum as contour lines."""
         kwargs["plot_type"] = "contour"
         return self._plot_2dspectrum(**kwargs)
 
     def contourf(self, **kwargs: Any) -> Axes:
+        """Plot the 2d spectrum as filled contours."""
         kwargs["plot_type"] = "contourf"
         return self._plot_2dspectrum(**kwargs)
 
@@ -867,6 +872,8 @@ def _calc_Hm0(da: DataArray) -> DataArray:
 
 
 class DataArrayPlotterLineSpectrum(DataArrayPlotterGrid1D):
+    """Plot significant wave height along a line of spectra."""
+
     def __init__(self, da: DataArray) -> None:
         if da.n_timesteps > 1:
             Hm0 = _calc_Hm0(da[0])
@@ -876,6 +883,8 @@ class DataArrayPlotterLineSpectrum(DataArrayPlotterGrid1D):
 
 
 class DataArrayPlotterAreaSpectrum(DataArrayPlotterFM):
+    """Plot significant wave height on a mesh of spectra."""
+
     def __init__(self, da: DataArray) -> None:
         if da.n_timesteps > 1:
             Hm0 = _calc_Hm0(da[0])

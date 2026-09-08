@@ -353,6 +353,7 @@ class Dfs0:
         unit: EUMUnit | None = None,
         items: Sequence[ItemInfo] | None = None,
     ) -> None:
+        """Create a dfs0 file from a pandas DataFrame (deprecated, use mikeio.from_pandas)."""
         return dataframe_to_dfs0(df, filename, itemtype, unit, items)
 
 

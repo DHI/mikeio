@@ -46,14 +46,15 @@ def read(
 
     * Dfs2: area
     * Dfs3: layers
-    * Dfsu-2d: (x,y), elements, area
-    * Dfsu-layered: (xy,z), elements, area, layers
+    * Dfsu-2d: (x,y), elements, area, error_bad_data, fill_bad_data_value
+    * Dfsu-layered: (xy,z), elements, area, layers, error_bad_data,
+      fill_bad_data_value
 
     Parameters
     ----------
     filename
         Full path and file name to the dfs file.
-        A leading ``~`` is expanded to the user's home directory.
+        A leading `~` is expanded to the user's home directory.
     items: int, str, list[int] or list[str], optional
         Read only selected items, by number (0-based), or by name,
         by default None (=all)
@@ -71,13 +72,9 @@ def read(
     layers: int, str or sequence, optional
         Dfs3/Dfsu-layered: read only data from specific layers,
         by default None (=all layers)
-    error_bad_data: bool, optional
-            raise error if data is corrupt, by default True,
-    fill_bad_data_value:
-            fill value for to impute corrupt data, used in conjunction with error_bad_data=False
-            default np.nan
     **kwargs: Any
-        Additional keyword arguments
+        Additional keyword arguments, e.g. the file type specific arguments
+        listed above
 
     Returns
     -------
@@ -144,7 +141,7 @@ def open(
     ----------
     filename
         Full path and file name to the dfs file.
-        A leading ``~`` is expanded to the user's home directory.
+        A leading `~` is expanded to the user's home directory.
     **kwargs: Any
         Additional keyword arguments, e.g. *type="spectral"*
 

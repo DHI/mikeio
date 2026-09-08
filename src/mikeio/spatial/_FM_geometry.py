@@ -1031,6 +1031,22 @@ class GeometryFM2D(_GeometryFM):
     def elements_to_geometry(
         self, elements: int | Sequence[int], keepdims: bool = False
     ) -> GeometryFM2D | GeometryPoint2D:
+        """Export a selection of elements to a new geometry.
+
+        Parameters
+        ----------
+        elements : int or list[int]
+            Element indices to select
+        keepdims : bool
+            Keep the geometry as a mesh even for a single element,
+            by default False (a single element becomes a point geometry)
+
+        Returns
+        -------
+        GeometryFM2D or GeometryPoint2D
+            Geometry for the selected elements
+
+        """
         if isinstance(elements, (int, np.integer)):
             sel_elements: list[int] = [elements]
         else:
