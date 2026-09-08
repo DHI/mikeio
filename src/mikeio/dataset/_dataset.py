@@ -167,6 +167,14 @@ class Dataset:
         Derived from the DataArrays rather than stored, so that renaming one
         (da.name = "...") cannot leave the Dataset looking it up by the old name.
         """
+        names = self.names
+        if len(set(names)) != len(names):
+            duplicates = sorted({name for name in names if names.count(name) > 1})
+            dupes = ", ".join(duplicates)
+            raise ValueError(
+                f"Dataset has duplicate item names: {dupes}. "
+                "Rename items to unique names before name-based operations."
+            )
         return {da.name: da for da in self._das}
 
     @property
@@ -563,9 +571,13 @@ class Dataset:
         if name.startswith("_"):
             # never look up internals as items (also stops recursion on _das)
             raise AttributeError(name)
-        for da in self._das:
-            if _to_safe_name(da.name) == name:
-                return da
+        matches = [da for da in self._das if _to_safe_name(da.name) == name]
+        if len(matches) == 1:
+            return matches[0]
+        if len(matches) > 1:
+            raise AttributeError(
+                f"Dataset attribute {name!r} is ambiguous because multiple items match it"
+            )
         raise AttributeError(f"Dataset has no attribute or item named {name!r}")
 
     def __dir__(self) -> list[str]:

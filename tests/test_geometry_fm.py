@@ -1,3 +1,4 @@
+import numpy as np
 import pytest
 
 from mikeio.exceptions import OutsideModelDomainError
@@ -306,3 +307,51 @@ def test_setting_node_coordinates_updates_element_coordinates() -> None:
 
     with pytest.raises(ValueError, match="length of nodes"):
         g.node_coordinates = nc[:2]
+
+
+def test_setting_node_coordinates_copies_input() -> None:
+    g = GeometryFM2D(
+        node_coordinates=[(0.0, 0.0, 0.0), (1.0, 0.0, 0.0), (1.0, 1.0, 0.0)],
+        element_table=[(0, 1, 2)],
+        projection="LONG/LAT",
+    )
+    nc = g.node_coordinates.copy()
+    g.node_coordinates = nc
+    assert g.element_coordinates[0, 2] == 0.0
+
+    nc[:, 2] = -3.0
+
+    assert g.node_coordinates[0, 2] == 0.0
+    assert g.element_coordinates[0, 2] == 0.0
+
+
+def test_element_table_is_read_only() -> None:
+    g = GeometryFM2D(
+        node_coordinates=[(0.0, 0.0, 0.0), (1.0, 0.0, 0.0), (1.0, 1.0, 0.0)],
+        element_table=[(0, 1, 2)],
+        projection="LONG/LAT",
+    )
+
+    with pytest.raises(ValueError, match="read-only"):
+        g.element_table[0][0] = 1
+
+
+def test_setting_element_table_copies_input() -> None:
+    g = GeometryFM2D(
+        node_coordinates=[
+            (0.0, 0.0, 0.0),
+            (1.0, 0.0, 0.0),
+            (1.0, 1.0, 0.0),
+            (0.0, 1.0, 0.0),
+        ],
+        element_table=[(0, 1, 2)],
+        projection="LONG/LAT",
+    )
+    el = [np.array([0, 1, 2]), np.array([0, 2, 3])]
+    g.element_table = el  # type: ignore[arg-type]
+    assert g.element_coordinates[1, 0] == pytest.approx(1.0 / 3.0)
+
+    el[1][0] = 1
+
+    assert g.element_table[1][0] == 0
+    assert g.element_coordinates[1, 0] == pytest.approx(1.0 / 3.0)

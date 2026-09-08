@@ -1225,6 +1225,19 @@ def test_renamed_dataset_has_updated_attributes(ds1: mikeio.Dataset) -> None:
     assert isinstance(ds2.Baz, mikeio.DataArray)
 
 
+def test_duplicate_item_names_raise_on_name_based_access(ds1: mikeio.Dataset) -> None:
+    ds1[0].name = ds1[1].name
+
+    with pytest.raises(ValueError, match="duplicate item names"):
+        _ = ds1["Bar"]
+
+    with pytest.raises(AttributeError, match="ambiguous"):
+        _ = ds1.Bar  # type: ignore[attr-defined]
+
+    with pytest.raises(ValueError, match="duplicate item names"):
+        ds1.fillna(0.0)
+
+
 def test_merge_by_item() -> None:
     ds1 = mikeio.read("tests/testdata/tide1.dfs1")
     ds2 = mikeio.read("tests/testdata/tide1.dfs1")

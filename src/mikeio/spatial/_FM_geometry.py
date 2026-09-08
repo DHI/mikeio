@@ -263,6 +263,12 @@ def _read_only(values: np.ndarray) -> np.ndarray:
     return view
 
 
+def _copy_element_table(
+    element_table: Sequence[Sequence[int] | np.ndarray],
+) -> list[np.ndarray]:
+    return [np.array(nodes, copy=True) for nodes in element_table]
+
+
 class _GeometryFM(_Geometry):
     def __init__(
         self,
@@ -278,11 +284,13 @@ class _GeometryFM(_Geometry):
         reindex: bool = False,
     ) -> None:
         super().__init__(projection=projection)
-        self._node_coordinates = np.asarray(node_coordinates)
+        self._node_coordinates = np.array(node_coordinates, copy=True)
 
         n_nodes = len(self._node_coordinates)
         self._codes = (
-            np.zeros((n_nodes,), dtype=int) if codes is None else np.asarray(codes)
+            np.zeros((n_nodes,), dtype=int)
+            if codes is None
+            else np.array(codes, copy=True)
         )
 
         self._node_ids = (
@@ -291,11 +299,12 @@ class _GeometryFM(_Geometry):
 
         self._type = dfsu_type
 
-        self._element_table, self._element_ids = self._check_elements(
+        element_table, self._element_ids = self._check_elements(
             element_table=element_table,  # type: ignore
             element_ids=element_ids,
             validate=validate,
         )
+        self._element_table = _copy_element_table(element_table)
 
         if reindex:
             self._reindex()
@@ -316,11 +325,9 @@ class _GeometryFM(_Geometry):
     ) -> tuple[Any, Any]:
         if validate:
             max_node_id = self._node_ids.max()
-            for i, e in enumerate(element_table):
+            for e in element_table:
                 # TODO: avoid looping through all elements (could be +1e6)!
-                if not isinstance(e, np.ndarray):
-                    e = np.asarray(e)
-                    element_table[i] = e
+                e = np.asarray(e)
 
                 # NOTE: this check "e.max()" takes the most of the time when constructing a new FM_geometry
                 if e.max() > max_node_id:
@@ -411,7 +418,7 @@ class _GeometryFM(_Geometry):
 
     @node_coordinates.setter
     def node_coordinates(self, value: ArrayLike) -> None:
-        nc = np.asarray(value)
+        nc = np.array(value, copy=True)
         if len(nc) != self.n_nodes:
             raise ValueError(
                 f"node_coordinates must have length of nodes ({self.n_nodes})"
@@ -420,13 +427,14 @@ class _GeometryFM(_Geometry):
         clear_cached_properties(self)
 
     @property
-    def element_table(self) -> np.ndarray:
+    def element_table(self) -> tuple[np.ndarray, ...]:
         """For each element: the 0-based indices of its nodes."""
-        return self._element_table
+        return tuple(_read_only(nodes) for nodes in self._element_table)
 
     @element_table.setter
     def element_table(self, value: np.ndarray) -> None:
-        self._element_table, self._element_ids = self._check_elements(value)
+        element_table, self._element_ids = self._check_elements(value)
+        self._element_table = _copy_element_table(element_table)
         clear_cached_properties(self)
 
     @property
