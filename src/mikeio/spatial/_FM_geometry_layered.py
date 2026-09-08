@@ -543,11 +543,11 @@ class GeometryFM3D(_GeometryFMLayered):
         warnings.warn(
             "boundary_polylines is renamed to boundary_polygons", FutureWarning
         )
-        return self.geometry2d.boundary_polylines
+        return self.geometry2d.boundary_polygons
 
     @property
     def boundary_polygons(self) -> BoundaryPolygons:
-        return self.geometry2d.boundary_polylines
+        return self.geometry2d.boundary_polygons
 
     def contains(self, points: np.ndarray) -> np.ndarray:
         return self.geometry2d.contains(points)
