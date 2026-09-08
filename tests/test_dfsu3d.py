@@ -1,3 +1,4 @@
+import warnings
 from pathlib import Path
 
 import numpy as np
@@ -424,6 +425,27 @@ def test_boundary_codes() -> None:
     dfs = mikeio.Dfsu3D(filename)
 
     assert len(dfs.geometry.boundary_codes) == 3
+
+
+def test_boundary_polygons_does_not_warn() -> None:
+    filename = "tests/testdata/oresund_sigma_z.dfsu"
+    geometry = mikeio.Dfsu3D(filename).geometry
+    assert isinstance(geometry, GeometryFM3D)
+
+    with warnings.catch_warnings():
+        warnings.simplefilter("error", FutureWarning)
+        polygons = geometry.boundary_polygons
+
+    assert len(polygons.exteriors) > 0
+
+
+def test_boundary_polylines_is_deprecated() -> None:
+    filename = "tests/testdata/oresund_sigma_z.dfsu"
+    geometry = mikeio.Dfsu3D(filename).geometry
+    assert isinstance(geometry, GeometryFM3D)
+
+    with pytest.warns(FutureWarning, match="boundary_polygons"):
+        geometry.boundary_polylines
 
 
 def test_top_elements() -> None:
