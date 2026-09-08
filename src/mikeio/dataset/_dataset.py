@@ -122,9 +122,10 @@ class Dataset:
 
         data_vars = self._dataarrays_as_mapping(data)
 
-        first, *rest = data_vars.values()
-        for da in rest:
-            first._is_compatible(da)
+        if data_vars:
+            first, *rest = data_vars.values()
+            for da in rest:
+                first._is_compatible(da)
 
         self._data_vars = data_vars
 

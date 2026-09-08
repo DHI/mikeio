@@ -1797,3 +1797,47 @@ def test_custom_blocks_of_derived_dataset_are_copies(blocks_ds: Dataset) -> None
         # the dict is a new one too, so adding a block does not add it to the source
         derived.custom_blocks["Extra"] = np.array([1.0], dtype=np.float32)
         assert "Extra" not in blocks_ds.custom_blocks
+
+
+def test_validate_false_is_deprecated(ds1: Dataset) -> None:
+    das = list(ds1)
+
+    with pytest.warns(FutureWarning, match="validate=False is deprecated"):
+        Dataset(das, validate=False)
+
+
+def test_validate_false_still_validates() -> None:
+    da1 = mikeio.read("tests/testdata/HD2D.dfsu")[0]
+    da2 = mikeio.read("tests/testdata/oresundHD_run1.dfsu")[1]
+
+    with pytest.warns(FutureWarning, match="validate=False is deprecated"):
+        with pytest.raises(ValueError, match="shape"):
+            Dataset([da1, da2], validate=False)
+
+
+def test_from_numpy_validate_false_is_deprecated() -> None:
+    time = pd.date_range(start=datetime(2000, 1, 1), freq="s", periods=3)
+
+    with pytest.warns(FutureWarning, match="validate=False is deprecated"):
+        Dataset.from_numpy(
+            data=[np.zeros((3, 7))], time=time, items=[ItemInfo("Foo")], validate=False
+        )
+
+
+def test_different_geometry_of_same_type_not_allowed() -> None:
+    time = pd.date_range(start=datetime(2000, 1, 1), freq="s", periods=3)
+    da1 = mikeio.DataArray(
+        data=np.zeros((3, 7)),
+        time=time,
+        item=ItemInfo("Foo"),
+        geometry=mikeio.Grid1D(nx=7, dx=1.0),
+    )
+    da2 = mikeio.DataArray(
+        data=np.zeros((3, 7)),
+        time=time,
+        item=ItemInfo("Bar"),
+        geometry=mikeio.Grid1D(nx=7, dx=2.0),
+    )
+
+    with pytest.raises(ValueError, match="geometries must be the same"):
+        Dataset([da1, da2])
