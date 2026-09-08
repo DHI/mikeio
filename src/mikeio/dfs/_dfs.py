@@ -6,6 +6,7 @@ from dataclasses import dataclass
 from datetime import datetime
 from typing import Any, Sequence
 import numpy as np
+from numpy.typing import NDArray
 import pandas as pd
 
 from mikecore.DfsFile import (
@@ -18,6 +19,7 @@ from mikecore.DfsFileFactory import DfsFileFactory
 from mikecore.Projections import Cartography
 
 from ..dataset import Dataset
+from ._custom_blocks import read_custom_blocks
 from ..eum import ItemInfo, ItemInfoList
 from ..exceptions import ItemsError
 from .._time import DateTimeSelector
@@ -175,7 +177,7 @@ def _valid_timesteps(
                 raise ValueError("All elements in time_steps must be integers.")
             if not all(0 <= i < nt for i in time_steps):  # type: ignore
                 raise ValueError(
-                    f"All elements in time_steps must be in the range of 0 to {nt-1}."
+                    f"All elements in time_steps must be in the range of 0 to {nt - 1}."
                 )
             return False, list(time_steps)  # type: ignore
 
@@ -341,6 +343,10 @@ class _Dfs123:
         self._latitude: float = dfs.FileInfo.Projection.Latitude
         self._orientation: float = dfs.FileInfo.Projection.Orientation
         self._deletevalue: float = dfs.FileInfo.DeleteValueFloat
+        # Must happen before Close(): mikecore's block values are views over memory
+        # owned by the dfs library. Captured here for dfs1/dfs2/dfs3 alike, since
+        # this is where the generic handle is closed (see Dataset.custom_blocks).
+        self._custom_blocks: dict[str, NDArray[Any]] = read_custom_blocks(dfs.FileInfo)
 
         dfs.Close()
 

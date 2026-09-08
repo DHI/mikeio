@@ -789,6 +789,11 @@ def is_header_unchanged_on_read_write(tmp_path: Path, filename: str) -> None:
     )
     assert b.items == a.items
 
+    assert b.custom_blocks.keys() == a.custom_blocks.keys()
+    for name, values in a.custom_blocks.items():
+        np.testing.assert_array_equal(b.custom_blocks[name], values)
+        assert b.custom_blocks[name].dtype == values.dtype
+
 
 def test_read_write_header_unchanged_utm_not_rotated(tmp_path: Path) -> None:
     is_header_unchanged_on_read_write(tmp_path, "utm_not_rotated_neurope_temp.dfs2")

@@ -72,6 +72,11 @@ class Dataset:
         DataArray, list of DataArrays or dict of DataArrays
     validate:
         Optional validation of consistency of data arrays.
+    title:
+        Title of the dataset, by default "".
+    custom_blocks:
+        Custom blocks of the dfs file header, by default None (=no custom blocks).
+        See the *custom_blocks* property.
 
     Attributes
     ----------
@@ -104,6 +109,7 @@ class Dataset:
         data: Mapping[str, DataArray] | Sequence[DataArray],
         validate: bool = True,
         title: str = "",
+        custom_blocks: Mapping[str, Any] | None = None,
     ):
         data_vars = self._dataarrays_as_mapping(data)
 
@@ -119,6 +125,7 @@ class Dataset:
         self.plot = DatasetPlotter(self)
 
         self.title = title
+        self.custom_blocks = custom_blocks or {}
 
     @staticmethod
     def from_numpy(
@@ -130,6 +137,7 @@ class Dataset:
         zn: NDArray[np.floating] | None = None,
         validate: bool = True,
         title: str = "",
+        custom_blocks: Mapping[str, Any] | None = None,
         dt: float = 1.0,
     ) -> Dataset:
         """Create a Dataset from numpy arrays.
@@ -150,6 +158,9 @@ class Dataset:
             Validate the DataArrays, by default True
         title: str, optional
             Title of the dataset, by default ""
+        custom_blocks: Mapping[str, Any], optional
+            Custom blocks of the dfs file header, by default None (=no custom blocks).
+            See the *custom_blocks* property.
         dt: float, optional
             Dummy time step in seconds, by default 1.0
 
@@ -163,7 +174,9 @@ class Dataset:
             for dd, it in zip(data, item_infos)
         }
 
-        return Dataset(data_vars, validate=validate, title=title)
+        return Dataset(
+            data_vars, validate=validate, title=title, custom_blocks=custom_blocks
+        )
 
     @property
     def values(self) -> None:
@@ -332,6 +345,51 @@ class Dataset:
         return self[0].deletevalue
 
     @property
+    def custom_blocks(self) -> dict[str, Any]:
+        """Custom blocks of the dfs file header, as name -> 1-D array.
+
+        Values are stored as given and may be edited in place, which is how a
+        block is changed; what a block may hold is a property of the dfs header
+        and is checked when the file is written. Every Dataset owns its blocks: an
+        assigned value is copied, and MIKE IO carries the blocks through each
+        operation without checking that they still apply. See the
+        [dfs2 user guide](../user-guide/dfs2.qmd#custom-blocks) for MIKE 21's
+        "M21_Misc" block and the caveats.
+
+        Examples
+        --------
+        ```{python}
+        import mikeio
+        ds = mikeio.read("../data/waves.dfs2")
+        ds.custom_blocks
+        ```
+
+        Set the MIKE 21 land value, index 3 of "M21_Misc":
+
+        ```{python}
+        ds.custom_blocks["M21_Misc"][3] = -10.0
+        ```
+
+        Add a new block, with a dtype other than float32:
+
+        ```{python}
+        import numpy as np
+        ds.custom_blocks["Counts"] = np.array([1, 2, 3], dtype=np.int32)
+        ds.custom_blocks
+        ```
+
+        """
+        return self._custom_blocks
+
+    @custom_blocks.setter
+    def custom_blocks(self, value: Mapping[str, Any]) -> None:
+        # Stored as given: what a custom block may hold is a property of the dfs
+        # header, so mikeio.dfs checks and converts them when it writes a file.
+        # Deep-copied all the same, so that a Dataset owns its blocks and neither
+        # the caller's values nor a derived Dataset's are shared with it.
+        self._custom_blocks = {name: deepcopy(values) for name, values in value.items()}
+
+    @property
     def geometry(self) -> Any:
         """Geometry of each DataArray."""
         return self[0].geometry
@@ -378,7 +436,12 @@ class Dataset:
         """
         res = {name: da.fillna(value=value) for name, da in self._data_vars.items()}
 
-        return Dataset(data=res, validate=False, title=self.title)
+        return Dataset(
+            data=res,
+            validate=False,
+            title=self.title,
+            custom_blocks=self.custom_blocks,
+        )
 
     def dropna(self) -> Dataset:
         """Remove time steps where all items are NaN."""
@@ -425,7 +488,12 @@ class Dataset:
         )
         res = {name: da.squeeze() for name, da in self._data_vars.items()}
 
-        return Dataset(data=res, validate=False, title=self.title)
+        return Dataset(
+            data=res,
+            validate=False,
+            title=self.title,
+            custom_blocks=self.custom_blocks,
+        )
 
     def create_data_array(
         self,
@@ -561,7 +629,13 @@ class Dataset:
     # hasattr(type(self), ...) misses them. An item named like one of these
     # would clobber internal state (e.g. "plot" destroys the DatasetPlotter,
     # "_data_vars" corrupts the item dict), so reserve them explicitly.
-    _RESERVED_INSTANCE_ATTRS = frozenset({"plot", "title", "_data_vars"})
+    # Note that "custom_blocks" needs no entry: it is a property, so it is a class
+    # member and already covered by the hasattr probe below. Its backing store
+    # "_custom_blocks" is not, and _to_safe_name(" custom blocks") produces exactly
+    # that name.
+    _RESERVED_INSTANCE_ATTRS = frozenset(
+        {"plot", "title", "_data_vars", "_custom_blocks"}
+    )
 
     def _is_reserved_attr(self, name: str) -> bool:
         # Probe the CLASS, not the instance: hasattr(self, ...) would invoke the
@@ -616,14 +690,24 @@ class Dataset:
                     for k, da in self._data_vars.items()
                     if fnmatch.fnmatch(k, key)
                 }
-                return Dataset(data=data_vars, validate=False, title=self.title)
+                return Dataset(
+                    data=data_vars,
+                    validate=False,
+                    title=self.title,
+                    custom_blocks=self.custom_blocks,
+                )
             else:
                 item_names = ",".join(self._data_vars.keys())
                 raise KeyError(f"No item named: {key}. Valid items: {item_names}")
 
         if isinstance(key, Iterable):
             data_vars = {v: self._data_vars[v] for v in key}
-            return Dataset(data=data_vars, validate=False, title=self.title)
+            return Dataset(
+                data=data_vars,
+                validate=False,
+                title=self.title,
+                custom_blocks=self.custom_blocks,
+            )
 
         raise TypeError(f"indexing with a {type(key)} is not (yet) supported")
 
@@ -731,7 +815,12 @@ class Dataset:
             )
             for da in self
         ]
-        return Dataset(data=res, validate=False, title=self.title)
+        return Dataset(
+            data=res,
+            validate=False,
+            title=self.title,
+            custom_blocks=self.custom_blocks,
+        )
 
     def sel(
         self,
@@ -812,7 +901,12 @@ class Dataset:
             da.sel(time=time, x=x, y=y, z=z, coords=coords, area=area, layers=layers)
             for da in self
         ]
-        return Dataset(data=res, validate=False, title=self.title)
+        return Dataset(
+            data=res,
+            validate=False,
+            title=self.title,
+            custom_blocks=self.custom_blocks,
+        )
 
     def interp(
         self,
@@ -892,9 +986,19 @@ class Dataset:
                 das = [da.interp(x=x, y=y, interpolant=interpolant) for da in self]
             else:
                 das = [da.interp(x=x, y=y) for da in self]
-            ds = Dataset(das, validate=False, title=self.title)
+            ds = Dataset(
+                das,
+                validate=False,
+                title=self.title,
+                custom_blocks=self.custom_blocks,
+            )
         else:
-            ds = Dataset([da for da in self], validate=False, title=self.title)
+            ds = Dataset(
+                [da for da in self],
+                validate=False,
+                title=self.title,
+                custom_blocks=self.custom_blocks,
+            )
 
         # interp in time
         if isinstance(time, (pd.DatetimeIndex, DataArray)):
@@ -1021,7 +1125,7 @@ class Dataset:
             for da in self
         ]
 
-        return Dataset(das, title=self.title)
+        return Dataset(das, title=self.title, custom_blocks=self.custom_blocks)
 
     def interp_na(self, axis: str = "time", **kwargs: Any) -> Dataset:
         ds = self.copy()
@@ -1093,7 +1197,7 @@ class Dataset:
 
         interpolant = self.geometry.get_2d_interpolant(xy, **kwargs)
         das = [da.interp_like(geom, interpolant=interpolant) for da in self]
-        ds = Dataset(das, validate=False)
+        ds = Dataset(das, validate=False, custom_blocks=self.custom_blocks)
 
         if time is not None:
             ds = ds.interp_time(time)
@@ -1235,6 +1339,7 @@ class Dataset:
             geometry=ds.geometry,
             zn=zn,
             title=ds.title,
+            custom_blocks=ds.custom_blocks,
         )
 
     def _check_n_items(self, other: Dataset) -> None:
@@ -1288,13 +1393,23 @@ class Dataset:
                 zn=self._zn,
             )
 
-            return Dataset([da], validate=False, title=self.title)
+            return Dataset(
+                [da],
+                validate=False,
+                title=self.title,
+                custom_blocks=self.custom_blocks,
+            )
         else:
             res = {
                 name: da.aggregate(axis=axis, func=func, **kwargs)
                 for name, da in self._data_vars.items()
             }
-            return Dataset(data=res, validate=False, title=self.title)
+            return Dataset(
+                data=res,
+                validate=False,
+                title=self.title,
+                custom_blocks=self.custom_blocks,
+            )
 
     @staticmethod
     def _agg_item_from_items(items: Sequence[ItemInfo], name: str) -> ItemInfo:
@@ -1390,14 +1505,24 @@ class Dataset:
                     geometry=self.geometry,
                     zn=self._zn,
                 )
-                return Dataset([da], validate=False, title=self.title)
+                return Dataset(
+                    [da],
+                    validate=False,
+                    title=self.title,
+                    custom_blocks=self.custom_blocks,
+                )
             else:
                 res: list[DataArray] = []
                 for quantile in q:
                     qd = self._quantile(q=quantile, axis=axis, func=func, **kwargs)[0]
                     assert isinstance(qd, DataArray)
                     res.append(qd)
-                return Dataset(data=res, validate=False, title=self.title)
+                return Dataset(
+                    data=res,
+                    validate=False,
+                    title=self.title,
+                    custom_blocks=self.custom_blocks,
+                )
         else:
             if np.isscalar(q):
                 res = [da._quantile(q=q, axis=axis, func=func) for da in self]
@@ -1412,7 +1537,12 @@ class Dataset:
                         qd.name = newname
                         res.append(qd)
 
-            return Dataset(data=res, validate=False, title=self.title)
+            return Dataset(
+                data=res,
+                validate=False,
+                title=self.title,
+                custom_blocks=self.custom_blocks,
+            )
 
     def max(self, axis: int | str = 0, **kwargs: Any) -> Dataset:
         """Max value along an axis.
@@ -1688,7 +1818,7 @@ class Dataset:
                 data = [x / y for x, y in zip(self, other)]
             case _:
                 raise ValueError(f"Unsupported operator: {operator}")
-        return Dataset(data, title=self.title)
+        return Dataset(data, title=self.title, custom_blocks=self.custom_blocks)
 
     def _scalar_op(self, value: float, operator: str) -> Dataset:
         match operator:
@@ -1702,7 +1832,7 @@ class Dataset:
                 data = [x / value for x in self]
             case _:
                 raise ValueError(f"Unsupported operator: {operator}")
-        return Dataset(data, title=self.title)
+        return Dataset(data, title=self.title, custom_blocks=self.custom_blocks)
 
     # ===============================================
 
@@ -1757,6 +1887,13 @@ class Dataset:
             full path to the new dfs file
         **kwargs: Any
             additional arguments passed to the writing function, e.g. dtype for dfs0
+
+        Notes
+        -----
+        Custom blocks (see the *custom_blocks* property) are written for dfs0,
+        dfs1, dfs2 and dfs3. A dfsu file has no room for them - its one block,
+        "MIKE_FM", is derived from the geometry on every write - so a non-empty
+        *custom_blocks* is ignored when writing a dfsu file.
 
         """
         from ..dfs._dfs0 import write_dfs0
