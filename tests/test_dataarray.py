@@ -125,7 +125,7 @@ def test_write_1d(da2: DataArray, tmp_path: Path) -> None:
 def test_dataset_with_asterisk(da2: DataArray) -> None:
     da2.name = "Foo * Bar"
 
-    ds1 = mikeio.Dataset([da2], validate=False)
+    ds1 = mikeio.Dataset([da2])
 
     assert ds1[0].name == "Foo * Bar"
 
