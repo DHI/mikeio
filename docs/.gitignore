@@ -1,3 +1,10 @@
 /.quarto/
 
 **/*.quarto_ipynb
+
+# quarto renders next to the .qmd files
+**/*.html
+!_llms-head.html
+**/*.ipynb
+**/*_files/
+/site_libs/
