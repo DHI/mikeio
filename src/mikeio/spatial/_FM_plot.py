@@ -30,6 +30,7 @@ class Polygon:
 
     @property
     def area(self) -> float:
+        """Signed area of the polygon."""
         return (
             np.dot(self.xy[:, 1], np.roll(self.xy[:, 0], 1))
             - np.dot(self.xy[:, 0], np.roll(self.xy[:, 1], 1))
@@ -43,6 +44,7 @@ class BoundaryPolygons:
 
     @property
     def lines(self) -> list[Polygon]:
+        """All boundary polygons, exteriors followed by interiors."""
         return self.exteriors + self.interiors
 
     def contains(self, points: np.ndarray) -> np.ndarray:

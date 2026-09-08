@@ -174,6 +174,19 @@ class Grid1D(_Geometry):
         return int(np.argmin(d))
 
     def get_spatial_interpolant(self, x: float) -> Interpolant:
+        """Get weights and indices of the two nearest points for interpolation.
+
+        Parameters
+        ----------
+        x : float
+            x-coordinate of the point to interpolate to
+
+        Returns
+        -------
+        Interpolant
+            Indices and weights, weights are NaN outside the grid
+
+        """
         assert self.nx > 1, "Interpolation not possible for Grid1D with one point"
         d = np.abs(self.x - x)
         ids = np.argsort(d)[0:2]
@@ -1251,6 +1264,7 @@ class Grid3D(_Geometry):
     def find_index(
         self, coords: Any = None, layers: Any = None, area: Any = None
     ) -> Any:
+        """Not yet implemented for Grid3D, use mikeio.read() arguments instead."""
         if layers is not None:
             raise NotImplementedError(
                 f"Layer slicing is not yet implemented. Use the mikeio.read('file.dfs3', layers='{layers}')"

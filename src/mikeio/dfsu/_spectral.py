@@ -121,6 +121,7 @@ class DfsuSpectral:
 
     @property
     def time(self) -> pd.DatetimeIndex:
+        """Time axis of the file."""
         if self._equidistant:
             return pd.date_range(
                 start=self.start_time,

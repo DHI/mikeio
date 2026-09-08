@@ -42,6 +42,8 @@ if TYPE_CHECKING:
 
 
 class DfsuLayered:
+    """Base class for layered dfsu files (Dfsu2DV, Dfsu3D)."""
+
     def __init__(self, filename: str | Path) -> None:
         info = _get_dfsu_info(filename)
         self._filename = info.filename
@@ -514,7 +516,8 @@ class Dfsu2DV(DfsuLayered):
         figsize: tuple[float, float] | None = None,
         **kwargs: Any,
     ) -> Axes:
-        # deprecated remove in 3.1
+        """Plot a vertical profile (deprecated, use DataArray.plot() instead)."""
+        # deprecated, remove in v4.0
         import warnings
 
         warnings.warn(

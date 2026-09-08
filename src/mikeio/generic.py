@@ -337,7 +337,7 @@ def sum(
     infilename_b: str | pathlib.Path,
     outfilename: str | pathlib.Path,
 ) -> None:
-    # deprecated
+    """Add two dfs files (a+b) (deprecated, use add instead)."""
     warnings.warn(FutureWarning("This function is deprecated. Use add instead."))
     _process_dfs_files(infilename_a, infilename_b, outfilename, operator.add)
 
