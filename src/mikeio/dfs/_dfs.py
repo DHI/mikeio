@@ -8,6 +8,7 @@ from typing import Any, Sequence
 import numpy as np
 from numpy.typing import NDArray
 import pandas as pd
+from tqdm import trange
 
 from mikecore.DfsFile import (
     DfsDynamicItemInfo,
@@ -23,7 +24,7 @@ from ._custom_blocks import read_custom_blocks
 from ..eum import ItemInfo, ItemInfoList
 from ..exceptions import ItemsError
 from .._time import DateTimeSelector
-from .._options import _item_txt
+from .._options import _item_txt, _show_progress
 from .._path import normalize_path
 
 
@@ -276,7 +277,7 @@ def write_dfs_data(*, dfs: DfsFile, ds: Dataset, n_spatial_dims: int) -> None:
     else:
         t_rel = (ds.time - ds.time[0]).total_seconds()
 
-    for i in range(ds.n_timesteps):
+    for i in trange(ds.n_timesteps, disable=not _show_progress()):
         for item in range(ds.n_items):
             if has_no_time:
                 d = ds[item].values

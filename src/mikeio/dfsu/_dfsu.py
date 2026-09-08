@@ -121,7 +121,7 @@ def write_dfsu_data(dfs: DfsuFile, ds: Dataset, is_layered: bool) -> None:
     else:
         t_rel = (data.time - data.time[0]).total_seconds()
 
-    for i in range(n_time_steps):
+    for i in trange(n_time_steps, disable=not _show_progress()):
         if is_layered:
             zn_all = data.z.nodes
             if "time" in data.dims:
