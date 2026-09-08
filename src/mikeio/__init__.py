@@ -44,7 +44,7 @@ def read(
     All dfs files can be subsetted with the *items* and *time* arguments. But
     the following file types also have the shown additional arguments:
 
-    * Dfs2: area
+    * Dfs2: (x,y), area
     * Dfs3: layers
     * Dfsu-2d: (x,y), elements, area, error_bad_data, fill_bad_data_value
     * Dfsu-layered: (xy,z), elements, area, layers, error_bad_data,
