@@ -20,10 +20,10 @@ jobs:
     steps:
     - uses: actions/checkout@v4
 
-    - uses: extractions/setup-just@v3
+    - uses: extractions/setup-just@f8a3cce218d9f83db3a2ecd90e41ac3de6cdfd9b # v3
 
     - name: Set up uv
-      uses: astral-sh/setup-uv@v6
+      uses: astral-sh/setup-uv@d0cc045d04ccac9d8b7881df0226f9e82c39688e # v6
       with:
         enable-cache: true
     - name: Install dependencies
