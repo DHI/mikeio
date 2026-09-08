@@ -184,6 +184,34 @@ ds2.to_dfs("modified.dfsu")
 ```
 
 
+## {{< fa object-group >}} Combining Datasets
+
+Two Datasets can be joined either along the time axis or along the item axis.
+
+[`Dataset.concat()`](`mikeio.Dataset.concat`) joins along **time**. Where the two overlap, the later Dataset wins by default; pass `keep="first"` to prefer the earlier one.
+
+```{python}
+ds_a = mikeio.read("../data/HD2D.dfsu", time=[0, 1])
+ds_b = mikeio.read("../data/HD2D.dfsu", time=[1, 2, 3])
+
+ds_concat = mikeio.Dataset.concat([ds_a, ds_b])
+ds_concat.time
+```
+
+The two inputs have 2 and 3 time steps, and the result has 4 rather than 5, because the step they share is not repeated.
+
+[`Dataset.merge()`](`mikeio.Dataset.merge`) joins along **items** instead, for combining different quantities that share a time axis and geometry.
+
+```{python}
+ds_surf = mikeio.read("../data/HD2D.dfsu", items=[0])
+ds_uvel = mikeio.read("../data/HD2D.dfsu", items=[1])
+
+mikeio.Dataset.merge([ds_surf, ds_uvel]).names
+```
+
+To join *files* rather than in-memory Datasets, use [`generic.concat()`](`mikeio.generic.concat`) instead — it streams through the files and never holds them all in memory. See [Generic](generic.qmd).
+
+
 ## Properties
 The Dataset (and DataArray) has several properties:
 
@@ -236,7 +264,7 @@ Other methods that also return a Dataset:
 * [`interp_time()`](`mikeio.Dataset.interp_time`) - Temporal interpolation (see [Time interpolation notebook](../examples/Time-interpolation.qmd))
 * [`dropna()`](`mikeio.Dataset.dropna`) - Remove time steps where all items are NaN
 * [`fillna()`](`mikeio.Dataset.fillna`) - Fill missing values with a constant value
-* [`squeeze()`](`mikeio.Dataset.squeeze`) - Remove axes of length 1
+* [`squeeze()`](`mikeio.Dataset.squeeze`) - Remove axes of length 1. Deprecated, and removed in v4.0; use `isel()` to select the indices you want.
 
 ### Conversion:
 

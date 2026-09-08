@@ -69,7 +69,7 @@ Issues = "https://github.com/DHI/mikeio/issues"
 
 [tool.ruff.format]
 
-# keep line endings uniform; the default "auto" preserves whatever a file has
+# Match .gitattributes: LF regardless of platform.
 line-ending = "lf"
 
 [tool.ruff.lint]
