@@ -153,3 +153,32 @@ def test_generic_respects_show_progress(
     with mikeio.set_options(show_progress=True):
         generic.scale("tests/testdata/oresundHD_run1.dfsu", outfilename, factor=2.0)
     assert "it/s" in capsys.readouterr().err
+
+
+def test_write_shows_no_progress_bar_by_default(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    ds = mikeio.read("tests/testdata/oresundHD_run1.dfsu")
+    capsys.readouterr()
+    ds.to_dfs(tmp_path / "out.dfsu")
+    assert capsys.readouterr().err == ""
+
+
+def test_dfsu_write_shows_progress_bar_when_enabled(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    ds = mikeio.read("tests/testdata/oresundHD_run1.dfsu")
+    capsys.readouterr()
+    with mikeio.set_options(show_progress=True):
+        ds.to_dfs(tmp_path / "out.dfsu")
+    assert "it/s" in capsys.readouterr().err
+
+
+def test_dfs2_write_shows_progress_bar_when_enabled(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    ds = mikeio.read("tests/testdata/gebco_sound.dfs2")
+    capsys.readouterr()
+    with mikeio.set_options(show_progress=True):
+        ds.to_dfs(tmp_path / "out.dfs2")
+    assert "it/s" in capsys.readouterr().err
