@@ -36,7 +36,7 @@ from . import __dfs_version__
 from ._options import _show_progress
 from .dfs._dfs import _get_item_info, _valid_item_numbers
 from .eum import EUMType, EUMUnit, ItemInfo
-from ._path import normalize_path
+from ._path import normalize_output_path, normalize_path
 
 TimeAxis = Union[
     DfsEqTimeAxis, DfsNonEqTimeAxis, DfsEqCalendarAxis, DfsNonEqCalendarAxis
@@ -99,7 +99,7 @@ def _clone(
     datatype: int | None = None,
 ) -> DfsFile:
     infilename = normalize_path(infilename)
-    outfilename = normalize_path(outfilename)
+    outfilename = normalize_output_path(outfilename)
     source = DfsFileFactory.DfsGenericOpen(infilename)
     fi = source.FileInfo
 
@@ -183,7 +183,7 @@ def scale(
 
     """
     infilename = normalize_path(infilename)
-    outfilename = normalize_path(outfilename)
+    outfilename = normalize_output_path(outfilename)
     copyfile(infilename, outfilename)
     dfs = DfsFileFactory.DfsGenericOpenEdit(outfilename)
 
@@ -233,7 +233,7 @@ def fill_corrupt(
 
     """
     infilename = normalize_path(infilename)
-    outfilename = normalize_path(outfilename)
+    outfilename = normalize_output_path(outfilename)
     dfs_i = DfsFileFactory.DfsGenericOpen(infilename)
 
     item_numbers = _valid_item_numbers(dfs_i.ItemInfo, items)
@@ -296,7 +296,7 @@ def _process_dfs_files(
     """
     infilename_a = normalize_path(infilename_a)
     infilename_b = normalize_path(infilename_b)
-    outfilename = normalize_path(outfilename)
+    outfilename = normalize_output_path(outfilename)
     copyfile(infilename_a, outfilename)
 
     dfs_i_a = DfsFileFactory.DfsGenericOpen(infilename_a)
@@ -404,7 +404,7 @@ def concat(
 
     """
     infilenames = [normalize_path(f) for f in infilenames]
-    outfilename = normalize_path(outfilename)
+    outfilename = normalize_output_path(outfilename)
     # fast path for Dfs0
     suffix = pathlib.Path(infilenames[0]).suffix
     if suffix == ".dfs0":
@@ -591,7 +591,7 @@ def extract(
 
     """
     infilename = normalize_path(infilename)
-    outfilename = normalize_path(outfilename)
+    outfilename = normalize_output_path(outfilename)
     dfs_i = DfsFileFactory.DfsGenericOpenEdit(infilename)
 
     is_layered_dfsu = dfs_i.ItemInfo[0].Name == "Z coordinate"
@@ -795,7 +795,7 @@ def avg_time(
 
     """
     infilename = normalize_path(infilename)
-    outfilename = normalize_path(outfilename)
+    outfilename = normalize_output_path(outfilename)
     dfs_i = DfsFileFactory.DfsGenericOpen(infilename)
 
     dfs_o = _clone(infilename, outfilename)
@@ -883,7 +883,7 @@ def quantile(
 
     """
     infilename = normalize_path(infilename)
-    outfilename = normalize_path(outfilename)
+    outfilename = normalize_output_path(outfilename)
     func = np.nanquantile if skipna else np.quantile
 
     dfs_i = DfsFileFactory.DfsGenericOpen(infilename)
@@ -1023,7 +1023,7 @@ def change_datatype(
 
     """
     infilename = normalize_path(infilename)
-    outfilename = normalize_path(outfilename)
+    outfilename = normalize_output_path(outfilename)
     dfs_out = _clone(infilename, outfilename, datatype=datatype)
     dfs_in = DfsFileFactory.DfsGenericOpen(infilename)
 
@@ -1131,7 +1131,7 @@ def transform(
 
     """
     infilename = normalize_path(infilename)
-    outfilename = normalize_path(outfilename)
+    outfilename = normalize_output_path(outfilename)
     dfs_i = DfsFileFactory.DfsGenericOpen(infilename)
 
     item_numbers = _valid_item_numbers(dfs_i.ItemInfo)

@@ -33,7 +33,7 @@ from ._geometry import Geometry0D, GeometryPoint2D, _Geometry
 
 from ._grid_geometry import Grid2D
 from ._distance import xy_to_bbox
-from .._path import normalize_path
+from .._path import normalize_output_path
 
 
 if TYPE_CHECKING:
@@ -1140,7 +1140,7 @@ class GeometryFM2D(_GeometryFM):
 
         """
         builder = MeshBuilder()
-        outfilename = normalize_path(outfilename)
+        outfilename = normalize_output_path(outfilename)
 
         nc = self.node_coordinates
         builder.SetNodes(nc[:, 0], nc[:, 1], nc[:, 2], self.codes)

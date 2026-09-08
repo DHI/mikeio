@@ -27,7 +27,7 @@ from ._custom_blocks import (
 from ..eum import EUMType, EUMUnit, ItemInfo, TimeStepUnit, ItemInfoList
 from .._time import DateTimeSelector
 from .._options import _item_txt
-from .._path import normalize_path
+from .._path import normalize_output_path, normalize_path
 
 
 def write_dfs0(
@@ -36,7 +36,7 @@ def write_dfs0(
     title: str = "",
     dtype: DfsSimpleType | np.float32 | np.float64 = DfsSimpleType.Float,
 ) -> None:
-    filename = normalize_path(filename)
+    filename = normalize_output_path(filename)
 
     factory = DfsFactory()
     builder = DfsBuilder.Create(title, "mikeio", __dfs_version__)

@@ -34,7 +34,7 @@ from .._track import _extract_track
 from ._topology import get_elements_from_source, get_nodes_from_source
 from ..eum import ItemInfo, TimeStepUnit
 from .._options import _item_txt, _show_progress
-from .._path import normalize_path
+from .._path import normalize_output_path, normalize_path
 
 
 def write_dfsu(filename: str | Path, data: Dataset, title: str = "") -> None:
@@ -50,7 +50,7 @@ def write_dfsu(filename: str | Path, data: Dataset, title: str = "") -> None:
         Title of the dfsu file (default: "")
 
     """
-    filename = normalize_path(filename)
+    filename = normalize_output_path(filename)
 
     geometry = data.geometry
     dfsu_filetype = DfsuFileType.Dfsu2D
