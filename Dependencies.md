@@ -9,5 +9,6 @@ graph TD
     mikeio-.->|interpolation| scipy
     scipy --> numpy
     mikeio-->|time index| pandas
+    mikeio-->|progress bars| tqdm
     pandas--> numpy
 ```
