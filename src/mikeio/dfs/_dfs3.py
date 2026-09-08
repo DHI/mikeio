@@ -28,7 +28,7 @@ from ._custom_blocks import readonly_custom_blocks, write_custom_blocks
 from ..eum import TimeStepUnit
 from ..spatial import Grid3D
 from .._options import _show_progress
-from .._path import normalize_path
+from .._path import normalize_output_path, normalize_path
 
 
 def write_dfs3(filename: str | Path, ds: Dataset, title: str = "") -> None:
@@ -97,10 +97,7 @@ def _write_dfs3_header(filename: str | Path, ds: Dataset, title: str) -> DfsFile
 
     write_custom_blocks(builder, ds.custom_blocks)
 
-    try:
-        builder.CreateFile(normalize_path(filename))
-    except OSError:
-        print("cannot create dfs file: ", filename)
+    builder.CreateFile(normalize_output_path(filename))
 
     return builder.GetFile()
 
