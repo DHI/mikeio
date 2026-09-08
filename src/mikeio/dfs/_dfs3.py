@@ -6,6 +6,7 @@ from typing import Any, Mapping
 import numpy as np
 from numpy.typing import NDArray
 import pandas as pd
+from tqdm import tqdm
 
 from mikecore.DfsBuilder import DfsBuilder
 from mikecore.DfsFactory import DfsFactory
@@ -26,6 +27,7 @@ from ._dfs import (
 from ._custom_blocks import readonly_custom_blocks, write_custom_blocks
 from ..eum import TimeStepUnit
 from ..spatial import Grid3D
+from .._options import _show_progress
 from .._path import normalize_path
 
 
@@ -240,7 +242,7 @@ class Dfs3(_Dfs123):
 
         t_seconds = np.zeros(nt, dtype=float)
 
-        for i, it in enumerate(time_steps):
+        for i, it in enumerate(tqdm(time_steps, disable=not _show_progress())):
             for item in range(n_items):
                 itemdata = dfs.ReadItemTimeStep(item_numbers[item] + 1, int(it))
                 d = itemdata.Data

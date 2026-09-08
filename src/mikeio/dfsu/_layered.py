@@ -13,6 +13,7 @@ from scipy.spatial import KDTree
 from tqdm import trange
 
 from .._interpolation import Interpolant
+from .._options import _item_txt, _show_progress
 from ..dataset import DataArray, Dataset
 from ..dfs._dfs import (
     _get_item_info,
@@ -41,8 +42,6 @@ if TYPE_CHECKING:
 
 
 class DfsuLayered:
-    show_progress = False
-
     def __init__(self, filename: str | Path) -> None:
         info = _get_dfsu_info(filename)
         self._filename = info.filename
@@ -72,12 +71,7 @@ class DfsuLayered:
             out.append(
                 f"max number of z layers: {self.geometry.n_layers - self.geometry.n_sigma_layers}"
             )
-        if self.n_items < 10:
-            out.append("items:")
-            for i, item in enumerate(self.items):
-                out.append(f"  {i}:  {item}")
-        else:
-            out.append(f"number of items: {self.n_items}")
+        out.extend(_item_txt(self.items))
         if self.n_timesteps == 1:
             out.append(f"time: time-invariant file (1 step) at {self.time[0]}")
         else:
@@ -403,7 +397,7 @@ class DfsuLayered:
         if single_time_selected and not keepdims:
             data = data[0]
 
-        for i in trange(n_steps, disable=not self.show_progress):
+        for i in trange(n_steps, disable=not _show_progress()):
             it = time_steps[i]
             for item in range(n_items):
                 dfs, d, t = _read_item_time_step(

@@ -28,6 +28,19 @@ The generic module contains functionality that works for all types of dfs (dfs0,
 * When the input files data are not dfs files
 * When the end result is not a dfs file
 
+## Progress bar
+
+Operations on large files can take a while. Set the `show_progress` option to follow the progress:
+
+```python
+with mikeio.set_options(show_progress=True):
+    mikeio.generic.scale("large.dfsu", "scaled.dfsu", factor=1.1)
+```
+
+The option applies to reading and writing large files as well, e.g. [](`mikeio.read`), and can be set once for the rest of the session with [](`mikeio.set_options`).
+
+![Reading a 2.2 GB dfs2 with `show_progress=True`](../images/show_progress.gif)
+
 ## Examples
 
 ```{python}

@@ -23,6 +23,7 @@ from ._custom_blocks import read_custom_blocks
 from ..eum import ItemInfo, ItemInfoList
 from ..exceptions import ItemsError
 from .._time import DateTimeSelector
+from .._options import _item_txt
 from .._path import normalize_path
 
 
@@ -295,8 +296,6 @@ def write_dfs_data(*, dfs: DfsFile, ds: Dataset, n_spatial_dims: int) -> None:
 class _Dfs123:
     _ndim: int
 
-    show_progress = False
-
     def __init__(self, filename: str | Path) -> None:
         filename = normalize_path(filename)
         path = Path(filename)
@@ -356,12 +355,7 @@ class _Dfs123:
         out = [f"<mikeio.{name}>"]
 
         out.append(f"geometry: {self.geometry}")
-        if self.n_items < 10:
-            out.append("items:")
-            for i, item in enumerate(self.items):
-                out.append(f"  {i}:  {item}")
-        else:
-            out.append(f"number of items: {self.n_items}")
+        out.extend(_item_txt(self.items))
 
         if self._n_timesteps == 1:
             out.append("time: time-invariant file (1 step)")

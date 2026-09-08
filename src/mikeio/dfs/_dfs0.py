@@ -26,6 +26,7 @@ from ._custom_blocks import (
 )
 from ..eum import EUMType, EUMUnit, ItemInfo, TimeStepUnit, ItemInfoList
 from .._time import DateTimeSelector
+from .._options import _item_txt
 from .._path import normalize_path
 
 
@@ -143,12 +144,7 @@ class Dfs0:
         out = ["<mikeio.Dfs0>"]
         out.append(f"timeaxis: {repr(self._timeaxistype)}")
 
-        if self.n_items < 10:
-            out.append("items:")
-            for i, item in enumerate(self.items):
-                out.append(f"  {i}:  {item}")
-        else:
-            out.append(f"number of items: {self.n_items}")
+        out.extend(_item_txt(self.items))
 
         return str.join("\n", out)
 

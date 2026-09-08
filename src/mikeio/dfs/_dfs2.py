@@ -27,6 +27,7 @@ from ._dfs import (
 from ._custom_blocks import readonly_custom_blocks, write_custom_blocks
 from ..eum import TimeStepUnit
 from ..spatial import Grid2D
+from .._options import _show_progress
 from .._path import normalize_path
 
 
@@ -222,7 +223,7 @@ class Dfs2(_Dfs123):
 
         t_seconds = np.zeros(len(time_steps))
 
-        for i, it in enumerate(tqdm(time_steps, disable=not self.show_progress)):
+        for i, it in enumerate(tqdm(time_steps, disable=not _show_progress())):
             for item in range(n_items):
                 itemdata = self._dfs.ReadItemTimeStep(item_numbers[item] + 1, int(it))
                 d = itemdata.Data

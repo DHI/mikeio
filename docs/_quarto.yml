@@ -142,6 +142,11 @@ quartodoc:
       desc: ""
       contents:
         - generic
+    - title: Options
+      desc: "Global options controlling display and progress reporting."
+      contents:
+        - set_options
+        - get_options
     - title: Pfs
       desc: ""
       contents:

@@ -1001,15 +1001,19 @@ def test_append_dfsu_2d(tmp_path: Path) -> None:
     )
 
 
-def test_repr_dfsu_many_items_only_shows_number_of_items() -> None:
+def test_repr_dfsu_many_items_truncates_item_list() -> None:
     ds = mikeio.read("tests/testdata/random_data_20_items_2d.dfsu")
     txt = repr(ds)
-    assert "number of items: 20" in txt
+    assert "  0:  Exchange Rate" in txt
+    assert "  9:  Height Above Keel" in txt
+    assert "  10:" not in txt
+    assert "... and 10 more items (20 total)" in txt
 
     # repeat for mikeio.Dfsu2DH
     dfs = mikeio.Dfsu2DH("tests/testdata/random_data_20_items_2d.dfsu")
     txt_dfs = repr(dfs)
-    assert "number of items: 20" in txt_dfs
+    assert "  0:  Exchange Rate" in txt_dfs
+    assert "... and 10 more items (20 total)" in txt_dfs
 
 
 def test_dfsu_to_xarray_has_element_coordinates() -> None:

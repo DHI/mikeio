@@ -28,6 +28,7 @@ if TYPE_CHECKING:
 
 from ._dataarray import DataArray
 from .._track import _extract_track
+from .._options import _item_txt
 from ..eum import EUMType, EUMUnit, ItemInfo
 from ..spatial import (
     Geometry0D,
@@ -1966,12 +1967,7 @@ class Dataset:
         out.extend([da._dims_txt(), da._time_txt(), da._geometry_txt()])  # type: ignore
         out = [x for x in out if x is not None]
 
-        if self.n_items > 10:
-            out.append(f"number of items: {self.n_items}")
-        else:
-            out.append("items:")
-            for i, item in enumerate(self.items):
-                out.append(f"  {i}:  {item}")
+        out.extend(_item_txt(self.items))
 
         return str.join("\n", out)
 
