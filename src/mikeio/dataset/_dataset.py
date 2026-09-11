@@ -444,23 +444,49 @@ class Dataset:
             custom_blocks=self.custom_blocks,
         )
 
-    def dropna(self, how: str = "any") -> Dataset:
+    def dropna(self, *, how: Literal["any", "all"] = "any") -> Dataset:
         """Remove time steps where an item's entire field is NaN.
 
-        An item is considered missing at a time step only when its whole
-        (non-time) field is NaN; scattered NaNs (e.g. land/dry cells) do not
-        count as missing.
+        An item counts as missing at a time step only when its whole
+        (non-time) field is NaN; scattered NaNs (e.g. land or dry cells) do
+        not count as missing. This differs from
+        [](`pandas.DataFrame.dropna`), where `how="any"` drops a row on a
+        single NaN.
 
         Parameters
         ----------
-        how : {"any", "all"}, default "any"
-            "any" -> drop a time step if *any* item is missing there.
-            "all" -> drop a time step only if *all* items are missing there.
+        how: {"any", "all"}, optional
+            "any": drop a time step if *any* item is missing there (default),
+            "all": drop a time step only if *all* items are missing there.
 
         Returns
         -------
         Dataset
             Dataset with the offending time steps removed.
+
+        Examples
+        --------
+        ```{python}
+        import numpy as np
+        import pandas as pd
+        import mikeio
+
+        foo = np.zeros((4, 2))
+        bar = np.zeros((4, 2))
+        foo[1] = np.nan  # only Foo is missing in the second time step
+        foo[2] = np.nan  # both are missing in the third time step
+        bar[2] = np.nan
+
+        ds = mikeio.Dataset.from_numpy(
+            data=[foo, bar],
+            time=pd.date_range("2000-1-1", freq="h", periods=4),
+            items=["Foo", "Bar"],
+        )
+        ds.dropna().time  # steps 1 and 2 dropped
+        ```
+        ```{python}
+        ds.dropna(how="all").time  # only step 2 dropped
+        ```
 
         """
         if how not in ("any", "all"):
@@ -468,15 +494,14 @@ class Dataset:
         if not self[0]._has_time_axis:  # type: ignore
             raise ValueError("Not available if no time axis!")
 
-        n_time = self[0].to_numpy().shape[0]
-        missing = np.zeros((self.n_items, n_time), dtype=bool)
+        missing = np.zeros((self.n_items, self.n_timesteps), dtype=bool)
         for i in range(self.n_items):
             x = self[i].to_numpy()
             axes = tuple(range(1, x.ndim))  # all non-time axes
             missing[i] = np.isnan(x).all(axis=axes)
 
         drop = missing.any(axis=0) if how == "any" else missing.all(axis=0)
-        keep: Any = list(np.where(~drop)[0])
+        keep = np.where(~drop)[0]
         return self.isel(time=keep)
 
     def flipud(self) -> Dataset:

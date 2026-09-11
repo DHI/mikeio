@@ -870,6 +870,47 @@ def test_dropna() -> None:
     assert ds2.n_timesteps == 8
 
 
+def test_dropna_how_all() -> None:
+    nt = 10
+    d1 = np.zeros([nt, 100, 30])
+    d2 = np.zeros([nt, 100, 30])
+
+    d1[9:] = np.nan
+    d2[8:] = np.nan
+
+    time = pd.date_range("2000-1-2", freq="h", periods=nt)
+    items = [ItemInfo("Foo"), ItemInfo("Bar")]
+    ds = mikeio.Dataset.from_numpy(data=[d1, d2], time=time, items=items)
+
+    # default drops a step where *any* item is missing
+    assert ds.dropna().n_timesteps == 8
+
+    # "all" only drops steps where *every* item is missing
+    assert ds.dropna(how="all").n_timesteps == 9
+
+
+def test_dropna_scattered_nans_are_kept() -> None:
+    nt = 5
+    d1 = np.zeros([nt, 100, 30])
+    d1[:, 0, 0] = np.nan  # e.g. a land cell, missing in every time step
+
+    time = pd.date_range("2000-1-2", freq="h", periods=nt)
+    ds = mikeio.Dataset.from_numpy(data=[d1], time=time, items=[ItemInfo("Foo")])
+
+    assert ds.dropna().n_timesteps == nt
+    assert ds.dropna(how="all").n_timesteps == nt
+
+
+def test_dropna_invalid_how() -> None:
+    nt = 5
+    d1 = np.zeros([nt, 100, 30])
+    time = pd.date_range("2000-1-2", freq="h", periods=nt)
+    ds = mikeio.Dataset.from_numpy(data=[d1], time=time, items=[ItemInfo("Foo")])
+
+    with pytest.raises(ValueError, match="how"):
+        ds.dropna(how="foo")  # type: ignore[arg-type]
+
+
 def test_dfsu3d_dataset() -> None:
     filename = "tests/testdata/oresund_sigma_z.dfsu"
 
