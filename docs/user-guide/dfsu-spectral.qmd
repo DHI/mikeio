@@ -1,0 +1,118 @@
+---
+title: Dfsu - spectral data
+---
+
+MIKE 21 SW can output the full wave spectrum, not just integrated parameters such as Hm0. Those files are dfsu files with up to two extra axes, **frequency** and **direction**, and they come in three shapes:
+
+* **point** — the spectrum at a single position
+* **line** — spectra along a line crossing the domain
+* **area** — spectra at every element of a mesh
+
+The geometry tells you which one you have, and `is_spectral` distinguishes these files from ordinary dfsu output.
+
+```{python}
+import numpy as np
+import mikeio
+
+da = mikeio.read("../data/spectra/pt_spectra.dfsu")[0]
+da
+```
+
+```{python}
+da.dims
+```
+
+The frequency and direction axes are on the geometry:
+
+```{python}
+np.round(da.geometry.frequencies[:5], 4), np.round(da.geometry.directions[:5], 1)
+```
+
+## Point spectra
+
+Plotting a point spectrum gives a polar plot of the first time step:
+
+```{python}
+da.plot();
+```
+
+`plot.patch` takes the same arguments and returns the axes, so the plot can be adjusted — here the radial limit is capped and the spokes labelled with the actual direction values:
+
+```{python}
+ax = da.plot.patch(rmax=8)
+dird = np.round(da.geometry.directions, 2)
+ax.set_thetagrids(dird, labels=dird);
+```
+
+## Line spectra
+
+Line spectra are **node-based**, unlike most dfsu files, which store values per element. The extra `node` axis is selected with `isel`:
+
+```{python}
+da = mikeio.read("../data/spectra/line_spectra.dfsu").Energy_density
+da.dims
+```
+
+```{python}
+spec = da[0].isel(node=3)
+spec.plot(cmap="Greys", rmax=8, r_as_periods=True);
+```
+
+`r_as_periods=True` labels the radial axis with wave periods rather than frequencies.
+
+Plotting the whole line, rather than one node, gives the integrated Hm0 along it:
+
+```{python}
+da.plot(title="Hm0 on a line crossing the domain");
+```
+
+## Area spectra
+
+For an area file the default plot is again the integrated Hm0, over the mesh:
+
+```{python}
+da = mikeio.read("../data/spectra/area_spectra.dfsu", items="Energy density")[0]
+da.plot();
+```
+
+Selecting a position with `sel` gives back the spectrum there, which plots as a polar plot:
+
+```{python}
+da_pt = da.sel(x=2.9, y=52.5)
+da_pt.plot(rmax=9);
+```
+
+## Directional sectors
+
+MIKE 21 SW can discretise directions over a sector rather than the full circle. Such files are read the same way, and the plot covers only the sector:
+
+```{python}
+da = mikeio.read("../data/spectra/MIKE21SW_dir_sector_area_spectra.dfsu", time=0)["Energy density"]
+da.isel(element=0).plot(rmax=10, vmin=0);
+```
+
+## Frequency and direction spectra
+
+A file need not carry both axes. Frequency spectra have no directions, and directional spectra have no frequencies; `n_frequencies` and `n_directions` report which case you are in, one of them being zero.
+
+```{python}
+da = mikeio.read("../data/spectra/pt_freq_spectra.dfsu")[0]
+da.geometry.n_frequencies, da.geometry.n_directions
+```
+
+With no directions to plot around a circle, the plot becomes an ordinary spectrum against frequency:
+
+```{python}
+da.sel(time="2017-10-27 02:00").plot();
+```
+
+The reverse case, a directional spectrum with no frequency axis:
+
+```{python}
+da = mikeio.read("../data/spectra/line_dir_spectra.dfsu")[0]
+da.geometry.n_frequencies, da.geometry.n_directions
+```
+
+```{python}
+da.isel(time=0).isel(node=5).plot();
+```

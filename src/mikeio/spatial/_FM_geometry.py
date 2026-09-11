@@ -33,6 +33,7 @@ from ._geometry import Geometry0D, GeometryPoint2D, _Geometry
 
 from ._grid_geometry import Grid2D
 from ._distance import xy_to_bbox
+from .._path import normalize_output_path
 
 
 if TYPE_CHECKING:
@@ -1030,6 +1031,22 @@ class GeometryFM2D(_GeometryFM):
     def elements_to_geometry(
         self, elements: int | Sequence[int], keepdims: bool = False
     ) -> GeometryFM2D | GeometryPoint2D:
+        """Export a selection of elements to a new geometry.
+
+        Parameters
+        ----------
+        elements : int or list[int]
+            Element indices to select
+        keepdims : bool
+            Keep the geometry as a mesh even for a single element,
+            by default False (a single element becomes a point geometry)
+
+        Returns
+        -------
+        GeometryFM2D or GeometryPoint2D
+            Geometry for the selected elements
+
+        """
         if isinstance(elements, (int, np.integer)):
             sel_elements: list[int] = [elements]
         else:
@@ -1139,7 +1156,7 @@ class GeometryFM2D(_GeometryFM):
 
         """
         builder = MeshBuilder()
-        outfilename = str(outfilename)
+        outfilename = normalize_output_path(outfilename)
 
         nc = self.node_coordinates
         builder.SetNodes(nc[:, 0], nc[:, 1], nc[:, 2], self.codes)

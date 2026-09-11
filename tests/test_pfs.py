@@ -276,7 +276,6 @@ def test_pfssection_write(d1, tmp_path: Path) -> None:
     assert pfs2.root.key1 == sct.key1
 
 
-
 def test_basic() -> None:
     pfs = mikeio.PfsDocument("tests/testdata/pfs/simple.pfs")
 

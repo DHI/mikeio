@@ -19,6 +19,7 @@ from .dfs import Dfs0, Dfs1, Dfs2, Dfs3
 from .dfsu import Dfsu, Mesh, Dfsu2DH, Dfsu2DV, Dfsu3D, DfsuSpectral
 from .eum import EUMType, EUMUnit, ItemInfo
 from .pfs import PfsDocument, PfsSection, read_pfs
+from ._options import get_options, set_options
 
 from .spatial import (
     Grid1D,
@@ -43,15 +44,17 @@ def read(
     All dfs files can be subsetted with the *items* and *time* arguments. But
     the following file types also have the shown additional arguments:
 
-    * Dfs2: area
+    * Dfs2: (x,y), area
     * Dfs3: layers
-    * Dfsu-2d: (x,y), elements, area
-    * Dfsu-layered: (xy,z), elements, area, layers
+    * Dfsu-2d: (x,y), elements, area, error_bad_data, fill_bad_data_value
+    * Dfsu-layered: (xy,z), elements, area, layers, error_bad_data,
+      fill_bad_data_value
 
     Parameters
     ----------
     filename
-        full path and file name to the dfs file.
+        Full path and file name to the dfs file.
+        A leading `~` is expanded to the user's home directory.
     items: int, str, list[int] or list[str], optional
         Read only selected items, by number (0-based), or by name,
         by default None (=all)
@@ -69,13 +72,9 @@ def read(
     layers: int, str or sequence, optional
         Dfs3/Dfsu-layered: read only data from specific layers,
         by default None (=all layers)
-    error_bad_data: bool, optional
-            raise error if data is corrupt, by default True,
-    fill_bad_data_value:
-            fill value for to impute corrupt data, used in conjunction with error_bad_data=False
-            default np.nan
     **kwargs: Any
-        Additional keyword arguments
+        Additional keyword arguments, e.g. the file type specific arguments
+        listed above
 
     Returns
     -------
@@ -141,10 +140,8 @@ def open(
     Parameters
     ----------
     filename
-        full path and file name to the dfs file.
-    type : str, optional
-        Dfs2 only. Additional information about the file, e.g.
-        "spectral" for spectral dfs2 files. By default: None.
+        Full path and file name to the dfs file.
+        A leading `~` is expanded to the user's home directory.
     **kwargs: Any
         Additional keyword arguments, e.g. *type="spectral"*
 
@@ -212,4 +209,6 @@ __all__ = [
     "open",
     "from_pandas",
     "from_polars",
+    "get_options",
+    "set_options",
 ]

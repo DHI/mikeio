@@ -8,6 +8,9 @@ on:
     types: [review_requested, ready_for_review]
   workflow_dispatch:
 
+permissions:
+  contents: read
+
 jobs:
   build:
 
@@ -16,7 +19,7 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     - name: Set up uv
-      uses: astral-sh/setup-uv@v6
+      uses: astral-sh/setup-uv@d0cc045d04ccac9d8b7881df0226f9e82c39688e # v6
       with:
         enable-cache: true
     - name: Install dependencies

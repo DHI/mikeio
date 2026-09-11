@@ -78,7 +78,7 @@ def test_write_with_title(tmp_path: Path) -> None:
     nt = 100
 
     da = mikeio.DataArray(
-        data=np.random.random([nt]).astype(np.float32),
+        data=np.random.default_rng(42).random(nt).astype(np.float32),
         time=pd.date_range("2000", periods=nt, freq="h"),
     )
 

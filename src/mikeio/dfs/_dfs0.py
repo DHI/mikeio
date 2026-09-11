@@ -2,10 +2,11 @@ from __future__ import annotations
 from functools import cached_property
 from pathlib import Path
 from datetime import datetime, timedelta
-from typing import Any, Sequence
+from typing import Any, Mapping, Sequence
 import warnings
 
 import numpy as np
+from numpy.typing import NDArray
 import pandas as pd
 from mikecore.DfsFactory import DfsBuilder, DfsFactory
 from mikecore.DfsFile import DfsSimpleType, StatType, TimeAxisType
@@ -14,9 +15,19 @@ from mikecore.eum import eumQuantity
 
 from .. import __dfs_version__
 from ..dataset import Dataset, DataArray
-from ._dfs import _get_item_info, _valid_item_numbers
+from ._dfs import (
+    _get_item_info,
+    _valid_item_numbers,
+)
+from ._custom_blocks import (
+    read_custom_blocks,
+    readonly_custom_blocks,
+    write_custom_blocks,
+)
 from ..eum import EUMType, EUMUnit, ItemInfo, TimeStepUnit, ItemInfoList
 from .._time import DateTimeSelector
+from .._options import _item_txt
+from .._path import normalize_output_path, normalize_path
 
 
 def write_dfs0(
@@ -25,7 +36,7 @@ def write_dfs0(
     title: str = "",
     dtype: DfsSimpleType | np.float32 | np.float64 = DfsSimpleType.Float,
 ) -> None:
-    filename = str(filename)
+    filename = normalize_output_path(filename)
 
     factory = DfsFactory()
     builder = DfsBuilder.Create(title, "mikeio", __dfs_version__)
@@ -61,6 +72,8 @@ def write_dfs0(
         newitem.SetAxis(factory.CreateAxisEqD0())
         builder.AddDynamicItem(newitem.GetDynamicItemInfo())
 
+    write_custom_blocks(builder, dataset.custom_blocks)
+
     builder.CreateFile(filename)
 
     dfs = builder.GetFile()
@@ -95,9 +108,9 @@ class Dfs0:
             File name including full path to the dfs0 file.
 
         """
-        self._filename = str(filename)
+        self._filename = normalize_path(filename)
 
-        path = Path(filename)
+        path = Path(self._filename)
         if not path.exists():
             raise FileNotFoundError(path)
 
@@ -121,18 +134,17 @@ class Dfs0:
         # time
         self._n_timesteps: int = dfs.FileInfo.TimeAxis.NumberOfTimeSteps
 
+        # Must happen before Close(): mikecore's block values are views over
+        # memory owned by the dfs library (see Dataset.custom_blocks).
+        self._custom_blocks: dict[str, NDArray[Any]] = read_custom_blocks(dfs.FileInfo)
+
         dfs.Close()
 
     def __repr__(self) -> str:
         out = ["<mikeio.Dfs0>"]
         out.append(f"timeaxis: {repr(self._timeaxistype)}")
 
-        if self.n_items < 10:
-            out.append("items:")
-            for i, item in enumerate(self.items):
-                out.append(f"  {i}:  {item}")
-        else:
-            out.append(f"number of items: {self.n_items}")
+        out.extend(_item_txt(self.items))
 
         return str.join("\n", out)
 
@@ -192,7 +204,12 @@ class Dfs0:
         else:
             item_infos = self.items
         ds = Dataset.from_numpy(
-            data, time=ftime, items=item_infos, title=self.title, validate=False
+            data,
+            time=ftime,
+            items=item_infos,
+            title=self.title,
+            custom_blocks=self.custom_blocks,
+            validate=False,
         )
 
         # select time steps
@@ -313,6 +330,17 @@ class Dfs0:
         """File title."""
         return self._title
 
+    @property
+    def custom_blocks(self) -> Mapping[str, NDArray[Any]]:
+        """Custom blocks of the dfs0 file header, as name -> 1-D array.
+
+        Read-only: a dfs header is written when the file is created, so neither
+        the mapping nor its arrays accept an edit here. Change them on a Dataset
+        and write a new file - see [](`mikeio.Dataset.custom_blocks`) for the
+        meaning of the values and for how to change them.
+        """
+        return readonly_custom_blocks(self._custom_blocks)
+
     # ======================
     # Deprecated in 2.5.0
     # ======================
@@ -325,6 +353,7 @@ class Dfs0:
         unit: EUMUnit | None = None,
         items: Sequence[ItemInfo] | None = None,
     ) -> None:
+        """Create a dfs0 file from a pandas DataFrame (deprecated, use mikeio.from_pandas)."""
         return dataframe_to_dfs0(df, filename, itemtype, unit, items)
 
 

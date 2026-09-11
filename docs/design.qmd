@@ -19,12 +19,7 @@ $ pip install mikeio
 ```
 
 ## {{< fa book >}} Easy to get started
-By providing many examples to cut/paste from.
-
-Examples are available in two forms:
-
-* [Example notebooks](examples/index.qmd)
-* [Unit tests](https://github.com/DHI/mikeio/tree/main/tests)
+Comprehensive documentation with user guides, tutorials, and runnable examples organized by file type and task. You're reading it right now.
 
 
 ## {{< fa layer-group >}} Abstraction over mikecore

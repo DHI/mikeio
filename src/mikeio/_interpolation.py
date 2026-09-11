@@ -50,6 +50,7 @@ class Interpolant:
         return get_idw_interpolant(distances, p)
 
     def interp1d(self, data: np.ndarray) -> np.ndarray:
+        """Interpolate a time series of 1d data, e.g. element values."""
         ids = self.ids
         weights = self.weights
         result = np.dot(data[:, ids], weights)

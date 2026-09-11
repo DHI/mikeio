@@ -903,6 +903,18 @@ def test_interp_like_grid_time_invariant() -> None:
     assert isinstance(ws_grid.geometry, Grid2D)
 
 
+def test_custom_blocks_preserved_through_interp_like() -> None:
+    """Dataset.interp_like constructs its result directly and used to drop the
+    custom blocks entirely, unlike every other geometry-preserving method."""
+    ds = mikeio.read("tests/testdata/wind_north_sea.dfsu", time=-1)
+    ds.custom_blocks["Mine"] = np.array([1.0], dtype=np.float32)
+    grid = ds.geometry.get_overset_grid(dx=0.1)
+
+    ds_grid = ds.interp_like(grid)
+
+    assert ds_grid.custom_blocks.keys() == {"Mine"}
+
+
 def test_interp_like_dataarray(tmp_path: Path) -> None:
     tmp_path / "interp.dfs2"
 
@@ -989,15 +1001,19 @@ def test_append_dfsu_2d(tmp_path: Path) -> None:
     )
 
 
-def test_repr_dfsu_many_items_only_shows_number_of_items() -> None:
+def test_repr_dfsu_many_items_truncates_item_list() -> None:
     ds = mikeio.read("tests/testdata/random_data_20_items_2d.dfsu")
     txt = repr(ds)
-    assert "number of items: 20" in txt
+    assert "  0:  Exchange Rate" in txt
+    assert "  9:  Height Above Keel" in txt
+    assert "  10:" not in txt
+    assert "... and 10 more items (20 total)" in txt
 
     # repeat for mikeio.Dfsu2DH
     dfs = mikeio.Dfsu2DH("tests/testdata/random_data_20_items_2d.dfsu")
     txt_dfs = repr(dfs)
-    assert "number of items: 20" in txt_dfs
+    assert "  0:  Exchange Rate" in txt_dfs
+    assert "... and 10 more items (20 total)" in txt_dfs
 
 
 def test_dfsu_to_xarray_has_element_coordinates() -> None:

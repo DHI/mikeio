@@ -507,6 +507,16 @@ class DataArray:
         return deepcopy(self)
 
     def squeeze(self) -> DataArray:
+        """Remove axes of length 1.
+
+        Deprecated since v3.1: squeeze() will be removed in v4.0,
+        use isel() to select specific indices instead.
+
+        Returns
+        -------
+        DataArray
+
+        """
         warnings.warn(
             "squeeze() is deprecated and will be removed in v4.0. "
             "Use isel() to select specific indices.",
@@ -1852,6 +1862,13 @@ class DataArray:
 
     # ============= output methods: to_xxx() ===========
     def to_dataset(self) -> Dataset:
+        """Create a Dataset with this DataArray as its only item.
+
+        Returns
+        -------
+        Dataset
+
+        """
         return self._to_dataset()
 
     def _to_dataset(self) -> Dataset:

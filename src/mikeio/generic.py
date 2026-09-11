@@ -33,14 +33,14 @@ from tqdm import tqdm, trange
 import mikeio
 
 from . import __dfs_version__
+from ._options import _show_progress
 from .dfs._dfs import _get_item_info, _valid_item_numbers
 from .eum import EUMType, EUMUnit, ItemInfo
+from ._path import normalize_output_path, normalize_path
 
 TimeAxis = Union[
     DfsEqTimeAxis, DfsNonEqTimeAxis, DfsEqCalendarAxis, DfsNonEqCalendarAxis
 ]
-
-show_progress = True
 
 __all__ = [
     "avg_time",
@@ -98,7 +98,9 @@ def _clone(
     items: Sequence[int | DfsDynamicItemInfo | ItemInfo] | None = None,
     datatype: int | None = None,
 ) -> DfsFile:
-    source = DfsFileFactory.DfsGenericOpen(str(infilename))
+    infilename = normalize_path(infilename)
+    outfilename = normalize_output_path(outfilename)
+    source = DfsFileFactory.DfsGenericOpen(infilename)
     fi = source.FileInfo
 
     builder = DfsBuilder.Create(fi.FileTitle, "mikeio", __dfs_version__)
@@ -144,7 +146,7 @@ def _clone(
                     case int():
                         builder.AddDynamicItem(source.ItemInfo[item])
 
-    builder.CreateFile(str(outfilename))
+    builder.CreateFile(outfilename)
 
     for static_item in iter(source.ReadStaticItemNext, None):
         builder.AddStaticItem(static_item)
@@ -180,8 +182,8 @@ def scale(
         Process only selected items, by number (0-based) or name, by default: all
 
     """
-    infilename = str(infilename)
-    outfilename = str(outfilename)
+    infilename = normalize_path(infilename)
+    outfilename = normalize_output_path(outfilename)
     copyfile(infilename, outfilename)
     dfs = DfsFileFactory.DfsGenericOpenEdit(outfilename)
 
@@ -192,7 +194,7 @@ def scale(
 
     deletevalue = dfs.FileInfo.DeleteValueFloat
 
-    for timestep in trange(n_time_steps, disable=not show_progress):
+    for timestep in trange(n_time_steps, disable=not _show_progress()):
         for item in range(n_items):
             itemdata = dfs.ReadItemTimeStep(item_numbers[item] + 1, timestep)
             time = itemdata.Time
@@ -230,14 +232,16 @@ def fill_corrupt(
         Process only selected items, by number (0-based) or name, by default: all
 
     """
+    infilename = normalize_path(infilename)
+    outfilename = normalize_output_path(outfilename)
     dfs_i = DfsFileFactory.DfsGenericOpen(infilename)
 
     item_numbers = _valid_item_numbers(dfs_i.ItemInfo, items)
     n_items = len(item_numbers)
 
     dfs = _clone(
-        str(infilename),
-        str(outfilename),
+        infilename,
+        outfilename,
         items=item_numbers,
     )
 
@@ -245,7 +249,7 @@ def fill_corrupt(
 
     deletevalue = dfs.FileInfo.DeleteValueFloat
 
-    for timestep in trange(n_time_steps, disable=not show_progress):
+    for timestep in trange(n_time_steps, disable=not _show_progress()):
         for item in range(n_items):
             itemdata = dfs_i.ReadItemTimeStep(item_numbers[item] + 1, timestep)
             if itemdata is not None:
@@ -290,9 +294,9 @@ def _process_dfs_files(
         operation to perform on the data arrays
 
     """
-    infilename_a = str(infilename_a)
-    infilename_b = str(infilename_b)
-    outfilename = str(outfilename)
+    infilename_a = normalize_path(infilename_a)
+    infilename_b = normalize_path(infilename_b)
+    outfilename = normalize_output_path(outfilename)
     copyfile(infilename_a, outfilename)
 
     dfs_i_a = DfsFileFactory.DfsGenericOpen(infilename_a)
@@ -305,7 +309,7 @@ def _process_dfs_files(
     n_items = len(dfs_i_a.ItemInfo)
     # TODO Add checks to verify identical structure of file a and b
 
-    for timestep in trange(n_time_steps):
+    for timestep in trange(n_time_steps, disable=not _show_progress()):
         for item in range(n_items):
             itemdata_a = dfs_i_a.ReadItemTimeStep(item + 1, timestep)
             d_a = itemdata_a.Data
@@ -333,7 +337,7 @@ def sum(
     infilename_b: str | pathlib.Path,
     outfilename: str | pathlib.Path,
 ) -> None:
-    # deprecated
+    """Add two dfs files (a+b) (deprecated, use add instead)."""
     warnings.warn(FutureWarning("This function is deprecated. Use add instead."))
     _process_dfs_files(infilename_a, infilename_b, outfilename, operator.add)
 
@@ -399,6 +403,8 @@ def concat(
     The list of input files have to be sorted, i.e. in chronological order
 
     """
+    infilenames = [normalize_path(f) for f in infilenames]
+    outfilename = normalize_output_path(outfilename)
     # fast path for Dfs0
     suffix = pathlib.Path(infilenames[0]).suffix
     if suffix == ".dfs0":
@@ -407,17 +413,17 @@ def concat(
         ds.to_dfs(outfilename)
         return
 
-    dfs_i_a = DfsFileFactory.DfsGenericOpen(str(infilenames[0]))
+    dfs_i_a = DfsFileFactory.DfsGenericOpen(infilenames[0])
 
-    dfs_o = _clone(str(infilenames[0]), str(outfilename))
+    dfs_o = _clone(infilenames[0], outfilename)
 
     n_items = len(dfs_i_a.ItemInfo)
     dfs_i_a.Close()
 
     current_time = datetime(1, 1, 1)  # beginning of time...
 
-    for i, infilename in enumerate(tqdm(infilenames, disable=not show_progress)):
-        dfs_i = DfsFileFactory.DfsGenericOpen(str(infilename))
+    for i, infilename in enumerate(tqdm(infilenames, disable=not _show_progress())):
+        dfs_i = DfsFileFactory.DfsGenericOpen(infilename)
         t_axis = dfs_i.FileInfo.TimeAxis
         n_time_steps = t_axis.NumberOfTimeSteps
         dt = t_axis.TimeStep
@@ -432,7 +438,7 @@ def concat(
 
         if keep == "last":
             if i < (len(infilenames) - 1):
-                dfs_n = DfsFileFactory.DfsGenericOpen(str(infilenames[i + 1]))
+                dfs_n = DfsFileFactory.DfsGenericOpen(infilenames[i + 1])
                 next_start_time = dfs_n.FileInfo.TimeAxis.StartDateTime
                 dfs_n.Close()
 
@@ -498,7 +504,7 @@ def concat(
 
             # Find the start time of next file
             if not last_file:
-                dfs_n = DfsFileFactory.DfsGenericOpen(str(infilenames[i + 1]))
+                dfs_n = DfsFileFactory.DfsGenericOpen(infilenames[i + 1])
                 next_start_time = dfs_n.FileInfo.TimeAxis.StartDateTime
             else:
                 next_start_time = datetime.max  # end of time ...
@@ -584,7 +590,9 @@ def extract(
     >>> extract('f_in.dfsu', 'f_out.dfsu', end='2018-2-1 00:00', items="Salinity")
 
     """
-    dfs_i = DfsFileFactory.DfsGenericOpenEdit(str(infilename))
+    infilename = normalize_path(infilename)
+    outfilename = normalize_output_path(outfilename)
+    dfs_i = DfsFileFactory.DfsGenericOpenEdit(infilename)
 
     is_layered_dfsu = dfs_i.ItemInfo[0].Name == "Z coordinate"
 
@@ -598,8 +606,8 @@ def extract(
         item_numbers.insert(0, 0)
 
     dfs_o = _clone(
-        str(infilename),
-        str(outfilename),
+        infilename,
+        outfilename,
         start_time=time.file_start_new,
         timestep=time.timestep,
         items=item_numbers,
@@ -786,7 +794,9 @@ def avg_time(
         exclude NaN/delete values when computing the result, default True
 
     """
-    dfs_i = DfsFileFactory.DfsGenericOpen(str(infilename))
+    infilename = normalize_path(infilename)
+    outfilename = normalize_output_path(outfilename)
+    dfs_i = DfsFileFactory.DfsGenericOpen(infilename)
 
     dfs_o = _clone(infilename, outfilename)
 
@@ -810,7 +820,7 @@ def avg_time(
         step0[has_value] = 1
         steps_list.append(step0)
 
-    for timestep in trange(1, n_time_steps, disable=not show_progress):
+    for timestep in trange(1, n_time_steps, disable=not _show_progress()):
         for item in range(n_items):
             itemdata = dfs_i.ReadItemTimeStep(item_numbers[item] + 1, timestep)
             d = itemdata.Data
@@ -872,6 +882,8 @@ def quantile(
     >>> quantile("with_nans.dfsu", "Q05.dfsu", q=0.5, skipna=False)
 
     """
+    infilename = normalize_path(infilename)
+    outfilename = normalize_output_path(outfilename)
     func = np.nanquantile if skipna else np.quantile
 
     dfs_i = DfsFileFactory.DfsGenericOpen(infilename)
@@ -1010,6 +1022,8 @@ def change_datatype(
     >>> change_datatype("in.dfsu", "out.dfsu", datatype=107)
 
     """
+    infilename = normalize_path(infilename)
+    outfilename = normalize_output_path(outfilename)
     dfs_out = _clone(infilename, outfilename, datatype=datatype)
     dfs_in = DfsFileFactory.DfsGenericOpen(infilename)
 
@@ -1116,7 +1130,9 @@ def transform(
     ```
 
     """
-    dfs_i = DfsFileFactory.DfsGenericOpen(str(infilename))
+    infilename = normalize_path(infilename)
+    outfilename = normalize_output_path(outfilename)
+    dfs_i = DfsFileFactory.DfsGenericOpen(infilename)
 
     item_numbers = _valid_item_numbers(dfs_i.ItemInfo)
     n_items = len(item_numbers)
@@ -1134,8 +1150,8 @@ def transform(
         items = existing_items + items
 
     dfs = _clone(
-        str(infilename),
-        str(outfilename),
+        infilename,
+        outfilename,
         items=items,
     )
 

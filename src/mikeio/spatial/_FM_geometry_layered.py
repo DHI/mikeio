@@ -533,6 +533,7 @@ class GeometryFM3D(_GeometryFMLayered):
 
     @property
     def plot(self) -> None:
+        """Not available for GeometryFM3D, use to_2d_geometry().plot instead."""
         raise AttributeError(
             "GeometryFM3D does not support plotting directly. "
             "Use .to_2d_geometry().plot instead."
@@ -540,19 +541,23 @@ class GeometryFM3D(_GeometryFMLayered):
 
     @property
     def boundary_polylines(self) -> BoundaryPolygons:
+        """Lists of polygons defining domain outline (deprecated, use boundary_polygons)."""
         warnings.warn(
             "boundary_polylines is renamed to boundary_polygons", FutureWarning
         )
-        return self.geometry2d.boundary_polylines
+        return self.geometry2d.boundary_polygons
 
     @property
     def boundary_polygons(self) -> BoundaryPolygons:
-        return self.geometry2d.boundary_polylines
+        """Lists of polygons defining domain outline."""
+        return self.geometry2d.boundary_polygons
 
     def contains(self, points: np.ndarray) -> np.ndarray:
+        """Test if a list of points are contained by the horizontal extent of the mesh."""
         return self.geometry2d.contains(points)
 
     def to_mesh(self, outfilename: str | Path) -> None:
+        """Export the horizontal mesh to a mesh file."""
         return self.geometry2d.to_mesh(outfilename)
 
     def find_index(
@@ -564,6 +569,37 @@ class GeometryFM3D(_GeometryFMLayered):
         area: tuple[float, float, float, float] | None = None,
         layers: int | Layer | Sequence[int] | None = None,
     ) -> np.ndarray:
+        """Find a *set* of 3d element indices for points, an area and/or layers.
+
+        Typically not called directly, but by Dataset/DataArray's
+        sel() method.
+
+        Parameters
+        ----------
+        x: float, optional
+            X coordinate (easting or longitude)
+        y: float, optional
+            Y coordinate (northing or latitude)
+        z: float, optional
+            Z coordinate (depth, positive upwards)
+        coords : np.array(float,float), optional
+            As an alternative to specifying x, y (and z) individually,
+            the argument coords can be used instead,
+            by default None
+        area : (float, float, float, float), optional
+            Bounding box of coordinates (left lower and right upper)
+            to be selected, by default None
+        layers : int or str or list[int], optional
+            layer(s) to be selected: subset of "all", "top", "bottom",
+            "bottom+1", ..., or a layer number (0=bottom, 1, 2, ...),
+            by default None
+
+        Returns
+        -------
+        np.array
+            3d element indices
+
+        """
         if layers is not None:
             idx = self.get_layer_elements(layers)
         else:
@@ -644,6 +680,34 @@ class GeometryFMVerticalProfile(_GeometryFMLayered):
         coords: np.ndarray | None = None,
         layers: int | Sequence[int] | Layer | None = None,
     ) -> np.ndarray:
+        """Find a *set* of element indices for points and/or layers.
+
+        Typically not called directly, but by Dataset/DataArray's
+        sel() method.
+
+        Parameters
+        ----------
+        x: float, optional
+            X coordinate (easting or longitude)
+        y: float, optional
+            Y coordinate (northing or latitude)
+        z: float, optional
+            Z coordinate (depth, positive upwards)
+        coords : np.array(float,float), optional
+            As an alternative to specifying x, y (and z) individually,
+            the argument coords can be used instead,
+            by default None
+        layers : int or str or list[int], optional
+            layer(s) to be selected: subset of "all", "top", "bottom",
+            "bottom+1", ..., or a layer number (0=bottom, 1, 2, ...),
+            by default None
+
+        Returns
+        -------
+        np.array
+            element indices
+
+        """
         if layers is not None:
             idx = self.get_layer_elements(layers)
         else:
@@ -749,6 +813,8 @@ class GeometryFMVerticalColumn(GeometryFM3D):
 
 
 class GeometryFMVerticalProfilePlotter:
+    """Plot a vertical profile geometry, e.g. geometry.plot()."""
+
     def __init__(self, geometry: GeometryFMVerticalProfile) -> None:
         self.g = geometry
 
@@ -768,6 +834,7 @@ class GeometryFMVerticalProfilePlotter:
         return ax
 
     def mesh(self, title: str = "Mesh", edge_color: str = "0.5", **kwargs: Any) -> Axes:
+        """Plot the mesh of the vertical profile."""
         v = np.full_like(self.g.element_coordinates[:, 0], np.nan)
         return _plot_vertical_profile(
             node_coordinates=self.g.node_coordinates,
