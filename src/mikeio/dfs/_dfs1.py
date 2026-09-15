@@ -11,7 +11,7 @@ from numpy.typing import NDArray
 import pandas as pd
 from tqdm import tqdm
 
-from .. import __dfs_version__
+from .._version import __dfs_version__
 from ..dataset import Dataset
 from ._dfs import (
     _Dfs123,

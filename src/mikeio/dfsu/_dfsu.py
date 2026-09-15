@@ -18,7 +18,7 @@ from tqdm import trange
 
 from mikeio.spatial._distance import xy_to_bbox
 
-from .. import __dfs_version__
+from .._version import __dfs_version__
 from ..dataset import Dataset
 from ..dfs._dfs import (
     _get_item_info,

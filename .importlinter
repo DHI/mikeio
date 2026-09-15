@@ -1,0 +1,31 @@
+[importlinter]
+root_package = mikeio
+# Type-only imports do not couple the modules at runtime.
+exclude_type_checking_imports = True
+
+[importlinter:contract:layers]
+name = MIKE IO layers
+type = layers
+layers =
+    mikeio.generic : mikeio.pfs
+    mikeio.dfsu
+    mikeio.dfs
+    mikeio.dataset
+    mikeio._track
+    mikeio.spatial
+    mikeio._options
+    mikeio.eum
+    mikeio.exceptions : mikeio._path : mikeio._interpolation : mikeio._spectral : mikeio._time
+ignore_imports =
+    # Dataset.to_dfs() dispatches on the output suffix and so has to reach
+    # down into the writers of every format, including ones above it in the
+    # layering. Deferred into the method body to keep the module importable.
+    mikeio.dataset._dataset -> mikeio.dfs._dfs0
+    mikeio.dataset._dataset -> mikeio.dfs._dfs1
+    mikeio.dataset._dataset -> mikeio.dfs._dfs2
+    mikeio.dataset._dataset -> mikeio.dfs._dfs3
+    mikeio.dataset._dataset -> mikeio.dfsu
+    # Track extraction accepts a dfs0 file or a Dataset as the track input,
+    # and builds a Dataset to return the result. Deferred for the same reason.
+    mikeio._track -> mikeio.dataset
+    mikeio._track -> mikeio.dfs
