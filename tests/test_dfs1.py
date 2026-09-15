@@ -74,6 +74,15 @@ def test_read() -> None:
     assert data.shape == (100, 3)  # time, x
 
 
+def test_read_dtype_deprecated() -> None:
+    dfs = mikeio.Dfs1("tests/testdata/random.dfs1")
+
+    with pytest.warns(FutureWarning, match="dtype"):
+        ds = dfs.read(items=[0], dtype=np.float64)
+
+    assert ds[0].to_numpy().dtype == np.float64
+
+
 def test_read_item_names() -> None:
     dfs = mikeio.Dfs1("tests/testdata/random.dfs1")
 

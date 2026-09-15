@@ -1,4 +1,5 @@
 from __future__ import annotations
+import warnings
 from pathlib import Path
 from typing import Any, Mapping, Sequence
 
@@ -129,13 +130,21 @@ class Dfs1(_Dfs123):
             When reading a single time step only, should the time-dimension be kept
             in the returned Dataset? by default: False
         dtype: data-type, optional
-            Define the dtype of the returned dataset (default = np.float32)
+            Deprecated since v3.4: the parameter will be removed in v4.0,
+            data is always read as np.float32. Use `Dataset.astype()` instead.
 
         Returns
         -------
         Dataset
 
         """
+        if dtype != np.float32:
+            warnings.warn(
+                "dtype parameter is deprecated and will be removed in v4.0. "
+                "Data is always read as np.float32, use Dataset.astype() to cast it afterwards.",
+                FutureWarning,
+                stacklevel=2,
+            )
         self._open()
 
         item_numbers = _valid_item_numbers(self._dfs.ItemInfo, items)
