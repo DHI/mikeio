@@ -45,7 +45,8 @@ def test_isel_list_of_indices(simple_3d_geom: GeometryFM3D) -> None:
     assert g2.element_coordinates[1, 0] == pytest.approx(0.6666666666666666)
 
 
-def test_basic() -> None:
+@pytest.fixture
+def triangle_2d_geom() -> GeometryFM2D:
     #     x     y    z
     nc = [
         (0.0, 0.0, 0.0),  # 0
@@ -55,18 +56,39 @@ def test_basic() -> None:
 
     el = [(0, 1, 2)]
 
-    g = GeometryFM2D(nc, el)
-    assert g.n_elements == 1
-    assert g.n_nodes == 3
-    assert g.is_geo
-    assert g.is_tri_only
-    assert g.projection == "LONG/LAT"
-    assert not g.is_layered
-    assert 0 in g.find_index(0.5, 0.5)
-    with pytest.raises(ValueError):
-        g.find_index(50.0, -50.0)
+    return GeometryFM2D(nc, el)
 
-    assert "nodes: 3" in repr(g)
+
+def test_single_triangle_reports_expected_counts_and_properties(
+    triangle_2d_geom: GeometryFM2D,
+) -> None:
+    """A GeometryFM2D built from one triangle reports real counts and properties."""
+    assert triangle_2d_geom.n_elements == 1
+    assert triangle_2d_geom.n_nodes == 3
+    assert triangle_2d_geom.is_geo
+    assert triangle_2d_geom.is_tri_only
+    assert triangle_2d_geom.projection == "LONG/LAT"
+    assert not triangle_2d_geom.is_layered
+
+
+def test_find_index_returns_element_containing_query_point(
+    triangle_2d_geom: GeometryFM2D,
+) -> None:
+    """A point inside the triangle resolves to the element that contains it."""
+    assert 0 in triangle_2d_geom.find_index(0.5, 0.5)
+
+
+def test_find_index_raises_for_point_outside_domain(
+    triangle_2d_geom: GeometryFM2D,
+) -> None:
+    """A point far outside the domain raises ValueError rather than returning a match."""
+    with pytest.raises(ValueError):
+        triangle_2d_geom.find_index(50.0, -50.0)
+
+
+def test_repr_reports_node_count(triangle_2d_geom: GeometryFM2D) -> None:
+    """The repr summarizes the geometry, including its node count."""
+    assert "nodes: 3" in repr(triangle_2d_geom)
 
 
 def test_too_many_elements() -> None:
