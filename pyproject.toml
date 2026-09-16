@@ -37,7 +37,7 @@ classifiers = [
 ]
 
 [dependency-groups]
-test = ["pytest", "pytest-cov", "mypy==1.19.1", "shapely", "pyproj", "polars"]
+test = ["pytest", "pytest-cov", "mypy==1.19.1", "shapely", "pyproj", "polars", "import-linter"]
 
 dev = [
     {include-group = "test"},

@@ -32,8 +32,9 @@ from tqdm import tqdm, trange
 
 import mikeio
 
-from . import __dfs_version__
+from ._version import __dfs_version__
 from ._options import _show_progress
+from .dataset import Dataset
 from .dfs._dfs import _get_item_info, _valid_item_numbers
 from .eum import EUMType, EUMUnit, ItemInfo
 from ._path import normalize_output_path, normalize_path
@@ -409,7 +410,7 @@ def concat(
     suffix = pathlib.Path(infilenames[0]).suffix
     if suffix == ".dfs0":
         dss = [mikeio.read(f) for f in infilenames]
-        ds = mikeio.Dataset.concat(dss, keep=keep)  # type: ignore
+        ds = Dataset.concat(dss, keep=keep)  # type: ignore
         ds.to_dfs(outfilename)
         return
 

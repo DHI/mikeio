@@ -1,18 +1,9 @@
 from __future__ import annotations
-from importlib.metadata import PackageNotFoundError, version
 from pathlib import Path
 from collections.abc import Sequence
 from typing import Any
 
-try:
-    # read version from installed package
-    __version__ = version("mikeio")
-except PackageNotFoundError:
-    # package is not installed
-    __version__ = "dev"
-
-__dfs_version__: int = 220
-
+from ._version import __version__ as __version__, __dfs_version__ as __dfs_version__
 
 from .dataset import DataArray, Dataset, from_pandas, from_polars
 from .dfs import Dfs0, Dfs1, Dfs2, Dfs3
