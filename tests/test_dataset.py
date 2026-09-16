@@ -1544,6 +1544,23 @@ def test_fillna() -> None:
     assert np.isnan(ds["foo"].to_numpy()[0])
 
 
+def test_astype() -> None:
+    ds = mikeio.Dataset(
+        {
+            "foo": mikeio.DataArray(np.array([1.0, 2.0], dtype=np.float32)),
+            "bar": mikeio.DataArray(np.array([3.0, 4.0], dtype=np.float32)),
+        }
+    )
+
+    ds64 = ds.astype(np.float64)
+
+    assert ds64["foo"].to_numpy().dtype == np.float64
+    assert ds64["bar"].to_numpy().dtype == np.float64
+
+    # original dataset is not modified
+    assert ds["foo"].to_numpy().dtype == np.float32
+
+
 def test_safe_name() -> None:
     from mikeio.dataset._dataset import _to_safe_name
 

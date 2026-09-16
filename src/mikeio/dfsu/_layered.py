@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import warnings
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Sequence, overload
 
@@ -321,7 +322,8 @@ class DfsuLayered:
             fill value for to impute corrupt data, used in conjunction with error_bad_data=False
             default np.nan
         dtype: numpy.dtype, optional
-            Data type to read, by default np.float32
+            Deprecated since v3.4: the parameter will be removed in v4.0,
+            data is always read as np.float32. Use `Dataset.astype()` instead.
 
         Returns
         -------
@@ -329,8 +331,15 @@ class DfsuLayered:
             A Dataset with data dimensions [t,elements]
 
         """
-        if dtype not in [np.float32, np.float64]:
-            raise ValueError("Invalid data type. Choose np.float32 or np.float64")
+        if dtype != np.float32:
+            if dtype not in [np.float32, np.float64]:
+                raise ValueError("Invalid data type. Choose np.float32 or np.float64")
+            warnings.warn(
+                "dtype parameter is deprecated and will be removed in v4.0. "
+                "Data is always read as np.float32, use Dataset.astype() to cast it afterwards.",
+                FutureWarning,
+                stacklevel=2,
+            )
 
         dfs = DfsuFile.Open(self._filename)
 
