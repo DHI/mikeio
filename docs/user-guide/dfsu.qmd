@@ -230,8 +230,3 @@ item = mikeio.ItemInfo(mikeio.EUMType.Chezy_No)
 da = mikeio.DataArray(data, time=time, item=item, geometry=msh.geometry)
 da.to_dfs("chezy_map.dfsu")
 ```
-
-```{python}
-import os
-os.remove("chezy_map.dfsu")
-```
