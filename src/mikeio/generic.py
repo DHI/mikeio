@@ -56,14 +56,10 @@ __all__ = [
 ]
 
 
-@dataclass
+@dataclass(frozen=True)
 class _ChunkInfo:
-    def __init__(self, n_data: int, n_chunks: int):
-        self.n_data = n_data
-        self.n_chunks = n_chunks
-
-    def __repr__(self) -> str:
-        return f"_ChunkInfo(n_chunks={self.n_chunks}, n_data={self.n_data}, chunk_size={self.chunk_size})"
+    n_data: int
+    n_chunks: int
 
     @property
     def chunk_size(self) -> int:
