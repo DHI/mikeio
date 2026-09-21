@@ -1,4 +1,8 @@
-# Design philosophy
+---
+title: Design philosophy
+aliases:
+  - ../design.html
+---
 
 
 ## {{< fa code >}} Easy to use
@@ -27,7 +31,7 @@ Comprehensive documentation with user guides, tutorials, and runnable examples o
 MIKE IO is built on top of [mikecore](https://github.com/DHI/mikecore-python), the low-level Python bindings to DHI's DFS and EUM C libraries. MIKE IO provides a high-level, user-friendly API that covers the vast majority of common data processing tasks. However, to keep the API simple and focused, some advanced or niche functionality is not exposed. If you encounter an edge case that MIKE IO doesn't support, you can use mikecore directly for full low-level access. While mikecore doesn't have formal documentation, its repository contains many examples to help you get started.
 
 ## {{< fa brands osi >}} Open Source​
-MIKE IO is an open source project licensed under the [BSD-3 license](license.qmd).
+MIKE IO is an open source project licensed under the [BSD-3 license](../license.qmd).
 The software is provided free of charge with the source code available for inspection and modification.
 
 Contributions are welcome!

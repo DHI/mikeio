@@ -1,5 +1,5 @@
 ---
-title: Dfsu - spectral data
+title: Dfsu spectral
 ---
 
 MIKE 21 SW can output the full wave spectrum, not just integrated parameters such as Hm0. Those files are dfsu files with up to two extra axes, **frequency** and **direction**, and they come in three shapes:

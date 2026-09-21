@@ -1,4 +1,8 @@
-# Getting started
+---
+title: Getting started
+aliases:
+  - data-structures.html
+---
 
 ## Requirements
 
@@ -38,6 +42,15 @@ Each DataArray have the following properties:
 * **time** - a [](`pandas.DatetimeIndex`) with the time instances of the data
 * **geometry** - a Geometry object with the spatial description of the data
 * **values** - a [](`numpy.ndarray`)
+
+The geometry comes in different flavours matching the type of dfs file:
+[Grid1D](`mikeio.Grid1D`), [Grid2D](`mikeio.Grid2D`), [Grid3D](`mikeio.Grid3D`),
+[GeometryFM2D](`mikeio.spatial.GeometryFM2D`), [GeometryFM3D](`mikeio.spatial.GeometryFM3D`) and others.
+
+[](`mikeio.open`) returns an object with the metadata (=header) of a dfs file:
+[Dfs0](`mikeio.Dfs0`), [Dfs1](`mikeio.Dfs1`), [Dfs2](`mikeio.Dfs2`), [Dfs3](`mikeio.Dfs3`),
+[Dfsu2DH](`mikeio.dfsu.Dfsu2DH`), [Dfsu2DV](`mikeio.dfsu.Dfsu2DV`), [Dfsu3D](`mikeio.dfsu.Dfsu3D`)
+or [DfsuSpectral](`mikeio.dfsu.DfsuSpectral`). Call its `read()` method to get a Dataset.
 
 ## {{< fa weight-hanging >}} Types and units
 
