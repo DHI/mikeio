@@ -1306,7 +1306,7 @@ class DataArray:
         ```
 
         """
-        from mikeio import Dataset
+        from ._dataset import Dataset
 
         datasets = [Dataset([da]) for da in dataarrays]
 
@@ -1708,7 +1708,7 @@ class DataArray:
         return self._quantile(q, axis=axis, func=np.nanquantile, **kwargs)
 
     def _quantile(self, q, *, axis: int | str = 0, func=np.quantile, **kwargs: Any):  # type: ignore
-        from mikeio import Dataset
+        from ._dataset import Dataset
 
         parsed_axis = self._parse_axis(axis)
         if isinstance(parsed_axis, tuple):
@@ -1873,7 +1873,7 @@ class DataArray:
 
     def _to_dataset(self) -> Dataset:
         """Create a single-item dataset."""
-        from mikeio import Dataset
+        from ._dataset import Dataset
 
         return Dataset(
             {self.name: self}
