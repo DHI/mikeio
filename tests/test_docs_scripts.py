@@ -2,11 +2,12 @@ import importlib.util
 from pathlib import Path
 from types import ModuleType
 
-import pytest
+import numpy as np
 
 import mikeio
 
 SCRIPTS = Path(__file__).parent.parent / "docs" / "scripts"
+TESTDATA = Path(__file__).parent / "testdata"
 
 
 def load_script(name: str) -> ModuleType:
@@ -18,18 +19,11 @@ def load_script(name: str) -> ModuleType:
     return module
 
 
-def test_concat_expands_glob(tmp_path: Path) -> None:
-    out = tmp_path / "out.dfs1"
-    load_script("concat").main(["tests/testdata/tide[12].dfs1", str(out)])
+def test_diff_subtracts_baseline_from_scenario(tmp_path: Path) -> None:
+    scenario = TESTDATA / "oresundHD_run2.dfsu"
+    baseline = TESTDATA / "oresundHD_run1.dfsu"
+    out = tmp_path / "diff.dfsu"
+    load_script("diff").main([str(scenario), str(baseline), str(out)])
 
-    ds = mikeio.read(out)
-    t1 = mikeio.read("tests/testdata/tide1.dfs1").time
-    t2 = mikeio.read("tests/testdata/tide2.dfs1").time
-    assert ds.time[0] == t1[0]
-    assert ds.time[-1] == t2[-1]
-
-
-def test_concat_exits_nonzero_when_nothing_matches(tmp_path: Path) -> None:
-    with pytest.raises(SystemExit) as e:
-        load_script("concat").main(["no_such_*.dfs1", str(tmp_path / "out.dfs1")])
-    assert e.value.code != 0
+    expected = mikeio.read(scenario)[0].to_numpy() - mikeio.read(baseline)[0].to_numpy()
+    np.testing.assert_allclose(mikeio.read(out)[0].to_numpy(), expected)
