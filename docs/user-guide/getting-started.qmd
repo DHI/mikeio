@@ -1,127 +1,106 @@
 ---
 title: Getting started
-aliases:
-  - data-structures.html
 ---
 
-## Requirements
+In this tutorial you set up a Python project, read results from a MIKE 21 flow model of the Øresund, plot them, and save the maximum water level to a new dfsu file.
 
-* Windows or Linux operating system
-* Python x64 3.12 - 3.14
-* (Windows) [VC++ redistributables](https://aka.ms/vs/17/release/vc_redist.x64.exe) (already installed if you have MIKE)
+MIKE IO runs on Windows and Linux. On Windows it needs the [VC++ redistributables](https://aka.ms/vs/17/release/vc_redist.x64.exe), which are already installed if you have MIKE.
 
-## Installation
+## Set up a project
 
-::: {.callout-tip}
-# Using uv
-[uv](https://docs.astral.sh/uv/) is an extremely fast Python package and project manager that is 10-100x faster than pip, and also makes it easy to install Python and manage projects. With uv, creating a virtual environment is as easy as uv venv.
-:::
+Install [uv](https://docs.astral.sh/uv/getting-started/installation/). uv installs Python for you, so you don't need a Python installation first.
 
-To install MIKE IO, run this command in a terminal:
+Create a project folder with MIKE IO and JupyterLab in it:
 
-::: {.panel-tabset}
-## pip
 ```bash
-pip install mikeio
+uv init mikeio-tutorial
+cd mikeio-tutorial
+uv add mikeio jupyterlab
 ```
 
-## uv
+Download [oresundHD_run1.dfsu](https://github.com/DHI/mikeio/raw/main/tests/testdata/oresundHD_run1.dfsu) into the `mikeio-tutorial` folder, then start JupyterLab:
+
 ```bash
-uv pip install mikeio
+uv run jupyter lab
 ```
 
-:::
+Create a new notebook and type the code below into its cells.
 
-## {{< fa database >}} Dataset
-The [Dataset](dataset.qmd) is the common MIKE IO data structure for data read from dfs files.
-The  [](`mikeio.read`) method returns a Dataset with a [DataArray](dataarray.qmd) for each item.
+```{python}
+#| echo: false
+import shutil
 
-Each DataArray have the following properties:
+shutil.copy("../data/oresundHD_run1.dfsu", ".");
+```
 
-* **item** - an  [](`mikeio.ItemInfo`) with name, type and unit
-* **time** - a [](`pandas.DatetimeIndex`) with the time instances of the data
-* **geometry** - a Geometry object with the spatial description of the data
-* **values** - a [](`numpy.ndarray`)
-
-The geometry comes in different flavours matching the type of dfs file:
-[Grid1D](`mikeio.Grid1D`), [Grid2D](`mikeio.Grid2D`), [Grid3D](`mikeio.Grid3D`),
-[GeometryFM2D](`mikeio.spatial.GeometryFM2D`), [GeometryFM3D](`mikeio.spatial.GeometryFM3D`) and others.
-
-[](`mikeio.open`) returns an object with the metadata (=header) of a dfs file:
-[Dfs0](`mikeio.Dfs0`), [Dfs1](`mikeio.Dfs1`), [Dfs2](`mikeio.Dfs2`), [Dfs3](`mikeio.Dfs3`),
-[Dfsu2DH](`mikeio.dfsu.Dfsu2DH`), [Dfsu2DV](`mikeio.dfsu.Dfsu2DV`), [Dfsu3D](`mikeio.dfsu.Dfsu3D`)
-or [DfsuSpectral](`mikeio.dfsu.DfsuSpectral`). Call its `read()` method to get a Dataset.
-
-## {{< fa weight-hanging >}} Types and units
-
-The dfs items in MIKE IO are represented by the [ItemInfo class](`mikeio.ItemInfo`).
-An ItemInfo consists of:
-
-* name - a user-defined string
-* type - an [EUMType](`mikeio.EUMType`)
-* unit - an [EUMUnit](`mikeio.EUMUnit`)
+## Read the file
 
 ```{python}
 import mikeio
 
-mikeio.ItemInfo("Viken", mikeio.EUMType.Water_Level)
-```
-
-```{python}
-mikeio.ItemInfo(mikeio.EUMType.Wind_speed)
-```
-
-## {{< fa chart-line >}} Dfs0
-A dfs0 file is also called a time series file.
-
-Read Dfs0 to Dataset:
-
-```{python}
-ds = mikeio.read("../data/da_diagnostic.dfs0")
+ds = mikeio.read("oresundHD_run1.dfsu")
 ds
 ```
 
-Read more on the [Dfs0 page](dfs0.qmd).
+`ds` is a [Dataset](dataset.qmd). The summary shows that the file holds four items on a mesh of 3612 elements, with one value per day from 7 to 11 March 2018.
 
-Convert the timeseries dataset to a pandas DataFrame:
-
-```{python}
-df = ds.to_dataframe()
-df.head()
-```
-
-
-## {{< fa map >}} Dfs2
-
-A dfs2 file is also called a grid series file. Values in a dfs2 file are ‘element based’, i.e. values are defined in the centre of each grid cell.
+## Pick out one item
 
 ```{python}
-ds = mikeio.read("../data/gebco_sound.dfs2")
-ds
+da = ds["Surface elevation"]
+da
 ```
 
-Read more on the [Dfs2 page](dfs2.qmd).
+`da` is a [DataArray](dataarray.qmd): the values of one item, together with its time axis and mesh.
 
+Plot the surface elevation on the last day:
 
-## {{< fa toolbox >}} Generic dfs
-MIKE IO has [`generic`](generic.qmd) functionality that works for all dfs files:
-
-* [`concat()`](`mikeio.generic.concat`) - Concatenates files along the time axis
-* [`extract()`](`mikeio.generic.extract`) - Extract timesteps and/or items to a new dfs file
-* [`diff()`](`mikeio.generic.diff`) - Calculate difference between two dfs files with identical geometry
-* [`add()`](`mikeio.generic.add`) - Calculate the sum of two dfs files
-* [`scale()`](`mikeio.generic.scale`) - Apply scaling to any dfs file
-* [`avg_time()`](`mikeio.generic.avg_time`) - Create a temporally averaged dfs file
-* [`quantile()`](`mikeio.generic.quantile`) - Create a dfs file with temporal quantiles
-
-All generic methods creates a new dfs file.
-
-```python
-from mikeio import generic
-generic.concat(["fileA.dfs2", "fileB.dfs2"], "new_file.dfs2")
+```{python}
+da.sel(time="2018-03-11").plot();
 ```
 
-## {{< fa book >}} Additional resources
+## Look at one location
 
-* Online book: [Getting started with Dfs files in Python using MIKE IO](https://dhi.github.io/getting-started-with-mikeio)
-* [DFS file system specification](https://docs.mikepoweredbydhi.com/core_libraries/dfs/dfs-file-system)
+Select the element that contains a point, given in the coordinates of the mesh (UTM zone 33):
+
+```{python}
+point = da.sel(x=355000, y=6160000)
+point
+```
+
+The result is a time series. Plot it:
+
+```{python}
+point.plot();
+```
+
+## Save the maximum water level
+
+Take the maximum over time in each element:
+
+```{python}
+max_elevation = da.max(axis="time")
+max_elevation.plot(title="Maximum surface elevation");
+```
+
+Write it to a new dfsu file:
+
+```{python}
+max_elevation.to_dfs("max_elevation.dfsu")
+```
+
+Read it back to check the result:
+
+```{python}
+mikeio.read("max_elevation.dfsu")
+```
+
+You can open `max_elevation.dfsu` in MIKE Zero like any other dfsu file.
+
+## Next steps
+
+* Read about the other file types: [dfs0](dfs0.qmd), [dfs1](dfs1.qmd), [dfs2](dfs2.qmd), [dfs3](dfs3.qmd), [dfsu](dfsu.qmd) and [mesh](mesh.qmd)
+* Process files without loading them into memory with [generic](generic.qmd)
+* Turn your notebook into a [script](scripts.qmd) you can run again on the next model run
+* Browse the [examples](../examples/index.qmd)
+* Follow the online course [Getting started with Dfs files in Python using MIKE IO](https://dhi.github.io/getting-started-with-mikeio)

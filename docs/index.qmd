@@ -15,8 +15,7 @@ format-links: false
 ::: {.g-col-6}
 ## {{< fa clock >}} **Set up in 5 minutes**
 
-Install **MIKE IO** with [`pip`](https://pypi.org/project/mikeio/) and get up
-and running in minutes
+Install **MIKE IO**, read a dfsu file, plot it and write a new one
 
 
 [**Getting started**](user-guide/getting-started.qmd)
