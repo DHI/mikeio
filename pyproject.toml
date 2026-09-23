@@ -109,12 +109,12 @@ explicit-preview-rules = true
 [tool.mypy]
 exclude = [
     "test_dfsu_plot",
-    "scripts*",
     "test_notebooks",
     "test_consistency",
     "conftest",
     "test_pfs",
-    "docs",
+    "^docs/(?!scripts/)",
+    "^roadmap/",
 ]
 python_version = "3.12"
 warn_return_any = false
