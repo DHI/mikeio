@@ -1,5 +1,7 @@
 project:
   type: website
+  resources:
+    - scripts/*.py
 
 website:
   title: "MIKE IO"
@@ -52,6 +54,7 @@ website:
         - user-guide/statistics.qmd
         - user-guide/generic.qmd
         - user-guide/pfs.qmd
+        - user-guide/scripts.qmd
 
     - title: Examples
       contents:
