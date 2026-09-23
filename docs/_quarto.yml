@@ -39,22 +39,27 @@ website:
       style: docked
       contents:
         - user-guide/getting-started.qmd
-        - design.qmd
-        - user-guide/data-structures.md
-        - user-guide/dataarray.qmd
-        - user-guide/dataset.qmd
-        - user-guide/dfs0.qmd
-        - user-guide/dfs1.qmd
-        - user-guide/dfs2.qmd
-        - user-guide/dfs3.qmd
-        - user-guide/dfsu.qmd
-        - user-guide/dfsu-spectral.qmd
-        - user-guide/mesh.qmd
-        - user-guide/eum.qmd
-        - user-guide/statistics.qmd
-        - user-guide/generic.qmd
-        - user-guide/pfs.qmd
-        - user-guide/scripts.qmd
+        - user-guide/design.qmd
+        - section: "Data structures"
+          contents:
+            - user-guide/dataset.qmd
+            - user-guide/dataarray.qmd
+            - user-guide/eum.qmd
+        - section: "File types"
+          contents:
+            - user-guide/dfs0.qmd
+            - user-guide/dfs1.qmd
+            - user-guide/dfs2.qmd
+            - user-guide/dfs3.qmd
+            - user-guide/dfsu.qmd
+            - user-guide/dfsu-spectral.qmd
+            - user-guide/mesh.qmd
+            - user-guide/pfs.qmd
+        - section: "Processing"
+          contents:
+            - user-guide/statistics.qmd
+            - user-guide/generic.qmd
+            - user-guide/scripts.qmd
 
     - title: Examples
       contents:
