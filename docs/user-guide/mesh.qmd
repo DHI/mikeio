@@ -9,12 +9,16 @@ import mikeio
 
 ## Read mesh file
 
+A mesh file holds the mesh topology — a set of Nodes and Elements — with no dynamic data. Load it with `mikeio.Mesh`:
+
 ```{python}
 msh = mikeio.Mesh("../data/odense_rough.mesh")
 msh
 ```
 
 ## Plot mesh
+
+Visualize the mesh structure and boundary nodes:
 
 ```{python}
 msh.plot()
@@ -25,14 +29,15 @@ msh.plot.boundary_nodes(boundary_names=['Land','Open boundary']);
 ```
 
 ## Convert mesh to shapely
-Convert mesh to [shapely](https://shapely.readthedocs.io/en/latest/manual.html) MultiPolygon object, requires that the `shapely` library is installed.
+
+Convert the mesh to a [shapely](https://shapely.readthedocs.io/en/latest/manual.html) `MultiPolygon` (requires `shapely`):
 
 ```{python}
 mp = msh.to_shapely()
 mp
 ```
 
-Now a lot of methods are available
+Now a lot of methods are available, e.g. computing the area and extents:
 
 ```{python}
 mp.area
@@ -41,6 +46,8 @@ mp.area
 ```{python}
 mp.bounds
 ```
+
+Create a buffered copy of the domain, and extract the coastal zone (the ring within 500 m of the boundary):
 
 ```{python}
 domain = mp.buffer(0)
@@ -56,6 +63,8 @@ coastalzone
 
 ## Check if points are inside the domain
 
+Test individual points against the shapely polygon:
+
 ```{python}
 from shapely.geometry import Point
 
@@ -65,7 +74,7 @@ print(mp.contains(p1))
 print(mp.contains(p2))
 ```
 
-We can get similar functionality from the `.geometry` attribute of the mesh object.
+The same check is available directly on the mesh geometry:
 
 ```{python}
 p1p2 = [[216000, 6162000], [220000, 6156000]]
@@ -106,7 +115,7 @@ g.find_nearest_elements([216000, 6162000], n_nearest=3)
 
 ### Boundary polygons
 
-Extract the mesh boundary as polygons:
+Extract the mesh boundary as polygons, e.g. to inspect the exterior ring:
 
 ```{python}
 bnd = g.boundary_polygons
@@ -116,7 +125,8 @@ exterior.xy.shape
 
 
 ## Change z values and boundary code
-Assume that we want to have a minimum depth of 2 meters and change the open boundary (code 2) to a closed one (code 1). 
+
+The mesh nodes carry z coordinates that can be edited in place. Here we enforce a minimum depth of 2 meters: 
 
 ```{python}
 g = msh.geometry
@@ -127,6 +137,7 @@ g.node_coordinates[:,2] = zc
 print(f'max z after: {g.node_coordinates[:,2].max()}')
 ```
 
+Also change the open boundary (code 2) to a land boundary (code 1):
 
 ```{python}
 c = g.codes
@@ -134,18 +145,12 @@ c[c==2] = 1
 g.codes = c
 ```
 
-## Save the modfied geometry to a new mesh file
+## Save the modified geometry to a new mesh file
+
+Write the edited geometry to a new file with `to_mesh()`:
 
 ```{python}
 g.to_mesh("new_mesh.mesh")
-```
-
-Cleanup
-
-```{python}
-import os
-
-os.remove("new_mesh.mesh")
 ```
 
 
