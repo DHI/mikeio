@@ -895,8 +895,6 @@ def quantile(
     if is_dfsu_3d and 0 in item_numbers:
         item_numbers.remove(0)  # Remove Zn item for special treatment
 
-    n_items_in = len(item_numbers)
-
     n_time_steps = dfs_i.FileInfo.TimeAxis.NumberOfTimeSteps
 
     # TODO: better handling of different item sizes (zn...)
@@ -929,26 +927,14 @@ def quantile(
     e1 = 0
     for _ in range(ci.n_chunks):
         e2 = ci.stop(e1)
-        # the last chunk may be smaller than the rest:
-        chunk_end = ci.chunk_end(e1)
+        chunk_end = ci.chunk_end(e1)  # the last chunk may be smaller than the rest
 
-        # read all data for this chunk
-        for timestep in range(n_time_steps):
-            item_out = 0
-            for item_no in item_numbers:
-                itemdata = _read_item(dfs_i, item_no, timestep)
-                data_chunk = itemdata[e1:e2]
-                datalist[item_out][timestep, 0:chunk_end] = data_chunk
-                item_out += 1
-
-        # calculate quantiles (for this chunk)
-        item_out = 0
-        for item in range(n_items_in):
-            qdat = np.zeros((len(qvec), (ci.chunk_size)))
-            qdat[:, :] = func(datalist[item][:, 0:chunk_end], q=qvec, axis=0)
-            for j in range(len(qvec)):
-                outdatalist[item_out][e1:e2] = qdat[j, :]
-                item_out += 1
+        _read_items_into_chunk(
+            dfs_i, item_numbers, n_time_steps, e1, e2, chunk_end, datalist
+        )
+        _compute_quantiles_for_chunk(
+            datalist, outdatalist, qvec, func, ci.chunk_size, e1, e2, chunk_end
+        )
 
         e1 = e2
 
@@ -962,6 +948,38 @@ def quantile(
         dfs_o.WriteItemTimeStepNext(0.0, darray)
 
     dfs_o.Close()
+
+
+def _read_items_into_chunk(
+    dfs_i: DfsFile,
+    item_numbers: Sequence[int],
+    n_time_steps: int,
+    e1: int,
+    e2: int,
+    chunk_end: int,
+    datalist: list[np.ndarray],
+) -> None:
+    for timestep in range(n_time_steps):
+        for item_out, item_no in enumerate(item_numbers):
+            itemdata = _read_item(dfs_i, item_no, timestep)
+            datalist[item_out][timestep, 0:chunk_end] = itemdata[e1:e2]
+
+
+def _compute_quantiles_for_chunk(
+    datalist: Sequence[np.ndarray],
+    outdatalist: Sequence[np.ndarray],
+    qvec: Sequence[float],
+    func: Callable[..., np.ndarray],
+    chunk_size: int,
+    e1: int,
+    e2: int,
+    chunk_end: int,
+) -> None:
+    for item in range(len(datalist)):
+        qdat = np.zeros((len(qvec), chunk_size))
+        qdat[:, :] = func(datalist[item][:, 0:chunk_end], q=qvec, axis=0)
+        for j in range(len(qvec)):
+            outdatalist[item * len(qvec) + j][e1:e2] = qdat[j, :]
 
 
 def _read_item(dfs: DfsFile, item: int, timestep: int) -> np.ndarray:
@@ -1027,7 +1045,6 @@ def change_datatype(
     dfs_out = _clone(infilename, outfilename, datatype=datatype)
     dfs_in = DfsFileFactory.DfsGenericOpen(infilename)
 
-    # Copy dynamic item data
     sourceData = dfs_in.ReadItemTimeStepNext()
     while sourceData:
         dfs_out.WriteItemTimeStepNext(sourceData.Time, sourceData.Data)
