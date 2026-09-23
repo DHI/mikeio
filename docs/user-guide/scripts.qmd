@@ -1,0 +1,59 @@
+# Scripts
+
+Notebooks are good for exploring data. For processing you run more than once, or hand over to someone else, write a script instead:
+
+* it takes its inputs as arguments, so the same code runs on the next dataset without editing
+* it runs unattended, from a scheduler or another script
+* it stops with an error code when something goes wrong, instead of leaving a half-run notebook
+* changes to it show up as a readable diff in version control
+
+## A script that carries its dependencies
+
+This script subtracts a baseline run from a scenario run, using [](`mikeio.generic.diff`):
+
+```{.python filename="diff.py"}
+{{< include ../scripts/diff.py >}}
+```
+
+The comment block at the top is [inline script metadata](https://packaging.python.org/en/latest/specifications/inline-script-metadata/). It lists the Python version and packages the script needs. [uv](https://docs.astral.sh/uv/guides/scripts/) reads it, creates an environment with exactly those packages, and runs the script in it. You don't need to install MIKE IO first, and the script doesn't touch any other environment on the machine.
+
+## Run it
+
+uv can run the script straight from this site:
+
+```bash
+uv run https://dhi.github.io/mikeio/scripts/diff.py scenario.dfsu baseline.dfsu difference.dfsu
+```
+
+or from a local copy:
+
+```bash
+uv run diff.py scenario.dfsu baseline.dfsu difference.dfsu
+```
+
+Run it with `--help` to see the arguments.
+
+## Pin the versions
+
+`mikeio==3.3.0` fixes the MIKE IO version, but not the versions of the packages MIKE IO depends on, such as NumPy and pandas. A new release of one of those can change the result or break the script. `exclude-newer` makes uv ignore every package released after the given date, so the script resolves to the same versions every time it runs, on any machine.
+
+To write or update the header, use:
+
+```bash
+uv add --script diff.py "mikeio==3.3.0"
+```
+
+For an exact record of every package version, `uv lock --script diff.py` writes a `diff.py.lock` file next to the script. Share both files.
+
+## Projects with several scripts
+
+When a project has several scripts that share dependencies, give the project its own environment instead:
+
+```bash
+uv init my-project
+cd my-project
+uv add mikeio
+uv run process.py
+```
+
+This writes the dependencies to `pyproject.toml` and the exact versions to `uv.lock`. Commit both. Each project then keeps the versions it was developed with, and upgrading MIKE IO for one project cannot break another. See [working on projects](https://docs.astral.sh/uv/guides/projects/) in the uv documentation.
