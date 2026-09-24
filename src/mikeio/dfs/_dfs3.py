@@ -275,7 +275,6 @@ class Dfs3(_Dfs123):
             geometry=geometry,
             title=self.title,
             custom_blocks=self.custom_blocks,
-            validate=False,
         )
 
     def append(self, ds: Dataset, validate: bool = True) -> None:

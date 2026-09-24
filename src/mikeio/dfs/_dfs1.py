@@ -183,7 +183,6 @@ class Dfs1(_Dfs123):
             geometry=self.geometry,
             title=self.title,
             custom_blocks=self.custom_blocks,
-            validate=False,
             dt=self._timestep,
         )
 
