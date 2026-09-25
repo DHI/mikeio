@@ -263,7 +263,7 @@ Other methods that also return a Dataset:
 
 * [`interp_like`](`mikeio.Dataset.interp_like`) - Spatio (temporal) interpolation (see [Dfsu interpolation notebook](../examples/dfsu/spatial_interpolation.qmd))
 * [`interp_time()`](`mikeio.Dataset.interp_time`) - Temporal interpolation (see [Time interpolation notebook](../examples/Time-interpolation.qmd))
-* [`dropna()`](`mikeio.Dataset.dropna`) - Remove time steps where all items are NaN
+* [`dropna()`](`mikeio.Dataset.dropna`) - Remove time steps where any item is missing its entire field (or, with `how="all"`, where every item is)
 * [`fillna()`](`mikeio.Dataset.fillna`) - Fill missing values with a constant value
 * [`squeeze()`](`mikeio.Dataset.squeeze`) - Remove axes of length 1. Deprecated, and removed in v4.0; use `isel()` to select the indices you want.
 
