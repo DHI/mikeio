@@ -484,6 +484,15 @@ def test_dropna(da2: DataArray) -> None:
     assert da3.n_timesteps == 8
 
 
+def test_astype(da2: DataArray) -> None:
+    assert da2.to_numpy().dtype == np.float64
+
+    da32 = da2.astype(np.float32)
+
+    assert da32.to_numpy().dtype == np.float32
+    assert da2.to_numpy().dtype == np.float64  # original is not modified
+
+
 def test_da_isel_space(da_grid2d: DataArray) -> None:
     assert da_grid2d.geometry.nx == 7
     assert da_grid2d.geometry.ny == 14

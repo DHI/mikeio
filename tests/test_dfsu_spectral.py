@@ -143,6 +143,12 @@ def test_read_spectrum_pt(dfsu_pt: DfsuSpectral) -> None:
     assert ds2.shape == (31, 16, 25)
 
 
+def test_read_dtype_deprecated(dfsu_pt: DfsuSpectral) -> None:
+    with pytest.warns(FutureWarning, match="dtype"):
+        ds = dfsu_pt.read(dtype=np.float64)
+    assert ds[0].dtype == np.float64
+
+
 def test_read_single_time(dfsu_pt: DfsuSpectral) -> None:
     dfs = dfsu_pt
     ds1 = dfs.read(time=0)

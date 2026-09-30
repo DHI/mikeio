@@ -1,4 +1,5 @@
 from __future__ import annotations
+import warnings
 from copy import deepcopy
 from dataclasses import dataclass
 from datetime import datetime
@@ -414,7 +415,8 @@ class Dfsu2DH:
             fill value for to impute corrupt data, used in conjunction with error_bad_data=False
             default np.nan
         dtype: Any, optional
-            Data type to read, by default np.float32
+            Deprecated since v3.4: the parameter will be removed in v4.0,
+            data is always read as np.float32. Use `Dataset.astype()` instead.
 
         Returns
         -------
@@ -422,8 +424,15 @@ class Dfsu2DH:
             A Dataset with data dimensions [t,elements]
 
         """
-        if dtype not in [np.float32, np.float64]:
-            raise ValueError("Invalid data type. Choose np.float32 or np.float64")
+        if dtype != np.float32:
+            if dtype not in [np.float32, np.float64]:
+                raise ValueError("Invalid data type. Choose np.float32 or np.float64")
+            warnings.warn(
+                "dtype parameter is deprecated and will be removed in v4.0. "
+                "Data is always read as np.float32, use Dataset.astype() to cast it afterwards.",
+                FutureWarning,
+                stacklevel=2,
+            )
         dfs = DfsuFile.Open(self._filename)
 
         single_time_selected, time_steps = _valid_timesteps(dfs, time)

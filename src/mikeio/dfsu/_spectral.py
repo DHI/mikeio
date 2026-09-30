@@ -1,4 +1,5 @@
 from __future__ import annotations
+import warnings
 from typing import Sequence, Sized, Any
 from pathlib import Path
 
@@ -300,7 +301,8 @@ class DfsuSpectral:
         nodes: list[int], optional
             Read only selected node ids (spectral line files only)
         dtype: numpy.dtype, optional
-            Data type to read. Default is np.float32
+            Deprecated since v3.4: the parameter will be removed in v4.0,
+            data is always read as np.float32. Use `Dataset.astype()` instead.
 
         Returns
         -------
@@ -326,8 +328,15 @@ class DfsuSpectral:
           0:  Energy density <Wave energy density> (meter pow 2 sec per deg)
 
         """
-        if dtype not in [np.float32, np.float64]:
-            raise ValueError("Invalid data type. Choose np.float32 or np.float64")
+        if dtype != np.float32:
+            if dtype not in [np.float32, np.float64]:
+                raise ValueError("Invalid data type. Choose np.float32 or np.float64")
+            warnings.warn(
+                "dtype parameter is deprecated and will be removed in v4.0. "
+                "Data is always read as np.float32, use Dataset.astype() to cast it afterwards.",
+                FutureWarning,
+                stacklevel=2,
+            )
 
         # Open the dfs file for reading
         # self._read_dfsu_header(self._filename)

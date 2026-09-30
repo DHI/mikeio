@@ -444,6 +444,28 @@ class Dataset:
             custom_blocks=self.custom_blocks,
         )
 
+    def astype(self, dtype: Any) -> Dataset:
+        """Return a new Dataset with values cast to dtype.
+
+        Parameters
+        ----------
+        dtype: data-type
+            Numpy dtype to cast the data to.
+
+        Returns
+        -------
+        Dataset
+
+        """
+        res = {name: da.astype(dtype) for name, da in self._data_vars.items()}
+
+        return Dataset(
+            data=res,
+            validate=False,
+            title=self.title,
+            custom_blocks=self.custom_blocks,
+        )
+
     def dropna(self) -> Dataset:
         """Remove time steps where all items are NaN."""
         if not self[0]._has_time_axis:  # type: ignore
