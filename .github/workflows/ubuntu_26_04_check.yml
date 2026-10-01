@@ -1,0 +1,25 @@
+name: Ubuntu 26.04 check
+
+on:
+  push:
+    branches: [ci/ubuntu-26.04-check]
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-26.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up uv
+        uses: astral-sh/setup-uv@d0cc045d04ccac9d8b7881df0226f9e82c39688e # v6
+        with:
+          python-version: "3.14"
+
+      - name: Install dependencies
+        run: uv sync --group test --no-dev
+
+      - name: Test mikecore-backed reading and writing
+        run: uv run pytest tests/test_dfs0.py tests/test_dfs2.py tests/test_dfsu2dh.py tests/test_dfsu3d.py tests/test_eum.py tests/test_mesh.py
