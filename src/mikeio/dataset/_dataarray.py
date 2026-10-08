@@ -1496,8 +1496,9 @@ class DataArray:
         Returns
         -------
         DataArray
-            One value per timestep. Concentrations in mg/l, g/m³, µg/l, mg/m³,
-            µg/m³, g/l or kg/m³ give a mass; other units give "Undefined".
+            One value per timestep, named "<item name> (volume integral)".
+            Concentrations in mg/l, g/m³, µg/l, mg/m³, µg/m³, g/l or kg/m³
+            give a mass; other units give "Undefined".
 
         Examples
         --------
@@ -1529,11 +1530,12 @@ class DataArray:
             return np.sum(x * weights, axis=axis)
 
         total = da.aggregate(axis="space", func=func)
+        name = f"{self.name} (volume integral)"
         mass_unit = _MASS_UNIT_OF_CONCENTRATION.get(self.unit)
         total.item = (
-            ItemInfo(self.name, EUMType.Mass, mass_unit)
+            ItemInfo(name, EUMType.Mass, mass_unit)
             if mass_unit is not None
-            else ItemInfo(self.name, EUMType.Undefined, EUMUnit.undefined)
+            else ItemInfo(name, EUMType.Undefined, EUMUnit.undefined)
         )
         return total
 

@@ -932,7 +932,7 @@ def test_volume_integral_of_whole_domain() -> None:
     total = n.volume_integral()
     assert total.dims == ("time",)
     assert total.time.equals(n.time)
-    assert total.name == NITROGEN
+    assert total.name == f"{NITROGEN} (volume integral)"
     assert total.type == mikeio.EUMType.Mass
     assert total.unit == mikeio.EUMUnit.gram
     expected = (n.values * n.z.volume.values).sum(axis=-1)
@@ -1044,8 +1044,9 @@ def test_dataset_volume_integral() -> None:
     ds = mikeio.read("tests/testdata/oresund_sigma_z.dfsu")
     totals = ds.volume_integral(layers="top")
     assert isinstance(totals, mikeio.Dataset)
-    assert totals.names == ds.names
+    assert totals.names == [f"{name} (volume integral)" for name in ds.names]
     for name in ds.names:
         assert np.allclose(
-            totals[name].values, ds[name].volume_integral(layers="top").values
+            totals[f"{name} (volume integral)"].values,
+            ds[name].volume_integral(layers="top").values,
         )

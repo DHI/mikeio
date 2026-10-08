@@ -1685,10 +1685,7 @@ class Dataset:
             One value per timestep for each item.
 
         """
-        res = {
-            name: da.volume_integral(layers=layers)
-            for name, da in self._data_vars.items()
-        }
+        res = [da.volume_integral(layers=layers) for da in self._data_vars.values()]
         return Dataset(data=res, validate=False, title=self.title)
 
     def average(self, *, weights, axis=0, **kwargs) -> Dataset:  # type: ignore
