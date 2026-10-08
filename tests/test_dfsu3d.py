@@ -910,3 +910,14 @@ def test_dataset_average_rejects_dataarray_weights_on_other_timesteps() -> None:
     ds = mikeio.read("tests/testdata/oresund_sigma_z.dfsu")
     with pytest.raises(ValueError, match="same time and geometry"):
         ds.average(axis="space", weights=ds.z.volume.isel(time=0))
+
+
+def test_sel_area_on_sigma_only_mesh() -> None:
+    da = mikeio.read("tests/testdata/basin_3d.dfsu")[0]
+    g = da.geometry
+    bbox = (0.0, 0.0, 1000.0, 50.0)
+    inside = da.sel(area=bbox)
+    ec = g.element_coordinates
+    expected = (ec[:, 0] <= 1000.0) & (ec[:, 1] <= 50.0)
+    assert inside.geometry.n_elements == expected.sum()
+    assert np.array_equal(inside.values, da.values[:, expected])
