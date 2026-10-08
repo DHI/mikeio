@@ -1,12 +1,16 @@
 ---
 toc: false
+page-layout: full
 format-links: false
-fig-width: 4
+fig-width: 5
 fig-height: 4
 ---
 
 ```{=html}
-<style>.hero-figure img { max-width: 100%; height: auto; }</style>
+<style>
+.hero-figure img { max-width: 100%; height: auto; }
+.hero-figure figcaption { color: var(--bs-body-color); opacity: 0.7; }
+</style>
 ```
 
 ::: {.grid}
@@ -24,20 +28,23 @@ fig-height: 4
 ```python
 import mikeio
 
-ds = mikeio.read("data/oresundHD_run1.dfsu")
-da = ds["Surface elevation"].max(axis="time")
-da.plot(title="Maximum surface elevation");
+ds = mikeio.read("data/NorthSea_HD_and_windspeed.dfsu")
+storm = ds.sel(x=8.0, y=54.0, time=slice("2017-10-28", "2017-10-29"))
+df = storm.to_dataframe()  # pandas from here on
+df.plot(subplots=True);
 ```
 :::
 
 ::: {.g-col-12 .g-col-lg-5 .hero-figure}
 ```{python}
 #| echo: false
+#| fig-cap: "German Bight, 28–29 October 2017: surface elevation (m) and wind speed (m/s)."
 import mikeio
 
-ds = mikeio.read("data/oresundHD_run1.dfsu")
-da = ds["Surface elevation"].max(axis="time")
-da.plot(title="Maximum surface elevation");
+ds = mikeio.read("data/NorthSea_HD_and_windspeed.dfsu")
+storm = ds.sel(x=8.0, y=54.0, time=slice("2017-10-28", "2017-10-29"))
+df = storm.to_dataframe()  # pandas from here on
+df.plot(subplots=True);
 ```
 :::
 
@@ -57,6 +64,7 @@ da.plot(title="Maximum surface elevation");
 
 Read, write and manipulate dfs{0,1,2,3,u} and mesh files, and the PFS
 setup files (.m21fm, .m3fm, …) that drive MIKE models.
+Data converts to pandas and xarray, and builds from pandas and polars.
 
 [**API Reference**](api/index.qmd)
 
