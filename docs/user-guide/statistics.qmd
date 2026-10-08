@@ -93,7 +93,7 @@ ds.Wind_speed.quantile(q=[0.1, 0.5, 0.9], axis="space").plot();
 ### Weighted spatial average
 
 ```{python}
-area = ds.geometry.get_element_area()
+area = ds.geometry.element_areas
 
 df_compare = (
     ds[["Wind speed"]]

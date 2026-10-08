@@ -138,7 +138,7 @@ def test_area() -> None:
 
     g = GeometryFM2D(node_coordinates=nc, element_table=el, projection="LONG/LAT")
     assert not g.is_tri_only
-    area = g.get_element_area()
+    area = g.element_areas
     assert len(area) == g.n_elements
     assert area > 0.0
 

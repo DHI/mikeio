@@ -468,26 +468,26 @@ def test_is_local_coordinates() -> None:
     assert dfs.geometry.is_local_coordinates is False
 
 
-def test_get_element_area_UTM() -> None:
+def test_element_areas_UTM() -> None:
     filename = "tests/testdata/HD2D.dfsu"
     dfs = mikeio.Dfsu2DH(filename)
-    areas = dfs.geometry.get_element_area()
+    areas = dfs.geometry.element_areas
     assert areas[0] == 4949.102548750438
 
 
-def test_get_element_area_LONGLAT() -> None:
+def test_element_areas_LONGLAT() -> None:
     filename = "tests/testdata/wind_north_sea.dfsu"
     dfs = mikeio.Dfsu2DH(filename)
 
-    areas = dfs.geometry.get_element_area()
+    areas = dfs.geometry.element_areas
     assert areas[0] == 139524218.81411952
 
 
-def test_get_element_area_tri_quad() -> None:
+def test_element_areas_tri_quad() -> None:
     filename = "tests/testdata/FakeLake.dfsu"
     dfs = mikeio.Dfsu2DH(filename)
 
-    areas = dfs.geometry.get_element_area()
+    areas = dfs.geometry.element_areas
     assert areas[0] == 0.0006875642143608321
 
 

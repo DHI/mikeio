@@ -871,13 +871,13 @@ def test_volume_weighted_mean_and_total_mass() -> None:
 
 def test_average_rejects_dataarray_weights_on_other_timesteps() -> None:
     da = mikeio.read("tests/testdata/oresund_sigma_z.dfsu")["Salinity"]
-    with pytest.raises(ValueError, match="weights"):
+    with pytest.raises(ValueError, match="same time and geometry"):
         da.average(axis="space", weights=da.z.volume.isel(time=0))
 
 
 def test_average_rejects_dataarray_weights_on_other_elements() -> None:
     da = mikeio.read("tests/testdata/oresund_sigma_z.dfsu")["Salinity"]
-    with pytest.raises(ValueError, match="weights"):
+    with pytest.raises(ValueError, match="same time and geometry"):
         da.isel(time=0).average(
             axis="space", weights=da.z.volume.isel(time=0).sel(layers="top")
         )
@@ -896,3 +896,17 @@ def test_vertical_profile_has_no_element_areas() -> None:
     g = mikeio.Dfsu2DV("tests/testdata/oresund_vertical_slice.dfsu").geometry
     assert isinstance(g, GeometryFMVerticalProfile)
     assert not hasattr(g, "element_areas")
+
+
+def test_dataset_volume_weighted_mean() -> None:
+    ds = mikeio.read("tests/testdata/oresund_sigma_z.dfsu")
+    mean = ds.average(axis="space", weights=ds.z.volume)
+    for name in ["Temperature", "Salinity"]:
+        expected = ds[name].average(axis="space", weights=ds.z.volume)
+        assert np.allclose(mean[name].values, expected.values)
+
+
+def test_dataset_average_rejects_dataarray_weights_on_other_timesteps() -> None:
+    ds = mikeio.read("tests/testdata/oresund_sigma_z.dfsu")
+    with pytest.raises(ValueError, match="same time and geometry"):
+        ds.average(axis="space", weights=ds.z.volume.isel(time=0))

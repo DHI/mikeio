@@ -734,11 +734,27 @@ class GeometryFM2D(_GeometryFM):
     def get_element_area(self) -> np.ndarray:
         """Calculate the horizontal area of each element.
 
+        Deprecated, use `element_areas` instead.
+
         Returns
         -------
         np.array(float)
             areas in m2
 
+        """
+        warnings.warn(
+            "get_element_area() is deprecated and will be removed in v4.0, "
+            "use element_areas instead",
+            FutureWarning,
+            stacklevel=2,
+        )
+        return self.element_areas.copy()
+
+    @cached_property
+    def element_areas(self) -> np.ndarray:
+        """Horizontal area of each element in m².
+
+        Geographic coordinates are converted to metres.
         """
         n_elements = self.n_elements
 

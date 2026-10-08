@@ -1424,7 +1424,7 @@ class DataArray:
         return self.aggregate(axis=axis, func=np.ptp, **kwargs)
 
     def average(
-        self, weights: np.ndarray, axis: int | str = 0, **kwargs: Any
+        self, weights: np.ndarray | DataArray, axis: int | str = 0, **kwargs: Any
     ) -> DataArray:
         """Compute the weighted average along the specified axis.
 
@@ -1432,8 +1432,9 @@ class DataArray:
         ----------
         axis: (int, str, None), optional
             axis number or "time" or "space", by default
-        weights: np.ndarray
-            weights to apply to the values
+        weights: np.ndarray or DataArray
+            weights to apply to the values. A DataArray, e.g. `da.z.volume`,
+            must have the same time and geometry as this DataArray.
         **kwargs: Any
             Additional keyword arguments
 
@@ -1451,11 +1452,12 @@ class DataArray:
         ```{python}
         import mikeio
         da= mikeio.read("../data/HD2D.dfsu")["Current speed"]
-        area = da.geometry.get_element_area()
+        area = da.geometry.element_areas
         da.average(axis="space", weights=area)
         ```
 
         """
+        weights = self._weights_to_numpy(weights)
 
         def func(x, axis, keepdims):  # type: ignore
             if keepdims:
@@ -1464,6 +1466,20 @@ class DataArray:
             return np.average(x, weights=weights, axis=axis)
 
         return self.aggregate(axis=axis, func=func, **kwargs)
+
+    def _weights_to_numpy(self, weights: np.ndarray | DataArray) -> np.ndarray:
+        if not isinstance(weights, DataArray):
+            return weights
+        if (
+            weights.shape != self.shape
+            or not weights.time.equals(self.time)
+            or weights.geometry != self.geometry
+        ):
+            raise ValueError(
+                "weights DataArray must have the same time and geometry as "
+                f"the data; got shape {weights.shape}, expected {self.shape}"
+            )
+        return weights.to_numpy()
 
     def nanmax(self, axis: int | str = 0, **kwargs: Any) -> DataArray:
         """Max value along an axis (NaN removed).
