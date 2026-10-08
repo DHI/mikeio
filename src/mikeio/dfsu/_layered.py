@@ -28,6 +28,7 @@ from ..spatial import (
     GeometryFMVerticalProfile,
     GeometryPoint3D,
 )
+from ..spatial._FM_geometry import Area
 from ..spatial._FM_plot import _plot_vertical_profile
 from ._dfsu import (
     _get_dfsu_info,
@@ -280,7 +281,7 @@ class DfsuLayered:
         items: str | int | Sequence[str | int] | None = None,
         time: int | str | slice | Sequence[int] | None = None,
         elements: Sequence[int] | np.ndarray | None = None,
-        area: tuple[float, float, float, float] | None = None,
+        area: Area | None = None,
         x: float | None = None,
         y: float | None = None,
         z: float | None = None,
@@ -301,10 +302,11 @@ class DfsuLayered:
         keepdims: bool, optional
             When reading a single time step only, should the time-dimension be kept
             in the returned Dataset? by default: False
-        area: list[float], optional
+        area: bbox, polygon or shapely geometry, optional
             Read only data inside (horizontal) area given as a
-            bounding box (tuple with left, lower, right, upper)
-            or as list of coordinates for a polygon, by default None
+            bounding box (tuple with left, lower, right, upper),
+            as list of coordinates for a polygon, or as a Polygon or
+            MultiPolygon with `__geo_interface__` (e.g. shapely), by default None
         x: float, optional
             Read only data for elements containing the (x,y,z) points(s)
         y: float, optional

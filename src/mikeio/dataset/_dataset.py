@@ -42,7 +42,7 @@ from ..spatial import (
 )
 
 
-from ..spatial._FM_geometry import _GeometryFM
+from ..spatial._FM_geometry import Area, _GeometryFM
 
 from ._data_plot import DatasetPlotter
 from ._z_accessor import NullZAccessor, ZAccessor
@@ -831,7 +831,7 @@ class Dataset:
         y: float | None = None,
         z: float | None = None,
         coords: np.ndarray | None = None,
-        area: tuple[float, float, float, float] | None = None,
+        area: Area | None = None,
         layers: int | str | Sequence[int | str] | None = None,
     ) -> Dataset:
         """Return a new Dataset whose data is given by
@@ -864,9 +864,12 @@ class Dataset:
             the argument coords can be used instead.
             (x,y)- or (x,y,z)-coordinates of point to be selected,
             by default None
-        area : (float, float, float, float), optional
-            Bounding box of coordinates (left lower and right upper)
-            to be selected, by default None
+        area : bbox, polygon or shapely geometry, optional
+            Area to be selected: a bounding box (left, lower, right, upper),
+            a list of (x, y) polygon vertices, or (flexible mesh only) a
+            Polygon or MultiPolygon with `__geo_interface__`, e.g. from shapely
+            or geopandas, holes excluded. Elements are selected by their centre.
+            By default None
         layers : int or str or list, optional
             layer(s) to be selected: "top", "bottom" or layer number
             from bottom 0,1,2,... or from the top -1,-2,... or as
