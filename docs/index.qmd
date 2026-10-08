@@ -26,7 +26,8 @@ and running in minutes
 
 ## {{< fa brands python >}} **It's just Python**
 
-Read, write and manipulate dfs0, dfs1, dfs2, dfs3, dfsu and mesh files. 
+Read, write and manipulate dfs{0,1,2,3,u} and mesh files, and the PFS
+setup files (.m21fm, .m3fm, …) that drive MIKE models.
 
 [**API Reference**](api/index.qmd)
 
@@ -34,11 +35,12 @@ Read, write and manipulate dfs0, dfs1, dfs2, dfs3, dfsu and mesh files.
 
 ::: {.g-col-6}
 
-## {{< fa solid diagram-project >}} **Associated package**
+## {{< fa solid diagram-project >}} **Related packages**
 
-See our sister library **MIKE IO 1D** for .res1d and .xns11 files.
+[**MIKE IO 1D**](https://dhi.github.io/mikeio1d/) for .res1d and .xns11 files.
 
-[**MIKE IO 1D**](https://dhi.github.io/mikeio1d/)
+[**ModelSkill**](https://dhi.github.io/modelskill/) to compare model results
+with observations.
 
 
 ## {{< fa scale-balanced >}} **Open Source**
