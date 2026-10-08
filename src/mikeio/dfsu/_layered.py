@@ -405,10 +405,8 @@ class DfsuLayered:
                 dfs, d, t = _read_item_time_step(
                     dfs=dfs,
                     filename=self._filename,
-                    time=time,
                     item_numbers=item_numbers,
                     deletevalue=deletevalue,
-                    shape=(data.shape[-1],),
                     item=item,
                     it=it,
                     error_bad_data=error_bad_data,
