@@ -1666,6 +1666,31 @@ class Dataset:
         """
         return self.aggregate(axis=axis, func=np.ptp, **kwargs)
 
+    def volume_integral(
+        self, *, layers: int | str | Sequence[int | str] | None = None
+    ) -> Dataset:
+        """Total amount per timestep of each item: the sum of value times element volume.
+
+        See DataArray.volume_integral.
+
+        Parameters
+        ----------
+        layers: int, str or list, optional
+            layer(s) to include: "top", "bottom", layer number from bottom
+            0, 1, 2, ... or from the top -1, -2, ...; by default all layers.
+
+        Returns
+        -------
+        Dataset
+            One value per timestep for each item.
+
+        """
+        res = {
+            name: da.volume_integral(layers=layers)
+            for name, da in self._data_vars.items()
+        }
+        return Dataset(data=res, validate=False, title=self.title)
+
     def average(self, *, weights, axis=0, **kwargs) -> Dataset:  # type: ignore
         """Compute the weighted average along the specified axis.
 

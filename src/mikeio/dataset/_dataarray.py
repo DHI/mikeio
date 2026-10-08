@@ -89,6 +89,18 @@ GeometryType = Union[
 IndexType = Union[int, slice, Sequence[int], np.ndarray, None]
 
 
+# concentration unit × m³ → mass unit
+_MASS_UNIT_OF_CONCENTRATION = {
+    EUMUnit.mg_per_liter: EUMUnit.gram,
+    EUMUnit.gram_per_meter_pow_3: EUMUnit.gram,
+    EUMUnit.mu_g_per_liter: EUMUnit.milligram,
+    EUMUnit.mg_per_meter_pow_3: EUMUnit.milligram,
+    EUMUnit.mu_g_per_meter_pow_3: EUMUnit.microgram,
+    EUMUnit.gram_per_liter: EUMUnit.kilogram,
+    EUMUnit.kg_per_meter_pow_3: EUMUnit.kilogram,
+}
+
+
 class DataArray:
     """DataArray with data and metadata for a single item in a dfs file.
 
@@ -1466,6 +1478,64 @@ class DataArray:
             return np.average(x, weights=weights, axis=axis)
 
         return self.aggregate(axis=axis, func=func, **kwargs)
+
+    def volume_integral(
+        self, *, layers: int | str | Sequence[int | str] | None = None
+    ) -> DataArray:
+        """Total amount per timestep: the sum of value times element volume.
+
+        For a concentration in mg/l (g/m³) this is the mass in g. Only for
+        layered 3D dfsu data; the volume follows the moving free surface.
+
+        Parameters
+        ----------
+        layers: int, str or list, optional
+            layer(s) to include: "top", "bottom", layer number from bottom
+            0, 1, 2, ... or from the top -1, -2, ...; by default all layers.
+
+        Returns
+        -------
+        DataArray
+            One value per timestep. Concentrations in mg/l, g/m³, µg/l, mg/m³,
+            µg/m³, g/l or kg/m³ give a mass; other units give "Undefined".
+
+        Examples
+        --------
+        ```python
+        n = mikeio.read("wq_3d.dfsu")["Inorganic nitrogen"]
+        n.volume_integral()                       # whole domain
+        n.volume_integral(layers="top")           # top layer
+        n.sel(area=[x0, y0, x1, y1]).volume_integral()
+        ```
+
+        """
+        if not isinstance(self.z, ZAccessor):
+            if isinstance(self.geometry, GeometryFM2D):
+                raise ValueError(
+                    "volume_integral needs layered 3D data, this DataArray is 2D. "
+                    "For a single layer, call volume_integral(layers=...) on the "
+                    "3D DataArray instead of selecting the layer first."
+                )
+            raise ValueError(
+                "volume_integral needs layered 3D data with z-coordinates, "
+                f"not {type(self.geometry).__name__}"
+            )
+        da, vol = self, self.z.volume
+        if layers is not None:
+            da, vol = self.sel(layers=layers), vol.sel(layers=layers)
+        weights = vol.to_numpy()
+
+        def func(x, axis, keepdims):  # type: ignore
+            return np.sum(x * weights, axis=axis)
+
+        total = da.aggregate(axis="space", func=func)
+        mass_unit = _MASS_UNIT_OF_CONCENTRATION.get(self.unit)
+        total.item = (
+            ItemInfo(self.name, EUMType.Mass, mass_unit)
+            if mass_unit is not None
+            else ItemInfo(self.name, EUMType.Undefined, EUMUnit.undefined)
+        )
+        return total
 
     def _weights_to_numpy(self, weights: np.ndarray | DataArray) -> np.ndarray:
         if not isinstance(weights, DataArray):
