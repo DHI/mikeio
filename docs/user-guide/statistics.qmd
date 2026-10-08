@@ -111,7 +111,8 @@ df_compare.plot(title="Simple mean vs area-weighted average");
 ```
 
 For layered 3D files, weight by element volume instead, see
-[Layer thickness and element volume](dfsu.qmd#layer-thickness-and-element-volume).
+[Volume-weighted mean](dfsu.qmd#volume-weighted-mean). For the total amount of a
+substance, see [Total amount of a substance](dfsu.qmd#total-amount-of-a-substance).
 
 
 ## Total aggregations
