@@ -16,10 +16,9 @@ format-links: false
 ::: {.grid}
 
 ::: {.g-col-6}
-## {{< fa clock >}} **Set up in 5 minutes**
+## {{< fa clock >}} **Set up in under a minute**
 
-Install **MIKE IO** with [`pip`](https://pypi.org/project/mikeio/) and get up
-and running in minutes
+`uv add mikeio` or `pip install mikeio`, and you're ready.
 
 
 [**Getting started**](user-guide/getting-started.qmd)
