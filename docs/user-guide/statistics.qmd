@@ -110,6 +110,9 @@ df_compare["Weighted"] = (
 df_compare.plot(title="Simple mean vs area-weighted average");
 ```
 
+For layered 3D files, weight by element volume instead, see
+[Layer thickness and element volume](dfsu.qmd#layer-thickness-and-element-volume).
+
 
 ## Total aggregations
 

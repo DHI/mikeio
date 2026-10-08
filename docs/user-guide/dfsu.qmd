@@ -187,22 +187,73 @@ da3d.z.elements.shape    # (n_time, n_elements) — mean of each element's node 
 cached on first access. The same accessor is available on Datasets
 (`ds.z.nodes`, `ds.z.elements`) and is delegated to the first item.
 
-### Worked example: dz-weighted column-mean
+### Layer thickness and element volume
 
-Element-center z-coordinates are useful for vertical integration. The cell
-height `dz` between layer interfaces can be approximated from successive
-element-center z-values within a column; for a clean dz, take a vertical column
-slice first:
+The free surface moves, so element thickness and volume change with time.
+`da.z.thickness` and `da.z.volume` return them as DataArrays with the same time
+and geometry as `da`. The example file holds inorganic nitrogen from a MIKE 3
+ECO Lab model of the Odense Estuary at two dates:
 
 ```{python}
-column = ds3d.sel(x=333934.1, y=6158101.5)
-ze = column["Temperature"].z.elements   # (n_time, n_layers)
-dz = np.diff(ze, axis=-1)
-dz = np.concatenate([dz[:, :1], dz], axis=-1)   # pad to match n_layers
+ds_wq = mikeio.read("../data/odense_rough_3d_wq.dfsu")
+nitrogen = ds_wq["IN, Inorganic nitrogen, g N/m3"]
+vol = nitrogen.z.volume
+vol
+```
 
-T = column["Temperature"].to_numpy()
-T_mean = (T * dz).sum(axis=-1) / dz.sum(axis=-1)
-T_mean.shape   # depth-weighted temperature per timestep
+The volume is the horizontal element area times the thickness (mean z of the
+element's top nodes minus mean z of its bottom nodes). For the horizontal area
+alone, use `geometry.element_areas`.
+
+### Total mass and volume-weighted mean
+
+Inorganic nitrogen is in mg/l, which is g/m³, so concentration times volume
+summed over all elements is the nitrogen mass in g:
+
+```{python}
+mass_g = (nitrogen.values * vol.values).sum(axis=-1)
+mass_g / 1e6   # tonnes of nitrogen, one value per timestep
+```
+
+```{python}
+nitrogen.average(axis="space", weights=vol).to_dataframe()
+```
+
+`average` checks that a DataArray of weights has the same time and geometry as
+the data, so a volume from another selection raises instead of giving a wrong
+mean.
+
+### Part of the domain
+
+Make the same selection on the data and on the volume:
+
+```{python}
+bbox = (212000, 6155000, 217000, 6160000)
+inside = nitrogen.sel(area=bbox)
+(inside.values * inside.z.volume.values).sum(axis=-1) / 1e6
+```
+
+Selecting a layer returns a 2D DataArray, which has no z-coordinates. Select the
+layer from the 3D volume instead:
+
+```{python}
+top = nitrogen.sel(layers="top")
+top_vol = nitrogen.z.volume.sel(layers="top")
+(top.values * top_vol.values).sum(axis=-1) / 1e6
+```
+
+A vertical column keeps its z-coordinates, so its thickness can be used directly
+as weights for a depth-averaged value:
+
+```{python}
+column = nitrogen.sel(x=221040, y=6163422)
+column.average(axis="space", weights=column.z.thickness).to_dataframe()
+```
+
+The volume can be written to a dfsu file, e.g. to inspect it in MIKE Zero:
+
+```python
+vol.to_dfs("volume.dfsu")
 ```
 
 ### Non-layered DataArrays
