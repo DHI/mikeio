@@ -1,21 +1,51 @@
 ---
 toc: false
 format-links: false
+fig-width: 4
+fig-height: 4
 ---
 
-![](MIKE-IO-Logo-Pos-RGB.svg)
+```{=html}
+<style>.hero-figure img { max-width: 100%; height: auto; }</style>
+```
+
+::: {.grid}
+
+::: {.g-col-12 .g-col-lg-7}
+![](MIKE-IO-Logo-Pos-RGB.svg){width=260px}
 
 # MIKE IO: input/output of MIKE files in Python
 
 *Suspiciously more than input/output.*
 
- ![Python version](https://img.shields.io/pypi/pyversions/mikeio.svg)
+![Python version](https://img.shields.io/pypi/pyversions/mikeio.svg)
 [![PyPI version](https://badge.fury.io/py/mikeio.svg)](https://badge.fury.io/py/mikeio)
 
+```python
+import mikeio
+
+ds = mikeio.read("data/oresundHD_run1.dfsu")
+da = ds["Surface elevation"].max(axis="time")
+da.plot(title="Maximum surface elevation");
+```
+:::
+
+::: {.g-col-12 .g-col-lg-5 .hero-figure}
+```{python}
+#| echo: false
+import mikeio
+
+ds = mikeio.read("data/oresundHD_run1.dfsu")
+da = ds["Surface elevation"].max(axis="time")
+da.plot(title="Maximum surface elevation");
+```
+:::
+
+:::
 
 ::: {.grid}
 
-::: {.g-col-6}
+::: {.g-col-12 .g-col-md-6}
 ## {{< fa clock >}} **Set up in under a minute**
 
 `uv add mikeio` or `pip install mikeio`, and you're ready.
@@ -32,7 +62,7 @@ setup files (.m21fm, .m3fm, …) that drive MIKE models.
 
 :::
 
-::: {.g-col-6}
+::: {.g-col-12 .g-col-md-6}
 
 ## {{< fa solid diagram-project >}} **Related packages**
 
@@ -44,7 +74,7 @@ with observations.
 
 ## {{< fa scale-balanced >}} **Open Source**
 
-MIKE IO is licensed under BSD-3-Clause license and available on [GitHub](https://github.com/DHI/mikeio)
+MIKE IO is BSD-3-Clause licensed and available on [GitHub](https://github.com/DHI/mikeio)
 
 [**Design philosophy**](user-guide/design.qmd)
 
