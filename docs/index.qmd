@@ -53,7 +53,7 @@ da.plot(title="Maximum surface elevation");
 
 [**Getting started**](user-guide/getting-started.qmd)
 
-## {{< fa brands python >}} **It's just Python**
+## {{< fa regular file >}} **dfs, mesh and PFS files**
 
 Read, write and manipulate dfs{0,1,2,3,u} and mesh files, and the PFS
 setup files (.m21fm, .m3fm, …) that drive MIKE models.
