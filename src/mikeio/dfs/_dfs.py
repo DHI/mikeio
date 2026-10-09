@@ -42,29 +42,38 @@ def _read_item_time_step(
     *,
     dfs: DfsFile,
     filename: str,
-    time: pd.DatetimeIndex,
     item_numbers: list[int],
     deletevalue: float,
-    shape: tuple[int, ...],
     item: int,
     it: int,
     error_bad_data: bool = True,
     fill_bad_data_value: float = np.nan,
 ) -> tuple[DfsFile, np.ndarray, float]:
-    itemdata = dfs.ReadItemTimeStep(item_numbers[item] + 1, it)
-    t = itemdata.Time
+    item_number = item_numbers[item] + 1
+    itemdata = dfs.ReadItemTimeStep(item_number, it)
     if itemdata is not None:
         d = itemdata.Data
         d[d == deletevalue] = np.nan
-    else:
-        if error_bad_data:
-            raise ValueError(f"Error reading: {time[it]}")
-        else:
-            warnings.warn(f"Error reading: {time[it]}")
-            d = np.zeros(shape[1])
-            d[:] = fill_bad_data_value
-            dfs.Close()
-            dfs = DfsFileFactory.DfsGenericOpen(filename)
+        return dfs, d, itemdata.Time
+
+    message = f"Error reading item {item_number}, timestep {it} in {filename}"
+    if error_bad_data:
+        raise ValueError(message)
+
+    # A failed read returns no time, so it can only be derived on an equidistant axis
+    time_axis = dfs.FileInfo.TimeAxis
+    if time_axis.TimeAxisType not in (
+        TimeAxisType.CalendarEquidistant,
+        TimeAxisType.TimeEquidistant,
+    ):
+        raise ValueError(
+            f"{message}; a corrupt timestep has no known time on a non-equidistant axis"
+        )
+    warnings.warn(message)
+    t = time_axis.StartTimeOffset + it * time_axis.TimeStep
+    d = np.full(dfs.ItemInfo[item_number - 1].ElementCount, fill_bad_data_value)
+    dfs.Close()
+    dfs = DfsFileFactory.DfsGenericOpen(filename)
     return dfs, d, t
 
 
