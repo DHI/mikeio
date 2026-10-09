@@ -37,7 +37,7 @@ def test_weighted_average(tmp_path: Path) -> None:
 
     ds = dfs.read(items=["Surface elevation", "Current speed"])
 
-    area = dfs.geometry.get_element_area()
+    area = dfs.geometry.element_areas
     ds2 = ds.average(weights=area, axis=1)
 
     out_path = tmp_path / "average.dfs0"

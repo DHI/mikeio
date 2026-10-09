@@ -321,7 +321,8 @@ class _GeometryFMLayered(_GeometryFM):
         """Find element ids of elements inside area."""
         idx2d = self.geometry2d._elements_in_area(area)
         if len(idx2d) > 0:
-            return np.hstack(self.e2_e3_table[idx2d])
+            # sigma-only: equal-length columns make e2_e3_table a 2d object array
+            return np.hstack(self.e2_e3_table[idx2d]).astype(int)
         else:
             return np.array([], dtype=int)
 
@@ -551,6 +552,11 @@ class GeometryFM3D(_GeometryFMLayered):
     def boundary_polygons(self) -> BoundaryPolygons:
         """Lists of polygons defining domain outline."""
         return self.geometry2d.boundary_polygons
+
+    @cached_property
+    def element_areas(self) -> np.ndarray:
+        """Horizontal area in m² of each 3d element, i.e. the area of its 2d column."""
+        return self.geometry2d.element_areas[self.elem2d_ids]
 
     def contains(self, points: np.ndarray) -> np.ndarray:
         """Test if a list of points are contained by the horizontal extent of the mesh."""

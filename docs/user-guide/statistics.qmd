@@ -93,7 +93,7 @@ ds.Wind_speed.quantile(q=[0.1, 0.5, 0.9], axis="space").plot();
 ### Weighted spatial average
 
 ```{python}
-area = ds.geometry.get_element_area()
+area = ds.geometry.element_areas
 
 df_compare = (
     ds[["Wind speed"]]
@@ -109,6 +109,10 @@ df_compare["Weighted"] = (
 )
 df_compare.plot(title="Simple mean vs area-weighted average");
 ```
+
+For layered 3D files, weight by element volume instead, see
+[Volume-weighted mean](dfsu.qmd#volume-weighted-mean). For the total amount of a
+substance, see [Total amount of a substance](dfsu.qmd#total-amount-of-a-substance).
 
 
 ## Total aggregations

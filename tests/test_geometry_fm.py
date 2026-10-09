@@ -138,9 +138,50 @@ def test_area() -> None:
 
     g = GeometryFM2D(node_coordinates=nc, element_table=el, projection="LONG/LAT")
     assert not g.is_tri_only
-    area = g.get_element_area()
+    area = g.element_areas
     assert len(area) == g.n_elements
     assert area > 0.0
+
+
+def test_element_areas_of_projected_triangle_and_quad() -> None:
+    nc = [(0.0, 0.0, 0.0), (2.0, 0.0, 0.0), (2.0, 1.0, 0.0), (0.0, 1.0, 0.0)]
+    el = [(0, 1, 2), (0, 1, 2, 3)]
+    g = GeometryFM2D(node_coordinates=nc, element_table=el, projection="UTM-33")
+    assert g.element_areas == pytest.approx([1.0, 2.0])
+
+
+def test_get_element_area_is_deprecated() -> None:
+    nc = [(0.0, 0.0, 0.0), (2.0, 0.0, 0.0), (2.0, 1.0, 0.0)]
+    g = GeometryFM2D(
+        node_coordinates=nc, element_table=[(0, 1, 2)], projection="UTM-33"
+    )
+    with pytest.warns(FutureWarning, match="element_areas"):
+        area = g.get_element_area()
+    assert area == pytest.approx(g.element_areas)
+
+
+def test_element_areas_3d_is_area_of_2d_column() -> None:
+    #     x     y    z
+    nc = [
+        (0.0, 0.0, 0.0),
+        (2.0, 0.0, 0.0),
+        (2.0, 1.0, 0.0),
+        (0.0, 0.0, -1.0),
+        (2.0, 0.0, -1.0),
+        (2.0, 1.0, -1.0),
+        (0.0, 0.0, -3.0),
+        (2.0, 0.0, -3.0),
+        (2.0, 1.0, -3.0),
+    ]
+    el = [(6, 7, 8, 3, 4, 5), (3, 4, 5, 0, 1, 2)]
+    g = GeometryFM3D(
+        node_coordinates=nc,
+        element_table=el,
+        projection="UTM-33",
+        n_layers=2,
+        n_sigma=2,
+    )
+    assert g.element_areas == pytest.approx([1.0, 1.0])
 
 
 def test_find_index_simple_domain() -> None:

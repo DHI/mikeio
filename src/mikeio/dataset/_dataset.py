@@ -1666,6 +1666,28 @@ class Dataset:
         """
         return self.aggregate(axis=axis, func=np.ptp, **kwargs)
 
+    def volume_integral(
+        self, *, layers: int | str | Sequence[int | str] | None = None
+    ) -> Dataset:
+        """Total amount per timestep of each item: the sum of value times element volume.
+
+        See DataArray.volume_integral.
+
+        Parameters
+        ----------
+        layers: int, str or list, optional
+            layer(s) to include: "top", "bottom", layer number from bottom
+            0, 1, 2, ... or from the top -1, -2, ...; by default all layers.
+
+        Returns
+        -------
+        Dataset
+            One value per timestep for each item.
+
+        """
+        res = [da.volume_integral(layers=layers) for da in self._data_vars.values()]
+        return Dataset(data=res, validate=False, title=self.title)
+
     def average(self, *, weights, axis=0, **kwargs) -> Dataset:  # type: ignore
         """Compute the weighted average along the specified axis.
 
@@ -1673,8 +1695,9 @@ class Dataset:
 
         Parameters
         ----------
-        weights: array_like
-            weights to average over
+        weights: array_like or DataArray
+            weights to average over. A DataArray, e.g. `ds.z.volume`, must
+            have the same time and geometry as the Dataset.
         axis: (int, str, None), optional
             axis number or "time", "space" or "items", by default 0
         **kwargs: Any
@@ -1692,12 +1715,12 @@ class Dataset:
 
         Examples
         --------
-        >>> dfs = Dfsu("HD2D.dfsu")
-        >>> ds = dfs.read(["Current speed"])
-        >>> area = dfs.get_element_area()
+        >>> ds = mikeio.read("HD2D.dfsu", items=["Current speed"])
+        >>> area = ds.geometry.element_areas
         >>> ds2 = ds.average(axis="space", weights=area)
 
         """
+        weights = self[0]._weights_to_numpy(weights)
 
         def func(x, axis, keepdims):  # type: ignore
             if keepdims:
