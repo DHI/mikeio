@@ -1,46 +1,88 @@
 ---
 toc: false
+page-layout: full
 format-links: false
+fig-width: 5
+fig-height: 4
 ---
 
-![](MIKE-IO-Logo-Pos-RGB.svg)
-
-# MIKE IO: input/output of MIKE files in Python
- ![Python version](https://img.shields.io/pypi/pyversions/mikeio.svg)
-[![PyPI version](https://badge.fury.io/py/mikeio.svg)](https://badge.fury.io/py/mikeio)
-
+```{=html}
+<style>
+.hero-figure img { max-width: 100%; height: auto; }
+.hero-figure figcaption { color: var(--bs-body-color); opacity: 0.7; }
+</style>
+```
 
 ::: {.grid}
 
-::: {.g-col-6}
-## {{< fa clock >}} **Set up in 5 minutes**
+::: {.g-col-12 .g-col-lg-7}
+![](MIKE-IO-Logo-Pos-RGB.svg){width=260px}
 
-Install **MIKE IO** with [`pip`](https://pypi.org/project/mikeio/) and get up
-and running in minutes
+# MIKE IO: input/output of MIKE files in Python
+
+*From .dfsu to DataFrame in four lines.*
+
+![Python version](https://img.shields.io/pypi/pyversions/mikeio.svg)
+[![PyPI version](https://badge.fury.io/py/mikeio.svg)](https://badge.fury.io/py/mikeio)
+
+```python
+import mikeio
+
+ds = mikeio.read("data/NorthSea_HD_and_windspeed.dfsu")
+storm = ds.sel(x=8.0, y=54.0, time=slice("2017-10-28", "2017-10-29"))
+df = storm.to_dataframe()  # pandas from here on
+df.plot(subplots=True);
+```
+:::
+
+::: {.g-col-12 .g-col-lg-5 .hero-figure}
+```{python}
+#| echo: false
+#| fig-cap: "German Bight, 28–29 October 2017: surface elevation (m) and wind speed (m/s)."
+import mikeio
+
+ds = mikeio.read("data/NorthSea_HD_and_windspeed.dfsu")
+storm = ds.sel(x=8.0, y=54.0, time=slice("2017-10-28", "2017-10-29"))
+df = storm.to_dataframe()  # pandas from here on
+df.plot(subplots=True);
+```
+:::
+
+:::
+
+::: {.grid}
+
+::: {.g-col-12 .g-col-md-6}
+## {{< fa clock >}} **Set up in under a minute**
+
+`uv add mikeio` or `pip install mikeio`, and you're ready.
 
 
 [**Getting started**](user-guide/getting-started.qmd)
 
-## {{< fa brands python >}} **It's just Python**
+## {{< fa regular file >}} **dfs, mesh and PFS files**
 
-Read, write and manipulate dfs0, dfs1, dfs2, dfs3, dfsu and mesh files. 
+Read, write and manipulate dfs{0,1,2,3,u} and mesh files, and the PFS
+setup files (.m21fm, .m3fm, …) that drive MIKE models.
+Data converts to pandas and xarray, and builds from pandas and polars.
 
 [**API Reference**](api/index.qmd)
 
 :::
 
-::: {.g-col-6}
+::: {.g-col-12 .g-col-md-6}
 
-## {{< fa solid diagram-project >}} **Associated package**
+## {{< fa solid diagram-project >}} **Related packages**
 
-See our sister library **MIKE IO 1D** for .res1d and .xns11 files.
+[**MIKE IO 1D**](https://dhi.github.io/mikeio1d/) for .res1d and .xns11 files.
 
-[**MIKE IO 1D**](https://dhi.github.io/mikeio1d/)
+[**ModelSkill**](https://dhi.github.io/modelskill/) to compare model results
+with observations.
 
 
 ## {{< fa scale-balanced >}} **Open Source**
 
-MIKE IO is licensed under BSD-3-Clause license and available on [GitHub](https://github.com/DHI/mikeio)
+MIKE IO is BSD-3-Clause licensed and available on [GitHub](https://github.com/DHI/mikeio)
 
 [**Design philosophy**](user-guide/design.qmd)
 
