@@ -66,9 +66,11 @@ def read(
     x, y, z: float, optional
         Dfsu: Read only data for elements containing the (x,y)
         or (x,y,z) points(s), by default None
-    area: (float, float, float, float), optional
+    area: bbox, polygon or shapely geometry, optional
         Dfs2/Dfsu: read only data within an area given by a bounding
-        box of coordinates (left, lower, right, upper), by default None (=all)
+        box of coordinates (left, lower, right, upper), by default None (=all).
+        Dfsu also accepts a list of polygon vertices or a Polygon or
+        MultiPolygon with `__geo_interface__`, e.g. from shapely.
     layers: int, str or sequence, optional
         Dfs3/Dfsu-layered: read only data from specific layers,
         by default None (=all layers)
