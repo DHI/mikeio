@@ -458,6 +458,23 @@ class DataArray:
         x[np.isnan(x)] = value
         return da
 
+    def astype(self, dtype: Any) -> DataArray:
+        """Return a new DataArray with values cast to dtype.
+
+        Parameters
+        ----------
+        dtype: data-type
+            Numpy dtype to cast the data to.
+
+        Returns
+        -------
+        DataArray
+
+        """
+        da = self.copy()
+        da.values = da.values.astype(dtype)
+        return da
+
     def dropna(self) -> DataArray:
         """Remove time steps where values are NaN."""
         if not self._has_time_axis:

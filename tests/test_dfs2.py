@@ -847,6 +847,13 @@ def test_read_single_precision() -> None:
     assert ds[0].dtype == np.float32
 
 
+def test_read_dtype_deprecated() -> None:
+    with pytest.warns(FutureWarning, match="dtype"):
+        ds = mikeio.read("tests/testdata/random.dfs2", items=0, dtype=np.float64)
+
+    assert ds[0].dtype == np.float64
+
+
 def is_header_unchanged_on_read_write(tmp_path: Path, filename: str) -> None:
     a = mikeio.Dfs2("tests/testdata/" + filename)
     ds = a.read()

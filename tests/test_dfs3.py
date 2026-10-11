@@ -50,7 +50,8 @@ def test_dfs3_read() -> None:
 
 
 def test_dfs3_read_double_precision() -> None:
-    ds = mikeio.read("tests/testdata/Grid1.dfs3", dtype=np.float64)
+    with pytest.warns(FutureWarning, match="dtype"):
+        ds = mikeio.read("tests/testdata/Grid1.dfs3", dtype=np.float64)
     assert ds[0].to_numpy().dtype == np.float64
 
 
