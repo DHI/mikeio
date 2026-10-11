@@ -72,7 +72,6 @@ See the [user guide](https://dhi.github.io/mikeio/user-guide/getting-started.htm
 * Documentation - [https://dhi.github.io/mikeio/](https://dhi.github.io/mikeio/)
 * General help, new ideas and feature requests - [GitHub Discussions](https://github.com/DHI/mikeio/discussions)
 * Bugs - [GitHub Issues](https://github.com/DHI/mikeio/issues)
-* Course material: [Getting started with Dfs files in Python using MIKE IO](https://dhi.github.io/getting-started-with-mikeio/intro.html)
 
 ## Testing
 
