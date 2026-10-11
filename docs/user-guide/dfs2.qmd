@@ -154,12 +154,3 @@ pda = mikeio.DataArray(
 pda.plot();
 ```
 
-Cleanup:
-
-```{python}
-import os
-os.remove("example_geo.dfs2")
-os.remove("with_land_value.dfs2")
-os.remove("bathy_with_land_value.dfs2")
-```
-
