@@ -215,6 +215,17 @@ def calc_m0_from_spectrum(
     return m0
 
 
+def calc_Hm0_from_spectrum(
+    spec: np.ndarray,
+    f: np.ndarray | None,
+    dir: np.ndarray | None = None,
+    tail: bool = True,
+) -> np.ndarray:
+    """Calculate significant wave height (Hm0) from spectrum."""
+    m0 = calc_m0_from_spectrum(spec, f, dir, tail)
+    return 4 * np.sqrt(m0)
+
+
 def _f_to_df(f: np.ndarray) -> np.ndarray:
     """Frequency bins for equidistant or logrithmic frequency axis."""
     if np.isclose(np.diff(f).min(), np.diff(f).max()):

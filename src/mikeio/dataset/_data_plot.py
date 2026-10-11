@@ -9,7 +9,7 @@ from matplotlib.axes import Axes
 
 from ..spatial._FM_plot import _plot_map, _plot_vertical_profile
 
-from .._spectral import plot_2dspectrum, calc_m0_from_spectrum
+from .._spectral import plot_2dspectrum, calc_Hm0_from_spectrum
 from ..eum import EUMType, ItemInfo
 from ..spatial import GeometryUndefined, Grid1D, GeometryFM2D
 
@@ -833,13 +833,12 @@ def _calc_Hm0(da: DataArray) -> DataArray:
     """Calculate Hm0 from spectral DataArray for plotting."""
     from ..spatial import GeometryFMLineSpectrum, GeometryFMAreaSpectrum
 
-    m0 = calc_m0_from_spectrum(
+    Hm0 = calc_Hm0_from_spectrum(
         da.to_numpy(),
         da.geometry.frequencies,
         da.geometry.directions,
         tail=True,
     )
-    Hm0 = 4 * np.sqrt(m0)
     item = ItemInfo(EUMType.Significant_wave_height)
     g = da.geometry
     geometry: Any = GeometryUndefined()
