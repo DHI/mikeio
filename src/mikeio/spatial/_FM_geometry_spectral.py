@@ -76,6 +76,9 @@ class GeometryFMPointSpectrum(_Geometry):
 
 
 class _GeometryFMSpectrum(_GeometryFM):
+    # The dfsu file type a subclass is stored as; subclasses set their own.
+    _default_dfsu_type: DfsuFileType
+
     def __init__(
         self,
         node_coordinates: np.ndarray,
@@ -95,7 +98,7 @@ class _GeometryFMSpectrum(_GeometryFM):
             element_table=element_table,
             codes=codes,
             projection=projection,
-            dfsu_type=dfsu_type,
+            dfsu_type=self._default_dfsu_type if dfsu_type is None else dfsu_type,
             element_ids=element_ids,
             node_ids=node_ids,
             validate=validate,
@@ -147,6 +150,8 @@ class _GeometryFMSpectrum(_GeometryFM):
 
 class GeometryFMAreaSpectrum(_GeometryFMSpectrum, GeometryFM2D):
     """Flexible mesh area spectrum geometry."""
+
+    _default_dfsu_type = DfsuFileType.DfsuSpectral2D
 
     @property
     def dims(self) -> tuple[str, ...]:
@@ -211,6 +216,8 @@ class GeometryFMAreaSpectrum(_GeometryFMSpectrum, GeometryFM2D):
 class GeometryFMLineSpectrum(_GeometryFMSpectrum):
     """Flexible mesh line spectrum geometry."""
 
+    _default_dfsu_type = DfsuFileType.DfsuSpectral1D
+
     @property
     def dims(self) -> tuple[str, ...]:
         """Names of the dimensions, ("node", ...spectral)."""
@@ -256,7 +263,6 @@ class GeometryFMLineSpectrum(_GeometryFMSpectrum):
             node_coordinates=node_coordinates,
             element_table=element_table,
             codes=np.zeros(n_nodes, dtype=int),
-            dfsu_type=DfsuFileType.DfsuSpectral1D,
             projection="LONG/LAT",
             frequencies=frequencies,
             directions=directions,
