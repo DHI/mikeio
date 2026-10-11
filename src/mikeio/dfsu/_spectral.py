@@ -154,30 +154,20 @@ class DfsuSpectral:
         frequencies = dfs.Frequencies
 
         # geometry
-        if dfsu_type == DfsuFileType.DfsuSpectral0D:
-            geometry: Any = GeometryFMPointSpectrum(
-                frequencies=frequencies, directions=directions
-            )  # No x,y coordinates
-        else:
-            # nc, codes, node_ids = get_nodes_from_source(dfs)
-            node_table = get_nodes_from_source(dfs)
-            el_table = get_elements_from_source(dfs)
-
-            if dfsu_type == DfsuFileType.DfsuSpectral1D:
-                geometry = GeometryFMLineSpectrum(
-                    node_coordinates=node_table.coordinates,
-                    element_table=el_table.connectivity,
-                    codes=node_table.codes,
-                    projection=dfs.Projection.WKTString,
-                    dfsu_type=dfsu_type,
-                    element_ids=el_table.ids,
-                    node_ids=node_table.ids,
-                    validate=False,
-                    frequencies=frequencies,
-                    directions=directions,
+        match dfsu_type:
+            case DfsuFileType.DfsuSpectral0D:
+                geometry: Any = GeometryFMPointSpectrum(
+                    frequencies=frequencies, directions=directions
+                )  # No x,y coordinates
+            case DfsuFileType.DfsuSpectral1D | DfsuFileType.DfsuSpectral2D:
+                node_table = get_nodes_from_source(dfs)
+                el_table = get_elements_from_source(dfs)
+                geometry_cls = (
+                    GeometryFMLineSpectrum
+                    if dfsu_type is DfsuFileType.DfsuSpectral1D
+                    else GeometryFMAreaSpectrum
                 )
-            elif dfsu_type == DfsuFileType.DfsuSpectral2D:
-                geometry = GeometryFMAreaSpectrum(
+                geometry = geometry_cls(
                     node_coordinates=node_table.coordinates,
                     element_table=el_table.connectivity,
                     codes=node_table.codes,
@@ -194,7 +184,6 @@ class DfsuSpectral:
 
     @staticmethod
     def _get_direction_unit(filename: str) -> int:
-        """Determine if the directional axis is in degrees or radians."""
         source = DfsFileFactory.DfsGenericOpen(filename)
         try:
             for static_item in iter(source.ReadStaticItemNext, None):
@@ -208,29 +197,28 @@ class DfsuSpectral:
     @property
     def n_frequencies(self) -> int | None:
         """Number of frequencies."""
-        return 0 if self.frequencies is None else len(self.frequencies)
+        return self.geometry.n_frequencies
 
     @property
     def frequencies(self) -> np.ndarray | None:
         """Frequency axis."""
-        return self.geometry._frequencies
+        return self.geometry.frequencies
 
     @property
     def n_directions(self) -> int | None:
         """Number of directions."""
-        return 0 if self.directions is None else len(self.directions)
+        return self.geometry.n_directions
 
     @property
     def directions(self) -> np.ndarray | None:
         """Directional axis."""
-        return self.geometry._directions
+        return self.geometry.directions
 
     def _get_spectral_data_shape(
         self,
         n_steps: int,
         elements: Sized | None,
         dfsu_type: DfsuFileType,
-        keepdims: bool,
     ) -> tuple[tuple[int, ...], tuple[int, ...]]:
         n_freq = self.geometry.n_frequencies
         n_dir = self.geometry.n_directions
@@ -239,28 +227,21 @@ class DfsuSpectral:
             shape = (n_freq,)
         elif n_freq == 0:
             shape = (n_dir,)
+
         match dfsu_type:
             case DfsuFileType.DfsuSpectral0D:
                 read_shape = (n_steps, *shape)
-
-            case DfsuFileType.DfsuSpectral1D:
-                # node-based, FE-style
-                n_nodes = self.geometry.n_nodes if elements is None else len(elements)
-                if n_nodes == 1:
-                    read_shape = (n_steps, *shape)
-                else:
-                    read_shape = (n_steps, n_nodes, *shape)
-                shape = (*shape, self.geometry.n_nodes)
-
-            case DfsuFileType.DfsuSpectral2D:
-                n_elems = (
-                    self.geometry.n_elements if elements is None else len(elements)
+            case DfsuFileType.DfsuSpectral1D | DfsuFileType.DfsuSpectral2D:
+                n_spatial = (
+                    self.geometry.n_nodes
+                    if dfsu_type is DfsuFileType.DfsuSpectral1D
+                    else self.geometry.n_elements
                 )
-                if n_elems == 1:
-                    read_shape = (n_steps, *shape)
-                else:
-                    read_shape = (n_steps, n_elems, *shape)
-                shape = (*shape, self.geometry.n_elements)
+                n_sel = n_spatial if elements is None else len(elements)
+                read_shape = (
+                    (n_steps, *shape) if n_sel == 1 else (n_steps, n_sel, *shape)
+                )
+                shape = (*shape, n_spatial)
 
         return read_shape, shape
 
@@ -330,7 +311,6 @@ class DfsuSpectral:
             raise ValueError("Invalid data type. Choose np.float32 or np.float64")
 
         # Open the dfs file for reading
-        # self._read_dfsu_header(self._filename)
         dfs = DfsuFile.Open(self._filename)
 
         single_time_selected, time_steps = _valid_timesteps(dfs, time)
@@ -356,7 +336,7 @@ class DfsuSpectral:
 
         n_steps = len(time_steps)
         read_shape, shape = self._get_spectral_data_shape(
-            n_steps, pts, self._type, keepdims
+            n_steps, pts, self._type
         )
         data_list: list[np.ndarray] = [
             np.ndarray(shape=read_shape, dtype=dtype) for _ in range(n_items)
@@ -403,47 +383,18 @@ class DfsuSpectral:
         x: float | None,
         y: float | None,
     ) -> np.ndarray | None:
-        """Parse geometry selection.
-
-        Parameters
-        ----------
-        area : list[float], optional
-            Read only data inside (horizontal) area given as a
-            bounding box (tuple with left, lower, right, upper)
-            or as list of coordinates for a polygon, by default None
-        x : float, optional
-            Read only data for elements containing the (x,y) points(s),
-            by default None
-        y : float, optional
-            Read only data for elements containing the (x,y) points(s),
-            by default None
-
-        Returns
-        -------
-        list[int]
-            List of element ids
-
-        Raises
-        ------
-        ValueError
-            If no elements are found in selection
-
-        """
-        elements = None
+        geometry = self.geometry
+        assert isinstance(geometry, GeometryFMAreaSpectrum)
 
         if area is not None:
-            assert isinstance(self.geometry, GeometryFMAreaSpectrum)
-            elements = self.geometry._elements_in_area(area)
+            elements = geometry._elements_in_area(area)
+        elif x is not None or y is not None:
+            elements = geometry.find_index(x=x, y=y)
+        else:
+            return None
 
-        if (x is not None) or (y is not None):
-            assert isinstance(self.geometry, GeometryFMAreaSpectrum)
-            elements = self.geometry.find_index(x=x, y=y)
-
-        if (x is not None) or (y is not None) or (area is not None):
-            # selection was attempted
-            if (elements is None) or len(elements) == 0:
-                raise ValueError("No elements in selection!")
-
+        if len(elements) == 0:
+            raise ValueError("No elements in selection!")
         return elements
 
     def _parse_elements_nodes(
@@ -451,41 +402,43 @@ class DfsuSpectral:
         elements: Sequence[int] | np.ndarray | int | None,
         nodes: Sequence[int] | np.ndarray | int | None,
     ) -> tuple[Any, Any]:
-        if self._type == DfsuFileType.DfsuSpectral0D:
-            if elements is not None or nodes is not None:
-                raise ValueError(
-                    "Reading specific elements/nodes is not supported for DfsuSpectral0D"
-                )
-            geometry = self.geometry
-            return geometry, None
+        elements = [elements] if np.isscalar(elements) else elements
+        nodes = [nodes] if np.isscalar(nodes) else nodes
 
-        elif self._type == DfsuFileType.DfsuSpectral1D:
-            if elements is not None:
-                raise ValueError(
-                    "Reading specific elements is not supported for DfsuSpectral1D"
-                )
-            if nodes is None:
-                geometry = self.geometry
-            else:
-                geometry = self.geometry._nodes_to_geometry(nodes)  # type: ignore
-                nodes = [nodes] if np.isscalar(nodes) else nodes  # type: ignore
-            return geometry, nodes
+        match self._type:
+            case DfsuFileType.DfsuSpectral0D:
+                if elements is not None or nodes is not None:
+                    raise ValueError(
+                        "Reading specific elements/nodes is not supported for DfsuSpectral0D"
+                    )
+                return self.geometry, None
 
-        elif self._type == DfsuFileType.DfsuSpectral2D:
-            if nodes is not None:
-                raise ValueError(
-                    "Reading specific nodes is only supported for DfsuSpectral1D"
+            case DfsuFileType.DfsuSpectral1D:
+                if elements is not None:
+                    raise ValueError(
+                        "Reading specific elements is not supported for DfsuSpectral1D"
+                    )
+                geometry = (
+                    self.geometry._nodes_to_geometry(nodes)  # type: ignore
+                    if nodes is not None
+                    else self.geometry
                 )
-            if elements is None:
-                geometry = self.geometry
-            else:
-                elements = (
-                    [elements] if np.isscalar(elements) else list(elements)  # type: ignore
-                )  # TODO check this
-                geometry = self.geometry.elements_to_geometry(elements)  # type: ignore
-            return geometry, elements  # type: ignore
+                return geometry, nodes
 
-        raise NotImplementedError(f"Not valid for type:{self._type}")
+            case DfsuFileType.DfsuSpectral2D:
+                if nodes is not None:
+                    raise ValueError(
+                        "Reading specific nodes is only supported for DfsuSpectral1D"
+                    )
+                geometry = (
+                    self.geometry.elements_to_geometry(elements)  # type: ignore
+                    if elements is not None
+                    else self.geometry
+                )
+                return geometry, elements
+
+            case _:
+                raise NotImplementedError(f"Not valid for type:{self._type}")
 
     def calc_Hm0_from_spectrum(
         self, spectrum: np.ndarray | DataArray, tail: bool = True
@@ -505,15 +458,6 @@ class DfsuSpectral:
             significant wave height values
 
         """
-        if isinstance(spectrum, DataArray):
-            m0 = calc_m0_from_spectrum(
-                spectrum.to_numpy(),
-                self.frequencies,
-                self.directions,
-                tail,
-            )
-        else:
-            m0 = calc_m0_from_spectrum(
-                spectrum, self.frequencies, self.directions, tail
-            )
+        s = spectrum.to_numpy() if isinstance(spectrum, DataArray) else spectrum
+        m0 = calc_m0_from_spectrum(s, self.frequencies, self.directions, tail)
         return 4 * np.sqrt(m0)
