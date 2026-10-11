@@ -480,7 +480,7 @@ class PfsDocument(PfsSection):
         To return the content as a string, use repr()
 
         """
-        from mikeio import __version__ as mikeio_version
+        from .._version import __version__ as mikeio_version
 
         now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         header = f"""// Created     : {now}

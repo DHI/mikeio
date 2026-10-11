@@ -13,7 +13,7 @@ from mikecore.DfsFile import DfsSimpleType, StatType, TimeAxisType
 from mikecore.DfsFileFactory import DfsFileFactory
 from mikecore.eum import eumQuantity
 
-from .. import __dfs_version__
+from .._version import __dfs_version__
 from ..dataset import Dataset, DataArray
 from ._dfs import (
     _get_item_info,

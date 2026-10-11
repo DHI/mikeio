@@ -1,5 +1,5 @@
-# Run all checks: lint, typecheck, test
-check: lint typecheck test
+# Run all checks: lint, layers, typecheck, test
+check: lint layers typecheck test
 
 # Build package (after typecheck and test)
 build: typecheck test
@@ -16,6 +16,10 @@ format:
 # Run tests
 test:
     uv run pytest
+
+# Check the import layering in .importlinter
+layers:
+    uv run lint-imports
 
 # Type check with mypy
 typecheck:
