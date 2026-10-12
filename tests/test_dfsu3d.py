@@ -11,6 +11,7 @@ from mikeio.spatial import (
     GeometryFM2D,
     GeometryFM3D,
     GeometryFMVerticalColumn,
+    GeometryFMVerticalProfile,
     GeometryPoint3D,
 )
 
@@ -760,3 +761,292 @@ def test_dataset_z_mirrors_first_dataarray() -> None:
     ds = mikeio.read("tests/testdata/oresund_sigma_z.dfsu")
     assert ds.z.nodes is ds[0].z.nodes
     assert np.array_equal(ds.z.elements, ds[0].z.elements)
+
+
+def test_z_accessor_thickness_is_top_minus_bottom_node_mean() -> None:
+    da = mikeio.read("tests/testdata/oresund_sigma_z.dfsu")[0]
+    dz = da.z.thickness
+    assert isinstance(dz, mikeio.DataArray)
+    assert dz.name == "Layer thickness"
+    assert dz.type == mikeio.EUMType.Layer_Thickness
+    assert dz.unit == mikeio.EUMUnit.meter
+    assert dz.time.equals(da.time)
+    assert dz.geometry == da.geometry
+
+    zn = da.z.nodes
+    expected = np.empty(da.shape)
+    for j, nodes in enumerate(da.geometry.element_table):
+        half = len(nodes) // 2
+        expected[:, j] = zn[:, nodes[half:]].mean(axis=1) - zn[:, nodes[:half]].mean(
+            axis=1
+        )
+    assert np.allclose(dz.values, expected)
+    assert (dz.values >= 0).all()
+    assert da.z.thickness is dz
+
+
+def test_z_accessor_thickness_sums_to_column_depth() -> None:
+    da = mikeio.read("tests/testdata/oresund_sigma_z.dfsu")[0]
+    g = da.geometry
+    dz = da.z.thickness.values
+    zn = da.z.nodes
+    for column in g.e2_e3_table[:50]:
+        bottom, top = g.element_table[column[0]], g.element_table[column[-1]]
+        half = len(bottom) // 2
+        depth = zn[:, top[half:]].mean(axis=1) - zn[:, bottom[:half]].mean(axis=1)
+        assert np.allclose(dz[:, column].sum(axis=1), depth)
+
+
+def test_z_accessor_volume_is_area_times_thickness() -> None:
+    da = mikeio.read("tests/testdata/oresund_sigma_z.dfsu")[0]
+    vol = da.z.volume
+    assert isinstance(vol, mikeio.DataArray)
+    assert vol.name == "Element volume"
+    assert vol.type == mikeio.EUMType.Element_Volume
+    assert vol.unit == mikeio.EUMUnit.meter_pow_3
+    assert vol.time.equals(da.time)
+    assert vol.geometry == da.geometry
+    assert np.allclose(vol.values, da.geometry.element_areas * da.z.thickness.values)
+    assert da.z.volume is vol
+
+
+def test_z_accessor_volume_of_single_timestep() -> None:
+    da = mikeio.read("tests/testdata/oresund_sigma_z.dfsu")[0]
+    vol0 = da.isel(time=0).z.volume
+    assert vol0.shape == (da.geometry.n_elements,)
+    assert np.allclose(vol0.values, da.z.volume.isel(time=0).values)
+
+
+def test_z_accessor_volume_follows_area_selection() -> None:
+    da = mikeio.read("tests/testdata/oresund_sigma_z.dfsu")[0]
+    bbox = (340000.0, 6150000.0, 360000.0, 6180000.0)
+    assert np.allclose(
+        da.sel(area=bbox).z.volume.values, da.z.volume.sel(area=bbox).values
+    )
+
+
+def test_z_accessor_volume_follows_vertical_column_selection() -> None:
+    da = mikeio.read("tests/testdata/oresund_sigma_z.dfsu")[0]
+    x, y = 333934.1, 6158101.5
+    assert np.allclose(
+        da.sel(x=x, y=y).z.volume.values, da.z.volume.sel(x=x, y=y).values
+    )
+
+
+def test_z_accessor_volume_layer_selection_aligns_with_data() -> None:
+    da = mikeio.read("tests/testdata/oresund_sigma_z.dfsu")["Salinity"]
+    g = da.geometry
+    top = da.sel(layers="top")
+    vol_top = da.z.volume.sel(layers="top")
+    assert vol_top.shape == top.shape
+    assert np.allclose(vol_top.values, da.z.volume.values[:, g.top_elements])
+
+
+def test_z_accessor_volume_after_layer_selection_points_to_3d() -> None:
+    da = mikeio.read("tests/testdata/oresund_sigma_z.dfsu")[0]
+    with pytest.raises(AttributeError, match="before selecting layers"):
+        _ = da.sel(layers="top").z.volume
+
+
+def test_z_accessor_volume_non_layered_raises() -> None:
+    da = mikeio.read("tests/testdata/random.dfs2")[0]
+    with pytest.raises(AttributeError, match="has no z-coordinates"):
+        _ = da.z.volume
+    with pytest.raises(AttributeError, match="has no z-coordinates"):
+        _ = da.z.thickness
+
+
+def test_dataset_z_volume_mirrors_first_dataarray() -> None:
+    ds = mikeio.read("tests/testdata/oresund_sigma_z.dfsu")
+    assert ds.z.volume is ds[0].z.volume
+
+
+def test_volume_weighted_mean_and_total_mass() -> None:
+    da = mikeio.read("tests/testdata/oresund_sigma_z.dfsu")["Salinity"]
+    vol = da.z.volume
+    mass = (da.values * vol.values).sum(axis=-1)
+    mean = da.average(axis="space", weights=vol)
+    assert np.allclose(mean.values, mass / vol.values.sum(axis=-1))
+
+
+def test_average_rejects_dataarray_weights_on_other_timesteps() -> None:
+    da = mikeio.read("tests/testdata/oresund_sigma_z.dfsu")["Salinity"]
+    with pytest.raises(ValueError, match="same time and geometry"):
+        da.average(axis="space", weights=da.z.volume.isel(time=0))
+
+
+def test_average_rejects_dataarray_weights_on_other_elements() -> None:
+    da = mikeio.read("tests/testdata/oresund_sigma_z.dfsu")["Salinity"]
+    with pytest.raises(ValueError, match="same time and geometry"):
+        da.isel(time=0).average(
+            axis="space", weights=da.z.volume.isel(time=0).sel(layers="top")
+        )
+
+
+def test_z_accessor_volume_roundtrips_to_dfsu(tmp_path: Path) -> None:
+    da = mikeio.read("tests/testdata/oresund_sigma_z.dfsu")[0]
+    fn = tmp_path / "volume.dfsu"
+    da.z.volume.to_dfs(fn)
+    back = mikeio.read(fn)["Element volume"]
+    assert back.type == mikeio.EUMType.Element_Volume
+    assert np.allclose(back.values, da.z.volume.values, rtol=1e-6)
+
+
+def test_vertical_profile_has_no_element_areas() -> None:
+    g = mikeio.Dfsu2DV("tests/testdata/oresund_vertical_slice.dfsu").geometry
+    assert isinstance(g, GeometryFMVerticalProfile)
+    assert not hasattr(g, "element_areas")
+
+
+def test_dataset_volume_weighted_mean() -> None:
+    ds = mikeio.read("tests/testdata/oresund_sigma_z.dfsu")
+    mean = ds.average(axis="space", weights=ds.z.volume)
+    for name in ["Temperature", "Salinity"]:
+        expected = ds[name].average(axis="space", weights=ds.z.volume)
+        assert np.allclose(mean[name].values, expected.values)
+
+
+def test_dataset_average_rejects_dataarray_weights_on_other_timesteps() -> None:
+    ds = mikeio.read("tests/testdata/oresund_sigma_z.dfsu")
+    with pytest.raises(ValueError, match="same time and geometry"):
+        ds.average(axis="space", weights=ds.z.volume.isel(time=0))
+
+
+def test_sel_area_on_sigma_only_mesh() -> None:
+    da = mikeio.read("tests/testdata/basin_3d.dfsu")[0]
+    g = da.geometry
+    bbox = (0.0, 0.0, 1000.0, 50.0)
+    inside = da.sel(area=bbox)
+    ec = g.element_coordinates
+    expected = (ec[:, 0] <= 1000.0) & (ec[:, 1] <= 50.0)
+    assert inside.geometry.n_elements == expected.sum()
+    assert np.array_equal(inside.values, da.values[:, expected])
+
+
+WQ_FILE = "tests/testdata/odense_rough_3d_wq.dfsu"
+NITROGEN = "IN, Inorganic nitrogen, g N/m3"
+
+
+def test_volume_integral_of_whole_domain() -> None:
+    n = mikeio.read(WQ_FILE)[NITROGEN]
+    total = n.volume_integral()
+    assert total.dims == ("time",)
+    assert total.time.equals(n.time)
+    assert total.name == f"{NITROGEN} (volume integral)"
+    assert total.type == mikeio.EUMType.Mass
+    assert total.unit == mikeio.EUMUnit.gram
+    expected = (n.values * n.z.volume.values).sum(axis=-1)
+    assert np.allclose(total.values, expected)
+    assert total.values / 1e6 == pytest.approx([122.138, 151.088], abs=1e-3)
+
+
+def test_volume_integral_of_area_selection() -> None:
+    n = mikeio.read(WQ_FILE)[NITROGEN]
+    bbox = (212000.0, 6155000.0, 217000.0, 6160000.0)
+    idx = n.geometry.find_index(area=bbox)
+    expected = (n.values[:, idx] * n.z.volume.values[:, idx]).sum(axis=-1)
+    assert np.allclose(n.sel(area=bbox).volume_integral().values, expected)
+
+
+def test_volume_integral_of_single_layer() -> None:
+    n = mikeio.read(WQ_FILE)[NITROGEN]
+    top = n.geometry.top_elements
+    expected = (n.values[:, top] * n.z.volume.values[:, top]).sum(axis=-1)
+    assert np.allclose(n.volume_integral(layers="top").values, expected)
+
+
+def test_volume_integral_of_several_layers() -> None:
+    n = mikeio.read(WQ_FILE)[NITROGEN]
+    by_keyword = n.volume_integral(layers=[-3, -2, -1])
+    by_sel = n.sel(layers=[-3, -2, -1]).volume_integral()
+    assert np.allclose(by_keyword.values, by_sel.values)
+    per_layer = sum(n.volume_integral(layers=k).values for k in [-3, -2, -1])
+    assert np.allclose(by_keyword.values, per_layer)
+
+
+def test_volume_integral_layers_add_up_to_whole_domain() -> None:
+    n = mikeio.read(WQ_FILE)[NITROGEN]
+    per_layer = sum(
+        n.volume_integral(layers=k).values for k in range(n.geometry.n_layers)
+    )
+    assert np.allclose(per_layer, n.volume_integral().values)
+
+
+def test_volume_integral_of_vertical_column() -> None:
+    n = mikeio.read(WQ_FILE)[NITROGEN]
+    x, y = 221040.0, 6163422.0
+    idx = n.geometry.find_index(x=x, y=y)
+    expected = (n.values[:, idx] * n.z.volume.values[:, idx]).sum(axis=-1)
+    assert np.allclose(n.sel(x=x, y=y).volume_integral().values, expected)
+
+
+def test_volume_integral_of_single_timestep() -> None:
+    n = mikeio.read(WQ_FILE)[NITROGEN]
+    total0 = n.isel(time=1).volume_integral()
+    assert total0.values == pytest.approx(n.volume_integral().values[1])
+
+
+def test_volume_integral_of_sigma_z_file() -> None:
+    da = mikeio.read("tests/testdata/oresund_sigma_z.dfsu")["Salinity"]
+    expected = (da.values * da.z.volume.values).sum(axis=-1)
+    assert np.allclose(da.volume_integral().values, expected)
+
+
+def test_volume_integral_unit_without_mass_equivalent_is_undefined() -> None:
+    da = mikeio.read("tests/testdata/oresund_sigma_z.dfsu")["Salinity"]
+    total = da.volume_integral()
+    assert total.type == mikeio.EUMType.Undefined
+    assert total.unit == mikeio.EUMUnit.undefined
+
+
+@pytest.mark.parametrize(
+    ("unit", "mass_unit"),
+    [
+        (mikeio.EUMUnit.mg_per_liter, mikeio.EUMUnit.gram),
+        (mikeio.EUMUnit.gram_per_meter_pow_3, mikeio.EUMUnit.gram),
+        (mikeio.EUMUnit.mu_g_per_liter, mikeio.EUMUnit.milligram),
+        (mikeio.EUMUnit.mg_per_meter_pow_3, mikeio.EUMUnit.milligram),
+        (mikeio.EUMUnit.mu_g_per_meter_pow_3, mikeio.EUMUnit.microgram),
+        (mikeio.EUMUnit.gram_per_liter, mikeio.EUMUnit.kilogram),
+        (mikeio.EUMUnit.kg_per_meter_pow_3, mikeio.EUMUnit.kilogram),
+    ],
+)
+def test_volume_integral_mass_unit(
+    unit: mikeio.EUMUnit, mass_unit: mikeio.EUMUnit
+) -> None:
+    n = mikeio.read(WQ_FILE)[NITROGEN]
+    c = mikeio.DataArray(
+        n.values,
+        time=n.time,
+        item=mikeio.ItemInfo("c", mikeio.EUMType.Concentration, unit),
+        geometry=n.geometry,
+        zn=n.z.nodes,
+    )
+    total = c.volume_integral()
+    assert total.type == mikeio.EUMType.Mass
+    assert total.unit == mass_unit
+    assert np.allclose(total.values, n.volume_integral().values)
+
+
+def test_volume_integral_on_selected_single_layer_points_to_layers_keyword() -> None:
+    n = mikeio.read(WQ_FILE)[NITROGEN]
+    with pytest.raises(ValueError, match=r"volume_integral\(layers="):
+        n.sel(layers="top").volume_integral()
+
+
+def test_volume_integral_on_2d_data_raises() -> None:
+    da = mikeio.read("tests/testdata/HD2D.dfsu")["Surface elevation"]
+    with pytest.raises(ValueError, match="layered"):
+        da.volume_integral()
+
+
+def test_dataset_volume_integral() -> None:
+    ds = mikeio.read("tests/testdata/oresund_sigma_z.dfsu")
+    totals = ds.volume_integral(layers="top")
+    assert isinstance(totals, mikeio.Dataset)
+    assert totals.names == [f"{name} (volume integral)" for name in ds.names]
+    for name in ds.names:
+        assert np.allclose(
+            totals[f"{name} (volume integral)"].values,
+            ds[name].volume_integral(layers="top").values,
+        )

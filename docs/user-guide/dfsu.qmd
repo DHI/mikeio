@@ -187,22 +187,93 @@ da3d.z.elements.shape    # (n_time, n_elements) — mean of each element's node 
 cached on first access. The same accessor is available on Datasets
 (`ds.z.nodes`, `ds.z.elements`) and is delegated to the first item.
 
-### Worked example: dz-weighted column-mean
+### Total amount of a substance
 
-Element-center z-coordinates are useful for vertical integration. The cell
-height `dz` between layer interfaces can be approximated from successive
-element-center z-values within a column; for a clean dz, take a vertical column
-slice first:
+`volume_integral()` sums concentration times element volume over the model
+domain, one value per timestep. The element volumes follow the moving free
+surface. The example file holds inorganic nitrogen from a MIKE 3 ECO Lab model
+of the Odense Estuary at two dates:
 
 ```{python}
-column = ds3d.sel(x=333934.1, y=6158101.5)
-ze = column["Temperature"].z.elements   # (n_time, n_layers)
-dz = np.diff(ze, axis=-1)
-dz = np.concatenate([dz[:, :1], dz], axis=-1)   # pad to match n_layers
+ds_wq = mikeio.read("../data/odense_rough_3d_wq.dfsu")
+nitrogen = ds_wq["IN, Inorganic nitrogen, g N/m3"]
+total = nitrogen.volume_integral()
+total
+```
 
-T = column["Temperature"].to_numpy()
-T_mean = (T * dz).sum(axis=-1) / dz.sum(axis=-1)
-T_mean.shape   # depth-weighted temperature per timestep
+Inorganic nitrogen is in mg/l, which is g/m³, so the result is the nitrogen mass
+in g. Concentrations in µg/l, mg/m³, µg/m³, g/l and kg/m³ give a mass too; for
+other units the result has the type "Undefined" and the unit of the values
+times m³.
+
+```{python}
+total.to_dataframe() / 1e6   # tonnes
+```
+
+For part of the domain, select it first:
+
+```{python}
+bbox = (212000, 6155000, 217000, 6160000)
+nitrogen.sel(area=bbox).volume_integral().to_dataframe()
+```
+
+```{python}
+polygon = [(212000, 6155000), (217000, 6155000), (217000, 6160000)]
+nitrogen.sel(area=polygon).volume_integral().to_dataframe()
+```
+
+```{python}
+nitrogen.sel(time="2002-01-15").volume_integral()
+```
+
+Selecting a single layer returns 2D data without element volumes, so pass the
+layers to `volume_integral` instead:
+
+```{python}
+nitrogen.volume_integral(layers="top").to_dataframe()
+```
+
+```{python}
+nitrogen.volume_integral(layers=[0, 1, 2]).to_dataframe()   # the three bottom layers
+```
+
+On a Dataset, `volume_integral()` returns the total of every item.
+
+### Volume-weighted mean
+
+```{python}
+nitrogen.average(axis="space", weights=nitrogen.z.volume).to_dataframe()
+```
+
+`average` checks that a DataArray of weights has the same time and geometry as
+the data, so a volume from another selection raises instead of giving a wrong
+mean.
+
+A vertical column keeps its z-coordinates, so its thickness can be used as
+weights for a depth-averaged value:
+
+```{python}
+column = nitrogen.sel(x=221040, y=6163422)
+column.average(axis="space", weights=column.z.thickness).to_dataframe()
+```
+
+### Layer thickness and element volume
+
+`da.z.thickness` and `da.z.volume` return the per-timestep element thickness and
+volume as DataArrays with the same time and geometry as `da`:
+
+```{python}
+vol = nitrogen.z.volume
+vol
+```
+
+The volume is the horizontal element area times the thickness (mean z of the
+element's top nodes minus mean z of its bottom nodes). For the horizontal area
+alone, use `geometry.element_areas`. The volume can be written to a dfsu file,
+e.g. to inspect it in MIKE Zero:
+
+```python
+vol.to_dfs("volume.dfsu")
 ```
 
 ### Non-layered DataArrays

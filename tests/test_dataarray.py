@@ -970,7 +970,7 @@ def test_dataarray_weigthed_average() -> None:
 
     da = ds["Surface elevation"]
 
-    area = da.geometry.get_element_area()
+    area = da.geometry.element_areas
 
     da2 = da.average(weights=area, axis=1)
 
