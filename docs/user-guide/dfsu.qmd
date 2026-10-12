@@ -156,6 +156,38 @@ ax = ds_deep[0].plot()
 dfs.geometry.plot.mesh(ax=ax);
 ```
 
+### Subsetting by polygon
+
+`sel(area=...)` and `read(area=...)` take a bounding box, a list of (x, y)
+vertices, or a shapely (or geopandas) Polygon or MultiPolygon. Holes, e.g.
+islands, are excluded, and an element is selected when its centre lies inside.
+The polygon must use the same coordinate system as the mesh.
+
+```{python}
+import shapely
+
+domain = ds.geometry.to_shapely()
+x0, y0, x1, y1 = domain.bounds
+north = shapely.box(x0, (y0 + y1) / 2, x1, y1)
+south = domain.difference(north)
+
+ax = ds["Surface elevation"].isel(time=-1).sel(area=south).plot()
+ds.geometry.plot.outline(ax=ax);
+```
+
+With regions from a file, read them with geopandas and convert them to the
+mesh's coordinate system. Polygons that are not valid (e.g. self-intersecting)
+raise an error; repair them with `make_valid`:
+
+```python
+import geopandas as gpd
+
+regions = gpd.read_file("regions.shp").to_crs("EPSG:32633")
+regions["geometry"] = regions.geometry.make_valid()
+regions = regions[regions.intersects(domain)]
+subsets = {name: ds.sel(area=geom) for name, geom in zip(regions["name"], regions.geometry)}
+```
+
 ### Boolean masking
 
 Instead of reading a subset, you can mask values directly on a DataArray:

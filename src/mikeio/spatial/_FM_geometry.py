@@ -4,9 +4,12 @@ from pathlib import Path
 from typing import (
     Any,
     Literal,
+    Mapping,
+    Protocol,
     Sequence,
     Sized,
     TYPE_CHECKING,
+    Union,
 )
 import warnings
 
@@ -40,6 +43,20 @@ if TYPE_CHECKING:
     from ._FM_geometry_layered import GeometryFM3D
     from matplotlib.axes import Axes
     from numpy.typing import ArrayLike
+
+
+class SupportsGeoInterface(Protocol):
+    """A geometry exposing `__geo_interface__`, e.g. a shapely Polygon."""
+
+    @property
+    def __geo_interface__(self) -> Mapping[str, Any]: ...
+
+
+Area = Union[
+    Sequence[float],
+    Sequence[tuple[float, float]],
+    SupportsGeoInterface,
+]
 
 
 class GeometryFMPlotter:
@@ -1008,11 +1025,48 @@ class GeometryFM2D(_GeometryFM):
             polygon = np.column_stack((polygon[0::2], polygon[1::2]))
         return mp.Path(polygon).contains_points(xy)
 
-    def _elements_in_area(
-        self, area: Sequence[float] | Sequence[tuple[float, float]]
-    ) -> np.ndarray:
+    @staticmethod
+    def _inside_geo_polygon(geo: Mapping[str, Any], xy: np.ndarray) -> np.ndarray:
+        import matplotlib.path as mp
+
+        kind = geo.get("type")
+        if kind == "Polygon":
+            polygons = [geo["coordinates"]]
+        elif kind == "MultiPolygon":
+            polygons = geo["coordinates"]
+        elif kind in ("Feature", "FeatureCollection"):
+            raise ValueError(
+                f"'area' must be a single Polygon or MultiPolygon, not a {kind}; "
+                "pass one geometry, e.g. gdf.geometry.iloc[0]"
+            )
+        else:
+            raise ValueError(f"'area' must be a Polygon or MultiPolygon, not {kind}")
+
+        mask = np.zeros(len(xy), dtype=bool)
+        for rings in polygons:
+            exterior, *holes = (np.asarray(ring, dtype=float)[:, :2] for ring in rings)
+            inside = mp.Path(exterior).contains_points(xy)
+            for hole in holes:
+                # test only points inside the hole's bounding box; polygons can
+                # have thousands of small holes (islands)
+                lo, hi = hole.min(axis=0), hole.max(axis=0)
+                near = np.flatnonzero(inside & np.all((xy >= lo) & (xy <= hi), axis=1))
+                if len(near) > 0:
+                    inside[near] &= ~mp.Path(hole).contains_points(xy[near])
+            mask |= inside
+        return mask
+
+    def _elements_in_area(self, area: Area) -> np.ndarray:
         """Find 2d element ids of elements inside area."""
-        if self._area_is_bbox(area):
+        if hasattr(area, "__geo_interface__"):
+            if getattr(area, "is_valid", True) is False:
+                raise ValueError(
+                    "'area' is not a valid polygon (e.g. self-intersecting); "
+                    "repair it first, e.g. with shapely.make_valid"
+                )
+            xy = self.element_coordinates[:, :2]
+            mask = self._inside_geo_polygon(area.__geo_interface__, xy)
+        elif self._area_is_bbox(area):
             x0, y0, x1, y1 = area
             xc = self.element_coordinates[:, 0]
             yc = self.element_coordinates[:, 1]
@@ -1025,7 +1079,10 @@ class GeometryFM2D(_GeometryFM):
             raise ValueError("'area' must be bbox [x0,y0,x1,y1] or polygon")
         elements = np.where(mask)[0]
         if len(elements) == 0:
-            raise ValueError("No elements in selection!")
+            raise ValueError(
+                "No elements in selection! Check that the area uses the same "
+                f"coordinate system as the mesh ({self.projection_string})"
+            )
         return elements
 
     def elements_to_geometry(
