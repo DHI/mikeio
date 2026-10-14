@@ -459,7 +459,11 @@ class DataArray:
         return da
 
     def dropna(self) -> DataArray:
-        """Remove time steps where values are NaN."""
+        """Remove time steps where the entire field is NaN.
+
+        A time step is dropped only when *all* values are NaN; scattered
+        NaNs (e.g. land or dry cells) are kept.
+        """
         if not self._has_time_axis:
             raise ValueError("Not available if no time axis!")
 
