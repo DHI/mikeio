@@ -35,7 +35,9 @@ Run it with `--help` to see the arguments.
 
 ## Pin the versions
 
-`mikeio==3.3.0` fixes the MIKE IO version, but not the versions of the packages MIKE IO depends on, such as NumPy and pandas. A new release of one of those can change the result or break the script. `exclude-newer` makes uv ignore every package released after the given date, so the script resolves to the same versions every time it runs, on any machine.
+`mikeio==3.3.0` fixes the MIKE IO version, but not the versions of the packages MIKE IO depends on, such as NumPy and pandas. A new release of one of those can change the result or break the script. `exclude-newer` makes uv ignore every package released after the given date, so the script resolves to the same versions every time it runs.
+
+`requires-python = "==3.12.*"` fixes the Python version too. Without it, uv uses the newest Python on the machine, and packages pinned to an earlier date may have no build for a Python released after it. uv downloads Python 3.12 if it isn't installed.
 
 To write or update the header, use:
 

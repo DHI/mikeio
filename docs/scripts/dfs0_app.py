@@ -1,6 +1,6 @@
 """View, trim and export a dfs0 file in the browser."""
 # /// script
-# requires-python = ">=3.12"
+# requires-python = "==3.12.*"
 # dependencies = ["mikeio==3.3.0", "streamlit==1.66.0"]
 # [tool.uv]
 # exclude-newer = "2026-10-18T00:00:00Z"
