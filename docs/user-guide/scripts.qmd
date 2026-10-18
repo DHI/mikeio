@@ -45,6 +45,30 @@ uv add --script diff.py "mikeio==3.3.0"
 
 For an exact record of every package version, `uv lock --script diff.py` writes a `diff.py.lock` file next to the script. Share both files.
 
+## An app in one file
+
+The same header works for a script with a user interface. This one is a [Streamlit](https://streamlit.io) app: upload a dfs0 file, plot Items, trim the time window and download the result as dfs0 or CSV. Without a file it shows synthetic tide-station data.
+
+```bash
+uv run https://dhi.github.io/mikeio/scripts/dfs0_app.py
+```
+
+The app opens in the browser and runs on your own machine, so there is no server to set up and your files are not uploaded anywhere. The first run takes about a minute while uv fetches the packages.
+
+Streamlit apps are normally started with `streamlit run app.py`. The block at the end of [dfs0_app.py](../scripts/dfs0_app.py) does that for you, so `uv run` is enough:
+
+```python
+if __name__ == "__main__":
+    if st.runtime.exists():
+        main()
+    else:
+        # Started with `uv run dfs0_app.py`: hand over to `streamlit run` on this file.
+        from streamlit.web import cli
+
+        sys.argv = ["streamlit", "run", __file__, *sys.argv[1:]]
+        sys.exit(cli.main())
+```
+
 ## Projects with several scripts
 
 When a project has several scripts that share dependencies, give the project its own environment instead:
