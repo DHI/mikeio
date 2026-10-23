@@ -35,7 +35,9 @@ Run it with `--help` to see the arguments.
 
 ## Pin the versions
 
-`mikeio==3.3.0` fixes the MIKE IO version, but not the versions of the packages MIKE IO depends on, such as NumPy and pandas. A new release of one of those can change the result or break the script. `exclude-newer` makes uv ignore every package released after the given date, so the script resolves to the same versions every time it runs, on any machine.
+`mikeio==3.3.0` fixes the MIKE IO version, but not the versions of the packages MIKE IO depends on, such as NumPy and pandas. A new release of one of those can change the result or break the script. `exclude-newer` makes uv ignore every package released after the given date, so the script resolves to the same versions every time it runs.
+
+`requires-python = "==3.12.*"` fixes the Python version too. Without it, uv uses the newest Python on the machine, and packages pinned to an earlier date may have no build for a Python released after it. uv downloads Python 3.12 if it isn't installed.
 
 To write or update the header, use:
 
@@ -44,6 +46,30 @@ uv add --script diff.py "mikeio==3.3.0"
 ```
 
 For an exact record of every package version, `uv lock --script diff.py` writes a `diff.py.lock` file next to the script. Share both files.
+
+## An app in one file
+
+The same header works for a script with a user interface. This one is a [Streamlit](https://streamlit.io) app: upload a dfs0 file, plot Items, trim the time window and download the result as dfs0 or CSV. Without a file it shows synthetic tide-station data.
+
+```bash
+uv run https://dhi.github.io/mikeio/scripts/dfs0_app.py
+```
+
+The app opens in the browser and runs on your own machine, so there is no server to set up and your files are not uploaded anywhere. The first run takes about a minute while uv fetches the packages.
+
+Streamlit apps are normally started with `streamlit run app.py`. The block at the end of [dfs0_app.py](../scripts/dfs0_app.py) does that for you, so `uv run` is enough:
+
+```python
+if __name__ == "__main__":
+    if st.runtime.exists():
+        main()
+    else:
+        # Started with `uv run dfs0_app.py`: hand over to `streamlit run` on this file.
+        from streamlit.web import cli
+
+        sys.argv = ["streamlit", "run", __file__, *sys.argv[1:]]
+        sys.exit(cli.main())
+```
 
 ## Projects with several scripts
 

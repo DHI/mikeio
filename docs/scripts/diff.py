@@ -1,6 +1,6 @@
 """Write the difference between two dfs files (scenario - baseline)."""
 # /// script
-# requires-python = ">=3.12"
+# requires-python = "==3.12.*"
 # dependencies = ["mikeio==3.3.0"]
 # [tool.uv]
 # exclude-newer = "2026-09-23T00:00:00Z"
