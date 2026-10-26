@@ -463,10 +463,8 @@ class Dfsu2DH:
                 dfs, d, t_rel[i] = _read_item_time_step(
                     dfs=dfs,
                     filename=self._filename,
-                    time=time,
                     item_numbers=item_numbers,
                     deletevalue=self.deletevalue,
-                    shape=shape,
                     item=item,
                     it=time_steps[i],
                     error_bad_data=error_bad_data,

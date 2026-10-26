@@ -59,12 +59,6 @@ class CRS:
         return "\n".join(summary)
 
     @property
-    def map_projection(self) -> MapProjection:
-        """Get the map projection object."""
-        # https://manuals.mikepoweredbydhi.help/2021/General/Class_Library/DHI_Projections/html/T_DHI_Projections_MapProjection.htm
-        return self.__cartography.Projection
-
-    @property
     def name(self) -> str:
         """Get the name of the projection."""
         return self.__cartography.ProjectionName
