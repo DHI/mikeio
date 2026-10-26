@@ -10,7 +10,7 @@ import numpy as np
 from mikecore.DfsuFile import DfsuFileType
 
 
-from ._FM_geometry import GeometryFM2D, _GeometryFM
+from ._FM_geometry import Area, GeometryFM2D, _GeometryFM
 from ._geometry import GeometryPoint3D
 
 from ._FM_plot import _plot_vertical_profile, BoundaryPolygons
@@ -315,9 +315,7 @@ class _GeometryFMLayered(_GeometryFM):
             # slow path
             return self._find_top_layer_elements(self.element_table)
 
-    def _elements_in_area(
-        self, area: Sequence[tuple[float, float]] | Sequence[float]
-    ) -> np.ndarray:
+    def _elements_in_area(self, area: Area) -> np.ndarray:
         """Find element ids of elements inside area."""
         idx2d = self.geometry2d._elements_in_area(area)
         if len(idx2d) > 0:
@@ -566,7 +564,7 @@ class GeometryFM3D(_GeometryFMLayered):
         y: float | None = None,
         z: float | None = None,
         coords: np.ndarray | None = None,
-        area: tuple[float, float, float, float] | None = None,
+        area: Area | None = None,
         layers: int | Layer | Sequence[int] | None = None,
     ) -> np.ndarray:
         """Find a *set* of 3d element indices for points, an area and/or layers.
@@ -586,9 +584,12 @@ class GeometryFM3D(_GeometryFMLayered):
             As an alternative to specifying x, y (and z) individually,
             the argument coords can be used instead,
             by default None
-        area : (float, float, float, float), optional
-            Bounding box of coordinates (left lower and right upper)
-            to be selected, by default None
+        area : bbox, polygon or shapely geometry, optional
+            Area to be selected: a bounding box (left, lower, right, upper),
+            a list of (x, y) polygon vertices, or a
+            Polygon or MultiPolygon with `__geo_interface__`, e.g. from shapely
+            or geopandas, holes excluded. Elements are selected by their centre.
+            By default None
         layers : int or str or list[int], optional
             layer(s) to be selected: subset of "all", "top", "bottom",
             "bottom+1", ..., or a layer number (0=bottom, 1, 2, ...),

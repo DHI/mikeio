@@ -399,10 +399,11 @@ class Dfsu2DH:
         keepdims: bool, optional
             When reading a single time step only, should the time-dimension be kept
             in the returned Dataset? by default: False
-        area: list[float], optional
+        area: bbox, polygon or shapely geometry, optional
             Read only data inside (horizontal) area given as a
-            bounding box (tuple with left, lower, right, upper)
-            or as list of coordinates for a polygon, by default None
+            bounding box (tuple with left, lower, right, upper),
+            as list of coordinates for a polygon, or as a Polygon or
+            MultiPolygon with `__geo_interface__` (e.g. shapely), by default None
         x, y: float or list[float], optional
             Read only data for elements containing the (x,y) points(s),
             by default None
