@@ -2,7 +2,7 @@ from __future__ import annotations
 from functools import cached_property
 from pathlib import Path
 
-from typing import TYPE_CHECKING, Any, Iterable, Literal, Sequence
+from typing import TYPE_CHECKING, Any, Iterable, Literal, Sequence, TypeGuard
 import warnings
 from numbers import Integral
 
@@ -856,7 +856,7 @@ class GeometryFMVerticalProfilePlotter:
         )
 
 
-def _is_integer(value: object) -> bool:
+def _is_integer(value: object) -> TypeGuard[Integral]:
     return isinstance(value, Integral) and not isinstance(value, bool)
 
 
