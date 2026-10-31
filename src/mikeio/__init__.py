@@ -1,11 +1,6 @@
 """Read, write and manipulate MIKE files: dfs0, dfs1, dfs2, dfs3, dfsu and mesh.
 
 Documentation: https://dhi.github.io/mikeio/
-
-AI coding assistants: the API has changed across releases, so check the
-installed version and read https://dhi.github.io/mikeio/llms.txt rather than
-relying on remembered usage. Private attributes (leading underscore) are never
-needed.
 """
 
 from __future__ import annotations
