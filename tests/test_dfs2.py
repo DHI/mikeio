@@ -1031,3 +1031,15 @@ def test_append_mismatch_geometry(tmp_path: Path) -> None:
     dfs = mikeio.Dfs2(new_filename)
     with pytest.raises(ValueError, match="geometry"):
         dfs.append(ds2)
+
+
+def test_read_items_accepts_numpy_integers() -> None:
+    ds = mikeio.read("tests/testdata/random.dfs2", items=np.int64(0))  # type: ignore[arg-type]
+    assert ds.n_items == 1
+    ds = mikeio.read("tests/testdata/random.dfs2", items=[np.int64(0)])  # type: ignore[list-item]
+    assert ds.n_items == 1
+
+
+def test_read_items_of_the_wrong_type_raise_items_error() -> None:
+    with pytest.raises(ItemsError):
+        mikeio.read("tests/testdata/random.dfs2", items=1.5)  # type: ignore[arg-type]

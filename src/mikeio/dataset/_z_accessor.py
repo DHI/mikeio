@@ -104,6 +104,7 @@ class NullZAccessor:
         # store geometry class name eagerly so the error message is available
         # even after the parent DataArray is gone
         self._geometry_type_name: str = type(da.geometry).__name__
+        self._layered: bool = getattr(da.geometry, "is_layered", False)
 
     def __getattr__(self, name: str) -> Any:
         # __getattr__ is only invoked when normal attribute lookup fails.
@@ -116,6 +117,12 @@ class NullZAccessor:
         # cannot recurse when the instance has been constructed without
         # __init__ (e.g. during deepcopy / unpickling).
         geom_name = self.__dict__.get("_geometry_type_name", "<unknown>")
+        if self.__dict__.get("_layered", False):
+            raise AttributeError(
+                f"DataArray with geometry '{geom_name}' has no z-coordinates: it "
+                "was created without zn. Pass the node z-coordinates when creating "
+                "it, e.g. DataArray(..., zn=ds.z.nodes)"
+            )
         raise AttributeError(
             f"DataArray with geometry '{geom_name}' has no z-coordinates; "
             "only layered 3D dfsu DataArrays expose .z"
