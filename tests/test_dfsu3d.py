@@ -755,6 +755,44 @@ def test_z_accessor_non_layered_raises_attribute_error() -> None:
         _ = da.z.elements
 
 
+def test_z_accessor_layered_without_zn_says_how_to_fix() -> None:
+    ds = mikeio.read("tests/testdata/oresund_sigma_z.dfsu")
+    da = ds[0]
+    no_zn = mikeio.DataArray(
+        da.to_numpy(), time=ds.time, geometry=da.geometry, item=da.item
+    )
+    with pytest.raises(AttributeError, match="created without zn"):
+        _ = no_zn.z.nodes
+
+
+def test_layers_accept_numpy_integers() -> None:
+    ds = mikeio.read("tests/testdata/oresund_sigma_z.dfsu")
+    g = ds.geometry
+    x, y = g.geometry2d.element_coordinates[100, :2]
+    top = g.n_layers - 1  # a numpy integer
+    assert not isinstance(top, int)
+    assert (
+        g.find_index(x=x, y=y, layers=top).tolist()
+        == g.find_index(x=x, y=y, layers=int(top)).tolist()
+    )
+    ds[0].sel(x=x, y=y, layers=top)
+    assert len(g.get_layer_elements([np.int64(0), np.int64(1)])) > 0
+
+
+def test_layers_of_the_wrong_type_raise_type_error() -> None:
+    g = mikeio.Dfsu3D("tests/testdata/oresund_sigma_z.dfsu").geometry
+    with pytest.raises(TypeError, match="layers must be an integer"):
+        g.get_layer_elements(1.5)  # type: ignore[arg-type]
+    with pytest.raises(TypeError, match="layers must be an integer"):
+        g.get_layer_elements([0, 1.5])  # type: ignore[list-item]
+
+
+def test_extract_surface_elevation_needs_a_positive_n_nearest() -> None:
+    dfs = mikeio.Dfsu3D("tests/testdata/oresund_sigma_z.dfsu")
+    with pytest.raises(ValueError, match="n_nearest must be at least 1"):
+        dfs.extract_surface_elevation_from_3d(n_nearest=0)
+
+
 def test_dataset_z_mirrors_first_dataarray() -> None:
     """S05: ds.z.nodes equals ds[0].z.nodes (shared array)."""
     ds = mikeio.read("tests/testdata/oresund_sigma_z.dfsu")

@@ -4,6 +4,7 @@ from pathlib import Path
 
 from typing import TYPE_CHECKING, Any, Iterable, Literal, Sequence
 import warnings
+from numbers import Integral
 
 from matplotlib.axes import Axes
 import numpy as np
@@ -422,17 +423,22 @@ class _GeometryFMLayered(_GeometryFM):
                 )
 
         if not np.isscalar(layers):
-            assert isinstance(layers, Iterable)
+            if not isinstance(layers, Iterable):
+                raise TypeError(_layers_type_error(layers))
             elem_ids = []
             for layer in layers:
-                assert isinstance(layer, int)
-                elem_ids.append(self.get_layer_elements(layer))
+                if not _is_integer(layer):
+                    raise TypeError(_layers_type_error(layer))
+                elem_ids.append(self.get_layer_elements(int(layer)))
             elem_ids = np.concatenate(elem_ids, axis=0)
             return np.sort(elem_ids)
 
         n_lay = self.n_layers
 
-        assert isinstance(layers, int)
+        # numpy integers too: n_layers and layer_ids are numpy integers
+        if not _is_integer(layers):
+            raise TypeError(_layers_type_error(layers))
+        layers = int(layers)
         if layers < (-n_lay) or layers >= n_lay:
             raise Exception(
                 f"Layer {layers!r} not allowed; must be between -{n_lay} and {n_lay - 1}"
@@ -848,3 +854,14 @@ class GeometryFMVerticalProfilePlotter:
             cmax=1.0,
             **kwargs,
         )
+
+
+def _is_integer(value: object) -> bool:
+    return isinstance(value, Integral) and not isinstance(value, bool)
+
+
+def _layers_type_error(value: object) -> str:
+    return (
+        f"layers must be an integer, 'top', 'bottom' or a list of integers, "
+        f"not {type(value).__name__} {value!r}"
+    )

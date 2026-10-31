@@ -571,12 +571,12 @@ class Dfsu3D(DfsuLayered):
             number of points for spatial interpolation (inverse_distance), default=4
 
         """
-        # validate input
-        assert (
-            self._type == DfsuFileType.Dfsu3DSigma
-            or self._type == DfsuFileType.Dfsu3DSigmaZ
-        )
-        assert n_nearest > 0
+        if self._type not in (DfsuFileType.Dfsu3DSigma, DfsuFileType.Dfsu3DSigmaZ):
+            raise ValueError(
+                f"a surface elevation needs a 3D sigma or sigma-z dfsu, not {self._type.name}"
+            )
+        if n_nearest < 1:
+            raise ValueError(f"n_nearest must be at least 1, not {n_nearest}")
 
         # make 2d nodes-to-elements interpolator
         top_el = self.geometry.top_elements

@@ -1012,7 +1012,8 @@ class DataArray:
 
                 case Grid1D():
                     if interpolant is None:
-                        assert x is not None
+                        if x is None:
+                            raise ValueError("x must be specified for a Grid1D")
                         interpolant = g.get_spatial_interpolant(x)
                     dai = interpolant.interp1d(self.to_numpy()).flatten()
                     geometry = GeometryUndefined()
