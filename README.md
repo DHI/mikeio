@@ -15,7 +15,7 @@ MIKE IO facilitates common data processing workflows for [MIKE files](https://ww
 ## Requirements
 
 * Windows or Linux operating system
-* Python x64 3.12 - 3.14
+* Python x64 3.12 - 3.15
 * (Windows) [VC++ redistributables](https://aka.ms/vs/17/release/vc_redist.x64.exe) (already installed if you have MIKE)
 
 ## Installation
@@ -76,7 +76,7 @@ See the [user guide](https://dhi.github.io/mikeio/user-guide/getting-started.htm
 
 ## Testing
 
-MIKE IO is tested extensively, with an overall statement coverage of ~95%. The test suite runs on every pull request against Python 3.12 and 3.14, and on a schedule on both Linux and Windows.
+MIKE IO is tested extensively, with an overall statement coverage of ~95%. The test suite runs on every pull request against Python 3.12 and 3.15, and on a schedule on both Linux and Windows.
 
 ```bash
 uv run pytest --cov=mikeio
