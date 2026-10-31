@@ -1797,3 +1797,8 @@ def test_custom_blocks_of_derived_dataset_are_copies(blocks_ds: Dataset) -> None
         # the dict is a new one too, so adding a block does not add it to the source
         derived.custom_blocks["Extra"] = np.array([1.0], dtype=np.float32)
         assert "Extra" not in blocks_ds.custom_blocks
+
+
+def test_dataset_from_the_wrong_type_raises_type_error() -> None:
+    with pytest.raises(TypeError, match="list of DataArrays"):
+        mikeio.Dataset(np.zeros(3))  # type: ignore[arg-type]

@@ -242,7 +242,11 @@ class Dataset:
 
         if isinstance(data, DataArray):
             data = [data]
-        assert isinstance(data, Sequence)
+        if not isinstance(data, Sequence):
+            raise TypeError(
+                "data must be a DataArray, a list of DataArrays or a dict of "
+                f"DataArrays, not {type(data).__name__}"
+            )
         item_names = [da.name for da in data]
         return {key: da for key, da in zip(item_names, data)}
 

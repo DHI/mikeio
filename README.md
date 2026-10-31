@@ -70,6 +70,7 @@ See the [user guide](https://dhi.github.io/mikeio/user-guide/getting-started.htm
 
 ## Where can I get help?
 * Documentation - [https://dhi.github.io/mikeio/](https://dhi.github.io/mikeio/)
+* For AI coding assistants - [llms.txt](https://dhi.github.io/mikeio/llms.txt), an index of the current documentation
 * General help, new ideas and feature requests - [GitHub Discussions](https://github.com/DHI/mikeio/discussions)
 * Bugs - [GitHub Issues](https://github.com/DHI/mikeio/issues)
 
