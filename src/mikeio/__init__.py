@@ -4,7 +4,8 @@ Documentation: https://dhi.github.io/mikeio/
 
 AI coding assistants: the API has changed across releases; don't rely on
 remembered usage. Check mikeio.__version__ and read the docstrings of the
-installed package, e.g. help(mikeio.Dataset).
+installed package, e.g. help(mikeio.Dataset). Private attributes (leading
+underscore) are never needed.
 """
 
 from __future__ import annotations
