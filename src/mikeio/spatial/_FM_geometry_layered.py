@@ -11,7 +11,7 @@ import numpy as np
 from mikecore.DfsuFile import DfsuFileType
 
 
-from ._FM_geometry import GeometryFM2D, _GeometryFM
+from ._FM_geometry import GeometryFM2D, _GeometryFM, _points_in_area
 from ._geometry import GeometryPoint3D
 
 from ._FM_plot import _plot_vertical_profile, BoundaryPolygons
@@ -23,395 +23,88 @@ if TYPE_CHECKING:
 
 Layer = Literal["all", "bottom", "top"]
 
+Area = Sequence[float] | Sequence[tuple[float, float]]
 
-class _GeometryFMLayered(_GeometryFM):
+
+class _Columns:
+    """Column and layer structure of a layered mesh.
+
+    The elements of a column have consecutive indices, bottom-up. A column is
+    identified by its index in `top_elements`.
+    """
+
     def __init__(
         self,
         *,
-        node_coordinates: ArrayLike,
-        element_table: ArrayLike,
-        codes: np.ndarray | None = None,
-        projection: str = "LONG/LAT",
-        dfsu_type: DfsuFileType = DfsuFileType.Dfsu3DSigma,
-        element_ids: np.ndarray | None = None,
-        node_ids: np.ndarray | None = None,
-        n_layers: int = 1,  # at least 1 layer
-        n_sigma: int | None = None,
-        validate: bool = True,
-        reindex: bool = False,
+        element_table: np.ndarray,
+        element_ids: np.ndarray,
+        node_coordinates: np.ndarray,
+        n_layers: int,
+        n_sigma: int,
     ) -> None:
-        super().__init__(
-            node_coordinates=node_coordinates,
-            element_table=element_table,
-            codes=codes,
-            projection=projection,
-            dfsu_type=dfsu_type,
-            element_ids=element_ids,
-            node_ids=node_ids,
-            validate=validate,
-            reindex=reindex,
-        )
-
-        self._n_layers = n_layers
-        self._n_sigma = n_sigma if n_sigma is not None else n_layers
-
-    def __str__(self) -> str:
-        return f"{self._type.name} ({self.n_elements} elements, {self.n_nodes} nodes)"
-
-    def __repr__(self) -> str:
-        return (
-            f"Flexible Mesh Geometry: {self._type.name}\n"
-            f"number of nodes: {self.n_nodes}\n"
-            f"number of elements: {self.n_elements}\n"
-            f"number of layers: {self.n_layers}\n"
-            f"number of sigma layers: {self.n_sigma_layers}\n"
-            f"projection: {self.projection_string}"
-        )
-
-    @cached_property
-    def geometry2d(self) -> GeometryFM2D:
-        return self.to_2d_geometry()
-
-    def isel(
-        self, idx: Sequence[int] | np.ndarray, keepdims: bool = False, **kwargs: Any
-    ) -> GeometryFM3D | GeometryPoint3D | GeometryFM2D | GeometryFMVerticalColumn:
-        return self.elements_to_geometry(elements=idx, keepdims=keepdims)
-
-    def elements_to_geometry(
-        self,
-        elements: int | Sequence[int] | np.ndarray,
-        node_layers: Layer = "all",
-        keepdims: bool = False,
-    ) -> GeometryFM3D | GeometryPoint3D | GeometryFM2D | GeometryFMVerticalColumn:
-        sel_elements: list[int]
-
-        if isinstance(elements, (int, np.integer)):
-            sel_elements = [elements]
-        else:
-            sel_elements = list(elements)
-        if len(sel_elements) == 1 and not keepdims:
-            x, y, z = self.element_coordinates[sel_elements.pop(), :]
-
-            return GeometryPoint3D(x=x, y=y, z=z, projection=self.projection)
-
-        # create new geometry
-        new_type = self._type
-
-        layers_used = self.layer_ids[sel_elements]
-        unique_layer_ids = np.unique(layers_used)
-        n_layers = len(unique_layer_ids)
-
-        if n_layers > 1:
-            bottom: Layer = "bottom"
-            elem_bot = self.get_layer_elements(layers=bottom)
-            if np.all(np.isin(sel_elements, elem_bot)):
-                n_layers = 1
-
-        if (
-            self._type == DfsuFileType.Dfsu3DSigma
-            or self._type == DfsuFileType.Dfsu3DSigmaZ
-        ) and n_layers == 1:
-            new_type = DfsuFileType.Dfsu2D
-
-        if n_layers == 1 and node_layers == "all":
-            node_layers = "bottom"
-
-        # extract information for selected elements
-        if n_layers == 1:
-            elem2d = self.elem2d_ids[sel_elements]
-            geom2d = self.geometry2d
-            node_ids, elem_tbl = geom2d._get_nodes_and_table_for_elements(elem2d)
-            assert len(elem_tbl[0]) <= 4, "Not a 2D element"
-            node_coords = geom2d.node_coordinates[node_ids]
-            codes = geom2d.codes[node_ids]
-            elem_ids = self._element_ids[elem2d]
-        else:
-            node_ids, elem_tbl = self._get_nodes_and_table_for_elements(
-                sel_elements, node_layers=node_layers
-            )
-            node_coords = self.node_coordinates[node_ids]
-            codes = self.codes[node_ids]
-            elem_ids = self._element_ids[sel_elements]
-
-        if new_type == DfsuFileType.Dfsu2D:
-            return GeometryFM2D(
-                node_coordinates=node_coords,
-                codes=codes,
-                node_ids=node_ids,
-                projection=self.projection_string,
-                element_table=elem_tbl,
-                element_ids=elem_ids,
-                dfsu_type=DfsuFileType.Dfsu2D,
-                reindex=True,
-            )
-        else:
-            lowest_sigma = self.n_layers - self.n_sigma_layers
-            n_sigma = sum(unique_layer_ids >= lowest_sigma)
-            if n_layers == len(elem_tbl):
-                return GeometryFMVerticalColumn(
-                    node_coordinates=node_coords,
-                    codes=codes,
-                    node_ids=node_ids,
-                    projection=self.projection_string,
-                    element_table=elem_tbl,
-                    element_ids=elem_ids,
-                    dfsu_type=self._type,
-                    reindex=True,
-                    n_layers=n_layers,
-                    n_sigma=n_sigma,
-                )
-            else:
-                klass = self.__class__
-                return klass(  # type: ignore
-                    node_coordinates=node_coords,
-                    codes=codes,
-                    node_ids=node_ids,
-                    projection=self.projection_string,
-                    element_table=elem_tbl,
-                    element_ids=elem_ids,
-                    dfsu_type=self._type,
-                    reindex=True,
-                    n_layers=n_layers,
-                    n_sigma=n_sigma,
-                )
-
-    def _get_nodes_and_table_for_elements(
-        self,
-        elements: Sequence[int] | np.ndarray,
-        node_layers: Layer = "all",
-    ) -> tuple[Any, Any]:
-        """list of nodes and element table for a list of elements.
-
-        Parameters
-        ----------
-        elements : np.array(int)
-            array of element ids
-        node_layers : str, optional
-            for 3D files 'all', 'bottom' or 'top' nodes
-            of each element, by default 'all'
-
-        Returns
-        -------
-        np.array(int)
-            array of node ids (unique)
-        list(list(int))
-            element table with a list of nodes for each element
-
-        """
-        elem_tbl = np.empty(len(elements), dtype=np.dtype("O"))
-        if node_layers == "all":
-            for j, eid in enumerate(elements):
-                elem_tbl[j] = self.element_table[eid]
-
-        else:
-            # 3D => 2D
-            for j, eid in enumerate(elements):
-                elem_nodes = self.element_table[eid]
-                halfn = len(elem_nodes) // 2
-                if node_layers == "bottom":
-                    elem_nodes = elem_nodes[:halfn]
-                elif node_layers == "top":
-                    elem_nodes = elem_nodes[halfn:]
-                elem_tbl[j] = elem_nodes
-
-        nodes = np.unique(np.hstack(elem_tbl))  # type: ignore
-        return nodes, elem_tbl
-
-    def to_2d_geometry(self) -> GeometryFM2D:
-        """extract 2d geometry from 3d geometry.
-
-        Returns
-        -------
-        GeometryFM2D
-            2d geometry
-
-        """
-        # extract information for selected elements
-        match self._type:
-            case DfsuFileType.Dfsu3DSigmaZ:
-                elem_ids = self.top_elements
-            case DfsuFileType.Dfsu3DSigma:
-                elem_ids = self.bottom_elements
-            case _:
-                raise NotImplementedError(
-                    f"Conversion to 2D not implemented for {self._type}"
-                )
-
-        node_ids, elem_tbl = self._get_nodes_and_table_for_elements(
-            elem_ids, node_layers="bottom"
-        )
-        node_coords = self.node_coordinates[node_ids]
-        codes = self._codes[node_ids]
-
-        geom = GeometryFM2D(
-            node_coordinates=node_coords,
-            codes=codes,
-            node_ids=node_ids,
-            projection=self.projection_string,
-            element_table=elem_tbl,
-            element_ids=elem_ids,
-            validate=False,
-            dfsu_type=DfsuFileType.Dfsu2D,
-            reindex=True,
-        )
-
-        # TODO do this before creating the geometry
-
-        # TODO extract method
-        # Fix z-coordinate for sigma-z:
-        if self._type == DfsuFileType.Dfsu3DSigmaZ:
-            zn = geom.node_coordinates[:, 2].copy()
-            for j, elem_nodes in enumerate(geom.element_table):
-                elem_nodes3d = self.element_table[self.bottom_elements[j]]
-                for jn in range(len(elem_nodes)):
-                    znj_3d = self.node_coordinates[elem_nodes3d[jn], 2]
-                    zn[elem_nodes[jn]] = min(zn[elem_nodes[jn]], znj_3d)
-            geom.node_coordinates[:, 2] = zn
-
-        return geom
-
-    @property
-    def is_layered(self) -> bool:
-        """Type is layered dfsu (3d, vertical profile or vertical column)."""
-        return True
-
-    @cached_property
-    def _2d_to_3d_association(self) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
-        """Cached (e2_e3_table, elem2d_ids, layer_ids) tuple."""
-        return self._get_2d_to_3d_association()
-
-    @cached_property
-    def layer_ids(self) -> np.ndarray:
-        """The layer number (0=bottom, 1, 2, ...) for each 3d element."""
-        return self._2d_to_3d_association[2]
-
-    @property
-    def n_layers(self) -> int:
-        """Maximum number of layers."""
-        return self._n_layers
-
-    @property
-    def n_sigma_layers(self) -> int:
-        """Number of sigma layers."""
-        return self._n_sigma
+        self._element_table = element_table
+        self._element_ids = element_ids
+        self._node_coordinates = node_coordinates
+        self.n_layers = n_layers
+        self.n_sigma_layers = n_sigma
 
     @property
     def n_z_layers(self) -> int:
-        """Maximum number of z-layers."""
         return self.n_layers - self.n_sigma_layers
 
     @cached_property
     def top_elements(self) -> np.ndarray:
-        """List of 3d element ids of surface layer."""
-        # note: if subset of elements is selected then this cannot be done!
-
-        # fast path if no z-layers
         if self.n_z_layers == 0:
-            return np.arange(
-                self.n_sigma_layers - 1,
-                self.n_elements,
-                self.n_sigma_layers,
-            )
-        else:
-            # slow path
-            return self._find_top_layer_elements(self.element_table)
-
-    def _elements_in_area(
-        self, area: Sequence[tuple[float, float]] | Sequence[float]
-    ) -> np.ndarray:
-        """Find element ids of elements inside area."""
-        idx2d = self.geometry2d._elements_in_area(area)
-        if len(idx2d) > 0:
-            return np.hstack(self.e2_e3_table[idx2d])
-        else:
-            return np.array([], dtype=int)
-
-    @staticmethod
-    def _find_top_layer_elements(elementTable: np.ndarray) -> np.ndarray:
-        """Find element indices (zero based) of the elements being the upper-most element
-        in its column.
-        Each column is identified by matching node id numbers. For 3D elements the
-        last half of the node numbers of the bottom element must match the first half
-        of the node numbers in the top element. For 2D vertical elements the order of
-        the node numbers in the bottom element (last half number of nodes) are reversed
-        compared to those in the top element (first half number of nodes).
-        To find the number of elements in each column, assuming the result
-        is stored in res:
-        For the first column it is res[0]+1.
-        For the i'th column, it is res[i]-res[i-1].
-        :returns: A list of element indices of top layer elements.
-        """
-        topLayerElments = []
-
-        # Find top layer elements by matching the number numers of the last half of elmt i
-        # with the first half of element i+1.
-        # Elements always start from the bottom, and the element of one columne are following
-        # each other in the element table.
-        for i in range(len(elementTable) - 1):
-            elmt1 = elementTable[i]
-            elmt2 = elementTable[i + 1]
-
-            if len(elmt1) != len(elmt2):
-                # elements with different number of nodes can not be on top of each other,
-                # so elmt2 must be another column, and elmt1 must be a top element
-                topLayerElments.append(i)
-                continue
-
-            # Number of nodes in a 2D element
-            elmt2DSize = len(elmt1) // 2
-
-            for j in range(elmt2DSize):
-                if elmt2DSize > 2:
-                    if elmt1[j + elmt2DSize] != elmt2[j]:
-                        # At least one node number did not match
-                        # so elmt2 must be another column, and elmt1 must be a top element
-                        topLayerElments.append(i)
-                        break
-                else:
-                    # for 2D vertical profiles the nodes in the element on the
-                    # top is in reverse order of those in the bottom.
-                    if elmt1[j + elmt2DSize] != elmt2[(elmt2DSize - 1) - j]:
-                        # At least one node number did not match
-                        # so elmt2 must be another column, and elmt1 must be a top element
-                        topLayerElments.append(i)
-                        break
-
-        # The last element will always be a top layer element
-        topLayerElments.append(len(elementTable) - 1)
-
-        return np.array(topLayerElments, dtype=np.int32)
+            n_elements = len(self._element_table)
+            return np.arange(self.n_sigma_layers - 1, n_elements, self.n_sigma_layers)
+        return _find_top_layer_elements(self._element_table)
 
     @cached_property
     def n_layers_per_column(self) -> np.ndarray:
-        """List of number of layers for each column."""
         top_elems = self.top_elements
-        n = len(top_elems)
-        tmp = top_elems.copy()
-        tmp[0] = -1
-        tmp[1:n] = top_elems[0 : (n - 1)]
-        n_layers_column = top_elems - tmp
-        return n_layers_column
+        below = np.empty_like(top_elems)
+        below[0] = -1
+        below[1:] = top_elems[:-1]
+        return top_elems - below
 
     @cached_property
     def bottom_elements(self) -> np.ndarray:
-        """List of 3d element ids of bottom layer."""
         return self.top_elements - self.n_layers_per_column + 1
 
+    @cached_property
+    def _association(self) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
+        e2_to_e3: list[
+            np.ndarray
+        ] = []  # for each column: its element ids, bottom to top
+        index2d: list[int] = []  # for each element: its column
+        layerid: list[int] = []  # for each element: its layer number
+        global_layer_ids = np.arange(self.n_layers)
+        for j, (bot, top) in enumerate(zip(self.bottom_elements, self.top_elements)):
+            col = np.arange(bot, top + 1)
+            e2_to_e3.append(col)
+            index2d.extend([j] * len(col))
+            # columns shorter than n_layers lack the lowest z-layers
+            layerid.extend(global_layer_ids[-len(col) :])
+
+        return (
+            np.array(e2_to_e3, dtype=object),
+            np.array(index2d),
+            np.array(layerid),
+        )
+
+    @property
+    def e2_e3_table(self) -> np.ndarray:
+        return self._association[0]
+
+    @property
+    def elem2d_ids(self) -> np.ndarray:
+        return self._association[1]
+
+    @property
+    def layer_ids(self) -> np.ndarray:
+        return self._association[2]
+
     def get_layer_elements(self, layers: int | Layer | Sequence[int]) -> np.ndarray:
-        """3d element ids for one (or more) specific layer(s).
-
-        Parameters
-        ----------
-        layers : int or list(int)
-            layer between 0 (bottom) and n_layers-1 (top)
-            (can also be negative counting from -1 at the top layer)
-
-        Returns
-        -------
-        np.array(int)
-            element ids
-
-        """
         if isinstance(layers, str):
             if layers == "top":
                 return self.top_elements
@@ -430,112 +123,367 @@ class _GeometryFMLayered(_GeometryFM):
                 if not _is_integer(layer):
                     raise TypeError(_layers_type_error(layer))
                 elem_ids.append(self.get_layer_elements(int(layer)))
-            elem_ids = np.concatenate(elem_ids, axis=0)
-            return np.sort(elem_ids)
+            return np.sort(np.concatenate(elem_ids, axis=0))
 
         n_lay = self.n_layers
 
         # numpy integers too: n_layers and layer_ids are numpy integers
         if not _is_integer(layers):
             raise TypeError(_layers_type_error(layers))
-        layers = int(layers)
-        if layers < (-n_lay) or layers >= n_lay:
+        layer = int(layers)
+        if layer < (-n_lay) or layer >= n_lay:
             raise Exception(
-                f"Layer {layers!r} not allowed; must be between -{n_lay} and {n_lay - 1}"
+                f"Layer {layer!r} not allowed; must be between -{n_lay} and {n_lay - 1}"
             )
 
-        if layers < 0:
-            layers = layers + n_lay
+        if layer < 0:
+            layer = layer + n_lay
 
-        return self._element_ids[self.layer_ids == layers]
-
-    @cached_property
-    def e2_e3_table(self) -> np.ndarray:
-        """The 2d-to-3d element connectivity table for a 3d object."""
-        return self._2d_to_3d_association[0]
+        return self._element_ids[self.layer_ids == layer]
 
     @cached_property
-    def elem2d_ids(self) -> np.ndarray:
-        """The associated 2d element id for each 3d element."""
-        return self._2d_to_3d_association[1]
+    def dz(self) -> np.ndarray:
+        """Height of each element, from the static node z."""
+        zn = self._node_coordinates[:, 2]
+        dz = np.full(len(self._element_table), fill_value=np.nan)
+        for j, nodes in enumerate(self._element_table):
+            halfn = len(nodes) // 2
+            dz[j] = np.mean(zn[nodes[halfn:]]) - np.mean(zn[nodes[:halfn]])
+        return dz
 
-    def _get_2d_to_3d_association(self) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
-        e2_to_e3 = []  # for each 2d element: the corresponding 3d element ids from bot to top
-        index2d = []  # for each 3d element: the associated 2d element id
-        layerid = []  # for each 3d element: the associated layer number
-        n2d = len(self.top_elements)
-        topid = self.top_elements
-        botid = self.bottom_elements
-        # layer_ids = 0, 1, 2...
-        global_layer_ids = np.arange(self.n_layers)
-        for j in range(n2d):
-            col = np.arange(botid[j], topid[j] + 1)
+    def find_elements_at_z(
+        self,
+        columns: np.ndarray,
+        z: np.ndarray | float,
+        element_coordinates: np.ndarray,
+    ) -> np.ndarray:
+        """Element in each of `columns` containing the matching z value."""
+        columns = np.atleast_1d(columns)
+        z_vec = np.full(columns.shape, fill_value=z) if np.isscalar(z) else z
+        elem3d = np.full_like(columns, fill_value=-1)
+        for j, column in enumerate(columns):
+            col = np.asarray(self.e2_e3_table[column], dtype=int)
+            idx = self._z_idx_in_column(col, z_vec[j], element_coordinates)  # type: ignore[index]
+            elem3d[j] = col[idx]
+        return elem3d
 
-            e2_to_e3.append(col)
-            for _ in col:
-                index2d.append(j)
-
-            n_local_layers = len(col)
-            local_layers = global_layer_ids[-n_local_layers:]
-            for ll in local_layers:
-                layerid.append(ll)
-
-        e2_to_e3 = np.array(e2_to_e3, dtype=object)
-        index2d = np.array(index2d)
-        layerid = np.array(layerid)
-        return e2_to_e3, index2d, layerid
-
-    def _z_idx_in_column(self, e3_col: np.ndarray, z: np.ndarray) -> np.ndarray:
-        dz = self._dz[e3_col]
-        z_col = self.element_coordinates[e3_col, 2]
+    def _z_idx_in_column(
+        self, col: np.ndarray, z: float, element_coordinates: np.ndarray
+    ) -> int:
+        dz = self.dz[col]
+        z_col = element_coordinates[col, 2]
         z_face = np.append(z_col - dz / 2, z_col[-1] + dz[-1] / 2)
         if z < z_face[0] or z > z_face[-1]:
-            xy = tuple(self.element_coordinates[e3_col[0], :2])
+            xy = tuple(element_coordinates[col[0], :2])
             raise ValueError(
                 f"z value '{z}' is outside water column [{z_face[0]},{z_face[-1]}] in point x,y={xy}"
             )
-        idx = np.searchsorted(z_face, z) - 1
-        return idx
+        return int(np.searchsorted(z_face, z)) - 1
 
-    def _find_elem3d_from_elem2d(
-        self, elem2d: int | np.ndarray, z: np.ndarray | float
-    ) -> np.ndarray:
-        """Find 3d element ids from 2d element ids and z-values."""
-        # TODO: coordinate with _find_3d_from_2d_points()
+    def elements_in_columns(self, columns: np.ndarray) -> np.ndarray:
+        if len(columns) == 0:
+            return np.array([], dtype=int)
+        return np.hstack(list(self.e2_e3_table[columns])).astype(int)
 
-        elem2d = [elem2d] if np.isscalar(elem2d) else elem2d
-        elem2d = np.asarray(elem2d)
-        z_vec = np.full(elem2d.shape, fill_value=z) if np.isscalar(z) else z
+    def layers_spanned(self, elements: Sequence[int]) -> tuple[int, int]:
+        """Number of layers and of sigma layers in a selection of elements.
 
-        elem3d = np.full_like(elem2d, fill_value=-1)
-        for j, e2 in enumerate(elem2d):
-            idx_3d = np.hstack(self.e2_e3_table[e2])
-            elem3d[j] = idx_3d[self._z_idx_in_column(idx_3d, z_vec[j])]  # type: ignore
+        Bottom elements of different columns can sit in different layers, but
+        together they form a single layer.
+        """
+        layer_ids = np.unique(self.layer_ids[elements])
+        if len(layer_ids) > 1 and np.all(np.isin(elements, self.bottom_elements)):
+            return 1, 1
+        n_sigma = int(np.sum(layer_ids >= self.n_z_layers))
+        return len(layer_ids), n_sigma
 
-            # z_col = self.element_coordinates[idx_3d, 2]
-            # elem3d[j] = (np.abs(z_col - z_vec[j])).argmin()  # nearest
-        return elem3d
+    def is_single_column(self, elements: Sequence[int]) -> bool:
+        return len(np.unique(self.elem2d_ids[elements])) == 1
+
+
+def _find_top_layer_elements(element_table: np.ndarray) -> np.ndarray:
+    """Indices of the upper-most element of each column.
+
+    For 3D elements the top half of the nodes of an element are the bottom
+    half of the element above it. For 2D vertical elements the shared nodes
+    appear in reverse order in the element above.
+    """
+    top_elements = []
+    for i in range(len(element_table) - 1):
+        elmt1 = element_table[i]
+        elmt2 = element_table[i + 1]
+
+        if len(elmt1) != len(elmt2):
+            top_elements.append(i)
+            continue
+
+        n_half = len(elmt1) // 2
+        for j in range(n_half):
+            above = elmt2[j] if n_half > 2 else elmt2[(n_half - 1) - j]
+            if elmt1[j + n_half] != above:
+                top_elements.append(i)
+                break
+
+    top_elements.append(len(element_table) - 1)
+    return np.array(top_elements, dtype=np.int32)
+
+
+def _nodes_and_table(
+    element_table: np.ndarray,
+    elements: Sequence[int] | np.ndarray,
+    node_layers: Layer = "all",
+) -> tuple[Any, Any]:
+    """Unique node ids and element table for a list of elements.
+
+    node_layers 'bottom' or 'top' keeps only that half of each element's nodes.
+    """
+    elem_tbl = np.empty(len(elements), dtype=np.dtype("O"))
+    for j, eid in enumerate(elements):
+        elem_nodes = element_table[eid]
+        halfn = len(elem_nodes) // 2
+        if node_layers == "bottom":
+            elem_nodes = elem_nodes[:halfn]
+        elif node_layers == "top":
+            elem_nodes = elem_nodes[halfn:]
+        elem_tbl[j] = elem_nodes
+
+    nodes = np.unique(np.hstack(list(elem_tbl)))
+    return nodes, elem_tbl
+
+
+def _as_element_list(elements: int | Sequence[int] | np.ndarray) -> list[int]:
+    if isinstance(elements, (int, np.integer)):
+        return [int(elements)]
+    return list(elements)
+
+
+def _layered_repr(
+    geom: GeometryFM3D | GeometryFMVerticalProfile | GeometryFMVerticalColumn,
+) -> str:
+    return (
+        f"Flexible Mesh Geometry: {geom._type.name}\n"
+        f"number of nodes: {geom.n_nodes}\n"
+        f"number of elements: {geom.n_elements}\n"
+        f"number of layers: {geom.n_layers}\n"
+        f"number of sigma layers: {geom.n_sigma_layers}\n"
+        f"projection: {geom.projection_string}"
+    )
+
+
+def _subset_kwargs(
+    geom: GeometryFM3D | GeometryFMVerticalProfile | GeometryFMVerticalColumn,
+    elements: list[int],
+    node_layers: Layer = "all",
+) -> dict[str, Any]:
+    """Constructor arguments for a layered geometry of the selected elements."""
+    node_ids, elem_tbl = geom._get_nodes_and_table_for_elements(
+        elements, node_layers=node_layers
+    )
+    n_layers, n_sigma = geom._columns.layers_spanned(elements)
+    return dict(
+        node_coordinates=geom.node_coordinates[node_ids],
+        codes=geom.codes[node_ids],
+        node_ids=node_ids,
+        projection=geom.projection_string,
+        element_table=elem_tbl,
+        element_ids=geom._element_ids[elements],
+        dfsu_type=geom._type,
+        reindex=True,
+        n_layers=n_layers,
+        n_sigma=n_sigma,
+    )
+
+
+def _parse_points(
+    x: float | None,
+    y: float | None,
+    z: float | None,
+    coords: np.ndarray | None,
+) -> tuple[np.ndarray, np.ndarray | float | None]:
+    """Points as an (n, 2) xy array plus their z values, if any."""
+    if coords is not None:
+        coords = np.atleast_2d(coords)
+        z_out = coords[:, 2] if coords.shape[1] == 3 else None
+        return coords[:, :2], z_out
+    return np.vstack((x, y)).T, z  # type: ignore[arg-type]
+
+
+class GeometryFM3D(_GeometryFM):
+    """Flexible 3d mesh geometry."""
+
+    def __init__(
+        self,
+        *,
+        node_coordinates: ArrayLike,
+        element_table: ArrayLike,
+        codes: np.ndarray | None = None,
+        projection: str = "LONG/LAT",
+        dfsu_type: DfsuFileType = DfsuFileType.Dfsu3DSigma,
+        element_ids: np.ndarray | None = None,
+        node_ids: np.ndarray | None = None,
+        n_layers: int = 1,
+        n_sigma: int | None = None,
+        validate: bool = True,
+        reindex: bool = False,
+    ) -> None:
+        super().__init__(
+            node_coordinates=node_coordinates,
+            element_table=element_table,
+            codes=codes,
+            projection=projection,
+            dfsu_type=dfsu_type,
+            element_ids=element_ids,
+            node_ids=node_ids,
+            validate=validate,
+            reindex=reindex,
+        )
+        self._n_layers = n_layers
+        self._n_sigma = n_sigma if n_sigma is not None else n_layers
 
     @cached_property
-    def _dz(self) -> np.ndarray:
-        """Height of each 3d element (using static zn information)."""
-        element_table = self.element_table
-        n_elements = len(element_table)
-        zn = self.node_coordinates[:, 2]
-        dz = np.full(n_elements, fill_value=np.nan)
+    def _columns(self) -> _Columns:
+        return _Columns(
+            element_table=self.element_table,
+            element_ids=self._element_ids,
+            node_coordinates=self.node_coordinates,
+            n_layers=self._n_layers,
+            n_sigma=self._n_sigma,
+        )
 
-        for j in range(n_elements):
-            nodes = element_table[j]
-            halfn = len(nodes) // 2
-            z_bot = np.mean(zn[nodes[:halfn]])
-            z_top = np.mean(zn[nodes[halfn:]])
-            dz[j] = z_top - z_bot
+    def __str__(self) -> str:
+        return f"{self._type.name} ({self.n_elements} elements, {self.n_nodes} nodes)"
 
-        return dz
+    def __repr__(self) -> str:
+        return _layered_repr(self)
 
+    @property
+    def is_layered(self) -> bool:
+        """Type is layered dfsu (3d, vertical profile or vertical column)."""
+        return True
 
-class GeometryFM3D(_GeometryFMLayered):
-    """Flexible 3d mesh geometry."""
+    @property
+    def n_layers(self) -> int:
+        """Maximum number of layers."""
+        return self._columns.n_layers
+
+    @property
+    def n_sigma_layers(self) -> int:
+        """Number of sigma layers."""
+        return self._columns.n_sigma_layers
+
+    @property
+    def n_z_layers(self) -> int:
+        """Maximum number of z-layers."""
+        return self._columns.n_z_layers
+
+    @property
+    def top_elements(self) -> np.ndarray:
+        """List of 3d element ids of surface layer."""
+        return self._columns.top_elements
+
+    @property
+    def bottom_elements(self) -> np.ndarray:
+        """List of 3d element ids of bottom layer."""
+        return self._columns.bottom_elements
+
+    @property
+    def n_layers_per_column(self) -> np.ndarray:
+        """List of number of layers for each column."""
+        return self._columns.n_layers_per_column
+
+    @property
+    def layer_ids(self) -> np.ndarray:
+        """The layer number (0=bottom, 1, 2, ...) for each 3d element."""
+        return self._columns.layer_ids
+
+    @property
+    def e2_e3_table(self) -> np.ndarray:
+        """The 2d-to-3d element connectivity table for a 3d object."""
+        return self._columns.e2_e3_table
+
+    @property
+    def elem2d_ids(self) -> np.ndarray:
+        """The associated 2d element id for each 3d element."""
+        return self._columns.elem2d_ids
+
+    def get_layer_elements(self, layers: int | Layer | Sequence[int]) -> np.ndarray:
+        """3d element ids for one (or more) specific layer(s).
+
+        Parameters
+        ----------
+        layers : int or list(int)
+            layer between 0 (bottom) and n_layers-1 (top)
+            (can also be negative counting from -1 at the top layer)
+
+        Returns
+        -------
+        np.array(int)
+            element ids
+
+        """
+        return self._columns.get_layer_elements(layers)
+
+    def _get_nodes_and_table_for_elements(
+        self, elements: Sequence[int] | np.ndarray, node_layers: Layer = "all"
+    ) -> tuple[Any, Any]:
+        return _nodes_and_table(self.element_table, elements, node_layers)
+
+    @cached_property
+    def geometry2d(self) -> GeometryFM2D:
+        """The 2d horizontal mesh."""
+        return self.to_2d_geometry()
+
+    def to_2d_geometry(self) -> GeometryFM2D:
+        """extract 2d geometry from 3d geometry.
+
+        Returns
+        -------
+        GeometryFM2D
+            2d geometry
+
+        """
+        match self._type:
+            case DfsuFileType.Dfsu3DSigmaZ:
+                elem_ids = self.top_elements
+            case DfsuFileType.Dfsu3DSigma:
+                elem_ids = self.bottom_elements
+            case _:
+                raise NotImplementedError(
+                    f"Conversion to 2D not implemented for {self._type}"
+                )
+
+        node_ids, elem_tbl = self._get_nodes_and_table_for_elements(
+            elem_ids, node_layers="bottom"
+        )
+        geom = GeometryFM2D(
+            node_coordinates=self.node_coordinates[node_ids],
+            codes=self._codes[node_ids],
+            node_ids=node_ids,
+            projection=self.projection_string,
+            element_table=elem_tbl,
+            element_ids=elem_ids,
+            validate=False,
+            dfsu_type=DfsuFileType.Dfsu2D,
+            reindex=True,
+        )
+
+        # sigma-z: the 2d node z is the lowest bed z of the nodes in its column
+        if self._type == DfsuFileType.Dfsu3DSigmaZ:
+            zn = geom.node_coordinates[:, 2].copy()
+            for j, elem_nodes in enumerate(geom.element_table):
+                elem_nodes3d = self.element_table[self.bottom_elements[j]]
+                for jn in range(len(elem_nodes)):
+                    znj_3d = self.node_coordinates[elem_nodes3d[jn], 2]
+                    zn[elem_nodes[jn]] = min(zn[elem_nodes[jn]], znj_3d)
+            geom.node_coordinates[:, 2] = zn
+
+        return geom
+
+    def _elements_in_area(self, area: Area) -> np.ndarray:
+        """Find element ids of elements inside area."""
+        return self._columns.elements_in_columns(
+            self.geometry2d._elements_in_area(area)
+        )
 
     @property
     def plot(self) -> None:
@@ -566,13 +514,59 @@ class GeometryFM3D(_GeometryFMLayered):
         """Export the horizontal mesh to a mesh file."""
         return self.geometry2d.to_mesh(outfilename)
 
+    def isel(
+        self, idx: Sequence[int] | np.ndarray, keepdims: bool = False, **kwargs: Any
+    ) -> GeometryFM3D | GeometryFMVerticalColumn | GeometryFM2D | GeometryPoint3D:
+        """Export a selection of elements to a new geometry."""
+        return self.elements_to_geometry(elements=idx, keepdims=keepdims)
+
+    def elements_to_geometry(
+        self,
+        elements: int | Sequence[int] | np.ndarray,
+        node_layers: Layer = "all",
+        keepdims: bool = False,
+    ) -> GeometryFM3D | GeometryFMVerticalColumn | GeometryFM2D | GeometryPoint3D:
+        """Export a selection of elements to a new geometry.
+
+        A selection within a single layer becomes a 2d mesh, and a selection
+        within a single column becomes a vertical column.
+        """
+        sel = _as_element_list(elements)
+        if len(sel) == 1 and not keepdims:
+            x, y, z = self.element_coordinates[sel[0], :]
+            return GeometryPoint3D(x=x, y=y, z=z, projection=self.projection)
+
+        n_layers, _ = self._columns.layers_spanned(sel)
+        if n_layers == 1:
+            return self._layer_to_2d_geometry(sel)
+
+        kwargs = _subset_kwargs(self, sel, node_layers=node_layers)
+        if self._columns.is_single_column(sel):
+            return GeometryFMVerticalColumn(**kwargs)
+        return GeometryFM3D(**kwargs)
+
+    def _layer_to_2d_geometry(self, elements: list[int]) -> GeometryFM2D:
+        elem2d = self.elem2d_ids[elements]
+        geom2d = self.geometry2d
+        node_ids, elem_tbl = geom2d._get_nodes_and_table_for_elements(elem2d)
+        return GeometryFM2D(
+            node_coordinates=geom2d.node_coordinates[node_ids],
+            codes=geom2d.codes[node_ids],
+            node_ids=node_ids,
+            projection=self.projection_string,
+            element_table=elem_tbl,
+            element_ids=self._element_ids[elem2d],
+            dfsu_type=DfsuFileType.Dfsu2D,
+            reindex=True,
+        )
+
     def find_index(
         self,
         x: float | None = None,
         y: float | None = None,
         z: float | None = None,
         coords: np.ndarray | None = None,
-        area: tuple[float, float, float, float] | None = None,
+        area: Area | None = None,
         layers: int | Layer | Sequence[int] | None = None,
     ) -> np.ndarray:
         """Find a *set* of 3d element indices for points, an area and/or layers.
@@ -594,7 +588,7 @@ class GeometryFM3D(_GeometryFMLayered):
             by default None
         area : (float, float, float, float), optional
             Bounding box of coordinates (left lower and right upper)
-            to be selected, by default None
+            or polygon to be selected, by default None
         layers : int or str or list[int], optional
             layer(s) to be selected: subset of "all", "top", "bottom",
             "bottom+1", ..., or a layer number (0=bottom, 1, 2, ...),
@@ -606,37 +600,25 @@ class GeometryFM3D(_GeometryFMLayered):
             3d element indices
 
         """
-        if layers is not None:
-            idx = self.get_layer_elements(layers)
-        else:
-            idx = self._element_ids
+        idx = self._element_ids if layers is None else self.get_layer_elements(layers)
 
-        if (
-            (coords is not None)
-            or (x is not None)
-            or (y is not None)
-            or (z is not None)
-        ):
+        if any(v is not None for v in (x, y, z, coords)):
             if area is not None:
                 raise ValueError(
                     "Coordinates and area cannot be provided at the same time!"
                 )
-            if coords is not None:
-                coords = np.atleast_2d(coords)
-                xy = coords[:, :2]  # type: ignore
-                z = coords[:, 2] if coords.shape[1] == 3 else None  # type: ignore
+            xy, z_sel = _parse_points(x, y, z, coords)
+            columns = self.geometry2d._find_element_2d(coords=xy)
+            assert len(columns) == len(xy)
+            if z_sel is None:
+                idx_3d = self._columns.elements_in_columns(columns)
             else:
-                xy = np.vstack((x, y)).T  # type: ignore
-            idx_2d = self.geometry2d._find_element_2d(coords=xy)
-            assert len(idx_2d) == len(xy)
-            if z is None:
-                idx_3d = np.hstack(self.e2_e3_table[idx_2d])
-            else:
-                idx_3d = self._find_elem3d_from_elem2d(idx_2d, z)
+                idx_3d = self._columns.find_elements_at_z(
+                    columns, z_sel, self.element_coordinates
+                )
             idx = np.intersect1d(idx, idx_3d).astype(int)
         elif area is not None:
-            idx_area = self._elements_in_area(area)
-            idx = np.intersect1d(idx, idx_area)
+            idx = np.intersect1d(idx, self._elements_in_area(area))
         elif layers is None:
             raise ValueError(
                 "At least one selection argument (x,y,z,coords,area,layers) needs to be provided!"
@@ -644,15 +626,134 @@ class GeometryFM3D(_GeometryFMLayered):
         return idx
 
 
-class GeometryFMVerticalProfile(_GeometryFMLayered):
+class GeometryFMVerticalProfile(_GeometryFM):
     """Flexible mesh 2d vertical profile geometry."""
+
+    def __init__(
+        self,
+        *,
+        node_coordinates: ArrayLike,
+        element_table: ArrayLike,
+        codes: np.ndarray | None = None,
+        projection: str = "LONG/LAT",
+        dfsu_type: DfsuFileType = DfsuFileType.DfsuVerticalProfileSigmaZ,
+        element_ids: np.ndarray | None = None,
+        node_ids: np.ndarray | None = None,
+        n_layers: int = 1,
+        n_sigma: int | None = None,
+        validate: bool = True,
+        reindex: bool = False,
+    ) -> None:
+        super().__init__(
+            node_coordinates=node_coordinates,
+            element_table=element_table,
+            codes=codes,
+            projection=projection,
+            dfsu_type=dfsu_type,
+            element_ids=element_ids,
+            node_ids=node_ids,
+            validate=validate,
+            reindex=reindex,
+        )
+        self._n_layers = n_layers
+        self._n_sigma = n_sigma if n_sigma is not None else n_layers
+
+    @cached_property
+    def _columns(self) -> _Columns:
+        return _Columns(
+            element_table=self.element_table,
+            element_ids=self._element_ids,
+            node_coordinates=self.node_coordinates,
+            n_layers=self._n_layers,
+            n_sigma=self._n_sigma,
+        )
+
+    def __str__(self) -> str:
+        return f"{self._type.name} ({self.n_elements} elements, {self.n_nodes} nodes)"
+
+    def __repr__(self) -> str:
+        return _layered_repr(self)
+
+    @property
+    def is_layered(self) -> bool:
+        """Type is layered dfsu (3d, vertical profile or vertical column)."""
+        return True
+
+    @property
+    def n_layers(self) -> int:
+        """Maximum number of layers."""
+        return self._columns.n_layers
+
+    @property
+    def n_sigma_layers(self) -> int:
+        """Number of sigma layers."""
+        return self._columns.n_sigma_layers
+
+    @property
+    def n_z_layers(self) -> int:
+        """Maximum number of z-layers."""
+        return self._columns.n_z_layers
+
+    @property
+    def top_elements(self) -> np.ndarray:
+        """List of element ids of surface layer."""
+        return self._columns.top_elements
+
+    @property
+    def bottom_elements(self) -> np.ndarray:
+        """List of element ids of bottom layer."""
+        return self._columns.bottom_elements
+
+    @property
+    def n_layers_per_column(self) -> np.ndarray:
+        """List of number of layers for each column."""
+        return self._columns.n_layers_per_column
+
+    @property
+    def layer_ids(self) -> np.ndarray:
+        """The layer number (0=bottom, 1, 2, ...) for each element."""
+        return self._columns.layer_ids
+
+    @property
+    def e2_e3_table(self) -> np.ndarray:
+        """The element ids of each column, bottom to top."""
+        return self._columns.e2_e3_table
+
+    @property
+    def elem2d_ids(self) -> np.ndarray:
+        """The column index of each element."""
+        return self._columns.elem2d_ids
+
+    def get_layer_elements(self, layers: int | Layer | Sequence[int]) -> np.ndarray:
+        """Element ids for one (or more) specific layer(s).
+
+        Parameters
+        ----------
+        layers : int or list(int)
+            layer between 0 (bottom) and n_layers-1 (top)
+            (can also be negative counting from -1 at the top layer)
+
+        Returns
+        -------
+        np.array(int)
+            element ids
+
+        """
+        return self._columns.get_layer_elements(layers)
+
+    def _get_nodes_and_table_for_elements(
+        self, elements: Sequence[int] | np.ndarray, node_layers: Layer = "all"
+    ) -> tuple[Any, Any]:
+        return _nodes_and_table(self.element_table, elements, node_layers)
 
     @cached_property
     def plot(self) -> GeometryFMVerticalProfilePlotter:
+        """Plot the profile."""
         return GeometryFMVerticalProfilePlotter(self)
 
     @cached_property
     def relative_element_distance(self) -> np.ndarray:
+        """Distance of each element along the profile from its start."""
         ec = self.element_coordinates
         nc0 = self.node_coordinates[0, :2]
         return relative_cumulative_distance(ec, reference=nc0, is_geo=self.is_geo)
@@ -678,15 +779,46 @@ class GeometryFMVerticalProfile(_GeometryFMLayered):
         idx = np.argmin(dd2)
         return self.relative_element_distance[idx]
 
+    def isel(
+        self, idx: Sequence[int] | np.ndarray, keepdims: bool = False, **kwargs: Any
+    ) -> GeometryFMVerticalProfile | GeometryFMVerticalColumn | GeometryPoint3D:
+        """Export a selection of elements to a new geometry."""
+        return self.elements_to_geometry(elements=idx, keepdims=keepdims)
+
+    def elements_to_geometry(
+        self,
+        elements: int | Sequence[int] | np.ndarray,
+        keepdims: bool = False,
+    ) -> GeometryFMVerticalProfile | GeometryFMVerticalColumn | GeometryPoint3D:
+        """Export a selection of elements to a new geometry.
+
+        A selection within a single column becomes a vertical column.
+        """
+        sel = _as_element_list(elements)
+        if len(sel) == 1 and not keepdims:
+            x, y, z = self.element_coordinates[sel[0], :]
+            return GeometryPoint3D(x=x, y=y, z=z, projection=self.projection)
+
+        kwargs = _subset_kwargs(self, sel)
+        if self._columns.is_single_column(sel):
+            return GeometryFMVerticalColumn(**kwargs)
+        return GeometryFMVerticalProfile(**kwargs)
+
+    def _elements_in_area(self, area: Area) -> np.ndarray:
+        """Element ids of the columns whose position is inside area."""
+        xy = self.element_coordinates[self.top_elements, :2]
+        return self._columns.elements_in_columns(_points_in_area(xy, area))
+
     def find_index(
         self,
         x: float | None = None,
         y: float | None = None,
         z: float | None = None,
         coords: np.ndarray | None = None,
-        layers: int | Sequence[int] | Layer | None = None,
+        area: Area | None = None,
+        layers: int | Layer | Sequence[int] | None = None,
     ) -> np.ndarray:
-        """Find a *set* of element indices for points and/or layers.
+        """Find a *set* of element indices for points, an area and/or layers.
 
         Typically not called directly, but by Dataset/DataArray's
         sel() method.
@@ -703,6 +835,10 @@ class GeometryFMVerticalProfile(_GeometryFMLayered):
             As an alternative to specifying x, y (and z) individually,
             the argument coords can be used instead,
             by default None
+        area : (float, float, float, float), optional
+            Bounding box of coordinates (left lower and right upper)
+            or polygon; selects the columns positioned inside it,
+            by default None
         layers : int or str or list[int], optional
             layer(s) to be selected: subset of "all", "top", "bottom",
             "bottom+1", ..., or a layer number (0=bottom, 1, 2, ...),
@@ -714,36 +850,28 @@ class GeometryFMVerticalProfile(_GeometryFMLayered):
             element indices
 
         """
-        if layers is not None:
-            idx = self.get_layer_elements(layers)
-        else:
-            idx = self._element_ids
+        idx = self._element_ids if layers is None else self.get_layer_elements(layers)
 
-        # select in space
-        if (
-            (coords is not None)
-            or (x is not None)
-            or (y is not None)
-            or (z is not None)
-        ):
-            if coords is not None:
-                coords = np.atleast_2d(coords)
-                xy = coords[:, :2]  # type: ignore
-                z = coords[:, 2] if coords.shape[1] == 3 else None  # type: ignore
+        if any(v is not None for v in (x, y, z, coords)):
+            if area is not None:
+                raise ValueError(
+                    "Coordinates and area cannot be provided at the same time!"
+                )
+            xy, z_sel = _parse_points(x, y, z, coords)
+            columns = self._find_nearest_column(xy)
+            if z_sel is None:
+                idx_3d = self._columns.elements_in_columns(columns)
             else:
-                xy = np.vstack((x, y)).T  # type: ignore
-
-            idx_2d = self._find_nearest_element_2d(coords=xy)
-
-            if z is None:
-                idx_3d = np.hstack(self.e2_e3_table[idx_2d])
-            else:
-                idx_3d = self._find_elem3d_from_elem2d(idx_2d, z)
+                idx_3d = self._columns.find_elements_at_z(
+                    columns, z_sel, self.element_coordinates
+                )
             idx = np.intersect1d(idx, idx_3d)
+        elif area is not None:
+            idx = np.intersect1d(idx, self._elements_in_area(area))
 
         return idx
 
-    def _find_nearest_element_2d(self, coords: np.ndarray) -> np.ndarray:
+    def _find_nearest_column(self, coords: np.ndarray) -> np.ndarray:
         ec2d = self.element_coordinates[self.top_elements, :2]
         xe, ye = ec2d[:, 0], ec2d[:, 1]
         coords = np.atleast_2d(coords)
@@ -754,8 +882,192 @@ class GeometryFMVerticalProfile(_GeometryFMLayered):
         return idx
 
 
-class GeometryFMVerticalColumn(GeometryFM3D):
-    "A 3d geometry with consisting of a single vertical column."
+class GeometryFMVerticalColumn(_GeometryFM):
+    """A layered geometry consisting of a single vertical column."""
+
+    def __init__(
+        self,
+        *,
+        node_coordinates: ArrayLike,
+        element_table: ArrayLike,
+        codes: np.ndarray | None = None,
+        projection: str = "LONG/LAT",
+        dfsu_type: DfsuFileType = DfsuFileType.Dfsu3DSigma,
+        element_ids: np.ndarray | None = None,
+        node_ids: np.ndarray | None = None,
+        n_layers: int = 1,
+        n_sigma: int | None = None,
+        validate: bool = True,
+        reindex: bool = False,
+    ) -> None:
+        super().__init__(
+            node_coordinates=node_coordinates,
+            element_table=element_table,
+            codes=codes,
+            projection=projection,
+            dfsu_type=dfsu_type,
+            element_ids=element_ids,
+            node_ids=node_ids,
+            validate=validate,
+            reindex=reindex,
+        )
+        self._n_layers = n_layers
+        self._n_sigma = n_sigma if n_sigma is not None else n_layers
+
+    @cached_property
+    def _columns(self) -> _Columns:
+        return _Columns(
+            element_table=self.element_table,
+            element_ids=self._element_ids,
+            node_coordinates=self.node_coordinates,
+            n_layers=self._n_layers,
+            n_sigma=self._n_sigma,
+        )
+
+    def __str__(self) -> str:
+        return f"{self._type.name} ({self.n_elements} elements, {self.n_nodes} nodes)"
+
+    def __repr__(self) -> str:
+        return _layered_repr(self)
+
+    @property
+    def is_layered(self) -> bool:
+        """Type is layered dfsu (3d, vertical profile or vertical column)."""
+        return True
+
+    @property
+    def n_layers(self) -> int:
+        """Number of layers."""
+        return self._columns.n_layers
+
+    @property
+    def n_sigma_layers(self) -> int:
+        """Number of sigma layers."""
+        return self._columns.n_sigma_layers
+
+    @property
+    def n_z_layers(self) -> int:
+        """Number of z-layers."""
+        return self._columns.n_z_layers
+
+    @property
+    def top_elements(self) -> np.ndarray:
+        """Element id of the surface element, as a list of one."""
+        return self._columns.top_elements
+
+    @property
+    def bottom_elements(self) -> np.ndarray:
+        """Element id of the bottom element, as a list of one."""
+        return self._columns.bottom_elements
+
+    @property
+    def n_layers_per_column(self) -> np.ndarray:
+        """Number of layers, as a list of one."""
+        return self._columns.n_layers_per_column
+
+    @property
+    def layer_ids(self) -> np.ndarray:
+        """The layer number (0=bottom, 1, 2, ...) for each element."""
+        return self._columns.layer_ids
+
+    @property
+    def e2_e3_table(self) -> np.ndarray:
+        """The element ids of the column, bottom to top, as a table of one."""
+        return self._columns.e2_e3_table
+
+    @property
+    def elem2d_ids(self) -> np.ndarray:
+        """The column index of each element (all 0)."""
+        return self._columns.elem2d_ids
+
+    def get_layer_elements(self, layers: int | Layer | Sequence[int]) -> np.ndarray:
+        """Element ids for one (or more) specific layer(s).
+
+        Parameters
+        ----------
+        layers : int or list(int)
+            layer between 0 (bottom) and n_layers-1 (top)
+            (can also be negative counting from -1 at the top layer)
+
+        Returns
+        -------
+        np.array(int)
+            element ids
+
+        """
+        return self._columns.get_layer_elements(layers)
+
+    def _get_nodes_and_table_for_elements(
+        self, elements: Sequence[int] | np.ndarray, node_layers: Layer = "all"
+    ) -> tuple[Any, Any]:
+        return _nodes_and_table(self.element_table, elements, node_layers)
+
+    def isel(
+        self, idx: Sequence[int] | np.ndarray, keepdims: bool = False, **kwargs: Any
+    ) -> GeometryFMVerticalColumn | GeometryPoint3D:
+        """Export a selection of elements to a new geometry."""
+        return self.elements_to_geometry(elements=idx, keepdims=keepdims)
+
+    def elements_to_geometry(
+        self,
+        elements: int | Sequence[int] | np.ndarray,
+        keepdims: bool = False,
+    ) -> GeometryFMVerticalColumn | GeometryPoint3D:
+        """Export a selection of elements to a new geometry."""
+        sel = _as_element_list(elements)
+        if len(sel) == 1 and not keepdims:
+            x, y, z = self.element_coordinates[sel[0], :]
+            return GeometryPoint3D(x=x, y=y, z=z, projection=self.projection)
+        return GeometryFMVerticalColumn(**_subset_kwargs(self, sel))
+
+    def find_index(
+        self,
+        x: float | None = None,
+        y: float | None = None,
+        z: float | None = None,
+        coords: np.ndarray | None = None,
+        area: Area | None = None,
+        layers: int | Layer | Sequence[int] | None = None,
+    ) -> np.ndarray:
+        """Find a *set* of element indices for z values and/or layers.
+
+        A column has a single horizontal position, so x, y, area and the x,y
+        part of coords are rejected.
+
+        Parameters
+        ----------
+        x: float, optional
+            Not supported
+        y: float, optional
+            Not supported
+        z: float, optional
+            Z coordinate (depth, positive upwards)
+        coords : np.array(float,float,float), optional
+            Not supported
+        area : (float, float, float, float), optional
+            Not supported
+        layers : int or str or list[int], optional
+            layer(s) to be selected: subset of "all", "top", "bottom",
+            "bottom+1", ..., or a layer number (0=bottom, 1, 2, ...),
+            by default None
+
+        Returns
+        -------
+        np.array
+            element indices
+
+        """
+        if any(v is not None for v in (x, y, coords, area)):
+            raise ValueError(
+                "A vertical column has a single horizontal position; select with z or layers"
+            )
+        idx = self._element_ids if layers is None else self.get_layer_elements(layers)
+        if z is not None:
+            idx_z = self._columns.find_elements_at_z(
+                np.zeros(1, dtype=int), z, self.element_coordinates
+            )
+            idx = np.intersect1d(idx, idx_z)
+        return idx
 
     def calc_ze(self, zn: np.ndarray | None = None) -> np.ndarray:
         """Z-coordinates at element centers."""
@@ -816,6 +1128,10 @@ class GeometryFMVerticalColumn(GeometryFM3D):
         if zn is None:
             zn = self.node_coordinates[:, 2]
         return zn[..., idx].mean(axis=-1)
+
+
+GeometryFMLayered = GeometryFM3D | GeometryFMVerticalProfile | GeometryFMVerticalColumn
+"""Geometries made of layered columns."""
 
 
 class GeometryFMVerticalProfilePlotter:

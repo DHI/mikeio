@@ -1012,21 +1012,7 @@ class GeometryFM2D(_GeometryFM):
         self, area: Sequence[float] | Sequence[tuple[float, float]]
     ) -> np.ndarray:
         """Find 2d element ids of elements inside area."""
-        if self._area_is_bbox(area):
-            x0, y0, x1, y1 = area
-            xc = self.element_coordinates[:, 0]
-            yc = self.element_coordinates[:, 1]
-            mask = (xc >= x0) & (xc <= x1) & (yc >= y0) & (yc <= y1)
-        elif self._area_is_polygon(area):
-            polygon = np.array(area)
-            xy = self.element_coordinates[:, :2]
-            mask = self._inside_polygon(polygon, xy)
-        else:
-            raise ValueError("'area' must be bbox [x0,y0,x1,y1] or polygon")
-        elements = np.where(mask)[0]
-        if len(elements) == 0:
-            raise ValueError("No elements in selection!")
-        return elements
+        return _points_in_area(self.element_coordinates[:, :2], area)
 
     def elements_to_geometry(
         self, elements: int | Sequence[int], keepdims: bool = False
@@ -1179,3 +1165,21 @@ class GeometryFM2D(_GeometryFM):
                 f"Cannot reduce GeometryFM2D over {axis}, only 'element' is valid"
             )
         return Geometry0D(projection=self.projection)
+
+
+def _points_in_area(
+    xy: np.ndarray, area: Sequence[float] | Sequence[tuple[float, float]]
+) -> np.ndarray:
+    """Indices of the points in xy inside a bbox [x0,y0,x1,y1] or a polygon."""
+    if GeometryFM2D._area_is_bbox(area):
+        x0, y0, x1, y1 = area
+        x, y = xy[:, 0], xy[:, 1]
+        mask = (x >= x0) & (x <= x1) & (y >= y0) & (y <= y1)
+    elif GeometryFM2D._area_is_polygon(area):
+        mask = GeometryFM2D._inside_polygon(np.array(area), xy)
+    else:
+        raise ValueError("'area' must be bbox [x0,y0,x1,y1] or polygon")
+    elements = np.where(mask)[0]
+    if len(elements) == 0:
+        raise ValueError("No elements in selection!")
+    return elements

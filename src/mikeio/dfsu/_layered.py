@@ -346,10 +346,10 @@ class DfsuLayered:
                 or (area is not None)
                 or (layers is not None)
             ):
-                elements = self.geometry.find_index(  # type: ignore
+                elements = self.geometry.find_index(
                     x=x, y=y, z=z, area=area, layers=layers
                 )
-                if len(elements) == 0:  # type: ignore
+                if len(elements) == 0:
                     raise ValueError("No elements in selection!")
 
         geometry = (
@@ -559,7 +559,12 @@ class Dfsu3D(DfsuLayered):
     @property
     def geometry2d(self) -> GeometryFM2D:
         """The 2d geometry for a 3d object."""
-        return self.geometry.geometry2d
+        geometry = self.geometry
+        if not isinstance(geometry, GeometryFM3D):
+            raise ValueError(
+                f"A vertical profile has no 2d horizontal geometry ({self._type.name})"
+            )
+        return geometry.geometry2d
 
     def extract_surface_elevation_from_3d(self, n_nearest: int = 4) -> DataArray:
         """Extract surface elevation from a 3d dfsu file (based on zn)
@@ -578,9 +583,12 @@ class Dfsu3D(DfsuLayered):
         if n_nearest < 1:
             raise ValueError(f"n_nearest must be at least 1, not {n_nearest}")
 
+        geometry = self.geometry
+        assert isinstance(geometry, GeometryFM3D)
+
         # make 2d nodes-to-elements interpolator
-        top_el = self.geometry.top_elements
-        geom = self.geometry.elements_to_geometry(top_el, node_layers="top")
+        top_el = geometry.top_elements
+        geom = geometry.elements_to_geometry(top_el, node_layers="top")
         xye = geom.element_coordinates[:, 0:2]  # type: ignore
         xyn = geom.node_coordinates[:, 0:2]  # type: ignore
         tree2d = KDTree(xyn)

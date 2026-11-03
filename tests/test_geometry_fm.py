@@ -1,7 +1,7 @@
 import pytest
 
 from mikeio.exceptions import OutsideModelDomainError
-from mikeio.spatial import GeometryFM2D, GeometryFM3D, GeometryPoint2D
+from mikeio.spatial import GeometryFM2D, GeometryFM3D, GeometryPoint2D, GeometryPoint3D
 
 
 @pytest.fixture
@@ -36,12 +36,14 @@ def test_isel_list_of_indices(simple_3d_geom: GeometryFM3D) -> None:
     g = simple_3d_geom
 
     g1 = g.isel([0, 1])
-    assert isinstance(g1, GeometryFM3D)
+    assert not isinstance(g1, (GeometryFM2D, GeometryPoint3D))
+    assert g1.n_layers == 2
     assert g1.element_coordinates[0, 0] == pytest.approx(0.6666666666666666)
 
     # you can get elements in arbitrary order
     g2 = g.isel([1, 0])
-    assert isinstance(g2, GeometryFM3D)
+    assert not isinstance(g2, (GeometryFM2D, GeometryPoint3D))
+    assert g2.n_layers == 2
     assert g2.element_coordinates[1, 0] == pytest.approx(0.6666666666666666)
 
 
@@ -253,7 +255,8 @@ def test_layered(simple_3d_geom: GeometryFM3D) -> None:
 
     # subset
     g2 = g.isel(idx)
-    assert isinstance(g2, GeometryFM3D)
+    assert not isinstance(g2, (GeometryFM2D, GeometryPoint3D))
+    assert g2.n_layers == 2
     assert g2.n_elements == 2
 
     assert "elements: 2" in repr(g2)
