@@ -8,3 +8,4 @@ A collection of specific examples of working with dfsu files. For a general intr
 * [2D spatial interpolation](spatial_interpolation.qmd)
 * [CMEMS to vertical profile](cmems_vertical_profile.qmd)
 * [Merging subdomain dfsu files](merge_subdomains.qmd)
+* [Vertical profile](vertical_profile.qmd)
