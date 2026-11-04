@@ -521,3 +521,25 @@ def test_create_line_spectrum_dummy_coordinates() -> None:
         n_nodes=10, frequencies=freq, directions=dirs
     )
     assert geometry.n_nodes == 10
+
+
+def test_area_spectrum_constructed_without_dfsu_type_knows_its_file_type() -> None:
+    geometry = GeometryFMAreaSpectrum(
+        node_coordinates=np.array([[0.0, 0.0, 0.0], [1.0, 0.0, 0.0], [0.0, 1.0, 0.0]]),
+        element_table=[[0, 1, 2]],
+        projection="LONG/LAT",
+        frequencies=np.array([0.1, 0.2]),
+        directions=np.arange(0.0, 360.0, step=90.0),
+    )
+    assert DfsuFileType.DfsuSpectral2D.name in repr(geometry)
+
+
+def test_line_spectrum_constructed_without_dfsu_type_knows_its_file_type() -> None:
+    geometry = GeometryFMLineSpectrum(
+        node_coordinates=np.array([[0.0, 0.0, 0.0], [1.0, 1.0, 0.0]]),
+        element_table=[[0, 1]],
+        projection="LONG/LAT",
+        frequencies=np.array([0.1, 0.2]),
+        directions=np.arange(0.0, 360.0, step=90.0),
+    )
+    assert DfsuFileType.DfsuSpectral1D.name in repr(geometry)
