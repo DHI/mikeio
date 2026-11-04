@@ -54,7 +54,7 @@ def test_isel_list_of_indices(simple_3d_geom: GeometryFM3D) -> None:
 
 
 def test_isel_across_columns_is_not_a_column() -> None:
-    g = mikeio.open("tests/testdata/oresund_sigma_z.dfsu").geometry
+    g = mikeio.Dfsu3D("tests/testdata/oresund_sigma_z.dfsu").geometry
     t = g.top_elements
     # as many distinct layers as elements, which once passed for a single column
     assert isinstance(g.isel([t[0], t[1] - 1]), GeometryFM3D)
