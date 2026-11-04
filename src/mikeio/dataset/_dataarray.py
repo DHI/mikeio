@@ -547,7 +547,7 @@ class DataArray:
                     k = _get_time_idx_list(self.time, k)
                     if _n_selected_timesteps(self.time, k) == 0:
                         raise IndexError("No timesteps found!")
-                da = da.isel(**{dims[j]: k})
+                da = da.isel(k, axis=dims[j])
         return da
 
     def _getitem_parse_key(self, key: Any) -> Any:
