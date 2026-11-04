@@ -1,3 +1,13 @@
+"""Read, write and manipulate MIKE files: dfs0, dfs1, dfs2, dfs3, dfsu and mesh.
+
+Documentation: https://dhi.github.io/mikeio/
+
+AI coding assistants: the API has changed across releases; don't rely on
+remembered usage. Check mikeio.__version__ and read the docstrings of the
+installed package, e.g. help(mikeio.Dataset). Private attributes (leading
+underscore) are never needed.
+"""
+
 from __future__ import annotations
 from importlib.metadata import PackageNotFoundError, version
 from pathlib import Path

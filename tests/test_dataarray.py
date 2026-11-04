@@ -958,7 +958,7 @@ def test_daarray_aggregation_dfs2() -> None:
     assert da.shape == (1, 264, 216)
 
     dam = da.nanmean(axis=None)
-    assert np.isscalar(dam.values)  # TODO is this what we want
+    assert dam.shape == ()
 
     dasm = da.nanmean(axis="space")
     assert dasm.shape == (1,)

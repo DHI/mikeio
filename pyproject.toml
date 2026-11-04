@@ -5,7 +5,7 @@ build-backend = "uv_build"
 
 [project]
 name = "mikeio"
-version = "3.3.0"
+version = "3.4.0.dev0"
 dependencies = [
     "mikecore>=0.2.2",
     "numpy>=2.1",
@@ -33,6 +33,7 @@ classifiers = [
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",
     "Programming Language :: Python :: 3.14",
+    "Programming Language :: Python :: 3.15",
     "Topic :: Scientific/Engineering",
 ]
 
@@ -109,12 +110,12 @@ explicit-preview-rules = true
 [tool.mypy]
 exclude = [
     "test_dfsu_plot",
-    "scripts*",
     "test_notebooks",
     "test_consistency",
     "conftest",
     "test_pfs",
-    "docs",
+    "^docs/(?!scripts/)",
+    "^roadmap/",
 ]
 python_version = "3.12"
 warn_return_any = false

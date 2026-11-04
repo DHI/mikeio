@@ -129,7 +129,10 @@ class Mesh:
         """
         geometry = self.geometry
 
-        assert isinstance(geometry, GeometryFM2D)  # i.e. not a GeometryPoint2d
+        if not isinstance(geometry, GeometryFM2D):
+            raise TypeError(
+                f"only a mesh with elements can be written, not a {type(geometry).__name__}"
+            )
 
         self.geometry.to_mesh(outfilename=outfilename)
 

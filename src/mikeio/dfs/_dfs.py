@@ -84,7 +84,7 @@ def _fuzzy_item_search(
 
 def _valid_item_numbers(
     dfsItemInfo: list[DfsDynamicItemInfo],
-    items: str | int | Sequence[int | str] | None = None,
+    items: str | int | np.integer | Sequence[int | str] | None = None,
     ignore_first: bool = False,
 ) -> list[int]:
     start_idx = 1 if ignore_first else 0
@@ -97,7 +97,7 @@ def _valid_item_numbers(
     item_numbers: list[int] = []
 
     # check if items is a scalar (int or str)
-    if isinstance(items, (int, str)):
+    if isinstance(items, (int, np.integer, str)):
         if isinstance(items, str) and "*" in items:
             return _fuzzy_item_search(
                 dfsItemInfo=dfsItemInfo, search=items, start_idx=start_idx
@@ -105,19 +105,20 @@ def _valid_item_numbers(
         elif isinstance(items, str):
             item_number = _item_numbers_by_name(dfsItemInfo, [items], ignore_first)[0]
             return [item_number]
-        elif isinstance(items, int):
+        else:
             if (items < 0) or (items >= n_items_file):
                 raise ItemsError(n_items_file)
-            return [items]
+            return [int(items)]
 
-    assert isinstance(items, Sequence)
+    if not isinstance(items, Sequence):
+        raise ItemsError(n_items_file)  # type: ignore[unreachable]
     for item in items:
         if isinstance(item, str):
             item_number = _item_numbers_by_name(dfsItemInfo, [item], ignore_first)[0]
-        elif isinstance(item, int):
+        elif isinstance(item, (int, np.integer)):
             if (item < 0) or (item >= n_items_file):
                 raise ItemsError(n_items_file)
-            item_number = item
+            item_number = int(item)
         else:
             raise ItemsError(n_items_file)
         item_numbers.append(item_number)
