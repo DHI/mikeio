@@ -148,7 +148,7 @@ def test_read_dfsu3d_area_single_element() -> None:
 
     bbox = (356000, 6144000, 357000, 6144500)
     ds = dfs.read(area=bbox)
-    assert ds.geometry.geometry2d.n_elements == 1
+    assert len(ds.geometry.top_elements) == 1
     assert ds.geometry.n_elements == 4
 
     ds = dfs.read(area=bbox, layers="top")
@@ -191,6 +191,14 @@ def test_read_dfsu3d_column() -> None:
     assert np.all(dscol1.to_numpy() == dscol2.to_numpy())
     assert dscol2.z.nodes.shape == (ds.n_timesteps, 5 * 3)
     assert np.all(dscol1.z.nodes == dscol2.z.nodes)
+
+
+def test_column_sel_z() -> None:
+    ds = mikeio.read("tests/testdata/oresund_sigma_z.dfsu")
+    col = ds.sel(x=333934.1, y=6158101.5)
+    ze = col.geometry.element_coordinates[:, 2]
+    pt = col.sel(z=ze[1])
+    assert pt.geometry.z == pytest.approx(ze[1])
 
 
 def test_flip_column_upside_down() -> None:

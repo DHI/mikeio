@@ -54,7 +54,7 @@ from ..spatial import (
 )
 
 # We need this type to know if we should keep zn
-from ..spatial._FM_geometry_layered import _GeometryFMLayered
+from ..spatial._FM_geometry_layered import GeometryFMLayered
 
 from ._z_accessor import NullZAccessor, ZAccessor
 from ._data_plot import (
@@ -227,7 +227,7 @@ class DataArray:
         zn: np.ndarray | None, geometry: GeometryType, n_timesteps: int
     ) -> np.ndarray | None:
         if zn is not None:
-            if isinstance(geometry, _GeometryFMLayered):
+            if isinstance(geometry, GeometryFMLayered):
                 # TODO: np.squeeze(zn) if n_timesteps=1 ?
                 if (n_timesteps > 1) and (zn.shape[0] != n_timesteps):
                     raise ValueError(
@@ -294,12 +294,12 @@ class DataArray:
 
     def _get_z_accessor_by_geometry(self) -> ZAccessor | NullZAccessor:
         # Mirrors _get_plotter_by_geometry: dispatch on geometry type.
-        # _GeometryFMLayered is the common parent of GeometryFM3D,
+        # GeometryFMLayered covers GeometryFM3D,
         # GeometryFMVerticalProfile, and GeometryFMVerticalColumn — the
         # geometries where _zn is populated. The _zn check guards the rare
         # path where a layered DataArray is constructed without zn (e.g. some
         # isel paths) so .z.nodes raises a clean AttributeError, not assert.
-        if isinstance(self.geometry, _GeometryFMLayered) and self._zn is not None:
+        if isinstance(self.geometry, GeometryFMLayered) and self._zn is not None:
             return ZAccessor(self)
         return NullZAccessor(self)
 
@@ -733,7 +733,7 @@ class DataArray:
                 )
                 geometry = self.geometry.isel(idx, axis=spatial_axis)
 
-            if isinstance(geometry, _GeometryFMLayered):
+            if isinstance(geometry, GeometryFMLayered):
                 node_ids, _ = self.geometry._get_nodes_and_table_for_elements(
                     idx, node_layers="all"
                 )
