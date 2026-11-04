@@ -11,7 +11,7 @@ from tqdm import trange
 from ..dataset import DataArray, Dataset
 from ..eum import ItemInfo, EUMUnit
 from ..dfs._dfs import _get_item_info, _valid_item_numbers, _valid_timesteps
-from .._spectral import calc_m0_from_spectrum
+from .._spectral import calc_Hm0_from_spectrum
 from .._options import _item_txt, _show_progress
 from ._dfsu import (
     _get_dfsu_info,
@@ -505,15 +505,5 @@ class DfsuSpectral:
             significant wave height values
 
         """
-        if isinstance(spectrum, DataArray):
-            m0 = calc_m0_from_spectrum(
-                spectrum.to_numpy(),
-                self.frequencies,
-                self.directions,
-                tail,
-            )
-        else:
-            m0 = calc_m0_from_spectrum(
-                spectrum, self.frequencies, self.directions, tail
-            )
-        return 4 * np.sqrt(m0)
+        spec = spectrum.to_numpy() if isinstance(spectrum, DataArray) else spectrum
+        return calc_Hm0_from_spectrum(spec, self.frequencies, self.directions, tail)
