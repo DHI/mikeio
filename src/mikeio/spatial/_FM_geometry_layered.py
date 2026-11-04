@@ -26,7 +26,7 @@ Layer = Literal["all", "bottom", "top"]
 Area = Sequence[float] | Sequence[tuple[float, float]]
 
 
-class _Columns:
+class _Layering:
     """Column and layer structure of a layered mesh.
 
     The elements of a column have consecutive indices, bottom-up. A column is
@@ -279,7 +279,7 @@ def _subset_kwargs(
     node_ids, elem_tbl = geom._get_nodes_and_table_for_elements(
         elements, node_layers=node_layers
     )
-    n_layers, n_sigma = geom._columns.layers_spanned(elements)
+    n_layers, n_sigma = geom._layering.layers_spanned(elements)
     return dict(
         node_coordinates=geom.node_coordinates[node_ids],
         codes=geom.codes[node_ids],
@@ -341,8 +341,8 @@ class GeometryFM3D(_GeometryFM):
         self._n_sigma = n_sigma if n_sigma is not None else n_layers
 
     @cached_property
-    def _columns(self) -> _Columns:
-        return _Columns(
+    def _layering(self) -> _Layering:
+        return _Layering(
             element_table=self.element_table,
             element_ids=self._element_ids,
             node_coordinates=self.node_coordinates,
@@ -364,47 +364,47 @@ class GeometryFM3D(_GeometryFM):
     @property
     def n_layers(self) -> int:
         """Maximum number of layers."""
-        return self._columns.n_layers
+        return self._layering.n_layers
 
     @property
     def n_sigma_layers(self) -> int:
         """Number of sigma layers."""
-        return self._columns.n_sigma_layers
+        return self._layering.n_sigma_layers
 
     @property
     def n_z_layers(self) -> int:
         """Maximum number of z-layers."""
-        return self._columns.n_z_layers
+        return self._layering.n_z_layers
 
     @property
     def top_elements(self) -> np.ndarray:
         """List of 3d element ids of surface layer."""
-        return self._columns.top_elements
+        return self._layering.top_elements
 
     @property
     def bottom_elements(self) -> np.ndarray:
         """List of 3d element ids of bottom layer."""
-        return self._columns.bottom_elements
+        return self._layering.bottom_elements
 
     @property
     def n_layers_per_column(self) -> np.ndarray:
         """List of number of layers for each column."""
-        return self._columns.n_layers_per_column
+        return self._layering.n_layers_per_column
 
     @property
     def layer_ids(self) -> np.ndarray:
         """The layer number (0=bottom, 1, 2, ...) for each 3d element."""
-        return self._columns.layer_ids
+        return self._layering.layer_ids
 
     @property
     def e2_e3_table(self) -> np.ndarray:
         """The 2d-to-3d element connectivity table for a 3d object."""
-        return self._columns.e2_e3_table
+        return self._layering.e2_e3_table
 
     @property
     def elem2d_ids(self) -> np.ndarray:
         """The associated 2d element id for each 3d element."""
-        return self._columns.elem2d_ids
+        return self._layering.elem2d_ids
 
     def get_layer_elements(self, layers: int | Layer | Sequence[int]) -> np.ndarray:
         """3d element ids for one (or more) specific layer(s).
@@ -421,7 +421,7 @@ class GeometryFM3D(_GeometryFM):
             element ids
 
         """
-        return self._columns.get_layer_elements(layers)
+        return self._layering.get_layer_elements(layers)
 
     def _get_nodes_and_table_for_elements(
         self, elements: Sequence[int] | np.ndarray, node_layers: Layer = "all"
@@ -481,7 +481,7 @@ class GeometryFM3D(_GeometryFM):
 
     def _elements_in_area(self, area: Area) -> np.ndarray:
         """Find element ids of elements inside area."""
-        return self._columns.elements_in_columns(
+        return self._layering.elements_in_columns(
             self.geometry2d._elements_in_area(area)
         )
 
@@ -536,12 +536,12 @@ class GeometryFM3D(_GeometryFM):
             x, y, z = self.element_coordinates[sel[0], :]
             return GeometryPoint3D(x=x, y=y, z=z, projection=self.projection)
 
-        n_layers, _ = self._columns.layers_spanned(sel)
+        n_layers, _ = self._layering.layers_spanned(sel)
         if n_layers == 1:
             return self._layer_to_2d_geometry(sel)
 
         kwargs = _subset_kwargs(self, sel, node_layers=node_layers)
-        if self._columns.is_single_column(sel):
+        if self._layering.is_single_column(sel):
             return GeometryFMVerticalColumn(**kwargs)
         return GeometryFM3D(**kwargs)
 
@@ -611,9 +611,9 @@ class GeometryFM3D(_GeometryFM):
             columns = self.geometry2d._find_element_2d(coords=xy)
             assert len(columns) == len(xy)
             if z_sel is None:
-                idx_3d = self._columns.elements_in_columns(columns)
+                idx_3d = self._layering.elements_in_columns(columns)
             else:
-                idx_3d = self._columns.find_elements_at_z(
+                idx_3d = self._layering.find_elements_at_z(
                     columns, z_sel, self.element_coordinates
                 )
             idx = np.intersect1d(idx, idx_3d).astype(int)
@@ -659,8 +659,8 @@ class GeometryFMVerticalProfile(_GeometryFM):
         self._n_sigma = n_sigma if n_sigma is not None else n_layers
 
     @cached_property
-    def _columns(self) -> _Columns:
-        return _Columns(
+    def _layering(self) -> _Layering:
+        return _Layering(
             element_table=self.element_table,
             element_ids=self._element_ids,
             node_coordinates=self.node_coordinates,
@@ -682,47 +682,47 @@ class GeometryFMVerticalProfile(_GeometryFM):
     @property
     def n_layers(self) -> int:
         """Maximum number of layers."""
-        return self._columns.n_layers
+        return self._layering.n_layers
 
     @property
     def n_sigma_layers(self) -> int:
         """Number of sigma layers."""
-        return self._columns.n_sigma_layers
+        return self._layering.n_sigma_layers
 
     @property
     def n_z_layers(self) -> int:
         """Maximum number of z-layers."""
-        return self._columns.n_z_layers
+        return self._layering.n_z_layers
 
     @property
     def top_elements(self) -> np.ndarray:
         """List of element ids of surface layer."""
-        return self._columns.top_elements
+        return self._layering.top_elements
 
     @property
     def bottom_elements(self) -> np.ndarray:
         """List of element ids of bottom layer."""
-        return self._columns.bottom_elements
+        return self._layering.bottom_elements
 
     @property
     def n_layers_per_column(self) -> np.ndarray:
         """List of number of layers for each column."""
-        return self._columns.n_layers_per_column
+        return self._layering.n_layers_per_column
 
     @property
     def layer_ids(self) -> np.ndarray:
         """The layer number (0=bottom, 1, 2, ...) for each element."""
-        return self._columns.layer_ids
+        return self._layering.layer_ids
 
     @property
     def e2_e3_table(self) -> np.ndarray:
         """The element ids of each column, bottom to top."""
-        return self._columns.e2_e3_table
+        return self._layering.e2_e3_table
 
     @property
     def elem2d_ids(self) -> np.ndarray:
         """The column index of each element."""
-        return self._columns.elem2d_ids
+        return self._layering.elem2d_ids
 
     def get_layer_elements(self, layers: int | Layer | Sequence[int]) -> np.ndarray:
         """Element ids for one (or more) specific layer(s).
@@ -739,7 +739,7 @@ class GeometryFMVerticalProfile(_GeometryFM):
             element ids
 
         """
-        return self._columns.get_layer_elements(layers)
+        return self._layering.get_layer_elements(layers)
 
     def _get_nodes_and_table_for_elements(
         self, elements: Sequence[int] | np.ndarray, node_layers: Layer = "all"
@@ -800,14 +800,14 @@ class GeometryFMVerticalProfile(_GeometryFM):
             return GeometryPoint3D(x=x, y=y, z=z, projection=self.projection)
 
         kwargs = _subset_kwargs(self, sel)
-        if self._columns.is_single_column(sel):
+        if self._layering.is_single_column(sel):
             return GeometryFMVerticalColumn(**kwargs)
         return GeometryFMVerticalProfile(**kwargs)
 
     def _elements_in_area(self, area: Area) -> np.ndarray:
         """Element ids of the columns whose position is inside area."""
         xy = self.element_coordinates[self.top_elements, :2]
-        return self._columns.elements_in_columns(_points_in_area(xy, area))
+        return self._layering.elements_in_columns(_points_in_area(xy, area))
 
     def find_index(
         self,
@@ -860,9 +860,9 @@ class GeometryFMVerticalProfile(_GeometryFM):
             xy, z_sel = _parse_points(x, y, z, coords)
             columns = self._find_nearest_column(xy)
             if z_sel is None:
-                idx_3d = self._columns.elements_in_columns(columns)
+                idx_3d = self._layering.elements_in_columns(columns)
             else:
-                idx_3d = self._columns.find_elements_at_z(
+                idx_3d = self._layering.find_elements_at_z(
                     columns, z_sel, self.element_coordinates
                 )
             idx = np.intersect1d(idx, idx_3d)
@@ -915,8 +915,8 @@ class GeometryFMVerticalColumn(_GeometryFM):
         self._n_sigma = n_sigma if n_sigma is not None else n_layers
 
     @cached_property
-    def _columns(self) -> _Columns:
-        return _Columns(
+    def _layering(self) -> _Layering:
+        return _Layering(
             element_table=self.element_table,
             element_ids=self._element_ids,
             node_coordinates=self.node_coordinates,
@@ -938,47 +938,47 @@ class GeometryFMVerticalColumn(_GeometryFM):
     @property
     def n_layers(self) -> int:
         """Number of layers."""
-        return self._columns.n_layers
+        return self._layering.n_layers
 
     @property
     def n_sigma_layers(self) -> int:
         """Number of sigma layers."""
-        return self._columns.n_sigma_layers
+        return self._layering.n_sigma_layers
 
     @property
     def n_z_layers(self) -> int:
         """Number of z-layers."""
-        return self._columns.n_z_layers
+        return self._layering.n_z_layers
 
     @property
     def top_elements(self) -> np.ndarray:
         """Element id of the surface element, as a list of one."""
-        return self._columns.top_elements
+        return self._layering.top_elements
 
     @property
     def bottom_elements(self) -> np.ndarray:
         """Element id of the bottom element, as a list of one."""
-        return self._columns.bottom_elements
+        return self._layering.bottom_elements
 
     @property
     def n_layers_per_column(self) -> np.ndarray:
         """Number of layers, as a list of one."""
-        return self._columns.n_layers_per_column
+        return self._layering.n_layers_per_column
 
     @property
     def layer_ids(self) -> np.ndarray:
         """The layer number (0=bottom, 1, 2, ...) for each element."""
-        return self._columns.layer_ids
+        return self._layering.layer_ids
 
     @property
     def e2_e3_table(self) -> np.ndarray:
         """The element ids of the column, bottom to top, as a table of one."""
-        return self._columns.e2_e3_table
+        return self._layering.e2_e3_table
 
     @property
     def elem2d_ids(self) -> np.ndarray:
         """The column index of each element (all 0)."""
-        return self._columns.elem2d_ids
+        return self._layering.elem2d_ids
 
     def get_layer_elements(self, layers: int | Layer | Sequence[int]) -> np.ndarray:
         """Element ids for one (or more) specific layer(s).
@@ -995,7 +995,7 @@ class GeometryFMVerticalColumn(_GeometryFM):
             element ids
 
         """
-        return self._columns.get_layer_elements(layers)
+        return self._layering.get_layer_elements(layers)
 
     def _get_nodes_and_table_for_elements(
         self, elements: Sequence[int] | np.ndarray, node_layers: Layer = "all"
@@ -1063,7 +1063,7 @@ class GeometryFMVerticalColumn(_GeometryFM):
             )
         idx = self._element_ids if layers is None else self.get_layer_elements(layers)
         if z is not None:
-            idx_z = self._columns.find_elements_at_z(
+            idx_z = self._layering.find_elements_at_z(
                 np.zeros(1, dtype=int), z, self.element_coordinates
             )
             idx = np.intersect1d(idx, idx_z)
