@@ -26,7 +26,7 @@ import pandas as pd
 
 
 from ..eum import EUMType, EUMUnit, ItemInfo
-from .._time import _get_time_idx_list, _n_selected_timesteps
+from .._time import _get_time_idx_list, _is_time_label, _n_selected_timesteps
 from .._track import _extract_track
 
 if TYPE_CHECKING:
@@ -543,7 +543,13 @@ class DataArray:
         for j, k in enumerate(key):
             if isinstance(k, Iterable) or k != slice(None):
                 if dims[j] == "time":
-                    # getitem accepts fancy indexing only for time
+                    if _is_time_label(k):
+                        warnings.warn(
+                            "Selecting time steps by value with [] is deprecated "
+                            "and will be removed in v4.0. Use .sel(time=...) instead.",
+                            FutureWarning,
+                            stacklevel=2,
+                        )
                     k = _get_time_idx_list(self.time, k)
                     if _n_selected_timesteps(self.time, k) == 0:
                         raise IndexError("No timesteps found!")
