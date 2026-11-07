@@ -12,7 +12,7 @@ from mikecore.DfsuFile import DfsuFileType
 
 
 from ._FM_geometry import GeometryFM2D, _GeometryFM, _points_in_area
-from ._geometry import GeometryPoint3D
+from ._geometry import GeometryPoint3D, Geometry0D
 
 from ._FM_plot import _plot_vertical_profile, BoundaryPolygons
 
@@ -483,6 +483,31 @@ class GeometryFM3D(_GeometryFM):
         """Find element ids of elements inside area."""
         return self._layering.elements_in_columns(
             self.geometry2d._elements_in_area(area)
+        )
+
+    def reduce(self, axis: str | tuple[str, ...]) -> GeometryFM2D | Geometry0D:
+        """Return reduced geometry after spatial aggregation.
+
+        Parameters
+        ----------
+        axis : str or tuple of str
+            Axis/axes to reduce. "z" collapses layers to 2D.
+            ("z", "element") or ("element",) collapses to a point.
+
+        Returns
+        -------
+        GeometryFM2D or Geometry0D
+            Reduced geometry.
+
+        """
+        if isinstance(axis, str):
+            axis = (axis,)
+        if set(axis) == {"z"}:
+            return self.to_2d_geometry()
+        if set(axis) == {"element"} or set(axis) == {"z", "element"}:
+            return Geometry0D(projection=self.projection)
+        raise ValueError(
+            f"Cannot reduce GeometryFM3D over {axis}, valid options: 'z', 'element', or both"
         )
 
     @property
