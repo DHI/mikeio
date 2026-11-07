@@ -43,3 +43,10 @@ def test_out_of_range_datetime() -> None:
     dts = DateTimeSelector(idx)
     with pytest.raises(KeyError):
         dts.isel(datetime(2000, 1, 5))
+
+
+def test_label_matching_several_unordered_steps() -> None:
+    # get_loc returns a boolean mask for a non-monotonic index
+    idx = pd.DatetimeIndex(["2000-01-02", "2000-01-01", "2000-01-02"])
+    dts = DateTimeSelector(idx)
+    assert dts.isel(datetime(2000, 1, 2)) == [0, 2]

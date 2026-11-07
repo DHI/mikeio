@@ -242,7 +242,11 @@ class Dataset:
 
         if isinstance(data, DataArray):
             data = [data]
-        assert isinstance(data, Sequence)
+        if not isinstance(data, Sequence):
+            raise TypeError(
+                "data must be a DataArray, a list of DataArrays or a dict of "
+                f"DataArrays, not {type(data).__name__}"
+            )
         item_names = [da.name for da in data]
         return {key: da for key, da in zip(item_names, data)}
 
@@ -436,6 +440,28 @@ class Dataset:
 
         """
         res = {name: da.fillna(value=value) for name, da in self._data_vars.items()}
+
+        return Dataset(
+            data=res,
+            validate=False,
+            title=self.title,
+            custom_blocks=self.custom_blocks,
+        )
+
+    def astype(self, dtype: Any) -> Dataset:
+        """Return a new Dataset with values cast to dtype.
+
+        Parameters
+        ----------
+        dtype: data-type
+            Numpy dtype to cast the data to.
+
+        Returns
+        -------
+        Dataset
+
+        """
+        res = {name: da.astype(dtype) for name, da in self._data_vars.items()}
 
         return Dataset(
             data=res,

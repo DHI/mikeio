@@ -5,7 +5,11 @@ project:
 
 website:
   title: "MIKE IO"
-  page-footer: "© 2026 DHI Group"
+  page-footer:
+    left: "© 2026 DHI Group"
+    right:
+      - text: "License: BSD-3-Clause"
+        href: license.qmd
   favicon: dhi.ico
   repo-url: https://github.com/DHI/mikeio
   repo-actions: [edit]

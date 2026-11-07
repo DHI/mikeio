@@ -4,7 +4,7 @@ title: Getting started
 
 In this tutorial you set up a Python project, read results from a MIKE 21 flow model of the Øresund, plot them, and save the maximum water level to a new dfsu file.
 
-MIKE IO runs on Windows and Linux. On Windows it needs the [VC++ redistributables](https://aka.ms/vs/17/release/vc_redist.x64.exe), which are already installed if you have MIKE.
+MIKE IO runs on Windows and Linux, with 64-bit Python 3.12 to 3.15. On Windows it needs the [VC++ redistributables](https://aka.ms/vs/17/release/vc_redist.x64.exe), which are already installed if you have MIKE.
 
 ## Set up a project
 
@@ -103,4 +103,4 @@ You can open `max_elevation.dfsu` in MIKE Zero like any other dfsu file.
 * Process files without loading them into memory with [generic](generic.qmd)
 * Turn your notebook into a [script](scripts.qmd) you can run again on the next model run
 * Browse the [examples](../examples/index.qmd)
-* Follow the online course [Getting started with Dfs files in Python using MIKE IO](https://dhi.github.io/getting-started-with-mikeio)
+* Read the [DFS file system specification](https://docs.mikepoweredbydhi.com/core_libraries/dfs/dfs-file-system)
