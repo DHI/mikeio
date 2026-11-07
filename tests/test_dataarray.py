@@ -739,6 +739,21 @@ def test_plot_grid2d_proj(da_grid2d_proj: DataArray) -> None:
     da_grid2d_proj.plot()
 
 
+def test_plot_grid_add_colorbar(da2: DataArray, da_grid2d_proj: DataArray) -> None:
+    plots = [
+        da2.plot.imshow,
+        da2.plot.pcolormesh,
+        da_grid2d_proj.plot.pcolormesh,
+        da_grid2d_proj.plot.contourf,
+    ]
+    for plot in plots:
+        ax = plot()
+        assert len(ax.figure.axes) == 2  # data axes + colorbar
+        ax = plot(add_colorbar=False)
+        assert len(ax.figure.axes) == 1
+    plt.close("all")
+
+
 def test_timestep(da1: DataArray) -> None:
     assert da1.timestep == 1.0
 

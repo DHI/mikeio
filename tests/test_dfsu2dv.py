@@ -219,7 +219,11 @@ def test_transect_read_area(vslice: Dfsu2DV) -> None:
 def test_transect_plot(vslice: Dfsu2DV) -> None:
     da = vslice.read()["Salinity"]
     da.plot()
-    da.plot(cmin=0, cmax=1)
+    ax = da.plot(vmin=0, vmax=1)
+    assert ax.collections[0].get_clim() == (0, 1)
+    with pytest.warns(FutureWarning, match="cmin and cmax"):
+        ax = da.plot(cmin=0, cmax=1)
+    assert ax.collections[0].get_clim() == (0, 1)
     da.plot(label="l", title="t", add_colorbar=False)
     da.plot(cmap="Blues", edge_color="0.9")
 

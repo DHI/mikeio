@@ -23,9 +23,8 @@ def hd2d_dfs() -> None:
 def test_plot_dfsu_contour_mixedmesh() -> None:
     dfs = mikeio.open("tests/testdata/FakeLake.dfsu")
     geometry = dfs.geometry
-    geometry.plot(plot_type="contour", levels=5)
-    geometry.plot(
-        plot_type="contourf",
+    geometry.plot.contour(levels=5)
+    geometry.plot.contourf(
         title="contourf",
         show_mesh=False,
         levels=[-30, -24, -22, -10, -8],
@@ -36,8 +35,20 @@ def test_plot_dfsu_contour_mixedmesh() -> None:
 def test_plot_dfsu_n_refinements() -> None:
     dfs = mikeio.open("tests/testdata/FakeLake.dfsu")
     geometry = dfs.geometry
-    geometry.plot(plot_type="contourf", levels=None, n_refinements=1)
-    assert True
+    with pytest.warns(FutureWarning, match="n_refinements"):
+        geometry.plot.contourf(levels=None, n_refinements=1)
+
+
+def test_plot_dfsu_vmin_vmax_zero_is_respected() -> None:
+    import matplotlib.pyplot as plt
+
+    # surface elevation spans -0.76 to 1.17, so 0 differs from both data limits
+    da = mikeio.read("tests/testdata/HD2D.dfsu", time=0)["Surface elevation"]
+    ax = da.plot.contourf(vmin=0, vmax=1)
+    assert ax.collections[-1].norm.vmin == 0
+    ax = da.plot.pcolormesh(vmin=-0.5, vmax=0)
+    assert ax.collections[-1].norm.vmax == 0
+    plt.close("all")
 
 
 def test_plot_dfsu_contour_subset_not_allowed(hd2d_dfs):
@@ -56,10 +67,20 @@ def test_plot_mesh() -> None:
 
 def test_plot_mesh_outline() -> None:
     msh = Mesh("tests/testdata/odense_rough.mesh")
-    msh.plot(plot_type="outline_only")
-    assert True
-    msh.plot(plot_type=None)
-    assert True
+    msh.plot.outline()
+
+
+@pytest.mark.parametrize(
+    "plot_type, method",
+    [("patch", "pcolormesh"), ("contourf", "contourf"), ("outline_only", "outline")],
+)
+def test_plot_type_is_deprecated(plot_type: str, method: str) -> None:
+    msh = Mesh("tests/testdata/odense_rough.mesh")
+    with pytest.warns(FutureWarning, match=rf"\.plot\.{method}\(\)"):
+        msh.plot(plot_type=plot_type)
+    da = mikeio.read("tests/testdata/HD2D.dfsu", time=0)["Surface elevation"]
+    with pytest.warns(FutureWarning, match="plot_type"):
+        da.plot(plot_type=plot_type)
 
 
 def test_plot_mesh_ax() -> None:
@@ -80,9 +101,7 @@ def test_plot_mesh_boundary_nodes() -> None:
 
 def test_plot_invalid() -> None:
     msh = Mesh("tests/testdata/odense_rough.mesh")
-    with pytest.raises(Exception):
-        msh.plot(plot_type="invalid")
-    with pytest.raises(Exception):
+    with pytest.warns(FutureWarning), pytest.raises(Exception):
         msh.plot(plot_type="invalid")
 
 
@@ -99,8 +118,8 @@ def test_plot_dfsu_vertical_profile() -> None:
         title="txt",
         label="txt",
         edge_color="0.3",
-        cmin=0,
-        cmax=20,
+        vmin=0,
+        vmax=20,
         cmap="plasma",
         figsize=(2, 2),
     )
@@ -176,6 +195,8 @@ def test_plot_point_spectrum() -> None:
 
     # 2d spectra
     da_pt = mikeio.read("tests/testdata/spectra/pt_spectra.dfsu")[0]
-    da_pt.plot.patch()
+    da_pt.plot.pcolormesh()
+    with pytest.warns(FutureWarning, match="pcolormesh"):
+        da_pt.plot.patch()
     da_pt.plot.contour()
     da_pt.plot.contourf()
