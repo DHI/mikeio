@@ -82,7 +82,7 @@ with observations.
 
 ## {{< fa scale-balanced >}} **Open Source**
 
-MIKE IO is BSD-3-Clause licensed and available on [GitHub](https://github.com/DHI/mikeio)
+MIKE IO is [BSD-3-Clause](license.qmd) licensed and available on [GitHub](https://github.com/DHI/mikeio)
 
 [**Design philosophy**](user-guide/design.qmd)
 
