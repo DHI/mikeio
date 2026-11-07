@@ -1077,3 +1077,52 @@ def test_read_dfsu_title(tmp_path: Path) -> None:
     # Dfsu files should have a title property
     assert hasattr(dfs, "title")
     assert isinstance(dfs.title, str)
+
+
+def _truncated_copy(src: str | Path, tmp_path: Path) -> Path:
+    """Copy a file without its last bytes, so reading its last timestep fails."""
+    fp = tmp_path / f"corrupt_{Path(src).name}"
+    fp.write_bytes(Path(src).read_bytes()[:-200])
+    return fp
+
+
+def test_read_corrupt_timestep_raises(tmp_path: Path) -> None:
+    fp = _truncated_copy("tests/testdata/HD2D.dfsu", tmp_path)
+
+    with pytest.raises(ValueError, match="timestep 8"):
+        mikeio.read(fp)
+
+
+def test_read_corrupt_timestep_fills(tmp_path: Path) -> None:
+    src = "tests/testdata/HD2D.dfsu"
+    fp = _truncated_copy(src, tmp_path)
+    expected = mikeio.read(src)
+
+    with pytest.warns(UserWarning, match="timestep 8"):
+        ds = mikeio.read(fp, error_bad_data=False, fill_bad_data_value=-1.0)
+
+    assert ds.time.equals(expected.time)
+    assert (ds[-1].values[-1] == -1.0).all()
+    np.testing.assert_array_equal(ds[0].values, expected[0].values)
+
+
+def test_read_corrupt_timestep_fills_single_time_and_elements(tmp_path: Path) -> None:
+    fp = _truncated_copy("tests/testdata/HD2D.dfsu", tmp_path)
+
+    with pytest.warns(UserWarning):
+        da = mikeio.read(fp, time=-1, elements=[0, 10], error_bad_data=False)[-1]
+
+    assert da.shape == (2,)
+    assert np.isnan(da.values).all()
+
+
+def test_read_corrupt_timestep_non_equidistant_raises(tmp_path: Path) -> None:
+    ds = mikeio.read("tests/testdata/HD2D.dfsu")
+    ds = ds.isel(time=[0, 1, 3, 8])
+    src = tmp_path / "non_equidistant.dfsu"
+    ds.to_dfs(src)
+    assert not mikeio.Dfsu2DH(src)._equidistant
+    fp = _truncated_copy(src, tmp_path)
+
+    with pytest.raises(ValueError, match="non-equidistant"):
+        mikeio.read(fp, error_bad_data=False)
