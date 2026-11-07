@@ -588,7 +588,7 @@ class GeometryFM3D(_GeometryFM):
             Area to be selected: a bounding box (left, lower, right, upper),
             a list of (x, y) polygon vertices, or a
             Polygon or MultiPolygon with `__geo_interface__`, e.g. from shapely
-            or geopandas, holes excluded. Elements are selected by their centre.
+            or geopandas, holes excluded. Elements are selected when their centre is inside the area or on its boundary.
             By default None
         layers : int or str or list[int], optional
             layer(s) to be selected: subset of "all", "top", "bottom",
@@ -840,7 +840,8 @@ class GeometryFMVerticalProfile(_GeometryFM):
             Area to be selected: a bounding box (left, lower, right, upper),
             a list of (x, y) polygon vertices, or a
             Polygon or MultiPolygon with `__geo_interface__`, holes excluded;
-            selects the columns positioned inside it, by default None
+            selects the columns whose centre is inside the area or on its
+            boundary, by default None
         layers : int or str or list[int], optional
             layer(s) to be selected: subset of "all", "top", "bottom",
             "bottom+1", ..., or a layer number (0=bottom, 1, 2, ...),

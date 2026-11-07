@@ -1,3 +1,5 @@
+from typing import Any
+
 import numpy as np
 import pytest
 import shapely
@@ -10,7 +12,8 @@ SIGMA_Z3D = "tests/testdata/oresund_sigma_z.dfsu"
 
 def _centres_inside(geometry: object, polygon: shapely.Geometry) -> np.ndarray:
     xy = geometry.element_coordinates[:, :2]  # type: ignore[attr-defined]
-    return np.flatnonzero(shapely.contains_xy(polygon, xy[:, 0], xy[:, 1]))
+    # intersects_xy counts the boundary as inside, matching sel(area=)
+    return np.flatnonzero(shapely.intersects_xy(polygon, xy[:, 0], xy[:, 1]))
 
 
 def _hd2d_polygon(da: mikeio.DataArray, shrink: float) -> shapely.Polygon:
@@ -136,3 +139,81 @@ def test_sel_area_invalid_polygon_raises_and_points_to_make_valid() -> None:
     assert not bowtie.is_valid
     with pytest.raises(ValueError, match="make_valid"):
         da.sel(area=bowtie)
+
+
+def _box_through_centres(geometry: object) -> tuple[float, float, float, float]:
+    """A bbox whose edges pass exactly through element centres."""
+    xy = geometry.element_coordinates[:, :2]  # type: ignore[attr-defined]
+    xs, ys = np.sort(xy[:, 0]), np.sort(xy[:, 1])
+    n = len(xs)
+    return (xs[n // 3], ys[n // 3], xs[2 * n // 3], ys[2 * n // 3])
+
+
+@pytest.mark.parametrize(
+    "filename", [HD2D, "tests/testdata/oresund_vertical_slice.dfsu"]
+)
+def test_sel_area_boundary_rule_is_the_same_for_every_area_form(filename: str) -> None:
+    dfs: Any = mikeio.open(filename)
+    geometry = dfs.geometry
+    x0, y0, x1, y1 = _box_through_centres(geometry)
+    ccw = [(x0, y0), (x1, y0), (x1, y1), (x0, y1)]
+    forms = {
+        "bbox": (x0, y0, x1, y1),
+        "vertices ccw": ccw,
+        "vertices cw": ccw[::-1],
+        "shapely box": shapely.box(x0, y0, x1, y1),
+    }
+    selected = {name: geometry.find_index(area=a) for name, a in forms.items()}
+    expected = _centres_inside(geometry, shapely.box(x0, y0, x1, y1))
+    for name, idx in selected.items():
+        assert np.array_equal(np.sort(idx), expected), name
+
+    # the box was built through centres, so some lie exactly on its edge
+    xy = geometry.element_coordinates[:, :2]
+    on_edge = np.flatnonzero(
+        np.isin(xy[:, 0], [x0, x1]) & (xy[:, 1] >= y0) & (xy[:, 1] <= y1)
+    )
+    assert len(on_edge) > 0
+    assert set(on_edge) <= set(selected["shapely box"])
+
+
+class _GeoInterface:
+    def __init__(self, geo: dict) -> None:
+        self.__geo_interface__ = geo
+
+
+def test_area_is_a_closed_set_and_hole_edges_are_inside() -> None:
+    from mikeio.spatial._FM_geometry import _points_in_area
+
+    outer = [(0.0, 0.0), (4.0, 0.0), (4.0, 4.0), (0.0, 4.0), (0.0, 0.0)]
+    hole = [(1.0, 1.0), (3.0, 1.0), (3.0, 3.0), (1.0, 3.0), (1.0, 1.0)]
+    area = _GeoInterface({"type": "Polygon", "coordinates": [outer, hole]})
+    points = {
+        (0.5, 0.5): True,  # interior
+        (0.0, 2.0): True,  # on outer edge
+        (4.0, 4.0): True,  # outer corner
+        (1.0, 2.0): True,  # on hole edge
+        (2.0, 2.0): False,  # inside hole
+        (5.0, 5.0): False,  # outside
+    }
+    xy = np.array(list(points))
+    inside = np.zeros(len(xy), dtype=bool)
+    inside[_points_in_area(xy, area)] = True
+    assert inside.tolist() == list(points.values())
+
+
+def test_sel_area_inverted_bbox_raises() -> None:
+    da = mikeio.read(HD2D, time=0)["Surface elevation"]
+    x0, y0, x1, y1 = _box_through_centres(da.geometry)
+    with pytest.raises(ValueError, match="left <= right"):
+        da.sel(area=(x1, y0, x0, y1))
+
+
+def test_sel_area_four_vertex_polygon_is_not_a_bbox() -> None:
+    dfs: Any = mikeio.open(HD2D)
+    geometry = dfs.geometry
+    x0, y0, x1, y1 = _box_through_centres(geometry)
+    four = [(x0, y0), (x1, y0), (x1, y1), (x0, y1)]
+    assert np.array_equal(
+        geometry.find_index(area=four), geometry.find_index(area=four + four[:1])
+    )

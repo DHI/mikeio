@@ -7,7 +7,6 @@ from typing import (
     Mapping,
     Protocol,
     Sequence,
-    Sized,
     TYPE_CHECKING,
     Union,
 )
@@ -502,8 +501,13 @@ class GeometryFM2D(_GeometryFM):
         return True
 
     @staticmethod
-    def _area_is_bbox(area: Sized) -> bool:
-        return isinstance(area, Sized) and len(area) == 4
+    def _area_is_bbox(area: object) -> bool:
+        # four numbers; four (x, y) pairs is a polygon
+        return (
+            isinstance(area, Sequence | np.ndarray)
+            and len(area) == 4
+            and all(np.isscalar(v) for v in area)
+        )
 
     @staticmethod
     def _area_is_polygon(area: Sequence[tuple[float, float]] | Sequence[float]) -> bool:
@@ -976,9 +980,11 @@ class GeometryFM2D(_GeometryFM):
             the argument coords can be used instead.
             (x,y)-coordinates of points to be found,
             by default None
-        area : (float, float, float, float), optional
-            Bounding box of coordinates (left lower and right upper)
-            to be selected, by default None
+        area : bbox, polygon or shapely geometry, optional
+            Area to be selected: a bounding box (left, lower, right, upper),
+            a list of (x, y) polygon vertices, or a Polygon or MultiPolygon
+            with `__geo_interface__`, holes excluded. Elements are selected when their centre is inside the area or on its boundary.
+            By default None
 
         Returns
         -------
@@ -1017,45 +1023,6 @@ class GeometryFM2D(_GeometryFM):
             return self._elements_in_area(area)
         else:
             raise ValueError("Provide either coordinates or area")
-
-    @staticmethod
-    def _inside_polygon(polygon: np.ndarray, xy: np.ndarray) -> np.ndarray:
-        import matplotlib.path as mp
-
-        if polygon.ndim == 1:
-            polygon = np.column_stack((polygon[0::2], polygon[1::2]))
-        return mp.Path(polygon).contains_points(xy)
-
-    @staticmethod
-    def _inside_geo_polygon(geo: Mapping[str, Any], xy: np.ndarray) -> np.ndarray:
-        import matplotlib.path as mp
-
-        kind = geo.get("type")
-        if kind == "Polygon":
-            polygons = [geo["coordinates"]]
-        elif kind == "MultiPolygon":
-            polygons = geo["coordinates"]
-        elif kind in ("Feature", "FeatureCollection"):
-            raise ValueError(
-                f"'area' must be a single Polygon or MultiPolygon, not a {kind}; "
-                "pass one geometry, e.g. gdf.geometry.iloc[0]"
-            )
-        else:
-            raise ValueError(f"'area' must be a Polygon or MultiPolygon, not {kind}")
-
-        mask = np.zeros(len(xy), dtype=bool)
-        for rings in polygons:
-            exterior, *holes = (np.asarray(ring, dtype=float)[:, :2] for ring in rings)
-            inside = mp.Path(exterior).contains_points(xy)
-            for hole in holes:
-                # test only points inside the hole's bounding box; polygons can
-                # have thousands of small holes (islands)
-                lo, hi = hole.min(axis=0), hole.max(axis=0)
-                near = np.flatnonzero(inside & np.all((xy >= lo) & (xy <= hi), axis=1))
-                if len(near) > 0:
-                    inside[near] &= ~mp.Path(hole).contains_points(xy[near])
-            mask |= inside
-        return mask
 
     def _elements_in_area(self, area: Area) -> np.ndarray:
         """Find 2d element ids of elements inside area."""
@@ -1215,26 +1182,111 @@ class GeometryFM2D(_GeometryFM):
 
 
 def _points_in_area(xy: np.ndarray, area: Area) -> np.ndarray:
-    """Indices of the points in xy inside a bbox [x0,y0,x1,y1], a polygon or a geometry with `__geo_interface__`."""
-    if hasattr(area, "__geo_interface__"):
-        if getattr(area, "is_valid", True) is False:
-            raise ValueError(
-                "'area' is not a valid polygon (e.g. self-intersecting); "
-                "repair it first, e.g. with shapely.make_valid"
-            )
-        mask = GeometryFM2D._inside_geo_polygon(area.__geo_interface__, xy)
-    elif GeometryFM2D._area_is_bbox(area):
-        x0, y0, x1, y1 = area
-        x, y = xy[:, 0], xy[:, 1]
-        mask = (x >= x0) & (x <= x1) & (y >= y0) & (y <= y1)
-    elif GeometryFM2D._area_is_polygon(area):
-        mask = GeometryFM2D._inside_polygon(np.array(area), xy)
-    else:
-        raise ValueError("'area' must be bbox [x0,y0,x1,y1] or polygon")
-    elements = np.where(mask)[0]
+    """Indices of the points in xy inside area, boundary included.
+
+    The area is a closed set: a point on its boundary is inside, a point
+    strictly inside a hole is outside, and a point on a hole's boundary is
+    inside. This rule is the same for every way of writing an area (bbox,
+    vertex list, `__geo_interface__`), because each is first converted to
+    the same rings and tested by one predicate.
+    """
+    mask = np.zeros(len(xy), dtype=bool)
+    for exterior, holes in _area_to_polygons(area):
+        inside = _in_closed_ring(exterior, xy)
+        for hole in holes:
+            # test only points inside the hole's bounding box; polygons can
+            # have thousands of small holes (islands)
+            lo, hi = hole.min(axis=0), hole.max(axis=0)
+            near = np.flatnonzero(inside & np.all((xy >= lo) & (xy <= hi), axis=1))
+            if len(near) > 0:
+                inside[near] &= ~_in_open_ring(hole, xy[near])
+        mask |= inside
+    elements = np.flatnonzero(mask)
     if len(elements) == 0:
         raise ValueError(
             "No elements in selection! Check that the area uses the same "
             "coordinate system as the mesh"
         )
     return elements
+
+
+_Rings = tuple[np.ndarray, list[np.ndarray]]
+"""An exterior ring and its holes, each an (n, 2) array of vertices."""
+
+
+def _area_to_polygons(area: Area) -> list[_Rings]:
+    """Convert every accepted way of writing an area to (exterior, holes) rings."""
+    if hasattr(area, "__geo_interface__"):
+        if getattr(area, "is_valid", True) is False:
+            raise ValueError(
+                "'area' is not a valid polygon (e.g. self-intersecting); "
+                "repair it first, e.g. with shapely.make_valid"
+            )
+        geo = area.__geo_interface__
+        kind = geo.get("type")
+        if kind == "Polygon":
+            polygons = [geo["coordinates"]]
+        elif kind == "MultiPolygon":
+            polygons = geo["coordinates"]
+        elif kind in ("Feature", "FeatureCollection"):
+            raise ValueError(
+                f"'area' must be a single Polygon or MultiPolygon, not a {kind}; "
+                "pass one geometry, e.g. gdf.geometry.iloc[0]"
+            )
+        else:
+            raise ValueError(f"'area' must be a Polygon or MultiPolygon, not {kind}")
+        result: list[_Rings] = []
+        for rings in polygons:
+            exterior, *holes = (np.asarray(ring, dtype=float)[:, :2] for ring in rings)
+            result.append((exterior, holes))
+        return result
+    if GeometryFM2D._area_is_bbox(area):
+        x0, y0, x1, y1 = np.asarray(area, dtype=float)
+        if x0 > x1 or y0 > y1:
+            raise ValueError(
+                "bbox must be (left, lower, right, upper) with left <= right "
+                f"and lower <= upper, got {(x0, y0, x1, y1)}"
+            )
+        box = np.array([[x0, y0], [x1, y0], [x1, y1], [x0, y1]])
+        return [(box, [])]
+    if GeometryFM2D._area_is_polygon(area):  # type: ignore[arg-type]
+        return [(np.asarray(area, dtype=float), [])]
+    raise ValueError("'area' must be bbox [x0,y0,x1,y1] or polygon")
+
+
+def _in_closed_ring(ring: np.ndarray, xy: np.ndarray) -> np.ndarray:
+    """Points inside the ring or on its boundary."""
+    import matplotlib.path as mp
+
+    # contains_points leaves the boundary undefined, so decide it explicitly
+    return mp.Path(ring).contains_points(xy) | _on_ring(ring, xy)
+
+
+def _in_open_ring(ring: np.ndarray, xy: np.ndarray) -> np.ndarray:
+    """Points strictly inside the ring, boundary excluded."""
+    import matplotlib.path as mp
+
+    return mp.Path(ring).contains_points(xy) & ~_on_ring(ring, xy)
+
+
+def _on_ring(ring: np.ndarray, xy: np.ndarray) -> np.ndarray:
+    """Points within a small tolerance of any edge of the (implicitly closed) ring."""
+    tol = 1e-9 * max(1.0, float(np.abs(ring).max()))
+    on = np.zeros(len(xy), dtype=bool)
+    order = np.argsort(xy[:, 0])
+    xs = xy[order, 0]
+    for (x0, y0), (x1, y1) in zip(ring, np.roll(ring, -1, axis=0)):
+        # candidates: points in the edge's x-range (sorted lookup), then y-range
+        lo = np.searchsorted(xs, min(x0, x1) - tol, side="left")
+        hi = np.searchsorted(xs, max(x0, x1) + tol, side="right")
+        idx = order[lo:hi]
+        py = xy[idx, 1]
+        idx = idx[(py >= min(y0, y1) - tol) & (py <= max(y0, y1) + tol)]
+        if len(idx) == 0:
+            continue
+        px, py = xy[idx, 0] - x0, xy[idx, 1] - y0
+        dx, dy = x1 - x0, y1 - y0
+        length2 = dx * dx + dy * dy
+        t = np.clip((px * dx + py * dy) / length2, 0.0, 1.0) if length2 > 0 else 0.0
+        on[idx[(px - t * dx) ** 2 + (py - t * dy) ** 2 <= tol * tol]] = True
+    return on

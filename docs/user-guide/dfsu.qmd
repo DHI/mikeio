@@ -160,8 +160,10 @@ dfs.geometry.plot.mesh(ax=ax);
 
 `sel(area=...)` and `read(area=...)` take a bounding box, a list of (x, y)
 vertices, or a shapely (or geopandas) Polygon or MultiPolygon. Holes, e.g.
-islands, are excluded, and an element is selected when its centre lies inside.
-The polygon must use the same coordinate system as the mesh.
+islands, are excluded. An element is selected when its centre lies inside the
+area or on its boundary, including the edge of a hole, and the same box selects
+the same elements whichever of the three forms it is written in. The polygon
+must use the same coordinate system as the mesh.
 
 ```{python}
 import shapely

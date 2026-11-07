@@ -838,7 +838,7 @@ class DataArray:
             Area to be selected: a bounding box (left, lower, right, upper),
             a list of (x, y) polygon vertices, or (flexible mesh only) a
             Polygon or MultiPolygon with `__geo_interface__`, e.g. from shapely
-            or geopandas, holes excluded. Elements are selected by their centre.
+            or geopandas, holes excluded. Elements are selected when their centre is inside the area or on its boundary.
             By default None
         layers : int or str or list, optional
             layer(s) to be selected: "top", "bottom" or layer number

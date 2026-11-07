@@ -404,7 +404,8 @@ class Dfsu2DH:
             Read only data inside (horizontal) area given as a
             bounding box (tuple with left, lower, right, upper),
             as list of coordinates for a polygon, or as a Polygon or
-            MultiPolygon with `__geo_interface__` (e.g. shapely), by default None
+            MultiPolygon with `__geo_interface__` (e.g. shapely), by default None.
+            Elements are selected when their centre is inside the area or on its boundary.
         x, y: float or list[float], optional
             Read only data for elements containing the (x,y) points(s),
             by default None

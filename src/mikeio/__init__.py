@@ -72,6 +72,8 @@ def read(
         box of coordinates (left, lower, right, upper), by default None (=all).
         Dfsu also accepts a list of polygon vertices or a Polygon or
         MultiPolygon with `__geo_interface__`, e.g. from shapely.
+        Elements and grid cells are selected when their centre is inside the
+        area or on its boundary.
     layers: int, str or sequence, optional
         Dfs3/Dfsu-layered: read only data from specific layers,
         by default None (=all layers)
