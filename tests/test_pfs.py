@@ -276,12 +276,18 @@ def test_pfssection_write(d1, tmp_path: Path) -> None:
     assert pfs2.root.key1 == sct.key1
 
 
-def test_basic() -> None:
+def test_targets_point_to_the_parsed_root_sections() -> None:
+    """The targets property exposes root sections, also reachable by attribute name."""
+    pfs = mikeio.PfsDocument("tests/testdata/pfs/simple.pfs")
+
+    assert pfs.targets[0] == pfs.BoundaryExtractor
+
+
+def test_scalar_and_nested_section_values_are_parsed() -> None:
+    """Reading simple.pfs parses scalar keywords and nested POINT sections."""
     pfs = mikeio.PfsDocument("tests/testdata/pfs/simple.pfs")
 
     data = pfs.targets[0]
-    assert pfs.targets[0] == pfs.BoundaryExtractor
-
     assert data.z_min == -3000
     assert data.POINT_1.y == 50
 

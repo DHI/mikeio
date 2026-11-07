@@ -1585,6 +1585,23 @@ def test_fillna() -> None:
     assert np.isnan(ds["foo"].to_numpy()[0])
 
 
+def test_astype() -> None:
+    ds = mikeio.Dataset(
+        {
+            "foo": mikeio.DataArray(np.array([1.0, 2.0], dtype=np.float32)),
+            "bar": mikeio.DataArray(np.array([3.0, 4.0], dtype=np.float32)),
+        }
+    )
+
+    ds64 = ds.astype(np.float64)
+
+    assert ds64["foo"].to_numpy().dtype == np.float64
+    assert ds64["bar"].to_numpy().dtype == np.float64
+
+    # original dataset is not modified
+    assert ds["foo"].to_numpy().dtype == np.float32
+
+
 def test_safe_name() -> None:
     from mikeio.dataset._dataset import _to_safe_name
 
@@ -1838,3 +1855,8 @@ def test_custom_blocks_of_derived_dataset_are_copies(blocks_ds: Dataset) -> None
         # the dict is a new one too, so adding a block does not add it to the source
         derived.custom_blocks["Extra"] = np.array([1.0], dtype=np.float32)
         assert "Extra" not in blocks_ds.custom_blocks
+
+
+def test_dataset_from_the_wrong_type_raises_type_error() -> None:
+    with pytest.raises(TypeError, match="list of DataArrays"):
+        mikeio.Dataset(np.zeros(3))  # type: ignore[arg-type]

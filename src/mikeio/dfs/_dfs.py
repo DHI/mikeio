@@ -42,29 +42,38 @@ def _read_item_time_step(
     *,
     dfs: DfsFile,
     filename: str,
-    time: pd.DatetimeIndex,
     item_numbers: list[int],
     deletevalue: float,
-    shape: tuple[int, ...],
     item: int,
     it: int,
     error_bad_data: bool = True,
     fill_bad_data_value: float = np.nan,
 ) -> tuple[DfsFile, np.ndarray, float]:
-    itemdata = dfs.ReadItemTimeStep(item_numbers[item] + 1, it)
-    t = itemdata.Time
+    item_number = item_numbers[item] + 1
+    itemdata = dfs.ReadItemTimeStep(item_number, it)
     if itemdata is not None:
         d = itemdata.Data
         d[d == deletevalue] = np.nan
-    else:
-        if error_bad_data:
-            raise ValueError(f"Error reading: {time[it]}")
-        else:
-            warnings.warn(f"Error reading: {time[it]}")
-            d = np.zeros(shape[1])
-            d[:] = fill_bad_data_value
-            dfs.Close()
-            dfs = DfsFileFactory.DfsGenericOpen(filename)
+        return dfs, d, itemdata.Time
+
+    message = f"Error reading item {item_number}, timestep {it} in {filename}"
+    if error_bad_data:
+        raise ValueError(message)
+
+    # A failed read returns no time, so it can only be derived on an equidistant axis
+    time_axis = dfs.FileInfo.TimeAxis
+    if time_axis.TimeAxisType not in (
+        TimeAxisType.CalendarEquidistant,
+        TimeAxisType.TimeEquidistant,
+    ):
+        raise ValueError(
+            f"{message}; a corrupt timestep has no known time on a non-equidistant axis"
+        )
+    warnings.warn(message)
+    t = time_axis.StartTimeOffset + it * time_axis.TimeStep
+    d = np.full(dfs.ItemInfo[item_number - 1].ElementCount, fill_bad_data_value)
+    dfs.Close()
+    dfs = DfsFileFactory.DfsGenericOpen(filename)
     return dfs, d, t
 
 
@@ -84,7 +93,7 @@ def _fuzzy_item_search(
 
 def _valid_item_numbers(
     dfsItemInfo: list[DfsDynamicItemInfo],
-    items: str | int | Sequence[int | str] | None = None,
+    items: str | int | np.integer | Sequence[int | str] | None = None,
     ignore_first: bool = False,
 ) -> list[int]:
     start_idx = 1 if ignore_first else 0
@@ -97,7 +106,7 @@ def _valid_item_numbers(
     item_numbers: list[int] = []
 
     # check if items is a scalar (int or str)
-    if isinstance(items, (int, str)):
+    if isinstance(items, (int, np.integer, str)):
         if isinstance(items, str) and "*" in items:
             return _fuzzy_item_search(
                 dfsItemInfo=dfsItemInfo, search=items, start_idx=start_idx
@@ -105,19 +114,20 @@ def _valid_item_numbers(
         elif isinstance(items, str):
             item_number = _item_numbers_by_name(dfsItemInfo, [items], ignore_first)[0]
             return [item_number]
-        elif isinstance(items, int):
+        else:
             if (items < 0) or (items >= n_items_file):
                 raise ItemsError(n_items_file)
-            return [items]
+            return [int(items)]
 
-    assert isinstance(items, Sequence)
+    if not isinstance(items, Sequence):
+        raise ItemsError(n_items_file)  # type: ignore[unreachable]
     for item in items:
         if isinstance(item, str):
             item_number = _item_numbers_by_name(dfsItemInfo, [item], ignore_first)[0]
-        elif isinstance(item, int):
+        elif isinstance(item, (int, np.integer)):
             if (item < 0) or (item >= n_items_file):
                 raise ItemsError(n_items_file)
-            item_number = item
+            item_number = int(item)
         else:
             raise ItemsError(n_items_file)
         item_numbers.append(item_number)
