@@ -68,6 +68,10 @@ class GeometryFMPlotter:
     ) -> Axes:
         """Plot bathymetry as coloured patches."""
         ax = self._get_ax(ax, figsize)
+        if kwargs.get("plot_type") is not None:
+            from .._deprecation import _warn_plot_type
+
+            _warn_plot_type(kwargs["plot_type"])
         kwargs["plot_type"] = kwargs.get("plot_type") or "patch"
         return self._plot_FM_map(ax, **kwargs)
 

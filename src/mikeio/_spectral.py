@@ -53,7 +53,7 @@ def plot_2dspectrum(
     rmin: float, optional
         Deprecated, use ``ax.set_rmin()`` on the returned Axes.
     rmax: float, optional
-        maximum frequency/period to be shown, default: None
+        Deprecated, use ``ax.set_rmax()`` on the returned Axes.
     levels: int, list(float), optional
         for contour plots: how many levels, default:10
         or a list of discrete levels e.g. [0.03, 0.04, 0.05]
@@ -180,6 +180,10 @@ def plot_2dspectrum(
         )
         ax.set_rmin(rmin)  # type: ignore
     if rmax is not None:
+        _warn_deprecated(
+            "rmax is deprecated and will be removed in MIKE IO 4.0. "
+            "Use ax.set_rmax() on the returned Axes instead."
+        )
         ax.set_rmax(rmax)  # type: ignore
 
     if add_colorbar:
