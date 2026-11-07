@@ -324,7 +324,7 @@ class DataArrayPlotterGrid2D(DataArrayPlotter):
         pos = ax.contour(x, y, da.values, **kwargs)
         # fig.colorbar(pos, label=self._label_txt())
         ax.clabel(pos, fmt="%1.2f", inline=1, fontsize=9)
-        self._set_aspect_and_labels(ax, self.da.geometry, y)
+        self._set_aspect_and_labels(ax, self.da.geometry)
         if title is not None:
             ax.set_title(title)
         return ax
@@ -358,7 +358,7 @@ class DataArrayPlotterGrid2D(DataArrayPlotter):
         pos = ax.contourf(x, y, da.values, **kwargs)
         if add_colorbar:
             fig.colorbar(pos, label=label, pad=0.01)
-        self._set_aspect_and_labels(ax, self.da.geometry, y)
+        self._set_aspect_and_labels(ax, self.da.geometry)
         if title is not None:
             ax.set_title(title)
         return ax
@@ -392,7 +392,7 @@ class DataArrayPlotterGrid2D(DataArrayPlotter):
         pos = ax.pcolormesh(xn, yn, da.values, **kwargs)
         if add_colorbar:
             fig.colorbar(pos, label=label, pad=0.01)
-        self._set_aspect_and_labels(ax, self.da.geometry, yn)
+        self._set_aspect_and_labels(ax, self.da.geometry)
         if title is not None:
             ax.set_title(title)
         return ax
@@ -408,26 +408,13 @@ class DataArrayPlotterGrid2D(DataArrayPlotter):
         return xn, yn
 
     @staticmethod
-    def _set_aspect_and_labels(ax: Axes, geometry: Any, y: np.ndarray) -> None:
-        if geometry.is_spectral:
-            ax.set_xlabel("Frequency [Hz]")
-            ax.set_ylabel("Directions [degree]")
-        elif geometry._is_rotated:
-            ax.set_xlabel("[m]")
-            ax.set_ylabel("[m]")
-        elif geometry.projection == "NON-UTM":
-            ax.set_xlabel("[m]")
-            ax.set_ylabel("[m]")
-        elif geometry.is_geo:
-            ax.set_xlabel("Longitude [degrees]")
-            ax.set_ylabel("Latitude [degrees]")
-            mean_lat = np.mean(y)
-            aspect_ratio = 1.0 / np.cos(np.pi * mean_lat / 180)
-            ax.set_aspect(aspect_ratio)
-        else:
-            ax.set_xlabel("Easting [m]")
-            ax.set_ylabel("Northing [m]")
-            ax.set_aspect("equal")
+    def _set_aspect_and_labels(ax: Axes, geometry: Any) -> None:
+        xlabel, ylabel = geometry._axis_labels
+        ax.set_xlabel(xlabel)
+        ax.set_ylabel(ylabel)
+        aspect = geometry._plot_aspect
+        if aspect is not None:
+            ax.set_aspect(aspect)
 
 
 class DataArrayPlotterFM(DataArrayPlotter):

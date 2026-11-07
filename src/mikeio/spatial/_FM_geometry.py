@@ -26,10 +26,9 @@ from ._FM_plot import (
     _plot_map,
     BoundaryPolygons,
     Polygon,
-    _set_xy_label_by_projection,  # TODO remove
     _to_polygons,  # TODO remove
 )
-from ._geometry import Geometry0D, GeometryPoint2D, _Geometry
+from ._geometry import Geometry0D, GeometryPoint2D, _Geometry, _geographic_aspect
 
 from ._grid_geometry import Grid2D
 from ._distance import xy_to_bbox
@@ -157,7 +156,7 @@ class GeometryFMPlotter:
         from matplotlib.collections import PatchCollection  # type: ignore
 
         ax = self._get_ax(ax=ax, figsize=figsize)
-        ax.set_aspect(self._plot_aspect())
+        ax.set_aspect(self.g._plot_aspect)
 
         patches = _to_polygons(self.g.node_coordinates, self.g.element_table)
         fig_obj = PatchCollection(
@@ -167,7 +166,9 @@ class GeometryFMPlotter:
         self.outline(ax=ax)
         ax.set_title(title)
         ax = self._set_plot_limits(ax)
-        _set_xy_label_by_projection(ax, self.g.projection)
+        xlabel, ylabel = self.g._axis_labels
+        ax.set_xlabel(xlabel)
+        ax.set_ylabel(ylabel)
         return ax
 
     def outline(
@@ -186,7 +187,7 @@ class GeometryFMPlotter:
 
         """
         ax = self._get_ax(ax=ax, figsize=figsize)
-        ax.set_aspect(self._plot_aspect())
+        ax.set_aspect(self.g._plot_aspect)
 
         linwid = 1.2
         out_col = "0.4"
@@ -217,7 +218,7 @@ class GeometryFMPlotter:
         import matplotlib.pyplot as plt
 
         ax = self._get_ax(ax=ax, figsize=figsize)
-        ax.set_aspect(self._plot_aspect())
+        ax.set_aspect(self.g._plot_aspect)
 
         nc = self.g.node_coordinates
         c = self.g.codes
@@ -251,13 +252,6 @@ class GeometryFMPlotter:
         ax.set_xlim(bbox.left - xybuf, bbox.right + xybuf)
         ax.set_ylim(bbox.bottom - xybuf, bbox.top + xybuf)
         return ax
-
-    def _plot_aspect(self) -> Literal["equal"] | float:
-        if self.g.is_geo:
-            mean_lat = np.mean(self.g.node_coordinates[:, 1])
-            return 1.0 / np.cos(np.pi * mean_lat / 180)
-        else:
-            return "equal"
 
 
 class _GeometryFM(_Geometry):
@@ -296,6 +290,12 @@ class _GeometryFM(_Geometry):
 
         if reindex:
             self._reindex()
+
+    @property
+    def _plot_aspect(self) -> Literal["equal"] | float:
+        if self.is_geo:
+            return _geographic_aspect(self.node_coordinates[:, 1])
+        return "equal"
 
     def _calc_element_coordinates(self) -> NDArray[np.floating]:
         element_table = self.element_table
@@ -483,8 +483,9 @@ class GeometryFM2D(_GeometryFM):
                 yp - yn[j]
             ) > 0:
                 return False
-            if (yn[0] - yn[-1]) * (xp - xn[-1]) + (-xn[0] + xn[-1]) * (yp - yn[-1]) > 0:
-                return False
+        # Check closing edge (last vertex → first vertex)
+        if (yn[0] - yn[-1]) * (xp - xn[-1]) + (-xn[0] + xn[-1]) * (yp - yn[-1]) > 0:
+            return False
         return True
 
     @staticmethod

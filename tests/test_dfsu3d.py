@@ -29,6 +29,14 @@ def test_read_simple_3d() -> None:
     assert ds.to_numpy().shape[0] == 3
     assert len(ds.items) == 3
 
+
+def test_read_dtype_deprecated() -> None:
+    filename = "tests/testdata/basin_3d.dfsu"
+    with pytest.warns(FutureWarning, match="dtype"):
+        ds = mikeio.read(filename, dtype=np.float64)
+
+    assert ds[0].dtype == np.float64
+
     assert ds.items[0].name != "Z coordinate"
     assert ds.items[2].name == "W velocity"
 
@@ -806,3 +814,16 @@ def test_dataset_z_mirrors_first_dataarray() -> None:
     ds = mikeio.read("tests/testdata/oresund_sigma_z.dfsu")
     assert ds.z.nodes is ds[0].z.nodes
     assert np.array_equal(ds.z.elements, ds[0].z.elements)
+
+
+def test_read_corrupt_timestep_fills_layered(tmp_path: Path) -> None:
+    src = Path("tests/testdata/basin_3d.dfsu")
+    fp = tmp_path / "corrupt.dfsu"
+    fp.write_bytes(src.read_bytes()[:-200])
+    expected = mikeio.read(src)
+
+    with pytest.warns(UserWarning, match="Error reading"):
+        ds = mikeio.read(fp, error_bad_data=False)
+
+    assert ds.time.equals(expected.time)
+    assert np.isnan(ds[-1].values[-1]).all()

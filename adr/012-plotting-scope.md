@@ -1,4 +1,4 @@
-# ADR-011: Plotting Is a Quick Look With One Way to Do Each Thing
+# ADR-012: Plotting Is a Quick Look With One Way to Do Each Thing
 
 **Status:** Accepted
 **Date:** 2026-11

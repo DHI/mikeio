@@ -35,6 +35,9 @@ jobs:
       - name: Install dependencies
         run: uv sync --group test --no-dev
 
+      - name: Check import layering
+        run: just layers
+
       - name: Type check
         run: just typecheck
 

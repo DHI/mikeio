@@ -3,7 +3,7 @@
 **Status:** Accepted
 **Date:** 2021
 
-Amended by [ADR-011](011-plotting-scope.md): plotting is for a quick look, not report-grade figures.
+Amended by [ADR-012](012-plotting-scope.md): plotting is for a quick look, not report-grade figures.
 
 ## Context
 
@@ -25,4 +25,4 @@ Example: `da.plot()` produces a sensible default plot based on the data's geomet
 - Familiar API for pandas/xarray users
 - Quick data exploration without boilerplate
 - Plot type adapts to geometry (line plot for 1D, pcolormesh for 2D, etc.)
-- Matplotlib is a required dependency (corrected 2026-11; see ADR-011)
+- Matplotlib is a required dependency (corrected 2026-11; see ADR-012)
