@@ -428,6 +428,8 @@ def test_plot_spectrum(dfsu_pt: DfsuSpectral) -> None:
     da.plot(levels=3, vmin=0, cmap="Greys")
     da.plot(title="pt", plot_type="shaded")
     da.plot(r_as_periods=False, plot_type="contour")
+    with pytest.warns(FutureWarning, match="rmin"):
+        da.plot(rmin=0.05)
     plt.close("all")
 
 

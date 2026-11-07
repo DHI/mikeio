@@ -36,8 +36,20 @@ def test_plot_dfsu_contour_mixedmesh() -> None:
 def test_plot_dfsu_n_refinements() -> None:
     dfs = mikeio.open("tests/testdata/FakeLake.dfsu")
     geometry = dfs.geometry
-    geometry.plot(plot_type="contourf", levels=None, n_refinements=1)
-    assert True
+    with pytest.warns(FutureWarning, match="n_refinements"):
+        geometry.plot(plot_type="contourf", levels=None, n_refinements=1)
+
+
+def test_plot_dfsu_vmin_vmax_zero_is_respected() -> None:
+    import matplotlib.pyplot as plt
+
+    # surface elevation spans -0.76 to 1.17, so 0 differs from both data limits
+    da = mikeio.read("tests/testdata/HD2D.dfsu", time=0)["Surface elevation"]
+    ax = da.plot.contourf(vmin=0, vmax=1)
+    assert ax.collections[-1].norm.vmin == 0
+    ax = da.plot.patch(vmin=-0.5, vmax=0)
+    assert ax.collections[-1].norm.vmax == 0
+    plt.close("all")
 
 
 def test_plot_dfsu_contour_subset_not_allowed(hd2d_dfs):
@@ -99,8 +111,8 @@ def test_plot_dfsu_vertical_profile() -> None:
         title="txt",
         label="txt",
         edge_color="0.3",
-        cmin=0,
-        cmax=20,
+        vmin=0,
+        vmax=20,
         cmap="plasma",
         figsize=(2, 2),
     )

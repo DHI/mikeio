@@ -2,6 +2,8 @@ from __future__ import annotations
 from collections.abc import Sequence
 from typing import Literal
 import numpy as np
+
+from ._deprecation import _warn_deprecated
 from matplotlib.axes import Axes
 from matplotlib.projections.polar import PolarAxes
 
@@ -49,7 +51,7 @@ def plot_2dspectrum(
     r_as_periods: bool, optional
         show radial axis as periods instead of frequency, default: True
     rmin: float, optional
-        mininum frequency/period to be shown, default: None
+        Deprecated, use ``ax.set_rmin()`` on the returned Axes.
     rmax: float, optional
         maximum frequency/period to be shown, default: None
     levels: int, list(float), optional
@@ -172,6 +174,10 @@ def plot_2dspectrum(
     # ax.set_xticks(dfs.directions, minor=True);
 
     if rmin is not None:
+        _warn_deprecated(
+            "rmin is deprecated and will be removed in MIKE IO 4.0. "
+            "Use ax.set_rmin() on the returned Axes instead."
+        )
         ax.set_rmin(rmin)  # type: ignore
     if rmax is not None:
         ax.set_rmax(rmax)  # type: ignore
