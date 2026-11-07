@@ -6,4 +6,5 @@ A collection of specific examples of working with dfs2 files. For a general intr
 
 * [Bathymetry](bathy.qmd)
 * [Meteo data](gfs.qmd)
+* [Snow cover comparison](snow.qmd)
 

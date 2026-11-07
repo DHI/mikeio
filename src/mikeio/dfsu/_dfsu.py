@@ -1,4 +1,5 @@
 from __future__ import annotations
+import warnings
 from copy import deepcopy
 from dataclasses import dataclass
 from datetime import datetime
@@ -18,7 +19,7 @@ from tqdm import trange
 
 from mikeio.spatial._distance import xy_to_bbox
 
-from .. import __dfs_version__
+from .._version import __dfs_version__
 from ..dataset import Dataset
 from ..dfs._dfs import (
     _get_item_info,
@@ -33,6 +34,8 @@ from ..spatial import Grid2D
 from .._track import _extract_track
 from ._topology import get_elements_from_source, get_nodes_from_source
 from ..eum import ItemInfo, TimeStepUnit
+from .._options import _item_txt, _show_progress
+from .._path import normalize_output_path, normalize_path
 
 
 def write_dfsu(filename: str | Path, data: Dataset, title: str = "") -> None:
@@ -48,7 +51,7 @@ def write_dfsu(filename: str | Path, data: Dataset, title: str = "") -> None:
         Title of the dfsu file (default: "")
 
     """
-    filename = str(filename)
+    filename = normalize_output_path(filename)
 
     geometry = data.geometry
     dfsu_filetype = DfsuFileType.Dfsu2D
@@ -119,7 +122,7 @@ def write_dfsu_data(dfs: DfsuFile, ds: Dataset, is_layered: bool) -> None:
     else:
         t_rel = (data.time - data.time[0]).total_seconds()
 
-    for i in range(n_time_steps):
+    for i in trange(n_time_steps, disable=not _show_progress()):
         if is_layered:
             zn_all = data.z.nodes
             if "time" in data.dims:
@@ -168,7 +171,7 @@ class _DfsuInfo:
 
 
 def _get_dfsu_info(filename: str | Path) -> _DfsuInfo:
-    filename = str(filename)
+    filename = normalize_path(filename)
     path = Path(filename)
     if not path.exists():
         raise FileNotFoundError(f"file {path} does not exist!")
@@ -204,8 +207,6 @@ class Dfsu2DH:
 
     """
 
-    show_progress = False
-
     def __init__(self, filename: str | Path) -> None:
         info = _get_dfsu_info(filename)
         self._filename = info.filename
@@ -225,12 +226,7 @@ class Dfsu2DH:
         out.append(f"number of elements: {self.geometry.n_elements}")
         out.append(f"number of nodes: {self.geometry.n_nodes}")
         out.append(f"projection: {self.geometry.projection_string}")
-        if self.n_items < 10:
-            out.append("items:")
-            for i, item in enumerate(self.items):
-                out.append(f"  {i}:  {item}")
-        else:
-            out.append(f"number of items: {self.n_items}")
+        out.extend(_item_txt(self.items))
         if self.n_timesteps == 1:
             out.append(f"time: time-invariant file (1 step) at {self.time[0]}")
         else:
@@ -419,7 +415,8 @@ class Dfsu2DH:
             fill value for to impute corrupt data, used in conjunction with error_bad_data=False
             default np.nan
         dtype: Any, optional
-            Data type to read, by default np.float32
+            Deprecated since v3.4: the parameter will be removed in v4.0,
+            data is always read as np.float32. Use `Dataset.astype()` instead.
 
         Returns
         -------
@@ -427,8 +424,15 @@ class Dfsu2DH:
             A Dataset with data dimensions [t,elements]
 
         """
-        if dtype not in [np.float32, np.float64]:
-            raise ValueError("Invalid data type. Choose np.float32 or np.float64")
+        if dtype != np.float32:
+            if dtype not in [np.float32, np.float64]:
+                raise ValueError("Invalid data type. Choose np.float32 or np.float64")
+            warnings.warn(
+                "dtype parameter is deprecated and will be removed in v4.0. "
+                "Data is always read as np.float32, use Dataset.astype() to cast it afterwards.",
+                FutureWarning,
+                stacklevel=2,
+            )
         dfs = DfsuFile.Open(self._filename)
 
         single_time_selected, time_steps = _valid_timesteps(dfs, time)
@@ -463,15 +467,13 @@ class Dfsu2DH:
             np.ndarray(shape=shape, dtype=dtype) for _ in range(n_items)
         ]
 
-        for i in trange(n_steps, disable=not self.show_progress):
+        for i in trange(n_steps, disable=not _show_progress()):
             for item in range(n_items):
                 dfs, d, t_rel[i] = _read_item_time_step(
                     dfs=dfs,
                     filename=self._filename,
-                    time=time,
                     item_numbers=item_numbers,
                     deletevalue=self.deletevalue,
-                    shape=shape,
                     item=item,
                     it=time_steps[i],
                     error_bad_data=error_bad_data,

@@ -6,31 +6,37 @@ on:
   pull_request:
     branches: [main]
 
+permissions:
+  contents: read
+
 jobs:
   build:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: ["3.12", "3.14"]
+        python-version: ["3.12", "3.15"]
 
     steps:
       - uses: actions/checkout@v4
 
-      - uses: astral-sh/ruff-action@v2
+      - uses: astral-sh/ruff-action@f2e32211077f40bfeab40e16285216924ebea4cb # v2
         with:
           version: 0.6.2
           src: src
 
-      - uses: extractions/setup-just@v3
+      - uses: extractions/setup-just@f8a3cce218d9f83db3a2ecd90e41ac3de6cdfd9b # v3
 
       - name: Set up uv
-        uses: astral-sh/setup-uv@v6
+        uses: astral-sh/setup-uv@d0cc045d04ccac9d8b7881df0226f9e82c39688e # v6
         with:
           python-version: ${{ matrix.python-version }}
           enable-cache: true
 
       - name: Install dependencies
         run: uv sync --group test --no-dev
+
+      - name: Check import layering
+        run: just layers
 
       - name: Type check
         run: just typecheck

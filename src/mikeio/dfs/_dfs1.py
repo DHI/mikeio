@@ -1,16 +1,18 @@
 from __future__ import annotations
+import warnings
 from pathlib import Path
-from typing import Any, Sequence
+from typing import Any, Mapping, Sequence
 
 from mikecore.DfsFactory import DfsBuilder, DfsFactory
 from mikecore.DfsFile import DfsFile, DfsSimpleType
 from mikecore.DfsFileFactory import DfsFileFactory
 from mikecore.eum import eumQuantity, eumUnit
 import numpy as np
+from numpy.typing import NDArray
 import pandas as pd
 from tqdm import tqdm
 
-from .. import __dfs_version__
+from .._version import __dfs_version__
 from ..dataset import Dataset
 from ._dfs import (
     _Dfs123,
@@ -19,8 +21,11 @@ from ._dfs import (
     _valid_timesteps,
     write_dfs_data,
 )
+from ._custom_blocks import readonly_custom_blocks, write_custom_blocks
 from ..eum import TimeStepUnit
 from ..spatial import Grid1D
+from .._options import _show_progress
+from .._path import normalize_output_path
 
 
 def write_dfs1(filename: str | Path, ds: Dataset, title: str = "") -> None:
@@ -64,10 +69,9 @@ def _write_dfs1_header(filename: str | Path, ds: Dataset, title: str) -> DfsFile
             item.data_value_type,
         )
 
-    try:
-        builder.CreateFile(str(filename))
-    except OSError:
-        print("cannot create dfs file: ", filename)
+    write_custom_blocks(builder, ds.custom_blocks)
+
+    builder.CreateFile(normalize_output_path(filename))
 
     return builder.GetFile()
 
@@ -87,7 +91,7 @@ class Dfs1(_Dfs123):
     def __init__(self, filename: str | Path) -> None:
         super().__init__(filename)
 
-        dfs = DfsFileFactory.Dfs1FileOpen(str(filename))
+        dfs = DfsFileFactory.Dfs1FileOpen(self._filename)
         self._x0: float = dfs.SpatialAxis.X0
         self._dx: float = dfs.SpatialAxis.Dx
         self._nx: int = dfs.SpatialAxis.XCount
@@ -127,13 +131,21 @@ class Dfs1(_Dfs123):
             When reading a single time step only, should the time-dimension be kept
             in the returned Dataset? by default: False
         dtype: data-type, optional
-            Define the dtype of the returned dataset (default = np.float32)
+            Deprecated since v3.4: the parameter will be removed in v4.0,
+            data is always read as np.float32. Use `Dataset.astype()` instead.
 
         Returns
         -------
         Dataset
 
         """
+        if dtype != np.float32:
+            warnings.warn(
+                "dtype parameter is deprecated and will be removed in v4.0. "
+                "Data is always read as np.float32, use Dataset.astype() to cast it afterwards.",
+                FutureWarning,
+                stacklevel=2,
+            )
         self._open()
 
         item_numbers = _valid_item_numbers(self._dfs.ItemInfo, items)
@@ -152,7 +164,7 @@ class Dfs1(_Dfs123):
 
         t_seconds = np.zeros(len(time_steps))
 
-        for i, it in enumerate(tqdm(time_steps, disable=not self.show_progress)):
+        for i, it in enumerate(tqdm(time_steps, disable=not _show_progress())):
             for item in range(n_items):
                 itemdata = self._dfs.ReadItemTimeStep(item_numbers[item] + 1, int(it))
 
@@ -180,12 +192,14 @@ class Dfs1(_Dfs123):
             items=items,
             geometry=self.geometry,
             title=self.title,
+            custom_blocks=self.custom_blocks,
             validate=False,
             dt=self._timestep,
         )
 
     @property
     def geometry(self) -> Grid1D:
+        """Spatial information."""
         assert isinstance(self._geometry, Grid1D)
         return self._geometry
 
@@ -208,3 +222,14 @@ class Dfs1(_Dfs123):
     def title(self) -> str:
         """Title of the dfs1 file."""
         return self._title
+
+    @property
+    def custom_blocks(self) -> Mapping[str, NDArray[Any]]:
+        """Custom blocks of the dfs1 file header, as name -> 1-D array.
+
+        Read-only: a dfs header is written when the file is created, so neither
+        the mapping nor its arrays accept an edit here. Change them on a Dataset
+        and write a new file - see [](`mikeio.Dataset.custom_blocks`) for the
+        meaning of the values and for how to change them.
+        """
+        return readonly_custom_blocks(self._custom_blocks)

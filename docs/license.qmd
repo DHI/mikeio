@@ -1,3 +1,7 @@
+---
+title: License
+---
+
 Copyright (c) 2019, DHI A/S
 All rights reserved. 
 

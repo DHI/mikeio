@@ -1,7 +1,6 @@
 from pathlib import Path
 import datetime
 import platform
-from typing import Any
 from matplotlib import pyplot as plt
 import numpy as np
 import pandas as pd
@@ -489,6 +488,93 @@ def test_select_area_rotated_UTM_2() -> None:
     assert g1.projection_string == g2.projection_string
 
 
+def test_sel_point_rotated_grid() -> None:
+    filepath = Path("tests/testdata/BW_Ronne_Layout1998_rotated.dfs2")
+    ds = mikeio.read(filepath)
+    g = ds.geometry
+    assert g.orientation != 0
+
+    # pick a grid cell and get its world coordinates
+    from mikecore.Projections import Cartography
+
+    cart = Cartography.CreateProjOrigin(
+        projectionString=g.projection_string,
+        east=g.origin[0],
+        north=g.origin[1],
+        orientationProj=g.orientation,
+    )
+    # grid-local center of cell (116, 2): x=116*5=580, y=2*5=10
+    east, north = cart.Xy2Proj(580.0, 10.0)
+
+    da = ds[0]
+    da_sel = da.sel(x=east, y=north)
+    expected = da.values[:, 2, 116]
+    assert da_sel.values == pytest.approx(expected)
+
+
+def test_contains_rotated_grid() -> None:
+    filepath = Path("tests/testdata/BW_Ronne_Layout1998_rotated.dfs2")
+    g = mikeio.read(filepath).geometry
+
+    from mikecore.Projections import Cartography
+
+    cart = Cartography.CreateProjOrigin(
+        projectionString=g.projection_string,
+        east=g.origin[0],
+        north=g.origin[1],
+        orientationProj=g.orientation,
+    )
+    # a point inside the grid
+    east_in, north_in = cart.Xy2Proj(580.0, 10.0)
+    assert g.contains([[east_in, north_in]])[0]
+
+    # a point far outside the grid
+    assert not g.contains([[east_in + 1e6, north_in]])[0]
+
+
+def test_read_point() -> None:
+    filename = "tests/testdata/eq.dfs2"
+    ds_full = mikeio.read(filename)
+    g = ds_full.geometry
+    x = g.x[3]
+    y = g.y[2]
+    ds_point = mikeio.read(filename, x=x, y=y)
+    expected = ds_full[0].values[:, 2, 3]
+    assert ds_point[0].to_numpy().ravel() == pytest.approx(expected)
+
+
+def test_read_point_rotated_grid() -> None:
+    filepath = Path("tests/testdata/BW_Ronne_Layout1998_rotated.dfs2")
+
+    from mikecore.Projections import Cartography
+
+    g = Dfs2(filepath).geometry
+    cart = Cartography.CreateProjOrigin(
+        projectionString=g.projection_string,
+        east=g.origin[0],
+        north=g.origin[1],
+        orientationProj=g.orientation,
+    )
+    east, north = cart.Xy2Proj(580.0, 10.0)
+
+    ds_point = mikeio.read(filepath, x=east, y=north)
+    ds_full = mikeio.read(filepath)
+    expected = ds_full[0].values[:, 2, 116]
+    assert ds_point[0].to_numpy().ravel() == pytest.approx(expected)
+
+
+def test_sel_single_axis_rotated_grid_raises() -> None:
+    filepath = Path("tests/testdata/BW_Ronne_Layout1998_rotated.dfs2")
+    ds = mikeio.read(filepath)
+    da = ds[0]
+
+    with pytest.raises(ValueError, match="rotated"):
+        da.sel(x=0.0)
+
+    with pytest.raises(ValueError, match="rotated"):
+        da.sel(y=0.0)
+
+
 def test_write_selected_item_to_new_file(
     dfs2_random_2items: Dfs2, tmp_path: Path
 ) -> None:
@@ -762,6 +848,13 @@ def test_read_single_precision() -> None:
     assert ds[0].dtype == np.float32
 
 
+def test_read_dtype_deprecated() -> None:
+    with pytest.warns(FutureWarning, match="dtype"):
+        ds = mikeio.read("tests/testdata/random.dfs2", items=0, dtype=np.float64)
+
+    assert ds[0].dtype == np.float64
+
+
 def is_header_unchanged_on_read_write(tmp_path: Path, filename: str) -> None:
     a = mikeio.Dfs2("tests/testdata/" + filename)
     ds = a.read()
@@ -790,6 +883,11 @@ def is_header_unchanged_on_read_write(tmp_path: Path, filename: str) -> None:
         b._dfs.FileInfo.TimeAxis.TimeAxisType == a._dfs.FileInfo.TimeAxis.TimeAxisType
     )
     assert b.items == a.items
+
+    assert b.custom_blocks.keys() == a.custom_blocks.keys()
+    for name, values in a.custom_blocks.items():
+        np.testing.assert_array_equal(b.custom_blocks[name], values)
+        assert b.custom_blocks[name].dtype == values.dtype
 
 
 def test_read_write_header_unchanged_utm_not_rotated(tmp_path: Path) -> None:
@@ -982,3 +1080,15 @@ def test_dfs2_read_closes_file_handle() -> None:
         results.append(dfs.read())
 
     assert _count_fds_for_file(filename) == 0
+
+
+def test_read_items_accepts_numpy_integers() -> None:
+    ds = mikeio.read("tests/testdata/random.dfs2", items=np.int64(0))  # type: ignore[arg-type]
+    assert ds.n_items == 1
+    ds = mikeio.read("tests/testdata/random.dfs2", items=[np.int64(0)])  # type: ignore[list-item]
+    assert ds.n_items == 1
+
+
+def test_read_items_of_the_wrong_type_raise_items_error() -> None:
+    with pytest.raises(ItemsError):
+        mikeio.read("tests/testdata/random.dfs2", items=1.5)  # type: ignore[arg-type]
