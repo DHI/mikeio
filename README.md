@@ -6,7 +6,7 @@
 [![PyPI version](https://badge.fury.io/py/mikeio.svg)](https://badge.fury.io/py/mikeio)
 ![OS](https://img.shields.io/badge/OS-Windows%20%7C%20Linux-blue)
 ![Downloads](https://img.shields.io/pypi/dm/mikeio)
-[![License: BSD-3-Clause](https://img.shields.io/badge/License-BSD--3--Clause-blue.svg)](https://github.com/DHI/mikeio/blob/main/License.txt)
+[![License: BSD-3-Clause](https://img.shields.io/badge/License-BSD--3--Clause-blue.svg)](https://github.com/DHI/mikeio/blob/main/LICENSE)
 
 Read, write and manipulate dfs0, dfs1, dfs2, dfs3, dfsu and mesh files.
 
@@ -88,4 +88,4 @@ Contributions are welcome — see [CONTRIBUTING.md](https://github.com/DHI/mikei
 
 ## License
 
-[BSD-3-Clause](https://github.com/DHI/mikeio/blob/main/License.txt)
+[BSD-3-Clause](https://github.com/DHI/mikeio/blob/main/LICENSE)
