@@ -1,4 +1,4 @@
-# ADR-011: Plotting Is for a Quick Look
+# ADR-011: Plotting Is a Quick Look With One Way to Do Each Thing
 
 **Status:** Accepted
 **Date:** 2026-11
@@ -7,7 +7,14 @@ Amends [ADR-006](006-matplotlib-style-plotting.md).
 
 ## Context
 
-ADR-006 added a `.plot` accessor so users can look at their data quickly. Since then the plotting code has grown options aimed at polished output: mesh refinement, colorbar toggles, outline toggles, polar-plot layout. That code accounts for a large share of open plotting issues (#914, #1017, #1024, #1025), and the maintainer's time is limited.
+ADR-006 added a `.plot` accessor so users can look at their data quickly. The plotting API has since grown in layers. A `plot_type=` keyword came first (2020, `8ec135fc`). Methods such as `.contourf()` were added later (2022, `ecb3f74f`) without retiring it. The result is several ways to do the same thing:
+
+- `geometry.plot(plot_type="contourf")` and `geometry.plot.contourf()`;
+- `patch` on flexible-mesh and spectrum plots, `pcolormesh` on grids, for the same "colour each cell" concept (the spectrum `patch` calls `ax.pcolormesh`);
+- `cmin`/`cmax` on vertical profiles, `vmin`/`vmax` everywhere else;
+- `rmin`/`rmax` duplicating `ax.set_rmin()`/`ax.set_rmax()`.
+
+Grid plots always draw a colorbar, while FM plots accept `add_colorbar`. Signatures differ in argument order and in whether `title` is named (#969). The maintainer could not tell from the code which of `plot_type=` or the methods was the canonical way. If the person who maintains an API can't tell, its users can't either.
 
 ## Decision
 
@@ -17,19 +24,23 @@ MIKE IO plotting exists for a quick look at the data, in the style of xarray:
 da.isel(time=0).plot.contourf()
 ```
 
-It is not meant to produce report-grade figures for every use case. Users customise the returned `Axes` with matplotlib.
+It is not meant to produce report-grade figures. Users customise the returned `Axes` with matplotlib.
 
-**Call contract.** Every plotting method:
+**Rule.** One name per concept, one way to do each thing, the same signature on every geometry. Where xarray has the concept, use xarray's name. Maintenance cost breaks ties.
 
-- accepts `ax=` and returns the matplotlib `Axes`;
-- has `title`, `label`, `figsize` and `ax` as its only named kwargs, because their defaults come from MIKE metadata (item name, unit, timestep);
-- passes all other `**kwargs` to the underlying matplotlib call.
+**Call contract.** Every plotting method has the signature
 
-The one exception is flexible-mesh maps (`plot`, `patch`, `contour`, `contourf` on FM geometries). They also name `cmap`, `vmin`, `vmax`, `levels` and `show_mesh`. An FM map is several matplotlib calls (patches or tricontour, colorbar, optional mesh overlay) that have to share one colour normalisation. `PatchCollection` has no `levels` argument, so plain passthrough can't do this.
+```python
+def method(self, ax=None, *, figsize=None, title=None, label=None, add_colorbar=True, **kwargs) -> Axes
+```
 
-**Removal rule.** A plotting feature is removed when it is both little used and costly to maintain. Usage evidence is the documentation and the issue tracker. A feature that is unused but implemented as a thin wrapper over one matplotlib call stays. Removing it would break users and save almost no code.
+and returns the matplotlib `Axes`. `add_colorbar` appears only on methods that draw a colorbar. `title` and `label` default to MIKE metadata (item name, unit, timestep). All other `**kwargs` go to the underlying matplotlib call.
 
-**Dependency.** matplotlib remains a required dependency. Making it optional would add an import guard, a code path without matplotlib, and a CI job to test that path. That is more maintenance, not less.
+Flexible-mesh maps additionally name `cmap`, `vmin`, `vmax`, `levels`, `show_mesh` and `show_outline`. An FM map is several matplotlib calls (patches or tricontour, colorbar, optional mesh and outline overlays) that have to share one colour normalisation. `PatchCollection` has no `levels` argument, so plain passthrough can't do this. Spectrum plots additionally name `r_as_periods`, which needs knowledge of the spectral geometry.
+
+**Scope of alignment.** Names, argument order and the shared aspect/label code are aligned across the existing plotters (#969). New plotters (for `Grid1D`, `Grid3D`, vertical columns, spectral geometries) and a `Plotter` Protocol are not added. They would grow the API, not streamline it.
+
+**Dependency.** matplotlib remains a required dependency. Making it optional would add an import guard, a code path without matplotlib, and a CI job to test that path.
 
 ## Changes
 
@@ -37,25 +48,35 @@ Deprecated in 3.5 with `FutureWarning`, removed in 4.0:
 
 | Item | Replacement |
 |---|---|
-| `n_refinements` | none |
-| `show_outline` | `da.geometry.plot.outline(ax=ax)` |
-| `add_colorbar=False` | remove the colorbar axes: `ax.figure.axes[-1].remove()` |
+| `plot_type=` keyword | the method of that name: `.contourf()`, `.mesh()`, `.outline()`, … |
+| `plot_type="shaded"` | none; `ax.tripcolor(..., shading="gouraud")` |
+| `.patch()` on FM and spectrum plots | `.pcolormesh()` |
 | `cmin`, `cmax` | `vmin`, `vmax` |
-| `rmin` (spectrum) | `ax.set_rmin(...)` |
+| `rmin`, `rmax` on spectrum plots | `ax.set_rmin()`, `ax.set_rmax()` |
+| `n_refinements` | none |
 | `Dfsu2DV.plot_vertical_profile` | `DataArray.plot()` |
 
-Changed in 4.0 without deprecation, since nothing raises: the hard-coded compass gridlines and the `::2` tick stride in polar spectrum plots are dropped.
+Added in 3.5:
 
-Every plotting method stays, along with `rmax` and `r_as_periods`.
+- `.pcolormesh()` on FM and spectrum plots;
+- `add_colorbar` on grid plots, which until now always drew one.
+
+Changed in 4.0 without deprecation, since nothing raises a warning:
+
+- arguments after `ax` become keyword-only;
+- `GeometryFMPlotter.mesh` and `.outline` take `ax` first, like every other method;
+- the hard-coded compass gridlines and the `::2` tick stride in polar spectrum plots are dropped.
 
 ## Alternatives Considered
 
+- **Remove only what is little used and costly** (the first draft of this ADR): Keeps cheap duplicates such as `plot_type=` alongside the methods, which is what confuses users.
 - **Keep only thin wrappers over a single matplotlib call**: Removes flexible-mesh plotting, which is the main reason MIKE IO has plotting at all.
-- **Remove everything the docs never use** (`imshow`, `pcolormesh`, geometry `contour`/`contourf`, `boundary_nodes`): `pcolormesh` is the default for `Grid2D.plot()`, and the others are thin. Removing them breaks users and saves little.
-- **matplotlib as an optional extra**: Discussed under *Dependency* above.
+- **Complete #969 including new plotters and a Protocol**: Makes the surface uniform by growing it.
+- **matplotlib as an optional extra**: See *Dependency*.
 
 ## Consequences
 
-- `_plot_map` and the polar spectrum code get simpler in 4.0. Most of the maintenance burden sits there, not in the number of methods.
+- Each plot type has one name, and the same name on every geometry where it applies.
+- `_plot_map` and the polar spectrum code get simpler in 4.0.
 - Users who need publication-quality figures customise with matplotlib.
-- Point-in-polygon tests in geometry code move off `matplotlib.path`. matplotlib stays required, but geometry should not depend on a plotting library.
+- Point-in-polygon tests in geometry code move off `matplotlib.path`, so geometry does not depend on a plotting library.
