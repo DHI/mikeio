@@ -208,7 +208,6 @@ class Dfs0:
             items=item_infos,
             title=self.title,
             custom_blocks=self.custom_blocks,
-            validate=False,
         )
 
         # select time steps

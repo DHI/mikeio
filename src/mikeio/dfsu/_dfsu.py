@@ -503,7 +503,6 @@ class Dfsu2DH:
             items=item_infos,
             geometry=geometry,
             title=self.title,
-            validate=False,
             dt=self.timestep,
         )
 

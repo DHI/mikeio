@@ -71,7 +71,8 @@ class Dataset:
     data:
         DataArray, list of DataArrays or dict of DataArrays
     validate:
-        Optional validation of consistency of data arrays.
+        Deprecated and ignored. Dataset always validates consistency.
+        Will be removed in a future version.
     title:
         Title of the dataset, by default "".
     custom_blocks:
@@ -107,13 +108,21 @@ class Dataset:
     def __init__(
         self,
         data: Mapping[str, DataArray] | Sequence[DataArray],
-        validate: bool = True,
+        validate: bool | None = None,
         title: str = "",
         custom_blocks: Mapping[str, Any] | None = None,
     ):
+        if validate is not None:
+            warnings.warn(
+                "The validate argument is deprecated and will be removed in a future version. "
+                "Dataset always validates consistency of its DataArrays.",
+                FutureWarning,
+                stacklevel=2,
+            )
+
         data_vars = self._dataarrays_as_mapping(data)
 
-        if validate:
+        if data_vars:
             first, *rest = data_vars.values()
             for da in rest:
                 first._is_compatible(da)
@@ -135,7 +144,7 @@ class Dataset:
         *,
         geometry: Any | None = None,
         zn: NDArray[np.floating] | None = None,
-        validate: bool = True,
+        validate: bool | None = None,
         title: str = "",
         custom_blocks: Mapping[str, Any] | None = None,
         dt: float = 1.0,
@@ -155,7 +164,8 @@ class Dataset:
         zn: NDArray[np.floating], optional
             Z-coordinates of the DataArrays, by default None
         validate: bool, optional
-            Validate the DataArrays, by default True
+            Deprecated and ignored. Dataset always validates consistency.
+            Will be removed in a future version.
         title: str, optional
             Title of the dataset, by default ""
         custom_blocks: Mapping[str, Any], optional
@@ -165,6 +175,14 @@ class Dataset:
             Dummy time step in seconds, by default 1.0
 
         """
+        if validate is not None:
+            warnings.warn(
+                "The validate argument is deprecated and will be removed in a future version. "
+                "Dataset always validates consistency of its DataArrays.",
+                FutureWarning,
+                stacklevel=2,
+            )
+
         item_infos = Dataset._parse_items(items, len(data))
 
         data_vars = {
@@ -174,9 +192,7 @@ class Dataset:
             for dd, it in zip(data, item_infos)
         }
 
-        return Dataset(
-            data_vars, validate=validate, title=title, custom_blocks=custom_blocks
-        )
+        return Dataset(data_vars, title=title, custom_blocks=custom_blocks)
 
     @property
     def values(self) -> None:
@@ -443,7 +459,6 @@ class Dataset:
 
         return Dataset(
             data=res,
-            validate=False,
             title=self.title,
             custom_blocks=self.custom_blocks,
         )
@@ -465,7 +480,6 @@ class Dataset:
 
         return Dataset(
             data=res,
-            validate=False,
             title=self.title,
             custom_blocks=self.custom_blocks,
         )
@@ -517,7 +531,6 @@ class Dataset:
 
         return Dataset(
             data=res,
-            validate=False,
             title=self.title,
             custom_blocks=self.custom_blocks,
         )
@@ -719,7 +732,6 @@ class Dataset:
                 }
                 return Dataset(
                     data=data_vars,
-                    validate=False,
                     title=self.title,
                     custom_blocks=self.custom_blocks,
                 )
@@ -731,7 +743,6 @@ class Dataset:
             data_vars = {v: self._data_vars[v] for v in key}
             return Dataset(
                 data=data_vars,
-                validate=False,
                 title=self.title,
                 custom_blocks=self.custom_blocks,
             )
@@ -844,7 +855,6 @@ class Dataset:
         ]
         return Dataset(
             data=res,
-            validate=False,
             title=self.title,
             custom_blocks=self.custom_blocks,
         )
@@ -930,7 +940,6 @@ class Dataset:
         ]
         return Dataset(
             data=res,
-            validate=False,
             title=self.title,
             custom_blocks=self.custom_blocks,
         )
@@ -1015,14 +1024,12 @@ class Dataset:
                 das = [da.interp(x=x, y=y) for da in self]
             ds = Dataset(
                 das,
-                validate=False,
                 title=self.title,
                 custom_blocks=self.custom_blocks,
             )
         else:
             ds = Dataset(
                 [da for da in self],
-                validate=False,
                 title=self.title,
                 custom_blocks=self.custom_blocks,
             )
@@ -1241,7 +1248,7 @@ class Dataset:
 
         interpolant = self.geometry.get_2d_interpolant(xy, **kwargs)
         das = [da.interp_like(geom, interpolant=interpolant) for da in self]
-        ds = Dataset(das, validate=False, custom_blocks=self.custom_blocks)
+        ds = Dataset(das, custom_blocks=self.custom_blocks)
 
         if time is not None:
             ds = ds.interp_time(time)
@@ -1439,7 +1446,6 @@ class Dataset:
 
             return Dataset(
                 [da],
-                validate=False,
                 title=self.title,
                 custom_blocks=self.custom_blocks,
             )
@@ -1450,7 +1456,6 @@ class Dataset:
             }
             return Dataset(
                 data=res,
-                validate=False,
                 title=self.title,
                 custom_blocks=self.custom_blocks,
             )
@@ -1551,7 +1556,6 @@ class Dataset:
                 )
                 return Dataset(
                     [da],
-                    validate=False,
                     title=self.title,
                     custom_blocks=self.custom_blocks,
                 )
@@ -1563,7 +1567,6 @@ class Dataset:
                     res.append(qd)
                 return Dataset(
                     data=res,
-                    validate=False,
                     title=self.title,
                     custom_blocks=self.custom_blocks,
                 )
@@ -1583,7 +1586,6 @@ class Dataset:
 
             return Dataset(
                 data=res,
-                validate=False,
                 title=self.title,
                 custom_blocks=self.custom_blocks,
             )
