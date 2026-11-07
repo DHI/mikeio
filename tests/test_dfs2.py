@@ -1,3 +1,4 @@
+from collections.abc import Callable
 from pathlib import Path
 import datetime
 import platform
@@ -1045,41 +1046,39 @@ def test_append_mismatch_geometry(tmp_path: Path) -> None:
     platform.system() != "Linux",
     reason="File descriptor counting via /proc only works on Linux",
 )
-def test_dfs2_init_closes_file_handle() -> None:
+def test_dfs2_init_closes_file_handle(count_fds: Callable[[str], int]) -> None:
     """Dfs2.__init__ must not leak a file handle.
 
     Dfs2.__init__ opens a Dfs2FileOpen handle to read spatial axis info
     and must close it before returning.
     """
-    from conftest import _count_fds_for_file
-
     filename = "tests/testdata/eq.dfs2"
+    before = count_fds(filename)
     instances = []
     for _ in range(50):
         instances.append(mikeio.Dfs2(filename))
 
-    assert _count_fds_for_file(filename) == 0
+    assert count_fds(filename) == before
 
 
 @pytest.mark.skipif(
     platform.system() != "Linux",
     reason="File descriptor counting via /proc only works on Linux",
 )
-def test_dfs2_read_closes_file_handle() -> None:
+def test_dfs2_read_closes_file_handle(count_fds: Callable[[str], int]) -> None:
     """Dfs2.read() must not leak file handles.
 
     Each read() opens a Dfs2FileOpen handle via _open();
     it must be closed before returning.
     """
-    from conftest import _count_fds_for_file
-
     filename = "tests/testdata/eq.dfs2"
+    before = count_fds(filename)
     results = []
     for _ in range(50):
         dfs = mikeio.Dfs2(filename)
         results.append(dfs.read())
 
-    assert _count_fds_for_file(filename) == 0
+    assert count_fds(filename) == before
 
 
 def test_read_items_accepts_numpy_integers() -> None:

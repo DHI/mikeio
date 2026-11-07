@@ -1,8 +1,12 @@
 """Shared test fixtures and utilities."""
 
+import gc
 import os
 import platform
+from collections.abc import Callable
 from pathlib import Path
+
+import pytest
 
 
 def _count_fds_for_file(filename: str) -> int:
@@ -14,6 +18,7 @@ def _count_fds_for_file(filename: str) -> int:
     if platform.system() != "Linux":
         return 0
 
+    gc.collect()  # release handles held only by unreachable objects, e.g. old tracebacks
     target = str(Path(filename).resolve())
     count = 0
     fd_dir = "/proc/self/fd"
@@ -25,3 +30,9 @@ def _count_fds_for_file(filename: str) -> int:
         except OSError:
             continue
     return count
+
+
+@pytest.fixture
+def count_fds() -> Callable[[str], int]:
+    """Return a function counting this process's open descriptors on a file."""
+    return _count_fds_for_file

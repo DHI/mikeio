@@ -1,3 +1,4 @@
+from collections.abc import Callable
 import platform
 import shutil
 from pathlib import Path
@@ -1059,20 +1060,19 @@ def test_dfsu_to_xarray_has_element_coordinates() -> None:
     platform.system() != "Linux",
     reason="File descriptor counting via /proc only works on Linux",
 )
-def test_dfsu_read_closes_file_handle() -> None:
+def test_dfsu_read_closes_file_handle(count_fds: Callable[[str], int]) -> None:
     """Dfsu read must not leak file handles.
 
     Each read() opens a DfsuFile; it must be closed before returning.
     """
-    from conftest import _count_fds_for_file
-
     filename = "tests/testdata/HD2D.dfsu"
+    before = count_fds(filename)
     results = []
     for _ in range(50):
-        dfs = mikeio.open(filename)
+        dfs = mikeio.Dfsu2DH(filename)
         results.append(dfs.read())
 
-    assert _count_fds_for_file(filename) == 0
+    assert count_fds(filename) == before
 
 
 def test_write_dfsu_with_title(tmp_path: Path) -> None:

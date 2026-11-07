@@ -1,3 +1,4 @@
+from collections.abc import Callable
 from pathlib import Path
 import platform
 
@@ -222,37 +223,34 @@ def test_interp_onepoint_dfs1() -> None:
     platform.system() != "Linux",
     reason="File descriptor counting via /proc only works on Linux",
 )
-def test_count_open_fds_sanity_check() -> None:
-    """Verify _count_fds_for_file detects mikecore file handles."""
-    from conftest import _count_fds_for_file
-
+def test_count_open_fds_sanity_check(count_fds: Callable[[str], int]) -> None:
+    """Verify the count_fds fixture detects mikecore file handles."""
     filename = "tests/testdata/random.dfs1"
-    assert _count_fds_for_file(filename) == 0
+    before = count_fds(filename)
 
     dfs = DfsFileFactory.DfsGenericOpen(filename)
     try:
-        assert _count_fds_for_file(filename) >= 1, "opening a file must increase FD count"
+        assert count_fds(filename) > before, "opening a file must increase FD count"
     finally:
         dfs.Close()
 
-    assert _count_fds_for_file(filename) == 0, "closing a file must restore FD count"
+    assert count_fds(filename) == before, "closing a file must restore FD count"
 
 
 @pytest.mark.skipif(
     platform.system() != "Linux",
     reason="File descriptor counting via /proc only works on Linux",
 )
-def test_dfs1_init_closes_file_handle() -> None:
+def test_dfs1_init_closes_file_handle(count_fds: Callable[[str], int]) -> None:
     """Dfs1.__init__ must not leak a file handle.
 
     Before the fix, Dfs1.__init__ stored the open handle in self._dfs
     without closing it, so each live instance held one file descriptor.
     """
-    from conftest import _count_fds_for_file
-
     filename = "tests/testdata/random.dfs1"
+    before = count_fds(filename)
     instances = []
     for _ in range(50):
         instances.append(mikeio.Dfs1(filename))
 
-    assert _count_fds_for_file(filename) == 0
+    assert count_fds(filename) == before

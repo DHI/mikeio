@@ -1,3 +1,4 @@
+from collections.abc import Callable
 from pathlib import Path
 import platform
 
@@ -294,20 +295,19 @@ def test_append_dfs3(tmp_path: Path) -> None:
     platform.system() != "Linux",
     reason="File descriptor counting via /proc only works on Linux",
 )
-def test_dfs3_init_closes_file_handle() -> None:
+def test_dfs3_init_closes_file_handle(count_fds: Callable[[str], int]) -> None:
     """Dfs3._read_dfs3_header must not leak a file handle.
 
     Before the fix, _read_dfs3_header stored the open handle in
     self._dfs without closing it.
     """
-    from conftest import _count_fds_for_file
-
     filename = "tests/testdata/Grid1.dfs3"
+    before = count_fds(filename)
     instances = []
     for _ in range(50):
         instances.append(mikeio.Dfs3(filename))
 
-    assert _count_fds_for_file(filename) == 0
+    assert count_fds(filename) == before
 
 
 def test_read_with_title() -> None:
