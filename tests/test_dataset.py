@@ -1,5 +1,6 @@
 from pathlib import Path
 from datetime import datetime
+from typing import Any
 import numpy as np
 import pandas as pd
 import pytest
@@ -84,7 +85,8 @@ def test_properties(ds1: Dataset) -> None:
     assert ds1.shape == (nt, ne)
     assert ds1.dims == ("time", "x")
     assert ds1.geometry.nx == 7
-    assert ds1._zn is None
+    with pytest.raises(AttributeError, match="has no z-coordinates"):
+        _ = ds1.z.nodes
 
     assert isinstance(ds1.items[0], ItemInfo)
 
@@ -145,6 +147,113 @@ def test_index_with_attribute() -> None:
     assert (
         ds["Foo"] is ds.Foo  # type: ignore
     )  # This is now modfied, but both methods points to the same object
+
+
+def test_item_named_like_reserved_property(tmp_path: Path) -> None:
+    # An item whose safe-name matches a read-only Dataset property (e.g. the
+    # z-coordinate accessor) must not crash construction by shadowing it.
+    # Regression for the read-only `z` property added in #977: dfs0 files can
+    # carry a vertical-coordinate item literally named "z".
+    time = pd.date_range(start=datetime(2000, 1, 1), freq="s", periods=3)
+    da_z = mikeio.DataArray(name="z", data=np.zeros(3), time=time)
+    da_foo = mikeio.DataArray(name="Foo", data=np.ones(3), time=time)
+
+    ds = mikeio.Dataset([da_z, da_foo])
+
+    # item is reachable via indexing
+    assert ds["z"].name == "z"
+    # the reserved attribute still resolves to the z-accessor, not the item
+    assert ds.z is not ds["z"]
+
+    # survives a dfs0 round-trip (the exact modelskill failure path)
+    fp = tmp_path / "z_item.dfs0"
+    ds.to_dfs(fp)
+    ds2 = mikeio.read(fp)
+    assert ds2["z"].name == "z"
+
+
+def test_item_named_like_reserved_method() -> None:
+    # An item whose safe-name matches a Dataset method (e.g. "mean") must not
+    # shadow the method on the instance; the method stays callable and the item
+    # is reachable via indexing.
+    time = pd.date_range(start=datetime(2000, 1, 1), freq="s", periods=3)
+    da_mean = mikeio.DataArray(name="mean", data=np.arange(3.0), time=time)
+
+    ds = mikeio.Dataset([da_mean])
+
+    assert ds["mean"].name == "mean"
+    # ds.mean is the aggregation method, not the item
+    reduced = ds.mean(axis="time")
+    assert isinstance(reduced, Dataset)
+
+
+def test_item_named_like_instance_attr() -> None:
+    # The collision guard must also cover instance attributes set in __init__
+    # (plot, title, _data_vars), not just class members — an item named "plot"
+    # would otherwise clobber the DatasetPlotter and break ds.plot.scatter(...).
+    time = pd.date_range(start=datetime(2000, 1, 1), freq="s", periods=3)
+    da = mikeio.DataArray(name="Foo", data=np.ones(3), time=time)
+
+    ds = mikeio.Dataset([da])
+    # add an item named "plot" after construction (routes through _set_name_attr)
+    ds["plot"] = mikeio.DataArray(name="plot", data=np.zeros(3), time=time)
+
+    # the item is reachable via indexing
+    assert ds["plot"].name == "plot"
+    # ds.plot is still the plotter, not the item
+    assert ds.plot is not ds["plot"]
+
+
+def test_aggregate_over_items_produces_method_named_item() -> None:
+    # aggregate(axis="items") names the result after the aggregation function
+    # ("nanmean"), which collides with Dataset.nanmean. This is the documented
+    # operation the ADR cites as the reason the collision skip is silent.
+    time = pd.date_range(start=datetime(2000, 1, 1), freq="s", periods=3)
+    ds = mikeio.Dataset(
+        [
+            mikeio.DataArray(name="A", data=np.ones(3), time=time),
+            mikeio.DataArray(name="B", data=np.zeros(3), time=time),
+        ]
+    )
+
+    agg = ds.aggregate(axis="items")
+
+    assert "nanmean" in agg.names
+    assert agg["nanmean"].name == "nanmean"  # item reachable by key
+    assert callable(agg.nanmean)  # method not shadowed by the item
+
+
+def test_rename_item_into_reserved_name() -> None:
+    # rename routes through _del_name_attr (old name) and _set_name_attr (new
+    # name); renaming an item to a method-like name must not shadow the method.
+    time = pd.date_range(start=datetime(2000, 1, 1), freq="s", periods=3)
+    ds = mikeio.Dataset([mikeio.DataArray(name="Foo", data=np.ones(3), time=time)])
+
+    ds2 = ds.rename({"Foo": "mean"})
+
+    assert ds2["mean"].name == "mean"  # item reachable by key
+    assert callable(ds2.mean)  # method not shadowed by the renamed item
+
+
+def test_init_instance_attrs_are_collision_protected() -> None:
+    # Drift guard: every non-item attribute __init__ sets on the instance (plot,
+    # title, ...) must be protected from being clobbered by an item of the same
+    # name. The reservation list is maintained by hand; if a new instance
+    # attribute is added to __init__ without reserving it, this test fails.
+    time = pd.date_range(start=datetime(2000, 1, 1), freq="s", periods=3)
+    base = mikeio.Dataset([mikeio.DataArray(name="Foo", data=np.ones(3), time=time)])
+    # instance attributes that are not the item dict and not items themselves
+    instance_attrs = set(vars(base)) - set(base.names) - {"_data_vars"}
+    assert instance_attrs  # sanity: there is something to protect (plot, title)
+
+    for attr in instance_attrs:
+        original_type = type(getattr(base, attr))
+        ds = mikeio.Dataset([mikeio.DataArray(name="Foo", data=np.ones(3), time=time)])
+        ds[attr] = mikeio.DataArray(name=attr, data=np.zeros(3), time=time)
+        # the real instance attribute is preserved, not replaced by the item
+        assert type(getattr(ds, attr)) is original_type
+        # and the item is still reachable by key
+        assert ds[attr].name == attr
 
 
 def test_getitem_time_string_not_supported(ds3: Dataset) -> None:
@@ -1018,6 +1127,24 @@ def test_concat_dataarray_keep_first() -> None:
     assert da3.to_numpy()[2] == 3.0
 
 
+def test_concat_duplicate_timestamps_raises() -> None:
+    # DA diagnostic output can have duplicate timestamps at correction times
+    time = pd.DatetimeIndex(["2000-01-01", "2000-01-01", "2000-01-02"])
+    ds1 = mikeio.Dataset.from_numpy(data=[np.zeros(3)], time=time)
+    ds2 = mikeio.Dataset.from_numpy(
+        data=[np.ones(2)], time=pd.date_range("2000-01-03", periods=2)
+    )
+    with pytest.raises(ValueError, match="duplicate timestamps"):
+        mikeio.Dataset.concat([ds1, ds2])
+
+
+def test_concat_invalid_keep_raises() -> None:
+    ds1 = mikeio.read("tests/testdata/tide1.dfs1", time=[0, 1])
+    ds2 = mikeio.read("tests/testdata/tide1.dfs1", time=[2, 3])
+    with pytest.raises(ValueError, match="Invalid keep"):
+        mikeio.Dataset.concat([ds1, ds2], keep="lasst")  # type: ignore
+
+
 def test_concat_by_time() -> None:
     ds1 = mikeio.read("tests/testdata/tide1.dfs1")
     ds2 = mikeio.read("tests/testdata/tide2.dfs1") + 0.5  # add offset
@@ -1185,8 +1312,8 @@ def test_concat_dfsu3d() -> None:
     assert isinstance(ds1.geometry, mikeio.spatial.GeometryFM3D)
     assert isinstance(ds3.geometry, mikeio.spatial.GeometryFM3D)
     assert ds3.geometry.n_elements == ds1.geometry.n_elements
-    assert ds3._zn.shape == ds._zn.shape  # type: ignore
-    assert np.all(ds3._zn == ds._zn)
+    assert ds3.z.nodes.shape == ds.z.nodes.shape
+    assert np.all(ds3.z.nodes == ds.z.nodes)
 
 
 def test_concat_dfsu3d_single_timesteps() -> None:
@@ -1417,6 +1544,23 @@ def test_fillna() -> None:
     assert np.isnan(ds["foo"].to_numpy()[0])
 
 
+def test_astype() -> None:
+    ds = mikeio.Dataset(
+        {
+            "foo": mikeio.DataArray(np.array([1.0, 2.0], dtype=np.float32)),
+            "bar": mikeio.DataArray(np.array([3.0, 4.0], dtype=np.float32)),
+        }
+    )
+
+    ds64 = ds.astype(np.float64)
+
+    assert ds64["foo"].to_numpy().dtype == np.float64
+    assert ds64["bar"].to_numpy().dtype == np.float64
+
+    # original dataset is not modified
+    assert ds["foo"].to_numpy().dtype == np.float32
+
+
 def test_safe_name() -> None:
     from mikeio.dataset._dataset import _to_safe_name
 
@@ -1427,3 +1571,251 @@ def test_safe_name() -> None:
     bad_name = "MSLP., 1:st level\n 2nd chain"
     safe_name = "MSLP_1_st_level_2nd_chain"
     assert _to_safe_name(bad_name) == safe_name
+
+
+# === Title propagation tests ===
+
+
+@pytest.fixture
+def titled_ds() -> Dataset:
+    nt = 10
+    ne = 7
+    d1 = np.zeros([nt, ne]) + 0.1
+    d2 = np.zeros([nt, ne]) + 0.2
+    data = [d1, d2]
+    time = pd.date_range(start=datetime(2000, 1, 1), freq="s", periods=nt)
+    items = [ItemInfo("Foo"), ItemInfo("Bar")]
+    return Dataset.from_numpy(
+        data=data,
+        time=time,
+        items=items,
+        geometry=mikeio.Grid1D(nx=7, dx=1),
+        title="Test Title",
+    )
+
+
+def test_title_default_empty() -> None:
+    ds = Dataset.from_numpy(
+        data=[np.zeros(5)],
+        time=pd.date_range("2000", periods=5, freq="s"),
+        items=[ItemInfo("X")],
+    )
+    assert ds.title == ""
+
+
+def test_title_property(titled_ds: Dataset) -> None:
+    assert titled_ds.title == "Test Title"
+    titled_ds.title = "New Title"
+    assert titled_ds.title == "New Title"
+
+
+def test_title_preserved_isel(titled_ds: Dataset) -> None:
+    assert titled_ds.isel(time=0).title == "Test Title"
+    assert titled_ds.isel(time=slice(0, 3)).title == "Test Title"
+    assert titled_ds.isel(x=0).title == "Test Title"
+
+
+def test_title_preserved_sel(titled_ds: Dataset) -> None:
+    assert titled_ds.sel(time=titled_ds.time[0]).title == "Test Title"
+
+
+def test_title_preserved_squeeze(titled_ds: Dataset) -> None:
+    ds = titled_ds.isel(x=0)
+    assert ds.squeeze().title == "Test Title"
+
+
+def test_title_preserved_fillna(titled_ds: Dataset) -> None:
+    assert titled_ds.fillna(0.0).title == "Test Title"
+
+
+def test_title_preserved_dropna(titled_ds: Dataset) -> None:
+    assert titled_ds.dropna().title == "Test Title"
+
+
+def test_title_preserved_interp_time(titled_ds: Dataset) -> None:
+    assert titled_ds.interp_time(dt=2).title == "Test Title"
+
+
+def test_title_preserved_aggregate(titled_ds: Dataset) -> None:
+    assert titled_ds.aggregate(axis="time").title == "Test Title"
+    assert titled_ds.aggregate(axis="items").title == "Test Title"
+
+
+def test_title_preserved_concat(titled_ds: Dataset) -> None:
+    ds2 = titled_ds.copy()
+    ds2.time = pd.date_range(start=datetime(2000, 1, 2), freq="s", periods=10)
+    result = Dataset.concat([titled_ds, ds2])
+    assert result.title == "Test Title"
+
+
+def test_title_preserved_merge(titled_ds: Dataset) -> None:
+    ds_a = titled_ds[["Foo"]]
+    ds_b = titled_ds[["Bar"]]
+    result = Dataset.merge([ds_a, ds_b])
+    assert result.title == "Test Title"
+
+
+def test_title_preserved_arithmetic(titled_ds: Dataset) -> None:
+    assert (titled_ds + 1).title == "Test Title"
+    assert (titled_ds * 2).title == "Test Title"
+    assert (titled_ds - titled_ds).title == "Test Title"
+
+
+def test_title_preserved_getitem(titled_ds: Dataset) -> None:
+    assert titled_ds[["Foo"]].title == "Test Title"
+    assert titled_ds[["Foo", "Bar"]].title == "Test Title"
+
+
+def test_title_preserved_copy(titled_ds: Dataset) -> None:
+    assert titled_ds.copy().title == "Test Title"
+
+
+def test_title_in_repr(titled_ds: Dataset) -> None:
+    r = repr(titled_ds)
+    assert "title: Test Title" in r
+
+
+def test_title_not_in_repr_when_empty() -> None:
+    ds = Dataset.from_numpy(
+        data=[np.zeros(5)],
+        time=pd.date_range("2000", periods=5, freq="s"),
+        items=[ItemInfo("X")],
+    )
+    assert "title:" not in repr(ds)
+
+
+# === Custom block tests ===
+
+
+def _tiny_ds(**kwargs: Any) -> Dataset:
+    return Dataset.from_numpy(
+        data=[np.zeros(5)],
+        time=pd.date_range("2000", periods=5, freq="s"),
+        items=[ItemInfo("X")],
+        **kwargs,
+    )
+
+
+@pytest.fixture
+def blocks_ds() -> Dataset:
+    """Grid2D dataset with a custom block, so isel(y=0) changes the geometry type."""
+    nt, ny, nx = 6, 3, 4
+    data = [np.zeros([nt, ny, nx]) + 0.1, np.zeros([nt, ny, nx]) + 0.2]
+    return Dataset.from_numpy(
+        data=data,
+        time=pd.date_range(start=datetime(2000, 1, 1), freq="s", periods=nt),
+        items=[ItemInfo("Foo"), ItemInfo("Bar")],
+        geometry=mikeio.Grid2D(nx=nx, dx=1.0, ny=ny, dy=1.0, projection="UTM-33"),
+        title="Test Title",
+        custom_blocks={
+            "M21_Misc": np.array([0, 0, -900, 10, 0, 0, 0], dtype=np.float32)
+        },
+    )
+
+
+def test_custom_blocks_default_empty() -> None:
+    assert _tiny_ds().custom_blocks == {}
+
+
+def test_custom_blocks_setter_replaces_all(blocks_ds: Dataset) -> None:
+    blocks_ds.custom_blocks = {"Other": np.array([1.0], dtype=np.float32)}
+    assert list(blocks_ds.custom_blocks) == ["Other"]
+
+    blocks_ds.custom_blocks = {}
+    assert blocks_ds.custom_blocks == {}
+
+
+def test_custom_blocks_setter_copies_the_input_value() -> None:
+    """A Dataset owns its blocks, so an assigned value is copied."""
+    values = np.array([1.0, 2.0], dtype=np.float32)
+    ds = _tiny_ds(custom_blocks={"B": values})
+
+    assert ds.custom_blocks["B"] is not values
+    assert not np.shares_memory(ds.custom_blocks["B"], values)
+
+    values[0] = 99.0  # editing the caller's array does not reach the Dataset
+    assert ds.custom_blocks["B"][0] == pytest.approx(1.0)
+
+
+def test_custom_blocks_setter_stores_values_as_given(blocks_ds: Dataset) -> None:
+    """What a block may hold is a dfs matter, checked when a file is written.
+
+    A Dataset therefore keeps whatever it was handed - unconverted, and unchecked
+    even when it could never be written. The write-time tests in test_dfs2.py are
+    where the rules live.
+    """
+    blocks_ds.custom_blocks = {
+        "List": [0, 0, -900, 10, 0, 0, 0],  # no dtype until it is written
+        "Ints": np.array([1, 2], dtype=np.int64),  # a dtype dfs cannot store
+        "2D": np.zeros((2, 2), dtype=np.float32),
+        "": np.array([1.0], dtype=np.float32),  # not even a usable name
+    }
+
+    assert blocks_ds.custom_blocks["List"] == [0, 0, -900, 10, 0, 0, 0]
+    assert blocks_ds.custom_blocks["Ints"].dtype == np.int64
+    assert blocks_ds.custom_blocks["2D"].shape == (2, 2)
+    assert list(blocks_ds.custom_blocks) == ["List", "Ints", "2D", ""]
+
+
+def test_custom_blocks_editable_in_place(blocks_ds: Dataset) -> None:
+    blocks_ds.custom_blocks["M21_Misc"][3] = -5.0
+    assert blocks_ds.custom_blocks["M21_Misc"][3] == pytest.approx(-5.0)
+
+    blocks_ds.custom_blocks["New"] = np.array([1.0], dtype=np.float32)
+    assert sorted(blocks_ds.custom_blocks) == ["M21_Misc", "New"]
+
+    del blocks_ds.custom_blocks["M21_Misc"]
+    assert list(blocks_ds.custom_blocks) == ["New"]
+
+
+def test_custom_blocks_carried_through_dataset_operations(blocks_ds: Dataset) -> None:
+    """Blocks propagate blindly, values intact, through operations returning a Dataset.
+
+    A few representative operations, not an exhaustive sweep: the point is the
+    rule, not the catalogue. That the values survive all the way to disk is
+    proven by the round-trip tests in test_custom_blocks.py, which read them back
+    from the written file.
+    """
+    expected = blocks_ds.custom_blocks["M21_Misc"].copy()
+
+    ds2 = blocks_ds.copy()
+    ds2.time = pd.date_range(start=datetime(2000, 1, 2), freq="s", periods=6)
+
+    derived = [
+        blocks_ds.isel(time=0),
+        blocks_ds.sel(time=blocks_ds.time[0]),
+        blocks_ds + 1,
+        blocks_ds[["Foo"]],
+        blocks_ds.copy(),
+        Dataset.concat([blocks_ds, ds2]),
+        # ... including operations that change the geometry type, after which a
+        # block may no longer describe the result. Fixing that is the user's job.
+        blocks_ds.isel(y=0),  # Grid2D -> Grid1D
+        blocks_ds.mean(axis="space"),  # -> 0D
+        # selecting down to zero items must not crash on the item-less geometry
+        blocks_ds[[]],
+    ]
+
+    for ds in derived:
+        assert ds.custom_blocks.keys() == {"M21_Misc"}
+        np.testing.assert_array_equal(ds.custom_blocks["M21_Misc"], expected)
+
+
+def test_custom_blocks_of_derived_dataset_are_copies(blocks_ds: Dataset) -> None:
+    """Every Dataset owns its blocks, so editing a derived one leaves the source alone."""
+    for derived in (blocks_ds.isel(time=0), blocks_ds * 2, blocks_ds[["Foo"]]):
+        block = derived.custom_blocks["M21_Misc"]
+        assert block is not blocks_ds.custom_blocks["M21_Misc"]
+        np.testing.assert_array_equal(block, blocks_ds.custom_blocks["M21_Misc"])
+
+        block[3] = 999.0
+        assert blocks_ds.custom_blocks["M21_Misc"][3] == pytest.approx(10.0)
+
+        # the dict is a new one too, so adding a block does not add it to the source
+        derived.custom_blocks["Extra"] = np.array([1.0], dtype=np.float32)
+        assert "Extra" not in blocks_ds.custom_blocks
+
+
+def test_dataset_from_the_wrong_type_raises_type_error() -> None:
+    with pytest.raises(TypeError, match="list of DataArrays"):
+        mikeio.Dataset(np.zeros(3))  # type: ignore[arg-type]

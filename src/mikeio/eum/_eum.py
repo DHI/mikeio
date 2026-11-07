@@ -49,6 +49,8 @@ def _unit_list(eum_type: int) -> list[eumUnit]:
 
 
 class TimeAxisType(IntEnum):
+    """Type of time axis in a dfs file."""
+
     EquidistantRelative = 1
     NonEquidistantRelative = 2
     EquidistantCalendar = 3
@@ -59,6 +61,8 @@ class TimeAxisType(IntEnum):
 
 
 class TimeStepUnit(IntEnum):
+    """Unit of the time step in a dfs file."""
+
     SECOND = 1400
     MINUTE = 1401
     HOUR = 1402
@@ -1348,6 +1352,7 @@ class EUMUnit(IntEnum):
 
     @property
     def short_name(self) -> str:
+        """Abbreviated unit name, e.g. "m" for meter."""
         unit_short_names = {
             "kilometer": "km",
             "centimeter": "cm",
@@ -1389,6 +1394,15 @@ class ItemInfo:
     data_value_type: str, optional
         One of the following strings: 'Instantaneous', 'Accumulated', 'StepAccumulated', 'MeanStepBackward',
         'MeanStepForward'. Default: 'Instantaneous'
+
+    Attributes
+    ----------
+    name : str
+        User defined name of the item.
+    type : EUMType
+        EUM type of the item.
+    data_value_type : DataValueType
+        How values relate to time (Instantaneous, Accumulated, ...).
 
     Examples
     --------
@@ -1502,10 +1516,13 @@ class ItemInfo:
 
 
 class ItemInfoList(list):
+    """List of ItemInfo, e.g. Dataset.items."""
+
     def __init__(self, items: Sequence[ItemInfo]):
         super().__init__(items)
 
     def to_dataframe(self) -> pd.DataFrame:
+        """Convert to a DataFrame with name, type and unit columns."""
         data = [
             {"name": item.name, "type": item.type.name, "unit": item.unit.name}
             for item in self

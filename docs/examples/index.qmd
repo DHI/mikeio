@@ -38,12 +38,12 @@ tests/testdata
 ## Dfs0
 
 * [CMEMS *In-situ* data](dfs0/cmems_insitu.qmd)
-* [Relative time](dfs0/relative_time.qmd)
 
 ## Dfs2
 
 * [Bathymetry](dfs2/bathy.qmd)
 * [Meteo data](dfs2/gfs.qmd)
+* [Snow cover comparison](dfs2/snow.qmd)
 
 ## Dfsu
 

@@ -26,13 +26,13 @@ from ._FM_plot import (
     _plot_map,
     BoundaryPolygons,
     Polygon,
-    _set_xy_label_by_projection,  # TODO remove
     _to_polygons,  # TODO remove
 )
-from ._geometry import Geometry0D, GeometryPoint2D, _Geometry
+from ._geometry import Geometry0D, GeometryPoint2D, _Geometry, _geographic_aspect
 
 from ._grid_geometry import Grid2D
 from ._distance import xy_to_bbox
+from .._path import normalize_output_path
 
 
 if TYPE_CHECKING:
@@ -152,7 +152,7 @@ class GeometryFMPlotter:
         from matplotlib.collections import PatchCollection  # type: ignore
 
         ax = self._get_ax(ax=ax, figsize=figsize)
-        ax.set_aspect(self._plot_aspect())
+        ax.set_aspect(self.g._plot_aspect)
 
         patches = _to_polygons(self.g.node_coordinates, self.g.element_table)
         fig_obj = PatchCollection(
@@ -162,7 +162,9 @@ class GeometryFMPlotter:
         self.outline(ax=ax)
         ax.set_title(title)
         ax = self._set_plot_limits(ax)
-        _set_xy_label_by_projection(ax, self.g.projection)
+        xlabel, ylabel = self.g._axis_labels
+        ax.set_xlabel(xlabel)
+        ax.set_ylabel(ylabel)
         return ax
 
     def outline(
@@ -181,7 +183,7 @@ class GeometryFMPlotter:
 
         """
         ax = self._get_ax(ax=ax, figsize=figsize)
-        ax.set_aspect(self._plot_aspect())
+        ax.set_aspect(self.g._plot_aspect)
 
         linwid = 1.2
         out_col = "0.4"
@@ -212,7 +214,7 @@ class GeometryFMPlotter:
         import matplotlib.pyplot as plt
 
         ax = self._get_ax(ax=ax, figsize=figsize)
-        ax.set_aspect(self._plot_aspect())
+        ax.set_aspect(self.g._plot_aspect)
 
         nc = self.g.node_coordinates
         c = self.g.codes
@@ -246,13 +248,6 @@ class GeometryFMPlotter:
         ax.set_xlim(bbox.left - xybuf, bbox.right + xybuf)
         ax.set_ylim(bbox.bottom - xybuf, bbox.top + xybuf)
         return ax
-
-    def _plot_aspect(self) -> Literal["equal"] | float:
-        if self.g.is_geo:
-            mean_lat = np.mean(self.g.node_coordinates[:, 1])
-            return 1.0 / np.cos(np.pi * mean_lat / 180)
-        else:
-            return "equal"
 
 
 class _GeometryFM(_Geometry):
@@ -291,6 +286,12 @@ class _GeometryFM(_Geometry):
 
         if reindex:
             self._reindex()
+
+    @property
+    def _plot_aspect(self) -> Literal["equal"] | float:
+        if self.is_geo:
+            return _geographic_aspect(self.node_coordinates[:, 1])
+        return "equal"
 
     def _calc_element_coordinates(self) -> NDArray[np.floating]:
         element_table = self.element_table
@@ -343,6 +344,7 @@ class _GeometryFM(_Geometry):
 
     @property
     def dims(self) -> tuple[str, ...]:
+        """Named array dimensions of data on this geometry."""
         return ("element",)
 
     @property
@@ -356,6 +358,7 @@ class _GeometryFM(_Geometry):
 
     @property
     def node_ids(self) -> np.ndarray:
+        """Node ids (0-based)."""
         return self._node_ids
 
     @property
@@ -365,6 +368,7 @@ class _GeometryFM(_Geometry):
 
     @property
     def element_ids(self) -> np.ndarray:
+        """Element ids (0-based)."""
         return self._element_ids
 
     @cached_property
@@ -423,7 +427,20 @@ class _GeometryFM(_Geometry):
 
 
 class GeometryFM2D(_GeometryFM):
-    """Flexible 2d mesh geometry."""
+    """Flexible 2d mesh geometry.
+
+    Attributes
+    ----------
+    node_coordinates : np.ndarray
+        N-by-3 array of node (x, y, z) coordinates.
+    element_table
+        For each element, the 0-based indices of its nodes.
+    projection_string : str
+        Projection string (e.g. "LONG/LAT" or a WKT/UTM string).
+    plot : GeometryFMPlotter
+        Plotting accessor for the geometry (bathymetry, mesh, outline, ...).
+
+    """
 
     def __init__(
         self,
@@ -462,8 +479,9 @@ class GeometryFM2D(_GeometryFM):
                 yp - yn[j]
             ) > 0:
                 return False
-            if (yn[0] - yn[-1]) * (xp - xn[-1]) + (-xn[0] + xn[-1]) * (yp - yn[-1]) > 0:
-                return False
+        # Check closing edge (last vertex → first vertex)
+        if (yn[0] - yn[-1]) * (xp - xn[-1]) + (-xn[0] + xn[-1]) * (yp - yn[-1]) > 0:
+            return False
         return True
 
     @staticmethod
@@ -477,6 +495,7 @@ class GeometryFM2D(_GeometryFM):
 
     @property
     def geometry2d(self) -> GeometryFM2D:
+        """The 2d horizontal geometry (returns self for 2d geometries)."""
         return self
 
     @property
@@ -994,25 +1013,27 @@ class GeometryFM2D(_GeometryFM):
         self, area: Sequence[float] | Sequence[tuple[float, float]]
     ) -> np.ndarray:
         """Find 2d element ids of elements inside area."""
-        if self._area_is_bbox(area):
-            x0, y0, x1, y1 = area
-            xc = self.element_coordinates[:, 0]
-            yc = self.element_coordinates[:, 1]
-            mask = (xc >= x0) & (xc <= x1) & (yc >= y0) & (yc <= y1)
-        elif self._area_is_polygon(area):
-            polygon = np.array(area)
-            xy = self.element_coordinates[:, :2]
-            mask = self._inside_polygon(polygon, xy)
-        else:
-            raise ValueError("'area' must be bbox [x0,y0,x1,y1] or polygon")
-        elements = np.where(mask)[0]
-        if len(elements) == 0:
-            raise ValueError("No elements in selection!")
-        return elements
+        return _points_in_area(self.element_coordinates[:, :2], area)
 
     def elements_to_geometry(
         self, elements: int | Sequence[int], keepdims: bool = False
     ) -> GeometryFM2D | GeometryPoint2D:
+        """Export a selection of elements to a new geometry.
+
+        Parameters
+        ----------
+        elements : int or list[int]
+            Element indices to select
+        keepdims : bool
+            Keep the geometry as a mesh even for a single element,
+            by default False (a single element becomes a point geometry)
+
+        Returns
+        -------
+        GeometryFM2D or GeometryPoint2D
+            Geometry for the selected elements
+
+        """
         if isinstance(elements, (int, np.integer)):
             sel_elements: list[int] = [elements]
         else:
@@ -1122,7 +1143,7 @@ class GeometryFM2D(_GeometryFM):
 
         """
         builder = MeshBuilder()
-        outfilename = str(outfilename)
+        outfilename = normalize_output_path(outfilename)
 
         nc = self.node_coordinates
         builder.SetNodes(nc[:, 0], nc[:, 1], nc[:, 2], self.codes)
@@ -1145,3 +1166,21 @@ class GeometryFM2D(_GeometryFM):
                 f"Cannot reduce GeometryFM2D over {axis}, only 'element' is valid"
             )
         return Geometry0D(projection=self.projection)
+
+
+def _points_in_area(
+    xy: np.ndarray, area: Sequence[float] | Sequence[tuple[float, float]]
+) -> np.ndarray:
+    """Indices of the points in xy inside a bbox [x0,y0,x1,y1] or a polygon."""
+    if GeometryFM2D._area_is_bbox(area):
+        x0, y0, x1, y1 = area
+        x, y = xy[:, 0], xy[:, 1]
+        mask = (x >= x0) & (x <= x1) & (y >= y0) & (y <= y1)
+    elif GeometryFM2D._area_is_polygon(area):
+        mask = GeometryFM2D._inside_polygon(np.array(area), xy)
+    else:
+        raise ValueError("'area' must be bbox [x0,y0,x1,y1] or polygon")
+    elements = np.where(mask)[0]
+    if len(elements) == 0:
+        raise ValueError("No elements in selection!")
+    return elements

@@ -1,7 +1,7 @@
 from __future__ import annotations
 from functools import cached_property
 from pathlib import Path
-from typing import Any, Sequence, TYPE_CHECKING, overload
+from typing import Any, Literal, Sequence, TYPE_CHECKING, overload
 from dataclasses import dataclass
 import numpy as np
 
@@ -16,6 +16,7 @@ from ._geometry import (
     GeometryPoint3D,
     GeometryUndefined,
     _Geometry,
+    _geographic_aspect,
 )
 
 from .._interpolation import Interpolant
@@ -139,6 +140,7 @@ class Grid1D(_Geometry):
 
     @property
     def dims(self) -> tuple[str, ...]:
+        """Named array dimensions of data on this grid."""
         return ("x",)
 
     def __repr__(self) -> str:
@@ -173,6 +175,19 @@ class Grid1D(_Geometry):
         return int(np.argmin(d))
 
     def get_spatial_interpolant(self, x: float) -> Interpolant:
+        """Get weights and indices of the two nearest points for interpolation.
+
+        Parameters
+        ----------
+        x : float
+            x-coordinate of the point to interpolate to
+
+        Returns
+        -------
+        Interpolant
+            Indices and weights, weights are NaN outside the grid
+
+        """
         assert self.nx > 1, "Interpolation not possible for Grid1D with one point"
         d = np.abs(self.x - x)
         ids = np.argsort(d)[0:2]
@@ -204,10 +219,12 @@ class Grid1D(_Geometry):
 
     @property
     def origin(self) -> tuple[float, float]:
+        """Coordinates of grid origo (in projection)."""
         return self._origin
 
     @property
     def orientation(self) -> float:
+        """Grid orientation (in degrees)."""
         return self._orientation
 
     def isel(
@@ -372,26 +389,12 @@ class Grid2DPlotter:
         return ax
 
     def _set_aspect_and_labels(self, ax: Axes) -> None:
-        g = self.g
-        if g.is_spectral:
-            ax.set_xlabel("Frequency [Hz]")
-            ax.set_ylabel("Directions [degree]")
-        elif g._is_rotated:
-            ax.set_xlabel("[m]")
-            ax.set_ylabel("[m]")
-        elif g.projection == "NON-UTM":
-            ax.set_xlabel("[m]")
-            ax.set_ylabel("[m]")
-        elif g.is_geo:
-            ax.set_xlabel("Longitude [degrees]")
-            ax.set_ylabel("Latitude [degrees]")
-            mean_lat = np.mean(g.y)
-            aspect_ratio = 1.0 / np.cos(np.pi * mean_lat / 180)
-            ax.set_aspect(aspect_ratio)
-        else:
-            ax.set_xlabel("Easting [m]")
-            ax.set_ylabel("Northing [m]")
-            ax.set_aspect("equal")
+        xlabel, ylabel = self.g._axis_labels
+        ax.set_xlabel(xlabel)
+        ax.set_ylabel(ylabel)
+        aspect = self.g._plot_aspect
+        if aspect is not None:
+            ax.set_aspect(aspect)
 
 
 @dataclass
@@ -497,11 +500,28 @@ class Grid2D(_Geometry):
 
     @property
     def dims(self) -> tuple[str, ...]:
+        """Named array dimensions of data on this grid."""
         return ("y", "x")
 
     @property
     def _is_rotated(self) -> Any:
         return np.abs(self._orientation) > 1e-5
+
+    @property
+    def _axis_labels(self) -> tuple[str, str]:
+        if self.is_spectral:
+            return "Frequency [Hz]", "Directions [degree]"
+        if self._is_rotated:
+            return "[m]", "[m]"
+        return super()._axis_labels
+
+    @property
+    def _plot_aspect(self) -> Literal["equal"] | float | None:
+        if self.is_spectral or self._is_rotated or self.is_local_coordinates:
+            return None
+        if self.is_geo:
+            return _geographic_aspect(self.y)
+        return "equal"
 
     def _create_in_bbox(
         self,
@@ -743,12 +763,22 @@ class Grid2D(_Geometry):
 
         """
         coords = np.atleast_2d(coords)
-        y = coords[:, 1]
         x = coords[:, 0]
+        y = coords[:, 1]
 
-        xinside = (self.bbox.left <= x) & (x <= self.bbox.right)
-        yinside = (self.bbox.bottom <= y) & (y <= self.bbox.top)
-        return xinside & yinside
+        if self._is_rotated:
+            x, y = self._proj_to_local(x, y)
+            x_min = self.x[0] - self.dx / 2
+            x_max = self.x[-1] + self.dx / 2
+            y_min = self.y[0] - self.dy / 2
+            y_max = self.y[-1] + self.dy / 2
+        else:
+            x_min = self.bbox.left
+            x_max = self.bbox.right
+            y_min = self.bbox.bottom
+            y_max = self.bbox.top
+
+        return (x >= x_min) & (x <= x_max) & (y >= y_min) & (y <= y_max)
 
     def __contains__(self, pt: Any) -> Any:
         return self.contains(pt)
@@ -794,10 +824,18 @@ class Grid2D(_Geometry):
                 raise ValueError("x,y and coords cannot be given at the same time!")
             coords = np.column_stack([np.atleast_1d(x), np.atleast_1d(y)])
         elif x is not None:
+            if self._is_rotated:
+                raise ValueError(
+                    "Single-axis sel(x=) not supported for rotated grids; provide both x and y"
+                )
             if x < self.x[0] or x > self.x[-1]:
                 raise OutsideModelDomainError(x=x, y=None)
             return np.atleast_1d(np.argmin(np.abs(self.x - x))), None
         elif y is not None:
+            if self._is_rotated:
+                raise ValueError(
+                    "Single-axis sel(y=) not supported for rotated grids; provide both x and y"
+                )
             if y < self.y[0] or y > self.y[-1]:
                 raise OutsideModelDomainError(x=None, y=y)
             return None, np.atleast_1d(np.argmin(np.abs(self.y - y)))
@@ -810,18 +848,37 @@ class Grid2D(_Geometry):
         else:
             raise ValueError("Provide x,y or coords")
 
+    def _proj_to_local(
+        self, x: np.ndarray, y: np.ndarray
+    ) -> tuple[np.ndarray, np.ndarray]:
+        """Convert projected (world) coordinates to grid-local coordinates."""
+        cart = Cartography.CreateProjOrigin(
+            projectionString=self.projection_string,
+            east=self.origin[0],
+            north=self.origin[1],
+            orientationProj=self.orientation,
+        )
+        x_local = np.empty_like(x, dtype=float)
+        y_local = np.empty_like(y, dtype=float)
+        for k in range(len(x)):
+            x_local[k], y_local[k] = cart.Proj2Xy(x[k], y[k])
+        return x_local, y_local
+
     def _xy_to_index(self, xy: ArrayLike) -> tuple[np.ndarray, np.ndarray]:
         """Find specific points in this geometry."""
         xy = np.atleast_2d(xy)
         y = xy[:, 1]
         x = xy[:, 0]
 
+        if self._is_rotated:
+            x, y = self._proj_to_local(x, y)
+
         ii = (-999999999) * np.ones_like(x, dtype=int)
         jj = (-999999999) * np.ones_like(y, dtype=int)
 
         inside = self.contains(xy)
         if np.any(~inside):
-            raise OutsideModelDomainError(x=x[~inside], y=y[~inside])
+            raise OutsideModelDomainError(x=xy[~inside, 0], y=xy[~inside, 1])
 
         # get index in x, and y for points inside based on the grid spacing and origin
         ii = np.floor((x - (self.x[0] - self.dx / 2)) / self.dx).astype(int)
@@ -887,6 +944,8 @@ class Grid2D(_Geometry):
     ) -> Grid2D | GeometryUndefined:
         ii = range(self.nx) if ii is None else ii
         jj = range(self.ny) if jj is None else jj
+        if len(ii) == 1 and len(jj) == 1:
+            return GeometryUndefined()
         assert len(ii) > 1 and len(jj) > 1, "Index must be at least len 2"
         assert ii[-1] < self.nx and jj[-1] < self.ny, "Index out of bounds"
         di = np.diff(ii)
@@ -1174,6 +1233,7 @@ class Grid3D(_Geometry):
 
     @property
     def dims(self) -> tuple[str, ...]:
+        """Named array dimensions of data on this grid."""
         return ("z", "y", "x")
 
     @property
@@ -1246,6 +1306,7 @@ class Grid3D(_Geometry):
     def find_index(
         self, coords: Any = None, layers: Any = None, area: Any = None
     ) -> Any:
+        """Not yet implemented for Grid3D, use mikeio.read() arguments instead."""
         if layers is not None:
             raise NotImplementedError(
                 f"Layer slicing is not yet implemented. Use the mikeio.read('file.dfs3', layers='{layers}')"

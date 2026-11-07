@@ -69,7 +69,8 @@ def test_read_precision_single_and_double() -> None:
     assert ds[0].dtype == np.float32
 
     # Double precision
-    ds = mikeio.read(filename, items=1, dtype=np.float64)
+    with pytest.warns(FutureWarning, match="dtype"):
+        ds = mikeio.read(filename, items=1, dtype=np.float64)
     assert ds[0].dtype == np.float64
 
 
@@ -903,6 +904,18 @@ def test_interp_like_grid_time_invariant() -> None:
     assert isinstance(ws_grid.geometry, Grid2D)
 
 
+def test_custom_blocks_preserved_through_interp_like() -> None:
+    """Dataset.interp_like constructs its result directly and used to drop the
+    custom blocks entirely, unlike every other geometry-preserving method."""
+    ds = mikeio.read("tests/testdata/wind_north_sea.dfsu", time=-1)
+    ds.custom_blocks["Mine"] = np.array([1.0], dtype=np.float32)
+    grid = ds.geometry.get_overset_grid(dx=0.1)
+
+    ds_grid = ds.interp_like(grid)
+
+    assert ds_grid.custom_blocks.keys() == {"Mine"}
+
+
 def test_interp_like_dataarray(tmp_path: Path) -> None:
     tmp_path / "interp.dfs2"
 
@@ -989,15 +1002,19 @@ def test_append_dfsu_2d(tmp_path: Path) -> None:
     )
 
 
-def test_repr_dfsu_many_items_only_shows_number_of_items() -> None:
+def test_repr_dfsu_many_items_truncates_item_list() -> None:
     ds = mikeio.read("tests/testdata/random_data_20_items_2d.dfsu")
     txt = repr(ds)
-    assert "number of items: 20" in txt
+    assert "  0:  Exchange Rate" in txt
+    assert "  9:  Height Above Keel" in txt
+    assert "  10:" not in txt
+    assert "... and 10 more items (20 total)" in txt
 
     # repeat for mikeio.Dfsu2DH
     dfs = mikeio.Dfsu2DH("tests/testdata/random_data_20_items_2d.dfsu")
     txt_dfs = repr(dfs)
-    assert "number of items: 20" in txt_dfs
+    assert "  0:  Exchange Rate" in txt_dfs
+    assert "... and 10 more items (20 total)" in txt_dfs
 
 
 def test_dfsu_to_xarray_has_element_coordinates() -> None:
@@ -1035,3 +1052,78 @@ def test_dfsu_to_xarray_has_element_coordinates() -> None:
     assert xr_da.x.values[example_quad_element] == approx(example_quad_coordinates[0])
     assert xr_da.y.values[example_quad_element] == approx(example_quad_coordinates[1])
     assert xr_da.z.values[example_quad_element] == approx(example_quad_coordinates[2])
+
+
+def test_write_dfsu_with_title(tmp_path: Path) -> None:
+    """Test writing a dfsu file with a custom title and reading it back."""
+    sourcefilename = "tests/testdata/HD2D.dfsu"
+    fp = tmp_path / "with_title.dfsu"
+
+    dfs = mikeio.Dfsu2DH(sourcefilename)
+    ds = dfs.read(items=[0])
+
+    custom_title = "Test DFSU with Custom Title"
+    ds.title = custom_title
+    ds.to_dfs(fp)
+
+    newdfs = mikeio.Dfsu2DH(fp)
+    assert newdfs.title == custom_title
+
+
+def test_read_dfsu_title(tmp_path: Path) -> None:
+    """Test reading the title from an existing dfsu file."""
+    sourcefilename = "tests/testdata/HD2D.dfsu"
+    dfs = mikeio.Dfsu2DH(sourcefilename)
+
+    # Dfsu files should have a title property
+    assert hasattr(dfs, "title")
+    assert isinstance(dfs.title, str)
+
+
+def _truncated_copy(src: str | Path, tmp_path: Path) -> Path:
+    """Copy a file without its last bytes, so reading its last timestep fails."""
+    fp = tmp_path / f"corrupt_{Path(src).name}"
+    fp.write_bytes(Path(src).read_bytes()[:-200])
+    return fp
+
+
+def test_read_corrupt_timestep_raises(tmp_path: Path) -> None:
+    fp = _truncated_copy("tests/testdata/HD2D.dfsu", tmp_path)
+
+    with pytest.raises(ValueError, match="timestep 8"):
+        mikeio.read(fp)
+
+
+def test_read_corrupt_timestep_fills(tmp_path: Path) -> None:
+    src = "tests/testdata/HD2D.dfsu"
+    fp = _truncated_copy(src, tmp_path)
+    expected = mikeio.read(src)
+
+    with pytest.warns(UserWarning, match="timestep 8"):
+        ds = mikeio.read(fp, error_bad_data=False, fill_bad_data_value=-1.0)
+
+    assert ds.time.equals(expected.time)
+    assert (ds[-1].values[-1] == -1.0).all()
+    np.testing.assert_array_equal(ds[0].values, expected[0].values)
+
+
+def test_read_corrupt_timestep_fills_single_time_and_elements(tmp_path: Path) -> None:
+    fp = _truncated_copy("tests/testdata/HD2D.dfsu", tmp_path)
+
+    with pytest.warns(UserWarning):
+        da = mikeio.read(fp, time=-1, elements=[0, 10], error_bad_data=False)[-1]
+
+    assert da.shape == (2,)
+    assert np.isnan(da.values).all()
+
+
+def test_read_corrupt_timestep_non_equidistant_raises(tmp_path: Path) -> None:
+    ds = mikeio.read("tests/testdata/HD2D.dfsu")
+    ds = ds.isel(time=[0, 1, 3, 8])
+    src = tmp_path / "non_equidistant.dfsu"
+    ds.to_dfs(src)
+    assert not mikeio.Dfsu2DH(src)._equidistant
+    fp = _truncated_copy(src, tmp_path)
+
+    with pytest.raises(ValueError, match="non-equidistant"):
+        mikeio.read(fp, error_bad_data=False)

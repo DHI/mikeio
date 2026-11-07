@@ -28,6 +28,7 @@ if TYPE_CHECKING:
 
 from ._dataarray import DataArray
 from .._track import _extract_track
+from .._options import _item_txt
 from ..eum import EUMType, EUMUnit, ItemInfo
 from ..spatial import (
     Geometry0D,
@@ -44,8 +45,10 @@ from ..spatial import (
 from ..spatial._FM_geometry import _GeometryFM
 
 from ._data_plot import DatasetPlotter
+from ._z_accessor import NullZAccessor, ZAccessor
 
 from ._dataarray import IndexType
+from .._path import normalize_path
 
 
 def _to_safe_name(name: str) -> str:
@@ -69,7 +72,18 @@ class Dataset:
         DataArray, list of DataArrays or dict of DataArrays
     validate:
         Optional validation of consistency of data arrays.
+    title:
+        Title of the dataset, by default "".
+    custom_blocks:
+        Custom blocks of the dfs file header, by default None (=no custom blocks).
+        See the *custom_blocks* property.
 
+    Attributes
+    ----------
+    plot : DatasetPlotter
+        Plotting accessor (e.g. ds.plot.scatter for dfs0, ds.plot() for timeseries).
+    title : str
+        Title of the dataset (empty string by default).
 
     Notes
     ---------------
@@ -94,6 +108,8 @@ class Dataset:
         self,
         data: Mapping[str, DataArray] | Sequence[DataArray],
         validate: bool = True,
+        title: str = "",
+        custom_blocks: Mapping[str, Any] | None = None,
     ):
         data_vars = self._dataarrays_as_mapping(data)
 
@@ -108,6 +124,9 @@ class Dataset:
             self._set_name_attr(key, value)
         self.plot = DatasetPlotter(self)
 
+        self.title = title
+        self.custom_blocks = custom_blocks or {}
+
     @staticmethod
     def from_numpy(
         data: Sequence[NDArray[np.floating]],
@@ -117,6 +136,8 @@ class Dataset:
         geometry: Any | None = None,
         zn: NDArray[np.floating] | None = None,
         validate: bool = True,
+        title: str = "",
+        custom_blocks: Mapping[str, Any] | None = None,
         dt: float = 1.0,
     ) -> Dataset:
         """Create a Dataset from numpy arrays.
@@ -135,6 +156,11 @@ class Dataset:
             Z-coordinates of the DataArrays, by default None
         validate: bool, optional
             Validate the DataArrays, by default True
+        title: str, optional
+            Title of the dataset, by default ""
+        custom_blocks: Mapping[str, Any], optional
+            Custom blocks of the dfs file header, by default None (=no custom blocks).
+            See the *custom_blocks* property.
         dt: float, optional
             Dummy time step in seconds, by default 1.0
 
@@ -148,10 +174,13 @@ class Dataset:
             for dd, it in zip(data, item_infos)
         }
 
-        return Dataset(data_vars, validate=validate)
+        return Dataset(
+            data_vars, validate=validate, title=title, custom_blocks=custom_blocks
+        )
 
     @property
     def values(self) -> None:
+        """Not available for Dataset, use to_numpy() or DataArray.values."""
         raise AttributeError(
             "Dataset has no property 'values' - use to_numpy() instead or maybe you were looking for DataArray.values?"
         )
@@ -213,7 +242,11 @@ class Dataset:
 
         if isinstance(data, DataArray):
             data = [data]
-        assert isinstance(data, Sequence)
+        if not isinstance(data, Sequence):
+            raise TypeError(
+                "data must be a DataArray, a list of DataArrays or a dict of "
+                f"DataArrays, not {type(data).__name__}"
+            )
         item_names = [da.name for da in data]
         return {key: da for key, da in zip(item_names, data)}
 
@@ -317,6 +350,51 @@ class Dataset:
         return self[0].deletevalue
 
     @property
+    def custom_blocks(self) -> dict[str, Any]:
+        """Custom blocks of the dfs file header, as name -> 1-D array.
+
+        Values are stored as given and may be edited in place, which is how a
+        block is changed; what a block may hold is a property of the dfs header
+        and is checked when the file is written. Every Dataset owns its blocks: an
+        assigned value is copied, and MIKE IO carries the blocks through each
+        operation without checking that they still apply. See the
+        [dfs2 user guide](../user-guide/dfs2.qmd#custom-blocks) for MIKE 21's
+        "M21_Misc" block and the caveats.
+
+        Examples
+        --------
+        ```{python}
+        import mikeio
+        ds = mikeio.read("../data/waves.dfs2")
+        ds.custom_blocks
+        ```
+
+        Set the MIKE 21 land value, index 3 of "M21_Misc":
+
+        ```{python}
+        ds.custom_blocks["M21_Misc"][3] = -10.0
+        ```
+
+        Add a new block, with a dtype other than float32:
+
+        ```{python}
+        import numpy as np
+        ds.custom_blocks["Counts"] = np.array([1, 2, 3], dtype=np.int32)
+        ds.custom_blocks
+        ```
+
+        """
+        return self._custom_blocks
+
+    @custom_blocks.setter
+    def custom_blocks(self, value: Mapping[str, Any]) -> None:
+        # Stored as given: what a custom block may hold is a property of the dfs
+        # header, so mikeio.dfs checks and converts them when it writes a file.
+        # Deep-copied all the same, so that a Dataset owns its blocks and neither
+        # the caller's values nor a derived Dataset's are shared with it.
+        self._custom_blocks = {name: deepcopy(values) for name, values in value.items()}
+
+    @property
     def geometry(self) -> Any:
         """Geometry of each DataArray."""
         return self[0].geometry
@@ -324,6 +402,19 @@ class Dataset:
     @property
     def _zn(self) -> np.ndarray | None:
         return self[0]._zn
+
+    @property
+    def z(self) -> ZAccessor | NullZAccessor:
+        """Z-coordinate accessor for layered dfsu Datasets.
+
+        Returns the accessor from the first DataArray; mirrors the ``_zn``
+        delegation. Use ``ds.z.nodes`` for per-timestep node z-coordinates
+        and ``ds.z.elements`` for element-center z-coordinates.
+
+        Like ``time`` and ``geometry``, ``z`` is a reserved attribute: a data
+        item literally named ``z`` is reached via ``ds["z"]``, not ``ds.z``.
+        """
+        return self[0].z
 
     def describe(self, **kwargs: Any) -> pd.DataFrame:
         """Generate descriptive statistics.
@@ -350,7 +441,34 @@ class Dataset:
         """
         res = {name: da.fillna(value=value) for name, da in self._data_vars.items()}
 
-        return Dataset(data=res, validate=False)
+        return Dataset(
+            data=res,
+            validate=False,
+            title=self.title,
+            custom_blocks=self.custom_blocks,
+        )
+
+    def astype(self, dtype: Any) -> Dataset:
+        """Return a new Dataset with values cast to dtype.
+
+        Parameters
+        ----------
+        dtype: data-type
+            Numpy dtype to cast the data to.
+
+        Returns
+        -------
+        Dataset
+
+        """
+        res = {name: da.astype(dtype) for name, da in self._data_vars.items()}
+
+        return Dataset(
+            data=res,
+            validate=False,
+            title=self.title,
+            custom_blocks=self.custom_blocks,
+        )
 
     def dropna(self) -> Dataset:
         """Remove time steps where all items are NaN."""
@@ -381,8 +499,8 @@ class Dataset:
     def squeeze(self) -> Dataset:
         """Remove axes of length 1.
 
-        .. deprecated:: 3.1
-            squeeze() will be removed in v4.0. Use isel() to select specific indices.
+        Deprecated since v3.1: squeeze() will be removed in v4.0,
+        use isel() to select specific indices instead.
 
         Returns
         -------
@@ -397,7 +515,12 @@ class Dataset:
         )
         res = {name: da.squeeze() for name, da in self._data_vars.items()}
 
-        return Dataset(data=res, validate=False)
+        return Dataset(
+            data=res,
+            validate=False,
+            title=self.title,
+            custom_blocks=self.custom_blocks,
+        )
 
     def create_data_array(
         self,
@@ -529,19 +652,51 @@ class Dataset:
 
         return ds
 
+    # Instance attributes assigned in __init__: not class members, so
+    # hasattr(type(self), ...) misses them. An item named like one of these
+    # would clobber internal state (e.g. "plot" destroys the DatasetPlotter,
+    # "_data_vars" corrupts the item dict), so reserve them explicitly.
+    # Note that "custom_blocks" needs no entry: it is a property, so it is a class
+    # member and already covered by the hasattr probe below. Its backing store
+    # "_custom_blocks" is not, and _to_safe_name(" custom blocks") produces exactly
+    # that name.
+    _RESERVED_INSTANCE_ATTRS = frozenset(
+        {"plot", "title", "_data_vars", "_custom_blocks"}
+    )
+
+    def _is_reserved_attr(self, name: str) -> bool:
+        # Probe the CLASS, not the instance: hasattr(self, ...) would invoke the
+        # z/geometry property getters on a partially-constructed Dataset.
+        return name in self._RESERVED_INSTANCE_ATTRS or hasattr(type(self), name)
+
     def _set_name_attr(self, name: str, value: DataArray) -> None:
         name = _to_safe_name(name)
+        # Don't shadow a real class member (property or method) with a dynamic
+        # item attribute — e.g. an item named "z" must not clobber the read-only
+        # z-coordinate accessor, nor "geometry"/"time"/"mean"/etc. The item stays
+        # accessible via ds[name]; only the convenience ds.<name> is reserved.
+        # This is silent (not a warning) because mikeio routinely manufactures
+        # such names itself — aggregate(axis="items") names the result after the
+        # aggregation function (e.g. "mean", "nanmean", "max").
+        if self._is_reserved_attr(name):
+            return
         setattr(self, name, value)
 
     def _del_name_attr(self, name: str) -> None:
         name = _to_safe_name(name)
+        if self._is_reserved_attr(name):
+            return
         delattr(self, name)
+
+    # `slice` must precede `Hashable | int`: since Python 3.12 slice objects are
+    # hashable, so the broader `Hashable` overload would otherwise shadow this one
+    # and slicing would be mistyped as `DataArray`. The overlap is disambiguated at
+    # runtime by isinstance checks in `_key_to_str`.
+    @overload
+    def __getitem__(self, key: slice) -> Dataset: ...  # type: ignore[overload-overlap]
 
     @overload
     def __getitem__(self, key: Hashable | int) -> DataArray: ...
-
-    @overload
-    def __getitem__(self, key: slice) -> Dataset: ...
 
     @overload
     def __getitem__(self, key: Iterable[Hashable]) -> Dataset: ...
@@ -562,14 +717,24 @@ class Dataset:
                     for k, da in self._data_vars.items()
                     if fnmatch.fnmatch(k, key)
                 }
-                return Dataset(data=data_vars, validate=False)
+                return Dataset(
+                    data=data_vars,
+                    validate=False,
+                    title=self.title,
+                    custom_blocks=self.custom_blocks,
+                )
             else:
                 item_names = ",".join(self._data_vars.keys())
                 raise KeyError(f"No item named: {key}. Valid items: {item_names}")
 
         if isinstance(key, Iterable):
             data_vars = {v: self._data_vars[v] for v in key}
-            return Dataset(data=data_vars, validate=False)
+            return Dataset(
+                data=data_vars,
+                validate=False,
+                title=self.title,
+                custom_blocks=self.custom_blocks,
+            )
 
         raise TypeError(f"indexing with a {type(key)} is not (yet) supported")
 
@@ -677,7 +842,12 @@ class Dataset:
             )
             for da in self
         ]
-        return Dataset(data=res, validate=False)
+        return Dataset(
+            data=res,
+            validate=False,
+            title=self.title,
+            custom_blocks=self.custom_blocks,
+        )
 
     def sel(
         self,
@@ -758,7 +928,12 @@ class Dataset:
             da.sel(time=time, x=x, y=y, z=z, coords=coords, area=area, layers=layers)
             for da in self
         ]
-        return Dataset(data=res, validate=False)
+        return Dataset(
+            data=res,
+            validate=False,
+            title=self.title,
+            custom_blocks=self.custom_blocks,
+        )
 
     def interp(
         self,
@@ -838,9 +1013,19 @@ class Dataset:
                 das = [da.interp(x=x, y=y, interpolant=interpolant) for da in self]
             else:
                 das = [da.interp(x=x, y=y) for da in self]
-            ds = Dataset(das, validate=False)
+            ds = Dataset(
+                das,
+                validate=False,
+                title=self.title,
+                custom_blocks=self.custom_blocks,
+            )
         else:
-            ds = Dataset([da for da in self], validate=False)
+            ds = Dataset(
+                [da for da in self],
+                validate=False,
+                title=self.title,
+                custom_blocks=self.custom_blocks,
+            )
 
         # interp in time
         if isinstance(time, (pd.DatetimeIndex, DataArray)):
@@ -967,9 +1152,26 @@ class Dataset:
             for da in self
         ]
 
-        return Dataset(das)
+        return Dataset(das, title=self.title, custom_blocks=self.custom_blocks)
 
     def interp_na(self, axis: str = "time", **kwargs: Any) -> Dataset:
+        """Fill in NaNs by interpolating according to different methods.
+
+        Wrapper of [](`xarray.DataArray.interpolate_na`)
+
+        Parameters
+        ----------
+        axis : str
+            Dimension to interpolate along, by default "time"
+        **kwargs : Any
+            Additional arguments passed on to
+            [](`xarray.DataArray.interpolate_na`)
+
+        Returns
+        -------
+        Dataset
+
+        """
         ds = self.copy()
         for da in ds:
             da.values = da.interp_na(axis=axis, **kwargs).values
@@ -1039,7 +1241,7 @@ class Dataset:
 
         interpolant = self.geometry.get_2d_interpolant(xy, **kwargs)
         das = [da.interp_like(geom, interpolant=interpolant) for da in self]
-        ds = Dataset(das, validate=False)
+        ds = Dataset(das, validate=False, custom_blocks=self.custom_blocks)
 
         if time is not None:
             ds = ds.interp_time(time)
@@ -1079,6 +1281,14 @@ class Dataset:
         4
 
         """
+        for i, ds in enumerate(datasets):
+            if ds.time.has_duplicates:
+                raise ValueError(
+                    f"Dataset {i} has duplicate timestamps, "
+                    "e.g. from DA diagnostic output. "
+                    "Remove duplicates before concatenating."
+                )
+
         ds = datasets[0].copy()
         for dsj in datasets[1:]:
             ds = ds._concat_time(dsj, copy=False, keep=keep)
@@ -1125,19 +1335,12 @@ class Dataset:
         keep: Literal["last", "first"] = "last",
     ) -> Dataset:
         self._check_n_items(other)
-        # assuming time is always first dimension we can skip / keep it by bool
         start_dim = int("time" in self.dims)
         if not np.all(
             self.shape[start_dim:] == other.shape[int("time" in other.dims) :]
         ):
-            # if not np.all(self.shape[1:] == other.shape[1:]):
             raise ValueError("Shape of the datasets must match (except time dimension)")
-        if hasattr(self, "time"):  # using attribute instead of dim checking. Works
-            ds = self.copy() if copy else self
-        else:
-            raise ValueError(
-                "Datasets cannot be concatenated as they have no time attribute!"
-            )
+        ds = self.copy() if copy else self
 
         s1 = pd.Series(np.arange(len(ds.time)), index=ds.time, name="idx1")
         s2 = pd.Series(np.arange(len(other.time)), index=other.time, name="idx2")
@@ -1149,26 +1352,38 @@ class Dataset:
         idx1 = np.where(~df12["idx1"].isna())
         idx2 = np.where(~df12["idx2"].isna())
         for j in range(ds.n_items):
-            if keep == "last":
-                newdata[j][idx1] = ds[j].to_numpy()
-                newdata[j][idx2] = other[j].to_numpy()
-            else:
-                newdata[j][idx2] = other[j].to_numpy()
-                newdata[j][idx1] = ds[j].to_numpy()
+            match keep:
+                case "last":
+                    newdata[j][idx1] = ds[j].to_numpy()
+                    newdata[j][idx2] = other[j].to_numpy()
+                case "first":
+                    newdata[j][idx2] = other[j].to_numpy()
+                    newdata[j][idx1] = ds[j].to_numpy()
+                case _:
+                    raise ValueError(
+                        f"Invalid keep value: {keep!r}, expected 'first' or 'last'"
+                    )
 
         zn = None
         if self._zn is not None and other._zn is not None:
             zshape = (len(newtime), self._zn.shape[start_dim])
             zn = np.zeros(shape=zshape, dtype=self._zn.dtype)
-            if keep == "last":
-                zn[idx1, :] = self._zn
-                zn[idx2, :] = other._zn
-            else:
-                zn[idx2, :] = other._zn
-                zn[idx1, :] = self._zn
+            match keep:
+                case "last":
+                    zn[idx1, :] = self._zn
+                    zn[idx2, :] = other._zn
+                case "first":
+                    zn[idx2, :] = other._zn
+                    zn[idx1, :] = self._zn
 
         return Dataset.from_numpy(
-            newdata, time=newtime, items=ds.items, geometry=ds.geometry, zn=zn
+            newdata,
+            time=newtime,
+            items=ds.items,
+            geometry=ds.geometry,
+            zn=zn,
+            title=ds.title,
+            custom_blocks=ds.custom_blocks,
         )
 
     def _check_n_items(self, other: Dataset) -> None:
@@ -1222,13 +1437,23 @@ class Dataset:
                 zn=self._zn,
             )
 
-            return Dataset([da], validate=False)
+            return Dataset(
+                [da],
+                validate=False,
+                title=self.title,
+                custom_blocks=self.custom_blocks,
+            )
         else:
             res = {
                 name: da.aggregate(axis=axis, func=func, **kwargs)
                 for name, da in self._data_vars.items()
             }
-            return Dataset(data=res, validate=False)
+            return Dataset(
+                data=res,
+                validate=False,
+                title=self.title,
+                custom_blocks=self.custom_blocks,
+            )
 
     @staticmethod
     def _agg_item_from_items(items: Sequence[ItemInfo], name: str) -> ItemInfo:
@@ -1324,14 +1549,24 @@ class Dataset:
                     geometry=self.geometry,
                     zn=self._zn,
                 )
-                return Dataset([da], validate=False)
+                return Dataset(
+                    [da],
+                    validate=False,
+                    title=self.title,
+                    custom_blocks=self.custom_blocks,
+                )
             else:
                 res: list[DataArray] = []
                 for quantile in q:
                     qd = self._quantile(q=quantile, axis=axis, func=func, **kwargs)[0]
                     assert isinstance(qd, DataArray)
                     res.append(qd)
-                return Dataset(data=res, validate=False)
+                return Dataset(
+                    data=res,
+                    validate=False,
+                    title=self.title,
+                    custom_blocks=self.custom_blocks,
+                )
         else:
             if np.isscalar(q):
                 res = [da._quantile(q=q, axis=axis, func=func) for da in self]
@@ -1346,7 +1581,12 @@ class Dataset:
                         qd.name = newname
                         res.append(qd)
 
-            return Dataset(data=res, validate=False)
+            return Dataset(
+                data=res,
+                validate=False,
+                title=self.title,
+                custom_blocks=self.custom_blocks,
+            )
 
     def max(self, axis: int | str = 0, **kwargs: Any) -> Dataset:
         """Max value along an axis.
@@ -1622,7 +1862,7 @@ class Dataset:
                 data = [x / y for x, y in zip(self, other)]
             case _:
                 raise ValueError(f"Unsupported operator: {operator}")
-        return Dataset(data)
+        return Dataset(data, title=self.title, custom_blocks=self.custom_blocks)
 
     def _scalar_op(self, value: float, operator: str) -> Dataset:
         match operator:
@@ -1636,7 +1876,7 @@ class Dataset:
                 data = [x / value for x in self]
             case _:
                 raise ValueError(f"Unsupported operator: {operator}")
-        return Dataset(data)
+        return Dataset(data, title=self.title, custom_blocks=self.custom_blocks)
 
     # ===============================================
 
@@ -1692,6 +1932,13 @@ class Dataset:
         **kwargs: Any
             additional arguments passed to the writing function, e.g. dtype for dfs0
 
+        Notes
+        -----
+        Custom blocks (see the *custom_blocks* property) are written for dfs0,
+        dfs1, dfs2 and dfs3. A dfsu file has no room for them - its one block,
+        "MIKE_FM", is derived from the geometry on every write - so a non-empty
+        *custom_blocks* is ignored when writing a dfsu file.
+
         """
         from ..dfs._dfs0 import write_dfs0
         from ..dfs._dfs1 import write_dfs1
@@ -1699,7 +1946,7 @@ class Dataset:
         from ..dfs._dfs3 import write_dfs3
         from ..dfsu import write_dfsu
 
-        filename = str(filename)
+        filename = normalize_path(filename)
 
         match self.geometry:
             case (
@@ -1710,25 +1957,25 @@ class Dataset:
             ):
                 if self.ndim == 0 or (self.ndim == 1 and self[0]._has_time_axis):
                     self._validate_extension(filename, ".dfs0")
-                    write_dfs0(filename, self, **kwargs)
+                    write_dfs0(filename, self, title=self.title, **kwargs)
                 else:
                     raise ValueError("Cannot write Dataset with no geometry to file!")
 
             case Grid2D():
                 self._validate_extension(filename, ".dfs2")
-                write_dfs2(filename, self)
+                write_dfs2(filename, self, title=self.title, **kwargs)
 
             case Grid3D():
                 self._validate_extension(filename, ".dfs3")
-                write_dfs3(filename, self)
+                write_dfs3(filename, self, title=self.title, **kwargs)
 
             case Grid1D():
                 self._validate_extension(filename, ".dfs1")
-                write_dfs1(filename, self)
+                write_dfs1(filename, self, title=self.title, **kwargs)
 
             case _GeometryFM():
                 self._validate_extension(filename, ".dfsu")
-                write_dfsu(filename, self)
+                write_dfsu(filename, self, title=self.title, **kwargs)
 
             case _:
                 raise NotImplementedError(
@@ -1747,7 +1994,10 @@ class Dataset:
         import xarray
 
         data = {da.name: da.to_xarray() for da in self}
-        return xarray.Dataset(data)
+        attrs = {}
+        if self.title:
+            attrs["title"] = self.title
+        return xarray.Dataset(data, attrs=attrs)
 
     # ===============================================
 
@@ -1755,15 +2005,13 @@ class Dataset:
         if len(self) == 0:
             return "Empty <mikeio.Dataset>"
         da = self[0]
-        out = ["<mikeio.Dataset>", da._dims_txt(), da._time_txt(), da._geometry_txt()]  # type: ignore
+        out = ["<mikeio.Dataset>"]
+        if self.title:
+            out.append(f"title: {self.title}")
+        out.extend([da._dims_txt(), da._time_txt(), da._geometry_txt()])  # type: ignore
         out = [x for x in out if x is not None]
 
-        if self.n_items > 10:
-            out.append(f"number of items: {self.n_items}")
-        else:
-            out.append("items:")
-            for i, item in enumerate(self.items):
-                out.append(f"  {i}:  {item}")
+        out.extend(_item_txt(self.items))
 
         return str.join("\n", out)
 

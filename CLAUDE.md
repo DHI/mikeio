@@ -38,13 +38,13 @@ uv run pytest tests/performance/ --durations=0
 ### Code Quality
 ```bash
 # Run all checks (lint, typecheck, test)
-make check
+just check
 
 # Lint code
 uv run ruff check .
 
 # Format code (required before committing)
-uv run ruff format mikeio/
+uv run ruff format .
 
 # Type checking
 uv run mypy .
@@ -53,13 +53,13 @@ uv run mypy .
 ### Building
 ```bash
 # Build package (includes typecheck and test)
-make build
+just build
 ```
 
 ### Documentation
 ```bash
 # Build and render documentation
-make docs
+just docs
 ```
 
 ## Code Architecture
@@ -135,7 +135,7 @@ The project uses **Quartodoc** and **Quarto** to build comprehensive documentati
 
 ```bash
 # Build and render documentation (from project root)
-make docs
+just docs
 
 # Manual build (from docs/ directory)
 cd docs
@@ -213,7 +213,6 @@ Alternative: `ds = mikeio.read("file.dfs2")` combines open and read.
   - This clearly marks versions installed directly from GitHub as development/pre-release
   - Version is set in `pyproject.toml` line 8
 - **Released versions**: Remove `.dev0` suffix for official releases (e.g., `3.0.0`, `3.1.0`)
-- **Latest release**: v3.0.0 (December 2024)
 
 ### Dependencies
 - Uses `mikecore` library (Python module with bindings to DFS and EUM C libraries) for low-level file I/O
