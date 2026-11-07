@@ -175,7 +175,6 @@ class Dfs0:
         if not path.exists():
             raise FileNotFoundError(f"File {path} not found")
 
-        # read data from file
         dfs = DfsFileFactory.DfsGenericOpen(self._filename)
         raw_data = dfs.ReadDfs0DataDouble()  # Bulk read the data
         dfs.Close()
