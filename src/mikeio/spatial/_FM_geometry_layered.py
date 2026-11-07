@@ -1166,8 +1166,8 @@ class GeometryFMVerticalProfilePlotter:
             title=title,
             add_colorbar=False,
             edge_color=edge_color,
-            cmin=0.0,
-            cmax=1.0,
+            vmin=0.0,
+            vmax=1.0,
             **kwargs,
         )
 

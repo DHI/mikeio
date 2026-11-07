@@ -3,6 +3,8 @@
 **Status:** Accepted
 **Date:** 2021
 
+Amended by [ADR-011](011-plotting-scope.md): plotting is for a quick look, not report-grade figures.
+
 ## Context
 
 Users need to quickly visualize MIKE data. Many are familiar with pandas and xarray where plotting is available via `.plot()` accessor.
@@ -23,4 +25,4 @@ Example: `da.plot()` produces a sensible default plot based on the data's geomet
 - Familiar API for pandas/xarray users
 - Quick data exploration without boilerplate
 - Plot type adapts to geometry (line plot for 1D, pcolormesh for 2D, etc.)
-- Matplotlib remains an optional dependency for core functionality
+- Matplotlib is a required dependency (corrected 2026-11; see ADR-011)
