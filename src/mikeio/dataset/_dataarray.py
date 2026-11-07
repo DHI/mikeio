@@ -26,7 +26,7 @@ import pandas as pd
 
 
 from ..eum import EUMType, EUMUnit, ItemInfo
-from .._time import _get_time_idx_list, _n_selected_timesteps
+from .._time import _get_time_idx_list, _is_time_label, _n_selected_timesteps
 from .._track import _extract_track
 
 if TYPE_CHECKING:
@@ -54,7 +54,7 @@ from ..spatial import (
 )
 
 # We need this type to know if we should keep zn
-from ..spatial._FM_geometry_layered import _GeometryFMLayered
+from ..spatial._FM_geometry_layered import GeometryFMLayered
 
 from ._z_accessor import NullZAccessor, ZAccessor
 from ._data_plot import (
@@ -227,7 +227,7 @@ class DataArray:
         zn: np.ndarray | None, geometry: GeometryType, n_timesteps: int
     ) -> np.ndarray | None:
         if zn is not None:
-            if isinstance(geometry, _GeometryFMLayered):
+            if isinstance(geometry, GeometryFMLayered):
                 # TODO: np.squeeze(zn) if n_timesteps=1 ?
                 if (n_timesteps > 1) and (zn.shape[0] != n_timesteps):
                     raise ValueError(
@@ -294,12 +294,12 @@ class DataArray:
 
     def _get_z_accessor_by_geometry(self) -> ZAccessor | NullZAccessor:
         # Mirrors _get_plotter_by_geometry: dispatch on geometry type.
-        # _GeometryFMLayered is the common parent of GeometryFM3D,
+        # GeometryFMLayered covers GeometryFM3D,
         # GeometryFMVerticalProfile, and GeometryFMVerticalColumn — the
         # geometries where _zn is populated. The _zn check guards the rare
         # path where a layered DataArray is constructed without zn (e.g. some
         # isel paths) so .z.nodes raises a clean AttributeError, not assert.
-        if isinstance(self.geometry, _GeometryFMLayered) and self._zn is not None:
+        if isinstance(self.geometry, GeometryFMLayered) and self._zn is not None:
             return ZAccessor(self)
         return NullZAccessor(self)
 
@@ -458,6 +458,23 @@ class DataArray:
         x[np.isnan(x)] = value
         return da
 
+    def astype(self, dtype: Any) -> DataArray:
+        """Return a new DataArray with values cast to dtype.
+
+        Parameters
+        ----------
+        dtype: data-type
+            Numpy dtype to cast the data to.
+
+        Returns
+        -------
+        DataArray
+
+        """
+        da = self.copy()
+        da.values = da.values.astype(dtype)
+        return da
+
     def dropna(self) -> DataArray:
         """Remove time steps where values are NaN."""
         if not self._has_time_axis:
@@ -507,6 +524,16 @@ class DataArray:
         return deepcopy(self)
 
     def squeeze(self) -> DataArray:
+        """Remove axes of length 1.
+
+        Deprecated since v3.1: squeeze() will be removed in v4.0,
+        use isel() to select specific indices instead.
+
+        Returns
+        -------
+        DataArray
+
+        """
         warnings.warn(
             "squeeze() is deprecated and will be removed in v4.0. "
             "Use isel() to select specific indices.",
@@ -533,11 +560,17 @@ class DataArray:
         for j, k in enumerate(key):
             if isinstance(k, Iterable) or k != slice(None):
                 if dims[j] == "time":
-                    # getitem accepts fancy indexing only for time
+                    if _is_time_label(k):
+                        warnings.warn(
+                            "Selecting time steps by value with [] is deprecated "
+                            "and will be removed in v4.0. Use .sel(time=...) instead.",
+                            FutureWarning,
+                            stacklevel=2,
+                        )
                     k = _get_time_idx_list(self.time, k)
                     if _n_selected_timesteps(self.time, k) == 0:
                         raise IndexError("No timesteps found!")
-                da = da.isel(**{dims[j]: k})
+                da = da.isel(k, axis=dims[j])
         return da
 
     def _getitem_parse_key(self, key: Any) -> Any:
@@ -723,7 +756,7 @@ class DataArray:
                 )
                 geometry = self.geometry.isel(idx, axis=spatial_axis)
 
-            if isinstance(geometry, _GeometryFMLayered):
+            if isinstance(geometry, GeometryFMLayered):
                 node_ids, _ = self.geometry._get_nodes_and_table_for_elements(
                     idx, node_layers="all"
                 )
@@ -1002,7 +1035,8 @@ class DataArray:
 
                 case Grid1D():
                     if interpolant is None:
-                        assert x is not None
+                        if x is None:
+                            raise ValueError("x must be specified for a Grid1D")
                         interpolant = g.get_spatial_interpolant(x)
                     dai = interpolant.interp1d(self.to_numpy()).flatten()
                     geometry = GeometryUndefined()
@@ -1296,7 +1330,7 @@ class DataArray:
         ```
 
         """
-        from mikeio import Dataset
+        from ._dataset import Dataset
 
         datasets = [Dataset([da]) for da in dataarrays]
 
@@ -1360,7 +1394,12 @@ class DataArray:
         return self.aggregate(axis=axis, func=np.min, **kwargs)
 
     def mean(self, axis: int | str | None = 0, **kwargs: Any) -> DataArray:
-        """Mean value along an axis.
+        """Unweighted mean value along an axis.
+
+        Note: on unstructured meshes with variable element sizes,
+        ``mean(axis="space")`` treats all elements equally regardless
+        of area. For an area-weighted spatial mean, use ``average()``
+        with ``weights=geometry.get_element_area()``.
 
         Parameters
         ----------
@@ -1379,6 +1418,7 @@ class DataArray:
         See Also
         --------
             nanmean : Mean values with NaN values removed
+            average : Weighted average along an axis
 
         """
         if axis == "z":
@@ -1387,7 +1427,7 @@ class DataArray:
 
     def _mean_z(self, **kwargs: Any) -> DataArray:
         """Thickness-weighted vertical mean, collapsing to 2D geometry."""
-        if not isinstance(self.geometry, _GeometryFMLayered):
+        if not isinstance(self.geometry, GeometryFM3D):
             raise ValueError(
                 "axis='z' is only supported for layered 3D geometries (GeometryFM3D)"
             )
@@ -1410,7 +1450,7 @@ class DataArray:
             dz_all: np.ndarray = self._compute_dynamic_dz(zn, geom3d, data.dtype)
             use_dynamic_dz = True
         else:
-            dz_all = geom3d._dz
+            dz_all = geom3d._layering.dz
             use_dynamic_dz = False
 
         with np.errstate(invalid="ignore", divide="ignore"):
@@ -1421,7 +1461,11 @@ class DataArray:
 
                 if has_time:
                     col_data = data[:, col_elements]
-                    dz = dz_all[:, col_elements] if use_dynamic_dz else dz_all[col_elements]
+                    dz = (
+                        dz_all[:, col_elements]
+                        if use_dynamic_dz
+                        else dz_all[col_elements]
+                    )
                     valid = ~np.isnan(col_data)
                     dz_masked = np.where(valid, dz, 0.0)
                     weighted_sum = np.nansum(col_data * dz_masked, axis=1)
@@ -1436,7 +1480,9 @@ class DataArray:
                     dz_masked = np.where(valid, dz, 0.0)
                     weighted_sum = np.nansum(col_data * dz_masked)
                     total_dz = np.sum(dz_masked)
-                    result[col_idx] = weighted_sum / total_dz if total_dz > 0 else np.nan
+                    result[col_idx] = (
+                        weighted_sum / total_dz if total_dz > 0 else np.nan
+                    )
 
         item = deepcopy(self.item)
         if "name" in kwargs:
@@ -1452,9 +1498,7 @@ class DataArray:
         )
 
     @staticmethod
-    def _compute_dynamic_dz(
-        zn: np.ndarray, geom3d: Any, dtype: np.dtype
-    ) -> np.ndarray:
+    def _compute_dynamic_dz(zn: np.ndarray, geom3d: Any, dtype: np.dtype) -> np.ndarray:
         """Compute time-varying layer thickness for all elements.
 
         Processes in timestep chunks to limit memory usage.
@@ -1483,7 +1527,9 @@ class DataArray:
             for halfn, idxs, bot_nodes, top_nodes in groups:
                 dz_chunk = zn_chunk[:, top_nodes[:, 0]] - zn_chunk[:, bot_nodes[:, 0]]
                 for k in range(1, halfn):
-                    dz_chunk += zn_chunk[:, top_nodes[:, k]] - zn_chunk[:, bot_nodes[:, k]]
+                    dz_chunk += (
+                        zn_chunk[:, top_nodes[:, k]] - zn_chunk[:, bot_nodes[:, k]]
+                    )
                 dz_all[t0:t1, idxs] = dz_chunk * (1.0 / halfn)
 
         return dz_all
@@ -1499,7 +1545,7 @@ class DataArray:
             Only used to pass name for the resulting item, e.g. name="vertical max"
 
         """
-        if not isinstance(self.geometry, _GeometryFMLayered):
+        if not isinstance(self.geometry, GeometryFM3D):
             raise ValueError(
                 "axis='z' is only supported for layered 3D geometries (GeometryFM3D)"
             )
@@ -1656,7 +1702,12 @@ class DataArray:
         return self.aggregate(axis=axis, func=np.nanmin, **kwargs)
 
     def nanmean(self, axis: int | str | None = 0, **kwargs: Any) -> DataArray:
-        """Mean value along an axis (NaN removed).
+        """Unweighted mean value along an axis (NaN removed).
+
+        Note: on unstructured meshes with variable element sizes,
+        ``nanmean(axis="space")`` treats all elements equally regardless
+        of area. For an area-weighted spatial mean, use
+        ``average()`` with ``weights=geometry.get_element_area()``.
 
         Parameters
         ----------
@@ -1673,6 +1724,7 @@ class DataArray:
         See Also
         --------
             mean : Mean values
+            average : Weighted average along an axis
 
         """
         return self.aggregate(axis=axis, func=np.nanmean, **kwargs)
@@ -1854,7 +1906,7 @@ class DataArray:
         return self._quantile(q, axis=axis, func=np.nanquantile, **kwargs)
 
     def _quantile(self, q, *, axis: int | str = 0, func=np.quantile, **kwargs: Any):  # type: ignore
-        from mikeio import Dataset
+        from ._dataset import Dataset
 
         parsed_axis = self._parse_axis(axis)
         if isinstance(parsed_axis, tuple):
@@ -2008,11 +2060,18 @@ class DataArray:
 
     # ============= output methods: to_xxx() ===========
     def to_dataset(self) -> Dataset:
+        """Create a Dataset with this DataArray as its only item.
+
+        Returns
+        -------
+        Dataset
+
+        """
         return self._to_dataset()
 
     def _to_dataset(self) -> Dataset:
         """Create a single-item dataset."""
-        from mikeio import Dataset
+        from ._dataset import Dataset
 
         return Dataset(
             {self.name: self}

@@ -1,10 +1,13 @@
 from __future__ import annotations
+import warnings
 from pathlib import Path
 from collections.abc import Sequence
-from typing import Any
+from typing import Any, Mapping
 
 import numpy as np
+from numpy.typing import NDArray
 import pandas as pd
+from tqdm import tqdm
 
 from mikecore.DfsBuilder import DfsBuilder
 from mikecore.DfsFactory import DfsFactory
@@ -13,7 +16,7 @@ from mikecore.DfsFileFactory import DfsFileFactory
 from mikecore.eum import eumQuantity, eumUnit
 from mikecore.Projections import Cartography
 
-from .. import __dfs_version__
+from .._version import __dfs_version__
 from ..dataset import Dataset
 from ._dfs import (
     _Dfs123,
@@ -22,8 +25,11 @@ from ._dfs import (
     _valid_timesteps,
     write_dfs_data,
 )
+from ._custom_blocks import readonly_custom_blocks, write_custom_blocks
 from ..eum import TimeStepUnit
 from ..spatial import Grid3D
+from .._options import _show_progress
+from .._path import normalize_output_path, normalize_path
 
 
 def write_dfs3(filename: str | Path, ds: Dataset, title: str = "") -> None:
@@ -90,10 +96,9 @@ def _write_dfs3_header(filename: str | Path, ds: Dataset, title: str) -> DfsFile
             item.data_value_type,
         )
 
-    try:
-        builder.CreateFile(str(filename))
-    except OSError:
-        print("cannot create dfs file: ", filename)
+    write_custom_blocks(builder, ds.custom_blocks)
+
+    builder.CreateFile(normalize_output_path(filename))
 
     return builder.GetFile()
 
@@ -111,7 +116,7 @@ class Dfs3(_Dfs123):
     _ndim = 3
 
     def __init__(self, filename: str | Path):
-        super().__init__(str(filename))
+        super().__init__(normalize_path(filename))
 
         # TODO
         self._x0 = 0.0
@@ -182,13 +187,21 @@ class Dfs3(_Dfs123):
         layers: int, str, list[int], optional
             Read only data for specific layers, by default None
         dtype: data-type, optional
-            Define the dtype of the returned dataset (default = np.float32)
+            Deprecated since v3.4: the parameter will be removed in v4.0,
+            data is always read as np.float32. Use `Dataset.astype()` instead.
 
         Returns
         -------
         Dataset
 
         """
+        if dtype != np.float32:
+            warnings.warn(
+                "dtype parameter is deprecated and will be removed in v4.0. "
+                "Data is always read as np.float32, use Dataset.astype() to cast it afterwards.",
+                FutureWarning,
+                stacklevel=2,
+            )
         if area is not None:
             raise NotImplementedError("area subsetting is not yet implemented for Dfs3")
         # NOTE:
@@ -235,7 +248,7 @@ class Dfs3(_Dfs123):
 
         t_seconds = np.zeros(nt, dtype=float)
 
-        for i, it in enumerate(time_steps):
+        for i, it in enumerate(tqdm(time_steps, disable=not _show_progress())):
             for item in range(n_items):
                 itemdata = dfs.ReadItemTimeStep(item_numbers[item] + 1, int(it))
                 d = itemdata.Data
@@ -270,6 +283,7 @@ class Dfs3(_Dfs123):
             items=items,
             geometry=geometry,
             title=self.title,
+            custom_blocks=self.custom_blocks,
             validate=False,
         )
 
@@ -316,6 +330,7 @@ class Dfs3(_Dfs123):
 
     @property
     def geometry(self) -> Grid3D:
+        """Spatial information."""
         return self._geometry
 
     @property
@@ -335,9 +350,21 @@ class Dfs3(_Dfs123):
 
     @property
     def shape(self) -> tuple[int, int, int, int]:
+        """Tuple with number of values in the t-, z-, y-, x-direction."""
         return (self._n_timesteps, self._nz, self._ny, self._nx)
 
     @property
     def title(self) -> str:
         """Title of the dfs3 file."""
         return self._title
+
+    @property
+    def custom_blocks(self) -> Mapping[str, NDArray[Any]]:
+        """Custom blocks of the dfs3 file header, as name -> 1-D array.
+
+        Read-only: a dfs header is written when the file is created, so neither
+        the mapping nor its arrays accept an edit here. Change them on a Dataset
+        and write a new file - see [](`mikeio.Dataset.custom_blocks`) for the
+        meaning of the values and for how to change them.
+        """
+        return readonly_custom_blocks(self._custom_blocks)

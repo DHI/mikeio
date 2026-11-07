@@ -22,15 +22,7 @@ The spatial information is available in the `geometry` attribute (accessible fro
 ds.geometry
 ```
 
-Grid1D's primary properties and methods are: 
-
-* `x` 
-* `nx`
-* `dx`
-* `find_index()`
-* `isel()`
-
-See [API specification](`mikeio.Grid1D`) for details.
+See the [API reference](`mikeio.Grid1D`) for the full set of properties and methods.
 
 
 ## Creating a dfs1 file

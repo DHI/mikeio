@@ -9,7 +9,7 @@ from matplotlib.axes import Axes
 
 from ..spatial._FM_plot import _plot_map, _plot_vertical_profile
 
-from .._spectral import plot_2dspectrum, calc_m0_from_spectrum
+from .._spectral import plot_2dspectrum, calc_Hm0_from_spectrum
 from ..eum import EUMType, ItemInfo
 from ..spatial import GeometryUndefined, Grid1D, GeometryFM2D
 
@@ -317,7 +317,7 @@ class DataArrayPlotterGrid2D(DataArrayPlotter):
         pos = ax.contour(x, y, da.values, **kwargs)
         # fig.colorbar(pos, label=self._label_txt())
         ax.clabel(pos, fmt="%1.2f", inline=1, fontsize=9)
-        self._set_aspect_and_labels(ax, self.da.geometry, y)
+        self._set_aspect_and_labels(ax, self.da.geometry)
         if title is not None:
             ax.set_title(title)
         return ax
@@ -349,7 +349,7 @@ class DataArrayPlotterGrid2D(DataArrayPlotter):
 
         pos = ax.contourf(x, y, da.values, **kwargs)
         fig.colorbar(pos, label=label, pad=0.01)
-        self._set_aspect_and_labels(ax, self.da.geometry, y)
+        self._set_aspect_and_labels(ax, self.da.geometry)
         if title is not None:
             ax.set_title(title)
         return ax
@@ -381,7 +381,7 @@ class DataArrayPlotterGrid2D(DataArrayPlotter):
 
         pos = ax.pcolormesh(xn, yn, da.values, **kwargs)
         fig.colorbar(pos, label=label, pad=0.01)
-        self._set_aspect_and_labels(ax, self.da.geometry, yn)
+        self._set_aspect_and_labels(ax, self.da.geometry)
         if title is not None:
             ax.set_title(title)
         return ax
@@ -397,26 +397,13 @@ class DataArrayPlotterGrid2D(DataArrayPlotter):
         return xn, yn
 
     @staticmethod
-    def _set_aspect_and_labels(ax: Axes, geometry: Any, y: np.ndarray) -> None:
-        if geometry.is_spectral:
-            ax.set_xlabel("Frequency [Hz]")
-            ax.set_ylabel("Directions [degree]")
-        elif geometry._is_rotated:
-            ax.set_xlabel("[m]")
-            ax.set_ylabel("[m]")
-        elif geometry.projection == "NON-UTM":
-            ax.set_xlabel("[m]")
-            ax.set_ylabel("[m]")
-        elif geometry.is_geo:
-            ax.set_xlabel("Longitude [degrees]")
-            ax.set_ylabel("Latitude [degrees]")
-            mean_lat = np.mean(y)
-            aspect_ratio = 1.0 / np.cos(np.pi * mean_lat / 180)
-            ax.set_aspect(aspect_ratio)
-        else:
-            ax.set_xlabel("Easting [m]")
-            ax.set_ylabel("Northing [m]")
-            ax.set_aspect("equal")
+    def _set_aspect_and_labels(ax: Axes, geometry: Any) -> None:
+        xlabel, ylabel = geometry._axis_labels
+        ax.set_xlabel(xlabel)
+        ax.set_ylabel(ylabel)
+        aspect = geometry._plot_aspect
+        if aspect is not None:
+            ax.set_aspect(aspect)
 
 
 class DataArrayPlotterFM(DataArrayPlotter):
@@ -723,6 +710,8 @@ class DataArrayPlotterFMVerticalProfile(DataArrayPlotter):
 
 
 class DataArrayPlotterPointSpectrum(DataArrayPlotter):
+    """Plot a point spectrum, e.g. da.plot() on a spectral DataArray."""
+
     def __call__(
         self,
         ax: Axes | None = None,
@@ -740,14 +729,17 @@ class DataArrayPlotterPointSpectrum(DataArrayPlotter):
             raise ValueError("Spectrum could not be plotted")
 
     def patch(self, **kwargs: Any) -> Axes:
+        """Plot the 2d spectrum as colored patches."""
         kwargs["plot_type"] = "patch"
         return self._plot_2dspectrum(**kwargs)
 
     def contour(self, **kwargs: Any) -> Axes:
+        """Plot the 2d spectrum as contour lines."""
         kwargs["plot_type"] = "contour"
         return self._plot_2dspectrum(**kwargs)
 
     def contourf(self, **kwargs: Any) -> Axes:
+        """Plot the 2d spectrum as filled contours."""
         kwargs["plot_type"] = "contourf"
         return self._plot_2dspectrum(**kwargs)
 
@@ -828,13 +820,12 @@ def _calc_Hm0(da: DataArray) -> DataArray:
     """Calculate Hm0 from spectral DataArray for plotting."""
     from ..spatial import GeometryFMLineSpectrum, GeometryFMAreaSpectrum
 
-    m0 = calc_m0_from_spectrum(
+    Hm0 = calc_Hm0_from_spectrum(
         da.to_numpy(),
         da.geometry.frequencies,
         da.geometry.directions,
         tail=True,
     )
-    Hm0 = 4 * np.sqrt(m0)
     item = ItemInfo(EUMType.Significant_wave_height)
     g = da.geometry
     geometry: Any = GeometryUndefined()
@@ -867,6 +858,8 @@ def _calc_Hm0(da: DataArray) -> DataArray:
 
 
 class DataArrayPlotterLineSpectrum(DataArrayPlotterGrid1D):
+    """Plot significant wave height along a line of spectra."""
+
     def __init__(self, da: DataArray) -> None:
         if da.n_timesteps > 1:
             Hm0 = _calc_Hm0(da[0])
@@ -876,6 +869,8 @@ class DataArrayPlotterLineSpectrum(DataArrayPlotterGrid1D):
 
 
 class DataArrayPlotterAreaSpectrum(DataArrayPlotterFM):
+    """Plot significant wave height on a mesh of spectra."""
+
     def __init__(self, da: DataArray) -> None:
         if da.n_timesteps > 1:
             Hm0 = _calc_Hm0(da[0])

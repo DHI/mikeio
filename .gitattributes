@@ -1,3 +1,26 @@
+# Line endings are decided here, not by each contributor's platform or editor.
+# Text files are stored and checked out as LF everywhere, so a file's endings
+# never depend on who last touched it.
+* text=auto eol=lf
+
+# MIKE writes PFS files with CRLF. These fixtures are kept byte-for-byte as
+# MIKE produced them, so the parser is exercised against real-world input.
+tests/testdata/pfs/** -text
+
+# Binary data: never inspected or converted by git. Note that .mesh and .xyz
+# are ASCII formats and are deliberately absent from this list.
+*.dfs0 binary
+*.dfs1 binary
+*.dfs2 binary
+*.dfs3 binary
+*.dfsu binary
+*.nc binary
+*.zip binary
+*.png binary
+*.gif binary
+*.jpg binary
+*.pdf binary
+
 *.ipynb linguist-language=Python
 docs/* linguist-documentation
 docsrc/* linguist-documentation
