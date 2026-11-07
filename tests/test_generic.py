@@ -349,6 +349,103 @@ def test_concat_keep(tmp_path: Path) -> None:
                     assert av_out, "overlap should be average of datasets"
 
 
+def test_concat_dfs0_keep_first_last(tmp_path: Path) -> None:
+    """Test keep='first' and keep='last' with overlapping dfs0 files."""
+    t1 = pd.date_range("2020-01-01", periods=4, freq="h")
+    t2 = pd.date_range("2020-01-01T02:00", periods=4, freq="h")
+
+    da1 = mikeio.DataArray(
+        data=np.array([10.0, 20.0, 30.0, 40.0]),
+        time=t1,
+        item=mikeio.ItemInfo("Test"),
+    )
+    da2 = mikeio.DataArray(
+        data=np.array([300.0, 400.0, 500.0, 600.0]),
+        time=t2,
+        item=mikeio.ItemInfo("Test"),
+    )
+
+    f1 = tmp_path / "a.dfs0"
+    f2 = tmp_path / "b.dfs0"
+    da1.to_dfs(f1)
+    da2.to_dfs(f2)
+
+    fp_first = tmp_path / "first.dfs0"
+    fp_last = tmp_path / "last.dfs0"
+
+    mikeio.generic.concat([f1, f2], fp_first, keep="first")
+    mikeio.generic.concat([f1, f2], fp_last, keep="last")
+
+    ds_first = mikeio.read(fp_first)
+    ds_last = mikeio.read(fp_last)
+
+    assert ds_first.n_timesteps == 6
+    assert ds_last.n_timesteps == 6
+
+    # Overlap at hours 2 and 3: da1=[30,40], da2=[300,400]
+    overlap_first = ds_first[0].to_numpy()[2:4]
+    overlap_last = ds_last[0].to_numpy()[2:4]
+
+    np.testing.assert_array_almost_equal(overlap_first, [30.0, 40.0])
+    np.testing.assert_array_almost_equal(overlap_last, [300.0, 400.0])
+
+
+def test_concat_dfs0_sorted_glob(tmp_path: Path) -> None:
+    """Test that sorted(glob(...)) gives correct results with keep='first'/'last'.
+
+    Simulates the workflow from GH issue #956: user collects dfs0 files with glob
+    and passes them to generic.concat. Files must be sorted chronologically.
+    """
+    from glob import glob
+
+    # Create 3 overlapping files (2 days overlap between consecutive files)
+    for i, year in enumerate([1979, 1980, 1981]):
+        t = pd.date_range(f"{year}-01-01", periods=6, freq="h")
+        da = mikeio.DataArray(
+            data=np.full(6, float(year)),
+            time=t,
+            item=mikeio.ItemInfo("WaterLevel"),
+        )
+        da.to_dfs(tmp_path / f"HD_Analysis_Loc_{year}.dfs0")
+
+    # Overwrite 1980 file to start at hour 4 of 1979 file (creating overlap)
+    t2 = pd.date_range("1979-01-01T04:00", periods=6, freq="h")
+    da2 = mikeio.DataArray(
+        data=np.full(6, 1980.0), time=t2, item=mikeio.ItemInfo("WaterLevel")
+    )
+    da2.to_dfs(tmp_path / "HD_Analysis_Loc_1980.dfs0")
+
+    t3 = pd.date_range("1979-01-01T08:00", periods=6, freq="h")
+    da3 = mikeio.DataArray(
+        data=np.full(6, 1981.0), time=t3, item=mikeio.ItemInfo("WaterLevel")
+    )
+    da3.to_dfs(tmp_path / "HD_Analysis_Loc_1981.dfs0")
+
+    files = sorted(glob(str(tmp_path / "HD_Analysis_Loc_*.dfs0")))
+    assert len(files) == 3
+
+    fp_first = tmp_path / "keep_first.dfs0"
+    fp_last = tmp_path / "keep_last.dfs0"
+
+    mikeio.generic.concat(files, fp_first, keep="first")
+    mikeio.generic.concat(files, fp_last, keep="last")
+
+    ds_first = mikeio.read(fp_first)
+    ds_last = mikeio.read(fp_last)
+
+    # Total timeline: hours 0-13 = 14 timesteps
+    assert ds_first.n_timesteps == 14
+    assert ds_last.n_timesteps == 14
+
+    # Overlap between file 1 and 2 at hours 4,5: values 1979 vs 1980
+    assert ds_first[0].to_numpy()[4] == pytest.approx(1979.0)  # keep first
+    assert ds_last[0].to_numpy()[4] == pytest.approx(1980.0)  # keep last
+
+    # Overlap between file 2 and 3 at hours 8,9: values 1980 vs 1981
+    assert ds_first[0].to_numpy()[8] == pytest.approx(1980.0)  # keep first
+    assert ds_last[0].to_numpy()[8] == pytest.approx(1981.0)  # keep last
+
+
 def test_concat_average(tmp_path: Path) -> None:
     # Test for multiple items?
     g = mikeio.Grid1D(x=range(5))
@@ -746,3 +843,26 @@ def test_transform_func_with_missing_item_reports_existing_items(
         transform(infilename, outfilename, items)
     assert "U velocity" in str(excinfo.value)
     assert not outfilename.exists()
+
+
+def test_scale_preserves_custom_blocks(tmp_path: Path) -> None:
+    """generic._clone has always copied the whole header; lock that in.
+
+    Closing the gap between this path and Dataset.to_dfs is the reason
+    Dataset.custom_blocks exists, so a regression here would be easy to miss -
+    hence also the check that the two write paths agree.
+    """
+    infilename = "tests/testdata/waves.dfs2"
+    via_generic = tmp_path / "scaled.dfs2"
+    via_dataset = tmp_path / "via_dataset.dfs2"
+
+    generic.scale(infilename, via_generic, offset=1.0)
+    mikeio.read(infilename).to_dfs(via_dataset)
+
+    orig = mikeio.Dfs2(infilename).custom_blocks
+    scaled = mikeio.Dfs2(via_generic).custom_blocks
+    assert scaled.keys() == orig.keys() == {"M21_Misc"}
+    np.testing.assert_array_equal(scaled["M21_Misc"], orig["M21_Misc"])
+    np.testing.assert_array_equal(
+        mikeio.Dfs2(via_dataset).custom_blocks["M21_Misc"], orig["M21_Misc"]
+    )

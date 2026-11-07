@@ -1,7 +1,11 @@
+from pathlib import Path
+
 import numpy as np
+import pandas as pd
 import pytest
 import matplotlib.pyplot as plt
 
+import mikeio
 from mikeio import Dfsu2DV
 from mikeio.spatial import (
     GeometryFMVerticalColumn,
@@ -148,6 +152,70 @@ def test_transect_sel_xy(vslice_geo: Dfsu2DV) -> None:
     assert da2.n_timesteps == da.n_timesteps
 
 
+def test_transect_column_sel_z(vslice_geo: Dfsu2DV) -> None:
+    col = vslice_geo.read()["Temperature"].sel(x=10.8, y=55.6)
+    pt = col.sel(z=-3)
+    assert pt.geometry.z == pytest.approx(-2.3)
+
+
+def test_transect_sel_layers_top(vslice: Dfsu2DV) -> None:
+    ds = vslice.read()
+    g = ds.sel(layers="top").geometry
+    assert g.n_elements == len(ds.geometry.top_elements)
+    assert g.n_layers == 1
+
+
+def test_transect_sel_layers_bottom(vslice: Dfsu2DV) -> None:
+    ds = vslice.read()
+    g = ds.sel(layers="bottom").geometry
+    assert g.n_elements == len(ds.geometry.bottom_elements)
+    assert g.n_layers == 1
+
+
+BBOX = (355000.0, 6130000.0, 362000.0, 6200000.0)
+
+
+def test_transect_sel_area_bbox(vslice: Dfsu2DV) -> None:
+    ds = vslice.read()
+    g = ds.sel(area=BBOX).geometry
+    x, y = g.element_coordinates[:, 0], g.element_coordinates[:, 1]
+    assert np.all((x >= BBOX[0]) & (x <= BBOX[2]))
+    assert np.all((y >= BBOX[1]) & (y <= BBOX[3]))
+
+    # whole columns are kept
+    g0 = ds.geometry
+    xt = g0.element_coordinates[g0.top_elements, 0]
+    n_columns_inside = np.sum((xt >= BBOX[0]) & (xt <= BBOX[2]))
+    assert 0 < n_columns_inside < len(g0.top_elements)
+    assert len(g.top_elements) == n_columns_inside
+
+
+def test_transect_find_index_area_polygon(vslice: Dfsu2DV) -> None:
+    g = vslice.geometry
+    x0, y0, x1, y1 = BBOX
+    polygon = [(x0, y0), (x1, y0), (x1, y1), (x0, y1), (x0, y0)]
+    np.testing.assert_array_equal(g.find_index(area=polygon), g.find_index(area=BBOX))
+
+
+def test_transect_sel_area_and_layers(vslice: Dfsu2DV) -> None:
+    ds = vslice.read()
+    g = ds.sel(area=BBOX, layers="top").geometry
+    assert g.n_elements == len(ds.sel(area=BBOX).geometry.top_elements)
+
+
+def test_transect_sel_area_outside(vslice: Dfsu2DV) -> None:
+    ds = vslice.read()
+    with pytest.raises(ValueError, match="No elements"):
+        ds.sel(area=(0.0, 0.0, 1.0, 1.0))
+
+
+def test_transect_read_area(vslice: Dfsu2DV) -> None:
+    ds = vslice.read(area=BBOX)
+    expected = vslice.read().sel(area=BBOX)
+    assert ds.geometry.n_elements == expected.geometry.n_elements
+    np.testing.assert_array_equal(ds[0].to_numpy(), expected[0].to_numpy())
+
+
 def test_transect_plot(vslice: Dfsu2DV) -> None:
     da = vslice.read()["Salinity"]
     da.plot()
@@ -170,3 +238,95 @@ def test_transect_plot_geometry(vslice: Dfsu2DV) -> None:
     g.plot.mesh()
 
     plt.close("all")
+
+
+def test_write_roundtrip(vslice: Dfsu2DV, tmp_path: Path) -> None:
+    ds = vslice.read()
+    fp = tmp_path / "vslice_roundtrip.dfsu"
+    ds.to_dfs(fp)
+
+    ds2 = mikeio.read(fp)
+    assert type(ds2.geometry) is GeometryFMVerticalProfile
+    assert ds2.geometry.n_elements == ds.geometry.n_elements
+    assert ds2.geometry.n_nodes == ds.geometry.n_nodes
+    assert ds2.geometry.n_sigma_layers == ds.geometry.n_sigma_layers
+    assert ds2.n_timesteps == ds.n_timesteps
+    assert ds2.n_items == ds.n_items
+    np.testing.assert_allclose(ds2[0].to_numpy(), ds[0].to_numpy(), atol=1e-5)
+
+
+def test_create_from_scratch(tmp_path: Path) -> None:
+    """Create a vertical profile dfsu from scratch and verify roundtrip."""
+    n_points = 5
+    depth = np.array([0.0, 10.0, 50.0, 100.0])
+    n_depths = len(depth)
+    n_layers = n_depths - 1
+    time = pd.date_range("2024-01-01", periods=2, freq="D")
+
+    lon = np.linspace(3.5, 5.5, n_points)
+    lat = np.linspace(40.5, 41.5, n_points)
+
+    # Build nodes: column-major, bottom-up
+    node_x, node_y, node_z = [], [], []
+    for pi in range(n_points):
+        for di in range(n_depths - 1, -1, -1):
+            node_x.append(lon[pi])
+            node_y.append(lat[pi])
+            node_z.append(-depth[di])
+    node_coords = np.column_stack([node_x, node_y, node_z])
+
+    # Build quadrilateral elements
+    element_table = []
+    nodes_per_col = n_depths
+    for pi in range(n_points - 1):
+        for li in range(n_layers):
+            bl = pi * nodes_per_col + li
+            tl = pi * nodes_per_col + li + 1
+            br = (pi + 1) * nodes_per_col + li
+            tr = (pi + 1) * nodes_per_col + li + 1
+            element_table.append(np.array([bl, br, tr, tl]))
+
+    geometry = GeometryFMVerticalProfile(
+        node_coordinates=node_coords,
+        element_table=element_table,
+        projection="LONG/LAT",
+        dfsu_type=DfsuFileType.DfsuVerticalProfileSigma,
+        n_layers=n_layers,
+        n_sigma=n_layers,
+    )
+
+    assert geometry.n_elements == (n_points - 1) * n_layers
+    assert geometry.n_nodes == n_points * n_depths
+    assert geometry.n_layers == n_layers
+    assert geometry.n_sigma_layers == n_layers
+
+    # Create data and write
+    n_elements = geometry.n_elements
+    rng = np.random.default_rng(42)
+    data = rng.random((len(time), n_elements)).astype(np.float32)
+    zn = np.tile(node_coords[:, 2], (len(time), 1)).astype(np.float32)
+
+    da = mikeio.DataArray(
+        data=data,
+        time=time,
+        geometry=geometry,
+        item=mikeio.ItemInfo("Temperature", mikeio.EUMType.Temperature),
+        zn=zn,
+    )
+    ds = mikeio.Dataset([da])
+
+    fp = tmp_path / "created_vprofile.dfsu"
+    ds.to_dfs(fp)
+
+    # Read back and verify
+    dfs = mikeio.open(fp)
+    assert type(dfs) is Dfsu2DV
+    assert dfs._type == DfsuFileType.DfsuVerticalProfileSigma
+
+    ds2 = dfs.read()
+    assert type(ds2.geometry) is GeometryFMVerticalProfile
+    assert ds2.geometry.n_elements == n_elements
+    assert ds2.geometry.n_layers == n_layers
+    assert ds2.geometry.n_sigma_layers == n_layers
+    assert ds2.n_timesteps == len(time)
+    np.testing.assert_allclose(ds2[0].to_numpy(), data, atol=1e-5)

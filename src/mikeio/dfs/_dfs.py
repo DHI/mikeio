@@ -6,7 +6,9 @@ from dataclasses import dataclass
 from datetime import datetime
 from typing import Any, Sequence
 import numpy as np
+from numpy.typing import NDArray
 import pandas as pd
+from tqdm import trange
 
 from mikecore.DfsFile import (
     DfsDynamicItemInfo,
@@ -18,9 +20,12 @@ from mikecore.DfsFileFactory import DfsFileFactory
 from mikecore.Projections import Cartography
 
 from ..dataset import Dataset
+from ._custom_blocks import read_custom_blocks
 from ..eum import ItemInfo, ItemInfoList
 from ..exceptions import ItemsError
 from .._time import DateTimeSelector
+from .._options import _item_txt, _show_progress
+from .._path import normalize_path
 
 
 @dataclass
@@ -37,29 +42,38 @@ def _read_item_time_step(
     *,
     dfs: DfsFile,
     filename: str,
-    time: pd.DatetimeIndex,
     item_numbers: list[int],
     deletevalue: float,
-    shape: tuple[int, ...],
     item: int,
     it: int,
     error_bad_data: bool = True,
     fill_bad_data_value: float = np.nan,
 ) -> tuple[DfsFile, np.ndarray, float]:
-    itemdata = dfs.ReadItemTimeStep(item_numbers[item] + 1, it)
-    t = itemdata.Time
+    item_number = item_numbers[item] + 1
+    itemdata = dfs.ReadItemTimeStep(item_number, it)
     if itemdata is not None:
         d = itemdata.Data
         d[d == deletevalue] = np.nan
-    else:
-        if error_bad_data:
-            raise ValueError(f"Error reading: {time[it]}")
-        else:
-            warnings.warn(f"Error reading: {time[it]}")
-            d = np.zeros(shape[1])
-            d[:] = fill_bad_data_value
-            dfs.Close()
-            dfs = DfsFileFactory.DfsGenericOpen(filename)
+        return dfs, d, itemdata.Time
+
+    message = f"Error reading item {item_number}, timestep {it} in {filename}"
+    if error_bad_data:
+        raise ValueError(message)
+
+    # A failed read returns no time, so it can only be derived on an equidistant axis
+    time_axis = dfs.FileInfo.TimeAxis
+    if time_axis.TimeAxisType not in (
+        TimeAxisType.CalendarEquidistant,
+        TimeAxisType.TimeEquidistant,
+    ):
+        raise ValueError(
+            f"{message}; a corrupt timestep has no known time on a non-equidistant axis"
+        )
+    warnings.warn(message)
+    t = time_axis.StartTimeOffset + it * time_axis.TimeStep
+    d = np.full(dfs.ItemInfo[item_number - 1].ElementCount, fill_bad_data_value)
+    dfs.Close()
+    dfs = DfsFileFactory.DfsGenericOpen(filename)
     return dfs, d, t
 
 
@@ -79,7 +93,7 @@ def _fuzzy_item_search(
 
 def _valid_item_numbers(
     dfsItemInfo: list[DfsDynamicItemInfo],
-    items: str | int | Sequence[int | str] | None = None,
+    items: str | int | np.integer | Sequence[int | str] | None = None,
     ignore_first: bool = False,
 ) -> list[int]:
     start_idx = 1 if ignore_first else 0
@@ -92,7 +106,7 @@ def _valid_item_numbers(
     item_numbers: list[int] = []
 
     # check if items is a scalar (int or str)
-    if isinstance(items, (int, str)):
+    if isinstance(items, (int, np.integer, str)):
         if isinstance(items, str) and "*" in items:
             return _fuzzy_item_search(
                 dfsItemInfo=dfsItemInfo, search=items, start_idx=start_idx
@@ -100,19 +114,20 @@ def _valid_item_numbers(
         elif isinstance(items, str):
             item_number = _item_numbers_by_name(dfsItemInfo, [items], ignore_first)[0]
             return [item_number]
-        elif isinstance(items, int):
+        else:
             if (items < 0) or (items >= n_items_file):
                 raise ItemsError(n_items_file)
-            return [items]
+            return [int(items)]
 
-    assert isinstance(items, Sequence)
+    if not isinstance(items, Sequence):
+        raise ItemsError(n_items_file)  # type: ignore[unreachable]
     for item in items:
         if isinstance(item, str):
             item_number = _item_numbers_by_name(dfsItemInfo, [item], ignore_first)[0]
-        elif isinstance(item, int):
+        elif isinstance(item, (int, np.integer)):
             if (item < 0) or (item >= n_items_file):
                 raise ItemsError(n_items_file)
-            item_number = item
+            item_number = int(item)
         else:
             raise ItemsError(n_items_file)
         item_numbers.append(item_number)
@@ -173,7 +188,7 @@ def _valid_timesteps(
                 raise ValueError("All elements in time_steps must be integers.")
             if not all(0 <= i < nt for i in time_steps):  # type: ignore
                 raise ValueError(
-                    f"All elements in time_steps must be in the range of 0 to {nt-1}."
+                    f"All elements in time_steps must be in the range of 0 to {nt - 1}."
                 )
             return False, list(time_steps)  # type: ignore
 
@@ -272,7 +287,7 @@ def write_dfs_data(*, dfs: DfsFile, ds: Dataset, n_spatial_dims: int) -> None:
     else:
         t_rel = (ds.time - ds.time[0]).total_seconds()
 
-    for i in range(ds.n_timesteps):
+    for i in trange(ds.n_timesteps, disable=not _show_progress()):
         for item in range(ds.n_items):
             if has_no_time:
                 d = ds[item].values
@@ -292,13 +307,12 @@ def write_dfs_data(*, dfs: DfsFile, ds: Dataset, n_spatial_dims: int) -> None:
 class _Dfs123:
     _ndim: int
 
-    show_progress = False
-
     def __init__(self, filename: str | Path) -> None:
+        filename = normalize_path(filename)
         path = Path(filename)
         if not path.exists():
             raise FileNotFoundError(path)
-        self._filename = str(filename) if filename else None
+        self._filename = filename if filename else None
         self._end_time = None
         self._is_equidistant = True
         dfs = DfsFileFactory.DfsGenericOpen(self._filename)
@@ -340,6 +354,10 @@ class _Dfs123:
         self._latitude: float = dfs.FileInfo.Projection.Latitude
         self._orientation: float = dfs.FileInfo.Projection.Orientation
         self._deletevalue: float = dfs.FileInfo.DeleteValueFloat
+        # Must happen before Close(): mikecore's block values are views over memory
+        # owned by the dfs library. Captured here for dfs1/dfs2/dfs3 alike, since
+        # this is where the generic handle is closed (see Dataset.custom_blocks).
+        self._custom_blocks: dict[str, NDArray[Any]] = read_custom_blocks(dfs.FileInfo)
 
         dfs.Close()
 
@@ -348,12 +366,7 @@ class _Dfs123:
         out = [f"<mikeio.{name}>"]
 
         out.append(f"geometry: {self.geometry}")
-        if self.n_items < 10:
-            out.append("items:")
-            for i, item in enumerate(self.items):
-                out.append(f"  {i}:  {item}")
-        else:
-            out.append(f"number of items: {self.n_items}")
+        out.extend(_item_txt(self.items))
 
         if self._n_timesteps == 1:
             out.append("time: time-invariant file (1 step)")

@@ -1,9 +1,17 @@
-from abc import ABC, abstractmethod
+from __future__ import annotations
 
+from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from typing import Any, Sequence
 
+import numpy as np
 from mikecore.Projections import MapProjection
+
+
+def _geographic_aspect(latitudes: np.ndarray) -> float:
+    """Aspect ratio correcting for longitude compression at a given latitude."""
+    mean_lat = float(np.mean(latitudes))
+    return 1.0 / np.cos(np.pi * mean_lat / 180)
 
 
 @dataclass
@@ -39,6 +47,7 @@ class BoundingBox:
     def parse(
         values: "BoundingBox" | Sequence[float],
     ) -> "BoundingBox":
+        """Create a BoundingBox from a BoundingBox or (left, bottom, right, top)."""
         match values:
             case BoundingBox():
                 bbox = values
@@ -79,28 +88,125 @@ class _Geometry(ABC):
         return self._projstr == "NON-UTM"
 
     @property
+    def _axis_labels(self) -> tuple[str, str]:
+        """(x, y) axis labels for plotting, derived from the projection."""
+        if self.is_geo:
+            return "Longitude [degrees]", "Latitude [degrees]"
+        if self.is_local_coordinates:  # NON-UTM
+            return "x [m]", "y [m]"
+        return "Easting [m]", "Northing [m]"
+
+    @property
     @abstractmethod
-    def default_dims(self) -> tuple[str, ...]:
+    def dims(self) -> tuple[str, ...]:
         pass
+
+    def get_space_axis(self) -> tuple[int, ...]:
+        """Get geographic space axis indices within the geometry's dims.
+
+        Returns which of the geometry's dims represent geographic space dimensions,
+        as opposed to spectral or other non-geographic dimensions.
+
+        This is used when axis="space" or axis="spatial" is specified in operations
+        like aggregate, mean, etc.
+
+        Returns
+        -------
+        tuple[int, ...]
+            Space axis indices (0-indexed within geometry.dims).
+            Returns empty tuple if there are no space dimensions (e.g., point
+            geometries, pure spectral geometries).
+
+        Examples
+        --------
+        Grid2D with dims=("y", "x") returns (0, 1) - both are space.
+        GeometryFMAreaSpectrum with dims=("element", "direction", "frequency")
+        returns (0,) - only element is space, direction/frequency are spectral.
+        GeometryFMPointSpectrum with dims=("frequency",) returns () - no space.
+
+        """
+        # Default: all dims are space dims
+        n_dims = len(self.dims)
+        if n_dims == 0:
+            return ()
+        elif n_dims == 1:
+            return (0,)
+        else:
+            return tuple(range(n_dims))
+
+    def reduce(self, axis: str | tuple[str, ...]) -> "_Geometry":
+        """Return reduced geometry after spatial aggregation."""
+        return Geometry0D(projection=self.projection_string)
 
 
 class GeometryUndefined(_Geometry):
+    """Deprecated. Use Geometry0D instead."""
+
+    def __init__(self, projection: str = "LONG/LAT") -> None:
+        super().__init__(projection)
+
     def __repr__(self) -> str:
         return "GeometryUndefined()"
 
     @property
-    def default_dims(self) -> tuple[str, ...]:
+    def dims(self) -> tuple[str, ...]:
+        """Not available for GeometryUndefined."""
         raise NotImplementedError()
 
 
+class Geometry0D(_Geometry):
+    """Zero-dimensional geometry for time series without spatial location.
+
+    This geometry represents data with no spatial dimensions, typically
+    time series data that will be written to dfs0 format.
+
+    Parameters
+    ----------
+    projection : str, optional
+        Projection string, by default "LONG/LAT"
+
+    Examples
+    --------
+    >>> g = Geometry0D()
+    >>> g.dims
+    ()
+
+    """
+
+    def __init__(self, projection: str = "LONG/LAT") -> None:
+        super().__init__(projection)
+
+    def __repr__(self) -> str:
+        return "Geometry0D()"
+
+    @property
+    def dims(self) -> tuple[str, ...]:
+        """Names of the dimensions, always empty."""
+        return ()
+
+
 class GeometryPoint2D(_Geometry):
+    """A single point in the horizontal plane, e.g. from DataArray.sel(x=..., y=...).
+
+    Parameters
+    ----------
+    x : float
+        X coordinate (easting or longitude)
+    y : float
+        Y coordinate (northing or latitude)
+    projection : str, optional
+        Projection string, by default "LONG/LAT"
+
+    """
+
     def __init__(self, x: float, y: float, projection: str = "LONG/LAT"):
         super().__init__(projection)
         self.x = x
         self.y = y
 
     @property
-    def default_dims(self) -> tuple[str, ...]:
+    def dims(self) -> tuple[str, ...]:
+        """Names of the dimensions, always empty."""
         return ()
 
     def __repr__(self) -> str:
@@ -112,15 +218,32 @@ class GeometryPoint2D(_Geometry):
 
     @property
     def wkt(self) -> str:
+        """Well-known text representation of the point."""
         return f"POINT ({self.x} {self.y})"
 
     def to_shapely(self) -> Any:
+        """Convert to a shapely Point."""
         from shapely.geometry import Point
 
         return Point(self.x, self.y)
 
 
 class GeometryPoint3D(_Geometry):
+    """A single point in space, e.g. from DataArray.sel(x=..., y=..., z=...).
+
+    Parameters
+    ----------
+    x : float
+        X coordinate (easting or longitude)
+    y : float
+        Y coordinate (northing or latitude)
+    z : float
+        Z coordinate (depth, positive upwards)
+    projection : str, optional
+        Projection string, by default "LONG/LAT"
+
+    """
+
     def __init__(self, x: float, y: float, z: float, projection: str = "LONG/LAT"):
         super().__init__(projection)
 
@@ -132,14 +255,17 @@ class GeometryPoint3D(_Geometry):
         return f"GeometryPoint3D(x={self.x}, y={self.y}, z={self.z})"
 
     @property
-    def default_dims(self) -> tuple[str, ...]:
+    def dims(self) -> tuple[str, ...]:
+        """Names of the dimensions, always empty."""
         return ()
 
     @property
     def wkt(self) -> str:
+        """Well-known text representation of the point."""
         return f"POINT Z ({self.x} {self.y} {self.z})"
 
     def to_shapely(self) -> Any:
+        """Convert to a shapely Point."""
         from shapely.geometry import Point
 
         return Point(self.x, self.y, self.z)

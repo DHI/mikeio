@@ -1,0 +1,77 @@
+---
+title: Dfs2 - Snow cover comparison
+description: Compare MIKE SHE and MODIS snow cover from two Dfs2 files
+jupyter: python3
+---
+
+This example compares snow cover data from a MIKE SHE model simulation with MODIS satellite observations stored in two separate Dfs2 files. A simple differencing approach highlights areas where the model and observations agree or disagree.
+
+
+```{python}
+import matplotlib as mpl
+import matplotlib.pyplot as plt
+import numpy as np
+import mikeio
+```
+
+## Read the data
+
+```{python}
+mshe_ds = mikeio.read("../../data/MikeSheExtract.dfs2")
+mshe_ds
+```
+
+```{python}
+modis_ds = mikeio.read("../../data/ModisExtract.dfs2")
+modis_ds
+```
+
+The MIKE SHE file has 3 timesteps with multiple snow-related items, while MODIS has 15 timesteps with a single snow cover percentage item.
+
+## Select matching timesteps
+
+```{python}
+mshe_snow = mshe_ds["Fraction of cell area covered by Snow"].isel(time=0)
+modis_snow = modis_ds["Snow Cover"].isel(time=0) / 100.0  # convert % to fraction
+```
+
+Use NaN values from MIKE SHE to mask the MODIS data to the catchment boundary:
+
+```{python}
+modis_snow.values = np.where(
+    np.isnan(mshe_snow.values),
+    mshe_snow.values,
+    modis_snow.values,
+)
+```
+
+## Compare snow cover
+
+```{python}
+modis_snow.plot(vmin=0.0, vmax=1.0, cmap="jet", label="Fraction")
+plt.title("MODIS");
+```
+
+```{python}
+mshe_snow.plot(vmin=0.0, vmax=1.0, cmap="jet", label="Fraction")
+plt.title("MIKE SHE");
+```
+
+## Difference
+
+```{python}
+diff = modis_snow.copy()
+diff.values = modis_snow.values - mshe_snow.values
+
+colors = ["yellow", "green", "red"]
+boundaries = [-1.0, -0.1, 0.1, 1.0]
+cmap = mpl.colors.ListedColormap(colors)
+norm = mpl.colors.BoundaryNorm(boundaries, cmap.N)
+
+diff.plot(cmap=cmap, norm=norm, figsize=(7, 5))
+plt.title("Difference (MODIS − MIKE SHE)");
+```
+
+- **Yellow**: MIKE SHE predicts more snow than MODIS observes (diff < −0.1)
+- **Green**: Model and observations agree within ±0.1
+- **Red**: MODIS observes more snow than MIKE SHE predicts (diff > 0.1)

@@ -1,4 +1,4 @@
-from ._geometry import GeometryPoint3D, GeometryPoint2D, GeometryUndefined
+from ._geometry import Geometry0D, GeometryPoint3D, GeometryPoint2D, GeometryUndefined
 from ._FM_geometry import (
     GeometryFM2D,
 )
@@ -19,6 +19,7 @@ from ._grid_geometry import Grid1D, Grid2D, Grid3D
 
 
 __all__ = [
+    "Geometry0D",
     "GeometryPoint3D",
     "GeometryPoint2D",
     "GeometryUndefined",
