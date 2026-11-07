@@ -1,3 +1,5 @@
+from typing import Any
+import warnings
 from datetime import datetime
 from pathlib import Path
 import numpy as np
@@ -455,13 +457,63 @@ def test_dataarray_getitem_time(da_grid2d: DataArray) -> None:
     da = da_grid2d
     # time=pd.date_range("2000-01-01", freq="h", periods=10)
     time = [da.time[0], da.time[1], da.time[3], da.time[7]]
-    da_sel = da[time]
+    with pytest.warns(FutureWarning):
+        da_sel = da[time]
     assert da_sel.n_timesteps == 4
     assert not da_sel.is_equidistant
 
-    da_sel = da[da.time[:5]]
+    with pytest.warns(FutureWarning):
+        da_sel = da[da.time[:5]]
     assert da_sel.n_timesteps == 5
     assert da_sel.is_equidistant
+
+
+def test_getitem_time_numpy_integers(da_grid2d: DataArray) -> None:
+    da = da_grid2d
+    assert da[np.int64(2)].time[0] == da.time[2]
+    np.testing.assert_array_equal(da[np.array([2, 3])].time, da.time[[2, 3]])
+
+
+def test_getitem_time_boolean_mask(da_grid2d: DataArray) -> None:
+    da = da_grid2d
+    mask = np.zeros(da.n_timesteps, dtype=bool)
+    mask[[2, 3]] = True
+    np.testing.assert_array_equal(da[mask].time, da.time[[2, 3]])
+
+
+def test_time_unsupported_key_raises(da_grid2d: DataArray) -> None:
+    with pytest.raises(TypeError, match="float"):
+        da_grid2d[1.5]
+    with pytest.raises(TypeError, match="float"):
+        da_grid2d.sel(time=1.5)
+
+
+@pytest.mark.parametrize(
+    "key",
+    [
+        pd.Timestamp("2000-01-01 02:00").to_pydatetime(),
+        np.datetime64("2000-01-01T02:00"),
+        slice(pd.Timestamp("2000-01-01 01:00"), pd.Timestamp("2000-01-01 03:00")),
+        [pd.Timestamp("2000-01-01 00:00"), pd.Timestamp("2000-01-01 02:00")],
+        pd.date_range("2000-01-01", freq="h", periods=5),
+    ],
+    ids=["datetime", "datetime64", "slice", "list", "DatetimeIndex"],
+)
+def test_getitem_time_label_is_deprecated(da_grid2d: DataArray, key: Any) -> None:
+    da = da_grid2d
+    with pytest.warns(FutureWarning, match=r"sel\(time=\.\.\.\)"):
+        da_sel = da[key]
+    np.testing.assert_array_equal(da_sel.time, da.sel(time=key).time)
+
+
+def test_getitem_time_by_position_does_not_warn(da_grid2d: DataArray) -> None:
+    da = da_grid2d
+    with warnings.catch_warnings():
+        warnings.simplefilter("error", FutureWarning)
+        da[0]
+        da[0:2]
+        da[[0, 1]]
+        da[np.array([0, 1])]
 
 
 def test_dataarray_grid2d_indexing_error(da_grid2d: DataArray) -> None:
