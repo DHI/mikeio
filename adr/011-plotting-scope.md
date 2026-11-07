@@ -79,4 +79,4 @@ Changed in 4.0 without deprecation, since nothing raises a warning:
 - Each plot type has one name, and the same name on every geometry where it applies.
 - `_plot_map` and the polar spectrum code get simpler in 4.0.
 - Users who need publication-quality figures customise with matplotlib.
-- Point-in-polygon tests in geometry code move off `matplotlib.path`, so geometry does not depend on a plotting library.
+- Geometry keeps using `matplotlib.path` for point-in-polygon tests. Replacing it would only matter if matplotlib became optional.
