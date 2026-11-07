@@ -29,6 +29,14 @@ def test_read_simple_3d() -> None:
     assert ds.to_numpy().shape[0] == 3
     assert len(ds.items) == 3
 
+
+def test_read_dtype_deprecated() -> None:
+    filename = "tests/testdata/basin_3d.dfsu"
+    with pytest.warns(FutureWarning, match="dtype"):
+        ds = mikeio.read(filename, dtype=np.float64)
+
+    assert ds[0].dtype == np.float64
+
     assert ds.items[0].name != "Z coordinate"
     assert ds.items[2].name == "W velocity"
 

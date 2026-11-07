@@ -69,7 +69,8 @@ def test_read_precision_single_and_double() -> None:
     assert ds[0].dtype == np.float32
 
     # Double precision
-    ds = mikeio.read(filename, items=1, dtype=np.float64)
+    with pytest.warns(FutureWarning, match="dtype"):
+        ds = mikeio.read(filename, items=1, dtype=np.float64)
     assert ds[0].dtype == np.float64
 
 
