@@ -30,6 +30,7 @@ class Polygon:
 
     @property
     def area(self) -> float:
+        """Signed area of the polygon."""
         return (
             np.dot(self.xy[:, 1], np.roll(self.xy[:, 0], 1))
             - np.dot(self.xy[:, 0], np.roll(self.xy[:, 1], 1))
@@ -43,6 +44,7 @@ class BoundaryPolygons:
 
     @property
     def lines(self) -> list[Polygon]:
+        """All boundary polygons, exteriors followed by interiors."""
         return self.exteriors + self.interiors
 
     def contains(self, points: np.ndarray) -> np.ndarray:
@@ -130,8 +132,10 @@ def _plot_map(
     if ax is None:
         _, ax = plt.subplots(figsize=figsize)
 
-    _set_aspect_ratio(ax, nc, geometry.projection)
-    _set_xy_label_by_projection(ax, geometry.projection)
+    ax.set_aspect(geometry._plot_aspect)
+    xlabel, ylabel = geometry._axis_labels
+    ax.set_xlabel(xlabel)
+    ax.set_ylabel(ylabel)
 
     if plot_type == "outline_only":
         _plot_outline_only(ax, boundary_polylines)
@@ -372,15 +376,6 @@ def _add_colorbar(
     )
 
 
-def _set_aspect_ratio(ax: Axes, nc: np.ndarray, projection: str) -> None:
-    is_geo = projection == "LONG/LAT"
-    if is_geo:
-        mean_lat = np.mean(nc[:, 1])
-        ax.set_aspect(1.0 / np.cos(np.pi * mean_lat / 180))
-    else:
-        ax.set_aspect("equal")
-
-
 def _add_non_tri_mesh(
     ax: Axes, nc: np.ndarray, element_table: np.ndarray, plot_type: str
 ) -> None:
@@ -405,18 +400,6 @@ def _add_non_tri_mesh(
 def _add_outline(ax: Axes, boundary_polylines: list[Polygon]) -> None:
     for line in boundary_polylines:
         ax.plot(*line.xy.T, color="0.4", linewidth=1.2)
-
-
-def _set_xy_label_by_projection(ax: Axes, projection: str) -> None:
-    if (not projection) or projection == "NON-UTM":
-        ax.set_xlabel("x [m]")
-        ax.set_ylabel("y [m]")
-    elif projection == "LONG/LAT":
-        ax.set_xlabel("Longitude [degrees]")
-        ax.set_ylabel("Latitude [degrees]")
-    else:
-        ax.set_xlabel("Easting [m]")
-        ax.set_ylabel("Northing [m]")
 
 
 def _is_tri_only(element_table: np.ndarray) -> bool:

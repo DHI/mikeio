@@ -6,6 +6,7 @@ from mikecore.DfsuFile import DfsuFile, DfsuFileType
 from ._dfsu import Dfsu2DH
 from ._layered import Dfsu2DV, Dfsu3D
 from ._spectral import DfsuSpectral
+from .._path import normalize_path
 
 
 DFSU_MAPPING = {
@@ -23,7 +24,7 @@ DFSU_MAPPING = {
 
 
 def dfsu(filename: str | Path) -> Any:
-    filename = str(filename)
+    filename = normalize_path(filename)
     dfs = DfsuFile.Open(filename)
     type = DfsuFileType(dfs.DfsuFileType)
     dfs.Close()

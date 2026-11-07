@@ -4,7 +4,14 @@ from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from typing import Any, Sequence
 
+import numpy as np
 from mikecore.Projections import MapProjection
+
+
+def _geographic_aspect(latitudes: np.ndarray) -> float:
+    """Aspect ratio correcting for longitude compression at a given latitude."""
+    mean_lat = float(np.mean(latitudes))
+    return 1.0 / np.cos(np.pi * mean_lat / 180)
 
 
 @dataclass
@@ -40,6 +47,7 @@ class BoundingBox:
     def parse(
         values: "BoundingBox" | Sequence[float],
     ) -> "BoundingBox":
+        """Create a BoundingBox from a BoundingBox or (left, bottom, right, top)."""
         match values:
             case BoundingBox():
                 bbox = values
@@ -78,6 +86,15 @@ class _Geometry(ABC):
     def is_local_coordinates(self) -> bool:
         """Are coordinates relative (NON-UTM)?"""
         return self._projstr == "NON-UTM"
+
+    @property
+    def _axis_labels(self) -> tuple[str, str]:
+        """(x, y) axis labels for plotting, derived from the projection."""
+        if self.is_geo:
+            return "Longitude [degrees]", "Latitude [degrees]"
+        if self.is_local_coordinates:  # NON-UTM
+            return "x [m]", "y [m]"
+        return "Easting [m]", "Northing [m]"
 
     @property
     @abstractmethod
@@ -133,6 +150,7 @@ class GeometryUndefined(_Geometry):
 
     @property
     def dims(self) -> tuple[str, ...]:
+        """Not available for GeometryUndefined."""
         raise NotImplementedError()
 
 
@@ -163,10 +181,24 @@ class Geometry0D(_Geometry):
 
     @property
     def dims(self) -> tuple[str, ...]:
+        """Names of the dimensions, always empty."""
         return ()
 
 
 class GeometryPoint2D(_Geometry):
+    """A single point in the horizontal plane, e.g. from DataArray.sel(x=..., y=...).
+
+    Parameters
+    ----------
+    x : float
+        X coordinate (easting or longitude)
+    y : float
+        Y coordinate (northing or latitude)
+    projection : str, optional
+        Projection string, by default "LONG/LAT"
+
+    """
+
     def __init__(self, x: float, y: float, projection: str = "LONG/LAT"):
         super().__init__(projection)
         self.x = x
@@ -174,6 +206,7 @@ class GeometryPoint2D(_Geometry):
 
     @property
     def dims(self) -> tuple[str, ...]:
+        """Names of the dimensions, always empty."""
         return ()
 
     def __repr__(self) -> str:
@@ -185,15 +218,32 @@ class GeometryPoint2D(_Geometry):
 
     @property
     def wkt(self) -> str:
+        """Well-known text representation of the point."""
         return f"POINT ({self.x} {self.y})"
 
     def to_shapely(self) -> Any:
+        """Convert to a shapely Point."""
         from shapely.geometry import Point
 
         return Point(self.x, self.y)
 
 
 class GeometryPoint3D(_Geometry):
+    """A single point in space, e.g. from DataArray.sel(x=..., y=..., z=...).
+
+    Parameters
+    ----------
+    x : float
+        X coordinate (easting or longitude)
+    y : float
+        Y coordinate (northing or latitude)
+    z : float
+        Z coordinate (depth, positive upwards)
+    projection : str, optional
+        Projection string, by default "LONG/LAT"
+
+    """
+
     def __init__(self, x: float, y: float, z: float, projection: str = "LONG/LAT"):
         super().__init__(projection)
 
@@ -206,13 +256,16 @@ class GeometryPoint3D(_Geometry):
 
     @property
     def dims(self) -> tuple[str, ...]:
+        """Names of the dimensions, always empty."""
         return ()
 
     @property
     def wkt(self) -> str:
+        """Well-known text representation of the point."""
         return f"POINT Z ({self.x} {self.y} {self.z})"
 
     def to_shapely(self) -> Any:
+        """Convert to a shapely Point."""
         from shapely.geometry import Point
 
         return Point(self.x, self.y, self.z)

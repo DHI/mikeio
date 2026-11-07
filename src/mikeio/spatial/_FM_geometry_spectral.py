@@ -33,6 +33,7 @@ class GeometryFMPointSpectrum(_Geometry):
 
     @property
     def dims(self) -> tuple[str, ...]:
+        """Names of the spectral dimensions."""
         if self.directions is None:
             return ("frequency",)
         else:
@@ -44,6 +45,7 @@ class GeometryFMPointSpectrum(_Geometry):
 
     @property
     def is_layered(self) -> bool:
+        """Point spectra are never layered."""
         return False
 
     def __repr__(self) -> str:
@@ -74,6 +76,9 @@ class GeometryFMPointSpectrum(_Geometry):
 
 
 class _GeometryFMSpectrum(_GeometryFM):
+    # The dfsu file type a subclass is stored as; subclasses set their own.
+    _default_dfsu_type: DfsuFileType
+
     def __init__(
         self,
         node_coordinates: np.ndarray,
@@ -93,7 +98,7 @@ class _GeometryFMSpectrum(_GeometryFM):
             element_table=element_table,
             codes=codes,
             projection=projection,
-            dfsu_type=dfsu_type,
+            dfsu_type=self._default_dfsu_type if dfsu_type is None else dfsu_type,
             element_ids=element_ids,
             node_ids=node_ids,
             validate=validate,
@@ -110,6 +115,7 @@ class _GeometryFMSpectrum(_GeometryFM):
 
     @property
     def is_layered(self) -> bool:
+        """Spectral geometries are never layered."""
         return False
 
     @property
@@ -145,8 +151,11 @@ class _GeometryFMSpectrum(_GeometryFM):
 class GeometryFMAreaSpectrum(_GeometryFMSpectrum, GeometryFM2D):
     """Flexible mesh area spectrum geometry."""
 
+    _default_dfsu_type = DfsuFileType.DfsuSpectral2D
+
     @property
     def dims(self) -> tuple[str, ...]:
+        """Names of the dimensions, ("element", ...spectral)."""
         return self._spectral_dims("element")
 
     def get_space_axis(self) -> tuple[int, ...]:
@@ -156,6 +165,7 @@ class GeometryFMAreaSpectrum(_GeometryFMSpectrum, GeometryFM2D):
     def isel(  # type: ignore
         self, idx: Sequence[int], **kwargs: Any
     ) -> GeometryFMPointSpectrum | GeometryFMAreaSpectrum:
+        """Select a subset of elements, see elements_to_geometry."""
         return self.elements_to_geometry(elements=idx)
 
     def elements_to_geometry(  # type: ignore
@@ -206,8 +216,11 @@ class GeometryFMAreaSpectrum(_GeometryFMSpectrum, GeometryFM2D):
 class GeometryFMLineSpectrum(_GeometryFMSpectrum):
     """Flexible mesh line spectrum geometry."""
 
+    _default_dfsu_type = DfsuFileType.DfsuSpectral1D
+
     @property
     def dims(self) -> tuple[str, ...]:
+        """Names of the dimensions, ("node", ...spectral)."""
         return self._spectral_dims("node")
 
     def get_space_axis(self) -> tuple[int, ...]:
@@ -218,6 +231,23 @@ class GeometryFMLineSpectrum(_GeometryFMSpectrum):
     def create_dummy_coordinates(
         n_nodes: int, frequencies: np.ndarray, directions: np.ndarray
     ) -> GeometryFMLineSpectrum:
+        """Create a line spectrum geometry with placeholder node coordinates.
+
+        Parameters
+        ----------
+        n_nodes : int
+            Number of nodes on the line
+        frequencies : np.array
+            Frequency axis
+        directions : np.array
+            Directional axis
+
+        Returns
+        -------
+        GeometryFMLineSpectrum
+            Geometry with nodes placed on a straight line
+
+        """
         # boogus x, y, z 1..n, 1..n, -10
         node_coordinates = np.zeros((n_nodes, 3), dtype=float)
         node_coordinates[:, 0] = np.arange(1, n_nodes + 1)  # x
@@ -233,7 +263,6 @@ class GeometryFMLineSpectrum(_GeometryFMSpectrum):
             node_coordinates=node_coordinates,
             element_table=element_table,
             codes=np.zeros(n_nodes, dtype=int),
-            dfsu_type=DfsuFileType.DfsuSpectral1D,
             projection="LONG/LAT",
             frequencies=frequencies,
             directions=directions,
@@ -242,6 +271,21 @@ class GeometryFMLineSpectrum(_GeometryFMSpectrum):
     def isel(  # type: ignore
         self, idx: Sequence[int], axis: str = "node"
     ) -> GeometryFMPointSpectrum | GeometryFMLineSpectrum:
+        """Select a subset of nodes.
+
+        Parameters
+        ----------
+        idx : list[int]
+            Node indices to select
+        axis : str
+            Not used, nodes is the only spatial axis
+
+        Returns
+        -------
+        GeometryFMPointSpectrum or GeometryFMLineSpectrum
+            Geometry for the selected nodes
+
+        """
         return self._nodes_to_geometry(nodes=idx)
 
     def _get_nodes_and_table_for_elements(

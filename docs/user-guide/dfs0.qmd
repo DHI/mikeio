@@ -151,11 +151,3 @@ item = ItemInfo(
 )
 item
 ```
-
-
-Cleanup:
-
-```{python}
-import os
-os.remove("mauna_loa_co2.dfs0")
-```

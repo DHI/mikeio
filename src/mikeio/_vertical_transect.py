@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Literal, Sequence
+from typing import Literal, Sequence
 
 import numpy as np
 from mikecore.DfsuFile import DfsuFileType
@@ -11,10 +11,6 @@ from .spatial import (
     GeometryFMVerticalProfile,
     Grid2D,
 )
-
-if TYPE_CHECKING:  # pragma: no cover
-    from .spatial._FM_geometry_layered import _GeometryFMLayered
-
 
 Mode = Literal["interpolate", "discrete"]
 
@@ -106,7 +102,7 @@ def _shape_function_weights(corner_xy: np.ndarray, x: float, y: float) -> np.nda
 # ---------------------------------------------------------------------------
 # Column geometry
 # ---------------------------------------------------------------------------
-def _column_level_nodes(geometry: "_GeometryFMLayered", col: int) -> np.ndarray:
+def _column_level_nodes(geometry: GeometryFM3D, col: int) -> np.ndarray:
     """3D node ids per vertical interface level for a 2D column.
 
     Shape ``(nl + 1, ncorner)``: level 0 = bed interface, level ``nl`` = surface.
@@ -123,7 +119,7 @@ def _column_level_nodes(geometry: "_GeometryFMLayered", col: int) -> np.ndarray:
     return levels
 
 
-def _column_corner_xy(geometry: "_GeometryFMLayered", levels: np.ndarray) -> np.ndarray:
+def _column_corner_xy(geometry: GeometryFM3D, levels: np.ndarray) -> np.ndarray:
     """``(ncorner, 2)`` x,y of a column's corners (from the bed-interface nodes)."""
     return geometry.node_coordinates[levels[0]][:, :2]
 
@@ -178,7 +174,7 @@ def _transect_crossings(
     ea, eb = nodes[edges[:, 0]], nodes[edges[:, 1]]
     emin = np.minimum(ea, eb)
     emax = np.maximum(ea, eb)
-    
+
     rows: list[tuple[float, float, float]] = []
     base = 0.0
     for i in range(len(pts) - 1):
@@ -201,7 +197,7 @@ def _transect_crossings(
                 rows.append((base + np.hypot(*(ip - p1)), ip[0], ip[1]))
         base += np.hypot(*(p2 - p1))
     rows.append((base, pts[-1][0], pts[-1][1]))
-    
+
     arr = np.array(rows)
     arr = arr[np.argsort(arr[:, 0])]
     keep = [0]
@@ -209,7 +205,7 @@ def _transect_crossings(
         if arr[k, 0] - arr[keep[-1], 0] > 1e-9 * max(base, 1.0):
             keep.append(k)
     stations = arr[keep, 1:3]
-    
+
     seg_col = np.array(
         [
             _find_col(geometry2d, *(0.5 * (stations[c] + stations[c + 1])))

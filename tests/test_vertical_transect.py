@@ -1,4 +1,5 @@
 """Tests for DataArray/Dataset.extract_vertical (vertical transect extraction)."""
+
 import numpy as np
 import pytest
 
