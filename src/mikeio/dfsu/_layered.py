@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import warnings
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Sequence, overload
 
@@ -321,7 +322,8 @@ class DfsuLayered:
             fill value for to impute corrupt data, used in conjunction with error_bad_data=False
             default np.nan
         dtype: numpy.dtype, optional
-            Data type to read, by default np.float32
+            Deprecated since v3.4: the parameter will be removed in v4.0,
+            data is always read as np.float32. Use `Dataset.astype()` instead.
 
         Returns
         -------
@@ -329,8 +331,15 @@ class DfsuLayered:
             A Dataset with data dimensions [t,elements]
 
         """
-        if dtype not in [np.float32, np.float64]:
-            raise ValueError("Invalid data type. Choose np.float32 or np.float64")
+        if dtype != np.float32:
+            if dtype not in [np.float32, np.float64]:
+                raise ValueError("Invalid data type. Choose np.float32 or np.float64")
+            warnings.warn(
+                "dtype parameter is deprecated and will be removed in v4.0. "
+                "Data is always read as np.float32, use Dataset.astype() to cast it afterwards.",
+                FutureWarning,
+                stacklevel=2,
+            )
 
         dfs = DfsuFile.Open(self._filename)
 
@@ -346,10 +355,10 @@ class DfsuLayered:
                 or (area is not None)
                 or (layers is not None)
             ):
-                elements = self.geometry.find_index(  # type: ignore
+                elements = self.geometry.find_index(
                     x=x, y=y, z=z, area=area, layers=layers
                 )
-                if len(elements) == 0:  # type: ignore
+                if len(elements) == 0:
                     raise ValueError("No elements in selection!")
 
         geometry = (
@@ -405,10 +414,8 @@ class DfsuLayered:
                 dfs, d, t = _read_item_time_step(
                     dfs=dfs,
                     filename=self._filename,
-                    time=time,
                     item_numbers=item_numbers,
                     deletevalue=deletevalue,
-                    shape=(data.shape[-1],),
                     item=item,
                     it=it,
                     error_bad_data=error_bad_data,
@@ -557,7 +564,12 @@ class Dfsu3D(DfsuLayered):
     @property
     def geometry2d(self) -> GeometryFM2D:
         """The 2d geometry for a 3d object."""
-        return self.geometry.geometry2d
+        geometry = self.geometry
+        if not isinstance(geometry, GeometryFM3D):
+            raise ValueError(
+                f"A vertical profile has no 2d horizontal geometry ({self._type.name})"
+            )
+        return geometry.geometry2d
 
     def extract_surface_elevation_from_3d(self, n_nearest: int = 4) -> DataArray:
         """Extract surface elevation from a 3d dfsu file (based on zn)
@@ -569,16 +581,19 @@ class Dfsu3D(DfsuLayered):
             number of points for spatial interpolation (inverse_distance), default=4
 
         """
-        # validate input
-        assert (
-            self._type == DfsuFileType.Dfsu3DSigma
-            or self._type == DfsuFileType.Dfsu3DSigmaZ
-        )
-        assert n_nearest > 0
+        if self._type not in (DfsuFileType.Dfsu3DSigma, DfsuFileType.Dfsu3DSigmaZ):
+            raise ValueError(
+                f"a surface elevation needs a 3D sigma or sigma-z dfsu, not {self._type.name}"
+            )
+        if n_nearest < 1:
+            raise ValueError(f"n_nearest must be at least 1, not {n_nearest}")
+
+        geometry = self.geometry
+        assert isinstance(geometry, GeometryFM3D)
 
         # make 2d nodes-to-elements interpolator
-        top_el = self.geometry.top_elements
-        geom = self.geometry.elements_to_geometry(top_el, node_layers="top")
+        top_el = geometry.top_elements
+        geom = geometry.elements_to_geometry(top_el, node_layers="top")
         xye = geom.element_coordinates[:, 0:2]  # type: ignore
         xyn = geom.node_coordinates[:, 0:2]  # type: ignore
         tree2d = KDTree(xyn)

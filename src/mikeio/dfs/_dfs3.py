@@ -1,4 +1,5 @@
 from __future__ import annotations
+import warnings
 from pathlib import Path
 from collections.abc import Sequence
 from typing import Any, Mapping
@@ -15,7 +16,7 @@ from mikecore.DfsFileFactory import DfsFileFactory
 from mikecore.eum import eumQuantity, eumUnit
 from mikecore.Projections import Cartography
 
-from .. import __dfs_version__
+from .._version import __dfs_version__
 from ..dataset import Dataset
 from ._dfs import (
     _Dfs123,
@@ -186,13 +187,21 @@ class Dfs3(_Dfs123):
         layers: int, str, list[int], optional
             Read only data for specific layers, by default None
         dtype: data-type, optional
-            Define the dtype of the returned dataset (default = np.float32)
+            Deprecated since v3.4: the parameter will be removed in v4.0,
+            data is always read as np.float32. Use `Dataset.astype()` instead.
 
         Returns
         -------
         Dataset
 
         """
+        if dtype != np.float32:
+            warnings.warn(
+                "dtype parameter is deprecated and will be removed in v4.0. "
+                "Data is always read as np.float32, use Dataset.astype() to cast it afterwards.",
+                FutureWarning,
+                stacklevel=2,
+            )
         if area is not None:
             raise NotImplementedError("area subsetting is not yet implemented for Dfs3")
         # NOTE:

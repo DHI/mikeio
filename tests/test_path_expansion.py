@@ -1,5 +1,6 @@
 """Tests that ``~`` is expanded in file names, like pandas and xarray do."""
 
+import re
 import shutil
 from pathlib import Path
 
@@ -29,8 +30,9 @@ def copy_to_home(home: Path, testfile: str) -> str:
 
 
 def test_normalize_path_expands_tilde(home: Path) -> None:
-    assert normalize_path("~/wl.dfs0") == str(home / "wl.dfs0")
-    assert normalize_path(Path("~/wl.dfs0")) == str(home / "wl.dfs0")
+    # compare as paths: on Windows expanduser keeps the "/" separator
+    assert Path(normalize_path("~/wl.dfs0")) == home / "wl.dfs0"
+    assert Path(normalize_path(Path("~/wl.dfs0"))) == home / "wl.dfs0"
 
 
 def test_normalize_path_leaves_other_paths_alone() -> None:
@@ -221,5 +223,5 @@ def test_extract_track_tilde(home: Path) -> None:
 
 
 def test_missing_file_error_shows_expanded_path(home: Path) -> None:
-    with pytest.raises(FileNotFoundError, match=str(home)):
+    with pytest.raises(FileNotFoundError, match=re.escape(str(home))):
         mikeio.open("~/does_not_exist.dfs0")

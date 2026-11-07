@@ -6,7 +6,7 @@
 [![PyPI version](https://badge.fury.io/py/mikeio.svg)](https://badge.fury.io/py/mikeio)
 ![OS](https://img.shields.io/badge/OS-Windows%20%7C%20Linux-blue)
 ![Downloads](https://img.shields.io/pypi/dm/mikeio)
-[![License: BSD-3-Clause](https://img.shields.io/badge/License-BSD--3--Clause-blue.svg)](https://github.com/DHI/mikeio/blob/main/License.txt)
+[![License: BSD-3-Clause](https://img.shields.io/badge/License-BSD--3--Clause-blue.svg)](https://github.com/DHI/mikeio/blob/main/LICENSE)
 
 Read, write and manipulate dfs0, dfs1, dfs2, dfs3, dfsu and mesh files.
 
@@ -15,7 +15,7 @@ MIKE IO facilitates common data processing workflows for [MIKE files](https://ww
 ## Requirements
 
 * Windows or Linux operating system
-* Python x64 3.12 - 3.14
+* Python x64 3.12 - 3.15
 * (Windows) [VC++ redistributables](https://aka.ms/vs/17/release/vc_redist.x64.exe) (already installed if you have MIKE)
 
 ## Installation
@@ -70,13 +70,13 @@ See the [user guide](https://dhi.github.io/mikeio/user-guide/getting-started.htm
 
 ## Where can I get help?
 * Documentation - [https://dhi.github.io/mikeio/](https://dhi.github.io/mikeio/)
+* For AI coding assistants - [llms.txt](https://dhi.github.io/mikeio/llms.txt), an index of the current documentation
 * General help, new ideas and feature requests - [GitHub Discussions](https://github.com/DHI/mikeio/discussions)
 * Bugs - [GitHub Issues](https://github.com/DHI/mikeio/issues)
-* Course material: [Getting started with Dfs files in Python using MIKE IO](https://dhi.github.io/getting-started-with-mikeio/intro.html)
 
 ## Testing
 
-MIKE IO is tested extensively, with an overall statement coverage of ~95%. The test suite runs on every pull request against Python 3.12 and 3.14, and on a schedule on both Linux and Windows.
+MIKE IO is tested extensively, with an overall statement coverage of ~95%. The test suite runs on every pull request against Python 3.12 and 3.15, and on a schedule on both Linux and Windows.
 
 ```bash
 uv run pytest --cov=mikeio
@@ -88,4 +88,4 @@ Contributions are welcome — see [CONTRIBUTING.md](https://github.com/DHI/mikei
 
 ## License
 
-[BSD-3-Clause](https://github.com/DHI/mikeio/blob/main/License.txt)
+[BSD-3-Clause](https://github.com/DHI/mikeio/blob/main/LICENSE)

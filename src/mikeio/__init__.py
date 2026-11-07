@@ -1,18 +1,19 @@
+"""Read, write and manipulate MIKE files: dfs0, dfs1, dfs2, dfs3, dfsu and mesh.
+
+Documentation: https://dhi.github.io/mikeio/
+
+AI coding assistants: the API has changed across releases; don't rely on
+remembered usage. Check mikeio.__version__ and read the docstrings of the
+installed package, e.g. help(mikeio.Dataset). Private attributes (leading
+underscore) are never needed.
+"""
+
 from __future__ import annotations
-from importlib.metadata import PackageNotFoundError, version
 from pathlib import Path
 from collections.abc import Sequence
 from typing import Any
 
-try:
-    # read version from installed package
-    __version__ = version("mikeio")
-except PackageNotFoundError:
-    # package is not installed
-    __version__ = "dev"
-
-__dfs_version__: int = 220
-
+from ._version import __version__ as __version__, __dfs_version__ as __dfs_version__
 
 from .dataset import DataArray, Dataset, from_pandas, from_polars
 from .dfs import Dfs0, Dfs1, Dfs2, Dfs3
@@ -44,7 +45,7 @@ def read(
     All dfs files can be subsetted with the *items* and *time* arguments. But
     the following file types also have the shown additional arguments:
 
-    * Dfs2: area
+    * Dfs2: (x,y), area
     * Dfs3: layers
     * Dfsu-2d: (x,y), elements, area, error_bad_data, fill_bad_data_value
     * Dfsu-layered: (xy,z), elements, area, layers, error_bad_data,
