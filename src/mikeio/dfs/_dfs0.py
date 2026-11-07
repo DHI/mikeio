@@ -16,7 +16,9 @@ from mikecore.eum import eumQuantity
 from .._version import __dfs_version__
 from ..dataset import Dataset, DataArray
 from ._dfs import (
+    _TimeAxisInfo,
     _get_item_info,
+    _opened,
     _valid_item_numbers,
 )
 from ._custom_blocks import (
@@ -76,24 +78,21 @@ def write_dfs0(
 
     builder.CreateFile(filename)
 
-    dfs = builder.GetFile()
+    with _opened(builder.GetFile()) as dfs:
+        delete_value = dfs.FileInfo.DeleteValueFloat
 
-    delete_value = dfs.FileInfo.DeleteValueFloat
+        t_seconds = (dataset.time - dataset.time[0]).total_seconds().values
 
-    t_seconds = (dataset.time - dataset.time[0]).total_seconds().values
+        data = np.array(dataset.to_numpy(), order="F").astype(np.float64).T
+        data[np.isnan(data)] = delete_value
 
-    data = np.array(dataset.to_numpy(), order="F").astype(np.float64).T
-    data[np.isnan(data)] = delete_value
-
-    if data.ndim == 2:
-        data_to_write = np.concatenate([t_seconds.reshape(-1, 1), data], axis=1)
-    else:
-        data_to_write = np.concatenate(
-            [np.atleast_2d(t_seconds), np.atleast_2d(data)], axis=1
-        )
-    dfs.WriteDfs0DataDouble(data_to_write)
-
-    dfs.Close()
+        if data.ndim == 2:
+            data_to_write = np.concatenate([t_seconds.reshape(-1, 1), data], axis=1)
+        else:
+            data_to_write = np.concatenate(
+                [np.atleast_2d(t_seconds), np.atleast_2d(data)], axis=1
+            )
+        dfs.WriteDfs0DataDouble(data_to_write)
 
 
 class Dfs0:
@@ -114,31 +113,33 @@ class Dfs0:
         if not path.exists():
             raise FileNotFoundError(path)
 
-        dfs = DfsFileFactory.DfsGenericOpen(str(path))
-        self._dfs = dfs
-        self._title = dfs.FileInfo.FileTitle
+        with _opened(DfsFileFactory.DfsGenericOpen(str(path))) as dfs:
+            self._time_axis = _TimeAxisInfo.from_mikecore(dfs.FileInfo.TimeAxis)
+            self._deletevalue_double: float = dfs.FileInfo.DeleteValueDouble
+            self._deletevalue_float: float = dfs.FileInfo.DeleteValueFloat
+            self._title = dfs.FileInfo.FileTitle
 
-        # Read items
-        self._items = _get_item_info(dfs.ItemInfo)
+            # Read items
+            self._items = _get_item_info(dfs.ItemInfo)
 
-        self._timeaxistype = dfs.FileInfo.TimeAxis.TimeAxisType
+            self._timeaxistype = dfs.FileInfo.TimeAxis.TimeAxisType
 
-        if self._timeaxistype in {
-            TimeAxisType.CalendarEquidistant,
-            TimeAxisType.CalendarNonEquidistant,
-        }:
-            self._start_time: datetime | None = dfs.FileInfo.TimeAxis.StartDateTime
-        else:  # relative time axis
-            self._start_time = None
+            if self._timeaxistype in {
+                TimeAxisType.CalendarEquidistant,
+                TimeAxisType.CalendarNonEquidistant,
+            }:
+                self._start_time: datetime | None = dfs.FileInfo.TimeAxis.StartDateTime
+            else:  # relative time axis
+                self._start_time = None
 
-        # time
-        self._n_timesteps: int = dfs.FileInfo.TimeAxis.NumberOfTimeSteps
+            # time
+            self._n_timesteps: int = dfs.FileInfo.TimeAxis.NumberOfTimeSteps
 
-        # Must happen before Close(): mikecore's block values are views over
-        # memory owned by the dfs library (see Dataset.custom_blocks).
-        self._custom_blocks: dict[str, NDArray[Any]] = read_custom_blocks(dfs.FileInfo)
-
-        dfs.Close()
+            # Must happen inside this block: mikecore's block values are views
+            # over memory owned by the dfs library (see Dataset.custom_blocks).
+            self._custom_blocks: dict[str, NDArray[Any]] = read_custom_blocks(
+                dfs.FileInfo
+            )
 
     def __repr__(self) -> str:
         out = ["<mikeio.Dfs0>"]
@@ -175,13 +176,14 @@ class Dfs0:
         if not path.exists():
             raise FileNotFoundError(f"File {path} not found")
 
-        dfs = DfsFileFactory.DfsGenericOpen(self._filename)
-        raw_data = dfs.ReadDfs0DataDouble()  # Bulk read the data
-        dfs.Close()
+        item_numbers = _valid_item_numbers([item.name for item in self._items], items)
+
+        with _opened(DfsFileFactory.DfsGenericOpen(self._filename)) as dfs:
+            raw_data = dfs.ReadDfs0DataDouble()  # Bulk read the data
 
         matrix = raw_data[:, 1:]
-        matrix[matrix == dfs.FileInfo.DeleteValueDouble] = np.nan  # cutil
-        matrix[matrix == dfs.FileInfo.DeleteValueFloat] = np.nan  # linux
+        matrix[matrix == self._deletevalue_double] = np.nan  # cutil
+        matrix[matrix == self._deletevalue_float] = np.nan  # linux
         ncol = matrix.shape[1]
         data = [matrix[:, i] for i in range(ncol)]
 
@@ -196,7 +198,6 @@ class Dfs0:
 
         # TODO common for all dfs files , extract
         # select items
-        item_numbers = _valid_item_numbers(dfs.ItemInfo, items)
         if items is not None:
             data = [data[it] for it in item_numbers]
             item_infos = [self.items[it] for it in item_numbers]
@@ -285,12 +286,14 @@ class Dfs0:
         """File end time."""
         if self.start_time is None:
             return None
-        if self._dfs.FileInfo.TimeAxis.IsEquidistant():
-            dt = self._dfs.FileInfo.TimeAxis.TimeStep
-            n_steps = self._dfs.FileInfo.TimeAxis.NumberOfTimeSteps
+        if self._time_axis.is_equidistant:
+            dt = self._time_axis.time_step
+            assert dt is not None
+            n_steps = self._time_axis.n_timesteps
             timespan = dt * (n_steps - 1)
         else:
-            timespan = self._dfs.FileInfo.TimeAxis.TimeSpan
+            assert self._time_axis.time_span is not None
+            timespan = self._time_axis.time_span
 
         return self.start_time + timedelta(seconds=timespan)
 
@@ -303,7 +306,7 @@ class Dfs0:
     def timestep(self) -> float:
         """Time step size in seconds."""
         if self._timeaxistype == TimeAxisType.CalendarEquidistant:
-            return self._dfs.FileInfo.TimeAxis.TimeStep  # type: ignore
+            return self._time_axis.time_step  # type: ignore
         else:
             raise ValueError("Time axis type not supported")
 

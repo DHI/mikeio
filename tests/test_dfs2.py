@@ -867,10 +867,9 @@ def is_header_unchanged_on_read_write(tmp_path: Path, filename: str) -> None:
     assert b.dx == pytest.approx(a.dx)
     assert b.dy == pytest.approx(a.dy)
 
-    pa, pb = a._dfs.FileInfo.Projection, b._dfs.FileInfo.Projection
-    assert pb.Longitude == pytest.approx(pa.Longitude)
-    assert pb.Latitude == pytest.approx(pa.Latitude)
-    assert pb.Orientation == pytest.approx(pa.Orientation)
+    assert b.longitude == pytest.approx(a.longitude)
+    assert b.latitude == pytest.approx(a.latitude)
+    assert b._orientation == pytest.approx(a._orientation)
 
     # everything else must round-trip exactly
     assert b.nx == a.nx
@@ -878,9 +877,7 @@ def is_header_unchanged_on_read_write(tmp_path: Path, filename: str) -> None:
     assert b._projstr == a._projstr
     assert b._n_timesteps == a._n_timesteps
     assert b._start_time == a._start_time
-    assert (
-        b._dfs.FileInfo.TimeAxis.TimeAxisType == a._dfs.FileInfo.TimeAxis.TimeAxisType
-    )
+    assert b._time_axis.axis_type == a._time_axis.axis_type
     assert b.items == a.items
 
     assert b.custom_blocks.keys() == a.custom_blocks.keys()

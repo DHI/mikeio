@@ -3,6 +3,7 @@ from pathlib import Path
 from typing import Any
 from mikecore.DfsuFile import DfsuFile, DfsuFileType
 
+from ..dfs._dfs import _opened
 from ._dfsu import Dfsu2DH
 from ._layered import Dfsu2DV, Dfsu3D
 from ._spectral import DfsuSpectral
@@ -25,9 +26,8 @@ DFSU_MAPPING = {
 
 def dfsu(filename: str | Path) -> Any:
     filename = normalize_path(filename)
-    dfs = DfsuFile.Open(filename)
-    type = DfsuFileType(dfs.DfsuFileType)
-    dfs.Close()
+    with _opened(DfsuFile.Open(filename)) as dfs:
+        type = DfsuFileType(dfs.DfsuFileType)
 
     klass = DFSU_MAPPING.get(type)
 

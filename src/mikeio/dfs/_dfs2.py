@@ -20,7 +20,9 @@ from .._version import __dfs_version__
 from ..dataset import Dataset
 from ._dfs import (
     _Dfs123,
-    _get_item_info,
+    _TimeAxisInfo,
+    _opened,
+    _select_items,
     _valid_item_numbers,
     _valid_timesteps,
     write_dfs_data,
@@ -33,8 +35,8 @@ from .._path import normalize_output_path, normalize_path
 
 
 def write_dfs2(filename: str | Path, ds: Dataset, title: str = "") -> None:
-    dfs = _write_dfs2_header(filename, ds, title)
-    write_dfs_data(dfs=dfs, ds=ds, n_spatial_dims=2)
+    with _opened(_write_dfs2_header(filename, ds, title)) as dfs:
+        write_dfs_data(dfs=dfs, ds=ds, n_spatial_dims=2)
 
 
 def _write_dfs2_header(filename: str | Path, ds: Dataset, title: str = "") -> DfsFile:
@@ -135,30 +137,28 @@ class Dfs2(_Dfs123):
 
         is_spectral = type == "spectral"
         is_vertical = type == "vertical"
-        dfs = DfsFileFactory.Dfs2FileOpen(filename)
+        with _opened(DfsFileFactory.Dfs2FileOpen(filename)) as dfs:
+            x0 = dfs.SpatialAxis.X0 if is_spectral else 0.0
+            y0 = dfs.SpatialAxis.Y0 if is_spectral else 0.0
 
-        x0 = dfs.SpatialAxis.X0 if is_spectral else 0.0
-        y0 = dfs.SpatialAxis.Y0 if is_spectral else 0.0
+            origin, orientation = self._origin_and_orientation_in_CRS()
 
-        origin, orientation = self._origin_and_orientation_in_CRS()
+            self._geometry = Grid2D(
+                dx=dfs.SpatialAxis.Dx,
+                dy=dfs.SpatialAxis.Dy,
+                nx=dfs.SpatialAxis.XCount,
+                ny=dfs.SpatialAxis.YCount,
+                x0=x0,
+                y0=y0,
+                projection=self._projstr,
+                orientation=orientation,
+                origin=origin,
+                is_spectral=is_spectral,
+                is_vertical=is_vertical,
+            )
 
-        self._geometry = Grid2D(
-            dx=dfs.SpatialAxis.Dx,
-            dy=dfs.SpatialAxis.Dy,
-            nx=dfs.SpatialAxis.XCount,
-            ny=dfs.SpatialAxis.YCount,
-            x0=x0,
-            y0=y0,
-            projection=self._projstr,
-            orientation=orientation,
-            origin=origin,
-            is_spectral=is_spectral,
-            is_vertical=is_vertical,
-        )
+            self._title = dfs.FileInfo.FileTitle
 
-        self._title = dfs.FileInfo.FileTitle
-
-        dfs.Close()
         self._validate_no_orientation_in_geo()
 
     def read(
@@ -208,13 +208,11 @@ class Dfs2(_Dfs123):
         if x is not None and area is not None:
             raise ValueError("x/y and area cannot be given at the same time!")
 
-        self._open()
-
-        item_numbers = _valid_item_numbers(self._dfs.ItemInfo, items)
+        item_numbers = _valid_item_numbers([item.name for item in self.items], items)
         n_items = len(item_numbers)
-        items = _get_item_info(self._dfs.ItemInfo, item_numbers)
+        items = _select_items(self.items, item_numbers)
 
-        single_time_selected, time_steps = _valid_timesteps(self._dfs.FileInfo, time)
+        single_time_selected, time_steps = _valid_timesteps(self._time_axis, time)
         nt = len(time_steps) if not single_time_selected else 1
 
         shape: tuple[int, ...]
@@ -245,25 +243,24 @@ class Dfs2(_Dfs123):
 
         t_seconds = np.zeros(len(time_steps))
 
-        for i, it in enumerate(tqdm(time_steps, disable=not _show_progress())):
-            for item in range(n_items):
-                itemdata = self._dfs.ReadItemTimeStep(item_numbers[item] + 1, int(it))
-                d = itemdata.Data
+        with _opened(DfsFileFactory.Dfs2FileOpen(self._filename)) as dfs:
+            for i, it in enumerate(tqdm(time_steps, disable=not _show_progress())):
+                for item in range(n_items):
+                    itemdata = dfs.ReadItemTimeStep(item_numbers[item] + 1, int(it))
+                    d = itemdata.Data
 
-                d[d == self.deletevalue] = np.nan
-                d = d.reshape(self.ny, self.nx)
+                    d[d == self.deletevalue] = np.nan
+                    d = d.reshape(self.ny, self.nx)
 
-                if take_subset:
-                    d = np.take(np.take(d, jj, axis=0), ii, axis=-1)
+                    if take_subset:
+                        d = np.take(np.take(d, jj, axis=0), ii, axis=-1)
 
-                if single_time_selected and not keepdims:
-                    data_list[item] = d
-                else:
-                    data_list[item][i] = d
+                    if single_time_selected and not keepdims:
+                        data_list[item] = d
+                    else:
+                        data_list[item][i] = d
 
-            t_seconds[i] = itemdata.Time
-
-        self._dfs.Close()
+                t_seconds[i] = itemdata.Time
 
         time = pd.to_datetime(t_seconds, unit="s", origin=self.start_time)
 
@@ -302,14 +299,11 @@ class Dfs2(_Dfs123):
                         f"Item in dataset {item_s.name} does not match {item_o.name}"
                     )
 
-        dfs = DfsFileFactory.Dfs2FileOpenAppend(str(self._filename))
-        write_dfs_data(dfs=dfs, ds=ds, n_spatial_dims=2)
+        with _opened(DfsFileFactory.Dfs2FileOpenAppend(str(self._filename))) as dfs:
+            write_dfs_data(dfs=dfs, ds=ds, n_spatial_dims=2)
 
-        self._n_timesteps = dfs.FileInfo.TimeAxis.NumberOfTimeSteps
-
-    def _open(self) -> None:
-        self._dfs = DfsFileFactory.Dfs2FileOpen(self._filename)
-        self._source = self._dfs
+            self._n_timesteps = dfs.FileInfo.TimeAxis.NumberOfTimeSteps
+            self._time_axis = _TimeAxisInfo.from_mikecore(dfs.FileInfo.TimeAxis)
 
     @property
     def geometry(self) -> Grid2D:

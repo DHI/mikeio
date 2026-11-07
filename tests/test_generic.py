@@ -477,6 +477,19 @@ def test_concat_average(tmp_path: Path) -> None:
     )
 
 
+@pytest.mark.parametrize("keep", ["first", "last", "average"])
+def test_concat_single_file_writes_it_unchanged(tmp_path: Path, keep: str) -> None:
+    infile = "tests/testdata/tide1.dfs1"
+    fp = tmp_path / "concat.dfs1"
+
+    mikeio.generic.concat([infile], fp, keep=keep)
+
+    orig = mikeio.read(infile)
+    ds = mikeio.read(fp)
+    assert ds.time.equals(orig.time)
+    np.testing.assert_array_equal(ds[0].to_numpy(), orig[0].to_numpy())
+
+
 def test_concat_non_equidistant_dfs0(tmp_path: Path) -> None:
     # create two non-equidistant dfs0 files
     da1 = mikeio.DataArray(
