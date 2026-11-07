@@ -152,6 +152,70 @@ def test_transect_sel_xy(vslice_geo: Dfsu2DV) -> None:
     assert da2.n_timesteps == da.n_timesteps
 
 
+def test_transect_column_sel_z(vslice_geo: Dfsu2DV) -> None:
+    col = vslice_geo.read()["Temperature"].sel(x=10.8, y=55.6)
+    pt = col.sel(z=-3)
+    assert pt.geometry.z == pytest.approx(-2.3)
+
+
+def test_transect_sel_layers_top(vslice: Dfsu2DV) -> None:
+    ds = vslice.read()
+    g = ds.sel(layers="top").geometry
+    assert g.n_elements == len(ds.geometry.top_elements)
+    assert g.n_layers == 1
+
+
+def test_transect_sel_layers_bottom(vslice: Dfsu2DV) -> None:
+    ds = vslice.read()
+    g = ds.sel(layers="bottom").geometry
+    assert g.n_elements == len(ds.geometry.bottom_elements)
+    assert g.n_layers == 1
+
+
+BBOX = (355000.0, 6130000.0, 362000.0, 6200000.0)
+
+
+def test_transect_sel_area_bbox(vslice: Dfsu2DV) -> None:
+    ds = vslice.read()
+    g = ds.sel(area=BBOX).geometry
+    x, y = g.element_coordinates[:, 0], g.element_coordinates[:, 1]
+    assert np.all((x >= BBOX[0]) & (x <= BBOX[2]))
+    assert np.all((y >= BBOX[1]) & (y <= BBOX[3]))
+
+    # whole columns are kept
+    g0 = ds.geometry
+    xt = g0.element_coordinates[g0.top_elements, 0]
+    n_columns_inside = np.sum((xt >= BBOX[0]) & (xt <= BBOX[2]))
+    assert 0 < n_columns_inside < len(g0.top_elements)
+    assert len(g.top_elements) == n_columns_inside
+
+
+def test_transect_find_index_area_polygon(vslice: Dfsu2DV) -> None:
+    g = vslice.geometry
+    x0, y0, x1, y1 = BBOX
+    polygon = [(x0, y0), (x1, y0), (x1, y1), (x0, y1), (x0, y0)]
+    np.testing.assert_array_equal(g.find_index(area=polygon), g.find_index(area=BBOX))
+
+
+def test_transect_sel_area_and_layers(vslice: Dfsu2DV) -> None:
+    ds = vslice.read()
+    g = ds.sel(area=BBOX, layers="top").geometry
+    assert g.n_elements == len(ds.sel(area=BBOX).geometry.top_elements)
+
+
+def test_transect_sel_area_outside(vslice: Dfsu2DV) -> None:
+    ds = vslice.read()
+    with pytest.raises(ValueError, match="No elements"):
+        ds.sel(area=(0.0, 0.0, 1.0, 1.0))
+
+
+def test_transect_read_area(vslice: Dfsu2DV) -> None:
+    ds = vslice.read(area=BBOX)
+    expected = vslice.read().sel(area=BBOX)
+    assert ds.geometry.n_elements == expected.geometry.n_elements
+    np.testing.assert_array_equal(ds[0].to_numpy(), expected[0].to_numpy())
+
+
 def test_transect_plot(vslice: Dfsu2DV) -> None:
     da = vslice.read()["Salinity"]
     da.plot()

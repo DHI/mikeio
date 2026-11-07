@@ -172,17 +172,3 @@ da_exc.plot(
     cmap="YlOrRd",
 );
 ```
-
-Cleanup temporary files:
-
-```{python}
-import os
-
-for f in [
-    "NorthSea_quantiles.dfsu",
-    "NorthSea_avg.dfsu",
-    "NorthSea_quantiles_generic.dfsu",
-]:
-    if os.path.exists(f):
-        os.remove(f)
-```

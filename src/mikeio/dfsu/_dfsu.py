@@ -1,4 +1,5 @@
 from __future__ import annotations
+import warnings
 from copy import deepcopy
 from dataclasses import dataclass
 from datetime import datetime
@@ -18,7 +19,7 @@ from tqdm import trange
 
 from mikeio.spatial._distance import xy_to_bbox
 
-from .. import __dfs_version__
+from .._version import __dfs_version__
 from ..dataset import Dataset
 from ..dfs._dfs import (
     _get_item_info,
@@ -415,7 +416,8 @@ class Dfsu2DH:
             fill value for to impute corrupt data, used in conjunction with error_bad_data=False
             default np.nan
         dtype: Any, optional
-            Data type to read, by default np.float32
+            Deprecated since v3.4: the parameter will be removed in v4.0,
+            data is always read as np.float32. Use `Dataset.astype()` instead.
 
         Returns
         -------
@@ -423,8 +425,15 @@ class Dfsu2DH:
             A Dataset with data dimensions [t,elements]
 
         """
-        if dtype not in [np.float32, np.float64]:
-            raise ValueError("Invalid data type. Choose np.float32 or np.float64")
+        if dtype != np.float32:
+            if dtype not in [np.float32, np.float64]:
+                raise ValueError("Invalid data type. Choose np.float32 or np.float64")
+            warnings.warn(
+                "dtype parameter is deprecated and will be removed in v4.0. "
+                "Data is always read as np.float32, use Dataset.astype() to cast it afterwards.",
+                FutureWarning,
+                stacklevel=2,
+            )
         dfs = DfsuFile.Open(self._filename)
 
         single_time_selected, time_steps = _valid_timesteps(dfs, time)
@@ -464,10 +473,8 @@ class Dfsu2DH:
                 dfs, d, t_rel[i] = _read_item_time_step(
                     dfs=dfs,
                     filename=self._filename,
-                    time=time,
                     item_numbers=item_numbers,
                     deletevalue=self.deletevalue,
-                    shape=shape,
                     item=item,
                     it=time_steps[i],
                     error_bad_data=error_bad_data,
