@@ -15,6 +15,7 @@ from typing import Any, Callable, Iterator
 import numpy as np
 import pytest
 from mikecore.DfsFile import DfsFile
+from mikecore.DfsFileFactory import DfsFileFactory
 
 import mikeio
 from mikeio import generic
@@ -70,6 +71,15 @@ def read_raises(monkeypatch: pytest.MonkeyPatch) -> Iterator[None]:
 
 # ---------------------------------------------------------------------------
 # File objects and their readers
+
+
+def test_count_fds_sees_a_mikecore_handle(count_fds: CountFds) -> None:
+    # Without this, a counter that never matches would pass every test below.
+    fn = DFS_FILES["dfs2"]
+    dfs = DfsFileFactory.DfsGenericOpen(str(fn))
+    assert count_fds(fn) == 1
+    dfs.Close()
+    assert count_fds(fn) == 0
 
 
 @pytest.mark.parametrize("kind", FILES)

@@ -29,10 +29,8 @@ def count_fds() -> Callable[[str | Path], int]:
     """Count descriptors this test left open on a path, relative to its start.
 
     Garbage is collected before every count, so a handle only counts while
-    something still references it. The idea comes from the open PR
-    "Fix file handle leaks in DFS/DFSU readers and generic functions"
-    (https://github.com/DHI/mikeio/pull/921). Linux only: the test is skipped
-    where /proc/self/fd does not exist.
+    something still references it. Linux only: the test is skipped where
+    /proc/self/fd does not exist.
     """
     if not _PROC_FD.is_dir():
         pytest.skip("counting open descriptors needs /proc/self/fd (Linux)")
