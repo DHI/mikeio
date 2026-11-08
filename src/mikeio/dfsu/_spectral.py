@@ -11,7 +11,12 @@ from tqdm import trange
 
 from ..dataset import DataArray, Dataset
 from ..eum import ItemInfo, EUMUnit
-from ..dfs._dfs import _get_item_info, _valid_item_numbers, _valid_timesteps
+from ..dfs._dfs import (
+    _opened,
+    _select_items,
+    _valid_item_numbers,
+    _valid_timesteps,
+)
 from .._spectral import calc_Hm0_from_spectrum
 from .._options import _item_txt, _show_progress
 from ._dfsu import (
@@ -48,6 +53,7 @@ class DfsuSpectral:
         self._n_timesteps = info.n_timesteps
         self._title = info.title
         self._items = info.items
+        self._time_axis = info.time_axis
         self._geometry = self._read_geometry(self._filename)
 
     def __repr__(self) -> str:
@@ -143,55 +149,53 @@ class DfsuSpectral:
     def _read_geometry(
         filename: str,
     ) -> GeometryFMPointSpectrum | GeometryFMLineSpectrum | GeometryFMAreaSpectrum:
-        dfs = DfsuFile.Open(filename)
-        dfsu_type = DfsuFileType(dfs.DfsuFileType)
+        with _opened(DfsuFile.Open(filename)) as dfs:
+            dfsu_type = DfsuFileType(dfs.DfsuFileType)
 
-        directions = dfs.Directions
-        if directions is not None:
-            dir_unit = DfsuSpectral._get_direction_unit(filename)
-            dir_conversion = 180.0 / np.pi if dir_unit == int(EUMUnit.radian) else 1.0
-            directions = directions * dir_conversion
-
-        frequencies = dfs.Frequencies
-
-        # geometry
-        match dfsu_type:
-            case DfsuFileType.DfsuSpectral0D:
-                geometry: Any = GeometryFMPointSpectrum(
-                    frequencies=frequencies, directions=directions
-                )  # No x,y coordinates
-            case DfsuFileType.DfsuSpectral1D | DfsuFileType.DfsuSpectral2D:
-                node_table = get_nodes_from_source(dfs)
-                el_table = get_elements_from_source(dfs)
-                geometry_cls = (
-                    GeometryFMLineSpectrum
-                    if dfsu_type is DfsuFileType.DfsuSpectral1D
-                    else GeometryFMAreaSpectrum
+            directions = dfs.Directions
+            if directions is not None:
+                dir_unit = DfsuSpectral._get_direction_unit(filename)
+                dir_conversion = (
+                    180.0 / np.pi if dir_unit == int(EUMUnit.radian) else 1.0
                 )
-                geometry = geometry_cls(
-                    node_coordinates=node_table.coordinates,
-                    element_table=el_table.connectivity,
-                    codes=node_table.codes,
-                    projection=dfs.Projection.WKTString,
-                    dfsu_type=dfsu_type,
-                    element_ids=el_table.ids,
-                    node_ids=node_table.ids,
-                    validate=False,
-                    frequencies=frequencies,
-                    directions=directions,
-                )
-        dfs.Close()
+                directions = directions * dir_conversion
+
+            frequencies = dfs.Frequencies
+
+            # geometry
+            match dfsu_type:
+                case DfsuFileType.DfsuSpectral0D:
+                    geometry: Any = GeometryFMPointSpectrum(
+                        frequencies=frequencies, directions=directions
+                    )  # No x,y coordinates
+                case DfsuFileType.DfsuSpectral1D | DfsuFileType.DfsuSpectral2D:
+                    node_table = get_nodes_from_source(dfs)
+                    el_table = get_elements_from_source(dfs)
+                    geometry_cls = (
+                        GeometryFMLineSpectrum
+                        if dfsu_type is DfsuFileType.DfsuSpectral1D
+                        else GeometryFMAreaSpectrum
+                    )
+                    geometry = geometry_cls(
+                        node_coordinates=node_table.coordinates,
+                        element_table=el_table.connectivity,
+                        codes=node_table.codes,
+                        projection=dfs.Projection.WKTString,
+                        dfsu_type=dfsu_type,
+                        element_ids=el_table.ids,
+                        node_ids=node_table.ids,
+                        validate=False,
+                        frequencies=frequencies,
+                        directions=directions,
+                    )
         return geometry
 
     @staticmethod
     def _get_direction_unit(filename: str) -> int:
-        source = DfsFileFactory.DfsGenericOpen(filename)
-        try:
+        with _opened(DfsFileFactory.DfsGenericOpen(filename)) as source:
             for static_item in iter(source.ReadStaticItemNext, None):
                 if static_item.Name == "Direction":
                     return static_item.Quantity.Unit.value
-        finally:
-            source.Close()
 
         raise ValueError("Direction static item not found in the file.")
 
@@ -319,10 +323,7 @@ class DfsuSpectral:
                 stacklevel=2,
             )
 
-        # Open the dfs file for reading
-        dfs = DfsuFile.Open(self._filename)
-
-        single_time_selected, time_steps = _valid_timesteps(dfs, time)
+        single_time_selected, time_steps = _valid_timesteps(self._time_axis, time)
 
         if self._type == DfsuFileType.DfsuSpectral2D:
             _validate_elements_and_geometry_sel(elements, area=area, x=x, y=y)
@@ -337,8 +338,8 @@ class DfsuSpectral:
 
         geometry, pts = self._parse_elements_nodes(elements, nodes)
 
-        item_numbers = _valid_item_numbers(dfs.ItemInfo, items)
-        items = _get_item_info(dfs.ItemInfo, item_numbers)
+        item_numbers = _valid_item_numbers([item.name for item in self.items], items)
+        items = _select_items(self.items, item_numbers)
         n_items = len(item_numbers)
 
         deletevalue = self.deletevalue
@@ -351,28 +352,27 @@ class DfsuSpectral:
 
         t_seconds = np.zeros(n_steps, dtype=float)
 
-        for i in trange(n_steps, disable=not _show_progress()):
-            it = time_steps[i]
-            for item in range(n_items):
-                itemdata = dfs.ReadItemTimeStep(item_numbers[item] + 1, it)
-                d = itemdata.Data
-                d[d == deletevalue] = np.nan
+        with _opened(DfsuFile.Open(self._filename)) as dfs:
+            for i in trange(n_steps, disable=not _show_progress()):
+                it = time_steps[i]
+                for item in range(n_items):
+                    itemdata = dfs.ReadItemTimeStep(item_numbers[item] + 1, it)
+                    d = itemdata.Data
+                    d[d == deletevalue] = np.nan
 
-                d = np.reshape(d, shape)
-                if self._type != DfsuFileType.DfsuSpectral0D:
-                    d = np.moveaxis(d, -1, 0)
+                    d = np.reshape(d, shape)
+                    if self._type != DfsuFileType.DfsuSpectral0D:
+                        d = np.moveaxis(d, -1, 0)
 
-                if pts is not None:
-                    d = d[pts, ...]
+                    if pts is not None:
+                        d = d[pts, ...]
 
-                if single_time_selected and not keepdims:
-                    data_list[item] = d
-                else:
-                    data_list[item][i] = d
+                    if single_time_selected and not keepdims:
+                        data_list[item] = d
+                    else:
+                        data_list[item][i] = d
 
-            t_seconds[i] = itemdata.Time
-
-        dfs.Close()
+                t_seconds[i] = itemdata.Time
 
         time = pd.to_datetime(t_seconds, unit="s", origin=self.start_time)
         return Dataset.from_numpy(

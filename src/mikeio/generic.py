@@ -7,7 +7,8 @@ import operator
 import os
 import pathlib
 import warnings
-from collections.abc import Sequence
+from collections.abc import Iterator, Sequence
+from contextlib import ExitStack, contextmanager
 from copy import deepcopy
 from dataclasses import dataclass
 from datetime import datetime, timedelta
@@ -35,7 +36,7 @@ import mikeio
 from ._version import __dfs_version__
 from ._options import _show_progress
 from .dataset import Dataset
-from .dfs._dfs import _get_item_info, _valid_item_numbers
+from .dfs._dfs import _get_item_info, _opened, _valid_item_numbers
 from .eum import EUMType, EUMUnit, ItemInfo
 from ._path import normalize_output_path, normalize_path
 
@@ -55,6 +56,11 @@ __all__ = [
     "transform",
     "change_datatype",
 ]
+
+
+def _item_names(dfs: DfsFile) -> list[str]:
+    """Names of the items in an open dfs file, in order."""
+    return [item.Name for item in dfs.ItemInfo]
 
 
 @dataclass(frozen=True)
@@ -87,6 +93,7 @@ class _ChunkInfo:
         return _ChunkInfo(n_data, n_chunks)
 
 
+@contextmanager
 def _clone(
     infilename: str | pathlib.Path,
     outfilename: str | pathlib.Path,
@@ -94,65 +101,72 @@ def _clone(
     timestep: float | None = None,
     items: Sequence[int | DfsDynamicItemInfo | ItemInfo] | None = None,
     datatype: int | None = None,
-) -> DfsFile:
+) -> Iterator[DfsFile]:
+    """Create outfilename with the header and static items of infilename.
+
+    Yields the new file, open for writing its dynamic data, and closes it
+    when the block exits. The source is closed before the new file is yielded.
+    """
     infilename = normalize_path(infilename)
     outfilename = normalize_output_path(outfilename)
-    source = DfsFileFactory.DfsGenericOpen(infilename)
-    fi = source.FileInfo
+    with ExitStack() as stack:
+        with _opened(DfsFileFactory.DfsGenericOpen(infilename)) as source:
+            fi = source.FileInfo
 
-    builder = DfsBuilder.Create(fi.FileTitle, "mikeio", __dfs_version__)
+            builder = DfsBuilder.Create(fi.FileTitle, "mikeio", __dfs_version__)
 
-    builder.SetDataType(datatype if datatype is not None else fi.DataType)
+            builder.SetDataType(datatype if datatype is not None else fi.DataType)
 
-    builder.SetGeographicalProjection(fi.Projection)
+            builder.SetGeographicalProjection(fi.Projection)
 
-    time_axis = fi.TimeAxis
-    if start_time is not None:
-        time_axis.StartDateTime = start_time
-    if timestep is not None:
-        time_axis.TimeStep = timestep
-    builder.SetTemporalAxis(time_axis)
+            time_axis = fi.TimeAxis
+            if start_time is not None:
+                time_axis.StartDateTime = start_time
+            if timestep is not None:
+                time_axis.TimeStep = timestep
+            builder.SetTemporalAxis(time_axis)
 
-    builder.SetItemStatisticsType(fi.StatsType)
-    builder.DeleteValueByte = fi.DeleteValueByte
-    builder.DeleteValueDouble = fi.DeleteValueDouble
-    builder.DeleteValueFloat = fi.DeleteValueFloat
-    builder.DeleteValueInt = fi.DeleteValueInt
-    builder.DeleteValueUnsignedInt = fi.DeleteValueUnsignedInt
+            builder.SetItemStatisticsType(fi.StatsType)
+            builder.DeleteValueByte = fi.DeleteValueByte
+            builder.DeleteValueDouble = fi.DeleteValueDouble
+            builder.DeleteValueFloat = fi.DeleteValueFloat
+            builder.DeleteValueInt = fi.DeleteValueInt
+            builder.DeleteValueUnsignedInt = fi.DeleteValueUnsignedInt
 
-    for customBlock in fi.CustomBlocks:
-        builder.AddCustomBlock(customBlock)
+            for customBlock in fi.CustomBlocks:
+                builder.AddCustomBlock(customBlock)
 
-    match items:
-        case None:
-            for item in source.ItemInfo:
-                builder.AddDynamicItem(item)
-
-        case list():
-            for item in items:
-                match item:
-                    case ItemInfo():
-                        builder.AddCreateDynamicItem(
-                            name=item.name,
-                            quantity=eumQuantity.Create(item.type, item.unit),
-                            valueType=item.data_value_type,
-                            spatialAxis=source.ItemInfo[-1].SpatialAxis,
-                        )
-                    case DfsDynamicItemInfo():
+            match items:
+                case None:
+                    for item in source.ItemInfo:
                         builder.AddDynamicItem(item)
-                    case int():
-                        builder.AddDynamicItem(source.ItemInfo[item])
 
-    builder.CreateFile(outfilename)
+                case list():
+                    for item in items:
+                        match item:
+                            case ItemInfo():
+                                builder.AddCreateDynamicItem(
+                                    name=item.name,
+                                    quantity=eumQuantity.Create(item.type, item.unit),
+                                    valueType=item.data_value_type,
+                                    spatialAxis=source.ItemInfo[-1].SpatialAxis,
+                                )
+                            case DfsDynamicItemInfo():
+                                builder.AddDynamicItem(item)
+                            case int():
+                                builder.AddDynamicItem(source.ItemInfo[item])
 
-    for static_item in iter(source.ReadStaticItemNext, None):
-        builder.AddStaticItem(static_item)
+            builder.CreateFile(outfilename)
+            # The created file is held by the builder until GetFile() hands it over;
+            # hold it from creation, so a failing static item cannot leak it.
+            file = stack.enter_context(_opened(builder.DfsFile))
 
-    file = builder.GetFile()
+            for static_item in iter(source.ReadStaticItemNext, None):
+                builder.AddStaticItem(static_item)
 
-    source.Close()
+            builder.GetFile()
 
-    return file
+        yield file
 
 
 def scale(
@@ -182,30 +196,27 @@ def scale(
     infilename = normalize_path(infilename)
     outfilename = normalize_output_path(outfilename)
     copyfile(infilename, outfilename)
-    dfs = DfsFileFactory.DfsGenericOpenEdit(outfilename)
+    with _opened(DfsFileFactory.DfsGenericOpenEdit(outfilename)) as dfs:
+        item_numbers = _valid_item_numbers(_item_names(dfs), items)
+        n_items = len(item_numbers)
 
-    item_numbers = _valid_item_numbers(dfs.ItemInfo, items)
-    n_items = len(item_numbers)
+        n_time_steps = dfs.FileInfo.TimeAxis.NumberOfTimeSteps
 
-    n_time_steps = dfs.FileInfo.TimeAxis.NumberOfTimeSteps
+        deletevalue = dfs.FileInfo.DeleteValueFloat
 
-    deletevalue = dfs.FileInfo.DeleteValueFloat
+        for timestep in trange(n_time_steps, disable=not _show_progress()):
+            for item in range(n_items):
+                itemdata = dfs.ReadItemTimeStep(item_numbers[item] + 1, timestep)
+                time = itemdata.Time
+                d = itemdata.Data
+                d[d == deletevalue] = np.nan
 
-    for timestep in trange(n_time_steps, disable=not _show_progress()):
-        for item in range(n_items):
-            itemdata = dfs.ReadItemTimeStep(item_numbers[item] + 1, timestep)
-            time = itemdata.Time
-            d = itemdata.Data
-            d[d == deletevalue] = np.nan
+                outdata = d * factor + offset
 
-            outdata = d * factor + offset
+                outdata[np.isnan(outdata)] = deletevalue
+                darray = outdata.astype(np.float32)
 
-            outdata[np.isnan(outdata)] = deletevalue
-            darray = outdata.astype(np.float32)
-
-            dfs.WriteItemTimeStep(item_numbers[item] + 1, timestep, time, darray)
-
-    dfs.Close()
+                dfs.WriteItemTimeStep(item_numbers[item] + 1, timestep, time, darray)
 
 
 def fill_corrupt(
@@ -231,44 +242,44 @@ def fill_corrupt(
     """
     infilename = normalize_path(infilename)
     outfilename = normalize_output_path(outfilename)
-    dfs_i = DfsFileFactory.DfsGenericOpen(infilename)
-
-    item_numbers = _valid_item_numbers(dfs_i.ItemInfo, items)
+    with _opened(DfsFileFactory.DfsGenericOpen(infilename)) as dfs_i:
+        item_numbers = _valid_item_numbers(_item_names(dfs_i), items)
+        n_time_steps = dfs_i.FileInfo.TimeAxis.NumberOfTimeSteps
     n_items = len(item_numbers)
 
-    dfs = _clone(
-        infilename,
-        outfilename,
-        items=item_numbers,
-    )
+    with _clone(infilename, outfilename, items=item_numbers) as dfs:
+        deletevalue = dfs.FileInfo.DeleteValueFloat
 
-    n_time_steps = dfs_i.FileInfo.TimeAxis.NumberOfTimeSteps
+        reads = [(t, item) for t in range(n_time_steps) for item in range(n_items)]
+        next_read = 0
+        with tqdm(total=n_time_steps, disable=not _show_progress()) as progress:
+            while next_read < len(reads):
+                # A failed read leaves the handle unusable: its block is closed
+                # and the remaining reads continue from a freshly opened file.
+                with _opened(DfsFileFactory.DfsGenericOpen(infilename)) as dfs_i:
+                    for timestep, item in reads[next_read:]:
+                        next_read += 1
+                        itemdata = dfs_i.ReadItemTimeStep(
+                            item_numbers[item] + 1, timestep
+                        )
+                        if itemdata is not None:
+                            time = itemdata.Time
+                            d = itemdata.Data
+                        else:
+                            iteminfo: DfsDynamicItemInfo = dfs_i.ItemInfo[item]
+                            d = np.zeros(iteminfo.ElementCount)
+                            d[:] = fill_value
+                            d[d == deletevalue] = np.nan
 
-    deletevalue = dfs.FileInfo.DeleteValueFloat
+                        d[np.isnan(d)] = deletevalue
+                        darray = d.astype(np.float32)
 
-    for timestep in trange(n_time_steps, disable=not _show_progress()):
-        for item in range(n_items):
-            itemdata = dfs_i.ReadItemTimeStep(item_numbers[item] + 1, timestep)
-            if itemdata is not None:
-                time = itemdata.Time
-                d = itemdata.Data
-            else:
-                iteminfo: DfsDynamicItemInfo = dfs_i.ItemInfo[item]
-                d = np.zeros(iteminfo.ElementCount)
-                d[:] = fill_value
-                d[d == deletevalue] = np.nan
+                        dfs.WriteItemTimeStep(item + 1, timestep, time, darray)
 
-                # close and re-open file to solve problem with reading
-                dfs_i.Close()
-                dfs_i = DfsFileFactory.DfsGenericOpen(infilename)
-
-            d[np.isnan(d)] = deletevalue
-            darray = d.astype(np.float32)
-
-            dfs.WriteItemTimeStep(item + 1, timestep, time, darray)
-
-    dfs_i.Close()
-    dfs.Close()
+                        if item == n_items - 1:
+                            progress.update()
+                        if itemdata is None:
+                            break
 
 
 def _process_dfs_files(
@@ -296,36 +307,33 @@ def _process_dfs_files(
     outfilename = normalize_output_path(outfilename)
     copyfile(infilename_a, outfilename)
 
-    dfs_i_a = DfsFileFactory.DfsGenericOpen(infilename_a)
-    dfs_i_b = DfsFileFactory.DfsGenericOpen(infilename_b)
-    dfs_o = DfsFileFactory.DfsGenericOpenEdit(outfilename)
+    with (
+        _opened(DfsFileFactory.DfsGenericOpen(infilename_a)) as dfs_i_a,
+        _opened(DfsFileFactory.DfsGenericOpen(infilename_b)) as dfs_i_b,
+        _opened(DfsFileFactory.DfsGenericOpenEdit(outfilename)) as dfs_o,
+    ):
+        deletevalue = dfs_i_a.FileInfo.DeleteValueFloat
 
-    deletevalue = dfs_i_a.FileInfo.DeleteValueFloat
+        n_time_steps = dfs_i_a.FileInfo.TimeAxis.NumberOfTimeSteps
+        n_items = len(dfs_i_a.ItemInfo)
+        # TODO Add checks to verify identical structure of file a and b
 
-    n_time_steps = dfs_i_a.FileInfo.TimeAxis.NumberOfTimeSteps
-    n_items = len(dfs_i_a.ItemInfo)
-    # TODO Add checks to verify identical structure of file a and b
+        for timestep in trange(n_time_steps, disable=not _show_progress()):
+            for item in range(n_items):
+                itemdata_a = dfs_i_a.ReadItemTimeStep(item + 1, timestep)
+                d_a = itemdata_a.Data
+                d_a[d_a == deletevalue] = np.nan
 
-    for timestep in trange(n_time_steps, disable=not _show_progress()):
-        for item in range(n_items):
-            itemdata_a = dfs_i_a.ReadItemTimeStep(item + 1, timestep)
-            d_a = itemdata_a.Data
-            d_a[d_a == deletevalue] = np.nan
+                itemdata_b = dfs_i_b.ReadItemTimeStep(item + 1, timestep)
+                d_b = itemdata_b.Data
+                d_b[d_b == deletevalue] = np.nan
+                time = itemdata_a.Time
 
-            itemdata_b = dfs_i_b.ReadItemTimeStep(item + 1, timestep)
-            d_b = itemdata_b.Data
-            d_b[d_b == deletevalue] = np.nan
-            time = itemdata_a.Time
+                outdata = op(d_a, d_b)
 
-            outdata = op(d_a, d_b)
+                darray = outdata.astype(np.float32)
 
-            darray = outdata.astype(np.float32)
-
-            dfs_o.WriteItemTimeStep(item + 1, timestep, time, darray)
-
-    dfs_i_a.Close()
-    dfs_i_b.Close()
-    dfs_o.Close()
+                dfs_o.WriteItemTimeStep(item + 1, timestep, time, darray)
 
 
 # TODO sum is conflicting with the built-in sum function, which we could haved used above.
@@ -410,143 +418,163 @@ def concat(
         ds.to_dfs(outfilename)
         return
 
-    dfs_i_a = DfsFileFactory.DfsGenericOpen(infilenames[0])
+    with _opened(DfsFileFactory.DfsGenericOpen(infilenames[0])) as dfs_i_a:
+        n_items = len(dfs_i_a.ItemInfo)
 
-    dfs_o = _clone(infilenames[0], outfilename)
+    remove_output = False
+    try:
+        with _clone(infilenames[0], outfilename) as dfs_o:
+            current_time = datetime(1, 1, 1)  # beginning of time...
 
-    n_items = len(dfs_i_a.ItemInfo)
-    dfs_i_a.Close()
+            for i, infilename in enumerate(
+                tqdm(infilenames, disable=not _show_progress())
+            ):
+                with _opened(DfsFileFactory.DfsGenericOpen(infilename)) as dfs_i:
+                    t_axis = dfs_i.FileInfo.TimeAxis
+                    n_time_steps = t_axis.NumberOfTimeSteps
+                    dt = t_axis.TimeStep
+                    start_time = t_axis.StartDateTime
 
-    current_time = datetime(1, 1, 1)  # beginning of time...
+                    if i > 0 and start_time > current_time + timedelta(seconds=dt):
+                        remove_output = True
+                        raise Exception("Gap in time axis detected - not supported")
 
-    for i, infilename in enumerate(tqdm(infilenames, disable=not _show_progress())):
-        dfs_i = DfsFileFactory.DfsGenericOpen(infilename)
-        t_axis = dfs_i.FileInfo.TimeAxis
-        n_time_steps = t_axis.NumberOfTimeSteps
-        dt = t_axis.TimeStep
-        start_time = t_axis.StartDateTime
+                    current_time = start_time
 
-        if i > 0 and start_time > current_time + timedelta(seconds=dt):
-            dfs_o.Close()
+                    if keep == "last":
+                        if i < (len(infilenames) - 1):
+                            with _opened(
+                                DfsFileFactory.DfsGenericOpen(infilenames[i + 1])
+                            ) as dfs_n:
+                                next_start_time = dfs_n.FileInfo.TimeAxis.StartDateTime
+
+                        for timestep in range(n_time_steps):
+                            current_time = start_time + timedelta(seconds=timestep * dt)
+                            if i < (len(infilenames) - 1):
+                                if current_time >= next_start_time:
+                                    break
+
+                            for item in range(n_items):
+                                itemdata = dfs_i.ReadItemTimeStep(item + 1, timestep)
+                                d = itemdata.Data
+
+                                darray = d.astype(np.float32)
+
+                                dfs_o.WriteItemTimeStepNext(0, darray)
+
+                    if keep == "first":
+                        if (
+                            i == 0
+                        ):  # all timesteps in first file are kept (is there a more efficient way to do this without the loop?)
+                            for timestep in range(n_time_steps):
+                                current_time = start_time + timedelta(
+                                    seconds=timestep * dt
+                                )
+
+                                for item in range(n_items):
+                                    itemdata = dfs_i.ReadItemTimeStep(
+                                        item + 1, timestep
+                                    )
+                                    d = itemdata.Data
+
+                                    darray = d.astype(np.float32)
+
+                                    dfs_o.WriteItemTimeStepNext(0, darray)
+                            end_time = (
+                                start_time + timedelta(seconds=timestep * dt)
+                            )  # reuse last timestep since there is no EndDateTime attribute in t_axis.
+
+                        else:
+                            # determine overlap in number of timesteps
+                            start_timestep = (
+                                int((end_time - start_time) / timedelta(seconds=dt)) + 1
+                            )
+                            # loop only through those timesteps that are not in previous file
+                            for timestep in range(start_timestep, n_time_steps):
+                                current_time = start_time + timedelta(
+                                    seconds=timestep * dt
+                                )
+
+                                for item in range(n_items):
+                                    itemdata = dfs_i.ReadItemTimeStep(
+                                        item + 1, timestep
+                                    )
+                                    d = itemdata.Data
+
+                                    darray = d.astype(np.float32)
+
+                                    dfs_o.WriteItemTimeStepNext(0, darray)
+                            end_time = start_time + timedelta(
+                                seconds=timestep * dt
+                            )  # get end time from current file
+
+                    elif keep == "average":
+                        ALPHA = 0.5  # averaging factor
+                        last_file = i == (len(infilenames) - 1)
+                        overlapping_with_next = False  # lets first asume no overlap
+
+                        with ExitStack() as next_file:
+                            # Find the start time of next file
+                            if not last_file:
+                                dfs_n = next_file.enter_context(
+                                    _opened(
+                                        DfsFileFactory.DfsGenericOpen(
+                                            infilenames[i + 1]
+                                        )
+                                    )
+                                )
+                                next_start_time = dfs_n.FileInfo.TimeAxis.StartDateTime
+                            else:
+                                next_start_time = datetime.max  # end of time ...
+
+                            if i == 0:
+                                timestep_n = 0  # have not read anything before
+
+                            # lets start where we left off (if last file overlapped)
+                            timestep = timestep_n
+                            while timestep < n_time_steps:
+                                current_time = start_time + timedelta(
+                                    seconds=timestep * dt
+                                )
+                                if (
+                                    current_time >= next_start_time
+                                ):  # false if last file
+                                    overlapping_with_next = True
+                                    break
+                                for item in range(n_items):
+                                    itemdata = dfs_i.ReadItemTimeStep(
+                                        item + 1, timestep
+                                    )
+                                    d = itemdata.Data
+                                    darray = d.astype(np.float32)
+                                    dfs_o.WriteItemTimeStepNext(0, darray)
+
+                                timestep += 1
+
+                            timestep_n = 0  # have not read anything from next file yet
+
+                            if not overlapping_with_next:
+                                continue  # next file
+
+                            # Otherwhise read overlapping part
+                            while timestep < n_time_steps:
+                                for item in range(n_items):
+                                    itemdata_i = dfs_i.ReadItemTimeStep(
+                                        item + 1, timestep
+                                    )
+                                    itemdata_n = dfs_n.ReadItemTimeStep(
+                                        item + 1, timestep_n
+                                    )
+                                    d_i = itemdata_i.Data
+                                    d_n = itemdata_n.Data
+                                    d_av = d_i * ALPHA + d_n * (1 - ALPHA)
+                                    darray = d_av.astype(np.float32)
+                                    dfs_o.WriteItemTimeStepNext(0, (darray))
+                                timestep += 1
+                                timestep_n += 1
+    finally:
+        if remove_output:
             os.remove(outfilename)
-            raise Exception("Gap in time axis detected - not supported")
-
-        current_time = start_time
-
-        if keep == "last":
-            if i < (len(infilenames) - 1):
-                dfs_n = DfsFileFactory.DfsGenericOpen(infilenames[i + 1])
-                next_start_time = dfs_n.FileInfo.TimeAxis.StartDateTime
-                dfs_n.Close()
-
-            for timestep in range(n_time_steps):
-                current_time = start_time + timedelta(seconds=timestep * dt)
-                if i < (len(infilenames) - 1):
-                    if current_time >= next_start_time:
-                        break
-
-                for item in range(n_items):
-                    itemdata = dfs_i.ReadItemTimeStep(item + 1, timestep)
-                    d = itemdata.Data
-
-                    darray = d.astype(np.float32)
-
-                    dfs_o.WriteItemTimeStepNext(0, darray)
-            dfs_i.Close()
-
-        if keep == "first":
-            if (
-                i == 0
-            ):  # all timesteps in first file are kept (is there a more efficient way to do this without the loop?)
-                for timestep in range(n_time_steps):
-                    current_time = start_time + timedelta(seconds=timestep * dt)
-
-                    for item in range(n_items):
-                        itemdata = dfs_i.ReadItemTimeStep(item + 1, timestep)
-                        d = itemdata.Data
-
-                        darray = d.astype(np.float32)
-
-                        dfs_o.WriteItemTimeStepNext(0, darray)
-                end_time = (
-                    start_time + timedelta(seconds=timestep * dt)
-                )  # reuse last timestep since there is no EndDateTime attribute in t_axis.
-                dfs_i.Close()
-
-            else:
-                # determine overlap in number of timesteps
-                start_timestep = (
-                    int((end_time - start_time) / timedelta(seconds=dt)) + 1
-                )
-                # loop only through those timesteps that are not in previous file
-                for timestep in range(start_timestep, n_time_steps):
-                    current_time = start_time + timedelta(seconds=timestep * dt)
-
-                    for item in range(n_items):
-                        itemdata = dfs_i.ReadItemTimeStep(item + 1, timestep)
-                        d = itemdata.Data
-
-                        darray = d.astype(np.float32)
-
-                        dfs_o.WriteItemTimeStepNext(0, darray)
-                end_time = start_time + timedelta(
-                    seconds=timestep * dt
-                )  # get end time from current file
-                dfs_i.Close()
-
-        elif keep == "average":
-            ALPHA = 0.5  # averaging factor
-            last_file = i == (len(infilenames) - 1)
-            overlapping_with_next = False  # lets first asume no overlap
-
-            # Find the start time of next file
-            if not last_file:
-                dfs_n = DfsFileFactory.DfsGenericOpen(infilenames[i + 1])
-                next_start_time = dfs_n.FileInfo.TimeAxis.StartDateTime
-            else:
-                next_start_time = datetime.max  # end of time ...
-
-            if i == 0:
-                timestep_n = 0  # have not read anything before
-
-            # lets start where we left off (if last file overlapped)
-            timestep = timestep_n
-            while timestep < n_time_steps:
-                current_time = start_time + timedelta(seconds=timestep * dt)
-                if current_time >= next_start_time:  # false if last file
-                    overlapping_with_next = True
-                    break
-                for item in range(n_items):
-                    itemdata = dfs_i.ReadItemTimeStep(item + 1, timestep)
-                    d = itemdata.Data
-                    darray = d.astype(np.float32)
-                    dfs_o.WriteItemTimeStepNext(0, darray)
-
-                timestep += 1
-
-            timestep_n = 0  # have not read anything from next file yet
-
-            if not overlapping_with_next:
-                dfs_n.Close()
-                continue  # next file
-
-            # Otherwhise read overlapping part
-            while timestep < n_time_steps:
-                for item in range(n_items):
-                    itemdata_i = dfs_i.ReadItemTimeStep(item + 1, timestep)
-                    itemdata_n = dfs_n.ReadItemTimeStep(item + 1, timestep_n)
-                    d_i = itemdata_i.Data
-                    d_n = itemdata_n.Data
-                    d_av = d_i * ALPHA + d_n * (1 - ALPHA)
-                    darray = d_av.astype(np.float32)
-                    dfs_o.WriteItemTimeStepNext(0, (darray))
-                timestep += 1
-                timestep_n += 1
-
-            # Close next file before opening it again
-            dfs_n.Close()
-
-    dfs_o.Close()
 
 
 def extract(
@@ -589,55 +617,50 @@ def extract(
     """
     infilename = normalize_path(infilename)
     outfilename = normalize_output_path(outfilename)
-    dfs_i = DfsFileFactory.DfsGenericOpenEdit(infilename)
+    with _opened(DfsFileFactory.DfsGenericOpenEdit(infilename)) as dfs_i:
+        is_layered_dfsu = dfs_i.ItemInfo[0].Name == "Z coordinate"
 
-    is_layered_dfsu = dfs_i.ItemInfo[0].Name == "Z coordinate"
+        time = _TimeInfo.parse(dfs_i.FileInfo.TimeAxis, start, end, step)
+        item_numbers = _valid_item_numbers(
+            _item_names(dfs_i), items, ignore_first=is_layered_dfsu
+        )
 
-    time = _TimeInfo.parse(dfs_i.FileInfo.TimeAxis, start, end, step)
-    item_numbers = _valid_item_numbers(
-        dfs_i.ItemInfo, items, ignore_first=is_layered_dfsu
-    )
+        if is_layered_dfsu:
+            item_numbers = [it + 1 for it in item_numbers]
+            item_numbers.insert(0, 0)
 
-    if is_layered_dfsu:
-        item_numbers = [it + 1 for it in item_numbers]
-        item_numbers.insert(0, 0)
+        with _clone(
+            infilename,
+            outfilename,
+            start_time=time.file_start_new,
+            timestep=time.timestep,
+            items=item_numbers,
+        ) as dfs_o:
+            file_start_shift = 0
+            if time.file_start_new is not None:
+                file_start_orig = dfs_i.FileInfo.TimeAxis.StartDateTime
+                file_start_shift = (
+                    time.file_start_new - file_start_orig
+                ).total_seconds()
 
-    dfs_o = _clone(
-        infilename,
-        outfilename,
-        start_time=time.file_start_new,
-        timestep=time.timestep,
-        items=item_numbers,
-    )
+            timestep_out = -1
+            for timestep in range(time.start_step, time.end_step, step):
+                for item_out, item in enumerate(item_numbers):
+                    itemdata = dfs_i.ReadItemTimeStep((item + 1), timestep)
+                    time_sec = itemdata.Time
 
-    file_start_shift = 0
-    if time.file_start_new is not None:
-        file_start_orig = dfs_i.FileInfo.TimeAxis.StartDateTime
-        file_start_shift = (time.file_start_new - file_start_orig).total_seconds()
+                    if time_sec > time.end_sec:
+                        return
 
-    timestep_out = -1
-    for timestep in range(time.start_step, time.end_step, step):
-        for item_out, item in enumerate(item_numbers):
-            itemdata = dfs_i.ReadItemTimeStep((item + 1), timestep)
-            time_sec = itemdata.Time
+                    if time_sec >= time.start_sec:
+                        if item == item_numbers[0]:
+                            timestep_out = timestep_out + 1
+                        time_sec_out = time_sec - file_start_shift
 
-            if time_sec > time.end_sec:
-                dfs_i.Close()
-                dfs_o.Close()
-                return
-
-            if time_sec >= time.start_sec:
-                if item == item_numbers[0]:
-                    timestep_out = timestep_out + 1
-                time_sec_out = time_sec - file_start_shift
-
-                outdata = itemdata.Data
-                dfs_o.WriteItemTimeStep(
-                    (item_out + 1), timestep_out, time_sec_out, outdata
-                )
-
-    dfs_i.Close()
-    dfs_o.Close()
+                        outdata = itemdata.Data
+                        dfs_o.WriteItemTimeStep(
+                            (item_out + 1), timestep_out, time_sec_out, outdata
+                        )
 
 
 @dataclass
@@ -793,52 +816,50 @@ def avg_time(
     """
     infilename = normalize_path(infilename)
     outfilename = normalize_output_path(outfilename)
-    dfs_i = DfsFileFactory.DfsGenericOpen(infilename)
+    with (
+        _opened(DfsFileFactory.DfsGenericOpen(infilename)) as dfs_i,
+        _clone(infilename, outfilename) as dfs_o,
+    ):
+        n_items = len(dfs_i.ItemInfo)
+        item_numbers = list(range(n_items))
 
-    dfs_o = _clone(infilename, outfilename)
+        n_time_steps = dfs_i.FileInfo.TimeAxis.NumberOfTimeSteps
+        deletevalue = dfs_i.FileInfo.DeleteValueFloat
 
-    n_items = len(dfs_i.ItemInfo)
-    item_numbers = list(range(n_items))
+        outdatalist = []
+        steps_list = []
 
-    n_time_steps = dfs_i.FileInfo.TimeAxis.NumberOfTimeSteps
-    deletevalue = dfs_i.FileInfo.DeleteValueFloat
+        # step 0
+        for item in item_numbers:
+            indatatime = dfs_i.ReadItemTimeStep(item + 1, 0.0)
+            indata = indatatime.Data
+            has_value = indata != deletevalue
+            indata[~has_value] = np.nan
+            outdatalist.append(indata.astype(np.float32))
+            step0 = np.zeros_like(indata, dtype=np.int32)
+            step0[has_value] = 1
+            steps_list.append(step0)
 
-    outdatalist = []
-    steps_list = []
+        for timestep in trange(1, n_time_steps, disable=not _show_progress()):
+            for item in range(n_items):
+                itemdata = dfs_i.ReadItemTimeStep(item_numbers[item] + 1, timestep)
+                d = itemdata.Data
+                has_value = d != deletevalue
 
-    # step 0
-    for item in item_numbers:
-        indatatime = dfs_i.ReadItemTimeStep(item + 1, 0.0)
-        indata = indatatime.Data
-        has_value = indata != deletevalue
-        indata[~has_value] = np.nan
-        outdatalist.append(indata.astype(np.float32))
-        step0 = np.zeros_like(indata, dtype=np.int32)
-        step0[has_value] = 1
-        steps_list.append(step0)
+                outdatalist[item][has_value] += d[has_value]
+                steps_list[item][has_value] += 1
 
-    for timestep in trange(1, n_time_steps, disable=not _show_progress()):
         for item in range(n_items):
-            itemdata = dfs_i.ReadItemTimeStep(item_numbers[item] + 1, timestep)
-            d = itemdata.Data
-            has_value = d != deletevalue
-
-            outdatalist[item][has_value] += d[has_value]
-            steps_list[item][has_value] += 1
-
-    for item in range(n_items):
-        darray = np.zeros_like(outdatalist[item], dtype=np.float32)
-        if skipna:
-            has_value = steps_list[item] == n_time_steps
-        else:
-            has_value = steps_list[item] > 0
-        darray[has_value] = outdatalist[item][has_value].astype(
-            np.float32
-        ) / steps_list[item][has_value].astype(np.float32)
-        darray[~has_value] = deletevalue
-        dfs_o.WriteItemTimeStepNext(0.0, darray)
-
-    dfs_o.Close()
+            darray = np.zeros_like(outdatalist[item], dtype=np.float32)
+            if skipna:
+                has_value = steps_list[item] == n_time_steps
+            else:
+                has_value = steps_list[item] > 0
+            darray[has_value] = outdatalist[item][has_value].astype(
+                np.float32
+            ) / steps_list[item][has_value].astype(np.float32)
+            darray[~has_value] = deletevalue
+            dfs_o.WriteItemTimeStepNext(0.0, darray)
 
 
 def quantile(
@@ -883,68 +904,65 @@ def quantile(
     outfilename = normalize_output_path(outfilename)
     func = np.nanquantile if skipna else np.quantile
 
-    dfs_i = DfsFileFactory.DfsGenericOpen(infilename)
+    with _opened(DfsFileFactory.DfsGenericOpen(infilename)) as dfs_i:
+        is_dfsu_3d = dfs_i.ItemInfo[0].Name == "Z coordinate"
 
-    is_dfsu_3d = dfs_i.ItemInfo[0].Name == "Z coordinate"
+        item_numbers = _valid_item_numbers(_item_names(dfs_i), items)
 
-    item_numbers = _valid_item_numbers(dfs_i.ItemInfo, items)
+        if is_dfsu_3d and 0 in item_numbers:
+            item_numbers.remove(0)  # Remove Zn item for special treatment
 
-    if is_dfsu_3d and 0 in item_numbers:
-        item_numbers.remove(0)  # Remove Zn item for special treatment
+        n_time_steps = dfs_i.FileInfo.TimeAxis.NumberOfTimeSteps
 
-    n_time_steps = dfs_i.FileInfo.TimeAxis.NumberOfTimeSteps
+        # TODO: better handling of different item sizes (zn...)
 
-    # TODO: better handling of different item sizes (zn...)
+        ci = _ChunkInfo.from_dfs(dfs_i, item_numbers, buffer_size)
 
-    ci = _ChunkInfo.from_dfs(dfs_i, item_numbers, buffer_size)
+        qvec: Sequence[float] = [q] if isinstance(q, float) else q
+        qtxt = [f"Quantile {q!r}" for q in qvec]
+        core_items = [dfs_i.ItemInfo[i] for i in item_numbers]
+        out_items = _get_repeated_items(core_items, prefixes=qtxt)
 
-    qvec: Sequence[float] = [q] if isinstance(q, float) else q
-    qtxt = [f"Quantile {q!r}" for q in qvec]
-    core_items = [dfs_i.ItemInfo[i] for i in item_numbers]
-    items = _get_repeated_items(core_items, prefixes=qtxt)
+        if is_dfsu_3d:
+            out_items.insert(0, dfs_i.ItemInfo[0])
 
-    if is_dfsu_3d:
-        items.insert(0, dfs_i.ItemInfo[0])
+        with _clone(infilename, outfilename, items=out_items) as dfs_o:
+            n_items_out = len(out_items)
+            if is_dfsu_3d:
+                n_items_out = n_items_out - 1
 
-    dfs_o = _clone(infilename, outfilename, items=items)
+            datalist = []
+            outdatalist = []
 
-    n_items_out = len(items)
-    if is_dfsu_3d:
-        n_items_out = n_items_out - 1
+            for item in item_numbers:
+                indata = _read_item(dfs_i, item, 0)
+                for _ in qvec:
+                    outdatalist.append(np.zeros_like(indata))
+                datalist.append(np.zeros((n_time_steps, ci.chunk_size)))
 
-    datalist = []
-    outdatalist = []
+            e1 = 0
+            for _ in range(ci.n_chunks):
+                e2 = ci.stop(e1)
+                # the last chunk may be smaller than the rest
+                chunk_end = ci.chunk_end(e1)
 
-    for item in item_numbers:
-        indata = _read_item(dfs_i, item, 0)
-        for _ in qvec:
-            outdatalist.append(np.zeros_like(indata))
-        datalist.append(np.zeros((n_time_steps, ci.chunk_size)))
+                _read_items_into_chunk(
+                    dfs_i, item_numbers, n_time_steps, e1, e2, chunk_end, datalist
+                )
+                _compute_quantiles_for_chunk(
+                    datalist, outdatalist, qvec, func, ci.chunk_size, e1, e2, chunk_end
+                )
 
-    e1 = 0
-    for _ in range(ci.n_chunks):
-        e2 = ci.stop(e1)
-        chunk_end = ci.chunk_end(e1)  # the last chunk may be smaller than the rest
+                e1 = e2
 
-        _read_items_into_chunk(
-            dfs_i, item_numbers, n_time_steps, e1, e2, chunk_end, datalist
-        )
-        _compute_quantiles_for_chunk(
-            datalist, outdatalist, qvec, func, ci.chunk_size, e1, e2, chunk_end
-        )
+            if is_dfsu_3d:
+                znitemdata = dfs_i.ReadItemTimeStep(1, 0)
+                # TODO should this be static Z coordinates instead?
+                dfs_o.WriteItemTimeStepNext(0.0, znitemdata.Data)
 
-        e1 = e2
-
-    if is_dfsu_3d:
-        znitemdata = dfs_i.ReadItemTimeStep(1, 0)
-        # TODO should this be static Z coordinates instead?
-        dfs_o.WriteItemTimeStepNext(0.0, znitemdata.Data)
-
-    for item in range(n_items_out):
-        darray = outdatalist[item].astype(np.float32)
-        dfs_o.WriteItemTimeStepNext(0.0, darray)
-
-    dfs_o.Close()
+            for item in range(n_items_out):
+                darray = outdatalist[item].astype(np.float32)
+                dfs_o.WriteItemTimeStepNext(0.0, darray)
 
 
 def _read_items_into_chunk(
@@ -991,7 +1009,7 @@ def _read_item(dfs: DfsFile, item: int, timestep: int) -> np.ndarray:
 def _get_repeated_items(
     items_in: list[DfsDynamicItemInfo], prefixes: list[str]
 ) -> list[ItemInfo]:
-    item_numbers = _valid_item_numbers(items_in)
+    item_numbers = _valid_item_numbers([item.Name for item in items_in])
     items_in = _get_item_info(items_in)
 
     new_items = []
@@ -1039,16 +1057,14 @@ def change_datatype(
     """
     infilename = normalize_path(infilename)
     outfilename = normalize_output_path(outfilename)
-    dfs_out = _clone(infilename, outfilename, datatype=datatype)
-    dfs_in = DfsFileFactory.DfsGenericOpen(infilename)
-
-    sourceData = dfs_in.ReadItemTimeStepNext()
-    while sourceData:
-        dfs_out.WriteItemTimeStepNext(sourceData.Time, sourceData.Data)
+    with (
+        _clone(infilename, outfilename, datatype=datatype) as dfs_out,
+        _opened(DfsFileFactory.DfsGenericOpen(infilename)) as dfs_in,
+    ):
         sourceData = dfs_in.ReadItemTimeStepNext()
-
-    dfs_out.Close()
-    dfs_in.Close()
+        while sourceData:
+            dfs_out.WriteItemTimeStepNext(sourceData.Time, sourceData.Data)
+            sourceData = dfs_in.ReadItemTimeStepNext()
 
 
 class DerivedItem:
@@ -1146,53 +1162,50 @@ def transform(
     """
     infilename = normalize_path(infilename)
     outfilename = normalize_output_path(outfilename)
-    dfs_i = DfsFileFactory.DfsGenericOpen(infilename)
+    remove_output = False
+    try:
+        with _opened(DfsFileFactory.DfsGenericOpen(infilename)) as dfs_i:
+            item_numbers = _valid_item_numbers(_item_names(dfs_i))
+            n_items = len(item_numbers)
 
-    item_numbers = _valid_item_numbers(dfs_i.ItemInfo)
-    n_items = len(item_numbers)
+            items = [v.item for v in vars]
+            funcs = {v.item.name: v.func for v in vars}
 
-    items = [v.item for v in vars]
-    funcs = {v.item.name: v.func for v in vars}
-
-    if keep_existing_items:
-        existing_items = [
-            ItemInfo.from_mikecore_dynamic_item_info(
-                dfs_i.ItemInfo[i],
-            )
-            for i in item_numbers
-        ]
-        items = existing_items + items
-
-    dfs = _clone(
-        infilename,
-        outfilename,
-        items=items,
-    )
-
-    n_time_steps = dfs_i.FileInfo.TimeAxis.NumberOfTimeSteps
-
-    for timestep in range(n_time_steps):
-        data = {}
-        for item in range(n_items):
-            name = dfs_i.ItemInfo[item].Name
-            data[name] = dfs_i.ReadItemTimeStep(item_numbers[item] + 1, timestep).Data
-
-        for item in items:
-            func = funcs.get(item.name, None)
-            if func is None:
-                darray = data[item.name]
-            else:
-                try:
-                    darray = func(data)
-                except KeyError as e:
-                    missing_key = e.args[0]
-                    keys = ", ".join(data.keys())
-                    dfs.Close()
-                    pathlib.Path(outfilename).unlink()
-                    raise KeyError(
-                        f"Item '{missing_key}' is not available in the file. Available items: {keys}"
+            if keep_existing_items:
+                existing_items = [
+                    ItemInfo.from_mikecore_dynamic_item_info(
+                        dfs_i.ItemInfo[i],
                     )
-            dfs.WriteItemTimeStepNext(0.0, darray)
+                    for i in item_numbers
+                ]
+                items = existing_items + items
 
-    dfs_i.Close()
-    dfs.Close()
+            with _clone(infilename, outfilename, items=items) as dfs:
+                n_time_steps = dfs_i.FileInfo.TimeAxis.NumberOfTimeSteps
+
+                for timestep in range(n_time_steps):
+                    data = {}
+                    for item in range(n_items):
+                        name = dfs_i.ItemInfo[item].Name
+                        data[name] = dfs_i.ReadItemTimeStep(
+                            item_numbers[item] + 1, timestep
+                        ).Data
+
+                    for out_item in items:
+                        func = funcs.get(out_item.name, None)
+                        if func is None:
+                            darray = data[out_item.name]
+                        else:
+                            try:
+                                darray = func(data)
+                            except KeyError as e:
+                                missing_key = e.args[0]
+                                keys = ", ".join(data.keys())
+                                remove_output = True
+                                raise KeyError(
+                                    f"Item '{missing_key}' is not available in the file. Available items: {keys}"
+                                )
+                        dfs.WriteItemTimeStepNext(0.0, darray)
+    finally:
+        if remove_output:
+            pathlib.Path(outfilename).unlink()
