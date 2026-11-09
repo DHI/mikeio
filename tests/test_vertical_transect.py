@@ -37,7 +37,7 @@ def test_extract_vertical_discrete_returns_profile(da3d: DataArray) -> None:
     xs, ys = _mid_transect(da3d.geometry)
     n_layers = da3d.geometry.n_layers
     section = da3d.extract_vertical(
-        xs=xs, ys=ys, mode="discrete", layer_min=1, layer_max=n_layers
+        xs=xs, ys=ys, mode="discrete", layer_min=0, layer_max=n_layers - 1
     )
     assert isinstance(section.geometry, GeometryFMVerticalProfile)
     assert section.geometry.n_elements > 0
@@ -48,7 +48,7 @@ def test_extract_vertical_discrete_values_are_source_elements(da3d: DataArray) -
     xs, ys = _mid_transect(da3d.geometry)
     n_layers = da3d.geometry.n_layers
     section = da3d.extract_vertical(
-        xs=xs, ys=ys, mode="discrete", layer_min=1, layer_max=n_layers
+        xs=xs, ys=ys, mode="discrete", layer_min=0, layer_max=n_layers - 1
     )
     src_vals = np.unique(da3d.to_numpy())
     out_vals = np.unique(section.to_numpy())
@@ -62,10 +62,13 @@ def test_extract_vertical_single_timestep(da3d: DataArray) -> None:
     assert section.shape[-2:] == (8, 10)
 
 
-def test_extract_vertical_discrete_requires_layers(da3d: DataArray) -> None:
+def test_extract_vertical_discrete_layers_out_of_range(da3d: DataArray) -> None:
     xs, ys = _mid_transect(da3d.geometry)
+    n_layers = da3d.geometry.n_layers
     with pytest.raises(ValueError):
-        da3d.extract_vertical(xs=xs, ys=ys, mode="discrete")
+        da3d.extract_vertical(
+            xs=xs, ys=ys, mode="discrete", layer_min=0, layer_max=n_layers
+        )
 
 
 def test_extract_vertical_bad_mode(da3d: DataArray) -> None:

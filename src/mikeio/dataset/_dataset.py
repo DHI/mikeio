@@ -1124,10 +1124,13 @@ class Dataset:
             element (returns a [](`mikeio.spatial.GeometryFMVerticalProfile`)).
             Default "interpolate".
         layer_min : int, optional
-            Lowest layer (1 = bed) to include, required for mode="discrete".
+            Lowest layer to include, used for mode="discrete". Layers follow
+            the same convention as `sel(layers=...)`: 0 is the bottom layer
+            and n_layers-1 the top layer; negative values count from -1 at
+            the top layer. Default None (bottom layer).
         layer_max : int, optional
-            Highest layer (n_layers = surface) to include, required for
-            mode="discrete".
+            Highest layer to include (inclusive), used for mode="discrete".
+            Same convention as `layer_min`. Default None (top layer).
         n_horizontal : int, optional
             Number of horizontal grid points, used for mode="interpolate".
             Default 50.
@@ -1147,6 +1150,16 @@ class Dataset:
             The extracted vertical section. Its geometry is a vertical
             [](`mikeio.Grid2D`) for mode="interpolate" and a
             [](`mikeio.spatial.GeometryFMVerticalProfile`) for mode="discrete".
+
+        Notes
+        -----
+        Layer numbers are global and aligned to the surface: layer -1 is the
+        top layer in every column. In a sigma-z mesh, layer 0 is the deepest
+        layer of the whole mesh and only exists in the deepest columns;
+        shallower columns start at a higher layer. A layer range near the
+        bottom (e.g. ``layer_min=0, layer_max=2``) therefore only returns
+        elements where the water is deep enough to have those layers, not a
+        band following each column's own bed.
 
         Examples
         --------

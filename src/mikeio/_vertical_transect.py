@@ -321,20 +321,51 @@ def _extract_interpolated(
 # ---------------------------------------------------------------------------
 # Mode "discrete": mesh-following vertical profile
 # ---------------------------------------------------------------------------
+def _layer_range(
+    n_layers: int, layer_min: int | None, layer_max: int | None
+) -> np.ndarray:
+    """Global layer ids ``layer_min..layer_max`` (inclusive), MIKE IO convention.
+
+    Layers are numbered from 0 (bottom) to ``n_layers - 1`` (top); negative
+    values count from -1 at the top layer, as in
+    [](`mikeio.spatial.GeometryFM3D.get_layer_elements`). ``None`` means the
+    bottom (``layer_min``) or top (``layer_max``) layer.
+    """
+    bounds = {
+        "layer_min": 0 if layer_min is None else layer_min,
+        "layer_max": n_layers - 1 if layer_max is None else layer_max,
+    }
+    for name, val in bounds.items():
+        if isinstance(val, bool) or not isinstance(val, (int, np.integer)):
+            raise TypeError(f"{name} must be an integer, got {val!r}")
+        if val < -n_layers or val >= n_layers:
+            raise ValueError(
+                f"{name}={val} not allowed; must be between -{n_layers} and {n_layers - 1}"
+            )
+        bounds[name] = int(val) + n_layers if val < 0 else int(val)
+    lo, hi = bounds["layer_min"], bounds["layer_max"]
+    if lo > hi:
+        raise ValueError(
+            f"layer_min ({layer_min}) must not be above layer_max ({layer_max})"
+        )
+    return np.arange(lo, hi + 1)
+
+
 def _extract_discrete(
     geometry: GeometryFM3D,
     zn: np.ndarray,
     values: list[np.ndarray],
     pts: np.ndarray,
-    layer_min: int,
-    layer_max: int,
+    layers: np.ndarray,
 ) -> tuple[GeometryFMVerticalProfile, np.ndarray, list[np.ndarray]]:
+    """Mesh-following vertical profile.
+
+    ``layers`` are global, surface-aligned 0-based layer ids (0 = deepest layer
+    in the mesh). Interface (node) levels are numbered 0..n_layers, so layer
+    ``k`` lies between interface ``k`` (below) and ``k + 1`` (above).
+    """
     g2 = geometry.geometry2d
     maxlayers = geometry.n_layers
-    layer_min = max(1, layer_min)
-    layer_max = min(maxlayers, layer_max)
-    if layer_min > layer_max:
-        raise ValueError("layer_min must be <= layer_max")
 
     stations, seg_col = _transect_crossings(pts, g2)
     n_station = len(stations)
@@ -384,14 +415,14 @@ def _extract_discrete(
         nl_local = int(n_lpc[col])
         offset = maxlayers - nl_local
         e3d = np.asarray(geometry.e2_e3_table[col], dtype=np.int64)
-        for j in range(layer_min, layer_max + 1):
-            li = j - offset
-            if li < 1 or li > nl_local:
+        for k in layers:
+            li = int(k) - offset  # 0-based layer index within this column
+            if li < 0 or li >= nl_local:
                 continue
-            bl, br = _node(c, j - 1), _node(c + 1, j - 1)
-            tr, tl = _node(c + 1, j), _node(c, j)
+            bl, br = _node(c, k), _node(c + 1, k)
+            tr, tl = _node(c + 1, k + 1), _node(c, k + 1)
             element_table.append(np.array([bl, br, tr, tl], dtype=np.int64))
-            elem_source.append(int(e3d[li - 1]))
+            elem_source.append(int(e3d[li]))
 
     if not element_table:
         raise ValueError("the transect does not intersect any mesh column")
@@ -442,10 +473,9 @@ def _extract_discrete(
     z_static = np.einsum("nc,nc->n", geometry.node_coordinates[:, 2][node_src], node_w)
     node_coords = np.column_stack([np.array(node_xy), z_static])
     n_sigma_global = geometry.n_sigma_layers
-    lowest_sigma = maxlayers - n_sigma_global
-    out_layers = np.arange(layer_min, layer_max + 1)
-    n_sigma_out = int(np.sum(out_layers > lowest_sigma))
-    n_layers_out = layer_max - layer_min + 1
+    first_sigma = maxlayers - n_sigma_global  # 0-based id of lowest sigma layer
+    n_sigma_out = int(np.sum(layers >= first_sigma))
+    n_layers_out = int(layers.size)
     dfsu_type = (
         DfsuFileType.DfsuVerticalProfileSigma
         if n_sigma_out == n_layers_out
@@ -513,7 +543,6 @@ def _extract_vertical(
             geometry, zn, values, pts, n_horizontal, n_vertical, z_min, z_max
         )
     if mode == "discrete":
-        if layer_min is None or layer_max is None:
-            raise ValueError('layer_min and layer_max are required for mode="discrete"')
-        return _extract_discrete(geometry, zn, values, pts, layer_min, layer_max)
+        layers = _layer_range(geometry.n_layers, layer_min, layer_max)
+        return _extract_discrete(geometry, zn, values, pts, layers)
     raise ValueError(f'mode must be "interpolate" or "discrete", got {mode!r}')
