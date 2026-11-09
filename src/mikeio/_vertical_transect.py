@@ -297,7 +297,9 @@ def _extract_interpolated(
             v_lo = np.take_along_axis(vals, lo[:, :, None], -1)[:, :, 0]
             v_hi = np.take_along_axis(vals, hi[:, :, None], -1)[:, :, 0]
             denom = zc_hi - zc_lo
-            wgt = np.clip(np.where(denom != 0, (z - zc_lo) / denom, 0.0), 0.0, 1.0)
+            wgt = np.zeros_like(denom)
+            np.divide(z - zc_lo, denom, out=wgt, where=denom != 0)
+            np.clip(wgt, 0.0, 1.0, out=wgt)
             val_m = v_lo + wgt * (v_hi - v_lo)
             inside = (z >= bed) & (z <= surf) & (nlev[None, :] > 0)
             res[:, m, :] = np.where(inside, val_m, np.nan).astype(np.float32)

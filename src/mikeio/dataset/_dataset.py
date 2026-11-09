@@ -1119,9 +1119,14 @@ class Dataset:
             y-coordinates of the transect polyline vertices.
         mode : {"interpolate", "discrete"}, optional
             "interpolate": sample onto a regular distance-by-elevation grid
-            (returns a vertical [](`mikeio.Grid2D`) geometry). "discrete":
-            follow the model layers, mapping each output element to a source 3D
-            element (returns a [](`mikeio.spatial.GeometryFMVerticalProfile`)).
+            (returns a vertical [](`mikeio.Grid2D`) geometry). Each sample
+            takes its values from the mesh column it falls in, interpolated
+            linearly between layer centres in the vertical; there is no
+            interpolation between neighbouring columns, so values are
+            piecewise constant along the transect (only the layer interfaces
+            are interpolated horizontally). "discrete": follow the model
+            layers, mapping each output element to a source 3D element
+            (returns a [](`mikeio.spatial.GeometryFMVerticalProfile`)).
             Default "interpolate".
         layer_min : int, optional
             Lowest layer to include, used for mode="discrete". Layers follow
