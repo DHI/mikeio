@@ -5,9 +5,11 @@ from typing import Literal, Sequence
 import numpy as np
 from mikecore.DfsuFile import DfsuFileType
 
+from .exceptions import OutsideModelDomainError
 from .spatial import (
     GeometryFM2D,
     GeometryFM3D,
+    GeometryFMVerticalColumn,
     GeometryFMVerticalProfile,
     Grid2D,
 )
@@ -156,7 +158,7 @@ def _mesh_edges(geometry2d: GeometryFM2D) -> np.ndarray:
 def _find_col(geometry2d: GeometryFM2D, x: float, y: float) -> int:
     try:
         return int(np.atleast_1d(geometry2d.find_index(x=x, y=y))[0])
-    except Exception:
+    except OutsideModelDomainError:
         return -1
 
 
@@ -522,8 +524,17 @@ def _extract_vertical(
     Returns ``(out_geometry, out_zn, out_values)`` where ``out_zn`` is the
     dynamic node z for the ``discrete`` mode and ``None`` for ``interpolate``.
     """
-    if not (isinstance(geometry, GeometryFM3D) and geometry.is_layered):
-        raise NotImplementedError("extract_vertical requires 3D layered dfsu data")
+    # GeometryFMVerticalColumn subclasses GeometryFM3D but has no horizontal
+    # extent to cut a transect through
+    if (
+        not isinstance(geometry, GeometryFM3D)
+        or isinstance(geometry, GeometryFMVerticalColumn)
+        or not geometry.is_layered
+    ):
+        raise NotImplementedError(
+            "extract_vertical requires 3D layered dfsu data with a horizontal "
+            f"mesh, got {type(geometry).__name__}"
+        )
     if zn is None:
         raise ValueError(
             "the source data has no z-coordinate (zn); a 3D dfsu is required"
