@@ -341,18 +341,26 @@ def _extract_discrete(
     n_seg = len(seg_col)
     n_lpc = geometry.n_layers_per_column
 
-    # per-station column used to interpolate node z (right segment, else left)
-    st_info: dict[int, tuple] = {}
+    # candidate columns per station for resolving node z: the column to the
+    # right of the station first, then the one to the left. In sigma-z the two
+    # columns can have a different number of layers, so a given interface level
+    # may exist in only one of them.
+    st_cols: dict[int, list[tuple[np.ndarray, np.ndarray]]] = {}
     for si in range(n_station):
-        c = seg_col[si] if si < n_seg else -1
-        if c < 0 and si > 0:
-            c = seg_col[si - 1]
-        if c < 0:
-            continue
-        levels = _column_level_nodes(geometry, int(c))
-        corner_xy = _column_corner_xy(geometry, levels)
-        w = _shape_function_weights(corner_xy, stations[si, 0], stations[si, 1])
-        st_info[si] = (levels, w)
+        cands = []
+        if si < n_seg:
+            cands.append(int(seg_col[si]))
+        if si > 0:
+            cands.append(int(seg_col[si - 1]))
+        infos = []
+        for c in cands:
+            if c < 0:
+                continue
+            levels = _column_level_nodes(geometry, c)
+            corner_xy = _column_corner_xy(geometry, levels)
+            w = _shape_function_weights(corner_xy, stations[si, 0], stations[si, 1])
+            infos.append((levels, w))
+        st_cols[si] = infos
 
     # build node list + element table (global, surface-aligned layer numbering)
     node_id: dict[tuple[int, int], int] = {}
@@ -403,26 +411,36 @@ def _extract_discrete(
     n_nodes_out = len(node_xy)
 
     # --- build padded (node -> source-node-ids, weights) arrays once ---
-    cmax = max((len(w) for _, w in st_info.values()), default=1)
+    cmax = max(
+        (len(w) for infos in st_cols.values() for _, w in infos),
+        default=1,
+    )
     node_src = np.zeros((n_nodes_out, cmax), dtype=np.int64)
     node_w = np.zeros((n_nodes_out, cmax), dtype=np.float64)
     for (si, gj), nid in node_id.items():
-        info = st_info.get(si)
-        if info is None:
-            continue
-        levels, w = info
-        nl_local = levels.shape[0] - 1
-        li = gj - (maxlayers - nl_local)
-        if 0 <= li <= nl_local:
-            nn = levels[li]
-            node_src[nid, : nn.size] = nn
-            node_w[nid, : w.size] = w
+        # a node is only created by a column that has this interface level, so
+        # one of the (right, left) candidates always contains it
+        for levels, w in st_cols[si]:
+            nl_local = levels.shape[0] - 1
+            li = gj - (maxlayers - nl_local)
+            if 0 <= li <= nl_local:
+                nn = levels[li]
+                node_src[nid, : nn.size] = nn
+                node_w[nid, : w.size] = w
+                break
+        else:
+            raise RuntimeError(
+                f"could not resolve z for transect node at station {si}, "
+                f"interface level {gj}"
+            )
 
-    # dynamic node z for all timesteps in one einsum (masked nodes -> 0)
+    # dynamic node z for all timesteps in one einsum
     zn_out = np.einsum("tnc,nc->tn", zn[:, node_src], node_w).astype(np.float32)
 
-    # static node z + geometry
-    node_coords = np.column_stack([np.array(node_xy), zn_out[0].astype(float)])
+    # static node z from the source mesh's static z (undisturbed water level),
+    # as MIKE does, rather than from the first time step
+    z_static = np.einsum("nc,nc->n", geometry.node_coordinates[:, 2][node_src], node_w)
+    node_coords = np.column_stack([np.array(node_xy), z_static])
     n_sigma_global = geometry.n_sigma_layers
     lowest_sigma = maxlayers - n_sigma_global
     out_layers = np.arange(layer_min, layer_max + 1)
