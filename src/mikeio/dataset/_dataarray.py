@@ -28,6 +28,7 @@ import pandas as pd
 from ..eum import EUMType, EUMUnit, ItemInfo
 from .._time import _get_time_idx_list, _is_time_label, _n_selected_timesteps
 from .._track import _extract_track
+from .._vertical_transect import _extract_vertical
 
 if TYPE_CHECKING:
     from ._dataset import Dataset
@@ -1122,6 +1123,112 @@ class DataArray:
             method=method,
             dtype=dtype,
             data_read_func=self.__dataarray_read_item_time_func,
+        )
+
+    def extract_vertical(
+        self,
+        *,
+        xs: Sequence[float],
+        ys: Sequence[float],
+        mode: Literal["interpolate", "discrete"] = "interpolate",
+        layer_min: int | None = None,
+        layer_max: int | None = None,
+        n_horizontal: int = 50,
+        n_vertical: int = 30,
+        z_min: float | None = None,
+        z_max: float | None = None,
+    ) -> "DataArray":
+        """Extract a vertical cross-section (transect) from 3D layered data.
+
+        The data is sampled along the horizontal polyline given by ``xs``, ``ys``
+        (in the mesh coordinate system) to produce a 2D vertical section.
+
+        Parameters
+        ----------
+        xs : Sequence[float]
+            x-coordinates of the transect polyline vertices.
+        ys : Sequence[float]
+            y-coordinates of the transect polyline vertices.
+        mode : {"interpolate", "discrete"}, optional
+            "interpolate": sample onto a regular distance-by-elevation grid
+            (returns a vertical [](`mikeio.Grid2D`) geometry). Each sample
+            takes its values from the mesh column it falls in, interpolated
+            linearly between layer centres in the vertical; there is no
+            interpolation between neighbouring columns, so values are
+            piecewise constant along the transect (only the layer interfaces
+            are interpolated horizontally). "discrete": follow the model
+            layers, mapping each output element to a source 3D element
+            (returns a [](`mikeio.spatial.GeometryFMVerticalProfile`)).
+            Default "interpolate".
+        layer_min : int, optional
+            Lowest layer to include, used for mode="discrete". Layers follow
+            the same convention as `sel(layers=...)`: 0 is the bottom layer
+            and n_layers-1 the top layer; negative values count from -1 at
+            the top layer. Default None (bottom layer).
+        layer_max : int, optional
+            Highest layer to include (inclusive), used for mode="discrete".
+            Same convention as `layer_min`. Default None (top layer).
+        n_horizontal : int, optional
+            Number of horizontal grid points, used for mode="interpolate".
+            Default 50.
+        n_vertical : int, optional
+            Number of vertical grid points, used for mode="interpolate".
+            Default 30.
+        z_min : float, optional
+            Minimum elevation of the grid, used for mode="interpolate".
+            Defaults to the minimum mesh node z.
+        z_max : float, optional
+            Maximum elevation of the grid, used for mode="interpolate".
+            Defaults to the maximum mesh node z.
+
+        Returns
+        -------
+        DataArray
+            The extracted vertical section. Its geometry is a vertical
+            [](`mikeio.Grid2D`) for mode="interpolate" and a
+            [](`mikeio.spatial.GeometryFMVerticalProfile`) for mode="discrete".
+
+        Notes
+        -----
+        Layer numbers are global and aligned to the surface: layer -1 is the
+        top layer in every column. In a sigma-z mesh, layer 0 is the deepest
+        layer of the whole mesh and only exists in the deepest columns;
+        shallower columns start at a higher layer. A layer range near the
+        bottom (e.g. ``layer_min=0, layer_max=2``) therefore only returns
+        elements where the water is deep enough to have those layers, not a
+        band following each column's own bed.
+
+        Examples
+        --------
+        >>> ds = mikeio.read("oresund_sigma_z.dfsu")
+        >>> da = ds["Temperature"]
+        >>> section = da.extract_vertical(xs=[350000, 360000], ys=[6150000, 6160000])
+        >>> section = da.extract_vertical(
+        ...     xs=[350000, 360000], ys=[6150000, 6160000],
+        ...     mode="discrete", layer_min=1, layer_max=da.geometry.n_layers,
+        ... )
+
+        """
+        geometry, zn, values = _extract_vertical(
+            geometry=self.geometry,
+            zn=self._zn,
+            values=[self.to_numpy()],
+            mode=mode,
+            xs=xs,
+            ys=ys,
+            layer_min=layer_min,
+            layer_max=layer_max,
+            n_horizontal=n_horizontal,
+            n_vertical=n_vertical,
+            z_min=z_min,
+            z_max=z_max,
+        )
+        return DataArray(
+            data=values[0],
+            time=self.time,
+            geometry=geometry,
+            item=deepcopy(self.item),
+            zn=zn,
         )
 
     def interp_time(

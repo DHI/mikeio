@@ -11,7 +11,7 @@ layers =
     mikeio.dfsu
     mikeio.dfs
     mikeio.dataset
-    mikeio._track
+    mikeio._track : mikeio._vertical_transect
     mikeio.spatial
     mikeio._options
     mikeio.eum
