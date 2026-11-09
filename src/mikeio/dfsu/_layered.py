@@ -11,14 +11,15 @@ from matplotlib.colors import Colormap
 from mikecore.DfsFileFactory import DfsFileFactory
 from mikecore.DfsuFile import DfsuFile, DfsuFileType
 from scipy.spatial import KDTree
-from tqdm import trange
 
 from .._interpolation import Interpolant
-from .._options import _item_txt, _show_progress
+from .._options import _item_txt
 from ..dataset import DataArray, Dataset
 from ..dfs._dfs import (
     _get_item_info,
-    _read_item_time_step,
+    _opened,
+    _read_item_time_steps,
+    _select_items,
     _valid_item_numbers,
     _valid_timesteps,
 )
@@ -29,6 +30,7 @@ from ..spatial import (
     GeometryFMVerticalProfile,
     GeometryPoint3D,
 )
+from ..spatial._FM_geometry import Area
 from ..spatial._FM_plot import _plot_vertical_profile
 from ._dfsu import (
     _get_dfsu_info,
@@ -55,6 +57,9 @@ class DfsuLayered:
         self._timestep = info.timestep
         self._n_timesteps = info.n_timesteps
         self._title = info.title
+        self._time_axis = info.time_axis
+        # all items in the file, including the "Z coordinate" item
+        self._all_items = info.items
         self._geometry = self._read_geometry(self._filename)
         # 3d files have a zn item
         self._items = self._read_items(self._filename)
@@ -149,45 +154,43 @@ class DfsuLayered:
 
     @staticmethod
     def _read_items(filename: str) -> list[ItemInfo]:
-        dfs = DfsuFile.Open(filename)
-        n_items = len(dfs.ItemInfo)
-        first_idx = 1
-        items = _get_item_info(
-            dfs.ItemInfo,
-            list(range(n_items - first_idx)),
-            ignore_first=True,
-        )
-        dfs.Close()
+        with _opened(DfsuFile.Open(filename)) as dfs:
+            n_items = len(dfs.ItemInfo)
+            first_idx = 1
+            items = _get_item_info(
+                dfs.ItemInfo,
+                list(range(n_items - first_idx)),
+                ignore_first=True,
+            )
         return items
 
     @staticmethod
     def _read_geometry(filename: str) -> GeometryFM3D | GeometryFMVerticalProfile:
-        dfs = DfsuFile.Open(filename)
-        dfsu_type = DfsuFileType(dfs.DfsuFileType)
+        with _opened(DfsuFile.Open(filename)) as dfs:
+            dfsu_type = DfsuFileType(dfs.DfsuFileType)
 
-        node_table = get_nodes_from_source(dfs)
-        el_table = get_elements_from_source(dfs)
+            node_table = get_nodes_from_source(dfs)
+            el_table = get_elements_from_source(dfs)
 
-        geom_cls: Any = GeometryFM3D
-        if dfsu_type in (
-            DfsuFileType.DfsuVerticalProfileSigma,
-            DfsuFileType.DfsuVerticalProfileSigmaZ,
-        ):
-            geom_cls = GeometryFMVerticalProfile
+            geom_cls: Any = GeometryFM3D
+            if dfsu_type in (
+                DfsuFileType.DfsuVerticalProfileSigma,
+                DfsuFileType.DfsuVerticalProfileSigmaZ,
+            ):
+                geom_cls = GeometryFMVerticalProfile
 
-        geometry = geom_cls(
-            node_coordinates=node_table.coordinates,
-            element_table=el_table.connectivity,
-            codes=node_table.codes,
-            projection=dfs.Projection.WKTString,
-            dfsu_type=dfsu_type,
-            element_ids=el_table.ids,
-            node_ids=node_table.ids,
-            n_layers=dfs.NumberOfLayers,
-            n_sigma=min(dfs.NumberOfSigmaLayers, dfs.NumberOfLayers),
-            validate=False,
-        )
-        dfs.Close()
+            geometry = geom_cls(
+                node_coordinates=node_table.coordinates,
+                element_table=el_table.connectivity,
+                codes=node_table.codes,
+                projection=dfs.Projection.WKTString,
+                dfsu_type=dfsu_type,
+                element_ids=el_table.ids,
+                node_ids=node_table.ids,
+                n_layers=dfs.NumberOfLayers,
+                n_sigma=min(dfs.NumberOfSigmaLayers, dfs.NumberOfLayers),
+                validate=False,
+            )
         return geometry
 
     @property
@@ -281,7 +284,7 @@ class DfsuLayered:
         items: str | int | Sequence[str | int] | None = None,
         time: int | str | slice | Sequence[int] | None = None,
         elements: Sequence[int] | np.ndarray | None = None,
-        area: tuple[float, float, float, float] | None = None,
+        area: Area | None = None,
         x: float | None = None,
         y: float | None = None,
         z: float | None = None,
@@ -302,10 +305,12 @@ class DfsuLayered:
         keepdims: bool, optional
             When reading a single time step only, should the time-dimension be kept
             in the returned Dataset? by default: False
-        area: list[float], optional
+        area: bbox, polygon or shapely geometry, optional
             Read only data inside (horizontal) area given as a
-            bounding box (tuple with left, lower, right, upper)
-            or as list of coordinates for a polygon, by default None
+            bounding box (tuple with left, lower, right, upper),
+            as list of coordinates for a polygon, or as a Polygon or
+            MultiPolygon with `__geo_interface__` (e.g. shapely), by default None.
+            Elements are selected when their centre is inside the area or on its boundary.
         x: float, optional
             Read only data for elements containing the (x,y,z) points(s)
         y: float, optional
@@ -341,9 +346,7 @@ class DfsuLayered:
                 stacklevel=2,
             )
 
-        dfs = DfsuFile.Open(self._filename)
-
-        single_time_selected, time_steps = _valid_timesteps(dfs, time)
+        single_time_selected, time_steps = _valid_timesteps(self._time_axis, time)
 
         _validate_elements_and_geometry_sel(
             elements, area=area, layers=layers, x=x, y=y, z=z
@@ -381,10 +384,12 @@ class DfsuLayered:
             n_nodes = geometry.n_nodes
 
         item_numbers = _valid_item_numbers(
-            dfs.ItemInfo, items, ignore_first=self.geometry.is_layered
+            [item.name for item in self._all_items],
+            items,
+            ignore_first=self.geometry.is_layered,
         )
-        items = _get_item_info(
-            dfs.ItemInfo, item_numbers, ignore_first=self.geometry.is_layered
+        items = _select_items(
+            self._all_items, item_numbers, ignore_first=self.geometry.is_layered
         )
         item_numbers = [it + 1 for it in item_numbers]
         if layered_data := hasattr(geometry, "is_layered") and geometry.is_layered:
@@ -408,39 +413,37 @@ class DfsuLayered:
         if single_time_selected and not keepdims:
             data = data[0]
 
-        for i in trange(n_steps, disable=not _show_progress()):
-            it = time_steps[i]
-            for item in range(n_items):
-                dfs, d, t = _read_item_time_step(
-                    dfs=dfs,
-                    filename=self._filename,
-                    item_numbers=item_numbers,
-                    deletevalue=deletevalue,
-                    item=item,
-                    it=it,
-                    error_bad_data=error_bad_data,
-                    fill_bad_data_value=fill_bad_data_value,
-                )
-                t_seconds[i] = t
+        def store(i: int, item: int, d: np.ndarray, t: float) -> None:
+            t_seconds[i] = t
 
-                if elements is not None:
-                    if item == 0 and item0_is_node_based:
-                        if selected_node_ids is None:
-                            raise ValueError(
-                                "Could not determine node ids for layered selection"
-                            )
-                        d = d[selected_node_ids]
-                    else:
-                        d = d[elements]  # type: ignore
-
-                if single_time_selected and not keepdims:
-                    data_list[item] = d
+            if elements is not None:
+                if item == 0 and item0_is_node_based:
+                    if selected_node_ids is None:
+                        raise ValueError(
+                            "Could not determine node ids for layered selection"
+                        )
+                    d = d[selected_node_ids]
                 else:
-                    data_list[item][i] = d
+                    d = d[elements]  # type: ignore
+
+            if single_time_selected and not keepdims:
+                data_list[item] = d
+            else:
+                data_list[item][i] = d
+
+        _read_item_time_steps(
+            open_file=lambda: DfsuFile.Open(self._filename),
+            filename=self._filename,
+            item_numbers=item_numbers,
+            time_steps=time_steps,
+            time_axis=self._time_axis,
+            deletevalue=deletevalue,
+            store=store,
+            error_bad_data=error_bad_data,
+            fill_bad_data_value=fill_bad_data_value,
+        )
 
         time = pd.to_datetime(t_seconds, unit="s", origin=self.start_time)
-
-        dfs.Close()
 
         if elements is not None and len(elements) == 1:
             # squeeze point data
@@ -454,7 +457,6 @@ class DfsuLayered:
                 geometry=geometry,
                 zn=data_list[0],
                 title=self.title,
-                validate=False,
                 dt=self.timestep,
             )
         else:
@@ -464,7 +466,6 @@ class DfsuLayered:
                 items=items,
                 geometry=geometry,
                 title=self.title,
-                validate=False,
                 dt=self.timestep,
             )
 
@@ -489,10 +490,13 @@ class DfsuLayered:
                         f"Item in dataset {item_s.name} does not match {item_o.name}"
                     )
 
-        dfs = DfsFileFactory.DfsuFileOpenAppend(str(self._filename), parameters=None)
-        write_dfsu_data(dfs=dfs, ds=ds, is_layered=ds.geometry.is_layered)
+        with _opened(
+            DfsFileFactory.DfsuFileOpenAppend(str(self._filename), parameters=None)
+        ) as dfs:
+            write_dfsu_data(dfs=dfs, ds=ds, is_layered=ds.geometry.is_layered)
         info = _get_dfsu_info(self._filename)
         self._n_timesteps = info.n_timesteps
+        self._time_axis = info.time_axis
 
 
 class Dfsu2DV(DfsuLayered):
@@ -542,8 +546,8 @@ class Dfsu2DV(DfsuLayered):
             values=values,
             zn=None,
             is_geo=g.is_geo,
-            cmin=cmin,
-            cmax=cmax,
+            vmin=cmin,
+            vmax=cmax,
             label=label,
             title=title,
             cmap=cmap,

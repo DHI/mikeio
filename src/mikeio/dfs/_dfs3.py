@@ -20,7 +20,9 @@ from .._version import __dfs_version__
 from ..dataset import Dataset
 from ._dfs import (
     _Dfs123,
-    _get_item_info,
+    _TimeAxisInfo,
+    _opened,
+    _select_items,
     _valid_item_numbers,
     _valid_timesteps,
     write_dfs_data,
@@ -33,8 +35,8 @@ from .._path import normalize_output_path, normalize_path
 
 
 def write_dfs3(filename: str | Path, ds: Dataset, title: str = "") -> None:
-    dfs = _write_dfs3_header(filename, ds, title)
-    write_dfs_data(dfs=dfs, ds=ds, n_spatial_dims=3)
+    with _opened(_write_dfs3_header(filename, ds, title)) as dfs:
+        write_dfs_data(dfs=dfs, ds=ds, n_spatial_dims=3)
 
 
 def _write_dfs3_header(filename: str | Path, ds: Dataset, title: str) -> DfsFile:
@@ -143,22 +145,19 @@ class Dfs3(_Dfs123):
         )
 
     def _read_dfs3_header(self, read_x0y0z0: bool = False) -> None:
-        self._dfs = DfsFileFactory.Dfs3FileOpen(self._filename)
+        with _opened(DfsFileFactory.Dfs3FileOpen(self._filename)) as dfs:
+            if read_x0y0z0:
+                self._x0 = dfs.SpatialAxis.X0
+                self._y0 = dfs.SpatialAxis.Y0
+                self._z0 = dfs.SpatialAxis.Z0
 
-        self._source = self._dfs
-
-        if read_x0y0z0:
-            self._x0 = self._dfs.SpatialAxis.X0
-            self._y0 = self._dfs.SpatialAxis.Y0
-            self._z0 = self._dfs.SpatialAxis.Z0
-
-        self._dx = self._dfs.SpatialAxis.Dx
-        self._dy = self._dfs.SpatialAxis.Dy
-        self._dz = self._dfs.SpatialAxis.Dz
-        self._nx = self._dfs.SpatialAxis.XCount
-        self._ny = self._dfs.SpatialAxis.YCount
-        self._nz = self._dfs.SpatialAxis.ZCount
-        self._title = self._dfs.FileInfo.FileTitle
+            self._dx = dfs.SpatialAxis.Dx
+            self._dy = dfs.SpatialAxis.Dy
+            self._dz = dfs.SpatialAxis.Dz
+            self._nx = dfs.SpatialAxis.XCount
+            self._ny = dfs.SpatialAxis.YCount
+            self._nz = dfs.SpatialAxis.ZCount
+            self._title = dfs.FileInfo.FileTitle
 
     def read(
         self,
@@ -208,20 +207,18 @@ class Dfs3(_Dfs123):
         # if keepdims is not False:
         #    return NotImplementedError("keepdims is not yet implemented for Dfs3")
 
-        dfs = DfsFileFactory.DfsGenericOpen(self._filename)
-
-        item_numbers = _valid_item_numbers(dfs.ItemInfo, items)
+        item_numbers = _valid_item_numbers([item.name for item in self.items], items)
         n_items = len(item_numbers)
 
         single_time_selected, time_steps = _valid_timesteps(
-            dfs.FileInfo, time_steps=time
+            self._time_axis, time_steps=time
         )
         nt = len(time_steps) if not single_time_selected else 1
 
         nz = self.geometry.nz
         ny = self.geometry.ny
         nx = self.geometry.nx
-        deleteValue = dfs.FileInfo.DeleteValueFloat
+        deleteValue = self.deletevalue
 
         data_list = []
 
@@ -248,35 +245,34 @@ class Dfs3(_Dfs123):
 
         t_seconds = np.zeros(nt, dtype=float)
 
-        for i, it in enumerate(tqdm(time_steps, disable=not _show_progress())):
-            for item in range(n_items):
-                itemdata = dfs.ReadItemTimeStep(item_numbers[item] + 1, int(it))
-                d = itemdata.Data
+        with _opened(DfsFileFactory.DfsGenericOpen(self._filename)) as dfs:
+            for i, it in enumerate(tqdm(time_steps, disable=not _show_progress())):
+                for item in range(n_items):
+                    itemdata = dfs.ReadItemTimeStep(item_numbers[item] + 1, int(it))
+                    d = itemdata.Data
 
-                d = d.reshape(nz, ny, nx)
-                d[d == deleteValue] = np.nan
+                    d = d.reshape(nz, ny, nx)
+                    d[d == deleteValue] = np.nan
 
-                if layers is None:
-                    dd = d
-                elif len(layers) == 1:
-                    if layers[0] == "bottom":
-                        dd = self._get_bottom_values(d)
+                    if layers is None:
+                        dd = d
+                    elif len(layers) == 1:
+                        if layers[0] == "bottom":
+                            dd = self._get_bottom_values(d)
+                        else:
+                            dd = d[layers[0], :, :]
                     else:
-                        dd = d[layers[0], :, :]
-                else:
-                    dd = d[layers, :, :]
+                        dd = d[layers, :, :]
 
-                if single_time_selected and not keepdims:
-                    data_list[item] = dd
-                else:
-                    data_list[item][i, ...] = dd
+                    if single_time_selected and not keepdims:
+                        data_list[item] = dd
+                    else:
+                        data_list[item][i, ...] = dd
 
-            t_seconds[i] = itemdata.Time
-
-        dfs.Close()
+                t_seconds[i] = itemdata.Time
 
         time = pd.to_datetime(t_seconds, unit="s", origin=self.start_time)
-        items = _get_item_info(dfs.ItemInfo, item_numbers)
+        items = _select_items(self.items, item_numbers)
         return Dataset.from_numpy(
             data_list,
             time=time,
@@ -284,7 +280,6 @@ class Dfs3(_Dfs123):
             geometry=geometry,
             title=self.title,
             custom_blocks=self.custom_blocks,
-            validate=False,
         )
 
     def append(self, ds: Dataset, validate: bool = True) -> None:
@@ -312,9 +307,10 @@ class Dfs3(_Dfs123):
                         f"Item in dataset {item_s.name} does not match {item_o.name}"
                     )
 
-        dfs = DfsFileFactory.Dfs3FileOpenAppend(str(self._filename))
-        write_dfs_data(dfs=dfs, ds=ds, n_spatial_dims=3)
-        self._n_timesteps = dfs.FileInfo.TimeAxis.NumberOfTimeSteps
+        with _opened(DfsFileFactory.Dfs3FileOpenAppend(str(self._filename))) as dfs:
+            write_dfs_data(dfs=dfs, ds=ds, n_spatial_dims=3)
+            self._n_timesteps = dfs.FileInfo.TimeAxis.NumberOfTimeSteps
+            self._time_axis = _TimeAxisInfo.from_mikecore(dfs.FileInfo.TimeAxis)
 
     @staticmethod
     def _get_bottom_values(data: np.ndarray) -> np.ndarray:

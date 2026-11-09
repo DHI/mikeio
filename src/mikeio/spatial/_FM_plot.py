@@ -13,6 +13,7 @@ from matplotlib.tri import Triangulation
 import numpy as np
 from scipy.sparse import csr_matrix
 
+from .._deprecation import _warn_deprecated
 from ._distance import relative_cumulative_distance
 
 if TYPE_CHECKING:
@@ -92,7 +93,7 @@ def _plot_map(
     vmin: float | None = None,
     vmax: float | None = None,
     levels: int | Sequence[float] | None = None,
-    n_refinements: int = 0,
+    n_refinements: int | None = None,
     show_mesh: bool = False,
     show_outline: bool = True,
     figsize: tuple[float, float] | None = None,
@@ -114,6 +115,14 @@ def _plot_map(
     if plot_type not in VALID_PLOT_TYPES:
         ok_list = ", ".join(VALID_PLOT_TYPES)
         raise Exception(f"plot_type {plot_type} unknown! ({ok_list})")
+
+    if n_refinements is not None:
+        _warn_deprecated(
+            "n_refinements is deprecated and will be removed in MIKE IO 4.0 "
+            "(see https://github.com/DHI/mikeio/issues/1106)."
+        )
+    else:
+        n_refinements = 0
 
     cmap = cmap or matplotlib.colormaps["viridis"]
 
@@ -240,8 +249,8 @@ def _set_colormap_levels(
     import matplotlib.cm as cm
     import matplotlib.colors as mplc
 
-    vmin = vmin or np.nanmin(z)
-    vmax = vmax or np.nanmax(z)
+    vmin = np.nanmin(z) if vmin is None else vmin
+    vmax = np.nanmax(z) if vmax is None else vmax
 
     if vmin == vmax:
         vmin = vmin - 0.1
@@ -536,6 +545,8 @@ def _plot_vertical_profile(
     values: np.ndarray,
     zn: np.ndarray | None = None,
     is_geo: bool = False,
+    vmin: float | None = None,
+    vmax: float | None = None,
     cmin: float | None = None,
     cmax: float | None = None,
     label: str = "",
@@ -569,11 +580,18 @@ def _plot_vertical_profile(
         cmap = "jet"
     pc = PolyCollection(verts, cmap=cmap)
 
-    if cmin is None:
-        cmin = np.nanmin(values)
-    if cmax is None:
-        cmax = np.nanmax(values)
-    pc.set_clim(cmin, cmax)
+    if cmin is not None or cmax is not None:
+        _warn_deprecated(
+            "cmin and cmax are deprecated and will be removed in MIKE IO 4.0. "
+            "Use vmin and vmax instead."
+        )
+        vmin = cmin if vmin is None else vmin
+        vmax = cmax if vmax is None else vmax
+    if vmin is None:
+        vmin = np.nanmin(values)
+    if vmax is None:
+        vmax = np.nanmax(values)
+    pc.set_clim(vmin, vmax)
 
     if add_colorbar:
         plt.colorbar(pc, ax=ax, label=label, orientation="vertical")

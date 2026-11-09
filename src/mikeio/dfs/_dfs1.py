@@ -16,7 +16,8 @@ from .._version import __dfs_version__
 from ..dataset import Dataset
 from ._dfs import (
     _Dfs123,
-    _get_item_info,
+    _opened,
+    _select_items,
     _valid_item_numbers,
     _valid_timesteps,
     write_dfs_data,
@@ -29,8 +30,8 @@ from .._path import normalize_output_path
 
 
 def write_dfs1(filename: str | Path, ds: Dataset, title: str = "") -> None:
-    dfs = _write_dfs1_header(filename, ds, title)
-    write_dfs_data(dfs=dfs, ds=ds, n_spatial_dims=1)
+    with _opened(_write_dfs1_header(filename, ds, title)) as dfs:
+        write_dfs_data(dfs=dfs, ds=ds, n_spatial_dims=1)
 
 
 def _write_dfs1_header(filename: str | Path, ds: Dataset, title: str) -> DfsFile:
@@ -91,11 +92,11 @@ class Dfs1(_Dfs123):
     def __init__(self, filename: str | Path) -> None:
         super().__init__(filename)
 
-        self._dfs = DfsFileFactory.Dfs1FileOpen(self._filename)
-        self._x0: float = self._dfs.SpatialAxis.X0
-        self._dx: float = self._dfs.SpatialAxis.Dx
-        self._nx: int = self._dfs.SpatialAxis.XCount
-        self._title: str = self._dfs.FileInfo.FileTitle
+        with _opened(DfsFileFactory.Dfs1FileOpen(self._filename)) as dfs:
+            self._x0: float = dfs.SpatialAxis.X0
+            self._dx: float = dfs.SpatialAxis.Dx
+            self._nx: int = dfs.SpatialAxis.XCount
+            self._title: str = dfs.FileInfo.FileTitle
 
         origin = self._longitude, self._latitude
         self._geometry = Grid1D(
@@ -106,9 +107,6 @@ class Dfs1(_Dfs123):
             origin=origin,
             orientation=self._orientation,
         )
-
-    def _open(self) -> None:
-        self._dfs = DfsFileFactory.Dfs1FileOpen(self._filename)
 
     def read(
         self,
@@ -145,12 +143,10 @@ class Dfs1(_Dfs123):
                 FutureWarning,
                 stacklevel=2,
             )
-        self._open()
-
-        item_numbers = _valid_item_numbers(self._dfs.ItemInfo, items)
+        item_numbers = _valid_item_numbers([item.name for item in self.items], items)
         n_items = len(item_numbers)
 
-        single_time_selected, time_steps = _valid_timesteps(self._dfs.FileInfo, time)
+        single_time_selected, time_steps = _valid_timesteps(self._time_axis, time)
         nt = len(time_steps) if not single_time_selected else 1
         shape: tuple[int, ...] = (nt, self.nx)
 
@@ -163,27 +159,26 @@ class Dfs1(_Dfs123):
 
         t_seconds = np.zeros(len(time_steps))
 
-        for i, it in enumerate(tqdm(time_steps, disable=not _show_progress())):
-            for item in range(n_items):
-                itemdata = self._dfs.ReadItemTimeStep(item_numbers[item] + 1, int(it))
+        with _opened(DfsFileFactory.Dfs1FileOpen(self._filename)) as dfs:
+            for i, it in enumerate(tqdm(time_steps, disable=not _show_progress())):
+                for item in range(n_items):
+                    itemdata = dfs.ReadItemTimeStep(item_numbers[item] + 1, int(it))
 
-                d = itemdata.Data
-                assert d.ndim == 1
+                    d = itemdata.Data
+                    assert d.ndim == 1
 
-                d[d == self.deletevalue] = np.nan
+                    d[d == self.deletevalue] = np.nan
 
-                if single_time_selected:
-                    data_list[item] = np.atleast_2d(d) if keepdims else d
-                else:
-                    data_list[item][i] = d
+                    if single_time_selected:
+                        data_list[item] = np.atleast_2d(d) if keepdims else d
+                    else:
+                        data_list[item][i] = d
 
-            t_seconds[i] = itemdata.Time
+                t_seconds[i] = itemdata.Time
 
         time = pd.to_datetime(t_seconds, unit="s", origin=self.start_time)
 
-        items = _get_item_info(self._dfs.ItemInfo, item_numbers)
-
-        self._dfs.Close()
+        items = _select_items(self.items, item_numbers)
 
         return Dataset.from_numpy(
             data=data_list,
@@ -192,7 +187,6 @@ class Dfs1(_Dfs123):
             geometry=self.geometry,
             title=self.title,
             custom_blocks=self.custom_blocks,
-            validate=False,
             dt=self._timestep,
         )
 

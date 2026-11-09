@@ -7,6 +7,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.axes import Axes
 
+from .._deprecation import _warn_deprecated, _warn_plot_type
 from ..spatial._FM_plot import _plot_map, _plot_vertical_profile
 
 from .._spectral import plot_2dspectrum, calc_Hm0_from_spectrum
@@ -218,6 +219,8 @@ class DataArrayPlotterGrid1D(DataArrayPlotter):
         self,
         ax: Axes | None = None,
         figsize: tuple[float, float] | None = None,
+        label: str | None = None,
+        add_colorbar: bool = True,
         **kwargs: Any,
     ) -> Axes:
         """Plot as 2d."""
@@ -227,7 +230,8 @@ class DataArrayPlotterGrid1D(DataArrayPlotter):
             )
         fig, ax = self._get_fig_ax(ax, figsize)
         pos = ax.imshow(self.da.values, **kwargs)
-        fig.colorbar(pos, ax=ax, label=self._label_txt())
+        if add_colorbar:
+            fig.colorbar(pos, ax=ax, label=label or self._label_txt())
         return ax
 
     def pcolormesh(
@@ -235,6 +239,8 @@ class DataArrayPlotterGrid1D(DataArrayPlotter):
         ax: Axes | None = None,
         figsize: tuple[float, float] | None = None,
         title: str | None = None,
+        label: str | None = None,
+        add_colorbar: bool = True,
         **kwargs: Any,
     ) -> Axes:
         """Plot multiple lines as 2d color plot."""
@@ -252,7 +258,8 @@ class DataArrayPlotterGrid1D(DataArrayPlotter):
             shading="nearest",
             **kwargs,
         )
-        _ = fig.colorbar(pos, label=self._label_txt())
+        if add_colorbar:
+            fig.colorbar(pos, label=label or self._label_txt())
         ax.set_xlabel(self.da.geometry.dims[0])
         ax.set_ylabel("time")
         return ax
@@ -328,6 +335,7 @@ class DataArrayPlotterGrid2D(DataArrayPlotter):
         figsize: tuple[float, float] | None = None,
         title: str | None = None,
         label: str | None = None,
+        add_colorbar: bool = True,
         **kwargs: Any,
     ) -> Axes:
         """Plot data as filled contours.
@@ -348,7 +356,8 @@ class DataArrayPlotterGrid2D(DataArrayPlotter):
         label = label if label is not None else self._label_txt()
 
         pos = ax.contourf(x, y, da.values, **kwargs)
-        fig.colorbar(pos, label=label, pad=0.01)
+        if add_colorbar:
+            fig.colorbar(pos, label=label, pad=0.01)
         self._set_aspect_and_labels(ax, self.da.geometry)
         if title is not None:
             ax.set_title(title)
@@ -360,6 +369,7 @@ class DataArrayPlotterGrid2D(DataArrayPlotter):
         figsize: tuple[float, float] | None = None,
         title: str | None = None,
         label: str | None = None,
+        add_colorbar: bool = True,
         **kwargs: Any,
     ) -> Axes:
         """Plot data as coloured patches.
@@ -380,7 +390,8 @@ class DataArrayPlotterGrid2D(DataArrayPlotter):
         label = label if label is not None else self._label_txt()
 
         pos = ax.pcolormesh(xn, yn, da.values, **kwargs)
-        fig.colorbar(pos, label=label, pad=0.01)
+        if add_colorbar:
+            fig.colorbar(pos, label=label, pad=0.01)
         self._set_aspect_and_labels(ax, self.da.geometry)
         if title is not None:
             ax.set_title(title)
@@ -429,8 +440,30 @@ class DataArrayPlotterFM(DataArrayPlotter):
         figsize: tuple[float, float] | None = None,
         **kwargs: Any,
     ) -> Axes:
-        """Plot data as coloured patches."""
+        """Plot data as coloured patches, one per element."""
+        if kwargs.get("plot_type") is not None:
+            _warn_plot_type(kwargs["plot_type"])
         ax = self._get_ax(ax, figsize)
+        return self._plot_FM_map(ax, **kwargs)
+
+    def pcolormesh(
+        self,
+        ax: Axes | None = None,
+        figsize: tuple[float, float] | None = None,
+        **kwargs: Any,
+    ) -> Axes:
+        """Plot data as coloured patches, one per element.
+
+        Examples
+        --------
+        ```{python}
+        da = mikeio.read("../data/HD2D.dfsu")["Surface elevation"]
+        da.plot.pcolormesh()
+        ```
+
+        """
+        ax = self._get_ax(ax, figsize)
+        kwargs["plot_type"] = "patch"
         return self._plot_FM_map(ax, **kwargs)
 
     def patch(
@@ -439,19 +472,12 @@ class DataArrayPlotterFM(DataArrayPlotter):
         figsize: tuple[float, float] | None = None,
         **kwargs: Any,
     ) -> Axes:
-        """Plot data as coloured patches.
-
-        Examples
-        --------
-        ```{python}
-        da = mikeio.read("../data/HD2D.dfsu")["Surface elevation"]
-        da.plot.patch()
-        ```
-
-        """
-        ax = self._get_ax(ax, figsize)
-        kwargs["plot_type"] = "patch"
-        return self._plot_FM_map(ax, **kwargs)
+        """Plot data as coloured patches (deprecated, use pcolormesh)."""
+        _warn_deprecated(
+            "patch() is deprecated and will be removed in MIKE IO 4.0. "
+            "Use pcolormesh() instead."
+        )
+        return self.pcolormesh(ax, figsize, **kwargs)
 
     def contour(
         self,
@@ -644,6 +670,8 @@ class DataArrayPlotterFMVerticalColumn(DataArrayPlotter):
         ax: Axes | None = None,
         figsize: tuple[float, float] | None = None,
         title: str | None = None,
+        label: str | None = None,
+        add_colorbar: bool = True,
         **kwargs: Any,
     ) -> Axes:
         """Plot data as coloured patches."""
@@ -656,7 +684,8 @@ class DataArrayPlotterFMVerticalColumn(DataArrayPlotter):
             shading="nearest",
             **kwargs,
         )
-        fig.colorbar(pos, label=self._label_txt())
+        if add_colorbar:
+            fig.colorbar(pos, label=label or self._label_txt())
         ax.set_xlabel("time")
         fig.autofmt_xdate()
         ax.set_ylabel("z (static)")
@@ -718,7 +747,8 @@ class DataArrayPlotterPointSpectrum(DataArrayPlotter):
         figsize: tuple[float, float] | None = None,
         **kwargs: Any,
     ) -> Axes:
-        # ax = self._get_ax(ax, figsize)
+        if kwargs.get("plot_type") is not None:
+            _warn_plot_type(kwargs["plot_type"])
         if self.da.geometry.n_frequencies > 0 and self.da.geometry.n_directions > 0:
             return self._plot_2dspectrum(figsize=figsize, **kwargs)
         elif self.da.geometry.n_frequencies == 0:
@@ -728,10 +758,18 @@ class DataArrayPlotterPointSpectrum(DataArrayPlotter):
         else:
             raise ValueError("Spectrum could not be plotted")
 
-    def patch(self, **kwargs: Any) -> Axes:
-        """Plot the 2d spectrum as colored patches."""
+    def pcolormesh(self, **kwargs: Any) -> Axes:
+        """Plot the 2d spectrum as coloured patches."""
         kwargs["plot_type"] = "patch"
         return self._plot_2dspectrum(**kwargs)
+
+    def patch(self, **kwargs: Any) -> Axes:
+        """Plot the 2d spectrum as coloured patches (deprecated, use pcolormesh)."""
+        _warn_deprecated(
+            "patch() is deprecated and will be removed in MIKE IO 4.0. "
+            "Use pcolormesh() instead."
+        )
+        return self.pcolormesh(**kwargs)
 
     def contour(self, **kwargs: Any) -> Axes:
         """Plot the 2d spectrum as contour lines."""

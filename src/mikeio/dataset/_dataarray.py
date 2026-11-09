@@ -55,6 +55,7 @@ from ..spatial import (
 )
 
 # We need this type to know if we should keep zn
+from ..spatial._FM_geometry import Area
 from ..spatial._FM_geometry_layered import GeometryFMLayered
 
 from ._z_accessor import NullZAccessor, ZAccessor
@@ -242,24 +243,19 @@ class DataArray:
                 raise ValueError("zn can only be provided for layered dfsu data")
         return zn
 
-    def _is_compatible(self, other: DataArray) -> bool:
-        """check if other DataArray has equivalent dimensions, time and geometry."""
+    def _is_compatible(self, other: DataArray) -> None:
+        """Check that other DataArray has equivalent dimensions, time and geometry."""
         problems = []
-        assert isinstance(other, DataArray)
         if self.shape != other.shape:
             problems.append("shape of data must be the same")
-        if self.n_timesteps != other.n_timesteps:
-            problems.append("Number of timesteps must be the same")
-        if self.start_time != other.start_time:
+        if self.time[0] != other.time[0]:
             problems.append("start_time must be the same")
-        if not isinstance(self.geometry, other.geometry.__class__):
+        if not isinstance(other.geometry, self.geometry.__class__):
             problems.append("The type of geometry must be the same")
-        if hasattr(self.geometry, "__eq__"):
-            if not (self.geometry == self.geometry):
+        elif type(self.geometry).__eq__ is not object.__eq__:
+            if self.geometry != other.geometry:
                 problems.append("The geometries must be the same")
         if self._zn is not None:
-            # it can be expensive to check equality of zn
-            # so we test only size, first and last element
             if (
                 other._zn is None
                 or self._zn.shape != other._zn.shape
@@ -267,14 +263,11 @@ class DataArray:
                 or self._zn.ravel()[-1] != other._zn.ravel()[-1]
             ):
                 problems.append("zn must be the same")
-
         if self.dims != other.dims:
-            problems.append("Dimension names (dims) must be the same")
+            problems.append("dims must be the same")
 
-        if len(problems) > 0:
+        if problems:
             raise ValueError(", ".join(problems))
-
-        return len(problems) == 0
 
     def _get_plotter_by_geometry(self) -> Any:
         # TODO: this is explicit, but with consistent naming, we could create this mapping automatically
@@ -801,7 +794,7 @@ class DataArray:
         y: float | slice | None = None,
         z: float | slice | None = None,
         coords: np.ndarray | None = None,
-        area: tuple[float, float, float, float] | None = None,
+        area: Area | None = None,
         layers: int | str | Sequence[int | str] | None = None,
     ) -> DataArray:
         """Return a new DataArray whose data is given by
@@ -834,9 +827,12 @@ class DataArray:
             the argument coords can be used instead.
             (x,y)- or (x,y,z)-coordinates of point to be selected,
             by default None
-        area : (float, float, float, float), optional
-            Bounding box of coordinates (left lower and right upper)
-            to be selected, by default None
+        area : bbox, polygon or shapely geometry, optional
+            Area to be selected: a bounding box (left, lower, right, upper),
+            a list of (x, y) polygon vertices, or (flexible mesh only) a
+            Polygon or MultiPolygon with `__geo_interface__`, e.g. from shapely
+            or geopandas, holes excluded. Elements are selected when their centre is inside the area or on its boundary.
+            By default None
         layers : int or str or list, optional
             layer(s) to be selected: "top", "bottom" or layer number
             from bottom 0,1,2,... or from the top -1,-2,... or as
@@ -1890,7 +1886,7 @@ class DataArray:
                 qd.name = newname
                 res.append(qd)
 
-            return Dataset(data=res, validate=False)
+            return Dataset(data=res)
 
     # ============= MATH operations ===========
 

@@ -36,10 +36,11 @@ Plotting a point spectrum gives a polar plot of the first time step:
 da.plot();
 ```
 
-`plot.patch` takes the same arguments and returns the axes, so the plot can be adjusted — here the radial limit is capped and the spokes labelled with the actual direction values:
+`plot.pcolormesh` takes the same arguments and returns the matplotlib axes, so the plot can be adjusted with matplotlib — here the radial limit is capped and the spokes labelled with the actual direction values:
 
 ```{python}
-ax = da.plot.patch(rmax=8)
+ax = da.plot.pcolormesh()
+ax.set_rmax(8)
 dird = np.round(da.geometry.directions, 2)
 ax.set_thetagrids(dird, labels=dird);
 ```
@@ -55,7 +56,8 @@ da.dims
 
 ```{python}
 spec = da[0].isel(node=3)
-spec.plot(cmap="Greys", rmax=8, r_as_periods=True);
+ax = spec.plot(cmap="Greys", r_as_periods=True)
+ax.set_rmax(8);
 ```
 
 `r_as_periods=True` labels the radial axis with wave periods rather than frequencies.
@@ -79,7 +81,8 @@ Selecting a position with `sel` gives back the spectrum there, which plots as a 
 
 ```{python}
 da_pt = da.sel(x=2.9, y=52.5)
-da_pt.plot(rmax=9);
+ax = da_pt.plot()
+ax.set_rmax(9);
 ```
 
 ## Directional sectors
@@ -88,7 +91,8 @@ MIKE 21 SW can discretise directions over a sector rather than the full circle. 
 
 ```{python}
 da = mikeio.read("../data/spectra/MIKE21SW_dir_sector_area_spectra.dfsu", time=0)["Energy density"]
-da.isel(element=0).plot(rmax=10, vmin=0);
+ax = da.isel(element=0).plot(vmin=0)
+ax.set_rmax(10);
 ```
 
 ## Frequency and direction spectra

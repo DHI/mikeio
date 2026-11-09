@@ -22,8 +22,11 @@ from mikeio.spatial._distance import xy_to_bbox
 from .._version import __dfs_version__
 from ..dataset import Dataset
 from ..dfs._dfs import (
+    _TimeAxisInfo,
     _get_item_info,
-    _read_item_time_step,
+    _opened,
+    _read_item_time_steps,
+    _select_items,
     _valid_item_numbers,
     _valid_timesteps,
 )
@@ -108,9 +111,8 @@ def write_dfsu(filename: str | Path, data: Dataset, title: str = "") -> None:
     builder.FileTitle = title
     builder.ApplicationTitle = "mikeio"
     builder.ApplicationVersion = __dfs_version__
-    dfs = builder.CreateFile(filename)
-
-    write_dfsu_data(dfs, data, geometry.is_layered)
+    with _opened(builder.CreateFile(filename)) as dfs:
+        write_dfsu_data(dfs, data, geometry.is_layered)
 
 
 def write_dfsu_data(dfs: DfsuFile, ds: Dataset, is_layered: bool) -> None:
@@ -143,7 +145,6 @@ def write_dfsu_data(dfs: DfsuFile, ds: Dataset, is_layered: bool) -> None:
                 d = d.reshape(-1)
 
             dfs.WriteItemTimeStepNext(t_rel[i], d.astype(np.float32))
-    dfs.Close()
 
 
 def _validate_elements_and_geometry_sel(elements: Any, **kwargs: Any) -> None:
@@ -168,6 +169,7 @@ class _DfsuInfo:
     items: list[ItemInfo]
     deletevalue: float
     title: str
+    time_axis: _TimeAxisInfo
 
 
 def _get_dfsu_info(filename: str | Path) -> _DfsuInfo:
@@ -175,26 +177,20 @@ def _get_dfsu_info(filename: str | Path) -> _DfsuInfo:
     path = Path(filename)
     if not path.exists():
         raise FileNotFoundError(f"file {path} does not exist!")
-    dfs = DfsuFile.Open(filename)
-    type = DfsuFileType(dfs.DfsuFileType)
-    deletevalue = dfs.DeleteValueFloat
-
-    timestep = dfs.TimeStepInSeconds
-    items = _get_item_info(dfs.ItemInfo)
-    equidistant = dfs.FileInfo.TimeAxis.TimeAxisType == TimeAxisType.CalendarEquidistant
-    title = dfs.FileInfo.FileTitle
-    dfs.Close()
-    return _DfsuInfo(
-        filename=filename,
-        type=type,
-        timestep=timestep,
-        equidistant=equidistant,
-        n_timesteps=dfs.NumberOfTimeSteps,
-        items=items,
-        start_time=dfs.FileInfo.TimeAxis.StartDateTime,
-        deletevalue=deletevalue,
-        title=title,
-    )
+    with _opened(DfsuFile.Open(filename)) as dfs:
+        time_axis = dfs.FileInfo.TimeAxis
+        return _DfsuInfo(
+            filename=filename,
+            type=DfsuFileType(dfs.DfsuFileType),
+            timestep=dfs.TimeStepInSeconds,
+            equidistant=time_axis.TimeAxisType == TimeAxisType.CalendarEquidistant,
+            n_timesteps=dfs.NumberOfTimeSteps,
+            items=_get_item_info(dfs.ItemInfo),
+            start_time=time_axis.StartDateTime,
+            deletevalue=dfs.DeleteValueFloat,
+            title=dfs.FileInfo.FileTitle,
+            time_axis=_TimeAxisInfo.from_mikecore(time_axis),
+        )
 
 
 class Dfsu2DH:
@@ -218,6 +214,7 @@ class Dfsu2DH:
         self._n_timesteps = info.n_timesteps
         self._items = info.items
         self._title = info.title
+        self._time_axis = info.time_axis
         self._geometry = self._read_geometry(self._filename)
 
     def __repr__(self) -> str:
@@ -302,23 +299,22 @@ class Dfsu2DH:
 
     @staticmethod
     def _read_geometry(filename: str) -> GeometryFM2D:
-        dfs = DfsuFile.Open(filename)
-        dfsu_type = DfsuFileType(dfs.DfsuFileType)
+        with _opened(DfsuFile.Open(filename)) as dfs:
+            dfsu_type = DfsuFileType(dfs.DfsuFileType)
 
-        node_table = get_nodes_from_source(dfs)
-        el_table = get_elements_from_source(dfs)
+            node_table = get_nodes_from_source(dfs)
+            el_table = get_elements_from_source(dfs)
 
-        geometry = GeometryFM2D(
-            node_coordinates=node_table.coordinates,
-            element_table=el_table.connectivity,
-            codes=node_table.codes,
-            projection=dfs.Projection.WKTString,
-            dfsu_type=dfsu_type,
-            element_ids=el_table.ids,
-            node_ids=node_table.ids,
-            validate=False,
-        )
-        dfs.Close()
+            geometry = GeometryFM2D(
+                node_coordinates=node_table.coordinates,
+                element_table=el_table.connectivity,
+                codes=node_table.codes,
+                projection=dfs.Projection.WKTString,
+                dfsu_type=dfsu_type,
+                element_ids=el_table.ids,
+                node_ids=node_table.ids,
+                validate=False,
+            )
         return geometry
 
     @overload
@@ -400,10 +396,12 @@ class Dfsu2DH:
         keepdims: bool, optional
             When reading a single time step only, should the time-dimension be kept
             in the returned Dataset? by default: False
-        area: list[float], optional
+        area: bbox, polygon or shapely geometry, optional
             Read only data inside (horizontal) area given as a
-            bounding box (tuple with left, lower, right, upper)
-            or as list of coordinates for a polygon, by default None
+            bounding box (tuple with left, lower, right, upper),
+            as list of coordinates for a polygon, or as a Polygon or
+            MultiPolygon with `__geo_interface__` (e.g. shapely), by default None.
+            Elements are selected when their centre is inside the area or on its boundary.
         x, y: float or list[float], optional
             Read only data for elements containing the (x,y) points(s),
             by default None
@@ -433,9 +431,7 @@ class Dfsu2DH:
                 FutureWarning,
                 stacklevel=2,
             )
-        dfs = DfsuFile.Open(self._filename)
-
-        single_time_selected, time_steps = _valid_timesteps(dfs, time)
+        single_time_selected, time_steps = _valid_timesteps(self._time_axis, time)
 
         _validate_elements_and_geometry_sel(elements, area=area, x=x, y=y)
         if area is not None:
@@ -452,7 +448,7 @@ class Dfsu2DH:
             n_elems = len(elements)
             geometry = self.geometry.elements_to_geometry(elements)
 
-        item_numbers = _valid_item_numbers(dfs.ItemInfo, items)
+        item_numbers = _valid_item_numbers([item.name for item in self.items], items)
         n_items = len(item_numbers)
 
         t_rel = np.zeros(len(time_steps))
@@ -467,35 +463,35 @@ class Dfsu2DH:
             np.ndarray(shape=shape, dtype=dtype) for _ in range(n_items)
         ]
 
-        for i in trange(n_steps, disable=not _show_progress()):
-            for item in range(n_items):
-                dfs, d, t_rel[i] = _read_item_time_step(
-                    dfs=dfs,
-                    filename=self._filename,
-                    item_numbers=item_numbers,
-                    deletevalue=self.deletevalue,
-                    item=item,
-                    it=time_steps[i],
-                    error_bad_data=error_bad_data,
-                    fill_bad_data_value=fill_bad_data_value,
-                )
+        def store(i: int, item: int, d: np.ndarray, t: float) -> None:
+            t_rel[i] = t
 
-                if elements is not None:
-                    d = d[elements]
+            if elements is not None:
+                d = d[elements]
 
-                if single_time_selected and not keepdims:
-                    data_list[item] = d
-                else:
-                    data_list[item][i] = d
+            if single_time_selected and not keepdims:
+                data_list[item] = d
+            else:
+                data_list[item][i] = d
 
-        dfs.Close()
+        _read_item_time_steps(
+            open_file=lambda: DfsuFile.Open(self._filename),
+            filename=self._filename,
+            item_numbers=item_numbers,
+            time_steps=time_steps,
+            time_axis=self._time_axis,
+            deletevalue=self.deletevalue,
+            store=store,
+            error_bad_data=error_bad_data,
+            fill_bad_data_value=fill_bad_data_value,
+        )
 
         if elements is not None and len(elements) == 1:
             # squeeze point data
             data_list = [np.squeeze(d, axis=-1) for d in data_list]
 
         time = pd.to_datetime(t_rel, unit="s", origin=self.start_time)
-        item_infos = _get_item_info(dfs.ItemInfo, item_numbers)
+        item_infos = _select_items(self.items, item_numbers)
 
         return Dataset.from_numpy(
             data_list,
@@ -503,7 +499,6 @@ class Dfsu2DH:
             items=item_infos,
             geometry=geometry,
             title=self.title,
-            validate=False,
             dt=self.timestep,
         )
 
@@ -528,10 +523,13 @@ class Dfsu2DH:
                         f"Item in dataset {item_s.name} does not match {item_o.name}"
                     )
 
-        dfs = DfsFileFactory.DfsuFileOpenAppend(str(self._filename), parameters=None)
-        write_dfsu_data(dfs=dfs, ds=ds, is_layered=False)
+        with _opened(
+            DfsFileFactory.DfsuFileOpenAppend(str(self._filename), parameters=None)
+        ) as dfs:
+            write_dfsu_data(dfs=dfs, ds=ds, is_layered=False)
         info = _get_dfsu_info(self._filename)
         self._n_timesteps = info.n_timesteps
+        self._time_axis = info.time_axis
 
     def get_overset_grid(
         self,
@@ -580,8 +578,8 @@ class Dfsu2DH:
     def _dfs_read_item_time_func(
         self, item: int, step: int
     ) -> tuple[np.ndarray, pd.Timestamp]:
-        dfs = DfsuFile.Open(self._filename)
-        itemdata = dfs.ReadItemTimeStep(item + 1, step)
+        with _opened(DfsuFile.Open(self._filename)) as dfs:
+            itemdata = dfs.ReadItemTimeStep(item + 1, step)
 
         return itemdata.Data, itemdata.Time
 
@@ -626,11 +624,9 @@ class Dfsu2DH:
         ```
 
         """
-        dfs = DfsuFile.Open(self._filename)
-
-        item_numbers = _valid_item_numbers(dfs.ItemInfo, items)
-        items = _get_item_info(dfs.ItemInfo, item_numbers)
-        _, time_steps = _valid_timesteps(dfs, time_steps=None)
+        item_numbers = _valid_item_numbers([item.name for item in self.items], items)
+        items = _select_items(self.items, item_numbers)
+        _, time_steps = _valid_timesteps(self._time_axis, time_steps=None)
 
         res = _extract_track(
             deletevalue=self.deletevalue,
@@ -647,5 +643,4 @@ class Dfsu2DH:
             dtype=dtype,
             data_read_func=self._dfs_read_item_time_func,
         )
-        dfs.Close()
         return res

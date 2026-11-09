@@ -127,7 +127,7 @@ def test_write_1d(da2: DataArray, tmp_path: Path) -> None:
 def test_dataset_with_asterisk(da2: DataArray) -> None:
     da2.name = "Foo * Bar"
 
-    ds1 = mikeio.Dataset([da2], validate=False)
+    ds1 = mikeio.Dataset([da2])
 
     assert ds1[0].name == "Foo * Bar"
 
@@ -737,6 +737,21 @@ def test_plot_grid1d(da2: DataArray) -> None:
 
 def test_plot_grid2d_proj(da_grid2d_proj: DataArray) -> None:
     da_grid2d_proj.plot()
+
+
+def test_plot_grid_add_colorbar(da2: DataArray, da_grid2d_proj: DataArray) -> None:
+    plots = [
+        da2.plot.imshow,
+        da2.plot.pcolormesh,
+        da_grid2d_proj.plot.pcolormesh,
+        da_grid2d_proj.plot.contourf,
+    ]
+    for plot in plots:
+        ax = plot()
+        assert len(ax.figure.axes) == 2  # data axes + colorbar
+        ax = plot(add_colorbar=False)
+        assert len(ax.figure.axes) == 1
+    plt.close("all")
 
 
 def test_timestep(da1: DataArray) -> None:

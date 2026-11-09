@@ -11,7 +11,7 @@ import numpy as np
 from mikecore.DfsuFile import DfsuFileType
 
 
-from ._FM_geometry import GeometryFM2D, _GeometryFM, _points_in_area
+from ._FM_geometry import Area, GeometryFM2D, _GeometryFM, _points_in_area
 from ._geometry import GeometryPoint3D
 
 from ._FM_plot import _plot_vertical_profile, BoundaryPolygons
@@ -22,8 +22,6 @@ if TYPE_CHECKING:
     from numpy.typing import ArrayLike
 
 Layer = Literal["all", "bottom", "top"]
-
-Area = Sequence[float] | Sequence[tuple[float, float]]
 
 
 class _Layering:
@@ -586,9 +584,12 @@ class GeometryFM3D(_GeometryFM):
             As an alternative to specifying x, y (and z) individually,
             the argument coords can be used instead,
             by default None
-        area : (float, float, float, float), optional
-            Bounding box of coordinates (left lower and right upper)
-            or polygon to be selected, by default None
+        area : bbox, polygon or shapely geometry, optional
+            Area to be selected: a bounding box (left, lower, right, upper),
+            a list of (x, y) polygon vertices, or a
+            Polygon or MultiPolygon with `__geo_interface__`, e.g. from shapely
+            or geopandas, holes excluded. Elements are selected when their centre is inside the area or on its boundary.
+            By default None
         layers : int or str or list[int], optional
             layer(s) to be selected: subset of "all", "top", "bottom",
             "bottom+1", ..., or a layer number (0=bottom, 1, 2, ...),
@@ -835,10 +836,12 @@ class GeometryFMVerticalProfile(_GeometryFM):
             As an alternative to specifying x, y (and z) individually,
             the argument coords can be used instead,
             by default None
-        area : (float, float, float, float), optional
-            Bounding box of coordinates (left lower and right upper)
-            or polygon; selects the columns positioned inside it,
-            by default None
+        area : bbox, polygon or shapely geometry, optional
+            Area to be selected: a bounding box (left, lower, right, upper),
+            a list of (x, y) polygon vertices, or a
+            Polygon or MultiPolygon with `__geo_interface__`, holes excluded;
+            selects the columns whose centre is inside the area or on its
+            boundary, by default None
         layers : int or str or list[int], optional
             layer(s) to be selected: subset of "all", "top", "bottom",
             "bottom+1", ..., or a layer number (0=bottom, 1, 2, ...),
@@ -1166,8 +1169,8 @@ class GeometryFMVerticalProfilePlotter:
             title=title,
             add_colorbar=False,
             edge_color=edge_color,
-            cmin=0.0,
-            cmax=1.0,
+            vmin=0.0,
+            vmax=1.0,
             **kwargs,
         )
 

@@ -1,19 +1,20 @@
 from __future__ import annotations
-from collections.abc import Iterable
+from collections.abc import Callable, Iterable, Iterator
+from contextlib import contextmanager
+from copy import deepcopy
 from pathlib import Path
 import warnings
 from dataclasses import dataclass
 from datetime import datetime
-from typing import Any, Sequence
+from typing import Any, Protocol, Sequence, TypeVar
 import numpy as np
 from numpy.typing import NDArray
 import pandas as pd
-from tqdm import trange
+from tqdm import tqdm, trange
 
 from mikecore.DfsFile import (
     DfsDynamicItemInfo,
     DfsFile,
-    DfsFileInfo,
     TimeAxisType,
 )
 from mikecore.DfsFileFactory import DfsFileFactory
@@ -28,6 +29,85 @@ from .._options import _item_txt, _show_progress
 from .._path import normalize_path
 
 
+class _Closable(Protocol):
+    def Close(self) -> None: ...
+
+
+_H = TypeVar("_H", bound=_Closable)
+
+
+@contextmanager
+def _opened(handle: _H) -> Iterator[_H]:
+    """Yield a mikecore file handle and close it on every exit path.
+
+    mikecore's DfsFile and DfsuFile are not context managers themselves. Every
+    native handle MIKE IO opens or creates - read, edit, append or a newly
+    built file - is held through this, so none outlives the call that opened
+    it, whether the call returns, raises or is interrupted.
+    """
+    try:
+        yield handle
+    finally:
+        handle.Close()
+
+
+@dataclass(frozen=True)
+class _TimeAxisInfo:
+    """The values of a file's temporal axis that MIKE IO reads after the header.
+
+    Copied out of the file once, inside the block that holds its handle, so
+    time selections can be validated and time properties answered without
+    opening the file again.
+    """
+
+    axis_type: TimeAxisType
+    n_timesteps: int
+    start_time_offset: float
+    start_datetime: datetime | None
+    """Calendar axes only."""
+    time_step: float | None
+    """Equidistant axes only, in the axis' own time unit."""
+    time_step_seconds: float | None
+    """Equidistant axes only."""
+    time_span: float | None
+    """Non-equidistant axes only, in the axis' own time unit."""
+
+    @staticmethod
+    def from_mikecore(time_axis: Any) -> _TimeAxisInfo:
+        """Copy the values from a mikecore temporal axis of an open file."""
+        axis_type = TimeAxisType(time_axis.TimeAxisType)
+        is_calendar = axis_type in (
+            TimeAxisType.CalendarEquidistant,
+            TimeAxisType.CalendarNonEquidistant,
+        )
+        is_equidistant = axis_type in (
+            TimeAxisType.CalendarEquidistant,
+            TimeAxisType.TimeEquidistant,
+        )
+        is_non_equidistant = axis_type in (
+            TimeAxisType.CalendarNonEquidistant,
+            TimeAxisType.TimeNonEquidistant,
+        )
+        return _TimeAxisInfo(
+            axis_type=axis_type,
+            n_timesteps=time_axis.NumberOfTimeSteps,
+            start_time_offset=time_axis.StartTimeOffset,
+            start_datetime=time_axis.StartDateTime if is_calendar else None,
+            time_step=time_axis.TimeStep if is_equidistant else None,
+            time_step_seconds=(
+                time_axis.TimeStepInSeconds() if is_equidistant else None
+            ),
+            time_span=time_axis.TimeSpan if is_non_equidistant else None,
+        )
+
+    @property
+    def is_equidistant(self) -> bool:
+        return self.axis_type in (
+            TimeAxisType.CalendarEquidistant,
+            TimeAxisType.TimeEquidistant,
+        )
+
+
 @dataclass
 class DfsHeader:
     n_items: int
@@ -38,51 +118,84 @@ class DfsHeader:
     items: list[ItemInfo]
 
 
-def _read_item_time_step(
+def _read_item_time_steps(
     *,
-    dfs: DfsFile,
+    open_file: Callable[[], Any],
     filename: str,
     item_numbers: list[int],
+    time_steps: Sequence[int],
+    time_axis: _TimeAxisInfo,
     deletevalue: float,
-    item: int,
-    it: int,
+    store: Callable[[int, int, np.ndarray, float], None],
     error_bad_data: bool = True,
     fill_bad_data_value: float = np.nan,
-) -> tuple[DfsFile, np.ndarray, float]:
-    item_number = item_numbers[item] + 1
-    itemdata = dfs.ReadItemTimeStep(item_number, it)
-    if itemdata is not None:
-        d = itemdata.Data
-        d[d == deletevalue] = np.nan
-        return dfs, d, itemdata.Time
+) -> None:
+    """Read every selected item at every selected timestep, in file order.
 
+    Calls store(i, item, data, time) for each read, with i indexing
+    time_steps and item indexing item_numbers. A corrupt timestep raises, or
+    with error_bad_data=False is filled with fill_bad_data_value; a failed
+    read leaves the handle unusable, so its block is closed and the remaining
+    reads continue from a freshly opened handle.
+    """
+    reads = [
+        (i, item) for i in range(len(time_steps)) for item in range(len(item_numbers))
+    ]
+    last_item = len(item_numbers) - 1
+    next_read = 0
+    with tqdm(total=len(time_steps), disable=not _show_progress()) as progress:
+        while next_read < len(reads):
+            with _opened(open_file()) as dfs:
+                for i, item in reads[next_read:]:
+                    next_read += 1
+                    it = time_steps[i]
+                    item_number = item_numbers[item] + 1
+                    itemdata = dfs.ReadItemTimeStep(item_number, it)
+                    if itemdata is not None:
+                        d = itemdata.Data
+                        d[d == deletevalue] = np.nan
+                        t = itemdata.Time
+                    else:
+                        t = _corrupt_time(
+                            filename, item_number, it, time_axis, error_bad_data
+                        )
+                        n = dfs.ItemInfo[item_number - 1].ElementCount
+                        d = np.full(n, fill_bad_data_value)
+                    store(i, item, d, t)
+                    if item == last_item:
+                        progress.update()
+                    if itemdata is None:
+                        break  # reopen before reading on
+
+
+def _corrupt_time(
+    filename: str,
+    item_number: int,
+    it: int,
+    time_axis: _TimeAxisInfo,
+    error_bad_data: bool,
+) -> float:
+    """Raise for a corrupt timestep, or warn and return the time it should have."""
     message = f"Error reading item {item_number}, timestep {it} in {filename}"
     if error_bad_data:
         raise ValueError(message)
 
     # A failed read returns no time, so it can only be derived on an equidistant axis
-    time_axis = dfs.FileInfo.TimeAxis
-    if time_axis.TimeAxisType not in (
-        TimeAxisType.CalendarEquidistant,
-        TimeAxisType.TimeEquidistant,
-    ):
+    if not time_axis.is_equidistant:
         raise ValueError(
             f"{message}; a corrupt timestep has no known time on a non-equidistant axis"
         )
+    assert time_axis.time_step is not None
     warnings.warn(message)
-    t = time_axis.StartTimeOffset + it * time_axis.TimeStep
-    d = np.full(dfs.ItemInfo[item_number - 1].ElementCount, fill_bad_data_value)
-    dfs.Close()
-    dfs = DfsFileFactory.DfsGenericOpen(filename)
-    return dfs, d, t
+    return time_axis.start_time_offset + it * time_axis.time_step
 
 
 def _fuzzy_item_search(
-    *, dfsItemInfo: list[DfsDynamicItemInfo], search: str, start_idx: int = 0
+    *, item_names: Sequence[str], search: str, start_idx: int = 0
 ) -> list[int]:
     import fnmatch
 
-    names = [info.Name for info in dfsItemInfo]
+    names = list(item_names)
     item_numbers = [
         i - start_idx for i, name in enumerate(names) if fnmatch.fnmatch(name, search)
     ]
@@ -92,12 +205,13 @@ def _fuzzy_item_search(
 
 
 def _valid_item_numbers(
-    dfsItemInfo: list[DfsDynamicItemInfo],
+    item_names: Sequence[str],
     items: str | int | np.integer | Sequence[int | str] | None = None,
     ignore_first: bool = False,
 ) -> list[int]:
+    """Validate an item selection against the names of a file's items, in order."""
     start_idx = 1 if ignore_first else 0
-    n_items_file = len(dfsItemInfo) - start_idx
+    n_items_file = len(item_names) - start_idx
     if items is None:
         return list(range(n_items_file))
 
@@ -109,10 +223,10 @@ def _valid_item_numbers(
     if isinstance(items, (int, np.integer, str)):
         if isinstance(items, str) and "*" in items:
             return _fuzzy_item_search(
-                dfsItemInfo=dfsItemInfo, search=items, start_idx=start_idx
+                item_names=item_names, search=items, start_idx=start_idx
             )
         elif isinstance(items, str):
-            item_number = _item_numbers_by_name(dfsItemInfo, [items], ignore_first)[0]
+            item_number = _item_numbers_by_name(item_names, [items], ignore_first)[0]
             return [item_number]
         else:
             if (items < 0) or (items >= n_items_file):
@@ -123,7 +237,7 @@ def _valid_item_numbers(
         raise ItemsError(n_items_file)  # type: ignore[unreachable]
     for item in items:
         if isinstance(item, str):
-            item_number = _item_numbers_by_name(dfsItemInfo, [item], ignore_first)[0]
+            item_number = _item_numbers_by_name(item_names, [item], ignore_first)[0]
         elif isinstance(item, (int, np.integer)):
             if (item < 0) or (item >= n_items_file):
                 raise ItemsError(n_items_file)
@@ -139,27 +253,25 @@ def _valid_item_numbers(
 
 
 def _valid_timesteps(
-    dfsFileInfo: DfsFileInfo, time_steps: int | Sequence[int] | str | slice | None
+    time_axis: _TimeAxisInfo, time_steps: int | Sequence[int] | str | slice | None
 ) -> tuple[bool, list[int]]:
-    time_axis = dfsFileInfo.TimeAxis
-
+    """Validate a time selection against a file's temporal axis, before opening it."""
     single_time_selected = False
     if isinstance(time_steps, (int, datetime)):
         single_time_selected = True
 
-    nt = time_axis.NumberOfTimeSteps
+    nt = time_axis.n_timesteps
 
-    if time_axis.TimeAxisType != TimeAxisType.CalendarEquidistant:
+    if time_axis.axis_type != TimeAxisType.CalendarEquidistant:
         # TODO is this the proper epoch, should this magic number be somewhere else?
         start_time_file = datetime(1970, 1, 1)
     else:
-        start_time_file = time_axis.StartDateTime
+        assert time_axis.start_datetime is not None
+        start_time_file = time_axis.start_datetime
 
-    if time_axis.TimeAxisType in (
-        TimeAxisType.CalendarEquidistant,
-        TimeAxisType.TimeEquidistant,
-    ):
-        time_step_file = time_axis.TimeStep
+    if time_axis.is_equidistant:
+        assert time_axis.time_step is not None
+        time_step_file = time_axis.time_step
 
         if time_step_file <= 0:
             if nt > 1:
@@ -174,7 +286,7 @@ def _valid_timesteps(
 
         freq = pd.Timedelta(seconds=time_step_file)
         time = pd.date_range(start_time_file, periods=nt, freq=freq)
-    elif time_axis.TimeAxisType == TimeAxisType.CalendarNonEquidistant:
+    elif time_axis.axis_type == TimeAxisType.CalendarNonEquidistant:
         idx = list(range(nt))
         if time_steps is None:
             return False, idx
@@ -208,7 +320,7 @@ def _valid_timesteps(
 
 
 def _item_numbers_by_name(
-    dfsItemInfo: list[DfsDynamicItemInfo],
+    file_item_names: Sequence[str],
     item_names: list[str],
     ignore_first: bool = False,
 ) -> list[int]:
@@ -216,8 +328,8 @@ def _item_numbers_by_name(
 
     Parameters
     ----------
-    dfsItemInfo : list[DfsDynamicItemInfo]
-        item info from dfs file
+    file_item_names : Sequence[str]
+        names of the items in the dfs file, in order
     item_names : list[str]
         Names of items to be found
     ignore_first : bool, optional
@@ -236,7 +348,7 @@ def _item_numbers_by_name(
 
     """
     first_idx = 1 if ignore_first else 0
-    names = [x.Name for x in dfsItemInfo[first_idx:]]
+    names = list(file_item_names[first_idx:])
 
     item_lookup = {name: i for i, name in enumerate(names)}
     try:
@@ -279,6 +391,21 @@ def _get_item_info(
     return ItemInfoList(items)
 
 
+def _select_items(
+    items: Sequence[ItemInfo],
+    item_numbers: list[int],
+    ignore_first: bool = False,
+) -> ItemInfoList:
+    """Copy the selected items out of a file object's stored item list.
+
+    item_numbers are as returned by `_valid_item_numbers` with the same
+    ignore_first. Copies, so a Dataset renaming an item leaves the file
+    object's items as read from the header.
+    """
+    first_idx = 1 if ignore_first else 0
+    return ItemInfoList([deepcopy(items[i + first_idx]) for i in item_numbers])
+
+
 def write_dfs_data(*, dfs: DfsFile, ds: Dataset, n_spatial_dims: int) -> None:
     deletevalue = dfs.FileInfo.DeleteValueFloat  # ds.deletevalue
     has_no_time = "time" not in ds.dims
@@ -301,8 +428,6 @@ def write_dfs_data(*, dfs: DfsFile, ds: Dataset, n_spatial_dims: int) -> None:
 
             dfs.WriteItemTimeStepNext(t_rel[i], darray.astype(np.float32))
 
-    dfs.Close()
-
 
 class _Dfs123:
     _ndim: int
@@ -315,51 +440,52 @@ class _Dfs123:
         self._filename = filename if filename else None
         self._end_time = None
         self._is_equidistant = True
-        dfs = DfsFileFactory.DfsGenericOpen(self._filename)
-        self._dfs = dfs
         self._geometry: Any = None  # Handled by subclass
-        n_items = len(dfs.ItemInfo)
-        self._items = self._get_item_info(list(range(n_items)))
-        if dfs.FileInfo.TimeAxis.TimeAxisType in {
-            TimeAxisType.CalendarEquidistant,
-            TimeAxisType.CalendarNonEquidistant,
-        }:
-            self._start_time = dfs.FileInfo.TimeAxis.StartDateTime
-        else:  # relative time axis
-            self._start_time = datetime(
-                1970, 1, 1
-            )  # TODO is this the proper epoch, should this magic number be somewhere else?
+        with _opened(DfsFileFactory.DfsGenericOpen(self._filename)) as dfs:
+            self._time_axis = _TimeAxisInfo.from_mikecore(dfs.FileInfo.TimeAxis)
+            self._items = [
+                ItemInfo.from_mikecore_dynamic_item_info(info) for info in dfs.ItemInfo
+            ]
+            if dfs.FileInfo.TimeAxis.TimeAxisType in {
+                TimeAxisType.CalendarEquidistant,
+                TimeAxisType.CalendarNonEquidistant,
+            }:
+                self._start_time = dfs.FileInfo.TimeAxis.StartDateTime
+            else:  # relative time axis
+                self._start_time = datetime(
+                    1970, 1, 1
+                )  # TODO is this the proper epoch, should this magic number be somewhere else?
 
-        if hasattr(dfs.FileInfo.TimeAxis, "TimeStep"):
-            self._timestep = (
-                # some files have dt = 0 😳
-                dfs.FileInfo.TimeAxis.TimeStepInSeconds()
-                if dfs.FileInfo.TimeAxis.TimeStepInSeconds() > 0
-                else 1
-            )  # TODO handle other timeunits
+            if hasattr(dfs.FileInfo.TimeAxis, "TimeStep"):
+                self._timestep = (
+                    # some files have dt = 0 😳
+                    dfs.FileInfo.TimeAxis.TimeStepInSeconds()
+                    if dfs.FileInfo.TimeAxis.TimeStepInSeconds() > 0
+                    else 1
+                )  # TODO handle other timeunits
 
-            freq = pd.Timedelta(seconds=self._timestep)
-            self._time = pd.date_range(
-                start=self._start_time,
-                periods=dfs.FileInfo.TimeAxis.NumberOfTimeSteps,
-                freq=freq,
+                freq = pd.Timedelta(seconds=self._timestep)
+                self._time = pd.date_range(
+                    start=self._start_time,
+                    periods=dfs.FileInfo.TimeAxis.NumberOfTimeSteps,
+                    freq=freq,
+                )
+            else:
+                self._timestep = None
+                self._time = None
+            self._n_timesteps: int = dfs.FileInfo.TimeAxis.NumberOfTimeSteps
+            projstr = dfs.FileInfo.Projection.WKTString
+            self._projstr: str = "NON-UTM" if not projstr else projstr
+            self._longitude: float = dfs.FileInfo.Projection.Longitude
+            self._latitude: float = dfs.FileInfo.Projection.Latitude
+            self._orientation: float = dfs.FileInfo.Projection.Orientation
+            self._deletevalue: float = dfs.FileInfo.DeleteValueFloat
+            # Must happen inside this block: mikecore's block values are views over
+            # memory owned by the dfs library and freed on Close(). Captured here for
+            # dfs1/dfs2/dfs3 alike (see Dataset.custom_blocks).
+            self._custom_blocks: dict[str, NDArray[Any]] = read_custom_blocks(
+                dfs.FileInfo
             )
-        else:
-            self._timestep = None
-            self._time = None
-        self._n_timesteps: int = dfs.FileInfo.TimeAxis.NumberOfTimeSteps
-        projstr = dfs.FileInfo.Projection.WKTString
-        self._projstr: str = "NON-UTM" if not projstr else projstr
-        self._longitude: float = dfs.FileInfo.Projection.Longitude
-        self._latitude: float = dfs.FileInfo.Projection.Latitude
-        self._orientation: float = dfs.FileInfo.Projection.Orientation
-        self._deletevalue: float = dfs.FileInfo.DeleteValueFloat
-        # Must happen before Close(): mikecore's block values are views over memory
-        # owned by the dfs library. Captured here for dfs1/dfs2/dfs3 alike, since
-        # this is where the generic handle is closed (see Dataset.custom_blocks).
-        self._custom_blocks: dict[str, NDArray[Any]] = read_custom_blocks(dfs.FileInfo)
-
-        dfs.Close()
 
     def __repr__(self) -> str:
         name = self.__class__.__name__
@@ -375,26 +501,6 @@ class _Dfs123:
             out.append(f"start time: {self._start_time}")
 
         return str.join("\n", out)
-
-    def _open(self) -> None:
-        raise NotImplementedError("Should be implemented by subclass")
-
-    def _get_item_info(self, item_numbers: Sequence[int]) -> list[ItemInfo]:
-        """Read DFS ItemInfo.
-
-        Parameters
-        ----------
-        item_numbers : list[int]
-            Item numbers to read
-
-        Returns
-        -------
-        list[Iteminfo]
-
-        """
-        infos = self._dfs.ItemInfo
-        nos = item_numbers
-        return [ItemInfo.from_mikecore_dynamic_item_info(infos[i]) for i in nos]
 
     @property
     def geometry(self) -> Any:
@@ -441,7 +547,11 @@ class _Dfs123:
     def timestep(self) -> Any:
         """Time step size in seconds."""
         # this will fail if the TimeAxisType is not calendar and equidistant, but that is ok
-        return self._dfs.FileInfo.TimeAxis.TimeStepInSeconds()
+        if self._time_axis.time_step_seconds is None:
+            raise AttributeError(
+                f"A {self._time_axis.axis_type.name} time axis has no time step"
+            )
+        return self._time_axis.time_step_seconds
 
     @property
     def projection_string(self) -> str:
