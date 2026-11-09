@@ -111,10 +111,10 @@ def test_extract_vertical_discrete_matches_mike(
         np.testing.assert_array_equal(
             section[item.name].to_numpy(), mike_slice[item.name].to_numpy()
         )
-        assert section[item.name]._zn is not None
-        np.testing.assert_allclose(
-            section[item.name]._zn, mike_slice[item.name]._zn, atol=1e-4
-        )
+        zn = section[item.name]._zn
+        zn_ref = mike_slice[item.name]._zn
+        assert zn is not None and zn_ref is not None
+        np.testing.assert_allclose(zn, zn_ref, atol=1e-4)
 
 
 def test_extract_vertical_discrete_dataarray_matches_dataset(
@@ -254,7 +254,9 @@ def test_extract_vertical_discrete_roundtrip(
     )
     for i in range(section.n_items):
         np.testing.assert_allclose(ds2[i].to_numpy(), section[i].to_numpy(), atol=1e-5)
-        np.testing.assert_allclose(ds2[i]._zn, section[i]._zn, atol=1e-4)
+        zn2, zn = ds2[i]._zn, section[i]._zn
+        assert zn2 is not None and zn is not None
+        np.testing.assert_allclose(zn2, zn, atol=1e-4)
 
 
 # ---------------------------------------------------------------------------

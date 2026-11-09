@@ -9,7 +9,6 @@ from .exceptions import OutsideModelDomainError
 from .spatial import (
     GeometryFM2D,
     GeometryFM3D,
-    GeometryFMVerticalColumn,
     GeometryFMVerticalProfile,
     Grid2D,
 )
@@ -524,13 +523,9 @@ def _extract_vertical(
     Returns ``(out_geometry, out_zn, out_values)`` where ``out_zn`` is the
     dynamic node z for the ``discrete`` mode and ``None`` for ``interpolate``.
     """
-    # GeometryFMVerticalColumn subclasses GeometryFM3D but has no horizontal
-    # extent to cut a transect through
-    if (
-        not isinstance(geometry, GeometryFM3D)
-        or isinstance(geometry, GeometryFMVerticalColumn)
-        or not geometry.is_layered
-    ):
+    # GeometryFMVerticalColumn (no horizontal extent) is not a GeometryFM3D,
+    # so it is rejected here as well
+    if not (isinstance(geometry, GeometryFM3D) and geometry.is_layered):
         raise NotImplementedError(
             "extract_vertical requires 3D layered dfsu data with a horizontal "
             f"mesh, got {type(geometry).__name__}"
