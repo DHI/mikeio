@@ -59,16 +59,18 @@ def test_eum_type_search() -> None:
     assert EUMType.Wind_Velocity in types
 
 
-def test_eum_conversion() -> None:
-    """Verify that all EUM types and units in mikecore have equivalents in MIKE IO"""
+def test_every_mikecore_eum_item_is_an_eum_type() -> None:
+    known = {t.value for t in EUMType}
+    assert [c for c in eumItem if c.value not in known] == []
 
-    for code in eumItem:
-        EUMType(code)
 
-    for code in eumUnit:
-        EUMUnit(code)
+def test_every_mikecore_eum_unit_is_an_eum_unit() -> None:
+    known = {u.value for u in EUMUnit}
+    assert [c for c in eumUnit if c.value not in known] == []
 
-    assert True
+
+def test_short_name_fractional_power() -> None:
+    assert EUMUnit.liter_per_sec_per_meter_pow_half.short_name == "l/s/m^(1/2)"
 
 
 def test_short_name() -> None:

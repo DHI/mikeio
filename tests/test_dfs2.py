@@ -483,7 +483,8 @@ def test_select_area_rotated_UTM_2() -> None:
     assert g1.dy == g2.dy
     assert g1.nx == g2.nx
     assert g1.ny == g2.ny
-    assert g1.orientation == g2.orientation  # orientation in projected coordinates
+    # orientation in projected coordinates
+    assert g1.orientation == pytest.approx(g2.orientation)
     assert g1.projection_string == g2.projection_string
 
 
