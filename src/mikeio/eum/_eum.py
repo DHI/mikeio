@@ -683,6 +683,53 @@ class EUMType(IntEnum):
     BladeThickness = 110318
     PlantDensity = 110319
     Thickness = 110320
+    CarbonEmissionFactor = 110321
+    AluminiumAl = 110322
+    BismuthBi = 110323
+    CalciumCa = 110324
+    CadmiumCd = 110325
+    CobaltCo = 110326
+    ChromiumCr = 110327
+    CopperCu = 110328
+    IronFe = 110329
+    PotassiumK = 110330
+    LithiumLi = 110331
+    MagnesiumMg = 110332
+    ManganeseMn = 110333
+    SodiumNa = 110334
+    NickelNi = 110335
+    LeadPb = 110336
+    StrontiumSr = 110337
+    ZincZn = 110338
+    SilverAg = 110339
+    BariumBa = 110340
+    BerylliumBe = 110341
+    IndiumIn = 110342
+    VanadiumV = 110343
+    ArsenicAs = 110344
+    SulfurS = 110345
+    MolybdenumMo = 110346
+    PhosphorusP = 110347
+    MercuryHg = 110348
+    AntimonySb = 110349
+    SeleniumSe = 110350
+    UraniumU = 110351
+    BoronB = 110352
+    OxidationReductionPotentialORP = 110353
+    TotalSuspendedSolidsTSS = 110354
+    TotalDissolvedSolidsTDS = 110355
+    ChlorideCl = 110356
+    TurbidityNTU = 110357
+    SulphateSO4 = 110358
+    PhosphatePO4 = 110359
+    NitrateNO3 = 110360
+    NitriteNO2 = 110361
+    FluorideF = 110362
+    TotalAlkalinity = 110363
+    ChemicalOxygenDemandCOD = 110364
+    FrequencyIntegratedWaveActionDensity = 110365
+    DirectionalIntegratedWaveActionDensity = 110366
+    FrequencyIntegratedWaveEnergyDensityRate = 110367
 
     def __init__(self, code: int) -> None:
         self.code = code
@@ -1339,6 +1386,24 @@ class EUMUnit(IntEnum):
     cPoise = 99264
     lbf_sec_per_feet_pow_2 = 99265
     pound_per__sec_feet_ = 99266
+    mg_per_min = 4221
+    meter_pow_2_sec_pow_2 = 5218
+    feet_pow_2_sec_pow_2 = 5219
+    meter_pow_2_sec_rad = 5220
+    feet_pow_2_sec_rad = 5221
+    kg_per_kWh = 5630
+    pound_per_kWh = 5631
+    liter_per_sec_per_meter_pow_half = 7530
+    liter_per_min_per_meter_pow_half = 7531
+    Ml_per_day_per_meter_pow_half = 7532
+    meter_pow_3_per_hour_per_meter_pow_half = 7533
+    meter_pow_3_per_day_per_meter_pow_half = 7534
+    feet_pow_3_per_sec_per_psi_pow_half = 7535
+    gallon_per_min_per_psi_pow_half = 7536
+    Mgal_per_day_per_psi_pow_half = 7537
+    MgalUK_per_day_per_psi_pow_half = 7538
+    acre_feet_per_day_per_psi_pow_half = 7539
+    m3_per_hour_per_bar_pow_half = 7540
 
     def __init__(self, code: int) -> None:
         self.code = code
@@ -1367,6 +1432,7 @@ class EUMUnit(IntEnum):
             "hertz": "Hz",
             "_pow_2": "^2",
             "_pow_3": "^3",
+            "_pow_half": "^(1/2)",
             "_per_": "/",
             "_": "*",
         }
