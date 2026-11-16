@@ -6,8 +6,6 @@ from typing import TYPE_CHECKING, Any, Sequence, overload
 
 import numpy as np
 import pandas as pd
-from matplotlib.axes import Axes
-from matplotlib.colors import Colormap
 from mikecore.DfsFileFactory import DfsFileFactory
 from mikecore.DfsuFile import DfsuFile, DfsuFileType
 from scipy.spatial import KDTree
@@ -41,6 +39,9 @@ from ._dfsu import (
 )
 
 if TYPE_CHECKING:
+    from matplotlib.axes import Axes
+    from matplotlib.colors import Colormap
+
     from ..spatial._FM_geometry_layered import Layer
 
 
