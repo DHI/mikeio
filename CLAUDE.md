@@ -37,8 +37,11 @@ uv run pytest tests/performance/ --durations=0
 
 ### Code Quality
 ```bash
-# Run all checks (lint, typecheck, test)
+# Run all checks (lint, layers, typecheck, test)
 just check
+
+# Check the import contracts in .importlinter
+just layers
 
 # Lint code
 uv run ruff check .
@@ -233,6 +236,11 @@ Alternative: `ds = mikeio.read("file.dfs2")` combines open and read.
 - Docstrings required for public modules, classes, methods, functions (D100-D103)
 - Line length limit is ignored (E501)
 - Single letter variable names are allowed for common patterns (E741)
+
+### Imports
+- `.importlinter` fixes the order between modules (ADR-011) and what may be imported from a subpackage (ADR-013); `just layers` checks it
+- From another subpackage, import through its `__init__` (`from ..spatial import Grid2D`), not from a file inside it (`from ..spatial._grid_geometry import Grid2D`)
+- Never add to `ignore_imports` to make the check pass; ask first
 
 ### Type Checking
 - `disallow_untyped_defs = true` in mypy config
