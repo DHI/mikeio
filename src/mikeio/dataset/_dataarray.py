@@ -58,17 +58,9 @@ from ..spatial._FM_geometry import Area
 from ..spatial._FM_geometry_layered import GeometryFMLayered
 
 from ._z_accessor import NullZAccessor, ZAccessor
-from ._data_plot import (
-    DataArrayPlotter,
-    DataArrayPlotterFM,
-    DataArrayPlotterGrid1D,
-    DataArrayPlotterGrid2D,
-    DataArrayPlotterAreaSpectrum,
-    DataArrayPlotterFMVerticalColumn,
-    DataArrayPlotterFMVerticalProfile,
-    DataArrayPlotterPointSpectrum,
-    DataArrayPlotterLineSpectrum,
-)
+
+if TYPE_CHECKING:
+    from ._data_plot import DataArrayPlotter
 
 GeometryType = Union[
     Geometry0D,
@@ -182,7 +174,7 @@ class DataArray:
 
         self.item = self._parse_item(item=item, name=name, type=type, unit=unit)
         self._zn = self._parse_zn(zn, self.geometry, self.n_timesteps)
-        self.plot = self._get_plotter_by_geometry()
+        self._plotter: DataArrayPlotter | None = None
         self.z: ZAccessor | NullZAccessor = self._get_z_accessor_by_geometry()
 
     @staticmethod
@@ -268,7 +260,26 @@ class DataArray:
         if problems:
             raise ValueError(", ".join(problems))
 
-    def _get_plotter_by_geometry(self) -> Any:
+    @property
+    def plot(self) -> Any:
+        """Plotter, created on first access so importing mikeio stays cheap."""
+        if self._plotter is None:
+            self._plotter = self._get_plotter_by_geometry()
+        return self._plotter
+
+    def _get_plotter_by_geometry(self) -> DataArrayPlotter:
+        from ._data_plot import (
+            DataArrayPlotter,
+            DataArrayPlotterFM,
+            DataArrayPlotterGrid1D,
+            DataArrayPlotterGrid2D,
+            DataArrayPlotterAreaSpectrum,
+            DataArrayPlotterFMVerticalColumn,
+            DataArrayPlotterFMVerticalProfile,
+            DataArrayPlotterPointSpectrum,
+            DataArrayPlotterLineSpectrum,
+        )
+
         # TODO: this is explicit, but with consistent naming, we could create this mapping automatically
         PLOTTER_MAP: Any = {
             GeometryFMVerticalProfile: DataArrayPlotterFMVerticalProfile,
