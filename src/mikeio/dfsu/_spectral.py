@@ -463,7 +463,9 @@ class DfsuSpectral:
             significant wave height values
 
         """
-        from .._spectral import calc_Hm0_from_spectrum
+        from .._spectral import (
+            calc_Hm0_from_spectrum,
+        )  # local import: keeps matplotlib out of "import mikeio"
 
         spec = spectrum.to_numpy() if isinstance(spectrum, DataArray) else spectrum
         return calc_Hm0_from_spectrum(spec, self.frequencies, self.directions, tail)

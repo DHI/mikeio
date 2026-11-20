@@ -142,7 +142,9 @@ class GeometryFMPlotter:
 
         plot_type = kwargs.pop("plot_type")
 
-        from ._FM_plot import _plot_map
+        from ._FM_plot import (
+            _plot_map,
+        )  # local import: keeps matplotlib out of "import mikeio"
 
         return _plot_map(
             geometry=self.g,
@@ -170,7 +172,9 @@ class GeometryFMPlotter:
 
         from matplotlib.collections import PatchCollection  # type: ignore
 
-        from ._FM_plot import _to_polygons
+        from ._FM_plot import (
+            _to_polygons,
+        )  # local import: keeps matplotlib out of "import mikeio"
 
         ax = self._get_ax(ax=ax, figsize=figsize)
         ax.set_aspect(self.g._plot_aspect)
@@ -545,7 +549,9 @@ class GeometryFM2D(_GeometryFM):
 
     @cached_property
     def _tree2d(self) -> KDTree:
-        from scipy.spatial import KDTree
+        from scipy.spatial import (
+            KDTree,
+        )  # local import: keeps scipy out of "import mikeio"
 
         xy = self.element_coordinates[:, :2]
         return KDTree(xy)
@@ -889,7 +895,10 @@ class GeometryFM2D(_GeometryFM):
 
     def _get_boundary_polygons(self) -> BoundaryPolygons:
         """Get boundary polylines and categorize as inner or outer by assessing the signed area."""
-        from ._FM_plot import BoundaryPolygons, Polygon
+        from ._FM_plot import (
+            BoundaryPolygons,
+            Polygon,
+        )  # local import: keeps matplotlib out of "import mikeio"
 
         polygons = self._get_boundary_polygons_uncategorized()
 
@@ -1127,7 +1136,9 @@ class GeometryFM2D(_GeometryFM):
             node-centered data
 
         """
-        from ._FM_plot import _get_node_centered_data
+        from ._FM_plot import (
+            _get_node_centered_data,
+        )  # local import: keeps matplotlib out of "import mikeio"
 
         geometry = self
         nc = geometry.node_coordinates

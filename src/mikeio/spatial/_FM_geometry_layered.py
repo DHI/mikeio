@@ -1160,7 +1160,9 @@ class GeometryFMVerticalProfilePlotter:
 
     def mesh(self, title: str = "Mesh", edge_color: str = "0.5", **kwargs: Any) -> Axes:
         """Plot the mesh of the vertical profile."""
-        from ._FM_plot import _plot_vertical_profile
+        from ._FM_plot import (
+            _plot_vertical_profile,
+        )  # local import: keeps matplotlib out of "import mikeio"
 
         v = np.full_like(self.g.element_coordinates[:, 0], np.nan)
         return _plot_vertical_profile(
