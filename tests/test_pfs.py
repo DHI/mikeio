@@ -93,6 +93,12 @@ def test_pfssection_keys_values_items(d1) -> None:
         j += 1
 
 
+def test_pfssection_iter_yields_keys(d1) -> None:
+    sct = mikeio.PfsSection(d1)
+    assert list(sct) == list(d1)
+    assert dict(sct) == dict(sct.items())
+
+
 def test_pfssection_from_dataframe() -> None:
     stations = dict(
         name=["Viken", "Drogden"], position=[[12.5817, 56.128], [12.7113, 55.5364]]
