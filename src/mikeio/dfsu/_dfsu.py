@@ -575,14 +575,6 @@ class Dfsu2DH:
             projection=self.geometry.projection_string,
         )
 
-    def _dfs_read_item_time_func(
-        self, item: int, step: int
-    ) -> tuple[np.ndarray, pd.Timestamp]:
-        with _opened(DfsuFile.Open(self._filename)) as dfs:
-            itemdata = dfs.ReadItemTimeStep(item + 1, step)
-
-        return itemdata.Data, itemdata.Time
-
     def extract_track(
         self,
         track: str | Path | Dataset | pd.DataFrame,
@@ -628,19 +620,27 @@ class Dfsu2DH:
         items = _select_items(self.items, item_numbers)
         _, time_steps = _valid_timesteps(self._time_axis, time_steps=None)
 
-        res = _extract_track(
-            deletevalue=self.deletevalue,
-            start_time=self.start_time,
-            end_time=self.end_time,
-            timestep=self.timestep,
-            geometry=self.geometry,
-            n_elements=self.geometry.n_elements,
-            track=track,
-            items=deepcopy(items),
-            time_steps=time_steps,
-            item_numbers=item_numbers,
-            method=method,
-            dtype=dtype,
-            data_read_func=self._dfs_read_item_time_func,
-        )
+        with _opened(DfsuFile.Open(self._filename)) as dfs:
+            # One handle for the whole extraction; opening per read dominates
+            # the runtime otherwise.
+
+            def read_item_time_step(item: int, step: int) -> tuple[np.ndarray, float]:
+                itemdata = dfs.ReadItemTimeStep(item + 1, step)
+                return itemdata.Data, itemdata.Time
+
+            res = _extract_track(
+                deletevalue=self.deletevalue,
+                start_time=self.start_time,
+                end_time=self.end_time,
+                timestep=self.timestep,
+                geometry=self.geometry,
+                n_elements=self.geometry.n_elements,
+                track=track,
+                items=deepcopy(items),
+                time_steps=time_steps,
+                item_numbers=item_numbers,
+                method=method,
+                dtype=dtype,
+                data_read_func=read_item_time_step,
+            )
         return res
