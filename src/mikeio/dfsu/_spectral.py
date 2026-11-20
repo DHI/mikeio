@@ -17,7 +17,6 @@ from ..dfs._dfs import (
     _valid_item_numbers,
     _valid_timesteps,
 )
-from .._spectral import calc_Hm0_from_spectrum
 from .._options import _item_txt, _show_progress
 from ._dfsu import (
     _get_dfsu_info,
@@ -464,5 +463,7 @@ class DfsuSpectral:
             significant wave height values
 
         """
+        from .._spectral import calc_Hm0_from_spectrum
+
         spec = spectrum.to_numpy() if isinstance(spectrum, DataArray) else spectrum
         return calc_Hm0_from_spectrum(spec, self.frequencies, self.directions, tail)

@@ -18,23 +18,20 @@ from numpy.typing import NDArray
 from mikecore.DfsuFile import DfsuFileType
 from mikecore.eum import eumQuantity
 from mikecore.MeshBuilder import MeshBuilder
-from scipy.spatial import KDTree
 
 from ..eum import EUMType, EUMUnit
 from ..exceptions import OutsideModelDomainError
 from .._interpolation import Interpolant
-from ._FM_plot import (
-    _get_node_centered_data,
-    _plot_map,
-    BoundaryPolygons,
-    Polygon,
-    _to_polygons,  # TODO remove
-)
 from ._geometry import Geometry0D, GeometryPoint2D, _Geometry, _geographic_aspect
 
 from ._grid_geometry import Grid2D
 from ._distance import xy_to_bbox
 from .._path import normalize_output_path
+
+if TYPE_CHECKING:
+    from scipy.spatial import KDTree
+
+    from ._FM_plot import BoundaryPolygons
 
 
 if TYPE_CHECKING:
@@ -145,6 +142,8 @@ class GeometryFMPlotter:
 
         plot_type = kwargs.pop("plot_type")
 
+        from ._FM_plot import _plot_map
+
         return _plot_map(
             geometry=self.g,
             plot_type=plot_type,
@@ -170,6 +169,8 @@ class GeometryFMPlotter:
         # TODO this must be a duplicate, delegate
 
         from matplotlib.collections import PatchCollection  # type: ignore
+
+        from ._FM_plot import _to_polygons
 
         ax = self._get_ax(ax=ax, figsize=figsize)
         ax.set_aspect(self.g._plot_aspect)
@@ -544,6 +545,8 @@ class GeometryFM2D(_GeometryFM):
 
     @cached_property
     def _tree2d(self) -> KDTree:
+        from scipy.spatial import KDTree
+
         xy = self.element_coordinates[:, :2]
         return KDTree(xy)
 
@@ -886,6 +889,8 @@ class GeometryFM2D(_GeometryFM):
 
     def _get_boundary_polygons(self) -> BoundaryPolygons:
         """Get boundary polylines and categorize as inner or outer by assessing the signed area."""
+        from ._FM_plot import BoundaryPolygons, Polygon
+
         polygons = self._get_boundary_polygons_uncategorized()
 
         interiors = []
@@ -1122,6 +1127,8 @@ class GeometryFM2D(_GeometryFM):
             node-centered data
 
         """
+        from ._FM_plot import _get_node_centered_data
+
         geometry = self
         nc = geometry.node_coordinates
         ec = geometry.element_coordinates

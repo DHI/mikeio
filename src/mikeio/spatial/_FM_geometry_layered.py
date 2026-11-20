@@ -6,7 +6,6 @@ from typing import TYPE_CHECKING, Any, Iterable, Literal, Sequence
 import warnings
 from numbers import Integral
 
-from matplotlib.axes import Axes
 import numpy as np
 from mikecore.DfsuFile import DfsuFileType
 
@@ -14,12 +13,13 @@ from mikecore.DfsuFile import DfsuFileType
 from ._FM_geometry import Area, GeometryFM2D, _GeometryFM, _points_in_area
 from ._geometry import GeometryPoint3D
 
-from ._FM_plot import _plot_vertical_profile, BoundaryPolygons
-
 from ._distance import relative_cumulative_distance
 
 if TYPE_CHECKING:
+    from matplotlib.axes import Axes
     from numpy.typing import ArrayLike
+
+    from ._FM_plot import BoundaryPolygons
 
 Layer = Literal["all", "bottom", "top"]
 
@@ -1160,6 +1160,8 @@ class GeometryFMVerticalProfilePlotter:
 
     def mesh(self, title: str = "Mesh", edge_color: str = "0.5", **kwargs: Any) -> Axes:
         """Plot the mesh of the vertical profile."""
+        from ._FM_plot import _plot_vertical_profile
+
         v = np.full_like(self.g.element_coordinates[:, 0], np.nan)
         return _plot_vertical_profile(
             node_coordinates=self.g.node_coordinates,
