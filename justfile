@@ -15,7 +15,7 @@ format:
 
 # Run tests
 test:
-    uv run pytest
+    uv run rstest
 
 # Check the import layering in .importlinter
 layers:
