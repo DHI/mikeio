@@ -228,13 +228,13 @@ def test_write_from_data_frame(tmp_path: Path) -> None:
     )
 
     filename = tmp_path / "dataframe.dfs0"
-    with pytest.warns(FutureWarning):
-        Dfs0.from_dataframe(
-            df,
-            filename,
-            itemtype=EUMType.Concentration,
-            unit=EUMUnit.gram_per_meter_pow_3,
-        )
+    mikeio.from_pandas(
+        df,
+        items=[
+            ItemInfo("Average", EUMType.Concentration, EUMUnit.gram_per_meter_pow_3),
+            ItemInfo("Trend"),
+        ],
+    ).to_dfs(filename)
 
     ds = mikeio.read(filename)
 
@@ -434,12 +434,6 @@ def test_write_from_named_pandas_series(tmp_path: Path) -> None:
     assert ds[0].unit == EUMUnit.gram_per_meter_pow_3
     assert np.isnan(ds["Average"].to_numpy()[3])
     assert ds.time[0].year == 1958
-
-    # Deprecated
-    with pytest.warns(FutureWarning, match="from_pandas"):
-        series.to_dfs0(
-            filename, itemtype=EUMType.Concentration, unit=EUMUnit.gram_per_meter_pow_3
-        )
 
 
 def test_write_from_data_frame_different_types(tmp_path: Path) -> None:

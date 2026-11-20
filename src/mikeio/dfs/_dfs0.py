@@ -3,7 +3,6 @@ from functools import cached_property
 from pathlib import Path
 from datetime import datetime, timedelta
 from typing import Any, Mapping, Sequence
-import warnings
 
 import numpy as np
 from numpy.typing import NDArray
@@ -14,7 +13,7 @@ from mikecore.DfsFileFactory import DfsFileFactory
 from mikecore.eum import eumQuantity
 
 from .._version import __dfs_version__
-from ..dataset import Dataset, DataArray
+from ..dataset import Dataset
 from ._dfs import (
     _TimeAxisInfo,
     _get_item_info,
@@ -26,7 +25,7 @@ from ._custom_blocks import (
     readonly_custom_blocks,
     write_custom_blocks,
 )
-from ..eum import EUMType, EUMUnit, ItemInfo, TimeStepUnit, ItemInfoList
+from ..eum import TimeStepUnit, ItemInfoList
 from .._time import DateTimeSelector
 from .._options import _item_txt
 from .._path import normalize_output_path, normalize_path
@@ -341,75 +340,3 @@ class Dfs0:
         meaning of the values and for how to change them.
         """
         return readonly_custom_blocks(self._custom_blocks)
-
-    # ======================
-    # Deprecated in 2.5.0
-    # ======================
-
-    @staticmethod
-    def from_dataframe(
-        df: pd.DataFrame,
-        filename: str | Path,
-        itemtype: EUMType | None = None,
-        unit: EUMUnit | None = None,
-        items: Sequence[ItemInfo] | None = None,
-    ) -> None:
-        """Create a dfs0 file from a pandas DataFrame (deprecated, use mikeio.from_pandas)."""
-        return dataframe_to_dfs0(df, filename, itemtype, unit, items)
-
-
-def series_to_dfs0(
-    self: pd.Series,
-    filename: str,
-    itemtype: EUMType | None = None,
-    unit: EUMUnit | None = None,
-    items: Sequence[ItemInfo] | None = None,
-    title: str | None = None,
-    dtype: Any = DfsSimpleType.Float,
-) -> None:
-    df = pd.DataFrame(self)
-    df.to_dfs0(filename, itemtype, unit, items, title, dtype)
-
-
-def dataframe_to_dfs0(
-    self: pd.DataFrame,
-    filename: str | Path,
-    itemtype: EUMType | None = None,
-    unit: EUMUnit | None = None,
-    items: Sequence[ItemInfo] | None = None,
-    title: str = "",
-    dtype: Any = DfsSimpleType.Float,
-) -> None:
-    warnings.warn(
-        "series/dataframe_to_dfs0 is deprecated. Use mikeio.from_pandas instead.",
-        FutureWarning,
-    )
-    if not isinstance(self.index, pd.DatetimeIndex):
-        raise ValueError(
-            "Dataframe index must be a DatetimeIndex. Hint: pd.read_csv(..., parse_dates=True)"
-        )
-
-    ncol = self.values.shape[1]
-    data = [self.values[:, i] for i in range(ncol)]
-
-    if items is None:
-        if itemtype is None:
-            items = [ItemInfo(name) for name in self.columns]
-        else:
-            if unit is None:
-                items = [ItemInfo(name, itemtype) for name in self.columns]
-            else:
-                items = [ItemInfo(name, itemtype, unit) for name in self.columns]
-
-    das = {
-        item.name: DataArray(data=d, item=item, time=self.index)
-        for d, item in zip(data, items)
-    }
-    ds = Dataset(das)
-    write_dfs0(filename=filename, dataset=ds, title=title, dtype=dtype)
-
-
-# Monkey patching onto Pandas classes
-pd.DataFrame.to_dfs0 = dataframe_to_dfs0
-
-pd.Series.to_dfs0 = series_to_dfs0
