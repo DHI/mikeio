@@ -329,17 +329,26 @@ class _GeometryFM(_Geometry):
     ) -> tuple[Any, Any]:
         if validate:
             max_node_id = self._node_ids.max()
-            for i, e in enumerate(element_table):
-                # TODO: avoid looping through all elements (could be +1e6)!
-                if not isinstance(e, np.ndarray):
-                    e = np.asarray(e)
-                    element_table[i] = e
-
-                # NOTE: this check "e.max()" takes the most of the time when constructing a new FM_geometry
-                if e.max() > max_node_id:
+            try:
+                table = np.asarray(element_table)
+            except ValueError:
+                table = None  # ragged table: mesh with mixed element types
+            if table is not None and table.dtype != object and table.ndim == 2:
+                if table.size > 0 and table.max() > max_node_id:
                     raise ValueError(
-                        f"Element table has node # {e.max()}. Max node id: {max_node_id}"
+                        f"Element table has node # {table.max()}. Max node id: {max_node_id}"
                     )
+                element_table = table
+            else:
+                for i, e in enumerate(element_table):
+                    if not isinstance(e, np.ndarray):
+                        e = np.asarray(e)
+                        element_table[i] = e
+
+                    if e.max() > max_node_id:
+                        raise ValueError(
+                            f"Element table has node # {e.max()}. Max node id: {max_node_id}"
+                        )
 
         if element_ids is None:
             element_ids = np.arange(len(element_table))
