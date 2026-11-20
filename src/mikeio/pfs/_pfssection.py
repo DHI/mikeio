@@ -1,5 +1,5 @@
 from __future__ import annotations
-from collections.abc import KeysView, ValuesView
+from collections.abc import Iterator, KeysView, ValuesView
 from datetime import datetime
 from types import SimpleNamespace
 from typing import (
@@ -77,8 +77,8 @@ class PfsSection(SimpleNamespace, MutableMapping[str, Any]):
     def __len__(self) -> int:
         return len(self.__dict__)
 
-    def __iter__(self) -> Any:
-        iter(self)
+    def __iter__(self) -> Iterator[str]:
+        return iter(self.__dict__)
 
     def __contains__(self, key: Any) -> bool:
         return key in self.keys()
