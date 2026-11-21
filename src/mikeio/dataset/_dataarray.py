@@ -480,11 +480,29 @@ class DataArray:
         idx = list(np.where(~np.isnan(x).all(axis=axes))[0])
         return self.isel(time=idx)  # type: ignore
 
-    def flipud(self) -> DataArray:
-        """Flip upside down (on first non-time axis)."""
+    def _flipud(self) -> DataArray:
+        """Flip values on the first non-time axis, without warning."""
         first_non_t_axis = 1 if self._has_time_axis else 0
         self.values = np.flip(self.values, axis=first_non_t_axis)
         return self
+
+    def flipud(self) -> DataArray:
+        """Flip upside down (on first non-time axis).
+
+        Deprecated since v3.5: flipud() will be removed in v4.0. It mirrors
+        values without moving coordinates; for flexible mesh data use
+        isel(element=...), and for a data-only mirror on a structured grid
+        assign np.flip(...) to values explicitly.
+        """
+        warnings.warn(
+            "flipud() is deprecated and will be removed in v4.0. It mirrors "
+            "values without moving coordinates; use isel(element=...) for "
+            "flexible mesh data, or assign np.flip(...) to values for a "
+            "data-only mirror.",
+            FutureWarning,
+            stacklevel=2,
+        )
+        return self._flipud()
 
     def describe(self, percentiles=None, include=None, exclude=None) -> pd.DataFrame:  # type: ignore
         """Generate descriptive statistics by wrapping [](`pandas.DataFrame.describe`).

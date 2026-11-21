@@ -682,18 +682,23 @@ def test_modify_selected_variable() -> None:
     assert ds.Foo.to_numpy()[0, 0] == 1.0  # type: ignore
 
 
-def test_flipud() -> None:
+def test_flipud_deprecated() -> None:
     nt = 2
     d = np.arange(nt * 100 * 30).reshape((nt, 100, 30)).astype(float)
     time = pd.date_range("2000-1-2", freq="h", periods=nt)
-    items = [ItemInfo("Foo")]
-    ds = mikeio.Dataset.from_numpy([d], time, items)
+    items = [ItemInfo("Foo"), ItemInfo("Bar")]
+    ds = mikeio.Dataset.from_numpy([d, d], time, items)
 
     dsud = ds.copy()
-    dsud.flipud()
+    with pytest.warns(FutureWarning, match="flipud") as record:
+        dsud.flipud()
 
+    # one warning for the Dataset, not one per item
+    assert len(record) == 1
     assert dsud.shape == ds.shape
     assert dsud["Foo"].to_numpy()[0, 0, 0] == ds["Foo"].to_numpy()[0, -1, 0]
+    # the Dataset that was flipped is a copy; the original is unchanged
+    assert ds["Foo"].to_numpy()[0, 0, 0] == 0.0
 
 
 def test_aggregation_dataset_no_time() -> None:

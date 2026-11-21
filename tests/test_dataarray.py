@@ -516,6 +516,20 @@ def test_getitem_time_by_position_does_not_warn(da_grid2d: DataArray) -> None:
         da[np.array([0, 1])]
 
 
+def test_dataarray_flipud_deprecated() -> None:
+    da = mikeio.DataArray(
+        data=np.arange(6.0).reshape(2, 3),
+        geometry=mikeio.Grid2D(x0=0.0, dx=1.0, nx=3, ny=2, dy=1.0, y0=0.0),
+    )
+    original = da.to_numpy().copy()
+
+    with pytest.warns(FutureWarning, match="flipud"):
+        flipped = da.flipud()
+
+    assert flipped is da
+    np.testing.assert_array_equal(flipped.to_numpy(), original[::-1, :])
+
+
 def test_dataarray_grid2d_indexing_error(da_grid2d: DataArray) -> None:
     with pytest.raises(IndexError, match="Key has more dimensions"):
         da_grid2d[0, :, :, 4]
