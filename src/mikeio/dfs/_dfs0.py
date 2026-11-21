@@ -27,7 +27,7 @@ from ._custom_blocks import (
     write_custom_blocks,
 )
 from ..eum import EUMType, EUMUnit, ItemInfo, TimeStepUnit, ItemInfoList
-from .._time import DateTimeSelector
+from .._time import DateTimeSelector, canonical_time
 from .._options import _item_txt
 from .._path import normalize_output_path, normalize_path
 
@@ -189,11 +189,12 @@ class Dfs0:
 
         t_seconds = raw_data[:, 0]
         if self._start_time is not None:
-            ftime = pd.to_datetime(t_seconds, unit="s", origin=self.start_time).round(
-                freq="ms"
+            ftime = canonical_time(
+                pd.to_datetime(t_seconds, unit="s", origin=self.start_time)
             )
         else:
-            # relative time use timedelta
+            # relative time use timedelta; offsets are durations, not converted
+            # datetimes, so they carry no float-to-calendar noise and are kept
             ftime = pd.to_timedelta(t_seconds, unit="s")
 
         # TODO common for all dfs files , extract
@@ -315,10 +316,12 @@ class Dfs0:
         """File all datetimes."""
         if self._timeaxistype == TimeAxisType.CalendarEquidistant:
             freq = pd.Timedelta(seconds=self.timestep)
-            return pd.date_range(
-                start=self.start_time,
-                periods=self.n_timesteps,
-                freq=freq,
+            return canonical_time(
+                pd.date_range(
+                    start=self.start_time,
+                    periods=self.n_timesteps,
+                    freq=freq,
+                )
             )
 
         elif self._timeaxistype == TimeAxisType.CalendarNonEquidistant:

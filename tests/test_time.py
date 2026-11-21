@@ -2,7 +2,7 @@ import pandas as pd
 import pytest
 from datetime import datetime
 
-from mikeio._time import DateTimeSelector
+from mikeio._time import DateTimeSelector, canonical_time
 
 
 def test_date_time_selector_valid() -> None:
@@ -50,3 +50,11 @@ def test_label_matching_several_unordered_steps() -> None:
     idx = pd.DatetimeIndex(["2000-01-02", "2000-01-01", "2000-01-02"])
     dts = DateTimeSelector(idx)
     assert dts.isel(datetime(2000, 1, 2)) == [0, 2]
+
+
+def test_canonical_time_snaps_float_noise() -> None:
+    noisy = pd.DatetimeIndex(
+        ["2020-01-01 00:00:00.000400", "2020-01-01 00:59:59.999600"]
+    )
+    expected = pd.DatetimeIndex(["2020-01-01 00:00:00", "2020-01-01 01:00:00"])
+    assert canonical_time(noisy).equals(expected)

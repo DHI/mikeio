@@ -17,6 +17,7 @@ from mikecore.eum import eumQuantity, eumUnit
 from mikecore.Projections import Cartography
 
 from .._version import __dfs_version__
+from .._time import canonical_time
 from ..dataset import Dataset
 from ._dfs import (
     _Dfs123,
@@ -262,7 +263,9 @@ class Dfs2(_Dfs123):
 
                 t_seconds[i] = itemdata.Time
 
-        time = pd.to_datetime(t_seconds, unit="s", origin=self.start_time)
+        time = canonical_time(
+            pd.to_datetime(t_seconds, unit="s", origin=self.start_time)
+        )
 
         return Dataset.from_numpy(
             data_list,

@@ -13,6 +13,7 @@ import pandas as pd
 from tqdm import tqdm
 
 from .._version import __dfs_version__
+from .._time import canonical_time
 from ..dataset import Dataset
 from ._dfs import (
     _Dfs123,
@@ -176,7 +177,9 @@ class Dfs1(_Dfs123):
 
                 t_seconds[i] = itemdata.Time
 
-        time = pd.to_datetime(t_seconds, unit="s", origin=self.start_time)
+        time = canonical_time(
+            pd.to_datetime(t_seconds, unit="s", origin=self.start_time)
+        )
 
         items = _select_items(self.items, item_numbers)
 

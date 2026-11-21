@@ -25,6 +25,7 @@ from ._custom_blocks import read_custom_blocks
 from ..eum import ItemInfo, ItemInfoList
 from ..exceptions import ItemsError
 from .._time import DateTimeSelector
+from .._time import canonical_time
 from .._options import _item_txt, _show_progress
 from .._path import normalize_path
 
@@ -285,7 +286,7 @@ def _valid_timesteps(
             time_step_file = 1
 
         freq = pd.Timedelta(seconds=time_step_file)
-        time = pd.date_range(start_time_file, periods=nt, freq=freq)
+        time = canonical_time(pd.date_range(start_time_file, periods=nt, freq=freq))
     elif time_axis.axis_type == TimeAxisType.CalendarNonEquidistant:
         idx = list(range(nt))
         if time_steps is None:
@@ -465,10 +466,12 @@ class _Dfs123:
                 )  # TODO handle other timeunits
 
                 freq = pd.Timedelta(seconds=self._timestep)
-                self._time = pd.date_range(
-                    start=self._start_time,
-                    periods=dfs.FileInfo.TimeAxis.NumberOfTimeSteps,
-                    freq=freq,
+                self._time = canonical_time(
+                    pd.date_range(
+                        start=self._start_time,
+                        periods=dfs.FileInfo.TimeAxis.NumberOfTimeSteps,
+                        freq=freq,
+                    )
                 )
             else:
                 self._timestep = None

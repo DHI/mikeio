@@ -18,6 +18,7 @@ from ..dfs._dfs import (
     _valid_timesteps,
 )
 from .._spectral import calc_Hm0_from_spectrum
+from .._time import canonical_time
 from .._options import _item_txt, _show_progress
 from ._dfsu import (
     _get_dfsu_info,
@@ -130,10 +131,12 @@ class DfsuSpectral:
     def time(self) -> pd.DatetimeIndex:
         """Time axis of the file."""
         if self._equidistant:
-            return pd.date_range(
-                start=self.start_time,
-                periods=self.n_timesteps,
-                freq=f"{int(self.timestep)}s",
+            return canonical_time(
+                pd.date_range(
+                    start=self.start_time,
+                    periods=self.n_timesteps,
+                    freq=f"{int(self.timestep)}s",
+                )
             )
         else:
             raise NotImplementedError(
@@ -374,7 +377,9 @@ class DfsuSpectral:
 
                 t_seconds[i] = itemdata.Time
 
-        time = pd.to_datetime(t_seconds, unit="s", origin=self.start_time)
+        time = canonical_time(
+            pd.to_datetime(t_seconds, unit="s", origin=self.start_time)
+        )
         return Dataset.from_numpy(
             data_list,
             time=time,
