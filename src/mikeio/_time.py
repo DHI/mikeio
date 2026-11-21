@@ -7,6 +7,23 @@ from typing import Sized
 import numpy as np
 import pandas as pd
 
+TIME_RESOLUTION = "ms"
+"""Resolution of calendar time in MIKE IO.
+
+DFS stores time as float seconds relative to a start datetime, so converting
+back to datetimes carries float noise: 00:59:59.999999 where the file means
+01:00:00. MIKE IO snaps calendar times to milliseconds where the file is read,
+so callers get clean labels and a stable contract. Relative-time axes keep the
+offsets exactly as stored, since those are durations rather than converted
+datetimes. For finer control than either, read the file with mikecore, which
+exposes the raw offset doubles.
+"""
+
+
+def canonical_time(time: pd.DatetimeIndex) -> pd.DatetimeIndex:
+    """Snap a calendar time index built from file offsets to TIME_RESOLUTION."""
+    return time.round(TIME_RESOLUTION)
+
 
 def _n_selected_timesteps(x: Sized, k: slice | Sized) -> int:
     if isinstance(k, slice):

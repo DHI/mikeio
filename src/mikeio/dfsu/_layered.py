@@ -11,6 +11,7 @@ from mikecore.DfsuFile import DfsuFile, DfsuFileType
 from scipy.spatial import KDTree
 
 from .._interpolation import Interpolant
+from .._time import canonical_time
 from .._options import _item_txt
 from ..dataset import DataArray, Dataset
 from ..dfs._dfs import (
@@ -133,10 +134,12 @@ class DfsuLayered:
     def time(self) -> pd.DatetimeIndex:
         """File time axis (only available for equidistant files; otherwise read the data)."""
         if self._equidistant:
-            return pd.date_range(
-                start=self.start_time,
-                periods=self.n_timesteps,
-                freq=f"{int(self.timestep)}s",
+            return canonical_time(
+                pd.date_range(
+                    start=self.start_time,
+                    periods=self.n_timesteps,
+                    freq=f"{int(self.timestep)}s",
+                )
             )
         else:
             raise NotImplementedError(
@@ -444,7 +447,9 @@ class DfsuLayered:
             fill_bad_data_value=fill_bad_data_value,
         )
 
-        time = pd.to_datetime(t_seconds, unit="s", origin=self.start_time)
+        time = canonical_time(
+            pd.to_datetime(t_seconds, unit="s", origin=self.start_time)
+        )
 
         if elements is not None and len(elements) == 1:
             # squeeze point data

@@ -140,6 +140,19 @@ def test_write_projected(tmp_path: Path) -> None:
     assert ds3.geometry.origin[1] == pytest.approx(y0)
 
 
+def test_read_time_is_millisecond_resolution(tmp_path: Path) -> None:
+    """On-disk times are float seconds; reading snaps them to milliseconds."""
+    fp = tmp_path / "sub_second.dfs2"
+    grid = Grid2D(nx=2, ny=2, dx=100, dy=100, projection="UTM-33")
+    time = pd.date_range("2020-01-01", periods=4, freq="100ms")
+    da = mikeio.DataArray(data=np.zeros((len(time), 2, 2)), time=time, geometry=grid)
+    da.to_dfs(fp)
+
+    ds = mikeio.read(fp)
+
+    assert ds.time.equals(time)
+
+
 def test_write_without_time(tmp_path: Path) -> None:
     fp = tmp_path / "utm.dfs2"
 
