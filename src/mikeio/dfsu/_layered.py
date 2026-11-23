@@ -192,6 +192,7 @@ class DfsuLayered:
                 n_sigma=min(dfs.NumberOfSigmaLayers, dfs.NumberOfLayers),
                 validate=False,
             )
+            geometry._submesh_type = dfs.SubMeshType
         return geometry
 
     @property

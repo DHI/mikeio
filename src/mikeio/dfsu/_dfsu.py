@@ -89,6 +89,9 @@ def write_dfsu(filename: str | Path, data: Dataset, title: str = "") -> None:
 
     builder.SetNodes(xn, yn, zn, geometry.codes)
     builder.SetElements(elem_table)
+    submesh_type = getattr(geometry, "_submesh_type", None)
+    if submesh_type is not None:
+        builder.SetSubMeshType(submesh_type)
 
     factory = DfsFactory()
     proj = factory.CreateProjection(geometry.projection_string)
@@ -315,6 +318,7 @@ class Dfsu2DH:
                 node_ids=node_table.ids,
                 validate=False,
             )
+            geometry._submesh_type = dfs.SubMeshType
         return geometry
 
     @overload

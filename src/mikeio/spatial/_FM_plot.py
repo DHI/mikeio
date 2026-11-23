@@ -18,7 +18,6 @@ from ._distance import relative_cumulative_distance
 
 if TYPE_CHECKING:
     from ._FM_geometry import GeometryFM2D
-    from ._FM_geometry_layered import GeometryFM3D
 
 
 MESH_COL = "0.95"
@@ -82,7 +81,7 @@ class BoundaryPolygons:
 
 
 def _plot_map(
-    geometry: GeometryFM2D | GeometryFM3D,
+    geometry: GeometryFM2D,
     z: np.ndarray | None = None,
     plot_type: Literal[
         "patch", "mesh_only", "shaded", "contour", "contourf", "outline_only"
@@ -129,6 +128,7 @@ def _plot_map(
     nc = geometry.node_coordinates
     ec = geometry.element_coordinates
     element_table = geometry.element_table
+    conforming_table = geometry._conforming_element_table
     boundary_polylines = geometry.boundary_polygons.lines
 
     if ((vmin is not None) or (vmax is not None)) and (
@@ -176,10 +176,15 @@ def _plot_map(
     else:
         # do node-based triangular plot
         mesh_linewidth = 0.0
-        if show_mesh and _is_tri_only(element_table):
+        # Elements with Hanging nodes are split into triangles for the plot,
+        # so draw the mesh from the element table instead
+        tri_mesh = _is_tri_only(conforming_table)
+        if show_mesh and tri_mesh:
             mesh_linewidth = 0.4
             n_refinements = 0
-        triang, zn = _get_tris(nc, element_table, ec, z, n_refinements)
+        triang, zn = _get_tris(
+            nc, element_table, ec, z, n_refinements, conforming_table=conforming_table
+        )
 
         if plot_type == "shaded":
             ax.triplot(triang, lw=mesh_linewidth, color=MESH_COL)
@@ -221,7 +226,7 @@ def _plot_map(
                 vmax=vmax,
             )
 
-        if show_mesh and (not _is_tri_only(element_table)):
+        if show_mesh and not tri_mesh:
             _add_non_tri_mesh(ax, nc, element_table, plot_type)
 
     if show_outline:
@@ -345,13 +350,19 @@ def _get_tris(
     ec: np.ndarray,
     z: np.ndarray,
     n_refinements: int,
+    conforming_table: Any = None,
 ) -> tuple[Triangulation, np.ndarray]:
     import matplotlib.tri as tri
 
-    elem_table, ec, z = _create_tri_only_element_table(nc, element_table, ec, data=z)
+    if conforming_table is None or conforming_table is element_table:
+        elem_table, _, _ = _create_tri_only_element_table(nc, element_table, ec, z)
+    else:
+        elem_table = _triangulate_conforming(nc, element_table, conforming_table)
     triang = tri.Triangulation(nc[:, 0], nc[:, 1], elem_table)
 
-    zn = _get_node_centered_data(nc, elem_table, ec, z)
+    zn = _get_node_centered_data(
+        nc, element_table, ec, z, conforming_table=conforming_table
+    )
 
     if n_refinements > 0:
         # TODO: refinements doesn't seem to work for 3d files?
@@ -432,14 +443,64 @@ def _to_polygons(node_coordinates: np.ndarray, element_table: np.ndarray) -> lis
     return polygons
 
 
-def _create_node_element_matrix(
-    element_table: np.ndarray, num_nodes: int
-) -> csr_matrix:
-    row_ind = element_table.ravel()
-    col_ind = np.repeat(np.arange(element_table.shape[0]), element_table.shape[1])
+def _triangulate_conforming(
+    nc: np.ndarray, element_table: Any, conforming_table: Any
+) -> np.ndarray:
+    """Split each Element of the conforming element table into triangles.
+
+    Quads are split as in `_create_tri_only_element_table`. An Element with
+    Hanging nodes is fanned out from one of them, so that no triangle has
+    zero area.
+    """
+    tris: list[Any] = []
+    for original, element in zip(element_table, conforming_table):
+        element = np.asarray(element)
+        if len(element) == len(original):
+            if len(element) == 3:
+                tris.append(element)
+            else:
+                tris.append(element[[0, 1, 2]])
+                tris.append(element[[2, 3, 0]])
+        else:
+            hanging = np.flatnonzero(~np.isin(element, original))
+            tris.extend(_fan_triangles(nc, element, hanging))
+    return np.asarray(tris, dtype=int)
+
+
+def _fan_triangles(
+    nc: np.ndarray, element: np.ndarray, hanging: np.ndarray
+) -> list[np.ndarray]:
+    """Triangles fanned out from a corner, trying the Hanging nodes first."""
+    n = len(element)
+    xy = nc[element, :2]
+    area = 0.5 * abs(
+        np.dot(xy[:, 0], np.roll(xy[:, 1], -1))
+        - np.dot(xy[:, 1], np.roll(xy[:, 0], -1))
+    )
+    others = np.setdiff1d(np.arange(n), hanging)
+    for apex in [*hanging.tolist(), *others.tolist()]:
+        idx = [[apex, (apex + i) % n, (apex + i + 1) % n] for i in range(1, n - 1)]
+        p = xy[np.asarray(idx)]
+        tri_area = 0.5 * (
+            (p[:, 1, 0] - p[:, 0, 0]) * (p[:, 2, 1] - p[:, 0, 1])
+            - (p[:, 2, 0] - p[:, 0, 0]) * (p[:, 1, 1] - p[:, 0, 1])
+        )
+        if np.all(tri_area > 1e-9 * area):
+            return [element[i] for i in idx]
+    return [element[i] for i in idx]
+
+
+def _create_node_element_matrix(element_table: Any, num_nodes: int) -> csr_matrix:
+    if isinstance(element_table, np.ndarray) and element_table.ndim == 2:
+        row_ind = element_table.ravel()
+        col_ind = np.repeat(np.arange(element_table.shape[0]), element_table.shape[1])
+    else:
+        lengths = [len(el) for el in element_table]
+        row_ind = np.concatenate([np.asarray(el) for el in element_table])
+        col_ind = np.repeat(np.arange(len(element_table)), lengths)
     data = np.ones(len(row_ind), dtype=int)
     connectivity_matrix = csr_matrix(
-        (data, (row_ind, col_ind)), shape=(num_nodes, element_table.shape[0])
+        (data, (row_ind, col_ind)), shape=(num_nodes, len(element_table))
     )
     return connectivity_matrix
 
@@ -450,12 +511,20 @@ def _get_node_centered_data(
     element_coordinates: np.ndarray,
     data: np.ndarray,
     extrapolate: bool = True,
+    conforming_table: Any = None,
 ) -> np.ndarray:
-    """convert cell-centered data to node-centered by pseudo-laplacian method."""
+    """convert cell-centered data to node-centered by pseudo-laplacian method.
+
+    With Hanging nodes, `conforming_table` gives every Element around a
+    Hanging node, so each Element is used whole, with its own center.
+    """
     nc = node_coordinates
-    elem_table, ec, data = _create_tri_only_element_table(
-        nc, element_table, element_coordinates, data
-    )
+    if conforming_table is None or conforming_table is element_table:
+        elem_table, ec, data = _create_tri_only_element_table(
+            nc, element_table, element_coordinates, data
+        )
+    else:
+        elem_table, ec = conforming_table, element_coordinates
     connectivity_matrix = _create_node_element_matrix(elem_table, nc.shape[0])
 
     node_centered_data = np.zeros(shape=nc.shape[0])

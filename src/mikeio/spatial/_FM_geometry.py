@@ -34,11 +34,11 @@ from ._geometry import Geometry0D, GeometryPoint2D, _Geometry, _geographic_aspec
 
 from ._grid_geometry import Grid2D
 from ._distance import xy_to_bbox
+from ._hanging_nodes import conforming_element_table
 from .._path import normalize_output_path
 
 
 if TYPE_CHECKING:
-    from ._FM_geometry_layered import GeometryFM3D
     from matplotlib.axes import Axes
     from numpy.typing import ArrayLike
 
@@ -72,7 +72,7 @@ class GeometryFMPlotter:
 
     """
 
-    def __init__(self, geometry: GeometryFM2D | GeometryFM3D) -> None:
+    def __init__(self, geometry: GeometryFM2D) -> None:
         self.g = geometry
 
     def __call__(
@@ -271,6 +271,10 @@ class GeometryFMPlotter:
 
 
 class _GeometryFM(_Geometry):
+    # Submesh type from the dfsu header, written back as read. Informative
+    # only: Hanging nodes are found from the geometry, never from this value.
+    _submesh_type: int | None = None
+
     def __init__(
         self,
         *,
@@ -837,6 +841,14 @@ class GeometryFM2D(_GeometryFM):
         """Lists of polygons defining domain outline."""
         return self._get_boundary_polygons()
 
+    @cached_property
+    def _conforming_element_table(self) -> Any:
+        """Element table with each Hanging node as an extra corner of its Element.
+
+        The same object as `element_table` when there are no Hanging nodes.
+        """
+        return conforming_element_table(self.node_coordinates, self.element_table)
+
     def contains(self, points: np.ndarray) -> np.ndarray:
         """Test if a list of points are contained by mesh.
 
@@ -904,7 +916,7 @@ class GeometryFM2D(_GeometryFM):
 
     def _get_boundary_faces(self) -> np.ndarray:
         """Construct list of faces."""
-        element_table = self.element_table
+        element_table = self._conforming_element_table
 
         all_faces = []
         for el in element_table:
@@ -1067,7 +1079,7 @@ class GeometryFM2D(_GeometryFM):
         codes = self.codes[node_ids]
         elem_ids = self.element_ids[sel_elements]
 
-        return GeometryFM2D(
+        geom = GeometryFM2D(
             node_coordinates=node_coords,
             codes=codes,
             node_ids=node_ids,
@@ -1077,6 +1089,8 @@ class GeometryFM2D(_GeometryFM):
             dfsu_type=self._type,
             reindex=True,
         )
+        geom._submesh_type = self._submesh_type
+        return geom
 
     def _get_nodes_and_table_for_elements(
         self, elements: np.ndarray | list[int]
@@ -1122,11 +1136,14 @@ class GeometryFM2D(_GeometryFM):
             node-centered data
 
         """
-        geometry = self
-        nc = geometry.node_coordinates
-        ec = geometry.element_coordinates
-        elem_table = geometry.element_table
-        return _get_node_centered_data(nc, elem_table, ec, data, extrapolate)
+        return _get_node_centered_data(
+            self.node_coordinates,
+            self.element_table,
+            self.element_coordinates,
+            data,
+            extrapolate,
+            conforming_table=self._conforming_element_table,
+        )
 
     def to_shapely(self) -> Any:
         """Export mesh as shapely MultiPolygon.

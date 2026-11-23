@@ -541,13 +541,15 @@ class GeometryFM3D(_GeometryFM):
         kwargs = _subset_kwargs(self, sel, node_layers=node_layers)
         if self._layering.is_single_column(sel):
             return GeometryFMVerticalColumn(**kwargs)
-        return GeometryFM3D(**kwargs)
+        geom = GeometryFM3D(**kwargs)
+        geom._submesh_type = self._submesh_type
+        return geom
 
     def _layer_to_2d_geometry(self, elements: list[int]) -> GeometryFM2D:
         elem2d = self.elem2d_ids[elements]
         geom2d = self.geometry2d
         node_ids, elem_tbl = geom2d._get_nodes_and_table_for_elements(elem2d)
-        return GeometryFM2D(
+        layer = GeometryFM2D(
             node_coordinates=geom2d.node_coordinates[node_ids],
             codes=geom2d.codes[node_ids],
             node_ids=node_ids,
@@ -557,6 +559,8 @@ class GeometryFM3D(_GeometryFM):
             dfsu_type=DfsuFileType.Dfsu2D,
             reindex=True,
         )
+        layer._submesh_type = self._submesh_type
+        return layer
 
     def find_index(
         self,
