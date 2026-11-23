@@ -2,10 +2,10 @@
 
 In a Locally refined mesh a coarse Face (A-C) meets two or more fine Faces
 (A-B, B-C) at a Hanging node B. The element table stores the coarse Element
-with corners A and C only, so the coarse Face and the fine Faces each occur
+with Nodes A and C only, so the coarse Face and the fine Faces each occur
 once, like Faces on the domain boundary.
 
-The conforming element table inserts each Hanging node as an extra corner of
+The conforming element table inserts each Hanging node as an extra Node of
 the coarse Element, between the ends of the Face it lies on. Then every
 interior Face is again shared by exactly two Elements.
 
@@ -25,7 +25,7 @@ _TOLERANCE = 1e-6
 
 
 def conforming_element_table(node_coordinates: np.ndarray, element_table: Any) -> Any:
-    """Element table with each Hanging node as an extra corner of its Element.
+    """Element table with each Hanging node as an extra Node of its Element.
 
     Returns `element_table` itself, the same object, when there are no
     Hanging nodes.
@@ -37,21 +37,23 @@ def conforming_element_table(node_coordinates: np.ndarray, element_table: Any) -
     lengths = np.fromiter(
         (len(el) for el in element_table), dtype=int, count=n_elements
     )
-    corners = np.concatenate([np.asarray(el) for el in element_table]).astype(np.int64)
+    element_nodes = np.concatenate([np.asarray(el) for el in element_table]).astype(
+        np.int64
+    )
     first = np.repeat(np.cumsum(lengths) - lengths, lengths)
-    local = np.arange(corners.size) - first
-    following = corners[first + (local + 1) % np.repeat(lengths, lengths)]
+    local = np.arange(element_nodes.size) - first
+    next_nodes = element_nodes[first + (local + 1) % np.repeat(lengths, lengths)]
 
     # Faces that occur once: on the domain boundary, or beside a Hanging node
-    lo = np.minimum(corners, following)
-    hi = np.maximum(corners, following)
-    key = lo * (int(max(corners.max(), following.max())) + 1) + hi
+    lo = np.minimum(element_nodes, next_nodes)
+    hi = np.maximum(element_nodes, next_nodes)
+    key = lo * (int(max(element_nodes.max(), next_nodes.max())) + 1) + hi
     _, inverse, counts = np.unique(key, return_inverse=True, return_counts=True)
     once = np.flatnonzero(counts[inverse] == 1)
     if once.size < 3:
         return element_table
 
-    start, end = corners[once], following[once]
+    start, end = element_nodes[once], next_nodes[once]
     xy = np.asarray(node_coordinates)[:, :2]
     a, c = xy[start], xy[end]
     d = c - a
@@ -99,8 +101,8 @@ def conforming_element_table(node_coordinates: np.ndarray, element_table: Any) -
     for element, faces in inserted.items():
         el = np.asarray(element_table[element])
         new: list[int] = []
-        for j, corner in enumerate(el.tolist()):
-            new.append(corner)
+        for j, node_id in enumerate(el.tolist()):
+            new.append(node_id)
             new.extend(faces.get(j, []))
         table[element] = np.asarray(new, dtype=el.dtype)
     return table

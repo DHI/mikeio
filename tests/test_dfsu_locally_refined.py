@@ -39,10 +39,10 @@ def linear(x: Any, y: Any) -> Any:
     return 2 * x + 3 * y + 10
 
 
-def quad_mesh_with_hanging_node(dy: float = 0.0) -> GeometryFM2D:
+def quad_mesh_with_hanging_node() -> GeometryFM2D:
     """A coarse quad (left) beside two fine quads (right).
 
-    Node 6 at (1, 1 + dy) is a Hanging node on the coarse Face (1, 0)-(1, 2).
+    Node 6 at (1, 1) is a Hanging node on the coarse Face (1, 0)-(1, 2).
     """
     nc = np.array(
         [
@@ -52,7 +52,7 @@ def quad_mesh_with_hanging_node(dy: float = 0.0) -> GeometryFM2D:
             [0.0, 2.0, 0.0],
             [2.0, 0.0, 0.0],
             [2.0, 1.0, 0.0],
-            [1.0, 1.0 + dy, 0.0],
+            [1.0, 1.0, 0.0],
             [2.0, 2.0, 0.0],
         ]
     )

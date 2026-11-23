@@ -843,7 +843,7 @@ class GeometryFM2D(_GeometryFM):
 
     @cached_property
     def _conforming_element_table(self) -> Any:
-        """Element table with each Hanging node as an extra corner of its Element.
+        """Element table with each Hanging node as an extra Node of its Element.
 
         The same object as `element_table` when there are no Hanging nodes.
         """

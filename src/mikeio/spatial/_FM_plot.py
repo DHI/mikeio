@@ -470,7 +470,7 @@ def _triangulate_conforming(
 def _fan_triangles(
     nc: np.ndarray, element: np.ndarray, hanging: np.ndarray
 ) -> list[np.ndarray]:
-    """Triangles fanned out from a corner, trying the Hanging nodes first."""
+    """Triangles fanned out from one Node, trying the Hanging nodes first."""
     n = len(element)
     xy = nc[element, :2]
     area = 0.5 * abs(
@@ -487,6 +487,8 @@ def _fan_triangles(
         )
         if np.all(tri_area > 1e-9 * area):
             return [element[i] for i in idx]
+    # Not reached for a convex Element: a fan from a Hanging node that is
+    # alone on its Face has no zero-area triangle.
     return [element[i] for i in idx]
 
 

@@ -475,6 +475,7 @@ class GeometryFM3D(_GeometryFM):
                     zn[elem_nodes[jn]] = min(zn[elem_nodes[jn]], znj_3d)
             geom.node_coordinates[:, 2] = zn
 
+        geom._submesh_type = self._submesh_type
         return geom
 
     def _elements_in_area(self, area: Area) -> np.ndarray:
