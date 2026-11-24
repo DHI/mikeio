@@ -21,7 +21,6 @@ that was built in code.
 from __future__ import annotations
 
 from collections.abc import Sequence
-from dataclasses import dataclass
 
 import numpy as np
 from numpy.typing import ArrayLike, NDArray
@@ -31,139 +30,14 @@ from scipy.spatial import cKDTree
 _TOLERANCE = 1e-6
 
 
-@dataclass(frozen=True)
-class FlatElementTable:
-    """Element table as one flat array of Nodes.
-
-    Element `i` has the Nodes `nodes[offsets[i]:offsets[i + 1]]`, in
-    counter-clockwise order.
-    """
-
-    nodes: NDArray[np.int64]
-    offsets: NDArray[np.int64]
-
-    @staticmethod
-    def from_element_table(element_table: Sequence[ArrayLike]) -> FlatElementTable:
-        """Flatten an element table: one array of Nodes per Element."""
-        n_elements = len(element_table)
-        lengths = np.fromiter(
-            (len(el) for el in element_table),  # type: ignore[arg-type]
-            dtype=np.int64,
-            count=n_elements,
-        )
-        offsets = np.zeros(n_elements + 1, dtype=np.int64)
-        np.cumsum(lengths, out=offsets[1:])
-        if n_elements == 0:
-            return FlatElementTable(np.zeros(0, dtype=np.int64), offsets)
-        nodes = np.concatenate([np.asarray(el) for el in element_table])
-        return FlatElementTable(nodes.astype(np.int64), offsets)
-
-    @property
-    def n_elements(self) -> int:
-        """Number of Elements."""
-        return len(self.offsets) - 1
-
-    @property
-    def lengths(self) -> NDArray[np.int64]:
-        """Number of Nodes of each Element."""
-        return np.diff(self.offsets)
-
-    @property
-    def element(self) -> NDArray[np.int64]:
-        """The Element of each entry in `nodes`."""
-        return np.repeat(np.arange(self.n_elements, dtype=np.int64), self.lengths)
-
-    @property
-    def position(self) -> NDArray[np.int64]:
-        """The position of each entry in `nodes` within its Element."""
-        return np.arange(self.nodes.size, dtype=np.int64) - self.offsets[self.element]
-
-    def faces(self) -> NDArray[np.int64]:
-        """Faces as (start, end) Node pairs, Element by Element.
-
-        Face `j` of an Element runs from its Node `j` to Node `j + 1`.
-        """
-        element = self.element
-        following = self.position + 1
-        following[following == self.lengths[element]] = 0
-        end = self.nodes[self.offsets[element] + following]
-        return np.column_stack([self.nodes, end])
-
-    def boundary_faces(self) -> NDArray[np.int64]:
-        """Faces that occur once, in the order of their sorted Node pair."""
-        faces = self.faces()
-        _, first, counts = np.unique(
-            _face_keys(faces), return_index=True, return_counts=True
-        )
-        return faces[first[counts == 1]]
-
-
-@dataclass(frozen=True)
-class ConformingElementTable(FlatElementTable):
-    """Element table with each Hanging node as an extra Node of its Element.
-
-    `hanging[k]` is True when `nodes[k]` is a Hanging node inserted into its
-    Element; these Nodes are not in the element table.
-    """
-
-    hanging: NDArray[np.bool_]
-
-    @property
-    def refined(self) -> NDArray[np.bool_]:
-        """True for each Element with Hanging nodes on its Faces."""
-        return np.add.reduceat(self.hanging, self.offsets[:-1]) > 0
-
-    def triangles(self, node_coordinates: NDArray[np.floating]) -> NDArray[np.int64]:
-        """Split every Element into triangles, none with zero area.
-
-        A quad without Hanging nodes is split as `0-1-2` and `2-3-0`. An
-        Element with Hanging nodes is fanned out from a Hanging node that is
-        alone on its Face; when there is none, it is split by ear clipping.
-        """
-        xy = np.asarray(node_coordinates, dtype=float)[:, :2]
-        lengths = self.lengths
-        refined = self.refined
-        first = self.offsets[:-1]
-
-        plain = first[~refined & (lengths == 3)]
-        quads = self.nodes[first[~refined & (lengths == 4)][:, None] + np.arange(4)]
-        tris = [
-            self.nodes[plain[:, None] + np.arange(3)],
-            quads[:, [0, 1, 2]],
-            quads[:, [2, 3, 0]],
-        ]
-
-        unsplit: list[int] = []
-        for n in np.unique(lengths[refined]).tolist():
-            elements = np.flatnonzero(refined & (lengths == n))
-            entries = first[elements][:, None] + np.arange(n)
-            hanging = self.hanging[entries]
-            alone = (
-                hanging & ~np.roll(hanging, 1, axis=1) & ~np.roll(hanging, -1, axis=1)
-            )
-            apex = np.argmax(alone, axis=1)
-            fan = (apex[:, None, None] + _fan(n)) % n
-            fan_nodes = self.nodes[np.take_along_axis(entries[:, None, :], fan, axis=2)]
-            area = _signed_area(xy[fan_nodes])
-            ok = alone.any(axis=1) & np.all(
-                area > _TOLERANCE * area.sum(axis=1, keepdims=True), axis=1
-            )
-            tris.append(fan_nodes[ok].reshape(-1, 3))
-            unsplit.extend(elements[~ok].tolist())
-
-        for element in unsplit:
-            nodes = self.nodes[self.offsets[element] : self.offsets[element + 1]]
-            tris.append(_ear_clip(xy, nodes))
-        return np.concatenate(tris).astype(np.int64)
-
-
 def conforming_element_table(
     node_coordinates: NDArray[np.floating],
-    element_table: Sequence[ArrayLike],
-) -> ConformingElementTable | None:
+    element_table: np.ndarray | Sequence[ArrayLike],
+) -> list[NDArray[np.int64]] | None:
     """Element table with each Hanging node as an extra Node of its Element.
 
-    Returns None when there are no Hanging nodes.
+    The same format as `element_table`: one array of Nodes per Element, in
+    counter-clockwise order. Returns None when there are no Hanging nodes.
 
     Examples
     --------
@@ -172,18 +46,18 @@ def conforming_element_table(
 
     >>> nc = np.array([[0, 0, 0], [1, 0, 0], [1, 2, 0], [1, 1, 0], [2, 1, 0]])
     >>> table = conforming_element_table(nc, [[0, 1, 2], [1, 4, 3], [3, 4, 2]])
-    >>> table.nodes[table.offsets[0] : table.offsets[1]]
+    >>> table[0]
     array([0, 1, 3, 2])
     >>> conforming_element_table(nc, [[0, 1, 2]]) is None
     True
 
     """
-    flat = FlatElementTable.from_element_table(element_table)
-    if flat.n_elements == 0:
+    connectivity, n_nodes = to_connectivity(element_table)
+    if n_nodes.size == 0:
         return None
 
     # Faces that occur once: on the domain boundary, or beside a Hanging node
-    faces = flat.faces()
+    faces, element, position = _faces(connectivity, n_nodes)
     _, inverse, counts = np.unique(
         _face_keys(faces), return_inverse=True, return_counts=True
     )
@@ -222,23 +96,138 @@ def conforming_element_table(
         return None
     face, node, t = face[on_face], node[on_face], t[on_face]
 
-    # Insert each Hanging node after the start Node of its Face, in order
-    # along the Face: sort all entries by Element, position, then distance
-    # along the Face (0 for the Element's own Nodes).
+    # Rebuild only the Elements that get Hanging nodes. Each Hanging node
+    # goes after the start Node of its Face, in order along the Face: sort
+    # by Element, position, then distance along the Face (0 for the
+    # Element's own Nodes).
     entry = once[face]
-    element = np.concatenate([flat.element, flat.element[entry]])
-    position = np.concatenate([flat.position, flat.position[entry]])
-    along = np.concatenate([np.zeros(flat.nodes.size), t])
-    order = np.lexsort((along, position, element))
+    refined = np.unique(element[entry])
+    own = np.isin(element, refined)
+    order = np.lexsort(
+        (
+            np.concatenate([np.zeros(own.sum()), t]),
+            np.concatenate([position[own], position[entry]]),
+            np.concatenate([element[own], element[entry]]),
+        )
+    )
+    nodes = np.concatenate([connectivity[own], node])[order]
+    sizes = n_nodes[refined] + np.bincount(element[entry])[refined]
 
-    nodes = np.concatenate([flat.nodes, node])[order]
-    hanging = np.concatenate(
-        [np.zeros(flat.nodes.size, dtype=bool), np.ones(node.size, dtype=bool)]
-    )[order]
-    lengths = flat.lengths + np.bincount(flat.element[entry], minlength=flat.n_elements)
-    offsets = np.zeros(flat.n_elements + 1, dtype=np.int64)
-    np.cumsum(lengths, out=offsets[1:])
-    return ConformingElementTable(nodes=nodes, offsets=offsets, hanging=hanging)
+    table = [np.asarray(el) for el in element_table]
+    for e, el in zip(refined.tolist(), np.split(nodes, np.cumsum(sizes)[:-1])):
+        table[e] = el.astype(table[e].dtype)
+    return table
+
+
+def boundary_faces(
+    element_table: np.ndarray | Sequence[ArrayLike],
+) -> NDArray[np.int64]:
+    """Faces that occur once, as (start, end) Node pairs.
+
+    Ordered by their sorted Node pair; each in the direction of its Element.
+    """
+    faces, _, _ = _faces(*to_connectivity(element_table))
+    _, first, counts = np.unique(
+        _face_keys(faces), return_index=True, return_counts=True
+    )
+    return faces[first[counts == 1]]
+
+
+def triangulate(
+    node_coordinates: NDArray[np.floating],
+    element_table: np.ndarray | Sequence[ArrayLike],
+    conforming: np.ndarray | Sequence[ArrayLike],
+) -> NDArray[np.int64]:
+    """Split each Element of the conforming element table into triangles.
+
+    None of the triangles has zero area. A quad without Hanging nodes is
+    split as `0-1-2` and `2-3-0`. An Element with Hanging nodes is fanned
+    out from a Hanging node that is alone on its Face; when there is none,
+    it is split by ear clipping.
+    """
+    xy = np.asarray(node_coordinates, dtype=float)[:, :2]
+    connectivity, n_nodes = to_connectivity(conforming)
+    original, original_n_nodes = to_connectivity(element_table)
+    element = np.repeat(np.arange(n_nodes.size), n_nodes)
+    refined = n_nodes != original_n_nodes
+
+    # A Hanging node is a Node of a refined conforming Element that is not a
+    # Node of the Element in the element table
+    in_refined = refined[element]
+    original_element = np.repeat(np.arange(n_nodes.size), original_n_nodes)
+    original_in_refined = refined[original_element]
+    key = int(max(connectivity.max(), original.max())) + 1
+    hanging = np.zeros(connectivity.size, dtype=bool)
+    hanging[in_refined] = ~np.isin(
+        element[in_refined] * key + connectivity[in_refined],
+        original_element[original_in_refined] * key + original[original_in_refined],
+    )
+
+    first = np.zeros(n_nodes.size, dtype=np.int64)
+    np.cumsum(n_nodes[:-1], out=first[1:])
+    plain = first[~refined & (n_nodes == 3)]
+    quads = connectivity[first[~refined & (n_nodes == 4)][:, None] + np.arange(4)]
+    tris = [
+        connectivity[plain[:, None] + np.arange(3)],
+        quads[:, [0, 1, 2]],
+        quads[:, [2, 3, 0]],
+    ]
+
+    unsplit: list[int] = []
+    for n in np.unique(n_nodes[refined]).tolist():
+        elements = np.flatnonzero(refined & (n_nodes == n))
+        entries = first[elements][:, None] + np.arange(n)
+        on_face = hanging[entries]
+        alone = on_face & ~np.roll(on_face, 1, axis=1) & ~np.roll(on_face, -1, axis=1)
+        apex = np.argmax(alone, axis=1)
+        fan = (apex[:, None, None] + _fan(n)) % n
+        fan_nodes = connectivity[np.take_along_axis(entries[:, None, :], fan, axis=2)]
+        area = _signed_area(xy[fan_nodes])
+        ok = alone.any(axis=1) & np.all(
+            area > _TOLERANCE * area.sum(axis=1, keepdims=True), axis=1
+        )
+        tris.append(fan_nodes[ok].reshape(-1, 3))
+        unsplit.extend(elements[~ok].tolist())
+
+    for e in unsplit:
+        tris.append(_ear_clip(xy, connectivity[first[e] : first[e] + n_nodes[e]]))
+    return np.concatenate(tris).astype(np.int64)
+
+
+def to_connectivity(
+    element_table: np.ndarray | Sequence[ArrayLike],
+) -> tuple[NDArray[np.int64], NDArray[np.int64]]:
+    """The element table as a dfsu file stores it: Connectivity and No of nodes.
+
+    Connectivity holds the Nodes of all Elements, one Element after the
+    other; No of nodes holds the number of Nodes of each Element.
+    """
+    n_elements = len(element_table)
+    n_nodes = np.fromiter(
+        (len(el) for el in element_table),  # type: ignore[arg-type]
+        dtype=np.int64,
+        count=n_elements,
+    )
+    if n_elements == 0:
+        return np.zeros(0, dtype=np.int64), n_nodes
+    connectivity = np.concatenate([np.asarray(el) for el in element_table])
+    return connectivity.astype(np.int64), n_nodes
+
+
+def _faces(
+    connectivity: NDArray[np.int64], n_nodes: NDArray[np.int64]
+) -> tuple[NDArray[np.int64], NDArray[np.int64], NDArray[np.int64]]:
+    """Faces as (start, end) Node pairs, with their Element and position.
+
+    Face `j` of an Element runs from its Node `j` to Node `j + 1`.
+    """
+    element = np.repeat(np.arange(n_nodes.size, dtype=np.int64), n_nodes)
+    first = np.cumsum(n_nodes) - n_nodes
+    position = np.arange(connectivity.size, dtype=np.int64) - first[element]
+    following = position + 1
+    following[following == n_nodes[element]] = 0
+    end = connectivity[first[element] + following]
+    return np.column_stack([connectivity, end]), element, position
 
 
 def _face_keys(faces: NDArray[np.int64]) -> NDArray[np.int64]:

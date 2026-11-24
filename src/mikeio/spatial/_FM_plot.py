@@ -15,7 +15,7 @@ from scipy.sparse import csr_matrix
 
 from .._deprecation import _warn_deprecated
 from ._distance import relative_cumulative_distance
-from ._FM_geometry_submesh import ConformingElementTable, FlatElementTable
+from ._FM_geometry_submesh import to_connectivity, triangulate
 
 if TYPE_CHECKING:
     from ._FM_geometry import GeometryFM2D
@@ -351,14 +351,14 @@ def _get_tris(
     ec: np.ndarray,
     z: np.ndarray,
     n_refinements: int,
-    conforming: ConformingElementTable | None = None,
+    conforming: list[NDArray[np.int64]] | None = None,
 ) -> tuple[Triangulation, np.ndarray]:
     import matplotlib.tri as tri
 
     if conforming is None:
         elem_table, _, _ = _create_tri_only_element_table(nc, element_table, ec, z)
     else:
-        elem_table = conforming.triangles(nc)
+        elem_table = triangulate(nc, element_table, conforming)
     triang = tri.Triangulation(nc[:, 0], nc[:, 1], elem_table)
 
     zn = _get_node_centered_data(nc, element_table, ec, z, conforming=conforming)
@@ -443,16 +443,15 @@ def _to_polygons(node_coordinates: np.ndarray, element_table: np.ndarray) -> lis
 
 
 def _create_node_element_matrix(
-    element_table: np.ndarray | FlatElementTable, num_nodes: int
+    element_table: np.ndarray | Sequence[np.ndarray], num_nodes: int
 ) -> csr_matrix:
-    if isinstance(element_table, FlatElementTable):
-        row_ind = element_table.nodes
-        col_ind = element_table.element
-        n_elements = element_table.n_elements
-    else:
+    if isinstance(element_table, np.ndarray) and element_table.ndim == 2:
         row_ind = element_table.ravel()
         col_ind = np.repeat(np.arange(element_table.shape[0]), element_table.shape[1])
-        n_elements = element_table.shape[0]
+    else:
+        row_ind, n_nodes = to_connectivity(element_table)
+        col_ind = np.repeat(np.arange(n_nodes.size), n_nodes)
+    n_elements = len(element_table)
     data = np.ones(len(row_ind), dtype=int)
     connectivity_matrix = csr_matrix(
         (data, (row_ind, col_ind)), shape=(num_nodes, n_elements)
@@ -466,7 +465,7 @@ def _get_node_centered_data(
     element_coordinates: np.ndarray,
     data: np.ndarray,
     extrapolate: bool = True,
-    conforming: ConformingElementTable | None = None,
+    conforming: list[NDArray[np.int64]] | None = None,
 ) -> np.ndarray:
     """convert cell-centered data to node-centered by pseudo-laplacian method.
 
@@ -474,7 +473,7 @@ def _get_node_centered_data(
     node, so each Element is used whole, with its own center.
     """
     nc = node_coordinates
-    elem_table: np.ndarray | FlatElementTable
+    elem_table: np.ndarray | Sequence[np.ndarray]
     if conforming is None:
         elem_table, ec, data = _create_tri_only_element_table(
             nc, element_table, element_coordinates, data

@@ -35,8 +35,7 @@ from ._geometry import Geometry0D, GeometryPoint2D, _Geometry, _geographic_aspec
 from ._grid_geometry import Grid2D
 from ._distance import xy_to_bbox
 from ._FM_geometry_submesh import (
-    ConformingElementTable,
-    FlatElementTable,
+    boundary_faces,
     conforming_element_table,
 )
 from .._path import normalize_output_path
@@ -846,7 +845,7 @@ class GeometryFM2D(_GeometryFM):
         return self._get_boundary_polygons()
 
     @cached_property
-    def _conforming_element_table(self) -> ConformingElementTable | None:
+    def _conforming_element_table(self) -> list[NDArray[np.int64]] | None:
         """Element table with each Hanging node as an extra Node of its Element.
 
         None when there are no Hanging nodes.
@@ -920,12 +919,8 @@ class GeometryFM2D(_GeometryFM):
 
     def _get_boundary_faces(self) -> np.ndarray:
         """Faces that occur once, with Hanging nodes taken into account."""
-        table = self._conforming_element_table
-        if table is None:
-            return FlatElementTable.from_element_table(
-                self.element_table
-            ).boundary_faces()
-        return table.boundary_faces()
+        conforming = self._conforming_element_table
+        return boundary_faces(self.element_table if conforming is None else conforming)
 
     def isel(
         self, idx: Sequence[int] | int, keepdims: bool = False, **kwargs: Any
