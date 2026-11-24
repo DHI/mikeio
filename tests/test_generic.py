@@ -1064,9 +1064,31 @@ def test_concat_missing_input_fails(tmp_path: Path) -> None:
         )
 
 
-@pytest.mark.parametrize(("keep", "junction_value"), [("last", 2.0), ("first", 1.0)])
-def test_concat_res1d(tmp_path: Path, keep: Keep, junction_value: float) -> None:
-    # network_a: 00:00 to 02:00, values 1.0; network_b: 01:00 to 03:00, values 2.0
+@pytest.mark.parametrize(
+    ("keep", "n_timesteps", "junction_value"), [("last", 9, 2.0), ("first", 8, 1.0)]
+)
+def test_concat_res1d(
+    tmp_path: Path, keep: Keep, n_timesteps: int, junction_value: float
+) -> None:
+    """Concat two synthetic res1d files with overlapping, non-equidistant time axes.
+
+    Both files hold 3 catchments (Hill, Meadow, Town) and 3 items (TotalRunOff,
+    RunOff, ActualRainfall), with 6 timesteps each on 2025-01-01. Every value is
+    constant in time; the test checks the first item (TotalRunOff) for Hill:
+
+        file       timesteps                            TotalRunOff
+        network_a  00:00 00:10 00:25 01:00 01:30 02:00  1.0
+        network_b  01:00 01:15 01:40 02:00 02:30 03:00  2.0
+
+    The overlap is 01:00 to 02:00: network_a has 3 timesteps in it, network_b 4,
+    and only 01:00 and 02:00 are shared. The junction is 01:00, where
+    network_b starts.
+
+    keep="last": network_a until 01:00, then all of network_b, so 9 timesteps.
+    01:00 has network_b's value, 2.0.
+    keep="first": all of network_a, then network_b after 02:00 (02:30, 03:00),
+    so 8 timesteps. 01:00 has network_a's value, 1.0.
+    """
     fp = tmp_path / "merged.res1d"
 
     generic.concat(
@@ -1085,6 +1107,7 @@ def test_concat_res1d(tmp_path: Path, keep: Keep, junction_value: float) -> None
     title = dfs.FileInfo.ApplicationTitle
     dfs.Close()
     assert title == "MIKE1D"
+    assert len(times) == n_timesteps
     assert times[0] == datetime(2025, 1, 1, 0)
     assert times[-1] == datetime(2025, 1, 1, 3)
     junction = times.index(datetime(2025, 1, 1, 1))
