@@ -17,7 +17,7 @@ MIKE writes a Submesh type to the dfsu header: 1 for a Locally refined mesh, 0 o
 
 Hanging nodes are found from the node coordinates and the element table only. No code branches on the Submesh type.
 
-Only Faces that occur once are candidates. A Node of another once-only Face is a Hanging node on Face A–C when it lies on segment A–C, strictly between A and C, within a tolerance relative to the Face length. Each Hanging node is inserted, in counter-clockwise order, as an extra Node of the Element that owns the Face. The result is an internal, cached *conforming element table* on `GeometryFM2D` (`_FM_geometry_submesh.py`), in the same format as `element_table` (one array of Nodes per Element), used for boundary Faces, the plot triangulation and node-centred data. `GeometryFM3D` gets it through its 2D geometry.
+Only Faces that occur once are candidates. A Node of another once-only Face is a Hanging node on Face A–C when it lies on segment A–C, strictly between A and C, within a tolerance relative to the Face length. Each Hanging node is inserted, in counter-clockwise order, as an extra Node of the Element that owns the Face. The result is an internal, cached *conforming element table* on `GeometryFM2D` (`_insert_hanging_nodes` in `_FM_geometry.py`), in the same format as `element_table` (one array of Nodes per Element), used for boundary Faces, the plot triangulation and node-centred data. `GeometryFM3D` gets it through its 2D geometry.
 
 `element_table` stays exactly as stored in the file. The conforming element table is never exposed.
 

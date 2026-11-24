@@ -3,7 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Any, Literal, Sequence, TYPE_CHECKING
 
-from numpy.typing import NDArray
+from numpy.typing import ArrayLike, NDArray
 from matplotlib.axes import Axes
 from matplotlib.cm import ScalarMappable
 from matplotlib.collections import PatchCollection
@@ -15,11 +15,13 @@ from scipy.sparse import csr_matrix
 
 from .._deprecation import _warn_deprecated
 from ._distance import relative_cumulative_distance
-from ._FM_geometry_submesh import to_connectivity, triangulate
 
 if TYPE_CHECKING:
     from ._FM_geometry import GeometryFM2D
 
+
+# Smallest triangle area when splitting an Element, relative to the Element
+_MIN_RELATIVE_AREA = 1e-6
 
 MESH_COL = "0.95"
 MESH_COL_DARK = "0.6"
@@ -358,7 +360,7 @@ def _get_tris(
     if conforming is None:
         elem_table, _, _ = _create_tri_only_element_table(nc, element_table, ec, z)
     else:
-        elem_table = triangulate(nc, element_table, conforming)
+        elem_table = _triangulate_conforming(nc, element_table, conforming)
     triang = tri.Triangulation(nc[:, 0], nc[:, 1], elem_table)
 
     zn = _get_node_centered_data(nc, element_table, ec, z, conforming=conforming)
@@ -442,6 +444,114 @@ def _to_polygons(node_coordinates: np.ndarray, element_table: np.ndarray) -> lis
     return polygons
 
 
+def _triangulate_conforming(
+    node_coordinates: NDArray[np.floating],
+    element_table: np.ndarray | Sequence[ArrayLike],
+    conforming: np.ndarray | Sequence[ArrayLike],
+) -> NDArray[np.int64]:
+    """Split each Element of the conforming element table into triangles.
+
+    None of the triangles has zero area. A quad without Hanging nodes is
+    split as `0-1-2` and `2-3-0`. An Element with Hanging nodes is fanned
+    out from a Hanging node that is alone on its Face; when there is none,
+    it is split by ear clipping.
+    """
+    # deferred: _FM_geometry imports this module (#1127)
+    from ._FM_geometry import _to_connectivity
+
+    xy = np.asarray(node_coordinates, dtype=float)[:, :2]
+    connectivity, n_nodes = _to_connectivity(conforming)
+    original, original_n_nodes = _to_connectivity(element_table)
+    element = np.repeat(np.arange(n_nodes.size), n_nodes)
+    refined = n_nodes != original_n_nodes
+
+    # A Hanging node is a Node of a refined conforming Element that is not a
+    # Node of the Element in the element table
+    in_refined = refined[element]
+    original_element = np.repeat(np.arange(n_nodes.size), original_n_nodes)
+    original_in_refined = refined[original_element]
+    key = int(max(connectivity.max(), original.max())) + 1
+    hanging = np.zeros(connectivity.size, dtype=bool)
+    hanging[in_refined] = ~np.isin(
+        element[in_refined] * key + connectivity[in_refined],
+        original_element[original_in_refined] * key + original[original_in_refined],
+    )
+
+    first = np.zeros(n_nodes.size, dtype=np.int64)
+    np.cumsum(n_nodes[:-1], out=first[1:])
+    plain = first[~refined & (n_nodes == 3)]
+    quads = connectivity[first[~refined & (n_nodes == 4)][:, None] + np.arange(4)]
+    tris = [
+        connectivity[plain[:, None] + np.arange(3)],
+        quads[:, [0, 1, 2]],
+        quads[:, [2, 3, 0]],
+    ]
+
+    unsplit: list[int] = []
+    for n in np.unique(n_nodes[refined]).tolist():
+        elements = np.flatnonzero(refined & (n_nodes == n))
+        entries = first[elements][:, None] + np.arange(n)
+        on_face = hanging[entries]
+        alone = on_face & ~np.roll(on_face, 1, axis=1) & ~np.roll(on_face, -1, axis=1)
+        apex = np.argmax(alone, axis=1)
+        fan = (apex[:, None, None] + _fan(n)) % n
+        fan_nodes = connectivity[np.take_along_axis(entries[:, None, :], fan, axis=2)]
+        area = _signed_area(xy[fan_nodes])
+        ok = alone.any(axis=1) & np.all(
+            area > _MIN_RELATIVE_AREA * area.sum(axis=1, keepdims=True), axis=1
+        )
+        tris.append(fan_nodes[ok].reshape(-1, 3))
+        unsplit.extend(elements[~ok].tolist())
+
+    if np.any(~refined & (n_nodes > 4)):
+        raise ValueError("Only triangles and quads can be split into triangles")
+
+    for e in unsplit:
+        tris.append(_ear_clip(xy, connectivity[first[e] : first[e] + n_nodes[e]]))
+    return np.concatenate(tris).astype(np.int64)
+
+
+def _fan(n: int) -> NDArray[np.int64]:
+    """Triangles fanned out from position 0 of an n-sided polygon."""
+    i = np.arange(1, n - 1)
+    return np.column_stack([np.zeros_like(i), i, i + 1])
+
+
+def _signed_area(tri_xy: NDArray[np.floating]) -> NDArray[np.floating]:
+    """Signed area of triangles given as (..., 3, 2) coordinates."""
+    ab = tri_xy[..., 1, :] - tri_xy[..., 0, :]
+    ac = tri_xy[..., 2, :] - tri_xy[..., 0, :]
+    return 0.5 * (ab[..., 0] * ac[..., 1] - ab[..., 1] * ac[..., 0])
+
+
+def _ear_clip(xy: NDArray[np.floating], nodes: NDArray[np.int64]) -> NDArray[np.int64]:
+    """Triangles of a convex polygon with Nodes on its sides, none with zero area.
+
+    Only a Node where the polygon turns can be clipped, and only when the
+    rest of the polygon keeps a non-zero area.
+    """
+    remaining = nodes.tolist()
+    total = abs(_signed_area(xy[np.asarray(remaining)][_fan(len(remaining))]).sum())
+    tris: list[list[int]] = []
+    while len(remaining) > 3:
+        for k in range(len(remaining)):
+            ear = [remaining[k - 1], remaining[k], remaining[(k + 1) % len(remaining)]]
+            rest = remaining[:k] + remaining[k + 1 :]
+            ear_area = _signed_area(xy[ear])
+            rest_area = _signed_area(xy[np.asarray(rest)][_fan(len(rest))]).sum()
+            if (
+                ear_area > _MIN_RELATIVE_AREA * total
+                and rest_area > _MIN_RELATIVE_AREA * total
+            ):
+                tris.append(ear)
+                remaining = rest
+                break
+        else:  # a degenerate Element: keep a fan rather than fail
+            break
+    tris.extend(np.asarray(remaining)[_fan(len(remaining))].tolist())
+    return np.asarray(tris, dtype=np.int64)
+
+
 def _create_node_element_matrix(
     element_table: np.ndarray | Sequence[np.ndarray], num_nodes: int
 ) -> csr_matrix:
@@ -449,7 +559,10 @@ def _create_node_element_matrix(
         row_ind = element_table.ravel()
         col_ind = np.repeat(np.arange(element_table.shape[0]), element_table.shape[1])
     else:
-        row_ind, n_nodes = to_connectivity(element_table)
+        # deferred: _FM_geometry imports this module (#1127)
+        from ._FM_geometry import _to_connectivity
+
+        row_ind, n_nodes = _to_connectivity(element_table)
         col_ind = np.repeat(np.arange(n_nodes.size), n_nodes)
     n_elements = len(element_table)
     data = np.ones(len(row_ind), dtype=int)
