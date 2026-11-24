@@ -15,7 +15,7 @@ from scipy.sparse import csr_matrix
 
 from .._deprecation import _warn_deprecated
 from ._distance import relative_cumulative_distance
-from ._FM_geometry_refined import ConformingElementTable, FlatElementTable
+from ._FM_geometry_submesh import ConformingElementTable, FlatElementTable
 
 if TYPE_CHECKING:
     from ._FM_geometry import GeometryFM2D

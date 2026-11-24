@@ -5,9 +5,9 @@
 
 ## Context
 
-From MIKE 2027 a dfsu can hold a Locally refined mesh: fine Elements meet coarse Elements, and Hanging nodes lie on coarse Faces. The element table is unchanged. It stores plain triangles and quads, so a coarse Face and the fine Faces beside it each occur once, like Faces on the domain boundary. Boundary detection, the plot triangulation and node-centred data all expect each interior Face to be shared by exactly two Elements, so all three were wrong on these files (#1112).
+From MIKE 2027 the MIKE engine can produce a Submesh result. A Globally refined mesh is an ordinary Flexible Mesh, but a Locally refined mesh is not: fine Elements meet coarse Elements, and Hanging nodes lie on coarse Faces. The element table is unchanged. It stores plain triangles and quads, so a coarse Face and the fine Faces beside it each occur once, like Faces on the domain boundary. Boundary detection, the plot triangulation and node-centred data all expect each interior Face to be shared by exactly two Elements, so all three were wrong on these files (#1112).
 
-MIKE writes a Submesh type to the dfsu header, 1 for a Locally refined mesh. It is the obvious switch for a fix, but it is a statement *about* the geometry and can be wrong:
+MIKE writes a Submesh type to the dfsu header: 0 for a Globally refined mesh, 1 for a Locally refined mesh. It is the obvious switch for a fix, but it is a statement *about* the geometry and can be wrong:
 
 - `to_dfs` and other tools have dropped it, so a Locally refined mesh can arrive with no Submesh type;
 - after `sel` or `isel` it can still say 1 when no Hanging nodes are left;
@@ -17,7 +17,7 @@ MIKE writes a Submesh type to the dfsu header, 1 for a Locally refined mesh. It 
 
 Hanging nodes are found from the node coordinates and the element table only. No code branches on the Submesh type.
 
-Only Faces that occur once are candidates. A Node of another once-only Face is a Hanging node on Face A–C when it lies on segment A–C, strictly between A and C, within a tolerance relative to the Face length. Each Hanging node is inserted, in counter-clockwise order, as an extra Node of the Element that owns the Face. The result is an internal, cached *conforming element table* on `GeometryFM2D` (`_FM_geometry_refined.py`), stored as one flat array of Nodes so that its consumers are vectorized, used for boundary Faces, the plot triangulation and node-centred data. `GeometryFM3D` gets it through its 2D geometry.
+Only Faces that occur once are candidates. A Node of another once-only Face is a Hanging node on Face A–C when it lies on segment A–C, strictly between A and C, within a tolerance relative to the Face length. Each Hanging node is inserted, in counter-clockwise order, as an extra Node of the Element that owns the Face. The result is an internal, cached *conforming element table* on `GeometryFM2D` (`_FM_geometry_submesh.py`), stored as one flat array of Nodes so that its consumers are vectorized, used for boundary Faces, the plot triangulation and node-centred data. `GeometryFM3D` gets it through its 2D geometry.
 
 `element_table` stays exactly as stored in the file. The conforming element table is never exposed.
 

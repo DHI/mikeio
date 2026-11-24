@@ -1,4 +1,7 @@
-"""Locally refined mesh: Hanging nodes and the conforming element table.
+"""Submesh results: Hanging nodes and the conforming element table.
+
+A Submesh result is a Globally refined mesh or a Locally refined mesh. A
+Globally refined mesh is an ordinary Flexible Mesh and needs nothing here.
 
 In a Locally refined mesh a coarse Face (A-C) meets two or more fine Faces
 (A-B, B-C) at Hanging nodes (B). The element table stores the coarse Element
@@ -10,7 +13,9 @@ the coarse Element, between the ends of the Face it lies on. Then every
 interior Face is again shared by exactly two Elements.
 
 Hanging nodes are found from the node coordinates and the element table only,
-never from the Submesh type in the dfsu header (ADR-014).
+never from the Submesh type in the dfsu header (ADR-014). The same code
+therefore handles a Locally refined mesh that has lost its Submesh type, or
+that was built in code.
 """
 
 from __future__ import annotations

@@ -34,7 +34,7 @@ from ._geometry import Geometry0D, GeometryPoint2D, _Geometry, _geographic_aspec
 
 from ._grid_geometry import Grid2D
 from ._distance import xy_to_bbox
-from ._FM_geometry_refined import (
+from ._FM_geometry_submesh import (
     ConformingElementTable,
     FlatElementTable,
     conforming_element_table,
