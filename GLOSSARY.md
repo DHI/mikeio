@@ -80,12 +80,8 @@ A Node that lies on a Face of a neighbouring Element but is not one of that Elem
 _Avoid_: dangling node, T-junction, irregular node.
 
 **Submesh**:
-A feature of the MIKE engine that produces refined results from a coarser simulation. The result is a **Globally refined mesh** or a **Locally refined mesh**.
+A feature of the MIKE engine that produces refined results from a coarser simulation. Only a result that is a **Locally refined mesh** differs from an ordinary Flexible Mesh.
 _Avoid_: sub-mesh, refinement.
-
-**Globally refined mesh**:
-A Submesh result where the whole mesh is refined. It has no Hanging nodes, so it is an ordinary Flexible Mesh.
-_Avoid_: submesh 0.
 
 **Locally refined mesh**:
 A Flexible Mesh that contains Hanging nodes, where finer Elements meet coarser ones. Usually a Submesh result.
@@ -306,7 +302,7 @@ A time-varying Item — what users mean when they say "Item" in everyday usage. 
 _Avoid_: data item, time-varying item.
 
 **Submesh type**:
-A value in the dfsu header, set by MIKE, that tells which kind of Submesh result the file holds: 0 = Globally refined mesh, 1 = Locally refined mesh. Files from before MIKE 2027 have none (`None` in MIKE IO). It is informative only: the Geometry itself is the source of truth.
+A value in the dfsu header, set by MIKE, that tells whether the file holds a Locally refined mesh: 1 if it does, 0 otherwise. Files from before MIKE 2027 have none (`None` in MIKE IO). It is informative only: the Geometry itself is the source of truth.
 _Avoid_: submesh flag, mesh type.
 
 ## Relationships

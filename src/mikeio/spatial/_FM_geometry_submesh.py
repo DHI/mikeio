@@ -1,7 +1,7 @@
 """Submesh results: Hanging nodes and the conforming element table.
 
-A Submesh result is a Globally refined mesh or a Locally refined mesh. A
-Globally refined mesh is an ordinary Flexible Mesh and needs nothing here.
+Only a Submesh result that is a Locally refined mesh differs from an
+ordinary Flexible Mesh.
 
 In a Locally refined mesh a coarse Face (A-C) meets two or more fine Faces
 (A-B, B-C) at Hanging nodes (B). The element table stores the coarse Element

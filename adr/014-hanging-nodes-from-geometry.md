@@ -5,9 +5,9 @@
 
 ## Context
 
-From MIKE 2027 the MIKE engine can produce a Submesh result. A Globally refined mesh is an ordinary Flexible Mesh, but a Locally refined mesh is not: fine Elements meet coarse Elements, and Hanging nodes lie on coarse Faces. The element table is unchanged. It stores plain triangles and quads, so a coarse Face and the fine Faces beside it each occur once, like Faces on the domain boundary. Boundary detection, the plot triangulation and node-centred data all expect each interior Face to be shared by exactly two Elements, so all three were wrong on these files (#1112).
+From MIKE 2027 the MIKE engine can produce a Submesh result that is a Locally refined mesh: fine Elements meet coarse Elements, and Hanging nodes lie on coarse Faces. The element table is unchanged. It stores plain triangles and quads, so a coarse Face and the fine Faces beside it each occur once, like Faces on the domain boundary. Boundary detection, the plot triangulation and node-centred data all expect each interior Face to be shared by exactly two Elements, so all three were wrong on these files (#1112).
 
-MIKE writes a Submesh type to the dfsu header: 0 for a Globally refined mesh, 1 for a Locally refined mesh. It is the obvious switch for a fix, but it is a statement *about* the geometry and can be wrong:
+MIKE writes a Submesh type to the dfsu header: 1 for a Locally refined mesh, 0 otherwise. It is the obvious switch for a fix, but it is a statement *about* the geometry and can be wrong:
 
 - `to_dfs` and other tools have dropped it, so a Locally refined mesh can arrive with no Submesh type;
 - after `sel` or `isel` it can still say 1 when no Hanging nodes are left;
