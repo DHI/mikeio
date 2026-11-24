@@ -57,6 +57,10 @@ _Avoid_: unstructured dfs, FM dfs.
 A `.mesh` file containing only mesh topology (Nodes + Elements) with no dynamic data. Distinct from dfsu.
 _Avoid_: mesh-only dfs (it's not a dfs file).
 
+**res1d**:
+A MIKE 1D result file (`.res1d`), written by the MIKE 1D engine in MIKE+. Stored in the DFS format, but **not** a dfs file in mikeio's sense: `mikeio.read`/`mikeio.open` do not support it, while the generic functions (e.g. `concat`) treat it like any other DFS-format file. Its time axis is typically non-equidistant.
+_Avoid_: res1d dfs, 1D dfs, network file.
+
 ### Spatial primitives
 
 **Element**:

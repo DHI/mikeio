@@ -83,6 +83,29 @@ c[0].isel(x=1).plot()
 c
 ```
 
+The files must be in chronological order, without a gap between them, and from the same model setup (same items and static data). `keep` chooses which file wins where they overlap: `"last"` (the default), `"first"` or `"average"`. If a check fails, `concat` raises an error that names the file and what is wrong, and writes no output.
+
+### Merging res1d files
+
+`concat` works on any file in the DFS format, not only dfs files. MIKE 1D result files (`.res1d`) from MIKE+ are one example: they have a non-equidistant time axis, which the output keeps, timestamp for timestamp. A common case is a hot-started continuation that overlaps the end of the previous run. With the default `keep="last"`, the merged file holds the first file's data until the second file starts, and the second file's data from then on.
+
+Save this as `merge.py` to merge two files from the command line:
+
+```python
+import sys
+
+import mikeio.generic
+
+file1, file2, merged = sys.argv[1:]
+mikeio.generic.concat([file1, file2], merged)
+```
+
+```bash
+python merge.py File1.res1d File2.res1d File3.res1d
+```
+
+If the files can't be merged, the script exits with the error on standard error, and no output file is written.
+
 ## Difference between two files
 
 Take difference between two dfs files with same structure - e.g. to see the difference in result between two calibration runs
