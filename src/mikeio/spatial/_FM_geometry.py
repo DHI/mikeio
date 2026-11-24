@@ -34,7 +34,11 @@ from ._geometry import Geometry0D, GeometryPoint2D, _Geometry, _geographic_aspec
 
 from ._grid_geometry import Grid2D
 from ._distance import xy_to_bbox
-from ._hanging_nodes import conforming_element_table
+from ._FM_geometry_refined import (
+    ConformingElementTable,
+    FlatElementTable,
+    conforming_element_table,
+)
 from .._path import normalize_output_path
 
 
@@ -842,10 +846,10 @@ class GeometryFM2D(_GeometryFM):
         return self._get_boundary_polygons()
 
     @cached_property
-    def _conforming_element_table(self) -> Any:
+    def _conforming_element_table(self) -> ConformingElementTable | None:
         """Element table with each Hanging node as an extra Node of its Element.
 
-        The same object as `element_table` when there are no Hanging nodes.
+        None when there are no Hanging nodes.
         """
         return conforming_element_table(self.node_coordinates, self.element_table)
 
@@ -915,25 +919,13 @@ class GeometryFM2D(_GeometryFM):
         return BoundaryPolygons(exteriors=exteriors, interiors=interiors)
 
     def _get_boundary_faces(self) -> np.ndarray:
-        """Construct list of faces."""
-        element_table = self._conforming_element_table
-
-        all_faces = []
-        for el in element_table:
-            ele = [*el, el[0]]
-            for j in range(len(el)):
-                all_faces.append(ele[j : j + 2])
-
-        all_faces = np.asarray(all_faces)
-
-        all_faces_sorted = np.sort(all_faces, axis=1)
-        _, uf_id, face_counts = np.unique(
-            all_faces_sorted, axis=0, return_index=True, return_counts=True
-        )
-
-        # boundary faces are those appearing only once
-        bnd_face_id = face_counts == 1
-        return all_faces[uf_id[bnd_face_id]]
+        """Faces that occur once, with Hanging nodes taken into account."""
+        table = self._conforming_element_table
+        if table is None:
+            return FlatElementTable.from_element_table(
+                self.element_table
+            ).boundary_faces()
+        return table.boundary_faces()
 
     def isel(
         self, idx: Sequence[int] | int, keepdims: bool = False, **kwargs: Any
@@ -1142,7 +1134,7 @@ class GeometryFM2D(_GeometryFM):
             self.element_coordinates,
             data,
             extrapolate,
-            conforming_table=self._conforming_element_table,
+            conforming=self._conforming_element_table,
         )
 
     def to_shapely(self) -> Any:

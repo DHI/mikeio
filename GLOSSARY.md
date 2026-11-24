@@ -72,7 +72,7 @@ A mesh vertex — a point with coordinates referenced by Element connectivity.
 _Avoid_: vertex, point, corner.
 
 **Face**:
-The interface between an Element and one neighbouring Element, or between an Element and the domain boundary. Carries data for DFSU type 2004 (e.g. discharge across an interface). In a **Locally refined mesh**, one coarse Face can meet two fine Faces at a **Hanging node**. In layered 3D meshes, "layer face" is the horizontal interface between two stacked Elements.
+The interface between an Element and one neighbouring Element, or between an Element and the domain boundary. Carries data for DFSU type 2004 (e.g. discharge across an interface). In a **Locally refined mesh**, one coarse Face can meet two or more fine Faces at **Hanging nodes**. In layered 3D meshes, "layer face" is the horizontal interface between two stacked Elements.
 _Avoid_: edge, interface, side.
 
 **Hanging node**:
@@ -298,7 +298,7 @@ A time-varying Item — what users mean when they say "Item" in everyday usage. 
 _Avoid_: data item, time-varying item.
 
 **Submesh type**:
-A value in the dfsu header, set by MIKE, that describes the mesh (e.g. 1 = Locally refined mesh). It is informative only: the Geometry itself is the source of truth.
+A value in the dfsu header, set by MIKE, that describes the mesh (e.g. 1 = Locally refined mesh). Files from before MIKE 2027 have none (`None` in MIKE IO). It is informative only: the Geometry itself is the source of truth.
 _Avoid_: submesh flag, mesh type.
 
 ## Relationships
