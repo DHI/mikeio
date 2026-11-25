@@ -516,6 +516,17 @@ def test_getitem_time_by_position_does_not_warn(da_grid2d: DataArray) -> None:
         da[np.array([0, 1])]
 
 
+def test_dataarray_ptp_deprecated() -> None:
+    da = mikeio.DataArray(
+        data=np.array([[1.0, 5.0], [4.0, 2.0], [3.0, 3.0]]),
+        time=pd.date_range("2000-01-01", periods=3, freq="h"),
+        geometry=mikeio.Grid1D(nx=2, dx=1.0),
+    )
+    with pytest.warns(FutureWarning, match=r"max\(\) - .*min\(\)"):
+        result = da.ptp()
+    np.testing.assert_array_equal(result.to_numpy(), [3.0, 3.0])
+
+
 def test_dataarray_flipud_deprecated() -> None:
     da = mikeio.DataArray(
         data=np.arange(6.0).reshape(2, 3),
@@ -1108,7 +1119,8 @@ def test_daarray_aggregation() -> None:
     assert len(da_std.time) == 1
     assert pytest.approx(da_std.values[0]) == 0.015291579
 
-    da_ptp = da.ptp(name="peak to peak (max - min)")
+    with pytest.warns(FutureWarning, match="ptp"):
+        da_ptp = da.ptp(name="peak to peak (max - min)")
     assert isinstance(da_std, mikeio.DataArray)
     assert da_ptp.geometry == da.geometry
     assert da_ptp.start_time == da.start_time

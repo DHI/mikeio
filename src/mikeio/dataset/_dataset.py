@@ -1749,7 +1749,10 @@ class Dataset:
         return self.aggregate(axis=axis, func=np.std, **kwargs)
 
     def ptp(self, axis: int | str = 0, **kwargs: Any) -> Dataset:
-        """Range (max - min) a.k.a Peak to Peak along an axis
+        """Range (max - min) a.k.a Peak to Peak along an axis.
+
+        Deprecated since v3.6: ptp() will be removed in v4.0. Use
+        .max() - .min() instead.
         Parameters.
         ----------
         axis: (int, str, None), optional
@@ -1761,6 +1764,12 @@ class Dataset:
             dataset with peak to peak values
 
         """
+        warnings.warn(
+            "ptp() is deprecated and will be removed in v4.0. "
+            "Use .max() - .min() instead.",
+            FutureWarning,
+            stacklevel=2,
+        )
         return self.aggregate(axis=axis, func=np.ptp, **kwargs)
 
     def average(self, *, weights, axis=0, **kwargs) -> Dataset:  # type: ignore
