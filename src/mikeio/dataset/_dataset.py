@@ -544,12 +544,30 @@ class Dataset:
         keep = np.where(~drop)[0]
         return self.isel(time=keep)
 
-    def flipud(self) -> Dataset:
-        """Flip data upside down (on first non-time axis)."""
+    def _flipud(self) -> Dataset:
+        """Flip data on the first non-time axis, without warning."""
         self._data_vars = {
-            key: value.flipud() for (key, value) in self._data_vars.items()
+            key: value._flipud() for (key, value) in self._data_vars.items()
         }
         return self
+
+    def flipud(self) -> Dataset:
+        """Flip data upside down (on first non-time axis).
+
+        Deprecated since v3.6: flipud() will be removed in v4.0. It mirrors
+        values without moving coordinates; for flexible mesh data use
+        isel(element=...), and for a data-only mirror on a structured grid
+        assign np.flip(...) to values explicitly.
+        """
+        warnings.warn(
+            "flipud() is deprecated and will be removed in v4.0. It mirrors "
+            "values without moving coordinates; use isel(element=...) for "
+            "flexible mesh data, or assign np.flip(...) to values for a "
+            "data-only mirror.",
+            FutureWarning,
+            stacklevel=2,
+        )
+        return self._flipud()
 
     def squeeze(self) -> Dataset:
         """Remove axes of length 1.
