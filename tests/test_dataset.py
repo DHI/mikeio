@@ -682,6 +682,19 @@ def test_modify_selected_variable() -> None:
     assert ds.Foo.to_numpy()[0, 0] == 1.0  # type: ignore
 
 
+def test_ptp_deprecated() -> None:
+    time = pd.date_range("2000-01-01", periods=3, freq="h")
+    d = np.array([[1.0, 5.0], [4.0, 2.0], [3.0, 3.0]])
+    ds = mikeio.Dataset.from_numpy([d, 2 * d], time, [ItemInfo("Foo"), ItemInfo("Bar")])
+    with pytest.warns(FutureWarning, match=r"max\(\) - .*min\(\)") as record:
+        result = ds.ptp()
+
+    # one warning for the Dataset, not one per item
+    assert len(record) == 1
+    np.testing.assert_array_equal(result["Foo"].to_numpy(), [3.0, 3.0])
+    np.testing.assert_array_equal(result["Bar"].to_numpy(), [6.0, 6.0])
+
+
 def test_flipud_deprecated() -> None:
     nt = 2
     d = np.arange(nt * 100 * 30).reshape((nt, 100, 30)).astype(float)
