@@ -61,24 +61,36 @@ def elements_at_nodes(g: GeometryFM2D) -> list[list[int]]:
     return at
 
 
-def plane_fit(g: GeometryFM2D, values: NDArray[np.floating], n: int) -> float:
-    """Least-squares plane through the Element values around Node n, at Node n."""
-    e = elements_at_nodes(g)[n]
-    d = g.element_coordinates[e, :2] - g.node_coordinates[n, :2]
-    A = np.column_stack([np.ones(len(e)), d])
-    coef, *_ = np.linalg.lstsq(A, values[e], rcond=None)
-    return float(coef[0])
+def plane_fit(
+    g: GeometryFM2D, values: NDArray[np.floating], nodes: list[int]
+) -> list[float]:
+    """Least-squares plane through the Element values around each Node, at the Node."""
+    at = elements_at_nodes(g)
+    fits = []
+    for n in nodes:
+        e = at[n]
+        d = g.element_coordinates[e, :2] - g.node_coordinates[n, :2]
+        A = np.column_stack([np.ones(len(e)), d])
+        coef, *_ = np.linalg.lstsq(A, values[e], rcond=None)
+        fits.append(float(coef[0]))
+    return fits
 
 
 def nodes_with_a_plane(g: GeometryFM2D) -> list[int]:
     return [n for n, e in enumerate(elements_at_nodes(g)) if len(e) >= 3]
 
 
-def inverse_distance(g: GeometryFM2D, values: NDArray[np.floating], n: int) -> float:
-    e = elements_at_nodes(g)[n]
-    d = g.element_coordinates[e, :2] - g.node_coordinates[n, :2]
-    w = 1 / np.hypot(d[:, 0], d[:, 1])
-    return float((w * values[e]).sum() / w.sum())
+def inverse_distance(
+    g: GeometryFM2D, values: NDArray[np.floating], nodes: list[int]
+) -> list[float]:
+    at = elements_at_nodes(g)
+    averages = []
+    for n in nodes:
+        e = at[n]
+        d = g.element_coordinates[e, :2] - g.node_coordinates[n, :2]
+        w = 1 / np.hypot(d[:, 0], d[:, 1])
+        averages.append(float((w * values[e]).sum() / w.sum()))
+    return averages
 
 
 MESHES = {
@@ -116,7 +128,7 @@ def test_node_value_is_the_plane_fit_of_surrounding_elements(
     zn = g.get_node_centered_data(values)
 
     nodes = nodes_with_a_plane(g)
-    expected = [plane_fit(g, values, n) for n in nodes]
+    expected = plane_fit(g, values, nodes)
     assert zn[nodes] == pytest.approx(expected, abs=1e-10)
 
 
@@ -130,7 +142,7 @@ def test_node_with_fewer_than_three_elements_is_inverse_distance_average(
 
     nodes = [n for n, e in enumerate(elements_at_nodes(g)) if len(e) < 3]
     assert nodes  # the corners at least
-    expected = [inverse_distance(g, values, n) for n in nodes]
+    expected = inverse_distance(g, values, nodes)
     assert zn[nodes] == pytest.approx(expected, abs=1e-12)
 
 
@@ -151,7 +163,7 @@ def test_node_whose_weights_sum_to_zero_is_inverse_distance_average(
     zn = g.get_node_centered_data(values)
 
     assert np.isfinite(zn).all()
-    assert zn[0] == pytest.approx(inverse_distance(g, values, 0), abs=1e-12)
+    assert zn[[0]] == pytest.approx(inverse_distance(g, values, [0]), abs=1e-12)
 
 
 @pytest.mark.parametrize("extrapolate", [True, False])
@@ -206,12 +218,11 @@ def test_linear_field_is_exact_where_three_or_more_elements_meet(
     g = mikeio.Dfsu2DH(filename).geometry
     assert isinstance(g, GeometryFM2D)
     ec, nc = g.element_coordinates, g.node_coordinates
-    x0, y0 = nc[:, 0].min(), nc[:, 1].min()
 
-    zn = g.get_node_centered_data(linear(ec[:, 0] - x0, ec[:, 1] - y0))
+    zn = g.get_node_centered_data(linear(ec[:, 0], ec[:, 1]))
 
     nodes = nodes_with_a_plane(g)
-    exact = linear(nc[nodes, 0] - x0, nc[nodes, 1] - y0)
+    exact = linear(nc[nodes, 0], nc[nodes, 1])
     assert zn[nodes] == pytest.approx(exact, rel=1e-9)
 
 
@@ -223,5 +234,5 @@ def test_node_values_on_hd2d_are_the_plane_fit() -> None:
     zn = g.get_node_centered_data(values)
 
     nodes = nodes_with_a_plane(g)
-    expected = [plane_fit(g, values, n) for n in nodes]
+    expected = plane_fit(g, values, nodes)
     assert zn[nodes] == pytest.approx(expected, abs=1e-10)

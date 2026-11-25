@@ -616,9 +616,9 @@ def _get_node_centered_data(
         omega = omega.clip(0.0, 2.0)
     omega = np.where(plane[node], omega, 0.0)
 
-    inverse_distance = per_node(omega) <= 1e-10
+    use_inverse_distance = per_node(omega) <= 1e-10
     with np.errstate(divide="ignore", invalid="ignore"):
-        omega = np.where(inverse_distance[node], 1 / np.hypot(dx, dy), omega)
+        omega = np.where(use_inverse_distance[node], 1 / np.hypot(dx, dy), omega)
         return per_node(omega * data[elem]) / per_node(omega)
 
 
