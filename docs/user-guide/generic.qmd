@@ -101,7 +101,7 @@ mikeio.generic.concat([file1, file2], merged)
 ```
 
 ```bash
-python merge.py File1.res1d File2.res1d File3.res1d
+uv run merge.py File1.res1d File2.res1d Merged.res1d
 ```
 
 If the files can't be merged, the script exits with the error on standard error, and no output file is written.

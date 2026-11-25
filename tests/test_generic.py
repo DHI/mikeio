@@ -1,15 +1,20 @@
 from contextlib import AbstractContextManager, nullcontext
 from datetime import datetime, timedelta
 from pathlib import Path
-from typing import Literal
+from typing import Any, Literal
 
 import numpy as np
 import pandas as pd
 import pytest
+
+from mikecore.DfsFactory import DfsBuilder, DfsFactory
+from mikecore.DfsFile import DataValueType, DfsSimpleType
 from mikecore.DfsFileFactory import DfsFileFactory
+from mikecore.eum import eumItem, eumQuantity, eumUnit
 
 import mikeio
 from mikeio import generic
+from mikeio.eum import TimeStepUnit
 from mikeio.generic import (
     DerivedItem,
     add,
@@ -1054,6 +1059,149 @@ def test_concat_failure_leaves_existing_output_alone(tmp_path: Path) -> None:
         generic.concat([tmp_path / "a.dfs2", tmp_path / "b.dfs2"], tmp_path / "c.dfs2")
 
     assert (tmp_path / "c.dfs2").read_bytes() == b"earlier result"
+
+
+def test_concat_unknown_keep_fails(tmp_path: Path) -> None:
+    keep: Any = "mean"
+    with pytest.raises(ValueError, match="keep must be"):
+        generic.concat(
+            ["tests/testdata/gebco_sound.dfs2", "tests/testdata/gebco_sound.dfs2"],
+            tmp_path / "c.dfs2",
+            keep=keep,
+        )
+
+
+def test_concat_output_that_is_an_input_fails(tmp_path: Path) -> None:
+    t1 = pd.date_range("2000-01-01 00:00", periods=3, freq="h")
+    t2 = pd.date_range("2000-01-01 01:00", periods=3, freq="h")
+    mikeio.DataArray(np.ones((3, 2, 2)), time=t1, geometry=GRID).to_dfs(
+        tmp_path / "a.dfs2"
+    )
+    mikeio.DataArray(np.ones((3, 2, 2)), time=t2, geometry=GRID).to_dfs(
+        tmp_path / "b.dfs2"
+    )
+    before = (tmp_path / "b.dfs2").read_bytes()
+
+    with pytest.raises(ValueError, match="also an input"):
+        generic.concat([tmp_path / "a.dfs2", tmp_path / "b.dfs2"], tmp_path / "b.dfs2")
+
+    assert (tmp_path / "b.dfs2").read_bytes() == before
+
+
+@pytest.mark.parametrize(
+    ("t2", "match"),
+    [
+        (pd.date_range("2000-01-01 00:20", periods=3, freq="5min"), "timestep"),
+        (
+            pd.to_datetime(
+                ["2000-01-01 00:20", "2000-01-01 00:25", "2000-01-01 00:45"]
+            ),
+            "time axis type",
+        ),
+    ],
+    ids=["different timestep", "non-equidistant after equidistant"],
+)
+def test_concat_files_with_different_time_axes_fails(
+    tmp_path: Path, t2: pd.DatetimeIndex, match: str
+) -> None:
+    t1 = pd.date_range("2000-01-01 00:00", periods=3, freq="10min")
+    mikeio.DataArray(np.ones((3, 2, 2)), time=t1, geometry=GRID).to_dfs(
+        tmp_path / "a.dfs2"
+    )
+    mikeio.DataArray(np.ones((3, 2, 2)), time=t2, geometry=GRID).to_dfs(
+        tmp_path / "b.dfs2"
+    )
+
+    with pytest.raises(ValueError, match=match):
+        generic.concat([tmp_path / "a.dfs2", tmp_path / "b.dfs2"], tmp_path / "c.dfs2")
+
+
+@pytest.mark.parametrize(
+    ("files", "match"),
+    [
+        ([("00:00", 4), ("02:00", 4), ("03:00", 4)], "two files only"),
+        ([("00:00", 4), ("01:00", 2)], "entirely inside"),
+    ],
+    ids=["03:00 in three files", "01:00-02:00 inside 00:00-03:00"],
+)
+def test_concat_average_overlap_rules(
+    tmp_path: Path, files: list[tuple[str, int]], match: str
+) -> None:
+    """Each file is (start, number of hourly timesteps)."""
+    paths = []
+    for i, (start, periods) in enumerate(files):
+        t = pd.date_range(f"2000-01-01 {start}", periods=periods, freq="h")
+        paths.append(tmp_path / f"{i}.dfs2")
+        mikeio.DataArray(np.ones((periods, 2, 2)), time=t, geometry=GRID).to_dfs(
+            paths[-1]
+        )
+
+    with pytest.raises(ValueError, match=match):
+        generic.concat(paths, tmp_path / "c.dfs2", keep="average")
+
+
+def test_concat_average_with_different_overlap_timestamps_leaves_existing_output_alone(
+    tmp_path: Path,
+) -> None:
+    """In the 01:00-02:00 overlap network_a has 01:30, network_b 01:15 and 01:40."""
+    (tmp_path / "merged.res1d").write_bytes(b"earlier result")
+
+    with pytest.raises(ValueError, match="identical timestamps"):
+        generic.concat(
+            [
+                "tests/testdata/res1d/network_a.res1d",
+                "tests/testdata/res1d/network_b.res1d",
+            ],
+            tmp_path / "merged.res1d",
+            keep="average",
+        )
+
+    assert (tmp_path / "merged.res1d").read_bytes() == b"earlier result"
+
+
+def _write_double_dfs1(filename: Path, start: datetime, value: float) -> None:
+    """Write a 3-timestep hourly dfs1 with one double-precision item.
+
+    mikeio writes only dfs0 in double precision, so build the file with mikecore.
+    """
+    factory = DfsFactory()
+    builder = DfsBuilder.Create("double", "test", 0)
+    builder.SetDataType(0)
+    builder.SetGeographicalProjection(
+        factory.CreateProjectionGeoOrigin("NON-UTM", 0, 0, 0)
+    )
+    builder.SetSpatialAxis(factory.CreateAxisEqD1(eumUnit.eumUmeter, 2, 0, 1))
+    builder.SetTemporalAxis(
+        factory.CreateTemporalEqCalendarAxis(TimeStepUnit.SECOND, start, 0, 3600)
+    )
+    builder.AddCreateDynamicItem(
+        "h",
+        eumQuantity.Create(eumItem.eumIWaterLevel, eumUnit.eumUmeter),
+        DfsSimpleType.Double,
+        DataValueType.Instantaneous,
+    )
+    builder.CreateFile(str(filename))
+    dfs = builder.GetFile()
+    for _ in range(3):
+        dfs.WriteItemTimeStepNext(0, np.full(2, value, dtype=np.float64))
+    dfs.Close()
+
+
+def test_concat_keeps_double_precision(tmp_path: Path) -> None:
+    value = 1.0 + 1e-12  # not representable in float32
+    _write_double_dfs1(tmp_path / "a.dfs1", datetime(2000, 1, 1, 0), value)
+    _write_double_dfs1(tmp_path / "b.dfs1", datetime(2000, 1, 1, 1), value)
+
+    generic.concat([tmp_path / "a.dfs1", tmp_path / "b.dfs1"], tmp_path / "c.dfs1")
+
+    dfs = DfsFileFactory.DfsGenericOpen(str(tmp_path / "c.dfs1"))
+    data_type = dfs.ItemInfo[0].DataType
+    n_timesteps = dfs.FileInfo.TimeAxis.NumberOfTimeSteps
+    data = dfs.ReadItemTimeStep(1, 3).Data
+    dfs.Close()
+    assert data_type == DfsSimpleType.Double
+    assert n_timesteps == 4
+    assert (data == value).all()
 
 
 def test_concat_missing_input_fails(tmp_path: Path) -> None:

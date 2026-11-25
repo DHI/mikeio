@@ -445,7 +445,8 @@ def concat(
       file ends; on a non-equidistant time axis the files overlap or touch;
     * all files come from the same setup: the same calendar time axis type
       (and timestep duration, if equidistant), the same dynamic items (name,
-      quantity, number of elements and data type) and identical static items.
+      quantity, number of elements and data type) and identical static items;
+    * with `keep="average"`, the overlap rules listed under `keep`.
 
     Files may use different time units. The output has the same time axis
     type as the inputs; non-equidistant inputs keep every selected timestamp
@@ -632,7 +633,34 @@ def _read_and_check_inputs(filenames: Sequence[str], keep: str) -> list[_ConcatI
                 f"{inputs[i - 1].filename} ({inputs[i - 1].end}). "
                 "keep='average' supports overlaps of two files only."
             )
+        if keep == "average":
+            _check_same_overlap_times(prev, cur)
     return inputs
+
+
+def _check_same_overlap_times(prev: _ConcatInput, cur: _ConcatInput) -> None:
+    """Raise if prev and cur do not have the same timestamps where they overlap."""
+    with _opened(DfsFileFactory.DfsGenericOpen(prev.filename)) as dfs:
+        prev_times: list[datetime] = []
+        for timestep in reversed(range(prev.axis.NumberOfTimeSteps)):
+            time = _timestep_time(dfs, prev, timestep)
+            if time < cur.start:
+                break
+            prev_times.insert(0, time)
+    with _opened(DfsFileFactory.DfsGenericOpen(cur.filename)) as dfs:
+        cur_times: list[datetime] = []
+        for timestep in range(cur.axis.NumberOfTimeSteps):
+            time = _timestep_time(dfs, cur, timestep)
+            if time > prev.end:
+                break
+            cur_times.append(time)
+    for prev_time, time in zip_longest(prev_times, cur_times):
+        if prev_time != time:
+            raise ValueError(
+                f"{cur.filename}: timestep at {time} does not match {prev_time} "
+                f"in {prev.filename}. keep='average' needs identical "
+                "timestamps in the overlap."
+            )
 
 
 def _timestep_time(dfs: DfsFile, inp: _ConcatInput, timestep: int) -> datetime:
@@ -683,14 +711,8 @@ def _write_timesteps(inputs: list[_ConcatInput], dfs_o: DfsFile, keep: str) -> N
                         break
                     data = _read_timestep(dfs, timestep)
                     if prev is not None:
+                        # The overlap timestamps were checked to be identical.
                         prev_dfs, prev_inp, prev_timestep = prev
-                        prev_time = _timestep_time(prev_dfs, prev_inp, prev_timestep)
-                        if prev_time != time:
-                            raise ValueError(
-                                f"{inp.filename}: timestep at {time} does not match "
-                                f"{prev_time} in {prev_inp.filename}. keep='average' "
-                                "needs identical timestamps in the overlap."
-                            )
                         data = [
                             (p * 0.5 + d * 0.5).astype(d.dtype, copy=False)
                             for p, d in zip(
