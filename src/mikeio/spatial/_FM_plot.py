@@ -358,7 +358,7 @@ def _get_tris(
     import matplotlib.tri as tri
 
     if conforming is None:
-        elem_table, _, _ = _create_tri_only_element_table(nc, element_table, ec, z)
+        elem_table = _create_tri_only_element_table(element_table)
     else:
         elem_table = _triangulate_conforming(nc, element_table, conforming)
     triang = tri.Triangulation(nc[:, 0], nc[:, 1], elem_table)
@@ -580,82 +580,55 @@ def _get_node_centered_data(
     extrapolate: bool = True,
     conforming: list[NDArray[np.int64]] | None = None,
 ) -> np.ndarray:
-    """convert cell-centered data to node-centered by pseudo-laplacian method.
+    """Node values from Element values, by the pseudo-Laplacian weights.
+
+    Holmes & Connell (1989), AIAA 89-1932, as ported from DHI.Mesh
+    `MeshNodeInterpolation`. Where three or more Elements
+    surround a Node, the weights give the value at the Node of the plane that
+    best fits, by least squares, the Element values at the Element centres.
+    Without `extrapolate` the weights are limited to 0-2. With fewer than three
+    Elements, or weights summing to zero, it is an inverse-distance average.
 
     With Hanging nodes, `conforming` gives every Element around a Hanging
     node, so each Element is used whole, with its own center.
     """
-    nc = node_coordinates
-    elem_table: np.ndarray | Sequence[np.ndarray]
-    if conforming is None:
-        elem_table, ec, data = _create_tri_only_element_table(
-            nc, element_table, element_coordinates, data
-        )
-    else:
-        elem_table, ec = conforming, element_coordinates
-    connectivity_matrix = _create_node_element_matrix(elem_table, nc.shape[0])
+    n_nodes = node_coordinates.shape[0]
+    table = element_table if conforming is None else conforming
+    pairs = _create_node_element_matrix(table, n_nodes).tocoo()
+    node, elem = pairs.row, pairs.col
 
-    node_centered_data = np.zeros(shape=nc.shape[0])
-    for n in range(connectivity_matrix.shape[0]):
-        item = connectivity_matrix.getrow(n).indices
-        I = ec[item][:, :2] - nc[n][:2]
-        I2 = (I**2).sum(axis=0)
-        Ixy = (I[:, 0] * I[:, 1]).sum(axis=0)
-        lamb = I2[0] * I2[1] - Ixy**2
-        omega = np.zeros(1)
-        if lamb > 1e-10 * (I2[0] * I2[1]):
-            # Standard case - Pseudo
-            lambda_x = (Ixy * I[:, 1] - I2[1] * I[:, 0]) / lamb
-            lambda_y = (Ixy * I[:, 0] - I2[0] * I[:, 1]) / lamb
-            omega = 1.0 + lambda_x * I[:, 0] + lambda_y * I[:, 1]
-            if not extrapolate:
-                omega[np.where(omega > 2)] = 2
-                omega[np.where(omega < 0)] = 0
-        if omega.sum() > 0:
-            node_centered_data[n] = np.sum(omega * data[item]) / np.sum(omega)
-        else:
-            # We did not succeed using pseudo laplace procedure, use inverse distance instead
-            InvDis = [
-                1 / np.hypot(case[0], case[1]) for case in ec[item][:, :2] - nc[n][:2]
-            ]
-            node_centered_data[n] = np.sum(InvDis * data[item]) / np.sum(InvDis)
+    def per_node(v: np.ndarray) -> np.ndarray:
+        return np.bincount(node, weights=v, minlength=n_nodes)
 
-    return node_centered_data
+    dx = element_coordinates[elem, 0] - node_coordinates[node, 0]
+    dy = element_coordinates[elem, 1] - node_coordinates[node, 1]
+    n_elements = np.bincount(node, minlength=n_nodes)
+    Ixx, Iyy, Ixy = per_node(dx * dx), per_node(dy * dy), per_node(dx * dy)
+    Rx, Ry = per_node(dx), per_node(dy)
+
+    lamb = Ixx * Iyy - Ixy**2
+    plane = (n_elements >= 3) & (lamb > 1e-10 * (Ixx * Iyy))
+    with np.errstate(divide="ignore", invalid="ignore"):
+        lambda_x = np.where(plane, (Ixy * Ry - Iyy * Rx) / lamb, 0.0)
+        lambda_y = np.where(plane, (Ixy * Rx - Ixx * Ry) / lamb, 0.0)
+    omega = 1.0 + lambda_x[node] * dx + lambda_y[node] * dy
+    if not extrapolate:
+        omega = omega.clip(0.0, 2.0)
+    omega = np.where(plane[node], omega, 0.0)
+
+    inverse_distance = per_node(omega) <= 1e-10
+    with np.errstate(divide="ignore", invalid="ignore"):
+        omega = np.where(inverse_distance[node], 1 / np.hypot(dx, dy), omega)
+        return per_node(omega * data[elem]) / per_node(omega)
 
 
-def _create_tri_only_element_table(
-    node_coordinates: np.ndarray,
-    element_table: np.ndarray,
-    element_coordinates: np.ndarray,
-    data: np.ndarray,
-) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
-    """Convert quad/tri mesh to pure tri-mesh."""
+def _create_tri_only_element_table(element_table: np.ndarray) -> np.ndarray:
+    """Split each quad into two triangles, for a triangulation."""
     if _is_tri_only(element_table):
-        # already tri-only? just convert to 2d array
-        return np.stack(element_table), element_coordinates, data  # type: ignore
-
-    ec = element_coordinates.copy()
-
-    elem_table = [list(element_table[i]) for i in range(len(element_table))]
-    tmp_elmnt_nodes = elem_table.copy()
-    for el, item in enumerate(tmp_elmnt_nodes):
-        if len(item) == 4:
-            elem_table.pop(el)  # remove quad element
-
-            # insert two new tri elements in table
-            elem_table.insert(el, item[:3])
-            tri2_nodes = [item[i] for i in [2, 3, 0]]
-            elem_table.append(tri2_nodes)
-
-            # new center coordinates for new tri-elements
-            ec[el] = node_coordinates[item[:3]].mean(axis=1)
-            tri2_ec = node_coordinates[tri2_nodes].mean(axis=1)
-            ec = np.append(ec, tri2_ec.reshape(1, -1), axis=0)
-
-            # use same data in two new tri elements
-            data = np.append(data, data[el])
-
-    return np.asarray(elem_table), ec, data
+        return np.stack(element_table)  # type: ignore
+    tris = [e for e in element_table if len(e) == 3]
+    quads = np.stack([e for e in element_table if len(e) == 4])
+    return np.vstack([*tris, quads[:, [0, 1, 2]], quads[:, [2, 3, 0]]])
 
 
 def _cbar_extend(

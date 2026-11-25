@@ -1116,12 +1116,23 @@ class GeometryFM2D(_GeometryFM):
     ) -> np.ndarray:
         """Convert cell-centered data to node-centered by pseudo-laplacian method.
 
+        Where three or more Elements surround a Node, its value is the value
+        at the Node of the plane that best fits, by least squares, the Element
+        values at the Element centres, so a linear field is reproduced exactly.
+        Where fewer Elements surround it, or no plane is defined, it is an
+        inverse-distance average. The method is that of Holmes & Connell
+        (1989), as implemented in DHI.Mesh.
+
         Parameters
         ----------
         data : np.array(float)
             cell-centered data
         extrapolate : bool, optional
-            allow the method to extrapolate, default:True
+            allow the method to extrapolate, default:True.
+            With False, each Element's weight is limited to 0-2, so node
+            values stay within the range of the surrounding Element values,
+            but a linear field is no longer reproduced exactly. DHI.Mesh
+            limits the weights by default.
 
         Returns
         -------

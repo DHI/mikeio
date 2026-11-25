@@ -738,10 +738,9 @@ def test_node_centered_data_at_hanging_nodes() -> None:
 
     zn = g.get_node_centered_data(linear(ec[:, 0], ec[:, 1]))
 
-    # Using only the fine Elements gave an error of 32. The pseudo-laplacian
-    # is not exact for a linear field, so some error remains (#1125).
+    # using only the fine Elements gave an error of 32
     exact = linear(nc[REFINED_HANGING_NODES, 0], nc[REFINED_HANGING_NODES, 1])
-    assert zn[REFINED_HANGING_NODES] == pytest.approx(exact, abs=12)
+    assert zn[REFINED_HANGING_NODES] == pytest.approx(exact, rel=1e-9)
 
 
 @pytest.mark.parametrize("name", HANGING_NODES)
@@ -753,7 +752,7 @@ def test_quad_mesh_node_centered_data_at_hanging_nodes(name: str) -> None:
 
     # error 2.5 from the fine Elements only
     nodes = HANGING_NODES[name]
-    assert zn[nodes] == pytest.approx(linear(nc[nodes, 0], nc[nodes, 1]), abs=0.5)
+    assert zn[nodes] == pytest.approx(linear(nc[nodes, 0], nc[nodes, 1]), rel=1e-9)
 
 
 def test_element_table_is_as_stored_in_file() -> None:

@@ -696,7 +696,8 @@ def test_get_node_centered_data() -> None:
     eid = 31
     assert wl_cc[eid] == pytest.approx(0.4593418836)
     nid = dfs.geometry.element_table[eid]
-    assert wl_nodes[nid].mean() == pytest.approx(0.4593501736)
+    # from a port of DHI.Mesh MeshNodeInterpolation (#1125)
+    assert wl_nodes[nid].mean() == pytest.approx(0.4593502070, abs=1e-10)
 
 
 def test_interp2d_radius() -> None:
