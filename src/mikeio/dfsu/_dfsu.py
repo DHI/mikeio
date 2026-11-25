@@ -20,6 +20,7 @@ from tqdm import trange
 from mikeio.spatial._distance import xy_to_bbox
 
 from .._version import __dfs_version__
+from .._time import canonical_time
 from ..dataset import Dataset
 from ..dfs._dfs import (
     _TimeAxisInfo,
@@ -282,10 +283,12 @@ class Dfsu2DH:
     def time(self) -> pd.DatetimeIndex:
         """File time axis (only available for equidistant files; otherwise read the data)."""
         if self._equidistant:
-            return pd.date_range(
-                start=self.start_time,
-                periods=self.n_timesteps,
-                freq=f"{int(self.timestep)}s",
+            return canonical_time(
+                pd.date_range(
+                    start=self.start_time,
+                    periods=self.n_timesteps,
+                    freq=f"{int(self.timestep)}s",
+                )
             )
         else:
             raise NotImplementedError(
@@ -490,7 +493,7 @@ class Dfsu2DH:
             # squeeze point data
             data_list = [np.squeeze(d, axis=-1) for d in data_list]
 
-        time = pd.to_datetime(t_rel, unit="s", origin=self.start_time)
+        time = canonical_time(pd.to_datetime(t_rel, unit="s", origin=self.start_time))
         item_infos = _select_items(self.items, item_numbers)
 
         return Dataset.from_numpy(

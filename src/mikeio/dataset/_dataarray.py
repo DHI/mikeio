@@ -1928,26 +1928,26 @@ class DataArray:
         """
         self._to_dataset().to_dfs(filename, **kwargs)
 
-    def to_dataframe(
-        self, *, unit_in_name: bool = False, round_time: str | bool = "ms"
-    ) -> pd.DataFrame:
+    def to_dataframe(self, *, unit_in_name: bool = False) -> pd.DataFrame:
         """Convert to DataFrame.
 
         Parameters
         ----------
         unit_in_name: bool, optional
             include unit in column name, default False,
-        round_time: str, bool, optional
-            round time to, by default "ms", use False to avoid rounding
 
         Returns
         -------
         pd.DataFrame
 
+        Notes
+        -----
+        The index is the DataArray time. Times read from a dfs file carry the
+        millisecond resolution MIKE IO guarantees; for finer control read the
+        file with mikecore, which exposes the raw offsets in seconds.
+
         """
-        return self._to_dataset().to_dataframe(
-            unit_in_name=unit_in_name, round_time=round_time
-        )
+        return self._to_dataset().to_dataframe(unit_in_name=unit_in_name)
 
     def to_pandas(self) -> pd.Series:
         """Convert to Pandas Series.

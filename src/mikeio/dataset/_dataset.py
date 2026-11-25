@@ -1926,30 +1926,30 @@ class Dataset:
 
     # ===============================================
 
-    def to_pandas(
-        self, *, unit_in_name: bool = False, round_time: str | bool = "ms"
-    ) -> pd.Series | pd.DataFrame:
-        """Convert Dataset to a Pandas DataFrame."""
+    def to_pandas(self, *, unit_in_name: bool = False) -> pd.Series | pd.DataFrame:
+        """Convert Dataset to a Pandas Series (one item) or DataFrame."""
         if self.n_items != 1:
-            return self.to_dataframe(unit_in_name=unit_in_name, round_time=round_time)
+            return self.to_dataframe(unit_in_name=unit_in_name)
         else:
             return self[0].to_pandas()
 
-    def to_dataframe(
-        self, *, unit_in_name: bool = False, round_time: str | bool = "ms"
-    ) -> pd.DataFrame:
+    def to_dataframe(self, *, unit_in_name: bool = False) -> pd.DataFrame:
         """Convert Dataset to a Pandas DataFrame.
 
         Parameters
         ----------
         unit_in_name: bool, optional
             include unit in column name, default False,
-        round_time: str, bool, optional
-            round time to, by default "ms", use False to avoid rounding
 
         Returns
         -------
         pd.DataFrame
+
+        Notes
+        -----
+        The index is the Dataset time. Times read from a dfs file carry the
+        millisecond resolution MIKE IO guarantees; for finer control read the
+        file with mikecore, which exposes the raw offsets in seconds.
 
         """
         if self.ndim > 1:
@@ -1961,12 +1961,7 @@ class Dataset:
             data = {f"{item.name} ({item.unit.name})": item.to_numpy() for item in self}
         else:
             data = {item.name: item.to_numpy() for item in self}
-        df = pd.DataFrame(data, index=self.time)
-
-        if round_time:
-            self.time = self.time.round(round_time)  # type: ignore
-
-        return df
+        return pd.DataFrame(data, index=self.time)
 
     def to_dfs(self, filename: str | Path, **kwargs: Any) -> None:
         """Write dataset to a new dfs file.

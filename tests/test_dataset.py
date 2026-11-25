@@ -534,6 +534,19 @@ def test_to_dataframe() -> None:
     assert isinstance(df.index, pd.DatetimeIndex)
 
 
+def test_to_dataframe_does_not_mutate_time() -> None:
+    """Conversion only: the Dataset's own time must survive to_dataframe()."""
+    t = pd.DatetimeIndex(["2020-01-01 00:00:00.123456", "2020-01-01 00:00:01.654321"])
+    ds = mikeio.Dataset(
+        {"x": mikeio.DataArray(np.array([1.0, 2.0]), time=t, item=ItemInfo("x"))}
+    )
+
+    df = ds.to_dataframe()
+
+    assert ds.time.equals(t)
+    assert df.index.equals(t)
+
+
 def test_to_pandas_single_item_dataset() -> None:
     da = mikeio.DataArray(
         data=np.zeros(5), time=pd.date_range("2000", freq="D", periods=5), name="Foo"
