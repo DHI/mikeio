@@ -489,7 +489,7 @@ class DataArray:
     def flipud(self) -> DataArray:
         """Flip upside down (on first non-time axis).
 
-        Deprecated since v3.5: flipud() will be removed in v4.0. It mirrors
+        Deprecated since v3.6: flipud() will be removed in v4.0. It mirrors
         values without moving coordinates; for flexible mesh data use
         isel(element=...), and for a data-only mirror on a structured grid
         assign np.flip(...) to values explicitly.
