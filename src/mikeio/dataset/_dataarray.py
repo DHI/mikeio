@@ -1048,7 +1048,7 @@ class DataArray:
                         raise ValueError("both x and y must be specified")
 
                     xr_da = self.to_xarray()
-                    dai = xr_da.interp(x=x, y=y).values
+                    dai = xr_da.interp(x=x, y=y).values.astype(self.dtype, copy=False)
                     geometry = GeometryPoint2D(x=x, y=y, projection=g.projection)
 
                 case Grid1D():
@@ -1187,7 +1187,7 @@ class DataArray:
             kind=method,
             bounds_error=not extrapolate,
             fill_value=fill_value,
-        )(t_out)
+        )(t_out).astype(self.dtype, copy=False)
 
         zn = (
             None
@@ -1199,7 +1199,7 @@ class DataArray:
                 kind=method,
                 bounds_error=not extrapolate,
                 fill_value=fill_value,
-            )(t_out)
+            )(t_out).astype(self._zn.dtype, copy=False)
         )
 
         return DataArray(

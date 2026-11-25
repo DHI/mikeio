@@ -1577,3 +1577,47 @@ def test_axis_spatial_deprecated() -> None:
         result = da.mean(axis="spatial")
     assert result.shape == (3,)
     assert result.dims == ("time",)
+
+
+@pytest.fixture
+def da_f32_grid1d() -> DataArray:
+    return mikeio.DataArray(
+        np.arange(12, dtype=np.float32).reshape(4, 3),
+        time=pd.date_range("2000-01-01", periods=4, freq="h"),
+        geometry=mikeio.Grid1D(nx=3, dx=1.0),
+    )
+
+
+def test_concat_keeps_float32(da_f32_grid1d: DataArray) -> None:
+    da = da_f32_grid1d
+    dac = mikeio.DataArray.concat([da.isel(time=[0, 1]), da.isel(time=[2, 3])])
+    assert dac.dtype == np.float32
+    ds = da.to_dataset()
+    dsc = mikeio.Dataset.concat([ds.isel(time=[0, 1]), ds.isel(time=[2, 3])])
+    assert dsc[0].dtype == np.float32
+
+
+def test_concat_float32_and_float64_gives_float64(da_f32_grid1d: DataArray) -> None:
+    da = da_f32_grid1d
+    da64 = da.isel(time=[2, 3]).astype(np.float64)
+    assert mikeio.DataArray.concat([da.isel(time=[0, 1]), da64]).dtype == np.float64
+
+
+def test_interp_time_keeps_float32(da_f32_grid1d: DataArray) -> None:
+    assert da_f32_grid1d.interp_time(dt=1800).dtype == np.float32
+    assert da_f32_grid1d.to_dataset().interp_time(dt=1800)[0].dtype == np.float32
+
+
+def test_interp_grid1d_keeps_float32(da_f32_grid1d: DataArray) -> None:
+    dai = da_f32_grid1d.interp(x=0.7)
+    assert dai.dtype == np.float32
+    np.testing.assert_allclose(dai.to_numpy(), [0.7, 3.7, 6.7, 9.7], rtol=1e-6)
+
+
+def test_interp_grid2d_keeps_float32() -> None:
+    da = mikeio.DataArray(
+        np.arange(24, dtype=np.float32).reshape(2, 3, 4),
+        time=pd.date_range("2000-01-01", periods=2, freq="h"),
+        geometry=mikeio.Grid2D(nx=4, ny=3, dx=1.0),
+    )
+    assert da.interp(x=1.5, y=0.5).dtype == np.float32
