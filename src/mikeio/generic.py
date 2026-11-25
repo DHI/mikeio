@@ -9,11 +9,12 @@ import pathlib
 import warnings
 from collections.abc import Iterator, Sequence
 from contextlib import ExitStack, contextmanager
+from itertools import zip_longest
 from copy import deepcopy
 from dataclasses import dataclass
 from datetime import datetime, timedelta
 from shutil import copyfile
-from typing import Callable, Mapping, Union
+from typing import Callable, Literal, Mapping, Union
 
 import numpy as np
 import pandas as pd
@@ -25,6 +26,7 @@ from mikecore.DfsFile import (
     DfsFile,
     DfsNonEqCalendarAxis,
     DfsNonEqTimeAxis,
+    DfsTemporalAxis,
     TimeAxisType,
 )
 from mikecore.DfsFileFactory import DfsFileFactory
@@ -101,11 +103,15 @@ def _clone(
     timestep: float | None = None,
     items: Sequence[int | DfsDynamicItemInfo | ItemInfo] | None = None,
     datatype: int | None = None,
+    keep_provenance: bool = False,
 ) -> Iterator[DfsFile]:
     """Create outfilename with the header and static items of infilename.
 
     Yields the new file, open for writing its dynamic data, and closes it
     when the block exits. The source is closed before the new file is yielded.
+
+    The new file is stamped as written by mikeio, unless `keep_provenance`
+    asks for the source's application title and version to be kept.
     """
     infilename = normalize_path(infilename)
     outfilename = normalize_output_path(outfilename)
@@ -113,7 +119,12 @@ def _clone(
         with _opened(DfsFileFactory.DfsGenericOpen(infilename)) as source:
             fi = source.FileInfo
 
-            builder = DfsBuilder.Create(fi.FileTitle, "mikeio", __dfs_version__)
+            if keep_provenance:
+                builder = DfsBuilder.Create(
+                    fi.FileTitle, fi.ApplicationTitle, fi.ApplicationVersion
+                )
+            else:
+                builder = DfsBuilder.Create(fi.FileTitle, "mikeio", __dfs_version__)
 
             builder.SetDataType(datatype if datatype is not None else fi.DataType)
 
@@ -386,195 +397,343 @@ def diff(
 def concat(
     infilenames: Sequence[str | pathlib.Path],
     outfilename: str | pathlib.Path,
-    keep: str = "last",
+    keep: Literal["first", "last", "average"] = "last",
 ) -> None:
     """Concatenates files along the time axis.
 
-    Overlap handling is defined by the `keep` argument,  by default the last one will be used.
+    Works on any DFS-format file: dfs0, dfs1, dfs2, dfs3, dfsu, and other
+    files in the DFS format such as MIKE 1D result files (res1d). The files
+    are joined by timestamp, timestep by timestep, so memory use does not depend on
+    file length.
+
+    Overlap handling is defined by the `keep` argument; by default the newer
+    file wins in the overlap.
 
     Parameters
     ----------
     infilenames:
-        filenames to concatenate
+        filenames to concatenate, in chronological order
     outfilename:
         filename of output
     keep:
-        either 'first' (keep older), 'last' (keep newer)
-        or 'average' can be selected. By default 'last'
+        how to handle the overlap between consecutive files:
+
+        * 'last' (default): keep the newer file, i.e. take timesteps from a
+          file until the next file starts
+        * 'first': keep the older file, i.e. take only the timesteps of a file
+          that are later than the last timestep already written
+        * 'average': average the two files in the overlap; their timestamps
+          must be identical there, the later file must not end before the
+          earlier one, and no more than two files may overlap at a time
+
+    Raises
+    ------
+    FileNotFoundError
+        If an input file does not exist.
+    ValueError
+        If the files cannot be concatenated, or if the output file is one of
+        the inputs. The message names the file and the property that is the
+        problem. Not raised for dfs0 files; see Notes.
 
     Notes
-    ------
+    -----
+    Before any output is written, the inputs are checked:
 
-    The list of input files have to be sorted, i.e. in chronological order
+    * each file starts strictly later than the one before it;
+    * there is no gap between consecutive files: on an equidistant time axis
+      the next file starts no later than one timestep after the previous
+      file ends; on a non-equidistant time axis the files overlap or touch;
+    * all files come from the same setup: the same calendar time axis type
+      (and timestep duration, if equidistant), the same dynamic items (name,
+      quantity, number of elements and data type) and identical static items;
+    * with `keep="average"`, the overlap rules listed under `keep`.
+
+    Files may use different time units. The output has the same time axis
+    type as the inputs; non-equidistant inputs keep every selected timestamp
+    exactly. Each item keeps its data type. The header and static items are
+    taken from the first file, including its application title and version.
+    If concatenation fails, no output file is left behind, and an output file
+    that existed before is left untouched unless it was already being
+    overwritten.
+
+    dfs0 files take a separate path: they are read into a Dataset and
+    concatenated with `Dataset.concat`. The checks above do not apply to
+    them, and `keep="average"` is not supported for dfs0.
+
+    Examples
+    --------
+    Merge two overlapping MIKE 1D result files, the second one winning in the
+    overlap:
+
+    ```{python}
+    from mikeio import generic
+    generic.concat(
+        ["../data/res1d/network_a.res1d", "../data/res1d/network_b.res1d"], "merged.res1d"
+    )
+    ```
 
     """
     infilenames = [normalize_path(f) for f in infilenames]
-    outfilename = normalize_output_path(outfilename)
     # fast path for Dfs0
     suffix = pathlib.Path(infilenames[0]).suffix
     if suffix == ".dfs0":
         dss = [mikeio.read(f) for f in infilenames]
         ds = Dataset.concat(dss, keep=keep)  # type: ignore
-        ds.to_dfs(outfilename)
+        ds.to_dfs(normalize_output_path(outfilename))
         return
 
-    with _opened(DfsFileFactory.DfsGenericOpen(infilenames[0])) as dfs_i_a:
-        n_items = len(dfs_i_a.ItemInfo)
+    if keep not in ("first", "last", "average"):
+        raise ValueError(f"keep must be 'first', 'last' or 'average', not {keep!r}")
 
-    remove_output = False
+    inputs = _read_and_check_inputs(infilenames, keep)
+    outfilename = normalize_path(outfilename)
+    existed = os.path.exists(outfilename)
+    if existed and any(os.path.samefile(f, outfilename) for f in infilenames):
+        raise ValueError(f"{outfilename}: the output file is also an input file")
+
+    # On failure, remove the output only if this call created it: a file that
+    # existed before is the user's until _clone has overwritten it.
+    created = not existed
+    # Creates the output file, so only once the inputs are known to be good.
+    outfilename = normalize_output_path(outfilename)
     try:
-        with _clone(infilenames[0], outfilename) as dfs_o:
-            current_time = datetime(1, 1, 1)  # beginning of time...
-
-            for i, infilename in enumerate(
-                tqdm(infilenames, disable=not _show_progress())
-            ):
-                with _opened(DfsFileFactory.DfsGenericOpen(infilename)) as dfs_i:
-                    t_axis = dfs_i.FileInfo.TimeAxis
-                    n_time_steps = t_axis.NumberOfTimeSteps
-                    dt = t_axis.TimeStep
-                    start_time = t_axis.StartDateTime
-
-                    if i > 0 and start_time > current_time + timedelta(seconds=dt):
-                        remove_output = True
-                        raise Exception("Gap in time axis detected - not supported")
-
-                    current_time = start_time
-
-                    if keep == "last":
-                        if i < (len(infilenames) - 1):
-                            with _opened(
-                                DfsFileFactory.DfsGenericOpen(infilenames[i + 1])
-                            ) as dfs_n:
-                                next_start_time = dfs_n.FileInfo.TimeAxis.StartDateTime
-
-                        for timestep in range(n_time_steps):
-                            current_time = start_time + timedelta(seconds=timestep * dt)
-                            if i < (len(infilenames) - 1):
-                                if current_time >= next_start_time:
-                                    break
-
-                            for item in range(n_items):
-                                itemdata = dfs_i.ReadItemTimeStep(item + 1, timestep)
-                                d = itemdata.Data
-
-                                darray = d.astype(np.float32)
-
-                                dfs_o.WriteItemTimeStepNext(0, darray)
-
-                    if keep == "first":
-                        if (
-                            i == 0
-                        ):  # all timesteps in first file are kept (is there a more efficient way to do this without the loop?)
-                            for timestep in range(n_time_steps):
-                                current_time = start_time + timedelta(
-                                    seconds=timestep * dt
-                                )
-
-                                for item in range(n_items):
-                                    itemdata = dfs_i.ReadItemTimeStep(
-                                        item + 1, timestep
-                                    )
-                                    d = itemdata.Data
-
-                                    darray = d.astype(np.float32)
-
-                                    dfs_o.WriteItemTimeStepNext(0, darray)
-                            end_time = (
-                                start_time + timedelta(seconds=timestep * dt)
-                            )  # reuse last timestep since there is no EndDateTime attribute in t_axis.
-
-                        else:
-                            # determine overlap in number of timesteps
-                            start_timestep = (
-                                int((end_time - start_time) / timedelta(seconds=dt)) + 1
-                            )
-                            # loop only through those timesteps that are not in previous file
-                            for timestep in range(start_timestep, n_time_steps):
-                                current_time = start_time + timedelta(
-                                    seconds=timestep * dt
-                                )
-
-                                for item in range(n_items):
-                                    itemdata = dfs_i.ReadItemTimeStep(
-                                        item + 1, timestep
-                                    )
-                                    d = itemdata.Data
-
-                                    darray = d.astype(np.float32)
-
-                                    dfs_o.WriteItemTimeStepNext(0, darray)
-                            end_time = start_time + timedelta(
-                                seconds=timestep * dt
-                            )  # get end time from current file
-
-                    elif keep == "average":
-                        ALPHA = 0.5  # averaging factor
-                        last_file = i == (len(infilenames) - 1)
-                        overlapping_with_next = False  # lets first asume no overlap
-
-                        with ExitStack() as next_file:
-                            # Find the start time of next file
-                            if not last_file:
-                                dfs_n = next_file.enter_context(
-                                    _opened(
-                                        DfsFileFactory.DfsGenericOpen(
-                                            infilenames[i + 1]
-                                        )
-                                    )
-                                )
-                                next_start_time = dfs_n.FileInfo.TimeAxis.StartDateTime
-                            else:
-                                next_start_time = datetime.max  # end of time ...
-
-                            if i == 0:
-                                timestep_n = 0  # have not read anything before
-
-                            # lets start where we left off (if last file overlapped)
-                            timestep = timestep_n
-                            while timestep < n_time_steps:
-                                current_time = start_time + timedelta(
-                                    seconds=timestep * dt
-                                )
-                                if (
-                                    current_time >= next_start_time
-                                ):  # false if last file
-                                    overlapping_with_next = True
-                                    break
-                                for item in range(n_items):
-                                    itemdata = dfs_i.ReadItemTimeStep(
-                                        item + 1, timestep
-                                    )
-                                    d = itemdata.Data
-                                    darray = d.astype(np.float32)
-                                    dfs_o.WriteItemTimeStepNext(0, darray)
-
-                                timestep += 1
-
-                            timestep_n = 0  # have not read anything from next file yet
-
-                            if not overlapping_with_next:
-                                continue  # next file
-
-                            # Otherwhise read overlapping part
-                            while timestep < n_time_steps:
-                                for item in range(n_items):
-                                    itemdata_i = dfs_i.ReadItemTimeStep(
-                                        item + 1, timestep
-                                    )
-                                    itemdata_n = dfs_n.ReadItemTimeStep(
-                                        item + 1, timestep_n
-                                    )
-                                    d_i = itemdata_i.Data
-                                    d_n = itemdata_n.Data
-                                    d_av = d_i * ALPHA + d_n * (1 - ALPHA)
-                                    darray = d_av.astype(np.float32)
-                                    dfs_o.WriteItemTimeStepNext(0, (darray))
-                                timestep += 1
-                                timestep_n += 1
-    finally:
-        if remove_output:
+        with _clone(inputs[0].filename, outfilename, keep_provenance=True) as dfs_o:
+            created = True
+            _write_timesteps(inputs, dfs_o, keep)
+    except BaseException:
+        if created and os.path.exists(outfilename):
             os.remove(outfilename)
+        raise
+
+
+@dataclass(frozen=True)
+class _ConcatInput:
+    """One concat input: its time axis, and the times of its first and last timestep."""
+
+    filename: str
+    axis: DfsTemporalAxis
+    start: datetime
+    end: datetime
+    dt: float | None
+    """Timestep duration in seconds, for an equidistant time axis."""
+
+    @staticmethod
+    def read(filename: str) -> _ConcatInput:
+        with _opened(DfsFileFactory.DfsGenericOpen(filename)) as dfs:
+            axis = dfs.FileInfo.TimeAxis
+        # Timestep times are relative to StartDateTime and include the offset.
+        start = axis.StartDateTime + timedelta(
+            seconds=axis.ToSeconds(axis.StartTimeOffset)
+        )
+        match axis.TimeAxisType:
+            case TimeAxisType.CalendarEquidistant:
+                dt = axis.TimeStepInSeconds()
+                span = dt * (axis.NumberOfTimeSteps - 1)
+            case TimeAxisType.CalendarNonEquidistant:
+                dt = None
+                span = axis.ToSeconds(axis.TimeSpan)
+            case other:
+                raise ValueError(
+                    f"{filename}: time axis type {other.name} is not supported; "
+                    "concat needs a calendar time axis"
+                )
+        return _ConcatInput(filename, axis, start, start + timedelta(seconds=span), dt)
+
+
+def _check_same_setup(reference: str, filename: str) -> None:
+    """Raise if `filename` does not have the time axis type and items of `reference`."""
+    with (
+        _opened(DfsFileFactory.DfsGenericOpen(reference)) as ref,
+        _opened(DfsFileFactory.DfsGenericOpen(filename)) as dfs,
+    ):
+        ref_axis, axis = (
+            ref.FileInfo.TimeAxis.TimeAxisType,
+            dfs.FileInfo.TimeAxis.TimeAxisType,
+        )
+        if axis != ref_axis:
+            raise ValueError(
+                f"{filename}: time axis type {axis.name} differs from "
+                f"{ref_axis.name} in {reference}"
+            )
+
+        if len(dfs.ItemInfo) != len(ref.ItemInfo):
+            raise ValueError(
+                f"{filename}: has {len(dfs.ItemInfo)} items, "
+                f"{reference} has {len(ref.ItemInfo)}"
+            )
+        for i, (ref_item, item) in enumerate(zip(ref.ItemInfo, dfs.ItemInfo)):
+            same = (
+                item.Name == ref_item.Name
+                and item.Quantity.Item == ref_item.Quantity.Item
+                and item.Quantity.Unit == ref_item.Quantity.Unit
+                and item.ElementCount == ref_item.ElementCount
+                and item.DataType == ref_item.DataType
+            )
+            if not same:
+                raise ValueError(
+                    f"{filename}: item {i + 1} ({item.Name}) differs from item "
+                    f"{i + 1} ({ref_item.Name}) in {reference} in name, quantity, "
+                    "element count or data type"
+                )
+
+        ref_statics = iter(ref.ReadStaticItemNext, None)
+        statics = iter(dfs.ReadStaticItemNext, None)
+        for i, (ref_static, static) in enumerate(zip_longest(ref_statics, statics)):
+            same = (
+                ref_static is not None
+                and static is not None
+                and static.Name == ref_static.Name
+                and static.DataType == ref_static.DataType
+                and np.array_equal(static.Data, ref_static.Data)
+            )
+            if not same:
+                raise ValueError(
+                    f"{filename}: static item {i + 1} differs from {reference}"
+                )
+
+
+def _read_and_check_inputs(filenames: Sequence[str], keep: str) -> list[_ConcatInput]:
+    """Read the inputs' time axes and check order, continuity and same setup."""
+    for f in filenames:
+        if not os.path.isfile(f):
+            raise FileNotFoundError(f"Input file not found: {f}")
+    for f in filenames[1:]:
+        _check_same_setup(filenames[0], f)
+    inputs = [_ConcatInput.read(f) for f in filenames]
+
+    for i, (prev, cur) in enumerate(zip(inputs, inputs[1:])):
+        if prev.dt != cur.dt:
+            raise ValueError(
+                f"{cur.filename}: timestep {cur.dt} s differs from "
+                f"{prev.dt} s in {prev.filename}"
+            )
+        if cur.start <= prev.start:
+            raise ValueError(
+                f"{cur.filename}: starts at {cur.start}, which is not after "
+                f"the start of the previous file {prev.filename} ({prev.start}). "
+                "Files must be in chronological order."
+            )
+        latest_start = prev.end + timedelta(seconds=prev.dt or 0.0)
+        if cur.start > latest_start:
+            raise ValueError(
+                f"{cur.filename}: starts at {cur.start}, after the end of the "
+                f"previous file {prev.filename} ({prev.end}). "
+                "Gap in time axis detected - not supported"
+            )
+        if keep == "average" and cur.end < prev.end:
+            raise ValueError(
+                f"{cur.filename}: lies entirely inside {prev.filename} "
+                f"({cur.start} to {cur.end} is within {prev.start} to "
+                f"{prev.end}). keep='average' needs the later file to "
+                "end no earlier than the previous one."
+            )
+        if keep == "average" and i > 0 and cur.start <= inputs[i - 1].end:
+            raise ValueError(
+                f"{cur.filename}: starts at {cur.start}, before the end of "
+                f"{inputs[i - 1].filename} ({inputs[i - 1].end}). "
+                "keep='average' supports overlaps of two files only."
+            )
+        if keep == "average":
+            _check_same_overlap_times(prev, cur)
+    return inputs
+
+
+def _check_same_overlap_times(prev: _ConcatInput, cur: _ConcatInput) -> None:
+    """Raise if prev and cur do not have the same timestamps where they overlap."""
+    with _opened(DfsFileFactory.DfsGenericOpen(prev.filename)) as dfs:
+        prev_times: list[datetime] = []
+        for timestep in reversed(range(prev.axis.NumberOfTimeSteps)):
+            time = _timestep_time(dfs, prev, timestep)
+            if time < cur.start:
+                break
+            prev_times.insert(0, time)
+    with _opened(DfsFileFactory.DfsGenericOpen(cur.filename)) as dfs:
+        cur_times: list[datetime] = []
+        for timestep in range(cur.axis.NumberOfTimeSteps):
+            time = _timestep_time(dfs, cur, timestep)
+            if time > prev.end:
+                break
+            cur_times.append(time)
+    for prev_time, time in zip_longest(prev_times, cur_times):
+        if prev_time != time:
+            raise ValueError(
+                f"{cur.filename}: timestep at {time} does not match {prev_time} "
+                f"in {prev.filename}. keep='average' needs identical "
+                "timestamps in the overlap."
+            )
+
+
+def _timestep_time(dfs: DfsFile, inp: _ConcatInput, timestep: int) -> datetime:
+    """Absolute time of a timestep: computed if equidistant, else read from the file."""
+    if inp.dt is not None:
+        return inp.start + timedelta(seconds=timestep * inp.dt)
+    time = dfs.ReadItemTimeStep(1, timestep).Time
+    return inp.axis.StartDateTime + timedelta(seconds=inp.axis.ToSeconds(time))
+
+
+def _read_timestep(dfs: DfsFile, timestep: int) -> list[np.ndarray]:
+    return [
+        dfs.ReadItemTimeStep(item + 1, timestep).Data
+        for item in range(len(dfs.ItemInfo))
+    ]
+
+
+def _write_timesteps(inputs: list[_ConcatInput], dfs_o: DfsFile, keep: str) -> None:
+    """Write the timesteps that `keep` selects from the inputs to dfs_o."""
+    out_axis = inputs[0].axis
+    last_written: datetime | None = None
+    # keep="average": the previous file, still open, and its next timestep to average.
+    prev: tuple[DfsFile, _ConcatInput, int] | None = None
+
+    with ExitStack() as prev_file:
+        for i, inp in enumerate(tqdm(inputs, disable=not _show_progress())):
+            next_start = inputs[i + 1].start if i + 1 < len(inputs) else None
+            n_timesteps = inp.axis.NumberOfTimeSteps
+            with ExitStack() as this_file:
+                dfs = this_file.enter_context(
+                    _opened(DfsFileFactory.DfsGenericOpen(inp.filename))
+                )
+                timestep = 0
+                if keep == "first" and last_written is not None:
+                    while (
+                        timestep < n_timesteps
+                        and _timestep_time(dfs, inp, timestep) <= last_written
+                    ):
+                        timestep += 1
+
+                while timestep < n_timesteps:
+                    time = _timestep_time(dfs, inp, timestep)
+                    if (
+                        keep != "first"
+                        and next_start is not None
+                        and time >= next_start
+                    ):
+                        break
+                    data = _read_timestep(dfs, timestep)
+                    if prev is not None:
+                        # The overlap timestamps were checked to be identical.
+                        prev_dfs, prev_inp, prev_timestep = prev
+                        data = [
+                            (p * 0.5 + d * 0.5).astype(d.dtype, copy=False)
+                            for p, d in zip(
+                                _read_timestep(prev_dfs, prev_timestep), data
+                            )
+                        ]
+                        prev = (prev_dfs, prev_inp, prev_timestep + 1)
+                        if prev_timestep + 1 == prev_inp.axis.NumberOfTimeSteps:
+                            prev = None
+                            prev_file.close()
+                    time_out = out_axis.ToRelativeTime(
+                        (time - out_axis.StartDateTime).total_seconds()
+                    )
+                    for d in data:
+                        dfs_o.WriteItemTimeStepNext(time_out, d)
+                    last_written = time
+                    timestep += 1
+
+                if keep == "average" and timestep < n_timesteps:
+                    prev = (dfs, inp, timestep)
+                    prev_file.push(this_file.pop_all())
 
 
 def extract(

@@ -1,12 +1,20 @@
+from contextlib import AbstractContextManager, nullcontext
+from datetime import datetime, timedelta
 from pathlib import Path
+from typing import Any, Literal
 
 import numpy as np
 import pandas as pd
 import pytest
+
+from mikecore.DfsFactory import DfsBuilder, DfsFactory
+from mikecore.DfsFile import DataValueType, DfsSimpleType
 from mikecore.DfsFileFactory import DfsFileFactory
+from mikecore.eum import eumItem, eumQuantity, eumUnit
 
 import mikeio
 from mikeio import generic
+from mikeio.eum import TimeStepUnit
 from mikeio.generic import (
     DerivedItem,
     add,
@@ -19,6 +27,8 @@ from mikeio.generic import (
     sum,
     transform,
 )
+
+Keep = Literal["first", "last", "average"]
 
 
 def test_add_constant(tmp_path: Path) -> None:
@@ -282,7 +292,7 @@ def test_concat_keep(tmp_path: Path) -> None:
     test keep arguments of concatenation function
     """
     # added keep arguments to test
-    keep_args = ["first", "last", "average"]
+    keep_args: list[Keep] = ["first", "last", "average"]
 
     infiles = [
         "tests/testdata/tide1.dfs1",
@@ -478,7 +488,7 @@ def test_concat_average(tmp_path: Path) -> None:
 
 
 @pytest.mark.parametrize("keep", ["first", "last", "average"])
-def test_concat_single_file_writes_it_unchanged(tmp_path: Path, keep: str) -> None:
+def test_concat_single_file_writes_it_unchanged(tmp_path: Path, keep: Keep) -> None:
     infile = "tests/testdata/tide1.dfs1"
     fp = tmp_path / "concat.dfs1"
 
@@ -879,3 +889,374 @@ def test_scale_preserves_custom_blocks(tmp_path: Path) -> None:
     np.testing.assert_array_equal(
         mikeio.Dfs2(via_dataset).custom_blocks["M21_Misc"], orig["M21_Misc"]
     )
+
+
+GRID = mikeio.Grid2D(nx=2, ny=2, dx=1.0)
+
+
+@pytest.mark.parametrize(
+    ("start", "expectation"),
+    [
+        ("2000-01-01 00:00:00", pytest.raises(ValueError, match="not after")),
+        ("2000-01-01 00:00:01", nullcontext()),
+    ],
+)
+def test_concat_next_file_must_start_after_previous(
+    tmp_path: Path, start: str, expectation: AbstractContextManager
+) -> None:
+    t1 = pd.to_datetime(["2000-01-01 00:00", "2000-01-01 00:10", "2000-01-01 00:25"])
+    t2 = pd.DatetimeIndex([start, "2000-01-01 00:30", "2000-01-01 00:45"])
+    mikeio.DataArray(np.ones((3, 2, 2)), time=t1, geometry=GRID).to_dfs(
+        tmp_path / "a.dfs2"
+    )
+    mikeio.DataArray(np.ones((3, 2, 2)), time=t2, geometry=GRID).to_dfs(
+        tmp_path / "b.dfs2"
+    )
+
+    with expectation:
+        generic.concat([tmp_path / "a.dfs2", tmp_path / "b.dfs2"], tmp_path / "c.dfs2")
+
+
+@pytest.mark.parametrize(
+    ("start", "expectation"),
+    [
+        ("2000-01-01 00:25:00", nullcontext()),
+        ("2000-01-01 00:25:01", pytest.raises(ValueError, match="Gap")),
+    ],
+)
+def test_concat_non_equidistant_next_file_must_start_by_previous_end(
+    tmp_path: Path, start: str, expectation: AbstractContextManager
+) -> None:
+    t1 = pd.to_datetime(["2000-01-01 00:00", "2000-01-01 00:10", "2000-01-01 00:25"])
+    t2 = pd.DatetimeIndex([start, "2000-01-01 00:30", "2000-01-01 00:45"])
+    mikeio.DataArray(np.ones((3, 2, 2)), time=t1, geometry=GRID).to_dfs(
+        tmp_path / "a.dfs2"
+    )
+    mikeio.DataArray(np.ones((3, 2, 2)), time=t2, geometry=GRID).to_dfs(
+        tmp_path / "b.dfs2"
+    )
+
+    with expectation:
+        generic.concat([tmp_path / "a.dfs2", tmp_path / "b.dfs2"], tmp_path / "c.dfs2")
+
+
+@pytest.mark.parametrize(
+    ("start", "expectation"),
+    [
+        ("2000-01-01 00:30:00", nullcontext()),
+        ("2000-01-01 00:30:01", pytest.raises(ValueError, match="Gap")),
+    ],
+)
+def test_concat_equidistant_next_file_must_start_by_previous_end_plus_dt(
+    tmp_path: Path, start: str, expectation: AbstractContextManager
+) -> None:
+    t1 = pd.date_range("2000-01-01 00:00", periods=3, freq="10min")  # ends 00:20
+    t2 = pd.date_range(start, periods=3, freq="10min")
+    mikeio.DataArray(np.ones((3, 2, 2)), time=t1, geometry=GRID).to_dfs(
+        tmp_path / "a.dfs2"
+    )
+    mikeio.DataArray(np.ones((3, 2, 2)), time=t2, geometry=GRID).to_dfs(
+        tmp_path / "b.dfs2"
+    )
+
+    with expectation:
+        generic.concat([tmp_path / "a.dfs2", tmp_path / "b.dfs2"], tmp_path / "c.dfs2")
+
+
+@pytest.mark.parametrize(
+    ("keep", "expected"),
+    [
+        ("last", [1.0, 2.0, 2.0, 2.0]),
+        ("first", [1.0, 1.0, 1.0, 2.0]),
+        ("average", [1.0, 1.5, 1.5, 2.0]),
+    ],
+)
+def test_concat_non_equidistant_overlap(
+    tmp_path: Path, keep: Keep, expected: list[float]
+) -> None:
+    t1 = pd.to_datetime(["2000-01-01 00:00", "2000-01-01 00:10", "2000-01-01 00:25"])
+    t2 = pd.to_datetime(["2000-01-01 00:10", "2000-01-01 00:25", "2000-01-01 00:45"])
+    mikeio.DataArray(np.full((3, 2, 2), 1.0), time=t1, geometry=GRID).to_dfs(
+        tmp_path / "a.dfs2"
+    )
+    mikeio.DataArray(np.full((3, 2, 2), 2.0), time=t2, geometry=GRID).to_dfs(
+        tmp_path / "b.dfs2"
+    )
+
+    generic.concat(
+        [tmp_path / "a.dfs2", tmp_path / "b.dfs2"], tmp_path / "c.dfs2", keep=keep
+    )
+
+    da = mikeio.read(tmp_path / "c.dfs2")[0]
+    assert list(da.time) == list(t1[:1].append(t2))
+    np.testing.assert_allclose(da.values[:, 0, 0], expected)
+
+
+def test_concat_files_with_different_items_fails(tmp_path: Path) -> None:
+    t1 = pd.date_range("2000-01-01 00:00", periods=3, freq="h")
+    t2 = pd.date_range("2000-01-01 01:00", periods=3, freq="h")
+    mikeio.DataArray(np.ones((3, 2, 2)), time=t1, geometry=GRID).to_dfs(
+        tmp_path / "a.dfs2"
+    )
+    mikeio.Dataset(
+        {
+            "u": mikeio.DataArray(np.ones((3, 2, 2)), time=t2, geometry=GRID),
+            "v": mikeio.DataArray(np.ones((3, 2, 2)), time=t2, geometry=GRID),
+        }
+    ).to_dfs(tmp_path / "b.dfs2")
+
+    with pytest.raises(ValueError, match="has 2 items"):
+        generic.concat([tmp_path / "a.dfs2", tmp_path / "b.dfs2"], tmp_path / "c.dfs2")
+
+
+def test_concat_files_with_different_grids_fails(tmp_path: Path) -> None:
+    t1 = pd.date_range("2000-01-01 00:00", periods=3, freq="h")
+    t2 = pd.date_range("2000-01-01 01:00", periods=3, freq="h")
+    grid_b = mikeio.Grid2D(nx=3, ny=2, dx=1.0)
+    mikeio.DataArray(np.ones((3, 2, 2)), time=t1, geometry=GRID).to_dfs(
+        tmp_path / "a.dfs2"
+    )
+    mikeio.DataArray(np.ones((3, 2, 3)), time=t2, geometry=grid_b).to_dfs(
+        tmp_path / "b.dfs2"
+    )
+
+    with pytest.raises(ValueError, match="element count"):
+        generic.concat([tmp_path / "a.dfs2", tmp_path / "b.dfs2"], tmp_path / "c.dfs2")
+
+
+def test_concat_files_with_different_meshes_fails(tmp_path: Path) -> None:
+    nodes = np.array(
+        [[0.0, 0.0, 0.0], [1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [1.0, 1.0, 0.0]]
+    )
+    elements = np.array([[0, 1, 2], [1, 3, 2]])
+    mesh_a = mikeio.GeometryFM2D(nodes, elements)
+    mesh_b = mikeio.GeometryFM2D(nodes + [0.5, 0.0, 0.0], elements)
+    t1 = pd.date_range("2000-01-01 00:00", periods=3, freq="h")
+    t2 = pd.date_range("2000-01-01 01:00", periods=3, freq="h")
+    mikeio.DataArray(np.ones((3, 2)), time=t1, geometry=mesh_a).to_dfs(
+        tmp_path / "a.dfsu"
+    )
+    mikeio.DataArray(np.ones((3, 2)), time=t2, geometry=mesh_b).to_dfs(
+        tmp_path / "b.dfsu"
+    )
+
+    with pytest.raises(ValueError, match="static item"):
+        generic.concat([tmp_path / "a.dfsu", tmp_path / "b.dfsu"], tmp_path / "c.dfsu")
+
+
+def test_concat_failure_leaves_existing_output_alone(tmp_path: Path) -> None:
+    t1 = pd.date_range("2000-01-01 00:00", periods=3, freq="h")
+    t2 = pd.date_range("2000-01-01 04:00", periods=3, freq="h")
+    mikeio.DataArray(np.ones((3, 2, 2)), time=t1, geometry=GRID).to_dfs(
+        tmp_path / "a.dfs2"
+    )
+    mikeio.DataArray(np.ones((3, 2, 2)), time=t2, geometry=GRID).to_dfs(
+        tmp_path / "b.dfs2"
+    )
+    (tmp_path / "c.dfs2").write_bytes(b"earlier result")
+
+    with pytest.raises(ValueError, match="Gap"):
+        generic.concat([tmp_path / "a.dfs2", tmp_path / "b.dfs2"], tmp_path / "c.dfs2")
+
+    assert (tmp_path / "c.dfs2").read_bytes() == b"earlier result"
+
+
+def test_concat_unknown_keep_fails(tmp_path: Path) -> None:
+    keep: Any = "mean"
+    with pytest.raises(ValueError, match="keep must be"):
+        generic.concat(
+            ["tests/testdata/gebco_sound.dfs2", "tests/testdata/gebco_sound.dfs2"],
+            tmp_path / "c.dfs2",
+            keep=keep,
+        )
+
+
+def test_concat_output_that_is_an_input_fails(tmp_path: Path) -> None:
+    t1 = pd.date_range("2000-01-01 00:00", periods=3, freq="h")
+    t2 = pd.date_range("2000-01-01 01:00", periods=3, freq="h")
+    mikeio.DataArray(np.ones((3, 2, 2)), time=t1, geometry=GRID).to_dfs(
+        tmp_path / "a.dfs2"
+    )
+    mikeio.DataArray(np.ones((3, 2, 2)), time=t2, geometry=GRID).to_dfs(
+        tmp_path / "b.dfs2"
+    )
+    before = (tmp_path / "b.dfs2").read_bytes()
+
+    with pytest.raises(ValueError, match="also an input"):
+        generic.concat([tmp_path / "a.dfs2", tmp_path / "b.dfs2"], tmp_path / "b.dfs2")
+
+    assert (tmp_path / "b.dfs2").read_bytes() == before
+
+
+@pytest.mark.parametrize(
+    ("t2", "match"),
+    [
+        (pd.date_range("2000-01-01 00:20", periods=3, freq="5min"), "timestep"),
+        (
+            pd.to_datetime(
+                ["2000-01-01 00:20", "2000-01-01 00:25", "2000-01-01 00:45"]
+            ),
+            "time axis type",
+        ),
+    ],
+    ids=["different timestep", "non-equidistant after equidistant"],
+)
+def test_concat_files_with_different_time_axes_fails(
+    tmp_path: Path, t2: pd.DatetimeIndex, match: str
+) -> None:
+    t1 = pd.date_range("2000-01-01 00:00", periods=3, freq="10min")
+    mikeio.DataArray(np.ones((3, 2, 2)), time=t1, geometry=GRID).to_dfs(
+        tmp_path / "a.dfs2"
+    )
+    mikeio.DataArray(np.ones((3, 2, 2)), time=t2, geometry=GRID).to_dfs(
+        tmp_path / "b.dfs2"
+    )
+
+    with pytest.raises(ValueError, match=match):
+        generic.concat([tmp_path / "a.dfs2", tmp_path / "b.dfs2"], tmp_path / "c.dfs2")
+
+
+@pytest.mark.parametrize(
+    ("files", "match"),
+    [
+        ([("00:00", 4), ("02:00", 4), ("03:00", 4)], "two files only"),
+        ([("00:00", 4), ("01:00", 2)], "entirely inside"),
+    ],
+    ids=["03:00 in three files", "01:00-02:00 inside 00:00-03:00"],
+)
+def test_concat_average_overlap_rules(
+    tmp_path: Path, files: list[tuple[str, int]], match: str
+) -> None:
+    """Each file is (start, number of hourly timesteps)."""
+    paths = []
+    for i, (start, periods) in enumerate(files):
+        t = pd.date_range(f"2000-01-01 {start}", periods=periods, freq="h")
+        paths.append(tmp_path / f"{i}.dfs2")
+        mikeio.DataArray(np.ones((periods, 2, 2)), time=t, geometry=GRID).to_dfs(
+            paths[-1]
+        )
+
+    with pytest.raises(ValueError, match=match):
+        generic.concat(paths, tmp_path / "c.dfs2", keep="average")
+
+
+def test_concat_average_with_different_overlap_timestamps_leaves_existing_output_alone(
+    tmp_path: Path,
+) -> None:
+    """In the 01:00-02:00 overlap network_a has 01:30, network_b 01:15 and 01:40."""
+    (tmp_path / "merged.res1d").write_bytes(b"earlier result")
+
+    with pytest.raises(ValueError, match="identical timestamps"):
+        generic.concat(
+            [
+                "tests/testdata/res1d/network_a.res1d",
+                "tests/testdata/res1d/network_b.res1d",
+            ],
+            tmp_path / "merged.res1d",
+            keep="average",
+        )
+
+    assert (tmp_path / "merged.res1d").read_bytes() == b"earlier result"
+
+
+def _write_double_dfs1(filename: Path, start: datetime, value: float) -> None:
+    """Write a 3-timestep hourly dfs1 with one double-precision item.
+
+    mikeio writes only dfs0 in double precision, so build the file with mikecore.
+    """
+    factory = DfsFactory()
+    builder = DfsBuilder.Create("double", "test", 0)
+    builder.SetDataType(0)
+    builder.SetGeographicalProjection(
+        factory.CreateProjectionGeoOrigin("NON-UTM", 0, 0, 0)
+    )
+    builder.SetSpatialAxis(factory.CreateAxisEqD1(eumUnit.eumUmeter, 2, 0, 1))
+    builder.SetTemporalAxis(
+        factory.CreateTemporalEqCalendarAxis(TimeStepUnit.SECOND, start, 0, 3600)
+    )
+    builder.AddCreateDynamicItem(
+        "h",
+        eumQuantity.Create(eumItem.eumIWaterLevel, eumUnit.eumUmeter),
+        DfsSimpleType.Double,
+        DataValueType.Instantaneous,
+    )
+    builder.CreateFile(str(filename))
+    dfs = builder.GetFile()
+    for _ in range(3):
+        dfs.WriteItemTimeStepNext(0, np.full(2, value, dtype=np.float64))
+    dfs.Close()
+
+
+def test_concat_keeps_double_precision(tmp_path: Path) -> None:
+    value = 1.0 + 1e-12  # not representable in float32
+    _write_double_dfs1(tmp_path / "a.dfs1", datetime(2000, 1, 1, 0), value)
+    _write_double_dfs1(tmp_path / "b.dfs1", datetime(2000, 1, 1, 1), value)
+
+    generic.concat([tmp_path / "a.dfs1", tmp_path / "b.dfs1"], tmp_path / "c.dfs1")
+
+    dfs = DfsFileFactory.DfsGenericOpen(str(tmp_path / "c.dfs1"))
+    data_type = dfs.ItemInfo[0].DataType
+    n_timesteps = dfs.FileInfo.TimeAxis.NumberOfTimeSteps
+    data = dfs.ReadItemTimeStep(1, 3).Data
+    dfs.Close()
+    assert data_type == DfsSimpleType.Double
+    assert n_timesteps == 4
+    assert (data == value).all()
+
+
+def test_concat_missing_input_fails(tmp_path: Path) -> None:
+    with pytest.raises(FileNotFoundError, match="missing.dfs2"):
+        generic.concat(
+            ["tests/testdata/gebco_sound.dfs2", tmp_path / "missing.dfs2"],
+            tmp_path / "c.dfs2",
+        )
+
+
+@pytest.mark.parametrize(
+    ("keep", "n_timesteps", "junction_value"), [("last", 9, 2.0), ("first", 8, 1.0)]
+)
+def test_concat_res1d(
+    tmp_path: Path, keep: Keep, n_timesteps: int, junction_value: float
+) -> None:
+    """Concat two synthetic res1d files with overlapping, non-equidistant time axes.
+
+    Both files hold 3 catchments (Hill, Meadow, Town) and 3 items (TotalRunOff,
+    RunOff, ActualRainfall), with 6 timesteps each on 2025-01-01. Every value is
+    constant in time; the test checks the first item (TotalRunOff) for Hill:
+
+        file       timesteps                            TotalRunOff
+        network_a  00:00 00:10 00:25 01:00 01:30 02:00  1.0
+        network_b  01:00 01:15 01:40 02:00 02:30 03:00  2.0
+
+    The overlap is 01:00 to 02:00: network_a has 3 timesteps in it, network_b 4,
+    and only 01:00 and 02:00 are shared. The junction is 01:00, where
+    network_b starts.
+
+    keep="last": network_a until 01:00, then all of network_b, so 9 timesteps.
+    01:00 has network_b's value, 2.0.
+    keep="first": all of network_a, then network_b after 02:00 (02:30, 03:00),
+    so 8 timesteps. 01:00 has network_a's value, 1.0.
+    """
+    fp = tmp_path / "merged.res1d"
+
+    generic.concat(
+        [
+            "tests/testdata/res1d/network_a.res1d",
+            "tests/testdata/res1d/network_b.res1d",
+        ],
+        fp,
+        keep=keep,
+    )
+
+    dfs = DfsFileFactory.DfsGenericOpen(str(fp))
+    axis = dfs.FileInfo.TimeAxis
+    steps = [dfs.ReadItemTimeStep(1, i) for i in range(axis.NumberOfTimeSteps)]
+    times = [axis.StartDateTime + timedelta(seconds=s.Time) for s in steps]
+    title = dfs.FileInfo.ApplicationTitle
+    dfs.Close()
+    assert title == "MIKE1D"
+    assert len(times) == n_timesteps
+    assert times[0] == datetime(2025, 1, 1, 0)
+    assert times[-1] == datetime(2025, 1, 1, 3)
+    junction = times.index(datetime(2025, 1, 1, 1))
+    assert steps[junction].Data[0] == junction_value

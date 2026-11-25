@@ -159,9 +159,9 @@ def test_generic_extract_tilde(home: Path) -> None:
 
 
 def test_generic_concat_tilde(home: Path) -> None:
-    infilename = copy_to_home(home, "tide1.dfs1")
+    infilenames = [copy_to_home(home, f) for f in ("tide1.dfs1", "tide2.dfs1")]
 
-    generic.concat([infilename, infilename], "~/out.dfs1")
+    generic.concat(infilenames, "~/out.dfs1")
 
     assert (home / "out.dfs1").exists()
     assert not Path("~").exists()
