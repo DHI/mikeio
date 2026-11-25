@@ -53,7 +53,7 @@ class Interpolant:
         """Interpolate a time series of 1d data, e.g. element values."""
         ids = self.ids
         weights = self.weights
-        result = np.dot(data[:, ids], weights)
+        result = np.dot(data[:, ids], weights.astype(data.dtype))
         assert isinstance(result, np.ndarray)
         return result
 

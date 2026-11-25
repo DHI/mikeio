@@ -1417,7 +1417,14 @@ class Dataset:
 
         newtime = df12.index
         shape = ds.shape[start_dim:]
-        newdata = [np.full((len(newtime), *shape), np.nan) for _ in range(ds.n_items)]
+        newdata = [
+            np.full(
+                (len(newtime), *shape),
+                np.nan,
+                dtype=np.result_type(ds[j].dtype, other[j].dtype),
+            )
+            for j in range(ds.n_items)
+        ]
         idx1 = np.where(~df12["idx1"].isna())
         idx2 = np.where(~df12["idx2"].isna())
         for j in range(ds.n_items):
