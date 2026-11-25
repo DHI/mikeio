@@ -188,8 +188,8 @@ def test_node_centered_data_at_hanging_nodes(refined: GeometryFM2D) -> None:
 
     zn = refined.get_node_centered_data(linear(ec[:, 0], ec[:, 1]))
 
-    # Using only the fine Elements gave an error of 32. get_node_centered_data
-    # is not exact for a linear field, even at ordinary internal Nodes.
+    # Using only the fine Elements gave an error of 32. The pseudo-laplacian
+    # is not exact for a linear field, so some error remains (#1125).
     exact = linear(nc[HANGING_NODES, 0], nc[HANGING_NODES, 1])
     assert zn[HANGING_NODES] == pytest.approx(exact, abs=12)
 
