@@ -236,3 +236,14 @@ def test_node_values_on_hd2d_are_the_plane_fit() -> None:
     nodes = nodes_with_a_plane(g)
     expected = plane_fit(g, values, nodes)
     assert zn[nodes] == pytest.approx(expected, abs=1e-10)
+
+
+def test_node_without_elements_is_zero_with_a_warning() -> None:
+    xyz = np.array([[0.0, 0, 0], [1, 0, 0], [0, 1, 0], [5, 5, 0]])  # Node 3 unused
+    g = GeometryFM2D(xyz, [[0, 1, 2]], projection="NON-UTM")
+
+    with pytest.warns(UserWarning, match="1 Node"):
+        zn = g.get_node_centered_data(np.array([4.0]))
+
+    assert zn[3] == 0.0
+    assert zn[:3] == pytest.approx(4.0)

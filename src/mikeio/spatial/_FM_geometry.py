@@ -1120,7 +1120,8 @@ class GeometryFM2D(_GeometryFM):
         at the Node of the plane that best fits, by least squares, the Element
         values at the Element centres, so a linear field is reproduced exactly.
         Where fewer Elements surround it, or no plane is defined, it is an
-        inverse-distance average. The method is that of Holmes & Connell
+        inverse-distance average. A Node that belongs to no Element gets 0,
+        with a warning. The method is that of Holmes & Connell
         (1989), AIAA 89-1932, as implemented in DHI.Mesh.
 
         Parameters

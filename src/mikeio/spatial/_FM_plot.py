@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import warnings
+
 from dataclasses import dataclass
 from typing import Any, Literal, Sequence, TYPE_CHECKING
 
@@ -588,6 +590,7 @@ def _get_node_centered_data(
     best fits, by least squares, the Element values at the Element centres.
     Without `extrapolate` the weights are limited to 0-2. With fewer than three
     Elements, or weights summing to zero, it is an inverse-distance average.
+    A Node that belongs to no Element gets 0, with a warning.
 
     With Hanging nodes, `conforming` gives every Element around a Hanging
     node, so each Element is used whole, with its own center.
@@ -619,7 +622,17 @@ def _get_node_centered_data(
     use_inverse_distance = per_node(omega) <= 1e-10
     with np.errstate(divide="ignore", invalid="ignore"):
         omega = np.where(use_inverse_distance[node], 1 / np.hypot(dx, dy), omega)
-        return per_node(omega * data[elem]) / per_node(omega)
+        node_values = per_node(omega * data[elem]) / per_node(omega)
+
+    no_elements = n_elements == 0
+    if no_elements.any():
+        warnings.warn(
+            f"{no_elements.sum()} Node(s) belong to no Element; their value is 0",
+            UserWarning,
+            stacklevel=3,
+        )
+        node_values[no_elements] = 0.0
+    return node_values
 
 
 def _create_tri_only_element_table(element_table: np.ndarray) -> np.ndarray:
