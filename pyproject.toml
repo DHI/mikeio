@@ -7,7 +7,7 @@ build-backend = "uv_build"
 name = "mikeio"
 version = "3.5.0"
 dependencies = [
-    "mikecore>=0.2.2",
+    "mikecore>=0.3.0rc1",
     "numpy>=2.1",
     "pandas>=2.2",
     "matplotlib>=3.9",
@@ -38,7 +38,7 @@ classifiers = [
 ]
 
 [dependency-groups]
-test = ["pytest", "pytest-cov", "mypy==1.19.1", "shapely", "pyproj", "polars", "import-linter"]
+test = ["pytest", "hypothesis", "pytest-cov", "mypy==1.19.1", "shapely", "pyproj", "polars", "import-linter"]
 
 dev = [
     {include-group = "test"},

@@ -38,9 +38,12 @@ from .._path import normalize_output_path
 
 
 if TYPE_CHECKING:
-    from ._FM_geometry_layered import GeometryFM3D
     from matplotlib.axes import Axes
     from numpy.typing import ArrayLike
+
+
+# Distance tolerance for Hanging nodes, relative to the length of the Face
+_HANGING_NODE_TOLERANCE = 1e-6
 
 
 class SupportsGeoInterface(Protocol):
@@ -72,7 +75,7 @@ class GeometryFMPlotter:
 
     """
 
-    def __init__(self, geometry: GeometryFM2D | GeometryFM3D) -> None:
+    def __init__(self, geometry: GeometryFM2D) -> None:
         self.g = geometry
 
     def __call__(
@@ -271,6 +274,10 @@ class GeometryFMPlotter:
 
 
 class _GeometryFM(_Geometry):
+    # Submesh type from the dfsu header, written back as read. Informative
+    # only: Hanging nodes are found from the geometry, never from this value.
+    _submesh_type: int | None = None
+
     def __init__(
         self,
         *,
@@ -837,6 +844,14 @@ class GeometryFM2D(_GeometryFM):
         """Lists of polygons defining domain outline."""
         return self._get_boundary_polygons()
 
+    @cached_property
+    def _conforming_element_table(self) -> list[NDArray[np.int64]] | None:
+        """Element table with each Hanging node as an extra Node of its Element.
+
+        None when there are no Hanging nodes.
+        """
+        return _insert_hanging_nodes(self.node_coordinates, self.element_table)
+
     def contains(self, points: np.ndarray) -> np.ndarray:
         """Test if a list of points are contained by mesh.
 
@@ -903,25 +918,15 @@ class GeometryFM2D(_GeometryFM):
         return BoundaryPolygons(exteriors=exteriors, interiors=interiors)
 
     def _get_boundary_faces(self) -> np.ndarray:
-        """Construct list of faces."""
-        element_table = self.element_table
-
-        all_faces = []
-        for el in element_table:
-            ele = [*el, el[0]]
-            for j in range(len(el)):
-                all_faces.append(ele[j : j + 2])
-
-        all_faces = np.asarray(all_faces)
-
-        all_faces_sorted = np.sort(all_faces, axis=1)
-        _, uf_id, face_counts = np.unique(
-            all_faces_sorted, axis=0, return_index=True, return_counts=True
+        """Faces that occur once, with Hanging nodes taken into account."""
+        conforming = self._conforming_element_table
+        element_table = self.element_table if conforming is None else conforming
+        faces, _, _ = _faces(*_to_connectivity(element_table))
+        _, first, counts = np.unique(
+            _face_keys(faces), return_index=True, return_counts=True
         )
-
-        # boundary faces are those appearing only once
-        bnd_face_id = face_counts == 1
-        return all_faces[uf_id[bnd_face_id]]
+        # in the order of their sorted Node pair, as before
+        return faces[first[counts == 1]]
 
     def isel(
         self, idx: Sequence[int] | int, keepdims: bool = False, **kwargs: Any
@@ -1067,7 +1072,7 @@ class GeometryFM2D(_GeometryFM):
         codes = self.codes[node_ids]
         elem_ids = self.element_ids[sel_elements]
 
-        return GeometryFM2D(
+        geom = GeometryFM2D(
             node_coordinates=node_coords,
             codes=codes,
             node_ids=node_ids,
@@ -1077,6 +1082,8 @@ class GeometryFM2D(_GeometryFM):
             dfsu_type=self._type,
             reindex=True,
         )
+        geom._submesh_type = self._submesh_type
+        return geom
 
     def _get_nodes_and_table_for_elements(
         self, elements: np.ndarray | list[int]
@@ -1122,11 +1129,14 @@ class GeometryFM2D(_GeometryFM):
             node-centered data
 
         """
-        geometry = self
-        nc = geometry.node_coordinates
-        ec = geometry.element_coordinates
-        elem_table = geometry.element_table
-        return _get_node_centered_data(nc, elem_table, ec, data, extrapolate)
+        return _get_node_centered_data(
+            self.node_coordinates,
+            self.element_table,
+            self.element_coordinates,
+            data,
+            extrapolate,
+            conforming=self._conforming_element_table,
+        )
 
     def to_shapely(self) -> Any:
         """Export mesh as shapely MultiPolygon.
@@ -1294,3 +1304,175 @@ def _on_ring(ring: np.ndarray, xy: np.ndarray) -> np.ndarray:
         t = np.clip((px * dx + py * dy) / length2, 0.0, 1.0) if length2 > 0 else 0.0
         on[idx[(px - t * dx) ** 2 + (py - t * dy) ** 2 <= tol * tol]] = True
     return on
+
+
+def _insert_hanging_nodes(
+    node_coordinates: NDArray[np.floating],
+    element_table: np.ndarray | Sequence[ArrayLike],
+) -> list[NDArray[np.int64]] | None:
+    """Conforming element table: each Hanging node as an extra Node of its Element.
+
+    In a Locally refined mesh a coarse Face (A-C) meets two or more fine
+    Faces (A-B, B-C) at Hanging nodes (B). The element table stores the
+    coarse Element with Nodes A and C only, so the coarse Face and the fine
+    Faces each occur once, like Faces on the domain boundary. Inserting each
+    Hanging node into the coarse Element, between the ends of its Face,
+    makes every interior Face shared by exactly two Elements again.
+
+    Hanging nodes are found from the node coordinates and the element table
+    only, never from the Submesh type (ADR-014).
+
+    Same format as `element_table`: one array of Nodes per Element, in
+    counter-clockwise order. Returns None when there are no Hanging nodes.
+
+    Examples
+    --------
+    A coarse triangle beside two fine triangles. Node 3 is a Hanging node
+    on the coarse Face 1-2.
+
+    >>> nc = np.array([[0, 0, 0], [1, 0, 0], [1, 2, 0], [1, 1, 0], [2, 1, 0]])
+    >>> table = _insert_hanging_nodes(nc, [[0, 1, 2], [1, 4, 3], [3, 4, 2]])
+    >>> table[0]
+    array([0, 1, 3, 2])
+    >>> _insert_hanging_nodes(nc, [[0, 1, 2]]) is None
+    True
+
+    """
+    connectivity, n_nodes = _to_connectivity(element_table)
+    if n_nodes.size == 0:
+        return None
+
+    # Faces that occur once: on the domain boundary, or beside a Hanging node
+    faces, element, position = _faces(connectivity, n_nodes)
+    _, inverse, counts = np.unique(
+        _face_keys(faces), return_inverse=True, return_counts=True
+    )
+    once = np.flatnonzero(counts[inverse] == 1)
+    # A Hanging node makes at least three once-only Faces: the coarse Face
+    # and the two fine Faces that meet it
+    if once.size < 3:
+        return None
+
+    start, end = faces[once, 0], faces[once, 1]
+    xy = np.asarray(node_coordinates, dtype=float)[:, :2]
+    a, c = xy[start], xy[end]
+    d = c - a
+    face_length = np.hypot(d[:, 0], d[:, 1])
+
+    # Nodes of once-only Faces within reach of each once-only Face
+    candidates = np.unique(np.concatenate([start, end]))
+    tree = KDTree(xy[candidates])
+    reach = 0.5 * face_length * (1.0 + _HANGING_NODE_TOLERANCE)
+    near = tree.query_ball_point(0.5 * (a + c), reach, return_sorted=False)
+    n_near = np.fromiter((len(n) for n in near), dtype=np.int64, count=len(near))
+    face = np.repeat(np.arange(once.size), n_near)
+    node = candidates[np.concatenate(near).astype(np.int64)]
+
+    keep = (node != start[face]) & (node != end[face])
+    face, node = face[keep], node[keep]
+
+    # On the Face, strictly between its ends
+    ap = xy[node] - a[face]
+    df = d[face]
+    length = face_length[face]
+    t = (ap[:, 0] * df[:, 0] + ap[:, 1] * df[:, 1]) / length**2
+    offset = np.abs(df[:, 0] * ap[:, 1] - df[:, 1] * ap[:, 0]) / length
+    on_face = (
+        (t > _HANGING_NODE_TOLERANCE)
+        & (t < 1.0 - _HANGING_NODE_TOLERANCE)
+        & (offset <= _HANGING_NODE_TOLERANCE * length)
+    )
+    if not on_face.any():
+        return None
+    face, node, t = face[on_face], node[on_face], t[on_face]
+
+    # A Hanging node has a fine Face along the coarse Face: a once-only
+    # Face to a Node on the coarse Face. A Node that only touches the coarse
+    # Face from outside (the corner of a separate Element) has none.
+    from_node = np.concatenate([start, end])
+    order = np.argsort(from_node, kind="stable")
+    from_node, to_node = from_node[order], np.concatenate([end, start])[order]
+    first = np.searchsorted(from_node, node, side="left")
+    n_faces = np.searchsorted(from_node, node, side="right") - first
+    pair = np.repeat(np.arange(node.size), n_faces)
+    k = np.arange(pair.size) - np.repeat(np.cumsum(n_faces) - n_faces, n_faces)
+    other = to_node[np.repeat(first, n_faces) + k]
+    ao = xy[other] - a[face[pair]]
+    df = d[face[pair]]
+    length = face_length[face[pair]]
+    t_other = (ao[:, 0] * df[:, 0] + ao[:, 1] * df[:, 1]) / length**2
+    offset = np.abs(df[:, 0] * ao[:, 1] - df[:, 1] * ao[:, 0]) / length
+    along = (
+        (t_other > -_HANGING_NODE_TOLERANCE)
+        & (t_other < 1.0 + _HANGING_NODE_TOLERANCE)
+        & (offset <= _HANGING_NODE_TOLERANCE * length)
+    )
+    hanging = np.bincount(pair[along], minlength=node.size) > 0
+    if not hanging.any():
+        return None
+    face, node, t = face[hanging], node[hanging], t[hanging]
+
+    # Rebuild only the Elements that get Hanging nodes. Each Hanging node
+    # goes after the start Node of its Face, in order along the Face: sort
+    # by Element, position, then distance along the Face (0 for the
+    # Element's own Nodes).
+    entry = once[face]
+    refined = np.unique(element[entry])
+    own = np.isin(element, refined)
+    order = np.lexsort(
+        (
+            np.concatenate([np.zeros(own.sum()), t]),
+            np.concatenate([position[own], position[entry]]),
+            np.concatenate([element[own], element[entry]]),
+        )
+    )
+    nodes = np.concatenate([connectivity[own], node])[order]
+    sizes = n_nodes[refined] + np.bincount(element[entry])[refined]
+
+    table = [np.asarray(el) for el in element_table]
+    for e, el in zip(refined.tolist(), np.split(nodes, np.cumsum(sizes)[:-1])):
+        table[e] = el.astype(table[e].dtype)
+    return table
+
+
+def _to_connectivity(
+    element_table: np.ndarray | Sequence[ArrayLike],
+) -> tuple[NDArray[np.int64], NDArray[np.int64]]:
+    """The element table as a dfsu file stores it: Connectivity and No of nodes.
+
+    Connectivity holds the Nodes of all Elements, one Element after the
+    other; No of nodes holds the number of Nodes of each Element.
+    """
+    n_elements = len(element_table)
+    n_nodes = np.fromiter(
+        (len(el) for el in element_table),  # type: ignore[arg-type]
+        dtype=np.int64,
+        count=n_elements,
+    )
+    if n_elements == 0:
+        return np.zeros(0, dtype=np.int64), n_nodes
+    connectivity = np.concatenate([np.asarray(el) for el in element_table])
+    return connectivity.astype(np.int64), n_nodes
+
+
+def _faces(
+    connectivity: NDArray[np.int64], n_nodes: NDArray[np.int64]
+) -> tuple[NDArray[np.int64], NDArray[np.int64], NDArray[np.int64]]:
+    """Faces as (start, end) Node pairs, with their Element and position.
+
+    Face `j` of an Element runs from its Node `j` to Node `j + 1`.
+    """
+    element = np.repeat(np.arange(n_nodes.size, dtype=np.int64), n_nodes)
+    first = np.cumsum(n_nodes) - n_nodes
+    position = np.arange(connectivity.size, dtype=np.int64) - first[element]
+    following = position + 1
+    following[following == n_nodes[element]] = 0
+    end = connectivity[first[element] + following]
+    return np.column_stack([connectivity, end]), element, position
+
+
+def _face_keys(faces: NDArray[np.int64]) -> NDArray[np.int64]:
+    """One integer per Face, the same in both directions."""
+    lo = faces.min(axis=1)
+    hi = faces.max(axis=1)
+    return lo * (int(hi.max(initial=0)) + 1) + hi

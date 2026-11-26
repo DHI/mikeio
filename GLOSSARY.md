@@ -72,8 +72,20 @@ A mesh vertex — a point with coordinates referenced by Element connectivity.
 _Avoid_: vertex, point, corner.
 
 **Face**:
-The interface between two Elements. Carries data for DFSU type 2004 (e.g. discharge across an interface). In layered 3D meshes, "layer face" is the horizontal interface between two stacked Elements.
+The interface between an Element and one neighbouring Element, or between an Element and the domain boundary. Carries data for DFSU type 2004 (e.g. discharge across an interface). In a **Locally refined mesh**, one coarse Face can meet two or more fine Faces at **Hanging nodes**. In layered 3D meshes, "layer face" is the horizontal interface between two stacked Elements.
 _Avoid_: edge, interface, side.
+
+**Hanging node**:
+A Node that lies on a Face of a neighbouring Element but is not one of that Element's Nodes.
+_Avoid_: dangling node, T-junction, irregular node.
+
+**Submesh**:
+A feature of the MIKE engine that produces refined results from a coarser simulation. Only a result that is a **Locally refined mesh** differs from an ordinary Flexible Mesh.
+_Avoid_: sub-mesh, refinement.
+
+**Locally refined mesh**:
+A Flexible Mesh that contains Hanging nodes, where finer Elements meet coarser ones. Usually a Submesh result.
+_Avoid_: submesh 1, non-conforming mesh.
 
 ### Spatial structures
 
@@ -288,6 +300,10 @@ _Avoid_: metadata item, header item, fixed item.
 **Dynamic item**:
 A time-varying Item — what users mean when they say "Item" in everyday usage. The Item entry in the file's data block.
 _Avoid_: data item, time-varying item.
+
+**Submesh type**:
+A value in the dfsu header, set by MIKE, that tells whether the file holds a Locally refined mesh: 1 if it does, 0 otherwise. Files from before MIKE 2027 have none (`None` in MIKE IO). It is informative only: the Geometry itself is the source of truth.
+_Avoid_: submesh flag, mesh type.
 
 ## Relationships
 
