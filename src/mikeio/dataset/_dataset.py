@@ -26,6 +26,8 @@ if TYPE_CHECKING:
     import xarray
     import polars as pl
 
+    from ._data_plot import DatasetPlotter
+
 from ._dataarray import DataArray
 from .._track import _extract_track
 from .._options import _item_txt
@@ -44,7 +46,6 @@ from ..spatial import (
 
 from ..spatial._FM_geometry import Area, _GeometryFM
 
-from ._data_plot import DatasetPlotter
 from ._z_accessor import NullZAccessor, ZAccessor
 
 from ._dataarray import IndexType
@@ -131,7 +132,7 @@ class Dataset:
 
         for key, value in data_vars.items():
             self._set_name_attr(key, value)
-        self.plot = DatasetPlotter(self)
+        self._plotter: DatasetPlotter | None = None
 
         self.title = title
         self.custom_blocks = custom_blocks or {}
@@ -200,6 +201,15 @@ class Dataset:
         raise AttributeError(
             "Dataset has no property 'values' - use to_numpy() instead or maybe you were looking for DataArray.values?"
         )
+
+    @property
+    def plot(self) -> DatasetPlotter:
+        """Plotter, created on first access so importing mikeio stays cheap."""
+        if self._plotter is None:
+            from ._data_plot import DatasetPlotter
+
+            self._plotter = DatasetPlotter(self)
+        return self._plotter
 
     @staticmethod
     def _modify_list(lst: Iterable[str]) -> list[str]:
@@ -733,7 +743,7 @@ class Dataset:
     # "_custom_blocks" is not, and _to_safe_name(" custom blocks") produces exactly
     # that name.
     _RESERVED_INSTANCE_ATTRS = frozenset(
-        {"plot", "title", "_data_vars", "_custom_blocks"}
+        {"plot", "title", "_data_vars", "_custom_blocks", "_plotter"}
     )
 
     def _is_reserved_attr(self, name: str) -> bool:

@@ -8,7 +8,6 @@ import numpy as np
 import pandas as pd
 from mikecore.DfsFileFactory import DfsFileFactory
 from mikecore.DfsuFile import DfsuFile, DfsuFileType
-from scipy.spatial import KDTree
 
 from .._interpolation import Interpolant
 from .._options import _item_txt
@@ -29,7 +28,6 @@ from ..spatial import (
     GeometryPoint3D,
 )
 from ..spatial._FM_geometry import Area
-from ..spatial._FM_plot import _plot_vertical_profile
 from ._dfsu import (
     _get_dfsu_info,
     _validate_elements_and_geometry_sel,
@@ -540,6 +538,10 @@ class Dfsu2DV(DfsuLayered):
         if isinstance(values, DataArray):
             values = values.to_numpy()
 
+        from ..spatial._FM_plot import (
+            _plot_vertical_profile,
+        )  # local import: keeps matplotlib out of "import mikeio"
+
         g = self.geometry
         return _plot_vertical_profile(
             node_coordinates=g.node_coordinates,
@@ -603,6 +605,10 @@ class Dfsu3D(DfsuLayered):
         geom = geometry.elements_to_geometry(top_el, node_layers="top")
         xye = geom.element_coordinates[:, 0:2]  # type: ignore
         xyn = geom.node_coordinates[:, 0:2]  # type: ignore
+        from scipy.spatial import (
+            KDTree,
+        )  # local import: keeps scipy out of "import mikeio"
+
         tree2d = KDTree(xyn)
         dist, node_ids = tree2d.query(xye, k=n_nearest)
         weights = Interpolant.from_distances(dist)
