@@ -492,6 +492,13 @@ def check_domain(g: GeometryFM2D) -> None:
 
 @given(m=meshes, data=st.data())
 def test_domain_is_the_elements(m: Mesh, data: st.DataObject) -> None:
+    """The geometry's domain is the union of its Elements.
+
+    For any mesh, subset and numbering, also after writing to and reading
+    from .dfsu or .mesh: boundary_polygons has the union's parts, rings, area
+    and perimeter; contains agrees with it; find_index finds each Element at
+    its centre; the outline draws each ring.
+    """
     g = m.geometry()
     if data.draw(st.booleans()):
         sub = g.isel(data.draw(subset(g)).tolist(), keepdims=True)
@@ -519,10 +526,11 @@ def test_domain_is_the_elements(m: Mesh, data: st.DataObject) -> None:
 
 @given(m=meshes, data=st.data())
 def test_node_values_are_a_local_linear_map(m: Mesh, data: st.DataObject) -> None:
-    """Node values are linear in the Element values and depend on nearby Elements only.
+    """Node values are a linear map of the Element values that keeps constants.
 
-    Near a Hanging node that includes the coarse Element. Without extrapolation
-    each Node value lies within the values around it.
+    A Node depends only on the Elements around it; around a Hanging node that
+    includes the coarse Element. Without extrapolation each Node value lies
+    between the smallest and largest Element value around it.
     """
     g = m.geometry()
     n = g.n_elements
@@ -557,6 +565,11 @@ def test_node_values_are_a_local_linear_map(m: Mesh, data: st.DataObject) -> Non
 @settings(max_examples=max(5, settings().max_examples // 3))  # matplotlib is slow
 @given(m=meshes)
 def test_shaded_plot_triangulates_the_domain(m: Mesh) -> None:
+    """The shaded plot's triangles tile the domain.
+
+    All counter-clockwise, together the domain's area, using every Node, each
+    edge in at most two triangles, and the edges in one as long as the boundary.
+    """
     g = m.geometry()
     da = mikeio.DataArray(np.arange(g.n_elements, dtype=float), geometry=g)
     with warnings.catch_warnings():
@@ -587,7 +600,12 @@ def test_shaded_plot_triangulates_the_domain(m: Mesh) -> None:
 def test_invariant_under_relabelling_and_similarity(
     m: Mesh, data: st.DataObject
 ) -> None:
-    """The same Hanging nodes and boundary after renumbering, rotating, scaling and moving."""
+    """Renumbering, rotating, scaling and moving a mesh changes nothing.
+
+    The same boundary rings through the same Nodes, and every Element centre
+    inside. Node values only follow the renumbering, not the start Node of
+    each Element or the move (#1125).
+    """
     moved, node_map, _ = data.draw(relabelled(m))
     scale = 10.0 ** data.draw(st.integers(-3, 4))
     # a quarter and a half turn keep the Faces of a grid along the axes;
@@ -639,6 +657,10 @@ def test_invariant_under_relabelling_and_similarity(
 
 @given(m=refined(), n_layers=st.integers(1, 3))
 def test_layered_mesh_agrees_with_its_2d_geometry(m: Mesh, n_layers: int) -> None:
+    """A layered mesh has the domain of its 2D mesh.
+
+    The same boundary polygons and contains, and its top layer has the same area.
+    """
     g2 = m.geometry()
     g3 = extrude(g2, n_layers)
 
