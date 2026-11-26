@@ -194,11 +194,29 @@ def linear(x: Any, y: Any) -> Any:
 
 @st.composite
 def grid(draw: st.DrawFn) -> Mesh:
-    """A grid of 1-3 by 1-3 unit cells: quads, triangles or both.
+    r"""A grid of 1-3 by 1-3 unit cells: quads, triangles or both.
 
-    Half the grids are jittered: each interior Node moves by an independent
-    offset of up to 0.2 of the cell size in x and in y. Nodes on the outline
-    stay put, so the domain is still the rectangle.
+    Nodes are numbered row by row from the bottom left; nx = 3, ny = 2:
+
+        8-----9----10----11
+        |     |     |     |
+        4-----5-----6-----7      cell:  d-----c
+        |     |     |     |             |     |
+        0-----1-----2-----3             a-----b
+
+    A cell is a quad [a, b, c, d] or two triangles, split along either
+    diagonal:
+
+        d-----c          d-----c
+        |   / |          | \   |
+        | /   |          |   \ |
+        a-----b          a-----b
+        [a, b, c]        [a, b, d]
+        [c, d, a]        [b, c, d]
+
+    Half the grids are jittered: each interior Node (5 and 6 above) moves by
+    an independent offset of up to 0.2 of the cell size in x and in y. Nodes
+    on the outline stay put, so the domain is still the rectangle.
     """
     nx, ny = draw(st.integers(1, 3)), draw(st.integers(1, 3))
     kind = draw(st.sampled_from(["quad", "tri", "mixed"]))
@@ -235,10 +253,26 @@ def from_file(filename: str) -> Mesh:
 
 
 def refine(m: Mesh, selected: set[int]) -> Mesh:
-    """Split each selected Element into 4 at its Face midpoints.
+    r"""Split each selected Element into 4 at its Face midpoints.
 
-    Unselected neighbours of a split Element get a Hanging node. A midpoint
-    with a Node already there, within rounding, reuses it.
+    A triangle [a, b, c] and a quad [a, b, c, d], with new Nodes at the
+    midpoints (ab, bc, ...) and, for the quad, the centre o:
+
+                c                 d----cd-----c
+               / \                |     |     |
+              /   \               |     |     |
+            ca-----bc             da----o-----bc
+            / \   / \             |     |     |
+           /   \ /   \            |     |     |
+          a-----ab----b           a----ab-----b
+
+        [a, ab, ca]  [ab, b, bc]   [a, ab, o, da]  [b, bc, o, ab]
+        [ca, bc, c]  [ab, bc, ca]  [c, cd, o, bc]  [d, da, o, cd]
+
+    An unselected neighbour across a-b keeps its Face a-b, so ab becomes a
+    Hanging node on it. A midpoint with a Node already there, within
+    rounding, reuses it: the midpoint of a Face shared by two split
+    Elements, or a Hanging node from an earlier refinement.
     """
     xy = list(m.xy)
     size = float(np.ptp(m.xy, axis=0).max())
@@ -256,6 +290,7 @@ def refine(m: Mesh, selected: set[int]) -> Mesh:
             out.append(el)
             continue
         p = m.xy[el]
+        # p is [a, b, c], rolled [b, c, a]: midpoints [ab, bc, ca]
         mid = [node_at(q) for q in 0.5 * (p + np.roll(p, -1, axis=0))]
         if len(el) == 3:
             (a, b, c), (ab, bc, ca) = el, mid
@@ -289,6 +324,17 @@ def relabelled(
     """Renumber Nodes, reorder Elements, and rotate each Element's start Node.
 
     Returns the new mesh, and for each new Node and Element the old one.
+    For example, with node_map [2, 0, 3, 1] and element_map [1, 0]:
+
+        old                new
+        3-----2            2-----0
+        | e1 /|            | E0 /|      E0 = e1: [0, 2, 3] -> [1, 0, 2],
+        |  /  |            |  /  |           rotated to start at 0: [0, 2, 1]
+        |/ e0 |            |/ E1 |      E1 = e0: [0, 1, 2] -> [1, 3, 0]
+        0-----1            1-----3
+
+    new = argsort(node_map) inverts the map: old Node 0 is new Node
+    new[0] = 1, and old Node 2 is new Node new[2] = 0.
     """
     rnd = draw(st.randoms(use_true_random=False))
     node_map = np.array(rnd.sample(range(len(m.xy)), len(m.xy)))
@@ -304,7 +350,17 @@ def relabelled(
 
 @st.composite
 def subset(draw: st.DrawFn, g: GeometryFM2D) -> NDArray[np.int64]:
-    """Elements on one side of a line, or a random set."""
+    """Elements on one side of a line, or a random set.
+
+    For the line, each Element centre is projected on a direction, d = centre
+    . direction, and the Elements below a quantile of d are kept. With angle
+    0 the direction is x, and the line is upright:
+
+          x   x   x | x   x
+            x   x   |   x   x      ->  direction
+          x   x   x | x   x
+            kept    | dropped
+    """
     if draw(st.booleans()):
         angle = draw(st.floats(0, 2 * np.pi))
         d = g.element_coordinates[:, :2] @ [np.cos(angle), np.sin(angle)]
@@ -315,7 +371,22 @@ def subset(draw: st.DrawFn, g: GeometryFM2D) -> NDArray[np.int64]:
 
 
 def extrude(g: GeometryFM2D, n_layers: int) -> GeometryFM3D:
-    """Sigma layers below the 2D mesh, bottom-up in each column."""
+    """Sigma layers below the 2D mesh, bottom-up in each column.
+
+    2D Node n becomes the column of Nodes n * k to n * k + n_layers, with
+    k = n_layers + 1 Nodes per column. With 2 layers, a 2D Face 0-1:
+
+         z   2D Node 0  2D Node 1
+         0        2-------5
+                  |       |        layer 1: [1, 4, ..] + [2, 5, ..]
+       -0.5       1-------4
+                  |       |        layer 0: [0, 3, ..] + [1, 4, ..]
+        -1        0-------3                 bottom Nodes + top Nodes
+
+    so a 2D triangle [0, 1, 2] gives the prisms [0, 3, 6, 1, 4, 7] and
+    [1, 4, 7, 2, 5, 8], in that order: the layers of an Element are
+    consecutive.
+    """
     k = n_layers + 1  # Nodes per column
     depth = np.linspace(-1.0, 0.0, k)
     nc = [[x, y, z] for x, y, _ in g.node_coordinates for z in depth]
@@ -387,6 +458,7 @@ def check_domain(g: GeometryFM2D) -> None:
     # points in and around the mesh; contains is undefined on the boundary, so
     # only those further than TOL from it
     face_midpoints = np.vstack(
+        # [a, b, c] with [b, c, a]: the midpoints of a-b, b-c and c-a
         [0.5 * (xy[el] + xy[np.roll(el, -1)]) for el in g.element_table]
     )
     margin = 0.1 * size_of(g)
@@ -469,7 +541,8 @@ def test_node_values_are_a_local_linear_map(m: Mesh, data: st.DataObject) -> Non
             atol=RTOL * (1 + bound * (abs(a) + abs(b)) + abs(c)),  # result size
         )
         e = data.draw(st.integers(0, n - 1))
-        changed = np.flatnonzero(node_values(np.eye(n)[e]))
+        one_element = np.eye(n)[e]  # 1 at Element e, 0 elsewhere
+        changed = np.flatnonzero(node_values(one_element))
         assert all(e in around[node] for node in changed)
 
     zn = g.get_node_centered_data(u, extrapolate=False)
@@ -534,7 +607,12 @@ def test_invariant_under_relabelling_and_similarity(
         xy = g.node_coordinates[:, :2]
         rings = []
         for line in g.boundary_polygons.lines:
-            ring = np.asarray(line.xy)[:-1]
+            ring = np.asarray(line.xy)[:-1]  # the last point repeats the first
+            # distance from each ring point (row) to each Node (column); the
+            # nearest Node is the ring point itself
+            #                Node 0  Node 1  Node 2
+            #   ring point 0    0      1.0     1.4    ->  Node 0
+            #   ring point 1   1.0      0      1.0    ->  Node 1
             node = np.linalg.norm(ring[:, None] - xy, axis=2).argmin(axis=1)
             rings.append(sorted(to_m[node].tolist()))
         return sorted(rings)
