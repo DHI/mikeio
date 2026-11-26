@@ -9,6 +9,7 @@ from pathlib import Path
 from typing import Callable
 
 import pytest
+from hypothesis import HealthCheck, settings
 
 _PROC_FD = Path("/proc/self/fd")
 
@@ -44,3 +45,21 @@ def count_fds() -> Callable[[str | Path], int]:
         return _open_targets()[target] - baseline[target]
 
     return count
+
+
+# Hypothesis: few, fixed examples by default, for a fast and stable suite;
+# HYPOTHESIS_PROFILE=deep searches far wider, e.g. after changing geometry code
+settings.register_profile(
+    "fast",
+    max_examples=30,
+    derandomize=True,
+    deadline=None,  # the first matplotlib call is slow
+    suppress_health_check=[HealthCheck.too_slow],
+)
+settings.register_profile(
+    "deep",
+    max_examples=1000,
+    deadline=None,
+    suppress_health_check=[HealthCheck.too_slow],
+)
+settings.load_profile(os.environ.get("HYPOTHESIS_PROFILE", "fast"))
