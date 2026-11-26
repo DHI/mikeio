@@ -713,6 +713,16 @@ def test_hanging_node_distance_from_face_end(t: float, n_rings: int) -> None:
     assert len(g.boundary_polygons.lines) == n_rings
 
 
+@pytest.mark.parametrize("plot_type", ["contour", "contourf"])
+def test_refined_plot_of_a_locally_refined_mesh(plot_type: str) -> None:
+    """Refining the plot triangulation crashed at Hanging nodes (#1112)."""
+    g = read_geometry(REFINED)
+
+    with pytest.warns(FutureWarning, match="n_refinements"):
+        getattr(g.plot, plot_type)(n_refinements=1)
+    plt.close("all")
+
+
 @pytest.mark.parametrize("name", HANGING_NODES)
 def test_coarse_element_contributes_to_hanging_nodes(name: str) -> None:
     g = CATALOGUE[name].geometry()
