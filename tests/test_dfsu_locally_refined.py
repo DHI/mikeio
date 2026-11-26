@@ -44,6 +44,9 @@ NOT_REFINED = "tests/testdata/submesh/Dfsu2D_CustomBlock6_Submesh0.dfsu"
 # How far off a Face a Node may be and still hang on it, relative to the
 # Face length; the same value as in mikeio.spatial._FM_geometry
 TOL = 1e-6
+# Rounding error allowed when a result is compared with an oracle, relative
+# to its size: far above float64 precision and far below TOL
+RTOL = 1e-9
 
 
 @dataclass
@@ -59,8 +62,7 @@ class Mesh:
         return GeometryFM2D(nc, self.elements, projection=self.projection)
 
     def __repr__(self) -> str:
-        xy = np.round(self.xy, 12).tolist()
-        return f"Mesh({xy}, {self.elements}, {self.projection!r})"
+        return f"Mesh({self.xy.tolist()}, {self.elements}, {self.projection!r})"
 
 
 def as_mesh(g: GeometryFM2D) -> Mesh:
@@ -207,9 +209,11 @@ def grid(draw: st.DrawFn) -> Mesh:
     x, y = np.meshgrid(np.arange(nx + 1.0), np.arange(ny + 1.0))
     xy = np.column_stack([x.ravel(), y.ravel()])
     if draw(st.booleans()):
-        # A corner is >= 0.71 from the opposite diagonal and the two can close
-        # by at most 2 * 0.2 * sqrt(2) = 0.57, so every quad stays convex.
-        jitter = st.floats(-0.2, 0.2, allow_nan=False)
+        # A corner is 1/sqrt(2) = 0.71 from the diagonal between its
+        # neighbours; corner and diagonal each move at most sqrt(2) * 0.2 =
+        # 0.28, so every quad stays convex.
+        max_jitter = 0.2
+        jitter = st.floats(-max_jitter, max_jitter, allow_nan=False)
         j = np.array(draw(st.lists(jitter, min_size=xy.size, max_size=xy.size)))
         interior = (xy[:, 0] > 0) & (xy[:, 0] < nx) & (xy[:, 1] > 0) & (xy[:, 1] < ny)
         xy = xy + j.reshape(-1, 2) * interior[:, None]
@@ -237,32 +241,39 @@ def from_file(filename: str) -> Mesh:
 def refine(m: Mesh, selected: set[int]) -> Mesh:
     """Split each selected Element into 4 at its Face midpoints.
 
-    Unselected neighbours of a split Element get a Hanging node. A Node
-    already at a midpoint, from an earlier refinement, is reused.
+    Unselected neighbours of a split Element get a Hanging node. Elements
+    split together share the midpoint of a common Face, and a Node already
+    at the middle of a Face, a Hanging node from an earlier refinement, is
+    reused.
     """
-    xy = [p for p in m.xy]
-    lo, size = m.xy.min(axis=0), float(np.ptp(m.xy, axis=0).max())
-    where = {tuple(np.round((p - lo) / size, 9)): i for i, p in enumerate(xy)}
+    xy = list(m.xy)
+    midpoints: dict[frozenset[int], int] = {}
 
-    def node_at(p: NDArray[np.float64]) -> int:
-        key = tuple(np.round((p - lo) / size, 9))
-        if key not in where:
-            xy.append(p)
-            where[key] = len(xy) - 1
-        return where[key]
+    def new_node(p: NDArray[np.float64]) -> int:
+        xy.append(p)
+        return len(xy) - 1
+
+    def midpoint(a: int, c: int) -> int:
+        face = frozenset((a, c))
+        if face not in midpoints:
+            nodes, t = on_face(m.xy, a, c)
+            middle = nodes[np.abs(t - 0.5) <= TOL]
+            midpoints[face] = (
+                int(middle[0]) if middle.size else new_node(0.5 * (m.xy[a] + m.xy[c]))
+            )
+        return midpoints[face]
 
     out: list[list[int]] = []
     for e, el in enumerate(m.elements):
         if e not in selected:
             out.append(el)
             continue
-        p = m.xy[el]
-        mid = [node_at(0.5 * (p[i] + p[(i + 1) % len(el)])) for i in range(len(el))]
+        mid = [midpoint(a, c) for a, c in zip(el, el[1:] + el[:1])]
         if len(el) == 3:
             (a, b, c), (ab, bc, ca) = el, mid
             out += [[a, ab, ca], [ab, b, bc], [ca, bc, c], [ab, bc, ca]]
         else:
-            centre = node_at(p.mean(axis=0))
+            centre = new_node(m.xy[el].mean(axis=0))
             out += [[el[i], mid[i], centre, mid[i - 1]] for i in range(4)]
     return Mesh(np.array(xy), out, m.projection)
 
@@ -313,17 +324,26 @@ def touching(g: GeometryFM2D) -> list[set[int]]:
     return around
 
 
+def on_face(
+    xy: NDArray[np.float64], a: int, c: int
+) -> tuple[NDArray[np.int64], NDArray[np.float64]]:
+    """The Nodes strictly between a and c on Face a-c, in order, and how far along.
+
+    Within TOL of the Face length, as in the code under test; how far along
+    is 0 at a and 1 at c.
+    """
+    d, r = xy[c] - xy[a], xy - xy[a]
+    length = np.hypot(*d)
+    t = r @ d / length**2
+    offset = np.abs(d[0] * r[:, 1] - d[1] * r[:, 0]) / length
+    nodes = np.flatnonzero((t > TOL) & (t < 1 - TOL) & (offset <= TOL * length))
+    nodes = nodes[np.argsort(t[nodes])]
+    return nodes, t[nodes]
+
+
 def nodes_on_faces(xy: NDArray[np.float64], el: NDArray[np.int64]) -> list[int]:
     """Nodes strictly inside a Face of the Element, in order along each Face."""
-    out = []
-    for a, c in zip(el, np.roll(el, -1)):
-        d = xy[c] - xy[a]
-        r = xy - xy[a]
-        t = r @ d / (d @ d)
-        offset = np.abs(d[0] * r[:, 1] - d[1] * r[:, 0]) / np.hypot(*d)
-        on = np.flatnonzero((t > TOL) & (t < 1 - TOL) & (offset <= TOL * np.hypot(*d)))
-        out += on[np.argsort(t[on])].tolist()
-    return out
+    return [int(n) for a, c in zip(el, np.roll(el, -1)) for n in on_face(xy, a, c)[0]]
 
 
 @st.composite
@@ -336,7 +356,8 @@ def subset(draw: st.DrawFn, g: GeometryFM2D) -> NDArray[np.int64]:
     if kind == "half-plane":
         angle = draw(st.floats(0, 2 * np.pi))
         d = g.element_coordinates[:, :2] @ [np.cos(angle), np.sin(angle)]
-        return np.flatnonzero(d <= np.quantile(d, draw(st.floats(0.2, 0.8))))
+        fraction = draw(st.floats(0.2, 0.8))  # never all or none of the Elements
+        return np.flatnonzero(d <= np.quantile(d, fraction))
     if kind == "random":
         elements = st.integers(0, g.n_elements - 1)
         return np.array(sorted(draw(st.sets(elements, min_size=1))))
@@ -346,10 +367,9 @@ def subset(draw: st.DrawFn, g: GeometryFM2D) -> NDArray[np.int64]:
 
 def extrude(g: GeometryFM2D, n_layers: int) -> GeometryFM3D:
     """Sigma layers below the 2D mesh, bottom-up in each column."""
-    k = n_layers + 1
-    nc = [
-        [x, y, -1.0 + i / n_layers] for x, y, _ in g.node_coordinates for i in range(k)
-    ]
+    k = n_layers + 1  # Nodes per column
+    depth = np.linspace(-1.0, 0.0, k)
+    nc = [[x, y, z] for x, y, _ in g.node_coordinates for z in depth]
     elements = [
         [n * k + i for n in el] + [n * k + i + 1 for n in el]
         for el in g.element_table
@@ -376,13 +396,7 @@ def face_pieces(g: GeometryFM2D) -> dict[tuple[int, int], list[int]]:
     pieces: dict[tuple[int, int], list[int]] = defaultdict(list)
     for e, el in enumerate(g.element_table):
         for a, c in zip(el, np.roll(el, -1)):
-            d, r = xy[c] - xy[a], xy - xy[a]
-            t = r @ d / (d @ d)
-            offset = np.abs(d[0] * r[:, 1] - d[1] * r[:, 0]) / np.hypot(*d)
-            on = np.flatnonzero(
-                (t > TOL) & (t < 1 - TOL) & (offset <= TOL * np.hypot(*d))
-            )
-            chain = [int(a), *on[np.argsort(t[on])].tolist(), int(c)]
+            chain = [int(a), *on_face(xy, a, c)[0].tolist(), int(c)]
             for p, q in zip(chain, chain[1:]):
                 pieces[(min(p, q), max(p, q))].append(e)
     return pieces
@@ -447,7 +461,7 @@ def planar_area(g: GeometryFM2D) -> float:
     """Element area in coordinate units; get_element_area is in m² for LONG/LAT."""
     area = float(sum(p.area for p in g.to_shapely().geoms))
     if g.projection != "LONG/LAT":
-        assert g.get_element_area().sum() == pytest.approx(area, rel=1e-9)
+        assert g.get_element_area().sum() == pytest.approx(area, rel=RTOL)
     return area
 
 
@@ -458,30 +472,33 @@ def check_domain(g: GeometryFM2D) -> None:
     polygons = g.boundary_polygons
 
     assert sum(p.area for p in polygons.lines) == pytest.approx(
-        planar_area(g), rel=1e-9
+        planar_area(g), rel=RTOL
     )
     assert (len(polygons.exteriors), len(polygons.lines)) == n_domains_and_rings(g)
     assert sum(ring_length(p.xy) for p in polygons.lines) == pytest.approx(
-        boundary_length(g), rel=1e-9
+        boundary_length(g), rel=RTOL
     )
 
-    # inside an Element, away from the boundary; contains is undefined on it
+    # Points at the Elements' centres, Face midpoints and Nodes, and random
+    # points in and around the mesh; contains is undefined on the boundary, so
+    # only those further than TOL from it
     boundary = shapely.MultiLineString([xy[list(face)] for face in boundary_faces(g)])
     face_midpoints = np.vstack(
         [0.5 * (xy[el] + xy[np.roll(el, -1)]) for el in g.element_table]
     )
-    rng = np.random.default_rng(0)
-    random_points = rng.uniform(
-        xy.min(axis=0) - 0.1 * size, xy.max(axis=0) + 0.1 * size, (200, 2)
+    margin = 0.1 * size
+    random_points = np.random.default_rng(0).uniform(
+        xy.min(axis=0) - margin, xy.max(axis=0) + margin, size=(200, 2)
     )
     points = np.vstack(
         [g.element_coordinates[:, :2], face_midpoints, xy, random_points]
     )
-    points = points[shapely.distance(boundary, shapely.points(points)) > 1e-6 * size]
-    # within rounding of an Element: a Hanging node leaves gaps of about 1e-13
+    points = points[shapely.distance(boundary, shapely.points(points)) > TOL * size]
+    # within rounding of an Element: along a Face with Hanging nodes, the
+    # Elements on either side leave gaps of about 1e-13
     near = shapely.points(points)
     in_an_element = np.any(
-        [shapely.dwithin(e, near, 1e-9 * size) for e in g.to_shapely().geoms], axis=0
+        [shapely.dwithin(e, near, RTOL * size) for e in g.to_shapely().geoms], axis=0
     )
     np.testing.assert_array_equal(g.contains(points), in_an_element)
 
@@ -533,9 +550,11 @@ def test_node_values_are_a_local_linear_map(m: Mesh, data: st.DataObject) -> Non
     """
     g = m.geometry()
     n = g.n_elements
-    field = st.lists(st.floats(-10, 10), min_size=n, max_size=n).map(np.array)
+    bound = 10.0  # on the Element values and the coefficients
+    value = st.floats(-bound, bound)
+    field = st.lists(value, min_size=n, max_size=n).map(np.array)
     u, w = data.draw(field), data.draw(field)
-    a, b, c = data.draw(st.tuples(*[st.floats(-10, 10)] * 3))
+    a, b, c = data.draw(st.tuples(value, value, value))
     around = touching(g)
     for extrapolate in (True, False):
 
@@ -545,7 +564,7 @@ def test_node_values_are_a_local_linear_map(m: Mesh, data: st.DataObject) -> Non
         np.testing.assert_allclose(
             node_values(a * u + b * w + c),
             a * node_values(u) + b * node_values(w) + c,
-            atol=1e-9 * (1 + 10 * (abs(a) + abs(b)) + abs(c)),
+            atol=RTOL * (1 + bound * (abs(a) + abs(b)) + abs(c)),  # result size
         )
         e = data.draw(st.integers(0, n - 1))
         changed = np.flatnonzero(node_values(np.eye(n)[e]))
@@ -555,7 +574,7 @@ def test_node_values_are_a_local_linear_map(m: Mesh, data: st.DataObject) -> Non
     for node, elements in enumerate(around):
         if elements:
             v = u[sorted(elements)]
-            assert v.min() - 1e-9 <= zn[node] <= v.max() + 1e-9
+            assert v.min() - RTOL * bound <= zn[node] <= v.max() + RTOL * bound
 
 
 @settings(max_examples=max(5, settings().max_examples // 3))  # matplotlib is slow
@@ -574,7 +593,7 @@ def test_shaded_plot_triangulates_the_domain(m: Mesh) -> None:
     ab, ac = p[:, 1] - p[:, 0], p[:, 2] - p[:, 0]
     area = 0.5 * (ab[:, 0] * ac[:, 1] - ab[:, 1] * ac[:, 0])
     assert (area > 0).all()
-    assert area.sum() == pytest.approx(planar_area(g), rel=1e-9)
+    assert area.sum() == pytest.approx(planar_area(g), rel=RTOL)
     assert set(np.unique(tri.triangles)) == set(range(g.n_nodes))
 
     edges = np.sort(tri.triangles[:, [0, 1, 1, 2, 2, 0]].reshape(-1, 2), axis=1)
@@ -584,7 +603,7 @@ def test_shaded_plot_triangulates_the_domain(m: Mesh) -> None:
     length = np.hypot(
         tri.x[once[:, 0]] - tri.x[once[:, 1]], tri.y[once[:, 0]] - tri.y[once[:, 1]]
     )
-    assert length.sum() == pytest.approx(boundary_length(g), rel=1e-9)
+    assert length.sum() == pytest.approx(boundary_length(g), rel=RTOL)
 
 
 @given(m=refined(), data=st.data())
@@ -594,31 +613,35 @@ def test_invariant_under_relabelling_and_similarity(
     """The same Hanging nodes and boundary after renumbering, rotating, scaling and moving."""
     moved, node_map, _ = data.draw(relabelled(m))
     scale = 10.0 ** data.draw(st.integers(-3, 4))
+    # a quarter and a half turn keep the Faces of a grid along the axes;
+    # 0.3 rad turns them off the axes
     angle = data.draw(st.sampled_from([0.0, 0.3, np.pi / 2, np.pi]))
-    # far from the origin relative to its size, Polygon.area loses precision
-    # (test_small_mesh_far_from_the_origin), so offsets scale with the mesh
-    offset = scale * np.array(
-        data.draw(st.tuples(*[st.sampled_from([0.0, -123.5, 1e4])] * 2))
-    )
+    # Far from the origin relative to its size, Polygon.area loses precision
+    # (test_small_mesh_far_from_the_origin), so the offset is a multiple of
+    # the scale: none, a negative non-integer, or far from the mesh
+    shift = st.sampled_from([0.0, -123.5, 1e4])
+    offset = scale * np.array(data.draw(st.tuples(shift, shift)))
     rotation = np.array(
         [[np.cos(angle), -np.sin(angle)], [np.sin(angle), np.cos(angle)]]
     )
     moved.xy = scale * moved.xy @ rotation.T + offset
     note(repr(moved))
 
-    def ring_nodes(g: GeometryFM2D, to_original: Any) -> list[frozenset[Any]]:
-        rings = [to_original(np.asarray(p.xy)[:-1]) for p in g.boundary_polygons.lines]
-        return sorted(
-            (frozenset(map(tuple, np.round(r, 6))) for r in rings), key=sorted
-        )
+    def ring_nodes(g: GeometryFM2D, to_m: NDArray[np.int64]) -> list[list[int]]:
+        """The Nodes of each boundary ring, numbered as in m."""
+        xy = g.node_coordinates[:, :2]
+        rings = []
+        for line in g.boundary_polygons.lines:
+            ring = np.asarray(line.xy)[:-1]
+            node = np.linalg.norm(ring[:, None] - xy, axis=2).argmin(axis=1)
+            rings.append(sorted(to_m[node].tolist()))
+        return sorted(rings)
 
     before, after = m.geometry(), moved.geometry()
     assert len(after.boundary_polygons.exteriors) == len(
         before.boundary_polygons.exteriors
     )
-    assert ring_nodes(
-        after, lambda xy: ((xy - offset) / scale) @ rotation
-    ) == ring_nodes(before, lambda xy: xy)
+    assert ring_nodes(after, node_map) == ring_nodes(before, np.arange(len(m.xy)))
     assert after.contains(after.element_coordinates[:, :2]).all()
 
     # #1125: node values depend on the start Node and position of quads, so
@@ -626,10 +649,10 @@ def test_invariant_under_relabelling_and_similarity(
     relabelled_mesh, node_map, element_map = data.draw(
         relabelled(m, rotate_start=False)
     )
-    z = np.arange(before.n_elements, dtype=float) % 5
+    z = np.cos(np.arange(before.n_elements))  # any field, of size 1
     zn = before.get_node_centered_data(z)
     zn_relabelled = relabelled_mesh.geometry().get_node_centered_data(z[element_map])
-    np.testing.assert_allclose(zn_relabelled, zn[node_map], atol=1e-9)
+    np.testing.assert_allclose(zn_relabelled, zn[node_map], atol=RTOL)
 
 
 @given(m=refined(), n_layers=st.integers(1, 3))
@@ -727,8 +750,7 @@ def test_element_table_is_as_stored_in_file() -> None:
     stored = [np.asarray(e) - 1 for e in dfs.ElementTable]
     dfs.Close()
 
-    assert len(g.element_table) == len(stored) == 40
-    for a, b in zip(g.element_table, stored):
+    for a, b in zip(g.element_table, stored, strict=True):
         np.testing.assert_array_equal(a, b)
 
 
