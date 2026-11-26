@@ -320,9 +320,7 @@ meshes = st.one_of(grid(), refined(), refined(files))
 
 
 @st.composite
-def relabelled(
-    draw: st.DrawFn, m: Mesh, rotate_start: bool = True
-) -> tuple[Mesh, Any, Any]:
+def relabelled(draw: st.DrawFn, m: Mesh) -> tuple[Mesh, Any, Any]:
     """Renumber Nodes, reorder Elements, and rotate each Element's start Node.
 
     Returns the new mesh, and for each new Node and Element the old one.
@@ -345,7 +343,7 @@ def relabelled(
     elements = []
     for e in element_map:
         el = [int(new[n]) for n in m.elements[e]]
-        k = rnd.randrange(len(el)) if rotate_start else 0
+        k = rnd.randrange(len(el))
         elements.append(el[k:] + el[:k])
     return Mesh(m.xy[node_map], elements, m.projection), node_map, element_map
 
@@ -562,6 +560,79 @@ def test_node_values_are_a_local_linear_map(m: Mesh, data: st.DataObject) -> Non
             assert v.min() - RTOL * bound <= zn[node] <= v.max() + RTOL * bound
 
 
+@given(m=meshes, data=st.data())
+def test_node_value_is_the_plane_fit_of_the_elements_around_it(
+    m: Mesh, data: st.DataObject
+) -> None:
+    """Each Node value is the least-squares plane through the Element values around it, at the Node.
+
+    Near a Hanging node that includes the coarse Element. With fewer than three
+    Elements, or centres on a line through the Node, the inverse-distance
+    average instead.
+    """
+    if m.projection == "NON-UTM":
+        # Elements up to 100 times longer than wide, at the origin or at a
+        # typical UTM easting and northing
+        stretch = data.draw(st.sampled_from([1.0, 100.0]))
+        offset = data.draw(st.sampled_from([(0.0, 0.0), (5e5, 6.2e6)]))
+        m = Mesh(m.xy * [stretch, 1.0] + offset, m.elements)
+    note(repr(m))
+    g = m.geometry()
+    n = g.n_elements
+    values = np.array(data.draw(st.lists(st.floats(-1, 1), min_size=n, max_size=n)))
+
+    zn = g.get_node_centered_data(values)
+
+    for node, elements in enumerate(touching(g)):
+        e = sorted(elements)
+        d = g.element_coordinates[e, :2] - g.node_coordinates[node, :2]
+        w = 1 / np.hypot(d[:, 0], d[:, 1])
+        inverse_distance = w @ values[e] / w.sum()
+        # A plane v = p0 + p1 dx + p2 dy, with dx, dy from the Node to an
+        # Element centre, has the value p0 at the Node. One row per Element:
+        #
+        #          1    dx    dy
+        #   A = [  1, -0.5,  0.3 ]   Element 3
+        #       [  1,  0.4,  0.2 ]   Element 7
+        #       [  1,  0.0, -1.0 ]   Element 8
+        #
+        # dx and dy are scaled to at most 1, which keeps lstsq well-conditioned.
+        A = np.column_stack([np.ones(len(e)), d / np.abs(d).max()])
+        # How far the centres are from a line through the Node: with
+        # M = [[sum dx^2, sum dx dy], [sum dx dy, sum dy^2]],
+        # spread = det M / (sum dx^2 * sum dy^2)
+        #        = 1 - (sum dx dy)^2 / (sum dx^2 * sum dy^2),
+        # 0 for centres on a line through the Node, 1 at most.
+        M = d.T @ d
+        spread = np.linalg.det(M) / (M[0, 0] * M[1, 1])
+        # The spec switches to inverse distance at a spread of 1e-10. Rounding
+        # decides close to it, so within a factor 100 either answer is right.
+        switch, factor = 1e-10, 100
+        plane_fit = is_a_plane_fit(A, values[e], zn[node])
+        by_inverse_distance = zn[node] == pytest.approx(inverse_distance, abs=RTOL)
+        if len(e) >= 3 and spread > switch * factor:
+            assert plane_fit
+        elif len(e) < 3 or spread < switch / factor:
+            assert by_inverse_distance
+        else:
+            assert plane_fit or by_inverse_distance
+
+
+def is_a_plane_fit(A: Any, values: Any, value: float) -> bool:
+    """A least-squares plane through the values (columns 1, dx, dy of A) has `value` at dx = dy = 0.
+
+    The plane is unique unless the centres lie on a line; then several fit.
+    """
+    # Centres within rounding of a line count as on it: lstsq treats singular
+    # values below this fraction of the largest as zero. Centres on a line at
+    # UTM coordinates have given A a condition number of 6e10, beyond 1e8.
+    on_a_line = 1e-8
+    best = np.linalg.lstsq(A, values, rcond=on_a_line)[0]
+    slope = np.linalg.lstsq(A[:, 1:], values - value, rcond=on_a_line)[0]
+    residual = np.sum((A @ best - values) ** 2)
+    return bool(np.sum((A[:, 1:] @ slope + value - values) ** 2) <= residual + RTOL)
+
+
 @settings(max_examples=max(5, settings().max_examples // 3))  # matplotlib is slow
 @given(m=meshes)
 def test_shaded_plot_triangulates_the_domain(m: Mesh) -> None:
@@ -602,11 +673,10 @@ def test_invariant_under_relabelling_and_similarity(
 ) -> None:
     """Renumbering, rotating, scaling and moving a mesh changes nothing.
 
-    The same boundary rings through the same Nodes, and every Element centre
-    inside. Node values only follow the renumbering, not the start Node of
-    each Element or the move (#1125).
+    The same boundary rings through the same Nodes, every Element centre
+    inside, and the same Node values for the same Element values.
     """
-    moved, node_map, _ = data.draw(relabelled(m))
+    moved, node_map, element_map = data.draw(relabelled(m))
     scale = 10.0 ** data.draw(st.integers(-3, 4))
     # a quarter and a half turn keep the Faces of a grid along the axes;
     # 0.3 rad turns them off the axes
@@ -644,15 +714,10 @@ def test_invariant_under_relabelling_and_similarity(
     assert ring_nodes(after, node_map) == ring_nodes(before, np.arange(len(m.xy)))
     assert after.contains(after.element_coordinates[:, :2]).all()
 
-    # #1125: node values depend on the start Node and position of quads, so
-    # for now only check renumbering
-    relabelled_mesh, node_map, element_map = data.draw(
-        relabelled(m, rotate_start=False)
-    )
     z = np.cos(np.arange(before.n_elements))  # any field, of size 1
     zn = before.get_node_centered_data(z)
-    zn_relabelled = relabelled_mesh.geometry().get_node_centered_data(z[element_map])
-    np.testing.assert_allclose(zn_relabelled, zn[node_map], atol=RTOL)
+    zn_moved = after.get_node_centered_data(z[element_map])
+    np.testing.assert_allclose(zn_moved, zn[node_map], atol=RTOL)
 
 
 @given(m=refined(), n_layers=st.integers(1, 3))
@@ -738,10 +803,9 @@ def test_node_centered_data_at_hanging_nodes() -> None:
 
     zn = g.get_node_centered_data(linear(ec[:, 0], ec[:, 1]))
 
-    # Using only the fine Elements gave an error of 32. The pseudo-laplacian
-    # is not exact for a linear field, so some error remains (#1125).
+    # using only the fine Elements gave an error of 32
     exact = linear(nc[REFINED_HANGING_NODES, 0], nc[REFINED_HANGING_NODES, 1])
-    assert zn[REFINED_HANGING_NODES] == pytest.approx(exact, abs=12)
+    assert zn[REFINED_HANGING_NODES] == pytest.approx(exact, rel=RTOL)
 
 
 @pytest.mark.parametrize("name", HANGING_NODES)
@@ -753,7 +817,7 @@ def test_quad_mesh_node_centered_data_at_hanging_nodes(name: str) -> None:
 
     # error 2.5 from the fine Elements only
     nodes = HANGING_NODES[name]
-    assert zn[nodes] == pytest.approx(linear(nc[nodes, 0], nc[nodes, 1]), abs=0.5)
+    assert zn[nodes] == pytest.approx(linear(nc[nodes, 0], nc[nodes, 1]), rel=RTOL)
 
 
 def test_element_table_is_as_stored_in_file() -> None:
