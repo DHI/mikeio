@@ -1386,6 +1386,32 @@ def _insert_hanging_nodes(
         return None
     face, node, t = face[on_face], node[on_face], t[on_face]
 
+    # A Hanging node has a fine Face along the coarse Face: a once-only
+    # Face to a Node on the coarse Face. A Node that only touches the coarse
+    # Face from outside (the corner of a separate Element) has none.
+    from_node = np.concatenate([start, end])
+    order = np.argsort(from_node, kind="stable")
+    from_node, to_node = from_node[order], np.concatenate([end, start])[order]
+    first = np.searchsorted(from_node, node, side="left")
+    n_faces = np.searchsorted(from_node, node, side="right") - first
+    pair = np.repeat(np.arange(node.size), n_faces)
+    k = np.arange(pair.size) - np.repeat(np.cumsum(n_faces) - n_faces, n_faces)
+    other = to_node[np.repeat(first, n_faces) + k]
+    ao = xy[other] - a[face[pair]]
+    df = d[face[pair]]
+    length = face_length[face[pair]]
+    t_other = (ao[:, 0] * df[:, 0] + ao[:, 1] * df[:, 1]) / length**2
+    offset = np.abs(df[:, 0] * ao[:, 1] - df[:, 1] * ao[:, 0]) / length
+    along = (
+        (t_other > -_HANGING_NODE_TOLERANCE)
+        & (t_other < 1.0 + _HANGING_NODE_TOLERANCE)
+        & (offset <= _HANGING_NODE_TOLERANCE * length)
+    )
+    hanging = np.bincount(pair[along], minlength=node.size) > 0
+    if not hanging.any():
+        return None
+    face, node, t = face[hanging], node[hanging], t[hanging]
+
     # Rebuild only the Elements that get Hanging nodes. Each Hanging node
     # goes after the start Node of its Face, in order along the Face: sort
     # by Element, position, then distance along the Face (0 for the
