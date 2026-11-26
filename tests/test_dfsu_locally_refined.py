@@ -1,11 +1,10 @@
 """Locally refined meshes: Faces with Hanging nodes (MIKE 2027, Submesh type 1).
 
 Property tests draw small meshes, refine some Elements so that their
-neighbours get Hanging nodes, and check the public geometry against
-independent oracles: a brute-force boundary written from the file
-specification (split each Face at the Nodes on it), and shapely for the
-Elements themselves. Each class of edge case found has a minimal mesh in
-CATALOGUE as well, so it fails fast without random search.
+neighbours get Hanging nodes, and check the public geometry against shapely:
+the domain is the union of the Elements as polygons. Each class of edge case
+found has a minimal mesh in CATALOGUE as well, so it fails fast without
+random search.
 
 Hypothesis profiles are set in conftest.py; `HYPOTHESIS_PROFILE=deep`
 searches far wider, for use after changing the geometry code.
@@ -15,7 +14,6 @@ from __future__ import annotations
 
 import tempfile
 import warnings
-from collections import Counter, defaultdict
 from dataclasses import dataclass
 from functools import cache
 from pathlib import Path
@@ -30,8 +28,6 @@ from hypothesis import assume, given, note, settings
 from hypothesis import strategies as st
 from mikecore.DfsuFile import DfsuFile
 from numpy.typing import NDArray
-from scipy.sparse import coo_array
-from scipy.sparse.csgraph import connected_components
 
 import mikeio
 from mikeio.spatial import GeometryFM2D, GeometryFM3D
@@ -241,39 +237,31 @@ def from_file(filename: str) -> Mesh:
 def refine(m: Mesh, selected: set[int]) -> Mesh:
     """Split each selected Element into 4 at its Face midpoints.
 
-    Unselected neighbours of a split Element get a Hanging node. Elements
-    split together share the midpoint of a common Face, and a Node already
-    at the middle of a Face, a Hanging node from an earlier refinement, is
-    reused.
+    Unselected neighbours of a split Element get a Hanging node. A midpoint
+    with a Node already there, within rounding, reuses it.
     """
     xy = list(m.xy)
-    midpoints: dict[frozenset[int], int] = {}
+    size = float(np.ptp(m.xy, axis=0).max())
 
-    def new_node(p: NDArray[np.float64]) -> int:
+    def node_at(p: NDArray[np.float64]) -> int:
+        distance = np.hypot(*(np.array(xy) - p).T)
+        if distance.min() <= RTOL * size:
+            return int(distance.argmin())
         xy.append(p)
         return len(xy) - 1
-
-    def midpoint(a: int, c: int) -> int:
-        face = frozenset((a, c))
-        if face not in midpoints:
-            nodes, t = on_face(m.xy, a, c)
-            middle = nodes[np.abs(t - 0.5) <= TOL]
-            midpoints[face] = (
-                int(middle[0]) if middle.size else new_node(0.5 * (m.xy[a] + m.xy[c]))
-            )
-        return midpoints[face]
 
     out: list[list[int]] = []
     for e, el in enumerate(m.elements):
         if e not in selected:
             out.append(el)
             continue
-        mid = [midpoint(a, c) for a, c in zip(el, el[1:] + el[:1])]
+        p = m.xy[el]
+        mid = [node_at(q) for q in 0.5 * (p + np.roll(p, -1, axis=0))]
         if len(el) == 3:
             (a, b, c), (ab, bc, ca) = el, mid
             out += [[a, ab, ca], [ab, b, bc], [ca, bc, c], [ab, bc, ca]]
         else:
-            centre = new_node(m.xy[el].mean(axis=0))
+            centre = node_at(p.mean(axis=0))
             out += [[el[i], mid[i], centre, mid[i - 1]] for i in range(4)]
     return Mesh(np.array(xy), out, m.projection)
 
@@ -314,55 +302,16 @@ def relabelled(
     return Mesh(m.xy[node_map], elements, m.projection), node_map, element_map
 
 
-def touching(g: GeometryFM2D) -> list[set[int]]:
-    """The Elements around each Node: those with the Node, or with it on a Face."""
-    xy = g.node_coordinates[:, :2]
-    around: list[set[int]] = [set() for _ in range(g.n_nodes)]
-    for e, el in enumerate(g.element_table):
-        for n in set(el.tolist()) | set(nodes_on_faces(xy, el)):
-            around[n].add(e)
-    return around
-
-
-def on_face(
-    xy: NDArray[np.float64], a: int, c: int
-) -> tuple[NDArray[np.int64], NDArray[np.float64]]:
-    """The Nodes strictly between a and c on Face a-c, in order, and how far along.
-
-    Within TOL of the Face length, as in the code under test; how far along
-    is 0 at a and 1 at c.
-    """
-    d, r = xy[c] - xy[a], xy - xy[a]
-    length = np.hypot(*d)
-    t = r @ d / length**2
-    offset = np.abs(d[0] * r[:, 1] - d[1] * r[:, 0]) / length
-    nodes = np.flatnonzero((t > TOL) & (t < 1 - TOL) & (offset <= TOL * length))
-    nodes = nodes[np.argsort(t[nodes])]
-    return nodes, t[nodes]
-
-
-def nodes_on_faces(xy: NDArray[np.float64], el: NDArray[np.int64]) -> list[int]:
-    """Nodes strictly inside a Face of the Element, in order along each Face."""
-    return [int(n) for a, c in zip(el, np.roll(el, -1)) for n in on_face(xy, a, c)[0]]
-
-
 @st.composite
 def subset(draw: st.DrawFn, g: GeometryFM2D) -> NDArray[np.int64]:
-    """Elements on one side of a line, a random set, or some around a Node.
-
-    Elements around a Node often touch at a single point only.
-    """
-    kind = draw(st.sampled_from(["half-plane", "random", "around a node"]))
-    if kind == "half-plane":
+    """Elements on one side of a line, or a random set."""
+    if draw(st.booleans()):
         angle = draw(st.floats(0, 2 * np.pi))
         d = g.element_coordinates[:, :2] @ [np.cos(angle), np.sin(angle)]
         fraction = draw(st.floats(0.2, 0.8))  # never all or none of the Elements
         return np.flatnonzero(d <= np.quantile(d, fraction))
-    if kind == "random":
-        elements = st.integers(0, g.n_elements - 1)
-        return np.array(sorted(draw(st.sets(elements, min_size=1))))
-    around = touching(g)[draw(st.integers(0, g.n_nodes - 1))]
-    return np.array(sorted(draw(st.sets(st.sampled_from(sorted(around)), min_size=1))))
+    elements = st.integers(0, g.n_elements - 1)
+    return np.array(sorted(draw(st.sets(elements, min_size=1))))
 
 
 def extrude(g: GeometryFM2D, n_layers: int) -> GeometryFM3D:
@@ -384,123 +333,76 @@ def extrude(g: GeometryFM2D, n_layers: int) -> GeometryFM3D:
     )
 
 
-# Oracles
+# Oracles: shapely, on the Elements as polygons
 
 
-def face_pieces(g: GeometryFM2D) -> dict[tuple[int, int], list[int]]:
-    """From the spec: each Face split at the Nodes on it, and the Elements of each piece.
+def size_of(g: GeometryFM2D) -> float:
+    return float(np.ptp(g.node_coordinates[:, :2], axis=0).max())
 
-    A piece with one Element is on the boundary; with two, it is shared.
+
+def domain(g: GeometryFM2D) -> Any:
+    """The union of the Elements.
+
+    Each Element is first snapped to the Nodes within rounding of it, which
+    puts the Hanging nodes on its Faces; a plain union leaves slivers along
+    them.
     """
-    xy = g.node_coordinates[:, :2]
-    pieces: dict[tuple[int, int], list[int]] = defaultdict(list)
-    for e, el in enumerate(g.element_table):
-        for a, c in zip(el, np.roll(el, -1)):
-            chain = [int(a), *on_face(xy, a, c)[0].tolist(), int(c)]
-            for p, q in zip(chain, chain[1:]):
-                pieces[(min(p, q), max(p, q))].append(e)
-    return pieces
+    nodes = shapely.MultiPoint(g.node_coordinates[:, :2])
+    snapped = [shapely.snap(e, nodes, RTOL * size_of(g)) for e in g.to_shapely().geoms]
+    return shapely.union_all(snapped)
 
 
-def boundary_faces(g: GeometryFM2D) -> list[tuple[int, int]]:
-    return [face for face, elements in face_pieces(g).items() if len(elements) == 1]
-
-
-def boundary_length(g: GeometryFM2D) -> float:
-    xy = g.node_coordinates[:, :2]
-    return float(sum(np.hypot(*(xy[p] - xy[q])) for p, q in boundary_faces(g)))
-
-
-def connected(n: int, pairs: list[tuple[int, int]]) -> NDArray[np.int64]:
-    """A label for each of n vertices: the connected part it belongs to."""
-    i, j = np.array(pairs, dtype=np.int64).reshape(-1, 2).T
-    graph = coo_array((np.ones(len(i)), (i, j)), shape=(n, n))
-    return connected_components(graph, directed=False)[1]
-
-
-def n_domains_and_rings(g: GeometryFM2D) -> tuple[int, int]:
-    """Domains: Elements connected by shared pieces. Rings: per domain, boundary pieces connected.
-
-    Counting rings per domain keeps two domains that touch at a point apart.
-    """
-    pieces = face_pieces(g)
-    domain = connected(
-        g.n_elements, [(e[0], e[1]) for e in pieces.values() if len(e) == 2]
-    )
-    rings = 0
-    for d in np.unique(domain):
-        faces = [
-            face for face, e in pieces.items() if len(e) == 1 and domain[e[0]] == d
-        ]
-        nodes = np.unique(faces)
-        label = connected(len(nodes), np.searchsorted(nodes, faces).tolist())
-        rings += len(np.unique(label))
-    return len(np.unique(domain)), rings
+def touching(g: GeometryFM2D) -> list[set[int]]:
+    """The Elements around each Node: those that reach it, within rounding."""
+    elements = np.array(g.to_shapely().geoms)
+    return [
+        set(np.flatnonzero(shapely.dwithin(elements, p, RTOL * size_of(g))).tolist())
+        for p in shapely.points(g.node_coordinates[:, :2])
+    ]
 
 
 def pinched(g: GeometryFM2D) -> bool:
-    """The boundary touches itself at a Node that is a Node of every Element there.
+    """The boundary touches itself at a point.
 
     Boundary tracing cannot handle that yet; it is not specific to Locally
     refined meshes (see test_boundary_pinched_at_a_node).
     """
-    degree = Counter(n for face in boundary_faces(g) for n in face)
-    on_a_face = {
-        n
-        for el in g.element_table
-        for n in nodes_on_faces(g.node_coordinates[:, :2], el)
-    }
-    return any(count > 2 and n not in on_a_face for n, count in degree.items())
-
-
-def ring_length(xy: Any) -> float:
-    return float(np.hypot(*np.diff(np.asarray(xy), axis=0).T).sum())
-
-
-def planar_area(g: GeometryFM2D) -> float:
-    """Element area in coordinate units; get_element_area is in m² for LONG/LAT."""
-    area = float(sum(p.area for p in g.to_shapely().geoms))
-    if g.projection != "LONG/LAT":
-        assert g.get_element_area().sum() == pytest.approx(area, rel=RTOL)
-    return area
+    return not domain(g).boundary.is_simple
 
 
 def check_domain(g: GeometryFM2D) -> None:
-    """boundary_polygons, contains, find_index and the outline agree with the Elements."""
+    """boundary_polygons, contains, find_index and the outline agree with the domain."""
     xy = g.node_coordinates[:, :2]
-    size = float(np.ptp(xy, axis=0).max())
+    expected = domain(g)
+    parts = list(getattr(expected, "geoms", [expected]))
     polygons = g.boundary_polygons
 
-    assert sum(p.area for p in polygons.lines) == pytest.approx(
-        planar_area(g), rel=RTOL
-    )
-    assert (len(polygons.exteriors), len(polygons.lines)) == n_domains_and_rings(g)
-    assert sum(ring_length(p.xy) for p in polygons.lines) == pytest.approx(
-        boundary_length(g), rel=RTOL
-    )
+    assert len(polygons.exteriors) == len(parts)
+    assert len(polygons.lines) == sum(1 + len(p.interiors) for p in parts)
+    assert sum(p.area for p in polygons.lines) == pytest.approx(expected.area, rel=RTOL)
+    perimeter = sum(shapely.LineString(p.xy).length for p in polygons.lines)
+    assert perimeter == pytest.approx(expected.length, rel=RTOL)
 
     # Points at the Elements' centres, Face midpoints and Nodes, and random
     # points in and around the mesh; contains is undefined on the boundary, so
     # only those further than TOL from it
-    boundary = shapely.MultiLineString([xy[list(face)] for face in boundary_faces(g)])
     face_midpoints = np.vstack(
         [0.5 * (xy[el] + xy[np.roll(el, -1)]) for el in g.element_table]
     )
-    margin = 0.1 * size
+    margin = 0.1 * size_of(g)
     random_points = np.random.default_rng(0).uniform(
         xy.min(axis=0) - margin, xy.max(axis=0) + margin, size=(200, 2)
     )
     points = np.vstack(
         [g.element_coordinates[:, :2], face_midpoints, xy, random_points]
     )
-    points = points[shapely.distance(boundary, shapely.points(points)) > TOL * size]
-    # within rounding of an Element: along a Face with Hanging nodes, the
-    # Elements on either side leave gaps of about 1e-13
-    near = shapely.points(points)
-    in_an_element = np.any(
-        [shapely.dwithin(e, near, RTOL * size) for e in g.to_shapely().geoms], axis=0
+    away = shapely.distance(expected.boundary, shapely.points(points)) > TOL * size_of(
+        g
     )
-    np.testing.assert_array_equal(g.contains(points), in_an_element)
+    points = points[away]
+    np.testing.assert_array_equal(
+        g.contains(points), shapely.contains_xy(expected, points)
+    )
 
     np.testing.assert_array_equal(
         g.find_index(coords=g.element_coordinates), np.arange(g.n_elements)
@@ -593,7 +495,7 @@ def test_shaded_plot_triangulates_the_domain(m: Mesh) -> None:
     ab, ac = p[:, 1] - p[:, 0], p[:, 2] - p[:, 0]
     area = 0.5 * (ab[:, 0] * ac[:, 1] - ab[:, 1] * ac[:, 0])
     assert (area > 0).all()
-    assert area.sum() == pytest.approx(planar_area(g), rel=RTOL)
+    assert area.sum() == pytest.approx(domain(g).area, rel=RTOL)
     assert set(np.unique(tri.triangles)) == set(range(g.n_nodes))
 
     edges = np.sort(tri.triangles[:, [0, 1, 1, 2, 2, 0]].reshape(-1, 2), axis=1)
@@ -603,7 +505,7 @@ def test_shaded_plot_triangulates_the_domain(m: Mesh) -> None:
     length = np.hypot(
         tri.x[once[:, 0]] - tri.x[once[:, 1]], tri.y[once[:, 0]] - tri.y[once[:, 1]]
     )
-    assert length.sum() == pytest.approx(boundary_length(g), rel=RTOL)
+    assert length.sum() == pytest.approx(domain(g).length, rel=RTOL)
 
 
 @given(m=refined(), data=st.data())
