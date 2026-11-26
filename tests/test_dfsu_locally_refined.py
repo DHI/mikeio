@@ -588,8 +588,21 @@ def test_node_value_is_the_plane_fit_of_the_elements_around_it(
         d = g.element_coordinates[e, :2] - g.node_coordinates[node, :2]
         w = 1 / np.hypot(d[:, 0], d[:, 1])
         inverse_distance = w @ values[e] / w.sum()
-        A = np.column_stack([np.ones(len(e)), d / np.abs(d).max()])  # well-conditioned
-        # how far the centres are from a line through the Node: 0 on it, 1 at most
+        # A plane v = p0 + p1 dx + p2 dy, with dx, dy from the Node to an
+        # Element centre, has the value p0 at the Node. One row per Element:
+        #
+        #          1    dx    dy
+        #   A = [  1, -0.5,  0.3 ]   Element 3
+        #       [  1,  0.4,  0.2 ]   Element 7
+        #       [  1,  0.0, -1.0 ]   Element 8
+        #
+        # dx and dy are scaled to at most 1, which keeps lstsq well-conditioned.
+        A = np.column_stack([np.ones(len(e)), d / np.abs(d).max()])
+        # How far the centres are from a line through the Node: with
+        # M = [[sum dx^2, sum dx dy], [sum dx dy, sum dy^2]],
+        # spread = det M / (sum dx^2 * sum dy^2)
+        #        = 1 - (sum dx dy)^2 / (sum dx^2 * sum dy^2),
+        # 0 for centres on a line through the Node, 1 at most.
         M = d.T @ d
         spread = np.linalg.det(M) / (M[0, 0] * M[1, 1])
         # The spec switches to inverse distance at a spread of 1e-10. Rounding
