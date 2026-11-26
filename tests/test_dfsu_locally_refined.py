@@ -219,6 +219,7 @@ def grid(draw: st.DrawFn) -> Mesh:
     on the outline stay put, so the domain is still the rectangle.
     """
     nx, ny = draw(st.integers(1, 3)), draw(st.integers(1, 3))
+    # every cell a quad, every cell two triangles, or each cell drawn at random
     kind = draw(st.sampled_from(["quad", "tri", "mixed"]))
     x, y = np.meshgrid(np.arange(nx + 1.0), np.arange(ny + 1.0))
     xy = np.column_stack([x.ravel(), y.ravel()])
@@ -237,10 +238,11 @@ def grid(draw: st.DrawFn) -> Mesh:
         for i in range(nx):
             a, b = k * (nx + 1) + i, k * (nx + 1) + i + 1
             c, d = b + nx + 1, a + nx + 1
+            # this cell: quad or triangles, as the grid says or drawn when mixed
             cell = kind if kind != "mixed" else draw(st.sampled_from(["quad", "tri"]))
             if cell == "quad":
                 elements.append([a, b, c, d])
-            elif draw(st.booleans()):
+            elif draw(st.booleans()):  # which diagonal splits it
                 elements += [[a, b, c], [c, d, a]]
             else:
                 elements += [[a, b, d], [b, c, d]]
