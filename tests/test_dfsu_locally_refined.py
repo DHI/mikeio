@@ -196,13 +196,19 @@ def linear(x: Any, y: Any) -> Any:
 
 @st.composite
 def grid(draw: st.DrawFn) -> Mesh:
-    """A grid of 1-3 by 1-3 quads, triangles or both; interior Nodes jittered."""
+    """A grid of 1-3 by 1-3 unit cells: quads, triangles or both.
+
+    Half the grids are jittered: each interior Node moves by an independent
+    offset of up to 0.2 of the cell size in x and in y. Nodes on the outline
+    stay put, so the domain is still the rectangle.
+    """
     nx, ny = draw(st.integers(1, 3)), draw(st.integers(1, 3))
     kind = draw(st.sampled_from(["quad", "tri", "mixed"]))
     x, y = np.meshgrid(np.arange(nx + 1.0), np.arange(ny + 1.0))
     xy = np.column_stack([x.ravel(), y.ravel()])
     if draw(st.booleans()):
-        # up to 0.2 of the spacing keeps every quad convex
+        # A corner is >= 0.71 from the opposite diagonal and the two can close
+        # by at most 2 * 0.2 * sqrt(2) = 0.57, so every quad stays convex.
         jitter = st.floats(-0.2, 0.2, allow_nan=False)
         j = np.array(draw(st.lists(jitter, min_size=xy.size, max_size=xy.size)))
         interior = (xy[:, 0] > 0) & (xy[:, 0] < nx) & (xy[:, 1] > 0) & (xy[:, 1] < ny)
