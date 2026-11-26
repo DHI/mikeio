@@ -68,21 +68,49 @@ def as_mesh(g: GeometryFM2D) -> Mesh:
     return Mesh(g.node_coordinates[:, :2].copy(), elements, g.projection_string)
 
 
-# Minimal meshes, one per class of edge case; all counter-clockwise
+# Minimal meshes, one per class of edge case; all counter-clockwise. In the
+# drawings, a Hanging node sits on a coarse Face, between its end Nodes.
 CATALOGUE = {
-    # coarse triangle 0-1-2, Hanging node 3 on Face 1-2
+    # coarse triangle 0-1-2; Hanging node 3 on its Face 1-2
+    #
+    #       2
+    #      /| \
+    #     / |   \
+    #    /  3-----4
+    #   /   |   /
+    #  /    | /
+    # 0-----1
     "one_hanging_tri": Mesh(
         np.array([[0, 0], [1, 0], [1, 2], [1, 1], [2, 1]], float),
         [[0, 1, 2], [1, 4, 3], [3, 4, 2]],
     ),
-    # coarse quad beside two fine quads, Hanging node 6
+    # coarse quad 0-1-2-3; Hanging node 6 on its Face 1-2
+    #
+    # 3-----2-----7
+    # |     |     |
+    # |     |     |
+    # |     6-----5
+    # |     |     |
+    # |     |     |
+    # 0-----1-----4
     "one_hanging_quad": Mesh(
         np.array(
             [[0, 0], [1, 0], [1, 2], [0, 2], [2, 0], [2, 1], [1, 1], [2, 2]], float
         ),
         [[0, 1, 2, 3], [1, 4, 5, 6], [6, 5, 7, 2]],
     ),
-    # Hanging nodes 6 and 7 on one coarse Face
+    # coarse quad 0-1-2-3; Hanging nodes 6 and 7 on its Face 1-2
+    #
+    # 3-----2-----9
+    # |     |     |
+    # |     |     |
+    # |     7-----8
+    # |     |     |
+    # |     |     |
+    # |     6-----5
+    # |     |     |
+    # |     |     |
+    # 0-----1-----4
     "two_on_one_face": Mesh(
         np.array(
             [
@@ -101,24 +129,47 @@ CATALOGUE = {
         ),
         [[0, 1, 2, 3], [1, 4, 5, 6], [6, 5, 8, 7], [7, 8, 9, 2]],
     ),
-    # coarse triangle beside two fine quads
+    # coarse triangle 0-1-2 beside two fine quads; Hanging node 3 on Face 1-2
+    #
+    #       2-----6
+    #     / |     |
+    #   /   |     |
+    # 0     3-----5
+    #   \   |     |
+    #     \ |     |
+    #       1-----4
     "coarse_tri_fine_quads": Mesh(
         np.array([[0, 1], [1, 0], [1, 2], [1, 1], [2, 0], [2, 1], [2, 2]], float),
         [[0, 1, 2], [1, 4, 5, 3], [3, 5, 6, 2]],
     ),
-    # boundary Nodes in line with their neighbouring Faces, at the Face ends
+    # no Hanging node: boundary Nodes 1 and 4 are in line with the Faces
+    # beside them, but at their ends
+    #
+    # 5-----4-----3
+    # |     |     |
+    # |     |     |
+    # 0-----1-----2
     "face_ends_not_hanging": Mesh(
         np.array([[0, 0], [1, 0], [2, 0], [2, 1], [1, 1], [0, 1]], float),
         [[0, 1, 4, 5], [1, 2, 3, 4]],
     ),
-    # Geographic coordinates, Faces of 4.5e-6 degrees
+    # one_hanging_tri in Geographic coordinates: 4.5e-6 degrees per unit,
+    # with Node 0 at 4.5 degrees east on the equator
     "tiny_longlat": Mesh(
         np.array([[0, 0], [1, 0], [1, 2], [1, 1], [2, 1]]) * 4.5e-6 + [4.5, 0],
         [[0, 1, 2], [1, 4, 3], [3, 4, 2]],
         "LONG/LAT",
     ),
-    # the corner of a separate triangle touches the middle of Face 1-4: not
-    # a Hanging node, so two domains
+    # T-touch, no Hanging node: corner 2 of triangle 2-3-5 touches the middle
+    # of Face 1-4 of triangle 0-1-4 from outside, so two domains
+    #
+    # 4     5
+    # | \   | \
+    # |   \ |   \
+    # |     2-----3
+    # |       \
+    # |         \
+    # 0-----------1
     "t_touch": Mesh(
         np.array([[0, 0], [2, 0], [1, 1], [2, 1], [0, 2], [1, 2]], float),
         [[0, 1, 4], [2, 3, 5]],
