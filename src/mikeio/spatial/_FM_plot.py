@@ -190,6 +190,9 @@ def _plot_map(
         triang, zn = _get_tris(
             nc, element_table, ec, z, n_refinements, conforming=conforming
         )
+        # Node values can lie beyond the Element values; extend the colours
+        # to them, or contourf leaves those areas unfilled
+        cbar_extend = _cbar_extend(zn, vmin, vmax)
 
         if plot_type == "shaded":
             ax.triplot(triang, lw=mesh_linewidth, color=MESH_COL)

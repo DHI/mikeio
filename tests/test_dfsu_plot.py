@@ -39,6 +39,21 @@ def test_plot_dfsu_n_refinements() -> None:
         geometry.plot.contourf(levels=None, n_refinements=1)
 
 
+def test_plot_dfsu_contourf_fills_the_domain() -> None:
+    """Node values beyond the range of the Element values are filled too."""
+    from matplotlib.tri import TriContourSet
+
+    da = mikeio.read("tests/testdata/HD2D.dfsu", items="U velocity", time=-1)[0]
+
+    ax = da.plot.contourf()
+
+    (filled,) = [c for c in ax.collections if isinstance(c, TriContourSet)]
+    rings = [r for path in filled.get_paths() for r in path.to_polygons()]
+    # shoelace area of each closed ring; holes run clockwise, so they subtract
+    area = sum(0.5 * (r[:-1, 0] * r[1:, 1] - r[1:, 0] * r[:-1, 1]).sum() for r in rings)
+    assert area == pytest.approx(da.geometry.get_element_area().sum(), rel=1e-6)
+
+
 def test_plot_dfsu_vmin_vmax_zero_is_respected() -> None:
     import matplotlib.pyplot as plt
 

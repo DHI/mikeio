@@ -88,15 +88,63 @@ def test_node_whose_weights_sum_to_zero_is_inverse_distance_average(
     assert zn[[0]] == pytest.approx(inverse_distance(g, values, [0]), abs=1e-12)
 
 
-def test_without_extrapolation_some_weights_are_limited() -> None:
-    """Limiting the weights changes values on a jittered mesh, so it is not idle."""
-    g = jittered_mesh()
+def dhi_mesh(
+    g: GeometryFM2D, values: NDArray[np.floating], extrapolate: bool
+) -> NDArray[np.floating]:
+    """DHI.Mesh MeshNodeInterpolation, one Node at a time, as in its source.
+
+    https://github.com/DHI/DHI.Mesh/blob/c23cd612827ad0e2cfd0d2823774442149ddc7f2/src/DHI.Mesh/MeshNodeInterpolation.cs
+    """
+    out = np.zeros(g.n_nodes)
+    for n, e in enumerate(elements_at_nodes(g)):
+        dx, dy = (g.element_coordinates[e, :2] - g.node_coordinates[n, :2]).T
+        omega = np.zeros(len(e))
+        if len(e) >= 3:
+            Ixx, Iyy, Ixy = dx @ dx, dy @ dy, dx @ dy
+            Rx, Ry = dx.sum(), dy.sum()
+            lamb = Ixx * Iyy - Ixy * Ixy
+            if lamb > 1e-10 * (Ixx * Iyy):
+                lambda_x = (Ixy * Ry - Iyy * Rx) / lamb
+                lambda_y = (Ixy * Rx - Ixx * Ry) / lamb
+                omega = 1 + lambda_x * dx + lambda_y * dy
+                if not extrapolate:
+                    omega = omega.clip(0, 2)
+        if omega.sum() <= 1e-10:
+            omega = 1 / np.hypot(dx, dy)
+        out[n] = omega @ values[e] / omega.sum()
+    return out
+
+
+def one_sided_fan() -> GeometryFM2D:
+    """13 triangles around Node 0 on the boundary; only the first lies to its right.
+
+    The weight of that first Element at Node 0 is 2.29.
+    """
+    ring = [
+        [0.92, 0.0], [0.01, 0.07], [-0.12, 0.72], [-0.07, 0.32], [-0.16, 0.66],
+        [-0.04, 0.15], [-0.21, 0.23], [-0.1, 0.04], [-0.23, -0.05], [-0.22, -0.26],
+        [-0.2, -0.29], [-0.36, -0.72], [-0.23, -0.5], [-0.34, -0.81],
+    ]  # fmt: skip
+    xyz = np.array([[0.0, 0.0, 0.0]] + [[x, y, 0.0] for x, y in ring])
+    elements = [[0, i, i + 1] for i in range(1, len(ring))]
+    return GeometryFM2D(xyz, elements, projection="NON-UTM")
+
+
+@pytest.mark.parametrize("extrapolate", [True, False])
+@pytest.mark.parametrize(
+    "mesh", [jittered_mesh, one_sided_fan], ids=["jittered", "one-sided fan"]
+)
+def test_same_as_dhi_mesh(mesh: Any, extrapolate: bool) -> None:
+    """Without extrapolation the weights are limited to 0-2.
+
+    Some weights are below 0 on the jittered mesh, and one is above 2 on the fan.
+    """
+    g = mesh()
     values = random_values(g)
 
-    limited = g.get_node_centered_data(values, extrapolate=False)
-    unlimited = g.get_node_centered_data(values, extrapolate=True)
+    zn = g.get_node_centered_data(values, extrapolate=extrapolate)
 
-    assert not np.allclose(limited, unlimited)
+    np.testing.assert_allclose(zn, dhi_mesh(g, values, extrapolate), atol=1e-12)
 
 
 def linear(x: Any, y: Any) -> Any:
