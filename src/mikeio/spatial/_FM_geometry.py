@@ -678,10 +678,11 @@ class GeometryFM2D(_GeometryFM):
         coords = np.atleast_2d(coords)
         nc = self.node_coordinates
 
-        few_nearest, _ = self._find_n_nearest_2d_elements(
-            coords, n=min(self.n_elements, 2)
-        )
-        ids = np.atleast_2d(few_nearest)[:, 0]  # first guess
+        n_few = min(self.n_elements, 2)
+        few_nearest, _ = self._find_n_nearest_2d_elements(coords, n=n_few)
+        # one column per neighbour, also for a mesh of a single Element
+        few_nearest = np.reshape(few_nearest, (len(coords), n_few))
+        ids = few_nearest[:, 0].copy()  # first guess
 
         for k in range(len(ids)):
             # step 1: is nearest element = element containing point?
