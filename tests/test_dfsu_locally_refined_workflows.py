@@ -131,32 +131,17 @@ def linear_dataarray(g: GeometryFM2D, n_timesteps: int = 2) -> mikeio.DataArray:
 # Point location and interpolation
 
 
-# find_index tests the Elements with the 10 nearest centres only. Beside a
-# coarse Face, the fine Elements can crowd out the coarse Element itself.
-NEAREST_TEN = (
-    "find_index tries only the Elements with the 10 nearest centres; beside a "
-    "coarse Face the fine Elements can all be nearer than the coarse Element"
-)
-
-
 @pytest.mark.parametrize(
     "make",
     [
-        # in the file, a sliver of about 1.4 m2 of coarse Element 6 is not found:
-        # along its Face with Hanging node 11, near (80.5, 48) (file numbering)
-        pytest.param(
-            MESHES["file"], marks=pytest.mark.xfail(strict=True, reason=NEAREST_TEN)
-        ),
+        # in the file, the 10 nearest centres miss a sliver of about 1.4 m2 of
+        # coarse Element 6, along its Face with Hanging node 11, near
+        # (80.5, 48) (file numbering)
+        MESHES["file"],
         MESHES["nested_tri"],
         MESHES["nested_quad"],
-        pytest.param(
-            lambda: unbalanced(quad=False),
-            marks=pytest.mark.xfail(strict=True, reason=NEAREST_TEN),
-        ),
-        pytest.param(
-            lambda: unbalanced(quad=True),
-            marks=pytest.mark.xfail(strict=True, reason=NEAREST_TEN),
-        ),
+        lambda: unbalanced(quad=False),
+        lambda: unbalanced(quad=True),
     ],
     ids=["file", "nested_tri", "nested_quad", "unbalanced_tri", "unbalanced_quad"],
 )
