@@ -673,15 +673,23 @@ class GeometryFM2D(_GeometryFM):
         return elem_id, d
 
     def _find_element_2d(self, coords: np.ndarray) -> Any:
+        """Index of the Element that contains each point.
+
+        Elements are closed: a point on a Face shared by several Elements is
+        found in the one with the nearest centre. Most points are in one of
+        the Elements with the nearest centres; only the points that are not
+        are searched among all Elements that can reach them.
+        """
         points_outside = []
 
         coords = np.atleast_2d(coords)
         nc = self.node_coordinates
 
-        few_nearest, _ = self._find_n_nearest_2d_elements(
-            coords, n=min(self.n_elements, 2)
-        )
-        ids = np.atleast_2d(few_nearest)[:, 0]  # first guess
+        n_few = min(self.n_elements, 2)
+        few_nearest, _ = self._find_n_nearest_2d_elements(coords, n=n_few)
+        # one column per neighbour, also for a mesh of a single Element
+        few_nearest = np.reshape(few_nearest, (len(coords), n_few))
+        ids = few_nearest[:, 0].copy()  # first guess
 
         for k in range(len(ids)):
             # step 1: is nearest element = element containing point?
@@ -704,7 +712,7 @@ class GeometryFM2D(_GeometryFM):
             if not element_found and self.n_elements > 1:
                 many_nearest, _ = self._find_n_nearest_2d_elements(
                     coords[k, :],
-                    n=min(self.n_elements, 10),  # TODO is 10 enough?
+                    n=min(self.n_elements, 10),
                 )
                 for p in many_nearest[2:]:  # we have already tried the two first above
                     nodes = self.element_table[p]
@@ -718,6 +726,14 @@ class GeometryFM2D(_GeometryFM):
             if not element_found:
                 points_outside.append(k)
 
+        # step 4: small or thin Elements can crowd out the nearest centres,
+        # e.g. beside a coarse Face with Hanging nodes; try every Element
+        # that reaches the point
+        if len(points_outside) > 0:
+            found = self._find_element_2d_exhaustive(coords[points_outside])
+            ids[points_outside] = found
+            points_outside = [k for k, e in zip(points_outside, found) if e < 0]
+
         if len(points_outside) > 0:
             raise OutsideModelDomainError(  # type: ignore
                 x=coords[points_outside, 0],
@@ -726,6 +742,61 @@ class GeometryFM2D(_GeometryFM):
             )
 
         return ids
+
+    @cached_property
+    def _element_radius(self) -> np.ndarray:
+        """Distance from each Element's centre to its furthest Node."""
+        n_nodes = np.array([len(el) for el in self.element_table])
+        nodes = np.concatenate([np.asarray(el) for el in self.element_table])
+        centres = np.repeat(self.element_coordinates[:, :2], n_nodes, axis=0)
+        distance = np.hypot(*(self.node_coordinates[nodes, :2] - centres).T)
+        starts = np.concatenate([[0], np.cumsum(n_nodes)[:-1]])
+        # slack for rounding: a point on a Node is at exactly the radius
+        return np.maximum.reduceat(distance, starts) * (1 + 1e-9) + 1e-12
+
+    @cached_property
+    def _trees_by_radius(self) -> list[tuple[np.ndarray, KDTree, float]]:
+        """Element ids, a KDTree of their centres and their largest radius.
+
+        One group per power of 2 of the radius, so that a few large
+        Elements do not make every search reach far among small ones.
+        """
+        radius = self._element_radius
+        group = np.floor(np.log2(radius / radius.min())).astype(int)
+        ec = self.element_coordinates[:, :2]
+        trees = []
+        for g in np.unique(group):
+            ids = np.flatnonzero(group == g)
+            trees.append((ids, KDTree(ec[ids]), float(radius[ids].max())))
+        return trees
+
+    def _find_element_2d_exhaustive(self, coords: np.ndarray) -> np.ndarray:
+        """Index of the Element that contains each point, -1 for none.
+
+        An Element can contain a point only if the point is within the
+        Element's radius of its centre. Those candidates are tried in order
+        of distance, so the nearest centre wins on a shared Face.
+        """
+        nc = self.node_coordinates
+        ec = self.element_coordinates[:, :2]
+        radius = self._element_radius
+        reach = [
+            [ids[r] for r in tree.query_ball_point(coords, r=r_max)]
+            for ids, tree, r_max in self._trees_by_radius
+        ]
+        found = np.full(len(coords), -1, dtype=int)
+        for k in range(len(coords)):
+            candidates = np.concatenate([r[k] for r in reach]).astype(int)
+            distance = np.hypot(*(ec[candidates] - coords[k]).T)
+            near = distance <= radius[candidates]
+            for e in candidates[near][np.argsort(distance[near], kind="stable")]:
+                nodes = self.element_table[e]
+                if self._point_in_polygon(
+                    nc[nodes, 0], nc[nodes, 1], coords[k, 0], coords[k, 1]
+                ):
+                    found[k] = e
+                    break
+        return found
 
     def get_overset_grid(
         self,
